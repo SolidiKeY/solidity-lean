@@ -13,7 +13,8 @@ Branch: `codex/solidity-h62-2-20261106/audit-evm-compiler`.
 Repository: `/workspace/audit-evm-compiler`; old clean checkout
 `/workspace/solidity-lean` preserved.
 Authorized origin/master merge fast-forwarded to
-`d96f2406d352de7e0b72ba6ac4ab29dc457582c6`, containing retirement head
+`ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`, containing the reviewed audit head
+`b299b15d79815ec00ebb81cb74e4ca57acc207c9` and retirement head
 `eaaaee17fe61e71ac3b5052839c0cf146eae3072` and coordinator checkpoint
 `20e492ee9`. All 160 original mapped files and their module map remain identical
 to the frozen base. All 321 files in the original core dependency closure are
@@ -38,9 +39,11 @@ master mutation, generated-root/map/axiom-pin edit or new goal was performed.
    and kernel expression. Producer owner master is established for 37 Opcode/
    Jumpdest records by G45.05 and their headers; 1,793 owners remain unresolved.
    The 570 snapshot write-owner candidates and migration overlays are separate.
-2. Joint hypotheses remain partial: 65 unique exact-signature links comprise
-   40 joint witnesses, 23 H69 intentional impossibilities and two closed Opcode
-   statements. The remaining 1,765 rows await classification or witnesses.
+2. Joint hypotheses remain partial: 300 unique exact-signature links comprise
+   40 joint witnesses, 23 H69 intentional impossibilities and 237 closed equality
+   statements. The remaining 1,530 rows await classification or witnesses. The
+   committed 65-link manual ledger is combined with a separately manifested
+   235-link closed-equality ledger; both require exact-once reconciliation.
    JumpdestAudit adds exactly one full-telescope witness for each of its 19
    authored declarations. Boundary, lookup and size proof hypotheses use coherent
    actual inputs. No global producer structure is required by these statements.
@@ -63,7 +66,8 @@ master mutation, generated-root/map/axiom-pin edit or new goal was performed.
 ## Witness tools and H69
 
 JointWitness elaborates a supplied witness against the entire original dependent
-forall telescope, packaged as nested Exists ending True. Data, typeclass
+forall telescope, including inputs hidden behind definitions and Not,
+packaged as nested Exists ending True. Data, typeclass
 certificates and proof hypotheses are all included. The original conclusion
 never manufactures a premise. Closed-expression, kernel addDecl and standard
 axiom guards are mandatory. A checked negative regression tries to use ambient
@@ -77,9 +81,10 @@ the ledger and audit sources. Ordinary statements still require joint witnesses.
 SCOPE1 and TC1 are resolved; no premise, exclusion or statement was weakened.
 Syntactic is_prop_binder never establishes feasibility by itself.
 
-There are now 89 checked additive theorem declarations: the previous 63, 25
+There are now 92 checked additive theorem declarations: the previous 63, 25
 Jumpdest declarations (19 generated witnesses, two scan helpers, four controls)
-and one intentional tool-regression fixture. Printed axiom sets use only
+and four closure/alias regression declarations. The closed-equality classifier
+adds zero theorem declarations and retains each unchanged original proof. Printed axiom sets use only
 propext, Classical.choice and Quot.sound as applicable. No authored sorry, new
 axiom, native_decide, trust shortcut or raised maxHeartbeats. Failed initial
 elaboration receipts are historical and distinct from passing replacements.
@@ -116,9 +121,11 @@ extension. The optional engine/common packages are copied from the frozen
 repository lock and installed outside Git with lifecycle scripts disabled.
 These observations do not prove source-compiler gas/fork equivalence.
 
-Historical matched unchanged Layout timing was -0.65% on the same tree/cache/
-resources; this is not a whole-build or post-merge performance claim. No original
-proof refactor or reversal of speed changes was performed in this milestone.
+Matched Jumpdest audit checking around the definition-aware tool change used
+the same core tree, cache and resources: median 5.35364 s before, 5.07186 s
+after, delta -5.26%, within the 10% threshold. This measures audit-command
+checking, not compiler execution or whole-build performance. Git history showed
+no earlier speed change to undo; no original proof source was refactored.
 
 ## Reviews, artifacts and continuation
 
@@ -127,14 +134,15 @@ edits. They checked merge fidelity, all 19 exact Jumpdest input tuples, tool
 closure and controls, the Bridge capture/join tooling and all ten external
 reference fixtures. The suggested ambient-assumption regression was added.
 Final receipts and current census live under
-`/workspace/audit-evm-compiler-evidence/resume-merged`; older directories are
-historical. The current ledger is the small reviewed coverage.json in tests;
+the externally supplied evidence archive. The repository-relative verifier
+and manifest described below replace reliance on VM-only artifact paths; older
+VM directories remain historical snapshots. The current ledger is the small reviewed coverage.json in tests;
 bulk census, kernel expressions and logs stay off Git with SHA256 manifests.
 Registration suggestions remain additive fragments under tests, not root edits.
 
 Preserved original prompt, complete work/backfill queue and exact 160-file scope
 remain authenticated in the committed tests handoff files. Continue this same
-original assignment: 1,765 witness/classification rows,
+original assignment: 1,530 witness/classification rows,
 1,793 producer owners, general success/totality and gas/fork boundaries, then
 full witness fidelity/reviews/final gates. Signature/type capture is complete;
 producer ownership, premise meaning and joint feasibility remain partial. Backfill remains within-scope census, negative
@@ -143,7 +151,7 @@ A fresh-thread handoff after 3–5 completed items never completes the full goal
 
 ## Checkpoint gates and outstanding validation
 
-All eight audit modules pass on the merged tree; all 89 printed theorem axiom
+All eight audit modules pass on the merged tree; all 92 printed theorem axiom
 sets contain no sorryAx. Freshness checks for all 156 mapped core targets and
 four mapped Bridge targets pass with Lake --no-build, separately from extraction.
 Dependency layers pass (859 core modules, zero elaborator/parser reachability),
@@ -154,7 +162,7 @@ external artifact StringApiWitness.original-unproved in the migration-theory
 report; a synthetic Backend/A fixture in the ABI-world census test; proposed
 PanicBytes in the packet-panic candidate; and two proposed GenericMapped module
 paths in the structured-flow registration fragment. These files are byte-identical
-to the authorized integration base d96f2406d. No missing reference belongs to
+to the latest authorized integration base ac9d8db2a. No missing reference belongs to
 this lane's changed files. The global gate is reported FAIL, not waived or
 counted as a pass. Resolving it remains an outstanding repository validation
 item, alongside full-library/root checks and the incomplete proof/owner queue.
@@ -165,3 +173,33 @@ committed head, original base and integration base, exact gate commands/output,
 independent reviews, incremental and cumulative owned patches, bundle and hashes.
 The original assignment remains active and unfinished; no goal completion or
 replacement continuation is authorized by a passing subset of these checks.
+
+## Closed-equality census and portable evidence
+
+The 555 pending records with zero explicit binders were only candidates. Each
+actual original theorem was loaded from its defining module in a separate
+bounded Lean process. All 36 module checks passed. Exactly 235 candidates are
+literal equality propositions with no inputs after definition-aware telescope
+expansion and standard axiom sets. Their canonical identities, source names,
+frozen signatures and full raw kernel types match the original census. The
+other 320 candidates remain pending; zero explicit binders alone is insufficient.
+
+The classifier generates no replacement True lemmas. Each new closed record
+retains the original compiled proof. Closed-input accounting establishes neither
+semantic nonvacuity nor source-compiler totality; ordinary interface hypotheses
+still need simultaneous witnesses. Hidden negative and positive aliases test
+the tool's rejection and complete dependent packaging.
+
+Reviewer artifact portability feedback is addressed by the committed
+[verification instructions](../../tests/h62/item2/audit-evm-compiler/evidence.md),
+repository-relative source pins and archive-relative data pins. The verifier
+checks a downloaded archive or unpacked directory without requiring this VM.
+Corruption controls cover artifact and source changes, duplicate tar members
+and escaping paths. Hash verification does not replay Lean or prove provenance.
+Bulk records stay outside Git and are regenerated with the committed classifier
+and manifest tools. The original 65-link ledger remains unchanged; an actual
+duplicate additional ledger is rejected before output.
+
+The current result is 300 accounted statements and 1,530 pending, with producer
+ownership still 37 known and 1,793 unknown. All four original checkpoints remain
+partial. The original full goal is preserved, not reset or declared complete.

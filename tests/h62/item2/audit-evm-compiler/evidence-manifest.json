@@ -1,0 +1,1199 @@
+{
+  "schema_version": 1,
+  "archive_root": "continuation-2",
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "toolchain": "leanprover/lean4:v4.24.0",
+  "scope": "Closed-input equality classification; hashes are byte integrity, not proof replay or compiler totality.",
+  "sources": [
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean",
+      "sha256": "f232b62789acd9bdbbd58c5a632b58260fccdc71a702d54e8b860ec7c649ccfa"
+    },
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicRelative.lean",
+      "sha256": "ffce4511b53f3df1f7783af5a8db054174c055a0ad59a40b4a166a842146d1a9"
+    },
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicSourcePadding.lean",
+      "sha256": "d97fe721a8ebbf08412e3c1a69e22ab68c198a3ec77c80174cdd34310c8f8262"
+    },
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean",
+      "sha256": "8e3a45bf57fffc5784cfa0466c77ecb58b1a1112b35b545918517a9505052ee5"
+    },
+    {
+      "path": "Solidity/Backend/Assembler.lean",
+      "sha256": "d0991b737f9a65416829c5850edca4bbb3f8fe7193ad104dd5aaeac92803f9d0"
+    },
+    {
+      "path": "Solidity/Backend/Checks.lean",
+      "sha256": "74266d36668d04d028733dda12a5a5146bdeff195a48bf98f0c780f8fcee7aa4"
+    },
+    {
+      "path": "Solidity/Backend/Control.lean",
+      "sha256": "d0bfd37fcd1cf0b0a8827c4def7691a0b8cecd24fcb313377dcdffbc8f9a3386"
+    },
+    {
+      "path": "Solidity/Backend/EvmVectors.lean",
+      "sha256": "5203af3bdafde78eefdf6d8bc7b5280bb56bc5b76ba45936f5b30cd688146c5f"
+    },
+    {
+      "path": "Solidity/Backend/Jumpdest.lean",
+      "sha256": "e5fc894e1b3470311a90887aa9f663c0536c3703f41195e7e04491a2b58dc3b2"
+    },
+    {
+      "path": "Solidity/Backend/Opcode.lean",
+      "sha256": "70c1285ffee85bd60d8c01588978f0e07a4ab6c1eb7e353cb38fed071b615acc"
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Bitwise/Selected.lean",
+      "sha256": "b3e38022b1a0d1557c4e910886f3238a713085a0239ba15ed07da15c600adf03"
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Bitwise/Source.lean",
+      "sha256": "21b6535292cfa57054f7a7bc46896acf7ddbae847ac0d0340a84885e2f2565a3"
+    },
+    {
+      "path": "Solidity/Evm/Compile.lean",
+      "sha256": "e452bff7f9c882940ccbabea2a51566e333c30d3617486b8338d04d32f99e4a9"
+    },
+    {
+      "path": "Solidity/Evm/Compiler.lean",
+      "sha256": "38565297a2909c6213dbec3aad878f4f04823efdeee7a91c19d2cfee64ef1810"
+    },
+    {
+      "path": "Solidity/Evm/Correct.lean",
+      "sha256": "21f6b4b402515040d9adea80d61e0acf042aaf1fa93344e081f42cfc95ff4be1"
+    },
+    {
+      "path": "Solidity/Evm/Examples.lean",
+      "sha256": "76541321c77a543b8f29dbb8c7ac350ec31ca2af3cc6afa5816e05506520bf14"
+    },
+    {
+      "path": "Solidity/Evm/Exp.lean",
+      "sha256": "c0b3da3a583c13563162fd5cbd74a496caca559a5a9f1c8289ed31490df8ce35"
+    },
+    {
+      "path": "Solidity/Evm/Expr.lean",
+      "sha256": "6365964236a8720e4d773704ad336fba9f204ace8506b03f73d6374af766e591"
+    },
+    {
+      "path": "Solidity/Evm/Interpreter.lean",
+      "sha256": "3a98934d0bf0da1de9ca902367325d95fb428577ca10e967ccceb8fb4c4e77b2"
+    },
+    {
+      "path": "Solidity/Evm/Layout.lean",
+      "sha256": "597501303c66cda0586f0a2799b7bfff31c684ad66aec479f2c39fbd51b978b8"
+    },
+    {
+      "path": "Solidity/Evm/Machine.lean",
+      "sha256": "5b9ec1172302b00d76a01a8fa329615b63b6103bac9be6db45f7168ed4896686"
+    },
+    {
+      "path": "Solidity/Evm/Memory.lean",
+      "sha256": "1b40c67f29168850d969f8c37f0aad3e89e15e44c20c0078020e4588f34b5b34"
+    },
+    {
+      "path": "Solidity/Evm/MemoryAlloc.lean",
+      "sha256": "cfc0280445cf5aea444b4196be2b28ab767946dae7d4ded9d3e7626f4f3f634e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryAllocExamples.lean",
+      "sha256": "6ce6fff764e5c389b8a50b3bea95c80f76e11879cbe8b693c309ae13d5a420a3"
+    },
+    {
+      "path": "Solidity/Evm/MemoryAllocSource.lean",
+      "sha256": "37cbda823ff7333f5050f3c673ef6905d6a6bf7168589a10b826ffed1371e531"
+    },
+    {
+      "path": "Solidity/Evm/MemoryAllocSourceExamples.lean",
+      "sha256": "6fd3df39fbe1c5600c0c3aea52d28f1f7302f07ce20226ba83fddf29fd1be65f"
+    },
+    {
+      "path": "Solidity/Evm/MemoryCallExamples.lean",
+      "sha256": "4961d85eeefbdf8837772fc83a43fa3c441fa1ccf86d823dca79e90232f44165"
+    },
+    {
+      "path": "Solidity/Evm/MemoryCalls.lean",
+      "sha256": "e929e9fad2bd02bfeb3c2d3a77bdefd4f4ffcaa2e9b7baa65ab4b7656ebfefb3"
+    },
+    {
+      "path": "Solidity/Evm/MemoryCapture.lean",
+      "sha256": "d455818799b70c0b0f41dc30f4ce12dec1e20f319d8610d5e7b143e896937002"
+    },
+    {
+      "path": "Solidity/Evm/MemoryCompile.lean",
+      "sha256": "08f32f3755e4573f48408b48590adfaf0022e5e4d91c1c1913727311b87ba99b"
+    },
+    {
+      "path": "Solidity/Evm/MemoryCompileExamples.lean",
+      "sha256": "0a27f52ea790991d51d3e1a5c69a7f2f773aa8231b8835ffb64cd119a550f238"
+    },
+    {
+      "path": "Solidity/Evm/MemoryCompound.lean",
+      "sha256": "bcef05fe00a1cee5888b04631c981686d7bd6160f4797da3dab9d6010366b79a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultArraySource.lean",
+      "sha256": "9d341c289aec49adf63ceebb3703ba61f618d1a1efe78266d8ecd921b47cae55"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultBuilder.lean",
+      "sha256": "bfe6bc89a3f44f4b27623440528a2cbcc821ed59db17a66beda1bc64bb7212a7"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultChildren.lean",
+      "sha256": "9e2bbc0479999f13f50b6b21ba78b9d3355ba0ff6f54c567bdcfc0a77857eb53"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultChildrenSim.lean",
+      "sha256": "c7a0e8e68748492885ce5cbd01b8f2ea9d5f138753f202b725866f10f90eecf0"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultCompile.lean",
+      "sha256": "eda905610a56f7f9f1e2c8f464de556d334e9f8b2794dfba57f6ec0a80e47d4c"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultDynamic.lean",
+      "sha256": "9b5e31ba18df94007197a4710a001f419d6f532a359e23540c6b96024ee965a4"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultFixedBuilder.lean",
+      "sha256": "e9a97b84e54b4272e1a3f996f1b80d57ac7b3c8b274202012fc10dc43fcf7fb2"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultParent.lean",
+      "sha256": "f0f5a4e378d722f6fdf013e59cbfd2bbfda36e071c5284523c844391de23edda"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDelete.lean",
+      "sha256": "42e874337c932317c07a5deed307bb93e2226ca66359f064d8df9b10fc96fee8"
+    },
+    {
+      "path": "Solidity/Evm/MemoryDynamicFixedDefaultExamples.lean",
+      "sha256": "dea3cbf5d56c0e8263779f99e579f99301eef5ad2c4e64610d56302d53dc5e4a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryExamples.lean",
+      "sha256": "328489de0ee3bdb73937a80bf68f6405f7f0c8ae8bf05e72ba64d6896623998a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryExpr.lean",
+      "sha256": "84aa0c393f39081c6cbab5952b87ccbd208e6e0fe2b22b5e453346af418fd7ab"
+    },
+    {
+      "path": "Solidity/Evm/MemoryExprExamples.lean",
+      "sha256": "228a55448e850b8c16a2bbad4612d457b01bbac74ea8a20d6f654699febea6ab"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedChildArrayExamples.lean",
+      "sha256": "6e9fbc5f86f01f88e620c2a4c8efa1a67fa06be1a094334d3a424a4048a0d416"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedDefaultExamples.lean",
+      "sha256": "3a9bc9a1fbc7e5e50a3c605cc2442ae434655cf682523f4a5dc052737dccfd77"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedDynamicDefaultExamples.lean",
+      "sha256": "52dc5ec129233ea7136c97370dfdd2f80fc8b417d81e857a794a62dca4ed0bfc"
+    },
+    {
+      "path": "Solidity/Evm/MemoryGrowResult.lean",
+      "sha256": "05c861e391eadc867117ec21881012d933b35e04d567df288025d9fd9ee56da0"
+    },
+    {
+      "path": "Solidity/Evm/MemoryHeap.lean",
+      "sha256": "3a84a3a517c15e37f74d693602d93e26aa4833eb5a26c29187a77b29122c8835"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLocals.lean",
+      "sha256": "d034059608ab265031dc91254116673b458f27946021a43986cf00af4cebc821"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoop.lean",
+      "sha256": "5aac7a3861c618c7fbc8b8d8b0b40d74778e8d580917e7c5a1d18d1f212097b8"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopCompile.lean",
+      "sha256": "ade063ee486a481f81f5558d86b9cdc8bd4b5929a8eca02103241c0600fb040c"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopExamples.lean",
+      "sha256": "fab59aa7515a694c5fc3359071ce7737f0b4f67600f5f75767f3eecf8a666033"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectCheckedNested.lean",
+      "sha256": "4784628a3e3aa73eadf8ecf0d98bd49bf0cd1cb20883fe312270d38578cff3b1"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectCheckedReads.lean",
+      "sha256": "76d6d4e5bf619433c0730b57ea1a8f0ad67517f3b3c116d307b8d11fbc5f152d"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapControls.lean",
+      "sha256": "59503539c7e91b00955ae62be793b113f78aa4e54f1ffdaceb02d058706939fa"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapGrowth.lean",
+      "sha256": "859d39ae92dcbcf6ed942dfbf86b9c66c8545421c69b1200c959c480d52b213e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapKeeps.lean",
+      "sha256": "8609de4dae323ab61c8ce8e3fa32eca448797f2dbc388ae6d310a5b606c493c8"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapTypes.lean",
+      "sha256": "aa07e5d6aa151f8b0a9d24a7e0528a8ac96b5e0e413b1058d37379016ff25544"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLiveCells.lean",
+      "sha256": "877547fb52c27ebf9509329eb5d0fb09fa51014f736ef8d2f0926ed0691df60e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalAlias.lean",
+      "sha256": "60d33cde7bccfc48d6a9331c5e782d2d61fb29bdb9f2c40dcf52f7b5945752e0"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalAliasControls.lean",
+      "sha256": "e996beaa9b4bcd4ec5f156721bf2d9e57e653f901626ccc53c12d6874ba7bd37"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalBounds.lean",
+      "sha256": "69c897689e36856c474596b29085f942a2b79699b071ef4c7a002c3d35d59cdf"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalLoadControls.lean",
+      "sha256": "f73389d5f7ca4db2cf79cc6ba88b126faa48e6bed2c8fa96513f2b57663894b4"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalLoads.lean",
+      "sha256": "51c43bb2e48dcce8a5ca3b84c2b751a804f0a3acaf1d6612280149a88faeee1d"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalReads.lean",
+      "sha256": "bb88cd8d58bc1bf47956027ff20f4ac3885d797f38fa30b16d3cf9e9255b7d03"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalRefLoads.lean",
+      "sha256": "e55a3fc721d7155e9a47500e9418983f9a6fd521b0f9c5fe28fe5bafa92799c2"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedBounds.lean",
+      "sha256": "5d5ba6c8c9450c4fc69bfb7f17250f2a1009add2fdbbe0dc58c309e50a2119a5"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedControls.lean",
+      "sha256": "0fc2ad6ef1e2a3446316f3245a2f8225b949cba930a04b2b559469488e990a28"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedLoads.lean",
+      "sha256": "d9dc93fd597604ece742f40f8d93afaa6e815afe559106be164bf8e783904a56"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNewArrays.lean",
+      "sha256": "a11ebbf4011fa80c319e7e125e302a67f6444eb4e0073d51312b48d44c8f1fa0"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNewInventory.lean",
+      "sha256": "10459a9acb8ab4e49f8b2d891e61c26a09be23f36855422fca5e585f3a0a6a5a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparation.lean",
+      "sha256": "eae8c88a71e46b1229f027be151b42a636ea7dd5c3b6b47fea59f8f4238fc479"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparationControls.lean",
+      "sha256": "5c28aad7593c4b05d2e34f76de605c2731933f8068938ee1be04b8faf974259a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectOldElements.lean",
+      "sha256": "1613b39616e8050948f4731dda60eeec4263dd3f0aa5076f5e8ab36d7fbbd4a1"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectOldHeaders.lean",
+      "sha256": "bdb01611e32689fa915e0ed751ac9355b10f6afe9e59111513a9bd68d353692d"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectOldStructs.lean",
+      "sha256": "f81c8f437a669c5ec66902af99ccd6367d3b4d21b9730fd0cf48ce2f420ffc0c"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectRetainedNew.lean",
+      "sha256": "375fd0533dc8d05743d777826a99704cb2a395040f4f1c33cccc926122d363fe"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectRetainedRefs.lean",
+      "sha256": "85ab4ff4c8a838ca8224c7d858849d603246f949ed8cbb87b1b22862212f81cf"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopScope.lean",
+      "sha256": "b7c6b7bd2cebbcce6173ca1606a4f2e90a01afc50498c13636849be6cbb26ab1"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopScopeDemand.lean",
+      "sha256": "0223145a36941e57bcdf801dec77a112a8dbfe6bdcad5bc82fa45b98e7f4c034"
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopScopeExamples.lean",
+      "sha256": "882349a0b961b2c2e231b60acfe12c6fbc650077950525d7d048b76a220b4aa3"
+    },
+    {
+      "path": "Solidity/Evm/MemoryNestedFixedDefaultExamples.lean",
+      "sha256": "5c0a3f6fcce8b79bea8319355eefd8b17396d9c9a0a06c3f5afed1c204a33c7e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectAccess.lean",
+      "sha256": "4ccf493593a0995498d480d520d0daf4afdc868b7e9657af6133f8a37f5f60bd"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectAllocationCost.lean",
+      "sha256": "902b12bb0ba76ff8f7a92fedb5cd315ac082876a5d27db944597ce69b40fb1f7"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectAllocator.lean",
+      "sha256": "0f71968ed6a657c72a7efa05d33262d2f0f3afd34c9ea9ff445ba8b567fe970a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectArrayExamples.lean",
+      "sha256": "6473c1748e00240745b86fee9093e0f5ec939191be7c37462af5871d37867dd1"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectChildLoop.lean",
+      "sha256": "a41758bb77418b8f5301f484896685beaaa617e385511c10ba6123abc5efd67e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectChildrenCopy.lean",
+      "sha256": "d8321b1e94c9d3ac960151d2519f0652d23f6b90135fe7bde2b0fc085f2bc331"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectChildrenSim.lean",
+      "sha256": "392f04f83b44dd498bd3083ac5eca45e2f2b2c59063ab33afc167b71e962c6d9"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectCompile.lean",
+      "sha256": "93f684686866f348178f2b008f807b9c0caae97841591b6bfc418f0abf40d81c"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectConstructionCompile.lean",
+      "sha256": "10f0bc746629892b5d80b41e2a152c3c5d0b97bb33c5bbfa0c979a18ca381779"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectConstructionExamples.lean",
+      "sha256": "bb4ad9575a5417fb776c17ee64557819d39877ff560f7b1c032a5f083e04794b"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectConstructionSource.lean",
+      "sha256": "cbfbef6b7898ac5cdc365aed840bfff2a5db6744953f1e01741c5f7fab30f1f9"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectEmpty.lean",
+      "sha256": "819fec8e7e32d65fbbbb646941d6a531f448d3da7ef8d807914d73b4c0bf5c89"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectExpr.lean",
+      "sha256": "aa7b4d3282ae51d367feed471a52a6848632f7f7507948ca7cb4c5d982f30473"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFieldFrame.lean",
+      "sha256": "bd6d179f081aacd35f083e166ca391720e7c6ed4794a9439e6296d0e488dab9d"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFlatFixed.lean",
+      "sha256": "2ca635a280012fb4992ece61cfc320b1c215fb97bafcbb71518acdf4714f3460"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFlatStruct.lean",
+      "sha256": "8889f884a2958c99b9b909c27a4ccad6605fdcaa683412d23cf6f680bc425f6a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFrame.lean",
+      "sha256": "e9850071f310de971d35c247d3569d57a00adb3b69b0e7ac0f3d9d00767a0ba7"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectGrow.lean",
+      "sha256": "7b7d434fa353e5846bd900fbc9a61ae19d487c024733ecf3441337e00adfa085"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectNested.lean",
+      "sha256": "ba5615103b956227dcfd277e5bda1dd272543e304a180c32149eb8d722721c92"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectPaths.lean",
+      "sha256": "e122dec204e5ef940ff8cc5cccdc17020a6b85bc5b9d0cd5d4fd0ba77f6465ea"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectPrimitive.lean",
+      "sha256": "8387e21733934c681499eb5aa98953523894925f3fb7c898689d0a6c65444f7f"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectReserve.lean",
+      "sha256": "5d9a285950d9eebd014bc843a8eedf148be0249dac8bcddf6736c8a5e8c8b5ea"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectStatements.lean",
+      "sha256": "bf1874908097ab4f469bd807958ab6dd890eff70c0a55e36d23420a7c656aca7"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectValues.lean",
+      "sha256": "a8862a44981c798b3f47a268445bdaac73b0f026e9f37eda8dcac71a0ef89180"
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjects.lean",
+      "sha256": "31fb3cda3b69ad128a90d4dd783519e66573a4e391dd95a5aaeb206244e02269"
+    },
+    {
+      "path": "Solidity/Evm/MemoryPathExamples.lean",
+      "sha256": "c4b619ce839f823fd6a4a558cf51aaf44f1c02e187d2301c2c66e63e343f9cba"
+    },
+    {
+      "path": "Solidity/Evm/MemoryPaths.lean",
+      "sha256": "95ec734b0817e9b0d3b48ac2df2b477c598443de22bd2df2d7387b6027b9d1ac"
+    },
+    {
+      "path": "Solidity/Evm/MemoryPrimitiveStructArrayDefaultExamples.lean",
+      "sha256": "b80d0be1a168899095767ad453b406f6cb2cac353688615d84e82e6d5ad0829b"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArray.lean",
+      "sha256": "9a4c60a90d13ca9f7ba6b1b054698e37d5eacac1aa945a12fcb6626dd6e1f877"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayCompile.lean",
+      "sha256": "99979fb8889846ffc296e2ec4ab6416bb83e9ad312f480d2e3e03cd8e2c6d159"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayExamples.lean",
+      "sha256": "6e4f9f5eb27fb7a1f5ad22e71cc4b794a383998a3959ab53b53be5c47a97c17e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayPaths.lean",
+      "sha256": "f3482c1e58db74f12a22c914540caf678627e0fbdfc9e422649e86f8f0bb96cb"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayState.lean",
+      "sha256": "a9af24f242d988570263634d4e6915a27b732feb66f19d7dc74ac39c604ad39a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayStatements.lean",
+      "sha256": "5ea1165268b49624570a815211e107de9933afc6dd8d920e54a8ae053bb2ba26"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefDelete.lean",
+      "sha256": "44c175e3eb79bb1bfe31b03a6a6876aa8380ccde940dca58063a8cde69102027"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefWrite.lean",
+      "sha256": "5f2e741096ea555764c253ccc96368792c4ee8e158046c3f65fbffb68d04c188"
+    },
+    {
+      "path": "Solidity/Evm/MemoryReferenceArrayRebindExamples.lean",
+      "sha256": "f3887844957b9c0086ac40bc851a37348665b6895b9519c771065df3344e43e5"
+    },
+    {
+      "path": "Solidity/Evm/MemoryReferenceDefaultSource.lean",
+      "sha256": "c5ecc2dbc40011ed9e93066af5c20e6dc6455b6171c7662daf32efd3fe21a4d0"
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefs.lean",
+      "sha256": "da3283bf96f2d1c3bfe498934a71443666986717ce1264bcd771021e75eba5b5"
+    },
+    {
+      "path": "Solidity/Evm/MemoryScope.lean",
+      "sha256": "7f34df6f3e0da6e89e6c5f59b42410f7953552ee69427900bff035b6fbf42529"
+    },
+    {
+      "path": "Solidity/Evm/MemorySource.lean",
+      "sha256": "0c843eaf5933df26cfc09d9d969c8975936b2e0ae51a37659874a5fc70a5dcfd"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStatements.lean",
+      "sha256": "a32528b73a25f251dc8d1d09bb9bb7a9a9fc93c18ac62776ba9ff5e304c288ab"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageCopyCompile.lean",
+      "sha256": "6a1c1fc05b3b33cf5705c36138fcd2393e60c7878de9ef80ad3279d90dee6bf9"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStruct.lean",
+      "sha256": "9e759f5656be7937e20bb0cc8799ec4b1652615ce5be45f8055aef6fa41fb08e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructAlloc.lean",
+      "sha256": "3d04b062ffa05ab66098c27b7356e4e5dd585bf82c4e6cc9be214707bbc5960f"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructArrayChild.lean",
+      "sha256": "fa7228deeb5905662e70022278030f3f5d509e12019812c53ff88fe25d934235"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructArrayInputExamples.lean",
+      "sha256": "f31162e528e2f9b1359313b910db27986e2fe91eb695bd51835918b086eaf29c"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopy.lean",
+      "sha256": "4ee69b32cc29e65b4740a1be0d7012934a44076d0f7a8d3743365b7d3bf474e4"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopyAlloc.lean",
+      "sha256": "b0bf383c67f583e32571731d14cae0bedd87f1fe4e650dd049562bf3482edf0c"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopyCode.lean",
+      "sha256": "46464cdd2bb1d8c52fb81611911c5aea4f20dee082d7e55f392de6f99ed8ad52"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopyExamples.lean",
+      "sha256": "b7724df737886e4a77ad2467b8cfcc4b2dc33110c3afae5a719deb94531fde99"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopySource.lean",
+      "sha256": "b1a8535a539cdc283c853c6a16e847b63c8cd182747cf91349807a753582be3a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefault.lean",
+      "sha256": "08b905c22ee805ec68cd16957fd73b80c08cb8ad085e1722dee48cbe5c4807df"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultCode.lean",
+      "sha256": "7b0c05ce1cf200d39b83c8568977b25dd46de0feacfccb66513f32b7894f2fdf"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultExamples.lean",
+      "sha256": "bee96b4f425b0c4001abf7e7ee7ca855eea12ca6293db2feb623d96e23fbdd92"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultLayout.lean",
+      "sha256": "6b6aadf9dfb5d1d0caac2e18bb55dfa093f493aeb3b6aecd709dfa78867f3638"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultPlan.lean",
+      "sha256": "98abc761d60de911b1bfefd496a102acfd46b42f38e0caec6855f0cf1b3dd002"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultSource.lean",
+      "sha256": "30fd021cc1304c8a76b3704c233b1b749b3448c861dda135c9f5fb9fa86b5d43"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructExamples.lean",
+      "sha256": "bb6ebf02214a2a8eb96f0d24f0937938e8bdbd20badead54fd12ad9457e03bbd"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructGrow.lean",
+      "sha256": "df64c124bfab79d22acb3e7741f004ac82ab6142e6bfb2106c6318da30ae90ba"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructHeap.lean",
+      "sha256": "b200cbd15d504dab96b3e0bb2c80f75f3dcb626e19c1f039e6fbfcd136872802"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceAlloc.lean",
+      "sha256": "340d1567877623d410ae06adf4ce7f118d73f633bcd9ecdd5349989469bc1042"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceCode.lean",
+      "sha256": "ee4334db47d63a0e6f3d910d8bf1686d940d80aa3288756d29872241417910ef"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceDefaultBoundaries.lean",
+      "sha256": "0bf7795d1df91fb86267cd71baa6a904d714fb8ce740a3379b247d12b9b98ccb"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceDefaultExamples.lean",
+      "sha256": "a4a3ed5d0ccc89263247b30a981d741a88dd114c340f0612bfa6208100659aa1"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceDefaultLiterals.lean",
+      "sha256": "b3a2f7c72021a41bcff8915129ede8495155923b461f679ec5ca3cfd31fd9219"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceDefaultModes.lean",
+      "sha256": "655c9e619ede4083fb37cd4006e4803075005b53ed60292edbe7aecb6e9a8a86"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructSource.lean",
+      "sha256": "a1471b84851209bb39bbf1d234fca8f9266849bd86978fbd55b333115f8f1350"
+    },
+    {
+      "path": "Solidity/Evm/Repr.lean",
+      "sha256": "eac29c092292aca1f82d90409ab7d43a68450c2c44e8607b0fae06d18bafd240"
+    },
+    {
+      "path": "Solidity/Evm/Signed.lean",
+      "sha256": "fcb02aa1a92478fa0208cb86045569309682107a0d65677f24767ad5de7c8563"
+    },
+    {
+      "path": "Solidity/Evm/Sim.lean",
+      "sha256": "321e9c2a68f360c0e48393d3ff4b8599cb2307efb6ab0329ee134f145240d2f4"
+    },
+    {
+      "path": "Solidity/Evm/SimLemmas.lean",
+      "sha256": "165702d523b0237822f108dc3c2090163beeb8762a4ca4b130fd26beabf5ebac"
+    },
+    {
+      "path": "Solidity/Evm/Stmt.lean",
+      "sha256": "2e1929f2066ff110c62829520dd38f1a8f3fafddcda4b532d86780ed72e3b2f6"
+    },
+    {
+      "path": "Solidity/Evm/StorageLemmas.lean",
+      "sha256": "bb5c05a7f5a51d15b951235bfd45957c83a9788a4fef93e7b0021c54cecc21ea"
+    },
+    {
+      "path": "Solidity/Evm/TryPanicCallMetadata.lean",
+      "sha256": "8341f93c990b586e8195cbc1fb90cf37abfa18a1c89fcdcacbd3e902e79f92e7"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/TryPanicCallMetadata.lean",
+      "sha256": "54122509a94407661270a7c9f6c27bb8c73ae873d6f10842f7c1450932253fad"
+    },
+    {
+      "path": "docs/module-map/evm-compiler.md",
+      "sha256": "cf48db7b7f504ee9dd471ab657e143192cd5729a4c2826d85fe834b2a35cbae5"
+    },
+    {
+      "path": "lean-toolchain",
+      "sha256": "42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/Closed.lean",
+      "sha256": "c757bfb231e33be61978442d5987d996e84dab52f4f02f0ba33d1f76c038d9f5"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/Inspect.lean",
+      "sha256": "ca8f6dbb45e2e29c93211c46dd8449215e30563f31b6b18a805a160cea7280f3"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/bounded.py",
+      "sha256": "fc173e2d8d6a6a8ac2a2129976ced6bde524aa004d71a0df37e2efcb9e21131c"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/census.py",
+      "sha256": "a3a1b0b26271f35afb1e2d409353c341c76b65ac8abc70770660aaa464e123e6"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/closed_census.py",
+      "sha256": "ab64888a55aa3b0ec680a00accc75f052621cad0b5b7c7fad34b17c74c0a3662"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/manifest_evidence.py",
+      "sha256": "75b16ebdb5bf9145bdd965822597fb8a6519bd43ba04799c56d6b9eb733a907e"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/reconcile.py",
+      "sha256": "ab7356a8e5b1b71bcc90b4616beefb2a3cad42e9ccc312cf91a7420fae123aa8"
+    },
+    {
+      "path": "scripts/h62/item2/audit-evm-compiler/verify_evidence.py",
+      "sha256": "a5a695329125f70a435c652db7e7699b829f84cd0858a5814da0599ee23f7731"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/HeadlineAudit.lean",
+      "sha256": "0c2f4d804a563a78d2b53e14b9e3600b0db3cd6eedefef9fc31c9dc8db9f1491"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/IntentionalAudit.lean",
+      "sha256": "d47da59595f2921c50e508f4ee333fe8cd6448fff3c34be1783f5254f9af3323"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/JointImpossible.lean",
+      "sha256": "742f1493a2c7a452b42dd68b184312bb648efe983d688bd0a386bdcebc347735"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/JointWitness.lean",
+      "sha256": "cfd3d311b813ee3dacfa57bdad78fec9a0ababb8954f74394124c602ada25b15"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "sha256": "d361a09fcfeaabbc5638dc7fb2ad9175fc1c0f9cc3669c12b5e4f461923a8517"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/LayoutAudit.lean",
+      "sha256": "2e3e242c960e3a20624497a6c06376183d9ff10ecd5cc6bb0c81f6bf32f6e993"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/OpcodeAudit.lean",
+      "sha256": "fd4a3b84b7a09ce8c33d8e588a2d9f2b8b8d632611f9b165517537ac252835cf"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/SuccessAudit.lean",
+      "sha256": "94878c368077f7275148c19d1aec3aa2388c6d7dfcb3faef297e532d012673b7"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/check_evidence.py",
+      "sha256": "43ad57d1527fbc105248ab80d19a9ffd336debe82b4e7c3e375cea9f715dd8ac"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/coverage.json",
+      "sha256": "c65c4de12ef4dc421171c1350da48a6cfc35a19ae16054b56f239207746ba077"
+    },
+    {
+      "path": "tests/h62/item2/audit-evm-compiler/handoff/original-rendered-prompt.md",
+      "sha256": "09ff865b8a9d706a421292d8ab3e3e91331c238361981dbd1348e023f8cb514e"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "before-telescope.json",
+      "sha256": "a65bd8693cc780c83fb8d4fb9f3007774cff3642e2a3482135199e6cec538484"
+    },
+    {
+      "path": "closed-Solidity.Evm.Examples.json",
+      "sha256": "a06cc392bc5d80c1ef16a6221c1790bfa942a488116e9ab7827facaebe4c0386"
+    },
+    {
+      "path": "closed-Solidity.Evm.Examples.log",
+      "sha256": "882d6b777273bf567419f3de40b25bb1af740ff2d44a766c2f04e30116a270a1"
+    },
+    {
+      "path": "closed-Solidity.Evm.Interpreter.json",
+      "sha256": "964d2490c6fce1c186ec90222a980a52e9b95393c42167ac4419f089036ea6a8"
+    },
+    {
+      "path": "closed-Solidity.Evm.Interpreter.log",
+      "sha256": "5771cca49f90a93a3089d872caa98feb21f0b2dea11680ad429fa9f96c5d0aaf"
+    },
+    {
+      "path": "closed-Solidity.Evm.Machine.json",
+      "sha256": "235b8a94dc9aeaf5f2e2e815ba9c305bdab8214e1d16ced2c7fba83991ffacd3"
+    },
+    {
+      "path": "closed-Solidity.Evm.Machine.log",
+      "sha256": "d186345bdfc3eda876a0d1a349d19b402e9fe0013c5098aab7e1b5e43957178b"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryAllocExamples.json",
+      "sha256": "d216fdc228864f2699e62e9e9f441151b71bbd94c3d13848e6835ba75ef2ac86"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryAllocExamples.log",
+      "sha256": "7133e3d2391411aa8636dda7f2b33fbace046d83eba8cbb727998868476fea8a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryAllocSourceExamples.json",
+      "sha256": "5d37c54a533ee4b9e11fb29e3f0a36389dcd34f534c4c3bb1471bb27e37d76df"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryAllocSourceExamples.log",
+      "sha256": "c040aca3825c6ca8b84d268a8740ed820c1cdddc9f52e7bb70be1c0851177fc3"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryCallExamples.json",
+      "sha256": "4b8165e42e4d7ab6dc0ec5779465f54ff035cb9959437aecc08810ec6e581c6a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryCallExamples.log",
+      "sha256": "bf5898d85ca25346beb54eafc6de684f38f8abedc6ad6da19ee0ef449363a9c9"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryCompileExamples.json",
+      "sha256": "d7888609eb97dec76331485301a0fd47c6bd74dc925e0106b04cc87017f43857"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryCompileExamples.log",
+      "sha256": "9fe7fc555937d8dd780caf17c0327248ff6d0496991235b23ca8678aff06eca1"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryDynamicFixedDefaultExamples.json",
+      "sha256": "44d63bdb1a161469268e90f3327d58c1af95d355dd1a3b4264c353da24a38e29"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryDynamicFixedDefaultExamples.log",
+      "sha256": "2b45b7cae9a156bc01bbdd798c363462ef470dfa4f647440179fee48db0cb268"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryExamples.json",
+      "sha256": "4fb420a74127f23044c9be9dea28cc5a161214008528dd3a0415ceaea85f6a63"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryExamples.log",
+      "sha256": "2f79e25709483da9e59bc424311565d66aea559084f8a76c30b17f6689d0dbfe"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryExprExamples.json",
+      "sha256": "146f79dfaabe579f5b355d83463baaf50d1a36d9d6d6acaffcbad519fe231de7"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryExprExamples.log",
+      "sha256": "83b02dff5f7865bddaddf0beb7a58dd7384c3e72bd74ea408e3377fc2b2d7bab"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryFixedChildArrayExamples.json",
+      "sha256": "83cdb5c57f6dd271815ec0b9e2fd25edd86752d4e158f8c5faeb849038351804"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryFixedChildArrayExamples.log",
+      "sha256": "87ebb6bb826b0a63cc9abdf210d335c81777a4d19c47dc5acfb74f273e942d38"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryFixedDefaultExamples.json",
+      "sha256": "73c1ee1c58f5dd4baee66c94a3f03066e66f96cbae1fba44807f8ed9d75dfe37"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryFixedDefaultExamples.log",
+      "sha256": "17fa6232ace77bd1b9db1fc872e769cdeb6f521093cbf98cf95e090091bb0f0a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryFixedDynamicDefaultExamples.json",
+      "sha256": "f5c7cce885b137ee948431119dc346fa05a70075f80586f6eb6607204fb13aa0"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryFixedDynamicDefaultExamples.log",
+      "sha256": "6035a0763d58ac7eed86f6d69dc9c23d0783395e650b6f45e9748c817cf7dae1"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryLoopExamples.json",
+      "sha256": "83d11d5ff04f2d811bcece65faa79b1e75c54d098366d0dbeb1389b8ddda2610"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryLoopExamples.log",
+      "sha256": "ebb459a661dec66dc756b9e887fdd030d6db93bb67f773eb83d7784d94845da0"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryLoopHorizonObjectNewSeparationControls.json",
+      "sha256": "eef91bf28fb0be3828eae0425a1c38fd121d38161f165b98b9be33b19da99616"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryLoopHorizonObjectNewSeparationControls.log",
+      "sha256": "4a9fa7959b4adfea70bc7b38bd1ac1fb0c14d7090b67bfcf74d4dc4e9683a2ca"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryLoopScopeExamples.json",
+      "sha256": "0c967c6870c003ec60567fad4d6fe1f2f97b28eabcfa43c39e8621167ff384bc"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryLoopScopeExamples.log",
+      "sha256": "ea1c90c2d6475c8b913755eb2bc818c2fd62878d6edfb56d949308b9cadb9993"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryNestedFixedDefaultExamples.json",
+      "sha256": "db4f47b08cde01a397a7af25df1be7dd20409d20afd28bd6ced8a5bfa498433a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryNestedFixedDefaultExamples.log",
+      "sha256": "ea9c487e2639f328de594b8ebd73b8fff5859c9a860c673f11cc79fff597d703"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryObjectArrayExamples.json",
+      "sha256": "10aeff0e3745f4f95d4c73bdb938f0579e095c3af960186f200ea09356213516"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryObjectArrayExamples.log",
+      "sha256": "b4795b5a157c4ed0f26fc1322f7ea3c9e7631ef053a4e77bf014e619ee9f5171"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryObjectConstructionExamples.json",
+      "sha256": "bbbe883ce68128f73833dbcc6753a845d0675e87c31a2ab2e37432ba71af366c"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryObjectConstructionExamples.log",
+      "sha256": "76fa8f8a20ad5b477e10fd10d671a79e969550db26f7da6a6109618f679e132a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryPathExamples.json",
+      "sha256": "749648781b34028dbf9c4798eecb9bf4ee3303b77d13bac5f0f193eafa1ff42c"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryPathExamples.log",
+      "sha256": "57166a169caf81c6c2ddb0b1d0805566c6473f42c84bebce94ad37635e254bc5"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryPrimitiveStructArrayDefaultExamples.json",
+      "sha256": "290bbffe15ceb2f269b5174ee382949c2bcc5d865a07d3e20dc0dc7f78a0ee24"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryPrimitiveStructArrayDefaultExamples.log",
+      "sha256": "1debc7303f3e0a2e9cb0c9a1693e1b470805f27ea9aa8cdaa5cf6540b2c15c1c"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryRefArrayExamples.json",
+      "sha256": "e094c2b79cd71968eb42b0675415161b5ae8e6b6ab354d23df40927f7df2ed7b"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryRefArrayExamples.log",
+      "sha256": "1014100626ac6b7ac3260180f28d9406733215522d37e36d66521e4d9ad417ac"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryReferenceArrayRebindExamples.json",
+      "sha256": "9cb3f8e05cca16b2b70280a85ad2a3eb63dfc4c6cd39182409e73d2eff20bd58"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryReferenceArrayRebindExamples.log",
+      "sha256": "8c6956a9bcae76df3b7cfe40cd872da1ffe30b05424728e8f427d2d7c8ed4e34"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructArrayInputExamples.json",
+      "sha256": "ac6a8181f36f03b90a95636c086e6f0b81c96daaf62a5d7ffbbcd141ef08672e"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructArrayInputExamples.log",
+      "sha256": "6a7b1ab0120a0f5db2b900d91dbfdb80466cd0a904428aaaf9c08b333254c7b3"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructCopyExamples.json",
+      "sha256": "cbcbe6b9f4d82ce730481163a3e876f7c42f3ec67b2f76e1f6ba37fb60033cc0"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructCopyExamples.log",
+      "sha256": "1b14dc64f10a3dc7b95df50f26ffcc77b3b579810d66fcfa7ce5046cdcc88a39"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructDefaultExamples.json",
+      "sha256": "42c9277a12957d68043ccb5cef041fa24e4e5f5dc1016156a6c428459fb6e740"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructDefaultExamples.log",
+      "sha256": "7ae13388a15b3ad55926e259cac3be1aaaf6df531c4c3aec1726d21e3e271b9c"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructDefaultPlan.json",
+      "sha256": "3aafe2a7b57a41d6c2cf18fa03548e3795838da4ac35a836310a27b5ffafe91a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructDefaultPlan.log",
+      "sha256": "20a9b1fbad44447bbe880c619952a848ca7362cb6a7107a2d4918ebafb8d681b"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructExamples.json",
+      "sha256": "1b4c83942f4e7df2b815527887cd76f70b8ec94fae34326e60c740d8fd8d7db9"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructExamples.log",
+      "sha256": "4682c2773666c6e6a02b02cf2d144b128afa59d850801ed196ae2bf00b82a813"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultBoundaries.json",
+      "sha256": "fff1f40a637d3705a6f7485c8c907729444c5d634a9a2f7f96708999c55f8963"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultBoundaries.log",
+      "sha256": "fc0a2bc0d55879652528b530f79b0ef5c1464beefaf0b17a9028953cde677803"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultExamples.json",
+      "sha256": "e52dcd8587e16e43eda909937d890e3344db473582ded39d2af758a8a06ad8ee"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultExamples.log",
+      "sha256": "25c33c72c8499d0f88935b26c434c882bfb69c2e8497335cb202228486405708"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultLiterals.json",
+      "sha256": "812cfdb4c65061814e140c0cc008ff1027bee98175357ff4d99f94f6af387c8a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultLiterals.log",
+      "sha256": "bf6ef2141cc8a6c81c854b3aa88dd1821b8b3e4e1d7f169e58c17fb5907d3bbc"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultModes.json",
+      "sha256": "6d0314d60bbda7a91c8cd42b05866673e457f696dbe090a0d8447f650894507a"
+    },
+    {
+      "path": "closed-Solidity.Evm.MemoryStructReferenceDefaultModes.log",
+      "sha256": "3f0ed4885079fb37ec6d6d45ab67e4e9e3c300cc4ef45b8d209feec5303a2047"
+    },
+    {
+      "path": "closed-Solidity.Evm.Signed.json",
+      "sha256": "68e3f52afded5c94ee3ed25ea5ebb504eb550190c42eaa716d8f02bc1214726d"
+    },
+    {
+      "path": "closed-Solidity.Evm.Signed.log",
+      "sha256": "4698d549889c63b768b3c2f18650742666ecd4dd8a8c8730ff29e6d7e23de6d8"
+    },
+    {
+      "path": "closed-Solidity.Evm.Sim.json",
+      "sha256": "66cc6a449c265c55ea9218d5a096d6404512c5fa25021d1d9a92342b4235ab85"
+    },
+    {
+      "path": "closed-Solidity.Evm.Sim.log",
+      "sha256": "1b5d3b8a0c46036f3de16597742252212052235ffc92a187ec24fdc7b1e6c126"
+    },
+    {
+      "path": "closed-SolidityBridge.ExternalEvm.TryPanicRelative.json",
+      "sha256": "10f5a58ed493f45d70bea1587d6487e08e53edf6d45b88d1358c53a7704a30ae"
+    },
+    {
+      "path": "closed-SolidityBridge.ExternalEvm.TryPanicRelative.log",
+      "sha256": "46118f207c2025a098cf3b6b0ed2aaec19cd94ac783e49cfa2ada8ea6c12cb4f"
+    },
+    {
+      "path": "closed-SolidityBridge.ExternalEvm.TryPanicSourceScanner.json",
+      "sha256": "9b983d915ccf4b80d2e713b570cf9fc160c7d0f9595b5b4a730eb741df9b6baf"
+    },
+    {
+      "path": "closed-SolidityBridge.ExternalEvm.TryPanicSourceScanner.log",
+      "sha256": "76130b8fd4c93aee367095c855e668dda8ede22ef710f5bda7ea226a0e50d17f"
+    },
+    {
+      "path": "closed-checks.jsonl",
+      "sha256": "121abd9d805ccbd5ad539421fd3f2b953231da034646503ff399a0ea8dc610e1"
+    },
+    {
+      "path": "closed-coverage.json",
+      "sha256": "8786e44b2bc7ce62342ca9944b9f982535bab74251057e9b5a888fb94902af0c"
+    },
+    {
+      "path": "closed-summary.json",
+      "sha256": "9b53d56d93025bca9b4d11c6425bc1f9e5ff62fe7366e0807f8261dd4817b34b"
+    },
+    {
+      "path": "duplicate-ledger-control.log",
+      "sha256": "9b5f1105cbde80de57cb2cc5ef2aac0925f8a423a8209b6766ba8172979033c9"
+    },
+    {
+      "path": "evidence-controls.log",
+      "sha256": "fbaaa9415b4d09df7e02c570d4ad1aab363e5f90ea0dd57efa049597bbe41b2c"
+    },
+    {
+      "path": "final-HeadlineAudit.json",
+      "sha256": "3ba056a2a32c20cebea32c60fb7ff633284ac8a74c3267d481edc3d387d50e30"
+    },
+    {
+      "path": "final-HeadlineAudit.log",
+      "sha256": "ad3424776bd869e9e789105122117fa042ff737fe5664b7681de057cf352e899"
+    },
+    {
+      "path": "final-IntentionalAudit.json",
+      "sha256": "291c412a4baea8b06963e50b2c045edd0bc5dbd7fc4456c6646061d999cd6ba5"
+    },
+    {
+      "path": "final-IntentionalAudit.log",
+      "sha256": "68b58d3a589e336b4d8735b421bad3e98d490ac38442e49a8f63fc915145b590"
+    },
+    {
+      "path": "final-JointImpossible.json",
+      "sha256": "c04734d3dc43299cce874c1c5f084ec85fc7e40c59f14ba2afac3247686c6760"
+    },
+    {
+      "path": "final-JointImpossible.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-JointWitness.json",
+      "sha256": "2fef0fbcbfcfa778ae46892dd64558e0240bc0d91f48629823f82a34873edbea"
+    },
+    {
+      "path": "final-JointWitness.log",
+      "sha256": "f29557b4fd259716bd2e24e635f195363ae6abca710fad3783e4c7e7df367763"
+    },
+    {
+      "path": "final-JumpdestAudit.json",
+      "sha256": "7ec8acff8d3a371f16880f34a18027f511ef14914aecc7b48dea4782bab7d91e"
+    },
+    {
+      "path": "final-JumpdestAudit.log",
+      "sha256": "c8266146fdc024fed087b308eaa9288e217aa831d14e1350f7e54f7aaa06ddb7"
+    },
+    {
+      "path": "final-LayoutAudit.json",
+      "sha256": "612b200a9c677d1b2067f4e11bdc5170a2aac5de955ab257c7b8bc3550ebc5f0"
+    },
+    {
+      "path": "final-LayoutAudit.log",
+      "sha256": "6512e26de75d1642eace81b8175325db909b100735ad71b9f2b253bbfe1f3b9b"
+    },
+    {
+      "path": "final-OpcodeAudit.json",
+      "sha256": "7e28cd330aeec0a56741d2cacc4e400879bed925c7e28887afec14512176e30c"
+    },
+    {
+      "path": "final-OpcodeAudit.log",
+      "sha256": "40706064ee69cad53c768e77d1b3a62a7d310fd8610c21cc5d52257d9ca77e5e"
+    },
+    {
+      "path": "final-SuccessAudit.json",
+      "sha256": "2631cc2edfb2c75aeab651b60648034fa767a5e3374475e46f80cf1174b57210"
+    },
+    {
+      "path": "final-SuccessAudit.log",
+      "sha256": "489e0daa17c7e49b8e3a6439e7b19025ac544ac139a87a7ab9169263b13bb2cd"
+    },
+    {
+      "path": "final-gates.json",
+      "sha256": "90291063fbebaf046d2181fb8ba9adee43cc86e1b3e012df9e9b8a59c5394761"
+    },
+    {
+      "path": "gate-10.log",
+      "sha256": "2c2656715ef1a84974c96b203b8b06a87a76f917c7462518116636966f2c2ee3"
+    },
+    {
+      "path": "gate-11.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "gate-12.log",
+      "sha256": "fed3492d1dd575ed9a9c9cfaf024c452815d0d769734029d43dd6cf03e8ec0bb"
+    },
+    {
+      "path": "gate-9.log",
+      "sha256": "c7b04c4d8301890e4d977d0ee11681898036969edd38619ed5cc1a7a88a52251"
+    },
+    {
+      "path": "integrity.json",
+      "sha256": "2a4cf20931447ee33cc0bbf8bbc675c03740bd42ea8ca20a9296f5d59e044b15"
+    },
+    {
+      "path": "kernel.jsonl",
+      "sha256": "fcdd07230836b0cddf9f2bc2fc0bbff7a32df8124336d8b3fef6589dbc6d3f64"
+    },
+    {
+      "path": "keysort.json",
+      "sha256": "8c9ed8edb3d7c7dcc717d486ca564330441b6ff6d29e688f87af66595d7698b9"
+    },
+    {
+      "path": "keysort.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ownership-snapshot.json",
+      "sha256": "7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce"
+    },
+    {
+      "path": "promotion-summary.json",
+      "sha256": "e2018bb37eec49493277328d8b567f296e6f729eb1e3140ffcb7b78d11c17129"
+    },
+    {
+      "path": "reviews.md",
+      "sha256": "e15cd66c40e5defda01efb279d8254d8de4d9ddd77416f3b7731ac810358f779"
+    },
+    {
+      "path": "seed-census.json",
+      "sha256": "4ca809beed23baf8e2f849bac37ac6b9693f5c9d1732b3eb9c717492a12053c4"
+    },
+    {
+      "path": "source-census.json",
+      "sha256": "f199d8938c226b2c95431116337716233da3e6189a888f1a755c01c9ba17f2f1"
+    },
+    {
+      "path": "statement-census.json",
+      "sha256": "fd27675a3666983693d8bb7c0c6d3ccf6f5f6af5448538d63203eb91dbc0347c"
+    },
+    {
+      "path": "telescope-timing.json",
+      "sha256": "0ee1201471b0097f4c3fe2554b8b4c9ab0abda34d3df13f8e21281f36fc9c2e7"
+    },
+    {
+      "path": "tool-final.json",
+      "sha256": "d61c5550e99cb7e36e2efc7e26a571874c19cb4520ea589b80ec68b1745f1dbd"
+    },
+    {
+      "path": "tool-final.log",
+      "sha256": "f29557b4fd259716bd2e24e635f195363ae6abca710fad3783e4c7e7df367763"
+    },
+    {
+      "path": "versions.json",
+      "sha256": "f19b77c20a437e38cbf78ad0fa415269f7904216ed2d2242f77bb8de987d1ec1"
+    }
+  ],
+  "counts": {
+    "closed_added": 235,
+    "covered_total": 300,
+    "pending": 1530,
+    "joint": 40,
+    "intentional": 23,
+    "closed": 237,
+    "known_owners": 37,
+    "unknown_owners": 1793,
+    "extra_ledger_duplicate_rejected": true,
+    "portable_verifier_controls": 6
+  }
+}
