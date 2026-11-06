@@ -435,3 +435,17 @@ with cumulative patch, lane.bundle, full handoff input files, evidence archive,
 open-items.json and SHA256SUMS. Earlier artifacts remain intact. No Lean recheck or
 known timing STOP rerun for these handoff-only changes. Historical validation
 boundaries remain; full assignment is unfinished.
+
+## Successor world/rollback provenance tranche
+
+Read-only source census at successor input 371ac25a44ae9a77500da2308229992a675ac508. This tranche classifies three additional producer boundaries; it does not extend the prior 674-theorem/378-fixture totals or claim exhaustive embedded-control coverage.
+
+| Actual declaration/module | Established boundary | Still required |
+|---|---|---|
+| `Backend/Transient/SourceFrames.source_body_exact`, `source_static_child` | Actual `Source.writeAt` primitive bodies, with explicit parent/child static flags; static child retains the prior parent write. | Actual G42 call entry, ABI dispatch, environment outcome and complete callback adequacy. |
+| `Yul/World/TransientTargetRollback.store_rollback` | An actual successful `transientSlotStore?` preparation, explicit nonstatic frame, and coupled Source/residual/target rollback restore the complete local input. | Universal preparation/layout, callee reachability, full-bank and transaction adequacy. Its checked preparation premise is not a desired callee outcome. |
+| `Yul/World/PendingCoupling.WorldLogAt` | Signature only: full physical relation, actual G42 Step, complete Source execution, ordered observations and successful-target endpoint are producer fields. | A concrete instance proving those fields, including source-origin and owner-reviewed G01/H25 observation relation. |
+
+`Backend/WorldCalls/Premises` explicitly supplies conditional interfaces rather than an executable world CALL producer. An inhabited primitive body or checked local store is therefore not evidence that `WorldLogAt` is inhabited. Source raw halts keep their own bytes; only completed outcomes constrain the last-returndata field. Coarse target revert/fault has no invented machine endpoint.
+
+No Lean declaration, proof, evaluator, statement or budget changed. Migration compatibility remains with migrate-root-gate (`Syntax/Raw.lean` and reported axiom growth); this source census does not accept that prerequisite.
