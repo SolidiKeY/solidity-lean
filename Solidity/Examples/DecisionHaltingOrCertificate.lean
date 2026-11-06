@@ -67,4 +67,30 @@ theorem one_target : (claim (uintOfNat 1)).inTarget {} = true := by rfl
 #guard_msgs in #eval (match decideGoal (claim (uintOfNat 0)) with
   | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")
 
+
+/-- A genuinely false member of the same source family, with no positivity restriction. -/
+def unequalClaim (key : PrimTy.uint.Denote) : Fml Probe [] :=
+  roots.sourceClaim (.user "i") (.user "j") (uintOfNat 0) key (uintOfNat 1)
+
+def unequalMember (key : PrimTy.uint.Denote) :
+    PartialOrBlockAt roots (uintOfNat 0) key (uintOfNat 1) (unequalClaim key) :=
+  ⟨.user "i", .user "j", rfl⟩
+
+/-- The concrete initialized-state countermodel includes the key-zero boundary. -/
+theorem unequal_zero_refutedH :
+    ¬ Fml.holdsH (State.init Probe) (unequalClaim (uintOfNat 0)) :=
+  (unequalMember _).initial_refutesH (by decide +kernel)
+
+theorem unequal_two_refutedH :
+    ¬ Fml.holdsH (State.init Probe) (unequalClaim (uintOfNat 2)) :=
+  (unequalMember _).initial_refutesH (by decide +kernel)
+
+#print axioms Solidity.Decide.ResidueReason.PartialOrRoots.mapRead_initial
+#print axioms Solidity.Decide.ResidueReason.PartialOrRoots.sourceBlock_initial
+#print axioms Solidity.Decide.ResidueReason.PartialOrRoots.sourceClaim_initial_refutes
+#print axioms Solidity.Decide.ResidueReason.PartialOrBlockAt.initial_refutes
+#print axioms Solidity.Decide.ResidueReason.PartialOrBlockAt.initial_refutesH
+#print axioms unequal_zero_refutedH
+#print axioms unequal_two_refutedH
+
 end Solidity.Examples.DecisionHaltingOrCertificate

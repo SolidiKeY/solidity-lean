@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopyControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.actual_shadow_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopyControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.all_fitting_payloads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopyControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.capacity_refusal_after_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopyControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopyControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.empty_child_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopyControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.long_child_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -65,4 +65,12 @@ async function inputProbe(client) {
   return {started,finished:Date.now(),roundTripMs:performance.now()-clock,focusedEditor:focused.result.value,
     scope:'Arrow-key dispatch and next renderer animation frame; includes DevTools transport and does not isolate paint time.'};
 }
-module.exports={availablePort,DevTools,connect,capture,inputProbe};
+async function buildKeybinding(client) {
+  const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
+  if(!focused.result.value)throw Error('No focused source editor for build keybinding');
+  const started=Date.now();
+  await client.request('Input.dispatchKeyEvent',{type:'keyDown',key:'B',code:'KeyB',windowsVirtualKeyCode:66,modifiers:10});
+  await client.request('Input.dispatchKeyEvent',{type:'keyUp',key:'B',code:'KeyB',windowsVirtualKeyCode:66,modifiers:10});
+  return {started,finished:Date.now(),focusedEditor:true,chord:'ctrl+shift+b',scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
+}
+module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding};
