@@ -584,14 +584,6 @@ theorem CasesD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope :
 
 /-- The fixed scoped checker input determines its entire derivation.
 All syntax and context indices remain explicit. -/
-theorem BlockD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
- (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n) (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.list .yulStmt))
- (first second : Solidity.Yul.ScopedBlockTyping.BlockD scope E control tree), first = second := by
-  intro X scope F n E index tree first second
-  exact Option.some.inj ((BlockD.complete first).symm.trans (BlockD.complete second))
-
-/-- The fixed scoped checker input determines its entire derivation.
-All syntax and context indices remain explicit. -/
 theorem DefaultD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
  (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n) (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.opt (.list .yulStmt)))
  (first second : Solidity.Yul.ScopedBlockTyping.DefaultD scope E control tree), first = second := by
@@ -605,5 +597,12 @@ theorem InitializerD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : 
  (first second : Solidity.Yul.ScopedBlockTyping.InitializerD scope E count tree), first = second := by
   intro X scope F n E index tree first second
   exact Option.some.inj ((InitializerD.fixed_complete first).symm.trans (InitializerD.fixed_complete second))
+
+/-- Exact reconstruction makes the independent typing certificate unique.
+This is about BlockTyping certificates, not the older separate ClosedPure
+certificate-uniqueness draft. -/
+theorem BlockD.unique {X scope F n E c body} (first second : @BlockD X scope F n E c body) :
+    first = second :=
+  Option.some.inj (first.complete.symm.trans second.complete)
 
 end Solidity.Yul.ScopedBlockTyping
