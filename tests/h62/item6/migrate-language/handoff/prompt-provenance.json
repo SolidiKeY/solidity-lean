@@ -10,5 +10,6 @@
   "work_queue_extracted_without_abridgement": true,
   "scope_matches_authenticated_registry": true,
   "goal_id": null,
-  "goal_creation_or_reset": false
+  "goal_creation_or_reset": false,
+  "queue_separator_normalization": "All queue content retained; only the final blank separator before the following owner-key table is removed from the extracted queue file. Full original assignment retains its original separator."
 }
