@@ -250,3 +250,51 @@ requested pause, but the only exposed goal tool accepts complete or blocked,
 not paused. Do not resume this assignment without further authorization.
 No H71 push permission was supplied in this thread; the original instruction
 prohibits pushing, so this lane was not pushed.
+
+## Resume after master integration
+
+The coordinator explicitly resumed this lane and requested merging master.
+The prior lane head was an ancestor of `origin/master`, so the lane was
+fast-forwarded to `5f14596531efea2be64f1a5e7a83afa5e151e865`. The reported
+master touched gate and reviews concern that integration; they do not validate
+this new continuation or replace its pending independent reviews.
+
+`Shared.lean` now has a passing per-file MCP diagnostic using the pinned
+Lean 4.35.0, `LEAN_NUM_THREADS=1`, explicit `-j1` on the server and worker,
+one open file, the writer lock and a 12 GiB virtual-memory limit. The saved
+structured result reports `success=true`, `partial=false`, no failed
+dependencies and three information messages: each correspondence theorem
+uses `[propext]`. This covers only the additive shared module, not either
+inferencer, the other candidates, import migration or full validation.
+
+`propose_migration.py` emits `migration-proposal.patch` deterministically from
+the current originals and the shared module. The proposal adds
+`Solidity/Source/InferHelpers.lean`, imports it from the two inferencers and
+keeps each existing helper name and type while changing its definition body
+to call the shared definition. It was not applied; `git apply --check` passes
+on this tree. It is a review artifact, not a checked migration: changed
+definition bodies require the H55 owner, and theorem definitional equality,
+all premise shapes, axiom inventories and timing must be checked after any
+owner-approved adoption. No inference or relation merge is proposed.
+
+Suggested owner registration fragment, subject to the final destination and
+owner approval, for `docs/module-map/source-definitions.d/<lane>.md`:
+
+`| Source/InferHelpers.lean | Shared top-level mapping, payable-argument and elementary conversion-location helpers. |`
+
+The owner/coordinator must integrate the module registration and generated
+roots according to repository policy; this lane has not edited them. The
+review patch includes a new module path and changes existing definition
+bodies, so it must not be applied merely on the strength of the text check.
+Candidate compatibility files still fail to reach diagnostics because of
+Source/Ctor migration failures. Full Hash and language migration, independent
+finder and skeptic reviews, H55 agreement, affected validation, acceptance,
+axiom comparison and before/after timings remain pending.
+
+The shared module additionally checks eight direct witness examples: positive
+mapping, an array containing a mapping (negative top-level test), both address
+flags, contract and Boolean payable cases, bytes/string location preservation,
+and the default array location. Per-file Lean 4.35 MCP diagnostics returned
+`success=true`, `partial=false`, no failed dependencies and the same three
+`[propext]` axiom reports. The patch proposal was regenerated after these
+additions; its applicability check is not a semantic or full-gate pass.
