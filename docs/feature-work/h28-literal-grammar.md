@@ -34,7 +34,7 @@ fragment `docs/module-map/frontend.d/literal-grammar.md`. Read-only inputs
 1. Independent Escape, Body, Quoted, HexBody, Plain, UnicodeLiteral, HexLiteral, Scan, Fragments, ModeLiteral and ModeSequence grammar/value relations are implemented independently of decoder outcomes. Body.toStrBody reuses existing strBody_sound. Numeric/EIP55 implementations remain immutable.
 2. Arbitrary-length completeness/soundness covers simple, hex and Unicode escapes, escaped line ends, both quote modes and exact values. Scan/split theorems preserve every arbitrary suffix. Scanner iff is for literal delimiters 34/39; q=92 is an explicit negative boundary control.
 3. Exact pair/underscore rules, independent byte/codepoint arithmetic, lengths, fragment concatenation values, universal classification iff/refusal consequences and all-byte constructive round trips are proved. All modes are characterized, including asm raw-source length/quote guards and unsupported pragma/Yul literal classes. Mixed-kind sequences are lexical; no parser-expression admission is claimed.
-4. 242 kernel rows (28 hex, 53 body, 56 boundaries, 105 classification), inhabited positive and universal negative controls, 219 public theorem signatures/axiom pins (200 before the backfill) and 58 fixed compiler cases in both pipelines are implemented.
+4. 255 kernel rows (28 hex, 53 body, 56 boundaries, 118 classification; 242 and 105 before the 2026-11-06 fixture rerun), inhabited positive and universal negative controls, 219 public theorem signatures/axiom pins (200 before the backfill) and 71 fixed compiler cases (58 before the rerun) in both pipelines are implemented.
 5. Backfill (2026-11-05, `Lengths`, `Utf8Shape`): see below.
 
 The old StrBody relation overlaps at escaped CRLF for an always-true predicate; the decoder emits empty but that relation can derive LF. Body models CRLF priority without excluding accepted inputs. Both the old overlap and new exact result remain visible kernel witnesses.
@@ -96,19 +96,43 @@ fresh Lean log:
 - **Removed.** The obsolete `adopted-master.json`, the Codex
   `runtime-bin/lake` wrapper and `runtime.toml`.
 
-### Queue item 3: solc fixture rerun (blocked)
+### Queue item 3: solc fixture rerun
 
-The environment's network policy denies `binaries.soliditylang.org` (proxy
-CONNECT 403). The npm `solc@0.8.38` package's `soljson.js` has a different
-SHA256 (0b15fcb2…), and running it as a substitute was not permitted. So
-`solc-fixtures.mjs` was not rerun. The committed `solc-observations.json`
-(116 observations, 58 cases × legacy/viaIR) remains the Codex-era record.
-The skeptic review rebuilt every fixture source and input exactly as the
-runner does; all 116 `sourceSha256`/`inputSha256` values match. It also
-confirmed the recorded differences, e.g. the surrogate SyntaxError 8452.
+First session (2026-11-05): blocked. `binaries.soliditylang.org` was denied
+(proxy CONNECT 403) and the npm `solc@0.8.38` `soljson.js` has a different
+SHA256 (0b15fcb2…), so it was not used.
 
-To rerun the gate, allow that host (or supply the pinned soljson), then run
-`node tests/h28-sol/literal-grammar/solc-fixtures.mjs <soljson.js> <out.json>`.
+Follow-up (2026-11-06): `soljson-v0.8.38+commit.1835d247.js` was fetched
+from the GitHub mirror
+`raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/`. Its SHA256,
+`6c74ffba…4312d390`, equals the pin in `solc-cases.json`; the runner checks
+it again together with the reported version.
+
+- `node tests/h28-sol/literal-grammar/solc-fixtures.mjs <soljson> <out> check`
+  on the Codex-era 58 cases: PASS, and the output equals the committed
+  `solc-observations.json` (all 116 observations, bytecode hashes
+  included).
+- New cases (13), each with a matching `FullControls.lean` row that the
+  kernel checks (`fullControls_pass`). The model and solc agree on all 13:
+  - raw control bytes: `plain-raw-TAB`, `plain-raw-NUL`, `plain-raw-DEL`
+    (solc ParserError 8936 "Invalid character in string", model refuses:
+    not `printable`); `unicode-raw-TAB`, `unicode-raw-NUL`,
+    `unicode-raw-DEL` (both accept the raw byte as the value);
+    `unicode-raw-CR` (both refuse; solc "Expected string end-quote");
+    `yul-raw-TAB` (solc ParserError 1465, model refuses);
+  - the other quote inside a literal: `plain-double-other-quote` (`"'"`),
+    `plain-single-other-quote` (`'"'`), `unicode-double-other-quote`,
+    `unicode-single-other-quote`, `yul-single-other-quote` (all accept,
+    values `27`/`22`).
+- `record` mode rewrote `solc-observations.json`: the 116 earlier entries
+  are byte-identical (the diff only adds lines), 142 in total. A second
+  `check` run then passes: "PASS 71 cases x legacy/viaIR".
+- `audit.py` now derives the observation count from the case count
+  (71 cases, 142 observations) and prints the summed kernel-row count
+  from `pins.json`; `full_control_count` is 118.
+
+A raw NUL/DEL fixture travels as a JSON string. The runner's
+`sourceSha256` binds the exact bytes.
 
 ### Queue item 4: backfill (suffix, byte-length and encoding properties)
 

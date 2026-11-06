@@ -763,7 +763,7 @@
   },
   "hex_control_count": 28,
   "body_control_count": 53,
-  "full_control_count": 105,
+  "full_control_count": 118,
   "boundary_control_count": 56,
   "safe_declarations": [
     "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28._aux_Solidity_Frontend_LiteralGrammarH28_WordTable___elabRules_Solidity_Frontend_LiteralGrammarH28_tacticWord_range_all_1.match_1: Lean.DefinitionSafety.safe",

@@ -157,7 +157,8 @@ assert identities['sources'] == {str(p.relative_to(root)): hashlib.sha256(p.read
 hexrows = [dict(raw=json.loads('"'+raw+'"'), expected=None if expected=='none' else json.loads(expected[5:])) for raw,expected in re.findall(r'\("((?:[^"\\]|\\.)*)", (none|some \[[^\]]*\])\)', controls)]
 assert hexrows == json.loads((root/'tests/h28-sol/literal-grammar/hex-coverage.json').read_text())
 fixtures = json.loads((root/'tests/h28-sol/literal-grammar/solc-cases.json').read_text())
-assert len(fixtures['cases']) == 58 and len({c['id'] for c in fixtures['cases']}) == 58
+n_cases = len(fixtures["cases"])
+assert n_cases == 71 and len({c["id"] for c in fixtures["cases"]}) == n_cases
 by_id = {row['id']: row for row in full_rows}
 assert len(by_id) == len(full_rows)
 for case in fixtures['cases']:
@@ -179,6 +180,6 @@ for case in fixtures['cases']:
         assert row['expected'] == expected, (key,row['expected'],expected)
     if case['compilerAccept'] != case['checkedModelAccept']: assert case.get('difference')
 observations=json.loads((root/'tests/h28-sol/literal-grammar/solc-observations.json').read_text())
-assert not observations['failures'] and len(observations['observations']) == 116
+assert not observations['failures'] and len(observations["observations"]) == 2 * n_cases
 assert {(row['id'],row['viaIR']) for row in observations['observations']} == {(c['id'],v) for c in fixtures['cases'] for v in [False,True]}
-print(f"PASS: {len(pins['inputs'])} frozen input hashes; {len(found)} exact theorem axiom sets; 242 kernel control rows; 8 safe proof-tactic declarations ({'fresh' if fresh_safety else 'committed'} report); exact local registration; exclusive scope ({scope_checked} changed paths since {scope_base}); trust restrictions; axiom log {log_path}")
+print(f"PASS: {len(pins['inputs'])} frozen input hashes; {len(found)} exact theorem axiom sets; {sum(pins[k] for k in ('hex_control_count','body_control_count','boundary_control_count','full_control_count'))} kernel control rows; 8 safe proof-tactic declarations ({'fresh' if fresh_safety else 'committed'} report); exact local registration; exclusive scope ({scope_checked} changed paths since {scope_base}); trust restrictions; axiom log {log_path}")
