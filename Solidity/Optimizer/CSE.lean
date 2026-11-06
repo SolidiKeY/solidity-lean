@@ -13,13 +13,16 @@ successfully (its statement completed), and the state it reads is unchanged
 while the entry lives, so the occurrence it replaces evaluates to the same
 value: a failing expression is never replaced. An entry survives an
 assignment only when `e` is pure (literals, locals, environment reads and
-operators over them) and does not read the assigned local (`Val.indep`).
+operators over them) and does not read the assigned local (`Val.indep`); the
+pure entries also survive the storage statements `assign`, `delete` and `pop`
+(`Avail.keep`, via `KeepsLocals`), and an `assign`'s stored value is rewritten.
 
 Only pure expressions are compared: equality is syntactic on the typed IR
 (`Val.pbeq`, `false` outside the pure fragment, sound by `Val.pbeq_eq`),
 decided without a classical oracle. The invariant is `Avail.Holds A σ`: each
 recorded expression evaluates in `σ` to its local's value. Entries are kept
-only across `x = e`, `T x = e`, `require` and `assert`, as in propagation;
+across `x = e`, `T x = e`, `require` and `assert` (and, pure ones only, across
+`assign`, `delete`, `pop`), as in propagation; any other statement clears them;
 assigning a local drops every entry that reads it or is held by it; a branch,
 block or loop exit forgets them, and a loop body starts with none.
 Preservation: `Prog.cse_runC` (exact typed run where the entries hold) and
@@ -387,6 +390,65 @@ theorem Avail.holds_decl {A : List (Avail C Γ)} {σ : State C Γ} (hA : Avail.H
       exact hv e rfl
     · exact Avail.holds_push (t := .val p) hA v a ha
 
+/-! ## Across statements that keep the locals -/
+
+/-- The pure fragment: literals, locals, environment reads and operators. -/
+def Val.isPure : {p : PrimTy} → Val C Γ p → Bool
+  | _, .simple _ => true
+  | _, .binop _ _ _ a b => Val.isPure a && Val.isPure b
+  | _, .unop _ _ _ a => Val.isPure a
+  | _, .ternary c a b => Val.isPure c && Val.isPure a && Val.isPure b
+  | _, .modular _ a b k => Val.isPure a && Val.isPure b && Val.isPure k
+  | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. | _, .hash .. => false
+
+theorem Val.evalT_keep {σ τ : State C Γ}
+    (hl : ∀ (q : PrimTy) (k : Idx Γ (.val q)), TEnv.get k τ.env = TEnv.get k σ.env)
+    (he : ∀ key, τ.envVal key = σ.envVal key) :
+    {p : PrimTy} → (v : Val C Γ p) → Val.isPure v = true → v.evalT τ = v.evalT σ
+  | _, .simple s, _ => by
+    cases s with
+    | lit => rfl
+    | bool => rfl
+    | «local» k => exact congrArg Except.ok (hl _ k)
+    | env key hp => cases hp; exact congrArg Except.ok (he key)
+  | _, .binop op ha hq a b, h => by
+    simp only [Val.isPure, Bool.and_eq_true] at h
+    simp only [Val.evalT, Val.evalT_keep hl he a h.1, Val.evalT_keep hl he b h.2]
+  | _, .unop op ha hq a, h => by
+    simp only [Val.isPure] at h
+    simp only [Val.evalT, Val.evalT_keep hl he a h]
+  | _, .ternary c a b, h => by
+    simp only [Val.isPure, Bool.and_eq_true] at h
+    simp only [Val.evalT, Val.evalT_keep hl he c h.1.1, Val.evalT_keep hl he a h.1.2,
+      Val.evalT_keep hl he b h.2]
+  | _, .modular op a b k, h => by
+    simp only [Val.isPure, Bool.and_eq_true] at h
+    simp only [Val.evalT, Val.evalT_keep hl he a h.1.1, Val.evalT_keep hl he b h.1.2,
+      Val.evalT_keep hl he k h.2]
+  | _, .read _, h | _, .readMem _, h | _, .len .., h | _, .mlen .., h | _, .hash .., h => by
+    simp only [Val.isPure, Bool.false_eq_true] at h
+
+/-- The pure entries, which survive a step that keeps the locals. -/
+def Avail.keep (A : List (Avail C Γ)) : List (Avail C Γ) := A.filter fun a => Val.isPure a.e
+
+theorem Avail.holds_keep {A : List (Avail C Γ)} {f : TStep C Γ Γ} (hk : KeepsLocals f)
+    {σ : State C Γ} (hA : Avail.Holds A σ) {o : Out C σ.H Γ} (ho : f σ = .ok o) :
+    Avail.Holds (Avail.keep A) o.st := by
+  obtain ⟨hl, he⟩ := hk σ o ho
+  intro a ha
+  obtain ⟨hmem, hp⟩ := List.mem_filter.mp ha
+  rw [Val.evalT_keep hl he a.e hp, hA a hmem, hl]
+
+/-- CSE inside a storage source's value. -/
+def _root_.Solidity.Src.cse (A : List (Avail C Γ)) : {T : Ty} → Src C Γ T → Src C Γ T
+  | _, .val v => .val (v.cse A)
+  | _, s@(.copy ..) | _, s@(.fixedCopy ..) | _, s@(.copyMem ..) | _, s@(.fixedCopyMem ..) => s
+
+theorem _root_.Solidity.Src.cse_valueT {A : List (Avail C Γ)} {σ : State C Γ}
+    (hA : Avail.Holds A σ) : {T : Ty} → (r : Src C Γ T) → (r.cse A).valueT σ = r.valueT σ
+  | _, .val v => by simp only [Src.cse, Src.valueT, Val.cse_evalT hA]
+  | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
+
 /-! ## The pass -/
 
 mutual
@@ -401,12 +463,15 @@ def Stmt.cse : {Γ Γ' : Ctx} → List (Avail C Γ) → Stmt C Γ Γ' → Stmt C
     (.ite (c.cse F) (Prog.cse F thn) (Prog.cse F els), [])
   | _, _, F, .block body => (.block (Prog.cse F body), [])
   | _, _, _, .loop a c body => (.loop a c (Prog.cse [] body), [])
-  | _, _, _, s@(.assign ..) | _, _, _, s@(.rebind ..) | _, _, _, s@(.declStorage ..)
+  | _, _, F, .assign l r => (.assign l (r.cse F), Avail.keep F)
+  | _, _, F, .delete l => (.delete l, Avail.keep F)
+  | _, _, F, .pop b => (.pop b, Avail.keep F)
+  | _, _, _, s@(.rebind ..) | _, _, _, s@(.declStorage ..)
   | _, _, _, s@(.opAssign ..) | _, _, _, s@(.incDec ..) | _, _, _, s@(.assignIncDec ..)
-  | _, _, _, s@(.assignLocalPush ..) | _, _, _, s@(.push ..) | _, _, _, s@(.pop ..)
+  | _, _, _, s@(.assignLocalPush ..) | _, _, _, s@(.push ..)
   | _, _, _, s@(.transfer ..) | _, _, _, s@(.send ..) | _, _, _, s@(.declMem ..)
   | _, _, _, s@(.rebindMem ..) | _, _, _, s@(.assignFromMem ..) | _, _, _, s@(.assignMem ..)
-  | _, _, _, s@(.delete ..) | _, _, _, s@(.deleteMem ..) | _, _, _, s@(.assignNew ..)
+  | _, _, _, s@(.deleteMem ..) | _, _, _, s@(.assignNew ..)
   | _, _, _, s@.revert | _, _, _, s@.assumeFalse | _, _, _, s@(.call ..)
   | _, _, _, s@(.tryCall ..) | _, _, _, s@(.pushOpAssign ..) | _, _, _, s@(.pushIncDec ..)
   | _, _, _, s@(.callReceiver ..) | _, _, _, s@(.callReceiverPush ..)
@@ -508,12 +573,17 @@ theorem Stmt.cse_runC : {Γ Γ' : Ctx} → (F : List (Avail C Γ)) → (s : Stmt
       funext fun τ => Prog.cse_runC [] body τ (Avail.holds_nil τ)
     simp only [Stmt.cse, Stmt.runC]
     rw [hb, Subsingleton.elim (Prog.cse [] body).ext body.ext]
-  | _, _, _, .assign .., _, _ | _, _, _, .rebind .., _, _ | _, _, _, .declStorage .., _, _
+  | _, _, F, .assign l r, σ, hF =>
+    ⟨by simp only [Stmt.cse, Stmt.runC, TRun.assign, Src.cse_valueT hF],
+      fun _ ho => Avail.holds_keep (keeps_assign l r) hF ho⟩
+  | _, _, F, .delete l, σ, hF => ⟨rfl, fun _ ho => Avail.holds_keep (keeps_delete l) hF ho⟩
+  | _, _, F, .pop b, σ, hF => ⟨rfl, fun _ ho => Avail.holds_keep (keeps_pop b) hF ho⟩
+  | _, _, _, .rebind .., _, _ | _, _, _, .declStorage .., _, _
   | _, _, _, .opAssign .., _, _ | _, _, _, .incDec .., _, _ | _, _, _, .assignIncDec .., _, _
-  | _, _, _, .assignLocalPush .., _, _ | _, _, _, .push .., _, _ | _, _, _, .pop .., _, _
+  | _, _, _, .assignLocalPush .., _, _ | _, _, _, .push .., _, _
   | _, _, _, .transfer .., _, _ | _, _, _, .send .., _, _ | _, _, _, .declMem .., _, _
   | _, _, _, .rebindMem .., _, _ | _, _, _, .assignFromMem .., _, _
-  | _, _, _, .assignMem .., _, _ | _, _, _, .delete .., _, _ | _, _, _, .deleteMem .., _, _
+  | _, _, _, .assignMem .., _, _ | _, _, _, .deleteMem .., _, _
   | _, _, _, .assignNew .., _, _ | _, _, _, .revert, _, _ | _, _, _, .assumeFalse, _, _
   | _, _, _, .call .., _, _ | _, _, _, .tryCall .., _, _ | _, _, _, .pushOpAssign .., _, _
   | _, _, _, .pushIncDec .., _, _ | _, _, _, .callReceiver .., _, _

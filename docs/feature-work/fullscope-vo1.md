@@ -1139,3 +1139,8 @@ environment value unchanged), and the value an `assign` stores is propagated int
 (`Src.opt`, `Src.opt_valueT`). `transfer`/`send` still reset facts (`selfBalance`, an
 environment value, changes). Control `prop_across_store`
 (`uint a = 5; total = a; uint b = a + 1;` → `total = 5; uint b = 6;`).
+
+CSE across storage statements: pure entries (`Val.isPure`) survive `assign`, `delete`,
+`pop` (`Avail.keep`, `Avail.holds_keep` via `Val.evalT_keep` and `KeepsLocals`); impure
+entries (storage/memory reads) are dropped there, so a storage write never leaves a stale
+storage-read entry. Control `cse_across_store`.

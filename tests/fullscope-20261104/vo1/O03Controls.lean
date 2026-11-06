@@ -35,6 +35,17 @@ theorem cse_replaced : Prog.cse [] cseProg =
 theorem cse_same : Prog.runC (Prog.cse [] cseProg) = Prog.runC cseProg :=
   Prog.cse_empty_runC cseProg
 
+/-- `uint b = a + 1; total = b; uint c = a + 1;`: the entry survives the store. -/
+def storeCse : Prog C G [.val .uint, .val .uint, .val .uint] :=
+  .cons (.declLocal .uint (.user "b") (some (add (.simple (.local .here)) (lit 1))))
+    (.cons (.assign (.root (T := .prim .uint) "total" rfl) (.val (.simple (.local .here))))
+      (.cons (.declLocal .uint (.user "c") (some aPlus1)) .nil))
+
+theorem cse_across_store : Prog.cse [] storeCse =
+    .cons (.declLocal .uint (.user "b") (some (add (.simple (.local .here)) (lit 1))))
+      (.cons (.assign (.root (T := .prim .uint) "total" rfl) (.val (.simple (.local .here))))
+        (.cons (.declLocal .uint (.user "c") (some (.simple (.local .here)))) .nil)) := rfl
+
 /-- `uint b = a + 1; a = 7; uint c = a + 1;`: the assignment to `a` kills the
 entry, so `c` still computes `a + 1` (reading `b` would observe the old `a`). -/
 def killProg : Prog C G [.val .uint, .val .uint, .val .uint] :=
