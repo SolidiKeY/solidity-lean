@@ -3,7 +3,7 @@
 import copy,difflib,hashlib,json,pathlib,re,runpy,subprocess,sys,tempfile,os
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 F=pathlib.Path(__file__).resolve().parent
-BASE='4095d848297d87e374b4f069692511cfe4a36cf7'
+BASE='3883c64ef750dd49acdb7d83adcdf0f101d42c6c'
 DEST='docs/module-map/frontend.md'
 INPUT_ROOT=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))
 INPUT_FOLDER=INPUT_ROOT/'tests/primitive-packets-1105/Constants'
@@ -69,6 +69,8 @@ def collect():
  for row in missing:assert re.fullmatch(r'\| `'+re.escape(row['path'].removeprefix('Solidity/'))+r'` \| [^|]+ \|',row['row'])
  inputs=['scripts/coord-tools/module-map.py','tests/sol-numeric-literals/acceptance.json','tests/sol-numeric-literals/kernel-inventory.json','tests/sol-numeric-literals/source-pins.json','tests/primitive-packets-1105/Constants/manifest.json','tests/primitive-packets-1105/Constants/kernel-inventory.json']
  plan=dict(base=BASE,generator_sha256=sha(pathlib.Path(__file__).read_bytes()),status='proposal-pending-coordinator' if missing else 'registration-observed',owner='coordinator; shared roots/maps remain untouched',root_sha256=sha(root.encode()),map_sha256={p:sha(t.encode()) for p,t in maps.items()},input_sha256={p:sha((ROOT/p).read_bytes()) for p in inputs},owned_modules=modules,kernel_declarations=1037,numeric_authored=sum(len(m['authored']) for m in numeric),constant_authored=len(constants['declarations']),missing_rows=missing,desired_map_sha256=sha(after.encode()),patch_sha256=sha(patch.encode()),boundary='Registration and pinned inventory validation only; does not replace live Lean proofs, solc fixtures, full scoped acceptance or final runtime gates.')
+ plan['imported_continuity']=[row for row in ck if not row['module'].startswith('Solidity.Backend.PrimitivePackets.Constants.')]
+ plan['owned_kernel_declarations']=len(rows)-len(plan['imported_continuity'])
  return plan,patch
 
 def compare(plan,patch,expected,expected_patch):

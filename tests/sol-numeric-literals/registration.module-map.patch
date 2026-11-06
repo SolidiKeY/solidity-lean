@@ -1,9 +1,9 @@
 --- a/docs/module-map/frontend.md
 +++ b/docs/module-map/frontend.md
-@@ -175,3 +175,37 @@
- | `Backend/PrimitivePackets/Constants/Agreement.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
- | `Backend/PrimitivePackets/Constants/Target.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
- | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Typed H22 call metadata from the retained whole-source resolution. |
+@@ -272,3 +272,37 @@
+ | `Frontend/ExpressionUniqueness/YieldBalance.lean` | Balance algebra for the intrinsic expression printer These token and success-predicate lemmas support the recursive expression/type/ argument category closure. |
+ | `Frontend/ExpressionUniqueness/YieldShape.lean` | Structural facts about successful intrinsic expression yields A small success-predicate calculus for the existing state printer proves facts about arbitrary inputs and arbitrary remaining layouts. |
+ | `Frontend/ExpressionUniqueness/YieldSplit.lean` | Invert actual printer executions into successful child executions These are state-printer inversion facts. |
 +| `Backend/PrimitivePackets/Constants/Controls.lean` | Kernel integer-constant controls for every legal width/sign, endpoints, saved stack and invalid values. |
 +| `Frontend/NumericLiteralProofs/Audit.lean` | Full owned kernel declaration, signature and transitive axiom inventory. |
 +| `Frontend/NumericLiteralProofs/Backfill.lean` | Exact numeric consumed-prefix, source-range and denomination-separation theorems. |
