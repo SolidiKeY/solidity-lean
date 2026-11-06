@@ -298,6 +298,71 @@ def prior_map(records, key, label):
         result[row[key]] = row
     return result
 
+def selected_paths(root, pattern, errors):
+    """Path.glob-style selection with explicit enumeration errors.
+
+    Recursive ** does not follow directory symlinks. Explicit finite directory
+    components can follow them; resolved containment is checked before reading.
+    """
+    parts = Path(pattern).parts
+    directories_only = pattern.endswith("/")
+    if not parts or Path(pattern).is_absolute() or ".." in parts or any("**" in p and p != "**" for p in parts):
+        raise ValueError("invalid relative selection pattern: " + pattern)
+
+    def failure(path, exc):
+        error = dict(path=str(path), pattern=pattern,
+                     reason="selection enumeration failed: " + str(exc))
+        if error not in errors:
+            errors.append(error)
+
+    def descend(base, index):
+        if index == len(parts):
+            try:
+                if not directories_only or base.is_dir():
+                    yield base
+            except OSError as exc:
+                failure(base, exc)
+            return
+        part = parts[index]
+        if part != "**" and not any(c in part for c in "*?["):
+            path = base / part
+            try:
+                path.lstat()
+                if index + 1 == len(parts) or path.is_dir():
+                    yield from descend(path, index + 1)
+            except FileNotFoundError:
+                pass
+            except OSError as exc:
+                failure(path, exc)
+            return
+        if part == "**":
+            yield from descend(base, index + 1)
+        try:
+            with os.scandir(base) as iterator:
+                entries = sorted(iterator, key=lambda entry: entry.name)
+        except OSError as exc:
+            failure(base, exc)
+            return
+        for entry in entries:
+            path = base / entry.name
+            if part == "**":
+                try:
+                    if entry.is_dir(follow_symlinks=False):
+                        yield from descend(path, index)
+                except OSError as exc:
+                    failure(path, exc)
+            elif fnmatch.fnmatchcase(entry.name, part):
+                if index + 1 == len(parts):
+                    yield from descend(path, index + 1)
+                else:
+                    try:
+                        if entry.is_dir():
+                            yield from descend(path, index + 1)
+                    except OSError as exc:
+                        failure(path, exc)
+    yield from descend(root, 0)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
@@ -351,10 +416,14 @@ def main():
                     raise ValueError("malformed previous " + field)
         except (OSError, UnicodeError, ValueError, RecursionError) as exc:
             parser.error("previous report: " + str(exc))
-    matched = {pat: sorted(f for f in root.glob(pat) if f.suffix == ".lean") for pat in args.paths}
+    selection_errors = []
+    try:
+        matched = {pat: sorted(f for f in selected_paths(root, pat, selection_errors) if f.suffix == ".lean") for pat in sorted(set(args.paths))}
+    except ValueError as exc:
+        parser.error(str(exc))
     unmatched = sorted(pat for pat, paths in matched.items() if not paths)
     files = sorted({f for paths in matched.values() for f in paths})
-    rows, errors, inputs, aliases = [], [], [], []
+    rows, errors, inputs, aliases = [], selection_errors, [], []
     resolved_inputs = {}
     owners = json.loads(args.owners.read_text()) if args.owners else {}
     if not isinstance(owners, dict) or not all(isinstance(k, str) and isinstance(v, str) and v for k, v in owners.items()):

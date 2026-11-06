@@ -418,6 +418,81 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual([row["path"] for row in report["inputs"]], ["alias/A.lean"])
             self.assertEqual(report["input_aliases"], [{"path": "alias/A.lean", "resolved_path": "real/A.lean"}])
 
+    def test_unreadable_selected_subtree_is_explicit_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+            locked = root / "locked"
+            locked.mkdir()
+            (locked / "Hidden.lean").write_text("theorem hidden : True := by trivial\n")
+            locked.chmod(0)
+            try:
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"], capture_output=True)
+            finally:
+                locked.chmod(0o700)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(report["errors"])
+            self.assertEqual({row["path"] for row in report["errors"]}, {str(locked)})
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["candidate_groups"])
+            self.assertEqual([row["path"] for row in report["inventory"]], ["Good.lean"])
+
+    def test_selector_matches_supported_path_globs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("A.lean", ".Hidden.lean", "sub/B.lean", "sub/deep/C.lean", "sub/Other.txt"):
+                path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text("theorem ok : True := by trivial\n")
+            (root / "alias").symlink_to("sub", target_is_directory=True)
+            for pattern in ("*.lean", "**/*.lean", "sub/**/*.lean", "*/B.lean", "alias/*.lean", "[A-Z].lean", "missing/*.lean", "sub/**/C.lean"):
+                with self.subTest(pattern=pattern):
+                    errors=[]
+                    actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
+                    expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
+                    self.assertEqual(actual,expected)
+                    self.assertEqual(errors,[])
+
+    def test_nonrecursive_selection_does_not_read_unselected_subtree(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+            locked=root/"locked";locked.mkdir();locked.chmod(0)
+            try:
+                report=json.loads(subprocess.check_output([sys.executable,"-B",str(SCRIPT),str(root),"*.lean"]))
+            finally:
+                locked.chmod(0o700)
+            self.assertEqual(report["errors"],[])
+            self.assertEqual([row["path"] for row in report["inputs"]],["Good.lean"])
+
+    def test_trailing_separator_is_directory_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root / "File.lean").write_text("theorem file : True := by trivial\n")
+            (root / "Dir.lean").mkdir()
+            for pattern in ("*.lean/", "File.lean/", "Dir.lean/", "**/*.lean/"):
+                with self.subTest(pattern=pattern):
+                    errors=[]
+                    actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
+                    expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
+                    self.assertEqual(actual,expected)
+                    self.assertEqual(errors,[])
+
+    def test_exact_path_needs_execute_permission_not_directory_listing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            locked=root/"execute-only";locked.mkdir()
+            source=locked/"A.lean";source.write_text("theorem a : True := by trivial\n")
+            locked.chmod(0o100)
+            try:
+                report=json.loads(subprocess.check_output([sys.executable,"-B",str(SCRIPT),str(root),"execute-only/A.lean"]))
+                wildcard=subprocess.run([sys.executable,"-B",str(SCRIPT),str(root),"execute-only/*.lean"],capture_output=True)
+            finally:
+                locked.chmod(0o700)
+            self.assertEqual(report["errors"],[])
+            self.assertEqual([row["path"] for row in report["inputs"]],["execute-only/A.lean"])
+            self.assertNotEqual(wildcard.returncode,0)
+            self.assertEqual(json.loads(wildcard.stdout)["incremental"]["comparison_status"],"current-incomplete")
+
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
