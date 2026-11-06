@@ -46,6 +46,22 @@ class Census(unittest.TestCase):
             nested.mkdir(parents=True)
             (nested/'Extra.lean').write_text('theorem added : True := by trivial\n')
             self.assertEqual(len(c.inventory(root)['files']),1)
+    def test_acceptance_refuses_mutations(self):
+        import hashlib,json,sys,copy
+        sys.path.insert(0,str(Path(__file__).resolve().parents[4]/'scripts/h62/item4/generic-v08'))
+        from accept import validate
+        expected={'files':[{'path':'X','sha256':'original'}],
+                  'declarations':[{'path':'X','ordinal':1,'header':'original'}]}
+        manifest={'files':expected['files'],'declaration_count':1,
+                  'inventory_sha256':hashlib.sha256((json.dumps(expected,ensure_ascii=False,indent=2)+'\n').encode()).hexdigest()}
+        validate(expected,expected,manifest)
+        for field in ('files','declarations'):
+            changed=copy.deepcopy(expected)
+            changed[field]=[]
+            with self.assertRaises(ValueError): validate(expected,changed,manifest)
+        changed=copy.deepcopy(manifest)
+        changed['declaration_count']=0
+        with self.assertRaises(ValueError): validate(expected,expected,changed)
     def test_malformed_refused(self):
         with self.assertRaises(ValueError): c.mask('/- unterminated')
         with self.assertRaises(ValueError): c.declarations('X','theorem x : True\n')

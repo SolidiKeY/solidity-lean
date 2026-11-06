@@ -42,7 +42,7 @@ python3 -B scripts/h62/item4/generic-v08/census.py --revision c6f550e281a7e5affa
 python3 -B scripts/h62/item4/generic-v08/census.py --check /workspace/generic-v08-evidence/inventory.json
 ```
 
-Eleven mutation/parser tests pass. They cover nested comments and strings,
+Twelve mutation/parser and acceptance tests pass. They cover nested comments and strings,
 proof-body versus statement mutations, default binder values, equation-style
 definitions, complete match and let theorem conclusions, named instances,
 anonymous cases, nested module discovery and malformed-source refusal.
@@ -74,6 +74,9 @@ All confirmed defects were fixed. Regressions were added for match conclusions,
 let binding, named instances and nested modules. Re-reviews pass for the current
 220-file/4,428-declaration inventory. Reviewers ran ten tests read-only; the
 remaining temporary-directory test passed in the authorized main-worker run.
+The final skeptic also found assert-based checks could be disabled by Python
+optimization. Acceptance now uses explicit failures, with a mutation regression
+and an optimized-mode passing test run.
 The resource harness now labels requested threads, per-process address-space
 limits and nonaggregate RSS accurately and refuses surviving process groups.
 
@@ -138,3 +141,66 @@ central map, generated root, axiom pin or frozen interface is changed.
 
 No merge, push, PR, publication, pre-gate or deployment was performed. Preserve
 the existing goal as unfinished; do not create a replacement continuation.
+
+## Isolated admission backfill and handoff
+
+`tests/h62/item4/generic-v08/IntrinsicWidths.lean` adds five proved lemmas:
+`fixedBytes_widening`, `fixedBytes_identity`, `fixedBytes_narrowing`,
+`fixture_identity`, `table_identity`. It uses the existing intrinsic
+`Source.STy.implicit` relation and structural order proofs; it does not replace
+semantic proofs with a finite decide table. Two bounded fixture rows preserve
+the exact width/old/rhs inputs of the original `binary_client` and
+`maximum_client`: `(2,[255,128],[0,1])` and `(32,[],replicate 32 255)`.
+The raw payload lists are retained inputs, not intrinsically sized values or
+proved evaluations. The admission lemmas quantify over every legal width and
+all supplied declaration-base relations. Strict narrowing refusal remains
+explicit. This backfill does not complete queue checkpoint 2 or 3.
+
+The final per-file pinned Lean check passes without warnings, exit 0, 0.502 s;
+log `v435/IntrinsicWidths.log`. All five printed axiom sets contain only
+`propext`, `Classical.choice`, `Quot.sound`. There are no new axiom declarations,
+sorry terms, native_decide calls, heartbeat changes or touched frozen statements.
+
+Independent finder and skeptic reviews both pass for isolated admission.
+They verified both fixture rows against the originals and the published
+`STy.implicit` definition. Both requested unused-binder cleanup; that cleanup
+was applied and the final warning-free check rerun. They explicitly reject any
+interpretation as original execution/correspondence proof.
+
+Deterministic reproduction rebuilds the three-module Source.Types dependency closure into a
+separate output directory and then checks the helper, serially with the official
+release and bounded wrapper. It neither consumes the old master cache nor edits
+an owned source file:
+
+```sh
+python3 -B scripts/h62/item4/generic-v08/reproduce-width.py --toolchain /workspace/generic-v08-tools/lean-4.35.0-linux --archive /workspace/generic-v08-evidence/lean-4.35.0-linux.tar.zst --output /workspace/generic-v08-evidence/reproduce-width
+```
+
+Proposed registration for coordinator review only, contingent on exact-file
+owner agreement: `Solidity.Lowering.V08.GenericWidths` — intrinsic all-width admission
+composition, identity and strict-narrowing refusal; imports `Source.Types`.
+The actual helper remains under the assigned tests directory. No registration
+or production migration is performed by this checkpoint.
+
+Fresh-cache reproduction passed: Source.Syntax, Source.Const, Source.Types and
+the helper all exited 0; `reproduce-width.log`. The helper took 0.503 s on
+that run. These isolated times are not a before/after family comparison.
+
+## Final static checks and review closure
+
+Layer check, generated-root check, generated-fragment check and whitespace check
+pass. The documentation path checker initially refused the proposed nonexistent
+module path; it now passes after the proposal was written in module notation.
+It reports 115 pre-existing ambiguous references that resolve (non-strict mode).
+Normal and optimized Python runs each pass all 12 tests; normal and optimized
+source-integrity acceptance pass. The final independent finder and skeptic
+re-reviews pass for this explicitly partial deliverable after all findings were
+fixed. Evidence: `census-tests.log`, `census-tests-optimized.log`,
+`census-accept.log`, `census-accept-optimized.log`, `doc-paths-final.log`,
+`reviews.md` and `final-gates.json` in the external evidence directory.
+
+Checkpoint commits are reviewable local commits only. The exported original
+patch, bundle, evidence archive, final committed head and SHA256 manifest are
+recorded in `/workspace/generic-v08-export/HANDOFF.md`. Overall status remains
+blocked with all four original queue obligations preserved; no full completion
+or runtime-gate pass is asserted.
