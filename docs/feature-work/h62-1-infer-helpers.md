@@ -307,3 +307,19 @@ including source files that already print some axiom dependencies. Anonymous
 examples and compiler-generated helpers are outside this named-query inventory.
 Neither inferencer nor Shared.lean is changed. Prior c16efd4ed validation remains
 historical; production integration and full affected validation remain open.
+
+## Shared extraction correspondence
+
+After fetching master and rebasing onto71c5963f3, the published source already
+contained Shared and its migration proposal, but no SharedAgreement module.
+The new additive SharedAgreement.lean proves simultaneous agreement of all
+three shared observations with both production helper families for arbitrary
+STy, and exposes six pointwise projection lemmas. All eight are axiom-free.
+No existing statement, helper definition or inferencer was modified.
+
+The bounded serial per-file check passed in0.567s on liveLean4.24.0, with the
+existing12GiB/no-swap cap and4GiB reserve. Execution records are outside Git at
+/workspace/sol-numeric-literals-gate-output/shared-agreement-check.json and
+shared-agreement-files/1.log. Read-only finder and skeptic reviews passed.
+This establishes helper correspondence, not complete inferencer equivalence,
+production migration,4.35overlay acceptance or full affected validation.
