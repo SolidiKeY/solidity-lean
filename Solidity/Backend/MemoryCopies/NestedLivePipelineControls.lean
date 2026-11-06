@@ -153,6 +153,99 @@ theorem second_refusal_retains_first :
     · refine ⟨by simpa only [demand] using fits,base,intermediate,ran,?_,root,contents,secondRun,refusal.2⟩
       simpa only [demand] using allocated
 
+private def boundaryValue (count : Nat) (bounded : count < 128) : SVal (.ref Parent) :=
+  .array (SVec.replicate (child [] (by decide)) count) outerShadow
+    (by have wide : 128 < W := by decide
+        omega)
+private def boundaryStore (count : Nat) : WordStore :=
+  ⟨fun slot => match slot with | .root 0 => wmod count | _ => wmod 0⟩
+private def boundaryMachine (count : Nat) : Machine := {input.machine with store := boundaryStore count}
+private theorem boundary_repr (count : Nat) (bounded : count < 128) :
+    ReprAt (boundaryMachine count).store 128 (.ref Parent) source (boundaryValue count bounded) := by
+  refine .array ?_ bounded ?_
+  · change count % W = count
+    have wide : 128 < W := by decide
+    exact Nat.mod_eq_of_lt (Nat.lt_trans bounded wide)
+  · intro index item selected
+    simp only [SVec.toList_replicate] at selected
+    have same : item = child [] (by decide) := (List.mem_replicate.mp (List.mem_of_getElem? selected)).2
+    subst item
+    refine .array ?_ (by decide) ?_
+    · cases index <;> rfl
+    · intro offset word chosen
+      simp only [SVec.toList_ofList,List.map_nil,List.getElem?_nil] at chosen
+      cases chosen
+
+private def BoundaryRunResult (count : Nat) (bounded : count < 128) (cost : Nat) : Prop :=
+  let value := boundaryValue count bounded
+  let first := value.copyStToM input.heap rfl
+  let second := (MVal.copyMToSt first.heap first.val).copyStToM first.heap rfl
+  ∃ base target,
+    run (nestedLocationPipelineCode .uint) ((boundaryMachine count).push (.slot source)) =
+      .ok (target.push (.val (wmod (40+cost)))) 0 ∧
+    Objects.AllocatorRepr second.heap base 8 (wmod (40+2*cost)) target ∧
+    base second.val.id = wmod (40+cost) ∧ base (first.val.wk second.ext).id = wmod 40 ∧
+    first.val.id < second.val.id ∧ second.heap.len second.val .dyn = count ∧
+    MVal.copyMToSt second.heap (first.val.wk second.ext) = value.strip ∧
+    MVal.copyMToSt second.heap second.val = (MVal.copyMToSt first.heap first.val).strip ∧
+    target.mem 17 = w[7]
+
+private theorem boundary_runs (count : Nat) (bounded : count < 128) (cost : Nat)
+    (demandEq : nestedStorageParentDemand (nestedStorageLiveRows (boundaryValue count bounded)) = cost)
+    (room : 40 + 2*cost < W) : BoundaryRunResult count bounded cost := by
+  have allocator : Objects.AllocatorRepr input.heap input.base 8 (wmod 40) (boundaryMachine count) := input.allocator.mem_eq rfl
+  rcases nested_live_pipeline_correct input.heap (boundaryValue count bounded) input.base 8 (wmod 40)
+      (boundaryMachine count) source 128 allocator (boundary_repr count bounded) with success | refusal
+  · obtain ⟨fits,firstFits,base₁,intermediate,secondFits,base₂,target,firstRun,firstAllocator,firstRoot,secondRun,ran,allocated,secondRoot,retainedRoot,extension,shape,below,middleBelow,gaps,keeps,firstKeeps,fresh,length,retained,contents⟩ := success
+    have totalCursor : (⟨(wmod 40).val + 2*nestedStorageParentDemand (nestedStorageLiveRows (boundaryValue count bounded)),fits⟩ : Fin W) =
+        wmod (40+2*cost) := by
+      apply Fin.ext
+      change 40+2*nestedStorageParentDemand (nestedStorageLiveRows (boundaryValue count bounded)) = (40+2*cost)%W
+      rw [demandEq,Nat.mod_eq_of_lt room]
+    have middleCursor : (⟨(wmod 40).val + nestedStorageParentDemand (nestedStorageLiveRows (boundaryValue count bounded)),firstFits⟩ : Fin W) =
+        wmod (40+cost) := by
+      apply Fin.ext
+      change 40+nestedStorageParentDemand (nestedStorageLiveRows (boundaryValue count bounded)) = (40+cost)%W
+      rw [demandEq,Nat.mod_eq_of_lt (show 40+cost < W by omega)]
+    rw [totalCursor] at allocated
+    rw [middleCursor] at ran secondRoot
+    have actual : Objects.AllocatorRepr
+        ((MVal.copyMToSt ((boundaryValue count bounded).copyStToM input.heap rfl).heap
+          ((boundaryValue count bounded).copyStToM input.heap rfl).val).copyStToM
+          ((boundaryValue count bounded).copyStToM input.heap rfl).heap rfl).heap
+        base₂ 8 (wmod (40+2*cost)) target := allocated
+    refine ⟨base₂,target,?_,actual,?_,retainedRoot,fresh,?_,retained,contents,
+      (below 17 (by decide) (by decide)).trans rfl⟩
+    · exact ran
+    · exact secondRoot
+    · simpa only [nestedStorageLiveRows,boundaryValue,SVal.view_array,List.length_map,SVec.length_toList] using length
+  · have totalFits : (wmod 40).val + 2*nestedStorageParentDemand (nestedStorageLiveRows (boundaryValue count bounded)) < W := by
+      simpa only [demandEq] using room
+    rcases refusal.1 with ⟨firstFailed,_⟩ | ⟨firstFits,base,intermediate,firstRun,firstAllocator,firstRoot,contents,secondFailed,secondRun⟩
+    · exact (firstFailed (by omega)).elim
+    · exact (secondFailed totalFits).elim
+
+theorem empty_outer_runs : BoundaryRunResult 0 (by decide) 1 :=
+  boundary_runs 0 (by decide) 1 (by with_unfolding_all rfl) (by decide)
+
+theorem long_empty_children_run : BoundaryRunResult 64 (by decide) 129 :=
+  boundary_runs 64 (by decide) 129 (by with_unfolding_all rfl) (by decide)
+
+theorem boundary_cursor_observations :
+    observe (run (nestedLocationPipelineCode .uint) ((boundaryMachine 0).push (.slot source))) = some w[42] ∧
+    observe (run (nestedLocationPipelineCode .uint) ((boundaryMachine 64).push (.slot source))) = some w[298] := by
+  constructor
+  · obtain ⟨base,target,ran,allocated,_⟩ := empty_outer_runs
+    rw [ran]
+    exact congrArg some allocated.free.cell
+  · obtain ⟨base,target,ran,allocated,_⟩ := long_empty_children_run
+    rw [ran]
+    exact congrArg some allocated.free.cell
+
+theorem long_parent_only_demand_refuted :
+    nestedStorageParentDemand (nestedStorageLiveRows (boundaryValue 64 (by decide))) ≠ 65 := by
+  with_unfolding_all decide +kernel
+
 /--
 info: 'Solidity.Backend.MemoryCopies.NestedLivePipelineControls.mixed_shadows_reach_two_fresh_copies' depends on axioms: [propext,
  Classical.choice,
@@ -188,5 +281,33 @@ info: 'Solidity.Backend.MemoryCopies.NestedLivePipelineControls.second_refusal_r
 -/
 #guard_msgs in
 #print axioms second_refusal_retains_first
+
+/--
+info: 'Solidity.Backend.MemoryCopies.NestedLivePipelineControls.empty_outer_runs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms empty_outer_runs
+/--
+info: 'Solidity.Backend.MemoryCopies.NestedLivePipelineControls.long_empty_children_run' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms long_empty_children_run
+/--
+info: 'Solidity.Backend.MemoryCopies.NestedLivePipelineControls.boundary_cursor_observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms boundary_cursor_observations
+/--
+info: 'Solidity.Backend.MemoryCopies.NestedLivePipelineControls.long_parent_only_demand_refuted' depends on axioms: [propext,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms long_parent_only_demand_refuted
 
 end Solidity.Backend.MemoryCopies.NestedLivePipelineControls

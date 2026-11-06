@@ -23,5 +23,24 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.empty_outer_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.long_empty_children_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.boundary_cursor_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.long_parent_only_demand_refuted": [
+  "Quot.sound",
+  "propext"
  ]
 }
