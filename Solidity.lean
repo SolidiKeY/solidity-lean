@@ -700,6 +700,7 @@ import Solidity.Backend.MemoryCopies.FixedReferenceLiveControls
 import Solidity.Backend.MemoryCopies.FixedReferenceLiveInterface
 import Solidity.Backend.MemoryCopies.FixedReferencePath
 import Solidity.Backend.MemoryCopies.FixedReferencePathControls
+import Solidity.Backend.MemoryCopies.FixedReferencePathCopyInterface
 import Solidity.Backend.MemoryCopies.FixedReferencePathInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoop
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls

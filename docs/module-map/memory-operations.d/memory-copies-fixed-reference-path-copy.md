@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/FixedReferencePathCopyInterface.lean` | Contract only for checked compiled path plus fixed-parent copying of original arbitrary-shadow values, exact allocation and capacity refusal. |
