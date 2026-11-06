@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryCopies.NestedMemoryPath
+import Solidity.Backend.MemoryCopies.NestedMemoryPathFrame
 import Solidity.Evm.Correct
 
 /-! The source local is also the destination, and two old parent entries share
@@ -209,6 +210,42 @@ theorem actual_deep_bind :
     · rw [resolved] at resolution; cases resolution
       have fits : (wmod 40).val + memoryParentDemand heap .uint old < W := by rw [demand]; decide
       exact (tooLarge fits).elim
+
+private theorem old_gap : Objects.Gap heap bases 24 40 := by
+  intro R reference
+  rcases refs reference with ⟨rfl,equal⟩ | ⟨rfl,equal⟩
+  · cases equal; left; decide +kernel
+  · cases equal; left; decide +kernel
+
+theorem deep_bind_preserves_inhabited_gap :
+    Objects.Gap heap bases 24 40 ∧
+    ∃ base target,
+      run (chosen.nestedDeepBindCode destination) (initial (wmod 40)) = .ok target 0 ∧
+      Objects.StateRepr 128 1 8 (Frag.init Γ)
+        ((before.adopt grown).1.setLocal destination (some grown.val)) base target ∧
+      Objects.AllocatorRepr grown.heap base 8 (wmod 49) target ∧
+      Objects.Gap grown.heap base 24 40 ∧ target.mem 2 = w[40] ∧ target.mem 1 = w[16] := by
+  refine ⟨old_gap,?_⟩
+  rcases chosen.nestedDeepFramedBindExecute before bases (wmod 40) (initial (wmod 40)) destination
+      (represented _ _ (by decide)) (allocator _ (by decide) _) (by decide) with success | refusal
+  · obtain ⟨reference,resolution,fits,base,target,ran,post,allocated,root,extension,stack,localCell,below,gaps,keeps,fresh,newContents,oldContents⟩ := success
+    rw [resolved] at resolution
+    cases resolution
+    have actual : Objects.AllocatorRepr grown.heap base 8 (wmod 49) target := by
+      simpa only [before,state,grown,snapshot,demand] using allocated
+    exact ⟨base,target,ran,post,actual,gaps 24 40 old_gap (by decide),localCell,
+      (below 1 (by decide) (by decide) (by decide)).trans rfl⟩
+  · rcases refusal with ⟨refused,_⟩ | ⟨reference,resolution,tooLarge,_⟩
+    · rw [resolved] at refused; cases refused
+    · rw [resolved] at resolution; cases resolution
+      have fits : (wmod 40).val + memoryParentDemand heap .uint old < W := by rw [demand]; decide
+      exact (tooLarge fits).elim
+
+theorem gap_overlapping_old_child_refuted : ¬ Objects.Gap heap bases 21 22 := by
+  intro gap
+  have boundary : (bases oldChild.id).val + Objects.cells heap oldChild ≤ 21 ∨ 22 ≤ (bases oldChild.id).val := gap oldChild
+  have neither : ¬ ((bases oldChild.id).val + Objects.cells heap oldChild ≤ 21 ∨ 22 ≤ (bases oldChild.id).val) := by decide +kernel
+  exact neither boundary
 
 private def observe (result : Evm.Out) : Option (Evm.Word × Evm.Word × Evm.Word × Evm.Word × Evm.Word × Evm.Word) :=
   match result with
@@ -425,4 +462,17 @@ info: 'Solidity.Backend.MemoryCopies.NestedMemoryPathControls.wrong_alias_for_de
 -/
 #guard_msgs in
 #print axioms wrong_alias_for_deep_copy
+/--
+info: 'Solidity.Backend.MemoryCopies.NestedMemoryPathControls.deep_bind_preserves_inhabited_gap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms deep_bind_preserves_inhabited_gap
+/--
+info: 'Solidity.Backend.MemoryCopies.NestedMemoryPathControls.gap_overlapping_old_child_refuted' depends on axioms: [propext]
+-/
+#guard_msgs in
+#print axioms gap_overlapping_old_child_refuted
+
 end Solidity.Backend.MemoryCopies.NestedMemoryPathControls

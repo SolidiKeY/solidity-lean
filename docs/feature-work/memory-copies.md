@@ -1798,4 +1798,6 @@ Independent read-only implementation and receipt finder/skeptic reviews are reco
 
 ## Selected nested memory binding gaps
 
-NestedMemoryPathFrameInterface is an additive contract only: successful explicit deep binding must transport every old object gap ending below the original cursor, at the same base and target used by the full post-state/allocator/snapshot result. It preserves the frozen NestedMemoryPathInterface and its binding contract unchanged. Existing path/checked-capacity refusals remain distinct; no new caller capacity or target execution premise is introduced.
+NestedMemoryPathFrameInterface is an additive contract only: successful explicit deep binding must transport every old object gap ending at or below the original cursor, at the same base and target used by the full post-state/allocator/snapshot result. It preserves the frozen NestedMemoryPathInterface and its binding contract unchanged. Existing path/checked-capacity refusals remain distinct; no new caller capacity or target execution premise is introduced.
+
+The companion proves and inhabits the additive certificate by retaining the checked copier’s heap/base gap transport across the existing typed local store. Populated controls retain old parent/child objects, shared children and overlapping source/destination locals, transport the nonempty interval [24,40), and refute a claimed gap intersecting the live child payload. This extends the preceding explicit intrinsic deep-binding fragment; no general production, Source-machine or physical/gas closure is claimed.
