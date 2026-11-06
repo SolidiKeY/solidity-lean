@@ -1,7 +1,7 @@
 {
-  "commit": "5f7bb1441566aaad64a34436904afc61de762fd2",
+  "commit": "002f4f1786a5378f7e06dced5548d714f3e73a38",
   "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "authority": "H68 recorded-pin policy; coordinator2026-11-06 explicitly authorizes adoption of published5f7bb1441",
-  "publication": "Remote-verified origin/master5f7bb1441566aaad64a34436904afc61de762fd2; exact original-base and e778 ancestry verified",
+  "authority": "H68 recorded-pin policy;coordinator2026-11-06 authorizes published002f4f178 adoption",
+  "publication": "Remote-verified002f4f1786a5378f7e06dced5548d714f3e73a38;original-base/f04f4c4f ancestry verified",
   "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref."
 }

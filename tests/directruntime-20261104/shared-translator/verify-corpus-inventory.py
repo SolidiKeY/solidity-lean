@@ -19,7 +19,11 @@ def conform(desc,value):
   assert desc['scalar']==actual
   if 'value' in desc:assert digest(desc['value'])==digest(value)
 def escape(key):return str(key).replace('~','~0').replace('/','~1')
-summary=json.loads((OUT/'summary.json').read_text());forms={r['formId']:r for r in json.loads((OUT/'forms.json').read_text())}
+summary=json.loads((OUT/'summary.json').read_text())
+manifest=json.loads((OWNED/'corpus-inventory-manifest.json').read_text())
+assert summary['counts']==manifest['counts'], 'census manifest count mismatch'
+assert summary['sourceBindingCounts']==manifest['sourceBindingCounts'], 'census manifest source-binding count mismatch'
+forms={r['formId']:r for r in json.loads((OUT/'forms.json').read_text())}
 assert len(forms)==summary['counts']['forms']
 expected={};expectedEdges={};indexes={};documents={};formCounts=Counter();kindCounts=Counter();edgeCounts=Counter();functionContexts=Counter();seen=set()
 singles={'referencedDeclaration','scope','functionReturnParameters','declaration','function'}
@@ -156,5 +160,7 @@ assert seenEdges==expectedEdges.keys() and len(seenEdges)==summary['counts']['ed
 assert dict(Counter(d.get('sourceBinding','parse-refused') for d in documents.values()))==summary['sourceBindingCounts']
 assert dict(functionContexts)==summary['functionFieldContexts']
 assert dict(kindCounts)==summary['nodesByKind'] and dict(edgeCounts)==summary['edgeStatuses']
+computedCounts={'documents':len(documents),'nodes':len(seen),'forms':len(forms),'kinds':len(kindCounts),'edges':len(seenEdges),'formsWithSelectedObservations':sum(count>0 for count in observedCounts.values())}
+assert computedCounts==manifest['counts'], 'computed census manifest count mismatch'
 result={'status':'pass','documents':len(documents),'nodes':len(seen),'forms':len(forms),'identityFields':summary['identityFields'],'edges':len(seenEdges),'boundary':'All enumerated occurrences/field schemas/explicit reference slots checked;not source authenticity,lexical/overload adequacy or semantic preservation.'}
 (OUT/'verification.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
