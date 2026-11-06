@@ -2857,6 +2857,8 @@ import Solidity.Frontend.StatementGrammarH28.ConditionalYield
 import Solidity.Frontend.StatementGrammarH28.ConstructorControls
 import Solidity.Frontend.StatementGrammarH28.ContextPr
 import Solidity.Frontend.StatementGrammarH28.ContextualDeclCounterexample
+import Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms
+import Solidity.Frontend.StatementGrammarH28.ControlFreePr
 import Solidity.Frontend.StatementGrammarH28.ElsePosition
 import Solidity.Frontend.StatementGrammarH28.FixtureControls.Case00
 import Solidity.Frontend.StatementGrammarH28.FixtureControls.Case01
@@ -2926,6 +2928,7 @@ import Solidity.Frontend.StatementGrammarH28.RootHead
 import Solidity.Frontend.StatementGrammarH28.SemicolonSplit
 import Solidity.Frontend.StatementGrammarH28.Shape
 import Solidity.Frontend.StatementGrammarH28.SyntaxBalance
+import Solidity.Frontend.StatementGrammarH28.SyntaxControlFree
 import Solidity.Frontend.StatementGrammarH28.SyntaxHead
 import Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi
 import Solidity.Frontend.StatementGrammarH28.SyntaxPair
