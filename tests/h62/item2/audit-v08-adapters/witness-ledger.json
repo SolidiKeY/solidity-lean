@@ -1,0 +1,50 @@
+{
+  "fixture": "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean",
+  "rows": [
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:25:Bound.le_trans",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.trans_joint",
+      "signature_sha256": "f094c0ba4a71c3c2c529c39ebe9407d4cbc5f62f83368ec00aebf65fb49d9b54",
+      "signature_source": "theorem Bound.le_trans {a b c : Bound} (hab : a \u2264 b) (hbc : b \u2264 c) : a \u2264 c ",
+      "target": "Solidity.Source.FailureResources.Bound.le_trans"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:38:Bound.withFailures_mono",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.replacement_joint",
+      "signature_sha256": "2e63c640a01291f6b8723bc9a3e0845f32f6009e9fcba8b72418ecd89eef4390",
+      "signature_source": "theorem Bound.withFailures_mono {r s : Bound} (h : r \u2264 s) (p : FailurePoints) :\n    r.withFailures p \u2264 s.withFailures p ",
+      "target": "Solidity.Source.FailureResources.Bound.withFailures_mono"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:75:dropped_not_noFail",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.refusal_joint",
+      "signature_sha256": "9053774042a93569d17ccaf2c25e48b453a3f009d14c2d7f0987357513e3c233",
+      "signature_source": "theorem dropped_not_noFail {p : FailurePoints} {i : Nat} (h : p.tx i = .dropped) :\n    \u00ac NoFail p ",
+      "target": "Solidity.Source.FailureResources.dropped_not_noFail"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:83:frame_not_noFail",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.refusal_joint",
+      "signature_sha256": "169bac352a022a1102791177ff5dcf920c2135f6fbedb5f958cf8b19a4d3fe6d",
+      "signature_source": "theorem frame_not_noFail {p : FailurePoints} {k cut : Nat} (h : p.frame k = some cut) :\n    \u00ac NoFail p ",
+      "target": "Solidity.Source.FailureResources.frame_not_noFail"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:91:Bound.not_le_of_points_ne",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.schedule_change_joint",
+      "signature_sha256": "751495d507143efc9ac5165d0b9ccc70525b2a66372c1fc108782d60086579d9",
+      "signature_source": "theorem Bound.not_le_of_points_ne {r s : Bound} (h : r.points \u2260 s.points) : \u00ac r \u2264 s ",
+      "target": "Solidity.Source.FailureResources.Bound.not_le_of_points_ne"
+    }
+  ]
+}
