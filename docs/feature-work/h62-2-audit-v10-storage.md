@@ -316,3 +316,35 @@ historical evidence. Original VM/branch/artifacts are preserved without deletion
 No H71 push authorization was available in thread/files; no push, merge, PR, master
 change, source edit, Lean/MCP/build or timing rerun occurred. All four checkpoints and
 all open proof/backfill obligations remain as listed in retirement/OPEN-QUEUE.md.
+
+## H82 successor: checked loop premise bundles
+
+The additive LoopWitnesses test checks joint witnesses for all hypotheses of
+LoopLaws.turn_step, turn_exit and run_single_loop on actual condition/body
+programs and the existing populated intrinsic machine. The same frozen loop
+module is byte-identical to the original audit base. A companion map records
+its exact declaration signatures and witness names without rewriting the
+conservative frozen census. These are three checked premise bundles, not a
+claim that all 3281 rows have been audited.
+
+The positive step changes the stack; the zero-condition witness skips an actual
+REVERT body. Separate controls preserve body-revert propagation, the distinction
+between a nonzero returned control index and a fault, and the failed nonzero
+premise at zero. The declarations pass Lean 4.24.0 with only the existing
+standard logical axioms. The original scratch attempt confused the pending
+jump body's nonzero index with a direct fault; that failed attempt is retained.
+
+No production interface, representation, heartbeat or Source implementation
+changed. There is no arbitrary compiler/reject-all compiler contract proof,
+physical gas/fork result or v4.35 migration hold release. Full elaborated census,
+remaining joint witnesses, compiler totality controls and final validation stay
+open. The existing inventory and earlier failed gates remain unchanged.
+
+The finished-loop premise also has a positive-iteration witness: the existing
+populated store starts at header 11, the body writes zero, and the second
+condition exits. The actual loop program returns that changed machine. A direct
+monolithic reduction exceeded the original heartbeat limit; composing three
+checked instruction equations through the existing turn laws passes without
+a budget change. The concrete 11-to-zero observation uses no axioms. This is
+one supported terminating program, not arbitrary positive-loop termination
+or a compiler totality theorem.
