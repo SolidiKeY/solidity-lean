@@ -317,3 +317,11 @@ census, supported compiler/failure/gas/fork coverage and final gates remain open
 ### Successor metadata refusal backfill
 
 After adopting published master `71c5963f3`, the unchanged acceptance predicates are exercised against an empty run, a matching version with the wrong toolchain commit, and mixed successful/failed or stopped records in both orders. Synthetic metadata tests remain separate from joint premise witnesses and kernel proof acceptance. No acceptance predicate, Lean statement, budget or trust requirement changes.
+
+### Focused resource reacceptance after master adoption
+
+Published master `706e36825` was adopted before validation. The approved activated per-file route checks the unchanged resource witnesses and exact kernel census serially. Source snapshots before and after both runs match. The unchanged acceptance script accepts five joint witnesses, one intentional H69 impossibility, five premise-free source statements and the generated equation for the byte-unchanged `Source.FailureResources` module. The intentional impossibility is not an ordinary joint witness, and the inhabited resource NoFail predicate is not a global SourceSpec producer.
+
+The unchanged whole-area census fails at `Solidity/Backend/CalldataPackets/RawAddress/Controls.lean` because that mapped source differs from its frozen baseline. This failure is retained; focused resource reconciliation does not waive it, narrow the full audit, or establish complete statement fidelity. Full kernel-family/gas/fork/SourceSpec coverage and final gates remain open. The runs enforce a hard 12 GiB child address-space limit with sampled aggregate RSS/reserve guards; no hard aggregate cgroup-cap claim is made.
+
+The small `resource-reacceptance-manifest.json` records paths, sizes and SHA256 values for off-Git evidence and the H1 cleanup receipt. Cleanup removed only three independently reviewed inactive generated SolkeyCheck binaries, reclaiming 517738496 bytes and leaving 2292506624 free immediately afterward. Source, sibling hashes/traces, logs, bundles, seals, protected caches and current build outputs were preserved.
