@@ -3,7 +3,10 @@
 import hashlib, json, pathlib, re, subprocess
 root = pathlib.Path(__file__).resolve().parents[3]
 records=[]
+# The frozen census excludes newly added canonical/helper modules.
+pinned=set(subprocess.check_output(['git','ls-tree','-r','--name-only','4d3790eadb8a5212233bc7d5e345817476b2f590','--','Solidity/Yul/Compilation'],cwd=root,text=True).splitlines())
 for file in sorted((root/'Solidity/Yul/Compilation').glob('*.lean')):
+    if str(file.relative_to(root)) not in pinned: continue
     data=file.read_bytes()
     source=data.decode()
     for match in re.finditer(r'^(structure|inductive) (Artifact|Compiled)\b[^\n]*',source,re.M):

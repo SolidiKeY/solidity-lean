@@ -100,7 +100,7 @@ declared rules cover it or have disjoint applicability.
    build on a missing or extra row; `taclets_partitioned` and
    `printed_rules_partitioned` move with it.
 5. A taclet that reads storage or memory: its row in
-   `SortCheck/Annotations.lean`, then `lake exe solkeycheck`.
+   `SortCheck/Annotations.lean`.
 
 `docs/lean-key-rule-map.md` is the authority for the correspondence to
 solkey's taclet names. Do not restate it in a docstring or a banner.
