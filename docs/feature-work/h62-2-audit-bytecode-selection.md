@@ -45,9 +45,11 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item2/audit-bytecode-selection/ver
 The verification output directory must be fresh. Its dependency traversal masks
 comments, handles multiple import names, rejects cycles, and builds every local
 import from source in order. It uses neither the old package build nor Lake's
-v4.24 artifact cache. Each Lean process uses `LEAN_NUM_THREADS=1`, `-j1`,
-`-M8192`, `--tstack=131072`, a 12 GiB address-space cap, a 300-second timeout,
-and a continuously checked 4 GiB available-memory reserve. No proof options or
+v4.24 artifact cache. Current verifier processes use `LEAN_NUM_THREADS=1`, `-j1`, `-M8192`,
+`--tstack=131072`, the existing hard 16 GiB VM cgroup cap, no swap,
+a 300-second timeout and a polled 4 GiB physical/cgroup reserve. The allocator
+setting is `MIMALLOC_PURGE_DELAY=0`. The extra virtual-address cap used at the
+first checkpoint was removed after the resource diagnosis recorded below. No proof options or
 heartbeat budgets are raised.
 
 ## Three completed backfill items
@@ -140,13 +142,140 @@ both are implemented. Their rechecks found no remaining objection to the
 limited backfill. Documentation/handoff wording received a final read-only
 review before export. Full review records are saved as `reviews.md` off Git.
 
+## Second backfill milestone: three further items
+
+All four assignment checkpoints remain partial. The branch now has twenty
+checked audit theorems in four standalone Lean files, plus two new closed proof
+structure definitions (`RuntimeFixture.compiler` and `RuntimeFixture.consumer`).
+These do not implement the general H55-G49 theorem or edit producer interfaces.
+
+### Elaborated census and fidelity provenance
+
+`scripts/h62/item2/audit-bytecode-selection/elaborated_census.py` generates an
+external Lean inspection program. `inventory_report.py` normalizes its output.
+The final Selection and ValueGate reports cover six distinct mapped modules,
+188 constants, 33 direct fields and 28 proof fields. The other 221 mapped files
+remain uninspected by this elaborated census. The complete conservative source
+census still contains all 227 files and 1,660 named theorem candidates.
+
+The new reports retain fully qualified names, raw kernel type expressions,
+pretty types, universe parameters, binder types/proofness, head constants and
+parent-subobject metadata. Proofness is not an automatic global/per-input role
+classification. Direct fields are not flattened inherited obligations; parent
+links must be followed in the final coverage census. Generated/private theorem
+origins are retained for review. No field or source theorem is silently filtered
+because it is difficult or apparently infeasible.
+
+An inspection manifest pins exact frozen source bytes, the selected module set,
+and the SHA256 of the unexpanded inspection template. Each emitted record and
+completion marker carries that manifest fingerprint; completion also reports
+per-module counts. The reporter checks the actual inspection source checksum,
+module/source equality, unique declarations, complete counts, diagnostics and
+the supplied ownership snapshot checksum. It honors writer exclusions.
+Nine report/roster regressions reject truncation, diagnostics, mismatched modules,
+duplicate declarations, stale inspector output, and excluded-owner matches.
+The default verifier roster includes all four audit Lean files; a regression
+checks that no new audit file is silently omitted. The four earlier source-scanner
+tests also pass.
+
+Two independent runs for each context normalize byte-identically. Evidence:
+`selection-elaborated-final-1.json`, `selection-elaborated-final-2.json`,
+`valuegate-elaborated-final-1.json`, `valuegate-elaborated-final-2.json`, and
+`inspection-final-gates.json` under the evidence root. The Selection context has
+158 records and no explicit file-writer match in the supplied H30 snapshot;
+those owner fields remain unresolved. The 30 ValueGate records match the
+explicit PAR-AE writer scope. This does not transfer compiler or producer ownership.
+Raw census records still have no mechanically inferred witness linkage; the
+following reviewed links are additional manual evidence, not a complete ledger.
+
+### Full closed runtime projection witness
+
+`tests/h62/item2/audit-bytecode-selection/RuntimePremiseWitness.lean` uses the
+existing nonidentity 70-byte composition. Its V2 compiler record has an actual
+successful input and preserves the chosen relation uniformly. The closed
+consumer retains the unchanged compiler and decoder antecedents and derives
+its fixed input/output stacks from the relation using `irStack_injective`.
+It reuses the published `CompositionControls.conditional_transport`.
+
+`runtime_projection_jointWitness` simultaneously supplies the consumer self,
+compiler, decoder and every per-input antecedent of
+`Solidity.Backend.Selection.V2.RuntimeConsumer.consume` for that SAME artifact.
+`runtime_antecedents_jointWitness` additionally carries the actual successful IR
+execution. `actual_nonidentity_bytes` reuses the independently fetched six-step
+byte execution. This is one fixed local self-adapter fixture; it supplies no
+external Bridge agreement, source-wide coverage, gas/fork result or general G49
+construction. Q-H55-SELF was resolved within the authorized additive audit scope;
+a missing general H55 artifact does not block this closed fixture.
+
+### Checked public-compiler success and observable refusal
+
+`tests/h62/item2/audit-bytecode-selection/ValueGateSuccess.lean` supplies the
+existing global `ValueGateCertificate` with actual `Compiler.compile` selection
+and execution of that same compilation. Its uniform theorem retains both the
+success and revert branches for every caller machine. A concrete inhabited
+context witnesses execution premises. The nonpayable case has nonempty code
+and succeeds at zero call value; a separate theorem observes nonzero-value
+revert. Reject-all selection and always-revert execution controls fail, including
+an explicit always-revert comparison against the nonempty supported program.
+These are actual intrinsic compiler/IR results, not a replacement compiler.
+They remain gasless and do not establish charged native behavior or source-origin
+adequacy. Original failure/gas/fork observations are neither erased nor reclassified.
+
+### Actual verification, resources, reviews and remaining work
+
+The expanded runtime source check first failed in unchanged `PowerBounds.lean`
+with `std::bad_alloc` under the audit wrapper's additional 12 GiB virtual cap.
+The VM recorded no OOM. Without that extra cap, the identical module passed in
+259.666 s, sampled peak RSS 7,951,300 KiB and virtual size 15,544,028 KiB. The
+physical cgroup cap, 8 GiB Lean heap cap, no-swap requirement and 4 GiB reserve
+were retained. This follows the repository warning that reserved virtual space
+is not resident memory. The documented allocator setting
+`MIMALLOC_PURGE_DELAY=0` then passed the same module in 264.308 s (+1.79%), sampled
+RSS 3,758,948 KiB. No heartbeat, proof or physical-memory budget was raised.
+These are single-prerequisite measurements, not the final package timing gate.
+
+The runtime closure checked 94 original modules successfully, then the new leaf
+exposed a missing V2 import. After adding that import, its additional prerequisite
+and current runtime leaf passed (`premises-v2-extra.log`, `runtime-final-2.log`).
+The independent ValueGate closure passed all 188 files in 684.877 s. Its final
+leaf with the added concrete refusal controls also passes (`value-gate-final.log`).
+All twenty audit theorems and the two new closed proof definitions use only
+standard `propext`, `Classical.choice`, and/or `Quot.sound`. No new axiom,
+`sorry`, `native_decide`, or raised maxHeartbeats option appears in the audit files.
+
+A proposed binary-import consolidation rejected unequal binary hashes for two
+independently checked `Evm/Signed` outputs. No binary was combined or accepted by
+that experiment. Its unused copier and failure are retained off Git only.
+The final inspections instead use their separate coherent source-check contexts;
+comparison of inventory DATA does not combine opaque imports. See
+`import-context-boundary.md` and the individual source-check journals.
+
+Independent read-only finder and skeptic reviews used no Lean server or checks.
+Finder required completion/manifest binding, module/source equality, ownership
+checksum and exclusion checks, and finally the inspection-template fingerprint.
+All were fixed with regressions. Skeptic confirmed the closed self witness is
+within additive audit scope and the checked compiler controls preserve the
+frozen observation branches. Final review records are `reviews-milestone-2.md`.
+
+The full elaborated census, per-statement role/owner and witness ledger, remaining
+supported compiler families, charged gas/fork controls, full affected validation,
+`./run-lean.sh`, and final acceptance/performance gates remain pending. No
+RUNTIME_GATE_PASS or complete checkpoint is asserted. After these three further
+backfill items, continue on the SAME VM/branch/goal in a coordinator fresh thread.
+The next useful step is expanding the elaborated inventory to the other core
+mapped modules (190 total core roots; 703 local source dependencies), then the
+37 mapped Bridge files. Keep import contexts and their evidence provenance
+explicit. A kernel-type-derived explicit-hypothesis witness domain may help avoid
+manual binder omissions; it must be independently reviewed and must not unfold
+negative conclusions into false extra preconditions or omit hidden premises.
+
 ## Remaining four-checkpoint queue and handoff
 
 | Checkpoint | State | Remaining |
 |---|---|---|
 | 1. Exact frozen inventory and owners | partial | Elaborated complete census including public structure fields; exact-file ownership and global/per-input premise classification for every statement. |
 | 2. Simultaneous witnesses | partial | Almost all statement witnesses; whole runtime composition/compiler/decoder/input conjunctions; deliberate-negative classification. |
-| 3. Public supported-program totality/success | partial | Beyond the numeric literal component; actual public compilers, observable failure, gas, fork and resource boundaries; owner-approved repairs if needed. |
+| 3. Public supported-program totality/success | partial | Beyond numeric literal and ValueGate families; remaining public compilers, observable failure, gas, fork and resource boundaries; owner-approved repairs if needed. |
 | 4. Witness/fidelity verification | partial | Complete proof-to-statement census and uncovered-owner report; all final affected/full gates and acceptance/performance checks. |
 
 No checkpoint is claimed complete. The required final `./run-lean.sh`, bounded

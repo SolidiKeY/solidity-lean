@@ -15,6 +15,9 @@ import subprocess
 import time
 from census import mask
 
+DEFAULT_ROOTS = ["tests/h62/item2/audit-bytecode-selection/" + name + ".lean"
+                 for name in ["Witnesses", "LiteralSuccess", "RuntimePremiseWitness", "ValueGateSuccess"]]
+
 
 def memory_available():
     host = next(int(line.split()[1]) * 1024 for line in Path("/proc/meminfo").read_text().splitlines() if line.startswith("MemAvailable:"))
@@ -28,6 +31,7 @@ def main():
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--evidence", type=Path, required=True)
     parser.add_argument("--lean", type=Path, required=True)
+    parser.add_argument("--root", action="append", help="repo-relative Lean root; repeat to extend the audit closure")
     args = parser.parse_args()
     repo, evidence = args.repo.resolve(), args.evidence.resolve()
     if len(Path("/proc/swaps").read_text().splitlines()) != 1:
@@ -59,14 +63,23 @@ def main():
         seen.add(path)
         order.append(path)
 
-    for name in ["Witnesses", "LiteralSuccess"]:
-        visit("tests/h62/item2/audit-bytecode-selection/" + name + ".lean")
-    env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(build))
+    roots = args.root or DEFAULT_ROOTS
+    for root in roots:
+        path = (repo / root).resolve()
+        if not path.is_relative_to(repo):
+            raise ValueError("root escapes repository: " + root)
+        visit(str(path.relative_to(repo)))
+    env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(build), MIMALLOC_PURGE_DELAY="0")
     records = []
-    # A hard address-space cap in addition to Lean's allocation cap. The VM has
-    # 16 GiB cgroup memory; poll for >=4 GiB remaining throughout every job.
+    # The VM already has a hard cgroup memory cap. Bound Lean's heap and
+    # continuously preserve 4 GiB of physical/cgroup headroom. Do not impose a
+    # virtual-address cap: reserved address ranges are not resident memory.
+    cap = Path("/sys/fs/cgroup/memory.max").read_text().strip()
+    if cap == "max" or int(cap) > 16 * 1024**3:
+        raise SystemExit("STOP: expected existing <=16 GiB VM memory cap")
+
     def limits():
-        resource.setrlimit(resource.RLIMIT_AS, (12 * 1024**3, 12 * 1024**3))
+        resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
     for index, path in enumerate(order):
         if memory_available() < 4 * 1024**3:
@@ -77,9 +90,19 @@ def main():
         logfile = evidence / (str(index).zfill(3) + "-" + Path(path).stem + ".log")
         start = time.monotonic()
         reason = None
+        peak_rss_kib, peak_virtual_kib = 0, 0
         with logfile.open("w") as log:
             process = subprocess.Popen(command, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, preexec_fn=limits)
             while process.poll() is None:
+                try:
+                    status = Path(f"/proc/{process.pid}/status").read_text()
+                    for line in status.splitlines():
+                        if line.startswith("VmRSS:"):
+                            peak_rss_kib = max(peak_rss_kib, int(line.split()[1]))
+                        elif line.startswith("VmSize:"):
+                            peak_virtual_kib = max(peak_virtual_kib, int(line.split()[1]))
+                except FileNotFoundError:
+                    pass
                 if memory_available() < 4 * 1024**3:
                     reason = "resource-reserve"
                 if time.monotonic() - start > 300:
@@ -94,7 +117,8 @@ def main():
                     break
                 time.sleep(0.2)
         record = {"path": path, "command": command, "exit": process.returncode,
-                  "seconds": round(time.monotonic() - start, 3), "stop": reason, "log": str(logfile)}
+                  "seconds": round(time.monotonic() - start, 3), "stop": reason, "log": str(logfile),
+                  "peak_rss_kib": peak_rss_kib, "peak_virtual_kib": peak_virtual_kib}
         records.append(record)
         (evidence / "verification.json").write_text(json.dumps(records, indent=2) + "\n")
         print(json.dumps(record), flush=True)
