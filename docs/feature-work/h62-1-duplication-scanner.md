@@ -622,3 +622,15 @@ Two independent fresh runs produced byte-identical censuses of 46 visible consta
 Independent read-only finder and skeptic reviews found no remaining substantive issue after the generated-declaration acceptance fix. This probe remains an isolated test module with a staged local module name; it is not registered in generated production roots or module maps. Full original and inherited cleanup assignments remain unfinished.
 
 Final acceptance: 82 external scanner controls pass. The global documentation path gate retains the same four inherited missing references outside cleanup scope. The new test probe declares no theorem or axiom; its bounded per-file execution is not a production proof or RUNTIME_GATE_PASS.
+
+## Direct source-location binding
+
+The separate bind_source_locations.py command guards namespace guesses, generated parent aliases and ambiguous source locations. A pinned additive probe reports direct findDeclarationRangesCore? metadata, avoiding the editor navigation parent fallback. A fresh canonical kernel census and a second bounded probe establish local execution provenance; exact imported-name sets, source bytes, identifier text, codepoint positions and declaration kinds determine the join. Missing, ambiguous and unsupported rows remain unresolved. Lexical refusal reasons are retained.
+
+Both accepted fresh runs link all 20 lexical rows in the pinned fixture, retaining 26 additional visible constants without lexical links in the 46-constant inventory. This is fixture source/name/type linkage, not proof-body equivalence, general project coverage, unloaded/private artifact coverage or ownership. The default scanner and original five-record contract remain unchanged. No production roots, module maps, statements or budgets changed.
+
+Child receipt, census and rebuild bytes are hash-checked against the successful in-memory live result before parsing and rechecked after the probe. A saved receipt cannot authorize the CLI. Post-child mutation controls reject altered artifacts before another compiler step; this does not eliminate ABA or authenticate a remote executor. A development failure exposed integer-only receipt parsing; finite timing decimals are now supported without changing observation/signature parsers or accepting nonfinite numbers. Failed diagnostics are preserved.
+
+Independent read-only finder and skeptic reviews found no remaining issue after the provenance and receipt-number fixes. They ran no Lean/server, tests or benchmarks and wrote no files. Accepted evidence: /workspace/h62-audit-readonly-calls/source-locations/accepted-two/ and accepted-three/. Resource observations are in evidence/acceptance.json; these are not a matched old-workflow timing gate. The original +80.254966536% STOP and all 792 obligations remain, with the stopped workload not rerun.
+
+Final source-location acceptance: 94 external controls pass; two fresh binding packets are byte-identical. The global path gate retains four inherited missing references. No new theorem, axiom, sorry or production import was introduced, and no RUNTIME_GATE_PASS is claimed.
