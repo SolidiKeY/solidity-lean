@@ -1378,3 +1378,37 @@ failed clause span or establish constructor reachability/compiler/EVM agreement.
 No rendered/LSP lifecycle or fullruntime pass follows. FullgateSource.Horizon,
 TestSuite/timedstrict, realmetadata producer, H70rawarchive, nativeMac, allpaired
 rendered/proof/performance/scaling/adversarial and rowjudgment obligations remain.
+
+
+### Native certified proof-help observation and strict retirement guards (partial)
+
+The [H44 evidence bundle](dafny-proof-help-evidence-manifest.json) restores
+repo-relative raw LSP, PNG/DOM/AX, source snapshots, reports and original failed
+receipts. A real local certified refutation drives the registered status menu;
+CDP selects each native QuickPick action, and actual source-bound `calculus.md`
+and `README.md` document editors are captured. The command is invoked via API,
+not a physical status-bar click. This explicit existing certify:true request
+changes no default product verification profile. Native synchronized run exits0
+with a partial scenario, not full parity. Paired Dafny/macOS/lifecycle and both
+independent row judgments remain missing.
+
+Two native failures remain: a60s observer timeout waiting for an unpublished
+phase field, and rejection before actual didOpen synchronization. Repairs use
+actual producer fields and await production open, with URI/version/text/session/
+synchronization/range ownership. Finder/skeptic reviews additionally found a
+PID-birth loss and missing next-trial refusal barrier; both have retained failing
+controls and repaired regressions. All54targeted tests pass. Refused termination
+is not counted as completed cleanup, and blocks new trials. No budget increased.
+
+Readback found3exact-owned Lean zombies after each proof UI process cycle;
+there is no live owned proof work, but PID entries remain. This is a retention
+gap queued for investigation, not a solver/thread-retention pass. Source/runtime
+semantics, metadata and axioms are unchanged. Resource caps/reserve/no-swap and
+serial-j1 are retained; no cgroup claim. FullSource.Horizon/TestSuite/timedstrict/
+runtime, verifier clause metadata and H70rawarchive waits remain.
+
+All original486 IDs/order/discovery expectations are retained. Three original
+proof-help/lifecycle/adversarial scenario rows are appended (489total), all
+partial. Stale H49 help-exclusion assessment claims are corrected under H80;
+no row/premise/exclusion or judge contract was weakened. Exact committed-head
+native and full lightweight checks remain required after this development slice.

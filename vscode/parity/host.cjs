@@ -193,6 +193,36 @@ async function run() {
           return{status:'partial',observations,scope:'Native pinned lifecycle observations, including upstream race/menu state; observeOnly phases are recorded, not claimed successful suppression. No local positioned producer, rendered parity, native macOS or extension-decoration disposal proof.'};
         }finally{writeFileSync(join(config.dir,'trace-lifecycle-observations.json'),JSON.stringify(observations,null,2));await configuration.update('colorVerificationTrace',previousColor,vscode.ConfigurationTarget.Workspace);if(!doc.isClosed){await vscode.window.showTextDocument(doc,{preview:false});await vscode.commands.executeCommand('dafny.hideVerificationTrace');}if(other&&!other.isClosed){await vscode.window.showTextDocument(other,{preview:false});await other.save();await vscode.commands.executeCommand('workbench.action.closeActiveEditor');}}
       });
+    }else if(config.suite==='proof-help'){
+      await scenario('native-certified-proof-help',async()=>{
+        assert.equal(target,'local');assert.ok(api.service,'actual production language service required');
+        const checks=require('./proof-help.cjs'),tools=require('./trace-presentation.cjs'),capture=require('./phase-capture.cjs'),fs=require('node:fs');
+        localStatus=p=>{states.set(p.uri,p);record('localStatus',p);};api.service.on('status',localStatus);
+        const doc=await open('proof-help',1,true),records=()=>readFileSync(config.trace,'utf8').trim().split('\n').filter(Boolean).map(line=>JSON.parse(line));
+        const binding=()=>{const rows=records(),wire=tools.wireDocument(rows,rows.length,doc.uri.toString());wire.synchronizationId=rows[wire.openIndex].message.params.textDocument.synchronizationId;return checks.sourceBinding(doc,sessionFor(doc),wire);};
+        const before=await bounded(checks.synchronizedBinding(api.service,doc,binding),'production document synchronization'),observations={initiator:'Explicit existing production LSP certify:true request; ordinary product verification defaults unchanged',menuInitiator:'Registered solidityLean.openStatusBarMenu command via API; native picker selection via CDP keyboard',before};
+        const save=()=>writeFileSync(join(config.dir,'proof-help-observations.json'),JSON.stringify(observations,null,2));save();
+        const report=await bounded(api.service.request('solidityLean/verify',doc,{options:{certify:true,counterexamples:true,function:'f0()'}}),'actual certified refutation');
+        checks.sameSource(before,binding());checks.assertCertifiedFailureObservation(report,before,doc.uri.fsPath);observations.report=report;save();
+        await until(()=>checks.currentFailureStatus(current(doc),before,report.results[0]),'current native failed function status');
+        await until(()=>api.reports.get(doc.uri.toString())?.results?.some(row=>row.status==='refuted'&&row.counterexample?.certified===true),'accepted current certified report');
+        observations.status=current(doc);observations.actions=[];save();
+        for(const [choice,label,fileName]of [['guide','Help with a proof','calculus.md'],['index','Proof documentation index','README.md']]){
+          await vscode.window.showTextDocument(doc,{preview:false});const owner=binding();checks.sameSource(before,owner);
+          let completed=false;const pending=bounded(vscode.commands.executeCommand('solidityLean.openStatusBarMenu'),'owned native proof-help menu').finally(()=>{completed=true;});pending.catch(()=>{});
+          try{
+            const menu=await capture.requestPhase(config.dir,config.runId,'proof-help-menu-'+choice,{action:'menu',binding:owner,label,status:current(doc)},timeout);
+            await pending;checks.sameSource(owner,binding());const destination=vscode.window.activeTextEditor?.document,expected=fs.realpathSync(join(config.backendPath,'docs',fileName));
+            // Resolve the recorded actual backend repository, never a guessed documentation URL.
+            assert.ok(destination&&!destination.isClosed);assert.equal(destination.uri.fsPath,expected);const destinationHash=createHash('sha256').update(destination.getText()).digest('hex');assert.equal(destinationHash,createHash('sha256').update(readFileSync(expected)).digest('hex'));
+            const targetBinding={uri:destination.uri.toString(),version:destination.version,textHash:destinationHash,path:expected};
+            const document=await capture.requestPhase(config.dir,config.runId,'proof-help-'+choice,{action:'document',binding:owner,destination:targetBinding},timeout);
+            checks.sameSource(owner,binding());assert.equal(vscode.window.activeTextEditor?.document,destination);assert.equal(createHash('sha256').update(destination.getText()).digest('hex'),targetBinding.textHash);
+            observations.actions.push({choice,label,source:owner,destination:targetBinding,menu,document});save();
+          }finally{if(!completed)await vscode.commands.executeCommand('workbench.action.closeQuickOpen');await pending.catch(()=>{});}
+        }
+        return {status:'partial',observations,scope:'Actual Linux certified service response and native VS Code picker/document rendering. Not default automatic kernel verification, paired Dafny/macOS, failed-clause metadata, EVM or complete parity.'};
+      });
     }else if(visual){
       const {requestPhase,phaseObserved}=require('./phase-capture.cjs');
       const localStates=new Map();
