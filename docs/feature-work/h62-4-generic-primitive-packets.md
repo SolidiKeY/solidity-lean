@@ -334,3 +334,48 @@ prerequisites yield no timing delta. Roadmap.Contracts:1104 remains the current
 dependency failure, requiring its owner's trust-preserving repair. No Lean gate,
 source, statement, trust or budget changed in this metadata-only update.
 The existing same-VM/same-goal fresh-thread handoff remains requested.
+
+## H82 smallest safe preservation checkpoint and successor handoff
+
+Lane-specific human retirement names survivor
+`solidity-compiler10-20261028/memory-reference-structs` and prohibits new proof
+implementation. A subsequent generic H82 standing update also says Continue now;
+Q-H82-RETIRE asks whether that cancels this specific retirement. No answer is
+inferred from elapsed time. Only safe preservation work was performed while
+that direction remains unresolved. No proof implementation or Lean run started.
+
+H82 withdraws first-kind exact-file agreement waits. B-OWNER-RELAY is therefore
+removed from active waits and retained as withdrawn history; statement,
+dependent-definition, interface, budget, axiom-set and exclusion changes still
+need their owner, with H57 pairs for frozen interfaces. Do not treat earlier
+protocol prose as a current proof-only edit permission barrier. The Roadmap
+axiom-policy mismatch remains recorded, not waived. Independent unfinished
+queue/backfill remains; this handoff does not claim none exists.
+
+The full visible original assignment is preserved from this thread in
+`tests/h62/item4/generic-primitive-packets/handoff/original-assignment.txt`.
+Original work/backfill queue, complete open-item inventory, exact original and
+updated scope, directive provenance and prompt/transcript hash boundaries are
+in that directory's `original-queues.md`, `open-queue-and-waits.json`,
+`scope-manifest.json`, and `h82-directives.txt`. The lossless queue section
+(including its original final blank lines) is encoded in `original-queues.json`;
+the readable Markdown normalizes only its final newline. These files are committed into
+the cumulative patch and Git bundle; no coordinator-local path is assumed
+retrievable on the successor VM. The original launcher-rendered wrapper blob
+is not tool-exposed: its supplied SHA256 is retained separately from the actual
+SHA256 of the complete visible assignment transcript, without asserting equality.
+
+Portable external exports include cumulative patch, base-prerequisite bundle,
+current handoff files, verified coordinator inputs, full prior evidence archive
+and SHA256SUMS. Exact final head and artifact hashes are in the final external
+result, avoiding self-referential commit hashes in this document. The VM,
+branch, original source and all evidence are preserved. No H71 lane-push
+permission was supplied, so no push is performed; no master push or merge.
+
+Goal PAUSED cannot be set through the exposed goal API: only
+`stop_goal(outcome: complete|blocked)` exists, with no pause/get/set-status
+operation. No complete state or substitute blocked transition is sent for the
+retirement. Coordinator must apply a true pause externally if retirement is
+confirmed; no new/reset goal or automatic implementation continuation is
+created. Final stopped/head acknowledgement and remaining direction question
+are reported explicitly. Successor integration is its responsibility.

@@ -21,30 +21,25 @@
       "evidence": "/workspace/h62-generic-primitive-packets-evidence/hash-overlay/run/dependency-logs/Solidity.Roadmap.Contracts.log",
       "required_resolution": "Coordinator relays an owner-reviewed exact-base migration resolution preserving frozen statements and trust policy; do not silently change the axiom guard or pins.",
       "relay_status": "New exact-path ticket recorded here for coordinator routing; no external owner message sent by worker."
-    },
-    {
-      "id": "B-OWNER-RELAY",
-      "kind": "owner-applied-protocol-agreed-application-review-pending",
-      "status": "blocked",
-      "exact_files": [
-        "Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean"
-      ],
-      "owner": "solidity-compiler10-20261028/memory-reference-structs",
-      "coordinator": "V09",
-      "required_resolution": "Owner reviews semantic generic lemma/correspondence once dependencies check, then owner applies exact-instance migration; no existing family write is authorized here.",
-      "relay_status": "H71 MRS owner-applied coordination protocol agreed; current exact-writer confirmation and semantic application review remain pending.",
-      "routing_receipt": "Inline H71 owner agreement; no approval of an unseen candidate or source-edit delegation.",
-      "protocol_agreed": true,
-      "application_approval": false,
-      "source_edit_delegated": false,
-      "reference_head": "0b2a648b32335f35ff323ff468f75907e926fc13",
-      "reference_raw_sha256": "6076f049bccc97e12e08c10512770cb9597a1cd79394a0111a41367a0143c945",
-      "local_reference_hash_matches": true,
-      "protocol": "tests/h62/item4/generic-primitive-packets/mrs-owner-protocol.json"
     }
   ],
-  "questions": [],
-  "registration": "Area registration fragments and exact-instance migration remain pending semantic bridge, full gates/timing and owner application review under the agreed owner-applied protocol.",
+  "questions": [
+    {
+      "id": "Q-H82-RETIRE",
+      "sources": [
+        "H82 lane-specific stop-and-handoff instruction",
+        "Subsequent H82 standing update: Continue now"
+      ],
+      "question": "Does Continue now cancel the lane-specific stop-and-handoff to memory-reference-structs, or should this worker finish that handoff and pause?",
+      "options": [
+        "Finish handoff and pause this lane: stop implementation and transfer the saved queue to the named survivor",
+        "Cancel retirement and resume this lane: continue the same unfinished goal/VM/branch under H82 standing rules"
+      ],
+      "status": "pending",
+      "authorization_boundary": "No answer inferred from elapsed time; no new implementation while direction is unresolved."
+    }
+  ],
+  "registration": "Original registration/candidate artifacts remain unfinished. H82 removes first-kind exact-file agreement waits; statement/interface/trust/budget changes still require their owner.",
   "resolved_dependencies": [
     {
       "id": "B-MIGRATION-HASH",
@@ -74,5 +69,30 @@
     "manifest": "tests/h62/item4/generic-primitive-packets/hash-owner-relay.json",
     "patch": "tests/h62/item4/generic-primitive-packets/hash-owner-relay.patch.json",
     "authorization": "Isolated staged-source consumption only; no checkout-original edit permission"
-  }
+  },
+  "withdrawn_waits": [
+    {
+      "id": "B-OWNER-RELAY",
+      "kind": "owner-applied-protocol-agreed-application-review-pending",
+      "status": "withdrawn-for-statement-preserving-first-kind-edits",
+      "exact_files": [
+        "Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean"
+      ],
+      "owner": "solidity-compiler10-20261028/memory-reference-structs",
+      "coordinator": "V09",
+      "required_resolution": "Owner reviews semantic generic lemma/correspondence once dependencies check, then owner applies exact-instance migration; no existing family write is authorized here.",
+      "relay_status": "H71 MRS owner-applied coordination protocol agreed; current exact-writer confirmation and semantic application review remain pending.",
+      "routing_receipt": "Inline H71 owner agreement; no approval of an unseen candidate or source-edit delegation.",
+      "protocol_agreed": true,
+      "application_approval": false,
+      "source_edit_delegated": false,
+      "reference_head": "0b2a648b32335f35ff323ff468f75907e926fc13",
+      "reference_raw_sha256": "6076f049bccc97e12e08c10512770cb9597a1cd79394a0111a41367a0143c945",
+      "local_reference_hash_matches": true,
+      "protocol": "tests/h62/item4/generic-primitive-packets/mrs-owner-protocol.json",
+      "withdrawal_authority": "H82 standing rule1; no prior exact-file agreement required for proof-only/additive/module/import/doc changes",
+      "remaining_boundary": "Owner still required for statement/dependent-definition/interface/budget/axiom-set/exclusion changes; frozen interfaces H57 pairs."
+    }
+  ],
+  "handoff_state": "H82 lane-specific retirement plus generic Continue now update; Q-H82-RETIRE pending. Safe preservation only, no new proof implementation."
 }
