@@ -26,9 +26,14 @@ Fetched published3ad22f66d8fc6431378c22e71823436c79dede7f and verified8bf83218 a
 
 Both modules build serially in3.56seconds total; no owned module above60seconds. Fresh MCP inventory contains18 information-only actual axiom reports; no partial/timeout/error. Separate read-only finder and skeptic accepted the statements without Lean/server or edits. Skeptic identified an overbroad English phrase about old allocations; corrected to every address other than the allocation address, matching the theorem exactly. No theorem or premise changed.
 
-This closes observation, empty/EOF and low-horizon obligations. Width-specific accepted-range arithmetic, actual raw-negative/mixed-offset copying, frame binding/guard controls, partial-word padding and exact guarded axiom pins remain unfinished. Original ConstantDepth and prior RawInt seals stay intact.
+The observation and empty/EOF controls cover those cases. The zero/one-horizon controls demonstrate fuel exhaustion only; they do not close semantic or execution-adequacy obligations. Width-specific accepted-range arithmetic, actual raw-negative/mixed-offset copying, frame binding/guard controls, partial-word padding were unfinished at this historical checkpoint; the published increment below supersedes this list and supplies the exact guarded axiom pins. Original ConstantDepth and prior RawInt seals stay intact.
+
+The earlier checkpoint lists above are historical. Current published coverage is recorded below.
 
 ## Claude-VM increment (2026-11-05)
+
+The following preserves the published Claude-VM report. Its references to "here"
+and "this checkout" refer to that VM, not fresh validation on the original Codex VM.
 
 The lane moved to a Claude VM (`cloud/moved4-20261105/constant-depth`). The Codex
 bulk evidence (H44, `H44-manifest.json`) stays on the Codex VM and is not cited;
