@@ -1,0 +1,35 @@
+{
+  "status": "global-doc-check-fail; no missing reference in changed audit scope",
+  "gate_exit": 1,
+  "owner": "coordinator/doc-reference-owners",
+  "parent": "ff539d74a5243890974f5e41f790a2802b801fc0",
+  "findings": [
+    {
+      "source": "docs/feature-work/h62-6-migrate-theory.md",
+      "reference": "StringApiWitness.original-unproved.lean",
+      "present_in_parent": true
+    },
+    {
+      "source": "scripts/h62/item2/audit-abi-world/test_census.py",
+      "reference": "Backend/A.lean",
+      "present_in_parent": true
+    },
+    {
+      "source": "tests/h62/item1/packet-panic/H71-CANDIDATE.md",
+      "reference": "Solidity/Backend/PrimitivePackets/PanicBytes.lean",
+      "present_in_parent": true
+    },
+    {
+      "source": "tests/h62/item4/generic-structuredflow/registration.md",
+      "reference": "Backend/StructuredFlow/GenericMapped.lean",
+      "present_in_parent": true
+    },
+    {
+      "source": "tests/h62/item4/generic-structuredflow/registration.md",
+      "reference": "Solidity/Backend/StructuredFlow/GenericMapped.lean",
+      "present_in_parent": true
+    }
+  ],
+  "evidence": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/bytes-header-doc-paths.log",
+  "action": "route; no read-only producer file edits or checker exemption changes"
+}

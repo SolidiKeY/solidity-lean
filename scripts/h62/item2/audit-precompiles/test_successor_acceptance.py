@@ -6,7 +6,7 @@ E=audit.ROOT/'tests/h62/item2/audit-precompiles/successor-evidence'
 class ReceiptTests(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory(prefix='acceptance-',dir=E);self.e=pathlib.Path(self.temp.name)
-  for stem in ['basic-final','core-final','data-final','type-fidelity-final','identity-final424','bridge-fidelity-final424','stipend-control424','keysort424','imported-bridge-axioms424']:
+  for stem in ['basic-final','core-final','data-final','type-fidelity-final','identity-final424','bridge-fidelity-final424','stipend-control424','keysort424','imported-bridge-axioms424','bytes-gas-final424','header-short-zero424']:
    for ext in ['.json','.log']:shutil.copyfile(E/(stem+ext),self.e/(stem+ext))
  def tearDown(self):self.temp.cleanup()
  def alter(self,fn):
@@ -14,7 +14,7 @@ class ReceiptTests(unittest.TestCase):
  def rejected(self):
   with self.assertRaises(AssertionError):audit.generate(self.e)
  def test_valid_partial_boundary(self):
-  r=audit.generate(self.e);self.assertEqual(r['counts']['case_accounted'],59);self.assertEqual(r['pending'],79);self.assertFalse(r['owner_compiler_success_supplied'])
+  r=audit.generate(self.e);self.assertEqual(r['counts']['case_accounted'],97);self.assertEqual(r['pending'],41);self.assertFalse(r['owner_compiler_success_supplied'])
  def test_failed_job(self):self.alter(lambda m:m.update(exit=1));self.rejected()
  def test_timeout(self):self.alter(lambda m:m.update(timeout=True));self.rejected()
  def test_resource_stop(self):self.alter(lambda m:m.update(resource_stop='cap'));self.rejected()
@@ -50,4 +50,14 @@ class ReceiptTests(unittest.TestCase):
  def test_nonstandard_printed_axiom(self):
   p=self.e/'identity-final424.log';p.write_text(p.read_text()+"\n'H62.AuditPrecompiles.fake' depends on axioms: [unapprovedAxiom]\n")
   self.alter(lambda m:m.update(log_sha256=hashlib.sha256(p.read_bytes()).hexdigest()));self.rejected()
+ def test_missing_bytes_gas_receipt(self):
+  (self.e/'bytes-gas-final424.json').unlink()
+  with self.assertRaises(FileNotFoundError):audit.generate(self.e)
+ def test_query_bytes_gas_command(self):
+  p=self.e/'bytes-gas-final424.json';m=json.loads(p.read_text());m['command'].insert(-1,'--version');p.write_text(json.dumps(m));self.rejected()
+ def test_missing_header_receipt(self):
+  (self.e/'header-short-zero424.json').unlink()
+  with self.assertRaises(FileNotFoundError):audit.generate(self.e)
+ def test_stale_header(self):
+  p=self.e/'header-short-zero424.json';m=json.loads(p.read_text());src=str(audit.ROOT/'tests/h62/item2/audit-precompiles/BridgeHeaderWitnesses.lean');m['input_sha256'][src]='0'*64;p.write_text(json.dumps(m));self.rejected()
 if __name__=='__main__':unittest.main()

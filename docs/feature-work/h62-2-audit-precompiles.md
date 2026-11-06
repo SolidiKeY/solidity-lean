@@ -2,7 +2,7 @@
 
 **Successor update (2026-11-06):** the retired member's authenticated final head is now
 merged on the original precompile-agreement branch. Fresh frozen-v4.24 evidence
-accounts for 59/138 cases, with 79 pending; details are in the successor checkpoint
+accounts for 97/138 cases, with 41 pending; details are in the successor checkpoint
 below. The retirement notice immediately below applies to the retired member,
 whose goal remains paused. The successor continues its existing original goal.
 
@@ -343,3 +343,43 @@ malformed-membership1,BLS/PointEval/Osaka29 and Stipend12 original cases at the 
 pin. Do not mark blocked or complete while these independent cases remain.
 No retired goal is woken, recreated or reset. No Claude source edit/message, master
 push or host cache shipment occurred.
+
+## Bytes/Gas and Header/membership continuation, 2026-11-06
+
+The next 38 original cases now pass at the unchanged frozen4.24 pin: Bytes10,
+Gas11,Header16 and malformed-membership1. These construct12joint-premise and
+26data-domain witnesses; the general word-rounding lemma is not counted as an
+extra original case. Current exactly-once totals are25joint,47data,25closed
+fidelity =97accounted/138,41pending. Full-type coverage remains97, a separate
+measure. No source statement, body, interface, budget, axiom set or exclusion
+was changed. New modules name the guarded regressions in their docstrings (H90),
+and no roadmap/phase folder or core dependency was added.
+
+[BridgeBytesGasWitnesses.lean](../../tests/h62/item2/audit-precompiles/BridgeBytesGasWitnesses.lean)
+retains both word-size/affordability bounds, all original conclusions, private
+list-loop data and actual success flags in error-capable gas projections.
+Its general rounding lemma applies to every n. All22 public axiom guards pass.
+[BridgeHeaderWitnesses.lean](../../tests/h62/item2/audit-precompiles/BridgeHeaderWitnesses.lean)
+uses17guards and keeps padding, four-byte common domain and one-byte zero-header
+exception distinct. Validation size/flag/gas are constructed together for one
+input; flags0/1,flag2,insufficient gas,invalid size and membership are inhabited.
+A general header decoding lemma avoids opaque computation. Compression outputs
+are not equated to crypto implementations. Actual private constants are reused
+through ordinary term checking. Final checks took2.762s and4.520s respectively,
+no resource stop or budget increase. Initial failures and passing receipts remain
+off git; none is an unchanged timing STOP.
+
+Acceptance requires both new genuine receipts, exact commands/tool identity,
+complete frozen input closure, log hashes/markers and measured resource bounds.
+Twenty-five failed/stale/missing/query receipt mutations pass. Finder/skeptic
+read-only proof reviews found no meaning, vacuity, scope or H90 issue.
+
+H70 updated disposition: H85/H86 replace the old H45 blanket hold with the fixed
+host bridge-build.sh package/user allow rule and unchanged lane budget. These
+have not been verified or executed by this worker. All Raw/BLS/Bridge migration
+waits now belong to migrate-root-gate; retired producer goals are not contacted.
+Historical raw-evidence absence is a regeneration limitation underH86. Actual
+G43 compiler success remains staged for forwarding; Exp integration is separate.
+Current continuation/handoff: BYTES-GAS-HEADER-HANDOFF.md under the audit tests.
+Ready work remains29 BLS/PointEval/Osaka and12Stipend cases; no full-goal,
+full-build, migration435, native-crypto or actual-compiler claim is made.

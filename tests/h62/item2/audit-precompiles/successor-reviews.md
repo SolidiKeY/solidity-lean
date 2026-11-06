@@ -29,3 +29,19 @@ Final independent handoff reviews PASS, no new findings. Both confirmed all16
 staged files remain in inherited scope; ready continuation, exact counts and
 historical/migration/full-build limits are accurate. They approved commit and
 checksum sealing without Lean/server/builds/tests or edits.
+
+## Bytes/Gas and Header/membership review
+
+Separate read-only finder and skeptic approve all38 new original-case samples.
+All12 joint witnesses construct hypotheses for the same data; six prior
+IDENTITY proofs are unchanged. Short padding, short zero-header exception,
+flags0/1/2, actual gas success flags and malformed membership remain distinct.
+General rounding/header lemmas do not pad original case counts. Both confirm
+H90 regression docstrings, inherited scope and no vacuity/fidelity findings.
+Neither used Lean/server/builds/tests or edits. Ledger97accounted/41pending
+retains migration/native/compiler/full-validation boundaries.
+
+Final Bytes/Header handoff reviews PASS, no findings; both verified all14
+staged files were in scope, current counts and H85/H86/H90 routing. Subsequent
+globaldoc check found5parent-existing out-of-scope references, explicitly
+recorded/routed rather than changed or waived. Trustscan6468sources0findings.
