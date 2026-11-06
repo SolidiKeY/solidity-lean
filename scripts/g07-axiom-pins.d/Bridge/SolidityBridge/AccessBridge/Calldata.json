@@ -1,0 +1,72 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.budget_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.budget_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.Checks.bytes_offsets": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.Checks.gas_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.Checks.low_budget_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.Checks.populated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.Checks.populated_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.Checks.stack_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.continuation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.installed_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Calldata.lean:SolidityBridge.AccessBridge.Calldata.readBytes_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
