@@ -27,6 +27,7 @@ class SelectionLedgerControls(unittest.TestCase):
         span = rows[0]["span"]
         inventory = {"base": census.BASE, "production_inputs": inputs, "inventory": [
             {"id": "Taclet.one", "file": rules, "line_start": span["line_start"], "line_end": span["line_end"], "span_sha256": span["sha256"]}]}
+        manifest["declared_case_counts"] = ledger.case_counts(manifest["cases"])
         return catalog, manifest, sources, inventory
 
     def test_every_candidate_and_unit_remains_visible(self):
@@ -63,6 +64,7 @@ class SelectionLedgerControls(unittest.TestCase):
 
     def test_only_linked_survivor_duplicate_is_allowed(self):
         c, m, s, i = self.inputs(); control = copy.deepcopy(m["cases"][0]); control.update(id="control.one", kind="runner-survivor-control", control_of="one", regression="oracle.lean"); m["cases"].append(control)
+        m["declared_case_counts"] = ledger.case_counts(m["cases"])
         self.assertEqual(ledger.account(c, m, s, i)["counts"]["selected_ids"], 2)
         for fault in ("wrong-parent", "independent-known-kill", "no-regression", "unique-unlinked-survivor"):
             altered = copy.deepcopy(m)
@@ -102,4 +104,9 @@ class SelectionLedgerControls(unittest.TestCase):
         self.assertEqual(result["program_counts"]["case_ids"], 2)
         m["declared_case_counts"]["distinct_scored_programs"] = 0
         with self.assertRaisesRegex(ValueError, "declared case/program counts mismatch"):
+            ledger.account(c, m, s, i)
+
+    def test_omitted_declared_counts_are_rejected(self):
+        c, m, s, i = self.inputs(); m.pop("declared_case_counts")
+        with self.assertRaisesRegex(ValueError, "declared case counts are required"):
             ledger.account(c, m, s, i)

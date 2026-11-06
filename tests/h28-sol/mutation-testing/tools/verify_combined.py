@@ -23,6 +23,9 @@ def verify(repo, profile='combined'):
   h=hashlib.sha256()
   for b in iter(lambda:f.read(1048576),b''):h.update(b)
  require(h.hexdigest()==pin['sha256'],'archive hash mismatch')
+ if 'member_manifest' in pin:
+  from verify_bulk import verify_h44_member_manifest
+  verify_h44_member_manifest(repo,pin)
  with tarfile.open(archive,'r:gz') as tar:
   members={}
   for m in tar:

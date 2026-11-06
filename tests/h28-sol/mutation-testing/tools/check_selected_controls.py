@@ -31,6 +31,7 @@ def run(repo):
                   ('empty-positive', 'empty positive census object'),
                   ('ledger-unit-omission', 'exhaustive ledger regeneration mismatch'),
                   ('fixture-theorem-omission', 'fixture theorem missing'),
+                  ('missing-case-result', 'fixture references missing case result'),
                   ('zero-memory-profile', 'census resource bounds mismatch'),
                   ('version-swap', 'version gate resource bounds mismatch'),
                   ('version-failure', 'version gate resource bounds mismatch')]
@@ -42,6 +43,10 @@ def run(repo):
             if fault == 'ledger-unit-omission':
                 ledger = json.loads(original('ledger.json')); ledger['declarations'][0]['units'].pop()
                 altered['ledger.json'] = json.dumps(ledger).encode()
+            if fault == 'missing-case-result':
+                fixture = json.loads(original('ledger.json'))['fixtures'][0]
+                case_id = fixture['selected_roles'][0]['case_id']
+                result['records'] = [r for r in result['records'] if r['id'] != case_id]
             if fault == 'fixture-theorem-omission':
                 fixture = json.loads(original('ledger.json'))['fixtures'][0]
                 case_id = fixture['selected_roles'][0]['case_id']; theorem = fixture['theorems'][0]

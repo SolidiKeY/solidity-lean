@@ -1040,3 +1040,26 @@ accounting replay passed before sealing. Actual published-entrypoint replay
 and all eight fault controls are next; no current full replay acceptance is
 claimed until their results are recorded. H41 delivery remains coordinator
 pending. Whole repository gates and whole-assignment acceptance remain pending.
+
+
+The fresh current receipt's published entrypoints subsequently passed at
+07885141f: normal/optimized 94 controls, bulk authentication, selected proof
+replay, and all eight real-evidence fault refusals. Optimized fault replay also
+passed all eight refusals; the guarded touched gate passed with no production
+targets. Both reviewers independently passed the five primary saved gates.
+These are actual replay results for the aab receipt, not the historical f8 pin.
+
+Published master `6cf853aea0417155aca29ddb91f1767d3f3a3cc4` is adopted after
+those checks. Its three non-blocking follow-ups are implemented: count tables
+are mandatory; the standalone proof verifier authenticates every declared H44
+member manifest; and absent case results produce an explicit checked refusal.
+Controls cover omitted counts, tampered member manifests through the standalone
+entrypoint, and a ninth real-evidence fault for a missing case result. Engine
+and bulk delivery anchors advance together to 6cf; semantic/cache and snapshot
+pins remain immutable. Cases, theorem statements and frozen proof inputs are
+unchanged, so the fresh aab proof receipt is preserved. Replays and controls
+for these stricter guards must pass before their checkpoint is complete.
+
+The standalone member-map check runs only after archive size/SHA authentication,
+preserving authentication before decompression. A real-Git malformed-archive
+control verifies that rejection precedes even member-map parsing.

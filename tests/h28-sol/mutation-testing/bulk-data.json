@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "authorization": "H44",
-  "delivery_base": "79e4972532b0628c539911dc80c4904d776e81ef",
+  "delivery_base": "6cf853aea0417155aca29ddb91f1767d3f3a3cc4",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
   "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
