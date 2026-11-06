@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "audit": "pass",
+  "kernel_declarations": 991,
+  "normalized_signature_and_axiom_inventory": "exactly unchanged",
+  "seconds": 20.586,
+  "memory_peak_bytes": 2815512576,
+  "minimum_parent_headroom_bytes": 16202633216,
+  "implementation_acceptance": "fail: foreign work differs from adopted publication",
+  "next_item": "Reconcile exact authenticated H82 member provenance in acceptance without granting arbitrary foreign edits.",
+  "full_runtime_gate": "not rerun; previous STOP evidence retained"
+}
