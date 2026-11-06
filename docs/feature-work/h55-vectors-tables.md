@@ -127,3 +127,17 @@ that removing each proposed marker restores the exact source, including all
 proofs, assumptions, imports and observations. These annotations do not migrate
 the tables or replace proof generation; substantive migration patches and Lean
 validation remain pending owner coordination. No owner files were edited.
+
+## H70 Raw lexical token accounting
+
+`raw_tokens.py` scans all 102 pinned Raw files for pipe and `case` occurrences
+outside line comments, nested block comments and strings. It records 1,933
+occurrences with line and column locations in the external
+`/workspace/scratch/h55-vectors-tables/raw-tokens.json`; a second extraction
+matched and its checksum is committed. Tests cover comments, nested comments,
+escaped strings, inline occurrences, malformed input and missing, extra and
+reordered tokens. This scanner is not the Lean parser: occurrences are not all
+semantic cases, and exact semantic case coverage and meaningful Lean validation
+are still pending. Current master includes an additional RawFrameLogic module
+and changes RawFrame and RawBoundary, so this 102-file frozen census is not a
+claim about the updated master inventory. Sixteen Python tests pass.
