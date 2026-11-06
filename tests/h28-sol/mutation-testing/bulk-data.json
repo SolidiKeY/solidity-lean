@@ -172,5 +172,17 @@
     "unchanged_off_git_files": 1012,
     "unchanged_frozen_manifests": 9,
     "prior_relaxed_bulk_gate_passes": "Historical only; superseded for strict tracked-mirror acceptance by the new post-fix gates"
+  },
+  "strict_mirror_validation": {
+    "archive": "/workspace/h28-strict-mirror-61724cdf/evidence.tar.gz",
+    "sha256": "17c838230f32d2713ff3668c7828d5760b184f2e19cec02f22e9eb69ddcbdc7f",
+    "bytes": 5519,
+    "files": 26,
+    "gate_head": "34d40f376ee7b2ca228d84d2e8c74acf97b82a99",
+    "policy": "Every tracked mirror requires GitHEAD authentication AND indexed size AND indexed SHA256",
+    "actual_gate_count": 20,
+    "unit_tests_per_mode": 74,
+    "finder": "PASS",
+    "skeptic": "PASS"
   }
 }
