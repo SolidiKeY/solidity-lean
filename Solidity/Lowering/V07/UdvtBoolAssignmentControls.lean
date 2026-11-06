@@ -117,7 +117,7 @@ def check (p : Roadmap.Pipeline) (checked x y : Bool) : Bool :=
   let w := value e (rfl : E.layout.underlying e = .bool) true
   match Source.convVal (.udvt e) v with
   | .error (.stuck why) => v.key == w.key && why == "user-defined value type" &&
-      !(Source.STy.udvt d).implicit E.isBase (.udvt e)
+      !(Source.STy.udvt d).implicit E.isBase E.mapFree (.udvt e)
   | _ => false))
 
 /-- info: 'Solidity.Lowering.V07.UdvtBoolAssignmentControls.underlying' depends on axioms: [propext, Classical.choice, Quot.sound] -/

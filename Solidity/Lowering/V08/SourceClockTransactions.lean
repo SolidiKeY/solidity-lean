@@ -90,8 +90,8 @@ theorem setup_reached : targetSetup.toOption.map targetObserve =
   decide +kernel
 
 theorem source_vector (bytes : Roadmap.Bytes) :
-    ((success bytes).ex.world.accounts user).balance.val = 93 ∧
-    ((success bytes).ex.world.accounts thisC).balance.val = 7 ∧
+    ((success bytes).ex.world.accounts user).balance = 93 ∧
+    ((success bytes).ex.world.accounts thisC).balance = 7 ∧
     ((success bytes).ex.world.accounts user).nonce = 3 ∧
     ((success bytes).ex.world.accounts thisC).nonce = 1 ∧
     ((success bytes).ex.world.accounts thisC).code = some 0 ∧

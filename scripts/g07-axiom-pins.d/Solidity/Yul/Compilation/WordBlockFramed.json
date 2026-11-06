@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/WordBlockFramed.lean:Solidity.Yul.Compilation.WordBlockFramed.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramed.lean:Solidity.Yul.Compilation.WordBlockFramed.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

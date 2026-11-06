@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentationControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeReturnRepresentation.Controls.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -205,3 +205,6 @@
 | `Yul/RawFrameLogic.lean` | Intrinsic raw-local frame logic and transport used by P16; retained typed frame obligations remain explicit. |
 | `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
 | `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |
+| `Yul/Composition/SourceCatchBinding.lean` | Actual Source raw-bytes try/catch allocation and canonical rethrow: complete-state all-byte/all-horizon≥3 proof, old/new heap readback and scoped controls; no native/physical/full-Yul adequacy. |
+
+| `Yul/Composition/MonetaryLifecycleControls.lean` | H19 whole-Nat lifecycle payment/rollback and wide-balance refusal/self-beneficiary controls with nonempty caller journal; no world adequacy claim. |

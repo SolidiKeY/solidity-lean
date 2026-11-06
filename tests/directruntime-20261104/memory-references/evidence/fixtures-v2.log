@@ -1,3 +1,0 @@
-PASS 8 compiler-invalid controls and 14 corrupted admission controls (not executed)
-PASS 72 full compiler AST fixtures; 18 scenarios x 2 modalities x 2 pipelines; compiler 0.8.34+commit.80d5c536.Emscripten.clang; no verifier invoked
-{"wallSeconds":16.37371766,"maxRssKiB":167308}

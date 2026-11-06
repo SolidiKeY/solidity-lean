@@ -18,7 +18,7 @@ private def measureMetadataSample (label : String) (run : Json → Except String
   return Json.mkObj [("phase", toJson label), ("iterations", toJson iterations),
     ("accepted", toJson accepted), ("nanos", toJson elapsed)]
 private def benchmark : IO Unit := do
-  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/ReaderFixtures.ast.json"))
+  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/ReaderFixtures.ast.json"))
   let ast ← checked (field fixture "ast")
   let header ← checked (field fixture "header")
   let inputs := ((J.nodes ast).filter fun j => match expression j with

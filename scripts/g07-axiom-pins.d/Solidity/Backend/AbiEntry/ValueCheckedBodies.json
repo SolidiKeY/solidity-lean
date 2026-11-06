@@ -1,0 +1,68 @@
+{
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.decoded_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.early_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.gated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.decoded_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.early_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.gated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean:Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

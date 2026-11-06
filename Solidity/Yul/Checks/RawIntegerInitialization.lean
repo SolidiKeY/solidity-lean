@@ -48,9 +48,9 @@ def concreteWide (glob : Solidity.Source.Glob Fixture.env) (frame : Solidity.Sou
 
 
 
-theorem refusals : Solidity.Source.STy.implicit Solidity.Yul.Checks.RawIntegerInitialization.Fixture.env.isBase
+theorem refusals : Solidity.Source.STy.implicit Solidity.Yul.Checks.RawIntegerInitialization.Fixture.env.isBase Solidity.Yul.Checks.RawIntegerInitialization.Fixture.env.mapFree
  (.rational (Solidity.Source.Q.ofInt 256)) (.int Solidity.Source.IntTy.u8) = false ∧
- Solidity.Source.STy.implicit Solidity.Yul.Checks.RawIntegerInitialization.Fixture.env.isBase
+ Solidity.Source.STy.implicit Solidity.Yul.Checks.RawIntegerInitialization.Fixture.env.isBase Solidity.Yul.Checks.RawIntegerInitialization.Fixture.env.mapFree
  (.rational Solidity.Yul.Checks.RawIntegerInitialization.Fixture.fraction) (.int Solidity.Source.IntTy.u8) = false ∧
  Solidity.Source.constVal (D := Solidity.Yul.Checks.RawIntegerInitialization.Fixture.env.layout)
  (Solidity.Source.Q.ofInt 256) (.int Solidity.Source.IntTy.u8) = .error (.stuck "integer out of range") ∧

@@ -40,9 +40,9 @@ theorem rejected_at_paid (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
 /-- Failure is specifically insufficient sender funds, NOT destination overflow. -/
 theorem paid_failure_reason (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
     amount89.val = 89 ∧
-    ((paid pipeline bytes).ex.world.accounts sender).balance.val = 88 ∧
-    ¬ (amount89.val ≤ ((paid pipeline bytes).ex.world.accounts sender).balance.val) ∧
-    ((paid pipeline bytes).ex.world.accounts self).balance.val + amount89.val < 2^256 := by
+    ((paid pipeline bytes).ex.world.accounts sender).balance = 88 ∧
+    ¬ (amount89.val ≤ ((paid pipeline bytes).ex.world.accounts sender).balance) ∧
+    ((paid pipeline bytes).ex.world.accounts self).balance + amount89.val < 2^256 := by
   exact ⟨rfl,rfl,(by decide +kernel : ¬ ((89 : Nat) ≤ 88)),
     (by decide +kernel : (12 : Nat) + 89 < 2^256)⟩
 
@@ -224,7 +224,7 @@ theorem false_refund (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
     (paid pipeline bytes).ex ≠ (innerRolled pipeline bytes).ex := by
   rw [SourceTransientReachedPayment.payment_inner_machine]
   intro same
-  have balances := congrArg (fun state => (state.world.accounts sender).balance.val) same
+  have balances := congrArg (fun state => (state.world.accounts sender).balance) same
   change 88 = 93 at balances
   cases balances
 
