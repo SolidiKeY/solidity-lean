@@ -5,6 +5,10 @@ const {terminateTree}=require('./backend.cjs'),{trackChild,waitForClose,waitForG
 const digest=text=>createHash('sha256').update(text).digest('hex');
 function selection(text){const parts=text.split('::');if(parts.length!==2||!/^[$A-Za-z_][$\w]*$/.test(parts[0])||!parts[1].trim())throw Error('Use Contract::function or Contract::function(type,...)');return{contract:parts[0],function:parts[1].trim()};}
 function argumentsOf(values){if(!Array.isArray(values)||values.some(v=>typeof v!=='boolean'&&(typeof v!=='string'||! /^-?(?:[0-9]+|0x[0-9a-fA-F]+)$/.test(v))))throw Error('Arguments must be booleans or exact integer strings');return values.map(String);}
+function buildArguments(value){
+ if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(key=>!['includePaths','remappings'].includes(key)))throw Error('Custom compiler arguments accept only includePaths and remappings');
+ const result={};for(const key of ['includePaths','remappings'])if(Object.hasOwn(value,key)){const items=value[key];if(!Array.isArray(items)||items.some(item=>typeof item!=='string'||!item.trim()||item.includes('\0')))throw Error('Custom compiler arguments must be arrays of nonempty strings');result[key]=[...items];}return result;
+}
 function processJob(config,args,signal,timeoutMs){return new Promise((resolve,reject)=>{
  if(signal?.aborted){reject(Object.assign(Error('Cancelled'),{code:'CANCELLED'}));return;}
  const child=spawn(config.nodePath||process.execPath,args,{cwd:config.backendPath,shell:false,detached:process.platform!=='win32',stdio:['ignore','pipe','pipe']});child.ownedGroup=process.platform!=='win32';child.processBirth=processState(child.pid)?.birth;const closed=trackChild(child);let stdout='',stderr='',settled=false,stopping;
@@ -15,6 +19,7 @@ function processJob(config,args,signal,timeoutMs){return new Promise((resolve,re
  child.on('close',async(code,signalCode)=>{if(stopping||settled)return;try{await waitForGroup(child);finish(null,{code,signalCode,stdout,stderr});}catch(error){error.cleanupFailed=true;finish(error);}});
  });}
 async function execute(operation,config,source,input={},signal){
+ if(operation==='buildCustomArgs'){config={...config,...buildArguments(input)};operation='build';}
  if(!Number.isSafeInteger(config.timeoutMs)||config.timeoutMs<1||config.timeoutMs>3600000)throw Error('Invalid source-command timeout');
  const deadline=Date.now()+config.timeoutMs,remaining=()=>{const n=deadline-Date.now();if(n<=0)throw Object.assign(Error('Source command timed out'),{code:'TIMEOUT'});return n;};
  const text=fs.readFileSync(source,'utf8'),project=require('./project.cjs').snapshot(source,text,config,[]);
@@ -23,8 +28,8 @@ async function execute(operation,config,source,input={},signal){
  if(!require('./project.cjs').current(project,[]))throw Error('Source project changed during runtime probe');
  const root=path.resolve(config.backendPath),directory=path.join(root,'.lake/editor-source-artifacts');fs.mkdirSync(directory,{recursive:true});const scratch=fs.mkdtempSync(path.join(directory,operation+'-'));
  if(operation==='build'){
-  const artifact=path.join(scratch,'source.ast.json'),args=[path.join(root,'scripts/solc-ast.mjs'),'--source',source,'--out',artifact,'--no-wrapper','--project-root',config.projectRoot];for(const p of config.includePaths||[])args.push('--include-path',p);for(const r of config.remappings||[])args.push('--remapping',r);
-  const result=await processJob(config,args,signal,remaining());if(result.code!==0)throw Error(result.stderr||result.stdout||'Compiler build failed');const fixture=JSON.parse(fs.readFileSync(artifact,'utf8'));if((fixture.header?.sourceSha256??fixture.sourceUnits?.find(unit=>unit.name===fixture.header?.mainSource)?.sourceSha256)!==digest(text)||!require('./project.cjs').current(project,[]))throw Error('Source changed during build');const report={schemaVersion:1,operation,kind:'compiler-ast',source,sourceHash:digest(text),artifact,projectDigest:project.digest,verification:'not-run'};fs.writeFileSync(path.join(scratch,'manifest.json'),JSON.stringify(report,null,2)+'\n');return report;
+  const artifact=path.join(scratch,'source.ast.json'),args=[path.join(root,'scripts/solc-ast.mjs'),'--source',source,'--out',artifact,'--no-wrapper','--project-root',config.projectRoot];for(const p of config.includePaths||[])args.push('--include-path',path.resolve(config.projectRoot||path.dirname(source),p));for(const r of config.remappings||[])args.push('--remapping',r);
+  const result=await processJob(config,args,signal,remaining());if(result.code!==0)throw Error(result.stderr||result.stdout||'Compiler build failed');const fixture=JSON.parse(fs.readFileSync(artifact,'utf8'));if((fixture.header?.sourceSha256??fixture.sourceUnits?.find(unit=>unit.name===fixture.header?.mainSource)?.sourceSha256)!==digest(text)||!require('./project.cjs').current(project,[]))throw Error('Source changed during build');const report={schemaVersion:1,operation,kind:'compiler-ast',source,sourceHash:digest(text),artifact,projectDigest:project.digest,compilerOptions:{includePaths:[...(config.includePaths||[])],remappings:[...(config.remappings||[])]},verification:'not-run'};fs.writeFileSync(path.join(scratch,'manifest.json'),JSON.stringify(report,null,2)+'\n');return report;
  }
  if(operation!=='run'&&operation!=='test')throw Error('Unknown source command');
  if(config.includePaths?.length||config.remappings?.length)throw Error('Concrete CLI currently supports its default import resolution; custom include paths/remappings are not silently ignored');
@@ -54,7 +59,9 @@ function install(vscode,context,{settings,output,cancelVerification}){
   const uri=doc.uri.toString();documents.set(uri,doc);touch(uri);const epoch=epochs.get(uri);let version=doc.version,text=doc.getText(),job;
   try{
    if(doc.isUntitled||!await doc.save())return;version=doc.version;text=doc.getText();let input={};
-   if(operation==='run'){
+   if(operation==='buildCustomArgs'){
+    const configured=settings(doc),value=await vscode.window.showInputBox({prompt:'Compiler import options as JSON (includePaths, remappings only)',value:JSON.stringify({includePaths:configured.includePaths||[],remappings:configured.remappings||[]})});if(value===undefined)return;input=buildArguments(JSON.parse(value));
+   }else if(operation==='run'){
     const target=await vscode.window.showInputBox({prompt:'Concrete typed-model call: Contract::function(signature)'});if(target===undefined)return;selection(target);
     const args=await vscode.window.showInputBox({prompt:'Arguments as JSON booleans/integer strings',value:'[]'});if(args===undefined)return;input={target,args:JSON.parse(args)};argumentsOf(input.args);
    }else if(operation==='test'){
@@ -76,10 +83,10 @@ function install(vscode,context,{settings,output,cancelVerification}){
   }
  };
  function dispose(){if(disposal)return disposal;disposed=true;disposal=stop();return disposal;}
- const subscriptions=['build','run','test'].map(operation=>vscode.commands.registerCommand('solidityLean.'+operation,command(operation)));
+ const subscriptions=['build','run','test','buildCustomArgs'].map(operation=>vscode.commands.registerCommand('solidityLean.'+operation,command(operation)));
  if(vscode.workspace.onDidChangeTextDocument)subscriptions.push(vscode.workspace.onDidChangeTextDocument(event=>{if(event.contentChanges.length){touch(event.document.uri.toString());stop(event.document.uri.toString()).catch(recordFailure);}}));
  if(vscode.workspace.onDidCloseTextDocument)subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc=>{const uri=doc.uri.toString();touch(uri);documents.delete(uri);epochs.delete(uri);stop(uri).catch(recordFailure);}));
  if(vscode.workspace.onDidChangeConfiguration)subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{for(const [uri,doc]of documents)if(['backendPath','nodePath','timeoutMs','includePaths','remappings'].some(key=>event.affectsConfiguration('solidityLean.'+key,doc.uri))){touch(uri);stop(uri).catch(recordFailure);}}));
  subscriptions.push({dispose:()=>{dispose().catch(recordFailure);}});context.subscriptions.push(...subscriptions);return{cancel:uri=>{if(uri===undefined)for(const key of epochs.keys())touch(key);else touch(uri);const result=stop(uri);result.catch(recordFailure);return result;},dispose};
 }
-module.exports={execute,install,selection,argumentsOf,processJob};
+module.exports={execute,install,selection,argumentsOf,buildArguments,processJob};

@@ -101,7 +101,7 @@ async function launch(config,options) {
   let keybindingTask,keybindingStarted=false;
   const renderTimer=setInterval(()=>{
     if(options.suite==='commands'&&!keybindingStarted&&existsSync(join(config.dir,'keybinding-request.json'))){
-      keybindingStarted=true;keybindingTask=(async()=>{let client;try{const request=JSON.parse(readFileSync(join(config.dir,'keybinding-request.json'),'utf8'));if(request.runId!==config.runId)throw Error('Foreign keybinding request');client=await renderer.connect(debugPort);const observation=await renderer.buildKeybinding(client);writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,requestId:request.requestId,observation}));}catch(error){writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,error:error.message}));}finally{client?.close();}})();
+      keybindingStarted=true;keybindingTask=(async()=>{let client;try{const request=JSON.parse(readFileSync(join(config.dir,'keybinding-request.json'),'utf8'));if(request.runId!==config.runId)throw Error('Foreign keybinding request');client=await renderer.connect(debugPort);const menuDirectory=join(config.dir,'context-menu');mkdirSync(menuDirectory,{recursive:true});const contextMenu=await renderer.contextSubmenu(client,menuDirectory);const observation={...await renderer.buildKeybinding(client),contextMenu};writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,requestId:request.requestId,observation}));}catch(error){writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,error:error.message}));}finally{client?.close();}})();
     }
     if(options.suite==='visual'&&!phaseBusy){
       phaseBusy=true;

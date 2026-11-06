@@ -65,6 +65,23 @@ async function inputProbe(client) {
   return {started,finished:Date.now(),roundTripMs:performance.now()-clock,focusedEditor:focused.result.value,
     scope:'Arrow-key dispatch and next renderer animation frame; includes DevTools transport and does not isolate paint time.'};
 }
+async function contextSubmenu(client,directory) {
+  const point=await client.request('Runtime.evaluate',{expression:'(()=>{const e=document.querySelector(".monaco-editor.focused .view-lines")||document.querySelector(".monaco-editor .view-lines");if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left+80,y:r.top+12};})()',returnByValue:true});
+  if(!point.result.value)throw Error('No source editor for context submenu capture');
+  const menuNodes='(()=>{const roots=[document],nodes=[];for(let i=0;i<roots.length;i++){const root=roots[i];nodes.push(...root.querySelectorAll(".monaco-menu .action-label"));for(const e of root.querySelectorAll("*"))if(e.shadowRoot)roots.push(e.shadowRoot);}return nodes;})()';
+  const labels=()=>client.request('Runtime.evaluate',{expression:menuNodes+'.filter(e=>e.getClientRects().length).map(e=>e.textContent)',returnByValue:true});
+  try {
+    for(const type of ['mousePressed','mouseReleased'])await client.request('Input.dispatchMouseEvent',{type,...point.result.value,button:'right',clickCount:1});
+    const deadline=Date.now()+3000;let entry;
+    while(Date.now()<deadline){entry=await client.request('Runtime.evaluate',{expression:'(()=>{const e='+menuNodes+'.find(e=>e.textContent==="Solidity Lean"&&e.getClientRects().length);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.right-5,y:r.top+r.height/2};})()',returnByValue:true});if(entry.result.value)break;await new Promise(r=>setTimeout(r,20));}
+    if(!entry?.result.value)throw Error('Declared Solidity Lean submenu is not visible');
+    await client.request('Input.dispatchMouseEvent',{type:'mouseMoved',...entry.result.value});
+    let visible;
+    while(Date.now()<deadline){visible=(await labels()).result.value;if(visible.some(label=>label.includes('Build Compiler Artifact with Import Options')))break;await new Promise(r=>setTimeout(r,20));}
+    if(!visible?.some(label=>label.includes('Build Compiler Artifact with Import Options')))throw Error('Custom compiler action is not rendered in the submenu');
+    const rendered=await capture(client,directory,true);return{labels:visible,rendered,scope:'Actual trusted Linux Solidity context submenu; native action execution and Dafny/macOS correspondence are separate obligations.'};
+  } catch(error){try{writeFileSync(join(directory,'attempt-labels.json'),JSON.stringify((await labels()).result.value));await capture(client,directory,true);}catch{}throw error;} finally {for(let i=0;i<2;i++)for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27});}
+}
 async function buildKeybinding(client) {
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
   if(!focused.result.value)throw Error('No focused source editor for build keybinding');
@@ -73,4 +90,4 @@ async function buildKeybinding(client) {
   await client.request('Input.dispatchKeyEvent',{type:'keyUp',key:'B',code:'KeyB',windowsVirtualKeyCode:66,modifiers:10});
   return {started,finished:Date.now(),focusedEditor:true,chord:'ctrl+shift+b',scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
 }
-module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding};
+module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu};

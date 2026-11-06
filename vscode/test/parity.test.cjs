@@ -232,3 +232,7 @@ test('native build key dispatch refuses an unfocused editor (injected CDP bounda
  await assert.rejects(buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:false}};}}),/No focused source editor/);assert.equal(calls.length,1);
  calls.length=0;const value=await buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:true}};}});assert.equal(value.chord,'ctrl+shift+b');assert.deepEqual(calls.slice(1).map(c=>[c.method,c.params.type,c.params.code,c.params.modifiers]),[['Input.dispatchKeyEvent','keyDown','KeyB',10],['Input.dispatchKeyEvent','keyUp','KeyB',10]]);
 });
+
+test('context submenu observation refuses to click without a source editor (injected CDP boundary)',async()=>{
+ const {contextSubmenu}=require('../parity/renderer.cjs'),calls=[];await assert.rejects(contextSubmenu({request:async(method,params)=>{calls.push({method,params});return{result:{value:null}};}},'/unused'),/No source editor/);assert.equal(calls.length,1);assert.equal(calls[0].method,'Runtime.evaluate');
+});

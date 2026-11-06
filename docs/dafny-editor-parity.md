@@ -1088,3 +1088,48 @@ results are retained in
 All 486 obligations and frozen 270 IDs remain; no row, gate/judge, budget, theorem or Lean
 source changed. Whole original parity and mandatory proof/runtime/rendered/
 performance/adversarial/scaling/paired-judge obligations remain unfinished.
+
+### H70 first strict failure: context submenu — 2026-11-06
+
+Rebased next work onto `origin/master` at
+`5f7bb1441566aaad64a34436904afc61de762fd2`. The coordinator wrapper merge
+`d7ddbc0457b7eafed57e10ced7b0d538cef33384` is preserved under
+`refs/archive/solidity-dafny-20261105/dafny-parity-pre-5f7bb1441`.
+H70's exact first failure is `submenus:dafny.context` (partial), with inventory
+passed and 486 obligations. Only that existing row's assessment is updated;
+all 486 IDs/order and frozen 270 IDs remain unchanged. H70 routing supplied no owner
+ticket permission; no other-lane/original Lean files were edited.
+
+The supported context menu now includes F6 custom Build using the existing
+compiler's includePaths/remappings JSON contract. Defaults come from resource
+settings; per-invocation overrides do not change workspace settings. Unknown
+proof/runtime/deadline fields are rejected. Save/trust/current-source/generation/
+cancellation/disposal checks remain. Native multi-source compiler evidence and
+injected cancel/invalid/close/configuration tests are explicitly distinguished.
+Dafny accepts arbitrary CLI strings; this finite import-only interface does not
+claim that correspondence or binary/kernel execution equivalence.
+
+Finder/skeptic caught a real argv escape: a flag-looking include value activated
+compiler flags. Native failing regression retained; absolute include arguments
+now match project resolution and four flag-shaped names leave compiler settings
+unchanged. Source and review evidence is checksum-bound by
+[dafny-custom-build-evidence-manifest.json](dafny-custom-build-evidence-manifest.json),
+including its explicit REVIEWS.md member hash.
+
+Native first-row observation retains failures and diagnostic pixels: the menu
+was present inside an open shadow root while the first selector missed it.
+Traversal was corrected, without dropping visibility assertions or raising
+deadlines. A separate DevTools connection timeout is retained. Final precommit
+Linux capture shows all ten supported local actions, including F6, before
+ordinary Build succeeds. This establishes local visibility, not custom-action
+execution or full context-menu equivalence. Native macOS remains separately
+pending. Trace show/hide/copy actions, paired Dafny menus and complete action/
+lifecycle/performance correspondence plus both row judgments remain missing;
+the first row stays partial.
+
+H44 data remains VM-only in `/workspace/dafny-parity-custom-build-20261106/`,
+with updated inventory/evidence archive manifests and local inputs.env. Prior
+bundles/artifact checksums remain untouched. Exact-head receipts follow there.
+Whole original queue and all mandatory proof/runtime/rendered/performance/
+adversarial/scaling/fresh-judge gates remain unfinished; no gate, theorem,
+axiom/sorry, budget, exclusion or goal status changed. No push/merge/PR.

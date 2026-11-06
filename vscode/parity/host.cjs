@@ -111,7 +111,7 @@ async function run() {
         const requestId=require('node:crypto').randomUUID();
         writeFileSync(join(config.dir,'keybinding-request.json'),JSON.stringify({runId:config.runId,requestId,uri:doc.uri.toString(),version,sourceHash:createHash('sha256').update(source).digest('hex')}));
         await until(()=>existsSync(join(config.dir,'keybinding-reply.json')),'renderer keybinding dispatch');
-        const reply=JSON.parse(readFileSync(join(config.dir,'keybinding-reply.json'),'utf8'));assert.equal(reply.runId,config.runId);assert.equal(reply.requestId,requestId,reply.error);assert.equal(reply.observation.focusedEditor,true);
+        const reply=JSON.parse(readFileSync(join(config.dir,'keybinding-reply.json'),'utf8'));assert.equal(reply.runId,config.runId);assert.equal(reply.requestId,requestId,reply.error);assert.equal(reply.observation.focusedEditor,true);assert.ok(reply.observation.contextMenu.labels.some(label=>label.includes('Build Compiler Artifact with Import Options')),'actual context submenu contains supported custom compiler action');
         let report;
         await until(()=>{for(const event of events.filter(e=>e.kind==='output')){try{const value=JSON.parse(event.data.text);if(value.operation==='build'&&value.source===doc.uri.fsPath){report=value;return true;}}catch{}}return false;},'native compiler Build output after key dispatch');
         assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.equal(doc.isDirty,false,'Build saved the current buffer');assert.equal(readFileSync(doc.uri.fsPath,'utf8'),source);assert.equal(report.sourceHash,createHash('sha256').update(source).digest('hex'));assert.equal(report.kind,'compiler-ast');assert.equal(report.verification,'not-run');
