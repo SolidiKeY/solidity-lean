@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 0,
+ "exit": 0,
+ "elapsed_s": 50.794,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storageIndexWriteStorageRefCaptureAllComplexRecv.receiver-capture-bypassed.1",
+ "scratch_sha256": "f535332a26f9f66095006e780c124c43d37cd60aa8848db61b7d80659842eb23",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storageIndexWriteStorageRefCaptureAllComplexRecv.receiver-capture-bypassed.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -442,3 +442,3 @@\n   | storageIndexWriteStorageRefCaptureAllComplexRecv :\n-      dl{ ⟨[ nsp[e] = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; sp[ie] = path; ]⟩ }\n+      dl{ ⟨[ nsp[e] = path; ]⟩ ⇝ ⟨[ nsp[e] = path; ]⟩ }\n   | storageIndexWriteCaptureAllNonSimpleIndex :\n",
+ "mutant_sha256": "c3642434df80b6b0570965db0d9c541a379ddabcc37dbf02312829477b2f8a5a",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.assign (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝) (Src.copy path✝ hm✝))\nis not definitionally equal to the right-hand side\n  Premise.unfold\n    (Prog.cons (Stmt.assign (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝) (Src.copy path✝ hm✝)) Prog.nil) Ext.refl\n\ncase loc.field\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\nx✝² : RefTy\nx✝¹ : PrimTy\nx✝ : RefTy\nit✝ : IndexTy x✝² x✝¹ (Ty.ref x✝)\ne✝ : Val C✝ Γ✝ x✝¹\npath✝ : SPath C✝ Γ✝ (Ty.ref x✝)\nhm✝ : (Ty.ref x✝).mapFree = true\ns✝ : Name\nb✝ : SPath C✝ Γ✝ (Ty.struct s✝)\nf✝ : Name\nh✝ : C✝.fieldType s✝ f✝ = some (Ty.ref x✝²)\n⊢ Stmt.step k✝ m✝ (Stmt.assign (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝) (Src.copy path✝ hm✝)) =\n    Premise.unfold\n      (Prog.cons (Stmt.assign (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝) (Src.copy path✝ hm✝)) Prog.nil) Ext.refl",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv"
+  ],
+  "cascade": 0
+ }
+}

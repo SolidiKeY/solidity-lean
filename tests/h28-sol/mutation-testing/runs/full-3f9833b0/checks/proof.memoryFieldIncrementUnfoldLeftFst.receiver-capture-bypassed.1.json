@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 2,
+ "exit": 0,
+ "elapsed_s": 47.225,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.memoryFieldIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+ "scratch_sha256": "eea85df103f52ede95682cb1e0db7670b02f7023729062d3540f9db5ae300f43",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "memoryFieldIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -599,3 +599,3 @@\n   | memoryFieldIncrementUnfoldLeftFst :\n-      dl{ ⟨[ nmp.fld⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv.fld⊕⊕; ]⟩ }\n+      dl{ ⟨[ nmp.fld⊕⊕; ]⟩ ⇝ ⟨[ nmp.fld⊕⊕; ]⟩ }\n   | memoryIndexIncrementUnfoldLeftFst :\n",
+ "mutant_sha256": "c6057afc324ca20da7efa0500d31ecd618b872967891c48106b63fac69e72b1b",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.memoryFieldIncrementUnfoldLeftFst: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.incDec op✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝))\nis not definitionally equal to the right-hand side\n  Premise.unfold (Prog.cons (Stmt.incDec op✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝)) Prog.nil) Ext.refl\n\ncase loc\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\np✝ : PrimTy\nop✝ : IncDec\nhp✝ : p✝.isNumeric = true\nx✝ fld✝ : Name\nhfld✝ : C✝.fieldType x✝ fld✝ = some (Ty.prim p✝)\nl✝ : MLoc C✝ Γ✝ (Ty.struct x✝)\n⊢ Stmt.step k✝ m✝ (Stmt.incDec op✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝)) =\n    Premise.unfold (Prog.cons (Stmt.incDec op✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝)) Prog.nil) Ext.refl",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.memoryFieldIncrementUnfoldLeftFst` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.memoryFieldIncrementUnfoldLeftFst"
+  ],
+  "cascade": 0
+ }
+}

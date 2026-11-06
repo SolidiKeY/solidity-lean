@@ -1,0 +1,86 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 1,
+ "exit": 0,
+ "elapsed_s": 41.199,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storagePushMulAssign.overflow-mul-to-add.1",
+ "scratch_sha256": "ee52e5ad7c8fe7514911293c4e047a2c42b158fe8aa59471a6272be652c07263",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storagePushMulAssign.overflow-mul-to-add.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -630,3 +630,3 @@\n         { storage := save(storage, sp.length, sp.length + 1) }\n-        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }\n   | storagePushDivAssign :\n",
+ "mutant_sha256": "ab7c08cbf0151897ba543bb0ac21f86f542a4def7391a86d7a2b35c3155757dc",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Application type mismatch: The argument\n  se\nhas type\n  Simple C Γ p\nbut is expected to have type\n  Simple C Γ PrimTy.uint\nin the application\n  se.lower",
+   "line": 631,
+   "column": 90,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "Application type mismatch: The argument\n  sp\nhas type\n  SPath C Γ (Ty.prim p).array\nbut is expected to have type\n  SPath C Γ (Ty.ref (RefTy.array (Ty.prim PrimTy.uint)))\nin the application\n  sp.lower",
+   "line": 631,
+   "column": 69,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "Function expected at\n  Taclet\nbut this term has type\n  ?m.1\n\nNote: Expected a function because this term is being applied to the argument\n  C",
+   "line": 1197,
+   "column": 14,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "Unknown constant `Taclet`",
+   "line": 1935,
+   "column": 17,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "invalid-compilation",
+  "errors": 4
+ }
+}

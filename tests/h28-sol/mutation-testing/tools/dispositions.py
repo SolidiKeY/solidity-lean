@@ -31,6 +31,17 @@ def main(manifest_path, run_dir):
     by_ctor = {}
     for m in manifest["mutants"]:
         by_ctor.setdefault(m["constructor"], []).append(m["id"])
+    root = lane.parents[2]
+    texts = {}
+    def mutated(t, old, new):
+        if t not in texts:
+            texts[t] = (root / t).read_text()
+        return t, texts[t].replace(old, new, 1)
+    semantic_of = {}
+    for c in manifest.get("semantic_cases", []):
+        if c["kind"] in ("mutant", "negative-control", "known-kill"):
+            semantic_of[mutated(c["target"], c["old"], c["new"])] = (c["id"], summary["semantic"][c["id"]]["outcome"])
+    sem = {m["id"]: semantic_of.get(mutated(m["target"], m["old"], m["new"])) for m in manifest["mutants"]}
     rows = []
     for c in manifest["constructors"]:
         ids = [i for i in by_ctor.get(c["id"], []) if not i.startswith(("pilot.", "control."))]
@@ -42,7 +53,8 @@ def main(manifest_path, run_dir):
             disp = "no-family-site"
         rows.append({"constructor": c["id"], "line": c["line"], "file": c["file"],
                      "heuristic_families": draft.get(c["id"], []), "disposition": disp,
-                     "mutants": {i: summary["mutants"][i]["outcome"] for i in ids}})
+                     "mutants": {i: summary["mutants"][i]["outcome"] for i in ids},
+                     "semantic": {i: {"case": sem[i][0], "outcome": sem[i][1]} for i in ids if sem.get(i)}})
     extra = {m["id"]: summary["mutants"][m["id"]]["outcome"] for m in manifest["mutants"]
              if m["id"].startswith(("pilot.", "control.")) or m["constructor"].startswith("Tms.")}
     out = {"manifest_sha256": summary["manifest_sha256"], "head": summary["head"],
@@ -51,7 +63,12 @@ def main(manifest_path, run_dir):
     counts = {}
     for r in rows:
         counts[r["disposition"]] = counts.get(r["disposition"], 0) + 1
+    linked = {i: v for r in rows for i, v in r["semantic"].items()}
+    out["census_mutants_with_semantic_witness"] = linked
+    (Path(run_dir) / "dispositions.json").write_text(json.dumps(out, indent=1) + "\n")
     print("constructors:", len(rows), counts)
+    print("census mutants with a semantic case:", len(linked),
+          {o: sum(v["outcome"] == o for v in linked.values()) for o in {v["outcome"] for v in linked.values()}})
     fam = summary["proof_oracle"]["by_family"]
     keys = sorted({k for v in fam.values() for k in v})
     print("| family | " + " | ".join(keys) + " |")

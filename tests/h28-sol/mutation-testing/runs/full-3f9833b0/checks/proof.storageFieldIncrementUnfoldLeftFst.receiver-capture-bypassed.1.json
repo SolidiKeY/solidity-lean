@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 0,
+ "exit": 0,
+ "elapsed_s": 44.401,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storageFieldIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+ "scratch_sha256": "6927a32ed881a2156c36ce812e60ff147adc54c333e8ebdebeadd53265efbd2d",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storageFieldIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -595,3 +595,3 @@\n   | storageFieldIncrementUnfoldLeftFst :\n-      dl{ ⟨[ nsp.fld⊕⊕; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld⊕⊕; ]⟩ }\n+      dl{ ⟨[ nsp.fld⊕⊕; ]⟩ ⇝ ⟨[ nsp.fld⊕⊕; ]⟩ }\n   | storageIndexIncrementUnfoldLeftFst :\n",
+ "mutant_sha256": "d649a4933923d9232550f9c9ca3452fb6fd9c33f442353b67ff29e9ee9825619",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storageFieldIncrementUnfoldLeftFst: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.incDec op✝ hp✝ (OpLoc.field (SPath.loc (Loc.field b✝ f✝ h✝)) fld✝ hfld✝))\nis not definitionally equal to the right-hand side\n  Premise.unfold (Prog.cons (Stmt.incDec op✝ hp✝ (OpLoc.field (SPath.loc (Loc.field b✝ f✝ h✝)) fld✝ hfld✝)) Prog.nil)\n    Ext.refl\n\ncase loc.field\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\np✝ : PrimTy\nop✝ : IncDec\nhp✝ : p✝.isNumeric = true\nx✝ fld✝ : Name\nhfld✝ : C✝.fieldType x✝ fld✝ = some (Ty.prim p✝)\ns✝ : Name\nb✝ : SPath C✝ Γ✝ (Ty.struct s✝)\nf✝ : Name\nh✝ : C✝.fieldType s✝ f✝ = some (Ty.struct x✝)\n⊢ Stmt.step k✝ m✝ (Stmt.incDec op✝ hp✝ (OpLoc.field (SPath.loc (Loc.field b✝ f✝ h✝)) fld✝ hfld✝)) =\n    Premise.unfold (Prog.cons (Stmt.incDec op✝ hp✝ (OpLoc.field (SPath.loc (Loc.field b✝ f✝ h✝)) fld✝ hfld✝)) Prog.nil)\n      Ext.refl",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storageFieldIncrementUnfoldLeftFst` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storageFieldIncrementUnfoldLeftFst"
+  ],
+  "cascade": 0
+ }
+}

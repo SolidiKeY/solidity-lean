@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 1,
+ "exit": 0,
+ "elapsed_s": 46.436,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.memoryFieldOpAssignUnfoldLeftFst.receiver-capture-bypassed.1",
+ "scratch_sha256": "01fdbd1a4ccaadd590f3b37ba9a76dcc3cd47630a9b6e58d073cf0ff022ae2fa",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "memoryFieldOpAssignUnfoldLeftFst.receiver-capture-bypassed.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -577,3 +577,3 @@\n   | memoryFieldOpAssignUnfoldLeftFst :\n-      dl{ ⟨[ nmp.fld ⊕= se; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv.fld ⊕= se; ]⟩ }\n+      dl{ ⟨[ nmp.fld ⊕= se; ]⟩ ⇝ ⟨[ nmp.fld ⊕= se; ]⟩ }\n   | memoryIndexOpAssignUnfoldLeftFst :\n",
+ "mutant_sha256": "437fb630f3c69f429f50689a9e0ab8697f6c03ba74399c4b00d0bb17b5c6dba9",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.memoryFieldOpAssignUnfoldLeftFst: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.opAssign op✝ hop✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝) (Val.simple se✝))\nis not definitionally equal to the right-hand side\n  Premise.unfold\n    (Prog.cons (Stmt.opAssign op✝ hop✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝) (Val.simple se✝)) Prog.nil) Ext.refl\n\ncase loc\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\np✝ : PrimTy\nop✝ : BinOp\nhop✝ : op✝.hasCompoundAssign = true\nhp✝ : p✝.isNumeric = true\nx✝ fld✝ : Name\nhfld✝ : C✝.fieldType x✝ fld✝ = some (Ty.prim p✝)\nse✝ : Simple C✝ Γ✝ p✝\nl✝ : MLoc C✝ Γ✝ (Ty.struct x✝)\n⊢ Stmt.step k✝ m✝ (Stmt.opAssign op✝ hop✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝) (Val.simple se✝)) =\n    Premise.unfold\n      (Prog.cons (Stmt.opAssign op✝ hop✝ hp✝ (OpLoc.mfield (MPath.loc l✝) fld✝ hfld✝) (Val.simple se✝)) Prog.nil) Ext.refl",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.memoryFieldOpAssignUnfoldLeftFst` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.memoryFieldOpAssignUnfoldLeftFst"
+  ],
+  "cascade": 0
+ }
+}

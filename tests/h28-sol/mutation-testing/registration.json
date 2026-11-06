@@ -159,6 +159,33 @@
       ]
     },
     {
+      "path": "tests/h28-sol/mutation-testing/oracles/IfElseBaseline.lean",
+      "namespace": "H28.IfElseBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/IfElsePolarityKill.lean",
+      "namespace": "H28.IfElsePolarityKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/IfThenPolarityKill.lean",
+      "namespace": "H28.IfThenPolarityKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
       "path": "tests/h28-sol/mutation-testing/oracles/OverflowBaseline.lean",
       "namespace": "H28.OverflowBaseline",
       "kind": "standalone per-file checked oracle",
@@ -278,6 +305,78 @@
     {
       "path": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
       "namespace": "H28.RevertDiamondKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/RootDeleteBaseline.lean",
+      "namespace": "H28.RootDeleteBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/RootDeleteSkippedKill.lean",
+      "namespace": "H28.RootDeleteSkippedKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/RootIncBaseline.lean",
+      "namespace": "H28.RootIncBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/RootIncSkipKill.lean",
+      "namespace": "H28.RootIncSkipKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/TransferBaseline.lean",
+      "namespace": "H28.TransferBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/TransferDiamondBaseline.lean",
+      "namespace": "H28.TransferDiamondBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/TransferDiamondTrueKill.lean",
+      "namespace": "H28.TransferDiamondTrueKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/TransferZeroKill.lean",
+      "namespace": "H28.TransferZeroKill",
       "kind": "standalone per-file checked oracle",
       "imports": [
         "Solidity.Calculus.Rules",

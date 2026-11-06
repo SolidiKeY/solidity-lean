@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 0,
+ "exit": 0,
+ "elapsed_s": 39.519,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storageIndexArrayDelete.delete-dropped.1",
+ "scratch_sha256": "6e349325edd7f22f6450932f272338ffacd60a9a7fff4793681f78cb3da3f72b",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storageIndexArrayDelete.delete-dropped.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -523,3 +523,3 @@\n   | storageIndexArrayDelete :\n-      dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := delAt(storage, arr[ie]) } ⟨[ ]⟩ }\n+      dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := storage } ⟨[ ]⟩ }\n   -- Lengths: KeY reads `.length` as the member `length` (`size`) ----------\n",
+ "mutant_sha256": "f143412200f27af7f5e685ca30e7af540637ef107fa1579147a1571392c138fa",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storageIndexArrayDelete: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.delete (Loc.index (IndexTy.arr ak✝) (SPath.alias i✝) (Val.simple ie✝)))\nis not definitionally equal to the right-hand side\n  Premise.update (Upd.nil.snoc (UpdElem.storage Tms.STerm.storage))\n\ncase alias\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\nx✝¹ : RefTy\nx✝ : Ty\nak✝ : ArrTy x✝¹ x✝\nie✝ : Simple C✝ Γ✝ PrimTy.uint\ni✝ : Idx Γ✝ (LTy.alias x✝¹)\n⊢ Stmt.step k✝ m✝ (Stmt.delete (Loc.index (IndexTy.arr ak✝) (SPath.alias i✝) (Val.simple ie✝))) =\n    Premise.update (Upd.nil.snoc (UpdElem.storage Tms.STerm.storage))",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storageIndexArrayDelete` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storageIndexArrayDelete"
+  ],
+  "cascade": 0
+ }
+}

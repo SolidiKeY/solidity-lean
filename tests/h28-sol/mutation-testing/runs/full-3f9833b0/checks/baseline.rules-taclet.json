@@ -1,0 +1,55 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 2,
+ "exit": 0,
+ "elapsed_s": 140.961,
+ "stderr": "",
+ "status": "complete",
+ "name": "baseline.rules-taclet",
+ "scratch_sha256": "19069fe73d99535ba72bf77f1ac25ab22a84ad0138655bca007b7f457e518a66",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   2119
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "baseline",
+ "entry": "rules-taclet",
+ "diagnostics": [],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   2119
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "pass",
+  "problems": 0
+ }
+}

@@ -44,6 +44,22 @@ def main():
                      "witness": "tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean",
                      "witness_sha256": sha("tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean"),
                      "from_pilot": None, "note": "separate callback table (H28 queue item 4)"})
+    # Census mutants with their own witnesses (Claude VM, 2026-11-05).
+    census = {m["id"]: m for m in data["mutants"]}
+    for cid, fam, base, kill in [
+            ("ifElseSplit.guard-true-to-false.1", "guard-polarity", "IfElseBaseline", "IfThenPolarityKill"),
+            ("ifElseSplit.guard-false-to-true.1", "guard-polarity", "IfElseBaseline", "IfElsePolarityKill"),
+            ("transferNoCallbackBox.payment-amount-zeroed.1", "rollback-payment", "TransferBaseline", "TransferZeroKill"),
+            ("transferDiamond.close-false-to-true.1", "rollback-payment", "TransferDiamondBaseline", "TransferDiamondTrueKill"),
+            ("storageRootDelete.delete-dropped.1", "pop-delete", "RootDeleteBaseline", "RootDeleteSkippedKill"),
+            ("storageRootIncrement.overflow-step-dropped.1", "overflow", "RootIncBaseline", "RootIncSkipKill")]:
+        m = census[cid]
+        assert m["family"] == fam
+        o, w = (f"tests/h28-sol/mutation-testing/oracles/{n}.lean" for n in (base, kill))
+        semantic.append({"id": "census." + cid, "kind": "mutant", "family": fam, "constructor": m["constructor"],
+                         "target": m["target"], "old": m["old"], "new": m["new"], "oracle": o,
+                         "oracle_sha256": sha(o), "witness": w, "witness_sha256": sha(w),
+                         "from_pilot": None, "census_id": cid})
     guard = next(c for c in semantic if c["id"] == "guard.require-success-false")
     pop = next(c for c in semantic if c["id"] == "pop.empty-skipped")
     # Runner self-test: a real witness of another constructor must never kill.
@@ -80,7 +96,8 @@ def main():
     pilots = [{"id": "pilot." + c["id"], "constructor": c["constructor"], "operator": "pilot-hand-selected",
                "family": c["family"], "target": c["target"], "old": c["old"], "new": c["new"],
                "affected": [c["constructor"]] if c["constructor"].split(".")[0] in ("Taclet", "LeanTaclet", "CallbackTaclet") else ["*"]}
-              for c in semantic if c["kind"] in ("mutant", "negative-control", "known-kill", "equivalent-control")]
+              for c in semantic if c["kind"] in ("mutant", "negative-control", "known-kill", "equivalent-control")
+              and not c.get("census_id")]
     data["mutants"] = data["mutants"] + pilots + controls
     out = LANE / "manifests/h28-full.json"
     out.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")

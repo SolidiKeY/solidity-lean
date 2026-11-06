@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 2,
+ "exit": 0,
+ "elapsed_s": 48.462,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storageFieldDelete.delete-dropped.1",
+ "scratch_sha256": "4d4369ede1cc1ac45ce1c39e2a89bd2fad86f366d2ca73d4e62f5d2e12a51287",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storageFieldDelete.delete-dropped.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -519,3 +519,3 @@\n   | storageFieldDelete :\n-      dl{ ⟨[ delete sp.fld; ]⟩ ⇝ { storage := delAt(storage, sp.fld) } ⟨[ ]⟩ }\n+      dl{ ⟨[ delete sp.fld; ]⟩ ⇝ { storage := storage } ⟨[ ]⟩ }\n   | storageIndexDelete :\n",
+ "mutant_sha256": "0ec137c98de025cf7ad8b7ccdad13d33bdf917afd7985356dbbaa76f9fbc9625",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storageFieldDelete: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.delete (Loc.field (SPath.alias i✝) fld✝ hfld✝))\nis not definitionally equal to the right-hand side\n  Premise.update (Upd.nil.snoc (UpdElem.storage Tms.STerm.storage))\n\ncase alias\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\nx✝¹ fld✝ : Name\nx✝ : Ty\nhfld✝ : C✝.fieldType x✝¹ fld✝ = some x✝\ni✝ : Idx Γ✝ (LTy.alias (RefTy.struct x✝¹))\n⊢ Stmt.step k✝ m✝ (Stmt.delete (Loc.field (SPath.alias i✝) fld✝ hfld✝)) =\n    Premise.update (Upd.nil.snoc (UpdElem.storage Tms.STerm.storage))",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storageFieldDelete` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storageFieldDelete"
+  ],
+  "cascade": 0
+ }
+}

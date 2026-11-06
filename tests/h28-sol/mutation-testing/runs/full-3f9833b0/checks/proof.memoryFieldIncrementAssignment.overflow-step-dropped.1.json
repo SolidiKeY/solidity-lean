@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 2,
+ "exit": 0,
+ "elapsed_s": 48.662,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.memoryFieldIncrementAssignment.overflow-step-dropped.1",
+ "scratch_sha256": "019708aa5fdc3999b1e8b567a5542d4194ca8f72defe78e935755745e8cc6974",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "memoryFieldIncrementAssignment.overflow-step-dropped.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -614,3 +614,3 @@\n       dl{ ⟨[ v = mv.fld⊕⊕; ]⟩ ⇝\n-          { memory := write(memory, mv.fld, mv.fld ± 1) ‖ v := mv.fld⊕⊕ } ⟨[ ]⟩ }\n+          { memory := write(memory, mv.fld, mv.fld) ‖ v := mv.fld⊕⊕ } ⟨[ ]⟩ }\n   | memoryIndexArrayIncrementAssignment :\n",
+ "mutant_sha256": "3df73ab375f4f9eaec0437f7e284afcf33b880c67b3c8cf7d8b093d217906be9",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.memoryFieldIncrementAssignment: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.assignIncDec v✝ op✝ hp✝ (OpLoc.mfield (MPath.var mv✝ hmv✝) fld✝ hfld✝) hs✝)\nis not definitionally equal to the right-hand side\n  Premise.update\n    ((Upd.nil.snoc\n          (UpdElem.memory\n            (Tms.MTerm.write Tms.MTerm.memory (Tms.MAddr.field (Tms.ITerm.pv mv✝) fld✝ hfld✝)\n              (Tms.MValT.val (Tms.Term.read Tms.MTerm.memory (Tms.MAddr.field (Tms.ITerm.pv mv✝) fld✝ hfld✝)))))).snoc\n      (UpdElem.local v✝\n        (Rhs.val\n          (Tms.Term.bumped op✝ hp✝ (Tms.Term.read Tms.MTerm.memory (Tms.MAddr.field (Tms.ITerm.pv mv✝) fld✝ hfld✝))))))\n\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\np✝ : PrimTy\nv✝ : Idx Γ✝ (LTy.val p✝)\nop✝ : IncDec\nhp✝ : p✝.isNumeric = true\nx✝ : Name\nmv✝ : Idx Γ✝ (LTy.mem (RefTy.struct x✝))\nhmv✝ : (Ty.ref (RefTy.struct x✝)).mapFree = true\nfld✝ : Name\nhfld✝ : C✝.fieldType x✝ fld✝ = some (Ty.prim p✝)\nhs✝ : (OpLoc.mfield (MPath.var mv✝ hmv✝) fld✝ hfld✝).recvSimple = true\n⊢ Stmt.step k✝ m✝ (Stmt.assignIncDec v✝ op✝ hp✝ (OpLoc.mfield (MPath.var mv✝ hmv✝) fld✝ hfld✝) hs✝) =\n    Premise.update\n      ((Upd.nil.snoc\n            (UpdElem.memory\n              (Tms.MTerm.write Tms.MTerm.memory (Tms.MAddr.field (Tms.ITerm.pv mv✝) fld✝ hfld✝)\n                (Tms.MValT.val (Tms.Term.read Tms.MTerm.memory (Tms.MAddr.field (Tms.ITerm.pv mv✝) fld✝ hfld✝)))))).snoc\n        (UpdElem.local v✝\n          (Rhs.val\n            (Tms.Term.bumped op✝ hp✝ (Tms.Term.read Tms.MTerm.memory (Tms.MAddr.field (Tms.ITerm.pv mv✝) fld✝ hfld✝))))))",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.memoryFieldIncrementAssignment` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.memoryFieldIncrementAssignment"
+  ],
+  "cascade": 0
+ }
+}

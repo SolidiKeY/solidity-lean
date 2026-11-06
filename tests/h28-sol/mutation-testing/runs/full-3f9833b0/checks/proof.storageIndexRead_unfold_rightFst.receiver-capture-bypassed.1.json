@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 0,
+ "exit": 0,
+ "elapsed_s": 42.116,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storageIndexRead_unfold_rightFst.receiver-capture-bypassed.1",
+ "scratch_sha256": "b2f1c79ad4da7a6815528e62fb7a9e592064393892ebd0e76436f3ba2037fdcf",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storageIndexRead_unfold_rightFst.receiver-capture-bypassed.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -427,3 +427,3 @@\n   | storageIndexRead_unfold_rightFst :\n-      dl{ ⟨[ lhs = nsp[e]; ]⟩ ⇝ ⟨[ T storage sp = nsp; lhs = sp[e]; ]⟩ }\n+      dl{ ⟨[ lhs = nsp[e]; ]⟩ ⇝ ⟨[ lhs = nsp[e]; ]⟩ }\n   | storageIndexRead_unfold_rightSndIndex :\n",
+ "mutant_sha256": "e9296fd430e0f1ccdf9e8535c9cdb416a6b194a33b2dd5e7cc8351fa27468eeb",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storageIndexRead_unfold_rightFst: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ ((SHole.local i✝).fill (SPath.loc (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝)))\nis not definitionally equal to the right-hand side\n  Premise.unfold\n    (Prog.cons ((SHole.local i✝).fill (SPath.loc (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝))) Prog.nil)\n    Ext.refl\n\ncase local.loc.field\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\nx✝¹ : RefTy\nx✝ : PrimTy\ne✝ : Val C✝ Γ✝ x✝\np✝ : PrimTy\ni✝ : Idx Γ✝ (LTy.val p✝)\nit✝ : IndexTy x✝¹ x✝ (Ty.prim p✝)\ns✝ : Name\nb✝ : SPath C✝ Γ✝ (Ty.struct s✝)\nf✝ : Name\nh✝ : C✝.fieldType s✝ f✝ = some (Ty.ref x✝¹)\n⊢ Stmt.step k✝ m✝ ((SHole.local i✝).fill (SPath.loc (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝))) =\n    Premise.unfold\n      (Prog.cons ((SHole.local i✝).fill (SPath.loc (Loc.index it✝ (SPath.loc (Loc.field b✝ f✝ h✝)) e✝))) Prog.nil)\n      Ext.refl",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storageIndexRead_unfold_rightFst` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storageIndexRead_unfold_rightFst"
+  ],
+  "cascade": 0
+ }
+}

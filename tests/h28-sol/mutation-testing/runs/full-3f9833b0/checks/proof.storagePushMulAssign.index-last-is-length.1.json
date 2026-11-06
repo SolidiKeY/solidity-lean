@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 2,
+ "exit": 0,
+ "elapsed_s": 50.891,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storagePushMulAssign.index-last-is-length.1",
+ "scratch_sha256": "fab69dc10018d38daaeba5c007b4dccd5c6a9fae85a11711e92628c8633bdae6",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storagePushMulAssign.index-last-is-length.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -630,3 +630,3 @@\n         { storage := save(storage, sp.length, sp.length + 1) }\n-        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n+        { storage := save(storage, sp[sp.length], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n   | storagePushDivAssign :\n",
+ "mutant_sha256": "4dc570039991040318b96d15c72a00342281c93ae60611c7f7f30bebed274ca4",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storagePushMulAssign: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.pushOpAssign BinOp.mul ⋯ hp✝ (SPath.alias i✝) (Val.simple se✝))\nis not definitionally equal to the right-hand side\n  Premise.updates\n    (Upd.nil.snoc (UpdElem.storage (Tms.STerm.pushSlot Tms.STerm.storage (SPath.alias i✝).lower (Ty.prim p✝) ⋯)))\n    (Upd.nil.snoc\n      (UpdElem.storage\n        (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.next (SPath.alias i✝).lower)\n          (Tms.SValT.val\n            (Tms.Term.binopC BinOp.mul ⋯ hp✝\n              (Tms.Term.find Tms.STerm.storage\n                (Tms.PTerm.at (IndexTy.arr ArrTy.dyn) (SPath.alias i✝).lower\n                  (Tms.Term.binop BinOp.sub PrimTy.uint (Tms.Term.lenH hlen✝ Tms.STerm.storage (SPath.alias i✝).lower)\n                    (Tms.Term.nat 1 ⋯) ⋯)))\n              se✝.lower)))))\n\ncase alias\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\np✝ : PrimTy\nhp✝ : p✝.isNumeric = true\nse✝ : Simple C✝ Γ✝ p✝\nhlen✝ : PrimTy.uint = PrimTy.uint\ni✝ : Idx Γ✝ (LTy.alias (RefTy.array (Ty.prim p✝)))\n⊢ Stmt.step k✝ m✝ (Stmt.pushOpAssign BinOp.mul ⋯ hp✝ (SPath.alias i✝) (Val.simple se✝)) =\n    Premise.updates\n      (Upd.nil.snoc (UpdElem.storage (Tms.STerm.pushSlot Tms.STerm.storage (SPath.alias i✝).lower (Ty.prim p✝) ⋯)))\n      (Upd.nil.snoc\n        (UpdElem.storage\n          (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.next (SPath.alias i✝).lower)\n            (Tms.SValT.val\n              (Tms.Term.binopC BinOp.mul ⋯ hp✝\n                (Tms.Term.find Tms.STerm.storage\n                  (Tms.PTerm.at (IndexTy.arr ArrTy.dyn) (SPath.alias i✝).lower\n                    (Tms.Term.binop BinOp.sub PrimTy.uint (Tms.Term.lenH hlen✝ Tms.STerm.storage (SPath.alias i✝).lower)\n                      (Tms.Term.nat 1 ⋯) ⋯)))\n                se✝.lower)))))",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storagePushMulAssign` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storagePushMulAssign"
+  ],
+  "cascade": 0
+ }
+}

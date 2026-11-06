@@ -1,0 +1,79 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 1,
+ "exit": 0,
+ "elapsed_s": 31.549,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storagePushDivAssign.division-zero-guard-negated.1",
+ "scratch_sha256": "4d00bca2b660587c7ed9c2dd15cc5b18f2f39f3c269b124dcb55d3780335f1a3",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storagePushDivAssign.division-zero-guard-negated.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -633,3 +633,3 @@\n       dl{ ⟨[ sp.push() /= se; ]⟩ ⇝\n-        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n+        if se == 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n           { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
+ "mutant_sha256": "56db91ffa3ed81dd6028edb0f796215a09b44c214e4be600519c15f0cf3cea48",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "no scoped reading of this formula yet",
+   "line": 634,
+   "column": 12,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "Function expected at\n  Taclet\nbut this term has type\n  ?m.1\n\nNote: Expected a function because this term is being applied to the argument\n  C",
+   "line": 1197,
+   "column": 14,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "Unknown constant `Taclet`",
+   "line": 1935,
+   "column": 17,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "invalid-compilation",
+  "errors": 3
+ }
+}

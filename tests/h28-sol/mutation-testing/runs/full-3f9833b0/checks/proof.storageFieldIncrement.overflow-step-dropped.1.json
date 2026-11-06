@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 1,
+ "exit": 0,
+ "elapsed_s": 43.865,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storageFieldIncrement.overflow-step-dropped.1",
+ "scratch_sha256": "d747f93e2aae7683ea1715870c60b840384f1b273cdf8a36f338ec20b3915d69",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storageFieldIncrement.overflow-step-dropped.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -587,3 +587,3 @@\n   | storageFieldIncrement :\n-      dl{ ⟨[ sp.fld⊕⊕; ]⟩ ⇝ { storage := save(storage, sp.fld, sp.fld ± 1) } ⟨[ ]⟩ }\n+      dl{ ⟨[ sp.fld⊕⊕; ]⟩ ⇝ { storage := save(storage, sp.fld, sp.fld) } ⟨[ ]⟩ }\n   | storageIndexIncrement :\n",
+ "mutant_sha256": "cd5694a3016e51675a2064d548ad45e50e70d23e41c818332646a10b47467a00",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storageFieldIncrement: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.incDec op✝ hp✝ (OpLoc.field (SPath.alias i✝) fld✝ hfld✝))\nis not definitionally equal to the right-hand side\n  Premise.update\n    (Upd.nil.snoc\n      (UpdElem.storage\n        (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.field (SPath.alias i✝).lower fld✝ hfld✝)\n          (Tms.SValT.val (Tms.Term.find Tms.STerm.storage (Tms.PTerm.field (SPath.alias i✝).lower fld✝ hfld✝))))))\n\ncase alias\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\np✝ : PrimTy\nop✝ : IncDec\nhp✝ : p✝.isNumeric = true\nx✝ fld✝ : Name\nhfld✝ : C✝.fieldType x✝ fld✝ = some (Ty.prim p✝)\ni✝ : Idx Γ✝ (LTy.alias (RefTy.struct x✝))\n⊢ Stmt.step k✝ m✝ (Stmt.incDec op✝ hp✝ (OpLoc.field (SPath.alias i✝) fld✝ hfld✝)) =\n    Premise.update\n      (Upd.nil.snoc\n        (UpdElem.storage\n          (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.field (SPath.alias i✝).lower fld✝ hfld✝)\n            (Tms.SValT.val (Tms.Term.find Tms.STerm.storage (Tms.PTerm.field (SPath.alias i✝).lower fld✝ hfld✝))))))",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storageFieldIncrement` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storageFieldIncrement"
+  ],
+  "cascade": 0
+ }
+}

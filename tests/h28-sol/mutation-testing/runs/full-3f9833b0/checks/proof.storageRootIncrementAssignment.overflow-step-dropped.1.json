@@ -1,0 +1,76 @@
+{
+ "command": [
+  "scripts/coord-tools/lean-mcp",
+  "call",
+  "lean_diagnostic_messages",
+  {
+   "file_path": "<scratch>",
+   "interactive": false
+  }
+ ],
+ "bridge": 1,
+ "exit": 0,
+ "elapsed_s": 45.886,
+ "stderr": "",
+ "status": "complete",
+ "name": "proof.storageRootIncrementAssignment.overflow-step-dropped.1",
+ "scratch_sha256": "4512d38b6d8cfebbc052503dbbe5591b15c77d441d5b63692130e716b5781c27",
+ "regions": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "phase": "proof",
+ "entry": "storageRootIncrementAssignment.overflow-step-dropped.1",
+ "diff": "--- a/Solidity/Calculus/Rules.lean\n+++ b/Solidity/Calculus/Rules.lean\n@@ -605,3 +605,3 @@\n   | storageRootIncrementAssignment :\n-      dl{ ⟨[ v = gsp⊕⊕; ]⟩ ⇝ { storage := save(storage, gsp, gsp ± 1) ‖ v := gsp⊕⊕ } ⟨[ ]⟩ }\n+      dl{ ⟨[ v = gsp⊕⊕; ]⟩ ⇝ { storage := save(storage, gsp, gsp) ‖ v := gsp⊕⊕ } ⟨[ ]⟩ }\n   | storageFieldIncrementAssignment :\n",
+ "mutant_sha256": "7d72237b8e753c339c56161fb2c99843dab02eba25a319dfb02a56f93d20ae8b",
+ "diagnostics": [
+  {
+   "severity": "error",
+   "message": "Solidity.Taclet.storageRootIncrementAssignment: Tactic `rfl` failed: The left-hand side\n  Stmt.step k✝ m✝ (Stmt.assignIncDec v✝ op✝ hp✝ (OpLoc.root gsp✝ hgsp✝) hs✝)\nis not definitionally equal to the right-hand side\n  Premise.update\n    ((Upd.nil.snoc\n          (UpdElem.storage\n            (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.root gsp✝ hgsp✝)\n              (Tms.SValT.val (Tms.Term.find Tms.STerm.storage (Tms.PTerm.root gsp✝ hgsp✝)))))).snoc\n      (UpdElem.local v✝\n        (Rhs.val (Tms.Term.bumped op✝ hp✝ (Tms.Term.find Tms.STerm.storage (Tms.PTerm.root gsp✝ hgsp✝))))))\n\nC✝ : Contract\nk✝ : Nat\nm✝ : Modality\nΓ✝ : Ctx\np✝ : PrimTy\nv✝ : Idx Γ✝ (LTy.val p✝)\nop✝ : IncDec\nhp✝ : p✝.isNumeric = true\ngsp✝ : Name\nhgsp✝ : C✝.rootType gsp✝ = some (Ty.prim p✝)\nhs✝ : (OpLoc.root gsp✝ hgsp✝).recvSimple = true\n⊢ Stmt.step k✝ m✝ (Stmt.assignIncDec v✝ op✝ hp✝ (OpLoc.root gsp✝ hgsp✝) hs✝) =\n    Premise.update\n      ((Upd.nil.snoc\n            (UpdElem.storage\n              (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.root gsp✝ hgsp✝)\n                (Tms.SValT.val (Tms.Term.find Tms.STerm.storage (Tms.PTerm.root gsp✝ hgsp✝)))))).snoc\n        (UpdElem.local v✝\n          (Rhs.val (Tms.Term.bumped op✝ hp✝ (Tms.Term.find Tms.STerm.storage (Tms.PTerm.root gsp✝ hgsp✝))))))",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  },
+  {
+   "severity": "error",
+   "message": "no proof that `Solidity.Taclet.storageRootIncrementAssignment` is `Stmt.step`'s rule",
+   "line": 1935,
+   "column": 1,
+   "lean_tags": null
+  }
+ ],
+ "regions_classified": {
+  "target": [
+   4,
+   1201
+  ],
+  "oracle": [
+   1201,
+   1938
+  ],
+  "imports": [
+   "Solidity.Calculus.Step",
+   "Solidity.Calculus.RuleSyntax",
+   "Solidity.Calculus.RuleKit"
+  ]
+ },
+ "result": {
+  "outcome": "detected",
+  "errors": 2,
+  "attributed": [
+   "Taclet.storageRootIncrementAssignment"
+  ],
+  "cascade": 0
+ }
+}
