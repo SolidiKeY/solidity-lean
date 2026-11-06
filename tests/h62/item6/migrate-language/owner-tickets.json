@@ -1,0 +1,55 @@
+[
+  {
+    "id": "B-MIGRATE-HASH",
+    "type": "DEPENDENCY_MIGRATION_REQUIRED",
+    "owner": "solidity-h62-6-20261106/migrate-hash",
+    "files": [
+      "Solidity/Hash/CollisionBound.lean"
+    ],
+    "failure_sites": [
+      407,
+      660,
+      680
+    ],
+    "evidence": "/workspace/migrate-language-evidence/full-new/run-lean.log",
+    "impact": "Full repository gate and P8/ForkAgreement consumer closures fail before acceptance.",
+    "requested_action": "Owner supplies statement/budget-preserving isolated migration overlay; coordinator relays it. No edit outside Language authorized."
+  },
+  {
+    "id": "B-MIGRATE-SOURCE-CTOR",
+    "type": "DEPENDENCY_MIGRATION_REQUIRED",
+    "owner": "solidity-h62-6-20261106/migrate-source",
+    "files": [
+      "Solidity/Source/Ctor.lean"
+    ],
+    "failure_sites": [
+      641,
+      715
+    ],
+    "evidence": "/workspace/migrate-language-evidence/affected-new/Solidity_Frontend_Admission_RootObservations.log",
+    "impact": "RootObservations and Standalone consumers cannot finish;641 reaches unchanged200000-heartbeat budget,715 dependent elimination fails.",
+    "requested_action": "Source owner repairs proofs without raising budget or changing frozen statements; coordinator relays reviewed overlay."
+  },
+  {
+    "id": "B-GENERATED-API",
+    "type": "ROOT_GATE_COMPILER_API_REVIEW_REQUIRED",
+    "owner": "solidity-h62-6-20261106/migrate-root-gate",
+    "files": [
+      "Solidity/Language/Features.lean",
+      "Solidity/Language/FixedPoint.lean",
+      "Solidity/Language/FixedPoint/Literals.lean",
+      "Solidity/Language/FixedPoint/Storage.lean"
+    ],
+    "evidence": "/workspace/migrate-language-evidence/frozen-comparison.json",
+    "impact": "345 source-declared types and279 explicit constructor/field types identical; compiler generated15removals33additions29typechanges include6public toCtorIdx removals and changed noConfusion types.",
+    "requested_action": "Root gate reviews generated public API drift and downstream closure without inferring any waiver of frozen statements. No direct Language helper caller found in scanned repository."
+  },
+  {
+    "id": "B-RSS-REGRESSION",
+    "type": "PER_MODULE_MEMORY_REGRESSION_ESCALATION",
+    "owner": "solidity-h62-6-20261106/migrate-root-gate",
+    "evidence": "/workspace/migrate-language-evidence/timing-comparison.json",
+    "impact": "Directory peak sampled RSS decreases10.67%, but7 individual modules show increased RSS; all wall times decrease and caps remain unchanged.",
+    "requested_action": "Coordinator/root gate reviews per-module RSS increases under the fixed fleet resource budget; no resource increase or regression waiver claimed."
+  }
+]

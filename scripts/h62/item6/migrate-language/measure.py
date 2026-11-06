@@ -47,6 +47,34 @@ for binary in ['lean','lake']:
     if not run([str(tool/'bin'/binary),'--version'],binary+'-version'): sys.exit(2)
 if not run([str(tool/'bin'/'lake'),'-f',str(config),'--no-cache','build','Solidity.KeySort:olean'],'keysort'): sys.exit(3)
 if '--key-only' in sys.argv: sys.exit(0)
+if '--full-gate' in sys.argv or '--serial-targets' in sys.argv:
+    # Use the official binaries and libraries unchanged. A private launch wrapper
+    # serializes compiler invocations; it is not a different Lean build.
+    sysroot=out/'serial-sysroot'; (sysroot/'bin').mkdir(parents=True)
+    for item in tool.iterdir():
+        if item.name!='bin': (sysroot/item.name).symlink_to(item,target_is_directory=item.is_dir())
+    for item in (tool/'bin').iterdir():
+        if item.name!='lean': (sysroot/'bin'/item.name).symlink_to(item)
+    import shlex
+    wrapper=sysroot/'bin/lean'
+    wrapper.write_text('#!/bin/bash\nexec flock -x '+shlex.quote(str(out/'compiler.lock'))+' '+shlex.quote(str(tool/'bin/lean'))+' --tstack=131072 -j1 -M8192 "$@"\n')
+    wrapper.chmod(0o755)
+    text=(root/'lakefile.toml').read_text().replace('enableArtifactCache = true','enableArtifactCache = false')
+    text=text.replace('version = "0.1.0"','version = "0.1.0"\nbuildDir = '+json.dumps(str(out/'build')))
+    text=text.replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1", "-M8192"]')
+    config.write_text(text)
+    shims=out/'shims'; shims.mkdir()
+    shim=shims/'lake'
+    shim.write_text('#!/bin/bash\nexec '+shlex.quote(str(tool/'bin/lake'))+' -f '+shlex.quote(str(config))+' --no-cache "$@"\n')
+    shim.chmod(0o755)
+    env.update(PATH=str(shims)+':'+env['PATH'],LEAN_SYSROOT=str(sysroot),LAKE_OVERRIDE_LEAN='true')
+    if '--serial-targets' in sys.argv:
+        targets=sys.argv[sys.argv.index('--serial-targets')+1:]
+        failed=False
+        for target in targets:
+            failed=not run([str(tool/'bin/lake'),'-f',str(config),'--no-cache','build',target+':olean'],target.replace('.','_')) or failed
+        sys.exit(6 if failed else 0)
+    sys.exit(0 if run(['bash','./run-lean.sh'],'run-lean') else 6)
 if '--check-file' in sys.argv:
     filename=sys.argv[sys.argv.index('--check-file')+1]
     if '--lean-path' in sys.argv: env['LEAN_PATH']=sys.argv[sys.argv.index('--lean-path')+1]

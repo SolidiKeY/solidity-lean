@@ -1,0 +1,51 @@
+{
+  "ticket": "H70-LANGUAGE-PRODUCER",
+  "status": "reviewed-local-overlay-ready-full-gate-blocked",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "head": "d8e1d9721455d3671882f19aa7155fbbd2d91415",
+  "repository": "/workspace/migrate-language",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "archive_sha256": "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+  "patches": [
+    {
+      "path": "/workspace/migrate-language-evidence/language-owner-overlay.patch",
+      "sha256": "68ca9db67d4594aee62182d3053c85fed8b1bc078720b63c666a608bbba6b846",
+      "source_paths": [
+        "Solidity/Language/"
+      ]
+    },
+    {
+      "path": "/workspace/migrate-language-evidence/fixedpoint-prerequisite.patch",
+      "sha256": "a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82",
+      "source_paths": [
+        "Solidity/Language/FixedPoint.lean"
+      ]
+    }
+  ],
+  "consumers": [
+    "solidity-h62-1-20261106/infer-helpers",
+    "solidity-h62-2-20261106/audit-language",
+    "solidity-h62-4-20261106/generic-yul-views"
+  ],
+  "evidence": "/workspace/migrate-language-evidence/new-clean-accepted/results.json",
+  "frozen_interfaces": "/workspace/migrate-language-evidence/frozen-comparison.json",
+  "reviews": "independent finder and skeptic, read-only, no Lean/server; five-file proof diff reviewed",
+  "live_owner_changes": {
+    "Solidity/Language/FixedPoint.lean": "Stage Bool/decide simplification before dependent unfolding; reorder implicit-order proof; close proof-irrelevant subtype equalities with rfl; canonical standard proof lemma names. Fx.zero changes only its proof field.",
+    "Solidity/Language/FixedPoint/Laws.lean": "Use Int.ediv_ediv_of_nonneg, the renamed original nonnegative lemma; stage order/bounds proofs; canonical proof lemma names.",
+    "Solidity/Language/FixedPoint/Abi.lean": "Use explicit Fx-typed equalities for ofInt?_val/isSome; stage decoder bounds; canonical proof lemma names.",
+    "Solidity/Language/FixedPoint/Literals.lean": "Reuse typed ofInt? helper laws in literal/exact/truncation proofs instead of unfolding dependent subtypes; canonical proof lemma names.",
+    "Solidity/Language/FixedPoint/Storage.lean": "Three if_true/if_false to ite_true/ite_false proof lemma renames only."
+  },
+  "limitations": [
+    "No live producer ownership transfer or cut-over permission. Coordinator relays this migration overlay.",
+    "All eight modules pass locally; no full RUNTIME_GATE_PASS.",
+    "Full gate records out-of-scope Hash/CollisionBound407/660/680 failures and was interrupted exit-2.",
+    "Compiler-generated public API drift and standard axiom graph drift require root-gate validation;345 source-declared types are structurally identical."
+  ],
+  "frozen_source_types_sha256": "4fa33bc11c32df564661f8744c67dfe873b893a9dafdccb30c7e711775efa3c0",
+  "source_declaration_count": 345,
+  "source_member_count": 279,
+  "original_anonymous_example_count": 44,
+  "dependency_tickets": "tests/h62/item6/migrate-language/owner-tickets.json"
+}

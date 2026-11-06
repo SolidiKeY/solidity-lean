@@ -1,172 +1,201 @@
-# H62 item 6: Language migration (blocked)
+# H62 item 6: Language migration overlay
 
-Owner: `solidity-h62-6-20261106/migrate-language`. This is an isolated migration
-overlay, with no transfer of live producer ownership. Repository
-`/workspace/migrate-language`, branch `codex/solidity-h62-6-20261106/migrate-language`,
-pinned base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+The five-file proof migration is committed and locally validated. The entire
+assignment remains **blocked** on outside-scope migration prerequisites and
+root-gate acceptance. No full runtime-gate pass or cut-over is claimed.
 
-## State and exact continuation
+Repository `/workspace/migrate-language`; branch
+`codex/solidity-h62-6-20261106/migrate-language`; pinned base
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The initial clean checkout on `work`
+at `/workspace/solidity-lean` remains intact. The base was fetched and verified
+as an ancestor of published origin/master before the assigned worktree was made.
+No push, merge, default-branch edit, freeze announcement or producer transfer.
 
-Checkpoint 1 census and clean old build are complete, subject to the independent
-review resolutions below. Checkpoint 2 toolchain identity is established, but
-production adaptation is blocked. Checkpoint 3 fails on unchanged FixedPoint;
-there is no valid whole-directory timing delta. Checkpoint 4 has a reviewable
-partial tooling/evidence handoff only. The assignment is NOT complete.
+## Authorization and producer delivery
 
-Typed blocker `OWNER-EXACT-FILE-ACK`: the mandated `relay.sh` is absent from the
-checkout and attached input directory. Exact-file acknowledgement from the live
-producer/coordinator is required before editing any of the eight existing files.
-The asynchronous coordinator request identifies all eight assigned files and the
-first FixedPoint errors (152, 170, 184). Scope options: provide the relay path so
-requests can be sent, or relay the live owners' exact-file acknowledgement. No
-absence of response is treated as permission. The isolated-branch authorization
-does not itself waive this explicit coordination requirement.
+The coordinator clarified that relay.sh is host-only and explicitly authorized
+this registered directory writer to apply statement-preserving migration patches.
+The previous OWNER-EXACT-FILE-ACK blocker is resolved. Live producers retain
+ownership; the coordinator relays the migration overlay at cut-over.
 
-After acknowledgement: adapt FixedPoint proofs first using the isolated fixture's
-staged simplification where applicable, recheck per file, then Laws, Abi,
-Literals, Storage and Conformance. Do not assume the fixture fixes all failures.
-The two catalog modules already compile on the new release. Preserve all names,
-types, meanings and budgets, retain module/source census coverage, and regenerate
-clean matched timing runs. Escalate any regression and STOP above 10%. Complete
-all affected-consumer/final gates and independent reviews before final acceptance.
-Do not edit the root toolchain pin, generated module roots, central maps or axiom
-pins. Export patch/bundle/checksums for migrate-root-gate; never push or merge.
+H70 requested the FixedPoint prerequisite for infer-helpers, audit-language and
+generic-yul-views. Reviewed production commit:
+`d8e1d9721455d3671882f19aa7155fbbd2d91415`, at the pinned base above.
 
-## Setup, versions and fixed resources
-
-The initial checkout `/workspace/solidity-lean` was clean on `work` at
-`6cf853aea`; it remains intact. `git fetch origin refs/heads/master:refs/remotes/origin/master`
-and `git fetch origin c6f550e281a7e5affa9a99bc2cdaed556dec00e4` succeeded.
-`git merge-base --is-ancestor BASE origin/master` exited 0 (observed remote tip
-`821e3e8f4c7a5ac3a51dc5cba8be813bb173e310`). The assigned worktree was created
-at the exact base; no existing work was reset or discarded.
-
-Old: Lean 4.24.0 release, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
-Lake `5.0.0-src+797c613` (Lean 4.24.0).
-New: official Lean 4.35.0 release, commit
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
-Lake `5.0.0-src+eb6cafb` (Lean 4.35.0).
-Archive `/workspace/migration-toolchains/lean-4.35.0-linux.tar.zst`, SHA256
-`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`,
-exactly matching `/workspace/h62-coordinator-inputs/toolchain-pin.json`.
-All five coordinator input checksums were independently verified.
-
-VM: cgroup memory cap 16 GiB, CPU quota 4 CPUs, no configured swap and zero swap
-usage. Each serial Lean worker uses explicit `-j1 -M8192 --tstack=131072`,
-`LEAN_NUM_THREADS=1`. A 100ms sampled aggregate process-group RSS guard stops at
-12 GiB, and a cgroup-aware min(host available, cap minus current usage) guard
-retains 4 GiB headroom. This is a sampled monitor plus Lean's allocator limit,
-not a dedicated 12GiB hard cgroup. No systemd invocation or other worker kill.
-All checks acquired the repository writer lock; no Lean MCP is exposed.
-
-Private absolute toolchain paths and private TOML builds keep the tracked
-`lean-toolchain` unchanged. Each clean run has a fresh build and cache directory,
-`enableArtifactCache=false` and `--no-cache`. No v4.24 per-master cache was used.
-OS page caches were warm/uncontrolled for both runs; clean refers to project
-artifacts, not an OS cache drop. Module checks target `:olean`, with Lake also
-emitting its normal intermediate C/ilean; these are elaboration/kernel checks,
-not the full executable/default-target gate. All eight original files remain
-byte-identical to BASE, including statements, cases, observations and budgets.
-
-## Census, interfaces and dependencies
-
-`python3 scripts/h62/item6/migrate-language/census.py --require-unchanged`
-exits 0. Saved JSON: `/workspace/migrate-language-evidence/census-base.json`.
-It freezes all eight source files by SHA256 and checks the base file inventory.
-Its 389 declaration-line rows are an audit index, not a Lean parser. Full byte
-hashes preserve all original declarations and anonymous cases, regardless of
-scanner recognition. Seven internal import edges and only `Lean.Data.Name`
-external to Language; no outside-project directory dependency blocks elaboration.
-
-Thirteen baseline production/root consumer import edges include the eight generated-root imports
-in `Solidity.lean`, plus Frontend/Admission/RootObservations, Frontend/Source,
-Frontend/Static/Standalone, Lowering/P8/FrozenInterface and
-Semantics/Nondeterminism/ForkAgreement. These owner directories and the generated
-root are read only. Root-gate must validate their migrated downstream closure.
-The additive Interfaces test imports three Language modules, yielding sixteen total
-tracked direct consumer edges after staging. No new production module or registration
-fragment is needed for the test helpers.
-
-`Interfaces.lean` captures all 1,721 baseline constants belonging to Language,
-including generated names, printing elaborated types and axiom dependencies.
-The baseline audit exits 0 and rejects any `sorryAx` dependency. Its ~1MB transcript
-is off Git at `/workspace/migrate-language-evidence/interface-old/fixture.log`.
-The transcript SHA256 is recorded in the external manifest. This is an elaborated
-baseline type snapshot; source hashes are separate source-preservation evidence.
-New-version interfaces and their comparison remain pending until migration builds.
-Neither identical source hashes nor a baseline transcript establishes new-toolchain
-kernel/API equivalence by itself.
-
-## Gates and decisive evidence
-
-All paths below are under `/workspace/migrate-language-evidence/`.
-The reproducible command prefix is
-`python3 scripts/h62/item6/migrate-language/measure.py TOOLCHAIN RUN_DIR`.
-Each results.json records the exact absolute commands, exits, wall times and
-peak sampled aggregate RSS; each module has a corresponding complete log.
-
-| Command suffix / check | Outcome | Evidence |
+| Artifact | Absolute path | SHA256 |
 |---|---|---|
-| old toolchain, `old-clean-final` | PASS all eight | `old-clean-final/results.json` |
-| new toolchain, `new-clean-final` | FAIL FixedPoint | `new-clean-final/FixedPoint.log` |
-| new toolchain, catalog targets independently | PASS Features, FeatureInfo | `catalog-new/results.json` |
-| KeySort prerequisite, both versions | PASS `Built Solidity.KeySort` | respective `keysort.log` |
-| `--check-file tests/h62/item6/migrate-language/Interfaces.lean --lean-path /workspace/migrate-language-evidence/old-clean-final/build/lib/lean` on old | PASS 1,721 constants | `interface-old/fixture.log` |
-| `--check-file tests/h62/item6/migrate-language/DecideFixture.lean` on each | PASS, empty diagnostic logs | `fixture-old-final/`, `fixture-new-final/` |
-| `python3 tests/h62/item6/migrate-language/test_census.py` | PASS mutation/deletion/addition/root controls | `census-controls.log` |
-| affected consumer closure / full `./run-lean.sh` | PENDING, known upstream Language failure | no success claimed |
-| new interface/axiom audit and timing delta | PENDING | cannot compare failed build with passing baseline |
+| Five-file Language overlay | `/workspace/migrate-language-evidence/language-owner-overlay.patch` | `68ca9db67d4594aee62182d3053c85fed8b1bc078720b63c666a608bbba6b846` |
+| FixedPoint-only prerequisite | `/workspace/migrate-language-evidence/fixedpoint-prerequisite.patch` | `a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82` |
 
-Clean old Language-only wall sum: **45.30031436 seconds** (8 serial module
-invocations, excludes versions and KeySort); peak sampled aggregate RSS
-**879,906,816 bytes**. The initial pre-review old run also passed, but the
-corrected guard's `old-clean-final` is the accepted baseline. Matched old/new
-harness source is saved as `measure-matched.py`, with identical harness hashes
-in their run directories. New FixedPoint exits 1 after 2.0160 seconds; that is
-failure latency, NOT a speed improvement. No RUNTIME_GATE_PASS is declared.
+`tests/h62/item6/migrate-language/producer-response.json` gives the exact base,
+head, files, toolchain identity, reviews, consumer names and boundaries.
+`verify-overlays.py EVIDENCE_DIRECTORY` applies both patches to fresh copies of
+the pinned sources and checks resulting bytes; no live checkout is modified.
 
-First errors: FixedPoint 152/170 generalization fails after one-stage unfolding
-leaves `decide` hypotheses; 184 expects `0 ≤ v` but gets `decide (0 ≤ v)=true`.
-Further errors include implicit conversion, integer conversion and ABI roundtrip
-proofs. Compiler-generated `sorry` warnings in the failed elaboration are error
-recovery output, not authored source admits and not accepted proof artifacts.
-No original theorem, premise, exclusion or observation was edited or weakened.
-No new axiom, sorry, native_decide or heartbeat increase was added.
+Live owners should know every production change:
 
-## Backfill and proof boundaries
+- FixedPoint: simplify Bool/decide propositions before unfolding dependent bounds;
+  reorder the implicit-order proof; close two residual subtype equalities by
+  reflexivity; use canonical standard lemma spellings. Fx.zero changes only its
+  proof field; its data remains zero.
+- Laws: use Int.ediv_ediv_of_nonneg, the renamed original nonnegative-divisor
+  lemma, rather than the new unrestricted ediv_ediv with a correction term;
+  stage order/bounds proofs and update deprecated proof lemma spellings.
+- Abi: keep Fx explicit in equalities proving ofInt?_val/isSome instead of
+  unfolding dependent subtypes; stage decoder bounds and update proof names.
+- Literals: reuse those typed ofInt? helper laws for exact/truncated conversion
+  and isSome proofs; retain both directions, denominators and range cases;
+  update deprecated proof lemma spellings.
+- Storage: exactly three if_true/if_false to ite_true/ite_false lemma renames.
 
-`DecideFixture.lean` isolates the intrinsic signed bounds and range proof.
-Simplifying Boolean/decide propositions before unfolding the bounds passes both
-releases with the same statement, no new options and no extra budget. A generator
-`negative-control.py OUTPUT` reconstructs the one-stage source to distinguish
-old pass/new failure. This is local proof compatibility evidence, not a repair or
-proof of acceptance of the six fixed-point production modules. Existing
-Conformance's original decided cases passed only on the old full Language build.
-The census controls run on a temporary Git repository and never change originals.
-No external Solidity/EVM conformance test or new semantic claim is asserted.
+Features, FeatureInfo and Conformance stay byte-identical to the pinned base.
+No computational branch, theorem statement, premise, exclusion, observation,
+constructor, import, heartbeat override or proof/resource budget was changed.
+No new axiom, authored sorry, native_decide, unsafe shortcut or production helper.
+No new registration, generated root, module-map or central axiom pin edit.
 
-## Independent reviews
+## Toolchain and resources
 
-Read-only finder and skeptic used no Lean server and made no edits. Finder found
-F1 missing root import edges, F2 deletion escaping the inventory gate, F3 host-only
-reserve, and F4 sampled-RSS qualification. Skeptic independently confirmed F1/F3
-and warned against equating source hashes with elaborated interfaces. F1/F2/F3
-are fixed; negative controls cover frozen source mutation/deletion/addition and
-root imports. F4 is explicitly qualified as sampled RSS; baseline elaborated
-interfaces are captured separately. Follow-up finder and skeptic reviews confirm F1–F3 are fixed, F4 is accurately
-qualified, matched harness hashes and measurements agree, and no success is
-claimed from the failed new build. Finder additionally caught the three staged
-test-helper consumer edges; the final census is regenerated after staging and
-the production/test counts are distinguished above. Reviews used no Lean/server
-and made no edits. Artifact verification is recorded in the external evidence handoff.
+All coordinator input hashes verified. Official release archive:
+`/workspace/migration-toolchains/lean-4.35.0-linux.tar.zst`, SHA256
+`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`,
+matching `/workspace/h62-coordinator-inputs/toolchain-pin.json` exactly.
+Old Lean 4.24.0 release commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake 5.0.0-src+797c613. New Lean 4.35.0 release
+commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+Lake 5.0.0-src+eb6cafb. Version outputs are saved in every measurement run.
 
-## Handoff artifacts
+Cgroup cap 16 GiB, CPU quota 4 CPUs, no configured swap/zero swap usage.
+LEAN_NUM_THREADS=1, explicit -j1, -M8192 and --tstack=131072. Heavy work is serial.
+A 100 ms process-group monitor enforces 12 GiB sampled RSS and 4 GiB headroom using
+min(host available,cgroup limit-current); this is not a separate hard 12 GiB cgroup.
+The VM cap and Lean allocator limits remain fixed. No systemd-run invocation.
+Writer lock held for edits and Lean checks. Lean MCP is unavailable; bounded
+command-line module diagnostics and repository run-lean.sh were used.
 
-External handoff `/workspace/migrate-language-evidence/HANDOFF.md` records the
-committed head, base, outstanding obligations and artifact hashes. Exported
-patch `/workspace/migrate-language-evidence/original.patch`, bundle
-`/workspace/migrate-language-evidence/migration.bundle`, checksum manifest
-`/workspace/migrate-language-evidence/SHA256SUMS`. Bulk transcripts/builds remain
-off Git. The patch contains additive scoped tooling/tests/documentation only;
-there is no production migration patch yet. No push, merge, freeze announcement,
-pre-gate or master changes have occurred.
+Each clean run uses a fresh build/cache directory, enableArtifactCache=false,
+--no-cache and the exact official binaries. No v4.24 per-master cache. The
+tracked lean-toolchain/lakefile stay unchanged. Private full/affected gate
+wrappers serialize actual compiler invocations with flock, using unchanged
+release binaries/libraries. OS page caches are warm/uncontrolled on both sides;
+clean means project artifacts. Source differs only in reviewed proof migration.
+Library checks target :olean and emit Lake's normal Lean/C intermediates;
+these are not the complete executable/default-target gate.
+
+## Checkpoints, frozen interfaces and census
+
+1. Complete: all 8 original modules/imports, 389 declaration audit rows and clean
+   old baseline. Seven internal import edges; only Lean.Data.Name external to
+   Language. No cross-directory project import prerequisite for these 8 modules.
+2. Complete locally: exact official toolchain plus five proof-only file changes;
+   every assigned module and original conformance/axiom-message check passes.
+3. Local measurements pass with no wall-time regression; per-module RSS increases
+   escalated below. Full affected/default-target acceptance remains blocked.
+4. Reviewable patches, bundle, hashes and dependency/owner reports are saved;
+   root-gate disposition and successful final fleet validation remain pending.
+
+`census.py --require-inventory` checks the base module inventory and records old
+and new source hashes. --require-unchanged remains useful for baseline controls,
+but intentionally fails on the five proof-migrated files. Final tracked consumers
+include 13 baseline production/root edges plus 6 additive audit-test edges.
+The production edges are 8 imports in the generated Solidity root and one each
+in Frontend.Source, Admission.RootObservations, Static.Standalone,
+Lowering.P8.FrozenInterface and Semantics.Nondeterminism.ForkAgreement.
+
+Frozen.lean emits structural types and axiom sets for ALL module constants:
+1721 old,1739 new. compare-frozen.py verifies identical alpha-normalized type
+expressions for 345 source declarations (344 named plus anonymous DecidableEq)
+and 279 explicit constructors/fields. Metadata, binder/universe parameter names
+and the let nondependency optimization hint are ignored; all type arguments,
+indices, binder kinds and universe structure are retained. Source-declared type
+hash: `4fa33bc11c32df564661f8744c67dfe873b893a9dafdccb30c7e711775efa3c0`.
+Constructor/field hash:
+`3e7fe3b2cf1ad7c16b3879090e97e3f74e7d7807ebafd543547fd8e50e98a659`.
+All 44 anonymous example prefixes match; full statements/cases were also reviewed
+and every original module compiles. The prefix scanner is lexical, not a Lean
+parser or a separate kernel equivalence proof of arbitrary source syntax.
+
+No blanket all-generated-API equality is claimed: 15 removals, 33 additions and 29
+generated type changes are fully listed in frozen-comparison.json. Six removed
+PUBLIC helpers are Language.BlockField/Current/Feature/Scope.toCtorIdx and
+Language.FixedPoint.Fail/Mode.toCtorIdx. Generated noConfusion types also change.
+No direct Language callers of these APIs were found in the repository scan;
+root-gate must validate downstream compatibility without assuming a waiver.
+
+All new axiom dependencies remain within the baseline union propext,
+Classical.choice,Quot.sound. 88 shared constants have standard dependency-graph
+changes (including 8 source declarations gaining standard dependencies), recorded
+for root-gate; no central pin edits or trust expansion. Every existing guarded
+axiom output in the assigned sources still passes unchanged. Failed preliminary
+elaborations' sorryAx messages were error recovery, never accepted artifacts.
+
+## Gates and timings
+
+Commands run from the repository. The common driver is
+`python3 scripts/h62/item6/migrate-language/measure.py TOOLCHAIN RUN_DIRECTORY`.
+Absolute toolchain directories are `/workspace/.setup/tools/lean-4.24.0-linux`
+and `/workspace/migration-toolchains/lean-4.35.0-linux`; RUN_DIRECTORY is below
+`/workspace/migrate-language-evidence/`. Each results.json saves exact commands,
+exits, wall time, sampled RSS and resource stops, with complete per-target logs.
+
+| Invocation | Outcome | Evidence directory/file |
+|---|---|---|
+| old,old-clean-final | PASS8/8 | old-clean-final/results.json |
+| new,new-clean-accepted | PASS8/8, no warnings | new-clean-accepted/results.json |
+| KeySort, both versions | PASS | corresponding keysort.log/version logs |
+| --check-file tests/h62/item6/migrate-language/Frozen.lean --lean-path BASELINE_OR_NEW_BUILD/lib/lean | PASS both | frozen-old-final,frozen-new-final |
+| compare-frozen.py OLD_LOG NEW_LOG OUTPUT_JSON | PASS345 + 279 | frozen-comparison.json |
+| Static trust, orphans, layers, roots, fragments, catalog generation and scope checks | PASS | static-gates.json,scope-validation.json |
+| test_census.py | PASS mutation/deletion/addition/root controls | census-controls.log |
+| test_frozen.py OLD_LOG NEW_LOG | PASS corrupted theorem/field, missing instance, sorryAx controls | frozen-negative-controls.log |
+| new,affected-new --serial-targets Solidity.Frontend.Source Solidity.Frontend.Admission.RootObservations Solidity.Frontend.Static.Standalone | Source PASS; remaining 2 FAIL in outside Source.Ctor | affected-new/results.json |
+| new,full-new --full-gate (runs bash ./run-lean.sh) | FAIL then interrupted exit-2 after outside Hash errors | full-new/run-lean.log |
+
+Old clean Language wall 45.30031436s; new 22.889750584s: **49.47% faster**.
+Directory peak sampled aggregate RSS 879906816 → 786042880 bytes: **10.67% lower**.
+All 8 module wall times decrease; no >10% slowdown. These are migration before/after
+measurements, not a full-fleet or full-default-target benchmark. timing-comparison.json
+contains every module's numbers. Seven modules individually increase sampled RSS;
+that regression is explicitly escalated to root-gate with unchanged caps. The
+structural audit itself also uses more RSS on the new release; it stays within
+bounds and is outside the module-build timing totals.
+
+The full gate recorded Hash/CollisionBound407,660,680 failures (plus consequent
+axiom-message mismatches). Only this lane's already-failed process group was
+interrupted; no full pass or performance delta is inferred. RootObservations
+and Standalone fail in Source/Ctor641 (existing 200000-heartbeat limit) and715
+(dependent elimination); no budget was raised. P8/ForkAgreement import paths
+reach the Hash blocker. These files are read only to this lane.
+
+## Reviews, backfill and outstanding work
+
+Independent finder and skeptic used no Lean server and made no edits. Both
+reviewed all production hunks and found no statement, case, computation, trust
+or budget change. Storage's final 3 name changes were separately confirmed.
+Both reviewed structural comparison boundaries and required explicit disclosure
+of PUBLIC generated API drift; that disclosure and exact lists are included.
+Initial tooling findings (root imports, deleted-file escape, cgroup headroom,
+sampled-RSS qualification and staged-test census count) were fixed with negative
+controls. Skeptic additionally required patch reproduction to read bytes from the recorded
+producer commit, not merely the worktree; that check is fixed and both overlays
+are reproduced again against immutable Git objects. Final artifact verification
+is recorded in the external handoff.
+
+Backfill is substantive and scoped: full source/constant census, baseline and
+new structural types/axioms, independent reviews, exact range-proof fixture,
+old-pass/new-fail generated control, corrupted-snapshot controls, fresh-source
+patch reproduction and deterministic measurement/export tooling. No extra
+semantic claim or external solc/EVM differential test is asserted.
+
+Outstanding owner/root requests are in owner-tickets.json beside producer-response:
+B-MIGRATE-HASH, B-MIGRATE-SOURCE-CTOR, B-GENERATED-API and B-RSS-REGRESSION.
+Coordinator relays exact-file prerequisite overlays; resume affected/full gates
+when available. Root owns the final toolchain pin and central compatibility/pin
+work. No full assignment completion with these gates unresolved. Questions=[].
+
+Handoff paths: `/workspace/migrate-language-evidence/HANDOFF.md`, original.patch,
+migration.bundle, evidence.tar.gz and SHA256SUMS in that directory. Older blocked
+artifacts are preserved in previous-blocked/. Bulk logs/builds stay off Git;
+only deterministic generators and scoped audit/test sources are committed.
+Coordinator owns the required fresh-thread handoff on this SAME VM/branch/goal;
+never create/reset a goal or self-launch a replacement thread.

@@ -32,3 +32,5 @@ if __name__=='__main__':
     result=census()
     print(json.dumps(result,indent=2,sort_keys=True))
     if '--require-unchanged' in sys.argv and (not result['inventory_unchanged'] or not all(r['unchanged'] for r in result['files'])): sys.exit(1)
+
+    if '--require-inventory' in sys.argv and not result['inventory_unchanged']: sys.exit(1)
