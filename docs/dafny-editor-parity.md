@@ -1353,3 +1353,28 @@ hash-bound841027byte native-browser evidence archive/index is absent here.
 No stopped benchmark rerun, threshold/metadata/profile change or web/producer
 scope takeover occurred. This is an evidence wait; independent editor work
 continues. Kernel metadata and Source.Horizon resource waits remain separate.
+
+
+### Exact-head CI validation and bounded certified CLI observations
+
+At `bf8cda11719d5cd3c1ed22901c3d8971280779b6`, full-input checks pass399Node
+tests with2original skips, inventory/pins/audit/statictrust/classification exit0.
+The unchanged mandatory parity gate exits1 with0/486. A new clean checkout at
+that exact commit passes392Node tests with9explicit unavailable-input skips;
+digest-only offline checks exit0 and strict missing-input inventory/parity both
+exit1. [Receipts](dafny-ci-evidence-manifest.json) distinguish localLinux/Node24.19
+from an unobserved hostedGitHub runner. Timedstrict remains separate; CI is not
+claimed ready to become blocking. Frozen270 hash is unchanged.
+
+[Certified CLI observations](dafny-kernel-cli-evidence-manifest.json) use the
+original `constant.sol`: f0() exits0/proved; f1() withcounterexamples exits1/refuted,
+certified=true, theorem `SolTests.Parity.f1.refuted`, only standardaxioms. Actual
+AST, generatedLean input, command/output and resource receipts are retained.
+Default API budgets/options and source are unchanged; no Lean changes since
+validated c35 dependencies. Each is a freshLean process with warmOS/artifactcache,
+not a cold/warm performance matrix. Both stay within the original guard with no
+owned survivors. The witness refutes the testedformula; it does not identify a
+failed clause span or establish constructor reachability/compiler/EVM agreement.
+No rendered/LSP lifecycle or fullruntime pass follows. FullgateSource.Horizon,
+TestSuite/timedstrict, realmetadata producer, H70rawarchive, nativeMac, allpaired
+rendered/proof/performance/scaling/adversarial and rowjudgment obligations remain.
