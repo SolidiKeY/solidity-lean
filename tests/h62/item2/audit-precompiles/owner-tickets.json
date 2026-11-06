@@ -1,0 +1,37 @@
+[
+  {
+    "id": "OBL-SUCCESS",
+    "status": "owner-decision-required",
+    "owner": "master source owner; G43/V14 adequacy owner",
+    "declaration": "Solidity.Stipend.Obligation",
+    "evidence": [
+      "Solidity/Stipend/Rule.lean:171",
+      "Solidity/Roadmap/Evm.lean:339",
+      "tests/h62/item2/audit-precompiles/StipendControl.lean"
+    ],
+    "finding": "Gas-only Fitted and one-way Enforced admit abstract zero-gas/always-failure functions. Proposed control remains unchecked because frozen import closure fails under pinned toolchain. Does not establish failure of an actual compiler correctness theorem.",
+    "options": [
+      "Owner links actual compiled execution and successful source inputs to the public obligation.",
+      "Owner publishes a separate public totality/success theorem tied to actual compilation, required alongside the gas obligation."
+    ],
+    "delivery": "Saved for local coordinator retrieval; relay.sh is absent. No original-file edits."
+  },
+  {
+    "id": "DEP-RAW-435",
+    "status": "producer-dependency",
+    "owner": "H62 migration Syntax/Source owner via coordinator",
+    "evidence": "import-prerequisite.log: Raw.lean String API failures at 597,650,665,682,684"
+  },
+  {
+    "id": "DEP-BLS-435",
+    "status": "producer-dependency",
+    "owner": "solidity-h62-6-20261106/migrate-precompiles",
+    "evidence": "osaka-imports.log: Bls12381.lean:171,172 maximum recursion depth"
+  },
+  {
+    "id": "DEP-BRIDGE-435",
+    "status": "producer-dependency",
+    "owner": "solidity-h62-6-20261106/migrate-bridge and solidity-sol-20261103/precompile-agreement",
+    "evidence": "Frozen Bridge/lakefile.toml pins v4.24 dependencies; owned worktree has no Bridge dependency installation"
+  }
+]

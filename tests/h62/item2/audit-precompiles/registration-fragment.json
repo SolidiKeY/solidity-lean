@@ -1,0 +1,24 @@
+{
+  "status": "proposal-only; coordinator registration decision required",
+  "root_imports": [],
+  "reason": "All four Lean files are standalone audit tests under tests/, not production library modules. No generated root changes requested. CoreSignatures and StipendControl remain limited as documented.",
+  "area_rows": [
+    {
+      "path": "tests/h62/item2/audit-precompiles/BasicWitnesses.lean",
+      "description": "Four simultaneous premise witnesses, IDENTITY success and negative controls"
+    },
+    {
+      "path": "tests/h62/item2/audit-precompiles/CoreWitnesses.lean",
+      "description": "Three simultaneous premise witnesses, supported precompile success and boundaries"
+    },
+    {
+      "path": "tests/h62/item2/audit-precompiles/CoreSignatures.lean",
+      "description": "24 public elaborated type checks"
+    },
+    {
+      "path": "tests/h62/item2/audit-precompiles/StipendControl.lean",
+      "description": "Two proposed unchecked abstract G43 contract negative controls; blocked imports"
+    }
+  ],
+  "central_axiom_pins": "No central pin edit. Read actual axiom sets in basic-final.log and core-final.log; unchecked Stipend declarations must not be registered as verified."
+}
