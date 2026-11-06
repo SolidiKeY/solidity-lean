@@ -15,7 +15,7 @@ def checkpoint (state : St E) : Nat × Nat × Heap E.layout :=
 
 /-- Self funding checks the live balance but performs no transfer or credit. -/
 theorem funded_self (F : Fr) (value : Word) (state : St E)
-    (enough : value.val ≤ (state.ex.world.accounts F.this).balance.val) :
+    (enough : value.val ≤ (state.ex.world.accounts F.this).balance) :
     (fund (E := E) F F.this value).run (L0 E,state) = (.ok true,(L0 E,state)) := by
   simp only [fund, ↓reduceIte, EM.st, bind, pure, ExceptT.bind, ExceptT.pure,
     ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind, StateT.pure,
@@ -28,7 +28,7 @@ theorem enter (G : Glob E) (F : Fr) (n : Nat) (value : Word) (input : Bytes)
     (guard : (F.static && decide (value.val ≠ 0)) = false)
     (lookup : (instanceAt G F.this : EM E [] _).run (L0 E,state) =
       (.ok (some code),(L0 E,state)))
-    (enough : value.val ≤ (state.ex.world.accounts F.this).balance.val) :
+    (enough : value.val ≤ (state.ex.world.accounts F.this).balance) :
     (callAddr G F (n+1) F.this value input requested).run (L0 E,state) =
       (enterInstance G n F.this F.this value input (requested || F.static)
         code (F.depth+1) (checkpoint state)).run (L0 E,state) := by
@@ -45,7 +45,7 @@ theorem success (G : Glob E) (F : Fr) (n : Nat) (value : Word) (input data : Byt
     (guard : (F.static && decide (value.val ≠ 0)) = false)
     (lookup : (instanceAt G F.this : EM E [] _).run (L0 E,state) =
       (.ok (some code),(L0 E,state)))
-    (enough : value.val ≤ (state.ex.world.accounts F.this).balance.val)
+    (enough : value.val ≤ (state.ex.world.accounts F.this).balance)
     (actual : (dispatch G (childFrame F.this F.this value input (requested || F.static)
       code (F.depth+1)) n input).run (L0 E,{state with heap := Heap.empty}) =
         (.ok data,(locals,dirty))) :
@@ -61,7 +61,7 @@ theorem reverted (G : Glob E) (F : Fr) (n : Nat) (value : Word) (input data : By
     (guard : (F.static && decide (value.val ≠ 0)) = false)
     (lookup : (instanceAt G F.this : EM E [] _).run (L0 E,state) =
       (.ok (some code),(L0 E,state)))
-    (enough : value.val ≤ (state.ex.world.accounts F.this).balance.val)
+    (enough : value.val ≤ (state.ex.world.accounts F.this).balance)
     (actual : (dispatch G (childFrame F.this F.this value input (requested || F.static)
       code (F.depth+1)) n input).run (L0 E,{state with heap := Heap.empty}) =
         (.error (.revert data),(locals,dirty))) :
@@ -78,7 +78,7 @@ theorem halted (G : Glob E) (F : Fr) (n : Nat) (value : Word) (input : Bytes)
     (guard : (F.static && decide (value.val ≠ 0)) = false)
     (lookup : (instanceAt G F.this : EM E [] _).run (L0 E,state) =
       (.ok (some code),(L0 E,state)))
-    (enough : value.val ≤ (state.ex.world.accounts F.this).balance.val)
+    (enough : value.val ≤ (state.ex.world.accounts F.this).balance)
     (actual : (dispatch G (childFrame F.this F.this value input (requested || F.static)
       code (F.depth+1)) n input).run (L0 E,{state with heap := Heap.empty}) =
         (.error halt,(locals,dirty))) :

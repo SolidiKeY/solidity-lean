@@ -1,0 +1,84 @@
+{
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.admitted": [
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.after": [],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.code_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.C": [
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.frame": [],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.loaded": [],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.machine": [],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.mapping": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.nonzero_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.post_representation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.self_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.snapshot": [],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.stale_capture_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.wrong_base_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.Controls.wrongCapture": [],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.emit": [],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.postSim": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedConditionAxioms.lean:Solidity.Backend.StructuredFlow.MappedCondition.run_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

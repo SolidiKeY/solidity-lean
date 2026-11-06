@@ -272,6 +272,21 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ExpressionUniqueness/YieldBalance.lean` | Balance algebra for the intrinsic expression printer These token and success-predicate lemmas support the recursive expression/type/ argument category closure. |
 | `Frontend/ExpressionUniqueness/YieldShape.lean` | Structural facts about successful intrinsic expression yields A small success-predicate calculus for the existing state printer proves facts about arbitrary inputs and arbitrary remaining layouts. |
 | `Frontend/ExpressionUniqueness/YieldSplit.lean` | Invert actual printer executions into successful child executions These are state-printer inversion facts. |
+
+### SOL-QN final target, C3 and normalization adequacy
+
+| Module | Purpose |
+|---|---|
+| `Frontend/QualifiedUnits/Linearization.lean` | Independent C3 hierarchy judgment on original declaration identities; `order_iff` (the `idUniverse` bound never refuses a hierarchy), precedence and acyclicity. |
+| `Frontend/QualifiedUnits/Target.lean` | The final SOL-QN target relation, including inherited overloads; `target_iff` against the public signature-aware resolver. |
+| `Frontend/QualifiedUnits/NormalizationAdequacy.lean` | Structural adequacy of signature normalization against Source elaboration on every supported signature category. |
+| `Frontend/QualifiedUnits/TargetControls.lean` | Kernel controls for the independent C3 judgment, the final target relation and normalization adequacy. |
+| `Frontend/QualifiedUnits/ConstructorFixtures.lean` | One typed specimen and literal expected traversal per existing Source constructor (all 112). |
+| `Frontend/QualifiedUnits/Layout.lean` | Original owner-body layout: universal frozen source-layout theorem and actual owner-body member correspondence. |
+| `Frontend/QualifiedUnits/MergeSpecification.lean` | Independent deterministic C3 merge judgment on original declaration identities; `merge_iff` against `mergeOwners`. |
+| `Frontend/QualifiedUnits/ReferenceCoverage.lean` | Universal preservation of frozen explicit references and all finite identifier/member paths. |
+| `Frontend/QualifiedUnits/SignatureResolution.lean` | Signature-aware declaration resolution over original Source identities (the public consumer `resolve`). |
+| `Frontend/QualifiedUnits/SignatureResolutionControls.lean` | Kernel observations for the actual signature-aware resolver, paired with each main compiler query. |
 | `Frontend/StatementGrammarH28/G0Nodes.lean` | Gate G0 twin of `Syn.nodes` constructors (`g0NodeCtors`, `Syn.casesOn` with structural recursion) read by the fixture observers, linked by `g0NodeCtors_eq_nodes`. |
 | `Frontend/StatementGrammarH28/AtomConditional.lean` | Statement-grammar `if`/`while`/`do`/empty-`for` coverage with arbitrary expression conditions under the exposed atom premise `ExprAtomRparen`; nearest else and token uniqueness inside the fragment. |
 | `Frontend/StatementGrammarH28/AtomNested.lean` | Mutual `AtomStmt`/`AtomItems`/`AtomCatch`/`AtomCatches` fragment: arbitrarily nested blocks, control leaves, `return e;`, `unchecked` items, atom-condition `if`/`while`/`do`/`for`, `for` initialisers, simple statements, `emit`/`revert`, contextual `revert` expression statements, `try`/`catch` and `assembly` (stated sub-parser premises); coverage by mutual structural recursion with syntax-derived budgets under the else and catch frames, nearest else, token and prefix uniqueness. |

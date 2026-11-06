@@ -115,5 +115,6 @@ solkey's taclet names. Do not restate it in a docstring or a banner.
 - `tyHasMapping` and other well-founded definitions do not reduce in the
   kernel, so a proof of them cannot be `Eq.refl`; carry a structural twin
   (`Ty.mapFree`) and prove it equal.
-- `lake env lean --tstack=131072 file.lean` checks a scratch file in
-  seconds; the MCP server is slow on this package.
+- Check a scratch module with `lean_diagnostic_messages`; outside the
+  server, `scripts/coord-tools/gate.sh per-file FILE` (`lake lean FILE --
+  --tstack=131072`).
