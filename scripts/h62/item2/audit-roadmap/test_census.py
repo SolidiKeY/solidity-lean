@@ -45,6 +45,11 @@ end A
         self.assertTrue(all(r["source_qualified_name"] is None for r in extra))
         self.assertEqual([r["source_id"] for r in extra], ["fixture.lean:2", "fixture.lean:3"])
 
+    def test_result_type_let_assignments(self):
+        src = "theorem t : let x := 1; let y := x + 1; y = 2 := rfl\n"
+        rows, _ = scan(src, "fixture.lean", "tools", "fixture")
+        self.assertEqual(rows[0]["signature"], "theorem t : let x := 1; let y := x + 1; y = 2")
+
     def test_unterminated_comment_fails_closed(self):
         with self.assertRaises(ValueError):
             mask("/- theorem t : False := x")

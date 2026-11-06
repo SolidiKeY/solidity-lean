@@ -51,9 +51,28 @@ theorem toy_failure_boundary (d : Bytes) :
     (Toy.quiet d).run false = ⟨[], some (.success d)⟩ ∧
     (Toy.quiet d).run true = ⟨[], some (.revert [])⟩ := ⟨rfl, rfl⟩
 
+/-- H69: the toy source intentionally emits no events; assumed membership
+in the output event list is therefore jointly impossible. -/
+theorem no_toy_event_witness :
+    ¬ ∃ (p : Toy) (r : Bound) (x : Event), x ∈ (Toy.run p r.exhausted).events := by
+  intro hw
+  obtain ⟨p, r, x, hm⟩ := hw
+  exact toy_no_event hm
+
+/-- H69: the compiled toy has the same intentional event-absence control. -/
+theorem no_toy_evm_event_witness :
+    ¬ ∃ (art : Artifact) (x : Event),
+      x ∈ ((decode (mainRuntime art)).run false).events := by
+  intro hw
+  obtain ⟨art, x, hm⟩ := hw
+  exact toyEvm_no_event hm
+
 end Solidity.H62.AuditRoadmap
 
 #print axioms Solidity.H62.AuditRoadmap.no_simultaneous_not_alwaysRevert_witness
 #print axioms Solidity.H62.AuditRoadmap.reject_all_excluded
 #print axioms Solidity.H62.AuditRoadmap.toy_joint_success
 #print axioms Solidity.H62.AuditRoadmap.toy_failure_boundary
+
+#print axioms Solidity.H62.AuditRoadmap.no_toy_event_witness
+#print axioms Solidity.H62.AuditRoadmap.no_toy_evm_event_witness

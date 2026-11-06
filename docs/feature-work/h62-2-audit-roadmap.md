@@ -1,167 +1,214 @@
-# H62 item 2 audit-roadmap — blocked handoff
+# H62 item 2 audit-roadmap — H69 continuation handoff
 
-Batch `solidity-h62-2-20261106`, owner `audit-roadmap`.
-Repository `/workspace/audit-roadmap`, assigned branch
-`codex/solidity-h62-2-20261106/audit-roadmap`, exact base
+Batch `solidity-h62-2-20261106`, worker `audit-roadmap`.
+Repository `/workspace/audit-roadmap`, branch
+`codex/solidity-h62-2-20261106/audit-roadmap`, frozen base
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
-The clean older `/workspace/solidity-lean` checkout on `work` was preserved.
-Fetched exact base and published master; ancestry passes (off-git `setup.json`).
-No push, merge, PR, pre-gate, publication, deployment or interface edit.
+The older clean `/workspace/solidity-lean` checkout remains on `work`.
+Exact base was fetched and verified an ancestor of published origin/master.
+All writes remain inside the three assigned audit prefixes. No original
+interface, generated root, central map, axiom pin or proof budget was edited.
+No push, merge, PR, pre-gate, publication or deployment.
 
-## Binding objective and status
+## Current accounting
 
-All four checkpoints remain unfinished. This is a reviewable blocked backfill
-checkpoint, not completion of the assignment or a runtime gate pass.
-The original persistent goal remains the supplied full frozen assignment
-(rendered prompt SHA256 `1f2f43a9089ad3fc56319ade15f7e99c83c1466170941c9c81c12defc4eadbf1`).
-`get_goal` is not exposed among tools; coordinator explicitly permits continuing
-without that optional inspection. No goal was created or reset.
-Original VM/environment ID:
-`ccarenv_b64_Y2NhcmVudl9lNmE5OTQwMjI2ZDg4MTkxYmZhZGE0ZGM1MTYwNmYyZQ`.
+**17 checked theorem audits; 334 uncovered. Full assignment incomplete.**
+All 351 source theorem declarations in all 46 frozen mapped files occur exactly
+once in the generated census. Another 642 declaration candidates require
+semantic classification, including proof-bearing definitions such as `Cert.comp`.
+No complete elaborated telescope/structure-field census is claimed.
 
-| Checkpoint | Evidence achieved | Remaining |
+| Checkpoint | Saved evidence | Remaining |
 |---|---|---|
-| 1 exact signatures and owners | 46/46 mapped files, 351 source theorem declarations exactly once; raw signatures and source hashes | Elaborated telescopes, global versus per-input hypotheses, exact-path owner evidence, proof-bearing definition classification |
-| 2 simultaneous witnesses | Exact obstruction identified; four additive proof drafts | All 351 theorem rows remain uncovered; own proofs and axiom checks unverified; impossible literal witness requires scope decision |
-| 3 totality/success | Draft generic reject-all exclusion, joint published toy success and explicit toy resource-failure boundary | Production supported programs, observable real failure/gas/fork boundary, comprehensive controls and proofs |
-| 4 fidelity and verification | Independent lexical count and reproducible frozen census, no original statements edited | Kernel telescope comparison, all witness associations, full affected gates and owner resolution |
+| 1 frozen signatures and owners |46 mapped files,351 theorem source signatures,642 other candidates; source hashes; snapshot scope matches for every module |Elaborated telescopes, inherited-premise classification and exact live-owner confirmation |
+| 2 simultaneous hypotheses |15 Evm mappings and2 Context mappings checked jointly;3 H69 controls explicitly classified |334 uncovered; all3 H69 impossibility checks blocked by unchanged Hash dependency |
+| 3 totality/success and controls |3 checked Evm gas/observation/fork-depth boundaries; supported-constructor and generic compiler-control drafts |Production supported-program success/totality and complete compiler/failure/gas/fork coverage; drafts blocked |
+| 4 fidelity census and validation |Hash-bound per-row report; deterministic reproduction; stale-evidence controls; independent finder/skeptic |All uncovered witnesses, semantic census, full affected gates and comparable timing |
 
-## Exact obstruction, without changing its statement
+Canonical off-git source inventory:
+`/workspace/audit-roadmap-evidence/census/census.json`.
+Canonical checked audit:
+`/workspace/audit-roadmap-evidence/h69-audit/audit-census.json`.
+Every row has its criterion, checked/uncovered status, original source signature,
+proof reference where applicable, and source-import dependency blockers.
 
-ESCALATE: Solidity.Roadmap.PublicCorrectness.not_alwaysRevert — frozen Contracts.lean:1078–1083 concludes False from h : PublicCorrectness, hv : S.NonVacuous and hrev denying every successful compiled run; h.succeeds hv supplies precisely such a run, so a simultaneous inhabitant is impossible. Options: (A) explicitly authorize a separate negative-control audit criterion proving joint unsatisfiability while preserving the theorem; (B) retain the literal simultaneous-witness criterion and keep checkpoint 2 blocked.
+## H69 criterion resolution
 
-This is an intentional negative control, not a finding that the public contract
-is defective or that the theorem should be weakened. No option is silently
-selected or recommended. Stable question `Q-NEG-01` / ticket `SCOPE-NEG-01`.
-The source-exact signature and its SHA256 are in
-`tests/h62/item2/audit-roadmap/owner-tickets.json`.
-No fresh premise, axiom, proof shortcut, changed exclusion or observation is used.
+Human authorization is saved verbatim in
+`tests/h62/item2/audit-roadmap/h69-decision.txt`:
 
-## Committed additions and external artifacts
+> for theorems whose hypotheses are contradictory on purpose (negative controls, separation lemmas, refutations), a checked Lean proof that the hypotheses cannot hold together IS the audit result for that theorem. Ordinary interface theorems still need a joint-satisfiability witness. Change no statement.
 
-The generator `scripts/h62/item2/audit-roadmap/census.py` reads **git show at the
-frozen base**, not current edited source. Comments/strings are masked with offsets
-preserved; namespaces, sections and mutual scopes are tracked. All theorem/lemma
-declarations are retained, including ones with no explicit hypothesis binder.
-11 private declarations have source aliases, visibility and null elaborated names.
-Section-variable text is context, not a claim about actual used binders.
-642 other declaration candidates include proof-bearing definitions such as
-`Cert.comp`, partial definitions and anonymous instances, including binder-led forms (source-location IDs).
-These candidates still need semantic classification. This source scan does not
-claim a complete elaborated interface or structure-field census.
-All 351 exact owner fields remain unresolved; family hints are separately labelled
-candidates. The older ownership snapshot is not treated as current ownership proof.
+`SCOPE-NEG-01` / `Q-NEG-01` are resolved by this authorization. No question remains
+pending. Proof checks remain separate obligations, not waived by that decision.
 
-Bulk outputs stay off git at `/workspace/audit-roadmap-evidence/census/census.json`.
-Reproduction at `census-reproduction/census.json` is byte-identical.
-The generator rejects an output directory inside this checkout.
-The acceptance script covers nested comments/mutual scopes, private declarations,
-root names, binder defaults containing `:=`, equation proofs, proof-definition
-candidates, and unterminated comments failing closed. Five tests pass.
+Historical escalation below is resolved by H69; it is not an active request:
 
-`tests/h62/item2/audit-roadmap/WitnessObstruction.lean` imports unchanged Controls.
-Its four declarations are:
+ESCALATE: Solidity.Roadmap.PublicCorrectness.not_alwaysRevert — frozen Contracts.lean:1078–1083 concludes False from h : PublicCorrectness, hv : S.NonVacuous and hrev denying successful compiled runs. Options recorded before H69: (A) authorize a separate checked joint-impossibility criterion; (B) retain literal simultaneous witnesses and block. H69 explicitly authorizes A without changing the theorem.
 
-- `Solidity.H62.AuditRoadmap.no_simultaneous_not_alwaysRevert_witness`;
-- `Solidity.H62.AuditRoadmap.reject_all_excluded`;
-- `Solidity.H62.AuditRoadmap.toy_joint_success`;
-- `Solidity.H62.AuditRoadmap.toy_failure_boundary`.
+`h69-classification.json` explicitly records names, intentional-control reasons
+and unchanged impossibility-proof references. Exactly three declarations have
+entire explicitly contradictory hypothesis worlds:
 
-They are **unverified drafts** because unchanged migration dependencies fail first.
-The toy control is not production compiler correctness or a real Osaka gas law.
-New axiom/sorry/native_decide declarations: zero by source inspection; the kernel
-axiom census remains pending. Registration is only a proposal fragment in tests;
-generated roots, central module maps and axiom pins are untouched.
+- `Solidity.Roadmap.PublicCorrectness.not_alwaysRevert`: public success contradicts universal success denial;
+- `Solidity.Roadmap.Controls.toy_no_event`: assumed member of the toy's proven empty event list;
+- `Solidity.Roadmap.Controls.toyEvm_no_event`: assumed member of the compiled toy's proven empty event list.
 
-## Actual validation and blockers
+All three have additive joint-impossibility drafts in `tests/h62/item2/audit-roadmap/WitnessObstruction.lean`;
+none has reached a successful pinned dependency check. Their status is uncovered.
+The 44 other root refutation/separation results retain ordinary outer-world
+witness requirements, plus their refutation proof references. Successful signed
+negative values, bitwise NOT clients, inequalities inside positive conjunctions
+and false Hoare success postconditions are not misclassified as impossible input
+worlds. Source review or a theorem name never counts as a checked proof.
 
-Coordinator input hashes all match `/workspace/h62-coordinator-inputs/sha256.json`.
-Official archive downloaded from the supplied pin URL, SHA256
+## Checked additive proofs
+
+`tests/h62/item2/audit-roadmap/EvmWitnesses.lean` imports the unchanged `Solidity.Roadmap.Evm`. Its 15 indexed
+wrappers jointly inhabit all inputs/premises of every frozen Evm theorem,
+including Fixed structures, resource/order hypotheses and the full certificate
+with a specified artifact, allowed environment and admissible resource in one
+world. `witness-index.json` describes global versus per-input premises per row.
+The certificate fixture is nonconstant but illustrative, not a real EVM model.
+The nonempty hash witness uses a singleton and zero roots; root-interaction
+coverage is not claimed.
+
+Three additional checked controls show the exact Osaka transaction cap versus
+its explicit pinned idealization, preserved/distinct failure observations, and
+the Osaka P256/call-depth/stack boundaries. They are interface-boundary results,
+not full compiler totality, intrinsic-gas accounting or transaction adequacy.
+Two private lemmas support the collision/overlap witness. All20 Evm helper
+lemmas checked;18 public axiom reports printed.
+
+`tests/h62/item2/audit-roadmap/ContextWitnesses.lean` imports unchanged `Solidity.Automation.H28.Context`.
+Both indexed theorems use one explicitly constructed nondefault Core.Context,
+including budget/heartbeat/diagnostic fields. Those fields are witness data;
+no proof-checking option or resource budget is increased. Both axiom reports
+printed. Total checked helper theorems: 22 (including 2 private); indexed original
+statement coverage: 17. Only standard `propext`, `Classical.choice`, `Quot.sound`
+appear where needed; no new axiom/sorry/native_decide declaration.
+
+Unverified drafts: 6 theorems in `tests/h62/item2/audit-roadmap/WitnessObstruction.lean`,1 in
+`tests/h62/item2/audit-roadmap/FrontendWitnesses.lean`,3 in `tests/h62/item2/audit-roadmap/CreationWitnesses.lean`. The latter constructs
+actual finite 105-byte constructor success and reject-all-return/always-revert
+controls on published supported target code; it does not claim Source admission,
+account installation, gas adequacy or compiler pipeline closure.
+
+## Census and acceptance corrections
+
+The generator reads original sources using `git show` at the frozen base.
+It tracks namespace/section/mutual scopes, masks nested comments and strings,
+distinguishes 11 private source aliases from generated elaborated names, and
+retains section variables as context rather than claiming they are used binders.
+Partial definitions and anonymous instances have explicit candidate/source IDs.
+
+H69 re-review found that the old extractor treated result-type `let :=` as a
+proof delimiter. Fixed and regression-tested:50 source signatures are now complete
+through those lets; no original declaration was changed. Repair name/hash list:
+`/workspace/audit-roadmap-evidence/signature-repairs.json`.
+The superseded truncated census is retained only under
+`/workspace/audit-roadmap-evidence/superseded/pre-h69-census`.
+The canonical census and reproduction were regenerated and are byte-identical.
+Six scanner acceptance tests pass, including nested comments/mutual scopes,
+private/root/anonymous names, binder defaults, result-type lets, equation proofs
+and fail-closed unterminated comments.
+
+`audit_report.py` accepts a witness only with successful original/helper checks,
+matching source hashes for its complete local import closure, an unchanged
+compiler binary, the exact coordinator pin and verified official archive hash,
+and printed helper axiom evidence without sorryAx/nonstandard axioms. Five
+integration controls accept valid 17 coverage and reject stale dependency/helper
+hashes, a failed check and a changed compiler. Synthetic negative records are
+explicitly labelled test fixtures and never count as proof evidence.
+
+Exact snapshot scope claims, including migration-overlay separation, are saved
+in `/workspace/audit-roadmap-evidence/owner-snapshot-evidence.json`. In particular,
+VX1 explicitly claims Contracts in the snapshot. Overlay scope never transfers
+live ownership. Live owner fields remain unresolved until confirmed; no
+original-file edit was attempted. No `relay.sh` was present. Owner tickets are
+saved for the coordinator's normal retrieval; no unrelated messaging app used.
+
+## Actual gates, commands and timings
+
+Official archive SHA256:
 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
-No v4.24 cache was used. Tracked `lean-toolchain` remains unchanged/read-only.
-Actual compiler: Lean 4.35.0, commit
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`; Lake
-`5.0.0-src+eb6cafb (Lean version 4.35.0)`.
+Actual Lean 4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+Lake `5.0.0-src+eb6cafb (Lean version 4.35.0)`. No v4.24 cache used.
+Tracked `lean-toolchain` stays unchanged; the explicit official binary is used.
 
-Runner command (first attempt, exit 1):
-
-```sh
-python3 scripts/h62/item2/audit-roadmap/serial_checks.py --lean /workspace/audit-roadmap-evidence/toolchain/official/lean-4.35.0-linux/bin/lean --output /workspace/audit-roadmap-evidence/lean-pinned
-```
-
-Decisive output: KeySort exit 0 (1.372 s), AST exit 0 (7.844 s), Annotations
-exit 0 (1.483 s), Parser exit 1 (4.394 s): `String.trim` missing at Parser:76.
-The actual taclet comparison did not run. Ticket `DEP-PARSER-01`; exact producer
-key unresolved. No unauthorized edits or compatibility shims were made.
-
-Unaffected audit dependency attempt (exit 1):
+Successful commands (prefix paths shown in full in results.json):
 
 ```sh
-python3 scripts/h62/item2/audit-roadmap/serial_checks.py --lean /workspace/audit-roadmap-evidence/toolchain/official/lean-4.35.0-linux/bin/lean --output /workspace/audit-roadmap-evidence/lean-audit --target audit
+python3 scripts/h62/item2/audit-roadmap/serial_checks.py --lean /workspace/audit-roadmap-evidence/toolchain/official/lean-4.35.0-linux/bin/lean --output /workspace/audit-roadmap-evidence/lean-evm-h69-final --target evm
+python3 scripts/h62/item2/audit-roadmap/serial_checks.py --lean /workspace/audit-roadmap-evidence/toolchain/official/lean-4.35.0-linux/bin/lean --output /workspace/audit-roadmap-evidence/lean-context-h69-final --target context
+python3 -m unittest discover -s scripts/h62/item2/audit-roadmap -p test_census.py -v
+python3 scripts/h62/item2/audit-roadmap/check_report_acceptance.py --evidence /workspace/audit-roadmap-evidence
 ```
 
-KeySort exit 0 (1.624 s); Hash/CollisionBound exit 1 (4.585 s): unsolved equality
-at line 407 and omega failures at 660/680. Ticket `DEP-HASH-01`; exact producer
-key unresolved. The additive audit file and its `#print axioms` were not reached.
-All commands, exit codes, logs, wall times and resource settings are in each
-attempt's off-git `results.json`. Logs retain warnings and exact errors.
+All exit 0. Actual module commands, exact source/compiler/pin/archive hashes,
+per-file wall times, logs and limits are in each run's `results.json`.
+KeySort passes before each targeted run. The actual taclet comparison remains
+blocked at Parser; KeySort compilation does not establish that comparison.
+Prior static checks pass for 857 core modules (no reach to elaborator/checked
+parser), generated roots and fragments. Existing doc-path check fails on the
+optional missing Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean citation;
+introduced audit paths are checked separately.
 
-One Lean subprocess at a time, `LEAN_NUM_THREADS=1`, explicit `-j1`, 300 s timeout,
-`--tstack=131072`, heap budget `-M11264`, no swap observed. Final runner bounds
-address space by min(12 GiB, host available minus 4 GiB, cgroup available minus
-4 GiB), with another 256 MiB margin; version failures abort. Writer lock held.
-Initial attempt used the simpler admission-only reserve guard; independent
-review identified and fixed it before the audit attempt. This correction does
-not retroactively certify the first guard. No peak-RSS measurement is claimed.
-No systemd invocation or proof-budget increase.
+Four reproduced external-owner blockers, all in unchanged source:
 
-No representation/refactor or existing proof edit occurred. Comparable same-tree,
-same-cache, same-resources before/after full timing gate remains pending. The two
-KeySort observations have different resource guards and are not a slowdown test.
-No performance improvement or RUNTIME_GATE_PASS is claimed. Full `./run-lean.sh`,
-all affected validation, passing taclet comparison, proof/axiom census and final
-acceptance remain pending until external migration dependencies are supplied.
+| Ticket | File | Decisive pinned failure/evidence |
+|---|---|---|
+|DEP-HASH-01|Hash/CollisionBound|407 unsolved equality,660/680 omega; lean-audit/results.json |
+|DEP-PARSER-01|SortCheck/Parser|76 missing String.trim; lean-pinned/results.json |
+|DEP-RAW-01|Syntax/Raw|597/650/665/682String versus Slice mismatches; lean-frontend-h69/results.json |
+|DEP-LINKING-01|Backend/Creation/Linking|109Disjoint simplification type mismatch; lean-creation-h69/results.json |
 
-Static checks: `node scripts/check-layers.mjs` passes (857 core modules,
-zero reach elaborator or checked parser adapters); generated-root and fragment
-`--check` commands pass. `bash scripts/check-doc-paths.sh` exits 1 on the existing
-`docs/feature-work/after-roadmap-va1.md` citation to missing optional
-Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean. The check ran before
-adding this lane's files to the Git index, so that failure is baseline evidence.
-All backticked Lean file paths introduced by this lane resolve in an incremental
-path check. No existing documentation or Bridge dependency was changed.
+These result paths are under `/workspace/audit-roadmap-evidence`.
+The source import graph places a known failed dependency on all 44 mapped modules
+outside the two successfully audited modules. This is an import-path obstruction
+census, not a Lean declaration dependency graph or proof of all future blockers.
+Do not bypass it by copying interfaces, introducing shims, editing owners' files
+or counting frozen proof text as checked. Owner-compatible overlays are needed.
 
-## Independent reviews and fixes
+Writer lock held for writes/Lean. One Lean process at a time,
+`LEAN_NUM_THREADS=1`, explicit `-j1`, 300 s timeout, `--tstack=131072`, heap
+`-M11264`; no swap observed. Hard address-space cap is min(12 GiB, host available
+minus 4 GiB, cgroup remaining minus 4 GiB), minus 256 MiB margin. No systemd invocation.
+The original admission-only reserve guard was corrected after review; old logs
+remain historical evidence, not retroactive reserve certification.
+No existing hot proof/representation was refactored. Comparable same-tree/cache/
+resource before-after full timing remains pending; different targeted runs are
+not a slowdown comparison. No RUNTIME_GATE_PASS, full affected validation,
+full acceptance or full-assignment completion is claimed.
 
-Finder and skeptic reviewed read-only, neither using Lean/server or making edits.
-Both independently confirmed the impossible literal simultaneous witness and the
-mathematical shape of all four draft helpers. Finder independently counted 351
-actual theorem declarations in 46 files (raw regex 352 includes prose in Evm).
-Fixed: mutual scope tracking; private source alias versus elaborated identity;
-proof-bearing definition candidates including Cert.comp; partial/anonymous
-candidate handling; inferred ownership separated from unresolved ownership;
-resource cap preserving reserve; version-command failure handling. Five scanner
-tests and deterministic reproduction pass. Review source findings are addressed;
-mathematical inspection is not elaboration or completion.
-Detailed reviews saved off git in `reviews.md`.
+## Reviews and next thread
 
-## Coordinator continuation
+Independent finder and skeptic were read-only, used neither Lean/server nor
+edits, and confirmed all17 same-input witness pairings and the H69 distinction.
+Fixed their findings: result-type let truncation, stale imported-source evidence,
+compiler/pin/archive binding, private/anonymous identities, proof-bearing
+candidates, inferred-owner labelling, reserve-derived cap and version failure
+handling. Final report acceptance controls pass; detailed reviews saved off git.
 
-Owner tickets are saved for coordinator retrieval; no `relay.sh` was available
-in this VM and no message was sent through an unrelated application. Tickets
-request unchanged-statement compatible migration overlays only; they transfer no
-producer ownership. H55 G49/G50 implementation was not duplicated.
+Five bounded subitems are finished: extraction repair, H69 classification,
+Evm witnesses/boundaries, Context witnesses, evidence acceptance controls.
+Fresh-thread continuation is handed to the coordinator on this SAME VM/branch
+and SAME existing goal; do not self-launch or reset/create another goal.
+The original full frozen objective remains binding, rendered prompt SHA256
+`1f2f43a9089ad3fc56319ade15f7e99c83c1466170941c9c81c12defc4eadbf1`.
+Environment ID:
+`ccarenv_b64_Y2NhcmVudl9lNmE5OTQwMjI2ZDg4MTkxYmZhZGE0ZGM1MTYwNmYyZQ`.
+get_goal is unavailable; coordinator explicitly permits that optional absence.
 
-Keep this exact VM, existing persistent goal and assigned branch. Obtain the
-explicit negative-control criterion decision and external owner fixes for Parser
-and CollisionBound; then rerun prerequisites and audit checks with the pinned
-archive, finish elaborated census and per-statement simultaneous witnesses,
-production success/totality/failure/gas/fork coverage, all owner associations and
-required final gates. Supply approved registration fragments through coordinator.
-Commit/export future checkpoints here. After 3–5 completed work items, relay a
-fresh-thread handoff through coordinator; do not launch/reset another goal.
+Next: obtain owner-compatible migration overlays, check the3 H69 impossibility
+proofs, complete334 uncovered rows and642candidate classifications, confirm
+live owners, finish supported-program totality/success and all required
+failure/gas/fork controls, elaborated fidelity/axiom census, full affected gates
+and timing/acceptance requirements. H55 implementation remains untouched.
+Keep all four checkpoints and persistent objective unfinished while blocked.
 
-Exported patch `/workspace/audit-roadmap-evidence/original.patch`, external handoff
-`/workspace/audit-roadmap-evidence/HANDOFF.md`, and checksum manifest
-`/workspace/audit-roadmap-evidence/SHA256SUMS`. Full committed head is recorded in
-external `commit.json` and the final CLOUDVM-RESULT (avoids self-referential hashes).
+Exports: `/workspace/audit-roadmap-evidence/original.patch`,
+`/workspace/audit-roadmap-evidence/HANDOFF.md`,
+`/workspace/audit-roadmap-evidence/SHA256SUMS`.
+Full committed head is in external commit.json and CLOUDVM-RESULT to avoid a
+self-referential hash. All H44 bulk evidence remains off git.

@@ -3,6 +3,7 @@
 This is targeted evidence only, not a replacement for run-lean.sh final gates.
 """
 import argparse
+import hashlib
 import json
 import os
 import pathlib
@@ -14,7 +15,7 @@ import time
 ap = argparse.ArgumentParser()
 ap.add_argument("--lean", required=True, type=pathlib.Path)
 ap.add_argument("--output", required=True, type=pathlib.Path)
-ap.add_argument("--target", choices=("all", "audit"), default="all")
+ap.add_argument("--target", choices=("all", "audit", "evm", "context", "frontend", "creation"), default="all")
 args = ap.parse_args()
 root = pathlib.Path(__file__).resolve().parents[4]
 out = args.output.resolve()
@@ -23,6 +24,14 @@ if out.is_relative_to(root):
 out.mkdir(parents=True,exist_ok=True)
 lib = out/"olean"
 lib.mkdir(exist_ok=True)
+pin_path = pathlib.Path("/workspace/h62-coordinator-inputs/toolchain-pin.json")
+pin = json.loads(pin_path.read_text())
+archive = args.lean.resolve().parents[3]/pin["asset"]
+archive_hash = hashlib.file_digest(archive.open("rb"), "sha256").hexdigest()
+if archive_hash != pin["sha256"]:
+    raise SystemExit("official archive checksum mismatch")
+compiler_hash = hashlib.sha256(args.lean.resolve().read_bytes()).hexdigest()
+pin_hash = hashlib.sha256(pin_path.read_bytes()).hexdigest()
 records = []
 env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(lib))
 
@@ -49,10 +58,13 @@ def run(label, cmd):
             code = result.returncode
         except subprocess.TimeoutExpired:
             code = 124
-    row = dict(label=label,command=cmd,exit=code,seconds=round(time.monotonic()-start,3),
+    row = dict(label=label,command=cmd,exit=code,compiler_sha256=compiler_hash,
+        toolchain_pin_sha256=pin_hash, official_archive_sha256=archive_hash,seconds=round(time.monotonic()-start,3),
         log=str(log),memory_address_space_bytes=budget,threads=1,
         cgroup_free_at_start=cap-used,host_available_at_start=available,
         swap_total_kib=int(re.search(r"SwapTotal:\s+(\d+)",pathlib.Path("/proc/meminfo").read_text())[1]))
+    if cmd[-1].endswith(".lean") and (root/cmd[-1]).is_file():
+        row["source_sha256"] = hashlib.sha256((root/cmd[-1]).read_bytes()).hexdigest()
     records.append(row)
     (out/"results.json").write_text(json.dumps(records,indent=2)+"\n")
     print(json.dumps(row),flush=True)
@@ -85,4 +97,5 @@ if args.target == "all":
     code = run("solkeycheck",[str(args.lean.resolve()),"-j1","-M11264","--tstack=131072","--run","SolkeyCheck.lean","--key",key])
     if code:
         raise SystemExit(code)
-compile_module("tests/h62/item2/audit-roadmap/WitnessObstruction.lean")
+audit_file = {"evm": "EvmWitnesses.lean", "context": "ContextWitnesses.lean", "frontend": "FrontendWitnesses.lean", "creation": "CreationWitnesses.lean"}.get(args.target, "WitnessObstruction.lean")
+compile_module("tests/h62/item2/audit-roadmap/" + audit_file)

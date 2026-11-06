@@ -7,11 +7,8 @@
     "frozen_signature": "theorem PublicCorrectness.not_alwaysRevert (h : PublicCorrectness S V compiler envAbs X)\n    (hv : S.NonVacuous)\n    (hrev : ∀ i art e rt d, compiler i = some art → V.lang.Allowed e → V.lang.Admissible rt →\n      (V.lang.sem (V.load art) e rt).final ≠ some (.success d)) : False",
     "signature_sha256": "6d0811ee37a20f1482929741ceb957b58d3bb31f395602120ab6e2eb266f5e48",
     "evidence": "Frozen conclusion False; h.succeeds hv supplies an execution refuted by hrev. Independent finder/skeptic concur. Additive obstruction draft awaits dependency repair.",
-    "options": [
-      "Authorize separate negative-control criterion: prove joint unsatisfiability while preserving the theorem.",
-      "Keep the literal simultaneous-witness criterion: checkpoint remains blocked."
-    ],
-    "status": "awaiting explicit decision"
+    "status": "criterion resolved by H69; proof check remains blocked by DEP-HASH-01",
+    "resolution": "H69: checked joint impossibility is the audit result for intentionally contradictory hypotheses; ordinary theorems still require joint witnesses."
   },
   {
     "id": "DEP-PARSER-01",
@@ -31,6 +28,26 @@
     "evidence": "Pinned official v4.35.0: line407 unsolved contains-function equality; lines660/680 omega failure; exit1 before additive module.",
     "log": "/workspace/audit-roadmap-evidence/lean-audit/Solidity_Hash_CollisionBound.lean.log",
     "request": "Owner supplies compatible isolated migration overlay preserving exact frozen statements/proof budgets. No file edits authorized here.",
+    "status": "blocked"
+  },
+  {
+    "id": "DEP-RAW-01",
+    "type": "external-owner-toolchain-compatibility",
+    "owner": "Syntax migration/area producer; exact live key unresolved",
+    "file": "Solidity/Syntax/Raw.lean",
+    "evidence": "Official4.35: String.drop returns Slice at597/650/665/682; exit1 before FrontendWitnesses.",
+    "log": "/workspace/audit-roadmap-evidence/lean-frontend-h69/Solidity_Syntax_Raw.lean.log",
+    "request": "Compatible owner-approved overlay preserving frozen interfaces; no original edits in audit scope.",
+    "status": "blocked"
+  },
+  {
+    "id": "DEP-LINKING-01",
+    "type": "external-owner-toolchain-compatibility",
+    "owner": "Backend migration/area producer; exact live key unresolved",
+    "file": "Solidity/Backend/Creation/Linking.lean",
+    "evidence": "Official4.35: line109 disjoint hypothesis simplification does not produce expected offset inequality; exit1 before CreationWitnesses.",
+    "log": "/workspace/audit-roadmap-evidence/lean-creation-h69/Solidity_Backend_Creation_Linking.lean.log",
+    "request": "Compatible owner-approved overlay preserving frozen interfaces/proof budgets; no original edits in audit scope.",
     "status": "blocked"
   }
 ]

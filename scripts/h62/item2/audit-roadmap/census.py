@@ -72,6 +72,7 @@ EVENT = re.compile(r"^[ \t]*(?:(?:private|protected|noncomputable|unsafe|partial
 
 def signature_end(clean, start):
     depth = 0
+    pending_lets = 0
     i = start
     while i < len(clean):
         ch = clean[i]
@@ -79,6 +80,12 @@ def signature_end(clean, start):
             depth += 1
         elif ch in ")}]":
             depth -= 1
+        if depth == 0 and re.match(r"(?<![\w.])let\b", clean[i:]) and (i == 0 or not (clean[i-1].isalnum() or clean[i-1] in "_.")):
+            pending_lets += 1
+        if depth == 0 and clean[i:i+2] == ":=" and pending_lets:
+            pending_lets -= 1
+            i += 2
+            continue
         if depth == 0 and (clean[i:i+2] == ":=" or
                            re.match(r"where\b", clean[i:]) or
                            (ch == "|" and not clean[clean.rfind("\n",0,i)+1:i].strip())):
