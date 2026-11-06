@@ -15,9 +15,9 @@ where each `eᵢ` is read past the parameters declared before it
 (`Val.wk (thinUnder _)`) and `body'` is the body weakened into the caller's
 context (`Prog.wk (thinTop Γ ps)`), so it reads only its parameters. The
 block runs as the call (`inlineBlock_runC`; `inlineCall_runC` dispatches):
-the declarations evaluate the arguments in the call's order with the same halts (`bindArgs_runC`), the
-weakened body runs as the body with the caller's locals kept alongside
-(`Prog.run_wk`, `TWkRel.drop`), and the block's end pops the parameters and
+the declarations evaluate the arguments in the call's order with the same
+halts (`bindArgs_runC`), the weakened body runs as the body with the caller's
+locals kept alongside (`Prog.run_wk`, `TWkRel.drop`), and the block's end pops the parameters and
 the body's locals, which leaves the caller's locals exactly as the call
 restores them (`drop_put_top`, `off_bot_inj`).
 
@@ -29,9 +29,9 @@ memory or storage returns, storage or memory parameters,
 recursive calls (`callRec`), receiver calls and external calls are left as
 written. The pass inlines every covered call, including calls inside `if`
 branches, blocks and loop bodies, once (a body's own calls are not inlined),
-and not inside `try`, receiver-call or non-inlined call bodies. Only `Stmt.runC` is preserved: the call's name, and
-whatever printers or automation read from it, are gone, and gas and code size
-are not modelled.
+and not inside `try`, receiver-call or non-inlined call bodies. Only
+`Stmt.runC` is preserved: the call's name, and whatever printers or automation
+read from it, are gone, and gas and code size are not modelled.
 -/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
