@@ -258,3 +258,15 @@ Bulk logs, scripts used to reconcile these results, snapshots, failed attempts a
 
 
 The repository-wide `bash scripts/check-doc-paths.sh` gate failed (exit 1, five missing references). Each citing source is byte-identical to inspected master: docs/feature-work/h62-1-infer-helpers.md, docs/feature-work/h62-6-migrate-theory.md, scripts/h62/item2/audit-abi-world/test_census.py and tests/h62/item4/generic-structuredflow/registration.md (two references). No citing source is part of this increment. Exact diagnostics, checked-master identity and comparison results are in the external doc-paths receipt linked by the evidence manifest. This failure remains explicit; the owned Lean passes do not discharge it.
+
+
+## Successor static roles and standing ownership (2026-11-06)
+
+After adopting master b0e78c2c309246590dc42bc881d1ab2d14a4e486, classified all three direct-correctness and five callback-correctness theorems, including two private helpers. Both source files match the frozen census. The ledger keeps evaluation success inside equivalence conclusions, universal predicate equivalence as a premise, first-order syntax certificates separate from invariant truth, universal callback outcomes separate from execution existence, and the exact callback-free guard. Prior78 rows are unchanged;86 roles reviewed,5197 pending. The #63 exact two-file owner answer was received after an immediate authorized question-ref submission.
+
+The same answer provides a standing ownership rule. Authenticated all25 H82b scope manifests, checked every conservative path pattern in24 live scopes and excluded the migration-only overlay under its explicit non-transfer rule. None lists any of158 Calculus files.151 newly mapped files resolve3660 additional candidate owners;3746 now confirmed,1537 unresolved. All86 role rows remain unchanged. Ownership decisions authenticate complete scope intake internally; a nonempty partial list cannot confirm an owner. Both independent read-only reviews pass, including this hardening, and all89 Python controls pass. Full classification acceptance remains FAIL exit1. No new Lean proof, runtime pass or cache acceptance is claimed.
+
+Bulk source roles, ownership decisions, scope bytes, actual commands and review evidence remain off Git, indexed by the small correct-classification and standing-owner manifests. This is static/ownership progress only; all original checkpoints and compiler/gas/fork/world/coverage obligations remain open. H28 migration checks remain explicitly paused; historical evidence gaps and prior STOPs remain binding.
+
+
+The updated repository-wide documentation gate still fails exit1 on the same five missing references in citing sources unchanged from inspected master. The exact diagnostics and source comparisons are retained in standing-calculus-owners-v8/doc-gate.json; no owned document introduces a missing reference. This failure is not converted into a passing gate by the successful Python accounting/controls.

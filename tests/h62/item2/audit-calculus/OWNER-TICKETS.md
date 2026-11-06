@@ -47,3 +47,8 @@ The machine checks metadata shape and frozen-source binding; authority authentic
 ## Q-SEM-OWNER-02 answered (#63)
 
 Explicit coordinator answer confirms `Solidity/Calculus/Correct.lean` and `Solidity/Calculus/CorrectCallback.lean` as master (coordinator), no live producer. The eight new source candidates are owner-confirmed, independently of their static roles; prior78 records are unchanged. Totals now86 owner-confirmed,5197 unresolved. Question-ref delivery: coord-q/codex/solidity-h28-sol-20261104/automation-benchmark/20261106T231250Z. Exact answer and standing-rule text are preserved in the external correct-classification-v7 evidence. No question remains pending here, and no blanket statement-change authorization follows. The broader standing rule is applied only after checking that no live lane scope contains the file; no such check or inference is made for other files in this increment.
+
+
+## Q-SEM-OWNER-02 standing rule applied to authenticated scopes
+
+All25 H82b scope manifests are hash-verified:24 live, one migration-only overlay with no live-owner transfer. No live scope lists any of158 frozen Calculus files. The #63 standing rule therefore confirms master (coordinator), no live producer, for all158; ownership stays snapshot-bound.151 new file mappings add3660 confirmed candidates, without changing86 existing role rows. Totals3746 owners confirmed,1537 unresolved;5197 roles still pending. No backend ownership is inferred from the Calculus rule. All owner decisions authenticate the complete snapshot internally and are independently reviewed. Exact scope decisions and pins are external in standing-calculus-owners-v8. No pending ownership question was created.
