@@ -280,3 +280,13 @@ The review retains state-universal validity, fixed-world conditional paid-entry 
 
 
 The world/deployment slice documentation check still fails exit1 on the same5missing references in citing sources unchanged from inspected master. Exact diagnostics/comparisons are archived; no whole-gate pass is claimed. Supplied typed constructor programs are not automatically linked to source constructor bodies or compiled code by these transport statements; that adequacy obligation remains separate.
+
+
+## Successor payment source-role slice (2026-11-06)
+
+After fresh master inspection at8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990, classified all8PaymentWitness and14PaymentConditions declared theorems against exact frozen/current source identities. Prior97rows and allowners are unchanged. Ledger now119roles reviewed,5164pending;3746owners confirmed,1537unresolved. No new witness or runtime acceptance is added.
+
+The review separates model recipient/oracle acceptance from funding, physical dispatch and gas; deterministic Simple send ok/Boolean behavior from all callback outcomes; and exact callback guards from success/exit/resumption obligations. It preserves unconditional false-return postconditions for callback sends even after acceptance, conditional success-resumption laws inside the equivalence, unique no-havoc refusal and exact empty/plain-revert payload behavior. RawJ/post data are not certificates. Both independent read-only reviews pass without Lean/server/writes;89Python controls pass, complete CLI acceptance still FAILS exit1. Bulk evidence remains off Git under payment-classification-v10 and its small manifest. Original queues, historical evidence limitations, H28 pause and prior STOPs remain binding.
+
+
+The payment slice's repository-wide documentation check fails exit1 on the same5missing references in citing sources unchanged from inspected master. Full diagnostics/source comparisons are in payment-classification-v10/doc-gate.json. Owned accounting/control success is not a passing documentation or full acceptance gate.

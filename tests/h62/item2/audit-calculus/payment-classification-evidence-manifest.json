@@ -1,0 +1,42 @@
+{
+  "scope": "all22static payment roles; zero new joint witnesses/runtime acceptance",
+  "counts": {
+    "role_reviewed": 119,
+    "role_pending": 5164,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/payment-classification-v10/evidence.tar.gz",
+      "bytes": 846306,
+      "sha256": "39beb4e3f065420f9e9b9cca956fb5990dc68007e92f2f23c29f0b58b082e980"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/payment-classification-v10/inputs.json",
+      "bytes": 993,
+      "sha256": "0974a11e617198e861824689e45d066b4a86d87cd44c1272258d94aa4b43aa06"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/payment-classification-v10/gates.json",
+      "bytes": 1344,
+      "sha256": "a3461cee47328632b76d9e2036968d991c08d8bd99892d97a8189fb1b29150bb"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/payment-classification-v10/reviews.md",
+      "bytes": 1273,
+      "sha256": "8bfc6fcd4aa4217797e4d6d4737f95c98e64748082333ab20d997f047ec2e463"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/payment-classification-v10/doc-gate.json",
+      "bytes": 1069,
+      "sha256": "55710a65abd3b7d61fb7108edffa470704b0120acb79fd27d27b794a68c2be9e"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/payment-classification-v10/semantic-roles-reviewed.json",
+      "bytes": 379413,
+      "sha256": "b61ef5bba522bd77a192f4109edcdf041ceadaebff301b717ae8b7c95ccc72fc"
+    }
+  ]
+}
