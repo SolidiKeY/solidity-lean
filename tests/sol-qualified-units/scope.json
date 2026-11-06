@@ -783,15 +783,15 @@
   "queue": [
     {
       "id": "inventory-relation",
-      "status": "partial"
+      "status": "done"
     },
     {
       "id": "lookup",
-      "status": "partial"
+      "status": "done"
     },
     {
       "id": "proofs-preservation",
-      "status": "partial"
+      "status": "done"
     },
     {
       "id": "fixtures-acceptance-handoff",
@@ -908,5 +908,5 @@
     }
   ],
   "reflection_pins": "tests/sol-qualified-units/declaration-pins.json",
-  "h27_status": "Signature-aware checked resolver integrated; 17 direct queries agree; model adequacy and final validation remain open"
+  "h27_status": "Signature-aware checked resolver integrated; final Target relation, independent C3 judgment and normalization adequacy proved; acceptance blocked on repository-wide gate failures outside this lane"
 }

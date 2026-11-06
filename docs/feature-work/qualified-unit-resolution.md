@@ -772,4 +772,26 @@ Limitations of this driver, from the tooling reviews:
 
 ### Gates at this checkpoint
 
-GATES_PENDING
+`scripts/coord-tools/gate.sh full` ran at c5c3a308 with elan on `PATH`. The sources are unchanged from that head except `scope.json`. Receipts are in `tests/sol-qualified-units/claude-evidence/`, as `gate-build.json`, `gate-repository.json`, `gate-keysort.json` and `gate-sh-summary.log`.
+
+| Gate | Result | Cause |
+|---|---|---|
+| build-touched | PASS | |
+| run-lean | FAIL | `lake build` passes (6122 jobs, no `error`). The failure comes from `check-solkey.sh` (note 1). |
+| trust | PASS | 0 findings |
+| orphans, layers, roots, fragments | PASS | |
+| doc-paths | FAIL | Fails on master: `docs/feature-work/after-roadmap-va1.md` cites a Bridge Mathlib path. |
+| axiom-pins | FAIL | 0 errors and 3919 unrecorded new pins in the repository-wide inventory (note 2). |
+| testsuite, corpus | FAIL | They compare the same sibling checkout's `TestSuite.sol` (`519abdd5…`) with the imported AST (`12de663e…`). |
+| automatic-strict | PASS | |
+| KeySort (`claude-gates.py keysort`) | PASS | `solkeycheck --key` matches the vendored `tests/migration/solkey` taclets. |
+
+Notes:
+1. `check-solkey.sh` reads the sibling `../solkey` checkout. On this VM that checkout is upstream HEAD `b8d5f883`, not the pinned revision, and it reports 167 annotation mismatches.
+2. None of the 3919 unrecorded pins is a `QualifiedUnits` theorem. The lane's own pins are in `tests/sol-qualified-units/axiom-pins.json` and pass.
+
+The lane gates pass: solc, signature probes, resolution probes, queries, declarations and axioms. `check-sol-qualified-units.py --claude-vm` stops at `required gate failures: build, repository`.
+
+A full build run started before the last source edits, and it reported errors in `TargetControls.lean`. They came from compiling against a stale `NormalizationAdequacy` olean. The rerun above rebuilt both modules cleanly, and the language server reports no errors in either file.
+
+These receipts are recorded as failures and are not waived. Queue items 1-4 and the proofs are done. `scope.json` keeps `fixtures-acceptance-handoff` partial and `acceptance_complete` false until `run-lean` and the repository gates pass. That needs either the pinned solkey sibling or a fixed master.
