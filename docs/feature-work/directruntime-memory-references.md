@@ -725,3 +725,40 @@ Independent read-only finder and skeptic found no defects: both checked the
 raw gate records, initial failure and retry,54 axiom reports, KeySort output,
 source fingerprints and cache/evidence archive hashes. Neither used Lean
 or changed files. Documentation/whitespace checks pass; no source was edited.
+
+## Fresh native regeneration after H86
+
+Regenerated pinned Lean source797c613 under the owned runtime directory.
+The unchanged native producer uses an owned prefix routing Lake through the
+existing-j1 wrapper. Exact12GiB/no-swap scope, serial CPU and headroom guard
+remain active. After recording the missing cc alternatives link, the supported
+CC selector names /usr/bin/gcc-14; generated C/link use pinned leanc. Native
+build passes637.285s, peak1679404KiB; binary20963016bytes.
+
+Fresh solc-to-native84-case gate exits1:64proved,16refuted,fourpending. Both
+exact Identity diamond twins prove; no required positive is missing and no
+negative is proved. Mandatory signed-int44/44 pass. All22 malformed/type
+refusals pass. No observed serialized Lean/source environment access, extra
+exec or network on these requests; observations are not exhaustive absence.
+
+Named-symbol/dynamic-link checks pass. The owned evidence helper was stale
+against current producer object keys; it now verifies every complete-input
+snapshot hash and matches206 exact compiled object keys, extracting14candidate
+bodies. Producer code is unchanged; old failure is retained. This is candidate
+body evidence, not an exhaustive9953-function absence theorem.
+
+Native packet and raw evidence remain outside Git, with paths/sizes/hashes in
+native-validation-receipt.json. Fresh browser handoff requests are regenerated.
+Four storage-diamond cases remain pending, browser execution and full final
+gates remain open. No RUNTIME_GATE_PASS or whole-assignment completion claim.
+
+Independent read-only finder and skeptic verified fresh binary SHA256, all206
+objects and60 build-input hashes. Exact14 C/ASM bodies retain six inert
+initializers and eight generic helpers; neither reviewer inferred exhaustive
+absence. No findings. Corrected helper instrumented gate passes26.875s,
+1228652KiB. Both native/evidence archives pass complete member readback.
+Refreshed H41 cache verifies1707 artifacts,573 mappings,588286089bytes and
+all seven Reader/Compose/Intrinsic/DirectRuntime/three-controls mappings.
+Delivery remains coordinator-pending, not full-tree freshness. Existing-owner
+counterexample request is recorded in counterexample-owner-ticket.json; no
+producer file was edited. Python syntax and whitespace checks pass.
