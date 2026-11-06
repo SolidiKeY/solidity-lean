@@ -1,0 +1,176 @@
+[
+  {
+    "constructor": "index",
+    "input": "a[0]",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_index",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "slice",
+    "input": "a[:]",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_slice",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "member",
+    "input": "a.b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_member",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "callOptions",
+    "input": "a{x:b}",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_callOptions",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "call",
+    "input": "a()",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_call",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "payableConv",
+    "input": "payable(a)",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_payableConv",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "metaType",
+    "input": "type(T)",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_metaType",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "unaryPrefix",
+    "input": "-a",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_unaryPrefix",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "unarySuffix",
+    "input": "a++",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_unarySuffix",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "exp",
+    "input": "a**b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_exp",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "mulDivMod",
+    "input": "a*b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_mulDivMod",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "addSub",
+    "input": "a+b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_addSub",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "shift",
+    "input": "a<<b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_shift",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "bitAnd",
+    "input": "a&b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_bitAnd",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "bitXor",
+    "input": "a^b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_bitXor",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "bitOr",
+    "input": "a|b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_bitOr",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "order",
+    "input": "a<b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_order",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "equality",
+    "input": "a==b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_equality",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "and",
+    "input": "a&&b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_and",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "or",
+    "input": "a||b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_or",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "cond",
+    "input": "a?b:c",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_cond",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "assign",
+    "input": "a=b",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_assign",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "new",
+    "input": "new T",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_new",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "tuple",
+    "input": "()",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_tuple",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "inlineArray",
+    "input": "[a]",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_inlineArray",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "ident",
+    "input": "a",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_ident",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "lit",
+    "input": "\"a\" \"b\"",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_lit",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "litUnit",
+    "input": "1 gwei",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_litUnit",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  },
+  {
+    "constructor": "elemType",
+    "input": "uint",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.constructor_elemType",
+    "boundary": "finite kernel accepted-root control; not uniqueness"
+  }
+]

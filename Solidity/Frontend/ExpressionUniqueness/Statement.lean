@@ -4,8 +4,8 @@ import Solidity.Frontend.Checked.Prec
 /-!
 # The original certified expression uniqueness target
 
-This definition preserves the original target. Its exhaustive structural
-induction remains a producer obligation outside this interface-only increment.
+This definition preserves the original target. Certified.certifiedYieldUnique
+inhabits it by exhaustive intrinsic structural induction.
 Layouts are independently existential through the existing `Syn.Derives`.
 -/
 
