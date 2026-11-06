@@ -40,3 +40,5 @@ open Solidity.Frontend.ExecutableAst.Shared
 #check Solidity.Frontend.ExecutableAst.Shared.localPrim
 #check Solidity.Frontend.ExecutableAst.Shared.localTypeName
 #check Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_narrow
+
+#check Solidity.Frontend.ExecutableAst.Shared.primitiveReturnObligation

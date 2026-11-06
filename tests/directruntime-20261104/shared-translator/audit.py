@@ -36,7 +36,11 @@ assert proofBlock(original)==proofBlock(current), 'proof-search block changed'
 intrinsic=(root/'Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean').read_text()
 oldAssertion=original[original.index('private def assertionObligation'):original.index('private structure Stronger')]
 oldBody=oldAssertion.split(':= do',1)[1].strip()
-newBody=intrinsic.split(':= do',1)[1].split('/-- One executable',1)[0].strip()
+newBody=intrinsic.split('def assertionObligation',1)[1].split(':= do',1)[1].split('/-- One executable',1)[0].strip()
+if 'def primitiveReturnObligation' in intrinsic:
+    packet=json.loads((root/'tests/directruntime-20261104/shared-translator/primitive-return-manifest.json').read_text())
+    assert hashlib.sha256(intrinsic.encode()).hexdigest()==packet['intrinsicSha256'], 'unreviewed primitive return helper'
+    newBody=newBody.replace('  if !d.rets.isEmpty then\n    return ← primitiveReturnObligation lowerBodyLoops callPre C d box', '  unless d.rets.isEmpty do throw "plain return obligation"')
 expected=oldBody.replace('  let ctx ← d.paramCtx', '  unless d.params.all (fun nt => nt.2 matches .prim _) do\n    throw "plain reference obligation"\n  let ctx ← d.paramCtx')
 expected=expected.replace('(Problem.callPre C Γ false [] false [] true)', '(callPre C Γ)')
 expected=expected.replace('  let (raw, st) ← (lowerBodyLoops [] 0 d.body).runFrom { funs := C.funs }\n    (ctx, RawStmt.maxIdxs d.body + 1)', '  let (raw, st) ← (do\n    let body ← renameStmts [] d.body\n    lowerBodyLoops [] 0 body).runFrom { funs := C.funs } (ctx, Scope.bodySeed C d)\n  Scope.validateScopes (d.params.map (·.1)) d.body')
