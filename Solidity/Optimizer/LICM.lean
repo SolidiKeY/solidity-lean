@@ -411,4 +411,164 @@ theorem licm_runC (a : LoopAnn C Γ) (c : Val C Γ .bool) {q : PrimTy} (x : Idx 
 
 end Main
 
+/-! ## The pass -/
+
+section Pass
+
+variable {Γ : Ctx}
+
+/-- A sequence that starts with a local assignment: the assignment and the rest. -/
+def splitAssign? {Δ : Ctx} : Prog C Γ Δ →
+    Option ((q : PrimTy) × Idx Γ (.val q) × Val C Γ q × Prog C Γ Δ)
+  | .nil => none
+  | .cons s P =>
+    match s, P with
+    | .assignLocal x e, P => some ⟨_, x, e, P⟩
+    | .assign .., _ | .rebind .., _ | .declLocal .., _ | .declStorage .., _ | .opAssign .., _ | .incDec .., _ | .assignIncDec .., _ | .assignLocalPush .., _ | .push .., _ | .pop .., _ | .transfer .., _ | .send .., _ | .declMem .., _ | .rebindMem .., _ | .assignFromMem .., _ | .assignMem .., _ | .delete .., _ | .deleteMem .., _ | .assignNew .., _ | .ite .., _ | .require .., _ | .assert .., _ | .revert, _ | .assumeFalse, _ | .call .., _ | .tryCall .., _ | .loop .., _ | .block .., _ | .pushOpAssign .., _ | .pushIncDec .., _ | .callReceiver .., _ | .callReceiverPush .., _ | .callRec .., _ | .revertData .., _ | .catchData .., _ => none
+
+theorem splitAssign?_eq {Δ : Ctx} {P : Prog C Γ Δ} {q : PrimTy} {x : Idx Γ (.val q)}
+    {e : Val C Γ q} {rest : Prog C Γ Δ} (h : splitAssign? P = some ⟨q, x, e, rest⟩) :
+    P = .cons (.assignLocal x e) rest := by
+  cases P with
+  | nil => simp only [splitAssign?, reduceCtorEq] at h
+  | cons s Q =>
+    cases s with
+    | assignLocal x' e' =>
+      simp only [splitAssign?, Option.some.injEq, Sigma.mk.injEq] at h
+      obtain ⟨rfl, h2⟩ := h
+      simp only [heq_eq_eq, Prod.mk.injEq] at h2
+      obtain ⟨rfl, rfl, rfl⟩ := h2
+      rfl
+    | assign | rebind | declLocal | declStorage | opAssign | incDec | assignIncDec | assignLocalPush | push | pop | transfer | send | declMem | rebindMem | assignFromMem | assignMem | delete | deleteMem | assignNew | ite | require | assert | revert | assumeFalse | call | tryCall | loop | block | pushOpAssign | pushIncDec | callReceiver | callReceiverPush | callRec | revertData | catchData => simp only [splitAssign?, reduceCtorEq] at h
+
+/-- The loop `while (c) body`, its leading invariant assignment hoisted under
+the guard `if (c)` when `licmB` allows it. -/
+def hoist {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C Γ Γ₁) : Stmt C Γ Γ :=
+  match splitAssign? body with
+  | some ⟨_, x, e, rest⟩ =>
+    if licmB c x e rest then .ite c (.cons (.assignLocal x e) (.cons (.loop a c rest) .nil)) .nil
+    else .loop a c body
+  | none => .loop a c body
+
+theorem hoist_runC {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C Γ Γ₁) :
+    Stmt.runC (hoist a c body) = Stmt.runC (.loop a c body) := by
+  unfold hoist
+  split
+  · next q x e rest hs =>
+    split
+    · next hl =>
+      rw [splitAssign?_eq hs]
+      exact licm_runC a c x e rest (licmB_ok hl)
+    · rfl
+  · rfl
+
+end Pass
+
+mutual
+/-- Loop-invariant code motion in every loop of a statement, innermost first. -/
+def Stmt.licm : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
+  | _, _, .ite c thn els => .ite c (Prog.licm thn) (Prog.licm els)
+  | _, _, .block body => .block (Prog.licm body)
+  | _, _, .loop a c body => hoist a c (Prog.licm body)
+  | _, _, s@(.assign ..) => s
+  | _, _, s@(.rebind ..) => s
+  | _, _, s@(.assignLocal ..) => s
+  | _, _, s@(.declLocal ..) => s
+  | _, _, s@(.declStorage ..) => s
+  | _, _, s@(.opAssign ..) => s
+  | _, _, s@(.incDec ..) => s
+  | _, _, s@(.assignIncDec ..) => s
+  | _, _, s@(.assignLocalPush ..) => s
+  | _, _, s@(.push ..) => s
+  | _, _, s@(.pop ..) => s
+  | _, _, s@(.transfer ..) => s
+  | _, _, s@(.send ..) => s
+  | _, _, s@(.declMem ..) => s
+  | _, _, s@(.rebindMem ..) => s
+  | _, _, s@(.assignFromMem ..) => s
+  | _, _, s@(.assignMem ..) => s
+  | _, _, s@(.delete ..) => s
+  | _, _, s@(.deleteMem ..) => s
+  | _, _, s@(.assignNew ..) => s
+  | _, _, s@(.require ..) => s
+  | _, _, s@(.assert ..) => s
+  | _, _, s@(.revert) => s
+  | _, _, s@(.assumeFalse) => s
+  | _, _, s@(.call ..) => s
+  | _, _, s@(.tryCall ..) => s
+  | _, _, s@(.pushOpAssign ..) => s
+  | _, _, s@(.pushIncDec ..) => s
+  | _, _, s@(.callReceiver ..) => s
+  | _, _, s@(.callReceiverPush ..) => s
+  | _, _, s@(.callRec ..) => s
+  | _, _, s@(.revertData ..) => s
+  | _, _, s@(.catchData ..) => s
+
+/-- Loop-invariant code motion in a sequence. -/
+def Prog.licm : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
+  | _, _, .nil => .nil
+  | _, _, .cons s P => .cons (Stmt.licm s) (Prog.licm P)
+end
+
+mutual
+theorem Stmt.licm_runC : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runC (Stmt.licm s) = Stmt.runC s
+  | _, _, .ite c thn els => by
+    simp only [Stmt.licm, Stmt.runC]
+    rw [Prog.licm_runC thn, Prog.licm_runC els]
+    exact TRun.ite_congr (fun _ => rfl) _ _ _ _ _ _
+  | _, _, .block body => by
+    simp only [Stmt.licm, Stmt.runC]
+    rw [Prog.licm_runC body]
+    exact TRun.block_congr _ _ _
+  | _, _, .loop a c body => by
+    simp only [Stmt.licm]
+    rw [hoist_runC]
+    simp only [Stmt.runC]
+    rw [Prog.licm_runC body]
+    exact TRun.loop_congr (fun _ => rfl) _ _ _
+  | _, _, .assign ..
+  | _, _, .rebind ..
+  | _, _, .assignLocal ..
+  | _, _, .declLocal ..
+  | _, _, .declStorage ..
+  | _, _, .opAssign ..
+  | _, _, .incDec ..
+  | _, _, .assignIncDec ..
+  | _, _, .assignLocalPush ..
+  | _, _, .push ..
+  | _, _, .pop ..
+  | _, _, .transfer ..
+  | _, _, .send ..
+  | _, _, .declMem ..
+  | _, _, .rebindMem ..
+  | _, _, .assignFromMem ..
+  | _, _, .assignMem ..
+  | _, _, .delete ..
+  | _, _, .deleteMem ..
+  | _, _, .assignNew ..
+  | _, _, .require ..
+  | _, _, .assert ..
+  | _, _, .revert
+  | _, _, .assumeFalse
+  | _, _, .call ..
+  | _, _, .tryCall ..
+  | _, _, .pushOpAssign ..
+  | _, _, .pushIncDec ..
+  | _, _, .callReceiver ..
+  | _, _, .callReceiverPush ..
+  | _, _, .callRec ..
+  | _, _, .revertData ..
+  | _, _, .catchData .. => rfl
+
+theorem Prog.licm_runC : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.runC (Prog.licm P) = Prog.runC P
+  | _, _, .nil => rfl
+  | _, _, .cons s P => by
+    simp only [Prog.licm, Prog.runC]
+    rw [Stmt.licm_runC s, Prog.licm_runC P]
+end
+
+theorem licm_preserves (Γ Γ' : Ctx) :
+    Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.licm : Lowering.Pass C Γ Γ') :=
+  fun P => (Prog.licm_runC P).symm
+
 end Solidity.Optimizer.ConstFold
