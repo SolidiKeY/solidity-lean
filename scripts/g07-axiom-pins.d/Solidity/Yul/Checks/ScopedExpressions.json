@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Checks/ScopedExpressions.lean:Solidity.Yul.ScopedExpressions.Checked.term_result_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/ScopedExpressions.lean:Solidity.Yul.ScopedExpressions.Checked.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequence.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequence.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

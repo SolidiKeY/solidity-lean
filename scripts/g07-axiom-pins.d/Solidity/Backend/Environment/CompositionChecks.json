@@ -1,0 +1,29 @@
+{
+ "Solidity/Backend/Environment/CompositionChecks.lean:Solidity.Backend.Environment.consCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CompositionChecks.lean:Solidity.Backend.Environment.materialize_then_hash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CompositionChecks.lean:Solidity.Backend.Environment.mixed_observation_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CompositionChecks.lean:Solidity.Backend.Environment.repeated_across_stable": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CompositionChecks.lean:Solidity.Backend.Environment.source_effect_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CompositionChecks.lean:Solidity.Backend.Environment.source_sequence_success": [
+  "propext"
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/ProducerInterfaceControls.lean:Solidity.Backend.StorageOps.ProducerInterfaceControls.changed_and_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ProducerInterfaceControls.lean:Solidity.Backend.StorageOps.ProducerInterfaceControls.compatible_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ProducerInterfaceControls.lean:Solidity.Backend.StorageOps.ProducerInterfaceControls.reached_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

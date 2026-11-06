@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.adopt_local_slice": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.allocDefault_old_ne_fresh": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.copyStToM_old_ne_fresh": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.local_slice_push_wk": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.sliceElems_allocDefault": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/ContextTransport.lean:Solidity.Backend.MemoryOps.sliceElems_copyStToM": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.empty_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.empty_prior": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.full_coherent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.repack_not_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.runtime_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.sparse_keys": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.sparse_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Semantics/TryConditions.lean:Solidity.TRun.tryCall_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

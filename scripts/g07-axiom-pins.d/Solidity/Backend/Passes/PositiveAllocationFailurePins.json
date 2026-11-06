@@ -1,0 +1,93 @@
+{
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.actual_body_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.allocation_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.initial_observations": [],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.prefix_saved_head": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.prefix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.reached_budget_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.reached_input_refused_near_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.reached_observations": [],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.skipped_assignment_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.Controls.stale_budget_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.initial_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.initial_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.instantiated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.reached_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.read_after_allocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean:Solidity.Backend.Passes.PositiveAllocationFailure.workspace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

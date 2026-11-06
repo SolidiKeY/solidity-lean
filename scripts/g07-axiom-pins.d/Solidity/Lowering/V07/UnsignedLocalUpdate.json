@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/V07/UnsignedLocalUpdate.lean:Solidity.Lowering.V07.UnsignedLocalUpdate.code_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdate.lean:Solidity.Lowering.V07.UnsignedLocalUpdate.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdate.lean:Solidity.Lowering.V07.UnsignedLocalUpdate.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdate.lean:Solidity.Lowering.V07.UnsignedLocalUpdate.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdate.lean:Solidity.Lowering.V07.UnsignedLocalUpdate.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdate.lean:Solidity.Lowering.V07.UnsignedLocalUpdate.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

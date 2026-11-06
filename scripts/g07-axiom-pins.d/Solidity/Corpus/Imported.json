@@ -1,0 +1,12 @@
+{
+ "Solidity/Corpus/Imported.lean:Solidity.Corpus.box_of_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Corpus/Imported.lean:Solidity.Corpus.diamond_of_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

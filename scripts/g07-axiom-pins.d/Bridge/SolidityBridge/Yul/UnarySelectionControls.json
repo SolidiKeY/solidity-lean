@@ -1,0 +1,100 @@
+{
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.bridge_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.compileBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.compileLeaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.iszero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.iszero_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.iszeroFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.model_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.not": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.not_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.notFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.scalar_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CountdownWitness.call_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

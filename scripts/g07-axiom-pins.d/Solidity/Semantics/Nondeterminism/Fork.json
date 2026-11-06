@@ -1,0 +1,20 @@
+{
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.BlockEnv.difficulty_control": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.BlockEnv.field?_slotnum_osaka": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkControls.slotnum_osaka": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkControls.slotnum_withSlotnum_not": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkedSplit.holdsOn_of_forkBlind": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_d2_pin": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_idealized_pin": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_pin": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osakaWithSlotnum_has": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.prague_differs": []
+}

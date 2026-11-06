@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/HashMove.lean:Solidity.Fml.tk_complete_move": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

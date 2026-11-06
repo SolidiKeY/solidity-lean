@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeat.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeat.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeat.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeat.numeric_repeat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeat.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeat.symbolic_repeat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

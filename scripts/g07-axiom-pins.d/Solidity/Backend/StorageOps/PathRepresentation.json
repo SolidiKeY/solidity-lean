@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/PathRepresentation.lean:Solidity.Backend.StorageOps.PathRepresentation.copy_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentation.lean:Solidity.Backend.StorageOps.PathRepresentation.focus": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentation.lean:Solidity.Backend.StorageOps.PathRepresentation.pop_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "Solidity/Semantics/ExternalReturnBytes.lean:Solidity.ExternalReturnBytes.decode_error": [
+  "propext"
+ ],
+ "Solidity/Semantics/ExternalReturnBytes.lean:Solidity.ExternalReturnBytes.decode_ok": [
+  "propext"
+ ]
+}

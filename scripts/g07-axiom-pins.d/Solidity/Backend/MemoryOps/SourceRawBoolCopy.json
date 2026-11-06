@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopy.lean:Solidity.Backend.MemoryOps.decode_raw_bool": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopy.lean:Solidity.Backend.MemoryOps.raw_bool_indices": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopy.lean:Solidity.Backend.MemoryOps.source_raw_bool_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopy.lean:Solidity.Backend.MemoryOps.source_raw_bool_copy_first_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopy.lean:Solidity.Backend.MemoryOps.source_raw_bool_copy_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
