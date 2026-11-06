@@ -810,3 +810,13 @@ therefore needs no additional approval merely to retain explicit unselected
 candidates. Remaining implementation work is an exhaustive selection/oracle
 ledger and direct rollback-state and frame/capture-effect mutants; existing
 send-flag witnesses keep their narrower claims until those additions pass.
+
+At `4418c39a713a450a36353ef8523157528cf07af4`, 86 controls and strict bulk/member
+verification pass in normal and optimized Python (four actual VM gates).
+Both read-only reviews PASS; peak RSS is 24,532 KiB. The touched gate passes
+with targets none and the write-scope guard passes.
+`bulk-data.json.member_manifest_validation` identifies the off-Git gate/review
+archive and its committed 11-member checksum manifest. No Lean source changed.
+The coordinator published this fix in a91a6cca; the current delivery-only
+anchor follows that published head while frozen snapshot provenance remains
+86253aba and semantic inputs remain 6f3eedf0. Full assignment work continues.
