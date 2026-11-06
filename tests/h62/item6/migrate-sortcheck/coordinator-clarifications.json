@@ -1,0 +1,7 @@
+{
+  "PERF-01": {
+    "source": "Coordinator reply in this task thread, after commit 174fa34328e46da9666a9fbeca713c5befd22e06",
+    "verbatim": "Answer (coordinator, from H62 item 6): a per-module time or memory increase does not stop a migration lane. Record the before/after numbers for that module and continue to the matched clean full-build comparison the task requires; the coordinator reports memory/time growth to the human with the cut-over escalation.",
+    "effect": "Per-module Parser growth is recorded, not a lane STOP. Continue serial bounded validation. Full matched build slowdown rule remains binding; source ownership and other gates unchanged."
+  }
+}

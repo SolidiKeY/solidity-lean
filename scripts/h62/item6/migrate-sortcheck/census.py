@@ -26,20 +26,34 @@ def uncomment(s):
             out.append(c); i+=1
             if c=='"': string=True
     return "".join(out)
-def path(m): return ROOT / (m.replace(".","/")+".lean")
-def imports(m):
-    return re.findall(r"(?m)^import\s+([\w.]+)",uncomment(path(m).read_text()))
-def closure(targets):
+def path(m, source_root=ROOT): return source_root / (m.replace(".","/")+".lean")
+def imports(m, source_root=ROOT):
+    # Lean 4.35 header: optional module/prelude, then optional public/meta,
+    # import, optional all, one module identifier. Reject unhandled valid
+    # syntax rather than silently omitting overlay dependencies.
+    out=[]
+    for lineno,line in enumerate(uncomment(path(m,source_root).read_text()).splitlines(),1):
+        line=line.strip()
+        if not line or line in {"module","prelude"}: continue
+        if re.fullmatch(r"(?:public|meta)(?:\s+(?:public|meta))*",line):
+            raise ValueError(f"unsupported multiline import modifier: {path(m,source_root)}:{lineno}: {line}")
+        if not re.match(r"(?:(?:public|meta)\s+)*import\b",line): break
+        match=re.fullmatch(r"(?:public\s+)?(?:meta\s+)?import\s+(?:all\s+)?(\w+(?:\.\w+)*)",line)
+        if not match or match[1]=="all":
+            raise ValueError(f"unsupported import header: {path(m,source_root)}:{lineno}: {line}")
+        out.append(match[1])
+    return out
+def closure(targets, source_root=ROOT):
     done=set(); active=set(); ordered=[]
     def visit(m):
         if m in done: return
-        if not path(m).exists():
+        if not path(m, source_root).exists():
             if m in targets or m.startswith("Solidity."):
                 raise ValueError("missing repository module: "+m)
             return
         if m in active: raise ValueError("import cycle: "+m)
         active.add(m)
-        for x in imports(m): visit(x)
+        for x in imports(m, source_root): visit(x)
         active.remove(m); done.add(m); ordered.append(m)
     for m in targets: visit(m)
     return ordered

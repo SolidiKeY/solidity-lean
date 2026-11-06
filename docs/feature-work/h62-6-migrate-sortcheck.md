@@ -1,82 +1,82 @@
-# H62/H63 SortCheck migration checkpoint and blocked handoff
+# H62/H63 SortCheck migration — reviewed blocked handoff
 
-Batch `solidity-h62-6-20261106`, owner `migrate-sortcheck`. This is an isolated migration overlay, not live producer ownership. **Overall status: blocked, not complete.** No production `.lean`, toolchain, Lake configuration, generated root, module map, or axiom pin changed. No push, merge, PR, pre-gate, freeze announcement, or master publication occurred.
+Batch `solidity-h62-6-20261106`, owner `migrate-sortcheck`. Overall **blocked, full goal unfinished**. This isolated migration overlay does not transfer live producer ownership. Production SortCheck, statements, premises, observations, proof budgets, toolchain/Lake files, roots/maps and axiom pins are unchanged. No push, merge, PR, pre-gate, freeze or publication.
 
-## Checkout and scope
+## Checkout and continuation
 
-Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Checkout: `/workspace/migrate-sortcheck`. Branch: `codex/solidity-h62-6-20261106/migrate-sortcheck`. Original clean `/workspace/solidity-lean` branch `work` at `6cf853aea0417155aca29ddb91f1767d3f3a3cc4` was preserved. The exact missing published base was fetched and verified an ancestor of `origin/master` before creating the assigned branch/worktree. Export metadata records the final full commit.
+Base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`; assigned branch `codex/solidity-h62-6-20261106/migrate-sortcheck`; checkout `/workspace/migrate-sortcheck`. Base fetched and verified ancestor of published origin/master before branch creation. Original clean `/workspace/solidity-lean` work branch at `6cf853aea0417155aca29ddb91f1767d3f3a3cc4` preserved. Export metadata records full committed head.
 
-Read AGENTS, SortCheck rule-table conventions, intrinsic G0, module map, build/parallelism/resource instructions, and lean-verify skill. No Lean MCP tool was exposed; per-file CLI elaboration was used with explicit `-j1` and `--tstack=131072`. Repository final gates remain required. The runtime skill was read and network policy inspected. All coordinator input hashes match `/workspace/h62-coordinator-inputs/sha256.json`. `get_goal` is not exposed; the coordinator explicitly says its absence is not a blocker. No replacement goal was created.
+Same VM and existing persistent goal; no replacement goal or thread launched. get_goal is not exposed, explicitly allowed by coordinator. Read repository AGENTS, rule-table conventions, intrinsic G0, module map, build/resource instructions and lean-verify/runtime skills. No Lean MCP tool exposed; guarded CLI/Lake checks used. relay.sh is **host-only**, not a VM installation task; saved exact requests are the coordinator handoff mechanism.
 
-## Queue accounting
+## Coordinator clarification: PERF-01 resolved
 
-| Checkpoint | Status | Evidence and missing work |
+Verbatim: “Answer (coordinator, from H62 item 6): a per-module time or memory increase does not stop a migration lane. Record the before/after numbers for that module and continue to the matched clean full-build comparison the task requires; the coordinator reports memory/time growth to the human with the cut-over escalation.”
+
+Tracked source: `tests/h62/item6/migrate-sortcheck/coordinator-clarifications.json`. The earlier conservative Parser-only STOP in checkpoint174fa343 is superseded. Module increases remain recorded in `resume-20261106/module-observations.json`; they do not block this lane. Only the required matched full-build comparison uses its escalation/>10% rule. No full-build delta is currently valid because the new build fails.
+
+## Four checkpoints
+
+| Checkpoint | Status | Evidence / remaining obligation |
 |---|---|---|
-| 1. Census and old baseline | partial | Complete source census plus all 46 generated theorem entries and nested helper; old elaborated census has 658 declarations. All 64 dependency-closure modules pass on 4.24. Preliminary clean per-file elaboration timing measured; canonical matched Lake/native build gate still pending. |
-| 2. Official toolchain and adaptation | partial | Official archive pin verified; actual Lean/Lake versions and new KeySort pass recorded. Annotations passes unchanged. Parser's two-line proposal passes only in isolated fixture. Exact-file owner acknowledgement and production adaptation pending. |
-| 3. New build and performance | blocked | New closure fails in out-of-scope Syntax/Raw. Faithfulness cannot be validated. Parser-only fixture observation exceeds 10%; further Lean work STOPPED. Full matched timing and final validation pending. |
-| 4. Reviewable export and interfaces | partial | Additive tooling/tests, source hashes, old complete interface/axiom capture, dependency report and proposed Parser patch exported. New complete interface comparison, final conformance/build gates, and root-gate acceptance pending. |
+| 1. Census and clean old build | done | Three source files,46 generated faithfulness invocations,nested helper/pattern cases; old full elaborated658-declaration capture; clean cache-disabled Lake leanArts build all64 dependency modules passes with wall/RSS and independent reviews. |
+| 2. Official435 and adaptation | partial | Exact official archive/version pin; KeySort/AST/Annotations pass. Parser proposal fixture/controls/conformance pass. Production edits await exact-file coordination; missing generated API aliases have tested proposals. |
+| 3. New full build and matched timing | blocked | Matched clean new Lake attempt fails in read-only Syntax/Raw. Faithfulness/full new interfaces not checked. No valid complete before/after delta. |
+| 4. Reviewed migration export | partial | Patch/bundle/evidence/source hashes,old full and new partial interfaces,dependency report and precise requests exported. Production overlay,root-gate acceptance and remaining full gates pending. |
 
-## Toolchain identity and resources
+## Identity, resources and measurement
 
-Required official archive: `https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst`.
-SHA-256: `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d` (exact coordinator pin).
+Official435 archive URL: `https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst`; SHA256 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`, matching coordinator toolchain-pin.json. All five coordinator input hashes verified.
 
-- Old Lean: `4.24.0`, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake `5.0.0-src+797c613`.
-- New Lean: `4.35.0`, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`; Lake `5.0.0-src+eb6cafb`.
-- VM: 16 GiB cgroup memory cap, four CPU quota, zero configured swap. Runner enforces 12 GiB per-process address-space cap plus sampled aggregate RSS limit, 4 GiB available reserve, no-swap check, 300s per-module safety timeout. One Lean process at a time, `LEAN_NUM_THREADS=1`, explicit `-j1`. Writer lock held throughout checks. No systemd-run, shared Lake/per-master cache, heartbeat increase, or toolchain-file override.
-- RSS sampling interval is 100ms. Corrected runner additionally records kernel cumulative child high-water RSS, compiler/archive identity, runner hashes, and before/after source and prerequisite artifact hashes. Provenance hashing is outside the measured build interval. These are different metrics and are labelled separately.
+- Old Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake5.0.0-src+797c613. Official old archive SHA256 b14f5e5159219dd1a1956c3b806813319f5e94ccd5bdfd56f54520609a5bb5ec.
+- New Lean4.35.0 commiteb6cafb7290e8bd5f2937522d8d804f58f02bafc; Lake5.0.0-src+eb6cafb.
+- VM16GiB cgroup memory,4CPU quota,no configured swap. Runner:12GiB per-process address-space bound plus sampled aggregateRSS bound,4GiB available reserve,300s per-module safety timeout,one Lean process at a time. LEAN_NUM_THREADS=1 and explicit -j1; writer lock held. No systemd-run or per-master/shared artifact cache.
+- Private off-git Lake project derives from tracked config: absolute selected srcDir/private buildDir,cache disabled,weakLeanArgs add -j1. Only testing-private lean-toolchain written. Each dependency-ordered +module builds leanArts (.olean,.ilean,C); **native C compilation/linking is separate**. Actual commands show -j1. Guard records max concurrent Lean processes; observed1.
+- Reports contain actual Lean/Lake versions,official archive digest,runner/census hashes,normalized private profile hash,selected-root source/import hashes before/after and explicit prerequisite artifact hashes for focused checks. Provenance hashing outside build interval. RSS sampled100ms; kernel cumulative child high-water RSS reported separately.
 
-## Results and proof boundaries
+Clean old **Lake** result: `/workspace/migrate-sortcheck-evidence/resume-20261106/old-lake-clean/result.json`: **64/64 pass,382.510216s**, sampled aggregate peak **7142703104 bytes**, kernel cumulative child maximum **6919620KiB**. Source snapshot stable. Earlier374.214s measurement was elaboration-only and is retained as historical evidence, not substituted for Lake.
 
-Old clean closure: **64/64 pass**, **374.214214s**, sampled aggregate peak **7081349120 bytes** (6.59 GiB). Initial harness lacked source snapshots/kernel high-water output; `old-clean-provenance.json` verifies every closure source against base and documents this limitation. This measures per-file elaboration/kernel checking into fresh private oleans, not native executable building or the full repository gate.
+Clean new **Lake** result: `/workspace/migrate-sortcheck-evidence/resume-20261106/new-lake-clean/result.json`: KeySort,AST,Annotations,SpecSyntax pass; Syntax/Raw fails with String/Slice mismatches at597,650,665,682/684. This belongs to migrate-syntax. No out-of-scope fix attempted. The matched comparison returns **blocked/null delta**, with new-build failure and unequal completed module sets as reasons; not a >10% STOP.
 
-New clean closure: KeySort, AST, Annotations and SpecSyntax pass; Syntax/Raw fails at 597, 650, 665, 682/684 (String/Slice API mismatches). See `new-clean2/result.json` and its exact commands/logs. This source is read-only in this lane; its migration owner is routed in `cross-directory-dependencies.json`. No changes outside scope were attempted.
+Both attempts used the same frozen runner/census/profile. Exact scripts preserved under `/workspace/migrate-sortcheck-evidence/resume-20261106/matched-attempt-harness`, with hashes matching both reports. Later scanner hardening changes the census hash; **future accepted comparison must regenerate both sides using identical final harnesses, or use the frozen harness identically on both sides where supported**. Never compare unlike runner/profile identities.
 
-Original Parser fails on removed String.trim/dropRight APIs. Deterministic `fixture.py` changes only `l.trim` to `l.trimAscii.copy` and `(t.dropRight 1).trim` to `(t.dropEnd 1).trimAscii.copy`. New fixture Parser and all controls pass. Deprecated String.mk remains to keep the proposal minimal. This proposal has not been applied to production. History review preserves the earlier executable #guard boundary and generated annotation representation; no speed refactor was reversed.
+## Conformance, controls and proof boundaries
 
-Controls: **two kernel examples and 24 executable guards**, both old production Parser and new isolated Parser pass. Coverage includes comments, unknown tokens/sorts, missing/ambiguous generic varconds, memory/storage/net/default/length classification, legacy valAt, multiset ordering/multiplicity, missing/unannotated taclets, rendering, and annotation/operator inventories. Scanner suffix operations do not kernel-reduce in these examples; their checks are executable guards, not a new external-parser equivalence theorem. Earlier failed test/setup iterations remain evidence and are not accepted as passing checks.
+`/workspace/migrate-sortcheck-evidence/resume-20261106/old-conformance/result.json` and `new-fixture-conformance/result.json`: guarded **lean --run SolkeyCheck.lean**, explicit frozen file, both report **377 taclets,131 read-bearing,table131,OK**. Rule SHA256 `02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb`. These execute the real checker via Lean's interpreter; **not a native lake exe or full run-lean gate**. New result uses isolated Parser proposal; production unchanged.
 
-Old interface capture: **658 declarations**, including generated/internal declarations from all three assigned modules, with complete printed types and transitive axiom sets. Log SHA-256: `85430e37388519d87672f7bd40ae3f12af7f66190f13011b064dd3d7e7cc818a`. Observed axiom union is only propext, Classical.choice, Quot.sound. No sorryAx or new trust shortcut was admitted. Printed text is an elaborated census, not proof of cross-version definitional equality. Source freeze protects exact original statements and budgets; new full capture remains pending.
+Earlier scoped controls pass on old production and new fixture: **two kernel examples and24 executable guards** covering comments,unknown tokens/sorts,varcond absence/ambiguity,all read domains/sites,legacy valAt,multiset ordering/multiplicity,missing/unannotated taclets,rendering and inventories. Scanner suffix computations remain executable guards,not a new external-parser equivalence theorem. Failed iterations are retained,never counted passing.
 
-## Performance STOP and dependency requests
+Parser proposal changes only l.trim → l.trimAscii.copy and (t.dropRight1).trim → (t.dropEnd1).trimAscii.copy; actual exact diff in parser435-fixture3/proposed-parser.patch. History3b03ac583/e4b8be05a reviewed; no speed-driven guard/row representation undone. String.mk deprecations remain rather than expanding the proposal.
 
-Parser-only observed times: old **2.222039s**, new isolated fixture **2.824587s**, observed **+27.12%**. New fixture sampled RSS is also higher. These runs differ in source adaptation, compiler prerequisites, source root and harness revision; **no full-directory timing delta is valid**. `compare.py` rejects the available full reports with null delta because the new build failed and the original baseline lacks final provenance fields. Nevertheless the observed increase triggers conservative STOP under the assignment's >10% rule. No further Lean build, timing rerun, executable conformance run, or final gate was performed after observing it.
+## Frozen interfaces and new compatibility findings
 
-**ESCALATE PERF-01:** Keep Lean checks stopped pending coordinator review/dependency migration, or authorize one bounded matched Parser timing pair while retaining the same >10% stop gate. No gate waiver or statement change is proposed.
+Old complete capture: **658 declarations**, complete printed types/transitive axiom sets. Log SHA256 `85430e37388519d87672f7bd40ae3f12af7f66190f13011b064dd3d7e7cc818a`. Source-primary signatures/statements and budgets frozen by exact source bytes.
 
-Saved requests in `coordination-requests.json`:
+Partial capture reuses the same template for Parser/Annotations: old331,new336 declarations;218 baseline public names audited. **26 source-primary printed signatures match**, none missing. **Full partial-interface result remains review-required**:
 
-1. DEP-SYNTAX-01: syntax migration owner must supply the pinned-toolchain Syntax/Raw overlay/dependencies. Full report enumerates all 61 out-of-directory repository dependencies and their migration owners.
-2. OWNER-PARSER-01: exact-file acknowledgement for Parser's two substitutions from coordinator/root migration and live producer before any existing-file edit. `relay.sh` is absent; the request is saved for coordinator routing, not falsely reported sent. Silence is not permission.
-3. PERF-01: timing STOP above. The original goal stays unfinished; resume only within its authorization and resolved stop/dependency conditions.
+- Three deprecated generated public aliases disappear: ReadDomain.toCtorIdx,ReadSite.toCtorIdx,SortVarcond.toCtorIdx. Do not discard them as an accepted exclusion.
+- Generated noConfusion/helper printed types change; per-definition standard axiom dependencies also change. Printed differences are not automatically semantic changes or automatically accepted.
+- Observed total axiom union is propext,Classical.choice,Quot.sound on both sides. No sorryAx/native trust primitive introduced,but unchanged union does not waive per-declaration review or authorize pin regeneration.
 
-## Frozen source hashes
+Reports/log hashes: parser-interface-comparison-classified.json and old/new-parser-interfaces/ParserInterfaces.log beneath resume-20261106. Text comparison is not cross-version kernel equivalence; full Faithfulness/new complete capture remains blocked.
+
+Test-only compatibility fragment `/workspace/migrate-sortcheck-evidence/resume-20261106/constructor-compat-source3/annotations-compat.fragment.lean` restores the three arrow-typed aliases with original reducible protected form and deprecated target/date2025-08-25 (verified against old Lean CtorIdx generator). It does not restore the old completion-blacklist metadata. **No production aliases applied.** Tests `ConstructorTags.lean` independently freeze exact numeric0..2 domain,0..3 site,0..4 varcond maps. Three universal kernel proofs cover all12 constructors on both compilers: old-constructor-tags-frozen and new-constructor-tags-frozen pass. The final tests supersede weaker same-version ctorIdx equality checks; no theorem/premise was weakened.
+
+## Ownership/dependency/H70 requests
+
+Current exact requests: `/workspace/migrate-sortcheck-evidence/resume-20261106/coordination-requests-current.json`; this supersedes historical performance-stop requests. DEP-SYNTAX-01 needs owner overlay exact base/head/path/hash. OWNER-PARSER-01 and OWNER-ANNOTATIONS-01 need live producer/root-gate coordination before existing-file edits. API-AXIOMS-01 requests review of generated signatures and standard axiom dependence. Silence/routing is not permission. Cross-directory report accounts for all61 repository dependencies and migration owners; no producer ownership transfer.
+
+H70 routes generic-v08 → Parser at requester headbc63858540d294f0e66c60ba62745c6dc90769b1. Reported full handoff14777 bytes/SHA256 b132587155bd438825a5d7f32d2a9f35275689cfc0b8659f8bd0c41067c35b12 lives at host receipt `/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-4-20261106__generic-v08/df8196188fc4-HANDOFF.md`, unreadable on this VM. **H70-DELIVERY-01 requests coordinator delivery**, not relay installation. We can supply tested proposals and precise evidence; no owner-authored accepted production overlay/head is claimed. Requester execution proofs,exact instances,correspondence,semantic refusal validation,final builds/full-family measurements remain unfinished/unproved here. Routing authorizes none of those changes.
+
+## Source hashes
 
 - `Solidity/SortCheck/Annotations.lean`: `45bc9365a12b009a45a4352fd3fb6f6bf16098400beb7593dea8c40f5f060188`
 - `Solidity/SortCheck/Faithfulness.lean`: `b006ff2d3243ae5b6a2510a1eae5e1e1d8459ba254ff16a89151054b4b67ea8b`
 - `Solidity/SortCheck/Parser.lean`: `e21e62c46abaf7f954aaa3447033983d66ba75a1257217f16bacecc1d9a2d330`
 
-Census records every source pattern-clause line and all generated theorem invocation metadata. Full environment capture supplies the elaborated declarations the lexical index cannot infer. No original statement, premise, exclusion, observation, proof budget, or generated row was changed. No axioms/sorry/native_decide added to production or tests. No helpers registered centrally; fixture/tests stay in the explicitly assigned test scope. H44 bulk logs/interfaces/generated experiments remain off git with manifest hashes.
+## Gates, review and remaining work
 
-## Reproduction and gates
+Tooling selfcheck includes missing-target/overlay-dependency controls,public/meta/all headers,explicit rejection of unsupported quoted/multiline forms,same-compiler/archive/runner/NaN/time rejection,module-vs-directory eligibility,and deterministic fixture checksums. Import discovery uses selected source_root. Private helper/test modules remain under tests or generated off git; no central registration edits. H44 bulk logs,sources,interfaces and cache outputs remain off git with SHA256 inventories.
 
-All exact per-file commands, exits, wall/RSS data and source/artifact identity are in the named `result.json` files beneath `/workspace/migrate-sortcheck-evidence`. Representative commands from repository root:
+Independent read-only finder/skeptic used no Lean server/builds/edits. Confirmed findings fixed: selected-root import provenance,modifier handling,frozen numeric tag cases,inventories,lifecycle cleanup,resource/provenance labels,and stale historical STOP prose. Final review results saved in resumed reviews. Per-module increases are record-only; memory/time growth goes to coordinator cut-over escalation.
 
-```sh
-python3 scripts/h62/item6/migrate-sortcheck/census.py
-python3 scripts/h62/item6/migrate-sortcheck/selfcheck.py
-python3 scripts/h62/item6/migrate-sortcheck/check.py --toolchain /workspace/.setup/tools/lean-4.24.0-linux --out FRESH_OLD_DIRECTORY
-python3 scripts/h62/item6/migrate-sortcheck/check.py --toolchain /workspace/migrate-sortcheck-evidence/toolchains/lean-4.35.0-linux --out FRESH_NEW_DIRECTORY
-python3 scripts/h62/item6/migrate-sortcheck/fixture.py --out FRESH_FIXTURE_DIRECTORY
-```
-
-These are reproduction instructions, not authorization to bypass the current performance STOP. Focused controls use `--dependency-lib` with explicit artifact hashes; `--source-root` selects the isolated fixture. `--run`/`--run-args` supports future bounded conformance once unblocked; not yet exercised. Fresh output directories are mandatory. No implicit shared cache is read.
-
-Passing non-Lean gates: tooling selfcheck (missing-module negative control, timing rejection/STOP controls, deterministic two-line fixture and checksum checks), layer check (857 core modules, no frontend reach), generated root `--check`, fragments `--check`, and scoped freeze check. Full `./run-lean.sh`, clean Lake/native build comparison and explicit frozen SolKey conformance execution remain pending, not waived. Frozen rule input SHA-256 is `02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb`.
-
-## Independent reviews and next handoff
-
-Read-only finder and skeptic did not use Lean servers or write files. They found and prompted fixes for missing 46 generated theorem entries/nested helper, missing-target false pass, subprocess cleanup, RSS labels, source/prerequisite provenance, overlay conflicts, and invalid initial finite tests. Actual final passing controls supersede failed iterations. Final follow-up review confirms the blocked conclusions. The finder additionally required exact compiler/archive identity, matching runner provenance and numeric wall-time validation in the future timing subgate; these and same-compiler/mismatched-runner negative controls were added without rerunning Lean. Generated Python bytecode was removed and future local imports suppress it. Final reports are recorded in the off-git review report. Known limitations above remain required gates, not accepted exclusions.
-
-Useful completed work items: source/declaration census and baseline; exact toolchain provisioning/prerequisite diagnostics; deterministic isolated scanner controls and tooling acceptance tests; reviewable blocked migration packet. Hand back to the coordinator after these items; do not self-launch a replacement thread or goal. The current VM/goal remain the continuation state. Export HANDOFF.md records absolute patch/bundle/evidence/checksum paths and full committed head. No RUNTIME_GATE_PASS is claimed for full migration.
+Passing static checks and source freeze recorded in the handoff. **Still pending**: production coordination/adaptation,syntax-owner dependencies,full new Faithfulness/build/interfaces,accepted compatibility review,matched successful clean full comparison,native conformance and required ./run-lean.sh final gate. No partial checkpoint declares full success. After these useful work items hand back to coordinator for fresh-thread continuation on exact same VM/goal/state; never self-launch/reset a goal.
