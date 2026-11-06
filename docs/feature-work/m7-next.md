@@ -150,8 +150,44 @@ Checkpoint 1 (MCP, per file): `Calculus/DecisionResidue.lean` and
 `#print axioms DecisionTheorem'` is `[propext, Classical.choice, Quot.sound]`
 (pinned). `hashBudget_residue` costs about 24 s of kernel checking (profiler,
 language server). The base commit failed `fragments.sh --check` (a README row
-without its fragment); this lane adds the fragment row. Full-gate results
-are in the final section below.
+without its fragment); this lane adds the fragment row.
+
+Final gates (2026-11-06, on the review-fixed head):
+
+* `./run-lean.sh`: every Lean job of the default targets and
+  `SolkeyTestSuite` builds without an error (two incremental runs: the first
+  was stopped when `Examples/Tactics/OpenLoops`, outside this lane, was killed
+  by the out-of-memory killer (exit 137) beside resident language-server
+  workers; the rerun built it and finished the Lean build in 10 min 55 s).
+  The script's last step, `scripts/check-solkey.sh`, then reports 167 drifts
+  against the sibling `../solkey` checkout (b8d5f88); this lane touches no
+  `SortCheck/`, rule or taclet file, so the drift is the checkout's, not this
+  lane's, and the step is recorded as not passing.
+* `layers`, `orphans`, `register.sh --check`, `fragments.sh --check`: pass.
+  `check-doc-paths.sh` fails on one citation outside this lane
+  (`after-roadmap-va1.md`, a Mathlib test path); `check-axiom-pins.mjs`
+  reports 0 errors and a repository-wide inventory of 4403 unrecorded
+  changes, none from this lane's modules.
+* Item 4 (module time under 300 s), measured per module. `lake build` times
+  from the full run: `DecisionGapOperators` 229 s, `DecisionFeatures` 156 s,
+  `DecisionResidue` 97–101 s, `DecisionHashKeys` 86 s, every other built
+  `Examples/Decision*` module under 60 s. The 19 modules the build replayed
+  from language-server artifacts were timed as fresh language-server checks
+  (wall time of the file worker, CPU in brackets): `DecisionGaps` 239 s
+  (236 s), `DecisionMemory` 83 s (81 s), `Decision` 73 s (65 s),
+  `DecisionHashCore` 63 s (60 s), `DecisionHaltingOrGaps` 26 s,
+  `DecisionKInt` 24 s, `DecisionQuantLedger` 20 s,
+  `DecisionNormalizationResidue` 19 s, `DecisionArrayGaps` 9 s,
+  `DecisionCoefficientBoundary` 7 s, `DecisionArrayCore` 4 s,
+  `DecisionHashes` 2 s, and `DecisionGapCensus`, `DecisionGapData`,
+  `DecisionMappingFieldReason`, `DecisionMemoryFixtureData`,
+  `DecisionMemoryParameterData`, `DecisionResidueReasons`,
+  `DecisionVerdictData` 1 s or less; all without an error. Every module
+  checks in under 300 s, so no split was needed and no guarded command or pin
+  moved. The older 966 s (`Decision`) and 417 s (`DecisionHashes`) figures in
+  `declarations-metadata.md` and `solidity-upstream-tests.md` were
+  single-worker retries under load before earlier splits. These timings are
+  not controlled benchmarks; the slowest margin is `DecisionGaps` (about 60 s).
 
 ## Reviews
 
