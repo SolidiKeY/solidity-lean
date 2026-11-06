@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 SPEC = importlib.util.spec_from_file_location('collector', ROOT / 'scripts/h62/item1/trust-fragments/collect.py')
@@ -16,6 +17,9 @@ ACCEPT_SPEC = importlib.util.spec_from_file_location('accept_baseline', ROOT / '
 ACCEPT = importlib.util.module_from_spec(ACCEPT_SPEC)
 ACCEPT_SPEC.loader.exec_module(ACCEPT)
 sys.modules['accept_baseline'] = ACCEPT
+MIGRATION_SPEC = importlib.util.spec_from_file_location('accept_migration', ROOT / 'scripts/h62/item1/trust-fragments/accept_migration.py')
+MIGRATION = importlib.util.module_from_spec(MIGRATION_SPEC)
+MIGRATION_SPEC.loader.exec_module(MIGRATION)
 CENSUS_SPEC = importlib.util.spec_from_file_location('census', ROOT / 'scripts/h62/item1/trust-fragments/census.py')
 CENSUS = importlib.util.module_from_spec(CENSUS_SPEC)
 CENSUS_SPEC.loader.exec_module(CENSUS)
@@ -32,6 +36,55 @@ TIMING_SPEC.loader.exec_module(TIMING)
 class CollectorTests(unittest.TestCase):
     def test_reproduces_frozen_audit(self):
         self.assertEqual(COLLECTOR.collect(COLLECTOR.FRAGMENTS), COLLECTOR.AUDIT.read_bytes())
+
+    def test_migration_acceptance_accounts_for_inputs_and_installed_file(self):
+        base = COLLECTOR.AUDIT.read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            lanes = root / 'lanes'
+            lane = lanes / 'owner-a'
+            lane.mkdir(parents=True)
+            (lane / 'extra.json').write_text(json.dumps({
+                'imports': ['Solidity.Fixture'],
+                'headlines': ['Solidity.Fixture.alpha', 'Solidity.Fixture.beta']}))
+            candidate = COLLECTOR.MARKER + COLLECTOR.collect_lanes(base, lanes)
+            result = MIGRATION.accept(lanes, candidate)
+            self.assertEqual((result['new_imports'], result['new_headlines'], result['checkout_state']), (1, 2, 'original'))
+            for altered in [candidate.replace(b'``Solidity.Fixture.alpha', b'``Solidity.Fixture.alphx', 1),
+                            candidate.replace(b'import Solidity.Fixture\n', b'', 1),
+                            candidate.replace(b'#print axioms ', b'--print axioms ', 1),
+                            candidate.replace(b'``propext', b'``propExt', 1)]:
+                with self.subTest(altered=altered[:80]), self.assertRaises(ValueError):
+                    MIGRATION.accept(lanes, altered)
+            with mock.patch.object(COLLECTOR, 'collect_lanes', return_value=base):
+                with self.assertRaisesRegex(ValueError, 'cover exactly'):
+                    MIGRATION.accept(lanes)
+            bad_patch = root / 'invalid.patch'
+            bad_patch.write_text('invalid patch\n')
+            with mock.patch.object(MIGRATION, 'PATCH', bad_patch):
+                with self.assertRaises(ValueError):
+                    MIGRATION.accept(lanes)
+            installed = root / 'installed.lean'
+            installed.write_bytes(candidate)
+            with mock.patch.object(COLLECTOR, 'AUDIT', installed):
+                self.assertEqual(MIGRATION.accept(lanes)['checkout_state'], 'migrated')
+                installed.write_bytes(candidate + b'-- changed\n')
+                with self.assertRaises(ValueError):
+                    MIGRATION.accept(lanes)
+
+    def test_fragment_symlinks_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            (root / '000-a.leanfrag').symlink_to(COLLECTOR.AUDIT)
+            with self.assertRaises(ValueError):
+                COLLECTOR.collect(root)
+            link = root.parent / (root.name + '-link')
+            link.symlink_to(root)
+            try:
+                with self.assertRaises(ValueError):
+                    COLLECTOR.collect(link)
+            finally:
+                link.unlink()
 
     def test_independent_lane_additions_preserve_baseline(self):
         base = COLLECTOR.AUDIT.read_bytes()

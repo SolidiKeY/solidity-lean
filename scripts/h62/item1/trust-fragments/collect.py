@@ -17,8 +17,10 @@ PATTERN = re.compile(r'\d{3}-[a-z0-9-]+\.leanfrag')
 
 
 def collect(directory):
+    if directory.is_symlink():
+        raise ValueError('fragment root must not be a symlink')
     entries = sorted(directory.iterdir(), key=lambda p: p.name)
-    if not entries or any(not p.is_file() or not PATTERN.fullmatch(p.name) for p in entries):
+    if not entries or any(p.is_symlink() or not p.is_file() or not PATTERN.fullmatch(p.name) for p in entries):
         raise ValueError('unexpected or missing fragment entry')
     for index, path in enumerate(entries):
         if not path.name.startswith(f'{index:03d}-'):
