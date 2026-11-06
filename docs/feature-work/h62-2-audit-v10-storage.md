@@ -366,3 +366,26 @@ nine proof declarations are axiom-free. The companion map preserves six exact
 frozen signatures; the original conservative census is unchanged. These six
 bundles plus the earlier three loop bundles do not close the full audit,
 compiler totality, physical separation or migration obligations.
+
+## Populated representation and agreement witnesses
+
+RepresentedWitnesses checks all joint premises of the frozen represented_read,
+write_agreement and represented_copy adapters using the existing concrete scalar
+endpoint. The reached target state contains the true word; the unwritten target
+fails that initial cell agreement. Actual SLOAD returns the populated word,
+SSTORE changes it from one to zero while the covered agreement is derived, and
+actual scalar self-copy preserves the whole machine.
+
+The self-copy witness uses dst=src and an explicitly empty query frame; its
+apartness and nonalias frame predicates are vacuous on that empty list. It does
+not cover a nonempty disjoint frame. FiniteRun and transport come from the
+existing concrete local endpoint, with their original parameters and fields.
+This is not a universal Producer or a physical/source/compiler bridge.
+
+All eleven declarations and their axiom guards pass with only the standard
+logical axioms. An intermediate malformed record update was rejected, and its
+error-recovery axiom guards failed as intended; that receipt is retained, never
+accepted as a proof or pin. The corrected source passes without recovery axioms.
+The companion map records three exact frozen signatures. Twelve premise bundles
+are now checked across these three audit packets; the full conservative census
+and compiler totality/failure/gas/fork obligations remain open.
