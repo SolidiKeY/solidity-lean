@@ -647,3 +647,64 @@ manifest and handoff archive. The H107 implementation is reviewable as one tooli
 increment; successful task-branch final gates and the whole original/H82 queue
 remain unfinished. Existing STOPs/H58/H67 holds and original producer/artifact waits
 are unchanged. No push, master publication, new goal or RUNTIME_GATE_PASS.
+
+
+### H112 Wave 0B documentation and pin-drift gates
+
+OT-W0B-GATES was completed after H107, after fetching and merging master
+8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990. Exact intake at parent
+7dbf2748b5b0a02e42cccd6cf25c91fa77c9aade found the requested five missing
+references across four files, and99 unrecorded pin changes with zero policy
+errors among16140 source pins. The older approximate4500 count was not padded
+or substituted for actual data. The five references name unadopted destinations,
+an off-git failed experiment, or a synthetic negative input; exact source/ref
+historical exceptions now carry reasons. Other sources citing those paths and
+other missing paths in the same source still fail. Existing ambiguous references
+remain warnings in the default gate and failures under its unchanged strict mode.
+
+The99 exact file/name/kind/old-axiom-set/new-axiom-set changes are frozen in
+scripts/g07-unrecorded-baseline.json, SHA256
+4d98b1810853c54992feb064f1a7b028e23d8212fd2aad8b8b65e81895d7c701.
+The separate active subset can only shrink, including across deletions/recreation
+and merges with configured first-parent diff defaults. Linked worktrees use the
+actual absolute graft path; shallow/custom histories are refused. A changed file,
+name or axiom set is new drift. Every original policy error remains unconditional:
+nonstandard axioms, growth, missing recorded pins, malformed prints and mismatched
+targets cannot be hidden by this baseline. No central pin inventory or fragments
+were rewritten; no source theorem, definition, empty guard, axiom set, exclusion
+or proof budget changed. The core import baseline95 is untouched.
+
+Both requested real gates now pass on staged tracked sources: doc-paths exit0
+with5 explicitly explained historical pairs; axiom-pins exit0 with0errors,
+0unrecorded changes and99baselined changes. Node syntax, bash syntax,
+fragments/register and baseline SHA checks pass. Four legacy and ten new controls
+pass (14total), covering real CLI success/new-drift/error failures, permanent
+shrinking, deletion/merge resurrection, linked-worktree graft refusal, immutable
+hash/schema identities, exact doc exception scope and optimized Python refusal.
+The exact-source Git-tree reproducer exits0 and yields byte-identical pinned
+baseline bytes, independent of today's source drift. It executes no Lean.
+
+Finder and skeptic reviewed read-only without Lean/server. Their absolute-path
+and optimized-assertion findings were fixed and tested; no static H112 blocker
+remains. An initial disposable doc fixture omission is retained as failed test
+evidence, not counted as a product failure or ignored. Before/after single locked
+observations: doc34.646257s to33.501830s, pins18.364501s to17.595592s. These are
+observations, not a repeated benchmark or proof of Lean performance. Bulk logs
+and evidence remain off git with SHA manifests; repo-relative source/output pins
+and actual gate outcomes are in h112-tooling-evidence.json. docs/contributing.md
+explains the checks and exception boundaries.
+
+H112 makes these two tooling gates green; it does not claim a successful full
+checkpoint, fresh kernel validation, production premise discharge or
+RUNTIME_GATE_PASS. H107's12 import repairs, runtime readiness, Contracts exact
+empty-guard/Raw compatibility, typed G49/bridge inputs and exact missing retired
+artifacts remain waits. Preserve H97+12.7602%, size+21.4335%, pin+46.58%STOP/pause,
+trust/H67/H58 holds and the whole original/H82 queue. H110 same-thread continuation
+is authorized; no replacement goal/thread/VM, Claude source edits, push or master
+publication. This is one tooling increment with its committed handoff section.
+
+H112 CI integration: the checks job previously used actions/checkout's default
+shallow history, incompatible with permanent shrink validation. Its checkout now
+uses fetch-depth0 and it runs the two gates plus their regression controls before
+the independent layer check. Lean build/audit jobs are unchanged; no held audit
+was started. This integration fix is included in the same H112 increment.
