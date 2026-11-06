@@ -20,7 +20,7 @@ run_cmd do
   let env ← getEnv
   let some path ← liftIO (IO.getEnv "H62_API_OUTPUT") | throwError "H62_API_OUTPUT missing"
   let out ← liftIO (IO.FS.Handle.mk (System.FilePath.mk path) IO.FS.Mode.write)
-  let mut count := 0
+  let mut count : Nat := 0
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
       let owner := env.header.moduleNames[idx.toNat]!

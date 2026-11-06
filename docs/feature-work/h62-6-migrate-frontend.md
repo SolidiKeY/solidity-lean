@@ -6,7 +6,7 @@ Branch: `codex/solidity-h62-6-20261106/migrate-frontend`.
 Checkout: `/workspace/solidity-h62-migrate-frontend`.
 Evidence: `/workspace/h62-migrate-frontend-evidence` (bulk files outside Git).
 
-Status: partial. Checkpoint 1 now has a passing clean old build and complete
+Status: blocked. Checkpoint 1 now has a passing clean old build and complete
 elaborated environment census; checkpoints 2–4 remain open until their
 required build, review, compatibility and timing gates pass. No runtime-gate
 pass, migration completion, producer ownership transfer, cut-over, root edit,
@@ -99,7 +99,8 @@ only this tooling checkpoint; later migration milestones need fresh reviews.
 4. Export the reviewable committed overlay patch/bundle, handoff, exact hashes
    and cross-directory dependency report to the root migration gate.
 
-No coordinator `relay.sh` is present in the repository or discovered setup.
+H70 confirmed that `relay.sh` is host-only, not a worker installation task.
+Saved exact-file requests are in `tests/h62/item6/migrate-frontend/owner-requests.json`.
 Existing Frontend originals remain untouched pending exact-file coordination.
 No scope expansion is inferred from the migration overlay exception.
 No second persistent goal has been created; get_goal is not exposed here,
@@ -199,3 +200,139 @@ or cross-version public-interface equivalence by themselves.
 All 16 Python/OS acceptance controls pass, including six provenance-substitution
 controls added for the API generator. Final independent finder and skeptic
 rechecks accepted checkpoint 1 with no remaining material findings.
+
+## Checkpoints 2–3: measured blocker, no compatibility/timing pass
+
+The final-settings v4.35.0 clean attempt (`new-clean-serial/measurement.json`)
+passed six targets, then failed target 7, `Solidity.Source.Ctor`, owned by
+`solidity-h62-6-20261106/migrate-source`. The failure log is
+`new-clean-serial/0006-Solidity.Source.Ctor.log`:
+
+- `Syn.nodes_eq`, line 641: deterministic `isDefEq` timeout at the unchanged
+  200,000-heartbeat limit.
+- `Syn.excl_ctor`, line 715: dependent-elimination failures involving reflected
+  Boolean conditions.
+
+No outside-scope repair or budget increase was attempted. The failed attempt
+lasted 44.529754 seconds and peaked at 987,189,248 sampled RSS bytes. Those are
+failed-attempt diagnostics, not an after-build benchmark. The fail-closed
+comparison returns exit 2, `blocked`, with null wall/RSS deltas. Complete new
+validation, frozen-interface comparison, affected acceptance, full `run-lean.sh`
+and the regression decision remain open. No `RUNTIME_GATE_PASS` is claimed.
+
+```sh
+python3 scripts/h62/item6/migrate-frontend/measure.py --toolchain /workspace/h62-migrate-frontend-evidence/toolchains/lean-4.35.0-linux --census /workspace/h62-migrate-frontend-evidence/census/census.json --out /workspace/h62-migrate-frontend-evidence/new-clean-serial
+python3 scripts/h62/item6/migrate-frontend/compare.py --old /workspace/h62-migrate-frontend-evidence/old-clean-serial/measurement.json --new /workspace/h62-migrate-frontend-evidence/new-clean-serial/measurement.json --out /workspace/h62-migrate-frontend-evidence/comparison.json
+```
+
+## H70 Token response and bounded Parser backfill
+
+H70 routed two Token consumer tickets; it explicitly granted no original-file
+permission. The live originals are still byte-identical to the pinned base.
+Small unapplied review patches are saved off Git at
+`token-overlay-v5/token-v435.patch` and `parser-overlay-v3/parser-v435.patch`
+under the evidence directory; committed exact owner requests contain their paths
+and hashes, and committed generators reproduce them. They remain separate from
+production source. Both candidates require coordination,
+axiom review, complete affected validation and timing acceptance before adoption.
+
+`token_overlay.py` reproduces the original v4.35 Token failure at line 38:
+`String.ofByteArray` requires two fields, while the old constructor literal
+provides one `List Char`. Its one-line candidate uses `String.ofList` and
+compiles the entire Token module. Universal `bytes_str_toList` is proved on both
+versions for **all** byte lists, without adding an ASCII premise. Kernel positive
+and negative controls establish that bytes `[195,169]` denote the two codepoints
+`Ã©`, not UTF8-decoded `é`. All 178 selected source declarations, constructors
+and field projections retain structural types/flags. Full old/new environment
+snapshots account separately for compiler auxiliary-name churn.
+
+The five-command Token candidate/control/API receipt succeeds independently
+of the later dependent smoke loop. The final `token-overlay-v5/` generator
+returns exit 1 because the unchanged original Parser then fails; it must not
+be described as a passing complete generator. Tables, Keccak and Print smoke
+compilation passed before that failure. Earlier fixture-only layout/counter
+errors are retained as failed probes, not accepted evidence.
+
+The dependent failure occurs at the six `match k` context refinements in Parser.
+The first custom-motive prototypes were rejected (old syntax form, then the new
+`do` elaborator's custom-motive restriction). The final unapplied candidate uses
+explicit `SCtx.casesOn`/`Bool.casesOn` with dependent result types. Inspection and
+independent reviews confirm branch bodies, recursive fuel, context bits, state
+operations and error strings are preserved. Parser history contained initial
+G08–G11 implementations, with no later speed change undone.
+
+`parser-overlay-v3/` compiles that candidate on both official toolchains, then
+compiles unchanged Prec and Lexer on v4.35 with the candidate artifacts. All nine
+context controls pass in three variants: old original, old candidate and new
+candidate. Accepted cases check parser yield and precedence; rejected cases check
+exact outside-loop/nested-unchecked messages. These are isolated kernel controls,
+not universal Parser equivalence or the full production Check gate, which remains
+blocked by Source.Ctor. All 93 unique source-declared/constructor/field types and
+flags match, including `contractPart'`. The initial selector's primed-name issue
+was corrected against complete saved snapshots without rerunning unchanged proofs.
+
+```sh
+python3 scripts/h62/item6/migrate-frontend/token_overlay.py --out /workspace/h62-migrate-frontend-evidence/token-overlay-v5
+python3 scripts/h62/item6/migrate-frontend/parser_overlay.py --token-proposal /workspace/h62-migrate-frontend-evidence/token-overlay-v5 --out /workspace/h62-migrate-frontend-evidence/parser-overlay-v3
+```
+
+The Parser pipeline's eight Lean commands pass; its generator deliberately exits
+2 for pending full-gate/axiom review. Its exact receipt is `commands.json`.
+`input-bindings.json` binds the census, old measurement, Token manifest/candidate/
+patch, copied Token artifact and eight dependency source hashes. The retrospective
+binding was independently rechecked; source, proofs and extraction were unchanged.
+
+## Axiom and resource boundaries
+
+The unchanged `ascii` definition and 66 selected Parser data declarations acquire
+`Classical.choice`, `Quot.sound`, `propext` dependencies through the new Std String
+implementation. The new universal byte control also uses these existing standard
+axioms. High-byte controls remain axiom-free. Both new module snapshots contain
+zero axiom declarations and no axiom outside the complete old Frontend union.
+This does **not** establish per-declaration axiom equivalence or permission to edit
+pins. `R-ROOT-AXIOMS` requests review against existing frozen allowlists; no premise,
+exclusion, statement, heartbeat, recursion or axiom-pin relaxation is authorized.
+
+An isolated nine-case observation records old-original wall/RSS
+8.266117 seconds / 843,948,032 bytes and new-candidate
+6.231692 seconds / 1,884,155,904 bytes. The memory increase is escalated to the root
+gate as preliminary evidence. It is not a clean full-directory comparison.
+
+There are 12 unique named isolated control theorems and one observation helper,
+generated off Git. No production declaration or frozen statement was changed;
+no new axiom declaration, `sorry`, `native_decide`, raised heartbeat or trust
+shortcut was introduced. Python/OS controls and source/hash inspections are
+external tests; they supplement, rather than substitute for, the recorded Lean
+kernel checks. All 33 Python/OS controls pass, including strict >10-percent,
+non-finite/duplicate/incomplete timing, missing-name and primed-name controls.
+
+Independent read-only finder and skeptic reviews accepted this isolated evidence
+and resolved all material findings. Neither used Lean/server. They explicitly
+retain universal Parser equivalence, full affected/root acceptance, clean new
+timing, per-declaration axiom review and original-file coordination as unfinished.
+
+## Checkpoint 4 and fresh-thread handoff
+
+The handoff exports a preparation branch patch/bundle, the two **unapplied**
+migration proposals, old source/interface hashes, cross-directory ownership and
+exact owner requests with checksums. This is a partial migration handoff, not a
+completed directory overlay. Statuses are: checkpoint 1 done; 2 blocked; 3 blocked;
+4 partial. Full new interface hashes/acceptance/timing and final migration patch
+are still required for migrate-root-gate.
+
+After five bounded reviewed preparation/backfill items, continuation belongs to
+the coordinator using this same original VM, checkout, assigned branch and existing
+goal. Do not create/reset a goal or self-launch a replacement. The precise pending
+queue is `handoff/continuation-queue.json`: 244 Frontend modules statically depend
+on Source.Ctor, while the other 246 are not certified and can have further API
+failures. Source ownership, approvals and proof budgets remain binding. No push,
+merge, cut-over, freeze announcement or live-producer ownership transfer occurred.
+
+The final global documentation-path check exits 1 on the unchanged baseline
+`docs/feature-work/after-roadmap-va1.md` reference to
+`Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean`. The citing document's
+bytes match the pinned base; this lane's document has no finding. The failure
+is recorded in `static-gates/doc-paths-baseline.json` and routed to the root
+gate without changing that outside-scope document or adding a core dependency.
+Layer/root/fragment/orphan checks pass; global documentation and full runtime
+acceptance are not represented as passing.
