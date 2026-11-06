@@ -2,12 +2,13 @@ import Lean
 
 open Lean Elab Command
 
-namespace TrustFragmentsFixture
+namespace Solidity.TrustFragmentsFixture
 
 theorem usesPropext : True = True := propext Iff.rfl
+theorem alsoUsesPropext : True = True := propext Iff.rfl
 
 run_cmd do
-  let headlines : List Name := [``TrustFragmentsFixture.usesPropext]
+  let headlines : List Name := [``Solidity.TrustFragmentsFixture.usesPropext]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name
@@ -17,4 +18,4 @@ run_cmd do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"fixture passed"
 
-end TrustFragmentsFixture
+end Solidity.TrustFragmentsFixture

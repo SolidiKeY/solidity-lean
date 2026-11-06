@@ -6,6 +6,8 @@ Lean binary. This is an external test of the audit mechanism, not a proof of the
 project's actual audit or a replacement for its build.
 """
 import argparse
+import hashlib
+import json
 import os
 import pathlib
 import resource
@@ -13,10 +15,12 @@ import subprocess
 import tempfile
 import time
 
+import collect
+
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 FIXTURE = ROOT / 'tests/h62/item1/trust-fragments/Fixture.lean'
 ALLOW = '[``propext, ``Classical.choice, ``Quot.sound]'
-NAME = '``TrustFragmentsFixture.usesPropext'
+NAME = '``Solidity.TrustFragmentsFixture.usesPropext'
 
 
 def headroom():
@@ -43,8 +47,21 @@ def main():
     args = parser.parse_args()
     source = FIXTURE.read_text()
     assert source.count(ALLOW) == 1 and source.count(NAME) == 1
+    # A synthetic baseline pin is used only in this isolated fixture process.
+    collect.BASELINE_SHA256 = hashlib.sha256(source.encode()).hexdigest()
+    with tempfile.TemporaryDirectory() as lane_tmp:
+        lane_dir = pathlib.Path(lane_tmp) / 'fixture-lane'
+        lane_dir.mkdir()
+        data = {'imports': [], 'headlines': ['Solidity.TrustFragmentsFixture.alsoUsesPropext']}
+        (lane_dir / 'extra.json').write_text(json.dumps(data))
+        generated = collect.collect_lanes(source.encode(), pathlib.Path(lane_tmp)).decode()
+        data['headlines'] = ['Solidity.TrustFragmentsFixture.missing']
+        (lane_dir / 'extra.json').write_text(json.dumps(data))
+        generated_missing = collect.collect_lanes(source.encode(), pathlib.Path(lane_tmp)).decode()
     controls = [
         ('positive', source, True, 'fixture passed'),
+        ('generated_lane', generated, True, 'fixture passed'),
+        ('generated_lane_missing', generated_missing, False, 'Unknown constant'),
         ('unexpected_dependency', source.replace(ALLOW, '[]'), False, 'unexpected axioms'),
         ('missing_declaration', source.replace(NAME, 'Name.mkSimple "missing_fixture_declaration"'), False, 'Unknown constant'),
     ]

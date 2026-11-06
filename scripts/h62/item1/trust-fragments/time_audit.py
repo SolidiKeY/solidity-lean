@@ -73,6 +73,13 @@ def run_one(lake, lean, source):
     return elapsed, output
 
 
+def audit_inputs(lanes):
+    baseline = collect.AUDIT.read_bytes()
+    reconstructed = collect.collect(collect.FRAGMENTS)
+    accept_baseline.accept(baseline, reconstructed, baseline)
+    return baseline, collect.MARKER + collect.collect_lanes(reconstructed, lanes)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--lean', type=pathlib.Path, required=True)
@@ -102,14 +109,12 @@ def main():
     with LOCK.open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         initial = snapshot()
-        baseline = collect.AUDIT.read_bytes()
-        reconstructed = collect.collect(collect.FRAGMENTS)
-        accept_baseline.accept(baseline, reconstructed, baseline)
+        baseline, candidate = audit_inputs(collect.LANES)
         with tempfile.TemporaryDirectory(prefix='h62-trust-timing-') as tmp:
             baseline_path = pathlib.Path(tmp) / 'Baseline.lean'
             candidate_path = pathlib.Path(tmp) / 'Candidate.lean'
             baseline_path.write_bytes(baseline)
-            candidate_path.write_bytes(collect.MARKER + reconstructed)
+            candidate_path.write_bytes(candidate)
             pairs = []
             for index in range(3):
                 order = [('baseline', baseline_path), ('candidate', candidate_path)]

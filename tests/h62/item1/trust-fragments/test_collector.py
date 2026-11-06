@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import pathlib
 import re
 import subprocess
@@ -31,6 +32,54 @@ TIMING_SPEC.loader.exec_module(TIMING)
 class CollectorTests(unittest.TestCase):
     def test_reproduces_frozen_audit(self):
         self.assertEqual(COLLECTOR.collect(COLLECTOR.FRAGMENTS), COLLECTOR.AUDIT.read_bytes())
+
+    def test_independent_lane_additions_preserve_baseline(self):
+        base = COLLECTOR.AUDIT.read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            lanes = pathlib.Path(directory)
+            for lane, headline in [('lane-b', 'Solidity.Fixture.b'), ('lane-a', 'Solidity.Fixture.a')]:
+                path = lanes / lane
+                path.mkdir()
+                (path / 'checks.json').write_text(json.dumps({
+                    'imports': ['Solidity.Fixture', 'Solidity.Theorems'], 'headlines': [headline]}))
+            result = COLLECTOR.collect_lanes(base, lanes)
+            self.assertTrue(result.startswith(b'import Solidity.Fixture\n'))
+            additions = b',\n    ``Solidity.Fixture.a,\n    ``Solidity.Fixture.b'
+            self.assertEqual(result.count(additions), 1)
+            self.assertEqual(result.replace(b'import Solidity.Fixture\n', b'', 1).replace(additions, b'', 1), base)
+            self.assertEqual(result.count(b'  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]'), 44)
+            original, candidate = TIMING.audit_inputs(lanes)
+            self.assertEqual(original, base)
+            self.assertEqual(candidate, COLLECTOR.MARKER + result)
+
+    def test_lane_inputs_fail_closed(self):
+        base = COLLECTOR.AUDIT.read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            lanes = pathlib.Path(directory)
+            lane = lanes / 'lane-a'
+            lane.mkdir()
+            path = lane / 'checks.json'
+            for payload in [
+                {'imports': [], 'headlines': []},
+                {'imports': ['Lean.Bad'], 'headlines': ['Solidity.Fixture.a']},
+                {'imports': [], 'headlines': ['Solidity.Fixture.a\n#eval 1']},
+                {'imports': [], 'headlines': ['Solidity.MemoryWitness.bind_exact']},
+                {'imports': [], 'headlines': ['Solidity.Fixture.a', 'Solidity.Fixture.a']},
+                {'imports': [], 'headlines': ['Solidity.Fixture.a'], 'extra': True},
+            ]:
+                path.write_text(json.dumps(payload))
+                with self.subTest(payload=payload), self.assertRaises(ValueError):
+                    COLLECTOR.collect_lanes(base, lanes)
+            path.write_text('{"imports": [], "headlines": ["Solidity.Fixture.a"], "headlines": ["Solidity.Fixture.b"]}')
+            with self.assertRaises(ValueError):
+                COLLECTOR.collect_lanes(base, lanes)
+            path.write_text(json.dumps({'imports': [], 'headlines': ['Solidity.Fixture.a']}))
+            with self.assertRaises(ValueError):
+                COLLECTOR.collect_lanes(base + b'-- changed', lanes)
+            path.unlink()
+            path.symlink_to(COLLECTOR.AUDIT)
+            with self.assertRaises(ValueError):
+                COLLECTOR.collect_lanes(base, lanes)
 
     def test_timing_gate_boundary(self):
         self.assertFalse(TIMING.is_slow(100.0, 110.0))
