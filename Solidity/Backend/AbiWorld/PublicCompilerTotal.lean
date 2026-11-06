@@ -205,11 +205,17 @@ theorem Grows.refl {Γ : Ctx} (F : Frag Γ) : Grows F F :=
 theorem Grows.trans {Γ Γ₁ Γ₂ : Ctx} {F : Frag Γ} {G : Frag Γ₁} {H : Frag Γ₂}
     (fg : Grows F G) (gh : Grows G H) : Grows F H := by
   refine ⟨?_, Nat.le_trans fg.2 gh.2⟩
-  rw [gh.1, fg.1, ← List.append_assoc, ← List.replicate_add]
-  congr 2
-  have := fg.2
-  have := gh.2
-  omega
+  have split : Γ₂.length - Γ.length = (Γ₂.length - Γ₁.length) + (Γ₁.length - Γ.length) := by
+    have := fg.2
+    have := gh.2
+    omega
+  rw [gh.1, fg.1, ← List.append_assoc, split]
+  congr 1
+  apply List.ext_getElem
+  · simp only [List.length_append, List.length_replicate]
+  · intro i _ _
+    simp only [List.getElem_replicate, List.getElem_append]
+    split <;> rfl
 
 theorem Grows.restrict {Γ Γ' : Ctx} {F : Frag Γ} {G : Frag Γ'} (fg : Grows F G) :
     G.restrict Γ = F := by
@@ -272,11 +278,11 @@ theorem StmtOk.frag : {Γ Γ' : Ctx} → {s : Solidity.Stmt C Γ Γ'} → StmtOk
   | _, _, _, .callNone _ ha hb, F => by
     obtain ⟨G, h, _⟩ := hb.frag (Frag.init _)
     refine ⟨F, ?_, Grows.refl F⟩
-    simp only [Evm.inFrag, ha.argsIn F, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn]
+    simp only [Evm.inFrag, ha.argsIn F, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn, Bool.false_eq_true, ite_false]
   | _, _, _, .callVal _ _ _ _ ha hb, F => by
     obtain ⟨G, h, _⟩ := hb.frag (Frag.init _)
     refine ⟨F, ?_, Grows.refl F⟩
-    simp only [Evm.inFrag, ha.argsIn F, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn]
+    simp only [Evm.inFrag, ha.argsIn F, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn, Bool.false_eq_true, ite_false]
 
 theorem ProgOk.frag : {Γ Γ' : Ctx} → {P : Solidity.Prog C Γ Γ'} → ProgOk P →
     ∀ F : Frag Γ, ∃ G, inFragP F P = some G ∧ Grows F G

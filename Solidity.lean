@@ -160,6 +160,8 @@ import Solidity.Backend.AbiWorld.PacketPrefixControls
 import Solidity.Backend.AbiWorld.PanicCallFrame
 import Solidity.Backend.AbiWorld.PanicCallFrameControls
 import Solidity.Backend.AbiWorld.PanicReadWindow
+import Solidity.Backend.AbiWorld.PublicCompilerTotal
+import Solidity.Backend.AbiWorld.PublicCompilerTotalControls
 import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.AbiWorld.TypedPacketMaterialize

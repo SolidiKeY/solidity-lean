@@ -19,25 +19,26 @@ def total : Solidity.Loc C Γ₁ (.prim .uint) := .root "total" rfl
 
 def x : Solidity.Val C Γ₁ .uint := .simple (.local .here)
 
-def lit (n : Nat) : Solidity.Val C Γ₁ .uint := .simple (.lit n (by decide))
+def lit (n : Nat) (h : PrimTy.uint.inRange n = true := by decide) : Solidity.Val C Γ₁ .uint :=
+  .simple (.lit n h)
 
 /-- `function f(uint p) returns (uint r) { r = p + 1; }`, frame `[r, p]`. -/
 def fBody : Solidity.Prog C ([.val .uint] ++ [.val .uint]) ([.val .uint] ++ [.val .uint]) :=
   .cons (.assignLocal .here
     (.binop .add rfl rfl (.simple (.local (.there .here))) (.simple (.lit 1 (by decide))))) .nil
 
-def fArgs : Solidity.Args C Γ₁ [.val .uint] := .snoc .nil .uint "p" x
+def fArgs : Solidity.Args C Γ₁ [.val .uint] := .snoc .nil .uint (.user "p") x
 
 /-- `uint x = total; while (x < 3) { x += 1; }
 if (x == 3) { balances[x] = x; } else { revert(); } x = f(x);` -/
 def program : Solidity.Prog C Γ₀ Γ₁ :=
-  .cons (.declLocal .uint "x" (some (.read (.root "total" rfl)))) <|
+  .cons (.declLocal .uint (.user "x") (some (.read (.root "total" rfl)))) <|
   .cons (.loop .auto (.binop .lt rfl rfl x (lit 3))
     (.cons (.opAssign .add rfl rfl (.local .here) (lit 1)) .nil)) <|
   .cons (.ite (.binop .eqB rfl rfl x (lit 3))
     (.cons (.assign (.index .map (.loc (.root "balances" rfl)) x) (.val x)) .nil)
     (.cons .revert .nil)) <|
-  .cons (.call "f" fArgs (.val .uint "r" (some .here)) fBody) .nil
+  .cons (.call "f" fArgs (.val .uint (.user "r") (some .here)) fBody) .nil
 
 theorem program_ok : ProgOk program :=
   .cons (.declSome _ _ (.read (.root _ _))) <|
@@ -87,11 +88,11 @@ theorem signedAnd_outside : ¬ ProgOk signedAnd := fun h =>
   absurd (compile_isSome 0 (Frag.init Γ₀) h) (by rw [Option.isSome_iff_ne_none,
     ← Option.isNone_iff_eq_none.mp signedAnd_refused]; exact fun e => e rfl)
 
-/-- info: 'Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_core' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_core' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms compile_core
 
-/-- info: 'Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_agrees' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms compile_agrees
 

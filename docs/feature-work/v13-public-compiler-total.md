@@ -33,7 +33,7 @@ nor the domain hides them.
 The proof shows (by mutual induction on the domain) that values are accepted
 from every fragment, that programs push, pay and shrink nothing, and that
 `inFragP` only pushes readable locals (`Grows`), so branch meets, scope
-restriction and the loop fixed-point check hold. Axioms: `propext` only
+restriction and the loop fixed-point check hold. Axioms: `propext`, `Classical.choice`, `Quot.sound` (the library standard)
 (guarded in the Controls). No compiler, statement, premise or observation is
 changed; no `maxHeartbeats` option is used.
 
