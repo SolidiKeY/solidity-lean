@@ -10,29 +10,7 @@ BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 OUT = ROOT/"tests/h62/item6/migrate-hash"
 sha = lambda s: hashlib.sha256(s.encode()).hexdigest()
 
-def strip_comments(s):
-    # Lean nested block comments, preserving line positions and strings.
-    out, i, depth, string = [], 0, 0, False
-    while i < len(s):
-        pair = s[i:i+2]
-        if depth:
-            if pair == "/-": depth += 1; out.extend("  "); i += 2; continue
-            if pair == "-/": depth -= 1; out.extend("  "); i += 2; continue
-            out.append("\n" if s[i] == "\n" else " "); i += 1; continue
-        if string:
-            out.append(s[i])
-            if s[i] == "\\" and i+1 < len(s): out.append(s[i+1]); i += 2; continue
-            if s[i] == '"': string = False
-            i += 1; continue
-        if pair == "/-": depth = 1; out.extend("  "); i += 2; continue
-        if pair == "--":
-            j = s.find("\n",i)
-            if j == -1: j = len(s)
-            out.extend(" "*(j-i)); i = j; continue
-        if s[i] == '"': string = True
-        out.append(s[i]); i += 1
-    assert depth == 0 and not string
-    return "".join(out)
+from lean_lex import strip_comments
 
 pattern = re.compile(r"^(?:@\[[^\n]*\]\s*)?(def|theorem|instance)\b", re.M)
 def parse(s):
@@ -61,8 +39,8 @@ for name in ("CollisionBound","Adaptive"):
     path = f"Solidity/Hash/{name}.lean"
     old = subprocess.check_output(["git","show",f"{BASE}:{path}"],text=True)
     current = pathlib.Path(path).read_text()
-    assert old == current, "Owned originals changed without a new census"
     fixture = (OUT/f"{name}.lean").read_text().replace("import tests.h62.item6.«migrate-hash».CollisionBound", "import Solidity.Hash.CollisionBound")
+    assert current in (old, fixture), "unexpected production source drift"
     original, candidate = parse(old), parse(fixture)
     for key in ("imports","contexts","proof_budget_options"):
         assert original[key] == candidate[key], (name,key)
@@ -73,6 +51,8 @@ for name in ("CollisionBound","Adaptive"):
             checks.append(f"#check @Solidity.Hash.{d['name']}")
             if d["kind"] == "theorem": checks.append(f"#print axioms Solidity.Hash.{d['name']}")
     original["candidate_source_sha256"] = sha(fixture)
+    original["production_source_sha256"] = sha(current)
+    original["production_migration_applied"] = current == fixture
     report["modules"][path] = original
 for rel in subprocess.check_output(["git","ls-files","*.lean"],text=True).splitlines():
     p = ROOT/rel
@@ -84,4 +64,6 @@ for rel in subprocess.check_output(["git","ls-files","*.lean"],text=True).splitl
 (OUT/"census.json").write_text(json.dumps(report,indent=2)+"\n")
 checks += ["", "example : Decidable (Solidity.Hash.CollisionFree (fun x : Nat => x) [0,1]) := inferInstance", "example : Decidable (Solidity.Hash.Near 8 2 0 1) := inferInstance", "example : Decidable (Solidity.Hash.Covers 8 2 0 1) := inferInstance", "example : Decidable (Solidity.Hash.RegionsDisjoint 8 2 (fun x : Nat => x) [7] [0,3]) := inferInstance"]
 (OUT/"Inventory.lean").write_text("\n".join(checks)+"\n")
+(OUT/"ProductionInventory.lean").write_text(("\n".join(checks)+"\n").replace("import tests.h62.item6.«migrate-hash».Adaptive", "import Solidity.Hash.Adaptive"))
+(OUT/"ProductionControls.lean").write_text((OUT/"Controls.lean").read_text().replace("import tests.h62.item6.«migrate-hash».Adaptive", "import Solidity.Hash.Adaptive"))
 print(json.dumps({"declarations":{p:len(v["declarations"]) for p,v in report["modules"].items()},"external_importers":report["direct_external_importers"]},indent=2))

@@ -1,4 +1,4 @@
-# H62 item 6 migrate-hash: blocked migration candidate
+# H62 item 6 migrate-hash: applied overlay, full gate blocked
 
 Repository `/workspace/migrate-hash`, branch `codex/solidity-h62-6-20261106/migrate-hash`,
 pinned base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
@@ -10,8 +10,8 @@ The exported result records the full committed head after this document's commit
 | Checkpoint | State | Evidence / remaining work |
 |---|---|---|
 | 1. Pinned census and clean old build | done | 125 declarations; native old-toolchain Hash build passes with fresh cache and canonical names |
-| 2. Identical new toolchain and adaptation | blocked | Official pin verified; proof-only candidate passes; existing-file owner response pending |
-| 3. New build and performance | blocked | Canonical candidate native build passes; RSS escalation and full affected/runtime gates pending |
+| 2. Identical new toolchain and adaptation | done | Official pin verified; exact production patch applied under coordinator authorization; direct production APIs/axioms/controls pass |
+| 3. New build and performance | blocked | Production Hash passes; clean full gate fails outside Hash in Syntax.Raw; old full baseline and matched comparison pending |
 | 4. Patch, hashes and root handoff | partial | Exported candidate and evidence ready for retrieval; root-gate acceptance pending |
 
 ## Toolchain and fixed resources
@@ -42,7 +42,7 @@ them unchanged afterwards. No tracked toolchain/configuration/registry is modifi
 anonymous decidability instances. Signature/context/import and definition-body
 hashes match the pinned originals after normalizing only the fixture import path.
 The lexical signature audit supplements kernel checks; it is not a kernel type hash.
-Original whole-source hashes (the production files remain byte-identical):
+Pinned original whole-source hashes (production proof bodies are now migrated):
 
 - `Solidity/Hash/CollisionBound.lean`: `49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce` (84 declarations).
 - `Solidity/Hash/Adaptive.lean`: `4aab278cc5f94bb8b00827b06b44ca2ac05fe2610038054a5821fcb638bf3779` (41 declarations).
@@ -86,9 +86,10 @@ Hash builds in private snapshots, not a whole-repository performance claim.
 
 Combined Hash wall: 9.7642 → 6.7362 seconds
 (-31.01%). No individual or aggregate >10% wall slowdown.
-**ESCALATE Q-HASH-RSS:** RSS increases remain unresolved. Faster wall time does not
-clear this regression. Options and exact evidence are in `coordination.json` and
-`/workspace/migrate-hash-evidence/performance.json`. No final runtime-pass claim.
+Coordinator resolved Q-HASH-RSS: per-module time/memory growth does not stop this
+lane. Record these numbers and continue to the matched clean full-build comparison;
+the coordinator reports growth to the human with cut-over escalation. The module
+numbers do not establish a full-build comparison. No final runtime-pass claim.
 
 ## Cross-directory handoff
 
@@ -100,17 +101,58 @@ affected closures using the identical toolchain. No new production module exists
 so the registration fragment is empty; generated roots, central maps and axiom
 pins are unchanged. Bridge validation remains an external/optional dependency gate.
 
-**ESCALATE Q-HASH-OWNER:** the required `scripts/coord-tools/relay.sh` is absent at
-the base and no alternate coordinator relay/owner response is available. Exact-file
-request: apply the exported candidate to `Solidity/Hash/CollisionBound.lean` and
-`Solidity/Hash/Adaptive.lean` as a migration-only overlay. Options are to provide
-the relay/owner response for this worker, or have the owner apply the candidate.
-Absent reply is not permission; neither production file was edited. The final
-lean-toolchain edit belongs to migrate-root-gate.
+Coordinator resolved Q-HASH-OWNER: relay.sh exists only on the coordinator host;
+the isolated migration lane is the registered writer of Hash. The exact tested
+patch is applied to both production Hash files. The coordinator will relay the
+following changes to the live owner at cut-over:
 
-Pending: owner coordination and production overlay, RSS regression disposition,
-full affected importer validation, `./run-lean.sh` in the root migration environment,
-and migrate-root-gate receipt. No claim that a snapshot build replaces these gates.
+- `CollisionBound`: explicit contains-cons simplification in `countP_contains_le`;
+  explicit proposition extraction in `countP_near_le` and `countP_covers_le`;
+  deprecated proof lemma aliases replaced by current `ite_*` names.
+- `Adaptive`: direct zero-query proofs in `two_mul_eagerCollides_le` and
+  `two_mul_eagerRegionsFail_le`; deprecated proof lemma aliases replaced.
+- No declaration type, definition body, premise, exclusion, axiom guard, or proof
+  budget changes. No producer ownership change. Kernel `decide +kernel` controls
+  are expressly allowed by coordinator H64 steering. Tracked lean-toolchain stays
+  at 4.24; the final global toolchain edit belongs to migration root.
+
+Production acceptance in `new-production-acceptance-1` passes KeySort, both Hash
+files, 121 named API checks, 97 theorem axiom audits, four instances and 19 controls
+through actual production imports. Inputs are hash-bound and unchanged.
+
+The corrected full-repository probe `full_measure.py ... --migrated` at
+`/workspace/migrate-hash-full/new-full-4` uses a clean pinned detached worktree,
+only the Hash overlay, a private toolchain override, and the unchanged original
+`run-lean.sh` as its final gate. It schedules 6,389 modules in validated topological
+order, builds both `+module:o` and `+module:o.noexport` serially, then links the two executables serially, and keeps the
+same 12 GiB address-space cap/4 GiB available reserve/no-swap budget. Every module has
+a 300s timeout; the final aggregate gate separately has an 1800s timeout. Both arms
+use identical private package configuration (SHA256
+e7519519bf936dcd920c5b6577fda1136391d79227ca92746aae30fae5a9585f)
+and fresh disabled caches. No outside-owner source is patched.
+
+**Owner migration request REQ-HASH-SYNTAX-RAW:** the full new probe exits 1 after
+4 / 6389 successful modules at Solidity.Syntax.Raw. Five String API errors occur at
+597:44, 650:23, 665:27, 684:34 and 682:46: String.drop now returns String.Slice, slice
+toList and String.dropRight are unavailable, and endsWith has a changed inferred
+function type. Exact errors are in the copied `full-new-probe` evidence and
+`coordination.json`. Source hashes remain unchanged, and no resource stop occurs.
+This is an out-of-scope owner migration dependency, not a performance verdict.
+
+The original old full attempt was interrupted for the independent review's native
+object serialization correction; its `aborted.json` excludes it from performance
+claims. The corrected clean old baseline is planned at
+`/workspace/migrate-hash-full/old-full-2`; inspect `baseline-controller.json` in the
+evidence directory for controller PID, command and log before resuming. A running
+controller owns the global writer lock and heavy job slot. Never start a duplicate.
+The baseline remains pending until its summary reports a completed final gate.
+
+Pending: owner overlays for Syntax.Raw and any further full-graph migration errors,
+completed old baseline, matched successful clean full-build comparison, full affected
+importer/runtime validation, and migrate-root-gate receipt. No snapshot or failed
+full probe replaces those gates. Both earlier questions are resolved; no scope
+question is pending.
+
 In-scope backfill completed: declaration census, negative scanner controls, isolated
 fixture proofs, all-declaration API/axiom checks, semantic controls and deterministic
 measurement/export tooling. No newly unclaimed cleanup scope was taken.
@@ -123,16 +165,16 @@ Findings fixed: guaranteed kill/reap on timeout/resource exceptions; fail-closed
 scanner handling of modifiers/indentation/standalone attributes; definition-body
 hashes; explicit four-instance checks; source-bound logs including Inventory and
 Controls; and >10% slowdown stop per module as well as aggregate. Final reviews
-approve this partial evidence handoff, explicitly retaining the owner, RSS and
-full-gate blockers. Full review record is `/workspace/migrate-hash-evidence/reviews.md`.
+approve the production patch and corrected serial native-object driver, explicitly
+retaining the out-of-scope Syntax.Raw and full-gate blockers. Full review record is `/workspace/migrate-hash-evidence/reviews.md`.
 
 ## Gates and retrieval
 
 Native old/new builds: exit 0 in their `results.json`; prerequisite KeySort passes.
-Final per-file API/axiom/control acceptance: `new-acceptance-3/results.json`, all five
+Final production per-file API/axiom/control acceptance: `new-production-acceptance-1/results.json`, all five
 commands exit 0 with empty proof/control error logs. Source-bound audit:
 `python3 scripts/h62/item6/migrate-hash/acceptance.py /workspace/migrate-hash-evidence`,
-exit 0, `acceptance-audit.log`. Static layer check passes (857 core modules; zero
+exit 0, `acceptance-after-application.log`. Static layer check passes (857 core modules; zero
 reach elaborator/checked-parser adapters); generated roots and fragments checks pass.
 Patch applicability and whitespace checks pass. The global documentation-path check
 exits 1 on the pre-existing unavailable Mathlib reference in
@@ -151,3 +193,14 @@ The existing persistent goal must remain unfinished. The worker did not create o
 reset a goal. `get_goal` is absent, as explicitly permitted by coordinator steering.
 Resume this exact branch/VM after blockers resolve; a fresh-thread handoff goes to
 the coordinator, never to a self-created replacement goal.
+
+## H70 consolidated producer delivery
+
+The coordinator routed twelve consumers of CollisionBound. The reviewed production
+repair is exported as `/workspace/migrate-hash-evidence/hash-owner-overlay.patch`
+(two files) and `collision-bound-overlay.patch` (CollisionBound only). Exact base,
+committed head, before/after file hashes, patch hashes, all twelve requester IDs,
+validation boundaries and live-owner changes are in `producer-overlay.json`. These
+are ready for coordinator retrieval/approved consumption; no direct cross-VM write,
+push, merge, ownership transfer or full-gate claim is made. The source census at the
+pinned base and all frozen axiom-message guards remain intact.

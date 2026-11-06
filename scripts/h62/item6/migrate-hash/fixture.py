@@ -5,8 +5,7 @@ import subprocess
 root = Path("tests/h62/item6/migrate-hash")
 root.mkdir(parents=True, exist_ok=True)
 for name in ("CollisionBound", "Adaptive"):
-    s = Path(f"Solidity/Hash/{name}.lean").read_text()
-    assert s == subprocess.check_output(["git", "show", f"c6f550e281a7e5affa9a99bc2cdaed556dec00e4:Solidity/Hash/{name}.lean"],text=True), "pinned source drift"
+    s = subprocess.check_output(["git", "show", f"c6f550e281a7e5affa9a99bc2cdaed556dec00e4:Solidity/Hash/{name}.lean"],text=True)
     if name == "CollisionBound":
         s = s.replace("A.countP (fun a => (a == x) || t.contains a) := by\n      congr 1", "A.countP (fun a => (a == x) || t.contains a) := by\n      simp only [List.contains_cons]")
         for predicate in ("Near N L a b", "Covers N L a r"):

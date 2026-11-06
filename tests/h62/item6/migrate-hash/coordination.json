@@ -1,41 +1,100 @@
 {
   "status": "blocked",
-  "requests": [
+  "resolved": [
     {
       "id": "Q-HASH-OWNER",
-      "type": "OWNER_COORDINATION_REQUIRED",
-      "sources": [
-        "H62 checkpoint 2",
-        "assignment exact-file owner coordination"
-      ],
-      "files": [
-        "Solidity/Hash/CollisionBound.lean",
-        "Solidity/Hash/Adaptive.lean"
-      ],
-      "action": "Apply the validated migration-candidate.patch as the isolated migration overlay, preserving live producer ownership. Exact owner response required before existing-file edits. Required relay.sh is absent; no alternate coordinator relay supplied.",
-      "options": [
-        "Provide relay path or exact-file owner coordination response, then apply and validate the overlay.",
-        "Keep originals unchanged and have the owner apply the exported tested candidate in the migration integration lane."
-      ]
+      "answer": "Coordinator: relay.sh exists only on the coordinator host; the isolated migration lane is the registered writer. Apply statement-preserving patches and list live-owner changes for cut-over relay."
     },
     {
       "id": "Q-HASH-RSS",
-      "type": "PERFORMANCE_RSS_REGRESSION",
+      "answer": "Coordinator: per-module time or memory increases do not stop a lane. Record them, continue to matched clean full-build comparison; coordinator reports growth with cut-over escalation."
+    }
+  ],
+  "requests": [
+    {
+      "id": "REQ-HASH-SYNTAX-RAW",
+      "type": "OUT_OF_SCOPE_DEPENDENCY_MIGRATION_REQUIRED",
+      "recipient": "solidity-h62-6-20261106/migrate-syntax via migrate-root-gate",
       "sources": [
         "H62 checkpoint 3",
-        "performance.json"
+        "/workspace/migrate-hash-full/new-full-4/Solidity.Syntax.Raw.log"
       ],
-      "action": "Resolve migration memory regression before accepting Hash performance gate; unchanged frozen theorem statements and resource budgets remain mandatory.",
-      "options": [
-        "Root migration lane investigates the pinned-toolchain RSS increase before accepting the migration.",
-        "Root migration lane explicitly evaluates the measured RSS increase within existing resource bounds and records its disposition before full gates."
-      ]
+      "files": [
+        "Solidity/Syntax/Raw.lean"
+      ],
+      "action": "Provide the owner migration overlay for official pinned Lean4.35 while preserving frozen interfaces. Hash lane must not edit this file.",
+      "errors": [
+        {
+          "line": 597,
+          "column": 44,
+          "detail": "f.drop1 returns String.Slice; HashKind.ofName? expects String"
+        },
+        {
+          "line": 650,
+          "column": 23,
+          "detail": "String.Slice.toList unavailable"
+        },
+        {
+          "line": 665,
+          "column": 27,
+          "detail": "slice dropRight result supplied where splitTopCommas expects String"
+        },
+        {
+          "line": 684,
+          "column": 34,
+          "detail": "String.dropRight unavailable"
+        },
+        {
+          "line": 682,
+          "column": 46,
+          "detail": "c.endsWith no longer has the String\u2192Bool type expected by List.find?"
+        }
+      ],
+      "evidence": "Clean canonical full probe exit1 after4/6389 modules; source hashes unchanged; no resource stop; no full-build timing conclusion."
     }
   ],
   "pending_gates": [
-    "production overlay application",
-    "full affected importer validation",
-    "./run-lean.sh in root migration environment",
+    "matched clean full-build comparison; corrected old baseline planned at /workspace/migrate-hash-full/old-full-2",
+    "owner-provided Syntax.Raw and further out-of-scope migration overlays",
+    "full affected importer validation and ./run-lean.sh",
     "migrate-root-gate receipt"
-  ]
+  ],
+  "live_owner_changes": {
+    "Solidity/Hash/CollisionBound.lean": [
+      "countP_contains_le: replace congr1 with explicit List.contains_cons simplification",
+      "countP_near_le and countP_covers_le: explicitly extract propositions using of_decide_eq_true before unfold/omega",
+      "Replace deprecated if_true/if_pos/if_neg proof lemma names with ite_true/ite_eq_left/ite_eq_right"
+    ],
+    "Solidity/Hash/Adaptive.lean": [
+      "two_mul_eagerCollides_le and two_mul_eagerRegionsFail_le: direct zero-query negation proofs using of_decide_eq_true and existing .nil lemmas",
+      "Replace deprecated if_pos/if_neg proof lemma names with ite_eq_left/ite_eq_right"
+    ]
+  },
+  "frozen_interface_changes": [],
+  "proof_budget_changes": [],
+  "new_axioms": 0,
+  "sorry": 0,
+  "proof_declarations_touched": {
+    "Solidity/Hash/CollisionBound.lean": [
+      "countP_contains_le",
+      "countP_covers_le",
+      "countP_near_le",
+      "countP_or_le",
+      "length_dedup_le",
+      "map_oracleOf",
+      "mem_dedup",
+      "nodup_dedup"
+    ],
+    "Solidity/Hash/Adaptive.lean": [
+      "length_upd",
+      "mem_upd",
+      "oracleOf_mem",
+      "oracleOf_upd_ne",
+      "oracleOf_upd_self",
+      "two_mul_eagerCollides_le",
+      "two_mul_eagerRegionsFail_le",
+      "upd_oracleOf",
+      "upd_upd"
+    ]
+  }
 }

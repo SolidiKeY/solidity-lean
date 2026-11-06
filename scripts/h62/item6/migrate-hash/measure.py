@@ -8,6 +8,8 @@ import argparse, hashlib, json, os, pathlib, resource, signal, subprocess, time
 ap = argparse.ArgumentParser()
 ap.add_argument("toolchain", type=pathlib.Path)
 ap.add_argument("output", type=pathlib.Path)
+ap.add_argument("--pinned-base", action="store_true", help="native snapshot sources from the pinned base")
+ap.add_argument("--production-extra", action="store_true")
 ap.add_argument("--fixture", action="store_true")
 ap.add_argument("--lake-overlay", action="store_true", help="clean canonical-name private Lake/native build")
 ap.add_argument("--extra", action="store_true", help="check API inventory and finite controls after fixtures")
@@ -50,7 +52,7 @@ if a.lake_overlay:
         source = root/path
         if a.fixture and name.startswith("Hash/"):
             source = root/"tests/h62/item6/migrate-hash"/(name.split("/")[-1]+".lean")
-        text = source.read_text().replace("import tests.h62.item6.«migrate-hash».CollisionBound", "import Solidity.Hash.CollisionBound")
+        text = (subprocess.check_output(["git","show","c6f550e281a7e5affa9a99bc2cdaed556dec00e4:"+path],text=True) if a.pinned_base else source.read_text()).replace("import tests.h62.item6.«migrate-hash».CollisionBound", "import Solidity.Hash.CollisionBound")
         dest = workdir/path
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(text)
@@ -61,6 +63,10 @@ if a.fixture and not a.lake_overlay:
 if a.extra:
     assert a.fixture, "--extra requires --fixture"
     modules += ("tests.h62.item6.migrate-hash.Inventory", "tests.h62.item6.migrate-hash.Controls")
+if a.production_extra:
+    assert not a.fixture and not a.lake_overlay
+    modules += ("tests.h62.item6.migrate-hash.ProductionInventory", "tests.h62.item6.migrate-hash.ProductionControls")
+if a.pinned_base: assert a.lake_overlay and not a.fixture
 source_hashes = {}
 for module in modules:
     path = module.replace(".", "/")+".lean"
