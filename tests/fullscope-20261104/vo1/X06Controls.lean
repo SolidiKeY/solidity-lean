@@ -1,5 +1,6 @@
 import Solidity.Optimizer.Loads
 import Solidity.Optimizer.DeadStore
+import Solidity.Optimizer.LICM
 
 /-!
 # X06 memory-optimization controls
@@ -232,5 +233,89 @@ theorem sstore_witness :
     Prog.runC (.cons (setTotal (lit 1)) (.cons (setTotal (lit 2)) .nil) : Prog C [] []) =
       Prog.runC (.cons (setTotal (lit 2)) .nil) :=
   sstore_dead_runC "total" rfl (.lit 1 (by decide)) (lit 2) rfl .nil
+
+/-! ## Loop-invariant code motion -/
+
+/-- Locals `[x, i]`: `x` innermost. -/
+abbrev G : Ctx := [.val .uint, .val .uint]
+
+def xv : Idx G (.val .uint) := .here
+def iv : Idx G (.val .uint) := .there .here
+def iRead : Val C G .uint := .simple (.local iv)
+def lt3 : Val C G .bool := .binop .lt rfl rfl iRead (lit 3)
+def incI : Stmt C G G := .assignLocal iv (add iRead (lit 1))
+
+/-- `while (i < 3) { x = total + 1; i = i + 1; }`. -/
+def invLoop : Stmt C G G := .loop .auto lt3 (.cons (.assignLocal xv (add total (lit 1))) (.cons incI .nil))
+
+/-- It becomes `if (i < 3) { x = total + 1; while (i < 3) { i = i + 1; } }`. -/
+theorem licm_hoisted : Stmt.licm invLoop =
+    .ite lt3 (.cons (.assignLocal xv (add total (lit 1)))
+      (.cons (.loop .auto lt3 (.cons incI .nil)) .nil)) .nil := rfl
+
+/-- The side conditions are satisfiable: they hold of this loop. -/
+theorem licm_witness : LicmOk lt3 xv (add total (lit 1)) (.cons incI .nil) :=
+  licmB_ok (by decide)
+
+theorem licm_same : Stmt.runC (Stmt.licm invLoop) = Stmt.runC invLoop := Stmt.licm_runC invLoop
+
+def startG : State C G := (start.push (t := .val .uint) (uintOfNat 0)).push (t := .val .uint) (uintOfNat 0)
+
+/-- The two locals after a run. -/
+def xi (r : TRes (Out C startG.H G)) : Option (Int × Int) :=
+  (r.map fun o => ((TEnv.get xv o.st.env : PrimTy.uint.Denote).1,
+    (TEnv.get iv o.st.env : PrimTy.uint.Denote).1)).toOption
+
+#guard xi (Stmt.runC invLoop startG) == some (1, 3)
+#guard xi (Stmt.runC (Stmt.licm invLoop) startG) == some (1, 3)
+
+/-! ### The zero-iteration guard
+
+`while (i < 0) { x = total - 1; … }` never runs from `i = 0`, but `total - 1`
+underflows (`total = 0`): the unguarded hoist `x = total - 1; while …` reverts
+where the loop returns. The pass emits the guarded form, which returns. -/
+
+def sub {Γ : Ctx} (a b : Val C Γ .uint) : Val C Γ .uint := .binop .sub rfl rfl a b
+def lt0 : Val C G .bool := .binop .lt rfl rfl iRead (lit 0)
+def failLoop : Stmt C G G :=
+  .loop .auto lt0 (.cons (.assignLocal xv (sub total (lit 1))) (.cons incI .nil))
+
+theorem licm_guarded : Stmt.licm failLoop =
+    .ite lt0 (.cons (.assignLocal xv (sub total (lit 1)))
+      (.cons (.loop .auto lt0 (.cons incI .nil)) .nil)) .nil := rfl
+
+/-- The unguarded hoist (negative control). -/
+def unguarded : Prog C G G :=
+  .cons (.assignLocal xv (sub total (lit 1))) (.cons (.loop .auto lt0 (.cons incI .nil)) .nil)
+
+#guard xi (Stmt.runC failLoop startG) == some (0, 0)
+#guard xi (Stmt.runC (Stmt.licm failLoop) startG) == some (0, 0)
+#guard (xi (Prog.runC unguarded startG)).isNone
+
+/-! ### Rejected: not invariant -/
+
+/-- `while (i < 3) { x = total; total = total + 1; i = i + 1; }`: the rest of the
+body writes `total`, which `x = total` reads, so nothing is hoisted. -/
+def writesRoot : Stmt C G G :=
+  .loop .auto lt3 (.cons (.assignLocal xv total)
+    (.cons (setTotal (add total (lit 1))) (.cons incI .nil)))
+
+theorem licm_root_rejected : Stmt.licm writesRoot = writesRoot := rfl
+
+/-- Negative control: the unchecked hoist leaves `x = 0` where the loop leaves
+`x = 2` (the last iteration reads `total = 2`). -/
+def wrongRoot : Stmt C G G :=
+  .ite lt3 (.cons (.assignLocal xv total)
+    (.cons (.loop .auto lt3 (.cons (setTotal (add total (lit 1))) (.cons incI .nil))) .nil)) .nil
+
+#guard xi (Stmt.runC writesRoot startG) == some (2, 3)
+#guard xi (Stmt.runC wrongRoot startG) == some (0, 3)
+
+/-- `while (i < 3) { x = i * 2; i = i + 1; }`: `x = i * 2` reads `i`, which the
+body writes; not hoisted. -/
+def mul2 : Val C G .uint := .binop .mul rfl rfl iRead (lit 2)
+def readsWritten : Stmt C G G := .loop .auto lt3 (.cons (.assignLocal xv mul2) (.cons incI .nil))
+
+theorem licm_local_rejected : Stmt.licm readsWritten = readsWritten := rfl
 
 end Solidity.Optimizer.X06Controls
