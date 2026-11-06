@@ -865,3 +865,38 @@ loss of original row metadata, and an uncaught malformed top-level JSON
 case in the first helper draft; those were fixed. They did not use Lean, a
 server or builds. H56 measurement and authenticated runner provenance, all
 remaining row classifications and generated-control scope remain open.
+
+## H28 standalone fixture groups: per-path static references
+
+`h28_classify.py` records 118 supplied tracked candidate rows individually:
+58 statement-grammar, 34 mutation-testing and 26 non-vacuity files. The
+artifact records source hashes, lexical import lines and group-specific
+driver references. Mutation rows additionally retain case IDs, roles, kinds
+and hashes of each manifest read. The final output is
+`/workspace/h55-module-times-evidence/46025ca8d-h28-classification-v3.json`;
+its checksum and that of the initial superseded output are committed in
+`tests/h55/module-times/h28-classification-evidence.sha256`. This is a
+partial static projection of caller-supplied census rows, accepts subsets,
+and authenticates neither the census head nor manifest/worktree provenance.
+
+Statement-grammar `runtime.py` offers generic per-file gate/diag modes,
+requires its separate container/tool configuration and writes evidence; a
+generic driver reference does not establish a prior invocation for each file.
+The separate solc runner is external testing, not a Lean proof. Mutation
+`tools/runner.py` and `tools/engine.py` use pinned cases, baseline/mutant
+trees, selected cache and runtime, and write patches and evidence. Oracle,
+witness, regression and equivalence roles vary by case; exit 1 or an oracle
+rejection alone is not a validated kill. The non-vacuity private `kernel.py`
+discovers direct namespace files, resolves private local imports and writes
+private oleans/index; it expects successful Lean checks when selected. Its
+`--fresh` option forces selected modules, not necessarily dependencies. A
+normal root-context file check is not equivalent. Full commands, prerequisite
+state, materialized resources and outcomes still require row-by-row runner
+validation; the classifications do not approve exclusions.
+
+Read-only reviews found a wrong mutation driver path in the first artifact
+and an overbroad non-vacuity namespace match in the first helper draft. The
+path was corrected, manifest hashes added, and the mapper now rejects files
+outside the private harness direct discovery directory. Regression controls
+cover these findings. Reviewers used no Lean/server/builds; current H56
+execution, KeySort and production acceptance remain unproved.
