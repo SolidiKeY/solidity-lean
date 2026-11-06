@@ -1059,3 +1059,33 @@ preparation succeeded. This is environment preparation only, not an A/B
 measurement, Lean proof or H56 acceptance. Actual five-module matched
 wall/RSS runs, separate relocated-pin checks and the quiet window remain
 outstanding.
+
+### H109 A/B preparation and resource limitation
+
+Two isolated source copies were made from `33eb46304cdb536e6c8b686223c6d8e456b703ae`;
+the five preview edits exist only under `/workspace/h55-h109-ab-after`, not
+in the task branch. Both copies have a temporary single-thread Lake config.
+Separate cache copies are `/workspace/h55-h109-cache-before` and
+`/workspace/h55-h109-cache-after`. During their creation, filesystem page
+cache temporarily filled the 16 GiB cgroup and breached the 4 GiB free
+reserve. No Lean comparison ran during that breach. `posix_fadvise` was
+then applied only to the private pack/copy files, retaining them on disk;
+cgroup usage fell to approximately 2.84 GB. Future preparation requires a
+continuous reserve guard, not an assumption that copying is harmless.
+
+A 64 MiB no-swap smoke container passed the existing owned-container watcher,
+which labels it `untrusted-exited`. One separate 8 GiB/no-swap/one-CPU
+container prepared `Solidity.Stipend.Rule:deps` in the before tree, reporting
+13 Lake jobs and process exit 0; this is not a timed comparison, proof pass
+or H56 evidence. Logs, metadata and an unexecuted A/B runner draft are
+listed in `tests/h55/module-times/h109-ab-preparation.sha256`.
+
+Independent read-only pre-use reviews found that the draft fails to bind the
+complete tree, cache and toolchain before/after, has insufficient timing
+precision for short runs, does not prove total job peak RSS or effective CPU
+policy, and can miss cleanup on interruption. It was not executed and is
+preserved outside the repository at
+`/workspace/h55-module-times-evidence/h109-ab-runner-unreviewed.py`. Repair,
+re-review and identical-condition verification are required before any
+claimed H109 A/B; the sampled watcher is not production attestation. No H93
+h55b cold-timing experiment was run.
