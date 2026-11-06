@@ -91,6 +91,7 @@ class FieldOps (α : Type) extends Add α, Sub α, Mul α, Neg α, BEq α where
 /-- Integers modulo `p`, inverted by Fermat (`a ^ (p - 2)`): a field at every
 prime `p`, which is how every precompile uses it. -/
 instance finFieldOps (p : Nat) [NeZero p] : FieldOps (Fin p) where
+  toBEq := ⟨fun a b => decide (a = b)⟩
   zero := Fin.ofNat p 0
   one := Fin.ofNat p 1
   inv a := Fin.ofNat p (powMod a.val (p - 2) p)

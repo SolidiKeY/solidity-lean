@@ -8,7 +8,7 @@ from unittest.mock import patch
 ROOT=Path.cwd(); HERE=Path(__file__).resolve().parent
 spec=importlib.util.spec_from_file_location("census",HERE/"census.py"); c=importlib.util.module_from_spec(spec);spec.loader.exec_module(c)
 base=c.census(ROOT)
-assert base["source_frozen"] and len(base["files"])==11 and len(base["topological_closure"])==16
+assert base["migration_matches"] and len(base["files"])==11 and len(base["topological_closure"])==16
 point=next(x for x in base["files"] if x["path"].endswith("PointEval.lean"))
 assert all(any(("def "+name+" ") in d["source"] for d in point["declarations"]) for name in ("decode","verifies"))
 osaka=next(x for x in base["files"] if x["path"].endswith("Osaka.lean"))
@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory(prefix="h62-controls-",dir="/workspace/h62-migr
     with patch.object(c.subprocess,"check_output",side_effect=show):
         for entry in base["files"]:
             p=tree/entry["path"]; data=p.read_bytes();p.write_bytes(data+b"\n-- changed source negative control\n")
-            assert not c.census(tree)["source_frozen"],p
+            assert not c.census(tree)["migration_matches"],p
             p.write_bytes(data)
         missing=tree/base["files"][0]["path"];data=missing.read_bytes();missing.unlink()
         try:c.census(tree);raise AssertionError("missing module passed")

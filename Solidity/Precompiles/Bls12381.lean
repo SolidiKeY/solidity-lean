@@ -168,13 +168,27 @@ def g2Discount : List Nat := [
   537, 536, 535, 535, 534, 533, 532, 532, 531, 530, 530, 529, 528, 528, 527, 526, 526, 525,
   524, 524]
 
-theorem g1Discount_length : g1Discount.length = 128 := rfl
-theorem g2Discount_length : g2Discount.length = 128 := rfl
+theorem g1Discount_length : g1Discount.length = 128 := by decide +kernel
+theorem g2Discount_length : g2Discount.length = 128 := by decide +kernel
+
+/-- Structural lookup without the unused proof fields of an indexing instance. -/
+private def msmLookup (table : List Nat) (index cap : Nat) : Nat :=
+  List.casesOn table cap fun a tail =>
+    Nat.casesOn index a fun i => msmLookup tail i cap
+
+private theorem msmLookup_eq_getD (table : List Nat) (index cap : Nat) :
+    msmLookup table index cap = table.getD index cap := by
+  induction table generalizing index with
+  | nil => rfl
+  | cons a table ih =>
+    cases index with
+    | zero => rfl
+    | succ i => exact ih i
 
 /-- The MSM gas of `k` pairs with base cost `c`, the discount table and its
 cap. -/
 def msmGas (c : Nat) (table : List Nat) (cap k : Nat) : Nat :=
-  k * c * (if k = 0 then 0 else table.getD (k - 1) cap) / 1000
+  k * c * (if k = 0 then 0 else msmLookup table (k - 1) cap) / 1000
 
 def g1MsmGas (d : Bytes) : Nat := msmGas 12000 g1Discount 519 (d.length / 160)
 
@@ -394,6 +408,7 @@ theorem msmGas_succ (c : Nat) (table : List Nat) (cap k : Nat) (hlen : table.len
     (htab : ∀ i < 128, (i + 1) * table.getD i cap ≤ (i + 2) * table.getD (i + 1) cap) :
     msmGas c table cap k ≤ msmGas c table cap (k + 1) := by
   unfold msmGas
+  simp only [msmLookup_eq_getD]
   apply Nat.div_le_div_right
   cases k with
   | zero => simp only [Nat.zero_mul, if_true, Nat.zero_le]

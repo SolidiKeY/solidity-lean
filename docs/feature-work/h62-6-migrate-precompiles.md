@@ -1,193 +1,176 @@
-# H62/H63 Precompiles migration — blocked checkpoint handoff
+# H62/H63 Precompiles migration — authorized patch, root dependency blocked
 
-Batch `solidity-h62-6-20261106`, lane `migrate-precompiles`.
-Repository `/workspace/solidity-lean`; isolated branch
-`codex/solidity-h62-6-20261106/migrate-precompiles`.
-Pinned base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
-No push, merge, PR, producer transfer, toolchain cut-over, generated-root change,
-axiom-pin edit or freeze announcement occurred. The persistent goal is unfinished.
+Batch `solidity-h62-6-20261106`, lane `migrate-precompiles`, repository
+`/workspace/solidity-lean`, branch
+`codex/solidity-h62-6-20261106/migrate-precompiles`, base
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Persistent goal unfinished.
 
-## Checkpoint status
+## Current checkpoint state
 
-1. **Census and old clean baseline: done.** Eleven assigned source files,
-   237 declaration lines, 152 `#guard` commands and three `#guard_msgs` assertions.
-   All original source bytes, tables, statements, definitions and budgets are
-   unchanged. Frozen-source SHA256 values are in the lane tests directory.
-2. **Pinned new toolchain and migration: blocked.** Official toolchain installed
-   and hash-verified; three proof-only candidate edits validated in isolation.
-   Producer originals remain read only pending exact-file owner clearance.
-   Further axiom-preserving repairs and a root-owner dependency remain.
-3. **New build and comparison: blocked.** Candidate v2 compiles the first ten
-   assigned modules but Osaka fails its original axiom assertions. A failed
-   build is not eligible for the final wall-time comparison.
-4. **Final root-gate handoff: partial.** Census, tooling, fixtures, owner requests,
-   candidate patch fragments and evidence are reviewable. Final migrated source,
-   passing full gates, final timing comparison and acceptance are outstanding.
+1. **Done:** pinned-base census and original clean v4.24 baseline.
+2. **Blocked on root dependency:** authorized local directory changes implemented
+   and validated, but the imported recovery producer adds a frozen-disallowed
+   axiom on v4.35. No source outside this lane was edited.
+3. **Blocked:** all16 modules pass on old toolchain; new compilation fails only
+   the original Osaka `run_eq_none_iff` axiom assertion. Final passing new-build
+   timing and full affected/final validation remain outstanding.
+4. **Partial:** reviewable production patch, exact source contract, hashes,
+   dependency request, tests and evidence are exported. Final root gate pending.
 
-## Setup and exact toolchain
+The coordinator clarified that VMs never receive host `relay.sh`: this lane is
+its directory's registered writer and must apply statement-preserving migration
+itself. Earlier OWNER-BLS/OWNER-POINT clearance questions are resolved by that
+explicit instruction, not by silence. `decide +kernel` is allowed under H64.
+The coordinator relays the following changes to the live owner at cut-over.
 
-Initial checkout was clean branch `work`, head
-`6cf853aea0417155aca29ddb91f1767d3f3a3cc4`. Fetched published master and the exact
-base, verified `git merge-base --is-ancestor BASE origin/master` (exit 0), then
-created the assigned branch directly at BASE. No reset or discarded work.
-Published master observed during setup was `821e3e8f4c7a5ac3a51dc5cba8be813bb173e310`.
-AGENTS, intrinsic Gate G0, module map, producer history, parallelism, contribution
-and resource instructions were inspected. No Lean MCP or coordinator `relay.sh`
-is exposed here; per-file command-line diagnostics are used instead. The supplied
-continuation objective is preserved; no second goal was created.
+## Every production change for live-owner relay
 
-Coordinator inputs `/workspace/h62-coordinator-inputs/sha256.json` verify all five
-provided documents. The shared `toolchain-pin.json` specifies
-`leanprover/lean4:v4.35.0`, official `lean-4.35.0-linux.tar.zst`:
+- `Solidity/Precompiles/Bls12381.lean`: both 128-entry discount-length proofs
+  use kernel-checked `decide +kernel` instead of depth-failing `rfl`.
+  New **private** `msmLookup` uses structural List/Nat `casesOn`, decreasing
+  the table tail and preserving short-circuit traversal. Private
+  `msmLookup_eq_getD` proves agreement for every table/index/fallback. `msmGas`
+  uses that helper, and `msmGas_succ` rewrites by its agreement theorem after
+  unfolding. All public statements, tables and cases remain unchanged.
+- `Solidity/Precompiles/Field.lean`: `finFieldOps.toBEq` is explicit constructive
+  `fun a b => decide (a = b)`, avoiding the newly inferred classical order
+  package. The universal `FiniteDecision` fixture proves agreement with the
+  standard comparison on both versions. The computational body is axiom-free.
+- `Solidity/Precompiles/PointEval.lean`: the impossible `none` branch of
+  `bind_check_eq_some` uses `cases h` instead of the incompatible
+  `Option.noConfusion h`. Its exact polymorphic type is unchanged.
+- `Solidity/Precompiles/Osaka.lean`: the stipend proof uses explicit
+  `Nat.decLt`/`of_decide_eq_true`. Its original empty-axiom assertion now passes
+  on v4.35. All axiom assertion comments and all original guards are unchanged.
+
+Four producer files changed; seven remain byte-identical. There are two new
+private core helper declarations; no new public core interfaces or area modules.
+No frozen statement/premise/exclusion, proof budget, generated root, module map,
+axiom pin or tracked toolchain was changed. No source sorry/new axiom/native_decide
+or kernel-skip option was introduced. No push, merge, PR or freeze announcement.
+
+## Toolchain, provenance and resource controls
+
+Initial clean checkout `work` was `6cf853aea0417155aca29ddb91f1767d3f3a3cc4`.
+Fetched master and exact base, verified base ancestry against remote master,
+created the assigned branch without reset/discard. Setup remote master was
+`821e3e8f4c7a5ac3a51dc5cba8be813bb173e310`.
+AGENTS, Gate G0, area docs/history, verification and resource policies were read.
+No Lean MCP is exposed; bounded per-file CLI diagnostics are used. No new or
+replacement persistent goal was created.
+
+The official coordinator-pinned `lean-4.35.0-linux.tar.zst` has SHA256
 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
-The downloaded archive matches exactly, rather than using an independently built
-compiler. Private toolchain path:
-`/workspace/h62-migrate-precompiles/toolchains/lean-4.35.0-linux`.
-Tracked `lean-toolchain` remains `leanprover/lean4:v4.24.0`.
+Archive checksum matches `/workspace/h62-coordinator-inputs/toolchain-pin.json`;
+all provided coordinator inputs were independently hash-verified. The private
+installation is `/workspace/h62-migrate-precompiles/toolchains/lean-4.35.0-linux`.
+Actual Lean 4.35.0 release commit:
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`; Lake `5.0.0-src+eb6cafb`.
+Old Lean 4.24.0 release commit:
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake `5.0.0-src+797c613`.
+Tracked lean-toolchain remains v4.24; root migration lane owns its final edit.
 
-Actual versions:
+VM: 16 GiB memory cgroup, CPU quota4 over CPUs0–4, no system swap. Each job:
+12 GiB hard address-space cap, 4 GiB available physical/cgroup reserve guard,
+LEAN_NUM_THREADS=1, explicit -j1, --tstack=131072, one heavy job at a time.
+Writer lock is inherited by the Lean process. Exception cleanup and parent-death
+lock behavior have executable controls. No systemd-run or other-worker kills.
+No v4.24/master Lake cache was restored. Clean runs use absent output directories
+and empty private olean roots; OS page cache was not explicitly flushed.
+Per-process RSS is measured by wait4, not cumulative rusage.
 
-- Lean 4.24.0, x86_64-unknown-linux-gnu, release commit
-  `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
-  Lake `5.0.0-src+797c613` (Lean 4.24.0).
-- Lean 4.35.0, x86_64-unknown-linux-gnu, release commit
-  `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
-  Lake `5.0.0-src+eb6cafb` (Lean 4.35.0).
+## Commands and evidence
 
-## Resources, commands and decisive evidence
+Evidence directory `/workspace/h62-migrate-precompiles/evidence/` contains exact
+commands, versions, expected/completed modules, exits, wall/RSS and logs in each
+run's `summary.json`. Use the in-scope `bounded-build.py` with `--toolchain` and
+fresh `--out`; fixture reuse has an explicit diagnostic-only --import-products
+label and is never treated as a clean benchmark.
 
-VM cgroup memory cap 16 GiB, CPU quota 4 cores across allowed CPUs 0–4,
-no system swap; no systemd-run used. Each Lean child
-has a hard 12 GiB address-space limit, one thread, explicit `-j1`,
-`--tstack=131072`, and a guard retaining at least 4 GiB of physical/cgroup
-headroom. A shared writer lock is acquired and inherited by the child; abnormal
-Python exit kills/reaps its owned child where possible, and parent death cannot
-release the inherited lock while the child survives. No other workers were killed.
-Heavy checks were serial. Per-child RSS comes from `wait4`, not cumulative rusage.
-Clean means an absent private output directory and empty olean product directory;
-no Lake/master artifact cache is used. OS page cache was not explicitly flushed.
-
-All paths below are relative to
-`/workspace/h62-migrate-precompiles/evidence/` unless stated otherwise.
-The full underlying Lean commands, exits, per-module wall/RSS, expected/completed
-inventory and compiler versions are in each `summary.json`.
-The common runner is
-`scripts/h62/item6/migrate-precompiles/bounded-build.py`.
-
-| Gate / command arguments | Outcome | Decisive evidence |
+| Command / run | Result | Decisive evidence |
 |---|---|---|
-| `census.py --verify` | pass | `census.json`: all 11 sources equal base |
-| `acceptance.py` | pass | `acceptance-final.log`: 11 source mutations, inventory/cycle controls, attribute/guard coverage, partial/failure/no-output/cache controls, parent-death lock control |
-| runner `--keysort-only --toolchain /workspace/.setup/tools/lean-4.24.0-linux --out .../old-keysort-final` | pass | Exactly `Solidity.KeySort`, 1/1, exit 0, 2.316 s, 264332 KiB |
-| runner `--keysort-only --toolchain .../lean-4.35.0-linux --out .../new-keysort-final` | pass | Exactly `Solidity.KeySort`, 1/1, exit 0, 1.818 s, 512164 KiB |
-| runner `--toolchain /workspace/.setup/tools/lean-4.24.0-linux --out .../old-measured` | pass | 16/16; 46.390716473 s; max worker RSS 375120 KiB |
-| runner new toolchain, `--out .../new-measured` | fail | BLS discount length `rfl` exceeds recursion depth, lines 171/172 |
-| runner from private `candidate-sources`, new toolchain | fail | BLS fixed; PointEval line 141 `Option.noConfusion` universe mismatch |
-| runner from private `candidate-v2-sources`, new toolchain | fail | 16 attempted, 15 pass; Osaka axiom assertions fail, lines 198/202 |
-| diagnostic `Inspect.lean`, old/new matching `--import-products` | pass | 221 named declarations each; `interface-comparison.json`: zero formatted signature changes, 69 axiom-set changes |
-| `DiscountKernel`, `BindCheck`, `StipendProof`, `FinEquality` fixtures on each toolchain | pass | Each fixture's old/new summary and log; exact statements, no budget overrides |
-| final clean migrated build / final timing / `./run-lean.sh` | pending | Cannot pass before owner/dependency repairs and original axiom assertions pass |
+| census.py --verify (original base) | pass | census.json:11 files,237 declaration lines,152 guards,3 guard_msgs |
+| census.py --verify-migration (current) | pass | authorized-census.json; all source bytes match exact authorized transformations |
+| acceptance.py (current) | pass | authorized-acceptance.log: all11 source mutation controls, missing/extra/cycle inventory, declarations/guards, failed/partial/missing-output/cache and parent-death lock controls |
+| bounded KeySort old/new | pass | old-keysort-final and new-keysort-final: exactly Solidity.KeySort 1/1, actual versions |
+| original old clean | pass | old-measured:16/16,46.390716473s,375120KiB peak |
+| final migrated old clean | pass | authorized-old-clean-2:16/16,42.248164142s,389620KiB peak |
+| final migrated new clean | fail | authorized-new-final:15/16 pass; sole Osaka line198 assertion failure;33.557409609s,601608KiB peak |
+| fresh public signature diagnostic | pass for signatures only | authorized-interface-comparison.json:221 names/types match,6 axiom deltas remain |
+| direct root axiom diagnostic | pass as diagnostic | root-trace-old/new print recover, recoverPoint and ecrecover |
+| all isolated proof fixtures old/new | pass | kernel lengths, bind check, explicit finite decision, structural recursor agreement and stipend obligations; individual summaries/logs |
+| ./run-lean.sh / final accepted comparison | pending | root dependency must first satisfy unchanged frozen directory assertions |
 
-Diagnostic import reuse is explicitly labeled in summaries and never counted as a
-clean timing. Two early pilot closure builds (`old-keysort`, `old-clean`) are
-excluded: the first was mislabeled because the caller omitted `--keysort-only`.
-`old-keysort-actual` is an incomplete pilot from discovering missing `/usr/bin/time`;
-final measurements instead use per-process `wait4`. A double-lock invocation was
-rejected and did not run Lean. Failed plain-decide and simp alternatives remain
-only as off-git pilot evidence, not accepted proofs or production changes.
+The old migrated tree has no measured checking slowdown against old baseline;
+its peak RSS increased3.87%. **A failed new build is not an eligible speedup or
+final time comparison.** New peak is60.38% above original old peak and is explicitly
+escalated to migration root/gate. No resource regression is silently accepted.
+No RUNTIME_GATE_PASS or whole-goal completion is claimed. Stop/escalate any
+accepted >10% checking slowdown when the complete comparable gate becomes possible.
 
-The failed candidate-v2 wall time is 34.648226113 s with peak 599552 KiB.
-**No final speedup percentage is claimed from a failed build.** The observed peak
-RSS increase versus the old full run is 59.83%; this is explicitly escalated to
-migration root/gate, not accepted as a passing resource comparison. No final
-slowdown gate has passed; >10% checking slowdown must stop the migration.
+Initial off-git pilots are excluded from final gates. A mislabeled old-keysort
+run omitted the selection flag; final KeySort runs correct it. Missing time
+binary, duplicate lock, incomplete status and census/RSS bugs were repaired and
+controlled. A direct internal lookup remained propext-dependent and broke a
+rewrite; a List.rec fixture could not compile; both were replaced. A fold
+prototype passed but was not selected because structural short-circuiting better
+preserves traversal cost. An explicit Nat.beq field prototype broke an old
+proof's definitional shape; constructive decide restored old compatibility
+without editing Bn254. Rejected pilots remain off git, with source/evidence
+provenance where applicable, and never count as passing final builds.
 
-## Exact candidate and blockers
+## Frozen interfaces and remaining root request
 
-`proposed-bls.patch` replaces only the two length theorem bodies `rfl` with
-`by decide +kernel`. Both tables still contain the same 128 entries, both
-statements are identical, and both version fixture logs report no axioms.
-The official tactic's kernel path constructs and kernel-checks a proof; it does
-not use native evaluation or a trusted Bool-reduction axiom. No heartbeat or
-recursion-depth setting is raised. A rejected simplifier alternative added
-`propext`, so it was not selected.
+`frozen-sources.json` preserves original whole-source hashes; `migration-sources.json`
+records current/base hashes and exact contract agreement. `contract.py` permits
+only the listed transformations, including private helper/proof additions;
+all other bytes must equal base. It is an exact source guard, not a kernel ABI
+oracle. The generated inspection hashes normalized printed types, not kernel
+Expr objects. It covers221 original source-named declarations outside Osaka;
+private/generated/anonymous items are covered by source hashes and compiled
+module checks. Osaka's11 original statement texts remain unchanged; it elaborates
+but its frozen axiom assertion fails, so full acceptance is not claimed.
 
-`proposed-pointeval.patch` replaces only the impossible `none` branch
-`exact Option.noConfusion h` with `cases h`. The exact polymorphic statement
-passes both versions; its fixture uses only `propext`, as the original helper.
-No decoding/verifying irreducibility or definition was changed.
+Fresh axiom deltas fell69→6: ecrecover/ecrecover_isSome gain Choice+Quot.sound;
+ofHex/setupG2Compressed gain standard Choice+Quot.sound+propext; Fp12.add/sub gain
+standard Quot.sound. All deltas are reported for root classification, not repinned.
+The actual remaining required assertion is:
+`Osaka.run_eq_none_iff`: expected [propext,Quot.sound], actual
+[propext,Classical.choice,Quot.sound]. Its original stipend/gas assertions pass.
 
-`candidate.py --out NEW_DIRECTORY` deterministically copies the 16-source closure
-and applies only these three proof edits to an **off-git** snapshot. Its `.git`
-symlink is used only for `git show BASE:path`; it is not a standalone checkout and
-must never be used for Git mutations or included as an independent repository.
-Snapshots and artifacts are private diagnostics, not approved producer edits.
+**ROOT-AXIOMS**: migrate-root-gate owns `Solidity/Secp256k1.lean`. Direct diagnostics
+confirm `Secp256k1.recover` changes from [propext] and `recoverPoint`
+from [] to [propext,Classical.choice,Quot.sound] under new inferred library instances.
+Please migrate that producer preserving its exact API/semantics and original
+axiom expectations, then provide the owner patch/dependency for bounded retest.
+This lane will not edit or duplicate that approved external implementation,
+weaken run_eq_none_iff, or update its frozen assertion/pins.
 
-Typed pending requests are recorded in `owner-requests.json`:
+Direct dependencies: Roadmap.Evm, Hashes, Secp256k1; closure also Keccak and
+RevertBytes. All five compile unchanged on new toolchain; compilation alone does
+not certify identical axiom dependencies. Roadmap/root owners retain ownership.
+Typed requests in owner-requests.json mark directory ownership resolved and retain
+ROOT-AXIOMS, RSS-REGRESSION and FULL-GATE blockers. No human scope question remains.
 
-- `OWNER-BLS`, `OWNER-POINT`: exact-file clearance requested in this thread via
-  Q-OWNER-BLS-01 / Q-OWNER-POINT-01; no answer grants permission by silence.
-- `ROOT-AXIOMS`: migrate-root-gate owns `Solidity/Secp256k1.lean`, which must retain
-  the approved `recover` API and frozen axiom expectations. Under the new inferred
-  standard instances, `Precompiles.ecrecover` changes from `[propext]` to
-  `[propext, Classical.choice, Quot.sound]`. This lane will not edit that file.
-- `LOCAL-AXIOMS`: producer clearance needed for subsequent exact-preserving Field
-  and Osaka repairs. The new `finFieldOps` print shows inherited BEq going through
-  `Std.PreorderPackage.toBEq` and `Fin.instLinearOrderPackage`; the individual
-  `Fin.ofNat/add/sub/mul/neg` and `Nat.mod_lt` remain axiom-free. The diagnostic
-  `upstream-new` has one expected unknown-name lookup (`Fin.instBEq`) and is not a
-  passing gate. Do not repin the failed Osaka expectations.
-- `RSS-REGRESSION`: higher RSS escalated above. `FULL-GATE`: all remaining final
-  validation, accepted timing, finder/skeptic review and final migration handoff.
+## Proof boundaries, independent reviews and handoff
 
-Direct outside-directory imports are `Solidity.Roadmap.Evm`, `Solidity.Hashes`,
-`Solidity.Secp256k1`; closure adds `Solidity.Keccak`, `Solidity.RevertBytes`.
-All five compile unchanged on the new version, but compiling is not evidence that
-their transitive axiom dependencies are unchanged. Roadmap owner retains Evm;
-root migration owner retains the other four. No source request was sent using an
-unavailable relay; the coordinator retrieves this saved exact-file report.
+Structural lookup agreement covers all tables, all indices and all fallbacks;
+finite comparison agreement covers every modulus/value pair. Their computational
+bodies are axiom-free on both toolchains. Agreement proofs use only the reported
+standard axiom sets; they are not inserted as axioms or new premises. The152
+original executable guards are preserved. They are finite computation vectors,
+not proofs of field/group laws or external-EVM equivalence.
 
-## Backfill, proof boundaries and review
+Independent finder and skeptic used read-only review, neither Lean/server nor
+edits. They caught and fixed earlier census, partial-PASS, RSS, inherited-lock,
+old definitional-shape and lookup rewrite issues. Final authorized review evidence
+is separate from the earlier blocked-handoff review; no review waives a gate.
 
-`FinEquality` proves, for every modulus and pair of finite values, that explicit
-`Nat.beq` of their values agrees with the current lawful comparison. The explicit
-computational definition is axiom-free on both versions; its agreement proof has
-standard axioms (new version includes Classical.choice) and is not smuggled into
-a frozen theorem. `StipendProof` uses explicit `Nat.decLt` to prove the exact
-numeric stipend obligation with no axioms on either version. These fixtures do
-not by themselves repair the frozen public Osaka theorem.
-
-There are no source `sorry`, new `axiom`, `native_decide`, kernel-skip options,
-raised proof budgets or weakened statements/premises/exclusions in this change.
-Rejected failed elaborations may print `sorryAx`; no such artifact is accepted.
-The 152 original computation guards are preserved. They are finite executable
-vectors, not proofs of elliptic-curve/field laws or external-EVM equivalence.
-The named signature comparison hashes normalized printed types, not kernel Expr
-objects; complete original source hashes cover all declaration/case bytes,
-including anonymous instances. Osaka's 11 source declarations remain frozen but
-its new-toolchain axiom gate fails, so full elaborated interface acceptance is
-not claimed. There are no new area modules to register; helpers remain in tests.
-
-Independent read-only finder and skeptic reviewed census/runner, identified and
-closed missing attributed declarations, missing guard_msgs, premature PASS,
-cumulative RSS and child cleanup/lock issues. Acceptance controls cover them.
-Both separately verified the two length proof candidates' exact tables,
-statements and empty axiom sets, and the off-git snapshot's exact three-proof
-scope was presented for further review. Neither reviewer ran Lean or a server.
-Final milestone reviews are recorded in the off-git review evidence after review
-of this document; no review substitutes for the failing required gates.
-
-Resume on this VM/goal/branch. Obtain exact-file owner clearances and the root
-axiom-preserving dependency first. Never infer approval to modify pins. Re-run
-clean old/new comparable measurements after implementing authorized repairs,
-stop/escalate regressions, run the required full affected/final gates, obtain
-fresh independent reviews, and export the final complete patch/bundle. Keep the
-same persistent goal unfinished; coordinator owns any fresh-thread handoff.
-
-Final independent finder and skeptic reviews found no serious defect in this
-blocked handoff and verified the production sources remain byte-identical.
-Their review approves reporting accuracy, not failed migration gates.
-`compare-inspection.py` exit 0 establishes signatures only; its 69 axiom deltas
-remain blockers. Repository static checks pass: layers (857 core modules),
-generated roots, generated fragments, and documentation paths. Their commands
-and outputs are in `static-gates.json` and the corresponding evidence logs.
+Export current committed original patch, verified bundle, handoff and checksum
+manifest from this VM/branch. Historical evidence.sha256 remains intact; new bulk
+outputs are off git and listed in evidence-authorized.sha256. Coordinator owns
+fresh-thread continuation; do not create/reset a goal or replacement thread.
+After root producer repair: apply only an authorized dependency input, rerun clean
+comparable new build and full affected/run-lean.sh validation with pinned toolchain,
+escalate resource regressions, obtain fresh reviews and deliver final complete
+handoff. The persistent goal must remain unfinished until every required gate passes.
