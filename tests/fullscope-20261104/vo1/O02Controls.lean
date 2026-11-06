@@ -77,6 +77,17 @@ theorem prop_constant : Prog.cprop Facts.empty propProg =
     .cons (.declLocal .uint (.user "a") (some (lit 5)))
       (.cons (.declLocal .uint (.user "b") (some (lit 6))) .nil) := rfl
 
+/-- `uint a = 5; total = a; uint b = a + 1;`: the fact survives the storage write. -/
+def storeProp : Prog C [] [.val .uint, .val .uint] :=
+  .cons (.declLocal .uint (.user "a") (some (lit 5)))
+    (.cons (.assign (.root (T := .prim .uint) "total" rfl) (.val (.simple (.local .here))))
+      (.cons (.declLocal .uint (.user "b") (some (add (.simple (.local .here)) (lit 1)))) .nil))
+
+theorem prop_across_store : Prog.cprop Facts.empty storeProp =
+    .cons (.declLocal .uint (.user "a") (some (lit 5)))
+      (.cons (.assign (.root (T := .prim .uint) "total" rfl) (.val (lit 5)))
+        (.cons (.declLocal .uint (.user "b") (some (lit 6))) .nil)) := rfl
+
 /-- `uint b = a; uint c = b;` (copy) reads `a` in place of `b`. -/
 def copyProg : Prog C G [.val .uint, .val .uint, .val .uint] :=
   .cons (.declLocal .uint (.user "b") (some x))

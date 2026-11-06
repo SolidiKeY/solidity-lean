@@ -11,7 +11,9 @@ expression is folded (`Val.cfold`), so a propagated constant feeds folding.
 Facts are created only by `x = e;` and `T x = e;` whose folded right-hand
 side is a literal or a local. They survive local assignments (minus the ones
 an assignment kills: the fact for the assigned local and every fact reading
-it), declarations, `require` and `assert`. Any other statement, and the exit
+it), declarations, `require`, `assert`, and the storage statements `assign`,
+`delete` and `pop`, which leave every local and environment value as it was
+(`KeepsLocals`); the value an `assign` stores is propagated into. Any other statement, and the exit
 of a branch, block or loop, forgets every fact; a loop body and its condition
 are processed with no facts, since they run in states the entry facts need not
 describe. `transfer`/`send` operands are not rewritten here (they are folded
@@ -269,6 +271,60 @@ theorem _root_.Solidity.Val.opt_evalT {Γ : Ctx} {F : Facts C Γ} {σ : State C 
     {p : PrimTy} (v : Val C Γ p) : (v.opt F).evalT σ = v.evalT σ := by
   rw [Val.opt, Val.cfold_evalT, Val.subst_evalT hF]
 
+/-! ## Statements that keep the locals -/
+
+/-- A step that leaves every value local and environment value as it was. -/
+def KeepsLocals {Γ : Ctx} (f : TStep C Γ Γ) : Prop :=
+  ∀ σ o, f σ = .ok o →
+    (∀ (q : PrimTy) (k : Idx Γ (.val q)), TEnv.get k o.st.env = TEnv.get k σ.env) ∧
+      ∀ key, o.st.envVal key = σ.envVal key
+
+theorem Facts.holds_keep {Γ : Ctx} {F : Facts C Γ} {f : TStep C Γ Γ} (hk : KeepsLocals f)
+    {σ : State C Γ} (hF : F.Holds σ) {o : Out C σ.H Γ} (ho : f σ = .ok o) : F.Holds o.st := by
+  obtain ⟨hl, he⟩ := hk σ o ho
+  intro q j s hs
+  rw [hl q j, hF q j s hs]
+  cases s with
+  | lit => rfl
+  | bool => rfl
+  | «local» k => exact (hl _ k).symm
+  | env key hp => cases hp; exact (he key).symm
+
+theorem keeps_assign {Γ : Ctx} {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
+    KeepsLocals (TRun.assign l r) := by
+  intro σ o ho
+  simp only [TRun.assign, bind, Except.bind, pure, Except.pure] at ho
+  repeat' split at ho
+  all_goals first
+    | exact absurd ho (by simp only [reduceCtorEq, not_false_eq_true])
+    | (cases ho; exact ⟨fun _ _ => rfl, fun _ => rfl⟩)
+
+theorem keeps_delete {Γ : Ctx} {T : Ty} (l : Loc C Γ T) : KeepsLocals (TRun.delete l) := by
+  intro σ o ho
+  simp only [TRun.delete, bind, Except.bind, pure, Except.pure] at ho
+  repeat' split at ho
+  all_goals first
+    | exact absurd ho (by simp only [reduceCtorEq, not_false_eq_true])
+    | (cases ho; exact ⟨fun _ _ => rfl, fun _ => rfl⟩)
+
+theorem keeps_pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : KeepsLocals (TRun.pop b) := by
+  intro σ o ho
+  simp only [TRun.pop, bind, Except.bind, pure, Except.pure] at ho
+  repeat' split at ho
+  all_goals first
+    | exact absurd ho (by simp only [reduceCtorEq, not_false_eq_true])
+    | (cases ho; exact ⟨fun _ _ => rfl, fun _ => rfl⟩)
+
+/-- Propagate into a storage source's value. -/
+def _root_.Solidity.Src.opt {Γ : Ctx} (F : Facts C Γ) : {T : Ty} → Src C Γ T → Src C Γ T
+  | _, .val v => .val (v.opt F)
+  | _, s@(.copy ..) | _, s@(.fixedCopy ..) | _, s@(.copyMem ..) | _, s@(.fixedCopyMem ..) => s
+
+theorem _root_.Solidity.Src.opt_valueT {Γ : Ctx} {F : Facts C Γ} {σ : State C Γ}
+    (hF : F.Holds σ) : {T : Ty} → (r : Src C Γ T) → (r.opt F).valueT σ = r.valueT σ
+  | _, .val v => by simp only [Src.opt, Src.valueT, Val.opt_evalT hF]
+  | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
+
 /-! ## The pass -/
 
 mutual
@@ -287,12 +343,15 @@ def Stmt.cprop : {Γ Γ' : Ctx} → Facts C Γ → Stmt C Γ Γ' → Stmt C Γ �
     (.ite (c.opt F) (Prog.cprop F thn) (Prog.cprop F els), Facts.empty)
   | _, _, F, .block body => (.block (Prog.cprop F body), Facts.empty)
   | _, _, _, .loop a c body => (.loop a c.cfold (Prog.cprop Facts.empty body), Facts.empty)
-  | _, _, _, s@(.assign ..) | _, _, _, s@(.rebind ..) | _, _, _, s@(.declStorage ..)
+  | _, _, F, .assign l r => (.assign l (r.opt F), F)
+  | _, _, F, .delete l => (.delete l, F)
+  | _, _, F, .pop b => (.pop b, F)
+  | _, _, _, s@(.rebind ..) | _, _, _, s@(.declStorage ..)
   | _, _, _, s@(.opAssign ..) | _, _, _, s@(.incDec ..) | _, _, _, s@(.assignIncDec ..)
-  | _, _, _, s@(.assignLocalPush ..) | _, _, _, s@(.push ..) | _, _, _, s@(.pop ..)
+  | _, _, _, s@(.assignLocalPush ..) | _, _, _, s@(.push ..)
   | _, _, _, s@(.transfer ..) | _, _, _, s@(.send ..) | _, _, _, s@(.declMem ..)
   | _, _, _, s@(.rebindMem ..) | _, _, _, s@(.assignFromMem ..) | _, _, _, s@(.assignMem ..)
-  | _, _, _, s@(.delete ..) | _, _, _, s@(.deleteMem ..) | _, _, _, s@(.assignNew ..)
+  | _, _, _, s@(.deleteMem ..) | _, _, _, s@(.assignNew ..)
   | _, _, _, s@.revert | _, _, _, s@.assumeFalse | _, _, _, s@(.call ..)
   | _, _, _, s@(.tryCall ..) | _, _, _, s@(.pushOpAssign ..) | _, _, _, s@(.pushIncDec ..)
   | _, _, _, s@(.callReceiver ..) | _, _, _, s@(.callReceiverPush ..)
@@ -395,12 +454,17 @@ theorem Stmt.cprop_runC : {Γ Γ' : Ctx} → (F : Facts C Γ) → (s : Stmt C Γ
       funext fun τ => Prog.cprop_runC Facts.empty body τ (Facts.holds_empty τ)
     simp only [Stmt.cprop, Stmt.runC]
     rw [hb, TRun.loop_congr (Val.cfold_evalT · c) body.ext]
-  | _, _, _, .assign .., _, _ | _, _, _, .rebind .., _, _ | _, _, _, .declStorage .., _, _
+  | _, _, F, .assign l r, σ, hF =>
+    ⟨by simp only [Stmt.cprop, Stmt.runC, TRun.assign, Src.opt_valueT hF],
+      fun _ ho => Facts.holds_keep (keeps_assign l r) hF ho⟩
+  | _, _, F, .delete l, σ, hF => ⟨rfl, fun _ ho => Facts.holds_keep (keeps_delete l) hF ho⟩
+  | _, _, F, .pop b, σ, hF => ⟨rfl, fun _ ho => Facts.holds_keep (keeps_pop b) hF ho⟩
+  | _, _, _, .rebind .., _, _ | _, _, _, .declStorage .., _, _
   | _, _, _, .opAssign .., _, _ | _, _, _, .incDec .., _, _ | _, _, _, .assignIncDec .., _, _
-  | _, _, _, .assignLocalPush .., _, _ | _, _, _, .push .., _, _ | _, _, _, .pop .., _, _
+  | _, _, _, .assignLocalPush .., _, _ | _, _, _, .push .., _, _
   | _, _, _, .transfer .., _, _ | _, _, _, .send .., _, _ | _, _, _, .declMem .., _, _
   | _, _, _, .rebindMem .., _, _ | _, _, _, .assignFromMem .., _, _
-  | _, _, _, .assignMem .., _, _ | _, _, _, .delete .., _, _ | _, _, _, .deleteMem .., _, _
+  | _, _, _, .assignMem .., _, _ | _, _, _, .deleteMem .., _, _
   | _, _, _, .assignNew .., _, _ | _, _, _, .revert, _, _ | _, _, _, .assumeFalse, _, _
   | _, _, _, .call .., _, _ | _, _, _, .tryCall .., _, _ | _, _, _, .pushOpAssign .., _, _
   | _, _, _, .pushIncDec .., _, _ | _, _, _, .callReceiver .., _, _

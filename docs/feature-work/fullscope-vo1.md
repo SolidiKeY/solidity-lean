@@ -1132,3 +1132,10 @@ write (`assign l (.val v)`, `push b (some (.val v))`, through `Src.vopt` and
 `Src.vopt_valueT`) and the right side of `opAssign`/`pushOpAssign`; the location `l` and
 its index expressions are still left as written. Control: `store_folded`
 (`total = 2 + 3; total += 0 + 1;` → `total = 5; total += 1;`), `store_same`.
+
+Propagation across storage statements: facts now survive `assign`, `delete` and `pop`
+(`KeepsLocals`, `keeps_assign`, `keeps_delete`, `keeps_pop`: every value local and
+environment value unchanged), and the value an `assign` stores is propagated into
+(`Src.opt`, `Src.opt_valueT`). `transfer`/`send` still reset facts (`selfBalance`, an
+environment value, changes). Control `prop_across_store`
+(`uint a = 5; total = a; uint b = a + 1;` → `total = 5; uint b = 6;`).
