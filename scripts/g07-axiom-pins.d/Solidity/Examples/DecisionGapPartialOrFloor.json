@@ -1,0 +1,17 @@
+{
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.good_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.atZero_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.wrongValue_countermodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
