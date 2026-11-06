@@ -1,0 +1,58 @@
+[
+  {
+    "id": "B-MIGRATE-HASH",
+    "type": "owned-prerequisite-fails-pinned-toolchain",
+    "owner": "solidity-h62-6-20261106/migrate-hash",
+    "file": "Solidity/Hash/CollisionBound.lean",
+    "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "toolchain": "leanprover/lean4:v4.35.0",
+    "evidence": "/workspace/h62-audit-language-evidence/hash-final-blocker/Solidity__Hash__CollisionBound.lean.log",
+    "failure_sites": [
+      407,
+      660,
+      680
+    ],
+    "impact": "Source.Machine/Hoare import chain stops before source program witnesses can be checked. Failed proofs also contaminate downstream axiom guard messages with sorryAx; no failed artifact is reused.",
+    "requested_action": "Owner supplies its isolated migration overlay preserving every frozen statement; coordinator arranges approved consumption. Audit lane must not edit this owned original.",
+    "delivery": "saved for coordinator retrieval; no relay.sh available in this checkout; not claimed sent"
+  },
+  {
+    "id": "B-MIGRATE-LANGUAGE",
+    "type": "owned-prerequisite-fails-pinned-toolchain",
+    "owner": "solidity-h62-6-20261106/migrate-language",
+    "file": "Solidity/Language/FixedPoint.lean",
+    "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "toolchain": "leanprover/lean4:v4.35.0",
+    "evidence": "/workspace/h62-audit-language-evidence/fixedpoint-final-blocker/Solidity__Language__FixedPoint.lean.log",
+    "failure_sites": [
+      152,
+      170,
+      184,
+      421,
+      423,
+      434,
+      451,
+      456,
+      472,
+      546
+    ],
+    "impact": "Remaining fixed-point interfaces and their ABI/literal/storage satellite witnesses cannot be checked unchanged under the mandatory release.",
+    "requested_action": "Migration owner repairs proofs in its own isolated overlay while retaining frozen signatures and budgets; coordinator relays approved prerequisite evidence. No ownership transfer or in-lane repair.",
+    "delivery": "saved for coordinator retrieval; not claimed sent"
+  },
+  {
+    "id": "B-OWNER-CENSUS",
+    "type": "owner-confirmation-and-elaborated-census-pending",
+    "owner": "coordinator / live area producers",
+    "impact": "The conservative census has 4146 declarations; live owner candidates, private names and interface/hypothesis classification need confirmation. Migration registrations remain separate claims, never producer ownership.",
+    "evidence": "/workspace/h62-audit-language-evidence/fidelity-final/statement-fidelity.json",
+    "requested_action": "Resolve exact-file live owners from the pinned ownership snapshot before any existing-file edits; complete per-statement classification without exclusions."
+  },
+  {
+    "id": "B-FINAL-GATES",
+    "type": "affected-and-full-validation-pending",
+    "owner": "audit-language after prerequisite delivery",
+    "impact": "./run-lean.sh, external Bridge package checks, compiler success/reject-all/always-revert controls, gas/fork boundaries, comprehensive witnesses and acceptance cannot be marked passed.",
+    "requested_action": "Resume the original goal after owner prerequisites; run all required gates and independent reviews before any complete claim."
+  }
+]
