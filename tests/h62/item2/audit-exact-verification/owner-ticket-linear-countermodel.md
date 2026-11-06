@@ -1,3 +1,15 @@
+# H82 disposition — proof-only agreement request withdrawn
+
+H82 authorizes statement-preserving proof changes without owner agreement.
+There is no pending exact-file permission request for this proof. This worker
+made explicit unfolding of falseNode at line 134 on the existing branch.
+The statement, dependent definitions, proof budget and imports are unchanged.
+The repair is UNVALIDATED: no Lean runs while B-PERFORMANCE-STOP remains operative.
+The historical compilation failure below is retained as reproduction evidence,
+not as an owner-permission wait. Validate the repair after runtime STOP is resolved.
+
+## Historical ticket
+
 # B-MIGRATION-LINEAR-COUNTERMODEL
 
 Recipient for coordinator relay: `solidity-h62-6-20261106/migrate-calculus`

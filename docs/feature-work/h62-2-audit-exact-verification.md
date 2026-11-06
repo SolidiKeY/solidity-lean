@@ -1,3 +1,19 @@
+# H82 retirement: STOPPED, PAUSED requested, incomplete
+
+Final successor: solidity-v12-v17-20261031/v17-validation-release.
+The worker performs only this preservation checkpoint and stops; no automatic
+continuation is authorized. Full original assignment, scope and queues are
+committed under tests/h62/item2/audit-exact-verification/handoff/.
+H82 permits the single proof-only falseNode unfolding edit; it remains UNVALIDATED
+under the timing STOP. The old exact-file permission request is withdrawn.
+The new lexical census draft accounts563saved names with no witnesses/exclusions;
+review found provenance/partition hardening gaps, retained for successor.
+No H71 push authorization is available, so the branch is not pushed.
+The exposed goal schema has no PAUSED operation; no completion/reset/new goal.
+See committed handoff/retirement.md and queues.md for every open obligation.
+
+## Prior H70 record (historical)
+
 # H62 item 2: H70 independent-module audit — blocked
 
 Same VM `/workspace/solidity-lean`, branch
