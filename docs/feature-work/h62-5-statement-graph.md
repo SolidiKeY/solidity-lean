@@ -529,3 +529,65 @@ authentication of unavailable original worker runtime evidence. The held audit
 was not started. H55 size controls are functionally improved but their +21.4335%
 performance STOP remains binding. No master publication, retired-lane revival,
 fresh-thread creation, goal recreation/reset or claim of whole-goal completion.
+
+
+### Published G49 source locator intake
+
+Coordinator supplied the exact-master source inventory at SHA256
+`af4f1a69410a9df1f408d2e2d9d9b82b39f926ce48c6bb601c16092514ed733e`.
+The intake verifies all five inline bodies and Git file hashes at
+706e36825929d6d0084dc08b88de9349abcd25aa, checkpoint ancestry
+5f7c70b16090b25ea706dddf3e666d94fb5a09fe, and the published shape/bridge
+metadata. Git replacement objects are disabled and shallow/grafted/custom
+history overrides refused. The fetched master was merged into this lane before
+this checkpoint. No Claude-owned source or frozen statement was edited.
+
+All five pending views now display the source-located shared conditional theorem
+`Solidity.Roadmap.G49Final.g49_g50_of_fold`. These are owner slices of one theorem,
+not five checked theorem instances. Source labels retain ten named top-level
+binders, nine context/function/package inputs including three certificate
+packages, and all fifteen named PublicObligations fields, including externally
+owned fields. Five reported bridge requests remain pending and undelivered.
+Thirty-two explicit source declaration anchors do not assert generated projection
+existence or exhaustive lane coverage. Historical producer checking claims and
+hashes are explicitly reported metadata, not fresh local checks.
+
+The source catalog remains pending-input, blocked and unclaimable: exists and
+elaborated types are unknown, typed declarations are zero, no statement edges
+come from source text, and expanded atomic open-premise counts remain null.
+Graph validation checks pinned named coverage and internal consistency; only
+source_intake.py's main command authenticates the catalog against the delivered
+packet and exact Git blobs. Neither mechanism elaborates Lean or discharges a
+premise. Reproduce with `python3 -B scripts/h62/item5/statement-graph/source_intake.py
+--output /tmp/g49-source-catalog.json`, then compare with pending-inputs.json.
+The command requires the authenticated coordinator packet and ownership snapshot.
+
+Fifty-two Python controls pass, covering source omissions, changed package roles,
+missing/substituted bridge requests, missing views/locators, owner/provenance
+changes, false typed/done promotion, exclusive-claim refusal and determinism.
+Finder identified missing source-census coverage and replacement-sensitive
+ancestry; both were fixed. Skeptic confirmed the source/type boundary and noted
+the ancestry environment qualification, now explicitly refused. Neither reviewer
+used Lean/server. Exact catalog regeneration is byte-identical.
+
+The first inline validator hit cold CLI +11.9968% and was stopped. Moving source
+validation behind a lazy source-only entry point preserves byte-identical legacy
+fixture output, with seven-run cold median 0.040133073s to 0.042375455s (+5.5874%)
+and warm median 0.000367768s to 0.000338361s (-7.9961%). These are Python fixture
+compatibility controls, not project or Lean performance measurements. The failed
+inline version and harness setup failures remain in off-git evidence. No unchanged
+STOP was rerun. Repo-relative source pins, counts and timing outputs are committed
+in g49-source-intake-evidence.json; generated graphs and bulk logs remain off git.
+
+Actual G49 source-input wait is resolved; elaborated production types, full
+per-area DAG and G49/G50 counts remain incomplete. Wait for migrate-root-gate's
+Contracts:1104 exact empty-guard repair and Syntax.Raw compatibility, and for
+actual producer bridges. No new Lean/Lake/KeySort run or RUNTIME_GATE_PASS is
+claimed for this Python/metadata-only change. Prior official Lean 4.35.0 and
+Lake 5.0.0-src+eb6cafb checks remain historical. Exact retired member source
+objects faca44dc415dfbdab9b9ea6b0664f1e755abaa57,
+9cc85b14fa3f611e183379c257b10b19e1aa5325 and
+f8975f25b12a5e9723b00ec794b261708280092c remain unavailable; no substitution.
+H97 cold +12.7602%, H55 size +21.4335%, pin +46.58% STOP/pause, H67 central
+reconciliation and H58 audit HOLD remain unchanged. Entire same-goal queue and
+required operational handoff remain unfinished.
