@@ -1,0 +1,36 @@
+[
+  {
+    "id": "SCOPE-NEG-01",
+    "type": "scope-decision",
+    "owner": "coordinator / roadmap area producer; no H55 implementation work",
+    "theorem": "Solidity.Roadmap.PublicCorrectness.not_alwaysRevert",
+    "frozen_signature": "theorem PublicCorrectness.not_alwaysRevert (h : PublicCorrectness S V compiler envAbs X)\n    (hv : S.NonVacuous)\n    (hrev : ∀ i art e rt d, compiler i = some art → V.lang.Allowed e → V.lang.Admissible rt →\n      (V.lang.sem (V.load art) e rt).final ≠ some (.success d)) : False",
+    "signature_sha256": "6d0811ee37a20f1482929741ceb957b58d3bb31f395602120ab6e2eb266f5e48",
+    "evidence": "Frozen conclusion False; h.succeeds hv supplies an execution refuted by hrev. Independent finder/skeptic concur. Additive obstruction draft awaits dependency repair.",
+    "options": [
+      "Authorize separate negative-control criterion: prove joint unsatisfiability while preserving the theorem.",
+      "Keep the literal simultaneous-witness criterion: checkpoint remains blocked."
+    ],
+    "status": "awaiting explicit decision"
+  },
+  {
+    "id": "DEP-PARSER-01",
+    "type": "external-owner-toolchain-compatibility",
+    "owner": "SortCheck migration/area producer; exact key unresolved",
+    "file": "Solidity/SortCheck/Parser.lean",
+    "evidence": "Pinned official v4.35.0: line76 String.trim absent; exit1; actual taclet comparison not executed.",
+    "log": "/workspace/audit-roadmap-evidence/lean-pinned/Solidity_SortCheck_Parser.lean.log",
+    "request": "Owner supplies compatible isolated migration overlay preserving exact frozen interfaces. No file edits authorized here.",
+    "status": "blocked"
+  },
+  {
+    "id": "DEP-HASH-01",
+    "type": "external-owner-toolchain-compatibility",
+    "owner": "Hash migration/area producer; exact key unresolved",
+    "file": "Solidity/Hash/CollisionBound.lean",
+    "evidence": "Pinned official v4.35.0: line407 unsolved contains-function equality; lines660/680 omega failure; exit1 before additive module.",
+    "log": "/workspace/audit-roadmap-evidence/lean-audit/Solidity_Hash_CollisionBound.lean.log",
+    "request": "Owner supplies compatible isolated migration overlay preserving exact frozen statements/proof budgets. No file edits authorized here.",
+    "status": "blocked"
+  }
+]
