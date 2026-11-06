@@ -131,4 +131,22 @@ refuted there (their `proved` verdicts are in `Examples/DecisionArrayGaps.lean`)
 
 ## Gates
 
-Recorded in the CLOUD-RESULT block of the final marker commit.
+* Per-file MCP diagnostics: zero errors on every new and edited Lean file.
+* Axiom pins (`#guard_msgs in #print axioms`, recorded in
+  `scripts/g07-axiom-pins.d/`): `good_proved`, `atZero_refuted`,
+  `wrongValue_countermodel`, `PartialOrFloor.valid_iff`, `allocAll_void_holds`,
+  `mappingOne_proved`, `arrayOut_refuted` — only `propext`,
+  `Classical.choice`, `Quot.sound`. No `sorry`, no axiom, no
+  `maxHeartbeats` change.
+* `./run-lean.sh`: the first run (100 min, cold cache) found one break,
+  `Calculus/DecisionGivenHeapFixedBoundary.lean` (a `simp` past the new
+  `memCovered` disjunct), fixed in `DecisionGivenHeapFixedBoundary: close…`;
+  the rerun printed `Build completed successfully (6409 jobs).` The script
+  then exits 1 in `scripts/check-solkey.sh`. It reports 167 mismatches against
+  the solkey checkout beside the repository: unknown tokens and unannotated
+  reads in storage taclets. This lane touched no rule or sort annotation, so
+  the mismatches are not caused by it.
+* `scripts/check-doc-paths.sh` fails on the base too: `after-roadmap-va1.md`
+  cites a Mathlib file under `Bridge/.lake`, absent on this VM.
+  `check-axiom-pins.mjs` reports about 4,380 inventory entries that were not
+  recorded before this lane. This lane's 5 new pins are recorded.
