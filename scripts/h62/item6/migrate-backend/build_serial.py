@@ -71,8 +71,8 @@ report = {"lean": subprocess.check_output([lean,"--version"],text=True).strip(),
           "head": subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
           "purpose":"direct compiler diagnostic; does not replace MCP/run-lean.sh final gate",
           "census_sha256": hashlib.sha256(args.census.read_bytes()).hexdigest(),
-          "settings": {"threads":1,"lean_args":["-j1","--tstack=131072","-M12288"],
-                       "memory_cap_bytes":cap,"reserve_bytes":reserve,"swap":False,
+          "settings": {"threads":1,"lean_args":["-j1","--tstack=131072","-M8192"],
+                       "memory_cap_bytes":cap,"module_lean_memory_limit_mib":8192,"reserve_bytes":reserve,"swap":False,
                        "cache":"empty private output, no .lake or remote artifacts",
                        "page_cache":"OS cache not flushed; no performance comparison claimed",
                        "affinity":sorted(os.sched_getaffinity(0))},
@@ -84,7 +84,7 @@ try:
         dest = args.output/"lib"/(m.replace(".","/")+".olean")
         dest.parent.mkdir(parents=True, exist_ok=True)
         log = args.output/(m+".log")
-        cmd = [lean,"-j1","--tstack=131072","-M12288","-o",str(dest),str(src)]
+        cmd = [lean,"-j1","--tstack=131072","-M8192","-o",str(dest),str(src)]
         begin = time.monotonic()
         with log.open("w") as stream:
             child = None

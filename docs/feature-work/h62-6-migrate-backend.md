@@ -309,3 +309,58 @@ checks, complete declaration inclusion, provenance, runtime resource checks
 and actual old/new API comparison remain pending. Self-reported declaration
 count consistency does not independently prove completeness. The unchanged
 old baseline remains the sole Lean job; no production source was edited.
+
+## H78 continuation and recovered observation
+
+H78 answers Q-H70-STOP-SCOPE: do not stop the running unchanged old4.24
+baseline. Migration lanes continue past time/memory increases, record them
+for cut-over review, and keep an 8 GiB per-module cap. This supersedes the
+previous performance STOP rule; it grants no axiom/pin/budget relaxation or
+live-owner original-file permission. The old gate remains the sole Lean job.
+
+The original supervisor PID20926 disappeared while root20979 and Lake21012
+continued. Its last progress snapshot was 9480.310465453 seconds; no final
+result or continuous-monitor record covers the subsequent gap. The cause
+is unestablished. Cgroup memory.events later showed zero OOM kills; that
+observation does not identify the cause. No missing exit/RSS value is invented.
+
+The initial prefix used Lean -M12288 and total12GiB/reserve4GiB. Its config,
+wrapper and progress bytes are preserved unchanged as evidence. The private
+wrapper now appends -j1 -M8192 after Lake arguments for subsequent modules;
+root/Lake, source bytes, selected toolchain and targets were not restarted or
+replaced. Future serial/gate launchers use -M8192; the generalized MCP helper
+remains an uncommitted runtime-unverified draft with that same lower limit.
+This mixed-resource epoch is not a matched clean before/after timing pass.
+
+A detached nontracing observer reacquired this same goal's writer lock.
+Its first instance70961 was replaced by reviewed instance72074 without
+signaling the baseline. It samples official-Lean descendants only, validates
+root and child PID epochs, and uses pidfd only when an owned module's RSS/HWM
+exceeds8GiB. OS headroom is recorded as an alert, not another signal condition.
+It tolerates arbitrary argv bytes, detects zombie roots and reports unexpected
+observer failures. A root zombie exit word is recorded only if actually seen;
+otherwise final exit remains unknown. Prior interval/full maximum RSS and
+matched timing remain unverified. No observer result proves a Lean theorem.
+
+Automatic approval review rejected the earlier combined recovery action
+because it included live ptrace and headroom-triggered module killing beyond
+H78's stop conditions. That tool action did not execute. The safer nontracing
+observer was accepted. A separate tracing proposal and Q-H78-EXIT-OBS were
+then withdrawn after independent review; its executable entry now refuses
+unconditionally. It has not been run. No tracing approval is requested now.
+
+Finder and skeptic reviewed the observer without executing Lean or a server.
+Confirmed epoch/decoding/zombie/error-status findings were fixed; 21 Python
+controls pass. Sealed evidence is
+`/workspace/migrate-backend-evidence/h78/static/`, recorded by
+`EVIDENCE-H78-STATIC.sha256`. Live progress is separately under
+`/workspace/migrate-backend-evidence/h78/recovered-baseline-v2/`.
+
+The latest audit-roadmap requester63d6ef9f5a50b93a1e2666bfc3c295c4514e2a88
+still waits for Creation/Linking. Its full18260-byte handoff was requested
+for exact delivery (reported SHA256
+ced72d8eb459cd162ef9323cb38419eebcc321019bb46c0d127962e8012b08d9).
+The supplied summary is not treated as the full verified payload. The existing
+committed Linking proposal remains unapplied and Lean-unverified; owner
+coordination and complete validation remain pending. All four assignment
+checkpoints remain unfinished; no RUNTIME_GATE_PASS or timing verdict.

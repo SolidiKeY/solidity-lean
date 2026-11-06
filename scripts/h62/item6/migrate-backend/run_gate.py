@@ -34,7 +34,7 @@ args.output = args.output.resolve()
 config = (root/"lakefile.toml").read_text().replace('enableArtifactCache = true','enableArtifactCache = false')
 # Package sources remain the exact checkout; only outputs/cache change.
 config = 'srcDir = '+json.dumps(str(root))+'\n'+config
-config = config.replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1", "-M12288"]')
+config = config.replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1", "-M8192"]')
 (args.output/"lakefile.toml").write_text(config)
 binpath = args.output/"bin"
 binpath.mkdir()
@@ -49,7 +49,7 @@ for entry in args.toolchain.iterdir():
 for entry in (args.toolchain/"bin").iterdir():
     if entry.name != "lean": (sysroot/"bin"/entry.name).symlink_to(entry)
 wrapper = sysroot/"bin/lean"
-wrapper.write_text('#!/bin/bash\nexec flock '+shlex.quote(str(lockdir/"heavy-lean.lock"))+' '+shlex.quote(lean)+' -j1 -M12288 "$@"\n')
+wrapper.write_text('#!/bin/bash\nexec flock '+shlex.quote(str(lockdir/"heavy-lean.lock"))+' '+shlex.quote(lean)+' -j1 "$@" -j1 -M8192\n')
 wrapper.chmod(0o700)
 (binpath/"lake").write_text('#!/bin/bash\nexec '+shlex.quote(lake)+' --no-cache -d '+shlex.quote(str(root))+' -f '+shlex.quote(str(args.output/"lakefile.toml"))+' "$@"\n')
 for p in binpath.iterdir(): p.chmod(0o700)
@@ -76,7 +76,7 @@ report = {"command":["bash","./run-lean.sh"],"purpose":"clean unchanged full rep
           "lean_wrapper":str(wrapper),
           "solkey_rules":str(rules),"solkey_rules_sha256":hashlib.sha256(rules.read_bytes()).hexdigest(),
           "page_cache":"OS page cache not flushed; matched policy required for comparison",
-          "memory_cap_bytes":cap,"reserve_bytes":reserve,"peak_cgroup_bytes":0,"status":"running"}
+          "memory_cap_bytes":cap,"module_lean_memory_limit_mib":8192,"reserve_bytes":reserve,"peak_cgroup_bytes":0,"status":"running"}
 start = time.monotonic()
 child = None
 try:
