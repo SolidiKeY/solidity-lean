@@ -357,3 +357,24 @@ exact baseline and rejects duplicate or missing rows. Its negative controls
 confirmed rejection of altered elaborated types, changed axiom sets, removed
 rows and duplicate rows; the real inventories pass. Counts must be re-derived
 from the compiled baseline if the underlying source scope changes.
+
+## Source ABI entry semantic review (partial)
+
+Manual review of the public statements in `SourceAbiEntryControls.lean`
+records these obligations for any shared Source/static fixture. They concern
+entry decoding and exact reached Source state; they do not assert general ABI
+adequacy or injectivity of the mixed byte observation.
+
+| Declarations | Original observations and premises to preserve |
+|---|---|
+| `observeResult_injective`, `observeBytes_injective` | Injectivity of the two explicitly defined observation functions over their stated result types. |
+| `binary_eager`, `empty_eager`, `long33_eager`, `input_sizes` | Eagerly decode the exact binary, empty and 33-byte inputs; their selector-inclusive input sizes are 100, 68 and 132 respectively. |
+| `binary_lazy`, `empty_lazy`, `long33_lazy`, `binary_reference` | Preserve existential lazy references and actual lazy reads for all three inputs; the concrete binary reference is `(68,3)`. |
+| `binary_source_entry` | For either pipeline and either static value, preserve the actual Source expression result, memory reference 1, exact allocated heap bytes, eager decoding and lazy reference/read witness. |
+| `shifted_head`, `truncated_data`, `wrong_decoded_bytes`, `wrong_reference` | Preserve the shifted-head and wrong-value inequalities, actual truncation revert, and exclusion of reference `(36,3)`. |
+| `mixed_entry`, `mixed_input_bytes`, `mixed_heap_object`, `mixed_effects_and_entry` | Preserve the three-branch decoder observation, exact selector-stripped bytes and allocated heap object; the combined Source/decoder fact includes reached effects and quantifies over both static values. |
+| `mixed_second_reference`, `wrong_argument_order`, `packed_not_entry` | Preserve the `(260,33)` reference, distinguish reversed argument order, and retain the actual revert verdict for packed data interpreted as canonical entry data. |
+
+The selected file's named public statements are reviewed here; other ABI and
+Source/static families, private/generated declarations, exact migrated
+statements, independent reviews and all broader acceptance gates remain open.
