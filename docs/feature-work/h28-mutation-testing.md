@@ -1,27 +1,32 @@
 # H28 semantic mutation testing
 
-Status: **scope-complete and sealed** (`runs/final-ff85b708`). The final
+Status: **scope-complete and sealed** (`runs/final-ae55acdb`). The final
 manifest `manifests/h28-final.json` extends the frozen 30-operator census with
 a clause-level inventory of the 98 constructors the census missed. Every
 entry is decided: none is unrun and none is in error. Each of the nine
-families has a semantic verdict on a census site or clause fixture, and each
-has a negative control that passed. `tools/accept.py` recomputes all of this
-from the per-check records and reports `scope_complete: true`.
-`tools/seal.py --verify` re-hashes the 108 sealed files. The repository gates
-are under [Gates](#gates), and what is not proved is under [Limits](#limits).
+families has a semantic verdict on a census site or clause fixture of that
+family: a kill for eight of them, and for alias-capture-once a certified
+sound survivor. Each family has a passing negative control. Four of those
+controls fail inside the kill argument itself; the other five fail at the
+witness's link. `tools/accept.py` recomputes this from the per-check records
+and reports `scope_complete: true`. `tools/seal.py --verify` re-hashes the
+189 sealed files. The repository gates are under [Gates](#gates), and what is
+not proved is under [Limits](#limits).
 
-| Recorded run | `runs/final-ff85b708` (sealed) |
+| Recorded run | `runs/final-ae55acdb` (sealed) |
 |---|---|
-| Head | `ff85b708f584812e793f3057841626e4b994376f` |
-| Manifest | `manifests/h28-final.json`, sha256 `7dc4a1c9…`; extends `manifests/h28-full.json` (`bb3f1f97…`), unchanged |
-| Constructors | 215: 117 with census sites, 98 in the clause inventory (96 with fixtures, the 2 `Rule` wrappers with a reason) |
-| Proof oracle (all 325 entries) | 261 detected, 6 equivalent-certified, 58 invalid-compilation, 0 error, 0 unrun |
-| Clause fixtures (119) | 109 detected, 10 invalid-compilation, 0 equivalent-certified |
-| Semantic cases (36) | 24 killed, 1 survivor-sound, 1 equivalent, 8 witness-failed and 2 link-mismatch (all negative controls, as expected), 0 error, 0 unrun |
-| Controls | 15, all as declared (`controls_pass: true`): the 5 earlier ones and 10 new negative controls (one per family; the guard family's is new beside its earlier ones) |
+| Head | `ae55acdb` (run); sealed at `8534c45c` |
+| Manifest | `manifests/h28-final.json`; extends `manifests/h28-full.json` (`bb3f1f97…`), unchanged |
+| Constructors | 215: 117 with census sites, 98 in the clause inventory (136 fixtures, 7 clauses with a reason) |
+| Proof oracle (all 342 entries) | 273 detected, 7 equivalent-certified, 62 invalid-compilation, 0 error, 0 unrun |
+| Clause fixtures (136) | 121 detected, 1 equivalent-certified, 14 invalid-compilation |
+| Constructors with no compiled mutant | 15 (listed in `acceptance.json`): the 2 `Rule` wrappers and 13 whose every tried edit the DSL refuses |
+| Semantic cases (40) | 24 killed, 1 survivor-sound, 1 equivalent, 8 witness-failed, 2 link-mismatch, 4 semantic-witness-failed; 0 error, 0 unrun. Every non-kill outcome but the survivor is a control meeting its expectation |
+| Controls | 19, all as declared (`controls_pass: true`): the 5 earlier ones, 9 link-level negative controls, 4 semantic negative controls, and the survivor case |
 | Baselines | full `Calculus/Taclet.lean`, every row and link alone, `CallbackTaclet.toTaclet`: all pass |
-| Acceptance | `runs/final-ff85b708/acceptance.json`: `scope_complete: true`, no failure |
-| Seal | `runs/final-ff85b708/seal.json`, 108 files |
+| Acceptance | `runs/final-ae55acdb/acceptance.json`: `scope_complete: true`, no failure |
+| Seal | `runs/final-ae55acdb/seal.json`, 189 files, including the Lean import closure, `lean-toolchain` and the reused runs' archives |
+| Earlier runs (kept) | `final-aa39f4cd` (2 classifier errors), `final-ff85b708` (scope-complete before the reviews' fixes) |
 
 The lane moved from a Codex VM to a Claude VM on 2026-11-05. Its earlier
 history, which used a Docker backend and caches that exist only on the Codex
@@ -50,34 +55,51 @@ which the final run reuses unchanged.
 ### Clause inventory
 
 [tools/clauses.py](../../tests/h28-sol/mutation-testing/tools/clauses.py)
-takes the 98 constructors with no census site and lists every clause of
-their premises. Each clause gets a family and a one-change fixture: a
+takes the 98 constructors with no census site and lists the clauses of
+their premises:
+- every capture and every update binding;
+- every branch and every arithmetic expression;
+- every Boolean or computed side condition;
+- every clause of a term-built premise that one hand fixture can address. Each clause gets a family and a one-change fixture: a
 mutant whose `old` is the whole constructor span, so it is attributed to
 that constructor alone. The fixture then runs through the proof oracle like
 a census mutant.
 
-| Clause kind | Fixture operator | Family | Fixtures | detected / invalid |
+| Clause kind | Fixture operator | Family | Fixtures | detected / equivalent / invalid |
 |---|---|---|---|---|
-| capture `T x = E; … x …` | the later uses read `E` again | alias-capture-once | 28 | 26 / 2 |
-| update binding `lhs := rhs` | the identity `lhs := lhs` | other:access; pop-delete for `delete mv` | 46 | 43 / 3 |
-| `if (c) {A} else {B}`, `if (se) thenStm else elseStm` | branches swapped | guard-polarity | 4 | 4 / 0 |
-| `a ⊕ b` | operands swapped | division-minimum | 8 | 8 / 0 |
-| `⊖se` | operator dropped | overflow | 2 | 0 / 2 |
-| short-circuit `&& true`, `‖ false`, `v = false`, `v = true` | flipped | guard-polarity | 4 | 4 / 0 |
-| term-built premise, `try` branches, loop clauses, declaration continuations, `addmod`/`mulmod` modulus | hand fixture (closing flipped, modality swapped, flag negated, premise closed `true`, branch body replaced, modulus swapped) | per constructor | 27 | 24 / 3 |
+| capture `T x = E; … x …` (each capture of a premise) | the later uses read `E` again | alias-capture-once | 32 | 30 / 0 / 2 |
+| update binding `lhs := rhs` (each binding) | the identity `lhs := lhs` | other:access; pop-delete for `delete mv` | 47 | 44 / 0 / 3 |
+| `if (c) {A} else {B}`, `if (se) thenStm else elseStm` | branches swapped | guard-polarity | 4 | 4 / 0 / 0 |
+| `a ⊕ b` | operands swapped | division-minimum | 8 | 8 / 0 / 0 |
+| `⊖se` | operator dropped | overflow | 2 | 0 / 0 / 2 |
+| short-circuit `&& true`, `‖ false`, `v = false`, `v = true` | flipped | guard-polarity | 4 | 4 / 0 / 0 |
+| Boolean side condition `(h : c = true/false)` | polarity flipped | side-condition | 6 | 5 / 1 / 0 |
+| term-built premise, each `try` branch, loop clauses, declaration continuations, `addmod`/`mulmod` modulus | hand fixture (closing flipped, modality swapped, flag negated, premise closed `true`, branch body replaced or emptied, condition negated, modulus swapped) | per constructor | 33 | 26 / 0 / 7 |
 
-- Every fixture is decided: 109 detected and 10 invalid-compilation. No
-  fixture is equivalent-certified, so each compiled one differs from
-  `Stmt.step`.
+- Every fixture is decided: 121 detected, 1 equivalent-certified and 14
+  invalid-compilation. "Detected" means the unchanged `toStep` evidence
+  fails on the mutant. That is evidence of a difference from `Stmt.step`,
+  not a proof of one.
+- The equivalent-certified fixture is `internalCallSummary`'s `hrets`
+  flipped to `true`. The constructor's `toStep` evidence does not use that
+  hypothesis, so the rule's premise is still `Stmt.step`'s wherever it
+  applies.
 - The invalid fixtures are shapes the DSL refuses:
   - the identity binding of a fresh declaration (`valueDeclSkip`,
     `storageLocalDeclSkip`, `memoryReferenceDeclFreshAlloc`);
-  - `⊖se` dropped (it changes the type);
+  - `⊖se` dropped, which changes the type;
   - re-reading a primitive push argument or `new T(se)`;
-  - an empty `call succeeded` branch;
-  - `if (!cond)` in `whileUnwind`.
-- `Rule.key` and `Rule.lean` have no premise of their own: `Rule.key d`
-  has `d`'s premise. Each has one clause with that reason and no fixture.
+  - an emptied `call succeeded` or `Panic caught` branch, in both tables;
+  - `if (!cond)` in `whileUnwind`;
+  - in `whileInvariantLexDiamond`, the negated condition and the emptied
+    "preserved" body.
+- **Clauses listed with a reason, not a fixture (7):**
+  - the computed side conditions `hf`, `hq`, `hcap`, `hexp` and `hs`, each
+    an equation to `some …`, `none` or `[]`. No one-change edit names
+    another inhabited value, and the premise they fix is covered by the
+    constructor's other clauses;
+  - the two `Rule` wrappers, which have no premise of their own:
+    `Rule.key d` has `d`'s premise.
 - The classifier missed one case. A mutated `LeanTaclet.ifElseJoin*` side
   condition fails that constructor's own `#h28_toStep_link` command, and
   an error on such a command line was not attributed to its constructor. So
@@ -86,7 +108,10 @@ a census mutant.
   to the constructor it names, and a self-test covers it. The recorded run
   `final-ff85b708` re-classified all 472 records of the byte-identical
   scratch files with this code, without re-running Lean. Both fixtures are
-  now `detected`.
+  now `detected`. The reviews then found the clause extraction incomplete
+  (see [Follow-up reviews](#follow-up-reviews)). The final run
+  `final-ae55acdb` adds the 17 missing fixtures and the semantic controls.
+  Its 22 fresh checks ran in 6.8 min; all other checks are reused.
 
 ### Per-family semantic verdicts
 
@@ -125,8 +150,8 @@ now has a verdict on a census site or clause fixture:
 
 ### Negative controls
 
-Each family now has a negative control. Each one runs a real kill witness
-against a *different* mutant, and must not kill it:
+Each family now has a link-level negative control. Each one runs a real
+kill witness against a *different* mutant, and must not kill it:
 
 | Family | Witness | Mutant | Result |
 |---|---|---|---|
@@ -140,8 +165,25 @@ against a *different* mutant, and must not kill it:
 | rollback-payment | `PaymentFalseKill` | `sendNoCallbackBox.send-flag-false-to-true.1` | witness-failed |
 | guard-polarity | `GuardTruePolarityKill` | `requireSimple.guard-false-to-true.1` | witness-failed |
 
-These are the first real `witness-failed` outcomes. Before, only the unit
-tests exercised that outcome.
+Every one of these fails with a type mismatch at the witness's own
+`source_link`. That shows the link rejects another premise; it does not
+show that the kill argument does.
+
+Four families also have a **semantic** negative control,
+`control.semantic.<family>`. Each one is a real kill witness with only its
+premise definition replaced by the production premise. The control
+requires the link to elaborate against the unchanged table and the kill
+argument to fail afterwards. The runner (`semantic_control`) refuses three
+cases: any error in the link span, a target error and a runtime limit. If
+the witness went through, the case would be `killed`, meaning the
+production rule is unsound.
+
+| Family | Control witness (from) | Where the kill argument fails |
+|---|---|---|
+| index-bounds | `BoundsZeroOnProduction` (`BoundsZeroKill`) | `update_returns`: the production read of `d[1]` does not land |
+| push-tail-length | `PushLastSlotOnProduction` (`PushLastSlotKill`) | `second_fails`: the production write at the pushed slot lands |
+| division-minimum | `DivisionOperandsOnProduction` (`DivisionOperandsKill`) | `update_returns`: the production `1 / 0` does not land |
+| pop-delete | `RootDeleteSkippedOnProduction` (`RootDeleteSkippedKill`) | `update_returns` and `premise_accepts_post`: after the production deletion the root reads 0, not 7 |
 
 ### Acceptance and seal
 
@@ -156,18 +198,125 @@ following:
 - the census constructors and the clause inventory partition the 215
   constructors, and every clause has a decided fixture or a reason;
 - each of the nine families has a `killed` or `survivor-sound` verdict on a
-  manifest mutant;
+  manifest mutant of that family;
 - no semantic case is unrun or in error;
 - every control meets its expectation;
-- each family has a passing negative control.
+- each family has a passing negative control of a semantic outcome (not a
+  proof-oracle control).
+
+It also lists the constructors with no compiled mutant (15) and the
+families with a semantic negative control (4). These are disclosed, not
+failures.
 
 On the previous census run it reports exactly the gaps this session
 closed: the 98 unaccounted constructors, three families without a verdict,
 and eight without a negative control.
 [tools/seal.py](../../tests/h28-sol/mutation-testing/tools/seal.py) seals
-only an accepted run. It hashes the manifest and its base, every lane tool
-and oracle, the production inputs, the proof oracle, the summary, the
-acceptance record, the compact records and the full-record archive.
+only an accepted run. It hashes:
+
+- the manifest and its base;
+- every lane tool and oracle;
+- the production inputs and the proof oracle;
+- the Lean import closure of the targets and oracles, and
+  `lean-toolchain`;
+- the full-record archives of the runs whose diagnostics were reused;
+- the summary, the acceptance record, the compact records and the run's
+  own full-record archive.
+
+### Follow-up reviews
+
+Separate read-only finder and skeptic reviews, neither using the Lean
+server, audited head `7c822c8d`, which held the run `final-ff85b708`.
+
+**What both confirmed.**
+
+- Recomputing `summarize` from the full-record archive gives the stored
+  summary, and `accept.py` gives the stored acceptance.
+- The seal verifies.
+- `freeze_final.py` regenerates the manifest byte-identically.
+- Every clause fixture is a one-change edit of exactly one constructor
+  span, unique in its target file.
+- The four new witnesses are linked, rejected on the normal table with the
+  constructor named, and non-vacuous, with only the three permitted axioms.
+  `LengthReevalSound` is a real universal proof.
+- The reclassification from `final-aa39f4cd` to `final-ff85b708` re-ran no
+  Lean, and changed exactly the two `ifElseJoin*` decisions. The new
+  row/link-line attribution cannot credit a non-affected constructor.
+- No production file changed. Reuse is valid: the import closure is
+  byte-identical from `91c9631d` and `20d7b77c` to this head.
+
+**Confirmed findings, fixed in the current run:**
+
+- **Incomplete clause extraction.** Three problems:
+  - The capture pattern consumed the rest of the premise, so a premise with
+    several captures listed only the first. It now reads the rest by
+    lookahead: 4 more capture clauses.
+  - A `‖` before a newline merged two bindings of `memoryStorageCopy` into
+    one two-change fixture. Bindings are now split on `‖` with any
+    whitespace.
+  - These clauses were unlisted:
+    - the `try` branches `Panic caught` and `other failure caught`, in both
+      tables;
+    - `whileInvariantLexDiamond`'s loop condition and its "preserved"
+      body;
+    - the Boolean side conditions (`hsc`, `hmem`, `hshape`, `he`, `hb`,
+      `hrets`), now polarity-flipped.
+
+    The computed side conditions (`hf`, `hq`, `hcap`, `hexp`, `hs`, all
+    equations to `some …`, `none` or `[]`) are listed with a reason.
+- **Negative controls tested only the link.** All nine `control.negative.*`
+  checks, like `control.cross-witness-survivor`, fail with a type mismatch
+  at the witness's own `source_link`. So they show that the link rejects
+  another premise, not that the kill argument does. New *semantic* negative
+  controls fix this for four families (index-bounds, push-tail-length,
+  division-minimum, pop-delete). Each one:
+  - takes a real kill witness and replaces only its premise definition with
+    the production premise;
+  - must elaborate its link against the unchanged table;
+  - must then fail in the kill argument itself.
+
+  The runner checks that no error lies in the link span. A pass would be
+  decided `killed`, which would mean a production rule is unsound. The
+  other five families keep only link-level controls; see
+  [Limits](#limits).
+- **Weak acceptance.** Three changes:
+  - A family's verdict now counts only if the case's mutant carries that
+    family. `callback.failed-send-flag-true`, whose mutant belongs to the
+    no-callback rollback-payment table, no longer counts for
+    callback-frames; `callback-table.failed-send-flag-true` does.
+  - Negative controls are semantic outcomes only. The invalid-syntax proof
+    control no longer counts as one.
+  - Constructors with no compiled mutant are listed
+    (`constructors_without_compiled_mutant`).
+- **Weak `sound_all` check.** Any statement with parameters printed a `∀`.
+  The check now requires the state that `Premise.Sound` is applied to to be
+  a bound variable of type `State`.
+- **Seal coverage.** The seal now also hashes:
+  - the Lean import closure of the targets and oracles, on which reuse
+    depends;
+  - `lean-toolchain`;
+  - the full-record archives of the reused runs.
+- **verify_bulk exit code.** It exited 0 on `local-only`; it now exits 3.
+- **Documentation.**
+  - The controls breakdown was wrong: 9 negative controls plus the
+    survivor case, not 10 negative controls.
+  - Reuse validity also names `91c9631d`, the source of most reused
+    records.
+  - The fixture timings were wrong.
+  - "Each compiled fixture differs from `Stmt.step`" overclaimed. A
+    detection means the unchanged evidence fails, not that the premise
+    provably differs.
+
+**Accepted as limits, not fixed:**
+
+- 13 constructors have no compiled one-change mutant; the DSL refuses every
+  edit tried.
+- Some family labels are generic: the internal-call rules are labelled
+  callback-frames, and all `⊕` operand swaps division-minimum.
+- The alias family's verdict is a soundness certificate, not a kill.
+- The H44 digests are not regenerated.
+- 7 Markdown links in the Codex history name Codex-only evidence, and the
+  census table had a duplicate header row (fixed).
 
 ### Reuse and runner changes
 
@@ -176,17 +325,19 @@ acceptance record, the compact records and the full-record archive.
   negative control's normal witness, is elaborated once.
 - Reuse is valid because the import closure has not changed. The 59 modules
   imported by `Calculus/Taclet.lean` and `Calculus/CallbackRules.lean`, and
-  the 71 modules imported by the oracles, are unchanged from `20d7b77c` to
-  this head. Neither the master merge nor this session touched them.
+  the 71 modules imported by the oracles, are unchanged from `91c9631d` and
+  `20d7b77c` (the sources of the reused records) to this head. Neither the
+  master merge nor this session touched them. The seal pins that closure.
 - Fresh Lean checks in `final-aa39f4cd` (40.8 min wall-clock, 3 bridges):
-  - the 119 clause fixtures, at about 35–65 s each;
+  - the 119 clause fixtures, at 2–74 s each, median 57 s;
   - the new and changed semantic checks.
 
   The other checks reuse `full-91c9631d`/`full-20d7b77c` diagnostics.
   `final-ff85b708` re-classified all of them.
-- Runner self-tests: 33 (`test_mcprun`). They now cover:
+- Runner self-tests: 34 (`test_mcprun`). They now cover:
   - the survivor verdict;
-  - `sound_all`'s statement;
+  - `sound_all` universal in the state;
+  - the semantic control;
   - the negative-control expectation;
   - link-command attribution.
 
@@ -206,7 +357,8 @@ It lists the Codex-only files it cannot verify. The old digests are neither
 re-derived nor faked. Here `inventory.extended.draft.json` matches its pin
 `e7f8f223…`. The callback cache manifest is absent, being Codex VM only.
 `test_verify_bulk_local.py` has three controls: local-only is never a pass,
-and a changed input and an uncommitted manifest are both refused.
+and a changed input and an uncommitted manifest are both refused. The
+command exits 3 on `local-only`.
 
 ## Method (Claude VM)
 
@@ -255,8 +407,6 @@ constructor. Four `Tms` helper edits come on top.
 The census covers every match of these 30 declared operators, not every
 conceivable fault. The operators, with their census sites, are:
 
-| Family | Operators (sites) |
-|---|---|
 | Family | Operators (sites) | Total |
 |---|---|---|
 | guard-polarity | branch guard `true`↔`false` (5), loop guard `b = TRUE`↔`FALSE` (7), assert check (1) | 13 |
@@ -582,12 +732,40 @@ those of the run head `20d7b77c`. The lane changes only
 
 ## Limits
 
-- **Proof-oracle verdicts** are about premise identity with `Stmt.step`, not
-  soundness. Semantic verdicts exist only for the 36 semantic cases (24 kills,
-  1 certified survivor). The other detected census sites and clause fixtures
-  have no semantic verdict. Some are probably sound, such as the 35 uncertified
-  pure-path receiver re-evaluations, the capture fixtures, and the operand
-  swaps of commutative operators.
+- **Proof-oracle verdicts** are about the `toStep` evidence for premise
+  identity with `Stmt.step`, not about soundness. Semantic verdicts exist only
+  for the 40 semantic cases: 24 kills, 1 certified survivor and the controls.
+  The other detected census sites and clause fixtures have no semantic
+  verdict. Some are probably sound: the 35 uncertified pure-path receiver
+  re-evaluations, the capture fixtures, and the operand swaps of commutative
+  operators.
+- **Alias family.** Its verdict is a soundness certificate, not a kill. No
+  census site or clause fixture of the family is killed. The only alias kill
+  is the hand-typed term pilot `AliasTwiceKill`, because the DSL refuses the
+  call-receiver re-evaluations.
+- **No compiled mutant.** 15 constructors have no compiled mutant:
+  - the 2 `Rule` wrappers;
+  - `storagePushLengthSave` and its `MappingElement` and `ReferenceElement`
+    variants;
+  - `storagePopSaveMappingElement`;
+  - `storageLocalPrimitivePushBind`;
+  - the two call-receiver unfolds;
+  - `LeanTaclet.loopExit`;
+  - `assertSimple`;
+  - `valueDeclSkip`;
+  - `storageLocalDeclSkip`;
+  - `storagePushValue_unfold_rightFstPrimitiveArgument`;
+  - `newArrayCapture`.
+
+  Every one-change edit tried on them is refused by the rule language, so no
+  oracle checked a mutant of them.
+- **Negative controls.** Four families (index-bounds, push-tail-length,
+  division-minimum, pop-delete) have a semantic negative control. The other
+  five have only link-level controls, which show that the link type rejects
+  another premise.
+- **Family labels.** Some are generic: the internal-call rules are labelled
+  callback-frames, and every `⊕` operand swap division-minimum, whatever the
+  operator.
 - **Census and clause scope.** The census covers the 30 declared operators.
   The clause inventory covers one fixture per listed clause of the 98
   constructors without a site, not every conceivable edit. Clauses of
