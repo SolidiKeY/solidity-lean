@@ -2,7 +2,7 @@
 """Reproduce H44 off-Git source census with exact parser-input binding."""
 import argparse, fcntl, json, pathlib, shutil, subprocess
 import census
-ap=argparse.ArgumentParser();ap.add_argument('--lean',type=pathlib.Path,required=True);ap.add_argument('--output',type=pathlib.Path,required=True);ap.add_argument('--witnesses',type=pathlib.Path);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--lean',type=pathlib.Path,required=True);ap.add_argument('--output',type=pathlib.Path,required=True);ap.add_argument('--witnesses',type=pathlib.Path);ap.add_argument('--kernel',type=pathlib.Path);args=ap.parse_args()
 args.output.mkdir(parents=True,exist_ok=True)
 lock=open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','a');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
 files,unmatched=census.files()
@@ -33,4 +33,5 @@ if len(records)!=len(files) or {json.loads(line)['file'] for line in records}!=s
 (args.output/'parser-errors.log').write_text('\n'.join(diagnostics)+'\n')
 cmd=['python3','scripts/h62/item2/audit-yul/census.py','--parsed',str(args.output/'parser.jsonl'),'--output',str(args.output/'census')]
 if args.witnesses:cmd+=['--witnesses',str(args.witnesses)]
+if args.kernel:cmd+=['--kernel',str(args.kernel)]
 raise SystemExit(subprocess.run(cmd).returncode)

@@ -30,26 +30,37 @@ def available():
  if cap!='max':host=min(host,int(cap)-int((cgroup/'memory.current').read_text()))
  return host
 
-def group_rss(pgid):
- total=0
+def swap_active():
+ if pathlib.Path('/proc/swaps').read_text().strip().count('\n'):return True
+ swap_current=cgroup/'memory.swap.current'
+ return swap_current.exists() and int(swap_current.read_text())>0
+
+def group_memory(pgid):
+ total=0;virtual=0
  for p in pathlib.Path('/proc').glob('[0-9]*/stat'):
   try:
    values=p.read_text().rsplit(')',1)[1].split()
-   if int(values[2])==pgid:total+=int(values[21])*os.sysconf('SC_PAGE_SIZE')
+   if int(values[2])==pgid:
+    total+=int(values[21])*os.sysconf('SC_PAGE_SIZE');virtual+=int(values[20])
   except (OSError,ValueError,IndexError):pass
- return total
+ return total,virtual
 
 def run(cmd,key,source):
  initial=available();cap=min(12*GiB,initial-4*GiB)
  if cap<GiB:raise SystemExit('insufficient room for child plus 4GiB reserve')
- def limits():resource.setrlimit(resource.RLIMIT_AS,(cap,cap))
- lp=ev/(key.replace('/','__')+'.attempt'+str(sum(1 for _ in log.open())+1 if log.exists() else 1)+'.log');start=time.monotonic();reason=None;peak=0
+ # The assigned budget is resident memory. RLIMIT_AS also charges reserved
+ # thread stacks, and is not an RSS bound (repository resource policy).
+ # Keep Lean's heap cap, VM cgroup hard cap, group RSS and reserve monitors.
+ def limits():resource.setrlimit(resource.RLIMIT_CORE,(0,0))
+ lp=ev/(key.replace('/','__')+'.attempt'+str(sum(1 for _ in log.open())+1 if log.exists() else 1)+'.log');start=time.monotonic();reason=None;peak=0;peak_virtual=0
  print('CHECK '+key,flush=True)
  with lp.open('w') as output:
   proc=subprocess.Popen(cmd,env=env,text=True,stdout=output,stderr=subprocess.STDOUT,preexec_fn=limits,start_new_session=True)
   while proc.poll() is None:
-   peak=max(peak,group_rss(proc.pid))
-   if available()<4*GiB:reason='resource_stop_4GiB_reserve'
+   rss,virtual=group_memory(proc.pid)
+   peak=max(peak,rss);peak_virtual=max(peak_virtual,virtual)
+   if swap_active():reason='resource_stop_swap_enabled_or_used'
+   elif available()<4*GiB:reason='resource_stop_4GiB_reserve'
    elif peak>cap:reason='resource_stop_group_RSS'
    elif time.monotonic()-start>1800:reason='timeout_1800s'
    if reason:
@@ -57,7 +68,7 @@ def run(cmd,key,source):
    time.sleep(0.2)
   code=proc.wait()
  elapsed=time.monotonic()-start
- row=dict(command=cmd,exit=code,stop_reason=reason,seconds=elapsed,source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),log=str(lp),available_before=initial,address_space_limit=cap,peak_group_rss=peak)
+ row=dict(command=cmd,exit=code,stop_reason=reason,seconds=elapsed,source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),log=str(lp),available_before=initial,resident_budget=cap,inherited_address_space_limit=resource.getrlimit(resource.RLIMIT_AS),peak_group_rss=peak,peak_group_virtual=peak_virtual)
  with log.open('a') as f:f.write(json.dumps(row,sort_keys=True)+'\n')
  print(f'EXIT {code} {elapsed:.3f}s {lp}',flush=True)
  if code or reason:raise SystemExit(code or 1)
@@ -68,10 +79,11 @@ def compile_file(path):
  if key in active:raise SystemExit('cyclic imports: '+key)
  active.add(key)
  for dep in re.findall(r'^import\s+(\S+)',path.read_text(),re.M):
-  dp=root/(dep.replace('.','/')+'.lean')
+  module_path=dep.replace('«','').replace('»','').replace('.','/')+'.lean'
+  dp=root/module_path
   if dp.exists():
    # Optional dependency lib must be from a separately logged fresh build.
-   if args.dependency_lib and (args.dependency_lib/(dep.replace('.','/')+'.olean')).exists():continue
+   if args.dependency_lib and (args.dependency_lib/pathlib.Path(module_path).with_suffix('.olean')).exists():continue
    compile_file(dp.relative_to(root))
  active.remove(key)
  out=lib/path.with_suffix('.olean');out.parent.mkdir(parents=True,exist_ok=True)

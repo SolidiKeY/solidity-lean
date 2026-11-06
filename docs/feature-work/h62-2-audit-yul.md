@@ -1,161 +1,191 @@
 # H62 item 2 — audit-yul
 
-Status: **blocked, not complete**. All four original checkpoints remain binding.
-Q-REFUTATION-01 needs a scope decision: the literal requirement to witness every
-premise bundle conflicts with intentional refutation theorems. No exclusion,
-premise, observation or frozen interface has been changed. The persistent goal
-has not been replaced or reset.
+Status: **partial; original goal remains unfinished**. H69 resolves the former
+Q-REFUTATION-01 scope blocker. All four frozen checkpoints, ownership rules,
+proof/resource budgets and final gates remain binding. No original interface,
+premise, exclusion, observation, root or axiom pin changed. No push, merge, PR,
+deployment, pre-gate or H55 work occurred.
 
-Repository: `/workspace/solidity-lean`. Assigned branch:
-`codex/solidity-h62-2-20261106/audit-yul`. Frozen base:
-`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
-The old clean `work` branch was preserved. The assigned remote ref did not
-exist; fetching published master recovered the exact base, whose ancestry was
-verified before creating this branch. No push, merge, PR or deployment occurred.
-The final committed head and artifact hashes are recorded in the off-Git handoff.
+Repository: `/workspace/solidity-lean`; branch
+`codex/solidity-h62-2-20261106/audit-yul`; frozen base
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The prior clean `work` branch remains
+preserved. Base ancestry was verified before branch creation and again on resume.
+Final full committed head and exported artifact hashes are in the off-Git handoff.
 
-## Checkpoint accounting
+## H69/H70
 
-| Checkpoint | State | Evidence and outstanding obligations |
+[H69.md](../../tests/h62/item2/audit-yul/H69.md) records the human decision
+verbatim. Checked impossibility is an audit result only for explicitly classified
+intentional negatives/refutations/separations. Ordinary statements still need a
+simultaneous witness. No statement change is authorized or performed.
+
+The eleven historical negative candidates are all certified and classified by
+name, intentional reason and proof in
+[witnesses.json](../../tests/h62/item2/audit-yul/witnesses.json). Their historical
+escalation lines remain once each in
+[owner-tickets.md](../../tests/h62/item2/audit-yul/owner-tickets.md), marked resolved.
+H70 relays reached VY1/VY2/VY3; VY5/V07 went to the current Claude coordinator.
+The receipt path is host-only, not a VM file. No relay installation or further
+human question is pending for these historical tickets.
+
+## Four-checkpoint accounting
+
+| Checkpoint | State | Actual result and remaining work |
 |---|---|---|
-| 1 — exact signatures and owners | Partial | Conservative inventory of 1,960 mapped/imported files, 19,230 named theorems, 1,887 anonymous examples and 268 structures. Every selected blob and module map matches the base. Kernel-type/implicit-binder reconciliation, structure fields and exact producer ownership are unfinished. |
-| 2 — simultaneous witnesses | Blocked | Three unchanged endpoints have joint witnesses. One full premise telescope is proved impossible. Ten further explicit-False refutations are candidates awaiting local proof certification. Remaining witnesses are unfinished. |
-| 3 — meaningful success | Partial | Actual literal-assignment visitor accepts every 256-bit word and returns exactly the certificate used for source/scalar execution with arbitrary caller tails. Reject-all, arbitrary-certificate REVERT, and exact source-horizon refusal controls pass. Native failure/gas/fork and full public Source/G24/assembly closure are unfinished. |
-| 4 — fidelity census | Partial | Deterministic generator, frozen-blob check, exact parser-input binding and structural acceptance. Full elaborated statement/owner/witness census and full validation remain pending. |
+| 1 — signatures and owners | Partial | 1,960 selected frozen files; 19,230 named theorems, 1,887 anonymous examples and 268 structures. All blobs and module map match the base. 2,017 source declarations now have unique typed matches, including 100 complete structure-field inventories. Full type/name/owner reconciliation remains open. |
+| 2 — simultaneous hypotheses | Partial | Five ordinary joint witnesses and eleven H69 intentional-refutation results. 513 named theorems have no exposed hypotheses and are recorded separately. 18,701 named theorems remain uncovered. |
+| 3 — meaningful success | Partial | Actual all-word literal-assignment compiler result, source/scalar success, arbitrary-certificate REVERT rejection, reject-all rejection and source-horizon refusal. Full public/Source/G24/native failure, gas and fork closure remain unfinished. |
+| 4 — fidelity census | Partial | Frozen-blob verification, source-parser provenance, reducing kernel telescope/fields, exact eleven-refutation fidelity, successful proof-source snapshots and negative stale-evidence controls pass. Full corpus, all witnesses and final gates remain unfinished. |
 
-The inventory deliberately retains every declaration in the source superset;
-it does not claim every named theorem has hypotheses. Classification of actual
-elaborated telescopes remains open. It accounts for each source declaration by
-one unique ID. Owner labels are area-based and explicitly provisional. Private
-kernel names and section-variable inclusion require reconciliation.
+These categories are disjoint. The arithmetic is
+19,230 = 18,701 uncovered + 513 no-exposed-hypothesis + 11 intentional refutations
++ 5 ordinary joint witnesses. Closed statements are **not** joint-witness counts
+or evidence of meaningful per-input success. Global record inhabitation does not
+establish actual supported-program feasibility. Owner labels remain explicit area
+assignments pending full live-producer reconciliation; no ownership is taken.
 
-The final census has 21,083 parser-confirmed source spans and 302 candidates:
-268 structures, 32 examples and two named WordLogic theorems using custom
-notation. Source spans are not elaborated Lean types. Parser recovery/errors
-remain in evidence. No lexical signature is promoted to a witness.
+The source census has 21,083 parser-confirmed spans and 302 source candidates
+(268 structures, 32 examples, two named WordLogic statements with custom notation).
+Kernel metadata is separate from source spans: fields for 100 structures are
+now recorded without promoting their lexical headers to full source signatures.
+The 6,365 typed records from 268 already source-checked modules include generated
+kernel auxiliaries; only unique (module, source-name, kind) source matches enter
+primary accounting. No synthetic utility declaration enters the source census.
+Fifty additional fully exposed negative conclusions remain in a separate
+intentionality-review list; they have not been automatically accepted under H69.
 
-## Checked additive proofs
+## Checked proofs
 
-[Success.lean](../../tests/h62/item2/audit-yul/Success.lean) supplies all data and
-proof arguments together for these exact frozen endpoints:
-
-- `Solidity.Yul.Compilation.ProducerExpressions.executes`
-- `Solidity.Yul.Compilation.ProducerStatements.executes`
-- `Solidity.Yul.Composition.CorrectnessInstances.Stages.publicCorrectness`
-
-The first two use real literal/assignment certificates, emitted instructions,
-locals, temporary prefix and caller stack. The last jointly supplies the
-existing toy Stages, full PublicBoundary record and TablesLinked proof. It
-establishes global-premise inhabitation at that toy instance, not actual
-assembly admission or general per-input feasibility.
-
-`assignment_compile_eq` connects the executable visitor to the tested output.
-`assignment_total` and `assignment_success` cover every word. The generic
-REVERT control quantifies every matching certificate, rather than only the
-chosen fixture. Fuel-one refusal is an actual compiler boundary; it is not a
-native gas statement. Scalar has no fork/gas parameter.
+[Refutations.lean](../../tests/h62/item2/audit-yul/Refutations.lean) preserves the
+ten original telescopes exactly and applies the unchanged negative theorems.
+They cover empty declaration/function/external contexts, pure-word/MLOAD
+separation, global/write and global/local separation, and fixed/dynamic storage
+separation. These are intentional refusals, not weaker success statements.
 
 [ImpossiblePremises.lean](../../tests/h62/item2/audit-yul/ImpossiblePremises.lean)
-packages precisely S, FailureProjection, encode, decode and roundtrip from
-`Solidity.Lowering.P8.SpecExecution.no_countable_resource`. Their joint
-existence is refuted through the unchanged original ResourceContractLaw1 proof
-dependency and FrozenInterface. This certificate has **no axioms**. The
-original mapped statement and its signature hash are unchanged. A direct
-SourceRealization import was attempted and failed in its Source/Horizon
-prerequisite; that validation failure remains recorded below.
+retains the exact resource-premise bundle and refutes its joint existence through
+the unchanged ResourceContractLaw1 dependency. It has no axioms. This is an audit
+of the negative statement; it is not an actual P8a producer or resource-model fix.
 
-Other checked proofs use only `propext`, `Classical.choice` and `Quot.sound`
-where reported. Added sorry, axiom, native_decide and heartbeat overrides: zero.
-No core representation or dependency changed. ParseSignatures uses Lean's
-standard parser and IO initialization only; it never elaborates or certifies
-a source proof through an unsafe acceptance path.
+[RefutationFidelity.lean](../../tests/h62/item2/audit-yul/RefutationFidelity.lean)
+checks ten literal elaborated type/level-parameter equalities and the original
+SourceRealization resource statement's type against its proof dependency up to
+alpha/definitional equality. All eleven comparisons pass after the unchanged
+SourceRealization import is checked.
 
-## Scope decision and owner tickets
+[Success.lean](../../tests/h62/item2/audit-yul/Success.lean) retains the prior
+expression and statement endpoint joint witnesses and the generic composition
+witness. The latter jointly supplies toy Stages, full PublicBoundary and
+TablesLinked; it is global toy inhabitation, not actual assembly admission.
+The visitor returns exactly the tested literal-assignment certificate for every
+256-bit word, with actual source/scalar completion and arbitrary caller tails.
+Its source-fuel boundary is not native gas; Scalar has no fork/gas parameter.
 
-[owner-tickets.md](../../tests/h62/item2/audit-yul/owner-tickets.md) contains one
-escalation line per identified refutation and two neutral options. These are
-intentional negative statements, not findings that their mathematics is wrong.
-The exact all-premise witness requirement cannot hold for the certified case.
-Neither option is approved or recommended on the user's behalf.
+Two further ordinary frozen statements, `Solidity.Yul.pow_halve` and
+`Solidity.Yul.powBits_correct`, have complete closed existential witnesses in
+[DefaultWitnessControls.lean](../../tests/h62/item2/audit-yul/DefaultWitnessControls.lean).
+The second includes the real proof-valued exponent bound. The generated values,
+original type fingerprint, source hash, tool hash and passing gate are snapshotted
+off Git. Synthetic universe/hidden-premise/empty-input controls are never counted.
 
-Route SourceRealization to VY5/P8a-SPEC, copied to V07 for the frozen P8a
-contract. Other candidates route to their listed area producers. No relay.sh
-was found; saved tickets await coordinator delivery. No original-file edit was
-requested or attempted, and no absent reply is treated as permission.
+[DefaultWitnesses.lean](../../tests/h62/item2/audit-yul/DefaultWitnesses.lean)
+constructs all exposed binders from the exact imported theorem type, preserving
+universe parameters. Head reduction exposes lets/aliases. An independent
+`forallTelescopeReducing` construction fixes the complete existential target and
+binder count. Terms must be closed; normal `addAndCompile` kernel checking and
+the axiom whitelist precede any covered record. Search failure is uncovered.
+A reducible decision must actually be true before its proof is constructed.
+No `native_decide`, sorry, axiom, unsafe proof acceptance or raised heartbeat
+budget is used. Read-only IO utilities create no proof declarations.
 
-## Commands and validation
+The negative controls caught a hidden-premise risk and a false `mkDecideProof`
+expected-type hint candidate before rollout. The kernel rejected the invalid
+candidate; its failed attempt remains in evidence. Head/shape/arity checks and
+explicit decision reduction now close those gaps. The final data/proof-hypothesis,
+universe, let/alias positive and impossible-input negative controls all pass.
 
-Use `/workspace/.setup/tools/lean-4.24.0-linux/bin/lean` and its sibling Lake:
-Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release;
-Lake 5.0.0-src+797c613 (Lean 4.24.0). This audit follows the frozen checkout's
-pin. The coordinator's official 4.35.0 archive pin is retained for the separate
-migration scope; no toolchain cut-over or v4.24 master-cache restoration was done.
-All five supplied coordinator-input SHA256 values passed verification.
+## Validation, resources and timing
 
-Final proof checks use `scripts/h62/item2/audit-yul/check_serial.py`, with
-`--evidence /workspace/h62-audit-yul-evidence/final-proofs`,
-`--dependency-lib /workspace/h62-audit-yul-evidence/impossible/lib`, the explicit
-`--lean` path above, and the three audit .lean files as targets. Exit zero.
-Every child uses LEAN_NUM_THREADS=1, -j1, --tstack=131072 and -M=11000.
-Writer locking, process-group monitoring, cgroup/host headroom and no-swap
-checks are enforced. No systemd-run, parallel heavy Lean or heartbeat increase.
+Actual toolchain remains the frozen audit pin: Lean 4.24.0, release commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake 5.0.0-src+797c613.
+No migration cut-over or v4.24 per-master cache restoration occurred. The separate
+migration pin is not applied outside that authorized scope. Five coordinator
+input SHA256 values passed verification during setup.
 
-KeySort compiled from source. The actual sort-check command was the serial
-runner with `--run SolkeyCheck.lean --key` and the frozen rule file at
-`/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key`.
-Exit zero: **parsed 377 taclets, 131 read-bearing, table covers 131; OK**.
-This is an external conformance check, separate from proof certification.
+All checks use the writer lock and one heavy Lean process at a time,
+LEAN_NUM_THREADS=1, explicit -j1, --tstack=131072 and -M=11000. The VM has a hard
+16 GiB cgroup limit. The at-most-12-GiB resident budget and four-GiB available
+reserve are sampled stop guards every 0.2 seconds, not a hard 12-GiB cgroup.
+Swap configuration/usage is checked during each run. No systemd-run is used.
 
-The direct SourceRealization import check failed in unchanged Source/Horizon:
-exit -6, std::bad_alloc, 305.158 s, peak sampled RSS 5,562,658,816 bytes, virtual
-cap 12,559,687,680 bytes. This virtual-address failure does not establish a
-resident-memory requirement. No cap was raised. Full affected and run-lean.sh
-validation remain pending; no RUNTIME_GATE_PASS is claimed.
+The prior audit runner incorrectly also charged virtual reservations to the
+resident budget with RLIMIT_AS. Correcting that accounting did not increase the
+Lean heap or resident budget. The unchanged SourceRealization import now passes:
+Source/Horizon 518.910 s (6.937 GiB sampled peak RSS, 13.800 GiB peak virtual;
+11.090 GiB assigned resident budget), HorizonDeploy 11.473 s, Session 2.825 s,
+and SourceRealization 1.008 s. No swap/resource stop occurred. The old 305.158 s
+std::bad_alloc attempt stays in historical evidence. This is not a valid passing
+before/after timing pair, and no full-build timing delta is claimed. Source/Horizon
+exceeds 300 s on this worker; gate-VM time-budget validation remains pending and
+no original-file performance refactor is authorized or attempted.
 
-An earlier isolated dependency-root setup error in Source/State was corrected
-by unioning fresh dependencies into one search root, then checked successfully.
-The failed attempt remains in the evidence. Target symlinks are unlinked before
-compilation to preserve the prior evidence library, and retry logs are unique.
+Actual KeySort prerequisite passed: 377 taclets, 131 read-bearing, table covers
+131; OK. This external conformance check is distinct from Lean proof checking.
+The typed reader completed 6,365 declarations with zero errors and no unexpected
+axioms. H69 certificates use only existing standard axioms where reported;
+new sorry/axiom/native_decide/heartbeat overrides are zero. The exact fidelity
+gate reports `H69_FROZEN_TYPE_FIDELITY_PASS: 11 exact elaborated telescopes`.
 
-Reproduce the census with:
+The registry updater binds the latest passing proof and generator source hashes,
+not historical append-log rows. Acceptance checks ordered six-record snapshots,
+type fingerprints, binder/value counts and universe parameters. Three negative
+provenance tests reject a stale tool hash, failed tool gate and duplicated record
+without editing any proof or original interface.
+
+Full affected/final validation, `./run-lean.sh`, all remaining ordinary witnesses
+and native failure/gas/fork obligations are pending. No RUNTIME_GATE_PASS or full
+completion is claimed.
+
+## Reproduction and evidence
+
+Canonical current census: `/workspace/h62-audit-yul-evidence/h69-census/census.json`.
+Kernel data: `/workspace/h62-audit-yul-evidence/h69-kernel/types-v2.jsonl`.
+The old first-checkpoint outputs remain historical. Bulk data stays off Git (H44);
+only deterministic tools, small registries and additive audit modules are committed.
 
 ```
-python3 scripts/h62/item2/audit-yul/generate.py --lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --output /workspace/h62-audit-yul-evidence/reproduced-complete --witnesses tests/h62/item2/audit-yul/witnesses.json
-python3 scripts/h62/item2/audit-yul/acceptance.py /workspace/h62-audit-yul-evidence/reproduced-complete/census/census.json --output /workspace/h62-audit-yul-evidence/acceptance
+flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock python3 scripts/h62/item2/audit-yul/record_h69.py --output /workspace/h62-audit-yul-evidence/h69-registry
+flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock python3 scripts/h62/item2/audit-yul/census.py --parsed /workspace/h62-audit-yul-evidence/reproduced-complete/parser.jsonl --witnesses tests/h62/item2/audit-yul/witnesses.json --kernel /workspace/h62-audit-yul-evidence/h69-kernel/types-v2.jsonl --output /workspace/h62-audit-yul-evidence/h69-census
+flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock python3 scripts/h62/item2/audit-yul/acceptance.py /workspace/h62-audit-yul-evidence/h69-census/census.json --output /workspace/h62-audit-yul-evidence/h69-acceptance
 ```
 
-Bulk census/parser/uncovered outputs stay off Git under
-`/workspace/h62-audit-yul-evidence`. Deterministic generators and the small
-witness registry are in Git. Parser diagnostics are JSON fields, and all
-1,960 files must be present exactly once. A stale input, duplicate/missing
-parser record or changed frozen blob is rejected.
+Each Lean gate's full executable/arguments, source hash, exit, wall time, resident
+budget, sampled RSS/virtual peaks and log path are in its `commands.jsonl` under
+h69-refutations-final, h69-fidelity, h69-default-checked, h69-kernel-v2-check and
+h69-source-gate. Dedicated uncovered and pending-negative lists are under
+h69-acceptance. Earlier failures remain visible; they are not passing gates.
 
-No performance refactor occurred. The 51-file fresh baseline and additive
-checks have individual command/time records. Successful additive proof checks
-were 0.806 s for Success and 0.404 s for ImpossiblePremises. No comparable
-passing before/after full build exists; timing delta is unavailable, not zero.
-The failed original import cannot be used as an acceptance or timing pass.
+## Reviews and continuation
 
-Structural acceptance and byte-for-byte census reproduction passed. Layer,
-generated-root, fragment and document-path checks exited zero; the document
-check reports 115 resolving ambiguous references. Current ParseSignatures was
-rechecked through the full generator after its final diagnostic-format change.
+Independent read-only finder and skeptic used no Lean server and made no fixes.
+They confirmed exact refutation telescopes, no statement weakening, complete
+reducing existential construction, universe preservation, closed-term checks,
+correct disjoint accounting and absence of synthetic coverage. Their findings
+about hidden hypotheses, false decision hints, source/tool provenance and sampled
+resource claims were fixed and tested. Final reports are saved off Git.
 
-## Independent reviews and handoff
+This checkpoint completes four bounded work items: H69 refutation certification,
+typed census/field extraction, ordinary joint-construction controls and two real
+witnesses, and original SourceRealization import recovery. Hand off to the
+coordinator at the requested 3–5-item fresh-thread boundary, preserving this exact
+VM/branch and original existing goal; do not create/reset a goal or self-launch a
+replacement. All four original checkpoints remain partial.
 
-Independent read-only finder and skeptic reviews used no Lean server and made
-no edits. They found and verified fixes for truncated let signatures, mutual
-namespace handling, frozen/source-parser provenance, resource reserve guards,
-dependency-output symlink overwrites and retry logging. Final reviews confirmed
-all three complete joint witnesses and the exact impossibility telescope, with
-no statement weakening. Their reports and remaining limits are saved in evidence.
-Final reproduction also exposed merged-stream corruption of eight parser
-records; diagnostics now stay inside each JSON record and completeness is checked.
-
-Outstanding typed blockers: Q-REFUTATION-01 scope decision; ten uncertified
-refutations; remaining exact signatures/types/owners and joint witnesses;
-native failure/gas/fork and full public totality; direct-import/final validation;
-owner-ticket delivery. No H55 work was duplicated. Registration information is
-supplied under tests; no generated root, central map or axiom pin was edited.
-Resume the same VM, branch, frozen assignment and existing goal after the scope
-decision. Do not create a replacement goal or treat this checkpoint as completion.
+Next work: expand source-checked kernel coverage beyond the 268 queried modules;
+review the fifty additional negative conclusions individually; apply the checked
+joint constructor in bounded batches to ordinary statements; add missing concrete
+per-input fixtures; finish supported-program/native failure/gas/fork results and
+all final gates. The current isolated resolver supports core and quoted audit
+module paths; Bridge package-root/dependency handling still requires a scoped
+tooling extension before Bridge can be claimed covered. Keep all producer files
+read-only and coordinate any exact-file change through the current coordinator.

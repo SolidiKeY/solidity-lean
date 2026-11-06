@@ -1,3 +1,23 @@
+# H69/H70 disposition — resolved historical tickets
+
+Q-REFUTATION-01 is resolved by the human's H69 decision. All eleven original
+intentional refutations now have checked contradiction certificates and explicit
+reasons in witnesses.json. No original statement or premise was changed.
+The historical escalation lines below are retained once each as provenance;
+they are not open human questions or requests to repair intentional negatives.
+
+H70 confirms relays accepted by VY1, VY2 and VY3. VY5/P8a-SPEC and V07 were
+deferred to the current Claude coordinator rather than obsolete Codex owners.
+The receipt is host-only:
+/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T142920Z.
+Its full files were verified/staged by the router; no VM-local read is claimed.
+relay.sh is host-only and is not a worker installation task. No merge, publication,
+budget change, original-file permission or passing gate follows from routing.
+
+---
+
+Historical ticket text follows, superseded by the disposition above.
+
 # Q-REFUTATION-01 — literal joint-witness rule conflicts with negative statements
 
 Status: scope decision pending. No theorem, premise, exclusion or interface was changed.

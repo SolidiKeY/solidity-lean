@@ -117,7 +117,7 @@ def declarations(path):
     return result
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--output',type=pathlib.Path,required=True);ap.add_argument('--parsed',type=pathlib.Path);ap.add_argument('--witnesses',type=pathlib.Path);args=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--output',type=pathlib.Path,required=True);ap.add_argument('--parsed',type=pathlib.Path);ap.add_argument('--witnesses',type=pathlib.Path);ap.add_argument('--kernel',type=pathlib.Path);args=ap.parse_args()
     selected,unmatched=files();rows=[]
     frozen=dict((p,(mode,kind,oid)) for mode,kind,oid,p in (line.split(None,3) for line in subprocess.check_output(['git','ls-tree','-r',BASE],text=True).splitlines()))
     paths=sorted(set(selected)|{str(MAP)})
@@ -157,15 +157,34 @@ def main():
             row=matches[0]
             if row['signature_sha256']!=evidence['frozen_signature_sha256']:raise ValueError('witness signature mismatch: '+evidence['theorem'])
             row['witness_status']=evidence['status'];row['audit_evidence']=evidence
+    kernel_rows=[];kernel_index=collections.defaultdict(list)
+    if args.kernel:
+        for line in args.kernel.read_text().splitlines():
+            rec=json.loads(line);kernel_rows.append(rec)
+            if rec['status']=='typed':kernel_index[(rec['module'],rec['source_name'])].append(rec)
+        for row in rows:
+            module=row['file'].removesuffix('.lean').removeprefix('Bridge/').replace('/','.')
+            matches=[r for r in kernel_index[(module,row['source_name'])] if r['kind']==('structure' if row['kind']=='class' else row['kind'])]
+            row['kernel_status']='matched' if len(matches)==1 else ('ambiguous' if matches else 'not_yet_matched')
+            if len(matches)!=1:continue
+            rec=matches[0]
+            row['kernel']={key:rec[key] for key in ['kernel_name','module','level_parameters','pretty_type','binders','result_pretty','result_is_false','axioms','source_range']}
+            row['kernel']['type_sha256']=sha(rec['type_repr'])
+            row['kernel']['fields']=[dict(name=f['name'],type_sha256=sha(f['type_repr']),pretty_type=f['pretty_type']) for f in rec['fields']]
+            row['hypothesis_classification']='Fully exposed elaborated telescope recorded; global structure versus per-input roles require case evidence.'
+            if row['kind']=='theorem' and row['witness_status']=='uncovered' and not rec['binders'] and set(rec['axioms'])<={'propext','Classical.choice','Quot.sound'}:
+                row['witness_status']='closed_statement_verified'
+            if row.get('audit_evidence',{}).get('frozen_type_sha256') and row['audit_evidence']['frozen_type_sha256']!=sha(rec['type_repr']):raise ValueError('kernel witness statement drift: '+row['source_name'])
+    accepted={'joint_witness_proved','intentional_refutation_proved','closed_statement_verified'}
     ids=[r['id'] for r in rows];assert len(ids)==len(set(ids))
     output=dict(base=BASE,module_map_sha256=sha(MAP.read_text()),scope='module-map explicit patterns plus local Yul import closure',
         limitations=['Source census is conservative, not an elaborated hypothesis census.',
         'Source names for private/protected declarations require kernel-name reconciliation.',
         'No witness or feasibility conclusion is inferred from a source signature.'],
-        frozen_blobs_verified=True,parser_files=len(parsed),unmatched_patterns=unmatched,files=[dict(path=p,sha256=sha(pathlib.Path(p).read_text()),reasons=selected[p]) for p in sorted(selected)],declarations=rows)
+        kernel_metadata_file=str(args.kernel) if args.kernel else None,kernel_metadata_sha256=hashlib.sha256(args.kernel.read_bytes()).hexdigest() if args.kernel else None,kernel_records=len(kernel_rows),kernel_errors=sum(r['status']=='error' for r in kernel_rows),frozen_blobs_verified=True,parser_files=len(parsed),unmatched_patterns=unmatched,files=[dict(path=p,sha256=sha(pathlib.Path(p).read_text()),reasons=selected[p]) for p in sorted(selected)],declarations=rows)
     args.output.mkdir(parents=True,exist_ok=True)
     text=json.dumps(output,ensure_ascii=False,sort_keys=True,indent=2)+'\n'
     (args.output/'census.json').write_text(text)
-    summary=dict(files=len(selected),declarations=len(rows),kinds=dict(collections.Counter(r['kind'] for r in rows)),owners=dict(collections.Counter(r['owner'] for r in rows)),unmatched_patterns=unmatched,census_sha256=sha(text),joint_witnesses=sum(r['witness_status']=='joint_witness_proved' for r in rows),impossible_premise_bundles=sum(r['witness_status']=='joint_witness_impossible' for r in rows),uncovered=sum(r['witness_status']!='joint_witness_proved' for r in rows),refutation_candidates=sum(r['witness_status']=='refutation_candidate_requires_check' for r in rows),signature_status=dict(collections.Counter(r['signature_status'] for r in rows)))
+    summary=dict(files=len(selected),declarations=len(rows),kinds=dict(collections.Counter(r['kind'] for r in rows)),owners=dict(collections.Counter(r['owner'] for r in rows)),unmatched_patterns=unmatched,census_sha256=sha(text),joint_witnesses=sum(r['witness_status']=='joint_witness_proved' for r in rows),intentional_refutations=sum(r['witness_status']=='intentional_refutation_proved' for r in rows),closed_theorems=sum(r['kind']=='theorem' and r['witness_status']=='closed_statement_verified' for r in rows),typed_source_declarations=sum(r.get('kernel_status')=='matched' for r in rows),typed_source_structures=sum(r['kind']=='structure' and r.get('kernel_status')=='matched' for r in rows),pending_negative_classifications=sum(r['kind']=='theorem' and r.get('kernel',{}).get('result_is_false',False) and r['witness_status'] not in accepted for r in rows),uncovered_named_theorems=sum(r['kind']=='theorem' and r['witness_status'] not in accepted for r in rows),uncovered=sum(r['witness_status'] not in accepted for r in rows),refutation_candidates=sum(r['witness_status']=='refutation_candidate_requires_check' for r in rows),signature_status=dict(collections.Counter(r['signature_status'] for r in rows)))
     (args.output/'summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n');print(json.dumps(summary,sort_keys=True))
 if __name__=='__main__':main()
