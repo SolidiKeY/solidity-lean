@@ -351,3 +351,9 @@ its original statement/proof-equivalence controls passed. This checks all
 kernel constants in these four modules, not every module or family in item 1;
 independent finder/skeptic reviews and the broader item acceptance still remain.
 Large inventories are off Git and hashed in the evidence manifest.
+
+The declaration comparator pins per-module baseline and changed counts for this
+exact baseline and rejects duplicate or missing rows. Its negative controls
+confirmed rejection of altered elaborated types, changed axiom sets, removed
+rows and duplicate rows; the real inventories pass. Counts must be re-derived
+from the compiled baseline if the underlying source scope changes.
