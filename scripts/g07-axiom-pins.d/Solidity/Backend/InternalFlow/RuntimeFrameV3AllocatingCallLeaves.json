@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallLeaves.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.closeAliasArgument": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallLeaves.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.closeReturn": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallLeaves.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.closeUintArgument": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallLeaves.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallLeaves.closeVariable": [
+  "propext"
+ ]
+}

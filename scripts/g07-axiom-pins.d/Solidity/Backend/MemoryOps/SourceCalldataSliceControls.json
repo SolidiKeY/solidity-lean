@@ -1,0 +1,122 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.complete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.endpoints": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.guarded_uint_slice_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.guarded_uint_slice_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.guarded_uint_slice_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.guarded_uint_slice_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.guarded_uint_slice_truncation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.guarded_uint_slice_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_add_bounds_timing": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_add_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_add_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_add_failure_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_add_operand_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_add_read_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_add_read_late_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_add_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_add_overflow_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_delete_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_locals_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_copy_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_copy_statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.slice_stale_alias_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceControls.lean:Solidity.Backend.MemoryOps.UintSliceControls.stale_window_and_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

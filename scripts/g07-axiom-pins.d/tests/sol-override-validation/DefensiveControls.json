@@ -1,0 +1,93 @@
+{
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.absent_reference": [
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.attribute_defenses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.bytes_refusals": [],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.classifier_controls": [
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.cyclic_choice_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.descriptor_defenses": [],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.descriptor_refusal": [],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.duplicate_clash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.duplicate_owners_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.duplicate_slots_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.fallback_other_constructor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.free_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.free_virtual_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.missing_base_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.missing_signature": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.ownership_controls": [
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.private_frontier_distinction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.projection_defaults": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.receive_flag_defenses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.root_flag_refusal": [],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.selection_private_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.unimplemented_concrete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/DefensiveControls.lean:Solidity.Frontend.OverrideValidation.DefensiveControls.unknown_owner_refusal": [
+  "propext"
+ ]
+}

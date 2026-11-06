@@ -32,13 +32,21 @@ not replaced by program catalog membership. No state/ledger semantics added. -/
 def sourceObservedBalance {E Γ} (G : Source.Glob E) (s : Source.EMState E Γ)
     (address : Roadmap.Address) : Roadmap.Word :=
   match (s.2.ex.world.accounts address).code with
-  | some _ => (s.2.ex.world.accounts address).balance
+  | some _ => Source.Monetary.wordView (s.2.ex.world.accounts address).balance
   | none => G.fixed.ledger G.balance0 s.2.events address
 
 theorem sourceObservedBalance_system {E Γ} (G : Source.Glob E) (s : Source.EMState E Γ)
     (address : Roadmap.Address) (code : Nat) (found : (s.2.ex.world.accounts address).code=some code) :
-    sourceObservedBalance G s address=(s.2.ex.world.accounts address).balance := by
+    sourceObservedBalance G s address=Source.Monetary.wordView (s.2.ex.world.accounts address).balance := by
   simp only [sourceObservedBalance,found]
+
+/-- Lossless money equality requires the explicit account-range fact. -/
+theorem sourceObservedBalance_system_exact {E Γ} (G : Source.Glob E) (s : Source.EMState E Γ)
+    (address : Roadmap.Address) (code : Nat) (found : (s.2.ex.world.accounts address).code=some code)
+    (fit : Source.Monetary.Fits (s.2.ex.world.accounts address).balance) :
+    (sourceObservedBalance G s address).val = (s.2.ex.world.accounts address).balance := by
+  simp only [sourceObservedBalance_system G s address code found,
+    Source.Monetary.wordView_exact _ fit]
 
 theorem sourceObservedBalance_external {E Γ} (G : Source.Glob E) (s : Source.EMState E Γ)
     (address : Roadmap.Address) (missing : (s.2.ex.world.accounts address).code=none) :
@@ -62,3 +70,9 @@ theorem sourceObserved_self_balance {E Γ} (G : Source.Glob E) (F : Source.Fr) (
       environmentWord (sourceObservedBalance G s F.this) := sourceObservedFunds_address G s F.this
 
 end Solidity.Yul.Views
+
+/-- info: 'Solidity.Yul.Views.sourceObservedBalance_system' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.sourceObservedBalance_system
+
+/-- info: 'Solidity.Yul.Views.sourceObservedBalance_system_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.sourceObservedBalance_system_exact

@@ -16,7 +16,7 @@ theorem word_range (fromBits : Nat)
   exact fromValid.2.2
 
 theorem allowed (fromBits : Nat) (fromValid : fromBits % 8 = 0 ∧ 8 ≤ fromBits ∧ fromBits ≤ 256) (E : Source.Env) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) :
-    (Source.STy.int (ty fromBits fromValid)).explicit E.isBase (.int (ty bits valid)) = true := by
+    (Source.STy.int (ty fromBits fromValid)).explicit E.isBase E.mapFree (.int (ty bits valid)) = true := by
   simp only [Source.STy.explicit,ty,BEq.beq,decide_true,Bool.true_or,Bool.or_true]
 
 theorem value_run (fromBits : Nat) (fromValid : fromBits % 8 = 0 ∧ 8 ≤ fromBits ∧ fromBits ≤ 256) {C : Contract} {Γ : Ctx} (target : State C Γ) (bits : Nat)
