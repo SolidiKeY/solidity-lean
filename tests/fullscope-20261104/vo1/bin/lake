@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" = serve ]]; then
+  exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake -f /workspace/solidity-lean/tests/fullscope-20261104/vo1/runtime.toml "$@" -j1 --tstack=131072
+fi
+exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake -f /workspace/solidity-lean/tests/fullscope-20261104/vo1/runtime.toml "$@"
