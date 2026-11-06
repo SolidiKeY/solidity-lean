@@ -1252,3 +1252,13 @@ lost to a container restart; Lake kept the built modules). Final run (02:48–03
   3735 unrecorded new pins from other lanes' merged modules, none from
   `Solidity/Optimizer/**` (no optimizer theorem appears in the output). Recording pins
   edits the shared trust pins, which this lane may not edit; left to the coordinator.
+
+## Lane-end gate `./run-lean.sh` at 6ccdac52 — 2026-11-06
+
+03:49–04:25 UTC, warm cache. Lake built every target, including Bridge and the solc
+TestSuite (`✔ [5832/5833] Built SolkeyTestSuite`), with no Lean errors. `check-layers`,
+`register.sh --check` and `fragments.sh --check` passed. The script exits 1 at its
+`solkeycheck` step: "167 mismatch(es) … parsed 392 taclets, 135 read-bearing, table
+covers 131". These are storage-taclet annotation rows and `save<[Struct<[..]>` tokens
+in the SolKey rule table. This lane changes no `Calculus/`, `scripts/` or SolKey pin
+file, so this is open for the rule-table/SolKey lanes, not for vo1.
