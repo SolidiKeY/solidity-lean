@@ -60,7 +60,7 @@ theorem run {E : Env} {Γ a h off len} {locals : Locals E.layout Γ}
      SourceEnvironment.sourceWord,EM.lift,bind,pure,ExceptT.bind,ExceptT.pure,
      ExceptT.bindCont,ExceptT.mk,StateT.bind,StateT.pure,StateT.get,
      get,getThe,MonadStateOf.get,liftM,monadLift,MonadLift.monadLift,ExceptT.lift,
-     Functor.map,StateT.map,Except.pure,Int.toNat_natCast,sliceR,
+     Functor.map,StateT.map,Except.pure,Int.toNat_natCast,sliceR,STy.cdStride,
      Bool.false_eq_true,↓reduceIte,Nat.one_mul,if_neg (Nat.not_lt.mpr ordered),if_neg (Nat.not_lt.mpr bounded)]
  | «from» prior i s start bounded ih =>
   have positive := height_positive prior
@@ -80,7 +80,7 @@ theorem run {E : Env} {Γ a h off len} {locals : Locals E.layout Γ}
      SourceEnvironment.sourceWord,EM.lift,bind,pure,ExceptT.bind,ExceptT.pure,
      ExceptT.bindCont,ExceptT.mk,StateT.bind,StateT.pure,StateT.get,
      get,getThe,MonadStateOf.get,liftM,monadLift,MonadLift.monadLift,ExceptT.lift,
-     Functor.map,StateT.map,Except.pure,Int.toNat_natCast,sliceR,
+     Functor.map,StateT.map,Except.pure,Int.toNat_natCast,sliceR,STy.cdStride,
      ↓reduceIte,Nat.one_mul,Nat.lt_irrefl,if_neg (Nat.not_lt.mpr bounded)]
 
 theorem arguments_run {E : Env} {Γ a h off len types} {locals : Locals E.layout Γ}

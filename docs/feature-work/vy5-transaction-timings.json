@@ -1,0 +1,89 @@
+{
+  "before": [
+    {
+      "files": {
+        "Solidity/Source/Semantics.lean": "1b3d0fb0827a4096d90f164710713a83f7868d3d14f7904069f8fa977f7bbba8"
+      },
+      "wallSeconds": 0.972184345999267,
+      "userSeconds": 0.903619,
+      "maxRSSKiB": 319616,
+      "exit": 0
+    },
+    {
+      "files": {
+        "Solidity/Source/Horizon.lean": "43ec3e6cf3450fa117a6816cbcb1fb5ee4382adc065a0e4a2bc7c1f4ec4c60dd"
+      },
+      "wallSeconds": 342.409527429998,
+      "userSeconds": 338.042677,
+      "maxRSSKiB": 7905360,
+      "exit": 0
+    }
+  ],
+  "after": [
+    {
+      "files": {
+        "Solidity/Source/Semantics.lean": "e50a3bc775adc8b150fdb3271c2558f203e8bf43316d9e10f120ce7774e09724"
+      },
+      "wallSeconds": 0.980516688003263,
+      "userSeconds": 0.9081349999999999,
+      "maxRSSKiB": 320092,
+      "exit": 0
+    },
+    {
+      "files": {
+        "Solidity/Source/Horizon.lean": "43ec3e6cf3450fa117a6816cbcb1fb5ee4382adc065a0e4a2bc7c1f4ec4c60dd"
+      },
+      "wallSeconds": 357.750699835,
+      "userSeconds": 355.194838,
+      "maxRSSKiB": 7166784,
+      "exit": 0
+    }
+  ],
+  "separated": [
+    {
+      "files": {
+        "Solidity/Source/Semantics.lean": "cbbb51950454c2f1884e644ad00bfcc560a1e6ba28482b7c0dc3f876d769fa62"
+      },
+      "wallSeconds": 0.9398541880000266,
+      "userSeconds": 0.848025,
+      "maxRSSKiB": 321836,
+      "exit": 0
+    },
+    {
+      "files": {
+        "Solidity/Source/FailureTransactionControls.lean": "c4b4551a6587cca93a3784a0577bb88015bf03721fcc5b0f52504e4eccd9d256"
+      },
+      "wallSeconds": 5.202358287002426,
+      "userSeconds": 5.051438000000001,
+      "maxRSSKiB": 548704,
+      "exit": 0
+    },
+    {
+      "files": {
+        "/workspace/vy5-composition/transaction-proof-20261104/Signatures.lean": "44b9b49180738e1009c6847349d68e78214032555b53bf111c95111578c6bddf"
+      },
+      "wallSeconds": 1.121243866000441,
+      "userSeconds": 1.054253,
+      "maxRSSKiB": 547204,
+      "exit": 0
+    },
+    {
+      "files": {
+        "Solidity/Source/Horizon.lean": "43ec3e6cf3450fa117a6816cbcb1fb5ee4382adc065a0e4a2bc7c1f4ec4c60dd"
+      },
+      "wallSeconds": 339.0777459739984,
+      "userSeconds": 336.090243,
+      "maxRSSKiB": 7989084,
+      "exit": 0
+    }
+  ],
+  "accepted": {
+    "Source.Semantics.beforeSeconds": 0.972184345999267,
+    "Source.Semantics.afterSeconds": 0.9398541880000266,
+    "Source.Horizon.beforeSeconds": 342.409527429998,
+    "Source.Horizon.afterSeconds": 339.0777459739984,
+    "legacyBodyUnchanged": true,
+    "policy": "Horizon300s failure remains both before and after; no RUNTIME_GATE_PASS",
+    "slowerDraft": "optional-signature draft rejected, not landed"
+  }
+}

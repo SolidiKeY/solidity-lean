@@ -1,0 +1,537 @@
+{
+  "schema": 1,
+  "scope": "Concrete component laws only; no full obligation discharged",
+  "originalObligations": 24,
+  "originalCombinations": 6,
+  "fullObligationsClosed": 0,
+  "consumerModuleHashes": {
+    "Solidity/Yul/Composition/Interface.lean": "f397d8ca5170fd1bc392d6fe3093d3e80e9ee4c376aff3703f250430d41945fa",
+    "Solidity/Yul/Composition/Concrete.lean": "c5371072ac481ec0c1dbb31fe8a97d0d3cf6cba3bb49ee9e38aee8833e8af383",
+    "Solidity/Yul/Composition/Controls.lean": "f5cb2cfa5a2d3badec9ac1f855ce8640ea51c859aceebbcf21ee2141981e6a32",
+    "Solidity/Yul/Composition/TargetRepeat.lean": "b91463c1bd45ed78f003f6ff6b2cd3f9dfb889e757f2973546aefac8d6130c9e",
+    "Solidity/Yul/Composition/ScopeTransport.lean": "00aff5a56ca2f32075a2a24c4dfc4416e6cb0a37728f1740d829dc948672e155",
+    "Solidity/Yul/Composition/WordBridge.lean": "31b3964d37afbe9858ef21a8f94815c01b598757b67b208a25ae6f8959eaf103"
+  },
+  "producerHeads": [
+    "250555de2df2c16e2413cf329f43c77ce51ac8b6",
+    "9c631ecb07af62039348239763e049275fd78c1e",
+    "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+    "2bb7bb20852e986f81a44aaaadfda104cac9c3f4"
+  ],
+  "facts": [
+    {
+      "name": "Solidity.Yul.Composition.revert_copy",
+      "module": "Solidity/Yul/Composition/Concrete.lean",
+      "scope": "Supplied VY4 completion rolls back and bounded bytes materialize under existing target-only executor; explicit window/fit premises"
+    },
+    {
+      "name": "Solidity.Yul.Composition.copied_window_and_frame",
+      "module": "Solidity/Yul/Composition/Concrete.lean",
+      "scope": "Exact selected physical target bytes and outside interval preservation"
+    },
+    {
+      "name": "Solidity.Yul.Composition.caught_then_success",
+      "module": "Solidity/Yul/Composition/Concrete.lean",
+      "scope": "Actual supplied completions, not Solidity try/catch semantics"
+    },
+    {
+      "name": "Solidity.Yul.Composition.nested_revert_window",
+      "module": "Solidity/Yul/Composition/Concrete.lean",
+      "scope": "Two strict returnWindow successes compose after actual VY4 failure"
+    },
+    {
+      "name": "Solidity.Yul.Composition.literalSum_run",
+      "module": "Solidity/Yul/Composition/Concrete.lean",
+      "scope": "Actual VY3 code computes sum with arbitrary caller tail"
+    },
+    {
+      "name": "Solidity.Yul.Composition.repeat_increment_run",
+      "module": "Solidity/Yul/Composition/TargetRepeat.lean",
+      "scope": "Finite target repetition, not source-loop/JUMP/fuel adequacy"
+    },
+    {
+      "name": "Solidity.Yul.Composition.Controls.reverted_witness",
+      "module": "Solidity/Yul/Composition/Controls.lean",
+      "scope": "Typed nonempty effects rollback storage/nonce/log and byte copy"
+    },
+    {
+      "name": "Solidity.Yul.Composition.Controls.success_witness",
+      "module": "Solidity/Yul/Composition/Controls.lean",
+      "scope": "Same supplied effects succeed and discriminate from rollback"
+    },
+    {
+      "name": "Solidity.Yul.Composition.computed_outer_write",
+      "module": "Solidity/Yul/Composition/ScopeTransport.lean",
+      "scope": "Actual arithmetic result transport through VY3 newer prefix to indexed outer slot; no source calling convention/dirty-local projection"
+    },
+    {
+      "name": "Solidity.Yul.Composition.computed_outer_read",
+      "module": "Solidity/Yul/Composition/ScopeTransport.lean",
+      "scope": "Actual arithmetic result transport through VY3 newer prefix to indexed outer slot; no source calling convention/dirty-local projection"
+    },
+    {
+      "name": "Solidity.Yul.Composition.world_target_word",
+      "module": "Solidity/Yul/Composition/WordBridge.lean",
+      "scope": "Lossless existing Fin256/BitVec256 representation and actual modular ADD; not narrow source dirty-local semantics"
+    },
+    {
+      "name": "Solidity.Yul.Composition.target_world_word",
+      "module": "Solidity/Yul/Composition/WordBridge.lean",
+      "scope": "Lossless existing Fin256/BitVec256 representation and actual modular ADD; not narrow source dirty-local semantics"
+    },
+    {
+      "name": "Solidity.Yul.Composition.world_word_add",
+      "module": "Solidity/Yul/Composition/WordBridge.lean",
+      "scope": "Lossless existing Fin256/BitVec256 representation and actual modular ADD; not narrow source dirty-local semantics"
+    }
+  ],
+  "combinations": [
+    {
+      "id": "loops",
+      "fullStatus": "pending",
+      "readyFacts": [
+        "repeat_increment_run"
+      ],
+      "required": [
+        "Y03",
+        "Y09.01",
+        "G49.03",
+        "G51.02"
+      ],
+      "remaining": "Actual intrinsic source constructor execution and compiler/world correspondence; component law does not close combination"
+    },
+    {
+      "id": "modifiers",
+      "fullStatus": "pending",
+      "readyFacts": [
+        "computed_outer_write",
+        "computed_outer_read"
+      ],
+      "required": [
+        "Y03",
+        "G48",
+        "G49.01"
+      ],
+      "remaining": "Actual intrinsic source constructor execution and compiler/world correspondence; component law does not close combination"
+    },
+    {
+      "id": "try-catch",
+      "fullStatus": "pending",
+      "readyFacts": [
+        "caught_then_success",
+        "revert_copy",
+        "nested_revert_window"
+      ],
+      "required": [
+        "Y07.01",
+        "Y07.02",
+        "G49.02"
+      ],
+      "remaining": "Actual intrinsic source constructor execution and compiler/world correspondence; component law does not close combination"
+    },
+    {
+      "id": "unchecked",
+      "fullStatus": "pending",
+      "readyFacts": [],
+      "required": [
+        "Y03",
+        "Y09.01",
+        "G48"
+      ],
+      "remaining": "Actual intrinsic source constructor execution and compiler/world correspondence; component law does not close combination"
+    },
+    {
+      "id": "constructors",
+      "fullStatus": "pending",
+      "readyFacts": [],
+      "required": [
+        "Y07.01",
+        "G50.01"
+      ],
+      "remaining": "Actual intrinsic source constructor execution and compiler/world correspondence; component law does not close combination"
+    },
+    {
+      "id": "libraries",
+      "fullStatus": "pending",
+      "readyFacts": [
+        "computed_outer_write",
+        "computed_outer_read"
+      ],
+      "required": [
+        "Y08.01",
+        "Y07.02",
+        "G48"
+      ],
+      "remaining": "Actual intrinsic source constructor execution and compiler/world correspondence; component law does not close combination"
+    }
+  ],
+  "obligations": [
+    {
+      "id": "Y01",
+      "owner": "VY1",
+      "fullStatus": "pending",
+      "peerHead": null,
+      "readyComponentFacts": [],
+      "availability": "specific producer package not delivered",
+      "unresolved": "Intrinsic scoped Yul AST; Osaka admission and canonical rethrow instance",
+      "dependencies": [
+        "S00"
+      ]
+    },
+    {
+      "id": "Y01.02",
+      "owner": "VY1",
+      "fullStatus": "pending",
+      "peerHead": null,
+      "readyComponentFacts": [],
+      "availability": "specific producer package not delivered",
+      "unresolved": "Checked Yul parsing over G08-G11 lexer",
+      "dependencies": [
+        "Y01",
+        "G08",
+        "G09",
+        "G10",
+        "G11"
+      ]
+    },
+    {
+      "id": "Y02",
+      "owner": "VY1",
+      "fullStatus": "pending",
+      "peerHead": null,
+      "readyComponentFacts": [],
+      "availability": "specific producer package not delivered",
+      "unresolved": "Scope/arity/literal/external-reference typing; checker soundness and completeness",
+      "dependencies": [
+        "Y01",
+        "S01"
+      ]
+    },
+    {
+      "id": "Y03",
+      "owner": "VY1",
+      "fullStatus": "pending",
+      "peerHead": null,
+      "readyComponentFacts": [],
+      "availability": "specific producer package not delivered",
+      "unresolved": "Word/control/function semantics; horizon and dirty-bit embedding",
+      "dependencies": [
+        "Y02",
+        "S02",
+        "S03",
+        "V04"
+      ]
+    },
+    {
+      "id": "Y04",
+      "owner": "VY2",
+      "fullStatus": "pending",
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
+      "readyComponentFacts": [],
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
+      "unresolved": "Packing/residual persistent/transient views, decode/encode, rollback and reset",
+      "dependencies": [
+        "Y03",
+        "S04",
+        "G27.01",
+        "G27.02",
+        "G27.03",
+        "G27.04",
+        "G27.05"
+      ]
+    },
+    {
+      "id": "Y05",
+      "owner": "VY2",
+      "fullStatus": "pending",
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
+      "readyComponentFacts": [],
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
+      "unresolved": "Byte memory, MemOK preservation and allocation refinement; G01 YQ3 amendment",
+      "dependencies": [
+        "Y03",
+        "S04",
+        "V04b",
+        "G32"
+      ]
+    },
+    {
+      "id": "Y06",
+      "owner": "VY2",
+      "fullStatus": "pending",
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
+      "readyComponentFacts": [],
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
+      "unresolved": "Calldata copy/load/hash and universally quantified environment inputs",
+      "dependencies": [
+        "Y05",
+        "S04.04"
+      ]
+    },
+    {
+      "id": "Y07.01",
+      "owner": "VY4",
+      "fullStatus": "pending",
+      "peerHead": "9c631ecb07af62039348239763e049275fd78c1e",
+      "readyComponentFacts": [
+        "revert_copy",
+        "nested_revert_window",
+        "caught_then_success"
+      ],
+      "availability": "verified supplied producer component bodies only",
+      "unresolved": "Raw call/staticcall/returndata/create/create2 correctness",
+      "dependencies": [
+        "Y06",
+        "G22",
+        "G42",
+        "V13"
+      ]
+    },
+    {
+      "id": "Y07.02",
+      "owner": "VY4",
+      "fullStatus": "pending",
+      "peerHead": "9c631ecb07af62039348239763e049275fd78c1e",
+      "readyComponentFacts": [
+        "copied_window_and_frame"
+      ],
+      "availability": "verified supplied producer component bodies only",
+      "unresolved": "Delegatecall/EIP-6780/logs and Solidity emit; G01 YQ6 amendment",
+      "dependencies": [
+        "Y07.01",
+        "G42",
+        "V13"
+      ]
+    },
+    {
+      "id": "Y08.01",
+      "owner": "VY3",
+      "fullStatus": "pending",
+      "peerHead": "250555de2df2c16e2413cf329f43c77ce51ac8b6",
+      "readyComponentFacts": [
+        "literalSum_run",
+        "computed_outer_write",
+        "computed_outer_read",
+        "repeat_increment_run"
+      ],
+      "availability": "verified supplied producer component bodies only",
+      "unresolved": "Concrete compiler stack/frame relation against G24 and Y04/Y05",
+      "dependencies": [
+        "Y04",
+        "Y05",
+        "Y06",
+        "G24",
+        "G27",
+        "G32",
+        "V12"
+      ]
+    },
+    {
+      "id": "Y08.02",
+      "owner": "VY3",
+      "fullStatus": "pending",
+      "peerHead": "250555de2df2c16e2413cf329f43c77ce51ac8b6",
+      "readyComponentFacts": [],
+      "availability": "verified supplied producer component bodies only",
+      "unresolved": "Actual opcode and bytecode correspondence through G45/G46/Bridge",
+      "dependencies": [
+        "Y08.01",
+        "G45",
+        "G46",
+        "V15"
+      ]
+    },
+    {
+      "id": "Y09.01",
+      "owner": "VY1",
+      "fullStatus": "pending",
+      "peerHead": null,
+      "readyComponentFacts": [],
+      "availability": "specific producer package not delivered",
+      "unresolved": "Sound word/control calculus; printed rules and Lean-only map rows",
+      "dependencies": [
+        "Y03",
+        "G51.interface"
+      ]
+    },
+    {
+      "id": "Y09.02",
+      "owner": "VY2",
+      "fullStatus": "pending",
+      "peerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
+      "readyComponentFacts": [],
+      "availability": "Verified represented source/physical actions and ordinary typed heap-image byte contracts available; broader full obligation remains pending",
+      "unresolved": "Sound physical/input calculus; update laws and printed rules",
+      "dependencies": [
+        "Y04",
+        "Y05",
+        "Y06",
+        "G51.interface"
+      ]
+    },
+    {
+      "id": "Y09.03",
+      "owner": "VY4",
+      "fullStatus": "pending",
+      "peerHead": "9c631ecb07af62039348239763e049275fd78c1e",
+      "readyComponentFacts": [],
+      "availability": "verified supplied producer component bodies only",
+      "unresolved": "Sound world-effect calculus and log observations",
+      "dependencies": [
+        "Y07.01",
+        "Y07.02",
+        "G51.interface"
+      ]
+    },
+    {
+      "id": "G48",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Concrete accepted source coverage and lowering; no residual assembly restriction",
+      "dependencies": [
+        "Y01",
+        "Y02",
+        "Y03",
+        "Y04",
+        "Y05",
+        "Y06",
+        "Y07.01",
+        "Y07.02",
+        "Y08.01"
+      ]
+    },
+    {
+      "id": "G49.01",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Every assembly constructor compiled with actual pass certificates",
+      "dependencies": [
+        "G48",
+        "Y08.01"
+      ]
+    },
+    {
+      "id": "G49.02",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Runtime source-to-bytes simulation in both pipelines",
+      "dependencies": [
+        "G49.01",
+        "Y08.02"
+      ]
+    },
+    {
+      "id": "G49.03",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Nonvacuity, failure preservation and resource-indexed progress",
+      "dependencies": [
+        "G49.02"
+      ]
+    },
+    {
+      "id": "G50.01",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Constructor/initcode/runtime installation and failure observations",
+      "dependencies": [
+        "G49.02",
+        "Y07.01"
+      ]
+    },
+    {
+      "id": "G50.02",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Reachable transaction/world composition and adversarial quantification",
+      "dependencies": [
+        "G50.01",
+        "Y07.02"
+      ]
+    },
+    {
+      "id": "G51.01",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Affected calculus soundness",
+      "dependencies": [
+        "Y09.01",
+        "Y09.02",
+        "Y09.03"
+      ]
+    },
+    {
+      "id": "G51.02",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Box/diamond/spec/callback/loop transfer",
+      "dependencies": [
+        "G49.03",
+        "G50.02",
+        "G51.01"
+      ]
+    },
+    {
+      "id": "G51.interface",
+      "owner": "V16",
+      "fullStatus": "pending",
+      "peerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+      "readyComponentFacts": [],
+      "availability": "Verified general certificate/observation interface exports available; actual assembly Lang/pass/Cert and guards not supplied",
+      "unresolved": "Actual G51 rule/specification interface contracts consumed by Y09; distinct from completed G51.01 theorem",
+      "dependencies": [
+        "V16"
+      ]
+    },
+    {
+      "id": "Y10",
+      "owner": "VY5",
+      "fullStatus": "pending",
+      "peerHead": null,
+      "readyComponentFacts": [
+        "revert_copy",
+        "computed_outer_read",
+        "repeat_increment_run"
+      ],
+      "availability": "own components, full closure pending",
+      "unresolved": "Concrete joint assembly composition and import closure",
+      "dependencies": [
+        "G48",
+        "G49.01",
+        "G49.02",
+        "G49.03",
+        "G50.01",
+        "G50.02",
+        "G51.01",
+        "G51.02",
+        "Y08.02",
+        "Y07.02"
+      ]
+    }
+  ],
+  "physicalEvidence": "tests/yul-composition/physical-component-ledger.json"
+}

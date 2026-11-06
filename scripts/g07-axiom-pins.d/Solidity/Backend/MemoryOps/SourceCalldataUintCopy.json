@@ -9,11 +9,6 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryOps/SourceCalldataUintCopy.lean:Solidity.Backend.MemoryOps.source_cd_uint_fixed_stuck": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryOps/SourceCalldataUintCopy.lean:Solidity.Backend.MemoryOps.source_cd_uint_run": [
   "Classical.choice",
   "Quot.sound",

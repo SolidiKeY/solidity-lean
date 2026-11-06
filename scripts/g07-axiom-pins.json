@@ -16577,11 +16577,6 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryOps/SourceCalldataUintCopy.lean:Solidity.Backend.MemoryOps.source_cd_uint_fixed_stuck": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryOps/SourceCalldataUintCopy.lean:Solidity.Backend.MemoryOps.source_cd_uint_run": [
   "Classical.choice",
   "Quot.sound",
@@ -45314,6 +45309,7 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/FailureProjection.lean:Solidity.Lowering.P8.SpecFailures.requestCutWitness_not_noFail": [],
  "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.assemble": [
   "Classical.choice",
   "Quot.sound",
@@ -45470,11 +45466,20 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceRealization.lean:Solidity.Lowering.P8.SpecExecution.machineAgreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceSize.lean:Solidity.Backend.MemoryCopies.NewArrayLengthPanicPremise.failure_of_parts": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/Readonly/StaticJournal.lean:Solidity.Lowering.Readonly.StaticJournal.balance_storage_word": [
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/StaticJournal.lean:Solidity.Lowering.Readonly.StaticJournal.History.balance_word": [],
  "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.complete": [
   "Classical.choice",
   "Quot.sound",
@@ -56813,7 +56818,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.cdStaticToMem_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/Calldata.lean:Solidity.Source.cdToMem_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.cdToMem_static_ok": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -56902,6 +56917,1286 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.approxAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.captured_timeout_not_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.changed_plan_not_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.completed_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.root_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.PlannedApprox.Controls.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureApproxControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.collectArgs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.construct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.deploy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.deployRun": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.deployRun_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.ancestor_no_receipt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.ancestor_stop_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.body_cut1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.body_uncut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut0_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut0_world_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut1_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut1_root_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut2_events": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.cut2_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.reader_signature": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_cut0": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_cut1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.receipt_uncut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.request_no_receipt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.request_stop_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.uncut_events": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.uncut_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.uncut_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.FailureExecution.ConstructorControls.variable_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.giveArgs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.runCtorBody": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureConstructorControls.lean:Solidity.Source.runInits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.collectArgs_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.collectArgs_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.construct_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.construct_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.ancestor_stop_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.body_cut_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.changed_plan_not_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.completed_cut_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.initializer_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deployRun_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deployRun_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deployRun_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.giveArgs_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.giveArgs_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runCtorBody_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runCtorBody_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runInits_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runInits_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.action_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.actual_fixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.erase_prefix_not_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.fixture_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.growth_does_not_fix_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.growAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.caller_nonce_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.caller_prefix_required": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.disabled_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.enabled_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.heap_alias_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.no_false_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.owner_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventLaws.lean:Solidity.Source.emitEvent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventLaws.lean:Solidity.Source.FailureExecution.emit_stopped_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.check_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.emit_plan_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.frame_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.frame_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.attempt_not_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.caller_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.completed_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.emitSeven_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.outer_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.timeout_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.timeout_to_emit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.check": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.emit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.pending": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.actual_local_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.ancestor_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.caller_prefix_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.child_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.child_write_reverted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.dangling_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.disabled_check": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.disabled_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.disabled_pending": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.dispatch_zero_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.empty_bytes_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.full_bytes_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.journal_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.journal_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.no_false_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.own_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.panic_bytes": [],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.panic_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.refused_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.request_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.request_not_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.stuck_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.timeout_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.wrong_child_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.wrong_full_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.wrong_mark_loses_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.zero_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.check_cutFree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.CutFree": [],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_advanceEvent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_empty": [],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_enterFrame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_enterRequest": [],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_leaveFrame": [
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_leaveRequest": [
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_stop": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.after_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.emitted_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.mismatched_not_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.mismatched_stop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.nested_clear": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.noFail_not_enough": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.one_event_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.points_noFail": [],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.requested_clear": [],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.retained_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsEffects.lean:Solidity.Source.FailureExecution.emitEvent_cutFree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_active_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_balance_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_dropped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_dropped_then_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_halt_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_revert_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.requestScope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admission_frames": [],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admission_other": [
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.active_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.dropped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.dropped_then_next": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.exact_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.full_nat_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.full_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.insufficient_before_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.insufficient_no_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.sufficient_zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admitRequestAt": [],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admitRequestFate": [],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.request_value_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.request_value_unfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.requestValueScope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.admission_at_funded": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.current_ordinal_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.current_ordinal_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.current_ordinal_underfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.current_ordinal_wide_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.current_ordinal_zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.family_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.full_bytes_discriminate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.readBalance_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.same_length_wrong_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.AdmissionHorizonControls.wrong_index_drops": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.request_value_admitted_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.request_value_rejected_counters": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.request_value_underfunded_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.requestValueScope_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.requestValueScope_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmissionHorizonControls.lean:Solidity.Source.FailureExecution.requestValueScope_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizon.lean:Solidity.Source.FailureExecution.requestScope_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizon.lean:Solidity.Source.FailureExecution.requestScope_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.actual_scope_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.body_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.caught_cut_cannot_succeed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.changed_plan_not_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.completed_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.cut_one_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.cut_zero_suppresses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.dropped_is_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.family_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.heap_alias_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.later_complete_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.zero_horizon_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.preflight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.ancestor_not_child_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.ancestor_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.bodyless_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.caller_heap_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.entered_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.first_event_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.nested_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.nested_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.panic_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.panic_full_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.registered_receiver": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.request_not_catchable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.request_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.second_event_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.static_event_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.transfer_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.transferred_entered_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.transferred_entered_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.uncut_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.wrong_frame_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.wrong_panic_payload_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRuntimeControls.lean:Solidity.Source.FailureExecution.RuntimeControls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.frame_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.PlannedBelow.belowAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.requestScope_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.attempt_not_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.panic_bytes_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.request_stop_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.revert_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.stuck_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.timeout_not_equal_completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.ancestor_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.ancestor_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.entry_stop_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.missing_code_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut0": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut0_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut1_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.panic_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.request_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.request_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.stuck_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.uncut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.runTx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.runTxWithPlan": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionGrowth.lean:Solidity.Source.FailureExecution.runTxWithPlan_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.dropped_then_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.earlier_tx_debits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.exact_balance_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.funded_revert_is_not_drop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.funded_timeout_is_not_drop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.invalid_advances_to_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.invalid_then_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.prior_credit_funds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.rejected_stress_fields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.rejected_whole_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.wrong_recipient_balance": [],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.FundsControls.zero_value_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.requestFunded_false_iff": [
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.requestFunded_true_iff": [
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_invalid_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_result_funded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.runCheckedTx_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.sessionGo_drop_unfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FundsControls.lean:Solidity.Source.sessionGoEvents_drop_unfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/Horizon.lean:Solidity.Source.belowAt": [
   "Classical.choice",
   "Quot.sound",
@@ -56930,6 +58225,286 @@
  "Solidity/Source/HorizonDeploy.lean:Solidity.Source.deploy_events_mono": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthority.lean:Solidity.Source.Monetary.Authority.funding_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthority.lean:Solidity.Source.Monetary.Authority.set_at": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthority.lean:Solidity.Source.Monetary.wide_authority_control": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthoritySource.lean:Solidity.Source.Monetary.Authority.request_postFee": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthoritySource.lean:Solidity.Source.Monetary.Authority.source_amount": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthoritySource.lean:Solidity.Source.Monetary.Authority.source_undo": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.credit_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.credit_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.debit_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.debit_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.wide_credit_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.wide_zero_debit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.deploy_code_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.deploy_open_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.edgeState_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_account_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_sameBalance_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_wordBalance_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.empty_balancesFit": [],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.set_fit": [],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSource_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSource_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSourceChecked?_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSourceChecked?_of_fits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.St.init_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.transferNat_hypotheses_satisfiable": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.unguarded_write_breaks": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.wideAuthority_writeSource_breaks": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.credit_success_fits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_fits": [],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_without_range": [],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.wide_zero_debit": [],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.attempt_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.creditRollback_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.mark_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.rollback_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.rollback_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.capture_is_not_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.continuation_reads_full_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.seed_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.seed_journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.successful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.wrong_mark_loses_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollbackControls.lean:Solidity.Source.MonetaryExecution.Controls.zero_credit_still_journals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.ExecState.storage_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.ExecState.transient_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.MonetaryStorage.applyOp_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.MonetaryStorage.setCell_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.MonetaryStorage.writeAt_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_fit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_undo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.seed_fit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.static_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_fit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_undo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.wrong_type_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.Account.wide_balance": [],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.CallFrame.rollback_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.apply_balanceFits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.endTx_balancesFit": [],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.transfer_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.transferNat_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.undo_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.undoN_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.savedWide_current_fit": [],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.savedWide_undo_not_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.World.set_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.World.wordView_exact": [
   "propext"
  ],
  "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Env.fieldTy?_of_fieldAt": [
@@ -57837,10 +59412,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Source/StateExamples.lean:Solidity.Source.StateExamples.transfers": [
-  "Quot.sound",
-  "propext"
- ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.StateExamples.transfers": [],
  "Solidity/Source/StateExamples.lean:Solidity.Source.Storage.write_read": [
   "Classical.choice",
   "Quot.sound",
@@ -63597,6 +65169,182 @@
  "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.two_target": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.fresh_self_burns_exact_wide": [],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.full_amount_and_prefix": [],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.full_rollback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.old_self_keeps_exact_wide": [],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.wide_distinct_refused": [],
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.actual_fresh_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.actual_fresh_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.fresh_full_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.represented_fresh_after_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.call_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.completed_horizons_agree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.empty_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.environment_has_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.exact_ordered_events": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.fresh_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.no_system_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.old_alias_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.one_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.panic_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.payload_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.ping_not_static": [],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.run_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.run_rethrow_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.same_length_wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.scope_state_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.selector_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.state_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/SourceCatchBinding.lean:Solidity.Yul.Composition.SourceCatchBinding.zero_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceControls.lean:Solidity.Yul.Views.Controls.sb_actual_wide": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceControls.lean:Solidity.Yul.Views.Controls.sb_wide_exact_state_and_word_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_exact_int": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_wide": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceInputs.lean:Solidity.Yul.Views.sourceObservedBalance_system": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceInputs.lean:Solidity.Yul.Views.sourceObservedBalance_system_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceReads.lean:Solidity.Yul.Views.sourceBalanceLocal_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/StorageBalanceInputs.lean:Solidity.Yul.Views.packedSourceStep_observed_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.destructTransfer_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.finish_balancesFit": [],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.selfBeneficiary_balancesFit": [
   "propext"
  ],
  "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits": [

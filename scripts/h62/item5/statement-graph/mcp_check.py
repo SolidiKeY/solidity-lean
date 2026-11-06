@@ -38,7 +38,7 @@ async def check(args):
     assert sha(args.archive) == pin['sha256'], 'pinned archive checksum mismatch'
     version = subprocess.check_output([str(args.lean_bin.resolve()/'lean'),'--version'],text=True)
     assert pin['toolchain'].split(':')[-1].lstrip('v') in version, 'wrong Lean version'
-    resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))
+    resource.setrlimit(resource.RLIMIT_AS,(8*1024**3,8*1024**3))
     records = []
     async with stdio_client(params) as (read,write):
         async with ClientSession(read,write) as session:
@@ -62,7 +62,7 @@ def main():
     parser.add_argument('--pin',type=Path,required=True)
     parser.add_argument('--archive',type=Path,required=True)
     parser.add_argument('--evidence',type=Path,required=True)
-    parser.add_argument('--files',nargs='+',choices=('Exporter.lean','Fixture.lean','Pending.lean','Census.lean','EvmCensus.lean'),default=['Exporter.lean','Fixture.lean'])
+    parser.add_argument('--files',nargs='+',choices=('Exporter.lean','Fixture.lean','Pending.lean','Census.lean','EvmCensus.lean','WitnessFixture.lean'),default=['Exporter.lean','Fixture.lean'])
     args = parser.parse_args()
     assert not args.evidence.resolve().is_relative_to(ROOT), 'evidence must be off git'
     with open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','a') as lock:

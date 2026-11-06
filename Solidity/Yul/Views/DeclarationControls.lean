@@ -45,7 +45,7 @@ theorem decl_reference_unsupported : declarationScalar? declPackingEnv.layout (.
 theorem decl_slot_overflow : (packDeclarationFields declPackingEnv declPackingRoot account 0 [("flag",.bool)] ((2^256)*32)).toOption = none := by rfl
 
 def declPackingState : Source.EMState declPackingEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := declPackingEnv.layout) (declPackingEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := declPackingEnv.layout) (declPackingEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def declPackingResidual := initialPackedComplement declPackingRegistry declPackingRegistry (fun _ => packedZeroRaw)
 
 theorem decl_plan_ready : (preparePackedFrame (ps := declPackingRegistry) (ts := declPackingRegistry)

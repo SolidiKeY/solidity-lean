@@ -74,7 +74,7 @@ inductive SFrag (X : StmtExt E) (A : Decl → Prop) {R : List STy} {M : Bool} :
   | ext {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)) :
       X.P s bs → (∀ b ∈ bs, IFrag X A b.b) → SFrag X A s
   | declTuple {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs))
-      (h : slotsFit E.isBase slots σs = true) : TupleInit A e → SlotsOK slots σs →
+      (h : slotsFit E.isBase E.mapFree slots σs = true) : TupleInit A e → SlotsOK slots σs →
       SFrag X A (RStmt.declTuple (R := R) (M := M) (k := k) slots e h)
   | block {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') : IFrag X A b → SFrag X A (.block b)
   | ifThen {k : SCtx} {Γ Γ₁ : RCtx} (c : RExpr E Γ .bool) (s : RStmt E R M k Γ Γ₁) :
