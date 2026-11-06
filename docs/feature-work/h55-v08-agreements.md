@@ -146,20 +146,36 @@ V07 local/storage/heap relation; P4 dispatch and G42 body/result preservation;
 InterfaceV1.ReturnClaim and InterfaceV1.PendingRestoration. These are named
 obligations, not implementations proved by this helper.
 
-ESCALATE QPIN1 [source: static-6.log; axiom-baseline-correspondence.json]:
-The pinned base's shared axiom inventory gate exits 1 with 4140 unrecorded
-changes and zero forbidden-axiom errors. This lane cannot edit shared pins.
-Coordinator options (no gate waiver or premise/exclusion change proposed):
+### QPIN1 resolved by H67; gate waiting on central merge
 
-1. Reconcile the shared inventory centrally on the pinned base and supply an
-   accepted handoff; the lane then reruns the unchanged required gate.
-2. Supply a validated replacement published base plus explicit adoption and
-   ownership instructions; the lane then revalidates all source and gates.
+Human coordinator decision (H67, 2026-11-06), verbatim:
 
-No option is approved or recommended. Owner/base lookup remains coordinator
-work; this record does not request a human lookup. Production adoption, actual
-owner-reviewed checkpoint before g49, comparable speed gate and complete
-production acceptance remain unfinished. The persistent goal is not complete.
+> Answer to QPIN1 (H67, human, 2026-11-06): option 1. The shared axiom-pin inventory drift is reconciled centrally by a separate coordinator job (branch coord/h67-g07-pins, merged to master after review). Do not edit the inventory. When it is on master, merge master and rerun the required gate; until then continue your queue and record the gate as waiting on H67.
+
+QPIN1 is resolved; there is no outstanding question or request for a gate waiver.
+The historical pinned-base failure remains evidence, while the current gate
+status is **waiting on H67**, not a new failure or a pass. Shared pins remain
+read-only. H67 authorizes merging reviewed master into this assigned branch
+when the reconciliation is present; it does not transfer production file leases.
+
+Read-only remote inspection found H67 tip
+`35b9d826d14b26bacdb203b235fcc506a5466f7b` directly above master
+`96788a95383b6295dc13774ef681297adf1337a7`. The explicit ancestor check exits 1:
+H67 has not yet reached master. Neither the coordinator branch nor master was
+merged prematurely. All six protected producer/interface files match the
+original pinned base on that master. The original production-input import
+closure contains 218 modules; the full helper import closure contains 225.
+All 225 modules and toolchain configuration are unchanged on the observed master.
+Import-dependency readiness is recorded in `/workspace/v08-agreements-evidence/h67-waiting/decision-and-readiness.json`.
+
+Once H67 is reviewed and merged to master, merge master under the writer lock,
+inspect incoming instructions/dependencies, and rerun the required pin gate and
+any affected proofs. Production migration still requires the separate coordinator
+notice naming actual owners, accepted handoff and exact transferred files.
+The standalone typed interface, component controls and migration correspondence
+backfill are already checked and reviewed. Production adoption, the owner-reviewed
+checkpoint before g49, comparable speed gate and full acceptance remain unfinished.
+Owner/base lookup remains coordinator work. The persistent goal is not complete.
 
 ## Handoff artifacts
 
@@ -189,6 +205,17 @@ external HANDOFF.md and SHA256SUMS. No empty marker commit is used.
 
 Checkpoint state: standalone interface/backfill done and independently reviewed;
 production migrations, owner acceptance before g49, adoption speed gate and
-full assignment acceptance blocked. The inherited pin inventory gate is a
-reported failure, not a pass. This handoff requests coordinator action only;
+full assignment acceptance blocked. The historical inherited pin gate failed; its current status is waiting on H67
+central reconciliation, with QPIN1 resolved. It is not a pass. This handoff requests coordinator action only;
 it does not request a human to find owners or approve a changed premise.
+
+## H67 follow-up receipt
+
+The H67 decision update changes only task-owned documentation and evidence
+metadata. No Lean source, producer, inventory, proof budget or source observation
+changes. Prior combined proof evidence remains tied to source checkpoint
+769bf7d5b1304642ac1995ee4a9c3a770cd948ce; it is not represented as a new run.
+New follow-up exports and checksums are under
+`/workspace/v08-agreements-evidence/h67-waiting`; original evidence and the
+validated cache pack remain unchanged. No new cache pack or Lean run is needed
+for this documentation-only update. No second goal is created or reset.
