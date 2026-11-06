@@ -25,7 +25,8 @@ run_elab do
         ("name", toJson name.toString),
         ("module", toJson owner.toString),
         ("levelParams", toJson (info.levelParams.map Name.toString)),
-        ("typeExpr", toJson (reprStr info.type))])
+        ("typeExpr", toJson (reprStr info.type)),
+        ("valueExpr", toJson (info.value?.map (fun value => reprStr value)))])
   for module in modules do
     unless env.constants.toList.any (fun (name, _) =>
         (env.getModuleIdxFor? name).any fun index =>

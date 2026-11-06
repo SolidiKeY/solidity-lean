@@ -13,6 +13,7 @@ SPEC.loader.exec_module(C)
 
 def baseline():
     return {'complete': True, 'modules': [{'module': 'M', 'exit': 0, 'stop': None}],
+            'tooling_sha256': {'measure.py': 'fixed', 'census.py': 'fixed'},
             'settings': {'threads': 1}, 'source_identity_sha256': 'fixed',
             'wall_seconds': 100, 'max_child_rss_kib': 100}
 
@@ -25,15 +26,22 @@ class AcceptanceControls(unittest.TestCase):
             with self.assertRaises(ValueError): C.compare(baseline(), new)
 
     def test_resource_and_input_drift_are_rejected(self):
-        for change in [{'settings': {'threads': 2}}, {'source_identity_sha256': 'changed'},
+        for change in [{'tooling_sha256': {}}, {'tooling_sha256': {'measure.py': 'changed'}},
+                       {'settings': {'threads': 2}}, {'source_identity_sha256': 'changed'},
                        {'modules': [{'module': 'different', 'exit': 0, 'stop': None}]}]:
             new = baseline(); new.update(change)
+            with self.assertRaises(ValueError): C.compare(baseline(), new)
+
+    def test_invalid_metrics(self):
+        for value in [float('nan'), float('inf'), -1, 0]:
+            new = baseline(); new['wall_seconds'] = value
             with self.assertRaises(ValueError): C.compare(baseline(), new)
 
     def test_regression_thresholds_and_rss(self):
         old = baseline()
         for wall, rss, expected in [(100, 100, 'NO_REGRESSION'),
                                    (101, 100, 'ESCALATE_REGRESSION'),
+                                   (110, 100, 'ESCALATE_REGRESSION'),
                                    (111, 100, 'STOP_GT_10_PERCENT'),
                                    (99, 111, 'STOP_GT_10_PERCENT')]:
             new = copy.deepcopy(old); new.update(wall_seconds=wall, max_child_rss_kib=rss)

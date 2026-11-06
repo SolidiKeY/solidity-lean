@@ -59,7 +59,8 @@ block. They are lexical evidence, not elaborated interface equivalence.
 
 `tests/h62/item6/migrate-solkey/FrozenInterfaces.lean` inventories all constants
 owned by the five modules, including private and command-generated constants,
-with universe parameters and kernel type expressions. It requires entries for
+with universe parameters, kernel type expressions and available definition/proof
+value expressions. It requires entries for
 every module and all three named theorems. It also prints the three theorem
 axiom sets. Output belongs off Git. This helper has not yet been elaborated;
 no successful semantic interface or axiom audit is claimed.
@@ -108,9 +109,26 @@ semantic interface hashes. Confirmed defects were repaired; both reviewers
 confirmed the repairs by inspection. Finder additionally requested fail-closed
 checks for module/theorem omissions in the interface fixture; these were added.
 
-Four scanner controls pass: nested comments/string delimiters, exact five-file
+Five scanner controls pass: module-system import modifiers, nested comments/string delimiters, exact five-file
 and eleven-import census, command locations, and source/fixture/dependency
-mutations. Three acceptance controls pass: incomplete/failed runs, resource or
+mutations. Four acceptance controls pass: finite positive metrics, incomplete/failed runs, resource or
 input drift, and wall/RSS regression thresholds. These are external Python tests,
 not Lean theorem proofs. Final fixture elaboration, Lean gates and measured
 acceptance remain outstanding.
+
+## Static validation evidence
+
+`node scripts/check-layers.mjs`: exit 0; 857 core modules, zero reaching
+either elaborators or checked parser adapters. Generated-root and fragment
+checks: exit 0. Census comparison: exit 0, all source/fixture/dependency hashes
+unchanged. `bash scripts/check-testsuite.sh --solkey
+tests/migration/solkey/keyext.solidity.examples`: exit 0; trust clean across
+54 modules and 564 public functions = 552 derived + 11 refuted + 1 excluded,
+zero pending, plus 2 skips. This checks pinned rows, not new Lean elaboration.
+The initially attempted default and setup-snapshot paths failed; the explicit
+repository-pinned snapshot resolves those setup failures without source edits.
+
+`bash scripts/check-doc-paths.sh`: exit 1 for a pre-existing missing reference
+in `docs/feature-work/after-roadmap-va1.md` to the optional Bridge Mathlib
+checkout. The new handoff introduces no missing Lean path. No fix outside the
+assigned scope is attempted. Logs are under off-Git `static-gates/`.

@@ -31,6 +31,7 @@ def main():
     lock = open('/tmp/solidity-lean-feature-groups-20261025/writer.lock', 'a')
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     if Path('/proc/swaps').read_text().count('\n') != 1: raise SystemExit('Swap is configured')
+    tooling = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__), Path(__file__).with_name('census.py')]}
     data = census(root)
     identity = {m['source']: {'source_sha256': m['source_sha256'], 'fixtures': m['fixtures']} for m in data['modules']}
     identity.update({v['source']: v['sha256'] for v in data['external_dependency_closure'].values() if v is not None})
@@ -87,7 +88,7 @@ def main():
                     break
                 time.sleep(.25)
         results.append({'module': n, 'command': cmd, 'exit': child.returncode, 'wall_seconds': time.monotonic()-t, 'stop': reason})
-        report = {'runner_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'complete': len(results) == len(order) and not child.returncode and not reason, 'source_identity_sha256': identity_hash, 'versions': versions, 'settings': {'threads': 1, 'as_cap_bytes': 12*GIB, 'cgroup_reserve_bytes': 4*GIB, 'swap': False, 'cache': 'fresh olean outputs; OS page cache uncontrolled'}, 'modules': results, 'wall_seconds': time.monotonic()-start, 'peak_cgroup_memory_bytes': peak, 'max_child_rss_kib': resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss, 'source_census_sha256': hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()}
+        report = {'tooling_sha256': tooling, 'complete': len(results) == len(order) and not child.returncode and not reason, 'source_identity_sha256': identity_hash, 'versions': versions, 'settings': {'threads': 1, 'as_cap_bytes': 12*GIB, 'cgroup_reserve_bytes': 4*GIB, 'swap': False, 'cache': 'fresh olean outputs; OS page cache uncontrolled'}, 'modules': results, 'wall_seconds': time.monotonic()-start, 'peak_cgroup_memory_bytes': peak, 'max_child_rss_kib': resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss, 'source_census_sha256': hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()}
         (out/'measurement.json').write_text(json.dumps(report, indent=2)+'\n')
         print(f'{n}: exit={child.returncode} wall={results[-1]["wall_seconds"]:.3f}s', flush=True)
         if child.returncode or reason: raise SystemExit(1)

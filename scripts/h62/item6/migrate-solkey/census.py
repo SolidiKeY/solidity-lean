@@ -44,7 +44,7 @@ def census(root):
     files = sorted((root/'Solidity/Solkey').glob('*.lean'))
     result, closure = [], {}
     def imports(path):
-        return [name for m in re.finditer(r'^(?:(?:public|private|meta)[ \t]+)*import[ \t]+([^\n]+)', uncomment(path.read_text()), re.M) for name in m[1].split()]
+        return [name for m in re.finditer(r'^(?:(?:public|private|meta)[ \t]+)*import[ \t]+([^\n]+)', uncomment(path.read_text()), re.M) for name in m[1].split() if name != 'all']
     def visit(mod):
         if mod in closure: return
         path = root / (mod.replace('.', '/') + '.lean')

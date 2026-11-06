@@ -28,6 +28,13 @@ class CensusControls(unittest.TestCase):
         self.assertEqual(sum(len(m['fixtures']) for m in data['modules']), 11)
         self.assertEqual(sum(c['text'].startswith('theorem ') for m in data['modules'] for c in m['commands']), 3)
 
+    def test_module_system_import_modifiers(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root/'Solidity/Solkey').mkdir(parents=True)
+            (root/'Solidity/Solkey/Case.lean').write_text('public meta import all Lean.Elab.Command\nimport Lean.Data.Name Lean.Data.Json\n')
+            data = C.census(root)
+            self.assertEqual(data['modules'][0]['imports'], ['Lean.Elab.Command', 'Lean.Data.Name', 'Lean.Data.Json'])
+
     def test_command_line_locations(self):
         data = C.census(ROOT)
         for mod in data['modules']:

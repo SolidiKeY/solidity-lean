@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Fail closed on missing runs, changed settings/order, or wall/RSS regression."""
 import argparse
+from decimal import Decimal
 import json
 from pathlib import Path
 
@@ -9,18 +10,24 @@ def compare(old, new):
     for label, run in [('old', old), ('new', new)]:
         if any(m['exit'] != 0 or m['stop'] for m in run['modules']):
             raise ValueError(label+' run is incomplete or failed')
-        if not run['modules'] or not run.get('complete', False):
+        if not run['modules'] or run.get('complete') is not True:
             raise ValueError(label+' run has no complete closure marker')
+    if not old.get('tooling_sha256') or old['tooling_sha256'] != new.get('tooling_sha256'):
+        raise ValueError('measurement/census tooling differs or is unrecorded')
     if old['settings'] != new['settings']: raise ValueError('resource/cache settings differ')
     if [m['module'] for m in old['modules']] != [m['module'] for m in new['modules']]:
         raise ValueError('module sets/order differ')
     if old['source_identity_sha256'] != new['source_identity_sha256']:
         raise ValueError('source/fixture inputs differ')
-    result = {}
+    result, deltas = {}, []
     for metric in ['wall_seconds', 'max_child_rss_kib']:
-        delta = (new[metric]/old[metric]-1)*100
-        result[metric+'_delta_percent'] = delta
-    worst = max(result.values())
+        before, after = Decimal(str(old[metric])), Decimal(str(new[metric]))
+        if not before.is_finite() or not after.is_finite() or before <= 0 or after <= 0:
+            raise ValueError('invalid measurement: '+metric)
+        delta = (after/before-1)*100
+        deltas.append(delta)
+        result[metric+'_delta_percent'] = float(delta)
+    worst = max(deltas)
     result['status'] = 'STOP_GT_10_PERCENT' if worst > 10 else 'ESCALATE_REGRESSION' if worst > 0 else 'NO_REGRESSION'
     return result
 
