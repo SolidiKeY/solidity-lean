@@ -1,3 +1,76 @@
+# Reactivated after the coordinator merge (2026-11-06)
+
+The coordinator explicitly instructed: “Merged migrate-examples e511ddcb6e into
+master 20e492ee9 (gate touched PASS, Bridge build PASS, finder+skeptic review:
+no blockers). Merge origin/master into your branch and continue.” This supersedes
+the historical retirement for this worker. No goal was created or reset. The
+exposed goal tool still has only complete/blocked outcomes, with no get/resume
+operation; the earlier blocked response remains historical evidence.
+
+The assigned branch fast-forwarded cleanly from
+`e511ddcb6e0b66e6e77d34542b57d61a3675e0c3` to fetched `origin/master`
+`d96f2406d352de7e0b72ba6ac4ab29dc457582c6`. The frozen base, retired lane head,
+and reported master merge `20e492ee99a3fa8679aa526de0b6e731d85e4134` are all
+ancestors. No push or default-branch write occurred.
+
+## Current checkpoint and limits
+
+A deterministic committed-blob dependency scanner now reproduces both base and
+integrated trees: original354 examples,1075 local explicit-import modules,721
+external local modules including8 LeanTeX vendor modules, no unresolved imports.
+All original354 source blobs and all1075 closure blobs are unchanged. Master
+additionally contains `Solidity/Examples/DecisionResidue.lean`, outside this
+original assignment and outside the original roots' dependency closure. The
+scanner reports that addition separately. Header inventory assumes valid source;
+stdlib artifact presence is not compiler/API validation.
+
+The audit-fixture generator verifies all354 census paths/hashes against frozen
+Git blobs and replaces only `import SolidityExamples` with the exact assigned
+imports in an off-Git fixture. It rejects any missing original or additional
+transitive example module, rather than filtering declarations. The serializer
+adds private-name encoding and protected-name metadata. Both flags participate
+in interface fingerprints and comparisons; a visibility-only negative control
+must fail. Those flags alone do not establish complete module-export visibility.
+All public generated declarations remain required by H78; no shims implemented.
+
+Five dependency/fixture controls and seven process/interface controls pass.
+Both pinned toolchains compile the updated stdlib-only serializer probe; both
+empty outputs are rejected by full-scope validation. These are tooling checks,
+not successful model inventories or general Solidity semantic theorems.
+
+The resumed old `lake build SolidityExamples` failed after1256.334362676s,
+shell247/child-9, `RESOURCE_STOP`, sampled group peak7264968704 bytes, while
+checking OpenLoops. Decisive guard: estimated cgroup headroom4290437120 bytes,
+below the unchanged4294967296-byte reserve; current13620232192 bytes,
+clean-inactive estimate730800128 bytes, swap0. Host available10348617728 bytes.
+This incremental failure is excluded from baseline/timing comparison. Do not
+rerun it unchanged. Advisory preparation now includes the already-allowlisted
+owned `.lake` directory and reduced charge6027747328 ->611373056 bytes;
+42767 regular files advised, no errors. No source bytes, reserve, cap or proof
+budget changed. Any retry must repeat that preparation and retain the same guard.
+
+The prior SortCheck Parser String.trim failure remains an external CLI issue,
+but Parser is NOT in the assigned examples' dependency closure (only Annotations
+and Faithfulness are). Current upstream policy removes solkeycheck from gates.
+It is not a reason to block this directory build. KeySort itself still has
+passing bounded checks on both pinned versions in the preserved evidence.
+
+All four original checkpoints remain partial: completed clean old baseline,
+full old/new generated-public API export and compatibility, new directory build,
+matched clean timings, meaning/axiom assessment and final `./run-lean.sh` are
+still required. No valid timing delta or RUNTIME_GATE_PASS exists. No original
+model source, frozen statement, definition body or budget was edited. No axiom
+declarations or trust shortcuts were edited; compiled old/new axiom comparison
+remains pending.
+Cumulative exported review patches are now restricted to original assigned paths;
+bundles also retain the authorized upstream integration ancestry. Earlier e511
+artifacts and all full original assignment/scope files are preserved.
+
+The following is the historical e511 handoff record. Its retirement/next-work
+instructions and external-blocker interpretation are superseded above.
+
+---
+
 # H82 RETIRED — no implementation continuation authorized
 
 Successor: `solidity-h62-6-20261106/migrate-root-gate`.
