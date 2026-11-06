@@ -222,6 +222,13 @@ def hand_spans(oracle_text, regions):
     for i, name in starts:
         stop = next((j for j in decl if j > i), len(lines))
         spans.append((regions["oracle"][0] + i, regions["oracle"][0] + stop - 1, name))
+    # a row or link check is one command naming its constructor: an error
+    # reported on that command is that constructor's (e.g. the link's
+    # `assumption` failing when a side condition no longer matches)
+    for i, l in enumerate(lines):
+        m = re.match(r"#h28_toStep_(?:row|link) (Taclet|LeanTaclet) (\w+)\b", l)
+        if m:
+            spans.append((regions["oracle"][0] + i, regions["oracle"][0] + i, f"{m[1]}.{m[2]}"))
     return spans
 
 

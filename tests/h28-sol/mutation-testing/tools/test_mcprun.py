@@ -108,6 +108,14 @@ class Proof(unittest.TestCase):
         self.assertEqual(self.classify([hand_err, trust], ["Taclet.ifElseSplit"]), "detected")
         self.assertEqual(self.classify([trust], ["Taclet.ifElseSplit"]), "error")
 
+    def test_link_command_attribution(self):
+        body = "theorem Taclet.x.toStep : True := trivial\nend Solidity\n#h28_toStep_link LeanTaclet ifElseJoin\n"
+        reg = {"target": [3, 100], "oracle": [101, 110]}
+        r = mcprun.proof_classify([item(103, "Tactic `assumption` failed")], reg, ["LeanTaclet.ifElseJoin"], body, "rules")
+        self.assertEqual(r["outcome"], "detected")
+        r = mcprun.proof_classify([item(103, "Tactic `assumption` failed")], reg, ["LeanTaclet.other"], body, "rules")
+        self.assertEqual(r["outcome"], "error")
+
     def test_helper_wildcard(self):
         self.assertEqual(self.classify([
             item(104, "no proof that `Solidity.Taclet.localOpAssign` is `Stmt.step`'s rule")], ["*"]), "detected")
