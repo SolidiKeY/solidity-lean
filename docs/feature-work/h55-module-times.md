@@ -726,3 +726,41 @@ sweep would still not establish atomicity and would add cache scanning; it
 has not been imposed or benchmarked. Discovery of actual dependency/cache
 inputs, their simultaneous authenticated identity, runner integration and
 H56 timing remain open. No production, runtime or Lean proof pass is claimed.
+
+## Static root and Bridge input/provenance inventory
+
+This census is a read-only snapshot of tracked files at head
+`74732686f3f2e175e26958361534d1c0463c3709` (tree
+`624d3edfc15c787fe66cd9539ae46be275bd8c34`), not a runnable or
+authenticated H56 inventory. The unchanged candidate mapper counted 7,592
+Lean paths: 6,460 root, 527 Bridge, 93 Bridge vendor, 8 root vendor, 495
+standalone root review, and 9 standalone Bridge review. It produced 7,088
+candidate module rows and 504 file-check-review rows with no module name;
+zero candidate `(context, module)` collisions do not establish valid
+Lake targets or complete source scope. Ignored/generated files are outside
+this tracked census. Decisions for every standalone row and actual execution
+recipes remain open.
+
+| Input or resolution | Static evidence and remaining binding |
+| --- | --- |
+| Root configuration | `lakefile.toml` defines core, examples and optional corpus/check targets plus LeanTeX in `vendor/LeanTeX`; `lake-manifest.json` declares no external packages. Root default targets do not cover every control or check. Bind source, imports, Lake arguments and the actual root workspace. |
+| Bridge configuration | `Bridge/lakefile.toml` uses a path dependency on the parent core checkout, direct mathlib, cslib and auto requirements, and selective `vendor` srcDir/globs. `Bridge/lake-manifest.json` has 12 entries including that path and inherited packages; the direct git revisions include mathlib `f897ebcf72cd16f89ab4577d0c826cd14afaafc7`, cslib `e1fea784d55eae30275c205291f12a1b4868eed3`, and auto `36d85bf6372f1a35fb5487325d1ef965b33c6296`. A manifest pin is not proof of materialized package bytes or imports. |
+| Workspace setup | Both toolchain files specify Lean 4.24.0. Before build actions Lake can load configuration and materialize dependencies; overrides, including `.lake/package-overrides.json`, must be bound or their absence established. `--no-build` does not establish that workspace loading is read-only or offline. |
+| Outputs and caches | Both packages enable artifact caching. Root and Bridge `.lake/build`, Bridge `.lake/packages`, vendored sources, transitive package configurations and the actually selected shared cache all need provenance and freshness. Lake cache selection gives `LAKE_CACHE_DIR` priority, then an identified Elan toolchain cache, then XDG/HOME fallback. Merely observing XDG does not prove the effective cache. |
+| Runtime and imports | Lake builds `LEAN_PATH` and `LEAN_SRC_PATH` from workspace/package paths and augments shared library paths. Executable hashes omit dynamically loaded Lean/Lake libraries and system loader; bind the actual toolchain, runtime, search paths and effective environment as well as source and cache. |
+| Timing identity | Lake 4.24's `weakLeanArgs` do not affect build traces; identical artifact traces or replay do not establish the actual weak arguments, thread count or fresh execution. Bind actual command, environment, resource policy, deadline and fresh measurement separately. No claim is made that `LAKE_NO_CACHE` alone forbids local reuse. |
+
+SHA-256 of the six configuration inputs at this snapshot, in root/Bridge
+`lakefile.toml`, `lake-manifest.json`, `lean-toolchain` order:
+`79e2e18f976dac7010db7ac489fc3a5d90717c682299f76de4583188caa5ab5e`,
+`8a441014ff7cad71175d9709ddb59f56cfb2106a0c2e2e19e4b3effb58572abe`,
+`42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434`;
+`cc6857054608cd99af58b2cc9208df6aeb03e92fc8aeb9bff4b3d99daa5fb236`,
+`97bba755b0c4f8bea75d4e69e153ec674a546bdbb4df722359775bd59b7b788d`,
+`42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434`.
+Hashes identify observed bytes only; they do not authenticate the VM, source
+snapshot or runner. Independent read-only finder and skeptic reviewed the
+mapping and Lake 4.24 source without Lean, a server or builds. Full reviewed
+coverage, atomic source binding, complete runtime provenance, bounded
+KeySort and H56 measurements remain outstanding; H93 cold timing remains
+deferred. No proof, production or runtime gate pass is claimed.
