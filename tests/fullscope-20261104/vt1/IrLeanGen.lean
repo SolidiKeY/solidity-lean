@@ -97,3 +97,9 @@ def genCode (text : String) : String :=
   let term := genCode (← IO.FS.readFile "tests/fullscope-20261104/vt1/fixtures/helpers.yul")
   IO.FS.writeFile "tests/fullscope-20261104/vt1/fixtures/helpers.term" (term ++ "\n")
   IO.println s!"HELPERS_TERM {term.length} chars"
+
+-- The same for the `checked_exp` group (`Solidity/SolcValidation/IrExpHelpers.lean`).
+#eval show IO Unit from do
+  let term := genCode (← IO.FS.readFile "tests/fullscope-20261104/vt1/fixtures/exp-helpers.yul")
+  IO.FS.writeFile "tests/fullscope-20261104/vt1/fixtures/exp-helpers.term" (term ++ "\n")
+  IO.println s!"EXP_HELPERS_TERM {term.length} chars"

@@ -3669,6 +3669,8 @@ import Solidity.SolcValidation.Dialect
 import Solidity.SolcValidation.IrCensus
 import Solidity.SolcValidation.IrEval
 import Solidity.SolcValidation.IrEvalFuel
+import Solidity.SolcValidation.IrExpHelpers
+import Solidity.SolcValidation.IrExpModel
 import Solidity.SolcValidation.IrHelperSim
 import Solidity.SolcValidation.IrHelperSource
 import Solidity.SolcValidation.IrHelperSteps
