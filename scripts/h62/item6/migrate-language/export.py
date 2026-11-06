@@ -78,6 +78,11 @@ Both producer patches apply to fresh pinned-source copies and reproduce expected
 bytes (patch-verification.json). Independent finder/skeptic used no Lean/server.
 No pushes, merges, master changes, cut-over, freeze or ownership transfer.
 """)
+relay=out/'hash-relay-evidence.json'
+if relay.exists():
+    data=json.loads(relay.read_text())
+    with (out/'HANDOFF.md').open('a') as f:
+        f.write("\nH70 Hash relay update: exact owner patch3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff passes an isolated CollisionBound fixture with no diagnostics. The original repository Hash source remains unchanged. This does not supersede historical full-gate failure or grant full Hash/consumer/root acceptance, owner agreement or any STOP waiver. Full Hash/Syntax.Raw, Source/Ctor and root generated-API/RSS disposition remain pending. See hash-relay-evidence.json and dependency-relay/ for exact source/patch hashes, commands, exits, resource evidence, negative control and independent reviews.\n")
 excluded={'build','cache','__pycache__','serial-sysroot','shims','previous-blocked','patch-verification'}
 files=sorted(p for p in out.rglob('*') if p.is_file() and not p.is_symlink() and not excluded.intersection(p.relative_to(out).parts) and p.name not in {'SHA256SUMS','evidence.tar.gz'})
 with (out/'evidence.tar.gz').open('wb') as f,gzip.GzipFile(filename='',mode='wb',fileobj=f,mtime=0) as gz,tarfile.open(fileobj=gz,mode='w') as tar:

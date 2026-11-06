@@ -13,7 +13,12 @@
     ],
     "evidence": "/workspace/migrate-language-evidence/full-new/run-lean.log",
     "impact": "Full repository gate and P8/ForkAgreement consumer closures fail before acceptance.",
-    "requested_action": "Owner supplies statement/budget-preserving isolated migration overlay; coordinator relays it. No edit outside Language authorized."
+    "requested_action": "Coordinator/root gate arranges approved full dependency consumption and remaining Hash/Syntax.Raw migration gates. Original Hash source remains unmodified on this branch; source and root review waits remain.",
+    "status": "owner partial CollisionBound patch received and passes isolated local fixture; full integration remains pending",
+    "received_patch_sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+    "owner_source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+    "owner_delivery_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
+    "isolated_evidence": "/workspace/migrate-language-dependency-evidence/hash-check/results.json"
   },
   {
     "id": "B-MIGRATE-SOURCE-CTOR",

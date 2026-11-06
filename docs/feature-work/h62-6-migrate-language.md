@@ -199,3 +199,50 @@ artifacts are preserved in previous-blocked/. Bulk logs/builds stay off Git;
 only deterministic generators and scoped audit/test sources are committed.
 Coordinator owns the required fresh-thread handoff on this SAME VM/branch/goal;
 never create/reset a goal or self-launch a replacement thread.
+
+
+## H70 Hash owner relay: isolated prerequisite check
+
+The coordinator supplied a partial CollisionBound overlay from source head
+`2a18afcdba00a85645b0b3079704f78ffcd78860`, delivery head
+`a3f49ee0ec1829e63022c90194048d5a1ffe0d22`. Its saved patch at
+`/workspace/migrate-language-dependency-evidence/collision-bound-overlay.patch`
+exactly matches the routed SHA256
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`.
+Two context-line transcription errors were corrected before consumption; the
+mismatched versions were never compiled or accepted.
+
+`prepare-hash-fixture.py PATCH FIXTURE_DIRECTORY` requires that exact checksum,
+checks the original pinned blob `b54c93a5b24340a19160c1fb378d057ccee60f84`, copies
+it into an off-Git fixture and applies only the relayed patch there. The resulting
+blob is `092971eda8c7d6997276a92ba19b25b7ce05844e`, matching the owner patch header;
+source SHA256 is
+`cfddc9e45edee7ac2f5a83c3212c741034d39a4e700a5384689b4ee6035565a0`.
+The helper rechecks the outside-owned original remains byte-identical to BASE.
+No Hash source or other outside-scope original was edited or committed.
+
+Command:
+`python3 scripts/h62/item6/migrate-language/measure.py /workspace/migration-toolchains/lean-4.35.0-linux /workspace/migrate-language-dependency-evidence/hash-check --check-file /workspace/migrate-language-dependency-evidence/fixture/Solidity/Hash/CollisionBound.lean`
+passed, exit 0, with no diagnostics, in 4.1354s and 613277696 bytes peak sampled
+aggregate RSS. The same run's bounded KeySort prerequisite passed. All existing
+axiom-message checks in the copied Hash module passed unchanged. The fixture
+retains the exact official toolchain, -j1/-M8192, thread count, writer lock,
+no-swap check and memory headroom; no proof or resource budget was raised.
+
+This is a per-file dependency fixture result, not a full run-lean.sh gate,
+Hash migration acceptance, owner agreement, consumer validation or release of
+any current STOP. Prior full-gate Hash errors remain historical evidence from
+the unpatched repository. B-MIGRATE-HASH now records the isolated pass and waits
+for approved full integration and remaining Hash/Syntax.Raw work. Source/Ctor,
+generated public API and per-module RSS review remain pending. Language producer
+patch bytes, source head, timings and existing validation are unchanged.
+
+Finder requested the full resulting Git blob rather than its nine-character
+prefix; the generator now checks the full value and reproduces byte-identical
+compiled fixture contents. Both reviewers confirmed the isolated boundary without
+Lean/server calls or edits.
+
+The checksum-refusal negative control verifies wrong receipt bytes fail before
+creating the fixture. Independent read-only finder/skeptic review and the final
+relay evidence/checksum receipt accompany this milestone. Bulk fixture sources
+and logs stay off Git; their deterministic generator is committed here.
