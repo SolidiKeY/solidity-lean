@@ -1031,3 +1031,31 @@ SHA-256 `af8ff93d3171aa367a4017606c59d7a25b36c5e8dc1900123a38451191679f6e`;
 its embedded head is `ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`. Its unpacked
 copy is `/workspace/h55-h109-pack/pack`. This is cache preparation, not a
 before/after measurement, proof pass or H56 evidence.
+
+### Five-file pin preview preparation
+
+`pin_preview.mjs` emits a non-applying JSON preview for selected files,
+rechecking observed source hashes, exact guard blocks and span non-overlap,
+and refusing unqualified/unparsed guards, occupied destinations and more
+than one selected source per proposed area. The current sample contains
+`Calculus/CallerModelValid` (3 pins), `Hash/CollisionBound` (7),
+`Precompiles/Osaka` (3), `Stipend/Rule` (2), and
+`Storage/HashedSeparation` (10). The retained preview and its checksum are
+listed in `tests/h55/module-times/h109-preview-evidence.sha256`.
+
+These are one-file-per-area samples, not the complete area consolidations.
+The preview preserves scanner-recognized blocks but has not established
+namespace, options, visibility, axiom equivalence, checker-key migration,
+imports, full semantic preservation or success under Lean. Independent
+read-only reviews found and fixed a dangling destination symlink case, and
+explicitly confirmed these boundaries. No source pin was moved.
+
+A pinned Debian base was prepared as local image
+`sha256:f06ce731f0b68759e0a999ec9006b24809bb7a8fe2950065f11af6a9b04930c8`;
+the pinned Lean binary printed version 4.24.0 in a 64 MiB, no-swap,
+network-isolated smoke container. The initial image-builder command rejected
+an unsupported `--cpus` flag; the bounded 1 GiB/no-swap/one-CPU container
+preparation succeeded. This is environment preparation only, not an A/B
+measurement, Lean proof or H56 acceptance. Actual five-module matched
+wall/RSS runs, separate relocated-pin checks and the quiet window remain
+outstanding.
