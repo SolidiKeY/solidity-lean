@@ -123,3 +123,33 @@ end Solidity.Lowering.Readonly.SourceDispatchV2.Controls
 #print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.horizon_zero
 #print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.migrated_all_callbacks
 #print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.migrated_all_at
+
+/-- info: 'Solidity.Lowering.Readonly.SourceDispatchV2.Controls.function_jointly_satisfiable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.function_jointly_satisfiable
+
+/-- info: 'Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_jointly_satisfiable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_jointly_satisfiable
+
+/-- info: 'Solidity.Lowering.Readonly.SourceDispatchV2.Controls.special_jointly_satisfiable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.special_jointly_satisfiable
+
+/-- info: 'Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_getter_empty_vacuous' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_getter_empty_vacuous
+
+/-- info: 'Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_special_empty_vacuous' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_special_empty_vacuous

@@ -52,3 +52,45 @@ theorem unrelated_target_refused :
   cases eq
 
 end Solidity.Backend.Passes.SourceCallProducerControls
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.produced_raw' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerControls.produced_raw
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.inhabited' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerControls.inhabited
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.call_reached' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerControls.call_reached
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.frame_restored' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerControls.frame_restored
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.spoofed_mode_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerControls.spoofed_mode_refused
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.unrelated_raw_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerControls.unrelated_raw_refused
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.unrelated_target_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerControls.unrelated_target_refused

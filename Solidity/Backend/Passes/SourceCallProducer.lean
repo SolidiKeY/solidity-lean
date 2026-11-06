@@ -157,3 +157,35 @@ theorem fetched_total (i : InvocationFrame.Invocation E Γ dn ps rs) (duty : Ret
   step_total i m
 
 end Solidity.Backend.Passes.SourceCallProducer
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.rawAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.rawAt
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.history' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.history
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.call_step' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.call_step
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.restored' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.restored
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.returns' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.returns
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.step_total' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.step_total
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.step_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.step_unique
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducer.fetched_total' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducer.fetched_total
