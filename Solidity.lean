@@ -362,8 +362,11 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingArguments
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallCoherence
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallCoherenceControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCoherence
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingDeclarationCheck
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingEmission
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingFailure
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViews
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViewsControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHistory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOutcome
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaims
@@ -598,6 +601,12 @@ import Solidity.Backend.MemoryCopies.AliasBindingControls
 import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.AllocationPanic
 import Solidity.Backend.MemoryCopies.AllocationPanicInterface
+import Solidity.Backend.MemoryCopies.BudgetedDefault
+import Solidity.Backend.MemoryCopies.BudgetedDefaultControls
+import Solidity.Backend.MemoryCopies.BudgetedDefaultInterface
+import Solidity.Backend.MemoryCopies.BudgetedReference
+import Solidity.Backend.MemoryCopies.BudgetedReferenceControls
+import Solidity.Backend.MemoryCopies.BudgetedReferenceInterface
 import Solidity.Backend.MemoryCopies.CanonicalArray
 import Solidity.Backend.MemoryCopies.CanonicalArrayControls
 import Solidity.Backend.MemoryCopies.CanonicalArrayInterface
