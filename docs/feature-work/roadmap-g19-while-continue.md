@@ -1,4 +1,6 @@
-# G19 mapped while with donor reset and continue
+# G19 context-related while with donor reset and continue
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 [AssignmentWhileContinue](../../Solidity/Lowering/G19/AssignmentWhileContinue.lean) extends the existing V07 ContextMap consumer. It proves actual Source execution of `while (i = a) { a = false; continue; suffix; }`, where suffix is any well-typed Source item list, including context-extending items. It introduces no lowering relation or semantics. False still performs the condition write. True executes the donor reset, propagates a genuine Out.cont, skips the suffix and recursively retests the assignment condition before exiting. The target reuses AssignmentWhileReset's actual intrinsic loop and mapped prefix. This one-shape continue elimination is justified by actual runs and the complete reached local relation, not by assumed execution.
 
