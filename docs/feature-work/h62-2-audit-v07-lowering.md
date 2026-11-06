@@ -23,3 +23,23 @@ reviews passed. Exact commands/logs are outside Git at:
 /workspace/sol-numeric-literals-gate-output/v07-family-import.json and
 /workspace/sol-numeric-literals-gate-output/v07-family-witness-guarded.json.
 No producer source, existing statement, proof budget or G07 pin was changed.
+
+## Condition contract nonvacuity
+
+The existing controls already demonstrate assignment success. The new
+ConditionContractWitness.lean reuses their exact model and relations rather
+than reproducing those controls. Its general theorem proves that any public
+Condition for a local Boolean assignment cannot reject every target input:
+initial_nonempty supplies an actual aligned input, intrinsic Boolean values
+supply the choice, Source assignment completes at horizon two, and the unchanged
+success field forces a successful target result. No extra feasibility premise
+is added. A concrete tuple jointly supplies the producer, alignment and completed
+Source run. The horizon control distinguishes timeout at zero from completion
+at two; this concerns evaluation horizons, not EVM gas or global termination.
+
+The module passes the bounded per-file gate in2.062s; its six printed theorem
+axiom sets use only the standard three axioms. Finder and skeptic reviews pass.
+Logs remain outside Git at v07-condition-contract-general.json and
+v07-condition-contract-general-files/1.log in the gate-output directory.
+This covers the specified expression shape, not admission, a full condition
+producer, whole compilation, or the complete V07 interface census.

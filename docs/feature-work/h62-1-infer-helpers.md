@@ -347,3 +347,11 @@ and a coordinated test Shared import shim to avoid duplicate canonical constants
 The question offers owner adoption with registration/full gates, or retention of
 the additive interface without production deduplication. No producer patch has
 been applied, and only the question ref—not this source branch—was pushed.
+
+The coordinator resolved Q-NL-SHARED-ADOPT1 as A in GitHub#47: this successor
+lane is authorized to create the canonical module, change the two helper
+definition bodies as proposed, add the test import shim in the same commit,
+register the module and run checkpoint/full gates. Every existing statement and
+consumer condition must remain unchanged; any necessary statement change stops
+that migration for a scope question. Admission-transport/v16-correctness-transfer
+is the source-relations successor and must be notified in the result.
