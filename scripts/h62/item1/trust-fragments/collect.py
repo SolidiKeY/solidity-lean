@@ -32,19 +32,12 @@ def collect(directory):
 # Each owner has a separate directory and each addition a separate JSON file.
 # Legacy bytes and the original check loop remain intact except for insertion
 # into the first headline list and imports at the beginning.
-def collect_lanes(baseline, directory):
-    if hashlib.sha256(baseline).hexdigest() != BASELINE_SHA256:
-        raise ValueError('lane collection requires the exact frozen baseline')
+def read_lane_files(directory):
     if directory.is_symlink():
         raise ValueError('lane root must not be a symlink')
     if not directory.exists():
-        return baseline
-    atom = r"[A-Za-z_][A-Za-z0-9_']*[?!]?"
-    module = re.compile(r'Solidity(?:\.' + atom + r')+')
-    known_imports = set(re.findall(rb'(?m)^import (\S+)', baseline))
-    known_names = set(re.findall(rb'``(Solidity[^,\s\]]+)', baseline))
-    imports = set()
-    names = []
+        return {}
+    result = {}
     for lane in sorted(directory.iterdir(), key=lambda p: p.name):
         if lane.is_symlink() or not lane.is_dir() or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', lane.name):
             raise ValueError(f'invalid lane directory: {lane.name}')
@@ -54,33 +47,51 @@ def collect_lanes(baseline, directory):
         for path in files:
             if path.is_symlink() or not path.is_file() or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*\.json', path.name):
                 raise ValueError(f'invalid lane fragment: {path.name}')
-            def unique_object(pairs):
-                data = {}
-                for key, value in pairs:
-                    if key in data:
-                        raise ValueError(f'duplicate JSON key: {key}')
-                    data[key] = value
-                return data
-            payload = json.loads(path.read_text(encoding='utf-8'), object_pairs_hook=unique_object)
-            if not isinstance(payload, dict) or set(payload) != {'imports', 'headlines'}:
-                raise ValueError(f'invalid lane fragment schema: {path}')
-            lane_imports, lane_names = payload['imports'], payload['headlines']
-            if not isinstance(lane_imports, list) or not isinstance(lane_names, list) or not lane_names:
-                raise ValueError(f'fragment must contain headline additions: {path}')
-            for name in lane_imports:
-                if not isinstance(name, str) or not module.fullmatch(name):
-                    raise ValueError(f'invalid import: {name!r}')
-                encoded = name.encode()
-                if encoded not in known_imports:
-                    imports.add(encoded)
-            for name in lane_names:
-                if not isinstance(name, str) or not module.fullmatch(name):
-                    raise ValueError(f'invalid headline: {name!r}')
-                encoded = name.encode()
-                if encoded in known_names:
-                    raise ValueError(f'duplicate headline: {name}')
-                known_names.add(encoded)
-                names.append(encoded)
+            result[f'{lane.name}/{path.name}'] = path.read_bytes()
+    return result
+
+
+def collect_lanes(baseline, directory):
+    return collect_lane_snapshot(baseline, read_lane_files(directory))
+
+
+def collect_lane_snapshot(baseline, files):
+    if hashlib.sha256(baseline).hexdigest() != BASELINE_SHA256:
+        raise ValueError('lane collection requires the exact frozen baseline')
+    atom = r"[A-Za-z_][A-Za-z0-9_']*[?!]?"
+    module = re.compile(r'Solidity(?:\.' + atom + r')+')
+    known_imports = set(re.findall(rb'(?m)^import (\S+)', baseline))
+    known_names = set(re.findall(rb'``(Solidity[^,\s\]]+)', baseline))
+    imports = set()
+    names = []
+    for path, data in sorted(files.items(), key=lambda row: tuple(row[0].split('/', 1))):
+        def unique_object(pairs):
+            data = {}
+            for key, value in pairs:
+                if key in data:
+                    raise ValueError(f'duplicate JSON key: {key}')
+                data[key] = value
+            return data
+        payload = json.loads(data.decode('utf-8'), object_pairs_hook=unique_object)
+        if not isinstance(payload, dict) or set(payload) != {'imports', 'headlines'}:
+            raise ValueError(f'invalid lane fragment schema: {path}')
+        lane_imports, lane_names = payload['imports'], payload['headlines']
+        if not isinstance(lane_imports, list) or not isinstance(lane_names, list) or not lane_names:
+            raise ValueError(f'fragment must contain headline additions: {path}')
+        for name in lane_imports:
+            if not isinstance(name, str) or not module.fullmatch(name):
+                raise ValueError(f'invalid import: {name!r}')
+            encoded = name.encode()
+            if encoded not in known_imports:
+                imports.add(encoded)
+        for name in lane_names:
+            if not isinstance(name, str) or not module.fullmatch(name):
+                raise ValueError(f'invalid headline: {name!r}')
+            encoded = name.encode()
+            if encoded in known_names:
+                raise ValueError(f'duplicate headline: {name}')
+            known_names.add(encoded)
+            names.append(encoded)
     if not names:
         return baseline
     first = baseline.index(b'  let headlines : List Name := [')
