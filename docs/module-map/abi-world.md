@@ -34,5 +34,5 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 
 | `Solidity.Backend.AbiWorld.MutatingWritePhysical` | Actual selected mutation prefix and P6 initial-frame physical byte-store consequence, with explicit scaled span. |
 | `Solidity.Backend.AbiWorld.MutatingWritePhysicalControls` | Populated initial physical frame, actual write/neighbor application and scale/bound negatives. |
-| `Backend/AbiWorld/PublicCompilerTotal.lean` | H62/H69 compiler-success theorem: the public `Compiler.compile` accepts every program of a syntactic restatement of the `Frag`-independent core fragment through its core branch, and `Compilation.Agrees` holds there. |
-| `Backend/AbiWorld/PublicCompilerTotalControls.lean` | Inhabited loop/branch/storage/call program accepted by the theorem and by kernel evaluation; signed-bitwise and self-balance refusals outside the domain. |
+| `Backend/AbiWorld/PublicCompilerTotal.lean` | H62/H69 compiler-success theorem: the public `Compiler.compile` accepts every program of the core fragment without alias bookkeeping (H87: with signed bitwise, plain aliases, storage `op=`) through its core branch, and `Compilation.Agrees` holds there. |
+| `Backend/AbiWorld/PublicCompilerTotalControls.lean` | Inhabited alias/storage-`op=`/signed-`&`/loop/call program accepted by the theorem and by kernel evaluation; self-balance and int-key refusals. |
