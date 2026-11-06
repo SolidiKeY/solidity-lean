@@ -7,6 +7,7 @@ import Solidity.Examples.DecisionQuantLedger
 import Solidity.Examples.DecisionArrayCore
 import Solidity.Examples.DecisionArrayGaps
 import Solidity.Examples.DecisionGapCensus
+import Solidity.Examples.DecisionGaps
 
 /-!
 # The residue's fixtures and `DecisionTheorem'`'s witness controls (M7-next)
@@ -82,7 +83,7 @@ open Solidity.Examples.DecisionNormalizationResidue
 
 /-- VA1's normalization budget (2049 visits against 2048): in the residue. -/
 theorem exhausted_residue : exhausted.inTarget {} = true ∧ exhausted.Residue :=
-  ⟨target_controls.1, residue_iff_unknown.2 (by rfl)⟩
+  ⟨target_controls.1, by decide +kernel⟩
 
 /-- Its finer VA1 source reasons (two-binder and primitive-prefix budget). -/
 theorem exhausted_sourceReasons : exhausted.sourceReasons =
@@ -92,9 +93,32 @@ theorem exhausted_sourceReasons : exhausted.sourceReasons =
 /-- A source reason is not a residue test: the 1025-visit sibling has no
 budget reason and still sits in the residue, and the class consults no route. -/
 theorem sibling_residue_without_reason : sibling.Residue ∧ sibling.sourceReasons = [] :=
-  ⟨residue_iff_unknown.2 (by rfl), by decide +kernel⟩
+  ⟨by decide +kernel, by decide +kernel⟩
 
 end Budget
+
+
+section Hash
+open Solidity.Examples.DecisionHashes
+open Solidity.Examples.Tactics.Hashing (Names)
+
+/-- `x + y == 5`, under two `uint` binders inside the two fresh strings. -/
+def hashAtom : Fml Names [.val .uint, .val .uint, .mem Str, .mem Str] :=
+  .eq (.app2 (.binop .add rfl) (.pvV .here) (.pvV (.there .here))) (num 5)
+
+/-- `n` doublings of a conjunction. -/
+def doubled {Γ : Ctx} (atom : Fml Names Γ) : Nat → Fml Names Γ
+  | 0 => atom
+  | n + 1 => .and (doubled atom n) (doubled atom n)
+
+/-- **`∀ fresh s t. keccak256(s) != keccak256(t) → ∀ x y. (x + y == 5) ∧ …`**
+(1024 copies): hashes compared against their kind, so in target; every hash
+try refuses, its swapped leaf over the normalizer budget. -/
+def hashBudget : Fml Names [] :=
+  strings (.imp (.not (.eq hS hT))
+    (.all (.user "x") .uint (.all (.user "y") .uint (doubled hashAtom 10))))
+
+end Hash
 
 /-! ## Witness controls: the hypotheses are jointly satisfiable
 
