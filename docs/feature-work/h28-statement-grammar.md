@@ -2371,3 +2371,79 @@ Original G11 remains partial: whole try-statement/catch-list coverage, arbitrary
 catch parameter types/lists, general compound boundary framing and remaining
 parser coverage/final whole-repository acceptance are open. SG-CEX-01/02 remain
 explicit; no exclusion or premise has been approved or weakened here.
+
+
+## Checkpoint AC — actual catch-list many coverage
+
+Continues the sealed AB checkpoint without changing its statements or source.
+[CatchListCoverage](../../Solidity/Frontend/StatementGrammarH28/CatchListCoverage.lean)
+connects intrinsic clause-list syntax to the actual `manyAux` and `many`
+combinators. `catchStep` names the step expression in the immutable try branch;
+the existing `catchClause` remains the sole clause parser implementation. This is a parser equation,
+beyond the AA token-count inequalities, whose coordinator qualification remains
+unchanged.
+
+`BooleanCatchList` is indexed by existing clause-list syntax, actual token
+segments and a structural maximum of the represented `BooleanCatch` budgets.
+Both nil and cons are inhabited. `boolean_catch_list_many_aux` proves success
+for one counter step per clause plus stopping, with arbitrary excess counter.
+`boolean_catch_list_many` supplies the actual parser counter from the proved
+nonempty-yield/token-count bound and arbitrary suffix length. Clause parser fuel
+is the maximum of syntax-derived bounds; no successful parse is assumed.
+Actual yields preserve layouts and common sufficient fuel proves list-tree
+uniqueness from flattened token equality inside the fragment.
+
+The terminal frame `NoFollowingCatch s` is the exact token-head observation that
+the catch loop stops. A following catch is greedily consumed: a checked control
+shows two plain clauses returned when one is supplied as the suffix. Omitting
+the frame would give a false stopping equation. This is not an approved source
+exclusion or a weakening of any prior theorem. `statement_no_following_catch`
+discharges the frame for **every actual following statement yield**, using the
+existing unconditional continuation-head theorem, without a root-fragment or
+expression-uniqueness restriction. Catch-list coverage remains restricted to
+AB's clause fragment; arbitrary parameter-type and whole-try coverage are open.
+
+The complete source inventory is 13 theorems: universal following-statement
+frame; catch-step stop, fragment head, step start and concrete step success;
+actual fragment list yield; universal arbitrary-catch yield head, nonemptiness
+and list token bound (reusing AA); fragment count bound; actual manyAux and many
+success; fragment list token/tree uniqueness. The three universal catch-yield
+results are unrestricted in header atoms/body syntax, while parser coverage is
+not. Existing G0 typed-list observations supply all computed syntax measures.
+
+[Controls](../../tests/h28-sol/statement-grammar/CatchListCoverageControls.lean)
+contain exactly 13 theorems: arbitrary mixed plain/signature pair-list bounds,
+counts, actual many and manyAux equations; empty-list parsing; preservation of
+non-catch keyword suffixes; consumed greedy catch suffix and its failed terminal
+frame; zero/insufficient counter refusal; malformed/underfuelled clause refusal;
+an actual non-Boolean string/memory/fragmented-literal catch yield head; both
+list relation constructors inhabited; and an actual following return-statement
+frame. These controls distinguish universal yield framing from restricted parser
+coverage and exercise both existing catch constructors plus list nil/cons.
+[Public audit](../../tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean)
+pins all 13 source theorem axiom messages plus both relation constructors;
+controls pin all 13 of their theorem messages. Thus 28 declarations are audited.
+
+Initial source diagnostics exposed incorrectly named indexed-induction binders
+and a beta-reduction rewrite issue. The former caused cascading type errors and
+a 200000-heartbeat timeout; all raw failures remain evidence. Correcting binders
+and exposing the proposition fixed the proofs without raising any budget or
+changing any statement. Source and control diagnostics and the preliminary
+controls gate passed. Finder and skeptic both caught a duplicated nested axiom
+guard introduced while pinning a shared name prefix; the trailer was rebuilt
+with exactly one guard per query before commit. Exact committed-head checks,
+final reviews, cache and seal
+remain acceptance requirements in the checkpoint handoff.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.CatchListCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchListCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. Whole try-statement header/composition coverage,
+arbitrary catch parameters, general compound framing and final whole-repository
+acceptance remain unfinished. SG-CEX-01/02 and the SOL-EU exclusion are unchanged.
+No solc semantic catch-validity claim follows from these kernel token-parser
+proofs; previous external fixture results remain separate evidence.
