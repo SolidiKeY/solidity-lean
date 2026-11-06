@@ -210,7 +210,7 @@ theorem lit_ok (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (k :
   decide_eq_true (p := (Q.ofInt k).FitsInt IntTy.u256) h
 
 def lit {Γ : RCtx} (k : Nat) (h : (Q.ofInt k).FitsInt IntTy.u256 := by decide) : RExpr EB Γ uint :=
-  .conv (.const (Q.ofInt k)) (.inl (lit_ok _ k h))
+  .conv (.const (Q.ofInt k)) (.inl (lit_ok _ _ k h))
 
 def setX {R : List STy} {Γ : RCtx} (e : RExpr EB Γ uint) : RStmt EB R false .body Γ Γ :=
   .expr (.assign (.state dX dX_ty rfl) e)
@@ -397,7 +397,7 @@ theorem dA_ty : dA.varTy EAB = some uint := by decide
 theorem dB_ty : dB.varTy EAB = some uint := by decide
 
 def litAB {Γ : RCtx} (k : Nat) (h : (Q.ofInt k).FitsInt IntTy.u256 := by decide) : RExpr EAB Γ uint :=
-  .conv (.const (Q.ofInt k)) (.inl (lit_ok _ k h))
+  .conv (.const (Q.ofInt k)) (.inl (lit_ok _ _ k h))
 
 def ctorA : RBody EAB := ⟨[], [], false, [], [],
   .stmt (.expr (.assign (.state dA dA_ty rfl) (.binary .add (.state dA dA_ty) (litAB 1)))) .nil, []⟩
