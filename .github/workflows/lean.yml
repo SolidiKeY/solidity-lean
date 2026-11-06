@@ -96,6 +96,11 @@ jobs:
       # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
       - name: Restore fetched artifacts
         run: python3 scripts/ci/restore-lake-artifacts.py
+      # H107/F7: keep inhabited compiler_correct/net/checked applications live.
+      - name: Elaborate headline non-vacuity witnesses
+        env:
+          LEAN_NUM_THREADS: '1'
+        run: lake env python3 tests/h28-sol/non-vacuity/kernel.py --all --fresh
       # Every declaration under `Solidity` may use only propext,
       # Classical.choice and Quot.sound; the `unsafe` twins behind
       # `@[implemented_by]` memo helpers, which reach `lcProof` through

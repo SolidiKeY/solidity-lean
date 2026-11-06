@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "ticket": "OT-W0-WITNESS",
+  "logs": [
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/build-theorems.log",
+      "bytes": 538,
+      "sha256": "d993ff80bbc8382f497ec06c342f1165d92125997aa901217d6dd879dfc8e09a"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/restore-writable.log",
+      "bytes": 19181,
+      "sha256": "3abc5620b756fe01d7c14fb8c945b43285e133752de092416d5c661a723f3495"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/restore.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/suite-after-restore.log",
+      "bytes": 955,
+      "sha256": "23f9ffd4c2822597c7159799736fb3b232af632c6797dd006aa4f307a2444af1"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/suite-writable-restore.log",
+      "bytes": 955,
+      "sha256": "23f9ffd4c2822597c7159799736fb3b232af632c6797dd006aa4f307a2444af1"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/suite.log",
+      "bytes": 941,
+      "sha256": "73f01f085fec6193c6a5ef8afb4dd9e8de3ca5c46e7c15c2cd82b8d28ad979b8"
+    }
+  ],
+  "localSuite": "FAILED: missing prerequisites; no green run",
+  "workflowDispatch": "PENDING: invalid GH_TOKEN; coordinator request sent",
+  "reviews": "finder and skeptic PASS for wiring only",
+  "witnessesChanged": false,
+  "checkPyChanged": false,
+  "budgetsChanged": false,
+  "generatedBuildPreserved": "/workspace/scratch/h107-nonvacuity-ci/private-build"
+}

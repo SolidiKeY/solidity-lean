@@ -630,3 +630,20 @@ independent reviews and cache/seal evidence are recorded in the local
 Implementation remains stopped; the accepted successor is `solidity-v12-v17-20261031/v17-validation-release`. The reviewable retirement increment keeps the complete original rendered prompt, original work/backfill queue and human-readable handoff under `tests/h28-sol/non-vacuity/retirement-h82/`. `BULK-MANIFEST.json` authenticates an off-git archive of every original retirement file, including the full scope/open-queue data, drafts, unfinished patch and evidence records. The held head remains preserved on a backup ref and its earlier immutable seal. No theorem, gate, budget, scope or live implementation changes. The PAUSED tool transition was rejected by its enum; human STOP remains binding. No applicable H71 push grant was available, so no push occurs. The coordinator/successor integrates the split head after review.
 
 The assurance successor also retains its earlier preservation records and `H44-OFF-TREE.json`; the published archive manifest is additive provenance. This merge does not certify archive availability on the successor VM, accept unfinished drafts or close any original obligation.
+
+### H107 headline witness CI safety net
+
+The library CI job now runs `kernel.py --all --fresh` with serial threads after
+cache restoration. It elaborates every private H28 witness module, including
+Families' actual Main.compiler_correct, compiler_net and compiler_checked
+applications. Any dependency or elaboration failure fails the step. Witnesses
+and check.py are unchanged. Finder and skeptic accepted the wiring read-only.
+V2 headlines are not present in the inspected tree; include their witness
+applications when V14 publishes them, without dropping existing coverage.
+
+Local validation remains FAILED: absent library oleans and root-owned build
+outputs prevented prerequisite restoration/build. No witness rejection or green
+run is inferred. GitHub authentication is invalid, so workflow_dispatch is
+pending coordinator execution. Q-H107-LOCAL and Q-H107-DISPATCH were submitted
+through coord-ask. Raw failures stay off git; the H107 evidence manifest records
+their paths, sizes and hashes. This is CI wiring, not non-vacuity completion.
