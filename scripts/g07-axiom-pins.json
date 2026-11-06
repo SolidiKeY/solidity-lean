@@ -9919,6 +9919,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.p1_frame_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingActivation.Checks.whole": [
   "Classical.choice",
   "Quot.sound",

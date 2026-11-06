@@ -343,6 +343,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4
 import Solidity.Backend.InternalFlow.RuntimeFrameMutation
 import Solidity.Backend.InternalFlow.RuntimeFrameNested
 import Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer
+import Solidity.Backend.InternalFlow.RuntimeFrameP1Bridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1Lang
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
 import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore

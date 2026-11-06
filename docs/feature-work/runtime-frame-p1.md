@@ -1827,12 +1827,10 @@ external.
   reverting witness keep asking for V3.
 - `V4Migration.of_unrolled` is the V4 analogue of `V3GeneralBoundary.of_unrolled`.
 
-### G49 bridge: waiting
+### G49 bridge
 
-The user chose to merge the G49 `PassCorrect` modules to master first (Q2).
-Wait: {lane: cloud/move6-20261106/g49-final, item: PassCorrect on master}.
-After that lands, this lane defines the canonical P1 Event/Outcome languages
-and proves `p1_frame_bridge`.
+The user chose to merge the G49 `PassCorrect` modules to master first (Q2);
+they landed at `706e36825` (H85). See the next section.
 
 Reviews: read-only finder and skeptic reviews found no proof defect or field
 mismatch with V3. Fixed from their findings: the trivial family is described
@@ -1840,3 +1838,73 @@ as degenerate and its bare-revert claim as vacuous at every index; the V4
 boundary wording matches `NeverSucceeds`; `no_incoherent_producer` replaces an
 unproved docstring claim; full `rfl` round trips replace a plan-only check;
 `exhausted_is_covered` states the Entry; the migration control is pinned.
+
+## P1 frame bridge (H68 family 3, after H85)
+
+`tests/h55/g49-final-theorem/bridge-requests.json` (family "P1 frame claims")
+requests `p1_frame_bridge : (x : NativeContext_frame) → Approved_frame x →
+BridgeGoal (A_frame x) (B_frame x) (ps_frame x) (pt_frame x) (beta_frame x)
+(nu_frame x) (Local_frame x)`.
+
+### Canonical languages
+
+`RuntimeFrameP1Lang` defines, for one P1 context (a source family
+`source : Nat → Stmt C Γ Δ`, an emitted code image and an admitted domain),
+`sourceLang` and `targetLang` of type `Lang Event Outcome`:
+
+- **Environment:** both languages use the same `Input` (the
+  `L frame caller base machine start` of `Entry`). `Allowed` is the admitted
+  domain, so the prescribed `beta` is the identity.
+- **Resources:** the source resource is the quotation depth, the only bound
+  intrinsic recursion has. The target resource is `Unit`, since `Evm.run` is
+  not indexed.
+- **Observations:** these are frame-boundary outcomes of the actual runs.
+  - There are no session events, because an internal frame emits none.
+  - Success becomes `Outcome.success []` and a bare revert `Outcome.revert []`.
+  - Every other halt (panic, payload, exhaustion, divergence, target fault)
+    is an unfinished prefix.
+  - Typed states and machine facts are not observed; they stay in `Local`.
+- **Depth consistency:** the source language takes the depth-consistency
+  proof as an argument, because `Lang.consistent` makes it a per-family fact.
+
+### Delivered bridge
+
+`RuntimeFrameP1Bridge.p1_frame_bridge` is proved for the V4 trivial family,
+with these instantiations:
+
+- **Native context:** the external approved family.
+- **`Approved_frame`:** the unchanged family agreement with the full physical
+  domain (no index or outcome filter).
+- **Programs and maps:** the actual source family and the actual emitted
+  image, with `beta := id` and `nu := fun _ _ => ()`.
+- **`Local_frame`:** the whole V4 conclusion: agreement, coverage, the
+  successful witness, coherence, and the universal return and bare-revert
+  claims.
+
+All `PassCorrect` fields are proved without further premises:
+
+- Forward at every depth: depth 0 is unfinished, so it lies below the
+  target's prefix.
+- Backward for every target prefix: the target always succeeds, which
+  `ReturnClaim` at depth 1 shows for every admitted input.
+
+`fold_entry` gives the G49 fold entry through `BridgeGoal.pass`. `inhabited`
+instantiates `approved := domain`, which shows satisfiability, not
+provenance. The controls show that depth 0 is unfinished (the source
+language is not success-only) and that a narrowed frame is not allowed.
+
+### Not delivered
+
+The bridge for general P1 families, including the scalar and allocating
+countdown families, is not delivered. Each family needs two things:
+
+- depth consistency of its source language, which fails for index-dependent
+  steps;
+- backward transport of every target outcome.
+
+The second needs the panic, payload, exhaustion and divergence transports of
+G37.02/G38, and the request forbids replacing them with success and
+bare-revert evidence. The countdown families have known exhausted-source /
+successful-target depths and panicking arithmetic, so their bridge needs that
+work first. The request's `adapterStatus` for P1 stays with the G49 lane,
+which must verify this delivery.
