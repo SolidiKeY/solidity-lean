@@ -1,0 +1,29 @@
+[
+  {
+    "id": "B-TOOLCHAIN-RAW",
+    "type": "external-owner-dependency",
+    "status": "blocked",
+    "source": "coordinator toolchain-pin.json; exclusive write scope",
+    "file": "Solidity/Syntax/Raw.lean",
+    "lines": [
+      597,
+      650,
+      665,
+      682,
+      684
+    ],
+    "action": "Coordinator migration owner supplies Lean4.35-compatible upstream dependency; revalidate ancestry and rerun isolated dependency gate before StorageOps proof work.",
+    "evidence": "/workspace/h62-generic-storageops/reproduction/dependencies.log"
+  },
+  {
+    "id": "B-V10-RELAY",
+    "type": "owner-agreement",
+    "status": "pending",
+    "owner": "V10",
+    "exact_files": [
+      "Solidity/Backend/StorageOps/OperationControls.lean"
+    ],
+    "action": "Before any migration of original controls or registration, obtain exact-file owner relay agreement; no request delivered and no permission inferred. Candidate file only, no prepared migration patch.",
+    "evidence": "No relay.sh in supplied checkout; existing originals unchanged."
+  }
+]
