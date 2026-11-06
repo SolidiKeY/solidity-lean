@@ -1,0 +1,6 @@
+/-! RawU8For.adapter composes the actual supported uint8 initializer with an
+existing checked no-post iteration/body and typed scope restoration. The real
+Source.forLoop law reuses the existing forIter/while equality and retains
+checked/coherent premises. Checks cover guard-changing bodies, break/continue,
+partial body writes, dirty words and per-pipeline initializer errors.
+General loop admission and dirty ordinary Source readback remain separate. -/
