@@ -591,3 +591,59 @@ f8975f25b12a5e9723b00ec794b261708280092c remain unavailable; no substitution.
 H97 cold +12.7602%, H55 size +21.4335%, pin +46.58% STOP/pause, H67 central
 reconciliation and H58 audit HOLD remain unchanged. Entire same-goal queue and
 required operational handoff remain unfinished.
+
+
+### H107 Wave 0 tooling safety nets (OT-W0-TOOLING)
+
+Implemented before other new queue work, after merging origin/master
+33eb46304cdb536e6c8b686223c6d8e456b703ae. No production Lean source changed.
+The exact architecture audit tree fa5acebd43214bbe642258d862f903bcf08d3f89
+reproduces 95 pinned boundary edges, not today's 107. Immutable baseline SHA256
+is d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b;
+its deterministic Git-object generator, snapshot, checksum and shrink-only active
+subset are committed. docs/parallelism.md P1 now explains the boundary policy.
+Existing elaborator/parser bans are retained independently. The closure scanner
+handles comments, indentation and multiple modules; unsupported import syntax
+fails closed. Paths through existing exceptions remain debt, not new CORE members.
+
+The gate retries failed named build steps exactly once only if the captured log
+contains `Lean exited with code 135`, printing `RETRY-SIGBUS <step>`. It preserves
+the first log plus the combined attempts. The full run-lean wrapper is a build
+step: its read-only prefixes repeat on retry, while separately named static gates
+never retry. Ordinary/thread failures remain failures. Backup-copy failure is
+explicitly fail-closed. No actual SIGBUS occurred in this checkpoint; injected
+controls establish the retry behavior, not proof of shared-cache crash recovery.
+
+Independent finder/skeptic reviews (neither Lean/server) identified deletion and
+recreation restoring removed allowances, failed backup yielding a false pass,
+hidden multi-import edges, and configured merge-diff filtering. Fixes include
+actual-parent history checks with explicit separate merge diffs, permanent subset
+checks, deletion rejection, backup failure propagation and robust import scanning.
+Nine H107 controls now cover these, cycles/transitive paths, success/ordinary
+failure, persistent SIGBUS, once-only recovery and the full-build wrapper. All 61
+graph/tooling controls passed before the final merge-diff flag hardening; the nine
+H107 controls passed again after it, including log.diffMerges=first-parent.
+Node syntax checks, bash -n, fragments/register checks and exact95-byte regeneration
+pass. History scanning avoids unrelated empty merge probes; final layer output is
+byte-identical to the checkpoint (about2.27s versus16s observed gate timing; this
+is a changed static tool, not a Lean speed claim).
+
+The required real `bash scripts/coord-tools/gate.sh checkpoint` ran once under the
+verified official Lean4.35.0 archive, LEAN_NUM_THREADS=1, serial Lean flock with
+explicit -j1, 8GiB AS/aggregate bound, no swap and4GiB reserve. Lean reports
+4.35.0/eb6cafb; Lake5.0.0-src+eb6cafb. KeySort built successfully in1.2s, but the
+library aborted with `failed to create thread: Resource temporarily unavailable`;
+this is not the SIGBUS marker and was not retried. Checkpoint exit1 after94.154s,
+peak aggregate RSS912216064 bytes, no memory/headroom stop. Layers correctly fail
+on12 boundary edges added after the95-edge audit, and existing doc-path ambiguity
+and99 unrecorded axiom-pin changes also fail. Trust/orphans/roots/fragments and
+build-touched pass. No pin edits, guard relaxation, new allowances or hidden retry
+were used to turn those failures into success. The checkpoint preceded the final
+history-scan optimization; final static checks preserve identical layer failures.
+
+Repo-relative source pins, exact12 edge endpoints, gate outcomes and limits are in
+h107-tooling-evidence.json. Bulk checkpoint logs remain off git with a checksum
+manifest and handoff archive. The H107 implementation is reviewable as one tooling
+increment; successful task-branch final gates and the whole original/H82 queue
+remain unfinished. Existing STOPs/H58/H67 holds and original producer/artifact waits
+are unchanged. No push, master publication, new goal or RUNTIME_GATE_PASS.
