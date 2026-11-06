@@ -436,3 +436,27 @@ acceptance, new negative controls and fresh timing remain pending at commit time
 Production G49/G50 declarations and Contracts' exact empty guard fix remain waits;
 no production discharge or RUNTIME_GATE_PASS is claimed. Pin writer STOP remains
 unchanged and its explicitly paused proposal was not resumed.
+
+Final witness checkpoint gates supersede the pending note above. At committed
+source head recorded in `h82-witness-evidence.json`, full clean-tree fixture
+acceptance passed, including 44 Python controls, deterministic same/fresh-process
+exports, unsafe/axiom/type/index/duplicate/universe/import rejection checks and
+all graph count assertions. Certificate and Pair now explicitly inhabit Type;
+MCP exposed the earlier inferred-Prop fixture gap. The corrected acceptance
+checks actual elaborated sort expressions and the certificate binder's isProp
+flag. Two harness-only assertion failures (nonexistent field and repr layout)
+were fixed without weakening those checks; failed evidence is retained off git.
+Both read-only reviews found no remaining static blocker. Exporter and corrected
+WitnessFixture per-file MCP diagnostics pass without warnings. MCP library
+shutdown prints an event-loop warning after results; diagnostic calls succeed
+and exit zero. No Lean server was used by either reviewer.
+
+Official versions: Lean 4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+Lake 5.0.0-src+eb6cafb. All bounded KeySort controls pass. Seven-run medians on
+the corrected fixture tree are 1.209114830s before and 1.162983514s after,
+-3.8153%; this is an unchanged-core control, not a project speedup claim.
+The evidence manifest binds actual outputs and the tested committed head.
+Full production DAG/counts, actual G49/G50 inventory, Contracts empty-guard fix,
+project final gate, and all inherited open member obligations remain unfinished.
+No known timing STOP was rerun, no frozen production statement/guard changed,
+and no original goal was created, reset, completed or claimed paused.
