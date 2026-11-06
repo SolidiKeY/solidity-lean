@@ -8,24 +8,26 @@ The original `/workspace/solidity-lean` checkout and its `work` branch are prese
 `git merge-base --is-ancestor c6f550e281a7e5affa9a99bc2cdaed556dec00e4 origin/master`
 returned 0. No assigned remote branch existed when inspected.
 
-## Queue status
+## Queue status — H82 retired/stopped
 
-1. **Partial:** source/import census and reproduction tooling prepared; full clean
-   v4.24.0 build measurement still required. Census: 1,774 Yul modules, 2,143
-   source modules in their dependency closure. The source census also lists
-   reverse consumers, including the separate Bridge package, and lexical
-   declarations, anonymous examples, and acceptance commands. It is not an
-   elaborated type/API audit or a proof of exhaustive Lean syntax recognition.
-2. **Blocked:** exact official v4.35.0 archive downloaded and SHA256 verified;
-   existing out-of-scope KeySort parser does not compile. No source migration
-   edits authorized by exact-file owner replies have been made.
-3. **Pending:** all assigned modules on v4.35.0, clean before/after wall/RSS
-   measurements and regression disposition. No timing delta exists yet.
-4. **Partial:** reviewable tooling patch, source hashes and dependency census
-   available; final migrated patch/API hashes and root-gate acceptance pending.
+1. **Partial:** census complete (1774 Yul modules,2143 closure modules); clean
+   v4.24 build passed all2143, wall7291.842 s, peak sampled RSS8441331712 bytes.
+   Full old API export stopped under H82 at261/1774 sealed snapshots;1513 remain.
+2. **Pending successor:** official v4.35 archive SHA and versions verified;
+   additive B05 candidate reviewed and passes both releases; production originals
+   unchanged. H82 withdraws the prior proof-only exact-file agreement request.
+   External migration overlays and new KeySort compatibility remain pending.
+3. **Pending successor:** new clean all-module build, full public/generated API
+   compatibility and clean wall/RSS comparison. No full timing delta available.
+4. **Partial:** cumulative patch/bundle, frozen source hashes, original prompt,
+   full queue/scope, waits and evidence prepared; full migration/root gates pending.
 
-The persistent goal remains unfinished. No runtime gate pass, master cut-over,
-freeze, merge, push, PR, or deployment is claimed. No H55 work was undertaken.
+Stopped handoff to `solidity-h62-6-20261106/migrate-root-gate`. The existing goal
+remains unfinished; PAUSED could not be set because the only exposed goal API
+accepts complete|blocked. Neither was used as a substitute. No automatic resume,
+new proof implementation, runtime gate pass, master change, push or PR.
+The sections below retain historical checkpoint evidence; this summary and final
+H82 retirement section supersede earlier permission/continuation statements.
 
 ## Toolchains and prerequisite evidence
 
@@ -393,3 +395,81 @@ Initial tooling-suite retry under read-only sandbox failed solely because
 tempfile had no writable directory; corrected with an owned artifact TMPDIR.
 
 Current tooling controls: 31 tests passed in 22.742 s using owned artifact TMPDIR.
+
+## H82 retirement: final stopped handoff
+
+Human-approved stop-and-handoff supersedes automatic continuation. Successor:
+`solidity-h62-6-20261106/migrate-root-gate`. No new proof implementation follows.
+Original VM `ccarenv_b64_Y2NhcmVudl8yODkwNjBkZWY4ZjA4MTkxODQxNGQ4ODBiMjNlNzAwNw`,
+checkout `/workspace/migrate-yul`, assigned branch unchanged. Existing launcher
+goal was never replaced, reset or completed. Requested state PAUSED cannot be
+set: tool discovery exposes only `stop_goal(outcome: complete|blocked)`, no
+pause/get_goal. Neither outcome was used as a substitute. Worker stops after
+this acknowledgement; no automatic implementation continuation is authorized.
+
+Full old interface export was interrupted safely under H82, supervisor exit130,
+261/1774 modules sealed; 1513 remain. Its manifest deliberately records fail /
+`export interrupted or incomplete`, not a pass. Current child had already exited;
+no Lean, build driver or export process remains. Interrupted export evidence
+and partial outputs are preserved, with H82-STOP.json explaining disposition.
+Do not resume its same-label export blindly: wrapper requires a fresh label.
+A successor may reuse verified sealed evidence through a reviewed resumption
+procedure; no such implementation has been added here.
+
+H82 standing agreements withdraw the former B05 exact-file permission request:
+the one-line statement-preserving proof-only replacement needs no owner agreement.
+Original ReservedNames.lean still matches base because retirement forbids new
+proof implementation. The proposed patch and passing additive probes remain
+available to the successor. Existing statement/definition/interface/budget/axiom/
+exclusion changes still need appropriate owner/H57 handling. H78 requires all
+original public generated APIs, without blanket generated exclusions. No shim
+was implemented here. Full production old/new generated-API comparison remains
+unfinished; isolated inspector fixture differences are recorded, not waived.
+
+Original rendered prompt transcription, full original four-item work queue,
+backfill queue and exact1777-entry scope manifest are committed under
+`tests/h62/item6/migrate-yul/handoff/`. The original prompt is reconstituted from
+the original user thread, with the exact scope string from the authenticated
+coordinator ownership input. Its computed SHA differs from the earlier reported
+launcher-objective SHA; provenance explicitly separates those two byte streams.
+The launcher objective bytes and get_goal are unavailable; no identity claim is
+made. Coordinator-local receipt paths remain provenance, not accessible artifacts.
+
+Open obligations for successor:
+1. Finish full old exported declaration inventory (261/1774 available), retain all
+   generated/public/private evidence and compare exact public shape under H78.
+   Census and clean old2143-module wall/RSS baseline already passed.
+2. Official v4.35 archive identity/versions are established; adapt Yul with exact
+   statement/semantics/budget/axiom preservation. B05 reviewed candidate unapplied.
+   Receive/validate required external migrations (Raw, CollisionBound, Scalar.Slice,
+   Source.Ctor, Frontend.Checked.Token and SortCheck). New KeySort remains failed.
+   B07 optional Bridge dependencies belong migrate-bridge, not intrinsic core.
+3. Complete clean new2143-module build using identical settings/cache policy;
+   full frozen-interface comparison and meaningful same-policy timing/RSS delta.
+   Any regression escalates; >10% STOP. Provisional candidate probe cost increase
+   is disclosed, not accepted. Old Horizon665.844s reported for external gate owner.
+4. Deliver/replay final root gates, cross-directory compatibility and interface
+   disposition. Existing patch/bundle is a partial migration/backfill checkpoint,
+   not proof of full success or runtime acceptance.
+
+Backfill completed: lexical scanner/import census, negative scanner/resource/
+comparison/interface controls,23 finite String cases with isolated proofs,
+source/output-bound reproducible interface tooling and B05 isolated kernel proof.
+Backfill unfinished: production new API/case coverage and full clean comparison/
+reproduction. No newly unclaimed cleanup has been authorized. Universal parser
+equivalence remains an unproved external-owner limitation, not an assigned theorem
+or an additional successor obligation from this lane.
+No task ownership was taken from producer lanes. No new sorry/axiom/native_decide,
+no frozen original statements changed, no budget raised. Kernel fixture proofs
+are distinguished from external solc/KeY corpus checks and full compiler gates.
+
+No push: the conditional H71 push authorization itself was not supplied here;
+the original no-push restriction remains. No master push, merge, PR or publication.
+All work is saved in isolated commits with cumulative patch/bundle and hashes.
+Schema-v1 waits are in `tests/h62/item6/migrate-yul/handoff/waits.json`.
+
+Retirement final reviews: finder confirmed prompt/queue/scope/hash integrity and
+corrected stale top queue summary. Skeptic confirmed integrity and no active
+jobs; clarified external parser equivalence is not an assigned theorem. Exact
+H82 retirement source text saved in handoff/h82-retirement-instruction.md.
+No Lean reruns or proof changes were made for retirement.
