@@ -14,19 +14,19 @@ proofs use no `native_decide`. The debt is in the **compiler side**, which
 now holds most of the package (Backend 1,932 modules, Yul 1,776, Lowering
 662, Evm 277: 4,647 of 6,454 modules, 598k of 1.08M lines). It is grown
 **by copying per case**: 144 files are exact copies of one another up to
-consistent renaming, seven EVM fragment compilers each redefine the same
-fragment relation, fifteen Yul compilation files each declare their own
-`Artifact`, and 207 `Yul.Views` modules form one serial import chain, the
-longest in the package. Test fixtures (`*Controls`) have become
-dependencies: 778 library modules import one transitively. The stated
-layering is not what is checked: `docs/parallelism.md` says the core is
-closed under imports, but 95 core imports leave it and its closure pulls in
-398 compiler-side modules. Finally, the sanctioned cache seed silently fails
-on cloud VMs, and once it works the per-file gate fails until a CI-only
-restore step is run. The highest payoff for the least risk is in the
-tooling (findings 1, 4) and in generic interfaces for the copied families
-(2, 5, 6); renaming the `Roadmap`/milestone namespaces (7) pays but is the
-riskiest.
+consistent renaming (137 of the 202 near-copies are in Yul), twenty Yul
+compilation files each declare their own `Artifact` while a generic one sits
+unused, and 207 `Yul.Views` modules form one serial import chain, the
+longest in the package. `*Controls` modules (19% of lines) cost about 28% of
+elaboration CPU in a timed sample, and about 117 library imports reach into
+them. The stated layering is not what is checked: `docs/parallelism.md`
+says the core is closed under imports, but 95 core imports leave it and its
+closure pulls in 398 compiler-side modules. Finally, the sanctioned cache
+seed silently fails on cloud VMs, and once it works the per-file gate fails
+until a restore step that only CI runs. The highest payoff for the least
+risk is in the tooling (ranks 1, 2), then generic interfaces for the copied
+families (ranks 3–5). Renaming `Roadmap` and the milestone namespaces pays
+least for its risk.
 
 ## 2. Method
 
@@ -45,34 +45,41 @@ All commands from the repository root at `c0228e0e`, on a 4-core, 15 GB VM.
 | Olean bytes per area | `python3 -I docs/audits/architecture-tools/olean_sizes.py <lake cache>` (trace `outputs.o` → artifact) | 6,443 modules, 5.60 GB |
 | Gate | `./run-lean.sh` after seeding the cache | 6,461 jobs |
 | Per-file elaboration | `scripts/coord-tools/gate.sh per-file` on a seeded random sample (seed 20261106) of 30 `*Controls` and 30 library files; then each again as an import-only copy, timed with bash `time` | 60 + 60 runs |
-| Skeptic | one read-only agent (no Lean server) tried to refute each finding | §5 of each finding, and §6 |
+| Skeptic | one read-only agent (no Lean server, no builds) re-ran the tools and tried to refute each finding | §7 |
 
 Cache: `fetch-lake-cache.sh` failed on this VM (finding 4). The pack was
-installed by running its own `install.sh` with `elan which` resolved from the
-repository (a shim on `PATH`; `LAKE_CACHE_DIR` not set), then
-`restore-lake-artifacts.py` placed 12,892 files.
+installed by running its own `install.sh` with `elan which` answered for the
+repository's toolchain (a shim on `PATH`; `LAKE_CACHE_DIR` not set for Lake),
+`./run-lean.sh` then fetched every module, and `restore-lake-artifacts.py`
+(given the cache path for that one run) placed 12,892 files.
 
 ## 3. Top 10
 
-| Rank | Finding | Evidence | Estimated payoff | Effort | Risk |
+Ranked after the skeptic pass (§4 numbers are finding IDs and keep
+their order of discovery; the rank is payoff against risk).
+
+| Rank | Finding (§4) | Evidence | Estimated payoff | Effort | Risk |
 |---|---|---|---|---|---|
-| 1 | The "core" is not closed under imports, contrary to `docs/parallelism.md` P1; the checker never tests closure | 95 direct core→non-core imports; closure adds 398 modules / 86,664 lines (115 Backend, 109 Evm); doc says 123 core modules, checker matches 859 | Restores the property P1 relies on (a compiler edit rebuilding the calculus); stops a silent drift that grows each lane | S (report) / M (fix 95 edges) | Low |
-| 2 | `Yul/Views` is a 868-file directory of renamed copies on one serial chain | 207 of the 212 modules of the longest import chain; 144 files in 49 exact alpha-renamed groups, 137 of 202 near-copy files | Cold-build critical path; ~6k lines of `*Ownership*` collapse to ~1k; one fix instead of 7 | M | Medium |
-| 3 | Test fixtures are dependencies, and cost ~28% of elaboration CPU | 394 edges library→Controls; 778 library modules depend on a Controls module; `Roadmap` (core) imports Backend Controls; Controls elaborate at 8.4 s/kline vs 4.5 (sample of 30+30) | Controls editable/deletable without rebuilding the compiler; ~0.6 CPU-h per cold build if halved | M | Low |
-| 4 | The cache seed silently fails on cloud VMs, and the per-file gate needs a CI-only restore step | `install.sh` → `elan which lean` panics "no active toolchain"; per-file gate 59/60 FAIL ("object file … does not exist") until `restore-lake-artifacts.py`; 60/60 PASS after | Every cloud lane: cold build (~24 min, `lean-lsp` instructions) instead of seconds; per-file gate usable | S | Low |
-| 5 | Seven EVM fragment compilers redefine the same fragment relation | 7 × `inductive StmtFrag`/`ProgFrag` over `Stmt C Γ Δ` in `Evm/Memory*Compile.lean` (3,615 lines); `ProgFrag.pushes_zero` ×7, private `run_cons_revert` ×7; Evm is 97 of 485 redundant lemma copies | A new memory feature is one constructor, not an eighth file; ~1–2k lines | M–L | Medium |
-| 6 | Yul compilation correctness is restated per statement shape | 15 `structure Artifact`; `Artifact.source_to_model`, `normal_to_model` with identical statements in 10 files each; 42 redundant copies in `Yul/Compilation` | One interface theorem, consumers stop depending on a shape file | M | Medium |
-| 7 | Project-history names are foundations: `Roadmap.*` types and milestone-tagged modules | `Roadmap.Pipeline` 3,671 uses, `Roadmap.Word` 1,733; `Roadmap.Contracts` 3,423 dependents; `Yul/Words.lean:15` `abbrev Word := Solidity.Roadmap.Word`; 846 module paths with V07/P8/G18/H24/V3 tags | Readability, onboarding; names stop lying when milestones close | L | High (rename churn, merge conflicts with live lanes) |
-| 8 | P2's size limit is not enforced | 20 files > 1,800 lines (max 3,977); `Source/Horizon.lean` 2,305 lines → largest olean, 95 MB | Worker memory, re-check size | S each | Low |
-| 9 | Duplicated general lemmas, many private | 340 groups, 485 redundant copies, 177 private; Yul/Views 128, Evm 97, Yul/Compilation 42 | Fewer places to fix; mostly falls out of 2, 5, 6 | S–M | Low |
-| 10 | Unreferenced library declarations | 1,553 library theorems (5%) never named elsewhere, 803 in Yul | Small; candidates for deletion after review | S | Low |
+| 1 | The "core" is not closed under imports, contrary to `docs/parallelism.md` P1; the checker never tests closure (§1) | 95 direct core→non-core imports (57 from exact-name Yul entries, 13 via `^Solidity\.Roadmap\.`); closure adds 398 modules / 86,664 lines (115 Backend, 109 Evm) | Restores what P1 promises (a compiler edit does not rebuild the calculus); stops drift that grows each lane | S (report) / M (fix edges) | Low |
+| 2 | The cache seed fails on cloud VMs, and the per-file gate needs a restore step only CI runs (§4) | `install.sh` leaves the repo, `elan which lean` panics ("no active toolchain") → "building cold"; per-file gate 59/60 FAIL until `restore-lake-artifacts.py`, 60/60 after | Every cloud lane: seconds instead of a ~24-min cold build; per-file gate usable | S | Low |
+| 3 | `Yul/Views`: an 868-file directory of renamed copies on one serial chain (§2) | 207 `Yul.Views` modules in the 211-module longest chain; 137 of 202 near-copy files; 7-way exact families (`OwnershipPlan`, `Frame`, `Following`, …) | Cold-build critical path; ~6k lines of `*Ownership*` → ~1k; one fix instead of 7 | M | Medium |
+| 4 | Controls are on the library's path and cost ~28% of elaboration CPU (§3) | ~117 genuine library→Controls edges; ~780–800 library modules depend on one; Controls elaborate at 8.4 s/kline vs 4.5 (sample 30+30) | Fixtures editable without rebuilding the compiler; ~0.6 CPU-h per cold build if halved | M | Low |
+| 5 | Yul compilation restated per shape, while a generic `Artifact` sits unused (§6) | 20 `structure Artifact`; `source_to_model` in 15 files; `Yul/Compilation/Artifact.lean` imported by none, an "unvalidated draft" of retired lane H55 | One interface; shape files stop being API | M | Medium (needs the `vy2-physical` owner) |
+| 6 | Seven private byte-identical `run_cons_revert` in the EVM fragment compilers (§5) | 7 × `inductive StmtFrag`/`ProgFrag` in `Evm/Memory*Compile.lean`; `run_cons_revert` equal (md5) in all 7 | Small (7 copies → 1) | S | Medium: home is `Semantics/Run.lean`, ~3,550 dependents |
+| 7 | P2's size limit is not enforced (§8) | 20 files > 1,800 lines (max 3,977); `Source/Horizon.lean` 2,305 lines → largest olean, 95 MB | Worker memory, re-check size | S each | Low |
+| 8 | Duplicated general lemmas (§9) | 340 groups / 485 copies / 177 private, about half real (166 groups name file-local constants) | Mostly falls out of ranks 3, 5, 6 | S–M | Low |
+| 9 | `Roadmap.*` types and milestone tags as names of foundations (§7) | `Roadmap.Pipeline` 3,671 uses, `Roadmap.Word` 1,733; `Roadmap.Contracts` 3,423 dependents; two `Word`s; ~846 tagged paths | Readability; placement itself is by design (G01) | L | High (near-full rebuild, conflicts with live lanes) |
+| 10 | Unreferenced library declarations (§10) | 1,553 library theorems (5%) named nowhere else, 803 in Yul; upper bound | Small | S | Low |
 
 ## 4. Findings
 
 ### 1. The core is not closed under imports
 
-**Evidence.** `docs/parallelism.md` P1: "The list is closed under imports: no
-core module imports a module outside it", and under P2, "123 modules now".
+**Evidence.** `docs/parallelism.md:46` (P1): "The list is closed under imports: no
+core module imports a module outside it". (The "123 modules now" at
+`:105-107` is a stale count in a historical P2 pitfall, not a contract.)
+Of the 95 leaks, 57 come from Yul modules that `CORE` names exactly and 13
+from the `^Solidity\.Roadmap\.` pattern (skeptic count).
 `scripts/check-layers.mjs:14-169` has 174 patterns matching 859 modules;
 it checks only that core reaches no elaborator (`:205-226`), never closure.
 `core_closure.py -v`:
@@ -101,7 +108,9 @@ modules; the document reports a property the code lost.
 
 **First step.** Add a closure report to `check-layers.mjs` (print the 95
 edges, fail only on new ones via a checked-in allow-list), and correct the
-module count in `docs/parallelism.md`. Then move the Semantics/Theory
+module count in `docs/parallelism.md`. The check already runs in CI
+(`lean.yml:44`), `run-lean.sh:23` and `gate.sh`, so a report-only step
+costs nothing new. Then move the Semantics/Theory
 modules that import `Source`/`Lowering` (`Semantics/Nondeterminism/*`,
 `Semantics/CtxEquiv/Source`, `Theory/Progress/*`) out of the core
 namespace, since they are bridges, not foundations.
@@ -110,12 +119,14 @@ namespace, since they are bridges, not foundations.
 
 **Evidence.** `ls Solidity/Yul/Views | wc -l` → 868 files, 74,110 lines,
 one directory. `node scripts/import-fanout.mjs` → "longest import chain 212
-modules"; `--chain` → 207 of them are `Yul.Views.*`, ending at
-`Yul.Views.RetainedLoopBatchRefreshControls`. `near_files.py`: 49 groups /
-144 files are exact copies after alpha-renaming; 202 files in near-copy
-clusters (Jaccard ≥ 0.8), 137 of them in Yul. Example:
-`{,Int,Member,Packed,Primitive,Recursive,Scalar}OwnershipPlan.lean`, 101
-lines each; `diff` of `PackedOwnershipPlan` against `ScalarOwnershipPlan`
+modules" (211 plus the `Solidity` root); `--chain` → 207 of them are
+`Yul.Views.*`, ending at `Yul.Views.RetainedLoopBatchRefreshControls`.
+`near_files.py`, package-wide: 49 groups / 144 files are exact copies after
+alpha-renaming (also `TestSuite/Derived*`, `Backend/Passes/*Pins`); 202
+files in near-copy clusters (Jaccard ≥ 0.8), 137 of them in Yul. Example:
+`{,Int,Member,Packed,Primitive,Recursive,Scalar}OwnershipPlan.lean`, 7
+files of 101 lines (`RetainedOwnershipPlan`, 118 lines, adds history and
+length fields and is not a copy); `diff` of `PackedOwnershipPlan` against `ScalarOwnershipPlan`
 after stripping the prefix differs only in the path type, the inventory
 function (`…SourceInventory?`), the snapshot function (`…Snapshot`) and the
 separation check. The same 7–8-way pattern repeats for `OwnershipFrame`,
@@ -130,17 +141,27 @@ an eighth copy.
 **First step.** Define one `OwnershipPlan` structure parameterised by a
 record `{Path, inventory?, snapshot, check}` and re-express
 `ScalarOwnershipPlan` as an `abbrev` instance; keep the old names as
-abbreviations so no consumer changes. Repeat per family once that
-elaborates at the same speed (time it with `gate.sh per-file`).
+abbreviations so no consumer changes. The parameters are intrinsic
+functions, so this keeps `docs/intrinsic.md`'s rules. Repeat for each
+family (Plan, Frame, Following, Reads, Batch, Banks, Inventory; seven
+chained conversions, not one), each once the first elaborates at the same
+speed (time it with `gate.sh per-file`).
 
 ### 3. Controls on the library's path
 
 **Evidence.** 1,412 `*Controls.lean` files, 205,003 lines (19% of
 `Solidity/`), 16,475 theorems, 13,923 `by decide`, 5,874 `#guard`.
-Edges from a non-Controls, non-root module into a Controls module: 394
-(`awk` over `imports.py edges`). Library modules (not Controls, Examples or
-Checks) that depend transitively on some Controls module: 778 of 4,357
-(Yul 365, Backend 357, Lowering 39, Frontend 11, Roadmap 4, Source 2). E.g.
+Edges from a non-Controls module other than the `Solidity` root into a
+Controls module: 394, but 158 come from the generated `SolidityBridge` root
+and 3 from `SolidityExamples`; of the remaining 237, 120 come from check-like
+modules (`*Pins`, `*Audit`, `*Axioms`, `*Checks`), leaving **about 117
+genuine library→Controls edges** (skeptic recount). Library modules (not
+Controls, Examples or Checks) that depend transitively on some Controls
+module: 778 of 4,357 by my filter, 803 by the skeptic's (Yul 365–367,
+Backend 357–363, Lowering 39, Frontend 11, Roadmap 4, Source 2). "Controls"
+does not mean test-only: 1,411 of 1,412 declare theorems or defs that other
+modules may use as witnesses (Roadmap V16 opens
+`CreationReturnProducerControls`). E.g.
 `Backend.FunctionValues.RuntimeConstruction → Backend.FunctionValues.Controls`,
 `Roadmap.V16.RelationalGuardSpec → Backend.FailurePaths.RelationalGuardControls`.
 Olean bytes: Controls are 0.47 of 5.60 GB (8%), but they are not cheap to
@@ -160,10 +181,11 @@ So Controls cost both coupling and about a quarter of build CPU; a data
 table checked by one `decide` per family (they hold 13,923 `by decide`)
 would recover part of the latter.
 
-**First step.** Rename the 706 Controls modules that something imports
-into what they are (fixtures or witnesses, e.g. `…Witness`), or move the
-imported definitions out; add a check that a `*Controls` module has no
-importer other than a root, with the current list as an allow-list.
+**First step.** A check, with the ~117 current library edges as an
+allow-list, that no new library module imports a `*Controls` module; then
+move the witnesses those 117 edges use into modules named for what they are
+(e.g. `…Witness`). Downgraded by the skeptic from "forbid" to "allow-list":
+some imports are deliberate witness reuse.
 
 ### 4. Cache seed and per-file gate on cloud VMs
 
@@ -181,9 +203,21 @@ modules in its cache (`scripts/ci/restore-lake-artifacts.py` docstring).
 CI runs that restore step (`.github/workflows/lean.yml:94-95`); `gate.sh`
 and `fetch-lake-cache.sh` do not. After running it, 60/60 passed.
 
-**First step.** In `fetch-lake-cache.sh`, resolve the toolchain from the
-repository before calling `install.sh` (or export the resolved cache path to
-it), and run `restore-lake-artifacts.py` after a successful install.
+This is not an elan bug: `install.sh` leaves the repository, so elan has no
+`lean-toolchain` to read. (The first run's panic was reported as "binary not
+found"; reproduced from a scratch directory, it reads "no active toolchain".)
+
+**First step.** (Corrected by the skeptic.) Two separate fixes:
+(a) in `fetch-lake-cache.sh`, give `install.sh` the toolchain, e.g.
+`ELAN_TOOLCHAIN=$(cat lean-toolchain)` or the cache path resolved from the
+repository root; (b) run `restore-lake-artifacts.py` in `gate.sh per-file`
+(or at the end of `run-lean.sh`), **after** a build, with the cache path
+resolved as `scripts/coord-tools/ship-cache.sh:151` does. Running it inside
+the fetch script would do nothing: it walks `.lake/build/**/*.trace`, which
+only a build writes, and it exits on an unset `LAKE_CACHE_DIR` off CI.
+Check that its hard links cannot be overwritten in place by a later local
+build (that would corrupt the shared cache); copying instead of linking
+avoids the question at ~6 GB of disk.
 
 ### 5. Seven EVM fragment compilers
 
@@ -192,31 +226,44 @@ pair each in `Evm/MemoryCompile.lean:165,381`, `MemoryObjectCompile.lean:9,37`,
 `MemoryObjectConstructionCompile.lean:9,60`, `MemoryRefArrayCompile.lean:10,27`,
 `MemoryFixedCompile.lean:62,104`, `MemoryStorageConstructionCompile.lean:9,15`,
 `MemoryStorageCopyCompile.lean:26,237`, all `… → Stmt C Γ Δ → List Instr →
-Prop`. Each restates `ProgFrag.pushes_zero` and a `private theorem
-run_cons_revert` (e.g. `MemoryCompile.lean:861`, `MemoryObjectCompile.lean:104`),
-the latter a fact about `Prog.run` alone. The 249 `Evm/Memory*` files hold
-33,683 lines; `dup_general.py` puts 97 redundant general lemmas in `Evm`, and
-15 between `MemoryCompile` and `MemoryStorageCopyCompile` alone.
+Prop`. Each has a `private theorem run_cons_revert` (e.g.
+`MemoryCompile.lean:861`, `MemoryObjectCompile.lean:104`) whose statement
+and proof are byte-identical across all seven (skeptic: equal md5), a fact
+about `Prog.run`/`Stmt.run` alone. `ProgFrag.pushes_zero` is restated too,
+but each copy is about its own file's relation, so those are not redundant
+(skeptic downgrade). The relations cover different fragments
+(`MemoryStorageConstructionCompile` reuses `Fixed`'s pieces). The 249
+`Evm/Memory*` files hold 33,683 lines.
 
-**First step.** Move `run_cons_revert` (and the other `Prog.run` facts in
-the duplicate list) to one public lemma in `Semantics` and delete the seven
-private copies. Then measure whether one `ProgFrag` indexed by a feature
-set elaborates as fast; if it does not (G0), keep the relations and share
-their lemmas through a common interface.
+**First step.** Put `run_cons_revert` once, public, beside
+`Prog.run_cons_ok` (`Semantics/Run.lean:1349`), and delete the seven
+private copies. **Warning:** `Semantics/Run.lean` has about 3,550
+dependents, so this edit rebuilds most of the package; batch it with
+another core edit or accept one cold rebuild. Whether one `ProgFrag`
+indexed by a feature set is as fast as seven relations (G0) is open; measure
+before merging relations.
 
 ### 6. Yul compilation restated per shape
 
 **Evidence.** `ls Solidity/Yul/Compilation | wc -l` → 230. `structure
-Artifact` is declared in 15 of them (e.g. `Artifact.lean:10`,
+Artifact` is declared in 20 of them (`grep -l '^structure Artifact'`; e.g.
 `ConditionalCompilation.lean:9`, `ForCompilation.lean:52`,
-`LetBranchCompilation.lean:45`); `Artifact.source_to_model` and
-`Artifact.normal_to_model` have identical statements in 10 files each
-(`dup_decls.py`, e.g. `SwitchCompilation.lean:153`). 42 redundant general
-lemma copies in the directory.
+`LetBranchCompilation.lean:45`); `Artifact.source_to_model` is stated in 15
+files, one statement six times and another four (`dup_decls.py`, e.g.
+`SwitchCompilation.lean:153`). 42 redundant general-lemma copies in the
+directory.
 
-**First step.** A structure `ArtifactSpec` carrying `code`, `profile` and the
-two model theorems as fields; make each shape file produce one, so
-consumers depend on the structure rather than on a shape file.
+**Already started, then stopped (found by the skeptic).**
+`Solidity/Yul/Compilation/Artifact.lean` is a generic intrinsic `Artifact`
+with `profile`, `code`, `source_to_model`, `model_to_source` and
+`normal_to_model`. It is registered in `Solidity.lean`, but no file imports
+it. `docs/feature-work/h55-yul-artifact.md:3-17` records it as an
+"unvalidated additive draft" of the retired H55 lane. Its successor is
+`vy2-physical`, and interface changes "still need the owner".
+
+**First step.** Do not write a second interface. Ask the `vy2-physical`
+owner whether to validate the H55 draft, then write one adapter (for
+`SwitchCompilation`'s `Artifact` → the generic one) and time it.
 
 ### 7. `Roadmap` and milestone names as foundations
 
@@ -226,14 +273,23 @@ consumers depend on the structure rather than on a shape file.
 `Roadmap.Contracts` has 3,423 transitive dependents, `Roadmap.Evm` 3,475.
 `Yul/Words.lean:15` `abbrev Word := Solidity.Roadmap.Word`;
 `Roadmap/Contracts.lean:55` `abbrev Word := Fin (2 ^ 256)`, while
-`Semantics.lean:71` has its own `abbrev Word := PrimTy.uint.Denote`. 846
-module paths carry a milestone tag (`V07/`, `P8/`, `G18…`, `H24…`,
-`RuntimeFrameV3…`).
+`Semantics.lean:71` has its own `abbrev Word := PrimTy.uint.Denote`. About
+846 module paths carry a milestone tag (`V07/`, `P8/`, `G18…`, `H24…`,
+`RuntimeFrameV3…`); the regex in §2's history is approximate (a simple
+variant also catches `Precompiles/P256.lean`, the curve).
+
+**Skeptic downgrade: intentional.** `Roadmap/Contracts.lean`'s docstring
+calls these the G01 "final theorem contracts", placed at the base on purpose
+(`docs/feature-work/roadmap-g01-interfaces.md`). The base placement is by
+design; what is wrong is the name, and two `Word` types (`Fin (2^256)` and
+`PrimTy.uint.Denote`).
 
 **First step.** Move `Word`, `Bytes`, `Address`, `Pipeline` from
 `Roadmap/Contracts.lean`/`Roadmap/Evm.lean` into a neutral module (e.g.
-`Solidity/Machine/Basic.lean`) with `export` aliases left in `Roadmap`, so
-no consumer changes at once. Do module renames only between lane batches.
+a new `Solidity.Machine.Basic` module) with `export` aliases left in `Roadmap`, so
+no consumer changes at once. **Warning (AGENTS.md):** `Roadmap.Contracts`
+has ~3,400 dependents, so this is a near-full rebuild; do it between lane
+batches. Do module renames only then too.
 
 ### 8. P2's size limit is not enforced
 
@@ -257,6 +313,13 @@ directory: Yul/Views 128, Evm 97, Yul/Compilation 42, Backend/InternalFlow
 `dup_decls.py` overall: 2,185 groups / 4,428 redundant copies, but most are
 in Controls where equal text reads different local constants and is not a
 duplicate.
+
+**Skeptic downgrade: an upper bound.** The hash ignores namespace, `open`
+and `variable` context. In 166 of the 340 groups (240 copies), the statement
+names a declaration that is local to each of at least two of its files (like
+`ProgFrag.pushes_zero`, finding 5). Those are statements about different
+constants. About half the 485 copies are real, and most of those fall out of
+findings 2, 5 and 6.
 
 **First step.** Work the `dup_general.py` pair list top-down after findings
 2, 5 and 6 (which remove most of it); `Calculus/CloseScoped/Leaf.lean` vs
@@ -301,10 +364,34 @@ an upper bound.
 
 ## 6. Open questions for the user
 
-None blocks this report. Two decisions shape the fixes:
+None blocks this report. Three decisions shape the fixes:
 
-- Should `Roadmap/**` stay in `CORE`? It is the main route by which compiler
-  modules enter the core's closure (finding 1); dropping the pattern is the
-  one-line alternative to moving 95 edges.
-- Are `*Controls` meant to be importable? If yes, finding 3 is a naming fix;
-  if no, it is a dependency fix.
+- Should `Roadmap/**` stay in `CORE`? The pattern brings 13 of the 95
+  leaks directly and the compiler-side Roadmap V16 statements with them
+  (finding 1). Dropping it is the cheap alternative to moving edges; keeping
+  it means moving the Roadmap V16 consumers out.
+- Are `*Controls` meant to be importable witnesses? If yes, finding 3 is a
+  naming fix plus an allow-list; if no, it is a dependency fix.
+- Should the H55 generic `Yul/Compilation/Artifact.lean` draft be validated
+  and adopted (finding 6), or deleted? Its lane is retired, its successor is
+  `vy2-physical`, and its doc says interface changes need the owner.
+
+## 7. Skeptic pass
+
+One read-only agent (no Lean server, no builds) re-ran the tools and tried
+to refute each finding. Its verdicts, and what changed here:
+
+| § | Verdict | Change made |
+|---|---|---|
+| 1 | Survives; numbers reproduced | "123 modules" identified as a stale P2 pitfall, not P1; leak breakdown (57 Yul exact names, 13 Roadmap) added |
+| 2 | Downgrade on counts | Chain is 211 modules + root; `OwnershipPlan` family is 7 files, not 8; 144-file count marked package-wide; fix is seven chained conversions |
+| 3 | Downgrade | 394 edges → ~117 genuine library edges after removing generated roots and check-like modules; "forbid" → allow-list; Controls can be deliberate witnesses. (The CPU share was added after this pass, from my timing.) |
+| 4 | Downgrade: fix in the wrong place | Restore needs a prior build and a cache path, so it goes in `gate.sh`/`run-lean.sh`, not the fetch script; root cause stated as a missing toolchain outside the repo, not an elan bug; hard-link hazard noted |
+| 5 | Survives for `run_cons_revert`, downgrade for `pushes_zero` | `pushes_zero` copies are about distinct relations; rank lowered to 6; rebuild warning for `Semantics/Run.lean` added |
+| 6 | Downgrade; known, stopped work | Counts corrected (20 `Artifact`s, 15 `source_to_model`); proposed new `ArtifactSpec` withdrawn in favour of the existing H55 draft, owner-gated |
+| 7 | Downgrade: intentional placement | G01 design noted; complaint narrowed to names and two `Word` types; tag count marked approximate; rebuild warning added; rank lowered to 9 |
+| 8 | Survives | Two of 22 > 1,800-line files are exempt (generated corpus, vendored), as already excluded |
+| 9 | Downgrade: upper bound | About half the copies name file-local constants and are not redundant |
+| 10 | Survives as an upper bound, low value | none |
+
+The skeptic found nothing structurally larger than findings 1–3.
