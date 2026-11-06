@@ -39,6 +39,14 @@ class ToolingTests(unittest.TestCase):
         for name in ["elabTaclet", "elabRun", "elabDeploy", "elabDiffTest"]:
             self.assertIn(name, heads)
 
+    def test_prebuilt_reuse_cannot_be_a_clean_or_multitarget_build(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for fixtures in [(), (Path("A.lean"), Path("B.lean"))]:
+                with self.assertRaises(SystemExit):
+                    runner.build(root, root, root / "output", fixtures, root / "prebuilt")
+            self.assertFalse((root / "output").exists())
+
     def test_monitor_interrupt_reaps_owned_process(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); (root / "Solidity").mkdir(); (root / "Solidity/KeySort.lean").write_text("")

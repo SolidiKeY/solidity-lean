@@ -25,7 +25,7 @@ Run from the repository root:
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-tools/census.py --output /workspace/migrate-tools-evidence/census-base.json
 PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item6/migrate-tools/test_tooling.py
-python3 scripts/h62/item6/migrate-tools/serial-build.py --root /workspace/solidity-lean --toolchain /workspace/migrate-tools-evidence/toolchains/lean-4.24.0-linux --output /workspace/migrate-tools-evidence/old-clean-2
+python3 scripts/h62/item6/migrate-tools/serial-build.py --root /workspace/solidity-lean --toolchain /workspace/migrate-tools-evidence/toolchains/lean-4.24.0-linux --output /workspace/migrate-tools-evidence/old-clean-3
 ```
 
 The scanner finds 30 assigned modules, 581 declaration candidates and 52 distinct
@@ -42,7 +42,7 @@ The serial runner produces fresh isolated `.olean` artifacts for the complete
 or use the old `.lake` directory. This is a clean import-closure experiment,
 not the repository `./run-lean.sh` acceptance gate or native-C build timing.
 It runs exactly one Lean process with `LEAN_NUM_THREADS=1`, `-j1` and
-`--tstack=131072`; each process has a 12 GiB hard address-space bound. A 0.2 s
+`--tstack=131072`; no virtual-address-space limit is imposed. A 0.2 s
 monitor enforces a sampled 12 GiB process-group RSS threshold and a conservative
 4 GiB host/cgroup available-memory reserve. The VM cap is 16 GiB; no swap device
 is present and observed cgroup swap use is zero. No `systemd-run` is used.
@@ -86,9 +86,8 @@ peak RSS 1,539,657,728 bytes are failed-probe measurements, not build timings.
 ## Isolated backfill and proof boundary
 
 `ApiFixtures.lean` checks expression construction, instantiation, evaluation,
-command diagnostics and rejection of an ill-typed application. The sole
-`bounded_val` theorem is checked by `rfl`; unsafe evaluation is observable
-metaprogram execution, not a theorem-proof shortcut.
+command diagnostics and rejection of an ill-typed application. Unsafe evaluation
+is observable metaprogram execution and supplies no theorem proof.
 
 `StringReference.lean` retains the old String operations found in
 Tools/LatexTerm and Tools/LatexSolkey; `StringFixtures.lean` supplies isolated
@@ -97,13 +96,13 @@ Unicode, empty values, malformed wrappers and alternative labels. Reference
 passes on v4.24.0; candidates pass on v4.35.0. These are examples, not universal
 equivalence proofs or a certification of original functions. Both versions pass
 KeySort and the common API fixture. Final fixture logs/results are
-`fixtures-old-2/` and `fixtures-new-3/` under the evidence directory.
+`fixtures-old-3/` and `fixtures-new-4/` under the evidence directory.
 Earlier exploratory fixture failures remain saved and are not passing gates.
 
-Five Python controls pass: nested-comment/string/character masking, continued
+Six Python controls pass: nested-comment/string/character masking, continued
 string line accounting across all actual Tools files, same-line attributes,
-current assigned census/missed commands, and interruption of a real fake-runtime
-child followed by termination/reaping. SIGTERM handling is reviewed statically;
+current assigned census/missed commands, explicit rejection of prebuilt caches for clean/multi-target runs, and
+interruption of a real fake-runtime child followed by termination/reaping. SIGTERM handling is reviewed statically;
 that regression specifically injects KeyboardInterrupt. No Lean server is used
 by those tests.
 
@@ -127,3 +126,32 @@ settings; escalate any regression and STOP above 10%; finish declaration/API and
 axiom audits; obtain independent milestone reviews; export final patch/bundle,
 frozen-interface hashes, cross-directory report and valid CLOUDVM-RESULT.
 No replacement goal or continuation is created by this lane.
+
+## Resource-run correction
+
+Old clean attempt 2 stopped after 193 passing dependencies at Calculus.TermSize
+with `failed to create thread` (exit -6), 1244.94 s incomplete wall time and
+3,848,314,880-byte sampled aggregate peak across completed/failed checks. The
+extra 12 GiB RLIMIT_AS in the first runner confused virtual stack reservations
+with resident memory. A same-source, explicitly non-clean single-module probe
+passed after removing RLIMIT_AS: 28.21 s, 1,663,352,832-byte sampled RSS peak.
+A process sample showed 13,404,156 KiB virtual size versus 1,418,968 KiB RSS.
+The repository explicitly warns about this distinction. Resident-memory budgets
+remain unchanged: existing 16 GiB hard VM cap, sampled 12 GiB RSS guard, 4 GiB
+available reserve, no swap. CORE dumps are disabled. The old run and warm probe
+are diagnostic evidence, not a clean timing comparison. Restart both toolchain
+runs under the revised identical guard before any comparison.
+
+Prebuilt artifacts are permitted only for one explicitly named diagnostic
+fixture/probe and are recorded as `clean:false`; they cannot satisfy build or
+performance acceptance. They assume unchanged dependencies and may shadow newer
+outputs, so they are not certification for modified dependency trees. Independent
+finder and skeptic reviewed this resource correction without Lean or edits.
+
+Before each restarted clean measurement, `release-cache.py --output <receipt>`
+uses best-effort POSIX_FADV_DONTNEED only on this lane's off-Git evidence files,
+including unpacked toolchains and old output artifacts. It deletes or modifies
+no artifact and does not drop system-global caches. This frees unused archive
+pages before the reserve guard; it does not establish a fully cold OS/source
+cache. Clean build means fresh isolated Lean artifacts with no artifact restores.
+The same cache-release procedure and resident-memory policy apply to both runs.

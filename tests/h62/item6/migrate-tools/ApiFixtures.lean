@@ -6,13 +6,8 @@ These do not import or certify any assigned Tools declaration. No registration.
 namespace H62.ToolsMigrationFixtures
 open Lean Meta Elab Command Term
 
-/-- Intrinsic witness keeps the finite bound in the value's type. -/
-def bounded (n : Nat) : Fin (n + 1) := ⟨n, Nat.lt_succ_self n⟩
-
-theorem bounded_val (n : Nat) : (bounded n).val = n := rfl
-
 /-- The same expression-construction/evaluation boundary as Tools.Common.
-This executes metaprogram code; the theorem above is a separate kernel proof.
+This executes metaprogram code and supplies no theorem proof.
 -/
 elab "#tools_api_fixture" : command => liftTermElabM do
   let expression ← mkAppM ``String.length #[toExpr "abc"]

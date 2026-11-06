@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Clean serial .olean closure experiment; NOT run-lean.sh/full acceptance.
 One Lean process (-j1), no artifact-cache restores, 12GiB aggregate RSS guard,
-4GiB available-memory reserve, 12GiB per-process address-space hard limit.
+4GiB available-memory reserve, existing 16GiB hard VM cap. Virtual stack
+reservations are not constrained as though they were resident memory.
 Logs and measurements live outside Git. Stop on first failed dependency.
 """
 import argparse, fcntl, json, os, resource, signal, subprocess, sys, time
@@ -18,9 +19,10 @@ def signal_group(proc, signum):
     except ProcessLookupError: pass
 
 def limits():
-    resource.setrlimit(resource.RLIMIT_AS, (12*GIB, 12*GIB))
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
-def build(root, toolchain, output, fixtures=()):
+def build(root, toolchain, output, fixtures=(), prebuilt_lib=None):
+    if prebuilt_lib is not None and len(fixtures) != 1: raise SystemExit("prebuilt imports are permitted only for one explicitly named fixture/probe")
     if output.exists(): raise SystemExit("refusing non-clean output directory")
     output.mkdir(parents=True)
     data = census(root)
@@ -31,8 +33,10 @@ def build(root, toolchain, output, fixtures=()):
             by_name[name] = path
     from census import imports
     ordered, seen, active = [], set(), set()
+    forced = {str(f).removesuffix(".lean").replace("/", ".") for f in fixtures}
     def visit(name):
         if name in seen or name not in by_name: return
+        if name not in forced and prebuilt_lib is not None and (prebuilt_lib / (name.replace(".", "/") + ".olean")).exists(): return
         if name in active: raise RuntimeError("import cycle: " + name)
         active.add(name)
         for imp in imports(by_name[name].read_text()): visit(imp)
@@ -45,10 +49,10 @@ def build(root, toolchain, output, fixtures=()):
             by_name[name] = path; visit(name)
     else:
         for row in data["modules"]: visit(row["module"])
-    env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(output / "lib"), LEAN_ABORT_ON_PANIC="1")
+    env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=(str(prebuilt_lib) + os.pathsep if prebuilt_lib is not None else "") + str(output / "lib"), LEAN_ABORT_ON_PANIC="1")
     result = {"command": [str(toolchain / "bin/lean"), "-j1", "--tstack=131072", "-o", "<isolated-lib/module.olean>", "<source>"],
-        "toolchain": str(toolchain), "clean": True, "kind": "serial olean import closure; not full acceptance", "modules_planned": ordered,
-        "status": "running", "limits": {"rss_bytes": 12*GIB, "available_reserve_bytes": 4*GIB, "address_space_bytes": 12*GIB, "threads": 1}, "modules": []}
+        "toolchain": str(toolchain), "clean": prebuilt_lib is None, "prebuilt_lib": str(prebuilt_lib) if prebuilt_lib is not None else None, "kind": "serial olean import closure/probe; not full acceptance", "modules_planned": ordered,
+        "status": "running", "limits": {"rss_bytes": 12*GIB, "available_reserve_bytes": 4*GIB, "hard_vm_cap_bytes": int(Path("/sys/fs/cgroup/memory.max").read_text()), "threads": 1}, "modules": []}
     for exe in ["lean", "lake"]:
         result[exe + "_version"] = subprocess.check_output([str(toolchain / "bin" / exe), "--version"], text=True).strip()
     start = time.monotonic(); peak = 0
@@ -94,6 +98,7 @@ def build(root, toolchain, output, fixtures=()):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--root", type=Path, required=True); ap.add_argument("--toolchain", type=Path, required=True); ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--fixture", type=Path, action="append", default=[])
+    ap.add_argument("--prebuilt-lib", type=Path)
     args = ap.parse_args()
     signal.signal(signal.SIGTERM, handle_termination)
     lock = open("/tmp/solidity-lean-feature-groups-20261025/writer.lock", "a")
@@ -101,4 +106,4 @@ if __name__ == "__main__":
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=args.root, text=True):
         print("Working tree status (review before continuing):", flush=True)
         subprocess.run(["git", "status", "--short"], cwd=args.root, check=True)
-    raise SystemExit(build(args.root, args.toolchain, args.output, args.fixture))
+    raise SystemExit(build(args.root, args.toolchain, args.output, args.fixture, args.prebuilt_lib))
