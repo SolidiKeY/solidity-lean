@@ -1,8 +1,14 @@
+"""Guard H44 regressions: approved-source JSON disguises and hidden root-history additions.
+
+Controls generate oversized payloads only inside disposable Git repositories.
+"""
 import hashlib
 import json
 import os
 from pathlib import Path
 import subprocess
+import shlex
+import sys
 import tempfile
 import unittest
 
@@ -104,6 +110,100 @@ class SizeCheck(unittest.TestCase):
         status, rows = self.run_gate()
         self.assertEqual(status, 1)
         self.assertTrue(any(r.get("path") == "huge.dat" and r.get("bytes") == 2000000 for r in rows))
+
+    def check_approved_json_is_data(self, body):
+        approval = self.root / "scripts/h55/result-size-cache/approved-source.json"
+        approval.parent.mkdir(parents=True)
+        approval.write_text(json.dumps({"large.py": hashlib.sha256(body).hexdigest()}))
+        self.git("add", "scripts/h55/result-size-cache/approved-source.json")
+        self.git("commit", "-qm", "trusted approval fixture")
+        self.base = self.git("rev-parse", "HEAD").strip()
+        (self.root / "large.py").write_bytes(body)
+        status, rows = self.run_gate()
+        self.assertEqual(status, 1)
+        self.assertTrue(any(r.get("path") == "large.py" and r.get("kind") == "data" and r.get("result") == "fail" for r in rows))
+
+    def test_approved_long_integer_json_does_not_gain_source_limit(self):
+        self.check_approved_json_is_data(b"1" * 102401)
+
+    def test_approved_deep_json_does_not_gain_source_limit(self):
+        self.check_approved_json_is_data(b"[" * 60000 + b"0" + b"]" * 60000)
+
+    def test_unrelated_root_addition_cannot_hide_behind_later_deletion(self):
+        original_branch = self.git("symbolic-ref", "--short", "HEAD").strip()
+        self.git("checkout", "--orphan", "historical")
+        (self.root / "big.dat").write_bytes(b"x" * 102401)
+        self.git("add", ".")
+        self.git("commit", "-qm", "root bulk addition")
+        root_commit = self.git("rev-parse", "HEAD").strip()
+        self.git("rm", "big.dat")
+        self.git("commit", "-qm", "delete before merge")
+        self.git("checkout", original_branch)
+        self.git("merge", "--allow-unrelated-histories", "--no-edit", "historical")
+        status, rows = self.run_gate()
+        self.assertEqual(status, 1)
+        self.assertTrue(any(r.get("scope") == "commit:" + root_commit and r.get("path") == "big.dat" and r.get("result") == "fail" for r in rows))
+
+    def test_replacement_refs_cannot_hide_historical_bulk(self):
+        (self.root / "big.dat").write_bytes(b"x" * 102401)
+        self.git("add", "big.dat")
+        self.git("commit", "-qm", "bulk addition")
+        addition = self.git("rev-parse", "HEAD").strip()
+        self.git("rm", "big.dat")
+        self.git("commit", "-qm", "delete bulk")
+        empty = self.git("commit-tree", self.base + "^{tree}", "-p", self.base, "-m", "replacement fixture").strip()
+        self.git("replace", addition, empty)
+        status, rows = self.run_gate()
+        self.assertEqual(status, 1)
+        self.assertTrue(any(r.get("path") == "big.dat" and r.get("result") == "fail" for r in rows))
+
+    def test_shallow_and_grafted_histories_refused(self):
+        (self.root / "small").write_text("small")
+        self.git("add", "small")
+        self.git("commit", "-qm", "second")
+        tip = self.git("rev-parse", "HEAD").strip()
+        shallow = self.root / self.git("rev-parse", "--git-path", "shallow").strip()
+        shallow.write_text(tip + "\n")
+        result = subprocess.run(["python3", str(SCRIPT), self.base], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("shallow history", result.stderr)
+        shallow.unlink()
+        grafts = self.root / self.git("rev-parse", "--git-path", "info/grafts").strip()
+        grafts.parent.mkdir(exist_ok=True)
+        grafts.write_text(tip + " " + self.base + "\n")
+        result = subprocess.run(["python3", str(SCRIPT), self.base], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("grafted history", result.stderr)
+
+    def test_clean_filter_cannot_hide_oversized_raw_worktree_bytes(self):
+        transform = self.root / ".git/clean-fixture.py"
+        transform.write_text("import sys; sys.stdin.buffer.read(); sys.stdout.write('{}')\n")
+        self.git("config", "filter.fixture.clean", shlex.join([sys.executable, str(transform)]))
+        (self.root / ".gitattributes").write_text("old.json filter=fixture\n")
+        self.git("add", ".gitattributes")
+        self.git("commit", "-qm", "filter fixture")
+        self.base = self.git("rev-parse", "HEAD").strip()
+        (self.root / "old.json").write_bytes(b"x" * 102401)
+        self.assertEqual(self.git("diff", "--name-only"), "")
+        result = subprocess.run(["python3", str(SCRIPT), self.base], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("transforming Git attributes", result.stderr)
+
+    def test_staging_after_captured_inventory_cannot_yield_pass(self):
+        (self.root / "seed.dat").write_text("small")
+        driver = self.root / ".git/census-race.py"
+        driver.write_text("import builtins,importlib.util,pathlib,subprocess,sys\n"
+            + "spec=importlib.util.spec_from_file_location('gate'," + repr(str(SCRIPT)) + ")\n"
+            + "gate=importlib.util.module_from_spec(spec);spec.loader.exec_module(gate)\n"
+            + "original=builtins.print;changed=False\n"
+            + "def intercept(*a,**kw):\n global changed\n original(*a,**kw)\n if not changed:\n  changed=True\n  pathlib.Path('late.dat').write_bytes(b'x'*102401)\n  subprocess.run(['git','add','late.dat'],check=True)\n"
+            + "builtins.print=intercept\n"
+            + "try: sys.exit(gate.main())\n"
+            + "except RuntimeError as e: sys.stderr.write(str(e));sys.exit(2)\n")
+        result = subprocess.run([sys.executable, str(driver), self.base], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("repository inputs changed", result.stderr)
+        self.assertFalse(any(row.get("summary") == "pass" for row in map(json.loads, result.stdout.splitlines())))
 
     def test_index_flags_and_fifo_fail_closed(self):
         self.git("update-index", "--assume-unchanged", "old.json")
