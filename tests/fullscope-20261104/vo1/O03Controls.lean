@@ -1,6 +1,7 @@
 import Solidity.Optimizer.CSE
 import Solidity.Optimizer.Laws
 import Solidity.Optimizer.Inline
+import Solidity.Optimizer.Pipeline
 
 /-!
 # O03 common-subexpression elimination controls
@@ -201,6 +202,23 @@ def callMem : Stmt C G (.mem (.array (.prim .uint)) :: G) :=
 
 theorem mem_call_kept : Stmt.inl callMem = callMem := rfl
 
+/-! ## The whole pipeline -/
+
+/-- `uint a = 2; f(a + 3);` with `f(x) { require(x > 3); }`. -/
+def e2e : Prog C [] [.val .uint] :=
+  .cons (.declLocal .uint (.user "a") (some (lit 2)))
+    (.cons (.call "f" (.snoc .nil .uint (.user "x") (add (.simple (.local .here)) (lit 3)))
+      .none fBody) .nil)
+
+/-- One round: inlined, `x = 5` propagated, `require(5 > 3)` folded and dropped, the
+unused `x` removed: `uint a = 2; { }`. -/
+theorem e2e_optimized : Prog.optimize 1 e2e =
+    .cons (.declLocal .uint (.user "a") (some (lit 2))) (.cons (.block .nil) .nil) := rfl
+
+theorem e2e_same : Prog.runC (Prog.optimize 1 e2e) = Prog.runC e2e := Prog.optimize_runC 1 e2e
+
+#print axioms Prog.optimize_runC
+#print axioms e2e_optimized
 #print axioms inlineBlock_runC
 #print axioms Prog.inl_runC
 #print axioms call_inlined

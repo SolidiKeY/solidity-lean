@@ -3229,6 +3229,7 @@ import Solidity.Optimizer.Controls
 import Solidity.Optimizer.Inline
 import Solidity.Optimizer.Laws
 import Solidity.Optimizer.Pass
+import Solidity.Optimizer.Pipeline
 import Solidity.Optimizer.Propagate
 import Solidity.Optimizer.RoadmapComposition
 import Solidity.Optimizer.Simplify

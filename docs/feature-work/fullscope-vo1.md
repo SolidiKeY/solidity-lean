@@ -1144,3 +1144,15 @@ CSE across storage statements: pure entries (`Val.isPure`) survive `assign`, `de
 `pop` (`Avail.keep`, `Avail.holds_keep` via `Val.evalT_keep` and `KeepsLocals`); impure
 entries (storage/memory reads) are dropped there, so a storage write never leaves a stale
 storage-read entry. Control `cse_across_store`.
+
+## Certified pipeline — 2026-11-06
+
+`Optimizer/Pipeline.lean`: `round Γ Γ' = Pass.pipeline [Prog.inl, Prog.cprop Facts.empty,
+Prog.simplify, Prog.cfold, Prog.cse [], Prog.uve]`, `Prog.optimize n` (n rounds),
+`round_preserves`, `optimize_preserves`, `Prog.optimize_runC n P : Prog.runC
+(Prog.optimize n P) = Prog.runC P` (no premise), all through the unchanged O01
+`Preserves.pipeline`. End-to-end control `e2e_optimized`: `uint a = 2; f(a + 3);` with
+`f(x) { require(x > 3); }` becomes `uint a = 2; { }` in one round (inline, propagate
+`x = 5`, fold `require(5 > 3)` to `true` and drop it, remove the unused `x`).
+For consumers (VO2/VT): `Prog.optimize`/`Prog.optimize_runC` are the stable entry points;
+no published `Pass.lean` signature changed.
