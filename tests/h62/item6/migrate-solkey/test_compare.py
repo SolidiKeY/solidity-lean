@@ -14,7 +14,7 @@ SPEC.loader.exec_module(C)
 def baseline():
     return {'complete': True, 'modules': [{'module': 'M', 'exit': 0, 'stop': None}],
             'tooling_sha256': {'measure.py': 'fixed', 'census.py': 'fixed'},
-            'settings': {'threads': 1}, 'source_identity_sha256': 'fixed',
+            'settings': {'threads': 1, 'mode': 'assigned-closure'}, 'source_identity_sha256': 'fixed',
             'wall_seconds': 100, 'max_child_rss_kib': 100}
 
 
@@ -31,6 +31,11 @@ class AcceptanceControls(unittest.TestCase):
                        {'modules': [{'module': 'different', 'exit': 0, 'stop': None}]}]:
             new = baseline(); new.update(change)
             with self.assertRaises(ValueError): C.compare(baseline(), new)
+
+    def test_diagnostic_modes_are_not_build_acceptance(self):
+        for mode in ['interface-fixture','per-file']:
+            old=baseline(); old['settings']['mode']=mode
+            with self.assertRaises(ValueError): C.compare(old, copy.deepcopy(old))
 
     def test_invalid_metrics(self):
         for value in [float('nan'), float('inf'), -1, 0]:

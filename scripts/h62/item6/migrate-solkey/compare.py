@@ -14,6 +14,8 @@ def compare(old, new):
             raise ValueError(label+' run has no complete closure marker')
     if not old.get('tooling_sha256') or old['tooling_sha256'] != new.get('tooling_sha256'):
         raise ValueError('measurement/census tooling differs or is unrecorded')
+    if any(run['settings'].get('mode') != 'assigned-closure' for run in [old,new]):
+        raise ValueError('clean-build acceptance requires assigned-closure runs')
     if old['settings'] != new['settings']: raise ValueError('resource/cache settings differ')
     if [m['module'] for m in old['modules']] != [m['module'] for m in new['modules']]:
         raise ValueError('module sets/order differ')

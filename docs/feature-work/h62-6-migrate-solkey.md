@@ -59,8 +59,8 @@ block. They are lexical evidence, not elaborated interface equivalence.
 
 `tests/h62/item6/migrate-solkey/FrozenInterfaces.lean` inventories all constants
 owned by the five modules, including private and command-generated constants,
-with universe parameters, kernel type expressions and available definition/proof
-value expressions. It requires entries for
+with declaration kind, universe parameters, kernel type expressions and definition,
+proof and opaque value expressions. It requires entries for
 every module and all three named theorems. It also prints the three theorem
 axiom sets. Output belongs off Git. This helper has not yet been elaborated;
 no successful semantic interface or axiom audit is claimed.
@@ -132,3 +132,58 @@ repository-pinned snapshot resolves those setup failures without source edits.
 in `docs/feature-work/after-roadmap-va1.md` to the optional Bridge Mathlib
 checkout. The new handoff introduces no missing Lean path. No fix outside the
 assigned scope is attempted. Logs are under off-Git `static-gates/`.
+
+## Corrected physical-memory measurement bounds
+
+The initial old pilot failed at `Solidity.Calculus.TermSize` with exit -6:
+`libc++abi: terminating due to uncaught exception of type lean::exception:
+failed to create thread`. It ran for 1462.017 s before stopping; maximum child
+RSS was 3,296,560 KiB. This is a failed partial pilot, not an accepted baseline.
+The extra RLIMIT_AS cap incorrectly limited virtual stack reservations. The
+repository explicitly distinguishes these reservations from RSS.
+
+A diagnostic recheck without that extra virtual-address limit passed TermSize
+in 29.830 s under the actual VM cgroup. A live sample showed 13,404,156 KiB
+virtual size versus 1,051,480 KiB RSS. No cgroup OOM event was recorded. The first
+diagnostic attempt failed because the new output root shadowed the supplied
+import root; the runner now places the existing import root first. Both failed
+attempts are retained as evidence, without theorem/source changes.
+
+Accepted measurements use the existing physical cgroup cap of 17,179,869,184
+bytes (16 GiB), no configured swap, a 4 GiB reserve checked against both host
+availability and cgroup headroom before launch and during each job, serial
+explicit `-j1`, bounded TERM/KILL cleanup, and no artificial virtual-address
+limit. Old and new comparisons require identical runner/census hashes, resource
+settings, module order and source/fixture hashes. Per-file and inventory modes
+cannot count as clean-build acceptance.
+
+Every completed module records its output OLean SHA256. Inventory mode requires
+a complete assigned-closure report, matching source identity and Lean/Lake
+versions, and verifies every imported OLean hash. Diagnostic per-file mode is
+explicitly separate and can use a partial closure to reproduce provisioning
+failures. Five scanner, five acceptance, and five interface controls currently
+pass; these Python controls do not replace Lean elaboration.
+
+## External prerequisite migration request
+
+The exact official 4.35.0 attempt passes KeySort, AST and SpecSyntax, then fails
+`Solidity/Syntax/Raw.lean` with five errors at lines 597, 650, 665, 682 and 684.
+`String.drop` now yields `String.Slice`; direct String consumers and Slice.toList
+fail, String.dropRight is unavailable, and passing endsWith without eta expansion
+fails overloaded-pattern inference. Warnings also report deprecated String.mk
+and Slice.dropRight. This dependency is outside this lane's write scope.
+
+Typed blocker: `EXTERNAL_DEPENDENCY_MIGRATION`. Recipient: Syntax migration
+owner through migrate-root-gate. Request an owner-approved compatible prerequisite
+overlay/artifacts on the coordinator's official pin, preserving exact types,
+semantics and budgets. No edit to Raw is made here, and no reply is inferred.
+The complete diagnostic and shortest dependency chains for all five assigned
+modules are saved in off-Git `dependency-blockers.json`. Every assigned module
+reaches Raw, so none can currently complete on the new compiler.
+
+`StringApiControls.lean` adds eight isolated case controls for the reported API
+boundaries, including Unicode, hash-name prefix stripping, function/return
+spelling, positive and negative location suffixes. These are finite case proofs,
+not a proof of Raw's parser correctness or a dependency migration. They are
+awaiting serial per-file checks on both toolchains. No original statement,
+premise, exclusion, observation or budget is changed.
