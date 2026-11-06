@@ -1,4 +1,4 @@
-import Solidity.Frontend.StatementGrammarH28.AtomTry
+import Solidity.Frontend.StatementGrammarH28.AtomAsm
 
 /-! Arbitrarily nested statements and item lists over expression atoms.
 
@@ -160,6 +160,11 @@ inductive AtomStmt : {k : SCtx} → Syn (.stmt k) → List Tok → Nat → Prop 
   | revertExpr {k : SCtx} {x : Syn .simple} {ss : List Tok} {a : Nat} :
       SimpleAtom x (.ident "revert" :: ss) a → revertExprNext (ss ++ [.punct .semi]) = true →
       AtomStmt (k := k) (.simpleStmt x) (.ident "revert" :: ss ++ [.punct .semi]) (a + 1)
+  | asm {k : SCtx} {evm : Bool} {flags : List String} {fts : List Tok}
+      {body : Syn (.list .yulStmt)} {ys : List Tok} {a : Nat} :
+      AsmFlags flags fts → YulBodyAtom body ys a → ys.head? = some (.punct .lbrace) →
+      AtomStmt (k := k) (.assembly evm flags body) ([.kw .assembly] ++ evmToks evm ++ fts ++ ys)
+        (a + 1)
   | tryS {k : SCtx} {e : Syn .expr} {es : List Tok} {a : Nat}
       {xs : Syn (.list (.item k))} {parts : List (List Tok)} {b : Nat}
       {c : Syn (.catchClause k)} {cts : List Tok} {f : Nat}
@@ -534,6 +539,9 @@ theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List T
     exact for_atom_step hc hv (n + d + 1) l s hb
   | _, _, _, _, .simpleS hx hh, n, s, _, _ => simple_stmt_coverage hx hh n s
   | _, _, _, _, .revertExpr hx hr, n, s, _, _ => revert_expr_coverage hx hr n s
+  | _, _, _, _, .asm (a := a) hf hy hl, n, s, _, _ => by
+    rw [show n + (a + 1) + 6 = (n + 6) + a + 1 by omega]
+    exact asm_step hf hy hl (n + 6) s
   | k, _, _, _, .tryS (e := e) (es := es) (a := a) (xs := xs) (parts := parts) (b := b)
       (c := c) (cts := cts) (f := f) (cs := cs) (cparts := cparts) (g := g)
       he hi hbp hc hcs, n, s, _, hf => by

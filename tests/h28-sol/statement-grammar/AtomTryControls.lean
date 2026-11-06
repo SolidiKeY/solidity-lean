@@ -1,8 +1,9 @@
 import Solidity.Frontend.StatementGrammarH28.AtomNested
 import Solidity.Frontend.StatementGrammarH28.G0Nodes
+import Solidity.Frontend.StatementGrammarH28.G0Rejections
 
-/-! Controls for `try` statements, catch clauses and contextual `revert`
-expression statements in the mutual atom fragment: every new constructor of
+/-! Controls for `try` statements, catch clauses, `assembly` statements and
+contextual `revert` expression statements in the mutual atom fragment: every new constructor of
 `AtomStmt`, `AtomCatch` and `AtomCatches` inhabited, coverage at every excess
 fuel and catch-free suffix, kernel parses, nesting inside blocks and
 conditionals, and negative controls for the greedy catch loop and the
@@ -174,6 +175,47 @@ theorem revert_ident_not_expr (y : String) (ts : List Tok) :
 /-- Negative: `catch` is not a simple-statement head. -/
 theorem catch_not_simple_head : simpleHeadList [.kw .catch_] = false := by decide
 
+/-- `{ assembly {} assembly "evmasm" ("memory-safe") {} }`: both dialect
+forms and both flag forms through the premises. -/
+def asmItems : Syn (.list (.item .body)) :=
+  .cons (.stmtItem (.assembly false [] .nil))
+    (.cons (.stmtItem (.assembly true ["memory-safe"] .nil)) .nil)
+
+def asmParts : List (List Tok) :=
+  [[.kw .assembly] ++ evmToks false ++ [] ++ [.punct .lbrace, .punct .rbrace],
+   [.kw .assembly] ++ evmToks true ++
+      ([.punct .lparen] ++ [.str (ascii "memory-safe")] ++ [.punct .rparen]) ++
+      [.punct .lbrace, .punct .rbrace]]
+
+theorem asm_items_relation : AtomItems asmItems asmParts 9 :=
+  .stmtCons (.asm .none empty_yul_body rfl)
+    (.stmtCons (.asm (.some memory_safe_flag_atom) empty_yul_body rfl) .nil)
+
+theorem asm_block_coverage (n : Nat) (s : St) :
+    stmt (n + 9 + 6) .body (locatedInput (braces asmParts.flatten) s) =
+      .ok (.blockStmt (.block asmItems), s) :=
+  atom_stmt_coverage (.block asm_items_relation) n s (Or.inl rfl) (Or.inl rfl)
+
+/-- The kernel parses the canonical rethrow statement of the accepted fixture
+(`assembly ("memory-safe") { revert(add(raw, 32), mload(raw)) }`), consuming
+every token, and the linked rethrow twin admits it (no rejection). -/
+theorem rethrow_asm_kernel :
+    (stmt 16 .body (locatedInput [.kw .assembly, .punct .lparen, .str (ascii "memory-safe"),
+      .punct .rparen, .punct .lbrace, .ident "revert", .punct .lparen, .ident "add",
+      .punct .lparen, .ident "raw", .punct .comma, .yulDec 32, .punct .rparen, .punct .comma,
+      .ident "mload", .punct .lparen, .ident "raw", .punct .rparen, .punct .rparen,
+      .punct .rbrace] ⟨[], [], 0⟩)).toOption.map
+      (fun p => (g0Rejections p.1, (g0NodeCtors p.1).take 3, p.2.ts.length)) =
+      some ([], [.assembly, .cons, .yulExprStmt], 0) := by
+  decide +kernel
+
+/-- Negative: an unknown dialect string is not `"evmasm"`; it is neither a
+flag list nor a Yul body, and the actual parser fails. -/
+theorem asm_unknown_dialect_refused :
+    (stmt 10 .body (locatedInput [.kw .assembly, .str (ascii "other"), .punct .lbrace,
+      .punct .rbrace] ⟨[], [], 0⟩)).toOption.isNone = true := by
+  decide +kernel
+
 #print axioms try_relation
 #print axioms try_coverage
 #print axioms try_token_unique
@@ -194,4 +236,8 @@ theorem catch_not_simple_head : simpleHeadList [.kw .catch_] = false := by decid
 #print axioms revert_block_coverage
 #print axioms revert_ident_not_expr
 #print axioms catch_not_simple_head
+#print axioms asm_items_relation
+#print axioms asm_block_coverage
+#print axioms rethrow_asm_kernel
+#print axioms asm_unknown_dialect_refused
 end Solidity.Frontend.StatementGrammarH28

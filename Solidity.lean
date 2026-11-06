@@ -2925,6 +2925,7 @@ import Solidity.Frontend.SolcJson.YulWalkPath
 import Solidity.Frontend.SolcJson.YulWords
 import Solidity.Frontend.Source
 import Solidity.Frontend.SourceUnits
+import Solidity.Frontend.StatementGrammarH28.AtomAsm
 import Solidity.Frontend.StatementGrammarH28.AtomCall
 import Solidity.Frontend.StatementGrammarH28.AtomConditional
 import Solidity.Frontend.StatementGrammarH28.AtomNested
