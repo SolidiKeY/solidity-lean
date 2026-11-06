@@ -58,7 +58,7 @@ def main():
             assert hashlib.sha256(artifact.read_bytes()).hexdigest() == record["olean_sha256"]
         env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(EVIDENCE/"olean"))
         results = []
-        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean", TESTS+"ValuesDefaultsWitnesses.lean", TESTS+"ValuesDefaultsFidelity.lean", TESTS+"UnitsSuccess.lean", TESTS+"UnitsSuccessFidelity.lean"]:
+        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean", TESTS+"ValuesDefaultsWitnesses.lean", TESTS+"ValuesDefaultsFidelity.lean", TESTS+"UnitsSuccess.lean", TESTS+"UnitsSuccessFidelity.lean", TESTS+"ProvisionedCensus.lean"]:
             current = int(Path("/sys/fs/cgroup/memory.current").read_text())
             cap = int(Path("/sys/fs/cgroup/memory.max").read_text())
             assert cap-current >= 4*1024**3, "Insufficient 4 GiB reserve"
@@ -135,7 +135,46 @@ def main():
         units_log = (EVIDENCE/"UnitsSuccessFidelity-checked.log").read_text()
         assert units_log.count("AUDIT-FULL-INPUTS Solidity.Frontend.Static.unitsChecker_complete via ") == 1
         assert "sorryAx" not in units_log
-        print("39 source witnesses and static resolution success controls checked; full assignment pending")
+        module_inventory = json.loads((EVIDENCE/"provisioned-module-inventory.json").read_text())
+        assert module_inventory["base"] == BASE
+        provisioned = {r["module"]: r for r in module_inventory["selected"]}
+        whole_log = (EVIDENCE/"ProvisionedCensus-checked.log").read_text()
+        all_rows = [json.loads(line.split("AUDIT-DECL ", 1)[1]) for line in whole_log.splitlines() if "AUDIT-DECL " in line]
+        assert len(all_rows) == len({r["name"] for r in all_rows})
+        assert {r["module"] for r in all_rows} <= set(provisioned)
+        module_markers = re.findall(r"^AUDIT-MODULE (\S+) theorem-count=(\d+)", whole_log, re.M)
+        assert len(module_markers) == len({m for m, _ in module_markers}) == len(provisioned)
+        assert {m for m, _ in module_markers} == set(provisioned)
+        module_counts = {m: int(count) for m, count in module_markers}
+        for module, count in module_counts.items():
+            assert count == sum(row["module"] == module for row in all_rows)
+        witnesses = {}
+        for log_name in ["ClosureFidelity", "ValuesListsFidelity", "ValuesDefaultsFidelity", "UnitsSuccessFidelity"]:
+            content = (EVIDENCE/(log_name+"-checked.log")).read_text()
+            for name, witness in re.findall(r"^AUDIT-(?:WITNESS|FULL-INPUTS) (\S+) via (\S+):", content, re.M):
+                assert name not in witnesses
+                witnesses[name] = witness
+        assert len(witnesses) == 39
+        assert set(witnesses) <= {r["name"] for r in all_rows}
+        for row in all_rows:
+            provenance = provisioned[row["module"]]
+            row["source_path"] = provenance["path"]
+            row["frozen_source_sha256"] = provenance["frozen_source_sha256"]
+            row["owner"] = None
+            row["owner_status"] = "live-producer-identity-unconfirmed"
+            row["historical_last_change"] = provenance["historical_last_change"]
+            row["witness"] = witnesses.get(row["name"])
+            row["status"] = "witness-checked" if row["witness"] else "uncovered-interface-classification-and-witness-pending"
+            row["hypothesis_roles"] = "pending; see reviewed witness modules for covered statement classification"
+        all_rows.sort(key=lambda row: row["name"])
+        result = dict(base=BASE, modules=len(provisioned), module_counts=module_counts, declarations=all_rows,
+            witnessed=len(witnesses), unprovisioned_modules=module_inventory["unprovisioned"],
+            limitations=module_inventory["limitations"])
+        (EVIDENCE/"statement-census.json").write_text(json.dumps(result, sort_keys=True, indent=2)+"\n")
+        uncovered = [r for r in all_rows if not r["witness"]]
+        (EVIDENCE/"uncovered-statements.tsv").write_text("name\tmodule\towner_status\n"+"".join(
+            r["name"]+"\t"+r["module"]+"\tlive-producer-identity-unconfirmed\n" for r in uncovered))
+        print(f"{len(all_rows)} exact theorem constants in {len(provisioned)} modules; 39 witnessed; {len(uncovered)} pending; full assignment pending")
 
 if __name__ == "__main__":
     main()

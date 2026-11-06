@@ -15,6 +15,7 @@ elab "#audit_module " mod:ident : command => do
     match info with
     | .thmInfo _ => if env.getModuleIdxFor? name == some idx then some name else none
     | _ => none
+  logInfo m!"AUDIT-MODULE {mod.getId} theorem-count={names.length}"
   for name in names.mergeSort Name.quickLt do
     let some info := env.find? name
       | throwError "missing declaration: {name}"
