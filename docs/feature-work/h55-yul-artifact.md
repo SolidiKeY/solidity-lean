@@ -290,3 +290,11 @@ Absolute delivery paths:
 `/workspace/h55-yul-artifact-evidence/SHA256SUMS`.
 The off-git handoff records the final full checkpoint head; this tracked document
 cannot contain the hash of its own commit. The full persistent goal is unfinished.
+
+## H82 successor: shared-header validation and first concrete adapter
+
+On the original VY2 branch, the inherited `Artifact` and `CompletionControls` drafts now pass pinned Lean4.24 checks against a coherently rebuilt120-module source closure. An initial import collision exposed mixed EVM dependency caches; it disappeared after the current-source rebuild. No producer source was changed. `ClzLowering` passed in205seconds within the unchanged300-second per-file bound. All closure workers used one thread; the largest peak was1406348KiB. Exact measurements and source hashes are in `/workspace/vy2-evidence/h55-successor-check/report.json`.
+
+`tests/h55/yul-artifact/ScopedControlAdapter.lean` adds the first concrete adapter, for `ScopedControlCompilation.Artifact`. It derives the common zero-prefix artifact's forward and reflection fields from existing producer theorems, preserves code, and uses `Artifact.Image` to retain the full original producer and emission/selection evidence. Both image/source roundtrips and producer recovery are proved. A real `lower1` skip result inhabits the image; the original zero-fuel refusal remains explicit. Image losslessness does not claim that arbitrary common artifacts recover an original producer. The adapter check passed in1second at1031812KiB.
+
+`tests/h55/yul-artifact/ArtifactAudit.lean` prints all eight shared-header/artifact theorem axiom sets; six adapter reports are printed in its own module. Every report uses only the existing standard axioms, with no `sorryAx`. Finder and skeptic inspected both directions, zero-prefix handling, actual inhabitance and retained refusal, found no confirmed defect, and ran no Lean/server/tests. Nine statement-tool and five timing-tool controls pass. Existing production definitions and theorem statements remain unchanged. This is one validated producer definition out of38, not whole-family migration, fullscope acceptance, a full build, or a valid before/after performance claim. Remaining adapters, source kinds, all family migrations, matched benchmarks and final gates remain open.
