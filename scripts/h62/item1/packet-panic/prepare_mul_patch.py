@@ -16,6 +16,7 @@ after = before.replace("import Solidity.Backend.PrimitivePackets.CheckedMul.Agre
 statements = {
     "exact_panic_bytes": "Source.panicData .arithmetic =\n    [0x4e,0x48,0x7b,0x71] ++ List.replicate 31 0 ++ [0x11]",
     "panic_not_truncated": "Source.panicData .arithmetic ≠\n    [0x4e,0x48,0x7b,0x71,0x11]",
+    "panic_not_empty": "Source.panicData .arithmetic ≠ []",
 }
 for name, statement in statements.items():
     old = f"theorem {name} : {statement} := by\n  first | decide | rfl | omega"
