@@ -5383,6 +5383,46 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePath.lean:Solidity.Backend.MemoryCopies.fixed_reference_path_select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePath.lean:Solidity.Backend.MemoryCopies.fixedReferencePath": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathControls.actual_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathControls.actual_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathControls.empty_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathControls.long_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePathControls.lean:Solidity.Backend.MemoryCopies.FixedReferencePathControls.wrong_slot_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_loop_abort": [
   "Classical.choice",
   "Quot.sound",
