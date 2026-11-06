@@ -1,0 +1,44 @@
+--- a/scripts/check-axiom-pins.mjs
++++ b/scripts/check-axiom-pins.mjs
+@@ -90,7 +90,7 @@
+   })(dir);
+   for (const [f, part] of parts) {
+     mkdirSync(dirname(join(root, f)), { recursive: true });
+-    writeFileSync(join(root, f), JSON.stringify(part, null, 1) + "\n");
++    writeFileSync(join(root, f), JSON.stringify(Object.fromEntries(Object.entries(part).sort(([a], [b]) => a.localeCompare(b))), null, 1) + "\n");
+   }
+ }
+ 
+--- a/scripts/coord-tools/fragments.py
++++ b/scripts/coord-tools/fragments.py
+@@ -128,11 +128,19 @@
+ def frag_of(d, key): return f"{d}/{pins_file(key)[:-len('.lean')]}.json"
+ 
+ 
++def reject_duplicate_pairs(pairs):
++    out = {}
++    for key, value in pairs:
++        if key in out: raise ValueError(f"duplicate JSON key {key}")
++        out[key] = value
++    return out
++
++
+ def json_parts(t, d, errors):
+     """{fragment path: dict} of a pins fragment directory."""
+     fs = ordered(t, d, "json", errors); t.prefetch(fs); out = {}
+     for f in fs:
+-        try: obj = json.loads(t.read(f))
++        try: obj = json.loads(t.read(f), object_pairs_hook=reject_duplicate_pairs)
+         except ValueError as e: errors.append(f"{f}: {e}"); continue
+         if not isinstance(obj, dict): errors.append(f"{f}: not an object"); continue
+         for k, v in obj.items():
+@@ -365,6 +373,9 @@
+     try: a, b = json.loads(gen), json.loads(comb)
+     except ValueError as e: notes.append(f"{c}: {name}'s file is not JSON ({e}); left"); return False
+     errors = []; parts = json_parts(w, d, errors); cur = {}
++    if errors:
++        notes.extend(errors)
++        return False
+     for obj in parts.values(): cur.update(obj)
+     ok = True; changed = set()
+     def put(k, v):
