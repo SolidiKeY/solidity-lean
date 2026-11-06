@@ -6,13 +6,57 @@ Batch `hard-20261106`, branch `cloud/hard-20261106/m7-decision`, base
 modules), the `Examples/Decision*.lean` splits and the M7-next section of
 `docs/automation.md`.
 
-## Status: stopped at a scope question (2026-11-06)
+## Status
 
-No Lean source was changed. Work queue items 1, 2, 3 (forward bridge) and 5
-wait on the scope question below; item 4 (module times) is measured by the
-full build recorded under "Gates".
+**2026-11-06, Q1 answered.** The coordinator relayed the user's answer to Q1
+[Residue]: **route-refusal Residue**. Residue is the named refusal of each
+pipeline route, with VA1's finer source reasons reported where they apply,
+each refusal with a fixture; exact and decidable; verdict correctness proved.
+In the user's words to be stated plainly: **"total off Residue" holds by
+definition, so `DecisionTheorem'` is not a completeness result**, and it is
+not presented as one here, in its docstring or in `docs/automation.md`.
 
-## Why the assigned statement needs a scope decision
+## Checkpoint 1: the residue and `DecisionTheorem'` (items 1, 2, 5)
+
+`Calculus/DecisionResidue.lean`:
+
+* `RouteRefusal`: the routes of `decideGoal` in order (`dependent`, `quant`,
+  `array`, `ledger`, `ledgerBlock`, `arrayBlock`, `memory`, `kint`, `kenc`,
+  `quantLedger`, `hash`), each with a one-line reason.
+* The refusals, computed from each route's front end, never from
+  `decideGoal`: `Fml.leafARefuses` (the six reductions return `none`),
+  `Fml.memRefuses`, `Fml.kintRefuses`, `Fml.kencRefuses`,
+  `Fml.quantLedgerRefuses`, `Fml.leafRefuses`, `Fml.hashRefuses` (every
+  hash try answers `unknown`; a try is itself a decision, so this one
+  refusal is stated on the try's verdict).
+* `Fml.residue` (Bool) and `Fml.Residue` (Prop) with a `Decidable` instance.
+* Exactness, route by route: `decideLeafA_unknown_iff`,
+  `decideMem_unknown_iff`, `decideKInt_unknown_iff`, `decideKEnc_unknown_iff`,
+  `decideQuantLedger_unknown_iff`, `decideLeaf_unknown_iff`,
+  `decideHash_unknown_iff`, and `residue_iff_unknown`.
+* `DecisionTheorem'`: for every waiver setting, contract and leaf in
+  `Fml.inTarget w` with `¬ Fml.Residue`, either `decideGoal φ = .proved` and
+  `Fml.ValidH φ`, or `decideGoal φ = .refuted σ` and `¬ Fml.holdsH σ φ`. The
+  hash premise is the goal's own (e3′); no global premise. The target premise
+  is not used by the proof (stated to keep the theorem about the user's
+  fragment).
+* `decideGoal_proved_iff_off_residue` (the verdict is exact off the residue)
+  and `decisionTheorem_iff_residue_disjoint` (the unchanged `DecisionTheorem w`
+  holds exactly when no in-target leaf is in the residue; later milestones
+  may only shrink it).
+* `Fml.sourceReasons`: VA1's source classes decidable from the leaf alone
+  (two-binder and primitive-prefix normalization budget, mapping-bearing
+  reversed field, array path kinds); `Fml.routeRefusals`; `Fml.residueReasons`
+  (source reasons then route reasons, empty exactly off the residue,
+  `residueReasons_eq_nil_iff`). VA1's halting-`||` class is parameterized by
+  contract roots and is not reported (its fixtures are residue members below).
+  `DecisionTheorem`, `Fml.inTarget`, `Fml.Covered`, `Waivers` and every route
+  are unchanged.
+
+`Examples/DecisionResidue.lean`: residue members per reason, witness
+controls per route family (item 5), and the negative control.
+
+## Q1 evidence (kept for the record)
 
 The assignment asks for a decidable `Fml.Residue` that is *exactly* the set of
 in-target goals `decideGoal` answers `unknown` on, built from named, documented

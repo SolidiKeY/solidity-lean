@@ -1,0 +1,1 @@
+| `Examples/DecisionResidue.lean` | M7-next: residue members per named reason (halting `||` APF guard valid and false, VA1 mapping-field and normalization-budget reasons, hash tries), witness controls (an in-target non-residue leaf per route family answered through `DecisionTheorem'`) and the negative control (a valid and a false residue leaf, neither claimed). |
