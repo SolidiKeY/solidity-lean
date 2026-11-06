@@ -33,3 +33,5 @@ filename exclusions and incomplete location count; both were corrected. Neither
 review used a Lean server. The initial creation of these two files was performed
 without the required writer lock; concurrent writer status was not checked. Subsequent
 changes and commit preparation used the lock.
+
+H70 routing: the host-only relay accepted an owner ticket for V14. Exact revert consumers, first-statement and tail revert cases, nested location cases and owner requests are recorded in `tests/h62/item1/evm-lemmas/case-accounting.md`. This is static source accounting; no owner permission, extraction or passing proof gate is inferred.
