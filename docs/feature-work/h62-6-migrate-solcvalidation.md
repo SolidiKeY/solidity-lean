@@ -1,7 +1,7 @@
 # H62 item 6 — SolcValidation migration overlay
 
-Status: **BLOCKED on external-owner migration for acceptance**. The existing
-serial measurement queue continues independently; this is not migration acceptance. No `RUNTIME_GATE_PASS`.
+Status: **BLOCKED on owner migrations and the full-baseline resource gate**.
+Both corrected full-build attempts and automatic collection have finished; neither full gate passed. No `RUNTIME_GATE_PASS`.
 
 The coordinator resolved Q-PERF-1: a per-module time or memory increase does
 not stop a migration lane. Record the module numbers and continue the matched
@@ -36,7 +36,7 @@ for coordinator retrieval. No claim of a delivered relay or owner permission.
    unchanged. `DataLayout` emits two deprecated-name warnings (`dif_pos`,
    `dif_neg`), retained pending any owner-approved cleanup. Full acceptance blocked.
 3. **Partial:** directory build and affected fixtures pass. A matched clean
-   repository-wide comparison is running old then new with identical settings.
+   repository-wide attempts finished with identical settings: old resource-stopped, new failed.
    Per-module growth is recorded; external owner failures still prevent final acceptance.
 4. **Partial:** reviewable patch, bundle, source/declaration hashes, dependency
    report and checksummed evidence exported. All 33 explicit original kernel
@@ -364,7 +364,7 @@ failed executable evaluation. This is an **EXTERNAL_OWNER_MIGRATION** blocker,
 not a failure to install the toolchain. KeySort itself already passed on both.
 The exact-file request DEP-SORTCHECK-1 is saved in owner-requests.json for the
 coordinator/root migration relay. No SortCheck source or pin is edited here.
-The matched full comparison continues independently; a new full gate cannot be
+The matched full attempts are now complete and nonpassing; a new full gate cannot be
 accepted until its owning lane supplies a compatible parser overlay.
 
 
@@ -424,16 +424,93 @@ line 76 and dependent lines 77–82; frozen old executable passes 377/131/131).
 Earlier complete diagnostic locations also include Hash/CollisionBound,
 Language/FixedPoint, Semantics/AbiAccess and Backend/AbiEntry/RawFreeTransport;
 these remain requests for the appropriate migration owners, not write scope here.
-The corrected queued new run will provide the full current diagnostic set.
+The completed corrected new run now supplies the full diagnostic set: 18 source files failed.
 All required final passing validation and the accepted full-build ratio remain
 unfinished until owner overlays are available. No statement, premise, proof
 budget or trust pin has been weakened to bypass them.
 
 The original goal is **blocked, not complete**, on these producer migrations.
-The already-started old→new measurement queue continues on this VM, followed
-by the lightweight collector; exact process/session IDs are saved in handoff.json.
+The old→new measurement queue and lightweight collector have both finished;
+their obsolete process/session IDs and completed outcomes are saved in handoff.json.
 No additional Lean job or competing goal is started. The coordinator can wake
 this original goal when owner migrations land, inspect the saved completed
 comparison, and resume the final affected/full gate. The reviewed patch, bundle,
 frozen-interface hashes, exact-file requests and checksum manifests are exported
 for that handoff. Questions are empty; the per-module-growth question is resolved.
+
+
+## H70 receipts and completed comparison — current authoritative state
+
+The corrected queue and collector are finished. No Lean or collector process
+remains active. The old clean full attempt stopped at the existing availability
+reserve guard (exit 125, RESOURCE_STOP): 3019.171153 s wall and 8479391744 bytes
+sampled process-group peak RSS. That peak is below the 12 GiB RSS cap, so the
+available-headroom guard triggered; its exact instantaneous estimate was not
+recorded. The interrupted run's kernel child maxRSS is not a complete subtree
+peak and must not be substituted for the sampled group figure.
+The new clean full attempt failed (exit 1): 249.754759 s wall and 3541495808 bytes
+sampled process-group peak. Neither is a passing full build. The accepted wall
+and RSS deltas are **null**. These attempt durations cannot support a speedup
+or regression ratio. No bound was raised, source weakened, or cache-enabled run
+substituted for a clean baseline.
+
+The collector has sealed matched-full-comparison.json and
+matched-full-comparison-SHA256SUMS. The deterministic follow-up is
+`scripts/h62/item6/migrate-solcvalidation/seal-full-evidence.py`:
+
+`python3 scripts/h62/item6/migrate-solcvalidation/seal-full-evidence.py --evidence /workspace/solcvalidation-evidence`
+
+completed-full-evidence.json contains the complete diagnostics for 18 failed
+new-toolchain source files and these seven successful module observations.
+They are rounded Lake log durations, not a successful full-build comparison.
+Both complete logs were produced without applying any H70 overlay.
+
+| Module | Old rounded seconds | New rounded seconds |
+|---|---:|---:|
+| Solidity.KeySort | 1.4 | 1.4 |
+| Solidity.Yul.Builtins | 2.0 | 1.6 |
+| Solidity.SolcValidation.Dialect | 0.58 | 0.423 |
+| Solidity.SolcValidation.DataLayout | 0.502 | 0.432 |
+| Solidity.Frontend.SolcJson.IrImport | 0.576 | 0.475 |
+| Solidity.SolcValidation.DataResolution | 0.284 | 0.238 |
+| Solidity.Frontend.SolcJson.IrImportControls | 3.4 | 3.6 |
+
+All three assigned modules and their direct IR importer/controls build on each version.
+This additional affected-consumer evidence does not clear whole-repository gates.
+Independent read-only finder and skeptic verified the attempt records, 18-file
+failure census, module observations, and absence of an accepted ratio. Neither
+used Lean/server or edited files.
+
+The H70 owner payloads are preserved **off Git** under h70-inbox. Their exact
+checksums match the coordinator-provided identities:
+
+- Hash overlay: 3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff;
+  ticket head 78c110f83dc1a30700acd1b5bd34b19f61da6ccd,
+  source head 2a18afcdba00a85645b0b3079704f78ffcd78860.
+- FixedPoint prerequisite: a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82;
+  ticket head 479f6e0079409a1867483dbffe5051932b8fa754,
+  source head d8e1d9721455d3671882f19aa7155fbbd2d91415.
+
+Read-only `git apply --check` passes for each payload against the pinned checkout.
+**Neither patch was applied** to the branch or immutable measurement snapshots.
+This is byte-identity and context applicability, not Lean validation, full owner
+acceptance, or merge permission. The saved H70 disposition explicitly records
+host delivery acceptance as unknown; the host relay journals decide that state.
+Hash remains partial with full gates and Syntax.Raw pending. FixedPoint remains
+partial with full migration gates pending. A local transcription context error
+was corrected before the FixedPoint artifact matched its exact owner checksum;
+no mismatching payload was applied or retained as authoritative.
+
+Current waits remain exactly the H70 routing disposition: migrate-sortcheck for
+Parser/String.trim, migrate-hash for CollisionBound, migrate-language for
+FixedPoint, migrate-semantics for AbiAccess, and migrate-abientry for
+RawFreeTransport. Current-owner delivery to migrate-abientry is still pending;
+no agreement is inferred from routing. All other observed cross-directory errors
+are retained in the completed report for migrate-root-gate. A successful clean
+old full baseline under the unchanged memory/reserve bounds also remains
+unresolved. There is no remaining authorized producer repair inside this lane.
+
+The goal remains unfinished and acceptance **blocked**. Wait for owner-complete
+migration inputs and root-gate handling of the old full-baseline resource stop.
+Do not restart the same unpatched full builds, edit owner files, merge/push,
+relax budgets, create a new goal or schedule a competing continuation.
