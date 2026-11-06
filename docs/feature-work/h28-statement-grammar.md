@@ -2447,3 +2447,76 @@ arbitrary catch parameters, general compound framing and final whole-repository
 acceptance remain unfinished. SG-CEX-01/02 and the SOL-EU exclusion are unchanged.
 No solc semantic catch-validity claim follows from these kernel token-parser
 proofs; previous external fixture results remain separate evidence.
+
+
+## Checkpoint AD — concrete try-statement composition
+
+Rebased onto published `c460b20c15fd99d207a1297b49eb340608a129ee` after verifying
+original-base ancestry and byte-identical owned Lean/tests. The recovery ref
+`refs/backup/statement-grammar/pre-c460b20c` preserves `528be0a5`. AB/AC sources are now published, but their central imports remain pending;
+the new try module also awaits central registration. No old proof or implementation is refactored.
+
+[TryCoverage](../../Solidity/Frontend/StatementGrammarH28/TryCoverage.lean)
+proves the actual statement parser on a restricted, inhabited try fragment:
+exactly an identifier call with empty positional arguments; no return parameters;
+an empty success block; a required first `BooleanCatch` and arbitrary finite
+`BooleanCatchList` tail. Catch bodies retain the earlier recursive Boolean item
+fragment. Identifier names are arbitrary token payload strings. This does not
+cover arbitrary calls, nonempty success blocks or return-parameter variants.
+
+Two exact prefix equations expose the actual expression/header/block composition
+before catch parsing. The fixed `f() {}` header followed by a catch has definite
+lookahead, so the expression parser does not consume the success block as call
+options. The generalized prefix permits any locations on that following catch.
+`boolean_try_coverage` then composes the actual proved catch-list `many` result
+and existing typed-list inverse. Sufficient statement fuel is
+`n + max firstClauseBound tailBound + 10`, for every excess `n` and suffix state
+satisfying the exact `NoFollowingCatch` greedy terminal frame. No successful
+parse is assumed; clause bounds are constructed from syntax in AB/AC. Existing
+universal following-statement framing discharges the terminal frame when used
+before any actual statement yield.
+
+`BooleanTry.attempt` is an inhabited relation indexed by existing statement
+syntax, actual tokens and the arithmetic bound. It introduces no alternate AST.
+`boolean_try_fragment_coverage` and `boolean_try_fragment_yield` expose actual
+parser/yield equations; common sufficient fuel proves fragment token/tree
+uniqueness. `boolean_try_derives` and `boolean_try_actual_yield_unique` concern
+actual derivations/layouts within the fragment. Expressions are fixed call
+atoms here; SOL-EU is neither assumed nor proved. Grammar parsing of a call or
+Boolean catch signature does not establish Solidity semantic try validity.
+
+The exact source inventory is nine theorems: two prefix equations; direct
+coverage/yield; fragment coverage/yield; token uniqueness; Derives; actual-yield
+uniqueness. [Public audit](../../tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean)
+checks all nine signatures plus the relation constructor and pins all 10 axiom
+messages with `#guard_msgs`. [Controls](../../tests/h28-sol/statement-grammar/TryCoverageControls.lean)
+have 14 theorems with 14 individual axiom pins, for 24 audited declarations total.
+
+Controls construct arbitrary natural-number catch-body depth and clause-list
+width, prove actual parsing and layout-preserving yields, exercise both plain
+and signature first clauses (including arbitrary optional names), plain-only
+and multi-clause tries, preserve a real following return statement, and establish
+an inhabited actual grammar derivation. Negative controls reject a missing catch,
+missing success block, empty catch parameters and insufficient fuel. A concrete
+try consumes two clauses when a second catch is supplied as suffix, retaining
+the necessity of the greedy terminal frame. These are kernel token-parser
+controls, not new solc semantic acceptance fixtures.
+
+Initial diagnostics required a syntax indentation fix, explicit flattening in
+the many rewrite and an explicit intrinsic context in a control helper. Raw failed
+iterations remain evidence; no theorem/premise/exclusion/budget changed. Source,
+controls and preliminary control gates passed. Exact committed-head gates,
+final finder/skeptic reviews, cache and seal remain handoff acceptance requirements.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.TryCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/TryCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. General try calls/success bodies/return parameters,
+arbitrary catch parameter types/lists, general compound boundary framing and
+remaining general parser coverage/final whole-repository acceptance remain open.
+SG-CEX-01/02 and all original exclusions/budgets are retained. Historical solc
+fixture evidence is separate from these universal restricted kernel proofs.
