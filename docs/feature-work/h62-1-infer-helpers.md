@@ -27,3 +27,41 @@ Next: configure the pinned toolchain and serial -j1 driver without reusing
 4.24 artifacts; obtain the required KeySort prerequisite; finish census,
 fixtures and additive helpers, compare exact behavior and timings, arrange
 owner coordination and independent reviews, then perform all required gates.
+
+## Shape census and migration blocker (continuation)
+
+`check_shapes.py` compares the six declarations with fixed token snapshots,
+ignoring whitespace. It is a lexical check, not a Lean parser, proof, or
+reference scanner. `test_shapes.py` checks all six against independent branch
+mutations, and checks duplicate declarations, token splitting and absent files.
+Both this test and `test_census.py` pass on the pinned base.
+
+The source case inventory below covers the 18 `STy` constructors. Mapping
+and payable columns are the expected Boolean outputs of both copies; the
+location column is the expected output of both copies. For bytes/string,
+`loc` is the input location, including memory, storage and calldata.
+
+| Constructors | Mapping | Payable | Conversion location |
+| --- | --- | --- | --- |
+| `mapping` | true | false | memory |
+| `address`, `contract` | false | true | memory |
+| `bytes`, `string` | false | false | loc |
+| `int`, `bool`, `fixedBytes`, `fixed`, `enum`, `udvt`, `array`, `struct`, `fn`, `rational`, `hexConst`, `stringLit`, `tuple` | false | false | memory |
+
+These are source observations, not kernel-checked equivalence theorems.
+
+On the unchanged base, the pinned 4.35.0 `./run-lean.sh` run used the
+separate cache and external Lake configuration recorded in the evidence
+directory, `LEAN_NUM_THREADS=1`, `-j1` per Lean process, a 12 GiB virtual
+memory limit and the writer lock. The log shows `Solidity.KeySort` built in
+1.5 s and then errors in `Solidity/Hash/CollisionBound.lean` (first at line
+407: unsolved goal) and `Solidity/Language/FixedPoint.lean` (first at line
+152: `generalize` failed). The already-failed run was interrupted, exit 130;
+it did not complete the final gate. These files are outside this lane. No
+runtime-gate pass or before/after comparison is claimed. Continue with
+in-scope backfill; full validation requires the toolchain-migration owners
+ to supply a compatible base, without changing frozen statements.
+
+The writer-lock and exact-file ownership rules remain in force. A filesystem
+search did not find `relay.sh` on this VM; no owner request or approval is
+claimed. No inferencer merge or edit was made.
