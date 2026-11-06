@@ -61,3 +61,7 @@ python3 scripts/h62/item4/generic-passes/measure.py --run-id paired-1 --acceptan
 ```
 
 The scripts derive the checkout root, use a fresh v4.35 artifact tree and preserve older logs. The generated census can be reproduced using `census.py --output PATH` and compared with its manifest. Full external evidence, original patch, committed head/base, hashes and unfinished obligations accompany the final external `HANDOFF.md` and `SHA256SUMS`. This checkpoint is not completion of the four-checkpoint queue.
+
+## H82 retirement update
+
+Human-authorized stop-and-handoff to `solidity-inline-assembly5-20261031/vy3-compilation`. No new proof implementation. Original assignment, queues, exact scope and retirement record are committed in `tests/h62/item4/generic-passes/handoff/` with their own SHA256SUMS. The original thread was transcribed; ownership JSON formatting is normalized, and the rendered-prompt SHA is provenance only. H82 withdraws earlier exact-file requests for statement-preserving proof-only work; statement/dependent-definition/interface/budget/axiom/exclusion changes still need the owner. Earlier blocker sections above describe the historical checkpoint, not permission requirements after H82. All unvalidated proof, final-gate and timing obligations pass to the successor. No H71 push permission is available, so nothing is pushed. No tool exposes PAUSED: only stop_goal(complete|blocked) is available; no completion/block substitution or replacement goal is created.
