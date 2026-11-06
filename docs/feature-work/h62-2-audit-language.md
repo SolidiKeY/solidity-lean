@@ -9,6 +9,93 @@ The exported `handoff.json` records the full committed head without a self-hash
 inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
 
+## H70 continuation: exhaustive source classification, semantic boundary retained
+
+H70 accepted both migration owner relays. Their repairs remain waits, not
+permission for this audit lane to edit originals. `relay.sh` is host-only;
+its absence on this VM is not an installation task or blocker.
+
+Every one of the 4,146 frozen source candidates now has a per-statement source
+classification, with zero omissions/exclusions and zero parse errors. Records
+include explicit and leading-result binders, source-declared proof/data sorts,
+Type-valued certificate fields, shared-variable dependencies, section context,
+include/omit/open history, definition evidence and separate ownership roles.
+Private declarations remain included (194 private, 3,952 public/protected).
+This classifies a conservative source superset; it does not declare every
+candidate an interface or turn source analysis into semantic certification.
+
+3,525 rows have source classifications for all header and referenced-context
+domains. 621 rows retain inferred/ambiguous domains explicitly in
+`h70-classification-final/unresolved-domains.json`. Section include/omit,
+auto-implicit parameters, actual private names and full imported telescope
+fidelity remain semantic obligations even for source-resolved rows. No new
+joint witness, global-premise inhabitance or totality claim was made.
+
+Known source-reviewed contract roles retain global laws separately from
+per-input feasibility: `PublicCorrectness`, Type-valued `Validator`, bounded
+`PaddingCorrect`, associated-code `MacroRefinement`, and the normal
+Source/model obligations. For example a validator's universal soundness law
+must coexist with its concrete validation-success, admission, well-formedness
+and profile premises; a proof that its structure is inhabited does not supply
+the whole tuple. Source field defaults and predicate-valued data fields are
+not treated as proof premises. Ambiguous symbol identities remain unresolved.
+
+| Ownership classification | Files | Declarations |
+|---|---:|---:|
+| One documented live scope owner | 127 | 1,270 |
+| Cleanup writer only; producer unresolved | 18 | 105 |
+| No documented live producer reservation | 244 | 2,771 |
+
+There are zero distinct-owner conflicts. The two DirectRuntime claims name
+the same owner and are deduplicated. Cleanup and migration reservations never
+stand in for a live producer, and unclaimed paths never default to `master`.
+The 262 exact paths needing authoritative routing are in
+`h70-classification-final/owner-routing.json`; the small in-scope request is
+`tests/h62/item2/audit-language/owner-resolution-request.json`.
+These are routing classifications, not new write authorization.
+
+The classifier reads frozen Git objects (including dependency definitions for
+name/sort evidence) and requires the external census to equal a fresh
+canonical census from the frozen maps, declarations and checksum-verified
+ownership snapshot. It rejects altered signatures, forged owners and missing
+candidates before creating output. It does not compile or edit dependencies.
+
+H70 validation:
+
+- `classify.py --census <evidence>/census-final/census.json --output
+  <evidence>/h70-classification-final`: exit 0; 58.753 seconds, 732,300 KiB
+  peak RSS. Exact command/outcome: `h70-classification-gate.json`.
+- `classification_acceptance.py` against that report: exit 0, all 4,146 IDs
+  reconciled, zero exclusions, and three provenance attacks rejected.
+  Evidence: `h70-classification-acceptance.log` and its `negative-controls.json`.
+- Independent deterministic regeneration: exit 0, 61.475 seconds, 735,008 KiB;
+  classification, owner routing and unresolved-domain files match byte for
+  byte. Evidence: `h70-reproduction-gate.json`.
+- The source-tool repeat was 4.63% slower; this is not a Lean before/after
+  regression measurement. No existing proof implementation or statement was
+  refactored. Full affected build/timing gates remain pending.
+
+Finder and skeptic independently reviewed this continuation without edits,
+Lean jobs or servers. Confirmed findings were fixed: default values falsely
+looked like proof fields; multiline proof fields were truncated; ambiguous
+names could select an unrelated certificate; external census owners/signatures
+were trusted; ASCII iff could be mistaken for a leading arrow. Regressions
+exercise these cases, dependent validator laws, existential conclusions,
+owner-role deduplication and the actual provenance attacks. Both final
+reviews pass for the source-classification checkpoint only. Initial failed
+preflights are retained as logs and are not counted as passing gates.
+
+The four H70 work items are source telescope classification, corrected owner
+roles/routing, mixed global/per-input contract evidence, and deterministic
+acceptance/negative controls. The original goal remains unfinished. Next work
+requires the named migration prerequisites and authoritative producer routing,
+then the 621 unresolved source domains, imported semantic fidelity, remaining
+joint witnesses, compiler success/negative controls, gas/fork boundaries and
+all final gates. The prior twelve certificates and all four Lean files remain
+unchanged; no Lean check or full runtime gate is newly claimed by this
+Python/documentation continuation. H70 evidence is off Git and enters the
+updated exported patch/handoff/checksum manifest.
+
 ## Work completed in this thread
 
 1. Recovered the older clean checkout without discarding work; fetched master,

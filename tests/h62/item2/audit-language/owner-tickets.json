@@ -14,7 +14,8 @@
     ],
     "impact": "Source.Machine/Hoare import chain stops before source program witnesses can be checked. Failed proofs also contaminate downstream axiom guard messages with sorryAx; no failed artifact is reused.",
     "requested_action": "Owner supplies its isolated migration overlay preserving every frozen statement; coordinator arranges approved consumption. Audit lane must not edit this owned original.",
-    "delivery": "saved for coordinator retrieval; no relay.sh available in this checkout; not claimed sent"
+    "delivery": "accepted by the named migration owner through coordinator H70 routing; prerequisite repair/delivery still pending",
+    "coordination_source": "H70 router user message following committed head 261852ee60b6e683d0cadbda95cc65579ccae4ee"
   },
   {
     "id": "B-MIGRATE-LANGUAGE",
@@ -38,15 +39,16 @@
     ],
     "impact": "Remaining fixed-point interfaces and their ABI/literal/storage satellite witnesses cannot be checked unchanged under the mandatory release.",
     "requested_action": "Migration owner repairs proofs in its own isolated overlay while retaining frozen signatures and budgets; coordinator relays approved prerequisite evidence. No ownership transfer or in-lane repair.",
-    "delivery": "saved for coordinator retrieval; not claimed sent"
+    "delivery": "accepted by the named migration owner through coordinator H70 routing; prerequisite repair/delivery still pending",
+    "coordination_source": "H70 router user message following committed head 261852ee60b6e683d0cadbda95cc65579ccae4ee"
   },
   {
     "id": "B-OWNER-CENSUS",
     "type": "owner-confirmation-and-elaborated-census-pending",
     "owner": "coordinator / live area producers",
-    "impact": "The conservative census has 4146 declarations; live owner candidates, private names and interface/hypothesis classification need confirmation. Migration registrations remain separate claims, never producer ownership.",
-    "evidence": "/workspace/h62-audit-language-evidence/fidelity-final/statement-fidelity.json",
-    "requested_action": "Resolve exact-file live owners from the pinned ownership snapshot before any existing-file edits; complete per-statement classification without exclusions."
+    "impact": "127 files / 1270 declarations have one documented live scope owner; 18 files / 105 declarations have cleanup writer only; 244 files / 2771 declarations have no documented live producer. Migration owners do not replace producers. DirectRuntime duplicate same-owner claims are deduplicated.",
+    "evidence": "/workspace/h62-audit-language-evidence/h70-classification-final/owner-routing.json",
+    "requested_action": "Coordinator supplies authoritative producer-owner routing for the 262 exact paths in the evidence artifact, or confirms explicitly unassigned status. No master ownership, transfer or edit permission is inferred."
   },
   {
     "id": "B-FINAL-GATES",
@@ -54,5 +56,13 @@
     "owner": "audit-language after prerequisite delivery",
     "impact": "./run-lean.sh, external Bridge package checks, compiler success/reject-all/always-revert controls, gas/fork boundaries, comprehensive witnesses and acceptance cannot be marked passed.",
     "requested_action": "Resume the original goal after owner prerequisites; run all required gates and independent reviews before any complete claim."
+  },
+  {
+    "id": "B-H70-SEMANTIC-CLASSIFICATION",
+    "type": "original-semantic-telescope-and-section-inclusion-pending",
+    "owner": "audit-language after migration prerequisite delivery",
+    "impact": "Every source candidate now has a detailed source classification. 621 rows retain unresolved/ambiguous domains; all source-level rows still need actual imported telescope/section-inclusion fidelity before semantic completion. No exclusions or new witnesses claimed.",
+    "evidence": "/workspace/h62-audit-language-evidence/h70-classification-final/unresolved-domains.json",
+    "requested_action": "Continue exact imported semantic classification after coordinator-approved prerequisites are available; preserve source signatures and do not infer inhabitance from source roles."
   }
 ]
