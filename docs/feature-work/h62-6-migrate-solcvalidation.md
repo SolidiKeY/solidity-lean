@@ -1,6 +1,7 @@
 # H62 item 6 — SolcValidation migration overlay
 
-Status: **RESUMED / PARTIAL**, not migration acceptance. No `RUNTIME_GATE_PASS`.
+Status: **BLOCKED on external-owner migration for acceptance**. The existing
+serial measurement queue continues independently; this is not migration acceptance. No `RUNTIME_GATE_PASS`.
 
 The coordinator resolved Q-PERF-1: a per-module time or memory increase does
 not stop a migration lane. Record the module numbers and continue the matched
@@ -195,9 +196,9 @@ no claim is made of a separate reviewer attestation file authored by the agents.
   SolKey sort checker and frontend consumer validation remain outstanding.
   KeySort is independently passing on both toolchains; this is not the complete
   SolKey executable conformance gate.
-- **GENERATED_API_REVIEW / H62.4:** all 33 explicit original kernel records
-  match exactly. Generated API changes remain a downstream/root review item;
-  they are separately inventoried and not mistaken for explicit type changes.
+- **GENERATED_API_REVIEW / H62.4 (scoped review complete):** all 33 explicit
+  kernel records match exactly. All generated deltas are classified below.
+  Downstream runtime acceptance remains part of the external-owner-blocked full gate.
 - **ROOT_GATE_ACCEPTANCE_PENDING / H62.4:** root lane must retrieve patch/bundle,
   assess regressions, combine external owner migrations and run its own gate.
 
@@ -365,3 +366,74 @@ The exact-file request DEP-SORTCHECK-1 is saved in owner-requests.json for the
 coordinator/root migration relay. No SortCheck source or pin is edited here.
 The matched full comparison continues independently; a new full gate cannot be
 accepted until its owning lane supplies a compatible parser overlay.
+
+
+## Final independent work and producer-blocked handoff
+
+Before each new item, fetched master and checked its log and relevant code.
+Latest fetched master is `5f7bb1441566aaad64a34436904afc61de762fd2`. Its selector remains v4.24.0; the three
+SolcValidation originals and SortCheck/Parser source hashes match pinned BASE.
+No relevant migration implementation or dependency repair landed, so the latest
+coordinator instruction's conditional rebase does not apply. Evidence is
+latest-master-check.json. No duplicate producer work or branch rewrite occurred.
+
+The scoped generated-API review is now **complete**. The deterministic
+`scripts/h62/item6/migrate-solcvalidation/review-generated-api.py` accounts for
+all 64 changed records: 28 noConfusion, 14 constructor injectivity, nine derived
+sizeOf, five Repr and eight equation/match auxiliary records. One removal and
+seven additions remain recorded, as do the two Repr propext dependency gains.
+Literal full-name and namespace-relative searches return zero hits at both BASE
+and fetched master. This does not cover all aliases, indirect or synthesized
+references and is not a theorem of downstream compatibility. No unsolicited
+source shim is justified by these results. Both independent read-only reviewers
+repeated the classification/checksum/search checks and found no concrete defect.
+
+The result collector is
+`scripts/h62/item6/migrate-solcvalidation/collect-full-comparison.py`.
+It starts no Lean process, edits no Git file and does not create a goal or Codex
+continuation. One lightweight process waits at most eight hours, sleeping no
+more than five seconds at a time, for the **existing** serial queue's completed
+old/new JSON results. It then writes matched-full-comparison.json and a separate
+matched-full-comparison-SHA256SUMS over completed outputs. Active logs are not
+hashed as completed evidence. Future code changes must not overwrite this
+pair's immutable snapshots/results.
+
+The collector validates the exact full run-lean command with the explicit
+existing SolKey input, each prepared lane's cwd and toolchain, fixed calibrated
+resource bounds, pinned identical sources and identical private configuration.
+Measurements and waiting bounds must be finite; RSS and wall must be positive.
+A failed, interrupted or resource-stopped gate produces **no accepted ratio**.
+The full wall threshold is strictly greater than ten percent, calculated with
+Decimal; per-module time or RSS growth does not stop the lane. Even two passing
+full builds leave root acceptance explicit. Eleven synthetic controls pass,
+including exact ten versus over ten percent, failed/resource stops, subset
+commands, duplicated toolchains, wrong cwd, nonfinite values and configuration
+mismatch. These controls are tooling tests, not actual migration measurements.
+Both independent read-only reviewers confirmed the false-success fixes.
+
+Commands and decisive controls:
+
+- `python3 scripts/h62/item6/migrate-solcvalidation/review-generated-api.py --evidence /workspace/solcvalidation-evidence --output /workspace/solcvalidation-evidence/generated-api-review.json`
+- `python3 scripts/h62/item6/migrate-solcvalidation/collect-full-comparison.py --evidence /workspace/solcvalidation-evidence --wait-seconds 28800`
+- generated-api-review.json records all 64 deltas and both zero-match searches.
+- full-comparison-controls.log records all eleven passing synthetic controls.
+
+The remaining accepted new-toolchain full gate requires an owner-produced
+**Solidity/SortCheck/Parser.lean** migration (DEP-SORTCHECK-1: String.trim removed,
+line 76 and dependent lines 77–82; frozen old executable passes 377/131/131).
+Earlier complete diagnostic locations also include Hash/CollisionBound,
+Language/FixedPoint, Semantics/AbiAccess and Backend/AbiEntry/RawFreeTransport;
+these remain requests for the appropriate migration owners, not write scope here.
+The corrected queued new run will provide the full current diagnostic set.
+All required final passing validation and the accepted full-build ratio remain
+unfinished until owner overlays are available. No statement, premise, proof
+budget or trust pin has been weakened to bypass them.
+
+The original goal is **blocked, not complete**, on these producer migrations.
+The already-started old→new measurement queue continues on this VM, followed
+by the lightweight collector; exact process/session IDs are saved in handoff.json.
+No additional Lean job or competing goal is started. The coordinator can wake
+this original goal when owner migrations land, inspect the saved completed
+comparison, and resume the final affected/full gate. The reviewed patch, bundle,
+frozen-interface hashes, exact-file requests and checksum manifests are exported
+for that handoff. Questions are empty; the per-module-growth question is resolved.
