@@ -276,4 +276,17 @@ theorem holds_skip : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Con
   exact holds_completed ctx control mode .skip True.intro post state 1 _
     (skip_run ctx control state)
 
+/-- Both raw modalities ignore pre-capture of the same authoritative word view,
+while retaining arbitrary whole-outcome postconditions. -/
+theorem holds_snapshot : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds mode code policy post
+ (Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state)) ↔
+ Solidity.Yul.RawFrame.Logic.holds mode code policy post state := by
+  intro ctx control mode code policy post state
+  cases mode <;> simp only [holds, RawFrame.run_snapshot]
+
 end Solidity.Yul.RawFrame.Logic

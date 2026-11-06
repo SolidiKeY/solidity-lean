@@ -927,4 +927,19 @@ theorem recursiveNegationContrast : Solidity.Yul.RawFrame.Logic.holds .box Solid
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.Logic.holds_skip
 
+/- Snapshot invariance concerns the same view, not arbitrary replacement words. -/
+#guard (RawFrame.capture rawInitial (RawFrame.view rawInitial)).raw flag ≠ rawInitial.raw flag
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 1
+  (RawFrame.capture rawInitial (fun _ => word 2))).map
+  (fun result => (RawFrame.view result.state flag).val) = some 2
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 1 rawInitial).map
+  (fun result => (RawFrame.view result.state flag).val) = some 1
+
+/-- info: 'Solidity.Yul.RawFrame.run_snapshot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_snapshot
+/-- info: 'Solidity.Yul.RawFrame.Logic.holds_snapshot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.holds_snapshot
+
 end Solidity.Yul.Checks.LocalBlock
