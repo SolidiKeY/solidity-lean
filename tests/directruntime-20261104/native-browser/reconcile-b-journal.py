@@ -107,7 +107,7 @@ def main():
               "exactRequestObjectsEqual": sum(r["exactRequestObjectEqual"] for r in rows),
               "controls": ["selector drift rejected", "AST value drift rejected"],
               "primaryFilesUnchanged": True,
-              "boundary": "Exact original journal received;84 source/compiler/case identities reconcile. Requests differ: original has raw metadata/sourceId, observed has normalized line metadata. Common fields match; absent fields are inventoried, not restricted to metadata by this checker. Only four primary files have before/after metadata snapshots; referenced sources are content-hashed once. No exact-journal backend replay or semantic equivalence claimed. Existing STOPs/pending/refusals remain."}
+              "boundary": "Exact original journal received;84 source/compiler/case identities reconcile. Complete request equality is reported per case. Common fields match; absent fields are inventoried, not restricted to metadata by this checker. Only four primary files have before/after metadata snapshots; referenced sources are content-hashed once. This checker reconciles saved data; it does not execute backends or prove semantic equivalence. Existing STOPs/pending/refusals remain."}
     with args.output.open("x") as f:
         f.write(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"cases": len(rows), "commonValueDifferences": 0,

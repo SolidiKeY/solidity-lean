@@ -468,3 +468,29 @@ This clears only the exact B delivery wait. Prior four pending diamond cases,
 The A H44 archive is still pending. Under H88 no new cache shipment or semantic
 gate is inferred from the old343-module pack. Original full acceptance remains
 open. All bulk stays outside Git with the committed checksum manifest.
+
+## Exact B journal functional replay
+
+[Replay manifest](../../tests/directruntime-20261104/native-browser/b-original-replay-manifest.json)
+advances the preceding receipt-only checkpoint. The exact delivered original
+84-request journal now runs through native and real Chromium WASM. All84
+complete request objects and reconstructed compact wire lines match delivery.
+Results match across backends:64 proved,16 refuted,4 pending, with all64 required
+positives and72 concrete halt expectations satisfied. Positive Identity diamond
+passes both compiler modes in both backends; paired controls reject vacuity.
+Statuses also match the earlier normalized-request run. These are trusted
+compiled-checker observations, not source/compiler preservation or proof terms.
+
+The run revalidates prior fresh H81 binaries and343 source hashes; no new
+runtime build occurred. Freshly compiled companion fixtures bind source/compiler
+provenance; submitted ASTs come from the exact original journal. The141.65s
+functional run used12GiB/no swap/CPU1, sampled RSS1.376GB and minimum outer
+headroom10.587GB. Native trace and browser asset observations found no forbidden
+environment/kernel loads. No performance benchmark was rerun.
+
+Finder and skeptic requested this mode-specific wording. The executed harness
+is archived; the subsequent edit changes only report boundary text. The final
+checker and syntax gates pass. Four pending storage diamond cases,13 unsupported
+C constructs, the existing browser stack failure and both timing STOPs remain.
+External A data and reviewed producer repairs remain required; no final runtime
+gate or whole-assignment completion is claimed.
