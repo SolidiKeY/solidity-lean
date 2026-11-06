@@ -3360,3 +3360,72 @@ Reviews (read-only, without the Lean server):
 
 Checkpoint @32bc4776f: all gates PASS except axiom-pins, which reported only
 the removed pin and two new ones; pins rewritten in the next commit.
+
+### Nested `cdToMem` from typed source (G18.05, 2026-11-06, follow-up)
+
+User decision (2026-11-06): `STy.implicit` compares array element types
+ignoring data location. Implemented as `(τ.withLoc l').same τ'` in the
+array arm (`Solidity/Source/Types.lean`; `STy.withLoc` moved there from
+`Typing.lean`), the comparison `STy.copiesTo` already used and solc's
+`ArrayType::isImplicitlyConvertibleTo`. This closes the open finder item of
+the previous entry: `uint256[2][] calldata` and `uint256[2][] storage`
+convert to `uint256[2][] memory`; static length, element type and target
+location are still compared exactly. No theorem statement changed, no
+premise was added, no proof needed repair for the change itself (the Bool
+and Option checkers call `STy.implicit` directly, so `hasType_iff` holds by
+construction; `implicit_of_copiesTo` still closes).
+
+`Solidity/Source/CalldataNestedCopyControls.lean` (new):
+
+- `nested_implicit`, `storage_nested_implicit`, `pointer_implicit` and the
+  refusals `length_refused`, `element_refused`, `to_calldata_refused`,
+  `to_storage_refused` (all `rfl`, for every `isBase`).
+- `convRV_cd_static_ok`: an implicit conversion of any `calldata`
+  reference to a `cdToMem_static_ok` target runs `cdToMem` and keeps
+  `MemOK`, never `stuck`. Premises: `σ.loc? = some .calldata` and the
+  target shape with `cdCopyElem`. It sits in the controls module so that
+  `Calldata.lean`'s dependents are not rebuilt.
+- `w_copy`: the `StmtD` derivation of `uint256[2][] memory c = xs;` for a
+  `uint256[2][] calldata` parameter; `w_copy_ok` instantiates
+  `convRV_cd_static_ok` for it; `convRV_nested` runs the conversion by
+  `rfl` to the previous entry's `nested` copy.
+- `elabN` (`#guard`, end to end): elaborated, deployed and called;
+  `[[1,2],[3,4]]` gives `c[1][0] = 3`; `bool[2][]` copies with length 2
+  and a `bool` element holding 2 reverts with no data; a `uint256[3][]`
+  target is refused at elaboration. No theorem links `w_copy` to the
+  elaborated contract; the `#guard`s cover that path.
+- `dynamic_elements_stuck`: see below.
+
+Storage→memory: `loadMem` already copies nested arrays (inner arrays
+allocated by `loadElem`); the change only makes it typable
+(`storage_nested_implicit`); no further control.
+
+Master merge port: six master `Lowering/G19` modules (`ReturnTail`,
+`AssignmentDoWhile{Break,Continue,Return}`, `AssignmentForBreak`,
+`AssignmentWhileReset`, plus `AssignmentBlocks`) applied `Source.evalE`
+directly to a state; they gain `(plan := none)`, the optParam default
+(only `have` types change).
+
+Reviews (read-only, without the Lean server):
+
+- **Finder.** Confirmed (medium): the change also admits `bytes[]`,
+  `string[]` and `uint256[][]` `calldata` to memory, as solc does, but
+  `cdToMem` copies no dynamically encoded element, so these copies are
+  `stuck`; and storage arrays of structs holding a mapping now convert to
+  memory and stop at `loadMem`'s mapping arm (solc refuses; the one-level
+  struct conversion already did this). Fixed by recording both in the
+  stuck census of `source-soundness.md` and the control
+  `dynamic_elements_stuck` (68a3ff07). Confirmed (medium):
+  `source-s02.md` stated nested storage-to-memory conversion is not
+  typable; corrected. Low: this entry records the closure of the previous
+  open item.
+- **Skeptic.** Claims survive: the arm matches solc on the stated cases;
+  typed source cannot build ill-formed mixed-location types (`Syn.tys`,
+  `Env.userTy` give inner elements the outer location); `w_copy` is a
+  genuine derivation, `convRV_cd_static_ok` is not vacuous, the ABI
+  payloads give the stated results; the `(plan := none)` edits change no
+  statement; `withLoc` is structural (no check-speed risk). Its confirmed
+  problems are the finder's two, fixed as above.
+
+Check speed: no measurable change expected; the full rebuild after the
+`Types.lean` edit is a cost of touching a root module, not of the proofs.
