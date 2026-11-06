@@ -25,3 +25,19 @@ H62/H63 supersedes the v4.24 per-master cache item. No cache implementation or r
 ## H82 standing rules and waits
 
 H82 supersedes the previous exact-file agreement protocol for statement-preserving edits; interface and semantic changes still require the applicable owner. The draft schema now requires typed, nonblank `waits` entries and forbids nonempty waits for `done`. Independent finder and skeptic reviews identified those validation gaps and they were fixed. A simulated digest-write refusal leaves an old digest readable even though the poller continues and records the error; a fail-closed consumer or independent invalidation protocol remains a coordinator dependency. The source approval/base trust, real inspect metadata, owner-controlled rollout and final proof gates also remain open.
+
+## H82 successor: versioned report compatibility
+
+The authenticated H82b assignment/scope and final stopped receipt were verified;
+exact final head `6c93ebcd6f7125bd0c9913cf211565a50b4241b1` was merged before this
+work. The optional integer `schema_version: 1` field now accepts the coordinator's
+v1 report envelope while preserving legacy unversioned inputs. Unknown fields,
+unsupported versions, booleans, strings, null and fractional versions remain
+rejected. Versioned done reports retain all existing completion constraints.
+JSON Schema treats numerical `1.0` as integer one; no lexical-number restriction
+is claimed. Independent read-only finder and skeptic found no blocker and used
+no Lean server. Final local controls ran 23 tests: 20 passed, 3 skipped because
+the original host poll.py snapshot is unavailable on this VM. Evidence:
+`/workspace/h62-statement-graph-evidence/h82/h55-schema-final-tests.log`.
+This does not establish host deployment, real inspect metadata, fail-closed
+consumer adoption, trusted-base integration or completion of either H55 item.
