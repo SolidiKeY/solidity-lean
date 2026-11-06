@@ -32,7 +32,26 @@ def verify_snapshot_files(repo, manifest, entries):
         total += expected['bytes']
     return total
 
-def verify_validation_archives(manifest):
+def verify_h44_member_manifest(repo, pin):
+    relative = Path(pin["member_manifest"])
+    require(not relative.is_absolute() and ".." not in relative.parts and relative.is_relative_to(bulk_inputs.PREFIX), "unsafe member manifest path")
+    manifest = json.loads(bulk_inputs.read(repo, repo / relative))
+    require(manifest["schema"] == 1 and manifest["authorization"] == "H44", "unsupported member manifest")
+    require((manifest["archive"], manifest["archive_bytes"], manifest["archive_sha256"]) == (pin["archive"], pin["bytes"], pin["sha256"]), "member manifest archive mismatch")
+    expected = manifest["members"]; seen = set()
+    if "members" in pin:
+        require(len(expected) == pin["members"], "archive member count mismatch")
+    with tarfile.open(pin["archive"], "r:gz") as archive:
+        for member in archive:
+            require(member.isfile() and member.name not in seen and not member.name.startswith("/") and ".." not in Path(member.name).parts, "unsafe archive member")
+            require(member.name in expected, "archive membership mismatch")
+            seen.add(member.name); data = archive.extractfile(member).read()
+            require(len(data) == expected[member.name]["bytes"] and digest(data) == expected[member.name]["sha256"], "archive member identity mismatch")
+    require(seen == set(expected), "archive membership mismatch")
+    return len(seen)
+
+
+def verify_validation_archives(manifest, repo=None):
     """Hash every validation/review archive, including nested audit receipts."""
     verified = []
     def walk(value, path=()):
@@ -42,6 +61,9 @@ def verify_validation_archives(manifest):
             archive = Path(value["archive"])
             require(archive.is_absolute() and archive.is_file() and not archive.is_symlink(), "invalid validation archive")
             require(archive.stat().st_size == value["bytes"] and digest(archive.read_bytes()) == value["sha256"], "validation archive identity mismatch")
+            if "member_manifest" in value:
+                require(repo is not None, "member verification requires repository")
+                verify_h44_member_manifest(repo, value)
             verified.append(".".join(path))
         for key, child in value.items():
             walk(child, path + (key,))
@@ -75,7 +97,7 @@ def verify(repo):
     entries = json.loads(index_bytes)['files']
     require(len(entries) == m['file_count'], 'bulk verification failed')
     external_inputs = verify_frozen_manifest_inputs(repo, m, entries)
-    validation_archives = verify_validation_archives(m)
+    validation_archives = verify_validation_archives(m, repo)
     total = verify_snapshot_files(repo, m, entries)
     require(total == m['uncompressed_bytes'], 'bulk verification failed')
     archive = Path(m['archive'])
