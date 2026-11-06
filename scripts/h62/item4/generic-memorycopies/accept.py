@@ -17,6 +17,7 @@ def main():
     p.add_argument('--root', type=Path, default=Path.cwd())
     p.add_argument('--frozen', type=Path, required=True)
     p.add_argument('--audit', type=Path, required=True)
+    p.add_argument('--plan', type=Path, help='check owner-review correspondence plan; not Lean validation')
     p.add_argument('--semantic', type=Path, help='require reviewed semantic grouping and its regression suite')
     p.add_argument('--output', type=Path, required=True)
     a = p.parse_args()
@@ -60,6 +61,12 @@ def main():
             raise SystemExit(semantic_tests.stdout+semantic_tests.stderr)
         semantic_result=dict(semantic_inventory_sha256=sha(semantic),semantic_test_exit=semantic_tests.returncode,
                              semantic_test_output=semantic_tests.stderr,semantic_boundary='Source-family classification with literal evidence and curated exceptions; not exhaustive terminal-result classification or correspondence proof.')
+    if a.plan:
+        from proof_plan import produce
+        planned=encoded(produce(a.root,json.loads(inventory)))
+        if planned != a.plan.read_bytes():
+            raise SystemExit('ACCEPT_FAIL: owner-review proof plan changed')
+        semantic_result.update(proof_plan_sha256=sha(planned),proof_plan_validation='source preservation and explicit route coverage only; all Lean proof obligations pending')
     result = dict(status='EXTERNAL_ACCEPT_PASS', base=a.base, base_files_verified=len(rows), inventory_sha256=sha(inventory), audit_sha256=sha(report),
                   parser_test_exit=checked.returncode, parser_test_output=checked.stderr,
                   proof_boundary='No semantic proof, compile gate, axiom audit or before/after speed acceptance implied.')
