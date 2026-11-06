@@ -404,3 +404,62 @@ old **689307648 bytes**, new **1767239680 bytes**. The exact percentage is in
 workload regression signal, not a full-directory memory comparison; it reinforces
 the retained worker STOP and root investigation. Both wall and sampled RSS are
 reported; neither is substituted for the still-missing full after-build gate.
+
+
+## H70 Contracts consumer wait: exact partial producer publication
+
+Two consumers now report an owned migration gate failure at
+`Solidity/Roadmap/Contracts.lean:1104`,
+`Solidity.Roadmap.PublicCorrectness.transfer`:
+
+- `solidity-h62-4-20261106/generic-primitive-packets`, requester head
+  `0a34d9c508ca24f6a914553953a0bc4abf5863dc`.
+- `solidity-h62-5-20261106/statement-graph`, requester head
+  `372e46284787e57e294d7c549f325f82f24ccfb2`.
+
+The original guard expects **[]**. Both relay reports observe **[propext,
+Classical.choice, Quot.sound]** under v4.35.0 after isolated Hash prerequisites.
+This remains a trust-guard failure even though these are standard Lean axioms;
+the strict theorem-specific guard cannot be silently replaced by an allowlist.
+No proof, statement, guard, pin or budget edit is authorized by ticket routing.
+No new Lean run was made: the existing performance STOP remains binding.
+
+The exact previously reviewed partial producer head is
+`767c5fda402f24b01c89507e8613e9fde415f022`, base
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`, same assigned branch.
+Contracts file SHA256:
+`96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79`;
+Git blob: `b7cbc5cc7531bdaa8d4e061587c02d29608cc183`.
+The file is identical at base, reviewed producer head and current checkout.
+The reviewed partial patch SHA256 is
+`b9c85ec601ff1e8a10678ef592dc4742305cfa4028ee9d32b973df58b2d3c1d6`
+(110430 bytes). It contains tooling/evidence work, **no Contracts change**.
+This receipt publishes no reviewed v4.35 Contracts resolution patch or ready producer head.
+Consumers must retain their blocker; applying this partial patch is not a fix.
+
+`producer_receipt.py` regenerates the exact local publication at
+`/workspace/migrate-roadmap-evidence/h70-contracts-producer/producer-receipt.json`
+and copies the reviewed partial patch there. It validates the source at all
+three revisions, exact file/blob/patch hashes, unchanged source diff, original
+empty axiom guard, and the prior local v4.24 inventory's empty theorem footprint.
+The theorem starts at line 1016; the guarded axiom observation is line 1104.
+The saved old API result remains a passing old-toolchain result, not a new gate.
+
+The two requester evidence paths are on other VMs and are not available here.
+Their failure outcomes, original ticket filenames/hashes, toolchain and aggregate
+validation-input hash are labeled as relayed. The normalized local ticket copy
+has its own hash; it is not claimed to reproduce either original raw ticket hash.
+The aggregate `29e283...` validation identifier is not presented as a file hash.
+The unrelated CheckedSub owner agreement stays with its existing owner.
+
+Independent read-only finder/skeptic reviews recomputed source/blob/patch hashes,
+confirmed unchanged Contracts and no resolution patch, and verified old-local
+versus remote-reported evidence separation. Neither used Lean, builds, servers
+or edits. Five non-Lean controls reject unreviewed source changes, changed base,
+relaxed guards even with updated hash constants, and duplicate target guards.
+
+Publication is a committed local receipt for coordinator retrieval, not a push,
+merge, PR, fleet cut-over or external message. The receipt carrier commit may
+advance while the reviewed partial producer head above stays fixed. Full new
+migration gates, the exact owner/G49 preserving resolution, and all current
+ownership/performance STOPs remain pending. No duplicate H55 proof work is taken.
