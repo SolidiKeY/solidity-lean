@@ -23,10 +23,9 @@ class ProposalTest(unittest.TestCase):
         lines = patch.decode().splitlines()
         removed = [line for line in lines if line.startswith("-") and not line.startswith("---")]
         added = [line for line in lines if line.startswith("+") and not line.startswith("+++")]
-        self.assertEqual(removed, ["-  first | decide | rfl | omega"] * 2)
+        self.assertEqual(removed, ["-  first | decide | rfl | omega"] * 3)
         self.assertEqual(added, ["+import Solidity.Backend.PrimitivePackets.PanicBytes"] +
-                         ["+  exact Solidity.Backend.PrimitivePackets.PanicBytes." + name for name in NAMES[:2]])
-        self.assertNotIn("PanicBytes.panic_not_empty", patch.decode())
+                         ["+  exact Solidity.Backend.PrimitivePackets.PanicBytes." + name for name in NAMES])
 
 
 if __name__ == "__main__":
