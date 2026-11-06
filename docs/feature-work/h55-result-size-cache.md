@@ -25,3 +25,56 @@ H62/H63 supersedes the v4.24 per-master cache item. No cache implementation or r
 ## H82 standing rules and waits
 
 H82 supersedes the previous exact-file agreement protocol for statement-preserving edits; interface and semantic changes still require the applicable owner. The draft schema now requires typed, nonblank `waits` entries and forbids nonempty waits for `done`. Independent finder and skeptic reviews identified those validation gaps and they were fixed. A simulated digest-write refusal leaves an old digest readable even though the poller continues and records the error; a fail-closed consumer or independent invalidation protocol remains a coordinator dependency. The source approval/base trust, real inspect metadata, owner-controlled rollout and final proof gates also remain open.
+
+## H82 successor: versioned report compatibility
+
+The authenticated H82b assignment/scope and final stopped receipt were verified;
+exact final head `6c93ebcd6f7125bd0c9913cf211565a50b4241b1` was merged before this
+work. The optional integer `schema_version: 1` field now accepts the coordinator's
+v1 report envelope while preserving legacy unversioned inputs. Unknown fields,
+unsupported versions, booleans, strings, null and fractional versions remain
+rejected. Versioned done reports retain all existing completion constraints.
+JSON Schema treats numerical `1.0` as integer one; no lexical-number restriction
+is claimed. Independent read-only finder and skeptic found no blocker and used
+no Lean server. Final local controls ran 23 tests: 20 passed, 3 skipped because
+the original host poll.py snapshot is unavailable on this VM. Evidence:
+`/workspace/h62-statement-graph-evidence/h82/h55-schema-final-tests.log`.
+This does not establish host deployment, real inspect metadata, fail-closed
+consumer adoption, trusted-base integration or completion of either H55 item.
+
+## H70/H90 successor size controls — stopped proposal
+
+Disposable Git controls reproduced three false passes before the fix: a trusted-
+base approved .py containing a >4300-digit JSON integer, deeply nested JSON, and
+oversized content added in an unrelated root commit then deleted before merge.
+Syntax-only JSON number parsing now avoids conversion limits; recursion failure
+is conservatively data. Root commits receive root-aware diff-tree enumeration.
+Replace refs are ignored and shallow/grafted histories are refused. New controls
+also exercise replacement refs, filters hiding raw worktree bytes, and staging
+a new oversized file after inventory capture. The prototype refuses transforming
+attributes/autocrlf and rechecks HEAD, index/path identity and untracked inventory.
+These are fail-closed refusals, not support for normalized raw-byte census.
+
+Actual external controls: 30 run, 27 pass, 3 host-snapshot controls skipped.
+Independent read-only finder and skeptic confirmed the stable-repository fixes,
+without Lean/server/test calls. They retained limitations: metadata fingerprints
+are not an atomic snapshot, global/system config/attributes and concurrent
+history changes are not fully frozen, and per-parent merge comparisons may
+conservatively flag an unchanged baseline blob. Trusted base, approvals, writer
+protocol and production host adoption remain external inputs.
+
+PERFORMANCE STOP: one warmup plus seven runs on the same persistent disposable
+approved-source fixture measured median 0.063232468s before and 0.076785400s after,
++21.4335%, exceeding the 10% bound. Output SHA256 is identical; wait4 maximum RSS
+is 13440 KiB for every measured invocation. The proposal is stopped and unaccepted;
+passing functional tests do not override STOP. No unchanged rerun or deployment.
+The earlier JSON/root-only stage measured +8.3606%; that does not validate the
+later guarded version. Reproduction/timing generator measure_size_check.py and
+regression docstrings name the guarded H44 cases per H90. Payloads are generated
+only in disposable repositories and bulk output stays off Git. Detailed evidence
+and hashes: tests/h55/result-size-cache/h82-size-evidence.json and
+/workspace/h62-statement-graph-evidence/h82-h55-size/.
+
+H86 unavailable original worker/host raw evidence remains a regeneration limit;
+no synthetic fixture is claimed to authenticate it. H58 audit HOLD, the separate
+pin pause/+46.58% STOP and H67 reconciliation remain unchanged.
