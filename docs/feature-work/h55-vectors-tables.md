@@ -163,3 +163,39 @@ coverage, constructor inhabitation or preservation by a parametrisation. The
 102 frozen files also predate the extra RawFrameLogic file on current master.
 The production migration, meaningful Lean validation, independent finder and
 skeptic reviews and owner handoffs remain open.
+
+## Master Raw reconciliation and semantic obligations
+
+Fetched master `5f7bb1441566aaad64a34436904afc61de762fd2` was compared with
+frozen base `4d3790eadb8a5212233bc7d5e345817476b2f590`. The external snapshot
+contains 103 Raw files; their paths and SHA-256 values are pinned in
+`master-raw-source-manifest.json`. A guarded Lean built-in parser run and a
+second identical run cover the entire snapshot. The reconciliation records 100
+unchanged files with identical selected nodes, two changed files and the new
+`RawFrameLogic.lean`. No file is removed. `RawBoundary.lean` changes documentation
+wording and retains identical selected parser-node content. `RawFrame.lean` adds
+four theorems and six `cases` tactic nodes. The new logic module adds two term
+match alternatives, 12 tactic alternatives and 11 `cases` tactics. The selected
+node total rises from 2,739 to 2,770. The complete counts and hashes are in
+`tests/h55/vectors-tables/master-raw-reconciliation.json`.
+
+The source-pinned ledger at
+`/workspace/scratch/h55-vectors-tables/master-raw-semantic-ledger.json` records
+two modal definitions, all 17 new logic theorem statements and all four added
+frame theorem statements, together with human classifications and declaration
+hashes. In particular, box quantifies completed runs and diamond requires a
+completed witness; absence at one fuel is not noncompletion at every fuel.
+Whole-outcome results and the clean, world and view equalities in `run_agrees`
+and `holds_agrees` remain explicit. `run_captured` requires an actual completed
+run; sparse-target exclusion does not exclude completion generally. Skip
+observes a full captured snapshot. These are source observations, not new proofs
+or an independent review. The parser uses the built-in environment without
+elaborating project imports. It does not establish the semantic case accounting
+for all 103 files or validate a parametrisation. No owner file was edited.
+
+The first ledger inventory test failed due to a recursive validation helper;
+`/workspace/scratch/h55-vectors-tables/python-tests-ledger-failure.log` retains
+the failure. The corrected helper and 19 Python tests pass. The external source
+snapshot archive, parser log, ledger and reconciliation hashes are in
+`master-raw-artifacts.sha256`. Owner handoffs, independent finder and skeptic
+reviews, production changes, full Lean gates and speed comparisons remain open.
