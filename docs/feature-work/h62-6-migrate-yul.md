@@ -515,3 +515,49 @@ axioms, output bindings, immutable-source reproduction and budgets verified;
 no findings. Skeptic independently verified the same production evidence,
 failed-attempt disposition and timing boundaries; no findings. Neither used Lean
 or wrote files. B05 production checkpoint approved; whole queue remains partial.
+
+## Allocation API census and pinned-source inventory partition
+
+Unmodified Solidity/Yul/Compilation/Allocation.lean compiles on official v4.35:
+`new-allocation/probe-result.json`, exit0,0.754666s,500707328bytes sampled RSS.
+Old/new private snapshots each contain74 declarations; no missing/added names.
+The standard comparator exits2 (differences_require_review): eight original
+public generated signatures differ. Exact name/kind/universes/visibility/type
+ASTs are in `allocation-public-api-records.json` and compressed raw snapshots.
+No shim or exclusion is implemented. Four structural changes affect
+Frame.noConfusion,Frame.noConfusionType,Slots.noConfusion,Slots.noConfusionType;
+both mk.noConfusion signatures also switch P/base/base' from explicit to implicit
+and rename h to eq. Both mk.inj differences are hygiene names in current raw types;
+they remain reported under H78. IR differences are retained too, not hidden.
+This is an unresolved public-API compatibility item for root/live-owner design,
+not a passing migration gate. The linearNoConfusionType option only selects the
+construction strategy in official source; no flag experiment or budget change
+was made to waive these shape differences. Axiom unions match, which alone is
+not a signature-preservation proof. Read-only finder and skeptic verified the
+74/74 coverage,all8 changes,hashes and limitations; neither ran Lean or wrote.
+
+Independent old API inventory continues from exact base in owned detached view
+`/workspace/migrate-yul-baseline`. No commit,branch reset,default branch change
+or source proof edit in that view. All original census source hashes verified;
+only four copied owned inspection helpers are untracked, byte-identical to the
+primary lane. Original private old build cache remains unchanged. Provenance:
+`/workspace/migrate-yul-artifacts/resume-d96f2406d/baseline-view.json`.
+
+New deterministic `partition-old-inventory.py` revalidates all261 sealed prefix
+summary/raw/gzip/probe/source/helper bindings and versions against the original
+census. It produces exactly1513 remaining targets, retaining the full original
+source-hash map and graph. This is a coverage partition, not an exclusion. The
+original interrupted export manifest is unchanged; its one unsealed raw output
+is retained diagnostically and not counted. Reordered-prefix and wrong-census
+negative controls both reject before output creation. Actual plan:
+`old-inventory-partition-v2/coverage-plan.json`; remaining-census.json is derived
+from the original1774-module census, indices261..1773. Final consolidation must
+require ordered exact union1774, disjoint fragments, parent hashes and verified
+complete snapshots/probes for every module before any full-inventory pass.
+Remaining fragment export and consolidation are pending. No full API, timing,
+runtime or whole-directory migration acceptance is implied by this partition.
+
+Final partition reviews: finder and skeptic independently verified exact261+1513
+coverage, full frozen source map, parent/probe/summary/raw/gzip hashes, detached
+base and helper identities, negative controls and no false acceptance. Neither
+ran Lean or wrote. No findings. Remaining export/consolidation still required.
