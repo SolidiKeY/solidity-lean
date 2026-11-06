@@ -21,7 +21,8 @@ def verify(repo, read, run, manifest, members):
     for fixture in ledger['fixtures']:
         qualified = set()
         for role in fixture['selected_roles']:
-            record = next(r for r in run['records'] if r['id'] == role['case_id'])
+            record = next((r for r in run['records'] if r['id'] == role['case_id']), None)
+            require(record is not None, 'fixture references missing case result')
             for phase, cert in record['validation'].items():
                 if phase.endswith('-' + role['role']) and 'all_owned_axioms' in cert:
                     qualified |= {n.rsplit('.', 1)[-1] for n in cert['all_owned_axioms']}

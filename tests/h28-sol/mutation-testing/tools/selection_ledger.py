@@ -87,8 +87,8 @@ def validate_catalog(catalog, sources, inventory, manifest):
 
 def account(catalog, manifest, sources, inventory):
     validate_case_hashes(manifest["cases"])
-    if "declared_case_counts" in manifest:
-        require(manifest["declared_case_counts"] == case_counts(manifest["cases"]), "declared case/program counts mismatch")
+    require("declared_case_counts" in manifest, "declared case counts are required")
+    require(manifest["declared_case_counts"] == case_counts(manifest["cases"]), "declared case/program counts mismatch")
     validate_catalog(catalog, sources, inventory, manifest)
     declarations = catalog["declarations"]
     by_id = {r["id"]: r for r in declarations}
