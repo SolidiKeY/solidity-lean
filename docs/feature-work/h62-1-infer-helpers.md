@@ -219,3 +219,34 @@ remain pending. The host-only path in the owner ticket is not a VM artifact;
 the prior base-blob match does not verify the patch bytes. Language FixedPoint
 migration and exact source-relations agreement are still outstanding. The
 independent finder/skeptic reviews must include this new candidate file.
+
+## Retirement handoff
+
+The final additive `tests/h62/item1/infer-helpers/Shared.lean` candidate
+imports `Solidity.Source.Types` and proposes the three shared definitions with
+inline-rule correspondence statements. It is unregistered and has not been
+Lean checked. It does not change original inferencers, and H55 has not reviewed
+this file. Its intended destination, migration patch, registration fragment,
+compatibility with frozen producer interfaces and proof/axiom checks remain
+open. The exact frozen source snapshot and checksums are exported separately.
+
+A bounded 4.35 MCP check through the corrected serial Lake route reported
+`CaseSpecifications.lean` diagnostics unavailable with failed dependencies
+`Solidity/Source/Const.lean`, `Solidity/Source/Ctor.lean` and
+`Solidity/Source/Types.lean`. A separate serial MCP diagnostic on
+`Solidity/Source/Ctor.lean` reported an isDefEq heartbeat timeout at line 641
+and dependent elimination failures at line 715. No proof budget was changed.
+These are failed diagnostics, not a gate pass; see the saved logs.
+
+The successor is `solidity-sol2-20261104/numeric-literals`. All four original
+checkpoints, backfill proofs, independent finder/skeptic reviews, exact owner
+migration proposal, affected validation, acceptance, axiom checks, timing
+comparison and final handoff gates remain incomplete. Waits include migration
+of Source/Ctor, Language/FixedPoint and Hash/CollisionBound, H55 review of
+this exact extraction and compatibility candidates, and independent reviews.
+The exact original rendered prompt bytes are unavailable in this VM; the
+committed queue excerpt explicitly identifies this limitation. The user
+requested pause, but the only exposed goal tool accepts complete or blocked,
+not paused. Do not resume this assignment without further authorization.
+No H71 push permission was supplied in this thread; the original instruction
+prohibits pushing, so this lane was not pushed.
