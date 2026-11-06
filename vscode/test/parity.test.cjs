@@ -221,3 +221,14 @@ test('visual launcher passes suite identity to report validation (injected edito
     assert.equal(run.status,'passed-with-gaps');assert.equal(run.result.scenarios.every(s=>s.status==='missing'),true);assert.deepEqual(run.result.checks,[]);
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('compiler command suite cannot masquerade as full proof evidence',()=>{
+ const config={runId:'commands-only',target:'local',suite:'commands'},report={schemaVersion:1,runId:config.runId,target:'local',status:'passed',checks:['command-build-keybinding'],scenarios:[{id:'command-build-keybinding',status:'passed'}]};
+ assert.deepEqual(hostEvidenceErrors(report,config),[]);assert.ok(hostEvidenceErrors(report,{...config,suite:'full'}).length);assert.ok(hostEvidenceErrors({...report,scenarios:[]},config).length);assert.ok(hostEvidenceErrors({...report,runId:'old'},config).length);assert.ok(hostEvidenceErrors({...report,checks:[]},config).length);
+ assert.throws(()=>parse(['--suite','commands','--targets','dafny']),/requires --targets local/);assert.equal(parse(['--suite','commands','--targets','local']).suite,'commands');
+});
+test('native build key dispatch refuses an unfocused editor (injected CDP boundary)',async()=>{
+ const {buildKeybinding}=require('../parity/renderer.cjs'),calls=[];
+ await assert.rejects(buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:false}};}}),/No focused source editor/);assert.equal(calls.length,1);
+ calls.length=0;const value=await buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:true}};}});assert.equal(value.chord,'ctrl+shift+b');assert.deepEqual(calls.slice(1).map(c=>[c.method,c.params.type,c.params.code,c.params.modifiers]),[['Input.dispatchKeyEvent','keyDown','KeyB',10],['Input.dispatchKeyEvent','keyUp','KeyB',10]]);
+});
