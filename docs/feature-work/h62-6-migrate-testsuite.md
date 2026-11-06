@@ -96,15 +96,16 @@ No RUNTIME_GATE_PASS is claimed by this document. Root-wide run-lean.sh final
 validation remains pending until the migration dependency graph is available.
 No push, merge, PR, master change, pre-gate or cut-over action is authorized here.
 
-## Current STOP and unfinished checkpoints
+## Recorded regression and resumed checkpoints
 
 The matched isolated fixture passes on both releases but regresses:
 old wall 1.809733351 s / sampled peak RSS 636,497,920 bytes;
 new wall 2.412217539 s / sampled peak RSS 1,626,386,432 bytes.
 This is +33.29% wall and +155.52% sampled RSS. It is one probe per version,
-not a full-directory comparison or a throughput conclusion. It triggers a
-conservative STOP under the assignment's >10% rule. Further Lean execution is
-paused pending Q-PERF-API; commit/export/review work can continue.
+not a full-directory comparison or a throughput conclusion. The initial worker
+interpretation paused further Lean runs; the coordinator clarification below
+resolves that pause. These module measurements remain recorded for cut-over
+escalation while matched clean full-directory measurements continue.
 
 1. Import/source census is complete; required full clean old build is unfinished.
 2. Exact release archive and versions are verified; new KeySort and isolated
@@ -113,9 +114,14 @@ paused pending Q-PERF-API; commit/export/review work can continue.
 4. Reviewable tooling patch and dependency/source-hash handoff are supplied;
    compiled old/new interface hashes and full migration patch acceptance remain pending.
 
-Q-PERF-API (sources: H62/H63 checkpoint 3, isolated replay-refusal API fixture):
-The unchanged isolated fixture passed on both pinned releases but exceeded 10%
-wall/RSS growth. Should migration owners investigate before any further Lean,
-authorize only bounded repeated fixture measurements, or authorize full clean
-directory measurements before deciding the performance gate while retaining
-this fixture regression? No option has been assumed approved.
+Q-PERF-API is resolved by the coordinator's H62 item 6 clarification:
+
+> a per-module time or memory increase does not stop a migration lane. Record
+> the before/after numbers for that module and continue to the matched clean
+> full-build comparison the task requires; the coordinator reports memory/time
+> growth to the human with the cut-over escalation.
+
+The same VM, branch, pinned releases, hard resource bounds and original goal
+are retained. No new goal or replacement continuation was created. The fresh
+old baseline uses new private outputs under `evidence/old-clean-03`; no previous
+partial outputs count toward its clean build.
