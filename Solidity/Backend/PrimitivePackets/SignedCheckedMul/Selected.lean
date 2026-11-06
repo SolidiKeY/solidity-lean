@@ -29,4 +29,10 @@ theorem original_guard {C : Contract} {Γ : Ctx} (offset : Nat) (F : Frag Γ)
       ([.dup 2,.dup 2,.mul,.push w[0],.dup 4,.slt,.push (.val wH),.dup 4,.eq,.and,.iszero] ++
        assertTop ++ [.dup 3,.dup 2,.sdiv,.dup 3,.eq,.dup 4,.iszero,.or] ++
        assertTop ++ [.swap 2,.pop,.pop]) := by rfl
+/-- The selected guard is exactly `sTail .mul`, the code `Evm.smul_tail` runs. -/
+theorem guard_is_sTail {C : Contract} {Γ : Ctx} (offset : Nat) (F : Frag Γ)
+    (a b : Idx Γ (.val .int)) :
+    (selected (C:=C) offset F a b).code =
+      Evm.compileVal (C:=C) offset (.simple (.local a)) ++
+      Evm.compileVal (C:=C) offset (.simple (.local b)) ++ sTail .mul := by rfl
 end Solidity.Backend.PrimitivePackets.SignedCheckedMul

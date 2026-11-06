@@ -5,7 +5,7 @@ import Solidity.Backend.PrimitivePackets.SignedDiv.Controls
 instantiates the arbitrary-state `success`/`overflow` theorems at the populated
 six-cell frame of `SignedDiv.Controls` with an arbitrary saved stack `tail`:
 both operand orders of `-2^255 * -1`, upper and lower overflow, and regular
-products of every sign. `guard_classification` is the existing `Evm.smul_tail`
+products of all four operand-sign combinations. `guard_classification` is the existing `Evm.smul_tail`
 at the selected guard, not a second arithmetic producer. -/
 namespace Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls
 open Evm Evm.Memory Solidity.Lowering.V07 Source.SemanticsExamples
@@ -54,9 +54,10 @@ def upper_negative (p : Roadmap.Pipeline) (tail : List Word) := joint_overflow p
 def lower (p : Roadmap.Pipeline) (tail : List Word) := joint_overflow p minimum two (by decide) tail
 def lower_swapped (p : Roadmap.Pipeline) (tail : List Word) := joint_overflow p two minimum (by decide) tail
 def lower_maximum (p : Roadmap.Pipeline) (tail : List Word) := joint_overflow p maximum negNine (by decide) tail
-/-- Regular products of every sign and the boundary successes. -/
+/-- Regular products for all four operand-sign combinations, and the boundary successes. -/
 def regular (p : Roadmap.Pipeline) (tail : List Word) := joint_success p negSeven nine (by decide) tail
 def regular_positive (p : Roadmap.Pipeline) (tail : List Word) := joint_success p negSeven negNine (by decide) tail
+def regular_both_positive (p : Roadmap.Pipeline) (tail : List Word) := joint_success p seven nine (by decide) tail
 def regular_swapped (p : Roadmap.Pipeline) (tail : List Word) := joint_success p nine negSeven (by decide) tail
 def minimum_one (p : Roadmap.Pipeline) (tail : List Word) := joint_success p minimum one (by decide) tail
 def one_minimum (p : Roadmap.Pipeline) (tail : List Word) := joint_success p one minimum (by decide) tail
@@ -123,6 +124,8 @@ theorem exact_panic : Source.panicData .arithmetic=[78,72,123,113]++List.replica
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.public_selection
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.original_guard' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.original_guard
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.guard_is_sTail' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.guard_is_sTail
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_success
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_overflow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -157,6 +160,8 @@ theorem exact_panic : Source.panicData .arithmetic=[78,72,123,113]++List.replica
 #guard_msgs (whitespace := lax) in #print axioms regular
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_positive' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms regular_positive
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_both_positive' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms regular_both_positive
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_swapped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms regular_swapped
 /-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/

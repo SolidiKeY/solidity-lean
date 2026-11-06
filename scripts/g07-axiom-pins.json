@@ -17816,6 +17816,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_both_positive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_exact": [
   "Classical.choice",
   "Quot.sound",
@@ -17848,6 +17853,10 @@
  ],
  "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.zero_minimum": [
   "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.guard_is_sTail": [
   "Quot.sound",
   "propext"
  ],
