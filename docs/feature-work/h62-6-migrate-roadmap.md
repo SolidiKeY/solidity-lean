@@ -463,3 +463,63 @@ merge, PR, fleet cut-over or external message. The receipt carrier commit may
 advance while the reviewed partial producer head above stays fixed. Full new
 migration gates, the exact owner/G49 preserving resolution, and all current
 ownership/performance STOPs remain pending. No duplicate H55 proof work is taken.
+
+
+## H71 MRS and consolidated routing disposition
+
+The MRS owner response at reported head
+`5f7bb1441566aaad64a34436904afc61de762fd2` reiterates the generic consumer's
+reported Contracts failure; it is not an independent MRS reproduction. The
+reported response path `/workspace/h70-mrs-update-08162/owner-response.md` is
+absent here. Its relayed SHA256 `2604d32e68406842da9735805584cd82e8758e19458d9b616943f46d24725ad3`
+is retained as a claimed original hash, separate from the normalized local copy.
+
+The CURRENT reported import-closure blocker is
+`B-MIGRATION-ROADMAP-CONTRACTS`, Contracts line 1104, expected **[]** and reported
+**[propext, Classical.choice, Quot.sound]**. Hash is cleared for the described
+ISOLATED consumer check as relayed from source
+`2a18afcdba00a85645b0b3079704f78ffcd78860`; the obsolete Hash import failure must
+not be repeated as that closure's current blocker. This does not clear full
+Hash/fleet gates, grant original-file permission, or establish a new check on
+this VM. Other migration branches and STOPs retain their own gate boundaries.
+
+The newer G49 `cd0b723b1fbe7db6866fc9905a5b57b9d455a7b0`, statement-graph
+`7974163ce7443d49e19e84abedaab95c41d386f7`, and Hash ticket
+`a3f49ee0ec1829e63022c90194048d5a1ffe0d22` are recorded as routing provenance
+only. G49's inventories, H68 full-certificate bridges and timing hold remain
+with their owners. The graph's five pending-input entries are not Roadmap proof
+results; its explicit wait and H64 exclusion of guard relaxation are retained.
+The raw Hash transport SHA `3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`
+is as relayed, not a locally reverified patch file. It identifies the same
+reported base/target source overlay, not a new Contracts fix or gate waiver.
+
+MRS's CheckedSub/H72 current writer, exact-file agreement and semantic helper
+requirements remain untouched. No packet arithmetic fixtures, lexical ledger,
+H68 certificate, application agreement or H55 proof duty is adopted by this
+migration lane. This publication is confined to the assigned Contracts interface
+and reported migration/trust boundary.
+
+`producer_receipt.py --h71` writes a separate immutable-version receipt directory:
+`/workspace/migrate-roadmap-evidence/h71-contracts-producer/`.
+It retains the reviewed partial producer head `767c5fda402f24b01c89507e8613e9fde415f022`,
+base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`, Contracts source SHA
+`96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79` and partial
+patch SHA `b9c85ec601ff1e8a10678ef592dc4742305cfa4028ee9d32b973df58b2d3c1d6`.
+There is still no Contracts resolution patch or ready v4.35 producer published.
+The receipt counts two primary consumer reports and one secondary MRS relay,
+with zero independent MRS reproductions. It cannot promote that relay to proof.
+
+Eight routing controls and five source/trust controls pass without Lean. They
+reject obsolete Hash waits, treating isolated clearance as a full gate, a false
+independent reproduction, permission expansion, false guard clearance and trust
+relaxation. Independent read-only finder/skeptic reviews confirmed the provenance,
+unchanged producer anchors, separated H70/H71 outputs and preserved STOPs. They
+used no Lean, server, build or edits. Earlier responses, receipts and seals remain
+unchanged. No new source, proof, guard, pin, observation, budget or trust-policy
+change is authorized or made, and no new semantic/runtime gate is claimed.
+
+H71 source/evidence receipt, current receipt-carrier head, exact patch/file hashes,
+and outstanding gate boundary are saved in that directory's `HANDOFF.json`;
+checksums are `SHA256SUMS`. Root/coordinator may retrieve these locally. No push,
+merge, PR, external message, host-only relay installation, scope transfer or
+performance waiver is implied. The original goal remains unfinished.

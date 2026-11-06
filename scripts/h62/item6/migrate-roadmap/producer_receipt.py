@@ -24,9 +24,20 @@ def validate_source(current,published,pinned):
     if len(indexes)!=1 or lines[indexes[0]-1]!="/-- info: '"+THEOREM+"' does not depend on any axioms -/":raise ValueError("original empty-axiom guard changed")
     return indexes[0]+1
 
+def validate_h71(relay):
+    if relay["current_import_closure_blocker"]!="B-MIGRATION-ROADMAP-CONTRACTS" or relay["file"]!=REL or relay["theorem"]!=THEOREM:raise ValueError("wrong current reported blocker")
+    if relay["expected_axioms"]!=[]:raise ValueError("H71 cannot change original trust policy")
+    if set(relay["observed_axioms_as_reported"])!={"propext","Classical.choice","Quot.sound"}:raise ValueError("secondary reported footprint changed")
+    if relay["independently_reproduced_by_mrs"] is not False or relay["raw_bytes_verified_locally"] is not False:raise ValueError("secondary relay must not become independent evidence")
+    clearance=relay["hash_clearance"]
+    if clearance["status"]!="cleared_for_isolated_consumer_check_as_relayed" or clearance["current_reported_import_blocker"] is not False:raise ValueError("obsolete Hash import wait must not be repeated")
+    if clearance["full_migration_gate_complete"] is not False or clearance["original_file_edit_authority"] is not False:raise ValueError("isolated clearance is not a full gate or write authority")
+    if any(value is not False for value in relay["permissions"].values()):raise ValueError("routing grants no original edit/application/certificate permission")
 def main():
-    out=Path(sys.argv[1]) if len(sys.argv)==2 else PARENT/"h70-contracts-producer"
-    if out.resolve()!=PARENT/"h70-contracts-producer":raise ValueError("dedicated receipt evidence path required")
+    h71=sys.argv[1:]==["--h71"]
+    out=PARENT/"h71-contracts-producer" if h71 else (Path(sys.argv[1]) if len(sys.argv)==2 else PARENT/"h70-contracts-producer")
+    expected=PARENT/("h71-contracts-producer" if h71 else "h70-contracts-producer")
+    if out.resolve()!=expected:raise ValueError("dedicated receipt evidence path required")
     subprocess.run(["git","merge-base","--is-ancestor",BASE,PRODUCER],cwd=ROOT,check=True)
     subprocess.run(["git","merge-base","--is-ancestor",PRODUCER,"HEAD"],cwd=ROOT,check=True)
     current=(ROOT/REL).read_bytes();published=git("show",PRODUCER+":"+REL);pinned=git("show",BASE+":"+REL)
@@ -65,6 +76,17 @@ def main():
         preserved_stops=dict(performance="B-PERF-INSPECTION: supplemental inspection wall+48.568879%,sampledRSS+156.378946%; no full-directory timing conclusion",ownership="No proof/guard/pin edit permission from routing; Evm proposal still unapplied"),
         publication="Local saved receipt/committed handoff only; no remote push, merge, PR, external message or default-branch publication",
         added_axioms=0,added_sorry=0,raised_proof_budgets=0)
+    if h71:
+        relay_path=ROOT/"tests/h62/item6/migrate-roadmap/contracts-mrs-h71-relay.json"
+        relay=json.loads(relay_path.read_text());validate_h71(relay)
+        receipt["h71_mrs_secondary_relay"]=relay
+        receipt["normalized_h71_relay_sha256"]=sha(relay_path.read_bytes())
+        receipt["current_reported_import_closure_blocker"]="B-MIGRATION-ROADMAP-CONTRACTS"
+        receipt["hash_dependency_gate_boundary"]=relay["hash_clearance"]
+        receipt["independent_mrs_reproduction_count"]=0
+        receipt["primary_consumer_reports"]=2
+        receipt["secondary_mrs_relays"]=1
+        receipt["consumers_waiting"].append(relay["requester"])
     (out/"producer-receipt.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
     print(json.dumps(dict(head=PRODUCER,base=BASE,file_sha256=SOURCE_SHA256,file_git_blob=SOURCE_BLOB,patch_sha256=sha(patch),gate="BLOCKED; original empty-axiom guard retained",receipt=str(out/"producer-receipt.json"))))
 if __name__=="__main__":main()
