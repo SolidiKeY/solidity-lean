@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "authorization": "Human H3 Per-pipeline; coordinator continuation2026-11-02",
+  "owner": "VY1",
+  "producerCommit": null,
+  "producerPackage": null,
+  "status": "pending committed producer evidence; human decisions answered",
+  "gates": [
+    {
+      "id": "Y10-VY1-LIB1",
+      "decision": "reviewed per-pipeline library-codegen contract, fresh validation",
+      "status": "pending committed VY1 contract/results",
+      "required": "exact committed source/compiler/settings/profile hashes, reviewed codegen contract and fresh complete runtime or diagnostic evidence"
+    },
+    {
+      "id": "Y10-VY1-UADD",
+      "decision": {
+        "legacy": 512,
+        "viaIR": 0
+      },
+      "status": "pending committed VY1 per-pipeline implementation/results",
+      "required": "exact fixture/source hashes, required optimizer/profile matrix and complete fresh observations; no inference that approvals imply implementation"
+    }
+  ],
+  "kernelBoundary": "Neither decision nor finite result discharges Source/raw/session/compiler/G01/Y10 adequacy; all24/six remain pending",
+  "reask": false,
+  "duplicateOwnerImplementation": false
+}

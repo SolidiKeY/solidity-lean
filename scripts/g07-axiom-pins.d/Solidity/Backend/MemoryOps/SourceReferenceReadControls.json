@@ -1,0 +1,289 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_delete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_reject_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_conditional_vectors": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_alias_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_delete_vectors": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_rejection_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_rhs_effect_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_rhs_value_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_short_circuit_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_alias_delete_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_alias_reject_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_alias_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_delete_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_reject_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_false_body_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_memory_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_memory_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_wrong_order_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.destination_reference_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.empty_reference_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_native_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_native_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_late_reject_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_late_reject_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_native_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_vectors": [],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_reject_late_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_reject_skipped_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skip_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skips_declaration": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skips_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_delete_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_fresh_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_redirect_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_wrong_map": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_read_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_effect_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_expression_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_expression_value_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_late_effect_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_success_effect_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.same_pointer_noop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_enter_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_horizons": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_reject_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_skip_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_skip_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean:Solidity.Backend.MemoryOps.SourceReferenceReadControls.wrong_reference_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

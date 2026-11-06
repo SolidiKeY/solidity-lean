@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Views/SourceBalanceControls.lean:Solidity.Yul.Views.Controls.sb_actual_wide": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceControls.lean:Solidity.Yul.Views.Controls.sb_wide_exact_state_and_word_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

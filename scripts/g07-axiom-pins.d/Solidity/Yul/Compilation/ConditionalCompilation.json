@@ -1,0 +1,32 @@
+{
+ "Solidity/Yul/Compilation/ConditionalCompilation.lean:Solidity.Yul.Compilation.ConditionalCompilation.Artifact.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilation.lean:Solidity.Yul.Compilation.ConditionalCompilation.Artifact.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilation.lean:Solidity.Yul.Compilation.ConditionalCompilation.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilation.lean:Solidity.Yul.Compilation.ConditionalCompilation.Artifact.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilation.lean:Solidity.Yul.Compilation.ConditionalCompilation.Artifact.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilation.lean:Solidity.Yul.Compilation.ConditionalCompilation.Artifact.test_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

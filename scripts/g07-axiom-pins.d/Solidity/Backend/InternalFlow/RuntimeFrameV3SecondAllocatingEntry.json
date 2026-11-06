@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SecondAllocatingEntry.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SecondAllocatingEntry.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/SourceLoopControls.lean:Solidity.Yul.Compilation.SourceLoop.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopControls.lean:Solidity.Yul.Compilation.SourceLoop.Controls.guards_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopControls.lean:Solidity.Yul.Compilation.SourceLoop.Controls.repeat_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopControls.lean:Solidity.Yul.Compilation.SourceLoop.Controls.source_and_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopControls.lean:Solidity.Yul.Compilation.SourceLoop.Controls.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopControls.lean:Solidity.Yul.Compilation.SourceLoop.Controls.stopped_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopControls.lean:Solidity.Yul.Compilation.SourceLoop.Controls.update_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
