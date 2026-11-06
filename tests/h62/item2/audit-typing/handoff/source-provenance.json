@@ -1,0 +1,14 @@
+{
+  "files": {
+    "STOPPED.md": "fd392d458d346336d4a8097a685a24e51d4ecc4bd1eaecaea4b363ce8d1b7a68",
+    "continuations-and-retirement.txt": "2a347562c96baeac20524b992802f453af10442585aae6decaa8e265de5d99f6",
+    "original-assignment.txt": "fbd71b180c08ff7ce3dae58dae6dcc663d439333f6e8149bd58b9e5189c8e731",
+    "original-goal-objective.txt": "ac637dd4d99c549a3ba2c19cc782f2d6a8bab23a413464a1c8e30c888f0db227",
+    "queues.md": "bd890f90f2b5e1ae2e9c7eab4f86cebe06f0a87e1a6021b26cbb50a2cd4a095a",
+    "scope-manifest.json": "1c16b3eacd2865d66e2bf71bb419abf1d9cee8cef629cea75bc45b89c33162af"
+  },
+  "limitation": "No on-disk original rendered envelope or thread-history reader is exposed. The full visible original assignment is transcribed here; its actual file checksum is separate and is not claimed to equal the launcher rendered-envelope identifier.",
+  "rendered_prompt_bytes_available": false,
+  "source": "Original user assignment and original goal_objective read from this conversation; later authorizations also captured",
+  "supplied_rendered_prompt_sha256": "38c86c8ae936d7d46882834692303bd39eccdd174f345bb4e862706b89d21d5e"
+}
