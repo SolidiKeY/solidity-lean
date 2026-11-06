@@ -1,6 +1,6 @@
 # H28 G08 nonnumeric literal decoder completeness
 
-Status: **partial: done except the fresh solc fixture rerun** (see "Claude VM
+Status: **partial: everything done except the fresh solc fixture rerun, which is blocked by the network** (see "Claude VM
 completion"). The lane moved from a Codex VM to a Claude VM on 2026-11-05;
 all 26 `Solidity/Frontend/LiteralGrammarH28/**` modules are registered in the
 generated `Solidity.lean` root, so the former registration blocker
@@ -176,7 +176,24 @@ Not fixed:
 
 ### Final gates
 
-Final-head `./run-lean.sh`: pending (recorded when it finishes).
+- `./run-lean.sh` at d22b90d8 (later commits change only this doc
+  from the final head). layers, `register.sh --check` and
+  `fragments.sh --check` pass. `lake build` of every default target plus
+  `SolkeyTestSuite` completes: all 5826 jobs, OpenLoops included (585 s),
+  no `error:`. The script then exits 1 at its last step,
+  `check-solkey.sh`. That step reads the default rules path
+  `../solkey/...`, a sibling checkout at upstream b8d5f88, which is newer
+  than the pinned snapshot (392 taclets, 167 mismatches). This comes from
+  the environment, not the lane.
+- `check-solkey.sh` with `SOLKEY_RULES` set to the pinned snapshot
+  `tests/migration/solkey/.../solidityProgramRules.key` (commit 473da894):
+  exit 0, "parsed 377 taclets, 131 read-bearing, table covers 131;
+  annotations match".
+- `python3 tests/h28-sol/literal-grammar/audit.py`: PASS. 4 frozen input
+  hashes, 219 exact theorem axiom sets, 242 kernel control rows, 8 safe
+  declarations (fresh report), exclusive scope since aec9adf1.
+- Lean MCP diagnostics are clean (severity error) on `Lengths.lean`,
+  `Utf8Shape.lean` and `FullPins.lean`.
 
 ### Retained deviations
 
