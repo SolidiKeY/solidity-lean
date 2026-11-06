@@ -1,0 +1,62 @@
+{
+  "status": "blocked",
+  "requests": [
+    {
+      "id": "OWNER-BLS",
+      "type": "owner-clearance",
+      "owner": "live directory producer via coordinator",
+      "files": [
+        "Solidity/Precompiles/Bls12381.lean"
+      ],
+      "action": "Apply proposed-bls.patch only after explicit exact-file clearance",
+      "evidence": "discount-kernel-old and discount-kernel-new; empty axiom sets; question Q-OWNER-BLS-01 pending"
+    },
+    {
+      "id": "OWNER-POINT",
+      "type": "owner-clearance",
+      "owner": "live directory producer via coordinator",
+      "files": [
+        "Solidity/Precompiles/PointEval.lean"
+      ],
+      "action": "Apply proposed-pointeval.patch only after explicit exact-file clearance",
+      "evidence": "bind-check-old and bind-check-new; exact polymorphic statement; question Q-OWNER-POINT-01 pending"
+    },
+    {
+      "id": "ROOT-AXIOMS",
+      "type": "cross-directory-dependency",
+      "owner": "solidity-h62-6-20261106/migrate-root-gate",
+      "files": [
+        "Solidity/Secp256k1.lean"
+      ],
+      "action": "Migrate approved recover function preserving frozen interfaces and original axiom dependencies; inspect newly inferred Fin equality/order instances. Do not repin or weaken assertions.",
+      "evidence": "inspect-old/new: Precompiles.ecrecover [propext] -> [propext, Classical.choice, Quot.sound]; upstream-new finFieldOps print confirms inferred Std order-package BEq"
+    },
+    {
+      "id": "LOCAL-AXIOMS",
+      "type": "owner-clearance-and-proof-repair",
+      "owner": "live producer and migration lane via coordinator",
+      "files": [
+        "Solidity/Precompiles/Field.lean",
+        "Solidity/Precompiles/Osaka.lean"
+      ],
+      "action": "Clear exact-file work to restore original axiom sets using equivalent explicit comparison and explicit Nat decision; never edit axiom pins",
+      "evidence": "FinEquality and StipendProof pass both versions; complete final implementation still pending"
+    },
+    {
+      "id": "RSS-REGRESSION",
+      "type": "resource-regression",
+      "owner": "migration root/gate",
+      "files": [],
+      "action": "Escalate higher RSS for official v4.35.0; no passing final wall/RSS comparison exists",
+      "evidence": "old-measured peak 375120 KiB; failing candidate-v2 peak 599552 KiB (+59.83%); all runs under bounds"
+    },
+    {
+      "id": "FULL-GATE",
+      "type": "required-validation",
+      "owner": "migration root/gate and directory lane",
+      "files": [],
+      "action": "After owner repairs: clean old/new comparison, axiom gates, full affected validation, run-lean.sh with identical official toolchain, reviews, final patch/bundle",
+      "evidence": "candidate-v2 fails frozen Osaka assertions; no RUNTIME_GATE_PASS or completion claimed"
+    }
+  ]
+}
