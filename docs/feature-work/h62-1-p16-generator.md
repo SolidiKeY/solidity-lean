@@ -81,10 +81,20 @@ Lake 5.0.0-src+eb6cafb. The earlier bounded KeySort MCP diagnostic returned
 zero errors. The attempted affected P16 diagnostic was stopped when dependency
 build processes were observed without the required explicit `-j1`; its result
 was `diagnostics_unavailable`, not a pass. The first attempt also failed because
-`/usr/bin/time` was unavailable. No affected build, acceptance gate, or
-before/after timing comparison has passed. Configure the dependency build to
-pass `-j1` explicitly before retrying, maintain no swap and 4 GiB headroom,
-and stop for a greater than 10% slowdown. No declarations, statements,
+`/usr/bin/time` was unavailable. A second MCP retry also spawned dependency builds without `-j1` and was stopped.
+A subsequent `bash ./run-lean.sh` used the pinned toolchain, an isolated Lake
+build directory, `LEAN_NUM_THREADS=1` and an alternate TOML with explicit
+`-j1`; the observed compiler command confirmed the flag. KeySort built, but
+the build failed in existing out-of-scope migration files: `Solidity/Hash/
+CollisionBound.lean:407` unsolved goals, `Solidity/Language/FixedPoint.lean:152`
+failed generalize, and `Solidity/Frontend/Checked/Token.lean:38` had a changed
+`String.ofByteArray` constructor. It was stopped after 114.139 seconds, exit
+143; this is a failed, incomplete gate, not a successful build. The full log,
+configuration and memory-guard record are in `/workspace/h62-p16-evidence/`.
+The guard did not report a resource stop. These failures must be relayed to the
+migration owners; this lane cannot edit their files. No affected acceptance gate
+or before/after timing comparison has passed. Maintain no swap and 4 GiB
+headroom, and stop for a greater than 10% slowdown. No declarations, statements,
 premises, axioms or sorries changed; no Lean proof is claimed by this work.
 
 Setup note: initial extraction of scoped prototype inputs before the prior
