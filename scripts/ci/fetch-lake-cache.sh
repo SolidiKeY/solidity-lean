@@ -6,14 +6,17 @@
 set -uo pipefail
 repo=${GITHUB_REPOSITORY:-SolidiKeY/solidity-lean}
 base="https://github.com/$repo/releases/download/lake-cache"
-cache=${LAKE_CACHE_DIR:-${RUNNER_TEMP:-/tmp}/lake-cache}
-[ -n "${GITHUB_ENV:-}" ] && echo "LAKE_CACHE_DIR=$cache" >> "$GITHUB_ENV"
+# On GitHub Actions the cache lives in RUNNER_TEMP and later steps get LAKE_CACHE_DIR; elsewhere
+# (cloud VMs, local checkouts) it is Lake's own cache: LAKE_CACHE_DIR if set, else the toolchain's.
+if [ -n "${GITHUB_ENV:-}" ]; then
+  export LAKE_CACHE_DIR=${LAKE_CACHE_DIR:-$RUNNER_TEMP/lake-cache}; echo "LAKE_CACHE_DIR=$LAKE_CACHE_DIR" >> "$GITHUB_ENV"
+fi
 tmp=$(mktemp -d)
 if curl -fsSL --retry 3 -o "$tmp/master-cache.tar.gz" "$base/master-cache.tar.gz" \
    && curl -fsSL --retry 3 -o "$tmp/master-cache.sha256" "$base/master-cache.sha256" \
    && (cd "$tmp" && sha256sum -c master-cache.sha256 >/dev/null) \
    && tar -C "$tmp" -xzf "$tmp/master-cache.tar.gz"; then
-  LAKE_CACHE_DIR=$cache bash "$tmp/pack/install.sh" || echo "::warning::lake-cache install failed; building cold"
+  PATH="$HOME/.elan/bin:$PATH" bash "$tmp/pack/install.sh" || echo "::warning::lake-cache install failed; building cold"
 else
   echo "::warning::lake-cache release unavailable; building cold"
 fi
