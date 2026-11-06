@@ -1,0 +1,90 @@
+--- a/scripts/check-axiom-pins.mjs
++++ b/scripts/check-axiom-pins.mjs
+@@ -13,7 +13,7 @@
+ //
+ // Usage: node scripts/check-axiom-pins.mjs [--write]
+ // Exit 0 = inventory matches, 1 = drift or a non-standard axiom.
+-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from "node:fs";
++import { readFileSync, writeFileSync, readdirSync, statSync, lstatSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from "node:fs";
+ import { join, resolve, dirname } from "node:path";
+ import { fileURLToPath } from "node:url";
+ import { blankLean } from "./check-trust.mjs";
+@@ -75,11 +75,18 @@
+   const parts = new Map();
+   for (const [key, axioms] of Object.entries(obj)) {
+     const i = key.indexOf(".lean:");
+-    const f = `${FRAGMENTS}/${key.slice(0, i)}.json`;
++    const file = key.slice(0, i);
++    if (i <= 0 || !key.slice(i + 6) || file.split("/").some(x => !x || x === "." || x === "..") || file.includes("\\")) throw new Error(`invalid pin key ${key}`);
++    const f = `${FRAGMENTS}/${file}.json`;
+     if (!parts.has(f)) parts.set(f, {});
+     parts.get(f)[key] = axioms;
+   }
+   const dir = join(root, FRAGMENTS);
++  (function checkLinks(d) {
++    if (!existsSync(d)) return;
++    if (lstatSync(d).isSymbolicLink()) throw new Error(`symlink in fragments: ${d}`);
++    if (lstatSync(d).isDirectory()) for (const f of readdirSync(d)) checkLinks(join(d, f));
++  })(dir);
+   (function prune(d) {
+     if (!existsSync(d)) return;
+     for (const f of readdirSync(d)) {
+@@ -90,7 +97,7 @@
+   })(dir);
+   for (const [f, part] of parts) {
+     mkdirSync(dirname(join(root, f)), { recursive: true });
+-    writeFileSync(join(root, f), JSON.stringify(part, null, 1) + "\n");
++    writeFileSync(join(root, f), JSON.stringify(Object.fromEntries(Object.entries(part).sort(([a], [b]) => (a.localeCompare(b) || (a < b ? -1 : a > b ? 1 : 0)))), null, 1) + "\n");
+   }
+ }
+ 
+--- a/scripts/coord-tools/fragments.py
++++ b/scripts/coord-tools/fragments.py
+@@ -122,17 +122,27 @@
+ 
+ def pins_file(key):
+     i = key.find(".lean:")
+-    return key[:i] + ".lean" if i > 0 else None
++    if i <= 0 or not key[i + 6:] or "\\" in key[:i]: return None
++    if any(x in ("", ".", "..") for x in key[:i].split("/")): return None
++    return key[:i] + ".lean"
+ 
+ 
+ def frag_of(d, key): return f"{d}/{pins_file(key)[:-len('.lean')]}.json"
++
++
++def reject_duplicate_pairs(pairs):
++    out = {}
++    for key, value in pairs:
++        if key in out: raise ValueError(f"duplicate JSON key {key}")
++        out[key] = value
++    return out
+ 
+ 
+ def json_parts(t, d, errors):
+     """{fragment path: dict} of a pins fragment directory."""
+     fs = ordered(t, d, "json", errors); t.prefetch(fs); out = {}
+     for f in fs:
+-        try: obj = json.loads(t.read(f))
++        try: obj = json.loads(t.read(f), object_pairs_hook=reject_duplicate_pairs)
+         except ValueError as e: errors.append(f"{f}: {e}"); continue
+         if not isinstance(obj, dict): errors.append(f"{f}: not an object"); continue
+         for k, v in obj.items():
+@@ -362,9 +372,16 @@
+ 
+ 
+ def apply_json(w, c, d, gen, comb, name, notes, own):
+-    try: a, b = json.loads(gen), json.loads(comb)
++    try: a, b = json.loads(gen, object_pairs_hook=reject_duplicate_pairs), json.loads(comb, object_pairs_hook=reject_duplicate_pairs)
+     except ValueError as e: notes.append(f"{c}: {name}'s file is not JSON ({e}); left"); return False
++    for obj in (a, b):
++        if not isinstance(obj, dict) or any(pins_file(k) is None or not isinstance(v, list) or not all(isinstance(x, str) for x in v) for k, v in obj.items()):
++            notes.append(f"{c}: {name}: invalid pin key or value; left")
++            return False
+     errors = []; parts = json_parts(w, d, errors); cur = {}
++    if errors:
++        notes.extend(errors)
++        return False
+     for obj in parts.values(): cur.update(obj)
+     ok = True; changed = set()
+     def put(k, v):

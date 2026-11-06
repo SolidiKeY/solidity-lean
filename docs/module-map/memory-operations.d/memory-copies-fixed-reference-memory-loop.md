@@ -1,0 +1,4 @@
+| `Backend/MemoryCopies/FixedReferenceMemoryLoopInterface.lean` | Contract only for actual fixed-parent memory child traversal with heap-derived rows, exact demand, headerless stores, source snapshot preservation and total capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceMemoryRows.lean` | Heap-derived fixed child rows, exact length and demand bounds, and snapshot-preserving row transport through actual checked child copies. |
+| `Backend/MemoryCopies/FixedReferenceMemoryLoop.lean` | Proved headerless fixed-memory child traversal with exact runtime demand, total capacity refusal, old-source snapshot preservation and fresh sibling copies. |
+| `Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean` | Represented shared-child and zero-outer fixed sources; actual empty/pair/64-element traversal, fresh pointers, later-child refusal and empty-parent padding preservation. |
