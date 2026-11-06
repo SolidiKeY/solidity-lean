@@ -1439,3 +1439,39 @@ overall RUNTIME_GATE_PASS. FullSource.Horizon retains its resource STOP; full
 build/TestSuite/timed strict, clause metadata, H70 raw packet, native macOS,
 paired rendered/performance/scaling evidence and both judgments remain open.
 All489 obligations/frozen270 and gate/judge/budget contracts remain unchanged.
+
+
+### Handoffs — compiler action identity and independent TestSuite attempt (2026-11-06)
+
+A real compiler regression failed because custom Build's artifact reported
+`build`. It now retains `buildCustomArgs`; the current completed command receipt
+contains its actual artifact path. Native observation requires matching command
+ID, session, URI, version, source hash, operation and artifact. Ordinary Build
+output cannot satisfy custom Build. All36 targeted compiler/injected-editor/
+process controls pass. Finder and skeptic inspected the actual changes and
+reported no remaining finding. No annotated fixture/admission guard changed;
+original native F6 and runtime/test equivalence remain incomplete.
+
+At source head92aadd00475c7027eec52a958219188ae1669e1e, serial Node passes414
+with four skips (two original runtime and two separately exercised real-Lean
+retention opt-ins). Inventory/source pins/audit/static trust/classification pass;
+the unchanged mandatory parity gate exits1,0/489. Classification is not timed
+strict. Frozen270 SHA remains unchanged.
+
+The independent `lake build SolkeyTestSuite` target excludes Source.Horizon,
+but also hit the unchanged OS reserve guard: command exit-9/shell247,
+aggregateRSS5557956608 bytes, MemAvailable12859424768, swap0, ownedSurvivors[].
+This is a failed incomplete target, not a theorem rejection or full gate pass.
+Derived17 and all24 fresh replay prerequisites completed before the STOP; the
+single300s fresh group and timed strict validator remain separate obligations.
+No unchanged TestSuite/full-library retry is authorized by this receipt.
+
+Original resource samples omitted child argv. Derived21's setup is the latest
+prepared input, an inference only; active module attribution is unknown. Future
+samples read argv only for already-owned PID births and reject identity reuse,
+without environment readback or changed caps. The small
+[evidence manifest](dafny-command-identity-evidence-manifest.json) binds the
+retained failing/passing controls, proof source hashes and failed target receipts.
+H16/full-root resource work, kernel clause/span and positioned-trace producers,
+H70 raw packet, hosted CI, native macOS, paired rendered/performance/scaling
+matrices and both fresh-process judgments remain open.

@@ -1,6 +1,7 @@
 """Keep an owned Linux build group from outliving its resource supervisor.
 Use owned_shell with a new-session child. Its interruptible wait and group KILL
-handle foreground payloads and TERM-ignoring children. No proof verdict.
+handle foreground payloads and TERM-ignoring children. Guards owned-command
+attribution against PID reuse; no environment readback or proof verdict.
 """
 import ctypes, os, signal, shlex, time, pathlib
 SUPERVISOR_PID = os.getpid()
@@ -27,6 +28,18 @@ def process(pid):
         return {'pid': pid, 'birth': fields[19], 'state': fields[0], 'group': int(fields[2]), 'session': int(fields[3])}
     except (FileNotFoundError, ProcessLookupError):
         return None
+
+def command_line(pid, birth):
+    """Read only an already-owned birth; refuse reused/disappeared PID attribution."""
+    before = process(pid)
+    if not before or before['birth'] != birth:
+        return None
+    try:
+        argv = [os.fsdecode(arg) for arg in pathlib.Path('/proc/' + str(pid) + '/cmdline').read_bytes().split(b'\0') if arg]
+    except (FileNotFoundError, ProcessLookupError):
+        return None
+    after = process(pid)
+    return argv if after and after['birth'] == birth else None
 
 def exited_without_reaping(pid):
     return os.waitid(os.P_PID, pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None

@@ -39,3 +39,9 @@ test('fixed resource admission rejects swap and insufficient reserve before payl
  const guard=path.resolve(__dirname,'../parity'),source=`import sys\nsys.path.insert(0,${JSON.stringify(guard)})\nfrom parent_death_guard import resources_allowed\nassert resources_allowed({'availableBytes':12*1024**3,'swapTotalBytes':0})\nassert not resources_allowed({'availableBytes':12*1024**3-1,'swapTotalBytes':0})\nassert not resources_allowed({'availableBytes':20*1024**3,'swapTotalBytes':1})\n`;
  const value=require('node:child_process').spawnSync('python3',['-c',source],{encoding:'utf8',timeout:3000});assert.equal(value.status,0,value.stderr);
 });
+
+// Regression: a resource STOP needs exact owned argv, with PID-birth attribution.
+test('owned command attribution refuses stale births and readback reuse (native Linux fixture)',{skip:process.platform!=='linux'},()=>{
+ const guard=path.resolve(__dirname,'../parity'),source=`import sys,os\nsys.path.insert(0,${JSON.stringify(guard)})\nimport parent_death_guard as g\nrecord=g.process(os.getpid())\nassert g.command_line(os.getpid(),record['birth'])\nassert g.command_line(os.getpid(),'injected-stale-birth') is None\noriginal=g.process\nreads=0\ndef reused(pid):\n global reads\n reads+=1\n return record if reads==1 else dict(record,birth='injected-reused-birth')\ng.process=reused\nassert g.command_line(os.getpid(),record['birth']) is None\ng.process=original\n`;
+ const value=require('node:child_process').spawnSync('python3',['-c',source],{encoding:'utf8',timeout:3000});assert.equal(value.status,0,value.stderr);
+});

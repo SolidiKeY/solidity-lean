@@ -1,7 +1,7 @@
 # Fixed-budget Linux lane build supervisor. No theorem or proof-result inference.
 import sys
 sys.path.insert(0,str(__import__('pathlib').Path(__file__).resolve().parent))
-from parent_death_guard import prepare_child, owned_shell, result_exit, process, exited_without_reaping, finish_owned, memory_state, resources_allowed
+from parent_death_guard import prepare_child, owned_shell, result_exit, process, exited_without_reaping, finish_owned, memory_state, resources_allowed, command_line
 import pathlib,os,subprocess,time,json,signal,argparse,resource
 parser=argparse.ArgumentParser(description='Bounded owned build supervision; fixed original12GiB/no-swap/headroom limits')
 parser.add_argument('--output',type=pathlib.Path,required=True);parser.add_argument('--script',type=pathlib.Path,required=True);args=parser.parse_args()
@@ -32,6 +32,7 @@ with (out/'heavy-resources.jsonl').open('w') as samples:
    for pid,r in table.items():
     if r['ppid'] in ids and pid not in ids:ids.add(pid);changed=True
   rows=[table[i] for i in ids if i in table];seen.update({r['pid']:r['birth'] for r in rows});rss=sum(r['rssBytes'] for r in rows);peak=max(peak,rss);mem=pathlib.Path('/proc/meminfo').read_text();available=int(next(l for l in mem.splitlines() if l.startswith('MemAvailable:')).split()[1])*1024;swap=int(next(l for l in mem.splitlines() if l.startswith('SwapTotal:')).split()[1])*1024
+  for row in rows: row['command'] = command_line(row['pid'], row['birth'])
   samples.write(json.dumps({'time':time.time(),'rssBytes':rss,'availableBytes':available,'swapTotalBytes':swap,'processes':rows})+'\n');samples.flush()
   if rss>12*1024**3 or available<12*1024**3 or swap!=0:
    stop={'reason':'resource guard','rssBytes':rss,'availableBytes':available,'swapTotalBytes':swap}
