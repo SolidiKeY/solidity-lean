@@ -227,3 +227,21 @@ fixed and added to controls. Memory controls cover cache-heavy usage, protected
 pages, true low availability, swap, cap overshoot, and inconsistent statistics;
 runner lifecycle controls pass under the repaired policy. No proof budget,
 production source, frozen statement, root registration or toolchain pin changed.
+
+The repaired run passed the previously incomplete Backend/Scalar/PowerBounds
+module (reported 228 seconds) and continued. At the observation after completion,
+sampled process-group peak was 8,387,137,536 bytes and minimum estimated cgroup
+availability 8,037,072,896 bytes. This validates progress past the previous stop,
+not completion of the full baseline. Runtime guard/configuration files are now
+held fixed throughout the matched measurement pair.
+
+The running log also exposed Lake's informational-success marker. Acceptance
+now counts `ℹ ... Built` (including its optional variation selector), alongside
+success and warning markers, and still excludes failed `✖ ... Building` rows.
+Negative controls and independent finder/skeptic review confirmed this fix.
+
+H70 disposition was received for the earlier 263d92c4d checkpoint: no verified
+owner-ticket payload or recipients recovered; relay.sh is host-only; routing
+grants no original-file edit permission. The running supervisor is preserved.
+No original production file has been edited. Census/API follow-up waits for the
+serial supervisor to finish, as requested; no full comparison is inferred.

@@ -9,7 +9,7 @@ def modules(log):
     found={}
     if not log.exists(): return found
     for line in log.read_text().splitlines():
-        m=re.match(r"^[✔⚠] \[\d+/\d+\] Built (\S+) \(([^)]+)\)",line)
+        m=re.match(r"^[✔⚠ℹ]\ufe0f? \[\d+/\d+\] Built (\S+) \(([^)]+)\)",line)
         if not m or m[1] not in expected: continue
         duration=m[2]; parts=re.findall(r"([0-9.]+)(ms|s|m|h)",duration)
         seconds=sum(float(n)*{"ms":0.001,"s":1,"m":60,"h":3600}[unit] for n,unit in parts) if parts else None

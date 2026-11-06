@@ -18,6 +18,11 @@ with tempfile.TemporaryDirectory() as d:
     r=run(); assert r["all_assigned_modules_built_both"]
     assert r["modules"][0]["reported_wall_delta_percent"]==100
     assert r["modules"][0]["escalate_per_module"] and r["full_comparison"]=="resource-comparison-pass"
+    for marker in ("✔","⚠","ℹ","ℹ\ufe0f"):
+        (evidence/"new-clean-full.log").write_text(f"{marker} [1/1] Built {module} (2s)\n")
+        assert run()["all_assigned_modules_built_both"]
+    (evidence/"new-clean-full.log").write_text(f"✖ [1/1] Building {module} (2s)\n")
+    assert not run()["all_assigned_modules_built_both"]
     (evidence/"new-clean-full.log").write_text("")
     assert not run()["all_assigned_modules_built_both"]
     (evidence/"new-clean-full.json").write_text(json.dumps({"exit":125,"stop_reason":"resource guard","wall_seconds":1,"sampled_peak_group_rss_bytes":1}))
