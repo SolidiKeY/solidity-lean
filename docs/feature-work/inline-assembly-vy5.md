@@ -3429,3 +3429,20 @@ Reviews (read-only, without the Lean server):
 
 Check speed: no measurable change expected; the full rebuild after the
 `Types.lean` edit is a cost of touching a root module, not of the proofs.
+
+Further master-merge ports found by the rebuild (statements unchanged):
+`(plan := none)` in four `Lowering/G19/Assignment*Controls`; `Nat`
+balances in three `Lowering/StorageOps` and nine `Backend/MemoryCopies`
+controls; `Source.FailureExecution.Cursor.empty` in two `St` literals
+(`SourceFieldsControls`, `SourceDefaultHorizonControls`). Axiom pins
+rewritten (`check-axiom-pins.mjs --write`: 0 errors, 0 unrecorded).
+
+Gates: `gate.sh checkpoint` @5d85461a: build-touched (6052 jobs), library,
+trust, orphans, layers, roots, fragments, doc-paths and axiom-pins PASS.
+`./run-lean.sh`: the first run built all but two modules, which the OS
+killed for memory (exit 137, parallel jobs:
+`Examples/Tactics/RevertData`, `OpenLoops`); the rerun built all 6470 jobs
+(`Build completed successfully`) and then `check-solkey.sh` failed against
+the unpinned `../solkey` (b8d5f88: 167 mismatches, unannotated reads).
+With the pinned rules (`SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key`)
+`check-solkey.sh` reports `OK — annotations match` (exit 0).
