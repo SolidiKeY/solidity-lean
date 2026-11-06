@@ -1,0 +1,28 @@
+{
+ "Solidity/Yul/Compilation/ZeroLoopScope.lean:Solidity.Yul.Compilation.ZeroLoopScope.entry": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScope.lean:Solidity.Yul.Compilation.ZeroLoopScope.entry_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScope.lean:Solidity.Yul.Compilation.ZeroLoopScope.initial_values": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScope.lean:Solidity.Yul.Compilation.ZeroLoopScope.lower": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScope.lean:Solidity.Yul.Compilation.ZeroLoopScope.source_scope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScope.lean:Solidity.Yul.Compilation.ZeroLoopScope.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

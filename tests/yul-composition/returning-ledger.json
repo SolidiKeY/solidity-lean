@@ -1,0 +1,50 @@
+{
+  "scope": "Selected actual known CALL/STATICCALL plus real typed extReturn/full buffer; not general callee/Source try/whole pipeline",
+  "facts": [
+    "decode_output",
+    "decode_revert",
+    "decode_short",
+    "decode_wrong",
+    "call_decode",
+    "static_decode",
+    "consume_halt",
+    "consume_refused",
+    "consume_missing",
+    "completion_frame",
+    "sample_run",
+    "static_sample",
+    "call_refused_decode",
+    "timeout_decode",
+    "input_refused_decode",
+    "missing_code",
+    "sample_state",
+    "call_decode_encoded",
+    "copied_decoder"
+  ],
+  "module": "Solidity/Yul/Composition/ReturningPhysical.lean",
+  "moduleSha256": "4212dc29a6cedca0a800d8709f37255755bcc3abdb97bbe4790cec2eded6895d",
+  "producer": "fd3da385f5e4ada7aa889821d3ae59a34833d235",
+  "producerProvenance": "/workspace/vy5-composition/return-consumer-20261102/producer-provenance.json",
+  "signatureFile": "/workspace/vy5-composition/return-consumer-20261102/Signatures.lean",
+  "fullCoverage": false,
+  "fullProofGate": "pending",
+  "originalObligations": 24,
+  "originalCombinations": 6,
+  "freshNativeComparisons": 0,
+  "existingNativeJournalFailures": 5,
+  "premises": [
+    "registered receiver64 code0",
+    "actual transfer owner48 receiver64 value7 CALL or0 STATICCALL",
+    "actual Fixed selector input; depth1/horizon10",
+    "shared source/observation execution; supplied full prefix",
+    "physical input load or actual Placement/finite HeapByteEntry/Nodup encoding",
+    "output ownership/placement/bounds; source and physical addresses distinct"
+  ],
+  "pending": [
+    "ordinary nonempty revert producer packet",
+    "general Source try selector",
+    "frontend derivation/admission",
+    "raw Source hooks/sessions",
+    "allocation/G01/world/compiler/V16 final adequacy"
+  ]
+}
