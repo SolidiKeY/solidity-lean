@@ -1,0 +1,31 @@
+{
+ "Solidity/Yul/Compilation/ScopedControlCompilation.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilation.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Artifact.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilation.lean:Solidity.Yul.Compilation.ScopedControlCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilation.lean:Solidity.Yul.Compilation.ScopedControlCompilation.lower": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilation.lean:Solidity.Yul.Compilation.ScopedControlCompilation.scope_selected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilation.lean:Solidity.Yul.Compilation.ScopedControlCompilation.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

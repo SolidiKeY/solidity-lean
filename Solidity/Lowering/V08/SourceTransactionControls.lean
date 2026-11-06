@@ -63,8 +63,8 @@ theorem revert_world (bytes : Roadmap.Bytes) : (reverted bytes).ex.world = (init
   exact congrArg (fun x => x.world) undo
 
 theorem success_vector (bytes : Roadmap.Bytes) :
-    ((success bytes).ex.world.accounts user).balance.val = 93 ∧
-    ((success bytes).ex.world.accounts thisC).balance.val = 7 ∧
+    ((success bytes).ex.world.accounts user).balance = 93 ∧
+    ((success bytes).ex.world.accounts thisC).balance = 7 ∧
     readX (success bytes) = some 5 ∧ readT (success bytes) = some 0 ∧
     ((success bytes).ex.transient.cells user).read dT.path = some (show Source.Val EB.layout uint from .int 0 (by decide +kernel)) ∧
     (success bytes).ex.journal = [] ∧ (success bytes).heap.next = 0 ∧

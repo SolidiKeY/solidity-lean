@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignment.lean:Solidity.Backend.MemoryOps.source_uint_read_assign": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignment.lean:Solidity.Backend.MemoryOps.source_uint_read_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

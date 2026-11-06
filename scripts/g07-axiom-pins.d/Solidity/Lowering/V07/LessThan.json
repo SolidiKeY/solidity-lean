@@ -1,0 +1,40 @@
+{
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.accepts": [],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.code_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.right_range": [],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.source_value": [],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.tail_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/LessThan.lean:Solidity.Lowering.V07.LessThan.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.check": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.emit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachine.lean:Solidity.Source.FailureExecution.pending": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

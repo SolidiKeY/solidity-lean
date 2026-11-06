@@ -113,16 +113,18 @@ theorem reached_read_negatives (p : Roadmap.Pipeline) :
   exact ⟨rfl,rfl,rfl,rfl,rfl⟩
 
 /-- Empty copy allocates a literal empty uint object; positive reads of an
-empty raw frame are zero padded. Neither establishes ABI bounds admission. -/
+empty raw frame are zero padded. Neither establishes ABI bounds admission.
+A fixed `uint256[3]` target is copied element by element (G18.05,
+`Source.cdStaticToMem`) into a new memory object. -/
 theorem empty_and_boundary (n off : Nat) :
     sourceCalldataUintValues E0 {F0 with cd := []} off n=
       .ok (List.replicate n (sourceUint (u 0))) ∧
     (Source.cdToMem frame SU 96 0).run (sy 96 0)=
       (.ok (.val (.memRef rfl 2)),((sy 96 0).1,{(sy 96 0).2 with heap :=
         ((sy 96 0).2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})) ∧
-    (Source.cdToMem frame (.array .memory (.int .u256) (some 3)) 0 3).run (sy 0 3)=
-      (.error (.stuck "calldata conversion"),sy 0 3) := by
-  refine ⟨sourceCalldataUintValues_empty _ rfl off n,?_,source_cd_uint_fixed_stuck frame 0 3 3 (sy 0 3)⟩
+    ((Source.cdToMem frame (.array .memory (.int .u256) (some 3)) 0 3).run (sy 0 3)).1=
+      .ok (.val (.memRef rfl 2)) := by
+  refine ⟨sourceCalldataUintValues_empty _ rfl off n,?_,rfl⟩
   rw [source_cd_uint_run]
   rfl
 

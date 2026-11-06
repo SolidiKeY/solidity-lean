@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.actual_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.argument_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.binary_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.binary_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.maximum_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.stale_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.wrong_byte_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.zero_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

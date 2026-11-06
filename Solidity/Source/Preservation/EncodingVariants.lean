@@ -10,7 +10,7 @@ namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {Γ : RCtx}
 
-theorem selector_source (B : DeclName → DeclName → Bool) {s : STy} (h : s.implicit B (.fixedBytes 4 (by decide)) = true) :
+theorem selector_source (B : DeclName → DeclName → Bool) (M : DeclName → Bool) {s : STy} (h : s.implicit B M (.fixedBytes 4 (by decide)) = true) :
     (s.isValue = true ∨ (∃ q, s = .rational q) ∨ (∃ q k, s = .hexConst q k)) ∨
       ∃ bs, s = .stringLit bs := by
   cases s with
@@ -21,10 +21,10 @@ theorem selector_source (B : DeclName → DeclName → Bool) {s : STy} (h : s.im
   | _ => change false = true at h; cases h
 
 theorem selectorConv_mem {H : HeapTy} (F : Fr) (n : Nat) {s : STy}
-    (hs : s.implicit E.isBase (.fixedBytes 4 (by decide)) = true) (v : RVal E.layout s) :
+    (hs : s.implicit E.isBase E.mapFree (.fixedBytes 4 (by decide)) = true) (v : RVal E.layout s) :
     Hoare (MemOK E H) (convRV F n (.fixedBytes 4 (by decide)) v : EM E Γ _)
       (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by
-  rcases selector_source E.isBase hs with hv | ⟨bs, rfl⟩
+  rcases selector_source E.isBase E.mapFree hs with hv | ⟨bs, rfl⟩
   · exact convRV_pres F n (.inl hs) hv v H
   · simp only [convRV, reduceCtorEq, ↓reduceDIte, pure_bind]
     exact Hoare.pure' fun _ h => h
@@ -41,7 +41,7 @@ theorem evalE_encodePacked_mem (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy}
 
 theorem evalE_encodeWithSelector_mem (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy}
     {s : STy} {ts : List STy} (args : RArgs E Γ (s :: ts))
-    (hs : s.implicit E.isBase (.fixedBytes 4 (by decide)) = true)
+    (hs : s.implicit E.isBase E.mapFree (.fixedBytes 4 (by decide)) = true)
     (ha : Hoare (MemOK E H) (evalArgs G F n args)
       (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)) :
     Hoare (MemOK E H) (evalE G F (n + 1) (.abiEncode .encodeWithSelector args))
@@ -73,7 +73,7 @@ theorem evalE_encodeWithSignature_mem (G : Glob E) (F : Fr) (n : Nat) {H : HeapT
 
 /-- All source-admitted encoding kinds, using the original signature check. -/
 theorem evalE_abiKind_mem (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy}
-    (k : AbiKind) {ts : List STy} (args : RArgs E Γ ts) (hk : k.argsOK E.isBase ts = true)
+    (k : AbiKind) {ts : List STy} (args : RArgs E Γ ts) (hk : k.argsOK E.isBase E.mapFree ts = true)
     (ha : Hoare (MemOK E H) (evalArgs G F n args)
       (fun _ y => MemOK E H y) (fun _ y => MemOK E H y)) :
     Hoare (MemOK E H) (evalE G F (n + 1) (.abiEncode k args))
