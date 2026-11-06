@@ -1,171 +1,201 @@
-# H62/H63 Tools migration overlay
+# H62/H63 Tools migration overlay — blocked
 
-Owner: `solidity-h62-6-20261106/migrate-tools`. Repository:
-`/workspace/solidity-lean`. Assigned base:
-`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Branch:
-`codex/solidity-h62-6-20261106/migrate-tools`.
+Owner: `solidity-h62-6-20261106/migrate-tools`.
+Repository: `/workspace/solidity-lean`.
+Branch: `codex/solidity-h62-6-20261106/migrate-tools`.
+Pinned base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 
-This is an isolated migration overlay. Live producer ownership is retained.
-No Tools originals, generated roots, module maps, trust pins or tracked
-`lean-toolchain` have been edited. No pushes, merges, PRs or freeze announcements.
+The old directory build and inventory checkpoint is complete within the measured
+serial library-facet boundary below. The full migration is unfinished and blocked.
+No original Tools file, tracked toolchain, generated root, module map, trust pin,
+default branch or live producer ownership changed. No push, merge, PR, deployment,
+pre-gate or freeze announcement was made. New Lean helpers remain under the
+assigned tests directory and require no central registration.
 
-## Current checkpoint status
+## Checkpoints
 
-1. Census/backfill complete; clean old-toolchain directory measurement pending.
-2. Official new archive provisioned and pinned; adaptation blocked by an external
-   dependency. No original declarations have been adapted yet.
-3. Full new directory build and matched clean comparison blocked. No timing
-   regression percentage or `RUNTIME_GATE_PASS` is claimed.
-4. Reviewable tooling/fixture checkpoint committed; final migration handoff pending.
+| Checkpoint | State | Evidence |
+|---|---|---|
+| 1. Pinned census/API baseline and clean old build | Done within serial library-facet boundary | 30 files, 581 source declaration candidates, 2,283 kernel constants, 390 theorem-kind constants; full old407-module closure passes |
+| 2. Official v4.35 provision and Tools adaptation | Blocked | Exact pinned archive verified; external Syntax.Raw fails before any Tools module |
+| 3. New builds, acceptance and matched performance | Blocked/STOP | New prefix fails; successful KeySort sample is 20.09% slower; no complete-directory ratio |
+| 4. Migration handoff | Partial | Tooling/fixture patch, frozen baseline interfaces and dependency report ready; completed migration patch awaits owner dependency and gates |
 
-## Reproduction and frozen boundary
-
-Run from the repository root:
-
-```sh
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-tools/census.py --output /workspace/migrate-tools-evidence/census-base.json
-PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item6/migrate-tools/test_tooling.py
-python3 scripts/h62/item6/migrate-tools/serial-build.py --root /workspace/solidity-lean --toolchain /workspace/migrate-tools-evidence/toolchains/lean-4.24.0-linux --output /workspace/migrate-tools-evidence/old-clean-3
-```
-
-The scanner finds 30 assigned modules, 581 declaration candidates and 52 distinct
-external direct imports. It masks nested comments, strings, character literals
-and escaped newlines. These are source candidates, not an elaborated API census.
-Whole-file SHA256 hashes conservatively freeze all bytes, including declarations,
-proofs, cases, namespaces, syntax and budget options missed by lexical analysis.
-All originals will be compared against the pinned Git base in the final manifest.
-Source trust-token totals are zero for `sorry`, `axiom` and `native_decide`; this
-is a lexical observation, not a transitive axiom audit.
-
-The serial runner produces fresh isolated `.olean` artifacts for the complete
-407-module dependency plan (including KeySort first). It does not restore caches
-or use the old `.lake` directory. This is a clean import-closure experiment,
-not the repository `./run-lean.sh` acceptance gate or native-C build timing.
-It runs exactly one Lean process with `LEAN_NUM_THREADS=1`, `-j1` and
-`--tstack=131072`; no virtual-address-space limit is imposed. A 0.2 s
-monitor enforces a sampled 12 GiB process-group RSS threshold and a conservative
-4 GiB host/cgroup available-memory reserve. The VM cap is 16 GiB; no swap device
-is present and observed cgroup swap use is zero. No `systemd-run` is used.
-The cgroup reserve includes reclaimable file cache, so a resource stop is not a
-performance regression. Timing includes guard overhead equally for both versions.
+The serial measurements emit the same `.olean`, `.ilean`, and C artifacts as
+Lake's library `leanArts` facet. They exclude Lake orchestration and hashing,
+native object/link facets for executables, and the full repository acceptance
+pipeline. They do not replace `./run-lean.sh`. No RUNTIME_GATE_PASS is claimed.
 
 ## Toolchain identity
 
-Coordinator inputs under `/workspace/h62-coordinator-inputs/` passed all five
-hashes in `sha256.json`.
+All five coordinator-input hashes in `/workspace/h62-coordinator-inputs/sha256.json`
+passed. The new archive hash equals the coordinator's `toolchain-pin.json`.
+Toolchains are invoked by absolute path; tracked `lean-toolchain` remains v4.24.0.
 
-| Toolchain | Release archive SHA256 | Actual versions |
+| Toolchain | Official linux archive SHA256 | Actual Lean/Lake |
 |---|---|---|
-| v4.24.0 | `b14f5e5159219dd1a1956c3b806813319f5e94ccd5bdfd56f54520609a5bb5ec` | Lean 4.24.0 / `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613 |
-| official pinned v4.35.0 | `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d` | Lean 4.35.0 / `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`; Lake 5.0.0-src+eb6cafb |
+| v4.24.0 | `b14f5e5159219dd1a1956c3b806813319f5e94ccd5bdfd56f54520609a5bb5ec` | Lean 4.24.0 commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake 5.0.0-src+797c613 |
+| v4.35.0 | `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d` | Lean 4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc; Lake 5.0.0-src+eb6cafb |
 
-Archives and unpacked toolchains remain off Git under
-`/workspace/migrate-tools-evidence/toolchains/`. The new SHA256 equals the
-coordinator's `toolchain-pin.json`. Tools are invoked by absolute path; the
-tracked toolchain remains v4.24.0.
+Archives/unpacked assets remain off Git at
+`/workspace/migrate-tools-evidence/toolchains/`. Bounded KeySort passes on both.
+No v4.24 per-master cache was restored.
 
-## Typed dependency request: DEP-SYNTAX-RAW-435
+## Reproduction and fixed resources
 
-Source: checkpoint 2, owner migration lane for Syntax via migrate-root-gate.
-Requested action: migrate only the owner-controlled String/Slice API uses in
-`Solidity/Syntax/Raw.lean` at base c6f550e, preserving exact public types and
-semantics; supply reviewed patch plus frozen-interface/build evidence. This lane
-requests no ownership transfer and has made no edit to that file. No relay.sh
-exists in this checkout; the coordinator retrieves this saved request.
+From this repository, with no other Lean job and a fresh output path:
 
-Exact reproduction: use the serial runner above with toolchain changed to
-`lean-4.35.0-linux` and a fresh output directory. The first clean new probe exits 1
-at Syntax.Raw after KeySort, AST and SpecSyntax pass. Errors are at lines 597,
-650, 665, 682 and 684: `String.drop` now yields `String.Slice`; `.toList`,
-`.dropRight` on String and first-class `.endsWith` application differ. Full
-messages: `/workspace/migrate-tools-evidence/new-clean-1/Solidity.Syntax.Raw.log`.
-All 30 Tools modules transitively depend on this file. No Tools declaration has
-been checked by the new directory probe. Partial prefix time 11.686 s and sampled
-peak RSS 1,539,657,728 bytes are failed-probe measurements, not build timings.
+```sh
+python3 scripts/h62/item6/migrate-tools/release-cache.py --output /workspace/migrate-tools-evidence/cache-release-before-old-lean-arts-1.json
+python3 scripts/h62/item6/migrate-tools/serial-build.py --root /workspace/solidity-lean --toolchain /workspace/migrate-tools-evidence/toolchains/lean-4.24.0-linux --output /workspace/migrate-tools-evidence/old-lean-arts-1 --lean-arts
+```
 
-## Isolated backfill and proof boundary
+The completed old run used those paths. For the new probe, replace v4.24.0 with
+v4.35.0 and the output with `new-lean-arts-1`; release-cache ran immediately before
+that probe too. Do not rerun or continue migration checks while the STOP below
+is unresolved. Existing output paths are deliberately rejected by the runner.
 
-`ApiFixtures.lean` checks expression construction, instantiation, evaluation,
-command diagnostics and rejection of an ill-typed application. Unsafe evaluation
-is observable metaprogram execution and supplies no theorem proof.
+The VM has a hard 16 GiB memory cap, 4 CPU quota and no swap device. Checks ran
+serially, one Lean process at a time, with `LEAN_NUM_THREADS=1`, explicit `-j1`
+and repository `--tstack=131072`. A 0.2 s monitor guards 12 GiB process-group RSS and
+at least 4 GiB host/cgroup available-memory reserve; these are sampled guards,
+not a claimed 12 GiB kernel cgroup limit. The VM hard cap remains 16 GiB. CORE dumps
+are disabled; no virtual-address limit or `systemd-run` is used. No proof budget,
+maxHeartbeats or original representation changed.
 
-`StringReference.lean` retains the old String operations found in
-Tools/LatexTerm and Tools/LatexSolkey; `StringFixtures.lean` supplies isolated
-new Slice materialization candidates. Eleven matched cases cover ASCII,
-Unicode, empty values, malformed wrappers and alternative labels. Reference
-passes on v4.24.0; candidates pass on v4.35.0. These are examples, not universal
-equivalence proofs or a certification of original functions. Both versions pass
-KeySort and the common API fixture. Final fixture logs/results are
-`fixtures-old-3/` and `fixtures-new-4/` under the evidence directory.
-Earlier exploratory fixture failures remain saved and are not passing gates.
+`release-cache.py` holds the writer lock and advises DONTNEED only on regular
+lane-owned evidence files, skipping symlinks. It preserves contents and does not
+use system-global cache dropping. The policy is best-effort file-page release,
+not a fully cold OS/source cache. Both measured attempts used it. Clean means
+fresh isolated build artifacts, with no artifact restores or old `.lake` inputs.
 
-Six Python controls pass: nested-comment/string/character masking, continued
-string line accounting across all actual Tools files, same-line attributes,
-current assigned census/missed commands, explicit rejection of prebuilt caches for clean/multi-target runs, and
-interruption of a real fake-runtime child followed by termination/reaping. SIGTERM handling is reviewed statically;
-that regression specifically injects KeyboardInterrupt. No Lean server is used
-by those tests.
+## Measurements and STOP escalation
 
-## Independent read-only reviews
+| Measurement | Outcome | Wall | Sampled peak aggregate RSS |
+|---|---|---:|---:|
+| Old matched-facet closure | All 407 modules pass, all 30 Tools included | 2046.698747s | 3885170688 bytes (3.62 GiB) |
+| New matched-facet probe | KeySort/AST/SpecSyntax pass; Syntax.Raw fails; zero Tools checked | 16.129358s failed prefix | 1534996480 bytes |
 
-Finder and skeptic were separate agents, neither using Lean or a Lean server.
-They found four missed attributed declarations (577 -> 581), quote-character
-masking, escaped-newline line drift, and missing exception/SIGTERM cleanup with
-an exit/signaling race. Findings were fixed and controls added. Both final
-reviews found no further blocking issue in tooling/backfill. They explicitly
-reject treating fixture success as Tools migration completion. Full checkpoint
-review remains necessary after the owner dependency arrives and final gates run.
+Receipts and exact per-module commands/artifact paths:
+`/workspace/migrate-tools-evidence/old-lean-arts-1/result.json` and
+`/workspace/migrate-tools-evidence/new-lean-arts-1/result.json`.
 
-## Remaining obligations
+Successful shared-prefix observations, one fresh-artifact sample per version:
 
-Complete old clean measurement; obtain the owner migration dependency; coordinate
-exact-file Tools edits before adapting originals; prove/check all original
-statements without budget increases; run full affected acceptance and repository
-final gate; perform matched clean old/new timing and RSS comparison under equal
-settings; escalate any regression and STOP above 10%; finish declaration/API and
-axiom audits; obtain independent milestone reviews; export final patch/bundle,
-frozen-interface hashes, cross-directory report and valid CLOUDVM-RESULT.
-No replacement goal or continuation is created by this lane.
+| Module | Old wall | New wall | Wall delta | RSS delta |
+|---|---:|---:|---:|---:|
+| KeySort | 2.014405s | 2.419012s | +20.09% | +25.38% |
+| AST | 9.278652s | 8.458920s | -8.83% | +27.06% |
+| SpecSyntax | 2.214833s | 2.018575s | -8.86% | +39.78% |
 
-## Resource-run correction
+STOP/escalation to migrate-root-gate: KeySort's successful-prefix wall sample
+exceeds 10%. Further migration checks are halted pending root investigation.
+These short measurements include 0.2 s polling overhead; they are not a full
+assigned-directory regression percentage. The complete-directory delta is null
+because the new build failed. No threshold exception or gate bypass is approved.
+All observed prefix resource increases are reported in
+`/workspace/migrate-tools-evidence/comparison-prefix.json`.
 
-Old clean attempt 2 stopped after 193 passing dependencies at Calculus.TermSize
-with `failed to create thread` (exit -6), 1244.94 s incomplete wall time and
-3,848,314,880-byte sampled aggregate peak across completed/failed checks. The
-extra 12 GiB RLIMIT_AS in the first runner confused virtual stack reservations
-with resident memory. A same-source, explicitly non-clean single-module probe
-passed after removing RLIMIT_AS: 28.21 s, 1,663,352,832-byte sampled RSS peak.
-A process sample showed 13,404,156 KiB virtual size versus 1,418,968 KiB RSS.
-The repository explicitly warns about this distinction. Resident-memory budgets
-remain unchanged: existing 16 GiB hard VM cap, sampled 12 GiB RSS guard, 4 GiB
-available reserve, no swap. CORE dumps are disabled. The old run and warm probe
-are diagnostic evidence, not a clean timing comparison. Restart both toolchain
-runs under the revised identical guard before any comparison.
+## Exact typed dependency request: DEP-SYNTAX-RAW-435
 
-Prebuilt artifacts are permitted only for one explicitly named diagnostic
-fixture/probe and are recorded as `clean:false`; they cannot satisfy build or
-performance acceptance. They assume unchanged dependencies and may shadow newer
-outputs, so they are not certification for modified dependency trees. Independent
-finder and skeptic reviewed this resource correction without Lean or edits.
+Owner: Syntax migration lane via migrate-root-gate. Exact file:
+`Solidity/Syntax/Raw.lean` at the pinned base. Request an owner-reviewed migration
+of its String/Slice API uses at lines 597,650,665,682,684, preserving exact public
+types, semantics, visibility and proof budgets. Supply consumption instructions
+compatible with isolated-lane no-merge rules. No ownership transfer or edit to
+that outside-scope original has occurred here.
 
-Before each restarted clean measurement, `release-cache.py --output <receipt>`
-uses best-effort POSIX_FADV_DONTNEED only on this lane's off-Git evidence files,
-including unpacked toolchains and old output artifacts. It deletes or modifies
-no artifact and does not drop system-global caches. This frees unused archive
-pages before the reserve guard; it does not establish a fully cold OS/source
-cache. Clean build means fresh isolated Lean artifacts with no artifact restores.
-The same cache-release procedure and resident-memory policy apply to both runs.
+New Lean reports `String.drop` returning `String.Slice` where String is expected,
+missing `Slice.toList`, missing `String.dropRight`, and a changed first-class
+`endsWith` application. Exact new matched-facet failure log:
+`/workspace/migrate-tools-evidence/new-lean-arts-1/Solidity.Syntax.Raw.log`.
+All 30 assigned modules transitively depend on this file. No relay.sh is available
+in this checkout; the coordinator retrieves the saved request and report at
+`/workspace/migrate-tools-evidence/cross-directory-dependencies.json`.
 
-## Build-facet correction
+## Frozen statements, checked interfaces and axiom audit
 
-Independent finder and skeptic confirmed that pinned Lake library `leanArts`
-emits `.olean`, `.ilean`, and C (`Lake/Build/Module.lean` and `Actions.lean`).
-The previous `-o`-only runs are checking-only experiments, not accepted library
-build timings. Old-clean-3 was intentionally interrupted for this correction.
-The runner now offers `--lean-arts` and checks that all three artifacts exist
-for every successful module. The clean matching-facet attempt is
-`old-lean-arts-1`, using the same serial bounds and cache-release policy.
-Both old/new timed attempts must use `--lean-arts`. Native object compilation
-and linking are additional executable facets; the repository final
-`./run-lean.sh` gate remains required. These serial measurements exclude Lake
-orchestration and hashing overhead, and do not replace that gate.
+`census.py` finds 30 source modules, 581 declaration candidates and 52 distinct
+direct imports outside Tools. Nested comments, strings, character literals,
+continued strings and same-line attributes have negative controls. This source
+census alone is not an elaborated certificate. Whole-file SHA256 checks against
+`git show` prove all 30 original files remain byte-for-byte identical to the base,
+including all original statements, cases, bodies and budget options.
+
+`tests/h62/item6/migrate-tools/ApiInventory.lean` inspects the checked old environment by recorded declaring
+module, including root-namespace extensions and private/generated constants.
+`wasOriginallyTheorem` handles original kind under the module system. It matches
+all 31 explicit source theorem candidates, and separately audits all 390 owned
+kernel theorem-kind constants. Both axiom unions are exactly
+`Classical.choice`, `Quot.sound`, `propext`; no sorryAx or native trust shortcut
+appears in either union. All 2,283 kernel declaration type representations are
+captured. This is ordinary Lean checking/introspection, not lean4checker replay.
+
+`normalize-api.py` requires exact module/theorem coverage and binds its input log
+to the unique successful inventory module row and source path in its complete
+receipt. It records SHA256 hashes for log, census, receipt, generator source and
+normalizer source. Seven controls reject missing/duplicate modules, missing
+source/generated theorem audits, unrelated receipts and mismatched logs, and
+confirm that changed types produce different fingerprints. The initial six scanner/resource controls also pass.
+
+Frozen data: `/workspace/migrate-tools-evidence/frozen-kernel-interfaces-old.json`.
+The hashes are toolchain-specific type-representation hashes, including generated
+names; they do not certify cross-version semantic equality or authorize excluding
+any original declaration. Inventory receipt `api-inventory-old-3/result.json` is
+explicitly non-clean and reuses only this lane's unchanged checked old artifacts;
+it provides no performance comparison.
+
+## Isolated fixture proofs and external-test boundary
+
+`tests/h62/item6/migrate-tools/ApiFixtures.lean` checks actual expression construction, instantiation, evaluation,
+diagnostics and rejection of an ill-typed application. This is metaprogram
+execution, not a theorem proof. It passes both toolchains.
+
+`tests/h62/item6/migrate-tools/StringReference.lean` retains the old operations at the two identified Tools
+printer sites. `tests/h62/item6/migrate-tools/StringFixtures.lean` contains new Slice materialization candidates,
+eleven matched example/negative cases and three universally quantified proofs:
+`slice_chars`, `definitionKey_chars`, `ruleLabel_chars`. They cover every string,
+all prefix/suffix lengths and all wrapper branches for the new candidates. Each
+proof's axiom printer reports exactly the three standard axioms above. No proof
+budget is raised. This is not a universal old-version/original-function equivalence
+proof, and no original printer has been edited or certified by these fixtures.
+
+Final fixture evidence: `fixtures-old-3/result.json`, `fixtures-new-4/result.json`
+and `string-spec-new-2/result.json` under the evidence directory. Earlier prototype
+failures are retained but never counted as passing acceptance gates.
+
+## Independent reviews and corrected experiments
+
+Separate finder/skeptic agents performed read-only reviews, with no Lean checks
+or server. Fixed findings: four missed attributed declarations (577→581), quote
+character masking, continued-string line drift, child cleanup on exception/SIGTERM
+and an exit/signaling race. The interruption regression exercises KeyboardInterrupt;
+SIGTERM handling was statically reviewed. Both reviewers independently checked
+actual source hashes, inventory coverage/provenance and declaration fingerprints,
+and found no remaining issue in the current code/artifacts. Final migration/full
+acceptance review is still pending, not implied by these backfill reviews.
+
+TermSize failed to create a thread under the first runner's extra 12 GiB
+RLIMIT_AS while RSS remained low; a same-source warm diagnostic passed after
+removing that limit. This supports a virtual-stack-reservation diagnosis rather
+than proving its cause.
+Resident-memory budgets never increased. Later -o-only checking profiles were
+intentionally stopped to match Lake's -o/-i/-c library workload. Those profiles
+and warm probes are diagnostic history and are excluded from accepted timings.
+Warm reuse is limited to one named probe, marked `clean:false`, and assumes
+unchanged dependencies; it cannot certify modified dependency trees.
+
+## Remaining obligations and handoff
+
+Obtain the owner migration dependency and root performance review; coordinate
+exact-file Tools edits before adapting any original; preserve all original
+statements/types/semantics/budgets; build every assigned new module; complete
+full affected validation and `./run-lean.sh`; finish the same-settings complete
+before/after comparison with STOP>10%/escalation rules; compare frozen interfaces,
+perform final independent reviews and export the completed migration patch.
+No declaration, premise, exclusion or observation may be weakened to unblock it.
+
+The coordinator retrieves the original patch, bundle, handoff, evidence and SHA256
+manifest from `/workspace/migrate-tools-evidence/`. The exported patch is currently
+tooling/backfill only, not a completed Tools migration. The original persistent
+goal remains unfinished and is blocked, not complete; do not create/reset a goal.
