@@ -654,3 +654,32 @@ build equivalent. Source, toolchain, cache, VM and effective resource
 provenance, production deadline enforcement and full integration remain
 unproved. This is not an H56 measurement or a runtime/proof gate pass.
 Installed versions inspected: Lean 4.24.0 (797c613), Lake 5.0.0-src+797c613.
+
+## Inventory acceptance review
+
+Read-only static review of `inventory_gate.py` and `census.py` identified
+remaining production acceptance gaps. The structural validator accepts a
+manifest with a Bridge path assigned root context and no module identity; it
+does not establish runnable mappings. The CLI checks tracked changes before
+reading worktree bytes, without an atomic binding to committed blobs, so a
+concurrent writer could invalidate the intended HEAD association. No such
+concurrent change was observed. Ignored and generated Lean paths are outside
+the current tracked-source census and untracked check. Resolving their role
+requires a reviewed full inventory and runner/source provenance; structural
+acceptance alone must not be used as the production gate.
+
+The finder exposed staged edits hidden by opposite unstaged edits in the
+original HEAD-to-worktree check. The checker now separately checks the index;
+a synthetic Git repository tests that the old comparison succeeds while the
+index comparison rejects a valid matching manifest. Both reviewers found the
+first version of that regression test could fail for an unrelated empty
+manifest; it was strengthened to check the precise diagnostic. This does not
+resolve the source-to-blob race. The finder also identified that Git index
+flags can hide changes; the checker now rejects Lean entries whose `ls-files
+-v` tag is not ordinary `H`, with an assume-unchanged regression control.
+This flag check is not an atomic source binding. Both reviews were read-only
+and ran no Lean server or build. On this
+turn origin/master advanced to `ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`;
+its per-file `lake lean` gate does not implement this inventory-wide timing
+acceptance. The H28 final Git object remains absent locally. No H56
+measurement, bounded KeySort, runtime gate or proof pass is claimed.

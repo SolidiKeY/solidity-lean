@@ -55,9 +55,15 @@ def main():
         return 2
     try:
         manifest = json.loads(pathlib.Path(sys.argv[1]).read_text())
-        # Both staged and unstaged tracked source changes invalidate the pin.
+        # Git diff can trust index flags and miss worktree changes.
+        flags = subprocess.check_output(["git", "ls-files", "-v", "-z", "--", "*.lean"], cwd=ROOT)
+        if any(not entry.startswith(b"H ") for entry in flags.split(b"\0") if entry):
+            raise ValueError("Lean index has unverified flags or stages")
+        # Compare HEAD to the index and worktree separately: staged edits can
+        # otherwise be cancelled by opposite unstaged edits.
         dirty = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", "*.lean"], cwd=ROOT).returncode
-        if dirty:
+        staged = subprocess.run(["git", "diff", "--cached", "--quiet", "HEAD", "--", "*.lean"], cwd=ROOT).returncode
+        if dirty or staged:
             raise ValueError("tracked Lean source differs from HEAD")
         untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard", "-z", "--", "*.lean"], cwd=ROOT)
         if untracked:
