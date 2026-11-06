@@ -40,9 +40,11 @@ private def producerObservation (route : String) (node : Json) : Json :=
   | .ok text => Json.mkObj [("status", "printed"), ("text", toJson text)]
   | .error (.unsupported text line) => Json.mkObj [("status", "refused"), ("reason", toJson text), ("line", toJson line)]
   | .error (.excluded text line) => Json.mkObj [("status", "excluded"), ("reason", toJson text), ("line", toJson line)]
-private def observe (read : Reader) (casesPath : String) : IO Json := do
+private def observe (read : Reader) (casesPath : String) (expectedCount : Nat := 57)
+    (distinctKinds : Bool := true) : IO Json := do
   let cases ← checked (Json.parse (← IO.FS.readFile casesPath))
   let mut rows : Array Json := #[]
+  let mut fixtures : List (String × Json) := []
   for row in ← checked (cases.getObjValAs? (Array Json) "cases") do
     let kind ← checked (row.getObjValAs? String "nodeType")
     let route ← checked (row.getObjValAs? String "route")
@@ -50,17 +52,29 @@ private def observe (read : Reader) (casesPath : String) : IO Json := do
       throw (IO.userError "unrecognized standalone route")
     let fixture ← checked (row.getObjValAs? String "fixture")
     let pointer ← checked (row.getObjValAs? String "pointer")
-    let input ← checked (Json.parse (← IO.FS.readFile fixture))
+    -- The writer lock keeps fixtures stable throughout this invocation.
+    let input ← match fixtures.lookup fixture with
+      | some input => pure input
+      | none => do
+        let input ← checked (Json.parse (← IO.FS.readFile fixture))
+        fixtures := (fixture, input) :: fixtures
+        pure input
     let node ← checked (select input pointer)
     unless J.kind node == kind do throw (IO.userError "source witness kind changed")
     let natural := invoke read route node
     let negative := if route == "none" then .null else invoke read route (node.setObjVal! "nodeType" "UnknownCompilerNode")
     unless route == "none" || J.str? negative "status" == some "refused" do
       throw (IO.userError s!"unknown {kind} root was accepted by {route}")
-    rows := rows.push (Json.mkObj [("nodeType", toJson kind), ("route", toJson route),
-      ("natural", natural), ("unknownRoot", negative), ("producerExpression", producerObservation route node)])
-  unless rows.size == 57 && (rows.toList.map J.kind).eraseDups.length == 57 do
-    throw (IO.userError "modern construct coverage changed")
+    let observed := Json.mkObj [("nodeType", toJson kind), ("route", toJson route),
+      ("natural", natural), ("unknownRoot", negative), ("producerExpression", producerObservation route node)]
+    let observed := match J.str? row "caseId" with
+      | some identity => observed.setObjVal! "caseId" (toJson identity)
+      | none => observed
+    rows := rows.push observed
+  let identities := rows.toList.map (fun row =>
+    if distinctKinds then J.kind row else (J.str? row "caseId").getD "")
+  unless rows.size == expectedCount && identities.eraseDups.length == expectedCount do
+    throw (IO.userError "reader witness coverage changed")
   return toJson rows
 private def controls : IO Unit := do
   let owned := "tests/directruntime-20261104/shared-translator/"
@@ -75,5 +89,18 @@ private def controls : IO Unit := do
         let expected ← checked (Json.parse (← IO.FS.readFile expectedPath))
         unless observed == expected do throw (IO.userError s!"{variant}{suitePrefix}construct reader observation changed")
         IO.println s!"Construct reader {variant}{suitePrefix}controls: 57 modern kinds, exact standalone outcomes and unknown-root refusals matched; no proof/backend support claim."
+private def variantControls : IO Unit := do
+  let owned := "tests/directruntime-20261104/shared-translator/"
+  for (variant, read) in [("", reader), ("composed-", executableReader)] do
+    let observed ← observe read (owned ++ "artifacts/h68-bulk/variant-reader-cases.json") 806 false
+    let expectedPath := owned ++ "artifacts/h68-bulk/" ++ variant ++ "variant-reader-matrix.json"
+    if (← IO.getEnv "SHARED_VARIANT_CAPTURE") == some "1" then
+      IO.FS.writeFile expectedPath (observed.pretty ++ "\n")
+      IO.println s!"Captured {variant}806 observed subvariants; review/frozen replay required."
+    else
+      let expected ← checked (Json.parse (← IO.FS.readFile expectedPath))
+      unless observed == expected do throw (IO.userError s!"{variant}variant reader observation changed")
+      IO.println s!"Reader {variant}806 observed subvariants: exact outcomes/unknown-root refusals matched; corpus observations only."
 #eval controls
+#eval variantControls
 end SharedTranslatorConstructControls
