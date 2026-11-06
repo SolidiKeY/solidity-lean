@@ -3,7 +3,8 @@
 
 Uses Linux child-subreaping and the VM's existing cgroup; never systemd-run or
 swap changes. The 12 GiB RSS and 4 GiB headroom checks sample every 0.2 seconds;
-RLIMIT_AS bounds every child and the existing cgroup supplies the VM hard cap.
+The existing VM cgroup supplies its hard resident-memory cap. Virtual address
+reservations are not capped: Lean's allocator may reserve much more than RSS.
 """
 import argparse
 import hashlib
@@ -12,7 +13,6 @@ import fcntl
 import json
 import os
 from pathlib import Path
-import resource
 import signal
 import subprocess
 import sys
@@ -109,9 +109,6 @@ def cleanup(process, remembered):
         time.sleep(0.05)
     raise RuntimeError("verified task descendants survived cleanup")
 
-def child_limits():
-    resource.setrlimit(resource.RLIMIT_AS,(CAP,CAP))
-
 def cancel(signum,frame):
     # Never raise across Popen/state initialization. The protected loop sees
     # this flag and always reaches finally cleanup, even for spawn-time signals.
@@ -148,7 +145,7 @@ with lock.open("a") as stream:
     env = dict(os.environ,LEAN_NUM_THREADS="1",LEAN_LSP_MAX_OPEN_FILES="1")
     started = time.monotonic()
     output_stream=args.output.open("wb") if args.output else None
-    process = subprocess.Popen(command,cwd=ROOT,env=env,preexec_fn=child_limits,start_new_session=True,stdout=output_stream)
+    process = subprocess.Popen(command,cwd=ROOT,env=env,start_new_session=True,stdout=output_stream)
     remembered = {}
     peak_rss,peak_cgroup,min_space = 0,current,space
     max_compilers,max_workers,max_jobs = 0,0,0
@@ -196,6 +193,8 @@ with lock.open("a") as stream:
         reserve_bytes=RESERVE,task_cap_bytes=CAP,swap_active_seen=swap_seen,subreaper=True,
         cleanup_complete=True,sample_interval_seconds=0.2,lean_num_threads=1,
         guard_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        hard_cgroup_limit_bytes=int((CGROUP/"memory.max").read_text()),
+        address_space_limit=None,
         stdout_file=str(args.output) if args.output else None,
         stdout_sha256=hashlib.sha256(args.output.read_bytes()).hexdigest() if args.output else None)
     args.receipt.parent.mkdir(parents=True,exist_ok=True)

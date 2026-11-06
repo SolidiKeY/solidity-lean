@@ -32,6 +32,7 @@ def checked_receipt(path, evidence):
     assert resource["cleanup_complete"] is True and resource["subreaper"] is True
     assert resource["swap_active_seen"] is False and resource["lean_num_threads"] == 1
     assert resource["reserve_bytes"] == 4*1024**3 and resource["task_cap_bytes"] == 12*1024**3
+    assert resource["hard_cgroup_limit_bytes"] == 16*1024**3 and resource["address_space_limit"] is None
     assert resource["minimum_available_bytes"] >= resource["reserve_bytes"]
     assert resource["peak_task_rss_bytes"] <= resource["task_cap_bytes"]
     assert resource["max_heavy_lean_jobs"] <= 1

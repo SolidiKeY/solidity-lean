@@ -171,7 +171,10 @@ retained PID/start-time identity and pidfd signaling keep cleanup within the tas
 own descendants. Catchable cancellation is recorded rather than raised during
 spawn; finally cleanup handles survivors before accepting success.
 
-Per-process RLIMIT_AS is 12 GiB; the VM cgroup hard limit is 16 GiB. Aggregate task
+The VM cgroup hard limit is 16 GiB. Virtual address reservations are not
+capped; they are distinct from resident memory. The worker-added RLIMIT_AS ceiling
+was removed after it produced a baseline PowerBounds std::bad_alloc at low RSS;
+the unchanged batch then checked PowerBounds successfully in 153 seconds. Aggregate task
 RSS ≤12 GiB and available memory ≥4 GiB are sampled every 0.2 seconds; those are
 sampling checks, not an additional hard cgroup. The seven current checks observed
 maximum task RSS 1501900800 bytes, minimum available memory 15264714752 bytes,
@@ -181,14 +184,36 @@ was called. An initial dependency check in the first checkpoint omitted explicit
 fixes. Occasional MCP event-loop shutdown warnings do not replace structured
 results, command exits or source/output hashes.
 
-The current before baseline is seven warm CodecWitnesses samples after a discarded
-warmup: median 1.219290965 seconds. Source/config/toolchain/guard/resource identities
-are captured. measure.py after must retain them and exits 2 above 10% slowdown.
-The matched after median is 1.217935128 seconds, a −0.1112% delta, within the
-10% limit. This is a warm per-file checking comparison, not a general performance
-improvement claim. Earlier baselines preceding
-necessary guard/config fixes are explicitly archived as superseded; none had an
-after comparison. Full ./run-lean.sh and final acceptance are still pending.
+The resident-policy matched timing pair passed: 1.236054186 → 1.226892517
+seconds (−0.7412%), seven warm samples plus discarded warmup. That pair is retained
+as timings-before-cache-advice-{before,after}; it does not measure the subsequent
+cache-maintenance policy. Under the reviewed generated-cache policy, a new baseline
+is 1.244709138 seconds; the corresponding after measurement remains pending.
+Source/config/toolchain/guard/resource identities are bound by measure.py, which
+fails above 10% slowdown. This is a warm per-file comparison, not a general speed claim.
+
+The normal resident-policy full run stopped at target 787/5994 after 1640.762 s
+when its strict 4 GiB reserve was crossed (minimum 4263129088 bytes). There were no
+Lean errors in the log. After verified cleanup, read-only POSIX_FADV_DONTNEED on
+clean generated .lake/build files reduced cgroup memory from 3.420 to 1.867 GB;
+files and all limits were preserved. Both reviewers accepted this housekeeping.
+The unchanged retry reached 5281/6117 without Lean errors, then stopped on the
+same reserve after 7676.810 s (minimum 4284727296 bytes, peak task RSS 8759885824,
+no swap, one heavy Lean job, complete cleanup). This is not a passing gate.
+
+Cache_advice.py holds the writer lock, rejects live Lean/Lake jobs and symlinked
+cache roots, uses read-only nofollow regular-file descriptors, and records advised
+bytes/errors and before/after cgroup statistics. Advice does not guarantee eviction;
+dirty pages are ignored. A second run advised 5.714 GB across 43459 files and observed
+cgroup memory fall from 9.855 to 5.882 GB, with zero errors. A further unchanged
+full retry will reuse completed artifacts. No global cache drop, budget increase,
+source edit, swapped memory or reserve-accounting relaxation is used.
+The current bounded KeySort diagnostics also pass under this resident policy.
+
+H82 standing agreements supersede earlier exact-file agreement requirements for
+statement-preserving edits. There are no pending owner requests or changed frozen
+statements. Active work remains final validation; resource-stopped attempts are
+retained, never counted as passes.
 
 ## Supported success and observable runtime boundaries
 
