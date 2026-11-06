@@ -17871,6 +17871,81 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.call_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.fetched_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.history": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.rawAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.step_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.step_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.call_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.frame_restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.produced_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.spoofed_mode_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.unrelated_raw_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.unrelated_target_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.actual_target": [
   "Classical.choice",
   "Quot.sound",
@@ -36178,6 +36253,31 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.function_jointly_satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_jointly_satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.special_jointly_satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_getter_empty_vacuous": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_special_empty_vacuous": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.complete": [
   "Classical.choice",
   "Quot.sound",
@@ -49665,106 +49765,6 @@
   "propext"
  ],
  "tests/upstream/RemainingDeclarations.lean:Solidity.Upstream.RemainingDeclarations.scalar_projection_value": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.rawAt": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.history": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.call_step": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.restored": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.returns": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.step_total": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.step_unique": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.fetched_total": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.produced_raw": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.inhabited": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.call_reached": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.frame_restored": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.spoofed_mode_refused": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.unrelated_raw_refused": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.unrelated_target_refused": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.function_jointly_satisfiable": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_jointly_satisfiable": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.special_jointly_satisfiable": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_getter_empty_vacuous": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_special_empty_vacuous": [
   "Classical.choice",
   "Quot.sound",
   "propext"
