@@ -134,3 +134,16 @@ This is a partial extraction: the other symbolic consumers, concrete-word uses,
 allocation and fragment lemmas, Claude-owned revert consumers, complete audit
 witnesses, generic control correspondence and final combined gates remain open.
 The current live toolchain remains Lean 4.24.0; no v4.35 cutover is implied.
+
+## Remaining consumer timing boundary
+
+A second packet instantiated the shared laws in eight further owned consumers,
+retaining every numeric word-injectivity application and its covered-location
+premises. The affected build passed 145 jobs and all eight candidate per-file
+kernel checks passed. Four single warm timing comparisons exceeded the 10% limit:
+TargetClearRepresentation, TargetArrayWrite, PrimitiveCycleNumeric and
+NumericRetainedCycle. The entire second packet was rejected and all eight
+original proof bodies were restored. The rejected patch, raw cold and warm
+measurements and failed timing disposition remain off Git. No unchanged timing
+retry, gate relaxation or production acceptance is inferred from the kernel
+passes. The first committed shared-law extraction remains separate.
