@@ -1,8 +1,8 @@
 {
-  "commit": "ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6",
+  "commit": "706e36825929d6d0084dc08b88de9349abcd25aa",
   "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
   "authority": "H82b authenticated translator scope and H90 reader extension; explicit published-master adoption",
-  "publication": "Fetched and adopted exact published ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6 after coordinator review; matched-census frontend/syntax/calculus dependencies unchanged from measurement base3a1e7047.",
+  "publication": "Fetched published706e36825 and merged before H68 static intake; exact CR branch remains unmerged.",
   "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref.",
   "exclusiveFiles": [
     "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
