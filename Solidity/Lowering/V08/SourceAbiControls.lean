@@ -581,18 +581,18 @@ theorem memory_signature_wrong_pointer (pipeline : Roadmap.Pipeline) (static : B
 #print axioms selector_byte_at
 
 /-- These are the published ABI argument predicates, not full source-unit admission. -/
-theorem selector_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase
+theorem selector_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase E.mapFree
     [.stringLit selectorBytes,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
 
-theorem signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase
+theorem signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase E.mapFree
     [.stringLit [],.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
 
-theorem memory_signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase
+theorem memory_signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase E.mapFree
     [.string .memory,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
 
 /-- Generic resolved evaluation is broader than admitted typing: this published
 rejection is preserved, with no new profile rule or restriction. -/
-theorem overlong_selector_not_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase
+theorem overlong_selector_not_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase E.mapFree
     [.stringLit long33,.stringLit binary] = false := rfl
 
 #print axioms selector_argsOK

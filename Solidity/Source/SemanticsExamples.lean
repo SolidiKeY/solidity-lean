@@ -205,8 +205,8 @@ theorem dX_ty : dX.varTy EB = some uint := by decide
 theorem dT_ty : dT.varTy EB = some uint := by decide
 theorem dPing_sig : dPing.fnSig EB = some ([], []) := by decide
 
-theorem lit_ok (B : DeclName → DeclName → Bool) (k : Nat) (h : (Q.ofInt k).FitsInt IntTy.u256) :
-    STy.implicit B (.rational (Q.ofInt k)) uint = true :=
+theorem lit_ok (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (k : Nat) (h : (Q.ofInt k).FitsInt IntTy.u256) :
+    STy.implicit B M (.rational (Q.ofInt k)) uint = true :=
   decide_eq_true (p := (Q.ofInt k).FitsInt IntTy.u256) h
 
 def lit {Γ : RCtx} (k : Nat) (h : (Q.ofInt k).FitsInt IntTy.u256 := by decide) : RExpr EB Γ uint :=

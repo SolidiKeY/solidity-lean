@@ -12,7 +12,8 @@ from a typed declaration. The element type, the static length and the
 target location are still compared exactly.
 
 - `nested_implicit` … `to_storage_refused`: the conversion and its
-  refusals. `dynamic_elements_stuck`: `bytes[] calldata` also converts,
+  refusals; `struct_mapping_refused`, `array_mapping_refused`: copies out of
+  `storage` of structs holding a mapping are refused (pointers kept). `dynamic_elements_stuck`: `bytes[] calldata` also converts,
   but its copy is `stuck` (no dynamic element copy; a recorded gap).
 - `w_copy`: the typing derivation of `uint256[2][] memory c = xs;` for a
   `uint256[2][] calldata` parameter; its elaborated form converts with
@@ -36,31 +37,31 @@ def memNested : STy := .array .memory pair none
 
 /-! ## The conversion -/
 
-theorem nested_implicit (B : DeclName → DeclName → Bool) : cdNested.implicit B memNested = true := rfl
+theorem nested_implicit (B : DeclName → DeclName → Bool) (M : DeclName → Bool) : cdNested.implicit B M memNested = true := rfl
 
 /-- The storage-to-memory analogue converts the same way (copied by
 `loadMem`, inner arrays allocated by `loadElem`). -/
-theorem storage_nested_implicit (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.array .storage (.array .storage u (some 2)) none) memNested = true := rfl
+theorem storage_nested_implicit (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.array .storage (.array .storage u (some 2)) none) memNested = true := rfl
 
 /-- A `calldata` pointer keeps its type. -/
-theorem pointer_implicit (B : DeclName → DeclName → Bool) : cdNested.implicit B cdNested = true := rfl
+theorem pointer_implicit (B : DeclName → DeclName → Bool) (M : DeclName → Bool) : cdNested.implicit B M cdNested = true := rfl
 
 /-- A different static length is refused. -/
-theorem length_refused (B : DeclName → DeclName → Bool) :
-    cdNested.implicit B (.array .memory (.array .memory u (some 3)) none) = false := rfl
+theorem length_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    cdNested.implicit B M (.array .memory (.array .memory u (some 3)) none) = false := rfl
 
 /-- A different element type is refused (no element-wise conversion). -/
-theorem element_refused (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.array .calldata (.array .calldata (.int IntTy.u8) (some 2)) none) memNested = false := rfl
+theorem element_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.array .calldata (.array .calldata (.int IntTy.u8) (some 2)) none) memNested = false := rfl
 
 /-- Memory does not convert to `calldata`. -/
-theorem to_calldata_refused (B : DeclName → DeclName → Bool) : memNested.implicit B cdNested = false := rfl
+theorem to_calldata_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) : memNested.implicit B M cdNested = false := rfl
 
 /-- `calldata` does not convert implicitly to `storage` (a copy into storage
 is an assignment, `STy.copiesTo`). -/
-theorem to_storage_refused (B : DeclName → DeclName → Bool) :
-    cdNested.implicit B (.array .storage (.array .storage u (some 2)) none) = false := rfl
+theorem to_storage_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    cdNested.implicit B M (.array .storage (.array .storage u (some 2)) none) = false := rfl
 
 /-- **A recorded gap** (`docs/feature-work/source-soundness.md`, census):
 `bytes[] calldata` now converts to `bytes[] memory`, as in solc, but
@@ -68,9 +69,49 @@ theorem to_storage_refused (B : DeclName → DeclName → Bool) :
 def dynElems := (convRV frame 0 (.array .memory (.bytes .memory) none)
   (σ := .array .calldata (.bytes .calldata) none) (.val (.cdRef rfl 0 1)) : EM EB [] _).run (L0 EB, sB)
 
-theorem dynamic_elements_stuck (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.array .calldata (.bytes .calldata) none) (.array .memory (.bytes .memory) none) = true ∧
+theorem dynamic_elements_stuck (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.array .calldata (.bytes .calldata) none) (.array .memory (.bytes .memory) none) = true ∧
     dynElems.1 = .error (.stuck "dynamic ABI decoding is not modelled") := ⟨rfl, rfl⟩
+
+/-! ## Copies out of storage of structs holding a mapping
+
+solc refuses copying a struct that holds a mapping out of `storage`, and an
+array of such structs (user decision 2026-11-06): `STy.implicit` asks
+`Env.mapFree`. A storage pointer keeps its type. -/
+
+def mU : Syn .typeName := .elem (.int false 256 (by decide))
+def mK : MapKey := .elem (.int false 256 (by decide)) (by decide)
+
+/-- `struct Keyed { uint256 a; mapping(uint256 => uint256) m; }` and
+`struct Plain { uint256 a; uint256[] xs; }`. -/
+def mapEnv : Env := ⟨[
+  ⟨.struct, "Keyed", none, true, .struct "Keyed" (.structMember mU "a")
+    (.cons (.structMember (.mapping mK none mU none) "m") .nil)⟩,
+  ⟨.struct, "Plain", none, true, .struct "Plain" (.structMember mU "a")
+    (.cons (.structMember (.array mU .none) "xs") .nil)⟩]⟩
+
+def keyed : DeclName := ⟨none, "Keyed"⟩
+def plain : DeclName := ⟨none, "Plain"⟩
+
+theorem keyed_holds_mapping : mapEnv.mapFree keyed = false ∧ mapEnv.mapFree plain = true := ⟨rfl, rfl⟩
+
+/-- `Keyed storage` to `Keyed memory` is refused; `Plain` copies. -/
+theorem struct_mapping_refused :
+    STy.implicit mapEnv.isBase mapEnv.mapFree (.struct .storage keyed) (.struct .memory keyed) = false ∧
+    STy.implicit mapEnv.isBase mapEnv.mapFree (.struct .storage plain) (.struct .memory plain) = true := ⟨rfl, rfl⟩
+
+/-- `Keyed[] storage` to `Keyed[] memory` is refused; `Plain[]` copies. -/
+theorem array_mapping_refused :
+    STy.implicit mapEnv.isBase mapEnv.mapFree (.array .storage (.struct .storage keyed) none)
+      (.array .memory (.struct .memory keyed) none) = false ∧
+    STy.implicit mapEnv.isBase mapEnv.mapFree (.array .storage (.struct .storage plain) none)
+      (.array .memory (.struct .memory plain) none) = true := ⟨rfl, rfl⟩
+
+/-- A storage pointer to a struct holding a mapping keeps its type. -/
+theorem mapping_pointer_kept :
+    STy.implicit mapEnv.isBase mapEnv.mapFree (.struct .storage keyed) (.struct .storage keyed) = true ∧
+    STy.implicit mapEnv.isBase mapEnv.mapFree (.array .storage (.struct .storage keyed) none)
+      (.array .storage (.struct .storage keyed) none) = true := ⟨rfl, rfl⟩
 
 /-! ## The conversion arm -/
 

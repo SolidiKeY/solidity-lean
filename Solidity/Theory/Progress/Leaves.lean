@@ -59,7 +59,7 @@ inductive RevertErrorNode (A : Decl → Prop) {R : List STy} {M : Bool} :
 inductive BuiltinNode (A : Decl → Prop) {R : List STy} {M : Bool} :
     {k : SCtx} → {Γ Γ' : RCtx} → RStmt E R M k Γ Γ' → Prop where
   | mk {k : SCtx} {Γ : RCtx} {ts : List STy} {t : STy} (b : Builtin) (args : RArgs E Γ ts)
-      (ht : b.callTy E.isBase ts = some t) :
+      (ht : b.callTy E.isBase E.mapFree ts = some t) :
       BuiltinFragment A b args t → BuiltinNode A (RStmt.expr (R := R) (M := M) (k := k) (.builtin b args ht))
 
 /-- `emit` nodes as an extension. -/
