@@ -1,0 +1,44 @@
+{
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.allowed": [],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.eqv_integer": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.fractional_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.integral_outside_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.not_allowed": [],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.numerator": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.source_value": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalConstants.lean:Solidity.Lowering.V07.IntegralRationalConstants.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

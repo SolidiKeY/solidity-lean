@@ -1,5 +1,45 @@
 # H62/H63 Source migration overlay
 
+## Current resumed state
+
+Coordinator explicitly resumed this lane after merging retirement head fffb54d01e.
+The assigned branch fast-forwarded cleanly to origin/master
+d96f2406d352de7e0b72ba6ac4ab29dc457582c6; original base c6f550e281a7e5affa9a99bc2cdaed556dec00e4
+and the reported20e492ee9 coordinator commit are verified ancestors. Historical
+retirement receipts below remain unchanged; this section supersedes their stopped
+worker status and unapplied-Ctor description. No push or goal reset occurred.
+
+Under H82's proof-only standing agreement, the previously reviewed Ctor proposal
+is now applied to Solidity/Source/Ctor.lean. It changes only Syn.nodes_eq and
+Syn.excl_ctor proof bodies. File SHA256:
+cbb058de6cdc41a5ea12e8a4e2d0865d91381551d27bf2ee02418dd74af53d92.
+The exact current source with the two axiom-print commands appended equals the
+previously checked fixture bytes (92a08a3c6879c88df6b1a6720fa0dc284e453c286fe384ee8b3471cb29657247).
+The two theorem headers, definitions and budgets remain unchanged.198 other
+assigned source files remain byte-identical to the original census. No fresh
+production-file build or consumer gate is claimed; MS-H78-SHIM-PERF-STOP remains
+active and no Lean run or timing rerun was made during resumption.
+
+The deterministic h78-inventory.py consolidates saved exports with no compiler
+run. It retains all17542 original names and their full-record fingerprints,
+including every hygienic/private candidate. Target evidence covers5/199 modules:
+1792 raw records identical,555 changed,18 absent;15177 are not target-checked.
+Family hints never exclude any name. Full raw type records remain in the saved
+old ledger; exact old/new Syn.noConfusion and noConfusionType records additionally
+include decoded binder order/kinds, universes and raw domain/result expressions
+in resumed/api-inventory/syn-exact-signatures.json. Both are definitions with
+universe parameter u. noConfusion changes5→7 binders; noConfusionType changes4→5.
+Visibility and attributes were not captured in these exports, so a complete public
+API/metadata compatibility verdict is unavailable. No accepted shim is installed.
+
+Static parser controls pass after correcting their initial repository-root path
+lookup. Repeated inventory generation is byte-identical. Actual inputs, hashes,
+proof-fixture byte binding, scope delta and validation logs are saved off git at
+/workspace/h62-migrate-source-evidence/resumed. H78 compatibility, target full build,
+matched full timing, axiom reconciliation and required final gates remain open.
+
+
+
 **Overall blocked; original goal incomplete.** Sole migration lane owner:
 `solidity-h62-6-20261106/migrate-source`. Branch:
 `codex/solidity-h62-6-20261106/migrate-source`. Published base:
