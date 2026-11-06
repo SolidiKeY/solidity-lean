@@ -2253,7 +2253,7 @@ contains exactly nine public theorems:
 | `list_yield_token_bound` | The generic premise yields the intrinsic list-count bound. |
 | `statement_list_yield_token_bound` | The premise is discharged for arbitrary statement syntax in every context. |
 | `item_list_yield_token_bound` | The premise is discharged for arbitrary item syntax, including unchecked blocks. |
-| `item_list_many_iteration_budget` | The actual located-input token-length-plus-one counter accommodates every item plus stopping, for arbitrary suffix states. |
+| `item_list_many_iteration_budget` | Token-count bound: item count plus one is at most located-input token length plus one (the `many` counter in Parser.lean); the link to `many` is not stated in Lean. |
 | `statement_list_many_iteration_budget` | The corresponding universal statement-list iteration bound. |
 
 These are universal structural measures, not parser-success assumptions.
@@ -2294,3 +2294,8 @@ This is assigned block/list decomposition and fuel backfill. It does not close
 the remaining general compound framing, structural parser coverage or final
 whole-repository acceptance obligations. SG-CEX-01/02 stay explicit and SOL-EU
 remains excluded. External solc fixture results are separate historical evidence.
+
+Coordinator merge review (2026-11-06): finder and skeptic found no blocker.
+The `#print axioms` lines in ListMeasures* are unpinned (no `#guard_msgs`), and
+the `*_many_iteration_budget` theorems are token-count bounds that do not
+mention `many`.
