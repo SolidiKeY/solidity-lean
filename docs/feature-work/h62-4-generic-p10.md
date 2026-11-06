@@ -362,3 +362,5 @@ thread assignment in `original-assignment.txt`, and the full original queue and
 scope in `queue-and-scope.json`. These files travel in the cumulative patch and
 bundle; bulk evidence stays off git with SHA256SUMS. The exposed goal tool
 cannot set PAUSED, and no available H71 permission authorizes a lane push.
+
+Coordinator resolution: KEEP RETIREMENT AND HANDOFF to solidity-parallel-20261103/executable-bytecode. Generic Continue now broadcasts do not revoke retirement. No human decision pending. Coordinator will set existing goal PAUSED after final head report and idle turn because worker lacks pause tool. No further proof implementation.

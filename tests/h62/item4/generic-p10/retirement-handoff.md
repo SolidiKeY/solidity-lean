@@ -40,3 +40,5 @@ handoff-only additions. The initial incomplete timing timeout is retained.
 All original frozen statements remain untouched; new axioms/sorry count zero.
 Full production `./run-lean.sh --bridge` remains pending. Full evidence and
 precise commands/exits are in the external handoff and acceptance ledger.
+
+Coordinator resolution: KEEP RETIREMENT AND HANDOFF to solidity-parallel-20261103/executable-bytecode. Generic Continue now broadcasts do not revoke retirement. No human decision pending. Coordinator will set existing goal PAUSED after final head report and idle turn because worker lacks pause tool. No further proof implementation.
