@@ -193,3 +193,24 @@ Coordinator relay of user decisions on this lane's questions:
     `docs/feature-work/roadmap-g06-osaka.md` and the intentional old-bytes record
     `tests/cr-canonical-reader/H68Pairs0.lean.txt`. The two h28-terra manifests
     list fixture paths only and hold no hashes.
+
+### Lean checks after the apply
+
+Per-file diagnostics (`scripts/coord-tools/lean-mcp diag`) on all 23 affected
+modules (20 pin holders and 3 path readers): 21 have 0 errors. The remaining two
+fail identically on the pre-migration bytes, after restoring the parent
+fixtures and modules and re-running, so the migration did not cause them:
+
+- `tests/upstream/EntryPointsAdmission.lean:15`: "malformed selector refusal lost its cause …" (1 error).
+- `tests/upstream/EntryPointsLeft.lean:312`: "Unknown constant `ViaIR_RenamedExternal_falseObservation`" (10 errors).
+
+Reviews of the apply (read-only):
+
+- **Finder.** Fixtures differ only by the added keys; all 128 pins equal the
+  new FNV values; four re-pinned files differ only in sha values. It found the
+  census regeneration, fixed above, and the doc omissions, fixed.
+- **Skeptic.** Traced every `typeIdentifier`/`tryCall` read site in the
+  importer (`SolcJson/Body.lean` 215, 333, 776, 835–862, 861, 1826;
+  `Contract.lean` 586, 637; `PaymentPlan.lean` 70; `WorldImport.lean` 100). Only
+  the `Body.lean:1826` slice reason changes for the migrated fixtures. No
+  non-Lean consumer checks key sets, node counts or byte lengths.
