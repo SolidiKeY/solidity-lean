@@ -1475,3 +1475,41 @@ retained failing/passing controls, proof source hashes and failed target receipt
 H16/full-root resource work, kernel clause/span and positioned-trace producers,
 H70 raw packet, hosted CI, native macOS, paired rendered/performance/scaling
 matrices and both fresh-process judgments remain open.
+
+
+### Handoffs — owned native-runtime retirement and authoritative merge (2026-11-06)
+
+Merged origin/master33eb46304cdb536e6c8b686223c6d8e456b703ae as
+3b02f54880b8d655cec106797b4d0da83a1edeb3 and pushed only the assigned lane
+with explicit user authorization. Eight conflicts retain newest H80 guide/index
+behavior and capture guards; both reviewers cleared the resolutions. All415
+Node tests pass/four skip; inventory/pins/audit/static trust/classification pass.
+Parity remains exit1,0/489. Whole-merge whitespace check reports inherited
+upstream findings; owned resolution paths are clean. Unfinished retention work
+was checksum-preserved in an owned worktree/patch/stash before the merge.
+
+A real-compiler/pending-only injected executable reproduced another normal
+retirement defect: successful disposal left an owned zombie. Native children
+are now tracked and physically closed before worker success. Private cache
+ownership prevents old failures evicting newer entries, superseded admission
+and terminal late results. Three failing controls are retained; all32 targeted
+cases pass/two actual-Lean opt-ins skip. Finder/skeptic report no remaining
+concrete finding; runtime payload/H68metadata/proof profiles/budgets unchanged.
+This is not actual native-C/solver or full forced/crash/detached/Wasm retention.
+
+Fresh replay at2b37d239d149c878c7471567877227009267dd6c timed out at the original
+300s guard (exit124); validator exits1 after only helper/Discover00–06 completed.
+No resource STOP or survivors. The separate TestSuite resource STOP remains
+failed. All334 TestSuite and24 replay source hashes still match after merge;
+no unchanged retry. Horizon changed through semantic support, with no demonstrated
+proof-cost repair or bounded artifact. Independent CLI/frontend closures are
+unchanged and validate successfully (347jobs, exit0, peak110821376); current
+serial TOML preserves master defaults and old configurations remain immutable.
+
+The [checksum manifest](dafny-direct-retention-evidence-manifest.json) binds
+raw before/after controls, failed replay and merge receipts outside git. Only
+assessment/evidence fields of two existing partial retention rows change; all489
+IDs/order/expectations/frozen270 are unchanged. Full roots/trust/TestSuite/timed
+strict, actual solver/performance/scaling/paired rendered/macOS matrices,
+producer-owned clause/span/positioned traces, hosted CI and both per-row
+judgments remain open. No completed row or overall runtime gate pass is claimed.

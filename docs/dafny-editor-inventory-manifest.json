@@ -1,30 +1,33 @@
 {
   "schemaVersion": 1,
   "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
-  "sourceHead": "c352ea6707bff3551b1978ae83276cdf682a8263",
+  "sourceHead": "3b02f54880b8d655cec106797b4d0da83a1edeb3",
   "repository": "/workspace/solidity-lean",
   "fileCount": 1,
-  "uncompressedBytes": 712773,
+  "uncompressedBytes": 715179,
   "rowCount": 489,
   "frozenRowCount": 270,
   "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
   "archive": {
-    "path": "/workspace/dafny-parity-proof-help-20261106/inventory/bulk.tar.gz",
-    "bytes": 42106,
-    "sha256": "fa7d1a34e96adcb111d1801a87ce7eaca5054145b089b0d3cb1841d566c1a0b9"
+    "path": "/workspace/dafny-parity-direct-retention-20261106/inventory/bulk.tar.gz",
+    "bytes": 42453,
+    "sha256": "5af8962f2baf34b76da83585bbd7f34c0cfe753f56eefb0716b6211357fd43fe"
   },
   "index": {
-    "path": "/workspace/dafny-parity-proof-help-20261106/inventory/files.json",
+    "path": "/workspace/dafny-parity-direct-retention-20261106/inventory/files.json",
     "bytes": 186,
-    "sha256": "5c41f229af266a171269af715c749b2d75578b2b5a2a50f5ec0dd8ed71bac84d"
+    "sha256": "1decb2b930904899fcd54396bd8279622fd3ed6dac2b851ab77cd5b5e4a4c7ec"
   },
   "rawInventory": {
-    "path": "/workspace/dafny-parity-proof-help-20261106/inventory/inventory.json",
-    "bytes": 712773,
-    "sha256": "0833c787cbcc0d8bb072659cac40a2b0c913c06df638483d4195712fc05dbafd"
+    "path": "/workspace/dafny-parity-direct-retention-20261106/inventory/inventory.json",
+    "bytes": 715179,
+    "sha256": "a6471ed5d1c37acf3d93ebe4c41d7eb5be2a8b71bcf296487bcdce7143ed5630"
   },
   "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
   "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
   "gateBoundary": "Tracked digest plus restored full489-row inventory. All original486 IDs/order/expected observations and original frozen270 unchanged;3additive original lifecycle/adversarial scenarios. Missing/corrupt full inputs still fail mandatoryinventory-check/parity-gate; offline --check is explicitlydigest-only when trulyabsent. No completedrow or gate/judge weakening.",
-  "evidenceRestoreManifest": "docs/dafny-proof-help-evidence-manifest.json"
+  "evidenceRestoreManifest": "docs/dafny-proof-help-evidence-manifest.json",
+  "additionalEvidenceRestoreManifests": [
+    "docs/dafny-direct-retention-evidence-manifest.json"
+  ]
 }

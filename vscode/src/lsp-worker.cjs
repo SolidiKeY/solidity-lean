@@ -5,7 +5,7 @@ const {pathToFileURL}=require('node:url');
 const {createHash}=require('node:crypto');
 const {LeanSession}=require('./lean-session.cjs');
 const projects=require('./project.cjs');
-const {checkDirect}=require('./direct-runtime.cjs');
+const {checkDirect,disposeDirect}=require('./direct-runtime.cjs');
 const {unknownResult}=require('./direct-model.cjs');
 
 let session,compiler,locations;
@@ -86,7 +86,7 @@ let stopping=false;
 process.on('message',async task=>{
   if(task.action==='shutdown'){
     if(stopping)return;stopping=true;
-    try{const deadline=Math.min(Number.isSafeInteger(task.deadline)?task.deadline:Date.now(),Date.now()+1000);await session?.finishDispose({deadline});process.exit(0);}
+    try{const deadline=Math.min(Number.isSafeInteger(task.deadline)?task.deadline:Date.now(),Date.now()+1000);await Promise.all([session?.finishDispose({deadline}),disposeDirect({deadline})]);process.exit(0);}
     catch(error){process.stderr.write('Lean worker retirement failed: '+error.message+'\n');session?.dispose();process.exit(1);}
     return;
   }
