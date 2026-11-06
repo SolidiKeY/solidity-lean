@@ -959,4 +959,16 @@ def otherCleanSameWords : RawFrame.State ctx :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.Logic.holds_agrees
 
+/- Actual completion stores dirty values in the overlay itself, not only in fallback reads. -/
+#guard logicResult.state.raw flag = some (word 2)
+#guard logicResult.state.raw small = some (word 257)
+#guard (logicResult.state.raw addr1).map (fun value => value.val) = some (2^256-1)
+
+/-- info: 'Solidity.Yul.RawFrame.run_captured' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_captured
+/-- info: 'Solidity.Yul.RawFrame.Logic.box_captured' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.box_captured
+
 end Solidity.Yul.Checks.LocalBlock
