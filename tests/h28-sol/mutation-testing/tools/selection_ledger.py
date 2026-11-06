@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Exhaustive candidate/fixture accounting; no semantic success is inferred."""
 import argparse
+import collections
 import difflib
 import json
 from pathlib import Path
 import subprocess
 import candidate_inventory as census
 import bulk_inputs
+from engine import KINDS, SCORED
 from archive_io import require
 
 
@@ -23,7 +25,71 @@ def overlaps(edit, span):
     return edit["start"] < span["stop"] and span["start"] < edit["stop"]
 
 
-def account(catalog, manifest, sources):
+def case_counts(cases):
+    scored = [c for c in cases if c["kind"] in SCORED]
+    return {"case_ids": len(cases), "scored_ids": len(scored),
+            "distinct_scored_programs": len({c["mutant_sha256"] for c in scored}),
+            "unscored_runner_controls": len(cases) - len(scored),
+            "distinct_programs_all_roles": len({c["mutant_sha256"] for c in cases}),
+            "roles": dict(collections.Counter(c["kind"] for c in cases))}
+
+
+def validate_case_hashes(cases):
+    by_hash = {}
+    by_id = {c["id"]: c for c in cases}
+    require(len(by_id) == len(cases), "duplicate selected ID")
+    for case in cases:
+        require(case["kind"] in KINDS, "unknown case role")
+        by_hash.setdefault(case["mutant_sha256"], []).append(case)
+    survivors = [c for c in cases if c["kind"] == "runner-survivor-control"]
+    require(len(survivors) <= 1, "multiple survivor controls")
+    for control in survivors:
+        parent = by_id.get(control.get("control_of"))
+        require(parent is not None and parent["kind"] in SCORED
+                and control["mutant_sha256"] == parent["mutant_sha256"]
+                and bool(control.get("regression")), "undeclared duplicate mutant hash or unlinked survivor control")
+    for group in by_hash.values():
+        if len(group) == 1:
+            continue
+        scored = [c for c in group if c["kind"] in SCORED]
+        controls = [c for c in group if c["kind"] == "runner-survivor-control"]
+        require(len(group) == 2 and len(scored) == len(controls) == 1
+                and controls[0].get("control_of") == scored[0]["id"]
+                and "regression" in controls[0], "undeclared duplicate mutant hash")
+
+
+def validate_catalog(catalog, sources, inventory, manifest):
+    require(set(census.INPUTS[:2]) <= set(sources), "missing candidate source file")
+    require(catalog["production_inputs"] == {f: census.digest(s.encode()) for f, s in sources.items()}, "catalog/source input identity mismatch")
+    expected = []
+    for file in census.INPUTS[:2]:
+        for row in census.declarations(sources[file], file):
+            row["clauses"] = census.premise_clauses(sources[file], row)
+            expected.append(row)
+    keys = ("id", "kind", "file", "span", "clauses")
+    require([{k: row[k] for k in keys} for row in catalog["declarations"]] == expected,
+            "catalog differs from exhaustive source declarations or units")
+    selected = {c["constructor_id"] for c in manifest["cases"]}
+    index = inventory["inventory"]
+    require(len(index) == len({row["id"] for row in index}) and {row["id"] for row in index} == selected,
+            "selected inventory declaration set mismatch")
+    expected_by_id = {row["id"]: row for row in expected}
+    require(inventory["base"] == manifest["base"] == census.BASE, "selected inventory base mismatch")
+    require(inventory["production_inputs"] == manifest["production_inputs"], "selected inventory/manifest input mismatch")
+    require(all(file in sources and census.digest(sources[file].encode()) == sha for file, sha in inventory["production_inputs"].items()), "selected inventory input identity mismatch")
+    for row in index:
+        require(row["id"] in expected_by_id, "selected inventory declaration missing from source")
+        original = expected_by_id[row["id"]]; span = original["span"]
+        require((row["file"], row["line_start"], row["line_end"], row["span_sha256"]) ==
+                (original["file"], span["line_start"], span["line_end"], span["sha256"]),
+                "selected inventory/source span mismatch")
+
+
+def account(catalog, manifest, sources, inventory):
+    validate_case_hashes(manifest["cases"])
+    if "declared_case_counts" in manifest:
+        require(manifest["declared_case_counts"] == case_counts(manifest["cases"]), "declared case/program counts mismatch")
+    validate_catalog(catalog, sources, inventory, manifest)
     declarations = catalog["declarations"]
     by_id = {r["id"]: r for r in declarations}
     require(len(by_id) == len(declarations), "duplicate candidate declaration")
@@ -70,6 +136,7 @@ def account(catalog, manifest, sources):
                        "execution_status": "requires-whole-run-receipt"} for c in cases],
             "counts": {"declarations": len(rows), "units": len(unit_ids), "fixtures": len(fixtures),
                        "profiles": len(catalog["frozen_manifests"]), "selected_ids": len(cases)},
+            "program_counts": case_counts(cases),
             "scope_complete": False, "score": None,
             "boundary": "Exhaustive source and selection accounting only. Unselected is not excluded, equivalent, killed or proved sound. Semantic acceptance requires actual proof/run receipts."}
 
@@ -89,7 +156,9 @@ def build(repo, manifest_path):
     sources = {file: subprocess.check_output(["git", "show", census.BASE + ":" + file], cwd=repo).decode()
                for file in catalog["production_inputs"]}
     require(all(census.digest(sources[p].encode()) == h for p, h in catalog["production_inputs"].items()), "census source drift")
-    result = account(catalog, manifest, sources)
+    inventory_bytes = bulk_inputs.read(repo, repo / manifest["inventory"])
+    require(census.digest(inventory_bytes) == manifest["inventory_sha256"], "selected inventory file hash mismatch")
+    result = account(catalog, manifest, sources, json.loads(inventory_bytes))
     result.update(schema=1, base=census.BASE,
                   input_head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip(),
                   manifest=str(manifest_path.relative_to(repo)), manifest_sha256=census.digest(manifest_bytes),

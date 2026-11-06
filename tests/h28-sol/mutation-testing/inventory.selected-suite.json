@@ -95,5 +95,5 @@
       "span_sha256": "ad75ee27d9c5350b6eec3ab7be4176311a2760c78fe96116b6591c62b9e33b31"
     }
   ],
-  "coverage_note": "Every selected source span is enumerated. This is an execution attribution index; exhaustive candidate census remains290 declarations/308units. Unselected candidates are not exclusions, equivalents or proved sound."
+  "coverage_note": "Every selected source span is enumerated. This is an execution attribution index; the exhaustive candidate census remains 290 declarations / 308 units. Unselected candidates are not exclusions, equivalents or proved sound."
 }

@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "authorization": "H44",
-  "source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
   "delivery_base": "79e4972532b0628c539911dc80c4904d776e81ef",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
@@ -375,5 +374,34 @@
     "archive_seconds": 5.854443480000555,
     "process_maxrss_kib": 23556,
     "cache_delivery_authorization": "H41"
+  },
+  "snapshot_source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
+  "selected_proof_pack_f8b65736": {
+    "authorization": "H44",
+    "cache_delivery_authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-selected-export-f8b65736/proof-worlds.tar.gz",
+    "bytes": 56215388,
+    "sha256": "17836afbe0df1a8c3836a99a524363888716778d45158779f1a334400531350d",
+    "members": 285,
+    "input_head": "f8b657366fc38e1aad85ba080d14bb2c249448eb",
+    "check_count": 113,
+    "axiom_export_count": 321,
+    "compiled_artifact_count": 78,
+    "kernel_export_count": 294,
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/selected-suite-f8b65736/manifest.json",
+    "coordinator_pull_observed": false,
+    "archive_seconds": 51.20917440800258,
+    "process_maxrss_kib": 73652
   }
 }

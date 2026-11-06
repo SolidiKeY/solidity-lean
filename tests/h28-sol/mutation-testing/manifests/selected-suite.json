@@ -3,9 +3,9 @@
   "state": "frozen",
   "scope": "full",
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "coverage_claim": "Whole declared selected suite:19 IDs,15distinct scored mutant programs and4controls; all original17 case payloads unchanged plus direct rollback-payment and return-frame/pending-callback mutations. This does not select every possible mutation or establish soundness of every constructor. Final scope acceptance requires exhaustive ledger and actual whole execution.",
+  "coverage_claim": "Whole declared selected suite: 19 case IDs; 15 scored cases (11 mutants and four negative-control semantic mutations), with 15 distinct scored mutant_sha256 values. Four unscored runner controls: independent known-kill, invalid compilation, label equivalence, and a weak-oracle survivor with a checked stronger regression. The survivor deliberately repeats guard.require-success-false via control_of; across all roles there are 18 distinct program hashes. All original 17 payloads remain unchanged, with direct rollback and return-frame mutations added. Exhaustive ledger and actual whole execution are required; no whole compiler correctness claim.",
   "inventory": "tests/h28-sol/mutation-testing/inventory.selected-suite.json",
-  "inventory_sha256": "a0bc2abb35f88abf244d2d60d3cd7e88058e25a5b788fa159bedc7e2d7d3f3e7",
+  "inventory_sha256": "dbf8e5aedba0b1d61a619a721d5da4ddcf682bfe7db15680313a2dc0ff43c2a2",
   "production_inputs": {
     "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
     "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
@@ -966,5 +966,20 @@
       }
     ],
     "bulk_manifest": "tests/h28-sol/mutation-testing/bulk-data.json"
+  },
+  "declared_case_counts": {
+    "case_ids": 19,
+    "scored_ids": 15,
+    "distinct_scored_programs": 15,
+    "unscored_runner_controls": 4,
+    "distinct_programs_all_roles": 18,
+    "roles": {
+      "known-kill": 1,
+      "mutant": 11,
+      "invalid-control": 1,
+      "equivalent-control": 1,
+      "runner-survivor-control": 1,
+      "negative-control": 4
+    }
   }
 }
