@@ -12,6 +12,33 @@ spec.loader.exec_module(module)
 
 
 class FixtureClassification(unittest.TestCase):
+    def test_abi_vector_output_and_unknown_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp).resolve()
+            source = root / module.ABI / "RuntimeVectors.lean"
+            source.parent.mkdir(parents=True)
+            source.write_text("import Lean\n")
+            entry = {"path": str(source.relative_to(root)), "sha256": hashlib.sha256(source.read_bytes()).hexdigest()}
+            row = module.classify(root, {"rows": [entry]})[0]
+            self.assertEqual("vector-output", row["role"])
+            self.assertIn("external extractor", row["side_effects"])
+            unknown = source.parent / "Unknown.lean"
+            source.rename(unknown)
+            entry["path"] = str(unknown.relative_to(root))
+            with self.assertRaisesRegex(ValueError, "unreviewed ABI"):
+                module.classify(root, {"rows": [entry]})
+
+    def test_closed_telescope_role_does_not_imply_runtime_witness(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp).resolve()
+            source = root / module.CALCULUS / "JoinWalkWitnesses.lean"
+            source.parent.mkdir(parents=True)
+            source.write_text("import Lean\n")
+            entry = {"path": str(source.relative_to(root)), "sha256": hashlib.sha256(source.read_bytes()).hexdigest()}
+            row = module.classify(root, {"rows": [entry]})[0]
+            self.assertEqual("closed-telescope-check", row["role"])
+            self.assertEqual("unresolved per invocation", row["auxiliary_inputs"])
+
     def test_export_side_effect_and_source_drift(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp).resolve()

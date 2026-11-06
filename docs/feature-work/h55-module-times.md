@@ -1185,3 +1185,30 @@ Independent read-only reviews found that the first draft omitted the second
 KernelCensus output and did not distinguish Yul self-test from export; both
 were corrected and rechecked. No Lean server or build was used. Remaining
 standalone rows, generated drivers and complete H56 execution remain open.
+
+## Typing, calculus and ABI fixture rows
+
+The static fixture classifier now includes 15 typing, 14 calculus and nine
+ABI-world rows alongside the earlier 57 G25 and six Yul rows: 101 supplied
+candidates total. Both versions of the five-group artifact are checksum-bound
+by `tests/h55/module-times/h62-five-groups-evidence.sha256`. They retain
+source hashes, candidate rows, lexical imports, reviewed driver references and
+explicitly unresolved per-invocation inputs. Subset coverage and worktree
+provenance are not authenticated.
+
+The typing `check_closure.py` sequence names all 15 files and expects
+successful checks with pinned producer inputs, private oleans and evidence.
+The calculus `bounded_lean.py` is a candidate driver for 14 private audit
+files; guarded refusal diagnostics are intended within successful
+elaboration. `JoinWalkWitnesses` checks closed telescopes and must not be
+reported as input-bearing runtime witnesses or semantic correctness. The
+nine ABI fixtures use a private library; `Fidelity` and `RuntimeVectors`
+have specific diagnostic drivers. RuntimeVectors emits JSON in diagnostics;
+a separate extractor writes provenance and vectors, and external replay is
+a test rather than a Lean proof. Actual current invocations, prerequisites,
+resource containment and H56 outcomes remain unverified.
+
+Independent read-only reviews corrected the JoinWalk role, clarified that
+typing output effects belong to the driver, and refined ABI success-control
+labeling. They used no Lean, server or build. No candidate is excluded or
+accepted solely from this static index.
