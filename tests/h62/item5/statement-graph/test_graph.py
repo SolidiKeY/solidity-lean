@@ -59,7 +59,7 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(nodes['L']['status'], 'done')
         self.assertEqual(nodes['H']['status'], 'open')
         self.assertEqual(nodes['R']['premises'][0]['name'], 'assumption')
-        self.assertEqual(self.graph['counts'], dict(open=1,ready=1,blocked=1,done=1,total=4,openPremises=1))
+        self.assertEqual(self.graph['counts'], dict(open=1,ready=1,blocked=1,done=1,total=4,typedDeclarations=4,pendingInputs=0,knownOpenPremises=1,premiseInventoryComplete=True,openPremises=1))
         self.assertEqual(self.graph['progress']['G49']['nodes'], ['P','R'])
         self.assertEqual(self.graph['progress']['G49']['openPremises'], 1)
 
@@ -223,6 +223,57 @@ class GraphTests(unittest.TestCase):
         ownership['items'][1]['owner']='new-owner'
         with self.assertRaisesRegex(ValueError,'owner snapshot mismatch'):
             g.build(self.export,catalog,BASE,TREE,ownership)
+
+    def test_production_pending_inventory(self):
+        catalog = g.read(ROOT/'tests/h62/item5/statement-graph/pending-inputs.json')
+        ownership = {'items':[{'id':p['ownerReference'],'owner':p['owner']} for p in catalog['pendingInputs']]}
+        export = dict(schema=1,source='Lean.ConstantInfo.type',declarations=[])
+        graph = g.build(export,catalog,BASE,TREE,ownership)
+        self.assertFalse(graph['fixture'])
+        self.assertEqual(graph['counts']['blocked'],5)
+        self.assertEqual(graph['counts']['pendingInputs'],5)
+        self.assertEqual(graph['counts']['typedDeclarations'],0)
+        self.assertEqual(graph['counts']['knownOpenPremises'],0)
+        self.assertIsNone(graph['counts']['openPremises'])
+        self.assertFalse(graph['counts']['premiseInventoryComplete'])
+        self.assertEqual(graph['progress']['G49']['pendingInputs'],3)
+        self.assertEqual(graph['progress']['G50']['pendingInputs'],2)
+        for node in graph['nodes']:
+            self.assertEqual(node['inputStatus'],'pending-input')
+            self.assertIsNone(node['declaration'])
+            self.assertIsNone(node['exists'])
+            self.assertIsNone(node['typeExpr'])
+            self.assertFalse(node['dependenciesKnown'])
+            with self.assertRaisesRegex(ValueError,'pending-input'):
+                g.transact(self.state,graph,'claim',node['id'],node['owner'])
+        self.assertFalse(self.state.exists())
+        other = copy.deepcopy(catalog)
+        other['pendingInputs'][0]['owner']='unrelated-owner'
+        with self.assertRaisesRegex(ValueError,'owner snapshot mismatch'):
+            g.build(export,other,BASE,TREE,ownership)
+
+    def test_mixed_pending_inputs_preserve_available_graph(self):
+        entry = dict(id='pending',area='consumer',owner='owner',ownerReference='item',
+                     inputArtifact='shapes.json',reason='not yet supplied',source='test producer')
+        self.catalog['pendingInputs']=[entry]
+        self.catalog['roots']['G49'].append('pending')
+        graph=g.build(self.export,self.catalog,BASE,TREE)
+        for node in self.graph['nodes']:
+            self.assertEqual(node,next(n for n in graph['nodes'] if n['id']==node['id']))
+        self.assertEqual(graph['counts']['done'],1)
+        self.assertEqual(graph['counts']['blocked'],2)
+        self.assertEqual(graph['counts']['knownOpenPremises'],1)
+        self.assertIsNone(graph['counts']['openPremises'])
+        self.assertFalse(graph['progress']['G49']['premiseInventoryComplete'])
+        self.assertTrue(graph['progress']['G50']['premiseInventoryComplete'])
+        self.assertEqual(g.canonical(graph),g.canonical(g.build(self.export,self.catalog,BASE,TREE)))
+        for field,value in (('completed',True),('declaration','Invented.theorem'),('dependencies',['L'])):
+            modified=copy.deepcopy(self.catalog)
+            modified['pendingInputs'][0][field]=value
+            with self.assertRaisesRegex(ValueError,'only nonempty provenance'):
+                g.build(self.export,modified,BASE,TREE)
+        self.catalog['pendingInputs'][0]['id']='L'
+        self.reject('duplicate typed/pending')
 
     def test_bad_lease_and_done_node(self):
         for ttl in (0,-1,float('nan'),float('inf'),86401):

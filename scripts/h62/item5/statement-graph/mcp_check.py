@@ -43,7 +43,7 @@ async def check(args):
     async with stdio_client(params) as (read,write):
         async with ClientSession(read,write) as session:
             await session.initialize()
-            for filename in ('Exporter.lean','Fixture.lean'):
+            for filename in args.files:
                 result = await asyncio.wait_for(session.call_tool('lean_diagnostic_messages',{
                     'file_path':str(ROOT/'tests/h62/item5/statement-graph'/filename),
                     'interactive':False,'timeout_s':60}),timeout=90)
@@ -62,6 +62,7 @@ def main():
     parser.add_argument('--pin',type=Path,required=True)
     parser.add_argument('--archive',type=Path,required=True)
     parser.add_argument('--evidence',type=Path,required=True)
+    parser.add_argument('--files',nargs='+',choices=('Exporter.lean','Fixture.lean','Pending.lean','Census.lean','EvmCensus.lean'),default=['Exporter.lean','Fixture.lean'])
     args = parser.parse_args()
     assert not args.evidence.resolve().is_relative_to(ROOT), 'evidence must be off git'
     with open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','a') as lock:

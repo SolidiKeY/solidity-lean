@@ -20,6 +20,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for arg in ('lean-bin','pin','archive','evidence'):
         parser.add_argument('--'+arg,type=Path,required=True)
+    parser.add_argument('--area',choices=('roadmap','evm'),default='roadmap')
     args = parser.parse_args()
     evidence = args.evidence.resolve()
     assert not evidence.is_relative_to(ROOT), 'evidence must be off git'
@@ -39,6 +40,10 @@ def main():
         # Exact read-only dependencies inspected in the pinned source tree.
         modules = [Path('Solidity/Hash/CollisionBound.lean'),Path('Solidity/Keccak.lean'),
                    Path('Solidity/Roadmap/Evm.lean'),Path('Solidity/Roadmap/Contracts.lean'),SCOPE/'Exporter.lean']
+        if args.area == 'evm':
+            modules = [Path('Solidity/Keccak.lean'),Path('Solidity/Roadmap/Evm.lean'),SCOPE/'Exporter.lean']
+        driver = SCOPE/('EvmCensus.lean' if args.area == 'evm' else 'Census.lean')
+        snapshot_name = args.area+'-census'
         logs = []
         def run(src,output=None):
             assert available() >= 4*1024**3, '4GiB reserve missing'
@@ -67,15 +72,15 @@ def main():
             assert proc.returncode == 0, logs[-1]
         for src in modules:
             run(src,build/src.with_suffix('.olean'))
-        run(SCOPE/'Census.lean')
-        assert (evidence/'roadmap-census.json').read_bytes() == (evidence/'roadmap-census-repeat.json').read_bytes(), 'census nondeterminism'
-        snapshot = json.loads((evidence/'roadmap-census.json').read_text())
+        run(driver)
+        assert (evidence/(snapshot_name+'.json')).read_bytes() == (evidence/(snapshot_name+'-repeat.json')).read_bytes(), 'census nondeterminism'
+        snapshot = json.loads((evidence/(snapshot_name+'.json')).read_text())
         rows = snapshot['declarations']
-        summary = dict(base=BASE,head=head,tree=subprocess.check_output(['git','rev-parse','HEAD^{tree}'],cwd=ROOT,text=True).strip(),
+        summary = dict(area=args.area,base=BASE,head=head,tree=subprocess.check_output(['git','rev-parse','HEAD^{tree}'],cwd=ROOT,text=True).strip(),
                        leanVersion=version.strip(),pinSha256=sha(args.pin),archiveSha256=sha(args.archive),
                        declarationCount=len(rows),constantKinds=dict(sorted(Counter(r['constantKind'] for r in rows).items())),
-                       fieldCount=sum(len(r['fields']) for r in rows),snapshotSha256=sha(evidence/'roadmap-census.json'),
-                       sourceSha256={str(p):sha(ROOT/p) for p in modules+[SCOPE/'Census.lean']},
+                       fieldCount=sum(len(r['fields']) for r in rows),snapshotSha256=sha(evidence/(snapshot_name+'.json')),
+                       sourceSha256={str(p):sha(ROOT/p) for p in modules+[driver]},
                        limitation='Kernel namespace census includes generated declarations; no final G49/G50 statement selection, ownership or progress assertion.')
         assert head == subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
         assert not subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],cwd=ROOT)

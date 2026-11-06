@@ -192,3 +192,30 @@ VM and branch after supplying H55 inputs and a producer-approved migration fix.
 Do not launch another goal or reset/discard this branch. Final absolute patch,
 bundle, handoff and evidence paths/hashes are recorded at
 `/workspace/h62-statement-graph-handoff/`.
+
+## Coordinator input update: pending G49 inventory
+
+The coordinator answered Q-H55-INVENTORY: `h64-shapes.json` is on the
+G49-final-theorem VM and is not yet on origin. The coordinator will relay it
+with the producer's next CLOUDVM-RESULT. No further inventory question is open.
+Continue available inputs; the G49/G50 work-item entries are explicitly
+`pending-input` in `tests/h62/item5/statement-graph/pending-inputs.json`, with
+existing H55 owner references. These are metadata placeholders, not invented
+Lean declarations or satisfied dependencies. H55's theorem remains read-only.
+
+The graph accepts these entries separately from typed declarations. They are
+blocked and unclaimable, retain `declaration=null`, `exists=null` and unknown
+dependency inventories, and cannot supply completion/declaration/dependency
+fields. Progress includes `pendingInputs`, `typedDeclarations`,
+`knownOpenPremises` and `premiseInventoryComplete`. When any input in a root's
+closure is pending, `openPremises=null`; the numeric known count remains a
+lower bound, never a complete zero-premise claim. Fully available root counts
+remain exact under the existing conservative open-premise semantics.
+
+`Pending.lean` produces an empty elaborated-type export; acceptance builds the
+pending-only production graph against the verified ownership snapshot. Mixed
+available/pending model tests verify that available typed nodes and counts are
+preserved and a pending entry cannot hide an omitted tagged declaration.
+The independent EVM input census can now run with `census.py --area evm` without
+importing the failing CollisionBound module. Its results are separately recorded;
+it makes no G49/G50 statement or owner inference. No full runtime gate is implied.

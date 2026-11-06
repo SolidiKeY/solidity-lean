@@ -63,7 +63,7 @@ def validate_owners(catalog, ownership):
     require(catalog.get('fixture') is not True, 'fixture catalog cannot claim production ownership')
     items = {item['id']: item for item in ownership['items']}
     require(len(items) == len(ownership['items']), 'duplicate ownership item')
-    for node in catalog['nodes']:
+    for node in catalog['nodes']+catalog.get('pendingInputs',[]):
         assignments = [node]+[r for r in node.get('binderRoles',{}).values() if r.get('kind')=='premise']
         for assignment in assignments:
             ref = assignment.get('ownerReference')
@@ -87,9 +87,13 @@ def build(export, catalog, base, tree, ownership=None):
                 require(isinstance(binder['isProp'],bool) and all(isinstance(binder[k],str) and binder[k] for k in ('name','type','typeExpr')), 'invalid typed binder')
         require(isinstance(row['isTheorem'], bool), 'missing theorem evidence')
     specs = catalog['nodes']
-    require(specs, 'empty catalog')
+    pending = catalog.get('pendingInputs', [])
+    require(isinstance(pending,list), 'invalid pending input inventory')
+    require(specs or pending, 'empty catalog')
     require(len({n['id'] for n in specs}) == len(specs), 'duplicate node ID')
     require(len({n['declaration'] for n in specs}) == len(specs), 'duplicate catalog declaration')
+    all_ids = [n['id'] for n in specs+pending]
+    require(len(set(all_ids)) == len(all_ids), 'duplicate typed/pending node ID')
     mapping = {n['declaration']: n['id'] for n in specs}
     require(set(by_decl).issubset(set(mapping)), 'catalog must cover every exported declaration')
     nodes = {}
@@ -133,6 +137,15 @@ def build(export, catalog, base, tree, ownership=None):
         nodes[spec['id']] = dict(spec, dependencies=deps, proofDependencies=proof,
                                  proofHelpers=[p for p in proof if next(n['kind'] for n in specs if n['id']==p)=='helper'],
                                  premises=premises, type=row['type'], typeExpr=row['typeExpr'])
+    for entry in sorted(pending, key=lambda n:n['id']):
+        required = {'id','area','owner','ownerReference','inputArtifact','reason','source'}
+        require(set(entry) == required and all(isinstance(v,str) and v for v in entry.values()),
+                'pending input must contain only nonempty provenance/owner fields')
+        nodes[entry['id']] = dict(entry, kind='pending-input', inputStatus='pending-input',
+                                 declaration=None, exists=None, type=None, typeExpr=None,
+                                 dependencies=[], dependenciesKnown=False,
+                                 proofDependencies=[], proofHelpers=[], premises=[],
+                                 premiseInventoryComplete=False)
     # A premise/helper can appear in a type. It remains a typed edge, not a proof edge.
     colors, order = {}, []
     def visit(key):
@@ -149,7 +162,7 @@ def build(export, catalog, base, tree, ownership=None):
         visit(key)
     for key in order:
         node = nodes[key]
-        blocked = bool(node['premises']) or any(nodes[d]['status'] != 'done' for d in node['dependencies'])
+        blocked = node.get('inputStatus') == 'pending-input' or bool(node['premises']) or any(nodes[d]['status'] != 'done' for d in node['dependencies'])
         if node.get('completed'):
             require(not blocked, 'completion has unresolved dependencies: '+key)
             status = 'done'
@@ -165,7 +178,13 @@ def build(export, catalog, base, tree, ownership=None):
         for key in keys:
             counts[nodes[key]['status']] += 1
         counts['total'] = len(keys)
-        counts['openPremises'] = sum(len(nodes[k]['premises']) for k in keys)
+        pending_count = sum(nodes[k].get('inputStatus') == 'pending-input' for k in keys)
+        known = sum(len(nodes[k]['premises']) for k in keys)
+        counts['typedDeclarations'] = len(keys)-pending_count
+        counts['pendingInputs'] = pending_count
+        counts['knownOpenPremises'] = known
+        counts['premiseInventoryComplete'] = pending_count == 0
+        counts['openPremises'] = None if pending_count else known
         return counts
     areas = {a: summary([k for k,n in nodes.items() if n['area'] == a]) for a in sorted({n['area'] for n in nodes.values()})}
     roots = catalog.get('roots', {})
@@ -201,6 +220,7 @@ def transact(path, graph, operation, node, owner, token=None, ttl=300, now=None)
     require((now is None or math.isfinite(now)) and math.isfinite(ttl) and 0 < ttl <= 86400, 'invalid lease time')
     by_id = {n['id']: n for n in graph['nodes']}
     require(node in by_id, 'unknown node')
+    require(by_id[node].get('inputStatus') != 'pending-input', 'pending-input node cannot be claimed')
     require(owner == by_id[node]['owner'], 'producer owner mismatch')
     require(by_id[node]['status'] != 'done', 'completed node cannot be claimed')
     path = Path(path)

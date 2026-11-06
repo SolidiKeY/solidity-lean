@@ -132,11 +132,20 @@ def main():
         run('overlay-conflict',[lean,*flags,str(conflict)],expected=1)
         assert 'conflicting H62 tags' in (evidence/'overlay-conflict.log').read_text()
         assert not list(evidence.glob('negative-*.json')), 'negative export produced a snapshot'
+        run('pending-export',[lean,*flags,str(SCOPE/'Pending.lean')])
         run('python-tests',[sys.executable,'-B',str(SCOPE/'test_graph.py')])
         tree = subprocess.check_output(['git','rev-parse','HEAD^{tree}'],cwd=ROOT,text=True).strip()
         run('fixture-graph',[sys.executable,'-B','scripts/h62/item5/statement-graph/graph.py','build',
              '--export',str(evidence/'fixture.json'),'--catalog',str(SCOPE/'catalog.json'),
              '--base',BASE,'--tree',tree,'--output',str(evidence/'fixture-graph.json')])
+        run('pending-graph',[sys.executable,'-B','scripts/h62/item5/statement-graph/graph.py','build',
+             '--export',str(evidence/'pending-export.json'),'--catalog',str(SCOPE/'pending-inputs.json'),
+             '--ownership','/workspace/h62-coordinator-inputs/ownership.json',
+             '--base',BASE,'--tree',tree,'--output',str(evidence/'pending-graph.json')])
+        pending = json.loads((evidence/'pending-graph.json').read_text())
+        assert pending['counts']['blocked']==5 and pending['counts']['pendingInputs']==5
+        assert pending['counts']['typedDeclarations']==0 and pending['counts']['openPremises'] is None
+        assert not pending['counts']['premiseInventoryComplete']
         for i in range(7):
             candidate.append(run('keysort-after-'+str(i),[lean,*flags,'Solidity/KeySort.lean'])['seconds'])
         import statistics
