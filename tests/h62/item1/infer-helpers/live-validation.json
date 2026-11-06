@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "toolchain": "Lean4.24.0, Lake5.0.0-src+797c613 (live, unchanged)",
+  "helper_sources": {
+    "tests/h62/item1/infer-helpers/Shared.lean": "b4e7c8cf988e3e67da82f84bc128cb032d1ab1c1094b88d185563b5892eb7ee5",
+    "tests/h62/item1/infer-helpers/CaseSpecifications.lean": "e4ed5c2120791b4d460a87f2cad36e8de882ba7b0274e43023a6a55d624ac7f2",
+    "tests/h62/item1/infer-helpers/CompletenessCompatibility.lean": "5deaba656a49e8702dcfa688c2cd62168056e89a88227a6b06d274b94f32a8e0"
+  },
+  "gates": [
+    {
+      "label": "h82-infer-shared",
+      "exit": 0,
+      "seconds": 1.091,
+      "resource_stop": false,
+      "command": [
+        "env",
+        "GATE_LOGS=/workspace/sol-numeric-literals-gate-output/h82-infer-shared-files",
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item1/infer-helpers/Shared.lean"
+      ],
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-infer-shared.json",
+      "record_sha256": "6cbe35d9a0c344aa4f366db1fe23b58966f5d1568f991ae3705e1b3e28367b34"
+    },
+    {
+      "label": "h82-infer-case-specifications",
+      "exit": 0,
+      "seconds": 1.075,
+      "resource_stop": false,
+      "command": [
+        "env",
+        "GATE_LOGS=/workspace/sol-numeric-literals-gate-output/h82-infer-case-specifications-files",
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item1/infer-helpers/CaseSpecifications.lean"
+      ],
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-infer-case-specifications.json",
+      "record_sha256": "77c92f09ec6ce9b6a944033979c3e21f31e2ad8007dd38d58f442422db569aed"
+    },
+    {
+      "label": "h82-infer-compatibility",
+      "exit": 1,
+      "seconds": 0.578,
+      "resource_stop": false,
+      "command": [
+        "env",
+        "GATE_LOGS=/workspace/sol-numeric-literals-gate-output/h82-infer-compatibility-files",
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item1/infer-helpers/CompletenessCompatibility.lean"
+      ],
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-infer-compatibility.json",
+      "record_sha256": "4096588e19b82465029a1b165cfcd4aa68ff13e0b967f4b23360c1966fc5aaf4"
+    },
+    {
+      "label": "h82-infer-complete-import",
+      "exit": 0,
+      "seconds": 88.183,
+      "resource_stop": false,
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Frontend.Static.InferComplete"
+      ],
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-infer-complete-import.json",
+      "record_sha256": "8a2e5b00b256f1fcc229cf47a87f697c908e64384a40541a6beba6062e708ffa"
+    },
+    {
+      "label": "h82-infer-compatibility-retry",
+      "exit": 0,
+      "seconds": 0.571,
+      "resource_stop": false,
+      "command": [
+        "env",
+        "GATE_LOGS=/workspace/sol-numeric-literals-gate-output/h82-infer-compatibility-retry-files",
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item1/infer-helpers/CompletenessCompatibility.lean"
+      ],
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-infer-compatibility-retry.json",
+      "record_sha256": "acee8483b3fcd3a2e45ca141b7cd38a4725116055229b04fe724cd5079380dbf"
+    },
+    {
+      "label": "h82-infer-axioms",
+      "exit": 0,
+      "seconds": 1.564,
+      "resource_stop": false,
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--root=/workspace",
+        "--tstack=131072",
+        "/workspace/sol-numeric-literals-h82/infer-helper-audit/Probe.lean"
+      ],
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-infer-axioms.json",
+      "record_sha256": "6c183c5c600797be79256e8e798b616bae87d64ca4bf625f3b4904dd12d8ec5d"
+    }
+  ],
+  "axioms": {
+    "Solidity.H62.InferHelpers.Shared.isMapping": [],
+    "Solidity.H62.InferHelpers.Shared.payableArg": [],
+    "Solidity.H62.InferHelpers.Shared.convLoc": [],
+    "Solidity.H62.InferHelpers.Shared.isMapping_rule": [],
+    "Solidity.H62.InferHelpers.Shared.payableArg_rule": [],
+    "Solidity.H62.InferHelpers.Shared.convLoc_rule": [],
+    "Solidity.H62.InferHelpers.expected": [],
+    "Solidity.H62.InferHelpers.source_cases": [],
+    "Solidity.H62.InferHelpers.static_cases": [],
+    "Solidity.H62.InferHelpers.mapping_agreement": [],
+    "Solidity.H62.InferHelpers.payable_agreement": [],
+    "Solidity.H62.InferHelpers.location_agreement": [],
+    "Solidity.H62.InferHelpers.mapping_positive": [],
+    "Solidity.H62.InferHelpers.mapping_array_negative": [],
+    "Solidity.H62.InferHelpers.payable_address": [],
+    "Solidity.H62.InferHelpers.payable_contract": [],
+    "Solidity.H62.InferHelpers.payable_bool_negative": [],
+    "Solidity.H62.InferHelpers.location_bytes": [],
+    "Solidity.H62.InferHelpers.location_string": [],
+    "Solidity.H62.InferHelpers.location_array_default": [],
+    "Solidity.H62.InferHelpers.source_mapping_premise": [],
+    "Solidity.H62.InferHelpers.static_mapping_premise": [],
+    "Solidity.H62.InferHelpers.source_delete": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.static_delete": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.source_payable": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.static_payable": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.source_conv_elem": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.static_conv_elem": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.source_delete_res": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.source_convElem_mem": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.H62.InferHelpers.source_payable_mem": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "axiom_free": 22,
+  "standard_axioms_only": 9,
+  "limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "lean_num_threads": 1,
+    "reserve_bytes": 4294967296
+  },
+  "limitations": "Individual additive modules and axiom probe only. No4.35 migration pass, full affected gate, production helper replacement, whole-inferencer equivalence or comparable optimization timing. Initial missing-import failure and generator inventory count failure retained. The axiom probe is not an inventory of compiler-generated helpers.",
+  "reviews": {
+    "finder": "PASS: copied declaration text and exact31-name coverage; excludes generated helpers and whole-inferencer equivalence",
+    "skeptic": "PASS: source hashes and body preservation checked; no Lean rerun"
+  }
+}
