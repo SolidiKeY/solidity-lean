@@ -4,12 +4,14 @@ import Solidity.Optimizer.Pass
 /-!
 # O02 constant folding and dead-branch elimination over lowering programs
 
-`Prog.cfold` folds the value expressions of local assignments, local
-declarations, storage writes of a value (`assign`, `push`), compound-assignment
-right sides (`opAssign`, `pushOpAssign`), `require`/`assert` conditions,
-`transfer`/`send` operands and
-`if`/`while` conditions (`Val.cfold`), and recurses into `if` branches, blocks
-and loop bodies. On the folded program it removes dead code whose removal the
+`Prog.vopt V` applies a proved expression pass `V` (`Prog.cfold` uses
+`Val.cfold`) to the value expressions of local assignments, local declarations,
+storage writes of a value and their locations' index expressions (`assign`,
+`push`, `delete`, `pop`, via `Src.vopt`, `Loc.vmap`, `SPath.vmap`),
+compound-assignment right sides (`opAssign`, `pushOpAssign`; their receivers are
+left as written, as is `pushIncDec`), `require`/`assert` conditions,
+`transfer`/`send` operands and `if`/`while` conditions, and recurses into `if`
+branches, blocks and loop bodies. On the folded program it removes dead code whose removal the
 run cannot observe:
 
 * `if (true) A else B` becomes the block `{ A }` (and `false` gives `{ B }`):
@@ -21,7 +23,7 @@ No pass recurses into call, `try`/`catch` or receiver-call bodies.
 Dropping `while (false)` also drops its `LoopAnn` (which the run does not read).
 
 A failing condition (`require(false)`, `assert(false)` — its Panic) is never
-dropped. Every other statement is left as written. The preservation theorem
+dropped. Every other statement and position is left as written. The preservation theorem
 is equality of the typed run, as a function of the typed state
 (`Prog.cfold_runC`): result, halt kind, final state and heap growth are all
 unchanged, so every observation of the program is.

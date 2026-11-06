@@ -1,6 +1,7 @@
 import Solidity.Optimizer.Simplify
 import Solidity.Optimizer.Laws
 import Solidity.Optimizer.UnusedVar
+import Solidity.Optimizer.DeadCode
 
 /-!
 # O02 value-pass controls
@@ -208,6 +209,28 @@ theorem store_folded : Prog.cfold storeProg =
 theorem store_same : Prog.runC (Prog.cfold storeProg) = Prog.runC storeProg :=
   Prog.cfold_runC storeProg
 
+/-! ## Code after a halting statement -/
+
+/-- `{ require(1 > 2); total = 1; uint z = 2; }` becomes `{ require(1 > 2); }`
+once folded: the condition is the literal `false`, so the rest never runs. -/
+def afterHalt : Stmt C [] [] :=
+  .block (.cons (.require (gt (lit 1) (lit 2)))
+    (.cons (.assign (.root (T := .prim .uint) "total" rfl) (.val (lit 1)))
+      (.cons (.declLocal .uint (.user "z") (some (lit 2))) .nil)))
+
+theorem after_halt_cut :
+    Prog.dce (Prog.cfold (.cons afterHalt .nil)) =
+      .cons (.block (.cons (.require (.simple (.bool false))) .nil)) .nil := rfl
+
+theorem after_halt_reverts (σ : State C []) :
+    Prog.runC (Prog.dce (Prog.cfold (.cons afterHalt .nil))) σ = .error .revert := rfl
+
+/-- The `require` itself is never cut: dropping it would turn the revert into success. -/
+theorem halt_kept_wrong (σ : State C []) :
+    Prog.runC (.cons afterHalt .nil) σ ≠ Prog.runC (.cons (.block .nil) .nil : Prog C [] []) σ := by
+  intro h
+  cases h
+
 /-! ## Unused-variable elimination -/
 
 /-- `{ uint y = 5; require(1 > 0); }`: `y` is unused and dropped. -/
@@ -265,6 +288,8 @@ theorem o02_pipeline_preserves (Γ Γ' : Ctx) :
 #print axioms prop_constant
 #print axioms unrestricted_mul_wrong
 #print axioms Prog.uve_runC
+#print axioms Prog.dce_runC
+#print axioms cut_scope
 #print axioms blockDecl_runC
 #print axioms unused_dropped
 

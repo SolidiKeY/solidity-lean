@@ -1129,8 +1129,7 @@ the discarded-return branch and a body reading the return default (`g2_assigned`
 
 `Prog.vopt` (hence `Prog.cfold`, `Prog.simplify`) now also rewrites the value of a storage
 write (`assign l (.val v)`, `push b (some (.val v))`, through `Src.vopt` and
-`Src.vopt_valueT`) and the right side of `opAssign`/`pushOpAssign`; the location `l` and
-its index expressions are still left as written. Control: `store_folded`
+`Src.vopt_valueT`) and the right side of `opAssign`/`pushOpAssign` (locations: see the location item below). Control: `store_folded`
 (`total = 2 + 3; total += 0 + 1;` → `total = 5; total += 1;`), `store_same`.
 
 Propagation across storage statements: facts now survive `assign`, `delete` and `pop`
@@ -1162,10 +1161,30 @@ Constant folding now also folds index expressions inside storage and memory path
 `Loc.cfold_resolveT`, `MPath.cfold_mvalT`, `MLoc.cfold_addrT`, `Val.cfold_evalT`); the
 statement of `Val.cfold_evalT` is unchanged. Control `index_folded`
 (`balances[2 + 3]` → `balances[5]`). This supersedes the "storage/memory path index
-expressions left as written" item for folding; propagation, simplification and CSE still
-leave path indices as written, and statement-level locations (`assign l`, `delete l`) are
-not yet rewritten.
+expressions left as written" item for folding. Propagation and simplification fold read
+paths too (`Val.opt` and `simpFoldPass` end in `Val.cfold`) but do not substitute or
+simplify inside them; CSE leaves them as written.
 `Prog.vopt` also rewrites the storage location of `assign`, `delete`, `push` and `pop`
 (`SPath.vmap`/`Loc.vmap` with `SPath.vmap_resolveT`, `Loc.vmap_resolveT`), so folding
 and simplification reach `x[e] = v`, `delete x[e]`, `x[e].push(v)` indices. Control
-`delete_index_folded`. Compound-assignment and memory locations are still left as written.
+`delete_index_folded`. Compound-assignment receivers (`opAssign`, `pushOpAssign`),
+`pushIncDec` and memory locations are still left as written.
+
+## O02 dead code after a halting statement — 2026-11-06
+
+`Optimizer/DeadCode.lean`. In every scope (block, `if` branch, loop body), the statements
+after one that always halts (`revert`, `assume(false)`, `require(lit false)`,
+`assert(lit false)`; `alwaysHalts_runC`) are removed (`Prog.cut`). Theorems: `cut_scope P σ
+: scopeRun (Prog.cut P).2 σ = scopeRun P σ` (the run with the scope ended is unchanged,
+the halt kept), `ConstFold.Prog.dce_runC P` (no premise), `dce_preserves`. The top-level
+sequence is not cut (its output context is the program's type). `Prog.dce` is a stage of
+`round` (after `Prog.cfold`). Controls: `after_halt_cut`, `after_halt_reverts`,
+`halt_kept_wrong` (dropping the halting `require` itself would change the run).
+
+Review of the storage-surviving facts/CSE entries, path folding, location rewriting and
+the pipeline (read-only finder+skeptic): no soundness issue (`KeepsLocals` holds for
+`assign/delete/pop` since they only replace `storage`; impure CSE entries are dropped
+there; no evaluation reordering; pipeline premise-free). Doc drift fixed: StmtFold
+header (locations of `assign/delete/push/pop`, receivers of compound assignments and
+`pushIncDec` left as written), stale location sentences in this document, `KeepsLocals`
+wording.

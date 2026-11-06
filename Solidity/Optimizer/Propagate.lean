@@ -273,7 +273,7 @@ theorem _root_.Solidity.Val.opt_evalT {Γ : Ctx} {F : Facts C Γ} {σ : State C 
 
 /-! ## Statements that keep the locals -/
 
-/-- A step that leaves every value local and environment value as it was. -/
+/-- A step that leaves every value-typed local and every environment value as it was. -/
 def KeepsLocals {Γ : Ctx} (f : TStep C Γ Γ) : Prop :=
   ∀ σ o, f σ = .ok o →
     (∀ (q : PrimTy) (k : Idx Γ (.val q)), TEnv.get k o.st.env = TEnv.get k σ.env) ∧
