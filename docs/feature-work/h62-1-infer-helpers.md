@@ -100,3 +100,31 @@ review `scripts/h62/item1/infer-helpers/` and
 `tests/h62/item1/infer-helpers/CaseSpecifications.lean`; this self-review is
 not a substitute. Full acceptance, helper extraction, proof checks, proposed
 migration, and comparison timings remain pending.
+
+## H70 case-value controls and current dependencies
+
+After `git fetch origin master`, master was
+`96788a95383b6295dc13774ef681297adf1337a7`. The three copied pairs and the
+18 `STy` constructors remain present there; the files owned by this lane
+are absent from that tree. The five relevant original files, including the
+hash and language files which failed under 4.35, have no changes between the
+frozen base and that master. No completed version of this lane item was found
+on master, so no rebase was performed.
+
+`check_case_values.py` checks every constructor argument pattern and expected
+triple in the candidate specification against an explicit textual oracle. It
+rejects additional wildcard arms. `test_case_values.py` mutates each of the
+three expected results in every case (54 mutations) and checks rejection.
+This and the other scanner tests pass. This is external text checking: it is
+not a Lean proof and does not establish equivalence to the inferencers.
+
+Remaining producer dependencies are the accepted migrate-hash ticket for
+`Solidity/Hash/CollisionBound.lean`, the accepted migrate-language ticket for
+`Solidity/Language/FixedPoint.lean`, and H55/source-relations for coordination
+of any proposed changes to `Solidity/Source/Infer.lean`,
+`Solidity/Frontend/Static/Infer.lean`, and
+`Solidity/Frontend/Static/InferComplete.lean`. Independent finder and skeptic
+reviewers must also review the scanner and the Lean candidate; no independent
+review is claimed here. The 4.35 full gate, candidate elaboration, proof and
+axiom checks, before/after timing, migration patch and all checkpoint gates
+remain pending. No new original-file edits or weakened statement were made.
