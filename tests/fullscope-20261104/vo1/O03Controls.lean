@@ -1,5 +1,6 @@
 import Solidity.Optimizer.CSE
 import Solidity.Optimizer.Laws
+import Solidity.Optimizer.Inline
 
 /-!
 # O03 common-subexpression elimination controls
@@ -71,6 +72,43 @@ theorem cse_pipeline (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.cse []) :=
   cse_preserves Γ Γ'
 
+/-! ## Inlining -/
+
+def gt {Γ : Ctx} (a b : Val C Γ .uint) : Val C Γ .bool := .binop .gt rfl rfl a b
+
+/-- `function f(uint x) internal { require(x > 3); }` -/
+def fBody : Prog C ([] ++ [.val .uint]) [.val .uint] :=
+  .cons (.require (gt (.simple (.local .here)) (lit 3))) .nil
+
+/-- `f(a + 1);` in a caller with one local `a`. -/
+def callF : Stmt C G G :=
+  .call "f" (.snoc .nil .uint (.user "x") (add (.simple (.local .here)) (lit 1))) .none fBody
+
+/-- The call becomes `{ uint x = a + 1; require(x > 3); }`. -/
+theorem call_inlined : Stmt.inl callF =
+    .block (.cons (.declLocal .uint (.user "x") (some (add (.simple (.local .here)) (lit 1))))
+      (.cons (.require (gt (.simple (.local .here)) (lit 3))) .nil)) := rfl
+
+def withA (n : Nat) : State C G := (State.init C).push (t := .val .uint) (uintOfNat n)
+
+/-- With `a = 5` both forms succeed; with `a = 1` both revert. -/
+theorem inlined_ok : (Stmt.runC (Stmt.inl callF) (withA 5)).toBool = true := rfl
+theorem call_ok : (Stmt.runC callF (withA 5)).toBool = true := rfl
+theorem inlined_reverts : Stmt.runC (Stmt.inl callF) (withA 1) = .error .revert := rfl
+theorem call_reverts : Stmt.runC callF (withA 1) = .error .revert := rfl
+
+theorem inline_same : Stmt.runC (Stmt.inl callF) = Stmt.runC callF := Stmt.inl_runC callF
+
+/-- A call with a return value is left as written. -/
+def callRet : Stmt C G G :=
+  .call "g" .nil (.val .uint (.user "r") (some .here))
+    (.cons (.assignLocal .here (lit 7)) .nil)
+
+theorem ret_call_kept : Stmt.inl callRet = callRet := rfl
+
+#print axioms inlineBlock_runC
+#print axioms Prog.inl_runC
+#print axioms call_inlined
 #print axioms Val.pbeq_eq
 #print axioms Val.cse_evalT
 #print axioms Prog.cse_empty_runC

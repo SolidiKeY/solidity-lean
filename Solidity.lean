@@ -3226,6 +3226,7 @@ import Solidity.Lowering.V08.WorldResetControls
 import Solidity.Optimizer.CSE
 import Solidity.Optimizer.ConstFold
 import Solidity.Optimizer.Controls
+import Solidity.Optimizer.Inline
 import Solidity.Optimizer.Laws
 import Solidity.Optimizer.Pass
 import Solidity.Optimizer.Propagate

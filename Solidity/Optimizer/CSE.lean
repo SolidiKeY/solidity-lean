@@ -4,7 +4,8 @@ import Solidity.Semantics.RunWk
 /-!
 # O03 common-subexpression elimination over lowering programs
 
-After `x = e;` (or `T x = e;`) succeeds, `x` holds `e`'s value; while neither
+After `x = e;` (recorded when `e` is pure and does not read `x`) or `T x = e;`
+(always recorded; an impure `e` is never matched) succeeds, `x` holds `e`'s value; while neither
 `x` nor a local `e` reads is assigned, a later occurrence of `e` is replaced
 by a read of `x`, as solc's `CommonSubexpressionEliminator` replaces an
 expression by a variable known to hold it. A recorded `e` evaluated
