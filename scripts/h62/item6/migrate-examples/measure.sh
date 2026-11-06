@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[[ $# == 5 ]] || { echo "usage: measure.sh OFFICIAL PRIVATE_SYSROOT PRIVATE_CACHE EVIDENCE LABEL" >&2; exit 2; }
+official=$(realpath "$1"); private=$(realpath "$2"); cache=$(realpath -m "$3"); evidence=$(realpath "$4"); label=$5
+[[ $label =~ ^[a-zA-Z0-9_-]+$ ]] || exit 2
+root=$(git rev-parse --show-toplevel); cd "$root"
+exec 9>/tmp/solidity-lean-feature-groups-20261025/writer.lock
+flock -n 9 || { echo "writer busy" >&2; exit 2; }
+[[ ! -e "$cache" && ! -e "$evidence/$label.json" ]] || { echo "refuse reused cache/result" >&2; exit 2; }
+mkdir -p "$cache"
+export PATH="$official/bin:$PATH"
+export LEAN_NUM_THREADS=1 LAKE_OVERRIDE_LEAN=true LEAN_SYSROOT="$private" LAKE_CACHE_DIR="$cache" LAKE_NO_CACHE=true
+{
+  git status --short; git rev-parse HEAD; lean --version; lake --version
+  cat /sys/fs/cgroup/memory.max; cat /sys/fs/cgroup/memory.swap.max
+} > "$evidence/$label-settings.txt"
+git ls-files -z -- Solidity/Examples | xargs -0 sha256sum > "$evidence/$label-source-before.sha256"
+lake clean
+set +e
+python3 scripts/h62/item6/migrate-examples/bounded-run.py --output "$evidence/$label.json" -- lake build SolidityExamples
+status=$?
+set -e
+git ls-files -z -- Solidity/Examples | xargs -0 sha256sum > "$evidence/$label-source-after.sha256"
+cmp "$evidence/$label-source-before.sha256" "$evidence/$label-source-after.sha256" || exit 3
+exit "$status"
