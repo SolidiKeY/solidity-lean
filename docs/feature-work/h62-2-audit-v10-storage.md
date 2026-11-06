@@ -348,3 +348,21 @@ checked instruction equations through the existing turn laws passes without
 a budget change. The concrete 11-to-zero observation uses no axioms. This is
 one supported terminating program, not arbitrary positive-loop termination
 or a compiler totality theorem.
+
+## Checked slot-key premise bundles
+
+KeyBoundsWitnesses adds six joint premise bundles for the unchanged frozen
+TargetOperations slot roundtrip, injectivity, offset, typed-step, path and query
+key-bound adapters. A nested hash/data location with key 7 supplies the same
+concrete inputs throughout. The typed path crosses a Boolean mapping key and
+a dynamic-array index using the existing schema fixture. The injectivity
+witness selects the same location on both sides; it does not claim distinct
+locations can have equal slots or that every input pair is feasible.
+
+A key equal to the word modulus fails the exact bound. A separate control
+shows that the fitting address still has an unavailable live graph read in
+the default value. That observation is not a Source or compiler refusal. All
+nine proof declarations are axiom-free. The companion map preserves six exact
+frozen signatures; the original conservative census is unchanged. These six
+bundles plus the earlier three loop bundles do not close the full audit,
+compiler totality, physical separation or migration obligations.
