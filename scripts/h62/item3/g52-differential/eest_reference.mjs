@@ -1,4 +1,5 @@
 // Pinned EEST Osaka reference conformance. No source-semantics pass is inferred.
+import { classifyRejection } from './eest_rejection.mjs';
 import { comparePost, validateConfig, guardedResult } from './eest_observation.mjs';
 import { createReadStream, readFileSync, createWriteStream, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -21,7 +22,6 @@ let modules;
 let activeBudget;
 async function execute(record) {
   const expected = { state_root: record.post.hash, logs_hash: record.post.logs };
-  if (record.post.expectException) return { status: 'unsupported', reason: 'expected-invalid-transaction-adapter-pending', expected };
   if (!validateConfig(record.config)) return { status: 'unsupported', reason: 'unsupported-fork-configuration', expected };
   if (!modules) {
     const require = createRequire(resolve(bulk, 'reference/package.json'));
@@ -66,9 +66,28 @@ async function execute(record) {
     mixHash: word(e.currentRandom ?? 0), baseFeePerGas: BigInt(e.currentBaseFee ?? 0),
     excessBlobGas: BigInt(e.currentExcessBlobGas ?? 0), blobGasUsed: 0n,
     parentBeaconBlockRoot: word(e.parentBeaconBlockRoot ?? 0) } }, { common });
-  const tx = createTxFromRLP(hexToBytes(record.post.txbytes), { common });
-  let result;
-  try { result = await runTx(vm, { tx, block }); } catch (error) { throw error; }
+  const beforeRoot = bytesToHex(await vm.stateManager.getStateRoot());
+  let result; let tx;
+  try {
+    tx = createTxFromRLP(hexToBytes(record.post.txbytes), { common });
+    result = await runTx(vm, { tx, block });
+  } catch (error) {
+    if (!record.post.expectException) throw error;
+    const facts = { transactionType: Number.parseInt(record.post.txbytes.slice(2,4),16) };
+    if (tx && error.message.startsWith('INTRINSIC_GAS_TOO_LOW:')) {
+      facts.gasLimit = tx.gasLimit.toString(); facts.intrinsicGas = tx.getIntrinsicGas().toString();
+      facts.floorGas = modules.getCalldataFloorGas(tx, tx.getSenderAddress()).toString();
+    }
+    const afterRoot = bytesToHex(await vm.stateManager.getStateRoot());
+    const classified = classifyRejection(record.post.expectException, error.message, facts, beforeRoot,
+      afterRoot, record.post.hash, record.post.logs, keccak256(RLP.encode([])));
+    return { ...classified, expected_exception: record.post.expectException, engine_reason: error.message,
+      validation_facts: facts, observed: { state_root: afterRoot, before_state_root: beforeRoot, logs_hash: keccak256(RLP.encode([])) }, expected };
+
+  }
+  if (record.post.expectException) return { status: 'reference_mismatch', fields: ['transaction_admission'],
+    reason: 'expected-invalid transaction accepted', expected_exception: record.post.expectException, expected };
+
   const observed = { state_root: bytesToHex(await vm.stateManager.getStateRoot()),
     logs_hash: keccak256(RLP.encode(result.execResult.logs ?? [])),
     output: bytesToHex(result.execResult.returnValue), execution_exception: result.execResult.exceptionError?.error ?? null,
@@ -86,8 +105,9 @@ if (workerMode) {
 } else {
   const limit = process.argv[3] === undefined ? Infinity : Number(process.argv[3]);
   const label = process.argv[4] ?? 'full';
-  const only = process.argv[5] === undefined ? null : Number(process.argv[5]);
+  const only = (process.argv[5] === undefined || process.argv[5] === 'all') ? null : Number(process.argv[5]);
   if (only !== null && (!Number.isInteger(only) || only < 0)) throw new Error('invalid index');
+  const invalidOnly = process.argv[6] === 'invalid-only';
   const mem = readFileSync('/proc/meminfo', 'utf8');
   if (Number(/^SwapTotal:\s+(\d+)/m.exec(mem)[1]) !== 0) throw new Error('no-swap prerequisite');
   if (!(limit > 0) || !/^[a-z0-9-]+$/.test(label)) throw new Error('invalid limit/label');
@@ -139,6 +159,7 @@ if (workerMode) {
     if (seen.size >= limit) break;
     const record = JSON.parse(line);
     if (only !== null && record.index !== only) continue;
+    if (invalidOnly && !record.post.expectException) continue;
     const original = census.cases[record.index];
     if (!original || original.path !== record.path || original.case !== record.case || original.variant !== record.variant || original.sha256 !== record.fixture_sha256) throw new Error('fixture identity mismatch');
     if (!Number.isInteger(record.index) || seen.has(record.index)) throw new Error('duplicate/invalid fixture index');

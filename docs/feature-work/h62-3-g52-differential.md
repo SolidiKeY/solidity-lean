@@ -294,3 +294,80 @@ stop request until onExit resets the worker; this is implemented and cleared.
 The final20-case pilot reports20reference matches and strict incomplete exit2.
 No independent work is blocked by these completed fixes. The pre-merge source
 backup retains the actual full-run adapter before the targeted IPC-stop fixes.
+
+
+## Expected-invalid transaction classification and H70 binding answer
+
+This checkpoint executes and classifies all778 formerly unsupported invalid
+transactions. The observed rejection category is derived from pinned engine
+validation diagnostics, actual transaction type, and engine-computed intrinsic
+and calldata-floor gas. Expected labels are consulted only afterward. Unknown
+host errors remain unsupported; an accepted expected-invalid transaction is a
+reference mismatch. Classification requires unchanged pre/post state roots,
+the exact fixture post-state root, and the expected empty-log commitment.
+Validation rejections do not provide captured execution logs; the empty-log
+commitment is inferred from the recognized pre-execution validation refusal.
+
+All778 cases match. They cover19 observed categories and22 expectation/alternative
+forms. In91 cases both intrinsic and calldata-floor constraints fail; both facts
+are retained and only explicit expected alternatives can match. No skip or
+arbitrary exception is counted as a match. New control module docstrings name
+the guarded regression as required by H90; no new phase/roadmap folders exist.
+Nine pure controls and one real-worker accepted-invalid contradiction control
+pass without skips. Wrong expected roots, overlapping gas failures, unknown host
+errors, and incompatible rejection categories are covered.
+
+The complete serial replay now has19093unique reference matches:18315valid cases
+and778observed rejections, zero unknown rejections, errors, or mismatches.
+It took351.765seconds with sampled aggregate RSS peak
+1191260160bytes. The earlier replay took352.501seconds but
+skipped778transactions; these are different workloads, so no checking-speed
+improvement is claimed. No Lean representation/refactor/budget changed; the
+checking-regression comparison remains inapplicable. Resource and instruction
+limits remain unchanged.
+
+The full reference command exits0 and reference_complete=true **only for pinned
+state-root/log commitments and expected transaction admission/refusal**. All19093
+source semantics adapters remain unsupported; differential_complete=false.
+Return/revert and gas data lack direct expected values in these fixtures. This
+is neither source/compiler agreement nor RUNTIME_GATE_PASS/full-G52 closure.
+The invalid-only778case command still exits2 because it leaves18315unselected.
+Evidence: evidence/eest-reference-rejection-complete-summary.json, its JSONL,
+rejection-acceptance.json, rejection-controls.log, rejection-integration-control.log,
+and rejection-reviews.json. Both independent reviewers verified the complete
+result SHA256 e4d572dd0dec3f202dc62256a92174919fd85438320e6c2fa90de37a39305a55,
+all rejection invariants, and explicit source incompleteness; neither used Lean
+or a server. This checkpoint creates no Lean declarations, axioms, sorry,
+frozen statement changes, exclusions, or proof-budget changes.
+
+Reproduce the rejection subset and controls:
+
+```sh
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 778 rejected-classified all invalid-only
+node --test tests/h62/item3/g52-differential/eest_rejection.test.mjs tests/h62/item3/g52-differential/eest_observation.test.mjs
+G52_BULK="$BULK" node --test tests/h62/item3/g52-differential/eest_rejection_integration.test.mjs
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 19093 rejection-complete
+```
+
+H70 owner answer: V17 at e13a151f8f5252a038ff051dde797cc00e173f87 confirms
+scripts/roadmap-v17-differential.py, scripts/roadmap-v17-runtime.mjs and
+scripts/roadmap-v17-compare.mjs, last adapter change21a2807ddd1f7cd8315d6b2202e904d64162c10f.
+The domain is the complete ordered schema1 SolCases enumeration, seed0,
+indices0-159,kinds0-9, four viaIR/optimizer combinations, pinned solc0.8.38,Osaka.
+Runtime binds exact records, settings, hashes, revision, toolchain and before/after
+inputs. This resolves the bounded lookup wait only. The answer is read-only
+source inspection, with no new runtime/gate claim. Its existing soljson path
+is not substituted for this lane's required official native compiler.
+Arbitrary-contract/EEST binding remains unestablished. Exact owner answer and
+consumer inspection hashes are saved at evidence/v17-adapter-inspection.json.
+G49's current owner is claudecloud/move6-20261106/g49-final; do not duplicate it.
+
+Continue the same original unfinished goal after these three bounded work items
+(classification, live-binding inspection, reviewed conformance/control validation).
+Next independent work: census/account non-state Osaka archive formats and expand
+admitted deterministic witnesses while awaiting arbitrary-contract/EEST source
+binding. Record waits for V17/G49 integration and the full G49 producer; do not
+stop at either while independent work remains. Full source/gas/deployment/world
+integration, mismatch minimization/relay when a real mismatch exists, all remaining
+original gates and full four-checkpoint completion stay open. No mismatch or
+owner ticket was fabricated from these reference-only matches.
