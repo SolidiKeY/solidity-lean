@@ -153,3 +153,9 @@ At the root, the notation's own tests:
 | `Examples/DecisionHashesChecks.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Examples/Tactics/StaticStorageCompatibility.lean` | Inhabited conditional frame, changed balance, reentry refusal and malformed decoder controls; no opaque static preservation assertion. |
+
+# VX1 OOM split of the open solc loops
+
+| Module | What it defines |
+|---|---|
+| `Examples/Tactics/OpenLoops/RowsNine.lean` | `binomialRowsNine`, the nested-loop binomial over nine memory rows, checked in chunks of 128 steps; split from `Examples/Tactics/OpenLoops.lean` for the pre-gate bounds. |
