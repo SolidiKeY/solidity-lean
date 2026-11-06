@@ -254,8 +254,8 @@ def deadStore (e₁ e₂ : Val C G2 .uint) : Prog C G2 G2 :=
 
 /-- Stores to different locals are both kept. -/
 theorem different_targets_kept :
-    Prog.dse (.cons (.assignLocal .here (lit 1)) (.cons (.assignLocal (.there .here) (lit 2)) .nil) :
-      Prog C G2 G2) =
+    Prog.dse (.cons (.assignLocal .here (lit 1))
+      (.cons (.assignLocal (.there .here) (lit 2)) .nil) : Prog C G2 G2) =
       .cons (.assignLocal .here (lit 1)) (.cons (.assignLocal (.there .here) (lit 2)) .nil) := rfl
 
 theorem dead_store_removed :
