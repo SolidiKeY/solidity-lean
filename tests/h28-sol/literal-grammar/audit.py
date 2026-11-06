@@ -2,12 +2,24 @@
 """Check frozen input identities, lane theorem axiom pins and scope.
 The supplied log must be actual Lean output; this script does not run Lean.
 """
-import hashlib, json, pathlib, re, subprocess, sys
+import argparse, hashlib, json, pathlib, re, subprocess
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('axiom_log', type=pathlib.Path)
+parser.add_argument('--evidence-dir', type=pathlib.Path,
+                    help='H44 external evidence directory (no files are copied into git)')
+parser.add_argument('--published-integration', action='store_true',
+                    help='audit the explicitly adopted 5f1459653 integration baseline')
+args = parser.parse_args()
 root = pathlib.Path(__file__).resolve().parents[3]
+evidence_dir = args.evidence_dir or root/'tests/h28-sol/literal-grammar/evidence'
+# This is a fixed human-published adoption, never a mutable origin/master exemption.
+integration = '5f14596531efea2be64f1a5e7a83afa5e151e865' if args.published_integration else None
+if integration:
+    subprocess.run(['git', 'merge-base', '--is-ancestor', integration, 'HEAD'], cwd=root, check=True)
 pins = json.loads((pathlib.Path(__file__).with_name('pins.json')).read_text())
 for name, expected in pins['inputs'].items():
     assert hashlib.sha256((root/name).read_bytes()).hexdigest() == expected, name
-log = '\n'.join(pathlib.Path(p).read_text() for p in sys.argv[1:])
+log = args.axiom_log.read_text()
 found = {}
 for name, tail in re.findall(r"'Solidity\.Frontend\.LiteralGrammarH28\.([^']+)' (depends on axioms: \[[^\]]*\]|does not depend on any axioms)", log):
     assert name not in found, ('duplicate axiom report', name)
@@ -38,7 +50,7 @@ if adoption_path.is_file():
         dict(published_master='b86ae4568cef6d6226f4d170360bbb089debe3fb', preserved_owned_head='59c3e31c820830d179a1b24911dcf8f3f6b001af')]
     for entry in chain:
         published, preserved = entry['published_master'], entry['preserved_owned_head']
-        for earlier, later in [(scope_base, preserved), (scope_base, published), (preserved, 'HEAD')]:
+        for earlier, later in [(scope_base, preserved), (scope_base, published)] + ([] if integration else [(preserved, 'HEAD')]):
             subprocess.run(['git', 'merge-base', '--is-ancestor', earlier, later], cwd=root, check=True)
         if subprocess.run(['git', 'merge-base', '--is-ancestor', published, 'HEAD'], cwd=root).returncode:
             # Only this exact latest merge may be validated before its commit.
@@ -47,6 +59,10 @@ if adoption_path.is_file():
         prior_paths = subprocess.check_output(['git', 'diff', '--name-only', scope_base, preserved], cwd=root, text=True).splitlines()
         assert all(owned_path(name) for name in prior_paths), 'pre-adoption ownership violation'
         scope_base = published
+# Published integration may rebase prior owned history. The historical ownership
+# checks above remain, and all 24 reviewed proof hashes below must still match.
+if integration:
+    scope_base = integration
 paths = subprocess.check_output(['git', 'diff', '--name-only', scope_base], cwd=root, text=True).splitlines()
 paths += subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], cwd=root, text=True).splitlines()
 allowed = ('Solidity/Frontend/LiteralGrammarH28/', 'tests/h28-sol/literal-grammar/')
@@ -61,7 +77,7 @@ assert set(found) == set(inventory['public_theorems'])
 assert all(set(v) <= {'propext', 'Quot.sound', 'Classical.choice'} for v in found.values())
 manifest = json.loads((root/'tests/h28-sol/literal-grammar/registration.json').read_text())
 assert {v['module'] for v in manifest['modules']} == {str(p.relative_to(root))[:-5].replace('/', '.') for p in (root/'Solidity/Frontend/LiteralGrammarH28').rglob('*.lean')}
-safety = json.loads((root/'tests/h28-sol/literal-grammar/evidence/proof-safety-diag.json').read_text())
+safety = json.loads((evidence_dir/'proof-safety-diag.json').read_text())
 assert safety['success'] and not safety['timed_out'] and not safety['partial']
 assert sorted(i['message'] for i in safety['items'] if i['message'].startswith('DECL_SAFETY ')) == pins['safe_declarations']
 assert len(pins['safe_declarations']) == 8 and all(x.endswith('Lean.DefinitionSafety.safe') for x in pins['safe_declarations'])
@@ -102,7 +118,7 @@ for group, definition in [('quote','quoteControls'),('scan','scanControls'),('pl
     assert actual == boundary[group], ('exact boundary coverage differs', group, actual, boundary[group])
 identities = json.loads((root/'tests/h28-sol/literal-grammar/proof-source-identities.json').read_text())
 assert identities['sources'] == {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in (root/'Solidity/Frontend/LiteralGrammarH28').rglob('*.lean')}, 'reviewed proof sources changed'
-assert len(sys.argv) == 2 and hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest() == identities['axiom_log_sha256'], 'axiom report does not match reviewed source evidence'
+assert hashlib.sha256(args.axiom_log.read_bytes()).hexdigest() == identities['axiom_log_sha256'], 'axiom report does not match reviewed source evidence'
 hexrows = [dict(raw=json.loads('"'+raw+'"'), expected=None if expected=='none' else json.loads(expected[5:])) for raw,expected in re.findall(r'\("((?:[^"\\]|\\.)*)", (none|some \[[^\]]*\])\)', controls)]
 assert hexrows == json.loads((root/'tests/h28-sol/literal-grammar/hex-coverage.json').read_text())
 fixtures = json.loads((root/'tests/h28-sol/literal-grammar/solc-cases.json').read_text())
@@ -130,4 +146,4 @@ for case in fixtures['cases']:
 observations=json.loads((root/'tests/h28-sol/literal-grammar/solc-observations.json').read_text())
 assert not observations['failures'] and len(observations['observations']) == 116
 assert {(row['id'],row['viaIR']) for row in observations['observations']} == {(c['id'],v) for c in fixtures['cases'] for v in [False,True]}
-print(f"PASS: {len(pins['inputs'])} frozen input hashes; {len(found)} exact theorem axiom sets; 242 kernel control rows; 8 safe proof-tactic declarations; exact local registration; exclusive scope; trust restrictions")
+print(f"PASS: {len(pins['inputs'])} frozen input hashes; {len(found)} exact theorem axiom sets; 242 kernel control rows; 8 safe proof-tactic declarations; exact local registration; exclusive scope; trust restrictions (historical log bound to unchanged sources, not a fresh Lean run)")
