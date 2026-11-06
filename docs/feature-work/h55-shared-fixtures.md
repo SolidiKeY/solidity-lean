@@ -215,3 +215,28 @@ obligations, not proof of a proposed shared fixture.
 This is not a review of all Source/static families or of every original
 private declaration and emitted observation. It does not establish exact
 statement preservation or discharge any Lean gate.
+
+## Transient emit Source/static semantic review (partial)
+
+The following records the named public statements in SourceTransientEmit and
+SourceTransientEmitPanic controls. Pipeline and fuel quantifiers, frame updates,
+reached states and exact failure data are part of the original obligations.
+
+| Control and declarations | Original observations to preserve |
+|---|---|
+| Emit `assignment_statement`, `arguments_reached`, `encoding_reached`, `emit_reached`, `sequence_complete` | Actual transient-write prefix, argument evaluation, encoding, direct emit and full item sequence, including the false local and reached intermediate states. Argument/encoding facts quantify over `static`. |
+| Emit `direct_static`, `prefix_static_refusal`, `static_boundary_contrast` | Direct static emit runs its arguments and encoding then reverts at `afterArgs`; the static prefix refuses at `opening`. Heap cursors differ, 2 versus 1. |
+| Emit `zero_horizon`, `direct_argument_timeout`, `prefix_argument_timeout` | Distinct timeout horizons and exact states: zero remains at opening, direct argument timeout stays written, prefixed argument timeout reaches written. |
+| Emit reordered argument, encoding, emit and sequence theorems; `wrong_actual_order` | Preserve the actual reordered reached states and the inequality of original versus reordered execution. |
+| Emit `complete_vector`, `payload_observation` | Preserve all specified account balances, storage/transient reads, journal/heap fields, events, log payload and local fields; retain selector plus exact hash/word encoding. |
+| Emit `erased_execution`, `erased_not_opening` | Log erasure yields the stated reached state but not opening; heap allocation remains observable. |
+| Emit `rollback_execution_component`, `rollback_logged`, `rollback_static`, `wrong_automatic_rollback` | Preserve explicit journal rollback equations and the negative automatic-rollback control. Source heap and logs are not claimed to roll back. |
+| Emit `end_fields`, `end_reads` | End-execution clears the journal and transient reads for both owners while preserving the specified world, heap, event, log and local fields. |
+| Panic `arguments_reached`, `direct_panic`, `items_panic`, `intrinsic_payload` | Argument failure occurs after the reached write/hash prefix, with exact division-by-zero panic bytes and `afterArgs`; direct failure holds for either static flag. |
+| Panic `decoder_observation`, `wrong_empty_payload`, `wrong_assert_payload` | Decoder observes code `0x12`; empty and assertion panic payloads are distinct. The decoder is an observation, not a Source catch or frame adequacy theorem. |
+| Panic `prefix_static_refusal`, `zero_timeout`, `wrong_before_hash` | Static prefix refuses at opening; zero horizon times out at opening; direct panic cannot be replaced by the pre-hash written state. |
+| Panic `complete_vector`, `rollback_after_panic`, `end_fields`, `end_reads`, `erased_failure` | Preserve the complete reached account/transient/heap/log vector, explicit journal-only rollback, end-execution fields and reads, and erased-log failure observation. No automatic rollback or EVM log adequacy is asserted. |
+
+This is a partial manual review of named public statements in two controls;
+other Source/static files, private declarations, exact post-migration
+statements and all Lean gates remain open.
