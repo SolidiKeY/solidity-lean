@@ -209,3 +209,32 @@ All 46 Python controls and final syntax/source/ancestry checks pass.
 Old interface export exit 0: 243.493156 s, sampled peak RSS 1113288704 bytes.
 Checkpoint 1 is complete; checkpoints 2–4 retain the external dependency
 blocker and unfinished new-interface/full-comparison/root-gate obligations.
+
+## H82 final retirement preservation
+
+Stopped by explicit human-authorized H82 handoff, successor
+`solidity-h62-6-20261106/migrate-root-gate`. No new proof/source work or Lean
+runs were performed during retirement. Full original rendered assignment,
+original queue, exact scope manifest, amendments, remaining queue and schema-v1
+waits are committed under `tests/h62/item6/migrate-testsuite/handoff/`, with
+SHA256SUMS. Original VM/branch/evidence are preserved. H71 push authorization
+was not available, so no branch push was attempted.
+
+The exposed goal tool has no PAUSED operation (only complete/blocked), and the
+previous transition failed for missing trusted goal/source-turn context. The
+authorized pause is recorded locally; no platform transition success, goal
+completion, reset or replacement is claimed. No automatic continuation is
+authorized.
+
+H70 confirms migration-Syntax is the accepted compatibility prerequisite. H78
+requires exhaustive original public generated API coverage and per-shim
+signature records; the old ModuleData kernel snapshot alone does not establish
+that inventory (compiler-only extraConstNames are excluded). These obligations
+remain with the survivor, together with new snapshot/parity/full comparison
+and root final gates. No frozen interface or axiom/proof-budget change was made.
+
+Retirement read-only finder/skeptic reviews verified scope, queue extraction,
+checksums and unchanged originals. Original assignment text is transcribed
+from the visible original thread, not authenticated as byte-identical to an
+unavailable canonical renderer artifact; see its explicit provenance note.
+The Syntax prerequisite remains awaited, not locally delivered or accepted.
