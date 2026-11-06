@@ -183,4 +183,24 @@ def normalizedDistinctCases : Syn (.list .yulCase) :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.ScopedBlockTyping.CasesD.result_unique
 
+/- Fixed initializer arities and default-body control indices remain significant. -/
+#guard (ScopedBlockTyping.checkInitializer .closed ClosedSyntax.rootEnv 2 .none).isSome
+#guard (ScopedBlockTyping.checkInitializer .closed ClosedSyntax.rootEnv 2 (.some (lit 7))).isNone
+#guard (ScopedBlockTyping.checkInitializer .closed ClosedSyntax.rootEnv 1 (.some (lit 7))).isSome
+#guard (ScopedBlockTyping.checkNode .closed (.none : Syn (.opt (.list .yulStmt)))
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).isSome
+#guard (ScopedBlockTyping.checkNode .closed
+  (.some (list [.yulBreak]) : Syn (.opt (.list .yulStmt)))
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).isNone
+
+/-- info: 'Solidity.Yul.ScopedBlockTyping.BlockD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.BlockD.unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.DefaultD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.DefaultD.unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.InitializerD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.InitializerD.unique
+
 end Solidity.Yul.Checks.BlockTyping

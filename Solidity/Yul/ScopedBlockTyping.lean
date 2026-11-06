@@ -582,4 +582,28 @@ theorem CasesD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope :
   intro X scope F n E control tree firstValue secondValue first second
   exact Option.some.inj ((CasesD.complete first).symm.trans (CasesD.complete second))
 
+/-- The fixed scoped checker input determines its entire derivation.
+All syntax and context indices remain explicit. -/
+theorem BlockD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n) (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.list .yulStmt))
+ (first second : Solidity.Yul.ScopedBlockTyping.BlockD scope E control tree), first = second := by
+  intro X scope F n E index tree first second
+  exact Option.some.inj ((BlockD.complete first).symm.trans (BlockD.complete second))
+
+/-- The fixed scoped checker input determines its entire derivation.
+All syntax and context indices remain explicit. -/
+theorem DefaultD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n) (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.opt (.list .yulStmt)))
+ (first second : Solidity.Yul.ScopedBlockTyping.DefaultD scope E control tree), first = second := by
+  intro X scope F n E index tree first second
+  exact Option.some.inj ((DefaultD.complete first).symm.trans (DefaultD.complete second))
+
+/-- The fixed scoped checker input determines its entire derivation.
+All syntax and context indices remain explicit. -/
+theorem InitializerD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n) (count : Nat) (tree : Solidity.Source.Syn (.opt .yulExpr))
+ (first second : Solidity.Yul.ScopedBlockTyping.InitializerD scope E count tree), first = second := by
+  intro X scope F n E index tree first second
+  exact Option.some.inj ((InitializerD.fixed_complete first).symm.trans (InitializerD.fixed_complete second))
+
 end Solidity.Yul.ScopedBlockTyping
