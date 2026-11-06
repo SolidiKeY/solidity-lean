@@ -19,7 +19,9 @@ REGIONS = {
     "RuntimeFrameV3MutatingResume.lean": (210, 381),
 }
 
-def parse(text):
+def parse(text, regions=None, facet_definitions=None):
+    regions = REGIONS if regions is None else regions
+    definitions = FACETS if facet_definitions is None else facet_definitions
     mapping = {}
     current = None
     for raw in text.splitlines():
@@ -36,24 +38,26 @@ def parse(text):
             raise ValueError("case outside region")
         facets, names = line.split(":", 1)
         tags = facets.split(",")
-        if set(tags) - FACETS.keys() or len(set(tags)) != len(tags) or not names.split():
+        if set(tags) - definitions.keys() or len(set(tags)) != len(tags) or not names.split():
             raise ValueError("unknown/duplicate facet or empty group")
         for name in names.split():
             if name in mapping[current]:
                 raise ValueError("duplicate case")
             mapping[current][name] = tags
-    if set(mapping) != set(REGIONS):
+    if set(mapping) != set(regions):
         raise ValueError("region inventory mismatch")
     return mapping
 
-def classify(inventory, mapping):
+def classify(inventory, mapping, regions=None, facet_definitions=None):
+    regions = REGIONS if regions is None else regions
+    definitions = FACETS if facet_definitions is None else facet_definitions
     result = []
     count = fixtures = 0
     for file in inventory["files"]:
         name = Path(file["path"]).name
-        if name not in REGIONS:
+        if name not in regions:
             continue
-        begin, end = REGIONS[name]
+        begin, end = regions[name]
         original = subprocess.check_output(["git", "show", BASE+":"+file["path"]], cwd=ROOT)
         if hashlib.sha256(original).hexdigest() != file["source_sha256"]:
             raise ValueError("source hash mismatch")
@@ -81,9 +85,9 @@ def classify(inventory, mapping):
         result.append({"path": file["path"], "source_sha256": file["source_sha256"], "namespace": "Checks", "begin": begin, "end": end, "declarations": rows})
         count += len(cases)
         fixtures += len(selected)-len(cases)
-    if len(result) != len(REGIONS):
+    if len(result) != len(regions):
         raise ValueError("missing original region")
-    return {"schema": 1, "base": BASE, "scope": "Only four explicitly bounded embedded Checks regions. Other embedded controls remain pending; no full checkpoint completion.", "boundary": "Source classification, not elaboration or semantic proof. Facets summarize; exact headers retain all premises/conjuncts. Counts are declarations, not executions.", "facet_definitions": FACETS, "files": result, "summary": {"regions": len(result), "theorems": count, "fixtures": fixtures, "unclassified_within_selected_regions": 0}}
+    return {"schema": 1, "base": BASE, "scope": "Only four explicitly bounded embedded Checks regions. Other embedded controls remain pending; no full checkpoint completion.", "boundary": "Source classification, not elaboration or semantic proof. Facets summarize; exact headers retain all premises/conjuncts. Counts are declarations, not executions.", "facet_definitions": definitions, "files": result, "summary": {"regions": len(result), "theorems": count, "fixtures": fixtures, "unclassified_within_selected_regions": 0}}
 
 def main():
     ap = argparse.ArgumentParser()

@@ -354,3 +354,50 @@ full conservation and independent reviews; do not count them complete now. Full
 proof/fixture/correspondence/migration/timing queue remains unfinished. Export:
 `/workspace/h62-artifacts/generic-internalflow/embedded1/` with cumulative patch,
 handoff and SHA256 manifest; prior exports preserved.
+
+## Embedded classification tranche 2: prefix Checks
+
+All original declarations in ParentPrefixes.Checks (100–172: 3 theorems,1 fixture),
+AllocatingPrefixes.Checks (114–250:12,4), and MutatingPrefixes.Checks
+(102–349:22,12) are classified and conserved. Total54 declarations=37 theorems+17
+fixtures; cumulative classification674 original theorem declarations+378 fixtures.
+These are not independent execution counts. Other embedded controls remain pending;
+full checkpoint1 is partial and the proof/migration/measurement queue unfinished.
+
+Map: `tests/h62/item4/generic-internalflow/prefix-cases.txt`; expander `prefix.py`
+in the assigned scripts directory. The boundary checker now accepts explicit
+region/facet parameters; default four-region output is unchanged. Prefixes add
+no Continuation conclusion. Preserve running versus stopped loop horizons; source
+write/evaluation success versus target activation success; actual Heap.Keeps versus
+length-only preservation; and failure of a particular GrowsAllocator budget versus
+missing ownership or incorrect computed cost. The full source headers remain
+authoritative for all conjuncts. Audit9/11/16 dispositions retain the prior semantic
+limits and do not approve any refactor or semantic decide table.
+
+Independent read-only finder and skeptic PASS (no Lean/server/builds/writes).
+All54 records retain every original inventory field, ordering and hashes; final
+expansion matches source map. Acceptance passes22 tests and deterministic full
+reproduction; original271 family files remain byte-identical. No new Lean checks.
+Historical KeySort success and unchanged Raw dependency failure remain historical,
+not new passing semantic gates. No RUNTIME_GATE_PASS, new axiom/sorry, raised budget,
+original edit or timing delta.
+
+Evidence: `/workspace/h62-evidence/generic-internalflow/embedded2/acceptance.log`;
+`prefix-inventory.json` SHA256
+`47c090ad626e9419d272bdba97a1cd1a5d94ea8200dbdb7e35d4fdd11755c2a8`.
+Cumulative/incremental patches and handoff:
+`/workspace/h62-artifacts/generic-internalflow/embedded2/`, with SHA256SUMS.
+
+Raw notice is recorded in `raw-prerequisite-notice.json` under assigned tests.
+Reported source074e62c1840dd2d7ab19c95ca5d437ebfe57dbb8 and patch hash are
+user-relayed metadata, not locally verified/applied artifacts. Thirty reported
+axiom-growth entries require root review; no trust acceptance or holds lifted.
+Wait for reviewed migrate-syntax Raw prerequisite and current Claude V12 exact-file
+agreement for the two no_ref/no_struct files. Current-owner delivery to
+`claudecloud/move5-20261106/v12-p1` remains pending; host journals determine acceptance.
+
+Fresh-thread handoff is ready after four completed census/classification work
+items. Coordinator should continue this exact VM, branch and existing goal; no
+replacement goal/thread is self-launched. Next independent read-only work remains
+unclassified embedded Checks/Client regions, with explicit region inventory and
+full per-declaration semantic accounting. Do not declare full checkpoint completion.

@@ -22,5 +22,10 @@ python3 scripts/h62/item4/generic-internalflow/embedded.py --inventory "$evidenc
 python3 scripts/h62/item4/generic-internalflow/embedded.py --inventory "$evidence/original-inventory.json" --output "$evidence/embedded-reproduced.json"
 cmp "$evidence/embedded-inventory.json" "$evidence/embedded-reproduced.json"
 sha256sum "$evidence/embedded-inventory.json"
+python3 tests/h62/item4/generic-internalflow/test_prefix.py
+python3 scripts/h62/item4/generic-internalflow/prefix.py --inventory "$evidence/original-inventory.json" --output "$evidence/prefix-inventory.json"
+python3 scripts/h62/item4/generic-internalflow/prefix.py --inventory "$evidence/original-inventory.json" --output "$evidence/prefix-reproduced.json"
+cmp "$evidence/prefix-inventory.json" "$evidence/prefix-reproduced.json"
+sha256sum "$evidence/prefix-inventory.json"
 git diff --check
 printf '%s\n' 'PASS external census/classification acceptance; NOT semantic Lean proof or RUNTIME_GATE_PASS'
