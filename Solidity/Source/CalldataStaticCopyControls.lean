@@ -10,6 +10,10 @@ inner arrays allocated before the outer one, as `zeroData` allocates. Every
 element is validated (a dirty `bool` reverts with no data); an element that
 is not statically encoded is not inline, so its copy is `stuck`. The one-word
 copy of a `uint256[] calldata` is unchanged.
+
+Only the `uint256[2]` copy is reachable from typed source: `STy.implicit`
+compares element locations, so the nested conversion does not type and the
+nested arm is exercised here by calling `cdToMem` directly.
 -/
 
 namespace Solidity.Source.CalldataStaticCopyControls

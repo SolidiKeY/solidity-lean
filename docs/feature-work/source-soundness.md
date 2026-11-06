@@ -1023,7 +1023,13 @@ Horizon's step proofs take them without new lemmas, except
   (G18.05): inner arrays are allocated before the outer one, as `zeroData`
   allocates (solc allocates the outer first; heap addresses are abstract
   indices, so no observation here depends on the order). An element that is
-  not statically encoded is not inline and stays `stuck`;
+  not statically encoded is not inline and stays `stuck`. Only the
+  one-level static copy is reachable from typed source today:
+  `STy.implicit` compares element types with `STy.same`, which compares
+  locations, so `uint256[2][] calldata` does not convert to
+  `uint256[2][] memory` and the nested arm runs only when `cdToMem` is
+  called directly (open: compare elements up to `withLoc`, as `copiesTo`
+  does);
 - `abi.decode(b, …)` on `bytes calldata` (`STy.decodeSrc` now admits it;
   `bytesOfRV` reads the reference).
 
