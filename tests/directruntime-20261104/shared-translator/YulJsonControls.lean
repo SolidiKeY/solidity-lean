@@ -58,7 +58,7 @@ private def checkedJson {α : Type} : Except String α → IO α
 private def requireDecode {α : Type} : Except YulJson.Error α → IO α
   | .ok value => pure value | .error e => throw (IO.userError (reprStr e))
 private def fixtureControls : IO Unit := do
-  let fixture ← checkedJson (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/YulKinds.ast.json"))
+  let fixture ← checkedJson (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/YulKinds.ast.json"))
   let some assembly := (J.nodes fixture).find? (fun n => J.kind n == "InlineAssembly")
     | throw (IO.userError "missing source assembly fixture")
   let ast ← checkedJson (assembly.getObjVal? "AST")

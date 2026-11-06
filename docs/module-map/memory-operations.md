@@ -540,6 +540,63 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedLocationPipeline.lean` | Two actual nested copy phases, retained heaps and separate capacity refusals. |
 | `Backend/MemoryCopies/NestedLocationPipelineObservations.lean` | Observable returned root, both parent headers, free cursor and machine framing. |
 | `Backend/MemoryCopies/NestedLocationPipelineControls.lean` | Inhabited empty/mixed 2/0/64 executions and distinct first/second allocation refusals. |
+| `Backend/MemoryCopies/BudgetedDefaultInterface.lean` | Configurable target word budgets, full selected-default success/refusal and 32-byte live-cell address bounds. |
+| `Backend/MemoryCopies/BudgetedDefault.lean` | Existing-guard bias, total checked selected defaults, complete allocator contract and live-cell address-fit proof. |
+| `Backend/MemoryCopies/BudgetedDefaultControls.lean` | Inhabited certificate, represented empty/nested successes, strict and zero-budget refusals, actual child contents and address-bound controls. |
+| `Backend/MemoryCopies/BudgetedFiniteInterface.lean` | Configurable finite-plan guards with complete existing success and actual declaration growth contracts. |
+| `Backend/MemoryCopies/BudgetedFinite.lean` | Total configurable finite-plan success/refusal and actual declaration growth, retaining the original full contract. |
+| `Backend/MemoryCopies/BudgetedFiniteControls.lean` | Nonzero parent offsets, actual child layout/declaration bindings, retained earlier children and strict/zero budget refusals. |
+| `Backend/MemoryCopies/BudgetedReferenceInterface.lean` | Configurable runtime reference-array budget guard and complete actual success/refusal certificate. |
+| `Backend/MemoryCopies/BudgetedReference.lean` | Division-based runtime budget checking and total complete allocator success/refusal for the unchanged reference constructor. |
+| `Backend/MemoryCopies/BudgetedReferenceControls.lean` | Populated empty/long/reference defaults, oversized unused-child success, overflow/strict-budget refusals and same-heap child contents. |
+| `Backend/MemoryCopies/FixedReferenceDeclareInterface.lean` | Contract only for checked fixed-reference declarations with actual successful TRun/StateRepr and separate machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceDeclare.lean` | Proved actual intrinsic TRun declaration and checked word-machine local binding with full object StateRepr, allocator and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceDeclareControls.lean` | Inhabited declaration/post-state/local-pointer controls with retained shadows, empty/64-element child and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceDeclareFrameControls.lean` | Nonempty heap/two-alias declaration framing controls, separate inhabited copy-gap transport and overlapping-gap negative control. |
+| `Backend/MemoryCopies/FixedReferenceLiveInterface.lean` | Signature-only live normalization contract for all fixed primitive-array children, retaining original copy/representation despite storage shadows. |
+| `Backend/MemoryCopies/FixedReferenceLive.lean` | Inhabited intrinsic live normalization preserving exact original storage copy, representation and stripped contents for arbitrary child shadows. |
+| `Backend/MemoryCopies/FixedReferenceLiveControls.lean` | Arbitrary-shadow, zero/long/many controls and represented fixed-parent execution retaining original copied heap and stored shadows. |
+| `Backend/MemoryCopies/FixedReferenceStorageLoopInterface.lean` | Headerless storage-child traversal with exact intrinsic row copying, pointer/framing/gap guarantees and total capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceStorageLoop.lean` | Finite headerless child-loop execution, exact allocator growth and pointer/framing transport, total size refusal. |
+| `Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean` | Mixed 2/0/64-element children, retained pointers/payloads, suffixes, actual later-refusal prefix and zero-count padded reservation. |
+| `Backend/MemoryCopies/FixedReferenceStorageParentInterface.lean` | Signature-only fixed-parent storage-copy contract: source representation, typed adoption, exact demand/growth and refusal. |
+| `Backend/MemoryCopies/FixedReferenceStorageParent.lean` | Full fixed storage representation, existing reservation/traversal/typed adoption, exact demand/growth and total size refusal. |
+| `Backend/MemoryCopies/FixedReferenceStorageParentControls.lean` | Empty/mixed/64-child typed parents, exact payloads/growth, alias retention, static code refusal and real reservation-prefix child failure. |
+| `Backend/MemoryCopies/FixedReferencePathCopyInterface.lean` | Contract only for checked compiled path plus fixed-parent copying of original arbitrary-shadow values, exact allocation and capacity refusal. |
+| `Backend/MemoryCopies/FixedReferencePathCopy.lean` | Proved actual compiled path plus checked parent copying for original arbitrary-shadow fixed reference values, full allocator/snapshot/growth and capacity refusal. |
+| `Backend/MemoryCopies/FixedReferencePathCopyControls.lean` | Inhabited retained-shadow path-copy execution40to44, empty/64-element child successes and real capacity refusal after path success. |
+| `Backend/MemoryCopies/FixedReferencePathInterface.lean` | Contract only for compiled storage-path selection of arbitrary-shadow fixed reference values and their live representation. |
+| `Backend/MemoryCopies/FixedReferencePath.lean` | Proved actual compiled path selection of original fixed-reference storage operands with live canonical representation. |
+| `Backend/MemoryCopies/FixedReferencePathControls.lean` | Inhabited represented root selection with retained child shadows, empty/64-element child and wrong-slot negative controls. |
+| `Backend/MemoryCopies/FixedReferenceRebindInterface.lean` | Contract only for checked fixed-reference local rebinding with intrinsic TRun/post-StateRepr, old-object preservation and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceRebind.lean` | Proved checked intrinsic fixed-reference local rebinding, full post-state/allocator, old-heap and fresh-root preservation, and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceRebindControls.lean` | Populated old-parent/child alias-separation controls, preserved live words, empty/64-element child successes and capacity refusal after path success. |
+| `Backend/MemoryCopies/FixedReferenceStorageTurnInterface.lean` | Headerless fixed-parent storage-child step with actual checked copying, allocator/gap/framing and refusal contracts. |
+| `Backend/MemoryCopies/FixedReferenceStorageTurn.lean` | Actual checked child copying and header0 pointer-store with complete allocator/gap/framing and total refusal. |
+| `Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean` | Actual fixed reservations, empty/pair/64-element child payloads, headerless-pointer negative and represented saturated refusals. |
+| `Backend/MemoryCopies/GuardedDefaultDeclarationInterface.lean` | Guard the actual selected declaration code; explicit frame/representation inputs and capacity-free success-or-refusal contract. |
+| `Backend/MemoryCopies/GuardedDefaultDeclaration.lean` | Guard the actual selected declaration with complete success state/allocator contract and explicit capacity refusal. |
+| `Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean` | Actual body selection, local bindings, stack/payload, full new contents, represented saturation refusal and unsupported-domain controls. |
+| `Backend/MemoryCopies/NestedLivePipelineInterface.lean` | Contract only for original shadow-retaining nested values through the existing two-copy pipeline, with full reached states and two refusal phases. |
+| `Backend/MemoryCopies/NestedLivePipeline.lean` | Proved original-value nested storage/memory pipeline by exact whole-copy and strip transport, retaining both reached refusal phases. |
+| `Backend/MemoryCopies/NestedLivePipelineControls.lean` | Original outer/child shadows, mixed live lengths, two fresh copies, actual final cursor, shallow-copy negative and first/later represented capacity-refusal controls. |
+| `Backend/MemoryCopies/NestedMemoryPathFrameInterface.lean` | Additive contract only for gap-preserving selected nested deep binding; frozen binding contract unchanged. |
+| `Backend/MemoryCopies/NestedMemoryPathFrame.lean` | Proved additive nested deep binding gap transport at the same full post-state and allocator witnesses. |
+| `Backend/MemoryCopies/NestedMemoryPathInterface.lean` | Contract only for selected nested memory paths, checked deep snapshot copying/binding, preserved old contents and distinct path/capacity refusals. |
+| `Backend/MemoryCopies/NestedMemoryPath.lean` | Proved selected nested deep copy/binding with full typed adoption, preserved old/new snapshots and separate path/capacity refusal. |
+| `Backend/MemoryCopies/NestedMemoryPathControls.lean` | Populated shared-child and overlapping-local controls distinguish alias from deep copy, observe distinct fresh children and actual target words, and test represented capacity refusal. |
+| `Backend/MemoryCopies/NestedStorageLiveInterface.lean` | Contract only for live normalization and existing checked dynamic-outer-array copying with arbitrary outer and child storage shadows. |
+| `Backend/MemoryCopies/NestedStorageLive.lean` | Proved exact live normalization, ReprAt transport and existing checked dynamic nested runtime copying for original arbitrary outer/child shadows. |
+| `Backend/MemoryCopies/NestedStorageLiveControls.lean` | Populated-heap mixed-length dynamic execution, retained outer/child shadows, 64-empty-child success and represented capacity refusal. |
+| `Backend/MemoryCopies/NestedStoragePathInterface.lean` | Contract only for actual dynamic-outer storage path copying and intrinsic declaration/rebinding, full post-state/allocator and machine refusal. |
+| `Backend/MemoryCopies/NestedStoragePath.lean` | Proved actual dynamic storage paths, exact live demand/growth, checked copy and intrinsic declaration/rebinding with full typed local transport. |
+| `Backend/MemoryCopies/NestedStoragePathControls.lean` | Populated dynamic parent/child alias controls for copy growth, declaration, rebinding, empty/long children and machine capacity refusal. |
+| `Backend/MemoryCopies/ReferenceDefaultDemandInterface.lean` | Actual runtime reference-array default demand and existing checked guard agreement; compiler selection explicit. |
+| `Backend/MemoryCopies/ReferenceDefaultDemand.lean` | Existing runtime default copy, actual live demand, heap-word growth and checked capacity branch agree under explicit compiler selection. |
+| `Backend/MemoryCopies/ReferenceDefaultDemandControls.lean` | Actual empty/2/64 and struct-child runs, explicit new contents, unused huge child, refusals and rejected-selection cost control. |
 | `Backend/MemoryCopies/SelectedDefaultDemandInterface.lean` | Existing default compiler selection implies exact intrinsic cell demand and checked capacity agreement. |
 | `Backend/MemoryCopies/SelectedDefaultDemand.lean` | Actual selected default cost equals live allocation demand; heap growth and checked guard agree without a capacity premise. |
 | `Backend/MemoryCopies/SelectedDefaultDemandControls.lean` | Selected/unselected cost controls, actual nested child snapshot, empty/long/unused-huge success, refusal and wrong cursor. |
+| `Backend/MemoryCopies/StorageRoundTripInterface.lean` | Contract only for actual primitive-array storage/memory/deep-memory/storage composition with represented destination, cleanup, framing and ordered allocation refusals. |
+| `Backend/MemoryCopies/StorageRoundTrip.lean` | Proved actual primitive-array copy-back from the reached two-copy allocator, preserving typed destination overlay, cleanup, storage/memory framing and ordered refusals. |
+| `Backend/MemoryCopies/StorageRoundTripControls.lean` | Closed round-trip runs, executable length-first cleanup mutant, same-slot snapshot restoration after explicit changed contents, framing observations and ordered refusals. |

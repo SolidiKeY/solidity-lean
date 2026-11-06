@@ -35,6 +35,12 @@ theorem Prepared.complete {outside localNames body} (p : Prepared outside localN
     rw [words.complete]
     rfl
 
+/-- Fixed original syntax and supplied namespace/local-name lists determine
+the entire certificate. This does not authenticate those supplied names or IDs. -/
+theorem Prepared.unique {outside localNames body}
+    (first second : Prepared outside localNames body) : first = second := by
+  exact Except.ok.inj (first.complete.symm.trans second.complete)
+
 theorem prepare_iff (outside localNames : List String) (body : Syn (.list .yulStmt)) :
     (prepare outside localNames body).isOk = true ↔ Nonempty (Prepared outside localNames body) := by
   constructor
@@ -50,6 +56,14 @@ theorem prepare_iff (outside localNames : List String) (body : Syn (.list .yulSt
 or Source/state refinement hypothesis. This is closed-word execution only. -/
 def Prepared.run {outside localNames body} (p : Prepared outside localNames body) (fuel : Nat) :=
   p.words.run fuel
+
+/-- The same preparation inputs determine the full closed-word result at
+each fixed fuel, including noncompletion; termination is not asserted. -/
+theorem Prepared.run_unique {outside localNames body}
+    (first second : Prepared outside localNames body) (fuel : Nat) :
+    first.run fuel = second.run fuel := by
+  exact congrArg (fun p => Prepared.run p fuel)
+    (Except.ok.inj (first.complete.symm.trans second.complete))
 
 theorem Prepared.old_result {outside localNames body} (p : Prepared outside localNames body) :
     WordSyntax.prepare outside body = .ok p.words := p.words.complete
