@@ -3671,6 +3671,7 @@ import Solidity.SolcValidation.IrEval
 import Solidity.SolcValidation.IrEvalFuel
 import Solidity.SolcValidation.IrExpHelpers
 import Solidity.SolcValidation.IrExpModel
+import Solidity.SolcValidation.IrExpSim
 import Solidity.SolcValidation.IrHelperSim
 import Solidity.SolcValidation.IrHelperSource
 import Solidity.SolcValidation.IrHelperSteps
