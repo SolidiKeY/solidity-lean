@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingResume.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingResume.coupled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

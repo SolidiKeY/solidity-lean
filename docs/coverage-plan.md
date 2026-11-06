@@ -1,8 +1,9 @@
 # Full compiler and proof roadmap
 
-The endpoint is a complete compiler for the pinned Solidity language **except
-features the user explicitly excluded**, with kernel-checked proofs from source
-through executable EVM bytecode. Source-model coverage, a restricted compiler
+The endpoint is a complete, optimizing compiler for the **whole** pinned
+Solidity language, with kernel-checked proofs from source through executable
+EVM bytecode, and a checker that proves solc's own output refines the same
+semantics ([full scope](feature-work/full-scope.md), 2026-11-04). Source-model coverage, a restricted compiler
 simulation, passing fixtures, or a list of named proof gaps does not meet this
 endpoint. This roadmap replaces the former 19-step feature-coverage plan.
 Existing integrated work is reused after checking its exact theorem and input
@@ -12,19 +13,14 @@ coverage; the groups below are remaining obligations, not claims of missing code
 
 The versioned starting point is [solidity-scope.md](solidity-scope.md), the
 [feature manifest](solidity-features.json) and the
-[upstream ledger](solidity-upstream-inventory.json). G00 records the precise
-user-approved exclusions and their evidence. A manifest exclusion without that
-evidence is a scope question to resolve, not permission to drop work. Until that
-reconciliation, preserve the recorded profile; never enlarge its exclusions.
-
-The recorded excluded families include general assembly/Yul, gas observations
-and exact machine-resource behavior, raw calldata and arbitrary low-level calls,
-`delegatecall`/low-level `staticcall`, selfdestruct, salted creation, raw code
-observations/execution, physical storage/transient layout and raw memory
-observations, observable logs, and listed extra chain/transaction fields. Use the
-exact feature IDs and exceptions in the scope document, not this summary, for
-admission. The old D1/D2 recommendations to add environment fields and logs are
-not approvals. Any such extension is conditional on an explicit user decision.
+[upstream ledger](solidity-upstream-inventory.json). The
+[full-scope decision](solidity-scope.md#full-scope-decision-2026-11-04)
+withdrew every exclusion: general assembly/Yul, gas and machine resources, raw
+calldata and low-level calls, `delegatecall`/`staticcall`, selfdestruct, salted
+creation, code observations and execution, physical storage/transient/memory
+layout, logs and the extra chain/transaction fields are all in profile. Groups
+X01–X08 of [full-scope.md](feature-work/full-scope.md) own them; a manifest
+row still marked `exclude` is open work, never a boundary.
 
 An implementation refusal, recursive type, signature, combination of features,
 proof timeout, difficult theorem, finite test universe or backend limitation is
@@ -32,11 +28,10 @@ proof timeout, difficult theorem, finite test universe or backend limitation is
 made complete by narrowing the profile, adding an oracle, assuming the desired
 result, or treating unsupported input as a successful compilation.
 
-Physical layout being unobservable does not remove the obligation to implement
-and prove the compiler's internal storage/memory representation. The compiler
-may choose its own representation; matching solc's packing is not required when
-excluded observations cannot distinguish it. The abstraction from EVM execution
-must still be proved. Hash collisions cannot be dismissed by assuming global
+Physical layout is observable (raw slots, `layout at`, memory addresses), so
+the compiler's storage, transient and memory representation must agree with
+solc's documented layout (decision D3), and the abstraction from EVM execution
+must be proved. Hash collisions cannot be dismissed by assuming global
 injectivity. Existing cryptographic/environment premises must be stated exactly;
 new premises require approval and cannot conceal a representation defect.
 
@@ -71,8 +66,10 @@ correctness true merely by running the compiler to define source semantics.
    nondeterministic environment quantification precisely. Preserve success and
    failure observations; do not permit a compiler that always reverts. Include
    termination/divergence or matching finite-prefix behavior; arbitrary fixed
-   fuel cannot stand in for source semantics. Excluded gas/resource observations
-   permit an explicit resource abstraction, not silent loss of functional behavior.
+   fuel cannot stand in for source semantics. Gas values are observations
+   read from the compiled artifact (decision D1 of
+   [full-scope.md](feature-work/full-scope.md)); exhaustion stays a failure the
+   source allows, never silent loss of functional behavior.
    G01/G06 must define it before backend work: for each finite source execution
    prefix, prove a corresponding EVM prefix with sufficient gas/memory/stack/code
    resources under the approved profile; conversely, each target functional step
@@ -89,18 +86,26 @@ correctness true merely by running the compiler to define source semantics.
    and exclusions remain unchanged. Incomplete search is distinct from an
    incomplete compiler proof.
 
-This proves this repository's compiler, not the correctness of solc's optimizer
-or every solc release. solc remains an external compatibility oracle unless its
-output is independently certified by the checked pipeline. An optional external
-EVM integration stays in `Bridge/`; the core stays dependency-free.
+7. **Optimizer:** every optimization pass of this compiler proved to preserve
+   obligations 3–5, or checked per program by a validator proved sound
+   (O01–O05).
+8. **solc validation:** for solc 0.8.38 in both pipelines, optimizer off and
+   on, a kernel-checked per-contract theorem that the emitted bytecode refines
+   the source semantics, by translation validation of the IR, each Yul
+   optimizer step, the Yul-to-bytecode transform and the legacy pipeline
+   (T01–T08). This certifies solc's output contract by contract, not solc's
+   source code.
+
+An optional external EVM integration stays in `Bridge/`; the core stays
+dependency-free.
 
 ## VM execution contract
 
 The schedule is **18 lanes** (see [VM assignments](#vm-assignments-revised-2026-10-29)),
 each on an isolated **16 GiB VM** for **eight to ten hours including
 validation**, with one branch/worktree and a reviewable patch per
-checkpoint. The 115 proof work packages below are checkpoints within
-those assignments, **not 115 separate VM launches**. An assignment performs
+checkpoint. The 118 proof work packages below are checkpoints within
+those assignments, **not 118 separate VM launches**. An assignment performs
 its checkpoints sequentially, reusing the environment, caches and context.
 
 These are unmeasured allocation estimates, not a guarantee that an open research
@@ -146,7 +151,7 @@ with a refusal, a new exclusion or a promise of a later proof.
 
 All rows are planned obligations. No row is marked complete by this documentation
 change. The seven waves are dependency phases, not seven simultaneous launches.
-Every wave depends on the preceding wave (with the explicit G36.03 deferred-check edge below); within each wave, the additional
+Every wave depends on the preceding wave (with the deferred-check edges G36.03 ← G43 and G39 ← G42.01/G42.03 below); within each wave, the additional
 prerequisites below define subwaves. Unlisted rows may run together only with
 independent writes and the frozen proof interfaces. Work may prepare against an
 interface, but cannot pass its final check until actual prerequisites merge.
@@ -261,7 +266,7 @@ S00/S01 status (2026-10-29): [source-s00-s01.md](feature-work/source-s00-s01.md)
 
 S04.01–S04.03 status (2026-10-29): [source-s04-state.md](feature-work/source-s04-state.md). The source state over S01's types and a declaration layout: values with intrinsic ranges, enum bounds and reference locations; recursive aggregates with content-keyed mappings; typed memory with copy and aliasing laws; read-only calldata; storage typed by its layout; ABI words, selectors and Panic/Error revert data under G01 Q5; instance accounts, transient storage, transaction configuration, and a journal whose rollback undoes any operations since a call's entry (`rollback_run`, nested calls, transfers). Aggregate storage copies, calldata decoding, the frame stack and its depth limit, static-call enforcement and logs remain for S04.04.
 
-S02 status (2026-10-29, lane V04; partial): [source-s02.md](feature-work/source-s02.md). Literal typing follows solc (Q1) and uniqueness of meaning is proved for every expression, statement and body (`Typed.unique`, `StmtD.unique`, `RBody.ofDerivation_unique`); type inference computes derivations and `elaborate` builds the program from a resolution, every part tied to its syntax and a derivation (item 1b); the expression semantics on `RExpr` has an arm for every constructor (some `stuck` on unmodelled inputs). Dynamic ABI arguments (`bytes`, `string`, dynamic value-type arrays) are decoded. Open: calldata references, `abi.decode`, `new`, slices, inline arrays, `try`, tuple declarations; ABI decoding of static arrays, structs and external function types (user-defined value types decoded since V04b); immutables assigned in a constructor (such contracts do not elaborate, [source-s02.md](feature-work/source-s02.md)); progress, failure points and `SourceSpec` (V04b, [source-soundness.md](feature-work/source-soundness.md)).
+S02 status (2026-10-29, lane V04; partial): [source-s02.md](feature-work/source-s02.md). Literal typing follows solc (Q1) and uniqueness of meaning is proved for every expression, statement and body (`Typed.unique`, `StmtD.unique`, `RBody.ofDerivation_unique`); type inference computes derivations and `elaborate` builds the program from a resolution, every part tied to its syntax and a derivation (item 1b); the expression semantics on `RExpr` has an arm for every constructor (some `stuck` on unmodelled inputs). Dynamic ABI arguments (`bytes`, `string`, dynamic value-type arrays) are decoded. Open: calldata structs and static/nested calldata arrays (references to `bytes`, `string` and one-word arrays and their slices: lane FU2-B), `abi.decode` beyond the decoder's types (closed at them by lane FU2-B), `new`, inline arrays, `try`, tuple declarations; ABI decoding of static arrays, structs and external function types (user-defined value types decoded since V04b); immutables assigned in a constructor (such contracts do not elaborate, [source-s02.md](feature-work/source-s02.md)); progress, failure points and `SourceSpec` (V04b, [source-soundness.md](feature-work/source-soundness.md)).
 
 S03 status (2026-10-29, lane V04; partial): [source-s03.md](feature-work/source-s03.md). Statements, modifiers, constructors and call frames as before; public value-type getters, `emit` reverting in static frames and value to non-payable constructors are modelled; horizon independence is proved (`runTx_stable`, `firstDone_runTx`). Open: gas/resource failure points, the stipend rule, Panic 0x41 (allocation too large) outside the ABI decoder (modelled there by V04b), `fallback` with parameters, getters of non-value types.
 
@@ -314,7 +319,7 @@ G11 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g11-
 | G20 | Prove callable lowering: getters, receive/fallback within scope, internal/external function values, overloads, inherited/library functions and all parameter/result signatures. |
 | G21 | Prove ABI/calldata and exception lowering: nested dynamic/reference values, slices, custom errors, revert reasons and every in-profile panic/catch case; preserve payloads and decoding failures. |
 | G22 | Complete ordinary source-world semantics/lowering for typed calls, callbacks, creation/try-new and linked libraries. Include payment entry, balance changes, rollback and source-order failures without bounded call expansion as a semantic restriction. |
-| G23 | Prove source lowering for transient lifetime/reset/rollback, allowed environment inputs, cryptographic builtins and event argument effects; maintain recorded excluded observations. Compose source-unit lowering coverage from G16–G22 contracts. |
+| G23 | Prove source lowering for transient lifetime/reset/rollback, allowed environment inputs, cryptographic builtins and event argument effects; the formerly excluded observations follow X01–X07. Compose source-unit lowering coverage from G16–G22 contracts. |
 
 ### Wave 3 — compiler values and persistent representation (G24–G31)
 
@@ -353,7 +358,7 @@ G11 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g11-
 | G44 | Compile constructor/initcode/runtime artifacts, inheritance initialization, deployment/new and try-new, address/world installation and linking; prove fresh instance identity and constructor rollback. |
 | G45 | Implement and prove instruction selection/expansion to actual EVM operations, stack manipulation, labels/jumps, assembly and byte encoding/decoding. Structured LOOP/relative jumps must have checked executable realizations. |
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
-| G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
+| G47 | Prove EVM call/create/return/revert and transaction correspondence, including exact gas (X03) and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
 
 G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`, and for adaptive runs (eager sampling, repeated queries, early stopping, regions) in `Solidity/Hash/Adaptive.lean` (random-oracle model; `q` counts every oracle query of the run and of whoever chose its inputs); bounded slot offsets are proved for the model's terms (`STy.locate_bounded`); only their tie to compiled code is open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
 
@@ -388,7 +393,7 @@ Handoffs per checkpoint are in
 
 ## Proof work-package manifest
 
-There are **115 proof work packages**: unsplit S/G rows plus child rows
+There are **118 proof work packages**: unsplit S/G rows plus child rows
 replacing split S/G parent milestones. These packages preserve the detailed
 coverage/proof checklist; the VM assignment table below schedules them in
 batches. Parent milestones are not additional work packages or VM launches.
@@ -418,6 +423,10 @@ lemmas without changing its obligation or automatically adding a VM.
 | G22.03 — Source creation | Prove new/try-new, constructor world installation and rollback lowering. |
 | G22.04 — Source libraries | Prove linked library and function-value world-context lowering. |
 | G22.05 — World composition | Compose the four lowering relations, including funded entry and nonzero-payment controls. |
+| G24.01 — Slot interface | Freeze an abstract storage-slot interface (root, mapping-key and array-element images, offsets) under every compiler proof, so G27.05 replaces the symbolic `Slot` behind it without changing its signatures. |
+| G24.02 — State interface | Freeze the typed core/memory state relations (`Sim`, `StateRepr`, the allocator input) as one relation interface that every backend pass and the `decode` export use. |
+| G24.03 — Statement interface | Freeze the statement-leaf outcome and pass-certificate signatures (`StmtOut`, the per-statement compile entry, `Cert` instances) that G25–G44 extend by new cases only. |
+| G24.04 — Unified entry | Unify the core/memory compiler entry on the frozen interfaces so mixed programs compose; restate T1/T12/T13/T15 without the unreachable payment disjunct. |
 | G27.01 — Struct representation | Prove internal storage struct member representation, separation and widths. |
 | G27.02 — Mapping representation | Prove representation for all in-profile mapping key types and nested mapping paths. |
 | G27.03 — Array representation | Prove fixed/dynamic array headers, elements and nested array paths. |
@@ -471,8 +480,9 @@ lemmas without changing its obligation or automatically adding a VM.
 | G54.03 — Trust and closure | Audit axioms/trust inventories, joint public import closure, executable artifacts and clean-cache equivalence after the other validation leaves pass. |
 
 G36.03 is checked after G43, so wave 4 exports its loop interface and
-completed G36.01/G36.02 first; the wave-5 barrier excludes only that
-deferred check, which remains mandatory before wave 6. G43 cannot assume
+completed G36.01/G36.02 first; the wave-5 barrier excludes that
+deferred check and the G39 ← G42.01/G42.03 check for transient sharing
+through self-calls and callbacks; both remain mandatory before wave 6. G43 cannot assume
 G36.03: its payment relation must be proved independently of loop composition.
 
 ## VM assignments (revised 2026-10-29)
@@ -538,7 +548,7 @@ several groups (noted per row); a lane starts by reading those results.
 | V01 | G02, G04 | V00 | Integrated. |
 | V02 | G03, G05, G06 | V00, V01 | Integrated (with the G06 Osaka re-pin). |
 | V03 | G07, S00, S01, S04.01–S04.03 | V02 | Done on `cloud/roadmap-l1-20261029/lane-source`; merges after the G01 revision. |
-| V04 | S02, S03, S04.04, S05 | V03 | Partial on `cloud/roadmap-l2-20261029/lane-semantics`: semantics, controls, G01 `Lang` instance, uniqueness of meaning, elaborator, horizon independence and unfinished transactions' events done. Open: calldata references, `abi.decode`, `new`, slices, inline arrays, `try`, tuple declarations; `fallback` with parameters, UDVT decoding (closed by V04b), getters of non-value types; Panic 0x41 outside the decoder, the stipend rule, sender funds; immutables assigned in a constructor (contracts fail to elaborate); progress, failure points, `SourceSpec`. V04b (`cloud/roadmap-l3-20261030/lane-soundness`, [source-soundness.md](feature-work/source-soundness.md)): checkpoint 1 (integration with G13's checker) done; checkpoint 2 (preservation of the heap typing; location reads and writes; the memory invariant `MemOK` with the object-shape and bare-element conditions, kept by every location write, every `delete`, zeroing, copies from storage to memory and copies into storage, with progress of memory accesses under it) and 3 (gap-relative progress: the value fragment with `return (a, b)`, internal calls to modifier-free fragment bodies (for a statement-level call, with the frame derived for elaborated programs up to the override's return types and the dispatched declaration's membership in the unit, `hdec`; inside expressions and recursively, under the whole-program hypothesis `CallsOK`, which nothing derives for elaborated programs), the stuck census, three typing gaps closed) partial; checkpoint 4 partial (UDVT argument decoding, Panic 0x41 in the ABI decoder); checkpoint 5 (`Failures`, `SourceSpec`) not started. |
+| V04 | S02, S03, S04.04, S05 | V03 | Partial on `cloud/roadmap-l2-20261029/lane-semantics`: semantics, controls, G01 `Lang` instance, uniqueness of meaning, elaborator, horizon independence and unfinished transactions' events done. Open: calldata structs and static/nested calldata arrays (lane FU2-B), `abi.decode` beyond the decoder's types (lane FU2-B), `new`, inline arrays, `try`, tuple declarations; `fallback` with parameters (run since lane FU2-B), UDVT decoding (closed by V04b), getters of non-value types; Panic 0x41 outside the decoder, the stipend rule, sender funds; immutables assigned in a constructor (contracts fail to elaborate); progress, failure points, `SourceSpec`. V04b (`cloud/roadmap-l3-20261030/lane-soundness`, [source-soundness.md](feature-work/source-soundness.md)): checkpoint 1 (integration with G13's checker) done; checkpoint 2 (preservation of the heap typing; location reads and writes; the memory invariant `MemOK` with the object-shape and bare-element conditions, kept by every location write, every `delete`, zeroing, copies from storage to memory and copies into storage, with progress of memory accesses under it) and 3 (gap-relative progress: the value fragment with `return (a, b)`, internal calls to modifier-free fragment bodies (for a statement-level call, with the frame derived for elaborated programs up to the override's return types and the dispatched declaration's membership in the unit, `hdec`; inside expressions and recursively, under `CallsOK`, now derived for actually elaborated complete function catalogues when the finite value-fragment admission check succeeds (`Solidity/Lowering/P9/FunctionCatalog.lean`); [checked program progress](feature-work/source-progress-checked.md) and [joint Hoare memory preservation](feature-work/source-preservation-allocations.md) retain the existing fragment, operation and frame boundaries), the stuck census, three typing gaps closed) partial; checkpoint 4 partial (UDVT argument decoding, Panic 0x41 in the ABI decoder); checkpoint 5 (`Failures`, `SourceSpec`) not started. |
 | V05 | G08, G09, G10, G11 | V04 | Partial (lane `roadmap-l2-20261029/lane-parse`, integrated 2026-10-30): checked lexer and parser, translation-validated against the lane's own transcriptions (`classify`, `Syn.yield`, `Syn.prec`); parse completeness and uniqueness open, so G05's `Checked.complete` and G01's `SourceSpec.Unambiguous` are not met; `-x++`, `~x++` and `a ? b : c = d`, which solc compiles, are refused (G10). Round-trip backfill done. |
 | V06 | G12, G13, G14, G15 | V05 | Fixed-point admission rules are prepared (`Solidity/Language/FixedPoint/Literals.lean`). Partial (lane `roadmap-l2-20261029/lane-static`, integrated 2026-10-30): G12 for file-level scopes (typing across units and `N.x` namespaces open); G13 decides S01's `Typed`/`WellFormed`, but the type-metadata trust is not yet removed and UDVT operators do not compose; G14's `InheritanceOK` is stated over the checker's own helpers and accepts programs solc refuses (fallback/receive overrides, getters, modifier overriding); G15 not started. Backfill item 5 (fixed-point mobile constants) done. |
 | V07 | G16, G17, G18, G19 | V06 | — |
@@ -558,15 +568,13 @@ starts when the previous one is merged. Lanes run in parallel only through
 backfill and prepare-against-interface work, never through a final check. G02's measurements apply per lane: one cold build
 of about an hour, then warm rebuilds of minutes; a lane whose edits touch a
 low module such as `AST.lean` pays about an hour per full rebuild. G03's
-shared-foundation child packages under G24 (decision G03 Q1) are not yet in
-the manifest: G03's ledger lists them under "Integration steps" and its
-checker applies them through `PROPOSED_PACKAGES` until they land. A lane
+shared-foundation child packages under G24 (decision G03 Q1) are in the manifest. A lane
 that still finishes early takes backfill items or the next ready lane's
 first group, and the coordinator merges the lane in parts.
 
 ### Authorized extension: inline assembly (2026-10-31)
 
-Inline assembly (Yul) remains excluded by current admission. The human has
+Inline assembly (Yul) is still refused by current admission. The human has
 [authorized its implementation](solidity-scope.md#inline-assembly-decisions-2026-10-31)
 in ten groups Y01–Y10 and five lanes VY1–VY5 (tier A, words only: VY1;
 tier B, physical storage/memory/inputs: VY2–VY3; tier C, raw calls, creation
@@ -575,6 +583,15 @@ YQ1–YQ7 are approved; prerequisite gates still apply. V10 and V11 already have
 active workers, so they inherit agreement obligations for VY2's storage and
 memory layout definitions (Y04, Y05). Parallel VY preparation does not discharge
 those obligations or establish implemented support.
+
+### Authorized extension: full scope, optimizer and solc validation (2026-11-04)
+
+The user withdrew all exclusions and asked for an optimizer and for proofs
+about solc's output. [full-scope.md](feature-work/full-scope.md) plans groups
+X01–X08, O01–O05 and T01–T08 in eleven lanes (VX1–VX5, VO1–VO2, VT1–VT4)
+over four parallel waves: VX1, VO1 and VT1 start now, independent of the main
+chain; the rest follow their integrated prerequisites. G48–G55 (V16, V17)
+close only with X, O and T included.
 
 ### Backfill queue
 
@@ -633,8 +650,11 @@ Completion requires **all** of the following on one integrated revision:
   compiler exclusions or excuses for missing preservation proofs.
 - All integrated kernel/trust/build gates pass, the TestSuite has zero pending,
   and the upstream corpus has zero unexplained broken or blocked in-profile
-  rows. Every excluded, invalid-upstream or resource-observation-only row has an
-  exact ledger justification; finite oracle agreement is never a theorem.
+  rows. Every manifest row is `model` or approved `abstract`; only
+  invalid-upstream rows carry a ledger justification. Finite oracle agreement
+  is never a theorem.
+- The optimizer (O01–O05) is inside the public theorem, and `solc_validated`
+  (T07) is kernel-checked with the T08 corpus run published.
 - All child groups, review findings and scope questions are closed, with the
   revision, commands, theorem names, assumptions and measured resource costs
   published. A timeout or an unfinished proof keeps the roadmap open.

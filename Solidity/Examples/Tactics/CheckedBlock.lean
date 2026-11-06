@@ -73,6 +73,8 @@ theorem shortCircuit : ⊨ᶠ dl!{ [ uint z = 0; bool b; checked { b = z > 0 && 
 /-! A loop's condition is guarded at its head and after every iteration. -/
 
 /--
+warning: unannotated literal-bounded loop `while (i + 1 < 4)`; keeping symbolic unrolling
+---
 info: dl{
   [ uint i = 0; assert(i <= i +% 1); while (i + 1 < 4) {assert(i <= i +% 1);i += 1;assert(i <= i +% 1);}; ]
     true } : Fml StandardExample []

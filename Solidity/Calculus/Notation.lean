@@ -548,6 +548,10 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml)
   let keepQ := quote keep
   let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
+  -- Diagnostics once, before the separate diamond/box readings or retries.
+  warnLiteralLoopSyntax φ (fun s => (fmlHole? s).isSome)
+  let warningRaw ← read (some ``Modality.diamond)
+  warnCalledLiteralLoops c (← `(RawFml.stmts $warningRaw)) φ
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
     elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll $useAllQ $keepAllQ $keepQ).map fun r =>

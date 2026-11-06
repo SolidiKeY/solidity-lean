@@ -32,10 +32,15 @@ proof uses it, never derived from a machine model.
 
 ## Open
 
-- **Revert data in formulas.** No formula reads the data a run halts with:
-  a computed or rethrown reason is bound as any byte string (`Fml.allocAll`).
-  Reading it needs a third modality over revert outcomes, with no solkey
-  taclet to follow ("Revert data", "Left open").
+- **Revert data in formulas** — partly closed by VS1 S6.2: a modal formula
+  reads its run's revert data semantically, `dl!{ [ P ] φ ↯ ψ }`
+  (`Semantics/CtxEquiv/RevertFml.lean`, notation and printers in
+  `Calculus/SurfaceRevert.lean`, examples in
+  `Examples/Tactics/RevertFormulas.lean`); see "Revert data", *Read in
+  formulas*.  Still open: the calculus (no taclet produces or consumes the
+  modality, and a computed or rethrown reason is still bound as any bytes by
+  `Fml.allocAll`), the data the model drops outside a self-call frame
+  (string reasons, custom errors, panics), and logs (not modelled, X07).
 - **Callbacks.** A diamond over a loop whose body calls back never holds
   (`holdsC_diamond_loop`, `docs/options.md` O3): refused, not open. An
   `allocAll` goal whose rest calls back has no `ProvesC` rule; the callback
@@ -61,7 +66,10 @@ proof uses it, never derived from a machine model.
   `Examples/Tactics/Nonlinear.lean`), not a decision procedure.
 - **Function types**: reference signatures outside the internal fragment in
   [finite-dispatch.md](feature-work/finite-dispatch.md) (memory/storage
-  arrays and nonrecursive structs as arguments, one memory return), and
+  arrays of a word of any width, a `bytesN`, `bool` or `address`, and
+  nonrecursive structs as arguments, one memory return, several returns with
+  full-word memory ones in `sol{}`, not through the solc import; a direct
+  call also admits narrow elements of the target's width), and
   calldata passed to a function value's memory parameter; a value
   of an external function this contract does not declare (`I(a).g`), and
   `abi.encodeCall` of one: its signature is unknown to `sol{}`.
@@ -80,6 +88,26 @@ proof uses it, never derived from a machine model.
   self-call's callee every panic is a revert with no data.
 - **`ecrecover`**: no general proof of the curve arithmetic or of equivalence
   to the precompile ([feature-work/abi-hashes.md](feature-work/abi-hashes.md)).
+
+- **Source semantics** (`Solidity/Source`, the S02–S05 reference
+  interpreter): the constructor ledger's gaps are `callOptions` beyond
+  `value`, `metaType` and `new` (`semExprGaps`; `new` as contract creation;
+  `new T[](n)` of one-word `T`, `new bytes(n)` and `new string(n)` run since lane FU2-B; inline arrays of one-word
+  elements are typed and evaluated since lane FU2-B, reference and
+  fractional elements refused; `fallback(bytes calldata) returns (bytes
+  memory)` runs since lane FU2-B), and among
+  statements `try` beyond one plain or `bytes memory` clause without
+  value (lane FU2-B; out of gas in the callee is not modelled, solc
+  catches it; tuple declarations are typed and evaluated since lane
+  FU2-B, without a progress theorem; a non-tuple initializer, a literal
+  component typed at its own type and repeated names are not modelled:
+  `docs/solc-alignment.md`); since lane FU2-B `abi.decode` is typed
+  and evaluated at the decoder's types (static arrays, structs, nested
+  arrays, fixed point and external function types are refused), and
+  `calldata` references (`bytes`, `string`, one-word-element dynamic
+  arrays) and their slices are read with access-time checks; `calldata`
+  structs, static and nested `calldata` arrays are not
+  ([feature-work/source-soundness.md](feature-work/source-soundness.md)).
 
 ## Closed
 
@@ -186,8 +214,10 @@ finds no marker.
   What differs is rewritten before the statement (`bytesPure`):
   `bytesM(b)` keeps the left bytes or pads on the right, as an implicit
   widening does; `b.length` is `N`; `b[i]` is
-  `uint8((b >> 8((N-1) -% i)) % 256)`, divided by `i < N ? 1 : 0` so an
-  index out of range reverts as an array's does; a literal at `bytesN` is
+  `uint8((b >> 8((N-1) -% i)) % 256)` behind `require(i < N)`, `i` held
+  first (`#bytesIndex`), so an index out of range reverts as an array's
+  does (`Panic(0x32)`'s data where a self-call's `catch` reads it); a
+  literal index is checked by the elaborator; a literal at `bytesN` is
   left-aligned. A marker row beside the width says which positions are bytes
   (`k#bytes ↦ N`, `valueRows?`).
 - `bytes` and `string` are `bytes1[]`: a `uint[]` of 8-bit elements in
@@ -205,6 +235,15 @@ finds no marker.
   the callee writes. What is left only reads, where sharing and copying agree.
   Slices `b[i:j]` are views (`RawStmt.sliceViews`) with primitive copies where
   a whole value is needed: [calldata-slice-copies.md](calldata-slice-copies.md).
+- **External calldata validation timing** (upstream replay only): solc
+  checks a nested calldata element when it is read. The replay models it for
+  a parameter whose body only indexes it, takes lengths, or passes it whole
+  to `abi.encode`/`abi.encodePacked` (`Semantics/AbiAccess.lean`,
+  `UpstreamEntry.accessOnly`); copies to memory, aliases, passing, slices,
+  struct members and modifiers keep the named refusal ("calldata element
+  fails only on access"). The calculus is unaffected: there, calldata values
+  are the decoded ones ([feature-work/abi-hashes.md](feature-work/abi-hashes.md),
+  "Lane FU2-C").
 - A storage array copied to memory keeps its length: `len` of a copy of
   `sfind(s, p)` is `len(s, p)` (`lenAtN`, `LTm.sfindLen?`,
   `SVal.copyStToM_array_len`; Lean only).
@@ -269,7 +308,17 @@ a fresh memory `bytes` with the array writes the model has:
 - `abi.decode` at value types, `bytes`/`string`, `T[]`, `T[k]`, structs and
   nested types: a word out of range, an offset or a length past the data
   reverts as solc's decoder does. A decoded calldata slice is read in place
-  (`ByteSrc`).
+  (`ByteSrc`). A top-level enum component (`abi.decode(b, (E, uint))`) is
+  read as a `uint8` and reverts unless below the member count, as solc's
+  `validator_revert_t_enum_*` (lane FU1; `EnumDecode` in
+  `Examples/Tactics/AbiFeatures.lean`); an array of enums (`(E[])`,
+  `(E[2])`) checks each element the same way (`abiReadGen`, lane FU2-D;
+  `EnumArrayDecode`, EVM vectors `tests/abi-0.8.38/EnumArrays.vectors.json`);
+  the import prints a component with nested enums (arrays, struct members,
+  any depth) as `solcEnumBelow(T, "k", n, …)`, decoded at its carriers and
+  checked at each position (lane FU2-D, `tests/upstream/EnumArrays.lean`);
+  in hand-written `sol{}` a struct's enum member is a plain `uint`, its enum
+  lost, so only the carrier's range is checked there.
 
 **`sha256`, `ripemd160`, `ecrecover`.** `Hashes.lean` computes SHA-256 and
 RIPEMD-160 as `Keccak.lean` does, checked against standard vectors.
@@ -339,10 +388,19 @@ and its code; `revert E(a, b)` with `E`'s selector and `abi.encode(a, b)`.
   custom error's selector or an ABI word of a value, by `revert`'s rules
   (`revertDataBox`, `revertDataDiamond`). The modalities read no data.
   `ExtResult.error`/`.other` carry another callee's reason and data.
-- *Where data is computed.* Since no modality reads a top-level revert's
-  data, literal and custom-error data are emitted only in the callee a
+- *Where data is computed.* Since no `Fml` modality reads a top-level
+  revert's data, literal and custom-error data are emitted only in the callee a
   self-call `try` runs (`selfFrame`) and its calls; elsewhere
   `require(c, "m")` is `require(c)`, so no other proof changes shape.
+  A reason written as a byte literal (`hex"6d"`, and every string literal
+  of the solc import, which prints them so: `byteLiteralText`) is
+  `Error(string)`'s literal data in every frame, as a computed reason's
+  memory bytes are, with nothing allocated (lane FU2-D; `requireReason` is
+  `if (c) {} else { revert … }` there). The two readings of one source
+  differ only in data no `Fml` modality reads outside a self-call's `catch`.
+  The revert-reading `RFml` layer (*Read in formulas*, below) does read it,
+  so there the lowering is a recorded deviation from solc
+  (`docs/solc-alignment.md`, "Revert data read in formulas").
   Computed memory operands keep their bytes everywhere (`RevPart.mem`,
   `Semantics/RevertMemory.lean`); the importer accepts the whole-buffer
   rethrow `assembly { revert(add(d, 32), mload(d)) }` and no other assembly.
@@ -383,12 +441,44 @@ one each (about 60 fold sites); `stmt_sim` stays within its pinned 11000
 heartbeats only because the statements outside the EVM fragment are ruled
 out by one lemma (`stmt_sim_outside`). Checking times did not move otherwise.
 
+*Read in formulas* (VS1 S6.2).  `RFml.revModal m P κ φ ψ`, written
+`dl!{ [ P ] φ ↯ ψ }` or `dl!{ ⟨ P ⟩ φ ↯ ψ }`, runs `P` with the typed run as
+`Fml.modal` does: a normal end must satisfy `φ`, a revert with data `d`
+(`THalt.revertData?`: `revert` is `[]`, `revertWith d` is `d`) the data
+predicate `ψ` (`DataPred`: `_`, `none`, exact bytes, `Error("m")`,
+`Error(_)`, `Panic(c)`, a selector, Boolean combinations), any other halt
+what the modality asks already (the box accepts divergence and exhaustion,
+the diamond exhaustion), never a panic.  So `⟨ P ⟩ false ↯ ψ` says that `P`
+reverts with data satisfying `ψ`, or exhausts.  It is a conservative
+extension: `[ P ] φ ↯ _` is `[ P ] φ` and `⟨ P ⟩ φ ↯ none` is `⟨ P ⟩ φ`
+(`revModal_box_any`, `revModal_diamond_none`).  It is a separate formula
+layer (`RFml`) over `Fml`, so no rule, closer or fold of `Fml` changes; the
+price is that the calculus has no taclet for it, and a goal is proved from
+the run (`revModal_of_revert`, `revModal_revertBytes`, `revModal_of_ok`).
+`↯` applies to a formula whose head is a modality; the notation refuses
+anything else.
+
+It reads the data the model computes, which outside a self-call frame
+(or `retainFailureData`) is less than solc's: `revert("m")`,
+`require(c, "m")` and `revert E(…)` revert with `[]`; a failed read, an
+out-of-bounds index, an empty `pop` and a checked overflow revert with `[]`
+where solc returns `Panic(0x32)` and the like (`docs/solc-alignment.md`);
+`assert` is a panic, which neither modality accepts, so
+`⟨ assert(false); ⟩ false ↯ Panic(1)` is false at top level.  A byte-literal
+reason (`revert(hex"…")`, the solc import's form) reads its `Error` data in
+every frame.  The controls pin each reading.  At the ABI boundary the data
+is what `Outcome.revert` would carry (`THalt.toOutcome?`); a panic has no
+outcome there, and no theorem yet relates a run's `RFml` to a session's
+outcomes in `Semantics/CtxEquiv/Basic.lean`.  Logs are not modelled as
+observations (X07); when they are, they join the event type of the
+contextual relations, not this modality.
+
 **Left open.**
 - A memory operand has no static pattern (`RevPart.pat?` is `none`), so
   `catchDataBox` binds arbitrary bytes; an exact link between the callee's
   computed data and the catch local needs a proved reading of revert
-  outcomes. A revert modality would add a fold case and a rule per statement
-  across the calculus; not added.
+  outcomes. The revert-reading modality above is a separate formula layer;
+  rules for it (a fold case and a rule per statement) are not added.
 - A fresh object's bytes read in a clause cost `sol_close` past its budget
   when premises read bytes too (`symbolicCustom` with `d[3] == 0x67`: about
   400k heartbeats against 200k). `sol_decide` would need an object-contents
@@ -396,4 +486,5 @@ out by one lemma (`stmt_sim_outside`). Checking times did not move otherwise.
   reflective closer; not added.
 - A raw datum always includes the empty one (an evaluator's revert), so a
   `catch (bytes memory d)` goal holds for `d` empty too.
-- Literal errors outside a self-call frame keep the empty-data lowering.
+- Literal errors (`"m"`, a custom error) outside a self-call frame keep the
+  empty-data lowering; a byte-literal reason keeps its data (above).

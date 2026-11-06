@@ -1,0 +1,26 @@
+{
+  "rows": [
+    {
+      "id": "overload-variable-barrier",
+      "accepted": false,
+      "error_codes": [
+        "9097",
+        "9097"
+      ],
+      "source_sha256": "78417574100ac93f9f3f47d2981c63b7944090569e333bb072222c4ed55c8027",
+      "kernel_theorems": [
+        "SignatureResolutionControls.visible_intermediate_barrier_refused",
+        "SignatureResolutionControls.qualified_barrier_refused"
+      ]
+    },
+    {
+      "id": "getter-override",
+      "accepted": true,
+      "error_codes": [],
+      "source_sha256": "802237dea9516995aa8cfebb0b2b2b2a837f8e52520d6117187303f472a89f68",
+      "kernel_theorems": [
+        "SignatureResolutionControls.getter_override_identity"
+      ]
+    }
+  ]
+}

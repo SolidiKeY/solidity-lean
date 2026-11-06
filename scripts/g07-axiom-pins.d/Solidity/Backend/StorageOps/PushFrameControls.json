@@ -1,0 +1,29 @@
+{
+ "Solidity/Backend/StorageOps/PushFrameControls.lean:Solidity.Backend.StorageOps.PushFrameControls.arbitrary_depth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrameControls.lean:Solidity.Backend.StorageOps.PushFrameControls.malformed_fixed_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrameControls.lean:Solidity.Backend.StorageOps.PushFrameControls.primitive_frames": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrameControls.lean:Solidity.Backend.StorageOps.PushFrameControls.recursive_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrameControls.lean:Solidity.Backend.StorageOps.PushFrameControls.same_target_negative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrameControls.lean:Solidity.Backend.StorageOps.PushFrameControls.wrong_other_negative": [
+  "Quot.sound",
+  "propext"
+ ]
+}

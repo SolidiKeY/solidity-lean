@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "state": "frozen-selected-attribution-index",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "inventory": [
+    {
+      "id": "Premise.expandCall",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 373,
+      "line_end": 398,
+      "span_sha256": "ad75ee27d9c5350b6eec3ab7be4176311a2760c78fe96116b6591c62b9e33b31",
+      "families": [
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "selected-oracle-frozen"
+    },
+    {
+      "id": "Taclet.revertDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 878,
+      "line_end": 885,
+      "span_sha256": "65fb796ca227f32bb03c183497a01d2d34a4a235a0273a7ecb6e1e063e5d9b79",
+      "families": [
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "selected-oracle-frozen"
+    }
+  ],
+  "coverage_note": "Two selected source attribution spans only; the independent exhaustive census remains 290 declarations / 308 units. Unselected declarations are not exclusions, equivalences or proved soundness."
+}

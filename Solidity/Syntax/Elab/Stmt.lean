@@ -204,7 +204,9 @@ partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Opt
   abiEncodeWith C (elabRec ()) std strs args marks sel
 
 /-- Prepare a reference call in argument order. Storage-to-memory conversion
-copies at the argument's evaluation point; every reference's identity and
+copies at the argument's evaluation point under the legacy schedule, after
+the last argument under the source-order one (`binaryLeftToRight`, solc's
+IR pipeline); every reference's identity and
 each scalar read are held before a later argument can change them. Calls
 with only value parameters retain the ordinary capture policy. -/
 partial def hoistCallArgs (f : String) (args : List RawExpr) :
@@ -216,6 +218,10 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
   -- before an earlier storage operand is copied.
   if f != "constructor" && funs.all (·.1 != f) && (fnTyOf? C (← ctx) f).isSome then
     return ([], args)
+  -- likewise through a callee that is not a name: `callValue`, the memory and
+  -- the tuple dispatch capture it at its function type, then the arguments
+  if f == callValueName && (args.head?.bind (fnTyOfExpr C (← ctx))).isSome then
+    return ([], args)
   let d := if f == "constructor" then C.ctor else lookupBy f funs
   let some d := d | return ← hoistArgs args
   unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
@@ -223,6 +229,13 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
     throw s!"{f} takes {d.params.length} arguments, not {args.length}"
   let mut P : SProg C := []
   let mut prepared : List RawExpr := []
+  -- solc's IR pipeline copies a storage operand of a memory parameter after
+  -- every argument ran (`tests/solc/FunctionValueReferences.sol`,
+  -- `argumentOrderDirect`: legacy 101, viaIR 901): under the source-order
+  -- schedule the operand's alias is captured at its position, its copy made
+  -- after the last argument
+  let late := C.evalOrder.binaryLeftToRight
+  let mut copies : List (String × RefTy × List (String × Nat) × List (String × Nat) × Var) := []
   for ((n, T), a) in d.params.zip args do
     -- a reference argument's narrow positions, on the expression as written,
     -- before a capture names it (`elabCallRet` checks the capture again)
@@ -259,11 +272,24 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
         | some .memory | some .calldata =>
           let rhs ← ElabM.lift (elabMRhs C Γ R a)
           if stable && (rhs matches .alias _) then pure ([], a) else do
+          if late && (rhs matches .copy ..) then do
+            let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
+            -- the operand's own shape, ABI markers included (`captureRef`)
+            let ws := exprShape C (← ctx) a
+            let x ← captureRef C "sp" (.alias R) a
+            let y := toString (← freshCapture "mv")
+            copies := copies ++ [(y, R, shapeUnder d.widths n, ws, x)]
+            pure ([.of Γ (.declStorage R x (some (.path sp)))], .name y)
+          else
           let x ← captureRef C "mv" (.mem R) a
           pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
         | none => throw s!"{f}: reference parameter {n} needs a data location"
     P := P ++ Q
     prepared := prepared ++ [a]
+  -- the late copies, in argument order
+  for (y, R, ws, shape, x) in copies do
+    P := P ++ (← elabStmtsP [.declMemory (rawTyW ws (.ref R) "") y (some (.name (toString x)))])
+    declareShape y shape
   pure (P, prepared)
 
 /-- The captures before an internal dispatch: the callee's tag first under
@@ -275,7 +301,9 @@ a later argument can change and failing member reads; the formal type
 supplies the contextual type of a literal expression. A memory-array argument
 is captured as a memory local: the reference itself for a memory operand (the
 callee's writes reach the caller, as Solidity passes memory by reference), a
-copy of a storage operand. A storage-array argument is a storage alias of its
+copy of a storage operand, taken at its position under the legacy schedule
+and after every capture under the source-order one (`binaryLeftToRight`,
+solc's IR pipeline: its alias at its position). A storage-array argument is a storage alias of its
 path. A struct argument (`fnRefStruct?`) is captured likewise at its location. Returns the statements, the tag's name and the captured arguments. -/
 partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (args : List RawExpr) :
     ElabM (List RawStmt × RawExpr × List RawExpr) := do
@@ -286,8 +314,26 @@ partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (arg
     pre := [.decl (.named ty) t (some h)]
     tag := .name t
   let mut as : List RawExpr := []
+  -- under the source-order schedule a storage operand of a memory parameter
+  -- is copied after every argument ran (solc's IR pipeline; `argumentOrder`:
+  -- legacy 101, viaIR 901): its alias at its position, the copy after
+  let late := C.evalOrder.binaryLeftToRight
+  let mut post : List RawStmt := []
   for (a, c) in args.zip ps do
     let y := toString (← freshCapture "se")
+    let memTy : Option RawTy := match fnRefElem? C c, fnRefStruct? C c with
+      | some (e, false), _ => some (.array (.named e))
+      | none, some (st, false) => some (.named st)
+      | _, _ => none
+    let fromStorage ← if late && memTy.isSome then
+        (try pure ((← synthM C a).2 matches .path _ _) catch _ => pure false)
+      else pure false
+    if let (some T, true) := (memTy, fromStorage) then
+      let z := toString (← freshCapture "sp")
+      pre := pre ++ [.declStorage T z (some a)]
+      post := post ++ [.declMemory T y (some (.name z))]
+      as := as ++ [.name y]
+      continue
     pre := pre ++ [match fnRefElem? C c, fnRefStruct? C c with
       | some (e, false), _ => .declMemory (.array (.named e)) y (some a)
       | some (e, true), _ => .declStorage (.array (.named e)) y (some a)
@@ -295,7 +341,7 @@ partial def dispatchCaptures (h : RawExpr) (ty : String) (ps : List String) (arg
       | none, some (st, true) => .declStorage (.named st) y (some a)
       | none, none => .decl (.named c) y (some a)]
     as := as ++ [.name y]
-  pure (pre, tag, as)
+  pure (pre ++ post, tag, as)
 
 /-- **A call through a function value** `h(a)`, `h` of the function type
 `ty` (`fnTyOf?`): its arguments captured once, left to right,
@@ -355,8 +401,8 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   pure P
 
 
-/-- Internal memory-return dispatch (`bytes memory` or `T[] memory`, one
-return) uses the same source tags, scope checks and argument captures as
+/-- Internal memory-return dispatch (`bytes memory`, `T[] memory` or a
+struct in memory, one return) uses the same source tags, scope checks and argument captures as
 scalar dispatch (`dispatchCaptures`). The shared destination is intrinsically
 a memory reference, and each branch binds the selected call's returned alias;
 no storage copy or scalar encoding of the returned reference is introduced. -/
@@ -365,9 +411,10 @@ partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
   let some (ps, [r], false) := fnParts? ty
     | throw "memory dispatch needs an internal signature with one memory return"
   let dstTy : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
-    match fnRefElem? C r with
-    | some (e, false) => pure (.array (.named e))
-    | _ => throw s!"memory dispatch returns a {r}, not a memory reference"
+    match fnRefElem? C r, fnRefStruct? C r with
+    | some (e, false), _ => pure (.array (.named e))
+    | none, some (st, false) => pure (.named st)
+    | _, _ => throw s!"memory dispatch returns a {r}, not a memory reference"
   unless ps.length == args.length do
     throw s!"memory dispatch takes {ps.length} arguments, not {args.length}"
   if let some c := ps.find? fun c =>
@@ -509,9 +556,10 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
   if let some (h, ty, actuals) := dynamic then
     let some (_, [r], false) := fnParts? ty | throw "memory function value of several returns"
     let expected : RawTy ← if r == "bytesmemory" then pure (.named "bytes") else
-      match fnRefElem? C r with
-      | some (e, false) => pure (.array (.named e))
-      | _ => throw s!"memory function value returns a {r}"
+      match fnRefElem? C r, fnRefStruct? C r with
+      | some (e, false), _ => pure (.array (.named e))
+      | none, some (st, false) => pure (.named st)
+      | _, _ => throw s!"memory function value returns a {r}"
     let (T, _) ← ElabM.lift (elabTyW C expected)
     unless T == .ref R do throw "memory function value returns a different reference type"
     let (P, _) ← fnMemoryDispatch h ty actuals
@@ -598,7 +646,7 @@ yet in scope. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
-    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) :=
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (Var × LocalTy)) :=
   elabCallRetWith C (elabRec ()) f args res resW targets ctor resNew selfFrame
 
 /-- **The body a `try` runs when its receiver is the contract itself**
@@ -699,7 +747,7 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let (_, k) ← get
   set (Γe, k)
   let other ← elabScope Γ' (setOk false)
-  let call : ExtCall C Γ'.ctx := ⟨addr', "receive", []⟩
+  let call : ExtCall C Γ'.ctx := ⟨addr', "receive", [], .call, .unknown⟩
   let tryS : Stmt C Γ'.ctx Γ'.ctx :=
     .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
   pure (P ++ [.of Γ1 (.declLocal .bool x (some c)),
@@ -787,6 +835,41 @@ must be entered in). -/
 partial def elabScope (Γ : NCtx) (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
   ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabBranch ss))
 
+/-- **A tuple assignment from a call through an internal function value**
+`(a, b) = h(x)`: the dispatch's captures (`dispatchCaptures`), then one
+branch per candidate `g` of `h`'s type, the direct tuple assignment
+`(a, b) = g(y)` on the captured arguments, then the unassigned-value failure.
+Value returns only: a direct tuple call binds primitive returns. -/
+partial def fnTupleDispatch (ts : List (Option RawExpr)) (h ty : String) (args : List RawExpr) :
+    ElabM (SProg C) := do
+  let some (ps, rs, false) := fnParts? ty
+    | throw s!"{h}(…): an external function value in a tuple assignment"
+  unless ps.length == args.length do throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  unless rs.length == ts.length do throw s!"{h} returns {rs.length} values, not {ts.length}"
+  if let some c := ps.find? fun c =>
+      (fnRefElem? C c).isNone && (fnRefStruct? C c).isNone && (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function type with a {c} parameter is not modelled"
+  -- a memory return among several: full-word elements only, as a single
+  -- one (`fnMemRet`), since the target's type is compared without widths
+  if let some c := rs.find? fun c => (fnCompTy? C c).isNone && !fnMemRet C c then
+    throw s!"{h}(…): a function value returning a {c} among several values is not modelled \
+      (a direct tuple call binds value and full-word memory returns)"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"{h}(…) may call {g}, which is not declared before this function: \
+          declare the functions of type {ty} first"
+  let (pre, tag, as) ← dispatchCaptures (.name h) ty ps args
+  let failure := if (← read).selfFrame || (← read).retainFailureData then
+      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
+  let dispatch := cands.foldr (fun (g, t) rest =>
+    RawStmt.ite (.binop .eqB tag (.num t)) [.tupleAssign ts (.call g as)] [rest]) failure
+  elabStmtsP (pre ++ [dispatch])
+
 /-- **A tuple assignment** `(t₀, , t₂) = e;`, written out as solkey's
 `ParserUtils.tupleAssignment` writes it.  From a call of a function of several
 returns: the call (`CallRet.rets`), then `tᵢ = rᵢ;` for each target, left to
@@ -830,15 +913,28 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   | .ternary c a b =>
     elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
+    -- a call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
+    -- `(h)(x)`): the callee into a fresh local of its type first, as
+    -- `callValue` does, then the dispatch on that local
+    if f == callValueName then
+      if let h :: rest := args then
+        if let some ty := fnTyOfExpr C (← ctx) h then
+          let y := toString (← freshCapture "se")
+          let P ← elabStmtsP [.decl (.named ty) y (some h)]
+          return P ++ (← fnTupleDispatch ts y ty rest)
+    -- a call through an internal function value (`fnTupleDispatch`)
+    if (← read).funs.all (·.1 != f) then
+      if let some ty := fnTyOf? C (← ctx) f then
+        return ← fnTupleDispatch ts f ty args
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
     let (P, args) ← hoistCallArgs f args
     let (Q, _, rs) ← elabCallRet f args none (targets := true)
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
-    for (p, r, w) in rs do declare C (toString r) (.val p w)
+    for (r, t) in rs do declare C (toString r) t
     let pairs := if reverseWrites then (ts.zip rs).reverse else ts.zip rs
-    let R ← elabStmtsP (pairs.filterMap fun (t, (_, r, _)) =>
+    let R ← elabStmtsP (pairs.filterMap fun (t, (r, _)) =>
       t.map fun t => .assign t (.name (toString r)))
     pure (P ++ Q ++ R)
   | .tuple es =>

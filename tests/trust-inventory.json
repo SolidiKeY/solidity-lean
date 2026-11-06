@@ -1,5 +1,40 @@
 [
   {
+    "file": "Solidity/Calculus/Assumptions.lean",
+    "kind": "opaque",
+    "code": "| opaque deriving DecidableEq, Repr, Inhabited"
+  },
+  {
+    "file": "Solidity/Calculus/Assumptions.lean",
+    "kind": "opaque",
+    "code": "hash : HashReading := .opaque zeroAddress : ZeroAddressReading := .noCode"
+  },
+  {
+    "file": "Solidity/Calculus/CallFunctionSearch.lean",
+    "kind": "override",
+    "code": "@[implemented_by subtermsM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallFunctionTransform.lean",
+    "kind": "override",
+    "code": "@[implemented_by transformM]"
+  },
+  {
+    "file": "Solidity/Calculus/CloseCallSharing.lean",
+    "kind": "unsafe",
+    "code": "let (quoted, shrunk) \u2190 unsafe evalExpr (Expr \u00d7 Bool)"
+  },
+  {
+    "file": "Solidity/Tools/CallFunctionShare.lean",
+    "kind": "unsafe",
+    "code": "let oldN \u2190 unsafe evalExpr Nat (mkConst ``Nat) (\u2190 mkAppM ``Fml.tmSize #[\u03c6])"
+  },
+  {
+    "file": "Solidity/Tools/CallFunctionShare.lean",
+    "kind": "unsafe",
+    "code": "let newN \u2190 unsafe evalExpr Nat (mkConst ``Nat) (\u2190 mkAppM ``Fml.tmSize #[\u03c8])"
+  },
+  {
     "file": "Solidity/Calculus/ChainGen.lean",
     "kind": "recovery",
     "code": "g.admit"
@@ -53,6 +88,11 @@
     "file": "Solidity/Calculus/Closer/Facts.lean",
     "kind": "override",
     "code": "@[implemented_by Facts.returnsM]"
+  },
+  {
+    "file": "Solidity/Calculus/Closer/Facts.lean",
+    "kind": "override",
+    "code": "@[implemented_by Facts.rwWithM]"
   },
   {
     "file": "Solidity/Calculus/Closer/Bytes.lean",
@@ -238,6 +278,11 @@
     "file": "Solidity/Calculus/DeclarationStaticReduction.lean",
     "kind": "unsafe",
     "code": "unless \u2190 withCurrHeartbeats (unsafe evalExpr Bool (mkConst ``Bool) some) do"
+  },
+  {
+    "file": "Solidity/Calculus/ElimFacts.lean",
+    "kind": "override",
+    "code": "@[implemented_by ElimM.rwFM]"
   },
   {
     "file": "Solidity/Calculus/ElimFacts.lean",
@@ -1065,7 +1110,7 @@
     "code": "let quotedValues \u2190 unsafe evalExpr (List (Var \u00d7 Semantics.CallValue))"
   },
   {
-    "file": "Solidity/Examples/Tactics/PolySize.lean",
+    "file": "Solidity/Tools/ProofTree.lean",
     "kind": "unsafe",
     "code": "unsafe evalExpr Nat (mkConst ``Nat) (\u2190 mkAppM ``Fml.tmSize #[ty.appArg!])"
   },
@@ -1192,7 +1237,27 @@
   {
     "file": "Solidity/Calculus/CallbackDerive.lean",
     "kind": "unsafe",
-    "code": "let refuted \u2190 unsafe evalExpr Bool (mkConst ``Bool) probe"
+    "code": "let (refuted, depth?) \u2190 unsafe evalExpr (Bool \u00d7 Option Nat) pairTy probePair"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let form \u2190 unsafe evalExpr Expr (mkConst ``Expr)"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let plan \u2190 unsafe evalExpr (Option (List PrefixProposal \u00d7 Expr \u00d7 Expr)) planTy"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let quoted \u2190 unsafe evalExpr (Option Expr) (mkApp (mkConst ``Option [0]) (mkConst ``Expr))"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "unsafe evalExpr Expr (mkConst ``Expr)"
   },
   {
     "file": "Solidity/Tools/Upstream.lean",
@@ -1288,5 +1353,95 @@
     "file": "Solidity/Tools/LibraryTryReplay.lean",
     "kind": "unsafe",
     "code": "unsafe evalExpr Json (mkConst ``Json) expression"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCert.lean",
+    "kind": "override",
+    "code": "@[implemented_by stmtneedM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCert.lean",
+    "kind": "override",
+    "code": "@[implemented_by progneedM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCompile.lean",
+    "kind": "override",
+    "code": "@[implemented_by compileStmtM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveCompile.lean",
+    "kind": "override",
+    "code": "@[implemented_by compileProgM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
+    "kind": "override",
+    "code": "@[implemented_by stmtallocatesM]"
+  },
+  {
+    "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
+    "kind": "override",
+    "code": "@[implemented_by progallocatesM]"
+  },
+  {
+    "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+    "kind": "override",
+    "code": "@[implemented_by expressionPathAnyM]"
+  },
+  {
+    "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+    "kind": "override",
+    "code": "@[implemented_by referencesM]"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "unsafe",
+    "code": "unsafe Meta.evalExpr Json (mkConst ``Json) value"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "unsafe",
+    "code": "let some [] \u2190 unsafe Meta.evalExpr (Option (List Expr)) qTy"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "kernel-option",
+    "code": "let solved \u2190 tryCatchRuntimeEx (withOptions (debug.skipKernelTC.set \u00b7 true) do"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "kernel-option",
+    "code": "let result \u2190 withOptions (debug.skipKernelTC.set \u00b7 true) <|"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by valueStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by localStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedEntryPaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by returnStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedRuntimePaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by runtimeStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedRuntimePaths.lean",
+    "kind": "override",
+    "code": "@[implemented_by runtimeValuesPathsM]"
+  },
+  {
+    "file": "Solidity/Yul/Views/RetainedLocationRun.lean",
+    "kind": "override",
+    "code": "@[implemented_by locationStoragePathsM]"
   }
 ]

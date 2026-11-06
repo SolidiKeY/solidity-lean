@@ -61,10 +61,21 @@ import Solidity.Source.Unique
 import Solidity.Source.Horizon
 import Solidity.Source.Session
 import Solidity.Source.SoundnessExamples
+import Solidity.Source.DecodeExamples
+import Solidity.Source.CalldataExamples
+import Solidity.Source.Decode
+import Solidity.Source.Calldata
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.Dispatch
 import Solidity.Examples.Tactics.FunctionTypes
+import Solidity.Examples.Tactics.MemoryReturns
+import Solidity.Calculus.RecursionCallback
+import Solidity.Semantics.AbiAccess
 
+import Solidity.Evm.MemoryStorageCopyExamples
+import Solidity.Evm.MemoryFixedCopyExamples
+import Solidity.Evm.MemoryFixedMixedExamples
+import Solidity.Evm.MemoryStorageLifecycleExamples
 /-! Local and CI gate for the transitive axioms of the public proof bridges.
 Unlike a source scan, this follows dependencies through every imported module.
 The normal build also pins their printed axiom sets in `Solidity.Theorems`.
@@ -331,6 +342,98 @@ run_cmd do
     ``Solidity.Evm.Memory.copiedStruct_body_correct,
     ``Solidity.Evm.Memory.copiedStruct_correct,
     ``Solidity.Evm.Memory.copiedStruct_rebind_correct,
+    ``Solidity.Evm.Memory.copyRange_run,
+    ``Solidity.Evm.Memory.clearRange_run,
+    ``Solidity.Evm.Compiler.Compilation.memory_copy_input,
+    ``Solidity.Evm.Compiler.Compilation.memory_copy_free_input,
+    ``Solidity.Evm.Compiler.Compilation.fixed_input,
+    ``Solidity.Evm.Memory.memoryFixedCopy_run,
+    ``Solidity.Evm.Memory.primitiveFixed_copy_repr,
+    ``Solidity.Evm.Memory.assignMemoryFixed_correct,
+    ``Solidity.Evm.Memory.memoryFixedPad_run,
+    ``Solidity.Evm.Memory.memoryFixedDynamic_run,
+    ``Solidity.Evm.Memory.fixedPadStore_tail,
+    ``Solidity.Evm.Memory.fixedPadStore_other,
+    ``Solidity.Evm.Memory.primitiveFixed_dynamic_repr,
+    ``Solidity.Evm.Memory.primitiveFixed_pad_repr,
+    ``Solidity.Evm.Memory.assignFixedDynamic_correct,
+    ``Solidity.Evm.Memory.assignFixedPad_correct,
+    ``Solidity.Evm.Memory.assignFixedAwareArray_correct,
+    ``Solidity.Evm.Memory.assignFixedAwareStruct_correct,
+    ``Solidity.Evm.Memory.Fixed.ProgFrag.correct,
+    ``Solidity.Evm.Memory.FixedCopyExamples.initial_repr,
+    ``Solidity.Evm.Memory.FixedCopyExamples.fixed_route,
+    ``Solidity.Evm.Memory.FixedCopyExamples.compiled_input,
+    ``Solidity.Evm.Memory.FixedCopyExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.FixedCopyExamples.source_false,
+    ``Solidity.Evm.Memory.FixedCopyExamples.source_true,
+    ``Solidity.Evm.Memory.FixedCopyExamples.source_independent,
+    ``Solidity.Evm.Memory.FixedMixedExamples.initial_repr,
+    ``Solidity.Evm.Memory.FixedMixedExamples.fixed_route,
+    ``Solidity.Evm.Memory.FixedMixedExamples.compiled_input,
+    ``Solidity.Evm.Memory.FixedMixedExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.FixedMixedExamples.source_observation,
+    ``Solidity.Evm.Memory.FixedCopyExamples.shape_demand,
+    ``Solidity.Evm.Memory.FixedCopyExamples.shape_bound_invalid,
+    ``Solidity.Evm.Memory.FixedCopyExamples.shape_input,
+    ``Solidity.Evm.Memory.FixedCopyExamples.shape_agrees,
+    ``Solidity.Evm.Memory.FixedCopyExamples.shape_source,
+    ``Solidity.Evm.Memory.FixedCopyExamples.failed_demand,
+    ``Solidity.Evm.Memory.FixedCopyExamples.failed_input,
+    ``Solidity.Evm.Memory.FixedCopyExamples.failed_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.zero_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.one_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.three_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.guarded_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.zero_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.one_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.three_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.guarded_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.source_zero,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.source_one,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.source_three,
+    ``Solidity.Evm.Memory.StorageCopyExamples.RuntimeLength.source_guard,
+    ``Solidity.Evm.Compiler.Compilation.copyConstruction_input,
+    ``Solidity.Evm.Memory.Objects.StateRepr.fixedCopy,
+    ``Solidity.Evm.Memory.FixedResult.objects,
+    ``Solidity.Evm.Memory.CopyConstruction.StmtFrag.correct,
+    ``Solidity.Evm.Memory.CopyConstruction.ProgFrag.correct,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.initial_repr,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.initial_allocator,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.selected_route,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.source_cost,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.copy_demand,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.compiled_input,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.bound_refusal,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.source_observation,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.failed_demand,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.failed_input,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.failed_agrees,
+    ``Solidity.Evm.Memory.StorageLifecycleExamples.failed_source,
+    ``Solidity.Evm.Memory.memoryArrayCopy_run,
+    ``Solidity.Evm.Memory.arrayCopyStore_tail,
+    ``Solidity.Evm.Memory.primitiveArray_copy_repr,
+    ``Solidity.Evm.Memory.assignMemoryArray_correct,
+    ``Solidity.Evm.Memory.memoryStructCopy_run,
+    ``Solidity.Evm.Memory.primitiveStruct_copy_repr,
+    ``Solidity.Evm.Memory.assignMemoryStruct_correct,
+    ``Solidity.Evm.Memory.StorageCopyExamples.initial_repr,
+    ``Solidity.Evm.Memory.StorageCopyExamples.compiled_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.source_observation,
+    ``Solidity.Evm.Memory.StorageCopyExamples.signed_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.signed_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.signed_source_success,
+    ``Solidity.Evm.Memory.StorageCopyExamples.bound_invalid,
+    ``Solidity.Evm.Memory.StorageCopyExamples.bad_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.bad_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.bad_source,
+    ``Solidity.Evm.Memory.StorageCopyExamples.failed_copy_bound_zero,
+    ``Solidity.Evm.Memory.StorageCopyExamples.failed_array_input,
+    ``Solidity.Evm.Memory.StorageCopyExamples.failed_array_agrees,
+    ``Solidity.Evm.Memory.StorageCopyExamples.failed_array_source,
+    ``Solidity.Evm.Memory.StorageCopyExamples.unreachable_bound_zero,
     ``Solidity.Evm.Memory.StructCopyExamples.initial_repr,
     ``Solidity.Evm.Memory.StructCopyExamples.program_cost,
     ``Solidity.Evm.Memory.StructCopyExamples.compiled_input,
@@ -720,6 +823,9 @@ run_cmd do
     ``Solidity.Evm.Memory.writeLocal_correct,
     ``Solidity.Evm.Memory.ProgFrag.correct,
     ``Solidity.Evm.Memory.compile_correct,
+    ``Solidity.Evm.Memory.StorageCopy.StmtFrag.correct,
+    ``Solidity.Evm.Memory.StorageCopy.ProgFrag.correct,
+    ``Solidity.Evm.Memory.StorageCopy.compile_correct,
     ``Solidity.Evm.Memory.CompileExamples.fixture_repr,
     ``Solidity.Evm.Memory.CompileExamples.compiled_simulates,
     ``Solidity.Evm.Memory.lengthLocal_correct,
@@ -1782,7 +1888,12 @@ run_cmd do
     ``Solidity.Examples.Tactics.FunctionTypes.memAlias_run,
     ``Solidity.Examples.Tactics.FunctionTypes.memDirect_run,
     ``Solidity.Examples.Tactics.FunctionTypes.storAlias_run,
-    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned]
+    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.structReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleCallee_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.memNoCopy_reason,
+    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned_halt]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name
@@ -1791,3 +1902,123 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} dispatch theorems use only the standard axioms"
+
+/-! Lane FU1: narrow and byte elements through function values, callees
+that are not names, and the tuple ternary return. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Examples.Tactics.FunctionTypes.narrowAlias_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.narrowOverflow,
+    ``Solidity.Examples.Tactics.FunctionTypes.byteArgs_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleCalleeDyn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.scalarCallee_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.ternaryReturn_run]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU1 dispatch theorems use only the standard axioms"
+
+/-! Lane FU2-A: several returns with memory ones in the call frame
+(`RetBinders`), the call rules' soundness over them, and the runs. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.RetBinders.enterT_lift,
+    ``Solidity.RetBinders.runSt_declsThen,
+    ``Solidity.Stmt.runSt_callRets,
+    ``Solidity.Premise.sound_callRets,
+    ``Solidity.Premise.sound_callCaptureRets,
+    ``Solidity.ExecS.callRets_inline,
+    ``Solidity.holdsC_callRets,
+    ``Solidity.holds_callRets,
+    ``Solidity.holds_callContract,
+    ``Solidity.FunContract.forall_rets,
+    ``Solidity.FunContractC.forall_rets,
+    ``Solidity.holdsC_callRecContract,
+    ``Solidity.Stmt.sound,
+    ``Solidity.Examples.Tactics.MemoryReturns.splitAssign_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.bothAlias_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.untouchedDefault_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.omitted_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.falseObservation_panics,
+    ``Solidity.Examples.Tactics.MemoryReturns.narrowAssign_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.untouched_proved,
+    ``Solidity.Examples.Tactics.MemoryReturns.split_proved,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueSplit_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueTernaryT_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueTernaryF_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueAlias_run]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-A frame theorems use only the standard axioms"
+
+/-! Lane FU2-B: `abi.decode` in the source semantics (typing, checker,
+preservation and progress of the decoder). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Static.hasType_iff,
+    ``Solidity.Source.Typed.unique,
+    ``Solidity.Source.TypingExamples.exprCoverage_operand,
+    ``Solidity.Source.TypingExamples.elemType_decode_operand,
+    ``Solidity.Source.Ledger.semExprGaps_spec,
+    ``Solidity.Source.decodeArg_ok,
+    ``Solidity.Source.decodeArgs_ok,
+    ``Solidity.Source.abiDecodeData_ok,
+    ``Solidity.Source.evalE_abiDecode_ok,
+    ``Solidity.Source.evalE_abiDecode_lit_ok,
+    ``Solidity.Source.evalE_abiDecode_local_ok,
+    ``Solidity.Source.Ledger.semExprCoverage_of_operand]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-B decode theorems use only the standard axioms"
+
+/-! Lane FU2-B: `calldata` references and slices in the source semantics. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Source.decodeArg_entry_ok,
+    ``Solidity.Source.decodeArgs_entry_ok,
+    ``Solidity.Source.readLoc_cd_ok,
+    ``Solidity.Source.cdToMem_ok,
+    ``Solidity.Source.evalE_cdLength_ok,
+    ``Solidity.Source.evalE_cdIndex_ok,
+    ``Solidity.Source.evalE_cdSlice_ok]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-B calldata theorems use only the standard axioms"
+
+/-! Lane FU2-C: access-time calldata reads agree with the lazy decoder (model only). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.AbiEntry.cpart_agree,
+    ``Solidity.AbiEntry.cpart_of_cval,
+    ``Solidity.AbiEntry.cval_revert_of_cpart,
+    ``Solidity.AbiEntry.cat_cpart,
+    ``Solidity.AbiEntry.verdictA_off,
+    ``Solidity.AbiEntry.verdictA_revert_iff,
+    ``Solidity.AbiEntry.verdictA_run_entry]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} access-time calldata theorems use only the standard axioms"

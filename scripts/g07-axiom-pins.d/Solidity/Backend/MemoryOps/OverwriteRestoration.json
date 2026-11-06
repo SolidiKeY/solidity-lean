@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.overwriteIntervals_eq_self_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.overwriteIntervals_path_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.overwriteIntervals_target_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteRestoration.lean:Solidity.Backend.MemoryOps.replaceSlice_twice_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

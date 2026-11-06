@@ -1,0 +1,72 @@
+{
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.add_keysFit": [],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.copyCode": [],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.encodeWord": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.KeysFit": [],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.ofSlot_toSlot": [],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.path_keysFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.query_keysFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.readCode": [],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.represented_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.represented_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.run_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.run_copy_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.run_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.run_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.step_keysFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.toSlot": [],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.toSlot_injective": [],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.toSlot_ofSlot": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.write_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperations.lean:Solidity.Backend.StorageOps.TargetOperations.writeCode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

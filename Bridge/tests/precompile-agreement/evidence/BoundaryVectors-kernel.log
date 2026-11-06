@@ -1,0 +1,4 @@
+CWD: /workspace/solidity-lean/Bridge
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 tests/precompile-agreement/BoundaryVectors.lean
+"BOUNDARY_VECTORS_PASS"
+EXIT=0 SECONDS=5.123 PEAK_RSS=391745536 MIN_AVAILABLE=17648377856 RESOURCE_STOP=False

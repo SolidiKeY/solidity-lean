@@ -1,0 +1,3 @@
+diag: 0 errors
+{"childMaxRssKiB": 12672, "command": ["env", "SHARED_CONSTRUCT_CAPTURE=1", "bash", "-c", "trap \"python3 scripts/coord-tools/lean-mcp stop\" EXIT; python3 scripts/coord-tools/lean-mcp diag tests/directruntime-20261104/shared-translator/ConstructReaderControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "527020032", "wallSeconds": 7.955140255995502}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 7626977280, "outerWallSeconds": 11.811473867004679}

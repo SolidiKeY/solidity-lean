@@ -1,0 +1,139 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "Direct failed-send payment-state mutation, plus independent revert known-kill. Inhabited accepted/refused controls, actual rollback, typed update landings and an unconditional semantic counterexample. No callback or whole-assignment completion claim.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+  "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+  "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+  "cache_root": "/workspace/h28-runtime/prepared-callback-base-6f3eedf0-v2",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "kind": "mutant",
+      "family": "rollback-payment",
+      "source_symbol": "Taclet.sendNoCallbackBox",
+      "target": "Solidity/Calculus/Rules.lean",
+      "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "constructor_id": "Taclet.sendNoCallbackBox",
+      "id": "payment.failure-books-payment",
+      "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pay(sadr, se) \u2016 pv := false } \u27e8[ ]\u27e9 }\n",
+      "mutant_sha256": "41139e82fe13279fb169c95f8bf42a5a24480db5c9f017ac4b4ff86ee161297a",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RollbackBaseline.lean",
+      "oracle_sha256": "10355fa94803c8073c47d6c3730481b295995a5ba2a5ba0464dfc998c264e69a",
+      "oracle_declarations": [
+        "H28.RollbackBaseline.source_link",
+        "H28.RollbackBaseline.input_inhabited",
+        "H28.RollbackBaseline.accepted_run",
+        "H28.RollbackBaseline.refused_run",
+        "H28.RollbackBaseline.paid_controls",
+        "H28.RollbackBaseline.rollback_controls"
+      ],
+      "oracle_signature_sha256": {
+        "H28.RollbackBaseline.source_link": "135907193184f248eb026bdad5d5b30921bbcd5ba2cc859f884ba40c40997a40",
+        "H28.RollbackBaseline.input_inhabited": "279a44cf5946dca8c1cdd0dc811af620ba059b34d4e96d783f430055a5177366",
+        "H28.RollbackBaseline.accepted_run": "f7c07420a2f337dbbf7d66eacf7e38d992e3cf479b52b29371d3747ed417442c",
+        "H28.RollbackBaseline.refused_run": "04c539e52e0a590d7b4d3d731a87f93ff6c2700c444e4e71c7e907ccd9bebda1",
+        "H28.RollbackBaseline.paid_controls": "e648da1884066653bb1e1c488857130aee591c13053f61d8122ea2b41f340b90",
+        "H28.RollbackBaseline.rollback_controls": "7d6dc536999df6fef13b7f5388a3fa1b2c4c31c79f8cd840f7e422aa907f9295"
+      },
+      "witness": "tests/h28-sol/mutation-testing/oracles/RollbackBookedKill.lean",
+      "witness_sha256": "afb7641b8a5ce9b37baf172c8880d9a8fe94ae1076f0c00278a1d67b92fcdb5e",
+      "witness_declarations": [
+        "H28.RollbackBookedKill.source_link",
+        "H28.RollbackBookedKill.input_inhabited",
+        "H28.RollbackBookedKill.refused_run",
+        "H28.RollbackBookedKill.rollback_controls",
+        "H28.RollbackBookedKill.mutant_effect_controls",
+        "H28.RollbackBookedKill.first_landing",
+        "H28.RollbackBookedKill.second_landing",
+        "H28.RollbackBookedKill.first_post",
+        "H28.RollbackBookedKill.second_post",
+        "H28.RollbackBookedKill.premise_accepts_post",
+        "H28.RollbackBookedKill.real_frames",
+        "H28.RollbackBookedKill.execution_rejects_post",
+        "H28.RollbackBookedKill.checked_kill"
+      ],
+      "witness_signature_sha256": {
+        "H28.RollbackBookedKill.source_link": "e8124f5a77891abccbe87f2560eb4594999c4ff483e55fbb5d57506d44db3929",
+        "H28.RollbackBookedKill.input_inhabited": "ee8f3afec4d1b863369f1967dc1c0d5529786b298645bb0beeb05c2fe9811c0d",
+        "H28.RollbackBookedKill.refused_run": "71a4081fb25d47100d37073e483757d13fb502f28b72fd0927a57bb03c8d3942",
+        "H28.RollbackBookedKill.rollback_controls": "0c50cbca4cc8d25ce16ab1adb196c13d5fcf562e69cb80dc294804fd53bc4e54",
+        "H28.RollbackBookedKill.mutant_effect_controls": "6335ff33e4efacb2eca58d4509ab3a8c6f9afc1d224dae0ae2a129e7245103b9",
+        "H28.RollbackBookedKill.first_landing": "b6b2c1d117ce2fea25b15d11f897341e0c86731722727cf4102b17899e11213f",
+        "H28.RollbackBookedKill.second_landing": "b11227a4bc55765489252c589d2f26e70bc5655408079ead719744891bfec6b0",
+        "H28.RollbackBookedKill.first_post": "aa2df556778b01740b5a40b35e4c6104b68307125fd24ef263e0225c4deebe3f",
+        "H28.RollbackBookedKill.second_post": "72711a6c30b612268038ac3bf095a94823a78132d1fcd7da43a61f6224740358",
+        "H28.RollbackBookedKill.premise_accepts_post": "e2e1586014a4cc9bc3dec3ac3751314624a01bce50e77c7acf568005d2413ed7",
+        "H28.RollbackBookedKill.real_frames": "671548fbc28e61fb23e0a90df77bb6b6ec406876e0662aa19f52703bba5eaedc",
+        "H28.RollbackBookedKill.execution_rejects_post": "0c709f81e16dbd0d1ce6da5206666af2f469bcd2fffd404453c91b3ed2a20710",
+        "H28.RollbackBookedKill.checked_kill": "7459d4619604e95539b2c081e4249f52f17cc34765d431f04281ac402235fbf5"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ],
+  "input_storage": {
+    "authorization": "H44",
+    "availability": "VM-only",
+    "bulk_manifest": "tests/h28-sol/mutation-testing/bulk-data.json",
+    "inputs": [
+      {
+        "role": "inventory",
+        "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+        "sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+        "bytes": 106323
+      },
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528
+      }
+    ]
+  }
+}

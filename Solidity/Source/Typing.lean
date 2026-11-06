@@ -652,6 +652,133 @@ def AbiKind.argsOK (B : DeclName → DeclName → Bool) : AbiKind → List STy �
   | .encodeWithSignature, σ :: σs => σ.isStringy && σs.all STy.abiArg
   | _, _ => false
 
+/-! ### `abi.decode` -/
+
+/-- The user-defined type a name denotes as a type expression (solc's
+`TypeType` of the declaration), in `memory`: a struct, an enum, a
+user-defined value type, a contract or an interface. A local or any
+other declaration is not a type. -/
+def Ctx.typeNameOf (Γ : Ctx) (x : String) : Option STy :=
+  match Γ.resolve x with
+  | Option.some (.decls [d]) =>
+    match d.kind with
+    | .struct => Option.some (.struct .memory ⟨d.scope, d.name⟩)
+    | .enum => Option.some (.enum ⟨d.scope, d.name⟩)
+    | .udvt => Option.some (.udvt ⟨d.scope, d.name⟩)
+    | .contract | .interface => Option.some (.contract ⟨d.scope, d.name⟩)
+    | _ => Option.none
+  | _ => Option.none
+
+/-- The types a list of type expressions names, in `memory`: an
+elementary type name, a user-defined type by an unqualified name, an
+array of one (`T[]`, `T[k]` with a positive constant `k`); qualified names
+(`L.S`) are not read. -/
+def Syn.typeExprs (Γ : Ctx) : {c : Cat} → Syn c → Option (List STy)
+  | _, .elemType el _ => Option.some [el.ty .memory]
+  | _, .ident x => (Γ.typeNameOf x).map ([·])
+  | _, .index t o =>
+    match t.typeExprs Γ, arrayLen o with
+    | Option.some [σ], Option.some k => Option.some [.array .memory σ k]
+    | _, _ => Option.none
+  | _, .some x => x.typeExprs Γ
+  | _, .nil => Option.some []
+  | _, .cons x xs =>
+    match x.typeExprs Γ, xs.typeExprs Γ with
+    | Option.some a, Option.some b => Option.some (a ++ b)
+    | _, _ => Option.none
+  | _, _ => Option.none
+
+/-- A top-level `address` component of `abi.decode` is `address payable`
+(solc: "We force address payable for address types"); an array's elements
+keep their type. -/
+def STy.payableTop : STy → STy
+  | .address _ => .address true
+  | τ => τ
+
+/-- The types `abi.decode`'s second argument names: the components of a
+parenthesized list of type expressions (`(T)` and `(T, U)`, every
+component present, none itself parenthesized), or a single type
+expression; a top-level `address` is `address payable`. -/
+def Ctx.decodeTys (Γ : Ctx) (e : Syn .expr) : Option (List STy) :=
+  (match e with
+   | .tuple o s => (Syn.cons o s).typeExprs Γ
+   | e => e.typeExprs Γ).map (fun τs : List STy => τs.map STy.payableTop)
+
+/-- The data `abi.decode` reads: `bytes` in memory or storage, or a string
+literal (all implicitly `bytes memory`), or `bytes calldata` (lane FU2-B,
+read through its reference), as solc requires. -/
+def STy.decodeSrc : STy → Bool
+  | .bytes .memory | .bytes .storage | .bytes .calldata | .stringLit _ => true
+  | _ => false
+
+/-- A one-word value type (an ABI head word): `STy.isValue` without
+function types. -/
+def STy.oneWord : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | _ => false
+
+/-- solc's `Type::commonType` of two element types of an inline array:
+`a`'s mobile type if `b` converts to it, else `b`'s if `a`'s mobile type
+converts to it (lane FU2-B; solc's fold starts at the first element's
+mobile type, so `[1, -1]` has none: `uint8` and `int8`). -/
+def STy.common (B : DeclName → DeclName → Bool) (a b : STy) : Option STy :=
+  if b.implicit B a.mobile then Option.some a.mobile
+  else if a.mobile.implicit B b.mobile then Option.some b.mobile else Option.none
+
+/-- The common type of an inline array's element types, folded left to
+right from the first's mobile type, as solc's `TypeChecker` does. -/
+def STy.commonOf (B : DeclName → DeclName → Bool) (a : STy) : List STy → Option STy
+  | [] => Option.some a.mobile
+  | b :: bs => match STy.common B a b with
+    | Option.some c => STy.commonOf B c bs
+    | Option.none => Option.none
+
+/-- **A type `new` allocates with a length** (lane FU2-B): `bytes`,
+`string`, a dynamic memory array of one-word elements. -/
+def STy.newable : STy → Bool
+  | .bytes .memory | .string .memory => true
+  | .array .memory σ none => σ.oneWord
+  | _ => false
+
+/-- **A sliceable type** (`a[s:e]`, lane FU2-B): `bytes` or a dynamic array
+of one-word values in `calldata` (solc: index range access only for
+dynamic calldata arrays). -/
+def STy.sliceable : STy → Bool
+  | .bytes .calldata => true
+  | .array .calldata σ none => σ.oneWord
+  | _ => false
+
+/-- A one-word ABI value the decoder reads (`decodeElemWord`), other than
+fixed point (solc's ABI coder does not implement it) and function types. -/
+def STy.wordElem : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .enum _ | .contract _ => true
+  | _ => false
+
+/-- The underlying type of a user-defined value type, as `Env.layout`
+(`Solidity/Source/Machine.lean`) reads it. -/
+def Env.udvtUnderlying (E : Env) (d : DeclName) : STy :=
+  match E.declOf .udvt d with
+  | Option.some ⟨.udvt, _, _, _, .udvt _ el⟩ => el.ty .memory
+  | _ => .bool
+
+/-- A one-word value the decoder reads: a user-defined value type at its
+underlying type, any other type by `STy.wordElem`. -/
+def STy.decodableElem (E : Env) : STy → Bool
+  | .udvt d => (E.udvtUnderlying d).wordElem
+  | τ => τ.wordElem
+
+/-- **A type `abi.decode` reads in the source semantics**: the types the
+ABI decoder of S02/S04 (`decodeArgs`) decodes: a one-word value type, an
+enum at its member count, a user-defined value type at its underlying
+type, `bytes`/`string` in memory, and a dynamic memory array of
+one-word values. Static arrays, structs, nested arrays, fixed point and
+external function types are refused (a named refusal: the decoder does
+not read them). -/
+def STy.decodable (E : Env) : STy → Bool
+  | .bytes .memory | .string .memory => true
+  | .array .memory σ none => σ.decodableElem E
+  | τ => τ.decodableElem E
+
 /-- A reference type moved to a location (nested arrays with it). -/
 def STy.withLoc (l : DataLoc) : STy → STy
   | .bytes _ => .bytes l
@@ -858,6 +985,37 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   literal; the target is a storage location, not a local `storage` pointer. -/
   | assignCopy {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ → σ.copiesTo τ = true →
       Γ.namesLocal a = false → Typed Γ (.assign .assign a b) τ
+  /-- `a[s:e]`, `a[s:]`, `a[:e]`, `a[:]` (lane FU2-B): a slice of a
+  `calldata` `bytes` or dynamic array, at the array's type (solc's slice
+  type converts implicitly to it), the bounds unsigned indices. -/
+  | slice {a s e : Syn .expr} {τ σ ρ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ s σ → σ.isIndex = true → Typed Γ e ρ → ρ.isIndex = true →
+      Typed Γ (.slice a (.some s) (.some e)) τ
+  | sliceFrom {a s : Syn .expr} {τ σ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ s σ → σ.isIndex = true → Typed Γ (.slice a (.some s) .none) τ
+  | sliceTo {a e : Syn .expr} {τ ρ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ e ρ → ρ.isIndex = true → Typed Γ (.slice a .none (.some e)) τ
+  | sliceAll {a : Syn .expr} {τ : STy} : Typed Γ a τ → τ.sliceable = true →
+      Typed Γ (.slice a .none .none) τ
+  /-- `abi.decode(data, (T₁, …, Tₙ))` (FU2-B): the values the ABI decoder
+  reads from `bytes` data, at the named types in `memory`, each one the
+  decoder reads (`STy.decodable`); one type is its value, more a tuple. -/
+  | abiDecode {g : String} {x ts : Syn .expr} {σ : STy} {τs : List STy} :
+      Γ.resolve g = Option.some (.builtin .abi) → Typed Γ x σ → σ.decodeSrc = true →
+      Γ.decodeTys ts = Option.some τs → τs.all (STy.decodable Γ.env) = true →
+      Typed Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) (STy.ret τs)
+  /-- `[e₁, …, eₙ]` (lane FU2-B): a new `T[n] memory`, `T` the elements'
+  common type (`STy.commonOf`), each element converting to it; only
+  one-word element types (references are not modelled). -/
+  | inlineArray {e : Syn .expr} {es : Syn (.list .expr)} {τ σ : STy} {τs : List STy} :
+      Typed Γ e τ → TypedArgs Γ es τs → STy.commonOf Γ.isBase τ τs = Option.some σ → σ.oneWord = true →
+      argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true →
+      Typed Γ (.inlineArray e es) (.array .memory σ (Option.some (τs.length + 1)))
+  /-- `new T[](n)`, `new bytes(n)`, `new string(n)` (lane FU2-B): a new
+  memory object of `n` zeroed elements (`STy.newable`); `n` an index. -/
+  | newArray {t : Syn .typeName} {x : Syn .expr} {τ σ : STy} :
+      t.ty Γ.env Γ.scope .memory = Option.some τ → τ.newable = true → Typed Γ x σ → σ.isIndex = true →
+      Typed Γ (.call (.new t) (.positional (.cons x .nil))) τ
 
 /-- Typing of an argument list. -/
 inductive TypedArgs (Γ : Ctx) : Syn (.list .expr) → List STy → Type where
@@ -909,6 +1067,121 @@ inductive OptCond (Γ : Ctx) : Syn (.opt .expr) → Type where
   | none : OptCond Γ .none
   | some {e : Syn .expr} : Typed Γ e .bool → OptCond Γ (.some e)
 
+/-! ### Tuple declarations (lane FU2-B) -/
+
+/-- A slot of a tuple declaration: a declared name with its type (solc's
+location rule for an initialized declaration), or a hole (`none`). -/
+def Ctx.declSlot (C : Ctx) : Syn (.opt .varDecl) → Option (Option (String × STy))
+  | .none => Option.some Option.none
+  | .some (.varDecl t l x) =>
+    match t.ty C.env C.scope (l.getD .memory) with
+    | Option.some τ => if locOK τ l true then Option.some (Option.some (x, τ)) else Option.none
+    | Option.none => Option.none
+
+/-- The slots of a list of optional declarations. -/
+def Ctx.declSlots (C : Ctx) : Syn (.list (.opt .varDecl)) → Option (List (Option (String × STy)))
+  | .nil => Option.some []
+  | .cons s ss =>
+    match C.declSlot s, C.declSlots ss with
+    | Option.some a, Option.some b => Option.some (a :: b)
+    | _, _ => Option.none
+
+/-- The slots of `(, , T x, …) = e`: the leading holes, the first
+declaration, the remaining slots. -/
+def Ctx.tupleSlots (C : Ctx) (holes : Nat) (d : Syn .varDecl) (ds : Syn (.list (.opt .varDecl))) :
+    Option (List (Option (String × STy))) :=
+  match C.declSlot (.some d), C.declSlots ds with
+  | Option.some a, Option.some b => Option.some (List.replicate holes Option.none ++ a :: b)
+  | _, _ => Option.none
+
+/-- **The success clause's locals of a `try`** (lane FU2-B): the
+function's return types, named by the `returns` parameters (`""` when
+unnamed), left to right. -/
+def tryLocals : List (Option String) → List STy → List (String × STy)
+  | n :: ns, τ :: τs => (n.getD "", τ) :: tryLocals ns τs
+  | [], τ :: τs => ("", τ) :: tryLocals [] τs
+  | _, [] => []
+
+theorem tryLocals_tys : (ns : List (Option String)) → (rs : List STy) → (tryLocals ns rs).map Prod.snd = rs
+  | _ :: ns, _ :: τs => by simp only [tryLocals, List.map_cons, tryLocals_tys ns τs]
+  | [], _ :: τs => by simp only [tryLocals, List.map_cons, tryLocals_tys [] τs]
+  | _ :: _, [] => rfl
+  | [], [] => rfl
+
+/-- **A `catch` clause the source semantics runs** (lane FU2-B), with the
+name it binds and its block: `catch { … }` (no binding) or
+`catch (bytes memory r) { … }` (the revert data); `Error(string)` and
+`Panic(uint)` clauses are not modelled. -/
+inductive CatchD {k : SCtx} : Syn (.catchClause k) → Option String → Syn (.list (.item k)) → Prop where
+  | plain (b : Syn (.list (.item k))) : CatchD (.catchPlain (.block b)) Option.none b
+  | bytes (x : Option String) (b : Syn (.list (.item k))) :
+      CatchD (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) x) .nil (.block b))
+        (Option.some (x.getD "")) b
+
+/-- A `catch` clause's locals: the revert data's, if bound. -/
+def catchLocals : Option String → List (String × STy) → List (String × STy)
+  | Option.none, L => L
+  | Option.some x, L => (x, .bytes .memory) :: L
+
+/-- A `catch` clause's local types. -/
+def catchCtx : Bool → List STy → List STy
+  | true, Γ => .bytes .memory :: Γ
+  | false, Γ => Γ
+
+theorem catchLocals_tys (x : Option String) (L : List (String × STy)) :
+    (catchLocals x L).map Prod.snd = catchCtx x.isSome (L.map Prod.snd) := by
+  cases x <;> rfl
+
+/-- The locals a tuple declaration adds onto `L`, left to right (the last
+declared innermost). -/
+def pushSlots : List (Option (String × STy)) → List (String × STy) → List (String × STy)
+  | [], L => L
+  | Option.none :: ss, L => pushSlots ss L
+  | Option.some p :: ss, L => pushSlots ss (p :: L)
+
+/-- The types a tuple declaration adds onto a context of types. -/
+def pushTys : List (Option STy) → List STy → List STy
+  | [], Γ => Γ
+  | Option.none :: ss, Γ => pushTys ss Γ
+  | Option.some τ :: ss, Γ => pushTys ss (τ :: Γ)
+
+theorem pushSlots_tys : ∀ (slots : List (Option (String × STy))) (L : List (String × STy)),
+    (pushSlots slots L).map Prod.snd = pushTys (slots.map (Option.map Prod.snd)) (L.map Prod.snd)
+  | [], _ => rfl
+  | Option.none :: ss, L => pushSlots_tys ss L
+  | Option.some p :: ss, L => pushSlots_tys ss (p :: L)
+
+theorem pushSlots_suffix : ∀ (slots : List (Option (String × STy))) (L : List (String × STy)),
+    ∃ ys, pushSlots slots L = ys ++ L
+  | [], _ => ⟨[], rfl⟩
+  | Option.none :: ss, L => pushSlots_suffix ss L
+  | Option.some p :: ss, L => by
+    obtain ⟨ys, h⟩ := pushSlots_suffix ss (p :: L)
+    exact ⟨ys ++ [p], by simp only [pushSlots, h, List.append_assoc, List.singleton_append]⟩
+
+theorem pushTys_suffix : ∀ (slots : List (Option STy)) (Γ : List STy), ∃ ys, pushTys slots Γ = ys ++ Γ
+  | [], _ => ⟨[], rfl⟩
+  | Option.none :: ss, Γ => pushTys_suffix ss Γ
+  | Option.some τ :: ss, Γ => by
+    obtain ⟨ys, h⟩ := pushTys_suffix ss (τ :: Γ)
+    exact ⟨ys ++ [τ], by simp only [pushTys, h, List.append_assoc, List.singleton_append]⟩
+
+/-- A component that is not the empty tuple `()`: solc refuses
+`(, uint a) = (g(), 1)` for a `g` without returns ("Tuple component
+cannot be empty"), holes included. -/
+def STy.nonEmpty : STy → Bool
+  | .tuple [] => false
+  | _ => true
+
+/-- **Each declared slot's component converts implicitly** to its type;
+a hole takes any non-empty component; the slots are as many as the
+components. -/
+def slotsFit (B : DeclName → DeclName → Bool) : List (Option STy) → List STy → Bool
+  | [], [] => true
+  | Option.none :: ss, σ :: σs => σ.nonEmpty && slotsFit B ss σs
+  | Option.some τ :: ss, σ :: σs => σ.implicit B τ && slotsFit B ss σs
+  | _, _ => false
+
 /-- An optional loop step, typed at some type. -/
 inductive OptExpr (Γ : Ctx) : Syn (.opt .expr) → Type where
   | none : OptExpr Γ .none
@@ -933,6 +1206,13 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
   | declVar {k : SCtx} {L : List (String × STy)} {t : Syn .typeName} {l : Option DataLoc} {x : String}
       {τ : STy} : t.ty C.env C.scope (l.getD .memory) = Option.some τ → locOK τ l false = true →
       StmtD C (k := k) L (.simpleStmt (.declVar (.varDecl t l x) .none)) ((x, τ) :: L)
+  /-- `(, T x, , U y) = e;` (lane FU2-B): `e` is a tuple whose components
+  convert implicitly to the declared types; holes discard theirs. -/
+  | declTuple {k : SCtx} {L : List (String × STy)} {h : Nat} {d : Syn .varDecl}
+      {ds : Syn (.list (.opt .varDecl))} {e : Syn .expr} {slots : List (Option (String × STy))}
+      {σs : List STy} : C.tupleSlots h d ds = Option.some slots → Typed (C.at L) e (.tuple σs) →
+      slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true →
+      StmtD C (k := k) L (.simpleStmt (.declTuple h d ds e)) (pushSlots slots L)
   /-- `T l x = e;`: `e` converts implicitly to `T`. -/
   | declInit {k : SCtx} {L : List (String × STy)} {t : Syn .typeName} {l : Option DataLoc} {x : String}
       {e : Syn .expr} {τ σ : STy} : t.ty C.env C.scope (l.getD .memory) = Option.some τ →
@@ -983,6 +1263,22 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       {σs : List STy} : TypedArgs (C.at L) args σs →
       ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) = [d] →
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
+  /-- `try c.f(args) returns (T₁ x₁, …) { … } catch … { … }` (lane FU2-B):
+  an external call without value whose revert runs the one `catch` clause
+  (`CatchD`); the `returns` types, when given, are the function's
+  (`STy.sameList`); the returns are bound in the success block (unnamed
+  without `returns`). -/
+  | tryCall {k : SCtx} {L L₁ L₂ : List (String × STy)} {c : Syn .expr} {f : String}
+      {args : Syn (.list .expr)} {rets : Syn (.list .param)} {okb : Syn (.list (.item k))}
+      {cl : Syn (.catchClause k)} {dn : DeclName} {d : Decl} {ps rs σs tys : List STy}
+      {x : Option String} {cb : Syn (.list (.item k))} :
+      Typed (C.at L) c (.contract dn) → TypedArgs (C.at L) args σs →
+      extOverloads C.env C.isBase dn f σs = [d] → d.fnSig C.env = Option.some (ps, rs) →
+      argsFit C.isBase σs ps = true →
+      rets.tys C.env C.scope .memory = Option.some tys → (tys.isEmpty || STy.sameList tys rs) = true →
+      ItemsD C ((tryLocals rets.paramNames rs).reverse ++ L) okb L₁ →
+      CatchD cl x cb → ItemsD C (catchLocals x L) cb L₂ →
+      StmtD C L (.tryStmt (.call (.member c f) (.positional args)) rets (.block okb) cl .nil) L
   /-- The canonical rethrow, of the `bytes memory` local it names
   (`rethrowVar?`). -/
   | rethrow {k : SCtx} {L : List (String × STy)} {fl : List String} {body : Syn (.list .yulStmt)}
@@ -1019,6 +1315,7 @@ theorem StmtD.locals_suffix {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {
   cases d <;> first
     | exact ⟨[], rfl⟩
     | exact ⟨[_], rfl⟩
+    | exact pushSlots_suffix _ _
 
 /-- **Constants have their value as type**: every constant expression other
 than an address literal or a bare hexadecimal literal is typed by its exact

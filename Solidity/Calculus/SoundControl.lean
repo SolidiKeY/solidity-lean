@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundLocal
+import Solidity.Calculus.Sound.JoinSequence
 
 /-!
 # Soundness of payments, control flow, declarations
@@ -294,9 +295,9 @@ theorem Upd.ifJoin_pushFree (c : Tm C Γ (.val .bool)) (hc : c.pushFree = true)
 /-- **`ifElseJoin`**: an `if` whose branches are joinable runs as the joined
 update; `if (se) { x = x + 1; }` as `{x := se ? x + 1 : x}`. -/
 theorem sound_iteJoin (se : Simple C Γ .bool) {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁)
-    (els : Prog C Γ Γ₂) {U : Upd C Γ Γ} (h : Upd.ifJoin? se.lower thn els = some U) :
+    (els : Prog C Γ Γ₂) {U : Upd C Γ Γ} (h : Upd.ifJoinSingle? se.lower thn els = some U) :
     Premise.Runs m (.ite (.simple se) thn els) (.update U) σ := by
-  unfold Upd.ifJoin? at h
+  unfold Upd.ifJoinSingle? at h
   split at h
   next a b ha hb =>
     cases h
@@ -336,7 +337,10 @@ theorem iteStep_sound (k : Nat) {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : 
   | simple se =>
     simp only [iteStep] at hs
     split at hs
-    next U hj => cases hs; exact sound_iteJoin σ se thn els hj
+    next U hj => cases hs; exact sound_iteJoin σ se thn els (Upd.ifJoin?_inl hj)
+    next body hj =>
+      cases hs
+      exact LocalWrites.joinPlan_sound σ (fse k) se thn els body hj
     cases hs
     refine Premise.sound_split σ (fun h => ?_) (fun h => ?_) ?_ (fun h J o he => ?_)
       (fun h J o he => ?_)

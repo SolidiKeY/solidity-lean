@@ -86,9 +86,6 @@ def load_plan(root):
             wave_of[m.group(1)] = wave
     children = re.findall(r"^\| ([SG]\d\d\.\d\d) —", text, re.M)
     in_plan = len([g for g in groups if g not in {c.split(".")[0] for c in children}]) + len(children)
-    proposed = [pid for pid, _, _ in D.PROPOSED_PACKAGES]
-    stale = [pid for pid in proposed if pid in children]
-    children = children + [pid for pid in proposed if pid not in children]
     parents = {c.split(".")[0] for c in children}
     for c in children:
         wave_of[c] = wave_of.get(c.split(".")[0])
@@ -103,7 +100,6 @@ def load_plan(root):
         if m:
             vms.append((m.group(1), m.group(2).strip(), m.group(3).strip()))
     return dict(groups=groups, children=children, parents=parents, packages=packages, in_plan=in_plan,
-                proposed=proposed, stale_proposals=stale,
                 stated=stated, wave_of=wave_of, vms=vms)
 
 
@@ -566,8 +562,6 @@ def build(root):
     plan = load_plan(root)
     if plan["stated"] is None or plan["stated"] < 0:
         errors.append(f"coverage-plan.md's stated package count does not match its {plan['in_plan']} rows")
-    for pid in plan["stale_proposals"]:
-        errors.append(f"PROPOSED_PACKAGES: {pid} is already in coverage-plan.md; drop the proposal")
     pk = set(plan["packages"])
     imports = load_imports_cached(root)
 
@@ -1670,17 +1664,16 @@ class D:
                 "of wave 3",
          ["G03 Q1 — shared compiler foundation", "Roadmap (G03)"],
          {"backend": "G24.01 G24.02 G24.03 G24.04"},
-         ["the child rows are not yet in coverage-plan.md's manifest and VM table (integration step 1); the "
-          "checker applies them from `PROPOSED_PACKAGES` until they land",
+         ["the child rows are in coverage-plan.md's manifest; the VM schedule awaits G02",
           "no frozen interface exists: `Slot`, `Sim`/`StateRepr` and `StmtOut` are concrete today"],
          None),
     ]
     DECISION_COVER = {
         "D23": [("backend", "Solidity.Evm.compile_net", "Solidity/Evm/Correct.lean",
                  "machine success gives net payments; no external credit")],
-        "D01": [('admission', "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/Features.lean",
+        "D01": [('admission', "Solidity.Language.Feature.exclusion_complete", "Solidity/Language/FeatureInfo.lean",
                  "every excluded feature has a structured diagnostic"),
-                ('admission', "Solidity.Language.Unmodelled.excluded", "Solidity/Language/Features.lean",
+                ('admission', "Solidity.Language.Unmodelled.excluded", "Solidity/Language/FeatureInfo.lean",
                  "every diagnostic denotes an excluded feature"),
                 ('admission', "Solidity.Frontend.Source.ScopeScan.within", "Solidity/Frontend/Source.lean",
                  "a successful scan's feature list is within the profile")],
@@ -1763,9 +1756,9 @@ class D:
         ("G22.04", "G22.03", "G-parent children in listed order", "roadmap"),
         ("G22.05", "G22.04", "G-parent children in listed order", "roadmap"),
         ("G23", "G16 G17 G18.06 G19 G20 G21 G22.05", "G23's whole-source composition follows G16–G22", "roadmap"),
-        ("G24.02", "G24.01", "G-parent children in listed order (proposed G24 children)", "roadmap"),
-        ("G24.03", "G24.02", "G-parent children in listed order (proposed G24 children)", "roadmap"),
-        ("G24.04", "G24.03", "G-parent children in listed order (proposed G24 children)", "roadmap"),
+        ("G24.02", "G24.01", "G-parent children in listed order (G24 children)", "roadmap"),
+        ("G24.03", "G24.02", "G-parent children in listed order (G24 children)", "roadmap"),
+        ("G24.04", "G24.03", "G-parent children in listed order (G24 children)", "roadmap"),
         ("G25", "G24.04", "G25–G31 follow G24", "roadmap"),
         ("G26", "G24.04", "G25–G31 follow G24", "roadmap"),
         ("G27.01", "G24.04", "G25–G31 follow G24", "roadmap"),
@@ -3131,9 +3124,9 @@ class D:
                        "until the manifest change lands, G15 must still refuse it as `upstream`",
                        "no reference semantics beyond solc 0.8.38's acceptance boundary",
                        "manifest scope is still `upstream`"],
-        'abiDecode': ["Enum decoding is refused ('requires nominal cardinality checks'). Lazy/noncanonical aggregate entry decoding is pending.", 'No backend/EVM stage. Calldata/ABI entry is outside the compiler theorems (R04, R20).'],
+        'abiDecode': ["A top-level enum decodes at its member count; nested enums too, the import's through solcEnumBelow positions at their carriers (lane FU2-D); a struct's enum member in hand-written sol{} is a plain uint. Lazy/noncanonical aggregate entry decoding is pending.", 'No backend/EVM stage. Calldata/ABI entry is outside the compiler theorems (R04, R20).'],
         'abiEncode': ['ABI is absent from the compiler theorems (R04), with no backend/EVM stage.', 'Internal function markers are refused. Struct enum members lose nominal identity, so recursive coverage is partial.'],
-        'abiEncodeCall': ['Implicit fixed-byte narrowing is refused. ABI identity of inherited renamed function values is left.', 'No backend/EVM stage (R04).'],
+        'abiEncodeCall': ['Implicit fixed-byte narrowing is refused.', 'No backend/EVM stage (R04).'],
         'abiEncodePacked': ['Packed arrays and hex-literal aggregates have only partial contextual coercions.', 'No backend/EVM stage (R04). Packed collisions are only kept, never proved.'],
         'abiEncodeWithSelector': ['Selector-prefix lowering supports restricted argument shapes only. Full recursive ABI is unestablished.', 'No backend/EVM stage (R04).'],
         'abiEncodeWithSignature': ['Only literal signatures are hashed once at elaboration. Argument shapes are restricted.', 'No backend/EVM stage (R04). The hash is computed concretely with no injectivity claim (correct).'],
@@ -3311,20 +3304,6 @@ class D:
     # Integrated wave-0 packages: their modules are rechecked by every build,
     # so later edits below them are ordinary integration checks, not findings.
     INTEGRATED = ("G00", "G04")
-    # Foundation children of G24 (user decision on G03 Q1, relayed by the
-    # coordinator 2026-10-29): proposed manifest rows, applied by the checker
-    # until coverage-plan.md carries them (then `--check` asks to drop them).
-    PROPOSED_PACKAGES = [
-        ("G24.01", "Slot interface", "Freeze an abstract storage-slot interface (root, mapping-key and "
-         "array-element images, offsets) under every compiler proof, so G27.05 replaces the symbolic `Slot` "
-         "behind it without changing its signatures."),
-        ("G24.02", "State interface", "Freeze the typed core/memory state relations (`Sim`, `StateRepr`, the "
-         "allocator input) as one relation interface that every backend pass and the `decode` export use."),
-        ("G24.03", "Statement interface", "Freeze the statement-leaf outcome and pass-certificate signatures "
-         "(`StmtOut`, the per-statement compile entry, `Cert` instances) that G25–G44 extend by new cases only."),
-        ("G24.04", "Unified entry", "Unify the core/memory compiler entry on the frozen interfaces so mixed "
-         "programs compose; restate T1/T12/T13/T15 without the unreachable payment disjunct."),
-    ]
     # Modules whose interface each foundation child freezes: findings through
     # them between packages scheduled after the child are resolved by it.
     FROZEN = {

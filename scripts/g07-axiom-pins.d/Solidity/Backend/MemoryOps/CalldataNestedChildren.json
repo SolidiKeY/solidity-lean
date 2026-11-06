@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.decodedRefChildren_overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.refChild_leaf_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.refChild_parent_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.index": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.index_bool": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.index_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.overwrite": [
+  "Quot.sound",
+  "propext"
+ ]
+}

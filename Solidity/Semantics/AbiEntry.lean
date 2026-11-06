@@ -48,6 +48,9 @@ inductive Kind where
   | int (bits : Nat)
   | bool
   | fixedBytes (n : Nat)
+  /-- An enum of `n` members, at its declared cardinality (its ABI type is
+  `uint8`; `validator_revert_t_enum_*` reverts unless the word is below `n`). -/
+  | enumBelow (n : Nat)
   deriving DecidableEq, Repr
 
 /-- `validator_revert_t_*`: the loaded word equals its cleanup. -/
@@ -56,6 +59,7 @@ def Kind.valid : Kind → Nat → Bool
   | .int b, w => decide (w < 2 ^ (b - 1)) || decide (W - 2 ^ (b - 1) ≤ w)
   | .bool, w => decide (w < 2)
   | .fixedBytes n, w => w % 2 ^ (256 - 8 * n) == 0
+  | .enumBelow n, w => decide (w < n)
 
 /-- A validated word of its kind. -/
 structure Word (k : Kind) where

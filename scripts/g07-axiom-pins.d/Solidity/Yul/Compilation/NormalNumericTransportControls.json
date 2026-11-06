@@ -1,0 +1,77 @@
+{
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.actual_emission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.actual_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.false_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.false_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.high_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.high_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.model_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.symbolic_high": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.true_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransportControls.lean:Solidity.Yul.Compilation.NormalNumericTransport.Controls.true_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -46,6 +46,11 @@ example (external : Bool) (parameters returns : List Ty) :
   let (_, addresses) ← parse "function(address[] memory) internal returns(uint256)"
   unless addresses != array && (addresses.parameters.map Ty.native) == ["uint[]memory"] do
     throw (IO.userError "memory-array element identity or native erasure changed")
+  let (_, narrowArray) ← parse "function(uint8[] memory, bytes2[] storage pointer) internal returns(uint256)"
+  unless narrowArray.parameters == [Ty.memoryArray (.word false ⟨0, by decide⟩),
+      Ty.storageArray (.bytes ⟨1, by decide⟩)] &&
+      narrowArray.native false == "function(uint8[]memory,bytes2[]storage)returns(uint)" do
+    throw (IO.userError s!"narrow/byte element arrays lost their width: {narrowArray.native false}")
   let (_, storageArray) ← parse "function(uint256[] storage pointer) internal returns(uint256)"
   unless storageArray.parameters == [Ty.storageArray (.word false ⟨31, by decide⟩)] do
     throw (IO.userError "storage-array parameter location lost")
@@ -58,6 +63,7 @@ example (external : Bool) (parameters returns : List Ty) :
     throw (IO.userError "struct parameters lost their nominal identity or location")
   for source in ["function(uint256[] calldata) internal returns(uint256)",
       "function(struct C.P calldata) internal returns(uint256)",
+      "function(enum C.E[] memory) internal returns(uint256)",
       "function(bytes1[] memory) internal returns(uint256)",
       "function(uint256[][] memory) internal returns(uint256)",
       "function(function() internal[] memory) internal returns(uint256)"] do

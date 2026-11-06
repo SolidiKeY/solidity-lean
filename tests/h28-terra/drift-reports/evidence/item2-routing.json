@@ -1,0 +1,3553 @@
+[
+  {
+    "id": "identifiers",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/Shadowing.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/source-shadowing.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/dafny-verification.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "comments",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "numericLiterals",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "stringLiterals",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "unicodeLiterals",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "hexLiterals",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "addressLiterals",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "pragmaVersion",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "pragmaAbicoder",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "pragmaOther",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "sourceUnits",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SourceUnits.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/source-units.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "imports",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SourceUnits.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/source-units.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "contracts",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "interfaces",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "libraries",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/LibraryTryFrame.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/LibraryTryImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTrySourceIR.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "inheritance",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "overrideDeclarations",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/EntryPointsLeft.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsLeft.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsAdmission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/entry-points-left.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/declarations-metadata.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functions",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/DeclarationMetadata.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "freeFunctions",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "constructors",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "modifiers",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "modifierPlaceholder",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "receiveFunction",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/EntryPointsLeft.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsLeft.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsAdmission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/entry-points-left.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/declarations-metadata.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "fallbackFunction",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/EntryPointsLeft.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsLeft.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsAdmission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/entry-points-left.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/declarations-metadata.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "visibility",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "stateMutability",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "stateVariables",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "constants",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "immutables",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "publicGetters",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Getters.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PublicGetters.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/public-getters.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/EntryPointsLeft.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsLeft.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/upstream/EntryPointsAdmission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/entry-points-left.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/declarations-metadata.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "structDeclarations",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "enumDeclarations",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "valueTypeDeclarations",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "errorDeclarations",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SourceUnits.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/source-units.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "eventDeclarations",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "usingFor",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SourceUnits.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/source-units.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "operatorAliases",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/OperatorAliasesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/numeric-operators.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "integerTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "addressTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "fixedBytesTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "dynamicBytesType",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "stringType",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "dynamicArrays",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "fixedArrays",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "mappings",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "structTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "enumTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "valueTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "internalFunctionTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "externalFunctionTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "tupleTypes",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "storageLocation",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "memoryLocation",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "calldataLocation",
+    "evidence": [
+      {
+        "path": "Solidity/AST.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "recursiveTypes",
+    "evidence": [
+      {
+        "path": "Solidity/TypeGraph.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/RecursiveStorage.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/recursive-types.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "names",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "tupleExpressions",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "inlineArrays",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Syntax/Elab/Lower.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Syntax/Elab/Arms.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/Aggregates.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AggregatesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/aggregates.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "memberAccess",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "indexAccess",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "rangeAccess",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AggregateSlices.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/aggregates.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Syntax/Elab/SliceCopy.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SliceReferenceCopies.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/calldata-slice-copies.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "unaryArithmetic",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "increments",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "deleteExpression",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "arithmetic",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "bitwise",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "shifts",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "comparisons",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "shortCircuit",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "conditional",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "assignment",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "compoundAssignment",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "explicitConversions",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "implicitConversions",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "structConstruction",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "namedArguments",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "newMemory",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functionCalls",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "callOptions",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "metaTypeExpression",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Grammar.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "blocks",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/Shadowing.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/source-shadowing.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/dafny-verification.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "uncheckedBlock",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "variableDeclarations",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "expressionStatements",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "whileStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/LoopInvariantWk.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/QuantifiedDiamond.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/loops.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "forStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/LoopInvariantWk.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/QuantifiedDiamond.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/loops.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "doWhileStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "continueStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "returnStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "tryStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/LibraryTryFrame.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/LibraryTryImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTrySourceIR.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "catchClauses",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/LibraryTryFrame.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/LibraryTryImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTrySource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTryControls.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/LibraryTrySourceIR.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/RevertData.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/DataIn.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/TryConditions.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "revertStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "emitStatement",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "canonicalRethrow",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Scoped.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "assertBuiltin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "requireBuiltin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "revertBuiltin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "addmodBuiltin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "mulmodBuiltin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "keccakBuiltin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "sha256Builtin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "ripemd160Builtin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "ecrecoverBuiltin",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Secp256k1.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/Heap.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/Recovery.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "wrapUnwrap",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "bytesConcat",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "stringConcat",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "msgValue",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/State.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "thisAddress",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/State.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "addressBalance",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/State.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "internalCalls",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "recursiveCalls",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "externalTypedCalls",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "externalSelfCalls",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "extensionCalls",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functionValues",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "valueOption",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "sendTransfer",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/PaymentWitness.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/CallbackSound/Payments.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentRules.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/PaymentConditions.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/payment-reference.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/diamond-payments.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/PaymentWorld.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/PaymentPlan.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/PaymentImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Tools/PaymentReplay.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentSource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/payment-source.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "emptyDataValueCall",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "newContract",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/ContractWorld.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/WorldImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/ContractWorldSource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/ContractWorldCertificates.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "creationTry",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/ContractWorld.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/WorldImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/ContractWorldSource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/ContractWorldCertificates.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/CreationTryFrame.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/CreationTryImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/CreationTrySource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/CreationTrySourceIR.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "callbackSemantics",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/PaymentWitness.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/CallbackSound/Payments.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentRules.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentCorpus.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Calculus/PaymentConditions.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/PaymentConditions.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/payment-reference.test.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/diamond-payments.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "externalLibraryCalls",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/ContractWorld.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/WorldImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/ContractWorldSource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/ContractWorldCertificates.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "abiEncode",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "abiEncodePacked",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "abiEncodeWithSelector",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab/Lower.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Syntax/Elab/Arms.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "abiEncodeWithSignature",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab/Lower.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Syntax/Elab/Arms.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "abiEncodeCall",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab/Lower.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Syntax/Elab/Arms.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "abiDecode",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/abi-hashes.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "typeBounds",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functionSelector",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab/Values.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/DeclarationMetadata.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functionAddress",
+    "evidence": [
+      {
+        "path": "Solidity/Syntax/Elab/Values.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Contract.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/DeclarationMetadata.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "arrayLength",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "arrayPush",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "arrayPushReference",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "arrayPop",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "storageCopy",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "memoryAliasing",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "storageAliasing",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "deleteMappingTails",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "danglingReferences",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Ops.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "transientState",
+    "evidence": [
+      {
+        "path": "Solidity/Semantics/Storage/Anon.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/Lifetime.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/TransientStorage.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/TransientWorld.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/TransientWorld.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/WorldImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/TransientWorldSource.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/check-transient-world-vectors.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "checkedArithmetic",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "uncheckedArithmetic",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "evaluationOrder",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "exactConstants",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "defaultInitialization",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "referenceCopyRules",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/Aggregates.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/aggregates.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "panicCodes",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/calls-exceptions.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SelfPowerData.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/SelfPowerData.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "revertPayloads",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/calls-exceptions.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SelfPowerData.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "tests/solc/SelfPowerData.sol",
+        "presentInSelectedCorpus": false,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "rollback",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "abiEntryValidation",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "constructorLifetime",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "nonpayableEntry",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "staticCallRestriction",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "termination",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "worldAssumptions",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "typeValidation",
+    "evidence": [
+      {
+        "path": "docs/solc-alignment.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "featureDetection",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "docs/feature-work/source-admission.md",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "creationCode",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/solc-code.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "runtimeCode",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/Source.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "scripts/solc-code.mjs",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "logicalStorageBase",
+    "evidence": [
+      {
+        "path": "Solidity/Frontend/SolcJson/Admission.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      },
+      {
+        "path": "Solidity/Semantics/Storage/Anon.lean",
+        "presentInSelectedCorpus": true,
+        "ownerHints": [],
+        "verdict": "owner-review-required"
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "fixedPoint",
+    "evidence": [],
+    "verdict": "owner-review-required"
+  }
+]

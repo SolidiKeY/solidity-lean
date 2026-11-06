@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean:Solidity.Backend.StorageOps.RecursivePathRepresentation.capture_success": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean:Solidity.Backend.StorageOps.RecursivePathRepresentation.copy_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean:Solidity.Backend.StorageOps.RecursivePathRepresentation.copy_at_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean:Solidity.Backend.StorageOps.RecursivePathRepresentation.copy_at_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean:Solidity.Backend.StorageOps.RecursivePathRepresentation.frame_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean:Solidity.Backend.StorageOps.RecursivePathRepresentation.header_frame_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean:Solidity.Backend.StorageOps.RecursivePathRepresentation.saved_after_copy": [
+  "Quot.sound",
+  "propext"
+ ]
+}

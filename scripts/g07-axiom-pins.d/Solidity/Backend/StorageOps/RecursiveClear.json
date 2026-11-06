@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.clearArrayPrefix_complete": [],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.clearArrayPrefix_progress": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.clearArrayPrefix_restart": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.clearArrayPrefix_unvisited": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.recursiveClear_eq_clear": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.recursiveClear_header": [],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.recursiveClear_idem": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.recursiveClear_mapping": [],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.recursiveClear_mapping_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.recursiveClear_tail": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClear.lean:Solidity.Backend.StorageOps.recursiveClearSlot_eq_clear": [
+  "Quot.sound",
+  "propext"
+ ]
+}

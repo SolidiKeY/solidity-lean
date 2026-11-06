@@ -455,7 +455,7 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
   have ha : (call.wk h).addr.evalT (σ.lift h d) = call.addr.evalT σ := Simple.evalT_wk h σ d _
   cases he with
   | trySelfOk hz hs hc hp =>
-    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets.toRet) sbody h σ d hc
     cases v with
     | halt _ => cases hr
     | violated => cases hr
@@ -468,12 +468,12 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
       exact CWkRel.cat _ d' hd (CWkRel.drop ((Thin.Over.append h ρ).trans
         (Prog.wk_over ok (Thin.keepAll ρ h))) hr')
   | trySelfHalt hz hs hc h1 h2 h3 =>
-    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets.toRet) sbody h σ d hc
     cases v <;> cases hr
     exact ⟨_, ExecS.trySelfHalt (call := call.wk h) (by rw [ha]; exact hz)
       (by rw [ha]; exact hs) hv h1 h2 h3, rfl⟩
   | trySelfViolated hz hs hc =>
-    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets.toRet) sbody h σ d hc
     cases v <;> try cases hr
     exact ⟨_, ExecS.trySelfViolated (call := call.wk h) (by rw [ha]; exact hz)
       (by rw [ha]; exact hs) hv, trivial⟩
@@ -496,20 +496,20 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
     obtain ⟨u, hu, hr⟩ := herr h σ d hp
     exact ⟨_, ExecS.tryError (by rw [ha]; exact hsf) hu, CWkRel.drop (Prog.wk_over err h) hr⟩
   | trySelfError hz hs hc hp =>
-    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets.toRet) sbody h σ d hc
     cases v <;> cases hr
     obtain ⟨u, hu, hr⟩ := herr h σ d hp
     exact ⟨_, ExecS.trySelfError (call := call.wk h) (by rw [ha]; exact hz)
       (by rw [ha]; exact hs) hv hu, CWkRel.drop (Prog.wk_over err h) hr⟩
   | trySelfOther hz hs hc he hp =>
-    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets.toRet) sbody h σ d hc
     cases v <;> cases hr
     obtain ⟨u, hu, hr⟩ := hoth h σ d hp
     exact ⟨_, ExecS.trySelfOther (call := call.wk h) (by rw [ha]; exact hz)
       (by rw [ha]; exact hs) hv he hu, CWkRel.drop (Prog.wk_over other h) hr⟩
   | trySelfPanic hz hs hc he hp =>
     rename_i v u e₀
-    obtain ⟨w, hw, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    obtain ⟨w, hw, hr⟩ := call_wk J call.fn sargs (.rets rets.toRet) sbody h σ d hc
     cases w <;> cases hr
     obtain ⟨u', hu, hr⟩ := hpnc (Thin.keepAll κ h)
       (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) (TEnv.append κ (code.decodeT v) d) hp

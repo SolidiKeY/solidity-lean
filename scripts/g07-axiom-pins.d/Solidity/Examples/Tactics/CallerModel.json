@@ -1,0 +1,47 @@
+{
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.exit_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.exit_staticOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.lock_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.lock_setX": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.lock_staticOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.open_setX": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.open_staticOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.setX_guards": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.setX_reachAny": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

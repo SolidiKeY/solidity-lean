@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopTransportControls.lean:Solidity.Backend.StorageOps.NestedPopTransport.Controls.absent_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransportControls.lean:Solidity.Backend.StorageOps.NestedPopTransport.Controls.boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransportControls.lean:Solidity.Backend.StorageOps.NestedPopTransport.Controls.bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransportControls.lean:Solidity.Backend.StorageOps.NestedPopTransport.Controls.collision_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransportControls.lean:Solidity.Backend.StorageOps.NestedPopTransport.Controls.empty_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransportControls.lean:Solidity.Backend.StorageOps.NestedPopTransport.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransportControls.lean:Solidity.Backend.StorageOps.NestedPopTransport.Controls.wrong_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

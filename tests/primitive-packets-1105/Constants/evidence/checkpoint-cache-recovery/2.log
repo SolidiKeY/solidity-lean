@@ -1,0 +1,216 @@
+⚠ [2/3200] Replayed Solidity.AST
+warning: Solidity/AST.lean:355:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+⚠ [21/3200] Replayed Solidity.Source.Ctor
+warning: Solidity/Source/Ctor.lean:701:52: This simp argument is unused:
+  List.mem_singleton
+
+Hint: Omit it from the simp argument list.
+  simp only [Syn.ctor, Excl.ctors, List.mem_cons, L̵i̵s̵t̵.̵m̵e̵m̵_̵s̵i̵n̵g̵l̵e̵t̵o̵n̵,̵ ̵true_or, or_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Source/Ctor.lean:720:52: This simp argument is unused:
+  List.mem_singleton
+
+Hint: Omit it from the simp argument list.
+  simp only [Syn.ctor, Excl.ctors, List.mem_cons, L̵i̵s̵t̵.̵m̵e̵m̵_̵s̵i̵n̵g̵l̵e̵t̵o̵n̵,̵ ̵true_or, or_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ℹ [44/3200] Replayed Solidity.Backend.AbiWorld.LibraryResultPacket
+info: Solidity/Backend/AbiWorld/LibraryResultPacket.lean:59:0: 'Solidity.Backend.AbiWorld.LibraryResultPacket.encoded_values' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/LibraryResultPacket.lean:60:0: 'Solidity.Backend.AbiWorld.LibraryResultPacket.length' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/LibraryResultPacket.lean:61:0: 'Solidity.Backend.AbiWorld.LibraryResultPacket.marker' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/LibraryResultPacket.lean:62:0: 'Solidity.Backend.AbiWorld.LibraryResultPacket.offset' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/LibraryResultPacket.lean:63:0: 'Solidity.Backend.AbiWorld.LibraryResultPacket.payload' depends on axioms: [propext, Quot.sound]
+⚠ [65/3200] Replayed Solidity.Counterexamples.DeleteFamilyGenericOverlap
+warning: Solidity/Counterexamples/DeleteFamilyGenericOverlap.lean:141:4: Try `simp at h` instead of `simpa using h`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: Solidity/Counterexamples/DeleteFamilyGenericOverlap.lean:183:4: Try `simp at h` instead of `simpa using h`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+ℹ [95/3200] Replayed Solidity.Frontend.StatementGrammarH28.Balance
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:125:0: 'Solidity.Frontend.StatementGrammarH28.balanced_scan_frame' depends on axioms: [propext]
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:126:0: 'Solidity.Frontend.StatementGrammarH28.close_after_balanced' depends on axioms: [propext]
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:127:0: 'Solidity.Frontend.StatementGrammarH28.balanced_braced_split' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:128:0: 'Solidity.Frontend.StatementGrammarH28.balanced_flatten' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:129:0: 'Solidity.Frontend.StatementGrammarH28.balanced_braced_list_unique' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:130:0: 'Solidity.Frontend.StatementGrammarH28.block_boundary_split' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:131:0: 'Solidity.Frontend.StatementGrammarH28.empty_block_boundary' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/Balance.lean:132:0: 'Solidity.Frontend.StatementGrammarH28.unmatched_close_not_balanced' depends on axioms: [propext]
+ℹ [96/3200] Replayed Solidity.Frontend.StatementGrammarH28.NearestElse
+info: Solidity/Frontend/StatementGrammarH28/NearestElse.lean:79:0: 'Solidity.Frontend.StatementGrammarH28.openSpine_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/NearestElse.lean:80:0: 'Solidity.Frontend.StatementGrammarH28.nearestElse_node' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/NearestElse.lean:81:0: 'Solidity.Frontend.StatementGrammarH28.nearestElse' depends on axioms: [propext]
+info: Solidity/Frontend/StatementGrammarH28/NearestElse.lean:82:0: 'Solidity.Frontend.StatementGrammarH28.block_closed' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/NearestElse.lean:83:0: 'Solidity.Frontend.StatementGrammarH28.doWhile_closed' does not depend on any axioms
+ℹ [97/3200] Replayed Solidity.Frontend.StatementGrammarH28.ElsePosition
+info: Solidity/Frontend/StatementGrammarH28/ElsePosition.lean:111:0: 'Solidity.Frontend.StatementGrammarH28.nearestSlot_unique' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/ElsePosition.lean:112:0: 'Solidity.Frontend.StatementGrammarH28.nearestSlot_exists_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/ElsePosition.lean:113:0: 'Solidity.Frontend.StatementGrammarH28.nearestSlot_unique_exists' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/ElsePosition.lean:114:0: 'Solidity.Frontend.StatementGrammarH28.prec_else_no_then_slot' depends on axioms: [propext, Quot.sound]
+ℹ [103/3200] Replayed Solidity.Frontend.TypeGrammarH28.Layouts
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:54:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:55:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:56:0: 'Solidity.Frontend.TypeGrammarH28.elem_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:57:0: 'Solidity.Frontend.TypeGrammarH28.userType_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:58:0: 'Solidity.Frontend.TypeGrammarH28.elem_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:59:0: 'Solidity.Frontend.TypeGrammarH28.userType_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:60:0: 'Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:61:0: 'Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout' does not depend on any axioms
+⚠ [129/3715] Replayed Solidity.Source.Observe
+warning: Solidity/Source/Observe.lean:79:47: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+ℹ [133/3715] Replayed Solidity.Backend.Scalar.Heights
+info: Solidity/Backend/Scalar/Heights.lean:198:0: 'Solidity.Backend.Scalar.run_capacity' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/Scalar/Heights.lean:199:0: 'Solidity.Backend.Scalar.prefix_capacity' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/Scalar/Heights.lean:201:0: 'Solidity.Backend.Scalar.step_height' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/Scalar/Heights.lean:202:0: 'Solidity.Backend.Scalar.run_height' depends on axioms: [propext, Quot.sound]
+ℹ [157/3715] Replayed Solidity.Frontend.StatementGrammarH28.YieldSplit
+info: Solidity/Frontend/StatementGrammarH28/YieldSplit.lean:88:0: 'Solidity.Frontend.StatementGrammarH28.block_yield_map' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/YieldSplit.lean:89:0: 'Solidity.Frontend.StatementGrammarH28.list_cons_yield_bind' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/YieldSplit.lean:90:0: 'Solidity.Frontend.StatementGrammarH28.block_yield_decompose' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/YieldSplit.lean:91:0: 'Solidity.Frontend.StatementGrammarH28.block_yield_of_items' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/YieldSplit.lean:92:0: 'Solidity.Frontend.StatementGrammarH28.list_yield_cons_decompose' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/StatementGrammarH28/YieldSplit.lean:93:0: 'Solidity.Frontend.StatementGrammarH28.list_yield_cons_of' does not depend on any axioms
+info: Solidity/Frontend/StatementGrammarH28/YieldSplit.lean:94:0: 'Solidity.Frontend.StatementGrammarH28.block_boundary_of_items' does not depend on any axioms
+ℹ [158/3715] Replayed Solidity.Frontend.TypeGrammarH28.Composition
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:220:0: 'Solidity.Frontend.TypeGrammarH28.exact_elem' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:221:0: 'Solidity.Frontend.TypeGrammarH28.exact_userType' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:222:0: 'Solidity.Frontend.TypeGrammarH28.exact_params_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:223:0: 'Solidity.Frontend.TypeGrammarH28.exact_params_cons' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:224:0: 'Solidity.Frontend.TypeGrammarH28.exact_no_length' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:225:0: 'Solidity.Frontend.TypeGrammarH28.exact_some_length' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:226:0: 'Solidity.Frontend.TypeGrammarH28.exact_array' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:227:0: 'Solidity.Frontend.TypeGrammarH28.exact_param' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:228:0: 'Solidity.Frontend.TypeGrammarH28.exact_mapping' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:229:0: 'Solidity.Frontend.TypeGrammarH28.exact_fnType' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:230:0: 'Solidity.Frontend.TypeGrammarH28.params_cons_decompose' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:231:0: 'Solidity.Frontend.TypeGrammarH28.exact_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:232:0: 'Solidity.Frontend.TypeGrammarH28.exact_layout_equivalent' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:233:0: 'Solidity.Frontend.TypeGrammarH28.exact_dynamic_depth' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:234:0: 'Solidity.Frontend.TypeGrammarH28.exact_empty_function' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:235:0: 'Solidity.Frontend.TypeGrammarH28.exact_nested_layout' does not depend on any axioms
+ℹ [159/3715] Replayed Solidity.Frontend.TypeGrammarH28.Counterexamples
+info: Solidity/Frontend/TypeGrammarH28/Counterexamples.lean:35:0: 'Solidity.Frontend.TypeGrammarH28.raw_yield_not_unique' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Counterexamples.lean:36:0: 'Solidity.Frontend.TypeGrammarH28.raw_counterexample_precedence' does not depend on any axioms
+ℹ [160/3715] Replayed Solidity.Frontend.TypeGrammarH28.ParserBasics
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:184:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.located_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:185:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.located_cons' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:186:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.located_one' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:187:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_eof' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:188:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_token_eof' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:189:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.payable_eof' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:190:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_single_projection' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:191:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.payable_projection' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:192:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_yield_eof' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:193:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_complete_ge' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:194:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.type_zero_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:195:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_zero_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:196:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.elementary_one_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:197:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_stop' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:198:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_dynamic_step' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:199:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_dynamic_complete' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:200:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.located_append' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserBasics.lean:201:0: 'Solidity.Frontend.TypeGrammarH28.ParserBasic.raw_payable_no_yield' does not depend on any axioms
+✔ [177/3715] Built Solidity.Yul.Checks.Shifts.Part03 (66s)
+✔ [178/3715] Built Solidity.Yul.Checks.Bytes (30s)
+✔ [179/3715] Built Solidity.Yul.Checks.Powers (2.1s)
+✔ [180/3715] Built Solidity.Yul.WordLaws (281ms)
+ℹ [181/3715] Built Solidity.Yul.Compilation.Allocation (843ms)
+info: Solidity/Yul/Compilation/Allocation.lean:112:0: 'Solidity.Yul.Compilation.Slots.injective' depends on axioms: [propext, Quot.sound]
+info: Solidity/Yul/Compilation/Allocation.lean:113:0: 'Solidity.Yul.Compilation.Slots.extend_at' depends on axioms: [propext, Quot.sound]
+info: Solidity/Yul/Compilation/Allocation.lean:114:0: 'Solidity.Yul.Compilation.Frame.caller_below_locals' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Yul/Compilation/Allocation.lean:115:0: 'Solidity.Yul.Compilation.label_relocate' depends on axioms: [propext, Quot.sound]
+ℹ [182/3715] Built Solidity.Yul.Compilation.Relocation (875ms)
+info: Solidity/Yul/Compilation/Relocation.lean:154:0: 'Solidity.Yul.Compilation.relocated_offsets' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Yul/Compilation/Relocation.lean:155:0: 'Solidity.Yul.Compilation.relocated_jump' depends on axioms: [propext, Classical.choice, Quot.sound]
+✔ [184/3715] Built Solidity.Yul.Composition.CorrectnessInstances (566ms)
+✔ [185/3715] Built Solidity.Yul.Static (848ms)
+ℹ [186/3715] Built Solidity.Backend.AbiWorld.ErrorReadWindow (586ms)
+info: Solidity/Backend/AbiWorld/ErrorReadWindow.lean:82:0: 'Solidity.Backend.AbiWorld.ErrorReadWindow.unpadded' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/ErrorReadWindow.lean:83:0: 'Solidity.Backend.AbiWorld.ErrorReadWindow.source_prefix' depends on axioms: [propext]
+info: Solidity/Backend/AbiWorld/ErrorReadWindow.lean:84:0: 'Solidity.Backend.AbiWorld.ErrorReadWindow.prefix_readback' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/ErrorReadWindow.lean:85:0: 'Solidity.Backend.AbiWorld.ErrorReadWindow.emitted' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Backend/AbiWorld/ErrorReadWindow.lean:86:0: Solidity.Backend.AbiWorld.ErrorReadWindow.emitted (bs suffix : List UInt8) (address : Nat)
+  (tail : Solidity.Backend.Program) (machine : Solidity.Backend.Failure.Slice.Machine)
+  (fits :
+    Solidity.Backend.Failure.Fits address (List.take (68 + bs.length) (Solidity.Semantics.encodeError bs) ++ suffix))
+  (stack : machine.stack.length + 2 ≤ 1024) :
+  have data := List.take (68 + bs.length) (Solidity.Semantics.encodeError bs) ++ suffix;
+  Solidity.Backend.Failure.Slice.checkedRun
+        (Solidity.Backend.Failure.emit address (Solidity.Backend.Failure.Input.custom data) ++ tail) machine =
+      some
+        ({ stack := machine.stack, memory := Solidity.Backend.Failure.Slice.putBytes machine.memory address data },
+          some (Solidity.Roadmap.Outcome.revert data)) ∧
+    Solidity.Backend.Failure.Slice.getBytes (Solidity.Backend.Failure.Slice.putBytes machine.memory address data)
+          address data.length =
+        data ∧
+      Solidity.Semantics.decodeError
+          (Solidity.Backend.Failure.Slice.getBytes (Solidity.Backend.Failure.Slice.putBytes machine.memory address data)
+            address data.length) =
+        some bs
+✔ [187/3715] Built Solidity.Backend.AbiEntry.EntryTransport (736ms)
+✔ [188/3715] Built Solidity.Backend.AbiEntry.RejectionInterface (290ms)
+✔ [189/3715] Built Solidity.Backend.Failure.SliceChecks (3.6s)
+✔ [190/3715] Built Solidity.Backend.Failure.Composition (341ms)
+ℹ [191/3715] Built Solidity.Backend.AbiWorld.PacketPrefix (995ms)
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:142:0: 'Solidity.Backend.AbiWorld.PacketPrefix.take_split' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:143:0: 'Solidity.Backend.AbiWorld.PacketPrefix.boundary' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:144:0: 'Solidity.Backend.AbiWorld.PacketPrefix.boundary_bytes' depends on axioms: [propext, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:145:0: 'Solidity.Backend.AbiWorld.PacketPrefix.length_push' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:146:0: 'Solidity.Backend.AbiWorld.PacketPrefix.offset_push' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:147:0: 'Solidity.Backend.AbiWorld.PacketPrefix.byte_push' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:148:0: 'Solidity.Backend.AbiWorld.PacketPrefix.byte_offset_push' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:149:0: 'Solidity.Backend.AbiWorld.PacketPrefix.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Backend/AbiWorld/PacketPrefix.lean:151:0: 'Solidity.Backend.AbiWorld.PacketPrefix.after_terminal' depends on axioms: [propext, Classical.choice, Quot.sound]
+✔ [192/3715] Built Solidity.Backend.Failure.Unwind (382ms)
+✔ [193/3715] Built Solidity.Yul.Views.Inputs (509ms)
+✔ [194/3715] Built Solidity.Semantics.CtxEquiv.Unify (754ms)
+✔ [195/3715] Built LeanTeX.Builtins (3.6s)
+✔ [197/3715] Built Solidity.Precompiles.PointEval (7.6s)
+✔ [198/3715] Built Solidity.Frontend.LiteralGrammarH28.HexEncoding (1.0s)
+ℹ [199/3715] Built Solidity.Frontend.TypeGrammarH28.ParserChecks (999ms)
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:168:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.checked_category_converse' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:169:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_located_complete' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:170:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_parseCat_complete' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:171:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.parseType_elem_complete' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:172:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.artificial_payable_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:173:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.parseType_elem_iff' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:174:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.witness_locations_tokens' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:175:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_tokens_injective' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:176:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_yield_unique' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/ParserChecks.lean:177:0: 'Solidity.Frontend.TypeGrammarH28.ParserCheck.checked_category_iff' depends on axioms: [propext]
+ℹ [200/3715] Built Solidity.Frontend.StatementGrammarH28.FixtureData (1.2s)
+info: Solidity/Frontend/StatementGrammarH28/FixtureData.lean:271:0: 'Solidity.Frontend.StatementGrammarH28.statement_fixture_constructor_inventory' does not depend on any axioms
+✔ [201/3715] Built Solidity.Frontend.Yul.Grammar (445ms)
+✔ [202/3715] Built Solidity.Frontend.ExpressionUniqueness.Fixtures (7.0s)
+✔ [203/3715] Built Solidity.Frontend.Checked.TypeExampleCore (314ms)
+✔ [204/3715] Built Solidity.Frontend.Checked.Certificate (1.3s)
+✔ [205/3715] Built Solidity.Source.Infer (16s)
+✔ [206/3715] Built Solidity.Source.UserOps (1.4s)
+⚠ [207/3715] Built Solidity.Frontend.Static.Infer (4.9s)
+warning: Solidity/Frontend/Static/Infer.lean:308:16: unused variable `τ'`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: Solidity/Frontend/Static/Infer.lean:315:19: unused variable `τv`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+✔ [208/3715] Built Solidity.Source.Overloads (282ms)
+✔ [211/3715] Built Solidity.Frontend.Admission.NameResolutionRoots (479ms)
+✔ [212/3715] Built Solidity.Frontend.QualifiedUnits.Relation (715ms)
+✔ [213/3715] Built Solidity.Frontend.Static.Units (1.8s)
+✔ [214/3715] Built Solidity.Frontend.C3Exactness.Renaming (539ms)
+✔ [215/3715] Built Solidity.Frontend.C3Exactness.OrderObstruction (357ms)
+✔ [216/3715] Built Solidity.Frontend.C3Exactness.Admission (749ms)
+✔ [217/3715] Built Solidity.Yul.Views.Regions (409ms)
+✔ [218/3715] Built Solidity.Yul.Views.Widths (381ms)
+✔ [219/3715] Built Solidity.Backend.AbiEntry.Premises.CalldataViewExtensions (281ms)
+✔ [220/3715] Built Solidity.Source.StateExamples (684ms)
+✔ [221/3715] Built Solidity.Yul.World.Raw (682ms)
+✔ [222/3715] Built Solidity.Backend.Creation.Linking (513ms)
+✔ [223/3715] Built Solidity.Backend.LabelExec.Step (395ms)
+✔ [224/3715] Built Solidity.Backend.Creation.ExecutionChecks (664ms)
+✔ [225/3715] Built Solidity.Backend.Creation.Placement (650ms)

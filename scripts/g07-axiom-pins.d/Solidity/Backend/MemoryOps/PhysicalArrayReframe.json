@@ -1,0 +1,6 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalArrayReframe.lean:Solidity.Backend.MemoryOps.Physical.uint_array_cells_eq": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,175 @@
+{
+  "items": [
+    {
+      "snippet": "unfold digitsTail; simp only [hd, Bool.true_eq, ↓reduceIte, ih]",
+      "goals": [],
+      "diagnostics": [
+        {
+          "severity": "error",
+          "message": "No goals to be solved",
+          "line": 39,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "unexpected token '|'; expected command",
+          "line": 40,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `digit` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `separated` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `other` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `finalUnderscore` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `badUnderscore` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        }
+      ],
+      "timed_out": false,
+      "proof_status": null
+    },
+    {
+      "snippet": "rename_i b r ds rest h; cases r <;> simp only [digitsTail, hd, Bool.true_eq, ↓reduceIte, ih]",
+      "goals": [],
+      "diagnostics": [
+        {
+          "severity": "error",
+          "message": "No goals to be solved",
+          "line": 39,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `digit` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `separated` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `other` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `finalUnderscore` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `badUnderscore` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "unexpected token '|'; expected command",
+          "line": 40,
+          "column": 3,
+          "lean_tags": null
+        }
+      ],
+      "timed_out": false,
+      "proof_status": null
+    },
+    {
+      "snippet": "rw [digitsTail.eq_def]; simp only [hd, Bool.true_eq, ↓reduceIte, ih]",
+      "goals": [],
+      "diagnostics": [
+        {
+          "severity": "error",
+          "message": "No goals to be solved",
+          "line": 39,
+          "column": 7,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "unexpected token '|'; expected command",
+          "line": 40,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `digit` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `separated` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `other` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `finalUnderscore` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        },
+        {
+          "severity": "error",
+          "message": "Alternative `badUnderscore` has not been provided",
+          "line": 37,
+          "column": 3,
+          "lean_tags": null
+        }
+      ],
+      "timed_out": false,
+      "proof_status": null
+    }
+  ]
+}

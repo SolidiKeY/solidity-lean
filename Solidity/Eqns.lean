@@ -1,4 +1,5 @@
-import Lean
+import Lean.Meta.Eqns
+import Lean.Elab.Attributes
 
 /-!
 # Equation lemmas named by hand

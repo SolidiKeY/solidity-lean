@@ -1,6 +1,9 @@
 import Solidity.Evm.MemoryLocals
 import Solidity.Evm.MemoryStructSource
 import Solidity.Evm.MemoryStructDefault
+import Solidity.Evm.MemoryStructDefaultSource
+import Solidity.Evm.MemoryStructDefaultCode
+import Solidity.Evm.MemoryStructArrayChild
 import Solidity.Evm.MemoryStructCopySource
 import Solidity.Evm.MemoryPaths
 import Solidity.Evm.MemoryRefWrite
@@ -197,9 +200,19 @@ inductive StmtFrag (b : Nat) : {Γ Δ : Ctx} → Frag Γ → Frag Δ → Stmt C 
         (.declMem (.array (.prim p)) x none rfl rfl) code
   | allocateStruct {Γ : Ctx} (F : Frag Γ) (s : Name) (x : Var)
       (hd : (Ty.ref (.struct s)).defaultOkS = true) (hm : (Ty.ref (.struct s)).mapFree = true)
-      (hb : 0 < b) (hp : primitiveMembers (Semantics.structDef s) = true) :
+      (hb : 0 < b) (data : DefaultCode (.struct s))
+      (cert : finiteDefaultCells (.ref (.struct s)) = some data.cost ∧ data.root < data.cost ∧
+        DefaultPlanSound (.struct s) data.cost data.root data.code) :
       StmtFrag b F (F.push (.mem (.struct s)) .ok)
-        (.declMem (.struct s) x none hd hm) (declareStructCode (Γ := Γ) b s)
+        (.declMem (.struct s) x none hd hm)
+        (data.code ++ [.mstore (cell (b + Γ.length))])
+  | allocateArrayField {Γ : Ctx} (F : Frag Γ) {s f : Name} {p : PrimTy}
+      (src : MPath C Γ (.ref (.struct s)))
+      (hf : C.fieldType s f = some (.ref (.array (.prim p))))
+      (n : Simple C Γ .uint) (pointer : List Instr) (hp : PtrFrag b src pointer)
+      (hb : 0 < b) (hn : simpleIn n = true) :
+      StmtFrag b F F (.assignNew (.mem (.field src f hf)) n rfl)
+        (newArrayFieldCode b n pointer (fieldOffset (Semantics.structDef s) f))
   | copyStruct {Γ : Ctx} (F : Frag Γ) (s : Name) (x : Var) (root : Name)
       (hr : C.rootType root = some (.ref (.struct s)))
       (hm : (Ty.ref (.struct s)).mapFree = true)
@@ -263,8 +276,11 @@ inductive StmtFrag (b : Nat) : {Γ Δ : Ctx} → Frag Γ → Frag Δ → Stmt C 
   | deleteStruct {Γ : Ctx} (F : Frag Γ) {s : Name}
       (dst : Idx Γ (.mem (.struct s))) (hd : (Ty.ref (.struct s)).defaultOkS = true)
       (hm : (Ty.ref (.struct s)).mapFree = true) (hb : 0 < b)
-      (hp : primitiveMembers (Semantics.structDef s) = true) :
-      StmtFrag b F F (.deleteMem (.var dst hm) hd) (deleteStructCode b dst)
+      (data : DefaultCode (.struct s))
+      (cert : finiteDefaultCells (.ref (.struct s)) = some data.cost ∧ data.root < data.cost ∧
+        DefaultPlanSound (.struct s) data.cost data.root data.code) :
+      StmtFrag b F F (.deleteMem (.var dst hm) hd)
+        (data.code ++ [.mstore (cellOf b dst)])
   | deleteArrayField {Γ : Ctx} (F : Frag Γ) {s f : Name} {p : PrimTy}
       (src : MPath C Γ (.ref (.struct s))) (hf : C.fieldType s f = some (.ref (.array (.prim p))))
       (pointer : List Instr) (hs : PtrFrag b src pointer) (hb : 0 < b) :
@@ -275,9 +291,11 @@ inductive StmtFrag (b : Nat) : {Γ Δ : Ctx} → Frag Γ → Frag Δ → Stmt C 
       (src : MPath C Γ (.ref (.struct s))) (hf : C.fieldType s f = some (.ref (.struct t)))
       (hd : (Ty.ref (.struct t)).defaultOkS = true) (hm : (Ty.ref (.struct t)).mapFree = true)
       (pointer : List Instr) (hs : PtrFrag b src pointer) (hb : 0 < b)
-      (hp : primitiveMembers (Semantics.structDef t) = true) :
+      (data : DefaultCode (.struct t))
+      (cert : finiteDefaultCells (.ref (.struct t)) = some data.cost ∧ data.root < data.cost ∧
+        DefaultPlanSound (.struct t) data.cost data.root data.code) :
       StmtFrag b F F (.deleteMem (.loc (.field src f hf)) hd)
-        (clearReferenceCode pointer (allocateStructCode (structAllocationSize t))
+        (clearReferenceCode pointer data.code
           (fieldOffset (Semantics.structDef s) f))
   | deleteField {Γ : Ctx} (F : Frag Γ) {s f : Name} {p : PrimTy}
       (src : MPath C Γ (.struct s)) (hf : C.fieldType s f = some (.prim p)) (code : List Instr)
@@ -457,8 +475,16 @@ def compileStmt (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
     pure ⟨F.push (.mem R) .ok, _, .declarePathAlias F x src hm pointer.code pointer.cert⟩
   | .declMem (.struct s) x none hd hm =>
     if hb : 0 < b then
-      if hp : primitiveMembers (Semantics.structDef s) = true then
-        some ⟨F.push (.mem (.struct s)) .ok, _, .allocateStruct F s x hd hm hb hp⟩
+      match hc : defaultCode? (.struct s) with
+      | none => none
+      | some data => some ⟨F.push (.mem (.struct s)) .ok, _,
+          .allocateStruct F s x hd hm hb data (defaultCode_sound hc)⟩
+    else none
+  | @Solidity.Stmt.assignNew _ _ (.array (.prim _)) (.mem (.field src _ hf)) n _ =>
+    if hb : 0 < b then
+      if hn : simpleIn n = true then do
+        let pointer ← compilePtr b src
+        pure ⟨F, _, .allocateArrayField F src hf n pointer.code pointer.cert hb hn⟩
       else none
     else none
   | .declMem (.struct s) x (some (.copy (.loc (.root root hr)) _)) _ hm =>
@@ -515,9 +541,9 @@ def compileStmt (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
     else none
   | @Solidity.Stmt.deleteMem _ _ (.ref (.struct s)) (.var dst hm) hd =>
     if hb : 0 < b then
-      if hp : primitiveMembers (Semantics.structDef s) = true then
-        some ⟨F, _, .deleteStruct F dst hd hm hb hp⟩
-      else none
+      match hc : defaultCode? (.struct s) with
+      | none => none
+      | some data => some ⟨F, _, .deleteStruct F dst hd hm hb data (defaultCode_sound hc)⟩
     else none
   | @Solidity.Stmt.deleteMem _ _ (.ref (.array (.prim _))) (.loc (.field src _ hf)) _ =>
     if hb : 0 < b then do
@@ -526,11 +552,12 @@ def compileStmt (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) :
     else none
   | @Solidity.Stmt.deleteMem _ _ (.ref (.struct t)) (.loc (.field src f hf)) hd =>
     if hb : 0 < b then
-      if hp : primitiveMembers (Semantics.structDef t) = true then do
+      match hc : defaultCode? (.struct t) with
+      | none => none
+      | some data => do
         let pointer ← compilePtr b src
         pure ⟨F, _, .deleteStructField F src hf hd (MLoc.field src f hf).mapFree
-          pointer.code pointer.cert hb hp⟩
-      else none
+          pointer.code pointer.cert hb data (defaultCode_sound hc)⟩
     else none
   | @Solidity.Stmt.deleteMem _ _ (.prim p) (.loc (.field (.var dst hm) _ hf)) _ => do
     let value ← compileVal b F (deleteDefaultValue p)
@@ -638,6 +665,7 @@ def allocationExpr {Γ Δ : Ctx} (s : Stmt C Γ Δ) : Option (Simple C Γ .uint)
   match s with
   | .declMem _ _ (some rhs) _ _ => rhsAllocationExpr rhs
   | .rebindMem _ rhs => rhsAllocationExpr rhs
+  | @Solidity.Stmt.assignNew _ _ (.array (.prim _)) (.mem (.field ..)) n _ => some n
   | @Solidity.Stmt.deleteMem _ _ (.ref (.array (.prim _))) (.var _ _) _ => some (.lit 0 rfl)
   | _ => none
 
@@ -682,7 +710,7 @@ private def rawAllocationCostStmt {Γ Δ : Ctx} (s : Stmt C Γ Δ) (σ : State C
     | .error _ => 0
   | .declMem R _ init _ _ => match init with
     | none => match R with
-      | .struct s => structAllocationSize s
+      | .struct s => (finiteDefaultCellsComputed (.ref (.struct s))).getD 0
       | .array (.prim _) => 1
       | _ => 0
     | some (.copy (.loc (.root ..)) _) => match R with | .struct s => structAllocationSize s | _ => 0
@@ -694,11 +722,12 @@ private def rawAllocationCostStmt {Γ Δ : Ctx} (s : Stmt C Γ Δ) (σ : State C
     | rhs => match rhsAllocationExpr rhs with
         | some n => (n.evalT σ).word.val + 1
         | none => 0
-  | @Solidity.Stmt.deleteMem _ _ (.ref (.struct s)) (.var _ _) _ => structAllocationSize s
+  | @Solidity.Stmt.deleteMem _ _ (.ref (.struct s)) (.var _ _) _ =>
+    (finiteDefaultCellsComputed (.ref (.struct s))).getD 0
   | @Solidity.Stmt.deleteMem _ _ (.ref (.array (.prim _))) (.loc (.field src ..)) _ =>
     match src.mvalT σ with | .ok _ => 1 | .error _ => 0
   | @Solidity.Stmt.deleteMem _ _ (.ref (.struct t)) (.loc (.field src ..)) _ =>
-    match src.mvalT σ with | .ok _ => structAllocationSize t | .error _ => 0
+    match src.mvalT σ with | .ok _ => (finiteDefaultCellsComputed (.ref (.struct t))).getD 0 | .error _ => 0
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal ..
   | .declStorage .. | .opAssign .. | .incDec .. | .assignIncDec ..
   | .assignLocalPush .. | .push .. | .pop .. | .transfer ..
@@ -1001,20 +1030,18 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
       (TRun.declMem (.array (.prim p)) none rfl σ) (run code m)
     rw [defaultArray_eq_allocate]
     exact ih h hcap ha
-  | allocateStruct F s x hd hm hb hp =>
+  | allocateStruct F s x hd hm hb data cert =>
     intro σ base m h hcap ha
-    rcases ha with hz | ⟨_, cursor, hal, hspace⟩
-    · change structAllocationSize s = 0 at hz
-      have hs : 1 ≤ structAllocationSize s := Nat.le_max_left _ _
-      omega
-    · have hn := defaultStruct_correct h hal hb hp hm hspace (statementEndCap hcap)
-      refine .inl ⟨⟨σ.allocPush (R := .struct s) (defaultFields (Semantics.structDef s) hp), List.prefix_append _ _⟩,
-        _, upd base σ.H.length cursor, hn.1, hn.2.1, hn.2.2.1, hn.2.2.2.2, ?_, ?_⟩
-      · exact fun r => allocationBase_old base cursor r
-      · intro c _ hc hcspace
-        have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
-        subst c
-        exact hn.2.2.2.1
+    let plan : DefaultPlan (.struct s) :=
+      ⟨data.cost, data.root, data.code, cert.1, cert.2.1, cert.2.2⟩
+    have hcost : allocationCostStmt (.declMem (.struct s) x none hd hm) σ = data.cost := by
+      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt,
+        if_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
+    rw [hcost] at ha ⊢
+    exact plan.declare_correct h hb hm (statementEndCap hcap) ha
+  | allocateArrayField F src hf n pointer hp hb hn =>
+    intro σ base m h hcap ha
+    exact newArrayField_correct h hb hp hf n hn ha
   | copyStruct F s x root hr hm hb hp loads plan =>
     intro σ base m h hcap ha
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
@@ -1075,20 +1102,14 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
     exact ih h hcap ha
   | deleteArray F dst code hs ih =>
     exact ih
-  | deleteStruct F dst hd hm hb hp =>
+  | deleteStruct F dst hd hm hb data cert =>
     intro σ base m h hcap ha
-    rcases ha with hz | ⟨_, cursor, hal, hspace⟩
-    · change structAllocationSize _ = 0 at hz
-      unfold structAllocationSize at hz
-      omega
-    · have hn := deleteStruct_correct h hal hb dst hp hm hspace
-      refine .inl ⟨⟨_, List.prefix_append _ _⟩,
-        _, upd base σ.H.length cursor, hn.1, hn.2.1, hn.2.2.1, hn.2.2.2.2, ?_, ?_⟩
-      · exact fun r => allocationBase_old base cursor r
-      · intro c _ hc hcspace
-        have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
-        subst c
-        exact hn.2.2.2.1
+    let plan : DefaultPlan _ := ⟨data.cost, data.root, data.code, cert.1, cert.2.1, cert.2.2⟩
+    have hcost : allocationCostStmt (.deleteMem (.var dst hm) hd) σ = data.cost := by
+      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt,
+        if_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
+    rw [hcost] at ha ⊢
+    exact plan.deleteLocal_correct h hb dst hm ha
   | deleteArrayField F src hf pointer hs hb =>
     intro σ base m h hcap ha
     obtain ⟨r, hr, _⟩ := hs.correct h
@@ -1105,24 +1126,15 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
         have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
         subst c
         exact hn.2.2.2.1
-  | deleteStructField F src hf hd hm pointer hs hb hp =>
-    rename_i parent child member
+  | deleteStructField F src hf hd hm pointer hs hb data cert =>
     intro σ base m h hcap ha
     obtain ⟨r, hr, _⟩ := hs.correct h
-    have hcost : allocationCostStmt (.deleteMem (.loc (.field src _ hf)) hd) σ = structAllocationSize child := by
-      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, hr, if_true]
+    let plan : DefaultPlan _ := ⟨data.cost, data.root, data.code, cert.1, cert.2.1, cert.2.2⟩
+    have hcost : allocationCostStmt (.deleteMem (.loc (.field src _ hf)) hd) σ = data.cost := by
+      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, hr,
+        if_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
     rw [hcost] at ha ⊢
-    rcases ha with hz | ⟨_, cursor, hal, hspace⟩
-    · unfold structAllocationSize at hz
-      omega
-    · have hn := deleteStructField_correct h hal hb hs r hr hf hp hm hspace
-      refine .inl ⟨⟨_, List.prefix_append _ _⟩, _, upd base σ.H.length cursor,
-        hn.1, hn.2.1, hn.2.2.1, hn.2.2.2.2, ?_, ?_⟩
-      · exact fun r => allocationBase_old base cursor r
-      · intro c _ hc hcspace
-        have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
-        subst c
-        exact hn.2.2.2.1
+    exact plan.deleteField_correct h hb hs r hr hf hm ha
   | deleteField F src hf code hs ih =>
     intro σ base m h hcap ha
     change GrowingResult L b frame 0 F σ base m (TRun.deleteMem (.loc (.field src _ hf)) σ) (run code m)

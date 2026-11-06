@@ -292,6 +292,12 @@ own (`CloseJ.budget`); fails, leaving the leaf as it was, where it does not
 close it. -/
 syntax "sol_close_join_steps" : tactic
 
+/-- Prepare a specification leaf with at least one joined local value, one
+update at a time (`CloseJ.prepareSteps`). Leaves arithmetic goals for the
+caller's solver. Global state writes keep the whole-leaf preparation path.
+Bounded by `CloseJ.prepBudget`; restores the goal if preparation fails. -/
+syntax "sol_close_join_prep" : tactic
+
 /-- A leaf whose joined values (`{x := c ? t : e}`, `ifElseJoin`) are split
 back into their cases, KeY's `ifthenelse_split` on the antecedent
 (`Fml.SplitTo.here`, `Calculus/LeafSplit.lean`): one goal per case, each
@@ -313,6 +319,14 @@ syntax "sol_close_ite_split_many" : tactic
 of `sol_close`'s alternatives that evaluate a leaf whole, which on such a
 leaf run past the heartbeats rather than fail. -/
 syntax "sol_close_few_joins" : tactic
+
+/-- Read a primitive anonymous loop frame through proved fresh intrinsic locals,
+within the existing sequential closer budget. -/
+syntax "sol_close_anon_steps" : tactic
+
+/-- The automatic anon attempt, restricted to joined anonymous leaves.
+Zero-join leaves retain the previous closer order. -/
+syntax "sol_close_joined_anon_steps" : tactic
 
 /-- `sol_close`'s last pass, on goals with no state left: the arithmetic
 (`omega`, `grind`), with the witnesses' ranges, an `Option` read split once,
@@ -355,6 +369,13 @@ macro "sol_close_finish" : tactic => `(tactic|
        grind [Int.tmod_lt_of_pos, Int.lt_tmod_of_pos, Int.tmod_nonneg, Close.tmod_nonpos,
          Int.tdiv_eq_ediv_of_nonneg]))
 
+/-- Exact shared call-family leaf closure; implementation in CloseCallSharing. -/
+syntax (name := tacticSol_close_call_shared) "sol_close_call_shared" : tactic
+/-- Internal plain-context route, before generic steps. -/
+syntax (name := tacticSol_close_call_shared_plain) "sol_close_call_shared_plain" : tactic
+/-- Internal joined-context route, after existing joined steps. -/
+syntax (name := tacticSol_close_call_shared_joined) "sol_close_call_shared_joined" : tactic
+
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
 (`Calculus/Close.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s
 steps of the same names).  Run `sol_symex` first; with no goal left it does
@@ -364,6 +385,8 @@ syntax "sol_close" : tactic
 macro_rules
   | `(tactic| sol_close) => `(tactic|
   all_goals first
+  -- Joined primitive anonymous frames: bind/copy/pop before later reads.
+  | sol_close_joined_anon_steps
   -- a leaf of one or two joined values that are not accumulations: back
   -- into the cases the walk's split would have left, each closed as such a
   -- leaf
@@ -373,6 +396,10 @@ macro_rules
   -- a leaf whose equations read a storage alias (an `ensures` of a returned
   -- alias): read in the Theory, the alias at the path it holds; else as below
   | sol_close_alias
+  -- Large plain call summaries are shared before the generic step path.
+  | sol_close_call_shared_plain
+  -- Large joined call summaries also avoid generic per-operation expansion.
+  | sol_close_call_shared_joined
   -- a leaf of many joined values: one update at a time, each value named
   -- once with its interval (`sol_close_join_steps`)
   | sol_close_join_steps

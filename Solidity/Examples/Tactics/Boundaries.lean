@@ -15,7 +15,7 @@ open Semantics Evm
 
 /-- `ping(uint(7), int(7), true)` retains all three argument types. -/
 private def ping : ExtCall StandardExample [] :=
-  ⟨.lit 9 rfl, "ping", [⟨.uint, .lit 7 rfl⟩, ⟨.int, .lit 7 rfl⟩, ⟨.bool, .bool true⟩]⟩
+  ⟨.lit 9 rfl, "ping", [⟨.uint, .lit 7 rfl⟩, ⟨.int, .lit 7 rfl⟩, ⟨.bool, .bool true⟩], .call, .unknown⟩
 
 /-- The interpreter passes the typed values directly to the external-call key. -/
 example : ping.keyT (State.init StandardExample) =

@@ -1,0 +1,72 @@
+{
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.Controls.actual_prefix_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.Controls.failure_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.Controls.order_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.Controls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.Controls.overlap_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.Controls.sequence_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.range_readLen_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.range_then_array": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.readAt_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.readCell_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.readCell_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.readLen_clearOp_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.readLen_log_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceReadFrames.lean:Solidity.Backend.StorageOps.SourceReadFrames.readLen_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

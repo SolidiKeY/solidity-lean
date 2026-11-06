@@ -99,7 +99,7 @@ def callVal {Γ ps Γf Γ₁ Γ₀ : Ctx} (m : Modality) (f : Name) (args : Args
     (.push (Ext.append Γ ps)) (Stmt.runSt_callVal f args p r res body) ω κ φ
 
 def callRets {Γ ps rs Γf Γ₁ Γ₀ : Ctx} (m : Modality) (f : Name) (args : Args C Γ ps)
-    (bs : Binders rs) (body : Prog C (rs ++ ps) Γf)
+    (bs : RetBinders rs) (body : Prog C (rs ++ ps) Γf)
     (ω : Prog C (rs ++ Γ) Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     DeclarationReduction (.modal m (.cons (.call f args (.rets bs) body) ω) κ φ) :=
   inline m (.call f args (.rets bs) body)

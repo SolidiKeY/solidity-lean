@@ -1,0 +1,67 @@
+[
+  {
+    "command": [
+      "node",
+      "scripts/check-layers.mjs"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.23032479799803696,
+    "log": "tests/fullscope-20261104/vt1/evidence/gates-integrated-f77/0.log"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-trust.sh"
+    ],
+    "exit": 0,
+    "wall_seconds": 6.994141906998266,
+    "log": "tests/fullscope-20261104/vt1/evidence/gates-integrated-f77/1.log"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-axiom-pins.mjs"
+    ],
+    "exit": 0,
+    "wall_seconds": 7.633706409000297,
+    "log": "tests/fullscope-20261104/vt1/evidence/gates-integrated-f77/2.log"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/coord-tools/register.sh",
+      "--check"
+    ],
+    "exit": 1,
+    "wall_seconds": 0.05857769800059032,
+    "log": "tests/fullscope-20261104/vt1/evidence/gates-integrated-f77/3.log"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-orphans.mjs"
+    ],
+    "exit": 1,
+    "wall_seconds": 0.16402643699984765,
+    "log": "tests/fullscope-20261104/vt1/evidence/gates-integrated-f77/4.log"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-doc-paths.sh"
+    ],
+    "exit": 0,
+    "wall_seconds": 6.3956857249977475,
+    "log": "tests/fullscope-20261104/vt1/evidence/gates-integrated-f77/5.log"
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/coord-tools/module-map.py",
+      "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce"
+    ],
+    "exit": 1,
+    "wall_seconds": 0.048723782998422394,
+    "log": "tests/fullscope-20261104/vt1/evidence/gates-integrated-f77/6.log"
+  }
+]

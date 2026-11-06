@@ -1,0 +1,461 @@
+{
+  "schema": 1,
+  "authorization": "H44",
+  "delivery_base": "6cf853aea0417155aca29ddb91f1767d3f3a3cc4",
+  "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
+  "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
+  "index_sha256": "b41dddfc7338a3172a08237277d36713b6ac927efc6ce7c32e4141c18a00c905",
+  "file_count": 1029,
+  "uncompressed_bytes": 6450844,
+  "archive": "/workspace/h28-h44-bulk-61724cdf-strict/bulk-data.tar.gz",
+  "archive_sha256": "ccc5ed10c94d60fd0746756ff749ce145e08b3e2bac6d586a4137b91a4fcaa06",
+  "archive_bytes": 886528,
+  "backup_ref": "codex/solidity-h28-sol-20261104/mutation-testing-strict-snapshot-61724cdf",
+  "backup_bundle": "/workspace/h28-h44-bulk-61724cdf-strict/snapshot.bundle",
+  "backup_bundle_sha256": "431da8acb0496fd0b53969b90adf887ba8747b75d593e30b544dc4d878a6eebf",
+  "boundary": "Bulk data stays on this VM; exact bytes pinned by this manifest and hashed per-file index. No transfer or full assignment completion claimed.",
+  "off_git_file_count": 1012,
+  "retained_reviewable_support_files": [
+    "tests/h28-sol/mutation-testing/evidence/alias-pilot-64d7def6/verify-pack.py",
+    "tests/h28-sol/mutation-testing/evidence/bounds-pilot-e852854d/verify-pack.py",
+    "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/verify-pack.py",
+    "tests/h28-sol/mutation-testing/evidence/h35-vm-build/archive-verify.py",
+    "tests/h28-sol/mutation-testing/evidence/payment-pilot-5b2317f3/verify-pack.py",
+    "tests/h28-sol/mutation-testing/evidence/pop-delete-pilot-5b488a11/verify-pack.py",
+    "tests/h28-sol/mutation-testing/evidence/push-pilot-ea111ccf/verify-pack.py",
+    "tests/h28-sol/mutation-testing/evidence/rebase-pilot-f664b046/verify-pack.py",
+    "tests/h28-sol/mutation-testing/manifests/alias-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/bounds-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/callback-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/division-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/overflow-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/payment-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/pop-delete-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/push-pilot.json",
+    "tests/h28-sol/mutation-testing/manifests/runner-pilot.json"
+  ],
+  "validation": {
+    "archive": "/workspace/h28-h44-validation-9863cd53/validation.tar.gz",
+    "sha256": "4beb9afcf794973c558d9ac2b5d15bc3ec6f638780e2a93d6b752f297510c6ea",
+    "bytes": 16514,
+    "proof_input_head": "9863cd532396595cccd57ab021cbb8e398f9c0a2",
+    "files": 14
+  },
+  "callback_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-callback-export-9863cd53/proof-worlds.tar.gz",
+    "sha256": "15b179909a17ed80e7e29c8b356f9fbbb7f25f53baaeb917903ce7e1d8154d5d",
+    "bytes": 6035778,
+    "archive_seconds": 5.645620486997359,
+    "process_maxrss_kib": 17280,
+    "catalog": "/workspace/h28-callback-export-9863cd53/catalog.json",
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "coordinator_pull_observed": false,
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    }
+  },
+  "normal_callback_cache_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+    "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+    "bytes": 9374835,
+    "archive_seconds": 7.230988657000125,
+    "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+    "dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "coordinator_pull_observed": false
+  },
+  "archive_verifier_review": {
+    "archive": "/workspace/h28-verifier-review-a6fa0138/evidence.tar.gz",
+    "sha256": "8edc925d89ce75253e79f9c627b678528b17a66cf50dbcc8aad6df4e47a576fb",
+    "bytes": 36581,
+    "files": 29,
+    "gate_head": "a310f670da30fbc0964477073fbf05829457e014",
+    "delivery_base": "a6fa01380efd373d85f7a8e6c13811e2d552ae7c",
+    "archive_verifier_executions": 16,
+    "unit_tests_per_mode": 74,
+    "bulk_verifications": 2,
+    "finder": "PASS",
+    "skeptic": "PASS",
+    "no_lean_or_gate_budget_change": true
+  },
+  "previous_snapshot": {
+    "source_head": "be546c1dc41728361a687eeb979f3b9261a08d4a",
+    "root": "/workspace/h28-h44-bulk-be546c1dc/files",
+    "index": "/workspace/h28-h44-bulk-be546c1dc/files.json",
+    "index_sha256": "3f8aba9680548515f26851f7d64803774ac5ce82af2e6b515d8b7d4a495057a9",
+    "file_count": 1029,
+    "uncompressed_bytes": 6446281,
+    "archive": "/workspace/h28-h44-bulk-be546c1dc/bulk-data.tar.gz",
+    "archive_sha256": "4a1eb27e2142d7464b9c705350f7ef803c2db4aceea474bf0e902eb0773e73e5",
+    "archive_bytes": 885301,
+    "backup_ref": "codex/solidity-h28-sol-20261104/mutation-testing-pre-h44-be546c1dc",
+    "backup_bundle": "/workspace/h28-h44-bulk-be546c1dc/pre-h44.bundle",
+    "backup_bundle_sha256": "c2fb38b1007804d651760b4b36a0f1fb7a0720821eaf9b2a6795f5d05095cf3d"
+  },
+  "snapshot_revision": {
+    "reason": "Restore strict indexed size/SHA comparison for every tracked mirror; no HEAD-only exception",
+    "support_source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
+    "refreshed_support_files": [
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/alias-pilot-64d7def6/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/bounds-pilot-e852854d/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/verify-pack.py",
+        "previous_sha256": "44ca7c0c2348aad319b5a801a971d5f5dc0b06054d8edabb47c7fd8a2e0cf12a",
+        "sha256": "c4ebfd5fb22bab782aee648bc5c3a1bcc880419682615857d887ef8f065f8c6d",
+        "previous_bytes": 1832,
+        "bytes": 2676
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/h35-vm-build/archive-verify.py",
+        "previous_sha256": "e48b763e108c7018a0fc35100d69b0d48bb07ce4bc54b8268420378dbac6b545",
+        "sha256": "a235d0353db34e24d5dd283d542097b844bddfd4e609d27afa2a296476a40309",
+        "previous_bytes": 2016,
+        "bytes": 2177
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/payment-pilot-5b2317f3/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/pop-delete-pilot-5b488a11/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/push-pilot-ea111ccf/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/rebase-pilot-f664b046/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      }
+    ],
+    "unchanged_files": 1021,
+    "unchanged_off_git_files": 1012,
+    "unchanged_frozen_manifests": 9,
+    "prior_relaxed_bulk_gate_passes": "Historical only; superseded for strict tracked-mirror acceptance by the new post-fix gates"
+  },
+  "strict_mirror_validation": {
+    "archive": "/workspace/h28-strict-mirror-61724cdf/evidence.tar.gz",
+    "sha256": "17c838230f32d2713ff3668c7828d5760b184f2e19cec02f22e9eb69ddcbdc7f",
+    "bytes": 5519,
+    "files": 26,
+    "gate_head": "34d40f376ee7b2ca228d84d2e8c74acf97b82a99",
+    "policy": "Every tracked mirror requires GitHEAD authentication AND indexed size AND indexed SHA256",
+    "actual_gate_count": 20,
+    "unit_tests_per_mode": 74,
+    "finder": "PASS",
+    "skeptic": "PASS"
+  },
+  "candidate_inventory_audit": {
+    "authorization": "H41/H44",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-candidate-export-b85da7eb/inventory-proof-world.tar.gz",
+    "sha256": "1d1f4da80c217f78eae36154c4ac283d765712b4c2bac8e7a0bc8f028e38dcfb",
+    "bytes": 200344,
+    "archive_seconds": 0.12219038599869236,
+    "process_maxrss_kib": 104192,
+    "regular_members": 13,
+    "input_head": "b85da7eb8f5cd1dc9cebeb19fd0a90f3613a2da9",
+    "positive_source_sha256": "50a662458218d17e1fcc92e3798a2c6c64f85b42a008ad34a0323e6576866ed2",
+    "artifact_sha256": "c0b0267507d47cba7e3b5b40175c64e51b80adc774b9bb6f0000385d7dca9e3e",
+    "catalog_sha256": "9977a50a4d659d02283ecc6587611413cd3ea298cc134bd01da5c36a052d2f73",
+    "dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "coordinator_pull_observed": false,
+    "validation": {
+      "archive": "/workspace/h28-candidate-export-b85da7eb/validation.tar.gz",
+      "sha256": "1c8b50d29e5ad8925bec4ecb7488e6b7e34734ec2d8057b86cbd255f2491a54e",
+      "bytes": 2932,
+      "files": 10,
+      "gate_head": "c78b96cac48b23c75cfd75782f56c7f8e2021ff0",
+      "finder": "PASS",
+      "skeptic": "PASS"
+    }
+  },
+  "combined_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-combined-export-fb7ce29b/proof-worlds.tar.gz",
+    "sha256": "d79ae154926399af25b2c0a598f0924c26da493bcb917efb2fb562bd2656b83a",
+    "bytes": 49560922,
+    "catalog": "/workspace/h28-combined-export-fb7ce29b/catalog.json",
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "coordinator_pull_observed": false,
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "input_head": "fb7ce29bc5305ca58bc4dd6264f4b30fc0fcbe56",
+    "members": 241,
+    "check_count": 101,
+    "compiled_artifact_count": 70,
+    "axiom_export_count": 267
+  },
+  "combined_validation": {
+    "archive": "/workspace/h28-combined-export-fb7ce29b/validation.tar.gz",
+    "sha256": "fd41cafd29edc296c5496e855e52463f7c0a7b20098a7ff3c5907879c05c48ee",
+    "bytes": 3212,
+    "gate_head": "3407707a3c8817ef72e5bd88211f41c712b2ef5c",
+    "effective_gate_count": 8,
+    "scope_complete": false
+  },
+  "frozen_manifest_inputs": {
+    "tests/h28-sol/mutation-testing/manifests/combined-pilot.json": [
+      {
+        "role": "inventory",
+        "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+        "sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+        "bytes": 106323
+      },
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528
+      }
+    ],
+    "tests/h28-sol/mutation-testing/manifests/rollback-pilot.json": [
+      {
+        "role": "inventory",
+        "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+        "sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+        "bytes": 106323
+      },
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528
+      }
+    ]
+  },
+  "held_fix_validation": {
+    "archive": "/workspace/h28-held-fix-6f2390ee/validation.tar.gz",
+    "sha256": "b232314cde37bb1f8a0c2b10ae7ff14975c5fe28c1309d16c923eb5f1430b676",
+    "bytes": 3957,
+    "gate_head": "6f2390eecd3d62655f8a0042134e1e1307f78233",
+    "commands": 8,
+    "scope_complete": false
+  },
+  "repository_gate_validation": {
+    "archive": "/workspace/h28-repository-gate-export-60a068dd/validation.tar.gz",
+    "sha256": "ee9db32fa3169d78b7e69ba91414c41aa8d6bda2c8bf62a581f7e214f3f40d81",
+    "bytes": 90180,
+    "full_gate_head": "60a068ddf3d32e2a41244fe44f7ce5ed14eb5b82",
+    "full_gate_exit": 1,
+    "updated_master": "812aeb301f27d70dad4acc3b3bd92d1c41d7c948",
+    "follow_up_head": "d9687ad3f29fda805977de9ba1c749771f21da50",
+    "status": "blocked",
+    "members": 50,
+    "scope_complete": false,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/repository-gate-60a068dd/manifest.json"
+  },
+  "snapshot_delivery_base": "86253aba9aad8b457190f9e5f14c77c7ad030318",
+  "member_manifest_validation": {
+    "archive": "/workspace/h28-manifest-fix-4418c39a/validation.tar.gz",
+    "sha256": "a30164e98ae16c7de846004fdc1fdbb9b5ac408cb15babc4afa4280fce04bb01",
+    "bytes": 2209,
+    "gate_head": "4418c39a713a450a36353ef8523157528cf07af4",
+    "members": 11,
+    "scope_complete": false,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/member-manifest-fix-4418c39a/manifest.json"
+  },
+  "rollback_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-rollback-export-ade0ec29/proof-worlds.tar.gz",
+    "sha256": "8a080a1e83ef060b50de077b77703a55f08cf3ff1b63216e030e3c53e537ec37",
+    "bytes": 5976656,
+    "members": 41,
+    "input_head": "ade0ec29779a21e2b71841e40f7d90b5691a87ad",
+    "check_count": 12,
+    "axiom_export_count": 27,
+    "compiled_artifact_count": 8,
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "coordinator_pull_observed": false,
+    "archive_seconds": 5.760611116998916,
+    "process_maxrss_kib": 23024,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/rollback-pilot-ade0ec29/manifest.json"
+  },
+  "frame_profile_inputs": {
+    "manifest": "tests/h28-sol/mutation-testing/manifests/frame-pilot.json",
+    "inventory": {
+      "path": "tests/h28-sol/mutation-testing/inventory.frame-selected.json",
+      "sha256": "9ebbba8a50d6ef8fabdfb9fa77419b9da7f31814fb953b3a8729f67c4ab78ba3",
+      "availability": "git-tracked"
+    },
+    "cache_manifest": {
+      "role": "cache_manifest",
+      "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+      "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+      "bytes": 36528,
+      "availability": "VM-only",
+      "authorization": "H44"
+    }
+  },
+  "frame_proof_pack": {
+    "authorization": "H44",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz",
+    "bytes": 6363366,
+    "sha256": "16236914543752364467b16717fdcd07eaf9147edc949726f6d5c85265625ab6",
+    "members": 41,
+    "input_head": "e198e3fbe0d29687129e571cdc5a192b7755b753",
+    "check_count": 12,
+    "axiom_export_count": 43,
+    "compiled_artifact_count": 8,
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/frame-pilot-e198e3fb/manifest.json",
+    "coordinator_pull_observed": false,
+    "archive_seconds": 5.854443480000555,
+    "process_maxrss_kib": 23556,
+    "cache_delivery_authorization": "H41"
+  },
+  "snapshot_source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
+  "selected_proof_pack_f8b65736": {
+    "authorization": "H44",
+    "cache_delivery_authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-selected-export-f8b65736/proof-worlds.tar.gz",
+    "bytes": 56215388,
+    "sha256": "17836afbe0df1a8c3836a99a524363888716778d45158779f1a334400531350d",
+    "members": 285,
+    "input_head": "f8b657366fc38e1aad85ba080d14bb2c249448eb",
+    "check_count": 113,
+    "axiom_export_count": 321,
+    "compiled_artifact_count": 78,
+    "kernel_export_count": 294,
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/selected-suite-f8b65736/manifest.json",
+    "coordinator_pull_observed": false,
+    "archive_seconds": 51.20917440800258,
+    "process_maxrss_kib": 73652
+  },
+  "selected_proof_pack": {
+    "authorization": "H44",
+    "cache_delivery_authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-selected-export-aab23327/proof-worlds.tar.gz",
+    "bytes": 56216293,
+    "sha256": "32625cd27ee6171cf5d206417d0ae491b6837649521fcd11e9b9de4a2cdc3748",
+    "members": 288,
+    "input_head": "aab23327962bcc278dd8fee43cd85652f9377fc1",
+    "check_count": 113,
+    "axiom_export_count": 321,
+    "compiled_artifact_count": 78,
+    "kernel_export_count": 294,
+    "program_counts": {
+      "case_ids": 19,
+      "scored_ids": 15,
+      "distinct_scored_programs": 15,
+      "unscored_runner_controls": 4,
+      "distinct_programs_all_roles": 18,
+      "roles": {
+        "known-kill": 1,
+        "mutant": 11,
+        "invalid-control": 1,
+        "equivalent-control": 1,
+        "runner-survivor-control": 1,
+        "negative-control": 4
+      }
+    },
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/selected-suite-aab23327/manifest.json",
+    "coordinator_pull_observed": false,
+    "archive_seconds": 50.43605456399746,
+    "process_maxrss_kib": 75772
+  },
+  "final_replay_validation": {
+    "authorization": "H44",
+    "archive": "/workspace/h28-final-replay-after-6cf/validation.tar.gz",
+    "bytes": 2746,
+    "sha256": "dc3e3c3a11e3c4acbdb87541aec7c0960b87eecd658fd17cc54c8ec1f0a92466",
+    "members": 17,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/final-replay-50a5679e/manifest.json",
+    "gate_head": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+    "commands": 7,
+    "scope_complete": false
+  }
+}

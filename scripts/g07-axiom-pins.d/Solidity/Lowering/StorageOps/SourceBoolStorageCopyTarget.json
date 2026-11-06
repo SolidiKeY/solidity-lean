@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopyTarget.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopyTarget.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopyTarget.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopyTarget.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

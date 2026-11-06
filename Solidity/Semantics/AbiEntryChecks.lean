@@ -112,6 +112,21 @@ example : (observe (cd [1, 2, 3]) [{ shape := .fixed (.fixed u256 2) 2, loc := .
 example : (observe (cd [0x100, 0]) [{ shape := .fixed u8 2, loc := .calldata }]).1 = lazyFail := by
   decide
 
+/-! Enum parameters (`EnumEntry`): the declared cardinality at entry. -/
+
+def E3 : Shape := .word (.enumBelow 3)
+example : observe (cd [2]) [{ shape := E3, loc := .value }] = ("run", (cd [2]).data.drop 4) := by
+  decide +kernel
+example : (observe (cd [3]) [{ shape := E3, loc := .value }]).1 = "revert" := by decide
+example : (observe (cd [W - 1]) [{ shape := E3, loc := .value }]).1 = "revert" := by decide
+example : (observe (cd [3, 0x40, 0]) [{ shape := E3, loc := .value },
+    { shape := .array u8, loc := .calldata }]).1 = "revert" := by decide
+example : (observe (cd [1, 0x1000]) [{ shape := E3, loc := .value },
+    { shape := .array u8, loc := .calldata }]).1 = "revert" := by decide
+example : (observe (cd [0, 0x60, 0, 1, 7]) [{ shape := E3, loc := .value },
+    { shape := .array u8, loc := .memory }]) = ("run", (cd [0, 0x40, 1, 7]).data.drop 4) := by
+  decide +kernel
+
 /-! Retained Group 10 vectors. -/
 
 -- calldata_array_length_v2: `f(uint256[][]): 0x20, 1, -32 -> 1, 1, 0` is lazy-only:

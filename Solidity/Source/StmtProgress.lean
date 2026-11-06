@@ -24,7 +24,9 @@ return types to agree (`Elaborated.callInternal_call_ns`). With internal
 calls inside expressions, expressions, statements, bodies and calls are
 proved together by induction on the horizon (`FragAt`, `fragAt`), for a
 program whose allowed functions are fragment bodies (`CallsOK`, a
-hypothesis: nothing derives it for elaborated programs):
+hypothesis; for a checked elaborated program and the allowlist of its
+complete catalogue it is derived by
+`Solidity.Lowering.P9.WholeProgram.functions_from_elaborate`):
 `evalE_callFrag_ns`.
 
 The scope facts it needs are structural: a statement's output context
@@ -47,6 +49,8 @@ theorem RStmt.ext {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} →
     ∃ ys, Γ' = ys ++ Γ
   | _, _, _, .declVar τ => ⟨[τ], rfl⟩
   | _, _, _, .declInit (τ := τ) _ _ => ⟨[τ], rfl⟩
+  | _, _, _, .declTuple slots _ _ => pushTys_suffix slots _
+  | _, _, _, .tryCall _ _ _ _ _ _ _ => ⟨[], rfl⟩
   | _, _, _, .expr _ | _, _, _, .placeholder _ | _, _, _, .block _ | _, _, _, .ifThen _ _
   | _, _, _, .ifElse _ _ _ | _, _, _, .whileLoop _ _ | _, _, _, .doWhile _ _ | _, _, _, .forLoop _ _ _ _
   | _, _, _, .skip | _, _, _, .brk | _, _, _, .cont | _, _, _, .ret _ | _, _, _, .retVal _ _ _
@@ -232,7 +236,7 @@ theorem Locals.setAt_ok {D : Layout} {τ : STy} {rest : RCtx} : (ys : RCtx) → 
     (v : Val D τ) → NotStuckR (l.setAt ys.length v)
   | [], .cons _ _, v => by
     intro w h
-    simp only [List.length_nil, Locals.setAt, dif_pos rfl] at h
+    simp only [List.length_nil, Locals.setAt] at h
     cases h
   | _ :: ys, .cons _ r, v => NotStuckR.bind (Locals.setAt_ok ys r v) fun _ => NotStuckR.pure _
 
@@ -421,7 +425,7 @@ theorem execS_nsStep (ih : StmtNSAt G A Q n) (hX : ∀ F, Q F.contract → ExprN
       NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
   | _ => exact hf.elim
 
-theorem execItems_nsStep (ih : StmtNSAt G A Q n) (hX : ∀ F, Q F.contract → ExprNSAt A G F n) (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
+theorem execItems_nsStep (ih : StmtNSAt G A Q n) (_hX : ∀ F, Q F.contract → ExprNSAt A G F n) (F : Fr) (hP : Q F.contract) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (hf : RItems.ValFragC A b) (ho : b.OpsOK)
     (hfr : BodyFrame nps R Γ) : NSP (execItems G F (n + 1) nps ph b l) (fun o => k.loop = false → o.esc = false) := by
   cases b with
@@ -577,7 +581,7 @@ theorem Locals.getAt_ok {D : Layout} {τ : STy} {rest : RCtx} : (ys : RCtx) → 
     NotStuckR (l.getAt ys.length τ)
   | [], .cons _ _ => by
     intro w h
-    simp only [List.length_nil, Locals.getAt, dif_pos rfl] at h
+    simp only [List.length_nil, Locals.getAt] at h
     cases h
   | _ :: ys, .cons _ r => Locals.getAt_ok ys r
 
@@ -862,7 +866,8 @@ of contract `c`: for every declaration `A` allows with a signature, virtual
 dispatch from `c` finds a body without modifiers, in the statement fragment
 with calls to `A` and in the operations' domains, whose locals are the
 frame the call builds and whose return types have defaults. It is
-assumed: no lemma derives it for an elaborated program. -/
+derived for a checked elaborated program and its complete catalogue by
+`Solidity.Lowering.P9.WholeProgram.functions_from_elaborate`. -/
 def CallsOK (A : Decl → Prop) (G : Glob E) (c : String) : Prop :=
   ∀ (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → A d →
     ∃ b, G.prog.body (G.dispatchFn c d) = some b ∧ b.mods = [] ∧

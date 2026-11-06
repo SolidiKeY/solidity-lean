@@ -15,15 +15,14 @@ changes are in `lean-4.24.patch`; the original hashes are retained.
 `EvmYul/EVM/Semantics.lean` also needs an explicit `UInt256` annotation
 on its existing zero literal in the account-creation branch. This type
 inference compatibility edit is recorded in the same patch. All other
-EvmYul modules are unchanged.
+EvmYul modules are unchanged apart from the H7 patch below.
 
 The closure includes the upstream EVM state, stack, PC update, opcode
 dispatcher, gas/halting driver and `execBinOp` transformer. It also contains upstream FFI declarations and
 an IO debugging helper. The original arithmetic agreement does not require FFI correctness; its pinned
 axiom audits in `SolidityBridge/Checks.lean` show only `propext`,
 `Classical.choice` and `Quot.sound`. The optional bounded memory refinement
-explicitly assumes a named zero-allocation correctness contract, with no
-claimed inhabitant. Its separate `scripts/check-external-memory.sh` observation
+explicitly assumes a named zero-allocation correctness contract, proved for the H7 logical body (see below), not for the native code. Its separate `scripts/check-external-memory.sh` observation
 fixture links only the verbatim pinned `memset_zero` function and a generated
 ABI wrapper. This neither replaces these Lean declarations nor proves that
 contract. No hashing C library or upstream conformance executable is linked
@@ -37,6 +36,27 @@ additional operations to the upstream dispatcher and record checked
 obstructions to treating core macro instructions as single opcodes.
 The original fragment's `Op` type is not a coverage inventory of all core
 instructions. This does not prove equivalence of the two full EVM interpreters.
+
+## H7 bounded scanner and padding patch
+
+Human decision H7 ("Implement") authorizes one further local patch,
+`h7-bounded-scanner-padding.patch`, recorded with the original and patched
+input hashes in `h7-bounded-scanner-padding-pin.json`. It changes two files:
+
+- `EVM/Semantics.lean`: the old partial jump-destination scanner is kept
+  verbatim as `D_J_aux_unbounded`. A terminating natural-PC scan `D_J_scan`
+  with the same parser, widths and accumulator order is added, and `D_J_aux`
+  selects it when `c.size + 33 < UInt256.size` (where no PC wraps), with
+  `D_J_aux_bounded` stating that choice. Outside that bound the original
+  partial computation is unchanged; no totalization is claimed.
+- `FFI/ffi.lean`: `ByteArray.zeroes` keeps its `memset_zero` extern symbol,
+  and its `opaque` declaration gets the logical body `Array.replicate n.toNat 0` with
+  size, empty and element laws. Native allocation and the correspondence of
+  `memset_zero` to that body stay separate obligations.
+
+`UPSTREAM_SHA256SUMS` keeps the upstream hashes; `SHA256SUMS` has the patched
+ones. To replay, check the original hashes in the pin record, then
+`git apply --binary --unidiff-zero` the patch from the repository root.
 
 To refresh, choose an explicit upstream commit, copy the modules listed in
 `UPSTREAM_SHA256SUMS` and the license, apply the documented compatibility

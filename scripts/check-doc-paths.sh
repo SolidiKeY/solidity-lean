@@ -18,7 +18,14 @@
 # reader cannot tell which file is meant either.
 #
 # References into the sibling repositories (`SolKey/`, `EvmYul/`, `Decode/`)
-# are not ours to resolve and are listed in EXTERNAL below.
+# and into Mathlib (cited as attribution; only `Bridge/` depends on it) are not
+# ours to resolve and are listed in EXTERNAL below, as is the deliberate
+# placeholder `PartNN` (Part01..Part11). The two module names the TF-gate
+# fixture (tests/terra-20261103/gate/test_cases.py) uses inside its disposable
+# repositories, Solidity/A and Solidity/MissingFixture, are exempt
+# only when that fixture file cites them (FIXTURE_SRC/FIXTURE_REF). Captured tool output
+# (`*.log`, `*validation.json` records) is skipped: it quotes earlier runs
+# verbatim, including their findings.
 #
 # Exit 0 = every reference resolves, 1 = at least one does not.
 set -euo pipefail
@@ -28,9 +35,15 @@ cd "$(dirname "$0")/.."
 strict=0
 [ "${1-}" = "--strict" ] && strict=1
 
-# Prefixes naming a file in another repository, plus the one deliberate
+# Prefixes naming a file in another repository, plus the deliberate
 # placeholder (`PartNN` stands for Part01..Part11).
-EXTERNAL='^(SolKey/|EvmYul/|Decode/)|PartNN'
+EXTERNAL='^(SolKey/|EvmYul/|Decode/|Mathlib/)|PartNN'
+# The TF-gate fixture's two placeholders, exempt only where that fixture cites
+# them: a document elsewhere naming either is still a finding (the fixture's own
+# negative control relies on this).
+FIXTURE_SRC='^tests/terra-20261103/gate/test_cases\.py$'
+FIXTURE_REF='^Solidity/(A|MissingFixture)\.lean$'
+CAPTURED='(\.log|validation\.json)$'
 
 lean_files=$(git ls-files '*.lean')
 
@@ -40,6 +53,8 @@ ambiguous=0
 while IFS=$'\t' read -r src ref; do
   [ -z "$ref" ] && continue
   [[ "$ref" =~ $EXTERNAL ]] && continue
+  [[ "$src" =~ $FIXTURE_SRC && "$ref" =~ $FIXTURE_REF ]] && continue
+  [[ "$src" =~ $CAPTURED ]] && continue
 
   dir=$(dirname "$src")
   if [ -f "$dir/$ref" ] || [ -f "Solidity/$ref" ] || [ -f "$ref" ]; then

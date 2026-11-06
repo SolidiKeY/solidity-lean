@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { pins, compare } from "./check-axiom-pins.mjs";
+import { pins, compare, collect } from "./check-axiom-pins.mjs";
 
 test("pins are read from guarded #print axioms, primes and wrapping included", () => {
   assert.deepEqual(pins("/-- info: 'A.b'' depends on axioms: [propext,\n Quot.sound] -/\n#guard_msgs in #print axioms b'\n"),
@@ -26,4 +26,23 @@ test("sorryAx, growth, renaming and lost pins fail; shrinking and new pins are n
   assert.equal(compare(f({ y: [] }), {}).notes.length, 1);
   const g = new Map([["F.lean:A.b", { name: "A.b", target: "c", axioms: [], file: "F.lean" }]]);
   assert.equal(compare(g, { "F.lean:A.b": [] }).errors.length, 1);
+});
+
+// The inventory follows project sources, not local dependency/build caches.
+test("collect includes all source areas and excludes nested Lake caches", async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import("node:fs");
+  const { join, dirname } = await import("node:path");
+  const { tmpdir } = await import("node:os");
+  const root = mkdtempSync(join(tmpdir(), "axiom-collect-"));
+  const files = ["Solidity/Keep.lean", "Bridge/SolidityBridge/Keep.lean",
+    "tests/Keep.lean", "Bridge/.lake/packages/mathlib/MathlibTest/Ignore.lean",
+    "Solidity/Nested/.lake/build/Ignore.lean"];
+  try {
+    for (const file of files) {
+      mkdirSync(dirname(join(root, file)), { recursive: true });
+      writeFileSync(join(root, file), "/-- info: 'pin' does not depend on any axioms -/\n#guard_msgs in #print axioms pin\n");
+    }
+    assert.deepEqual([...collect(root).keys()].sort(),
+      files.slice(0, 3).map(file => file + ":pin").sort());
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

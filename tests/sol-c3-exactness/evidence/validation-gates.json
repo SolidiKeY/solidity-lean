@@ -1,0 +1,171 @@
+{
+  "status": "blocked",
+  "source_proof_head": "df127b6726d9e99b7f9d9091202b03728a5557e6",
+  "lean_version": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+  "lake_version": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+  "gates": [
+    {
+      "command": [
+        "lake",
+        "build",
+        "+Solidity.Frontend.C3Exactness.Audit"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.5699690569999802,
+      "minimum_parent_available_bytes": 10169266176,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 56872,
+      "container_cumulative_peak_bytes": 10296709120,
+      "evidence": "tests/sol-c3-exactness/evidence/audit-confirmation.log",
+      "receipt": "tests/sol-c3-exactness/evidence/audit-confirmation.log.json",
+      "log_sha256": "8dc4d83c8c26ae1b53f49a0efce588346f665460b35558ebab88cc496cedad30"
+    },
+    {
+      "command": [
+        "node",
+        "tests/sol-c3-exactness/check-fixtures.mjs",
+        "/workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/compiler/soljson-v0.8.38+commit.1835d247.js",
+        "tests/sol-c3-exactness/evidence/compiler-fixtures.json"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 2.5899078009970253,
+      "minimum_parent_available_bytes": 9919225856,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 311488,
+      "container_cumulative_peak_bytes": 10296709120,
+      "evidence": "tests/sol-c3-exactness/evidence/compiler-fixtures-final.log",
+      "receipt": "tests/sol-c3-exactness/evidence/compiler-fixtures-final.log.json",
+      "log_sha256": "98e9e3dba13eb448cb4ba6ded9f3036946e3d7b259dec5f97f0fdefcbcbd2cf2"
+    },
+    {
+      "command": [
+        ".venv/bin/python",
+        "scripts/check-sol-c3-exactness.py",
+        "--checkpoint",
+        "fixtures",
+        "--self-test"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 4.324636982000811,
+      "minimum_parent_available_bytes": 10177957888,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 17696,
+      "container_cumulative_peak_bytes": 10296709120,
+      "evidence": "tests/sol-c3-exactness/evidence/acceptance-order.log",
+      "receipt": "tests/sol-c3-exactness/evidence/acceptance-order.log.json",
+      "log_sha256": "ad5d129685b26431c8e129ac855adb60184c1b17ab795a448b2fc930f22a2b84"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "Solidity",
+        "SolidityExamples",
+        "solkeycheck",
+        "solidity-lean",
+        "SolkeyTestSuite"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 2.07679169399853,
+      "minimum_parent_available_bytes": 10101411840,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 103272,
+      "container_cumulative_peak_bytes": 10296709120,
+      "evidence": "tests/sol-c3-exactness/evidence/default-targets-current.log",
+      "receipt": "tests/sol-c3-exactness/evidence/default-targets-current.log.json",
+      "log_sha256": "73b987b5421151c439c31f058abd57635f90410d43ab76a016189614361f6f2b"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-corpus.sh",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 35.145221005001076,
+      "minimum_parent_available_bytes": 9983569920,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 683144,
+      "container_cumulative_peak_bytes": 10296709120,
+      "evidence": "tests/sol-c3-exactness/evidence/corpus-final.log",
+      "receipt": "tests/sol-c3-exactness/evidence/corpus-final.log.json",
+      "log_sha256": "8b206419016ac051a00bbfd670c090687cffef94488e2932e237e8d1ca15f764"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-solkey.sh",
+        "--key",
+        "/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.5597723539976869,
+      "minimum_parent_available_bytes": 9646137344,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 225148,
+      "container_cumulative_peak_bytes": 10296709120,
+      "evidence": "tests/sol-c3-exactness/evidence/keysort-final.log",
+      "receipt": "tests/sol-c3-exactness/evidence/keysort-final.log.json",
+      "log_sha256": "dfce1818710da6232163451e472bfc8e1c2c33e9b29252f7be9a4c86d355eda9"
+    },
+    {
+      "command": [
+        ".venv/bin/python",
+        "tests/sol-c3-exactness/final-checks.py"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 43.794075771998905,
+      "minimum_parent_available_bytes": 9554812928,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 321588,
+      "container_cumulative_peak_bytes": 10296709120,
+      "evidence": "tests/sol-c3-exactness/evidence/final-source-gates.log",
+      "receipt": "tests/sol-c3-exactness/evidence/final-source-gates.log.json",
+      "log_sha256": "068012e6338e775a0959c7b43d101f3a01c3f61ea401613e2a14c82f6f2a95e0"
+    },
+    {
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 1.193549707000784,
+      "minimum_parent_available_bytes": 9728917504,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 169956,
+      "container_cumulative_peak_bytes": 138465280,
+      "evidence": "tests/sol-c3-exactness/evidence/run-lean-final.log",
+      "receipt": "tests/sol-c3-exactness/evidence/run-lean-final.log.json",
+      "log_sha256": "cd94172943431eae3d60060e0abe06d0e519fe1e4c27b2df95da42768a35a52f"
+    },
+    {
+      "command": [
+        ".venv/bin/python",
+        "scripts/check-sol-c3-exactness.py",
+        "--checkpoint",
+        "full",
+        "--self-test"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 4.702587978001247,
+      "minimum_parent_available_bytes": 9830477824,
+      "memory_limit_bytes": 12884901888,
+      "swap_limit_bytes": 0,
+      "maximum_process_or_child_rss_kib": 17944,
+      "container_cumulative_peak_bytes": 18276352,
+      "evidence": "tests/sol-c3-exactness/evidence/full-acceptance-order-pending.log",
+      "receipt": "tests/sol-c3-exactness/evidence/full-acceptance-order-pending.log.json",
+      "log_sha256": "17cae72fe6bb2948659da9411b4029c08cf82a767de7bbb238b047ea048e8e6c"
+    }
+  ],
+  "boundary": "A blocked handoff, not RUNTIME_GATE_PASS or full readiness. Final source/driver/full-acceptance failures remain unwaived. Each receipt binds current input hashes. Process/child maximum RSS is not aggregate RSS; cgroup peak is cumulative for its cgroup lifetime, not necessarily attributable only to that command."
+}

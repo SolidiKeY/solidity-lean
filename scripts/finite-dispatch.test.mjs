@@ -5,6 +5,9 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {runSolidityTests} from './test-solidity.mjs';
+import {solkeyTestOptions} from './test-compiler.mjs';
+
+const compilerOptions = solkeyTestOptions();
 
 // Uses the pinned compiler and the actual declaration reader/admission scan.
 // No build is started: rebuild the modified frontend before running this file.
@@ -16,7 +19,8 @@ function scopeCheck(source, body, mutate = '') {
     const check = join(dir, 'Check.lean');
     writeFileSync(input, '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n' + source);
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source', input,
-      '--out', fixture, '--no-wrapper'], {stdio:'pipe'});
+      '--out', fixture, '--no-wrapper', '--solkey', compilerOptions.solkey,
+      '--soljson', compilerOptions.soljson], {stdio:'pipe'});
     writeFileSync(check, `import Solidity.Frontend.SolcJson
 open Lean Solidity.Frontend
 private def put (j : Json) (key : String) (value : Json) : Json :=
@@ -50,7 +54,8 @@ function productionCheck(source, body, viaIR = false) {
     const check = join(dir, 'Check.lean');
     writeFileSync(input, '// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n' + source);
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source', input,
-      '--out', fixture, '--no-wrapper', ...(viaIR ? ['--via-ir'] : [])], {stdio:'pipe'});
+      '--out', fixture, '--no-wrapper', '--solkey', compilerOptions.solkey,
+      '--soljson', compilerOptions.soljson, ...(viaIR ? ['--via-ir'] : [])], {stdio:'pipe'});
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
@@ -85,7 +90,7 @@ function diagnostic(name, code) {
 }
 
 test('finite dispatch preserves the original FunctionTypes positive and negative verdicts', () => {
-  const report = runSolidityTests(['tests/solc/FunctionTypes.sol'], {build:false});
+  const report = runSolidityTests(['tests/solc/FunctionTypes.sol'], {...compilerOptions, build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(row => [row.function, row.status]));
   for (const name of ['applyAndCompose','localValue','storedByFlag','returnedValue',
@@ -219,7 +224,7 @@ test('private candidates cannot become self external targets through native type
   }`, diagnostic('entry', 'solidity.functionDispatch'));
 });
 
-test('external inherited selector renaming is an explicit boundary', () => {
+test('external inherited selector renaming uses retained source ABI identity', () => {
   scopeCheck(`contract Base {
     function target(uint x) external pure returns(uint) { return x; }
   }
@@ -228,7 +233,9 @@ test('external inherited selector renaming is an explicit boundary', () => {
       function(uint) external pure returns(uint) h = this.target;
       h(1);
     }
-  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone && !r.calls.isEmpty) do
+    throw (IO.userError "renamed external target was not admitted")`);
 });
 
 test('initializer dispatch is deployment scope and does not leak into ordinary entry points', () => {
@@ -444,10 +451,12 @@ const referenceSource = readFileSync('tests/solc/FunctionValueReferences.sol', '
 const panic51 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x51];
 const panic01 = [0x4e, 0x48, 0x7b, 0x71, ...Array(31).fill(0), 0x01];
 function referenceVectors(viaIR) {
-  // viaIR copies a storage argument after every argument (901); the model
-  // copies at the argument's position for direct and dispatched calls alike
-  // (finite-dispatch.md, "Recorded deviations"), so only legacy replays it.
-  const order = viaIR ? [] : [['argumentOrder()', [], ['101', '9']],
+  // viaIR copies a storage argument after every argument (901), legacy at
+  // its position (101); the model follows both schedules for direct and
+  // dispatched calls (finite-dispatch.md, "Recorded deviations"), the values
+  // those of check-function-value-references.mjs
+  const order = viaIR ? [['argumentOrder()', [], ['901', '9']],
+    ['argumentOrderDirect()', [], ['901', '9']]] : [['argumentOrder()', [], ['101', '9']],
     ['argumentOrderDirect()', [], ['101', '9']]];
   const callee = viaIR ? ['402'] : ['4002'];
   const calleeScalar = viaIR ? ['11'] : ['12'];
@@ -468,6 +477,19 @@ function referenceVectors(viaIR) {
     ['arrayReturn(bool)', ['true'], ['106', '106', '1']],
     ['arrayReturn(bool)', ['false'], ['5', '110', '1']],
     ['bytesReturn()', [], ['3', '65']],
+    ['tupleReturn()', [], ['3', '2']],
+    ['structReturn(bool)', ['true'], ['4', '5']],
+    ['structReturn(bool)', ['false'], ['40', '0']],
+    ['tupleCallee(bool)', ['true'], ['3', '2']],
+    ['tupleCallee(bool)', ['false'], ['103', '2']],
+    ['tupleCalleeForward(bool)', ['true'], ['4', '2']],
+    ['tupleCalleeForward(bool)', ['false'], ['104', '2']],
+    ['structReturnAssign()', [], ['6', '7']],
+    ['structReturnForward()', [], ['30']],
+    ['tupleAssigned(bool)', ['true'], ['3', '2']],
+    ['tupleAssigned(bool)', ['false'], ['103', '2']],
+    ['tupleForward()', [], ['104', '3']],
+    ['tupleUnassigned()', [], panic51],
     ['structMemory()', [], ['2', '2', '43']],
     ['structStorage()', [], ['8', '8']],
     ['nominalQ()', [], ['9']],
@@ -539,6 +561,30 @@ test('calldata passed to a memory parameter of a function value is refused', () 
   r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
 });
 
+test('calldata in a tuple assignment through a function value is refused', () => {
+  productionCheck(`contract C {
+    function split(uint[] memory xs) internal pure returns(uint, uint) { xs[0] = 7; return (xs[0], 1); }
+    function e(uint[] calldata xs) external pure returns(uint) {
+      function(uint[] memory) internal pure returns(uint, uint) h = split;
+      (uint a, uint b) = h(xs); return a + b + xs[0];
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "e")).any fun r =>
+  r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
+});
+
+test('calldata in a tuple assignment through a callee that is not a name is refused', () => {
+  // integration review: the tuple path's callee capture (`elabTuple`) keeps
+  // `calldataCheck`'s refusal for a conditional callee
+  productionCheck(`contract C {
+    function split(uint[] memory xs) internal pure returns(uint, uint) { xs[0] = 7; return (xs[0], 1); }
+    function other(uint[] memory xs) internal pure returns(uint, uint) { return (xs[0], 2); }
+    function e(uint[] calldata xs, bool c) external pure returns(uint) {
+      (uint a, uint b) = (c ? split : other)(xs); return a + b + xs[0];
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "e")).any fun r =>
+  r.status != .elaborated && (r.reason.splitOn "calldata passed").length > 1`);
+});
+
 test('struct candidates are nominal: a same-shaped struct function is not scanned', () => {
   // With a structural key, poison (same shape as P, reading block.number)
   // would be a native-compatible candidate and its body would be refused.
@@ -573,6 +619,44 @@ test('reference-array dispatch admits exact candidates and keeps their locations
     throw (IO.userError "memory-array dispatch was not admitted")`);
 });
 
+test('narrow and byte array elements dispatch at their width', () => {
+  // The capture is declared at the parameter's narrow shape (`dispatchCaptures`);
+  // bytes1[] stays refused (below).
+  scopeCheck(`contract C {
+    function narrow(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function stored(int16[] storage xs) internal view returns(uint) { return xs.length; }
+    function bytes2s(bytes2[] memory xs) internal pure returns(uint) { return uint16(xs[0]); }
+    int16[] values;
+    function entry() public view {
+      uint8[] memory xs = new uint8[](1);
+      function(uint8[] memory) internal pure returns(uint) h = narrow;
+      assert(h(xs) == 0);
+      function(int16[] storage) internal view returns(uint) g = stored;
+      g(values);
+      bytes2[] memory cs = new bytes2[](1);
+      function(bytes2[] memory) internal pure returns(uint) b2 = bytes2s;
+      assert(b2(cs) == 0);
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "narrow or byte element dispatch was not admitted")`);
+});
+
+test('narrow element widths are part of the dispatch key', () => {
+  // uint8[] and uint16[] erase to the same model array but not the same key:
+  // a uint16[] function is no candidate of a uint8[] value
+  scopeCheck(`contract C {
+    function wide(uint16[] memory xs) internal view returns(uint) { return xs[0] + block.number; }
+    function narrow(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
+    function entry() public pure {
+      uint8[] memory xs = new uint8[](1);
+      function(uint8[] memory) internal pure returns(uint) h = narrow; h(xs);
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone) do
+    throw (IO.userError "a uint16[] function was treated as a uint8[] candidate")`);
+});
+
 test('memory-array dispatch refuses an address/uint element collision', () => {
   scopeCheck(`contract C {
     function addrs(address[] memory xs) internal pure returns(uint) { return xs.length; }
@@ -594,11 +678,12 @@ test('other reference signatures remain refused', () => {
       S memory s;
       function(S memory) external view returns(uint) h = this.target; h(s);
     }`,
-    // a struct return
+    // a storage struct return (a memory struct return is admitted)
     `struct S { uint a; }
-    function target() internal pure returns(S memory s) { s.a = 1; }
-    function entry() public pure {
-      function() internal pure returns(S memory) h = target; h();
+    S stored;
+    function target() internal view returns(S storage s) { s = stored; }
+    function entry() public view {
+      function() internal view returns(S storage) h = target; h();
     }`,
     // a nominal element
     `struct S { uint a; }
@@ -607,17 +692,19 @@ test('other reference signatures remain refused', () => {
       S[] memory xs = new S[](1);
       function(S[] memory) internal pure returns(uint) h = target; h(xs);
     }`,
-    // a narrow element (a capture carries no width rows)
-    `function target(uint8[] memory xs) internal pure returns(uint) { return xs[0]; }
-    function entry() public pure {
-      uint8[] memory xs = new uint8[](1);
-      function(uint8[] memory) internal pure returns(uint) h = target; h(xs);
-    }`,
-    // a byte element
+    // a bytes1 element: the model's bytes is a bytes1[], so the key could
+    // not tell it from a bytes parameter (fnRefElem?)
     `function target(bytes1[] memory xs) internal pure returns(uint) { return xs.length; }
     function entry() public pure {
       bytes1[] memory xs = new bytes1[](1);
       function(bytes1[] memory) internal pure returns(uint) h = target; h(xs);
+    }`,
+    // an enum element
+    `enum E { A, B }
+    function target(E[] memory xs) internal pure returns(uint) { return xs.length; }
+    function entry() public pure {
+      E[] memory xs = new E[](1);
+      function(E[] memory) internal pure returns(uint) h = target; h(xs);
     }`,
     // a nested array
     `function target(uint[][] memory xs) internal pure returns(uint) { return xs.length; }

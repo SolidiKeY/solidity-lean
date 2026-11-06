@@ -1,0 +1,30 @@
+{
+ "Bridge/SolidityBridge/Arith/Widths.lean:Solidity.Bridge.Arith.Widths.check_bin_literal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/Widths.lean:Solidity.Bridge.Arith.Widths.check_binary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/Widths.lean:Solidity.Bridge.Arith.Widths.synth_bin_literal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/Widths.lean:Solidity.Bridge.Arith.Widths.synth_binary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/Widths.lean:Solidity.Bridge.Arith.Widths.synth_head": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/Widths.lean:Solidity.Bridge.Arith.Widths.synth_unary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/Widths.lean:Solidity.Bridge.Arith.Widths.synth_word": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_alloc": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_interstage_alloc": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.runCaptures_none_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.ScheduleGrowthControls.allocated_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.ScheduleGrowthControls.interstage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean:Solidity.Backend.MemoryOps.ScheduleReferenceGrowthControls.reference_allocated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

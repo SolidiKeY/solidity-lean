@@ -101,7 +101,7 @@ run_meta do
 /--
 info: all 181 rules of `Solidity.Taclet` print as rule lines
 ---
-info: all 27 rules of `Solidity.LeanTaclet` print as rule lines
+info: all 28 rules of `Solidity.LeanTaclet` print as rule lines
 ---
 info: all 4 rules of `Solidity.CallbackTaclet` print as rule lines
 -/

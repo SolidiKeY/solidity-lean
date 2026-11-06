@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/CallReduction.lean:Solidity.Examples.CallReduction.wrongResult_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/CallReduction.lean:Solidity.Stmt.runSt_callRets": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

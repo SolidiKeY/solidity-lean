@@ -20,7 +20,8 @@ source/native simulation or of extractor completeness.
   one `bytes memory` value or one memory array of a word, `bool` or `address`
   element, beside any admitted parameters (lane CF2; before it, only
   zero-argument `bytes memory`). The signature retains that memory kind;
-  several returns with a memory one, and external memory returns, remain
+  several returns with a memory one through the solc import (the
+  elaborator admits them, lane FU2-A), and external memory returns, remain
   refused. `scripts/finite-dispatch.test.mjs` covers receiver effects,
   invalid/unused tags and inherited overrides for this fragment.
 - **Candidates.** Own, inherited and imported free/library functions, each with
@@ -56,7 +57,7 @@ source/native simulation or of extractor completeness.
 
 - Reference signatures outside the internal memory returns and reference
   arguments above (calldata, `bytes`/`string`/`bytesN`/enum/function/nested
-  or nominal array elements, recursive structs, storage or struct returns,
+  or nominal array elements, recursive structs, storage arrays or structs as returns,
   several returns with a memory one, any reference in an external
   signature), unknown type metadata, and missing candidate or override
   identities.
@@ -66,9 +67,10 @@ source/native simulation or of extractor completeness.
   uint). All candidates are checked, whatever a points-to approximation would
   omit.
 - External dynamic calls with several return values, as in native dispatch.
-- External candidates declared private/internal, and inherited or overloaded
-  external candidates whose model name differs from the source name (native
-  selectors hash the model name). Internal inherited dispatch is supported.
+- Native-compatible candidates declared private/internal and source-kind
+  erasure collisions. Renamed inherited/overloaded external candidates use the
+  existing retained source selector/signature identity on packing and dispatch;
+  no generated helper name is hashed.
 
 Typed states still admit unassigned function tags; the dispatcher reverts on
 them.
@@ -110,7 +112,9 @@ not a simulation theorem.
   until an exact signature is known, even when another target would do.
   Unrelated static calls are unaffected.
 - Reference-valued getters are not shortened and missing metadata is not
-  guessed.
+  guessed. Supported static enum/contract getters retain nominal signatures as
+  unknown source candidates, including mapping keys, so dynamic calls cannot
+  erase them into ordinary uint8/address signatures.
 
 ### Tests
 
@@ -160,9 +164,15 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   the table name before its members (`structDisplay`), so the key is
   nominal. A single return `T[] memory` is spelled `T[]memory`, beside the
   existing `bytesmemory`. `canonFnTy` reads an array element as a value
-  component does (`uint256`/`address` are `uint`). Calldata, `bytes`,
-  narrow, `bytesN`, enum, function, nested or struct elements and recursive
-  structs keep no spelling, so no dispatch lists them. The source side
+  component does (`uint256`/`address` are `uint`). Since lane FU1 a narrow
+  word or `bytesN` element is spelled at its width (`uint8[]memory`,
+  `int16[]storage`, `bytes2[]memory`), so `uint8[]` and `uint16[]` functions
+  are not each other's candidates. A `bytes1` element keeps no spelling: the
+  model's `bytes` is a `bytes1[]` with the same rows (`solc-alignment.md`,
+  "Byte types"), so the key could not tell a `bytes` parameter from a
+  `bytes1[]` one, which solc and the source key keep apart. Calldata,
+  `bytes1`, enum, function, nested or struct elements and recursive structs
+  keep no spelling, so no dispatch lists them. The source side
   (`FiniteDispatch.Ty.memoryArray`, `storageArray`, `nominal`) parses the
   same components and requires the exact source signature as before: an
   `address[]`/`uint[]` collision in the native key is refused. A struct's
@@ -173,12 +183,14 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   `scripts/dispatch-signatures.test.mjs`).
 - **Capture and aliasing.** The arguments of a call through a function value
   are not hoisted by the caller (`hoistCallArgs`, the expression path in
-  `Arms.lean`): `fnDispatch` and `fnMemoryDispatch` capture each argument
+  `Arms.lean`): `fnDispatch`, `fnMemoryDispatch` and `fnTupleDispatch`
+  capture each argument
   once, left to right (`dispatchCaptures`), a later call argument running
   after an earlier operand's capture. A memory reference is captured as a
   memory local (`fnRefElem?`, `fnRefStruct?`): a memory operand is the
   reference itself, so the callee's writes are visible to the caller; a
-  storage operand is copied at its position. A storage reference is captured
+  storage operand is copied at its position (legacy; after every argument
+  under `binaryLeftToRight`, solc's IR order). A storage reference is captured
   as a storage alias of its path, so the callee writes the caller's storage.
   Each branch is the ordinary internal call of its candidate on the captured
   names (`hoistCallArgs` keeps the stable capture without a second copy).
@@ -189,6 +201,26 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
 - **Memory returns.** `fnMemoryDispatch` binds one shared memory destination
   of the return's type in every branch, after the argument captures; a
   zero-argument dispatch keeps its original capture of the tag first.
+- **Several value returns.** `(a, b) = h(x)`, `(uint a, uint b) = h(x)` and
+  `return h(x);` in a function of several returns (lowered to a tuple
+  assignment, `lowerReturn`) dispatch to the direct tuple assignment
+  `(a, b) = g(y)` in each branch (`fnTupleDispatch`; vectors `tupleReturn`,
+  `tupleAssigned` over two candidates, `tupleForward`, `tupleUnassigned`).
+  A callee that is not a name (`s.f(x)`, `fs[i](x)`, `(b ? f : g)(x)`,
+  `(h)(x)`) is evaluated into a fresh local of its type first, as `callValue`
+  does, then dispatched (vectors `tupleCallee`, `tupleCalleeForward` through
+  `return`). Only the conditional form is tested; a parenthesised declared
+  function `(g)(x)` also goes through the dispatch here (not the direct-call
+  shortcut `callValue` takes), so it is refused where `g` is not reachable
+  as a value: fail-closed. Several returns with a memory one stay refused
+  (see "Blockers" below).
+- **Struct memory returns.** A single nonrecursive struct return in memory
+  (`function(uint) returns (P memory)`) binds a shared memory destination of
+  the struct's type in every branch (`fnMemoryDispatch`, `structReturn`);
+  storage struct returns stay refused. Tested by declaration, assignment to
+  an existing local and `return h(v)` (`structReturn`,
+  `structReturnAssign`, `structReturnForward`). A recursive struct return is
+  admitted by the reader and refused by the elaborator (`fnRefStruct?`).
 - **Callee order.** solc's legacy code reads the callee value after the
   arguments, its IR pipeline before them (EVM observations `calleeOrder`,
   `calleeOrderScalar`). Under `evalOrder .viaIR` a named callee's tag is
@@ -197,6 +229,37 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
 - **Unassigned values.** A zero or deleted tag reaches the final branch:
   `Panic(0x51)` bytes in a self-call or failure-retaining frame, otherwise a
   revert.
+
+### Narrow and byte elements (lane FU1, CF2 blocker 2)
+
+`PrimTy` has no narrow integer: a `uint8[]` is a `uint` array whose width
+lives in shape rows (`elabTyW`). The capture `dispatchCaptures` already
+emits is a typed declaration, `uint8[] memory y = xs` at the component's
+spelling, whose initializer is `shapeCheck`ed against the operand like any
+reference local's (a storage operand copied, a memory one aliased); the
+refusal ("xs has a narrow element … not whole") came from the statement's
+pre-check, `narrowWholeUse?`, which knew the reference parameters of a
+declared function but not of a function value. It now reads them from the
+value's type (`fnTyOf?`, `fnTyOfExpr` for `callValueName`): a component
+`fnRefElem?`/`fnRefStruct?` accepts is a whole use whose shape the capture
+checks. `fnRefElem?` admits a word of any width and a `bytesN` element
+(`N ≥ 2`; `bytes1` is the model's `bytes`, see "Signature" above);
+`FunDecl.sigTy?` spells them at their width (an element `#bytes` row is
+allowed); the source side (`FiniteDispatch.parseType`) parses them, so the
+native key keeps the width (`uint8[]memory` ≠ `uint16[]memory`).
+
+Tests: `narrowAlias_run` (`uint8[]` by reference, the callee's write
+visible), `narrowOverflow` (the callee's `uint8` arithmetic: `6 + 250`
+reverts), the two wrong-width refusals (`uint8[]` to a `uint16[]` value and
+back: the capture's shape check), `byteArgs_run` (`bytes2[]`), the signature
+pin (`uint8[]memory`, `uint16[]memory`, `bytes2[]memory`; `bytes` unspelled);
+in
+`scripts/finite-dispatch.test.mjs` "narrow and byte array elements dispatch
+at their width" (memory and storage, `uint8`, `int16`, `bytes2`)
+and "narrow element widths are part of the dispatch key" (a `uint16[]`
+function is not scanned as a `uint8[]` candidate); in
+`scripts/dispatch-signatures.test.mjs` the parsed widths and native key.
+Enum and `bytes1` elements stay unspelled (refused in both scripts).
 
 ### Recorded deviations
 
@@ -208,14 +271,33 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   halt only for those two storage vectors.
 - Under viaIR, solc copies a storage argument to memory after all arguments
   ran (`argumentOrder`: `901`, legacy `101`); this holds for storage
-  structs passed to memory struct parameters too. The model copies at the
-  argument's position in both schedules, for direct calls
-  (`argumentOrderDirect`, pre-existing) and dispatched calls alike. The
-  viaIR replay leaves the two order vectors out, so the model's viaIR copy
-  point is unpinned.
+  structs passed to memory struct parameters too. Since lane FU2-A the
+  model follows both schedules: under the source-order schedule
+  (`binaryLeftToRight`, set by `EvalOrder.viaIR`; a contract may also set
+  the flag alone, `tests/upstream/ModifierFrames.lean`) a storage operand of a memory parameter is captured
+  as a storage alias at its position and copied after the last argument,
+  for direct calls (`hoistCallArgs`) and dispatched calls
+  (`dispatchCaptures`) alike; kernel-checked against the EVM-observed
+  values in `FunctionTypes.lean` (`memOrderIR_run`,
+  `memOrderDirectIR_run`: `901, 9`; `memOrder_run`, `memOrderDirect_run`:
+  legacy `101, 9`). The import replay's viaIR run now expects the two order
+  vectors at `901, 9` (`scripts/finite-dispatch.test.mjs`, from the EVM
+  script's values; not rerun here: it compiles through solc). Open: in
+  `dispatchCaptures` an operand the synthesiser cannot type (a call
+  returning a storage reference, `h(getRef(), setFirst())`) is not
+  recognised as storage and is copied at its position under both schedules
+  (as before the change); a struct constructor's field copies keep their
+  own schedule (`Arms.lean`, unchanged); a storage operand passed to a
+  calldata parameter is admitted (pre-existing; solc rejects it).
 - A callee that is not a name (`fs[i](…)`, `s.f(…)`, `choose(b)(…)`) is
-  evaluated before the arguments in both schedules (`callValue`,
+  evaluated before the arguments in both schedules (`callValue`, and the
+  tuple path's capture in `elabTuple`,
   pre-existing): under the legacy schedule solc evaluates it after them.
+- A parenthesised declared function as a callee with a call among its
+  arguments, `uint r = (g)(k(1));` (solc's single-element tuple callee), is
+  refused since `fnTyOfExpr` types a bare function name: the argument is no
+  longer hoisted, and `checkIn` rejects the nested call. It fails closed;
+  `g(k(1))` is unaffected (integration review, round 2).
 - The elaborator does not type-check a function value's assignment
   (`h = scalar` for a `function(uint[] memory)` local); solc rejects such
   programs. The dispatch then has no arm for that tag and reverts
@@ -237,7 +319,7 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   candidates and of a scalar argument beside a memory-byte return; nominal
   struct candidates; refusal (by the dispatch diagnostic or the reader's
   function-type refusal, checked by name) of address/uint element
-  collisions, external struct parameters, struct returns, struct, narrow,
+  collisions, external struct parameters, storage struct returns, struct, narrow,
   byte and nested array elements, calldata references, storage mappings,
   storage-array returns, several returns with a memory one and external
   memory-array parameters and returns; elaborator refusal of a recursive
@@ -247,8 +329,21 @@ entry: diag=some `solidity.functionDispatch body=Solidity.Frontend.Gap.unsupport
   elements stay unparsed.
 - `scripts/check-function-value-references.mjs SOLJSON MODULES_DIR [cancun|osaka]`:
   the pinned solc 0.8.34 on ethereumjs 10.1.3, legacy/viaIR × optimizer
-  off/on (80 executions per EVM version; cancun and osaka both pass), the
+  off/on (132 executions per EVM version; cancun and osaka both pass), the
   source of every expected observation above.
+
+### Blockers (lane CF2, after integration)
+
+- **Several returns with a memory one.** Resolved in lane FU2-A for the
+  elaborator, direct calls and function values (`RetBinders`, "Lane FU2-A"
+  below); the solc import still refuses a function *type* with a memory
+  return among several (`SolcJson/Body.lean`, "this function type's
+  reference return").
+- **Narrow array elements.** Resolved in lane FU1 (see "Narrow and byte
+  elements" under "Reference arguments").
+- **viaIR storage-to-memory copy order.** Resolved in lane FU2-A (the
+  copy after the last argument under `binaryLeftToRight`, "Recorded
+  deviations" above).
 
 ## Dispatch correctness
 
@@ -276,8 +371,10 @@ What is not proved: (1) that the elaborated guards
 `elabCall` on the same callee and names, by construction of the elaborator,
 which is `partial`. `memAlias_run`/`memDirect_run` check the same asserts
 for the dispatched and the direct call on one input; no theorem relates the
-two runs. `fnMemoryDispatch` writes raw `if … else if …` and is not
-`DispatchArm.chain`; the lemmas do not cover it.
+two runs. `fnMemoryDispatch` and `fnTupleDispatch` write raw
+`if … else if …` and are not `DispatchArm.chain`; the lemmas do not cover
+them. The three dispatchers repeat the candidate loop and failure; a shared
+helper would keep them from drifting.
 
 ### For lane-soundness (`roadmap-l3-20261030/lane-soundness`)
 
@@ -359,25 +456,26 @@ with the confirmed findings and their fixes:
 ## Handoff (lane CF2)
 
 Checkpoints: 1 (memory arrays), 2 (storage arrays), 3 (memory returns
-beside arguments; nonrecursive structs in memory and storage) and 4 (chain
+beside arguments; several value returns; nonrecursive structs in memory and
+storage) and 4 (chain
 selection theorems, lane-soundness notes) are implemented on
 `cloud/relocated-20261031/function-values`. Still refused: several returns
-with a memory one, narrow array elements, struct returns, calldata
+with a memory one, narrow array elements, storage struct returns, calldata
 arguments to function values, and every reference in an external
 signature.
 
-Gates run: `./run-lean.sh` (`lake build`: 1019 jobs, success; the
-SolkeyTestSuite step OOM-kills `Derived17`, the baseline; `Derived21`, also
-killed once under parallel load, builds on the retry in 166s;
-`check-solkey`: 37 mismatches, the baseline); `TrustAudit.lean` through
-the Lean server ("trust: 8 dispatch theorems use only the standard
-axioms"); `node --test` of `finite-dispatch` (30/30; the FunctionTypes.sol
-suite timed out once under load and passes alone), `dispatch-signatures`
-(1/1) and `getter-dispatch` (9/9); `check-function-value-references.mjs` (80
-executions, cancun and osaka); `check-layers`, `check-orphans`,
-`check-trust`, `check-automatic --strict` (0 pending), `check-doc-paths`
-(48, as on the base) and `check-g07` (the base's two failures; three new
-pinned theorems).
+Gates run after the merge of master (`099bfbe1`) and the post-integration
+work (SolkeyTestSuite and `check-solkey` from the earlier full run, since
+that step rebuilds every Derived module): `./run-lean.sh` `lake build`
+(1040 jobs, success); earlier SolkeyTestSuite run: only `Derived17` OOM-killed
+(the baseline), `check-solkey` 37 mismatches (the baseline); `TrustAudit.lean`
+through the Lean server ("trust: 13 dispatch theorems use only the standard
+axioms"); `node --test` of `finite-dispatch` (31/31),
+`dispatch-signatures` (1/1) and `getter-dispatch` (9/9);
+`check-function-value-references.mjs` (132 executions, cancun and osaka);
+`check-layers` (184 core modules, 0 reach the elaborator), `check-orphans`
+(0 orphaned), `check-trust` (0 findings), `check-automatic --strict`
+(0 pending), `check-doc-paths` (48, as on the base).
 
 Elaboration time of `Syntax/Elab/*.lean` on the base, from an otherwise idle
 `lake build`: Context 19s, Values 29s, Lower 26s, Arms 179s, Stmt 14s
@@ -385,5 +483,400 @@ Elaboration time of `Syntax/Elab/*.lean` on the base, from an otherwise idle
 modules were elaborated by the Lean server or under a parallel build, so no
 like-for-like figure was taken; the change adds `DispatchChain` (small) to
 `Stmt`'s imports and a `fnTyOf?` lookup per call to an undeclared name in
-`hoistCallArgs`. `Examples/Tactics/FunctionTypes.lean` builds in 85s.
+`hoistCallArgs`. `Examples/Tactics/FunctionTypes.lean` builds in 84s.
 
+### Later reviews
+
+- Tuple-dispatch review (read-only): no bug found; non-name callees in
+  tuple assignments, the uncovered raw chain, untested forms
+  (`tupleAssign`, several candidates, the unassigned value, `return h(x)`)
+  and the duplicated candidate loop were documented, and the forms gained
+  EVM-observed replay vectors. The refusal at `Arms.lean`'s named-callee
+  `targets` check is now unreachable and was left as a guard.
+- Coordinator follow-up (after integration at `099bfbe1`): non-name callees
+  in tuple assignments and `return h(x)` supported and tested; struct memory
+  returns supported; calldata in tuple assignments refused by the
+  integration's stricter `roMentions` check (`calldataCheck` reads a tuple's
+  right-hand side); `memNoCopy_reason` pins that the false observation fails
+  by the assertion's panic and the program without it returns;
+  `memUnassigned_halt` pins the revert (the `Panic(0x51)` bytes are pinned
+  by the import replay); several memory returns, narrow elements and the
+  viaIR copy order recorded under "Blockers".
+- Post-integration review (read-only, 8 items, no soundness bug): the tuple
+  path's callee-first order is now listed with `callValue`'s deviation;
+  untested forms gained vectors (`tupleCalleeForward`,
+  `structReturnAssign`, `structReturnForward`); stale "struct returns
+  refused" lines and the first blocker's message were corrected. Not
+  changed (recorded): the tuple path's captures stay in the enclosing scope
+  (fresh names; as the named path's), the parenthesised-name shortcut, and
+  the `tyText` comment in `Body.lean`, which still names only arrays and
+  `bytes` among memory returns.
+
+
+### Integration review (round 2, 2026-11-01)
+
+Read-only finder and skeptic on the merge of CF1 `99a8ce42` and CF2
+`6de34328` over master `099bfbe1`; no soundness defect or wrong verdict.
+Fixed at integration: the frontend's tuple-value branch for calls through
+internal function values (`tupleValue`, `SolcJson/Body.lean`) admitted any
+callee of internal function type, so library (`L.f(x)`) and using-for
+(`x.f()`) tuple assignments reached the elaborator untested; it now uses
+`isValueCallee`, the non-name callees its comment names. Docs: the
+callee-first deviation is stated in [options.md](../options.md), the module
+map row lists tuple and struct-return dispatch, and the `(g)(k(1))` refusal
+is recorded above. Open, not fixed: no tuple test with a memory return among
+several (`(bytes memory a, uint b) = h()`) or with calldata through a non-name
+callee; `tupleCallee_run` uses `true ? divmod : divmod`, so only the EVM
+vectors check which branch runs; non-tuple `(f)(x)` and `(b ? f : g)(x)` and
+the `lowerReturn` arm `ternary (call) (call)` are untested.
+
+## Lane FU1 (followup-20261101)
+
+**Done.** CF2 blocker 2 (narrow and `bytesN`, `N ≥ 2`, array elements; see
+"Narrow and byte elements" under "Reference arguments"). Integration-review
+test gaps (item 4), all in `Examples/Tactics/FunctionTypes.lean`:
+`tupleCalleeDyn_run` (a conditional callee on a condition read from memory,
+both branches, in a tuple assignment), `scalarCallee_run` (non-tuple `(sum2)(xs)`
+and `(b ? sum2 : bump)(xs)` both ways, `bump`'s write visible),
+`ternaryReturn_run` (`return b ? f(x) : g(x)` in a function of two returns,
+`lowerReturn`'s `ternary (call) (call)` arm; only the chosen branch runs,
+counted by `pickCounted`); and in `scripts/finite-dispatch.test.mjs`
+"calldata in a tuple assignment through a callee that is not a name is
+refused" (`(c ? split : other)(xs)` with `xs` calldata). These are DSL
+programs (no `pure`/`view`); no solc fixture pins the tuple ternary return.
+
+**Not done.** CF2 blocker 1 (several returns with a memory one) and, with
+it, the tuple test with a memory return among several: the ordinary call
+frame's `CallRet.rets` carries `Binders`, value binders only
+(`Scope.lean`), and admitting a memory binder means a new constructor (or a
+reference-capable binder type) matched in `CallRet.enterT`/`leaveT`
+(`Semantics/Run.lean`), `Binders.decodeT`/`defaultsT` (also used by
+`tryCall`/`catchData`), `RunWk`/`RunFrame`/`Callback*`, the call rules'
+soundness (`Calculus/SoundCalls.lean`, `SoundCatch.lean`,
+`RecursionCallback.lean`, `CallbackSound/Rules.lean`, `Closer/Leaf.lean`)
+and the elaborator (`elabCallRetCore`, 19 `Binders` match sites outside
+the examples, about 270 `.rets` mentions). Every edit there rebuilds the
+whole library (45–70 min on this lane's 4-core VM), so it did not fit
+beside the other items; no change was started. CF2 blocker 3 (viaIR copy
+order, backfill) was not reached.
+
+### Review (lane FU1)
+
+Read-only finder and skeptic (no Lean server) on the item 0 and item 2–4
+diffs. Confirmed and fixed: (1) `bytes1` elements: the model's `bytes` is a
+`bytes1[]` with the same rows, so admitting `bytes1[]` also spelled `bytes`
+parameters `bytes1[]memory` in the elaborator while the source key kept
+`bytesmemory`; a `function(bytes1[] memory)` dispatch could list a
+`bytes` function the source scan never checked. `bytes1` elements are now
+unspelled on both sides (refusal tests restored). (2) `narrowOverflow`'s
+docstring claimed it tests the capture's width; it tests the callee's
+arithmetic, and the capture's check is the two wrong-width refusals (the
+`uint16[]`→`uint8[]` direction added). (3) `ternaryReturn` used pure
+callees, so it could not tell one branch from both; `pickCounted` counts.
+(4) Wording: the audit's scope (the modules `import Solidity` reaches, not
+the corpus or TestSuite libraries), the `canonicalOnly` control comment, a
+section pointer, `abi-entry-collect.py` argument handling. Recorded, not
+changed: inside `sol{}` (not the import), `AbiTy.of` ignores `#enum` rows,
+so a DSL `abi.decode(b, (E[]))` decodes without the member-count check
+(pre-existing; the import refuses nested enums).
+
+### Integration review (lane FU1, 2026-11-01)
+
+Read-only finder and skeptic on the merge of FU1 `62f41850` over master
+`457130f3`. Fixed at integration: a memory-array return through a function
+value now keeps full-word elements (`FunDecl.sigTy?`, `fnMemRet`). FU1 had
+admitted narrow and `bytesN` returns, but the call site compares only the
+type, not the element width (`exprShape`), so `uint[] memory b = h(a)` was
+admitted for a `uint8[]` return, which solc rejects, and aliased the narrow
+object at width 256. A narrow or `bytesN` return is refused again. Docstrings
+corrected. Open: the `AxiomAudit.lean` treatment of a constant missing from
+the environment as clean (not exploitable with a complete import).
+
+## Lane FU2-A (fu2-20261102)
+
+### Design: memory returns in the ordinary call frame
+
+CF2 blocker 1 needs a call of several returns to leave a memory return in
+the caller beside value returns (`uint a; uint[] memory b; (a, b) = f(x);`).
+Two representations were considered.
+
+1. **A new `CallRet` constructor** (`retsMem`, or a `rets` with a second
+   binder list). Every `CallRet` match gains an arm: about 40 proof arms
+   (`RunWk`, `RunFrame`, `RunFrameMem`, `RunFrameOwn`, `TypedRunInv`,
+   `WkOver`, `FunContract`, `MemContract`, `Recursion`,
+   `RecursionCallback`, `SoundCalls`, `SolkeyFragment`, `CallSummary`,
+   `TermSize`, `SoundSummary`, `Stipend`, the printers and both quoters),
+   and the exhaustive matches in `Solidity/Evm/Compile.lean`
+   (`CallRetIn`), `Evm/Correct.lean` (`cases ret with … | rets _ => …`) and
+   `Evm/MemoryCalls.lean` (`CallRet.casesOn` with five minor premises).
+   Those files belong to the Codex EVM lanes and may not be edited here, so
+   this option is ruled out.
+2. **A reference-capable binder list for `CallRet.rets`** (chosen):
+   `CallRet.rets {rs} (bs : RetBinders rs)`, where `RetBinders`
+   (`Syntax/Scoped.lean`) has `nil`, `snoc` (a value) and `snocMem` (a
+   memory return, with the `defaultOkS`/`mapFree` evidence `CallRet.mem`
+   carries). The constructor keeps its arity, so every `| rets _` arm,
+   `.rets .nil` and the five-premise `casesOn` in `Solidity/Evm/**` still
+   elaborate unchanged. `Binders` itself is not changed: `tryCall` and
+   `catchData` decode their returns with `Binders.decodeT`, and a memory
+   binder there would need an ABI decoder; the self `try` path converts
+   with `Binders.toRet`.
+
+Semantics: `CallRet.enterT (.rets bs)` is `RetBinders.enterT`, which
+declares the binders in order on the frame's parameters, a value one at
+its default and a memory one a fresh default object (`State.allocDefaultG`,
+as `CallRet.mem` does and solc does on entry); `leaveT` is unchanged (the
+binders are left above the caller's locals, and the tuple's targets read
+them: a memory target takes the callee's object, by pointer, so aliasing
+is solc's). The inline rule's premise (`functionBodyExpand`,
+`Premise.expandCall`) declares the binders with `RetBinders.declsThen`
+(`T memory r;` for a memory one), so the premise's shape and the rule map
+do not change; its soundness rests on `RetBinders.runSt_declsThen` (the
+declarations run as the frame is entered) and `RetBinders.enterT_lift`
+(entering over a lifted state). The function-contract rule
+(`holds_callRets`) keeps its premises: a memory binder makes its "post"
+false (`RetBinders.all`), so a call with a memory return among several is
+inlined, never summarised by a contract. Recursive functions with a memory
+return among several stay refused by the elaborator.
+
+Proofs touched: the arms that read `enterT` of `.rets` (`RunFrame`,
+`RunFrameMem`, `RunFrameOwn`, `TypedRunInv`, `FunContract`,
+`MemContract`, `Recursion`, `RecursionCallback`, `SoundCalls`,
+`CallbackSound`), each by an induction over `RetBinders` instead of the
+former definitional unfolding; arms that only read `leaveT` are unchanged.
+Checking speed: `enterT` of value-only binders no longer reduces to one
+`TEnv.append` by definition, so the proofs that unfolded it
+(`holds_callRets`, `holdsC_callRets_k`, `Stmt.runSt_callRets`,
+`ExecS.callRets_inline`, `CallRet.enterT_snap`, `FunContract.forall_rets`,
+`FunContractC.forall_rets`, `CallRet.execP_declsThen`) rewrite with
+`Binders.enterT_toRet`, `RetBinders.enterT_lift` or `RetBinders.enterT_eq`
+instead. Kernel-evaluated runs of a tuple call (`decide +kernel`, e.g.
+`FunctionTypes.tupleReturn_run`) now evaluate the recursive
+`RetBinders.enterT`, one step per return variable; the elaboration times
+after the change are recorded below. `git log -S enterT` shows no earlier
+speed-motivated change to it.
+
+Baseline (base `84a2a4be`, `./run-lean.sh` on this lane's 4-core VM, fresh
+`.lake`): `lake build` 67m40s wall, 1039 of 1041 jobs (`Source.Horizon` and
+`Frontend.Checked.UnitExamples` OOM-killed under the 4-job build, both
+outside this lane). Elaboration of the touched modules on the base, from
+that build: `Syntax.Scoped` 13s, `Semantics.Run` 8.9s, `Semantics.RunWk`
+17s, `Semantics.RunFrame` 13s, `Typing.TypedRunInv` 2.6s,
+`Calculus.Blocks` 3.7s, `Calculus.RunFrameMem` 8.4s,
+`Calculus.RunFrameOwn` 7.0s, `Calculus.SoundCalls` 6.4s,
+`Calculus.SoundCatch` 2.2s, `Calculus.FunContract` 9.1s,
+`Calculus.MemContract` 3.3s, `Calculus.Recursion` 8.2s,
+`Calculus.RecursionCallback` 12s, `Calculus.CallbackSound.Calls` 13s,
+`Calculus.CallbackSound.Rules` 6.3s, `Calculus.SolkeyFragment` 35s,
+`Calculus.PrintStmt` 39s, `Syntax.Elab.Arms` 111s, `Syntax.Elab.Stmt` 12s,
+`Examples.Tactics.FunctionTypes` 55s.
+
+After the change (build rebuilding everything below `Syntax.Scoped`, same
+VM, 59m47s wall for `lake build`; module times under a 4-job build vary by
+a few seconds with scheduling): `Syntax.Scoped` 11s, `Semantics.Run` 6.9s,
+`Semantics.RunWk` 17s, `Semantics.RunFrame` 11s, `Typing.TypedRunInv` 3.3s,
+`Calculus.Blocks` 4.8s, `Calculus.RunFrameMem` 12s, `Calculus.RunFrameOwn`
+7.6s, `Calculus.SoundCalls` 8.4s, `Calculus.SoundCatch` 4.1s,
+`Calculus.FunContract` 9.2s, `Calculus.MemContract` 2.8s,
+`Calculus.Recursion` 8.8s, `Calculus.RecursionCallback` 11s,
+`Calculus.CallbackSound.Calls` 14s, `Calculus.CallbackSound.Rules` 6.9s,
+`Calculus.SolkeyFragment` 39s, `Calculus.PrintStmt` 41s, `Syntax.Elab.Arms`
+124s, `Syntax.Elab.Stmt` 13s, `Examples.Tactics.FunctionTypes` 61s (its
+kernel tuple runs now evaluate `RetBinders.enterT`); the new
+`Examples.Tactics.MemoryReturns` 6s. The largest increases are `Arms`
+(+13s, the elaborator's several-returns branch) and `FunctionTypes` (+6s).
+
+### Implementation (lane FU2-A, items 2–3)
+
+- **Frame.** `RetBinders` and `RetBinders.enterT` as designed above;
+  `Binders.toRet` for the self `try` (`TRun.tryCall`, `TRun.catchBytes`
+  and every proof of the self path, by `rets.toRet`, with
+  `Binders.toRet_noMem` where a frame lemma needs no allocation).
+- **Soundness, no new premise.** The inline rule
+  (`Stmt.runSt_callRets`, `Premise.sound_callRets`) by
+  `RetBinders.runSt_declsThen` and `RetBinders.enterT_lift`; with callbacks
+  (`ExecS.callRets_inline`, `holdsC_callRets`) by
+  `RetBinders.execP_declsThen(_eq)`; the frame lemmas
+  (`RetBinders.enterT_frame`, `enterT_frameM`, `enterT_own`,
+  `RunInv.retEnterT_env`, `RetBinders.enterT_storage`/`enterT_keeps`);
+  contracts (`RetBinders.enterT_snap`, `holds_callRets` with
+  `RetBinders.not_holds_all` for a memory binder, `FunContract.forall_rets`
+  and `FunContractC.forall_rets` by `RetBinders.enterT_eq`,
+  `FunContract.forall_mem`/`FunContractC.forall_mem` gaining the
+  `snocMem nil` case, `CallRet.isValues` of `.rets bs` now `bs.noMem`, so
+  the recursive-contract rule with callbacks does not take a memory return
+  among several). The premises of `functionBodyExpand`,
+  `functionCallArgCapture` and the contract rules are unchanged in
+  statement; `functionBodyExpand`'s premise now also declares a memory
+  return (`T memory r;`, `RetBinders.declsThen`'s new case), recorded in the
+  rule map's `functionBodyExpand` row. `holdsC_callRecContract`'s existing
+  premise `ret.isValues` is now `bs.noMem` for `.rets` (it was `true`); its
+  automated caller discharges it by `rfl` on concrete binders.
+- **Elaborator.** `elabCallRetCore` admits a memory return among several
+  (`retMem`, not `retStorage`), declared `mv…` in the frame and the caller;
+  `RetKind.rets` and the call's result list carry `LocalTy`s; a statement
+  call of such a function declares the memory return with `declMem`
+  (`.none`); a recursive function with a memory return among several is
+  refused ("is recursive and returns a memory value among several"). A
+  storage return among several keeps its refusal. A target of another
+  element width is refused by the rebinding's shape check (solc rejects
+  it); a narrow target of the same width is admitted.
+- **Function values.** `fnTupleDispatch` admits a full-word memory return
+  among several (`fnMemRet`, as for a single one); the dispatch's arms are
+  the direct tuple assignments above. The solc import still refuses the
+  function type (`SolcJson/Body.lean`, sibling lane's file; its refusal
+  cases in `scripts/finite-dispatch.test.mjs` stand).
+- **Printer, quoters.** `retBindersS?` (`PrintStmt`), `RetBinders.quote`,
+  `qRetBinders`, `RetBinders.declStrs`; a tuple declaration with a memory
+  binder prints as the call and its reads.
+
+Tests: `Examples/Tactics/MemoryReturns.lean`, kernel-checked runs
+(`decide +kernel`) `splitAssign_run`, `bothAlias_run` (a returned parameter
+aliases the argument), `untouchedDefault_run`, `rebound_run` (the target is
+rebound, not left as it was), `freshPair_run` (two memory returns are two
+objects; an unassigned value return beside one is its default),
+`wordAssign_run` (`bytes memory`), `omitted_run`, `narrowAssign_run`,
+`falseObservation_panics` (the false observation panics), through function
+values `valueSplit_run`, `valueTernaryT_run`, `valueTernaryF_run` (`(c ?
+split : split2)(5)`, only the chosen callee runs), `valueWord_run`,
+`valueAlias_run`; calculus proofs `untouched_proved`, `split_proved`
+(`sol_symex`/`sol_close`, the value target); the printed program; refusals
+(`#guard_msgs`) of a storage return among several, of a wider target, of a
+location that does not match a return's type, and of a narrow element
+through a function value.
+
+Open: the closer does not resolve a memory array's length or elements after
+its allocation (`[ uint[] memory b; ] b.length == 0` stays open with no call
+at all, as does a single memory return's `b.length == 0`), so the calculus
+examples read only the value target; the reads of the returned objects are
+pinned by the runs. EVM-observed vectors were not added: running the pinned
+soljson and the EVM harness (`scripts/check-function-value-references.mjs`)
+was refused by this session's command policy, and fixture expectations may
+not be written by hand.
+
+### Review (lane FU2-A)
+
+Read-only finder and skeptic (no Lean server) on `84a2a4be..a78e122`.
+Confirmed and fixed:
+
+- Finder 1: both printers stopped the tuple at a memory-local target
+  (`b = mv1;` is `Stmt.rebindMem`), printing `(a, ) = split(5); b = mv1;`.
+  `ppRetTargetS` (`PrintStmt`) and `Stmt.retTarget?` (`Scoped.lean`) read
+  a `rebindMem … (.alias (.var r))` target; the printed program is pinned
+  in `MemoryReturns.lean`. Memory-field and storage targets of a memory
+  return still print apart (the call, then each read).
+- Finder 2 / skeptic 8: the data-location flags are per function
+  (`FunDecl.retMem`), so `returns (uint[] memory a, uint[] b)` and
+  `returns (uint memory a, uint[] memory b)`, which solc rejects, were
+  admitted. The `contract!{}` reader (also the solc import's) now checks
+  each of several returns (a reference one has a location, a value one
+  none) and marks a mismatch, which `elabCallRetCore` refuses ("a return's
+  data location does not match its type"); both pinned.
+- Skeptic 2–4: the speed paragraph claimed no kernel run unfolds `enterT`
+  (every `decide +kernel` tuple run does) and undercounted the rewritten
+  proofs; the premise wording ("wrote nothing") hid that
+  `functionBodyExpand`'s premise now declares `T memory r;`. Corrected
+  above, the rule map's `functionBodyExpand` row and `intrinsic.md`
+  decision 19 updated.
+- Skeptic 6–7: tests added for a target rebound from an earlier object
+  (`rebound_run`), two memory returns being two objects and an unassigned
+  value return beside a memory one (`freshPair_run`), `bytes memory`
+  among several directly and through a function value (`wordAssign_run`,
+  `valueWord_run`), and the narrow-element refusal through a function value.
+- Skeptic 9: stale lines in `kernel-port.md` (several returns, value types
+  only; `Binders.defaultsT_eq`) and `semantic-gaps.md` corrected.
+
+Recorded, not changed: the tuple *declaration* `(uint a, uint[] memory b) =
+f(x);` does not parse in `sol{}` (`solTupleDecl` takes no location; finder
+3), so only the assignment form is tested; viaIR modifier frames
+(`Syntax/Elab/Lower.lean`, `modifierFrames`) now reach several returns with a memory one
+and alias the return pointer as viaIR does, untested (finder 4); direct calls
+of such functions through the solc import reach the elaborator with no EVM
+vectors behind them (skeptic 12); `holdsC_callRecContract`'s `isValues`
+premise now excludes a memory binder (skeptic 1, by design).
+
+### Handoff (lane FU2-A)
+
+Items 1–3 done (above); item 4 and the backfill not done (blocked, see
+`docs/assurance.md`, "Lane FU2-A", and the "Open" paragraph above). Gates on
+the lane head:
+
+- `./run-lean.sh` (final run, with the viaIR backfill; 61m16s):
+  `lake build` "Build completed successfully (1042 jobs)", `lake build
+  SolkeyTestSuite` "Build completed successfully (286 jobs)" (no OOM kill
+  on this run), `check-solkey` 37 mismatches (the baseline).
+- Lean server: every touched file clean; `TrustAudit.lean` "trust: 25 lane
+  FU2-A frame theorems use only the standard axioms"; `scripts/AxiomAudit.lean`
+  "115263 declarations under Solidity, 6 exempt unsafe implementations, 0
+  findings". No `sorry`, axiom, `native_decide`, `implemented_by` or
+  heartbeat change in the diff.
+- `node scripts/check-g07.mjs --log`: all must-pass gates ok; baselined:
+  check-doc-paths 48 (the 2 beyond the script's 46 cite
+  `inline-assembly.md`, not touched here), axiom-pin drift.
+- `node scripts/check-automatic.mjs --strict`: 491 automatic, 61 with a step
+  budget, 0 manual, 11 refuted, 0 pending.
+- `python3 scripts/roadmap-g03-ledger.py --check`: 0 errors after `--write`
+  (line anchors moved).
+- `node --test scripts/finite-dispatch.test.mjs` and
+  `solidity-upstream.test.mjs`: not run to completion: they compile through
+  `scripts/solc-ast.mjs`, which needs the pinned soljson in the solkey
+  checkout (absent), and this session was not permitted to install or run
+  the downloaded compiler. The same blocks the EVM replay vectors
+  (`check-function-value-references.mjs`).
+
+Shared files: one `import` line in `Solidity.lean`, one row in
+`docs/module-map.md`, two import lines and one appended block in
+`TrustAudit.lean`. Edits outside this lane's area, all needed by the core
+change: `Solidity/Examples/Tactics/{Print,TryPanicProducer,TryPanicCarrier,
+TryConditions}.lean` (a `RetBinders` literal; `Binders.toRet` in three
+`simp only` lists), `Semantics/EntryReturn.lean` (a binder type),
+`Syntax/Contract.lean` (per-return location check). No file under
+`Solidity/Evm/**`, `Backend/**`, `Storage/**`, `Precompiles/**`, `Roadmap/**`,
+`Source/**`, `Frontend/SolcJson/**` or TestSuite `Derived*` changed.
+
+### Backfill: viaIR copy order (lane FU2-A)
+
+CF2 blocker 3: under the source-order schedule (`binaryLeftToRight`, set by
+`EvalOrder.viaIR`) a storage operand of a memory parameter is captured as a
+storage alias at its position and copied after the last argument, for
+direct calls (`hoistCallArgs`) and calls through function values
+(`dispatchCaptures`); legacy keeps the copy at the position. Kernel-checked
+in `FunctionTypes.lean`: `memOrderIR_run` and `memOrderDirectIR_run` (`901,
+9`, the EVM-observed `argumentOrder`/`argumentOrderDirect` values of
+`scripts/check-function-value-references.mjs`), `memOrder_run` and
+`memOrderDirect_run` (legacy `101, 9`). No proof changes: the copy point is
+the elaborator's lowering. The import replay (`scripts/finite-dispatch.test.mjs`)
+now expects the order vectors under viaIR too; it was not run here (solc).
+
+Review (read-only finder and skeptic). Fixed: the late copy was declared at
+the parameter's raw type and lost the operand's ABI markers (`#string`,
+`#enum`); it now takes the operand's shape (`exprShape`, as `captureRef`
+does). Stale docstrings (`hoistCallArgs`, `dispatchCaptures`, the §6 module
+doc of `FunctionTypes.lean`), `options.md` (O9) and the replay comment
+corrected; the claim that the flag is set exactly by `.viaIR` reworded
+(`tests/upstream/ModifierFrames.lean` sets `binaryLeftToRight` alone).
+Recorded, not changed: `dispatchCaptures` cannot recognise a storage
+operand the synthesiser does not type (a call returning a storage
+reference) and copies it at its position; struct-constructor field copies
+keep their own schedule; the `EvalOrder` docstring in `Syntax/Raw.lean`
+("calls … keep their existing sequencing") is stale but left, since editing
+that module rebuilds the library; the constructor-statement path and the
+admitted storage-to-calldata conversion are pre-existing.
+
+### Follow-up (lane FU2-A, coordinator request): rows 43 and 57, replays
+
+With the pinned soljson installed in the solkey checkout, the replays the
+handoff above could not run now run, and the viaIR order vectors pass under
+the import: `node --test scripts/finite-dispatch.test.mjs` 34/34,
+`solidity-upstream.test.mjs` 25/25. TestSuite row 43 (`tryScopeExit`) is
+fixed in the callback walk (`CallbackWalk.liveFml`, `Calculus/CallbackDerive.lean`;
+diagnosis and reviews in `docs/assurance.md`, "Lane FU2-A"), with the
+regression `TryCatch.scopeExitKeepsAge`; row 57 (`tryArgumentSideEffect`)
+passes unchanged. `scripts/test-solidity.test.mjs` for both: 2 pass. Gates
+on this head: `./run-lean.sh` both builds green, `check-solkey` 37 (baseline);
+`check-g07 --log` must-pass gates ok (baselined: check-doc-paths 48, the
+axiom-pin note); `check-automatic --strict` 491 automatic, 0 pending;
+`roadmap-g03-ledger --check` after `--write` (a line anchor in
+`TryCatch.lean` moved). Not done: the solc-import side of item 3 (several
+returns with a memory one through `SolcJson/Body.lean` function values,
+with EVM vectors): not attempted in this follow-up.

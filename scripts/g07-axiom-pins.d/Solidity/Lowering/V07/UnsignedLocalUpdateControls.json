@@ -1,0 +1,62 @@
+{
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.binder_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.code_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.equal_content_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.live_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.repeated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.source_frame_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.value_source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean:Solidity.Lowering.V07.UnsignedLocalUpdateControls.value_target_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

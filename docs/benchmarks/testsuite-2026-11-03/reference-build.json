@@ -1,0 +1,11 @@
+{
+  "method": "Unmodified SolKey source; Gradle init replaces org.hyperledger.besu dependencies with same-version official Besu 24.12.2 release JARs because the configured Maven hosts were unavailable.",
+  "java": "Temurin 21.0.9+10",
+  "compiler": "soljson-v0.8.34+commit.80d5c536.js",
+  "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+  "jars": {
+    "besu-evm-24.12.2.jar": "407d7abacabd14ad68046c367bc087cdb7088c416cc0a34645d3d2e67c061c37",
+    "besu-datatypes-24.12.2.jar": "4ee417329890cb8cd691945be7604e2b1d5a48112ae25fd496ce53412372ffce"
+  },
+  "emscriptenImage": "emscripten/emsdk:4.0.15@sha256:27bc6267cb285223b8aebb7627bfebae7cb3ad2aaa0d5923b8aa5321793033e8"
+}

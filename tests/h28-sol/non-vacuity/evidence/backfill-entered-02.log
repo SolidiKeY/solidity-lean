@@ -1,0 +1,79 @@
+H28_DEP_COMMAND ["lean", "-j1", "--tstack=131072", "--root=/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean", "--deps", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean"]
+H28_PRIVATE_IMPORTS {"module": "Solidity.Assurance.NonVacuityH28.LoopContracts", "imports": {"Solidity.Assurance.NonVacuityH28.CheckedFamilies": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/lib/Solidity/Assurance/NonVacuityH28/CheckedFamilies.olean"}}
+H28_KERNEL_COMMAND ["lean", "-j1", "--tstack=131072", "--root=/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean", "-o", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/lib/Solidity/Assurance/NonVacuityH28/LoopContracts.olean", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean"]
+/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean:208:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  Evm.loopRun (fun m => Evm.exec [Evm.Instr.push (Evm.Word.val (Evm.wmod 1))] 0 m)
+    (fun m => Evm.exec [Evm.Instr.push (Evm.Word.val (Evm.wmod 0)), Evm.Instr.jumpi 1, Evm.Instr.revert] 0 m) mc
+in the target expression
+  ((Evm.loopRun (fun m => Evm.exec { code := Evm.compileVal 1 (Val.simple (Simple.bool true)), cert := ⋯ }.code 0 m)
+          (fun m =>
+            Evm.exec
+              {
+                  frag :=
+                    {
+                        frag :=
+                          { frag := liveLayout C,
+                              code :=
+                                { code := Evm.compileVal 1 (Val.simple (Simple.bool false)), cert := ⋯ }.code ++
+                                  Evm.assertTop,
+                              cert := ⋯ }.frag,
+                        code := [], cert := ⋯ }.frag,
+                  code :=
+                    { frag := liveLayout C,
+                          code :=
+                            { code := Evm.compileVal 1 (Val.simple (Simple.bool false)), cert := ⋯ }.code ++
+                              Evm.assertTop,
+                          cert := ⋯ }.code ++
+                      {
+                          frag :=
+                            { frag := liveLayout C,
+                                code :=
+                                  { code := Evm.compileVal 1 (Val.simple (Simple.bool false)), cert := ⋯ }.code ++
+                                    Evm.assertTop,
+                                cert := ⋯ }.frag,
+                          code := [], cert := ⋯ }.code,
+                  cert := ⋯ }.code
+              0 m)
+          mc).bind
+      fun m k => Evm.exec [] k m) =
+    Evm.Out.revert
+
+C : Contract
+a : LoopAnn C MemCtx
+mc : Evm.Machine
+ht :
+  Evm.loopRun (fun m => Evm.exec [Evm.Instr.push (Evm.Word.val (Evm.wmod 1))] 0 m)
+      (fun m => Evm.exec [Evm.Instr.push (Evm.Word.val (Evm.wmod 0)), Evm.Instr.jumpi 1, Evm.Instr.revert] 0 m) mc =
+    Evm.Out.revert
+⊢ ((Evm.loopRun (fun m => Evm.exec { code := Evm.compileVal 1 (Val.simple (Simple.bool true)), cert := ⋯ }.code 0 m)
+          (fun m =>
+            Evm.exec
+              {
+                  frag :=
+                    {
+                        frag :=
+                          { frag := liveLayout C,
+                              code :=
+                                { code := Evm.compileVal 1 (Val.simple (Simple.bool false)), cert := ⋯ }.code ++
+                                  Evm.assertTop,
+                              cert := ⋯ }.frag,
+                        code := [], cert := ⋯ }.frag,
+                  code :=
+                    { frag := liveLayout C,
+                          code :=
+                            { code := Evm.compileVal 1 (Val.simple (Simple.bool false)), cert := ⋯ }.code ++
+                              Evm.assertTop,
+                          cert := ⋯ }.code ++
+                      {
+                          frag :=
+                            { frag := liveLayout C,
+                                code :=
+                                  { code := Evm.compileVal 1 (Val.simple (Simple.bool false)), cert := ⋯ }.code ++
+                                    Evm.assertTop,
+                                cert := ⋯ }.frag,
+                          code := [], cert := ⋯ }.code,
+                  cert := ⋯ }.code
+              0 m)
+          mc).bind
+      fun m k => Evm.exec [] k m) =
+    Evm.Out.revert

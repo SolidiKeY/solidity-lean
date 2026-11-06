@@ -171,6 +171,9 @@ structure Fr where
   contract : String
   checked : Bool := true
   depth : Nat := 0
+  /-- The frame's call data, which `calldata` references read (lane FU2-B);
+  read only. -/
+  cd : Bytes := []
 
 /-- **What every execution reads**: the program, the pipeline, the fixed
 parameters (hash, precompiles, ledger, creation addresses), the session's

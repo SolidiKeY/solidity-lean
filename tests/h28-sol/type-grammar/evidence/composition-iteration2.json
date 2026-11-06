@@ -1,0 +1,12 @@
+{
+  "command": [
+    "bash",
+    "tests/h28-sol/type-grammar/mcp.sh",
+    "diag",
+    "Solidity/Frontend/TypeGrammarH28/Composition.lean"
+  ],
+  "exit": 1,
+  "tool_wall_s": 0.274011214,
+  "stdout": "ERROR 161:33 rfl expected ps.yield middle = some (b, rest). diag: 1 errors",
+  "resolution": "The tail equality remains propositional after pair elimination; retain hs there. No statement or premise changed."
+}
