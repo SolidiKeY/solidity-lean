@@ -3667,6 +3667,7 @@ import Solidity.SolcValidation.DataLayout
 import Solidity.SolcValidation.DataResolution
 import Solidity.SolcValidation.Dialect
 import Solidity.SolcValidation.IrAbiHelpers
+import Solidity.SolcValidation.IrAbiSim
 import Solidity.SolcValidation.IrCensus
 import Solidity.SolcValidation.IrEval
 import Solidity.SolcValidation.IrEvalFuel
