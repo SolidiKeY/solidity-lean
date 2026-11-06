@@ -6,6 +6,7 @@ The caller must supply an independently authenticated source-census SHA256.
 """
 import hashlib
 import json
+import math
 import re
 
 
@@ -19,7 +20,13 @@ def strict_json(raw):
         return result
     def constant(value):
         raise ValueError('nonfinite JSON constant')
-    return json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
+    def floating(value):
+        result = float(value)
+        if not math.isfinite(result):
+            raise ValueError('nonfinite JSON number')
+        return result
+    return json.loads(raw, object_pairs_hook=pairs, parse_constant=constant,
+                      parse_float=floating)
 
 
 def canonical(value):
@@ -75,3 +82,24 @@ def partition(raw_rows, annotated_rows, source_bytes, expected_source_sha256):
             raise ValueError('coverage partition drift')
     return {'uncovered': uncovered, 'source_name_matches': sorted(raw.keys() & names),
             'kernelValidated': False, 'witnesses_added': 0, 'releaseClosed': False}
+
+
+def partition_pinned(raw_bytes, annotated_bytes, source_bytes, pins):
+    """Guard coordinated compiler/annotation drift behind independent input pins.
+
+    Pins must come from an authenticated external inventory. Matching bytes do
+    not establish that a compiler ran or that its historical proof passed.
+    """
+    roles = {'compiler': raw_bytes, 'annotations': annotated_bytes, 'source': source_bytes}
+    if not isinstance(pins, dict) or pins.keys() != roles.keys():
+        raise ValueError('exact three-role digest inventory required')
+    for role, data in roles.items():
+        pin = pins[role]
+        if not isinstance(data, bytes):
+            raise ValueError('raw bytes required')
+        if not isinstance(pin, str) or not re.fullmatch('[0-9a-f]{64}', pin):
+            raise ValueError('independent input digest required')
+        if hashlib.sha256(data).hexdigest() != pin:
+            raise ValueError(role + ' digest drift')
+    return partition(strict_json(raw_bytes), strict_json(annotated_bytes),
+                     source_bytes, pins['source'])

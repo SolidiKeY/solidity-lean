@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -20,6 +21,44 @@ class PartitionTests(unittest.TestCase):
 
     def check(self):
         return p.partition(self.raw, self.old, self.source, self.pin)
+
+    def pinned(self, raw=None, annotations=None, source=None, pins=None):
+        data = {'compiler': json.dumps(self.raw).encode() if raw is None else raw,
+                'annotations': json.dumps(self.old).encode() if annotations is None else annotations,
+                'source': self.source if source is None else source}
+        inventory = {k: hashlib.sha256(v).hexdigest() for k, v in data.items()}
+        return p.partition_pinned(data['compiler'], data['annotations'], data['source'],
+                                  inventory if pins is None else pins)
+
+    def test_pinned_roundtrip_and_prior_label(self):
+        self.old[0]['coverage'] = 'named_source_prior_witness'
+        self.assertEqual(self.pinned(), self.check())
+
+    def test_each_input_requires_external_pin(self):
+        data = {'compiler': json.dumps(self.raw).encode(),
+                'annotations': json.dumps(self.old).encode(), 'source': self.source}
+        pins = {k: hashlib.sha256(v).hexdigest() for k, v in data.items()}
+        for role in pins:
+            bad = dict(pins, **{role: '0'*64})
+            with self.subTest(role=role), self.assertRaises(ValueError):
+                self.pinned(pins=bad)
+        for bad in ({}, dict(pins, extra='0'*64), dict(pins, compiler=True)):
+            with self.assertRaises(ValueError): self.pinned(pins=bad)
+
+    def test_coordinated_metadata_drift(self):
+        compiler = json.dumps(self.raw).encode()
+        annotations = json.dumps(self.old).encode()
+        pins = {'compiler': hashlib.sha256(compiler).hexdigest(),
+                'annotations': hashlib.sha256(annotations).hexdigest(),
+                'source': self.pin}
+        self.raw[0]['signature'] = 'changed'
+        self.old[0]['signature'] = 'changed'
+        with self.assertRaises(ValueError): self.pinned(pins=pins)
+
+    def test_duplicate_compiler_and_annotation_keys(self):
+        for key in ('raw', 'annotations'):
+            with self.subTest(role=key), self.assertRaises(ValueError):
+                self.pinned(**{key: b'[{"name":"A","name":"B"}]'})
 
     def test_partition_is_not_witness(self):
         result = self.check()
@@ -53,7 +92,7 @@ class PartitionTests(unittest.TestCase):
         with self.assertRaises(ValueError): self.check()
 
     def test_digest_and_json_controls(self):
-        for raw in (b'{"declarations":[],"declarations":[]}', b'{"declarations":NaN}', b'{"declarations":[{"name_candidate":false}]}'):
+        for raw in (b'{"declarations":[],"declarations":[]}', b'{"declarations":NaN}', b'{"declarations":[],"extra":1e999}', b'{"declarations":[{"name_candidate":false}]}'):
             self.source = raw
             self.pin = hashlib.sha256(raw).hexdigest()
             with self.assertRaises(ValueError): self.check()

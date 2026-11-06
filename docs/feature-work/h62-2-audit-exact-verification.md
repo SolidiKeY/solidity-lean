@@ -317,3 +317,10 @@ This helper is not yet wired into the historical Core-dependent runner.
 Original raw artifacts remain UNVERIFIABLE; actual census replay and proof
 validation remain pending. No Lean or timing STOP was rerun, no Core change
 was made, and no original obligation or release row is closed.
+
+The `partition_pinned` byte-input wrapper additionally requires exact external
+SHA256 inventory roles for compiler rows, annotations and source census before
+strict JSON parsing. Ten synthetic host controls pass, including coordinated
+compiler/annotation edits with stale pins. Pins must originate in an independent
+authenticated inventory; this helper cannot certify their provenance or turn
+matching bytes into historical execution evidence. Actual replay remains open.
