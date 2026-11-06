@@ -5,8 +5,8 @@ Each `checks/<key>.json` becomes one line of `checks.jsonl` keeping the key,
 phase, decision, timing, bridge exit, scratch and mutant hashes, the regions,
 the one-change diff, the sha256 of the full record, every error/warning
 location with its first 240 characters, and the `#print axioms` lines.  The
-full records are then archived as `checks-full.tar.gz` beside the run, which
-is ignored by Git, with its sha256 in `summary.json`.
+full records are then archived as `<run>-checks-full.tar.gz`, which
+is committed beside it (small), with its sha256 in `summary.json`.
 """
 import hashlib
 import json
@@ -40,7 +40,7 @@ def main(run):
         t.add(run / "checks", arcname=run.name + "/checks")
     summary = json.loads((run / "summary.json").read_text())
     summary["full_records"] = {"archive": archive.name, "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
-                               "files": len(lines), "in_git": False}
+                               "files": len(lines), "in_git": True}
     (run / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     print(len(lines), "records;", archive.name, summary["full_records"]["sha256"])
 
