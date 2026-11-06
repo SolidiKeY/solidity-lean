@@ -3,6 +3,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{once}=require('node:events');
 const {WorkerPool}=require('../src/worker-pool.cjs'),{SolidityService}=require('../src/lsp-server.cjs');
 const root=path.resolve(__dirname,'../..'),text='contract C {}';
+fs.mkdirSync(path.join(root,'.lake'),{recursive:true});
 function observe(pool){const entries=[],spawn=pool.spawn.bind(pool);pool.spawn=()=>{const worker=spawn();const entry={worker,closed:false};entry.close=new Promise(resolve=>worker.child.once('close',()=>{entry.closed=true;resolve();}));entries.push(entry);return worker;};return entries;}
 const task=directory=>({action:'analyze',source:path.join(directory,'C.sol'),text});
 test('compiler worker disposal settles child close before returning success',async()=>{

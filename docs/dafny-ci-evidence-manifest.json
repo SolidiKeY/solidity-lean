@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceParent": "82204fb1577a62336129f52c8af8cc5d4e25b3f5",
+  "archive": {
+    "path": "/workspace/dafny-parity-ci-20261106/ci-evidence.tar.gz",
+    "bytes": 66185,
+    "sha256": "f19ae6527ece88ba5e5ee0da5ddc91fa50901e752197d571755527f721ff2a90"
+  },
+  "reviewMember": "REVIEWS.md",
+  "sourceMember": "SOURCE-DRAFT.json",
+  "boundary": "CI digest-only is not full inventory/parity evidence. Failures retained; final committed clean checkout and hosted runner not yet observed. Mandatory parity gate unchanged and missing-input exit1 retained."
+}

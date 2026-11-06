@@ -1305,3 +1305,29 @@ checks, repair stale H49 tests under H80, and retain fresh-checkout failures.
 All486 rows/frozen270 remain; paired native/rendered/proof/performance/scaling
 and independent row judgments remain unfinished. KeySort's saved success is a
 source check, not a full runtime gate. No integration or completion claim.
+
+
+### OT-CI-PARITY: portable offline checks, full gates remain strict
+
+The [CI evidence manifest](dafny-ci-evidence-manifest.json) retains fresh-checkout
+failures, partial-input/symlink counterexamples, repaired regressions and required
+finder/skeptic reviews. Offline discover/audit `--check` may report digest-only
+when the H44 payload is wholly absent: they verify the committed transport
+metadata and explicitly omit full reconciliation. Present payloads retain full
+checks; strict source inventory and mandatory parity-gate never use digest-only.
+The missing-input mandatory gate remains exit1. No row or gate was weakened.
+
+Hermetic injected transport fixtures replace VM-data dependencies in unit tests.
+Native hover/large-file assertions remain unchanged when recordings are present;
+wholly absent recordings are explicit skips, and partial/symbolic/malformed input
+fails. Always-running injected mutation tests cannot certify native observations.
+H80 help assertions require both documentation destinations. The mock workspace
+is checkout-relative, and scratch fixtures create their ignored parent without
+requiring a prior Lean build. Initial fresh fullsuite failures remain retained;
+48focused fresh path cases and102targeted present-recording cases pass. A full
+committed-head fresh run and GitHub hosted runner observation remain pending at
+this checkpoint; no blocking-CI or parity success is claimed.
+
+All486 obligations/frozen270 remain. Full build/TestSuite/timed strict, native
+macOS, paired rendered/proof and performance/scaling/adversarial matrices, real
+metadata producer integration and paired independent row judgments remain open.
