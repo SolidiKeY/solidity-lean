@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OuterScalarRestore.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OuterScalarRestore.step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -3,6 +3,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceChild.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.set_fixed_primitive": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/PhysicalReferenceChild.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.set_primitive": [
   "Quot.sound",
   "propext"
