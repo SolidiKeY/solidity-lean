@@ -1,0 +1,9 @@
+6ae0dbf5161cddbd56892940487380279c0e3235575d3b20720710706ec2bdcc  tests/h55/interface-pairs/handoff/H82-standing-rules.txt
+42517814a71292e50888fae2fc1c53b3beff1d2b1448e4f0ac0a2d94131163ef  tests/h55/interface-pairs/handoff/H82-stop-and-handoff.txt
+e8557f99505d70ff916f4bf249ac20fdaa09f7bc69f32d100dadc75b361963ab  tests/h55/interface-pairs/handoff/goal-objective.txt
+4924690b72a595573f0e0536ab38b107ad8b4d0e5317722ab35e33b5283f915b  tests/h55/interface-pairs/handoff/goal-tool-capabilities.json
+765501f0d646c5642553e221846000d274c73601c6bb377702c68fa15502ed0f  tests/h55/interface-pairs/handoff/original-assignment.txt
+49f8fafb354a00dc88a90fd44883f84be2e21e36c2bb0243aca40ba7988f2079  tests/h55/interface-pairs/handoff/queue.md
+0628894a3e6feac36b329f2fb2dadfdbda3128e2bb709eac1d44c36f55182b05  tests/h55/interface-pairs/handoff/retirement.md
+94a45902c4f35391f5e8d077f26d119513cbe99a4ce1679d448d593293a4f383  tests/h55/interface-pairs/handoff/scheduled-merge-notice.txt
+698ed7c63e05550c26ab78fa89fa833d3fdc837fda13db5d74b057c312a161a8  tests/h55/interface-pairs/handoff/scope-manifest.json
