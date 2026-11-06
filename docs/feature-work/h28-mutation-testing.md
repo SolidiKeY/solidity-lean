@@ -652,14 +652,102 @@ The coordinator published this lane on mastera6fa01380efd373d85f7a8e6c13811e2d55
 
 The eight retained evidence verifier entrypoints now authenticate every external receipt/catalog read through the committed H44 manifest and index, rather than trusting ignored local JSON. Explicit failure checks replace bare Python asserts, so optimization cannot remove the checks. The bulk verifier similarly keeps its checks active under -O. The initial tracked-support branch checked only HEAD bytes and was subsequently rejected by the coordinator. That relaxation is superseded below: tracked mirrors must also match indexed size and SHA; all1012off-Git bulk mirrors remain byte-exact. New real-Git and optimized-interpreter controls pass, alongside all prior controls (74tests total). Existing archive hashes, theorem statements, proof budgets and gate criteria are unchanged. Actual normal/-O archive runs and read-only reviews are recorded in the external checkpoint receipt; no logs or generated data are added to Git. Full original assignment inventory/acceptance obligations remain open.
 
-Atcommittedgateheada310f670da30fbc0964477073fbf05829457e014 all8archiveverifiers pass in both normal and optimized Python (16executions). All74unitcontrols and full1029-file bulkverification pass in both modes. Separate finder/skeptic actualevidence reviews PASS. PeakRSS23,528KiB across20scriptgates. The first measurement launcher used a relative interpreter unsupported by execv and exited127; it remains separate from accepted absolute-interpreter runs. The compact bulk-data.json archive_verifier_review pointer seals commands/exits/timings/RSS/source/loghashes and preservation provenance; no new bulk is tracked.
+At committed gate head `a310f670da30fbc0964477073fbf05829457e014`, all eight archive verifiers pass in both normal and optimized Python (16 executions). All 74 unit controls and full 1029-file bulk verification pass in both modes. Separate finder/skeptic actual evidence reviews PASS. Peak RSS is 23,528 KiB across 20 script gates. The first measurement launcher used a relative interpreter unsupported by execv and exited 127; it remains separate from accepted absolute-interpreter runs. The compact bulk-data.json archive_verifier_review pointer seals commands, exits, timings, RSS, source/log hashes and preservation provenance; no new bulk is tracked.
 
 ## Held strict-mirror check correction
 
 The coordinator correctly rejected the HEAD-only tracked-mirror branch. `verify_snapshot_files` now retains the bytes returned by bulk_inputs.read and requires both their indexed byte count and SHA256, in addition to committed HEAD authentication. Regression controls reject same-length and different-length Git-committed replacements, plus uncommitted and external-copy tampering. Prior relaxed-check bulk gate results are historical and cannot establish the restored strict criterion.
 
-The restored check first rejected the old snapshot in normal and optimized Python, as expected: its eight verifier source pins predated the reviewed authentication changes. The original1029-file snapshot/index/archive remain untouched. A separate versioned snapshot refreshes exactly those eight source files from committed61724cdf; all other1021files, including all1012off-Git data files and nine frozen pilot configurations, are byte-identical. Both versions and their hashes are explicitly linked in bulk-data.json. No proof artifact, semantic source, witness, case, log, statement or budget was changed to obtain a pass.
+The restored check first rejected the old snapshot in normal and optimized Python, as expected: its eight verifier source pins predated the reviewed authentication changes. The original 1029-file snapshot/index/archive remain untouched. A separate versioned snapshot refreshes exactly those eight source files from committed 61724cdf; all other 1021 files, including all 1012 off-Git data files and nine frozen pilot configurations, are byte-identical. Both versions and their hashes are explicitly linked in bulk-data.json. No proof artifact, semantic source, witness, case, log, statement or budget was changed to obtain a pass.
 
-DELIVERY_BASE is the write-scope comparison anchor, not the semantic trust base. Earlier a6fa0138 was the then-published integration boundary; the coordinator now names published86253aba9aad8b457190f9e5f14c77c7ad030318, already an ancestor of this checkout. Advancing that anchor attributes published upstream work to master while retaining the same exclusive-scope rejection for this lane's held/new changes. BASE remains6f3eedf0788ee1f8a3bcf230558c712ecdca04d5; all71cache-source hashes and every frozen input/proof budget remain unchanged. New strict normal/optimized gates and read-only reviews are recorded separately from the superseded results.
+DELIVERY_BASE is the write-scope comparison anchor, not the semantic trust base. Earlier a6fa0138 was the then-published integration boundary; the coordinator now names published 86253aba9aad8b457190f9e5f14c77c7ad030318, already an ancestor of this checkout. Advancing that anchor attributes published upstream work to master while retaining the same exclusive-scope rejection for this lane's held/new changes. BASE remains 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5; all 71 cache-source hashes and every frozen input/proof budget remain unchanged. New strict normal/optimized gates and read-only reviews are recorded separately from the superseded results.
 
-Atstrictgatehead34d40f376ee7b2ca228d84d2e8c74acf97b82a99 all20actual normal/optimized archive,74-test andfullbulk gates pass. Separate finder/skeptic strictreviews PASS;peakRSS23,544KiB. The active1029-file snapshot totals6,450,844bytes, with exactly8reviewed verifier revisions and1021unchangedentries. Everytrackedmirror nowmatchesHEAD plusindexedsize/SHA. Original stale-index failures and superseded relaxed-policy results remain explicitly separate. The strict_mirror_validation pointer seals the newcommands/exits/loghashes/timings/RSS/reviews outsideGit.
+At strict gate head `34d40f376ee7b2ca228d84d2e8c74acf97b82a99`, all 20 actual normal/optimized archive, 74-test and full bulk gates pass. Separate finder/skeptic strict reviews PASS; peak RSS is 23,544 KiB. The active 1029-file snapshot totals 6,450,844 bytes, with exactly eight reviewed verifier revisions and 1021 unchanged entries. Every tracked mirror now matches HEAD plus indexed size/SHA. Original stale-index failures and superseded relaxed-policy results remain separate. The strict_mirror_validation pointer seals the new commands, exits, log hashes, timings, RSS and reviews outside Git.
+
+## Complete named-declaration census and finite operator audit
+
+After fetching and fast-forwarding to published `38d38d87e74376d6b95daf9b792fa884333f20b3`, the next original queue checkpoint adds a pinned source census. It enumerates all four constructor families (215 constructors), all 55 Tms definitions, all 17 other side-condition/call/summary helpers and three existing theorems in Rules/CallbackRules: 290 named entries and 308 textual premise/body units. It also enumerates all 30 tracked oracle fixtures, nine frozen manifests and 17 unique case variants, without treating fixture membership as a proof verdict.
+
+The generated external Lean audit checks all 290 names, types and axiom inventories, independently prints the complete constructor families/enums, and proves four universal finite tables: 23 binary operators × 3 primitive types, 23 compound flags, 3 numeric flags and 4 increment mappings. A deliberately wrong add/uint cell must be rejected at the universal proof and leave no compiled artifact. These are declaration/finite-table facts; semantic rule soundness, whole compiler correctness, mutation scoring and full assignment acceptance remain separate obligations. Generated Lean, data, logs and objects stay outside Git; the tool supplies local artifact registration without shared-root changes.
+
+Read-only finder/skeptic reviews closed a version-container cleanup gap before execution: the version probe now has a unique owned name, finally removal, confirmed cleanup and abort-on-uncertainty, with negative controls. The census was expanded to include previously omitted helpers, and pinned unqualified summary-helper references were recorded explicitly. This does not implement a general Lean resolver. All 83 unit controls pass. Committed actual Lean gates, axiom exports, source/kernel inventory comparison, H41 pack and final reviews follow. The semantic/oracle attribution and final whole-assignment acceptance obligations remain open.
+
+At committed audit head `b85da7eb8f5cd1dc9cebeb19fd0a90f3613a2da9`, actual Lean 4.24.0/Lake 5.0.0-src+797c613, KeySort and the positive/known-bad-table gates pass with confirmed cleanup, -j1, 6 GiB/no swap and at least 7,200,382,976 bytes estimated reserve. All 290 declarations plus four universal facts have 294 checked signatures/axiom exports; the independent printed constructor/enum inventories match completely. Peak RSS is 1,088,904 KiB. The wrong table fails only at its universal rfl proof and produces no object. Separate finder/skeptic actual evidence reviews PASS. Printed/source helper attribution identifies 28 binopC constructor consumers, including previously omitted increment paths. The committed candidate_inventory_audit pointer identifies the isolated H41 proof-world archive, source, object and catalog hashes; generated data remains off Git. The census/table checkpoint is complete; semantic attribution, exhaustive candidate selection, combined execution and final whole-assignment acceptance remain separate and unfinished.
+
+At final verifier head `c78b96cac48b23c75cfd75782f56c7f8e2021ff0`, all 83 unit controls, authenticated 294-export archive verification and strict 1029-file bulk verification pass in normal and optimized Python (six actual gates). Separate finder/skeptic reviews PASS; peak RSS is 23,492 KiB. Generation/audit sources and compiled Lean facts remain byte-identical to the proof-input commit. Validation receipts, logs and reviews are sealed separately in candidate_inventory_audit.validation; no generated bulk enters Git.
+
+## Combined execution of the existing declared suite
+
+combined-pilot.json copies exactly 17 unique previously frozen case payloads from nine original profiles, retaining original mutation, source, oracle and signature hashes. Its 13 scored program hashes are distinct; four controls remain outside that denominator. The active inventory is the existing 270-row extended superset: every used source/span/hash is identical to its original profile, including the older 215-row runner inventory. The existing authenticated 71-module callback cache supplies all oracle imports without changing production, runtime or budgets. This tenth configuration adds no mutant or fixture. The earlier census proof world records its nine original profiles at b85; current enumeration includes the combined configuration with the same 17 variants/30 fixtures. Combined execution alone does not grant semantic coverage of unselected candidates or whole-assignment acceptance.
+
+The frozen combined manifest explicitly declares two **off-Git H44 pins, verifiable only on this VM** in input_storage. Their matching declarations are in bulk-data.json.frozen_manifest_inputs; the authenticated H44 index and ignored mirrors supply the actual bytes:
+
+| Input | Bytes | SHA256 |
+|---|---:|---|
+| `tests/h28-sol/mutation-testing/inventory.extended.draft.json` | 106323 | `e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554` |
+| `tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json` | 36528 | `788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c` |
+
+A Git-only checkout cannot execute that manifest without the indexed VM data. The input hashes, 17 case payloads, proof statements and budgets remain unchanged. The historical executed manifest in the proof-world archive remains pinned to its original run head; this delivery annotation does not rewrite that evidence. verify_bulk.py checks both explicit declarations against the authenticated index and actual bytes, and hashes all validation/review archives referenced by bulk-data.json, including nested audit validation. verify_combined.py also checks the archive member count against its committed receipt.
+
+### Combined declared-suite VM execution (2026-11-06)
+
+Input head `fb7ce29bc5305ca58bc4dd6264f4b30fc0fcbe56`, delivery base
+`38d38d87e74376d6b95daf9b792fa884333f20b3`; semantic base remains
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. The exact frozen
+`manifests/combined-pilot.json` ran all 17 IDs: 13 scored mutants killed,
+independent known-kill killed, invalid control rejected during compilation,
+label-equivalence certified, and weak-primary control surviving with its
+stronger concrete regression checked separately. No unrun case entered the
+denominator. Score 13/13 applies only to this declared suite.
+
+Command: `python3 -B tests/h28-sol/mutation-testing/tools/runner.py tests/h28-sol/mutation-testing/manifests/combined-pilot.json /workspace/h28-combined-pilot-fb7ce29b` (exit 0).
+Actual 101 phase checks, 70 isolated compiled outputs and 267 full owned
+theorem axiom exports; summed check time 569.018 seconds; peak child RSS
+1,466,012 KiB; minimum estimated reserve 6,469,640,192 bytes. Every Lean
+check used -j1, hard 6 GiB/no swap, network disabled and confirmed cleanup.
+Finder and skeptic independently replayed all saved checks and passed.
+Their draft replay-verifier findings about missing phases, output attribution
+and resource guarantees were fixed before using that verifier as a gate.
+
+H41 pack: `/workspace/h28-combined-export-fb7ce29b/proof-worlds.tar.gz`,
+49,560,922 bytes, SHA256
+`d79ae154926399af25b2c0a598f0924c26da493bcb917efb2fb562bd2656b83a`.
+`bulk-data.json` records the authenticated pointer and both dependency packs.
+All generated data remains off Git; normal and mutant outputs must stay
+isolated. Ready for coordinator pull; no transfer observed.
+
+`tools/verify_combined.py` authenticates the committed pointer and archived
+manifest, every regular member, required phase sets, source-linked failures,
+positive signature/axiom certificates, output identities and runtime bounds.
+The scope boundary remains false: unselected candidates in the 290-entry,
+308-unit census have no general semantic validation, the final acceptance
+scope question remains pending, and repository-wide final gates remain open.
+
+Combined checkpoint gates at `3407707a3c8817ef72e5bd88211f41c712b2ef5c`:
+83 controls, combined evidence replay, census proof-world replay and strict
+bulk mirror verification all pass in normal Python and under `-O` (eight
+effective gates). `gate.sh touched` passes with targets none. The first
+optimized replay attempt was interrupted, retained as incomplete, and rerun
+in a fresh directory; it is not counted as a pass. Exact commands, exits,
+timings and process RSS are in the H44 validation archive referenced by
+`bulk-data.json.combined_validation`; no source changed between attempts.
+This receipt does not replace pending repository-wide final gates.
+
+### Held delivery review correction (2026-11-06)
+
+At `6f2390eecd3d62655f8a0042134e1e1307f78233`, all eight normal/optimized
+Python gates pass: 85 controls per mode, explicit H44 inventory/cache pins,
+five existing validation archives, strict 1029-file bulk verification, combined
+101-check/70-output/267-export replay and 294-export census replay. Both
+read-only finder and skeptic reviews PASS; peak gate RSS is 26,712 KiB.
+The touched gate passes with targets none. Exact commands, exits, timings,
+RSS, source hashes and reviews are in bulk-data.json.held_fix_validation.
+The pre-commit census test refused uncommitted manifest bytes; that attempt
+is explicitly excluded from passing gates. No Lean source, theorem, proof
+budget or original evidence archive changed. This receipt adds a sixth
+validation archive for subsequent bulk verification.
+
+The delivery-only anchor is published `7d8a48cabffa81e7cea2a1e5a87013b0fca79db4`,
+already included in coordinator-reviewed merge `54e50f69d`. The semantic base
+remains `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. Repository-wide final gates
+and broader original-assignment acceptance remain open.
