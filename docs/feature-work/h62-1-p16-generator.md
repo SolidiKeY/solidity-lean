@@ -57,7 +57,7 @@ and `solidity-inline-assembly5-20261031/vy3-compilation`. Please relay to both:
 
 ## Verification, reviews and outstanding gates
 
-The scoped Python suite currently has 14 tests. It covers exact baseline
+The scoped Python suite currently has 16 tests. It covers exact baseline
 reproduction, missing/extra/order/body drift, removed and tampered baseline
 fragments, joint fragment/hash tampering against the pinned Git source, bad
 registration and missing source, invalid/injected comments, unexpected files,
@@ -101,3 +101,54 @@ Setup note: initial extraction of scoped prototype inputs before the prior
 checkpoint did not acquire the writer lock. Subsequent writes and Lean checks
 used the lock; no other writer was observed and no owned original was changed.
 Keep all four work-queue checkpoints and in-scope backfill open until accepted.
+
+## H70 follow-up: owner-diff conservation and migration overlays
+
+`conservation.py --owner VY1|VY3 --after-rev FULL_SHA` compares one owner
+interface to the pinned baseline and that owner's registrations; `--owner
+integrated` compares the union. A file snapshot can be supplied via `--after`,
+but has no Git ancestry or source-tree verification. Commit-backed comparison
+requires a full descendant SHA and checks each observed imported source blob in
+that commit. Output status `interface_delta_match` covers only the supplied
+interface and registered fragments; it does not authenticate ownership, certify
+producer completeness, or prove an integrated merge. Original-node removals,
+doc changes, unregistered/omitted additions and output ordering/byte changes
+produce an interface mismatch. These checks deliberately remain stricter than a
+live pre-migration interface and may flag its different import order.
+
+`producer_inventory.py --owner VY1|VY3 --head FULL_SHA` catalogs every changed
+`Solidity/Yul/**/*.lean` file between the pinned base and a descendant commit,
+with Git status, tree mode, commit blob SHA-256, interface membership, and
+matching registration IDs. It records all candidates without assuming every changed Yul
+module belongs in P16. An owner must assess and certify each candidate; this
+catalog alone cannot prove membership or completeness of unpublished work.
+The catalog is a net tree diff: producers outside `Solidity/Yul`, unchanged
+files made relevant by external edits, and reverted changes are not listed.
+No owner heads or source snapshots were supplied with H70, so no owner-specific
+live census or certified candidate dispositions have been made. `--after-rev`
+checks regular source-file modes at the specified commit, rejecting symlinks;
+file snapshots leave source provenance unverified.
+
+Finder and skeptic independently reviewed the conservation and catalog tools
+without Lean. They identified local-versus-commit source checks, misleading
+pass labels, and Git symlink modes; fixes and fixture controls were added, and
+both found no further concrete defect in their final read-only review. The
+existing tests cover per-owner and integrated synthetic snapshots, missing and
+unrelated commit IDs, revision-source helpers, changed files and symlinks. A
+full end-to-end synthetic owner-commit test was not run: automatic approval
+review rejected the proposed fixture command, citing possible redirection of
+real checkout Git metadata and removal of a source file. No such command ran.
+The existing fixture helpers do not substitute for that end-to-end check.
+
+H70 supplied inline excerpts identified as partial owner overlays for
+`Solidity/Hash/CollisionBound.lean` (owner artifact SHA-256
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`,
+source head `2a18afcdba00a85645b0b3079704f78ffcd78860`) and
+`Solidity/Language/FixedPoint.lean` (artifact SHA-256
+`a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82`,
+source head `d8e1d9721455d3671882f19aa7155fbbd2d91415`). The standalone patch
+files were not present here, so their stated hashes have not been independently
+verified. Both are partial, and no overlay has been applied. The coordinator
+states Token, FixedPoint and CollisionBound overlays, complete migration gates,
+VY1/VY3 heads/snapshots, and ordering/integration agreement remain pending.
+Continue scoped backfill without editing any original owner files.

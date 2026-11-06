@@ -95,7 +95,7 @@ def validate_doc(path, content):
     raise ValueError("unbalanced documentation fragment " + path.name)
 
 
-def render():
+def render(require_sources=True):
     expected = registered_fragments()
     contents = [(HERE / "imports" / name).read_bytes().decode("utf-8") for name in sorted(expected["imports"])]
     if any(not x.endswith("\n") or x.count("\n") != 1 or "\r" in x for x in contents):
@@ -106,7 +106,7 @@ def render():
     if len(nodes) != len(set(nodes)):
         raise ValueError("duplicate manifest node")
     for node in nodes:
-        if not (ROOT / (node.replace(".", "/") + ".lean")).is_file():
+        if require_sources and not (ROOT / (node.replace(".", "/") + ".lean")).is_file():
             raise ValueError("missing source node " + node)
     body_files = [HERE / "body" / name for name in sorted(expected["body"])]
     body_parts = [p.read_bytes().decode("utf-8") for p in body_files]

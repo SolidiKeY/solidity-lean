@@ -272,6 +272,110 @@ class GeneratorControls(unittest.TestCase):
         manifest_path.write_text(json.dumps(manifest))
         self.assertEqual(self.run_gen("--render").returncode, 2)
 
+    def test_owner_and_integrated_conservation(self):
+        self.add_extension("VY1", "Alpha", "Solidity.Yul.Alpha", "/-! Alpha -/\n")
+        self.add_extension("VY3", "Beta", "Solidity.Yul.Beta", "/-! Beta -/\n")
+        lane = self.root / LANE
+        command = [sys.executable, "-B", str(lane / "conservation.py")]
+        header, body = self.original.split("\n\n", 1)
+        def snapshot(name, owners):
+            imports = "".join("\nimport Solidity.Yul." + node for node in owners)
+            docs = "".join("\n/-! " + node + " -/\n" for node in owners)
+            path = self.root / name
+            path.write_text(header + imports + "\n\n" + body + docs)
+            return path
+        a = snapshot("owner-a.lean", ["Alpha"])
+        b = snapshot("owner-b.lean", ["Beta"])
+        both = snapshot("both.lean", ["Alpha", "Beta"])
+        def run(path, owner):
+            return subprocess.run(command + ["--after", str(path), "--owner", owner], text=True, capture_output=True)
+        for path, owner in ((a, "VY1"), (b, "VY3"), (both, "integrated")):
+            result = run(path, owner)
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertEqual(json.loads(result.stdout)["status"], "interface_delta_match")
+        wrong_owner = run(a, "VY3")
+        self.assertEqual(wrong_owner.returncode, 1)
+        self.assertEqual(json.loads(wrong_owner.stdout)["unregistered_imports"][0]["node"], "Solidity.Yul.Alpha")
+        missing_other = run(a, "integrated")
+        self.assertEqual(missing_other.returncode, 1)
+        self.assertEqual(json.loads(missing_other.stdout)["unrepresented_import_registrations"][0]["node"], "Solidity.Yul.Beta")
+        without_baseline = self.root / "removed.lean"
+        without_baseline.write_text(a.read_text().removeprefix("import Solidity.Yul.RawFrameLogic\n"))
+        result = run(without_baseline, "VY1")
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(result.stdout)["removed_imports"][0]["node"], "Solidity.Yul.RawFrameLogic")
+        changed_doc = self.root / "changed.lean"
+        changed_doc.write_text(a.read_text().replace("# Syntax", "# Changed syntax", 1))
+        result = run(changed_doc, "VY1")
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(json.loads(result.stdout)["removed_documentation_sha256"])
+        reordered = self.root / "reordered.lean"
+        lines = both.read_text().splitlines(keepends=True)
+        lines[0], lines[1] = lines[1], lines[0]
+        reordered.write_text("".join(lines))
+        result = run(reordered, "integrated")
+        self.assertEqual(result.returncode, 1)
+        self.assertFalse(json.loads(result.stdout)["output_matches_registered_bytes_and_order"])
+        unavailable = subprocess.run(command + ["--after-rev", "1" * 40, "--owner", "VY1"], text=True, capture_output=True)
+        self.assertEqual(unavailable.returncode, 2)
+
+    def test_commit_sources_ancestry_and_change_inventory(self):
+        lane = self.root / LANE
+        command = [sys.executable, "-B", str(lane / "conservation.py"), "--owner", "VY1", "--after-rev"]
+        base = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
+        result = subprocess.run(command + [base], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["status"], "interface_delta_match")
+        self.assertEqual(report["owner_completeness"], "unverified")
+        self.assertEqual(report["source_module_check"], "git_tree_verified")
+        unrelated = "6cf853aea0417155aca29ddb91f1767d3f3a3cc4"
+        self.assertEqual(subprocess.run(command + [unrelated], capture_output=True).returncode, 2)
+        repo = self.root / "producer-git-fixture"
+        repo.mkdir()
+        def git(*args):
+            return subprocess.run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", *args], cwd=repo, text=True, capture_output=True, check=True).stdout.strip()
+        git("init", "-q")
+        directory = repo / "Solidity/Yul"
+        directory.mkdir(parents=True)
+        (directory / "Keep.lean").write_text("old\n")
+        (directory / "Gone.lean").write_text("old\n")
+        git("add", ".")
+        git("commit", "-qm", "before")
+        before = git("rev-parse", "HEAD")
+        (directory / "Keep.lean").write_text("new\n")
+        (directory / "Gone.lean").unlink()
+        (directory / "Added.lean").write_text("added\n")
+        git("add", "-A")
+        git("commit", "-qm", "after")
+        after = git("rev-parse", "HEAD")
+        code = "import sys,json; sys.path.insert(0,sys.argv[1]); import producer_inventory as p, conservation as c; rows=p.collect_changes(sys.argv[2],sys.argv[3],sys.argv[4]); c.verify_revision_sources(sys.argv[2],sys.argv[4],[\"Solidity.Yul.Added\"]); print(json.dumps(rows))"
+        result = subprocess.run([sys.executable, "-B", "-c", code, str(lane), str(repo), before, after], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = {row["path"]: row for row in json.loads(result.stdout)}
+        self.assertEqual(rows["Solidity/Yul/Added.lean"]["change"], "A")
+        self.assertEqual(rows["Solidity/Yul/Keep.lean"]["change"], "M")
+        self.assertEqual(rows["Solidity/Yul/Gone.lean"]["change"], "D")
+        self.assertIsNone(rows["Solidity/Yul/Gone.lean"]["sha256"])
+        self.assertEqual(rows["Solidity/Yul/Added.lean"]["sha256"], hashlib.sha256(b"added\n").hexdigest())
+        bad = "import sys; sys.path.insert(0,sys.argv[1]); import conservation as c; c.verify_revision_sources(sys.argv[2],sys.argv[3],[\"Solidity.Yul.Gone\"])"
+        result = subprocess.run([sys.executable, "-B", "-c", bad, str(lane), str(repo), after], capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        (directory / "Added.lean").unlink()
+        result = subprocess.run([sys.executable, "-B", "-c", code, str(lane), str(repo), before, after], capture_output=True)
+        self.assertEqual(result.returncode, 0)
+        (directory / "Added.lean").symlink_to("Keep.lean")
+        git("add", "-A")
+        git("commit", "-qm", "symlink")
+        symlink_commit = git("rev-parse", "HEAD")
+        result = subprocess.run([sys.executable, "-B", "-c", code, str(lane), str(repo), before, symlink_commit], capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        changed = "import sys,json; sys.path.insert(0,sys.argv[1]); import producer_inventory as p; print(json.dumps(p.collect_changes(sys.argv[2],sys.argv[3],sys.argv[4])))"
+        result = subprocess.run([sys.executable, "-B", "-c", changed, str(lane), str(repo), after, symlink_commit], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)[0]["change"], "T")
+        self.assertEqual(json.loads(result.stdout)[0]["mode"], "120000")
+
     def test_bad_input(self):
         entries = sorted((self.root / LANE / "imports").glob("*.txt"))
         entries[1].write_text(entries[0].read_text())
