@@ -1,4 +1,6 @@
-# G19 mapped do-while assignment and continue
+# G19 context-related do-while assignment and continue
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 This component extends the existing V07 ContextMap and assignment operand for one source shape: a block assigns a Boolean caller local, executes continue, and has an arbitrary typed remaining body suffix; the do-while condition is literal false. The proof shows that the suffix is skipped, the condition then exits, and the assignment remains visible. No new lowering relation, source evaluator, carrier or admission predicate is introduced.
 
