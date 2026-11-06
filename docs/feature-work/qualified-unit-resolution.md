@@ -745,7 +745,12 @@ These follow from the finder and skeptic reviews.
 
 ### Claude-VM gate driver
 
-`tests/sol-qualified-units/claude-gates.py` replaces the Docker runner here. On this VM the shell refuses `lean` and `lake build`; Lean evidence comes from language-server elaboration of generated probe files in `tests/sol-qualified-units/claude-evidence/`.
+`tests/sol-qualified-units/claude-gates.py` replaces the Docker runner here. On this VM the shell refuses `lean` and `lake build`; Lean evidence comes from language-server elaboration of generated probe files in the VM-local `claude-evidence/` directory.
+
+Under H44 that directory stays off git; the lane's `.gitignore` excludes it. The committed `tests/sol-qualified-units/claude-evidence-manifest.json` names all 36 files with their bytes and sha256, and records the receipt outcomes, the lane source digests, the runner digest and the two pin-file digests.
+- `check-sol-qualified-units.py --claude-vm` with the directory present requires every file to match the manifest, then runs the full content audit.
+- Without the directory it prints `EVIDENCE_OFF_GIT` and checks the manifest against the current sources, runner and pins, then applies the recorded receipt outcomes.
+- `--write-claude-manifest` re-records the manifest.
 - `probe M` writes the probe, deletes any old output and records source digests.
 - The queries and declarations probes write their own `.out` files through `IO.FS.writeFile`.
 - `record M F` requires the saved language-server diagnostics `F` to contain no errors. It also requires the sources to be unchanged since `probe`, and the output to be newer than its input.
@@ -772,7 +777,7 @@ Limitations of this driver, from the tooling reviews:
 
 ### Gates at this checkpoint
 
-`scripts/coord-tools/gate.sh full` ran at c5c3a308 with elan on `PATH`. The sources are unchanged from that head except `scope.json`. Receipts are in `tests/sol-qualified-units/claude-evidence/`, as `gate-build.json`, `gate-repository.json`, `gate-keysort.json` and `gate-sh-summary.log`.
+`scripts/coord-tools/gate.sh full` ran at c5c3a308 with elan on `PATH`. The sources are unchanged from that head except `scope.json`. The receipts (`gate-build.json`, `gate-repository.json`, `gate-keysort.json`, `gate-sh-summary.log`) are VM-local and listed in `tests/sol-qualified-units/claude-evidence-manifest.json`.
 
 | Gate | Result | Cause |
 |---|---|---|

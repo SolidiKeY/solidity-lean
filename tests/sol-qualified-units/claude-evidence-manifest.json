@@ -1,0 +1,240 @@
+{
+  "decision": "H44",
+  "bulk_directory": "tests/sol-qualified-units/claude-evidence",
+  "note": "VM-local, git-ignored; regenerate with tests/sol-qualified-units/claude-gates.py",
+  "recorded_head": "c5c3a30852e45f2d474a6301383c4849f14e6eac",
+  "runner_sha256": "11f39d56c94ee2acf0871033f484443776ff0458b305b471dd84d1021d774a8b",
+  "sources": {
+    "Solidity/Frontend/QualifiedUnits/Checked.lean": "02425ae76050b1ce22385c60302cd13f43508e3cc0eefdaf577e0e79d695e221",
+    "Solidity/Frontend/QualifiedUnits/CheckedControls.lean": "202cc5205d98669aed039382ae41a4c51a143f31f5ec2d09aa6b0c5c53e113ec",
+    "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean": "ca1406339c57eaffcdb28590b36e795b73b8ef6775d589e3c83c08ae712e8904",
+    "Solidity/Frontend/QualifiedUnits/Controls.lean": "fb5896dd7e25eebdf32cbf36b8a42e8654d68beab6bd62e0b9bb017a907e73b9",
+    "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean": "dc643fa398076a3505bbf5a82044eb432b91e69b625a9e42d3014d1685f16be5",
+    "Solidity/Frontend/QualifiedUnits/Inheritance.lean": "6df120d44b1468a657622be580084a8e89ad5200f92d9eb8b707269dbf64965c",
+    "Solidity/Frontend/QualifiedUnits/Layout.lean": "c4fd11bedbdd00589323d3eaf2e0b94e9c31563bbf1b944e4a82b812225f572d",
+    "Solidity/Frontend/QualifiedUnits/Linearization.lean": "0e49939e17d26ad3ec7013e3eb8b6b697ce7c7b8e53fca4d166bc1d98c3ecbcd",
+    "Solidity/Frontend/QualifiedUnits/Lookup.lean": "c35216b9b304c2845ab58ef850105ed1aa1943b99b635f623c35128924198123",
+    "Solidity/Frontend/QualifiedUnits/MergeSpecification.lean": "5d47804b187752e46023a4deda25828a6075f050e6119242a462e09793c9c62e",
+    "Solidity/Frontend/QualifiedUnits/NormalizationAdequacy.lean": "faa5b8cb72d140d5390c9f9701882fcd41fa78f3685e5d146f027ff7e9994067",
+    "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean": "e0a23f04685f8425b333a371769c2575799690226a31558decf995011cbcdbd9",
+    "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean": "66989256a8d4974a05fdf25491cea52b0583d3f971e1441c7f62ecb3a2ea9744",
+    "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean": "b7b9e8483e0d1568522a49ab1eaee6eb4360400478915110d3b569b78432eac5",
+    "Solidity/Frontend/QualifiedUnits/References.lean": "9299d770105a50eca452a540500ce29c34e83eb1bdae40a5e0864c6cecfcd1dc",
+    "Solidity/Frontend/QualifiedUnits/Relation.lean": "cefe3fa82d1b68807384926a5be746ec8fa633040e836749a7c6c4ebac75f23d",
+    "Solidity/Frontend/QualifiedUnits/SignatureGap.lean": "218bc10d9ff50b3ed0f7047e2ddf582e3c05f14b6cc7635158ff677d6050da21",
+    "Solidity/Frontend/QualifiedUnits/SignatureHiding.lean": "bb6e7c27b38ea666103adee02e36b772cd5f9b74ff8276c6c4876c633aa6c394",
+    "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean": "a0861531785bb150f43b3f927484400fea428c9cdfc792b3eceb7a702d8b4535",
+    "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean": "6ab202f1d76bc718bd27a85455c4701b7f7885b908210554ad882a527e7b672f",
+    "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean": "2b96b9bcdf27cfdedd1514fd0397c502d608c93e0b539492f22702def7347d94",
+    "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean": "89a70622eca93e32baf670bd9642ee010138c454984c09d871970ab706f461b8",
+    "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean": "d1f1f5844a535fe8f5f1bb9590348b584a30ed0adb4b409b324677456e9d1dd1",
+    "Solidity/Frontend/QualifiedUnits/Specification.lean": "ae81c2f99a1f9c0198eb1805555dc2c8eb297524ba5c99a3ef15cfafa7996155",
+    "Solidity/Frontend/QualifiedUnits/Target.lean": "3b25eafcb923861bf96f9ac5736a1f26b5c4f1cf9193043695eb9b9799083cf9",
+    "Solidity/Frontend/QualifiedUnits/TargetControls.lean": "1a9aa968036c00199752492dde2c11117c213902b77a8c3064c981b5ca5e34b7",
+    "Solidity/Frontend/QualifiedUnits/TypePaths.lean": "defc856b7212c50b6a9863de92ee9944619f6e5a1f049d84beba1a3df0c28b1e",
+    "Solidity/Frontend/QualifiedUnits/UnitPaths.lean": "ac2aef0d1bf0f843aec5deee619f9874507d7a5ddf17cc43d821137a82323624",
+    "Solidity/Frontend/Static/Closure.lean": "abf0e5f72ebeecb6330f47ece944b3f2724d1a680c4332e5963ac1ec1aef3faa",
+    "Solidity/Frontend/Static/Overloads.lean": "c72965fdb12e5952d95e1b44684de35f544b355aeeafc8e10b9692a595c8d2de",
+    "Solidity/Frontend/Static/Units.lean": "c85edc2df18acabfba22eebeab5f556e42d953c0a67ae70865d0a9ea3651fd6b",
+    "Solidity/Source/Decls.lean": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9",
+    "Solidity/Source/Resolve.lean": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1",
+    "Solidity/Source/Syntax.lean": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+    "Solidity/Source/Units.lean": "e67eec20ef932289c485f09d8e9005bbd559ce55c4f1f55134dcc00a226fee86",
+    "docs/feature-work/frontend-static.md": "95097e350585b5eb87c3d6c4b6ddcacc4d9fd82faafe82246f69f30534d733ac"
+  },
+  "declaration_pins_sha256": "a31cd8e778b4f4728df3dcc10ba99191828f8d0e0c4219c08bf97bc73afdae4f",
+  "axiom_pins_sha256": "608e4156591628432643b4e661659c223d42fb135ba50a35117e4f6336e6f97c",
+  "receipts": {
+    "solc": true,
+    "signature-probes": true,
+    "resolution-probes": true,
+    "axioms": true,
+    "declarations": true,
+    "queries": true,
+    "build": false,
+    "keysort": true,
+    "repository": false
+  },
+  "files": [
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-axioms.log",
+      "bytes": 46408,
+      "sha256": "1fd2b7a97d342c54f68567a3f6c6b995c0bc2f7afd7a064bb8e1aa182e102223"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-build.log",
+      "bytes": 482421,
+      "sha256": "5e1d3bbb4a866f362ecbcccffc403b397130dc148061367ecc8b946bbd5f23d2"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-declarations.log",
+      "bytes": 427235,
+      "sha256": "d150eb05253093c7e269f51c41ad070a881d5a8cb973db41e0f9224e69160944"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-keysort.log",
+      "bytes": 231,
+      "sha256": "535033443b0e4baa365e1f3528e38316e4d911516098ae47365ad8415a402b7f"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-queries.log",
+      "bytes": 2189,
+      "sha256": "6cb1fe54164f754e684182269297938cd344554c3f63760e2ebec582e479ec94"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-repository.log",
+      "bytes": 218,
+      "sha256": "50a67eaa9f53d43bb768f00f8554bfcde1cc6180cd8249c9276b9b32b874dd2a"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-resolution-probes.log",
+      "bytes": 65,
+      "sha256": "6b9cd0a3c67ee02c29f4742f0a2fe0c5aa1dc08efe0ff0024f2beb644a0f6288"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-signature-probes.log",
+      "bytes": 201,
+      "sha256": "2bab1d22705a8fd4d7a1bd933b746fd86ebec8ee20a3b97836b143970d114c28"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/candidate-solc.log",
+      "bytes": 25894,
+      "sha256": "ecc2b562103049e492a7457936c4f29cd58ed94b7d40762704653f197685cb97"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/declaration-report.json",
+      "bytes": 571053,
+      "sha256": "714a20d8acbe42cba42c60730230bb1de277e9714b5c2d3fe2f743a75b7f8ac0"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-axioms.json",
+      "bytes": 5400,
+      "sha256": "af0f7320a6dbd2ddf329e5f71fecec4c8dbd2e117ddd3e092d0a4ca0570c289f"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-build.json",
+      "bytes": 5517,
+      "sha256": "404c79c22e21ba6d59b21ba41ef6f9d1f90e0bc1936d7dcb6e02247cadd67d9b"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-declarations.json",
+      "bytes": 5413,
+      "sha256": "8f1b7407bad83ae6a04ace5301fc00836621d9fda119a90bd20cbaae672e40dc"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-keysort.json",
+      "bytes": 5296,
+      "sha256": "6ecf2f12127b7a82c1d42a21cd6ab0dbc4f23a7a6eb5932cab8db0929643236b"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-queries.json",
+      "bytes": 5403,
+      "sha256": "8a2463671ccf7b865b8d0ad5119c4ac595b249baf9edaa54f6cb879364ed70d1"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-repository.json",
+      "bytes": 5482,
+      "sha256": "4ce9c3be27e2167dfd3a92157f3300ddad405357674375cd8105c6b502b2a56a"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-resolution-probes.json",
+      "bytes": 5198,
+      "sha256": "cf8296ca4a4ed0103b4b07d0343d7f8646d5581d7745559dda156fd57166fee9"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-sh-summary.log",
+      "bytes": 218,
+      "sha256": "50a67eaa9f53d43bb768f00f8554bfcde1cc6180cd8249c9276b9b32b874dd2a"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-signature-probes.json",
+      "bytes": 5191,
+      "sha256": "29446547e53ecabe3737698785a7a4298e0dfafce2b82cb204f8d81acd8e4b0a"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/gate-solc.json",
+      "bytes": 5174,
+      "sha256": "e430fd10a757c84346f274e6459c73870fb999ab501645b7d87aa8b89132e123"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/h27-location-probe.json",
+      "bytes": 2863,
+      "sha256": "4dcf1834e5bf5d1bcce5e6bf6e528a068991891bd61dce193f61efeb72b28b66"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/observed-axioms.json",
+      "bytes": 43539,
+      "sha256": "7b14e351038018cda8c46934c4f1410bcba6b2f880da533bcb2c2cfedf745aba"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-axioms.diagnostics.json",
+      "bytes": 76080,
+      "sha256": "688718a87b47be3ab7a12a6ef61c77b7a848c4319a7cea55872dd8f9079f7a07"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-axioms.lean",
+      "bytes": 35437,
+      "sha256": "7ca24794acffe0d074cb96896266566f26296b845812aa463b1592b8d46ad080"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-axioms.sources.json",
+      "bytes": 4387,
+      "sha256": "054d933071af47536e51c3f4f2bf940c599dcb7bdf82fbcedd4e4b5a0ea25514"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-declarations.diagnostics.json",
+      "bytes": 205,
+      "sha256": "feea95cfd0b26a8fe730b62ed47bf766899d2f70c6730f0ff10f0a65ab3d5f3f"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-declarations.lean",
+      "bytes": 3007,
+      "sha256": "6d54b812b7d9634034f9e3ac1ce6dc1ee2e758b7f05c44f56ec18f85a7964431"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-declarations.out",
+      "bytes": 427208,
+      "sha256": "f120932b43293cb02e88f1c28a2c54ea624c0b3959d0b6b17045756139326b94"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-declarations.sources.json",
+      "bytes": 4387,
+      "sha256": "054d933071af47536e51c3f4f2bf940c599dcb7bdf82fbcedd4e4b5a0ea25514"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-queries.diagnostics.json",
+      "bytes": 200,
+      "sha256": "ce72a36e17e7743599e5c6aa8f11efefbe0966e73e8b248ca75f68d9d40862b8"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-queries.lean",
+      "bytes": 4982,
+      "sha256": "3d8397b90fbdf37f4694ddb52b5b6552faea326927e57574e56c939e44b82ee5"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-queries.out",
+      "bytes": 2161,
+      "sha256": "73a91fadc84a9413852d0dff96032febe6a0c99a8b0cd04db5c1c12769e338c0"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/probe-queries.sources.json",
+      "bytes": 4387,
+      "sha256": "054d933071af47536e51c3f4f2bf940c599dcb7bdf82fbcedd4e4b5a0ea25514"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/query-report.json",
+      "bytes": 17235,
+      "sha256": "6e9b6c59b4aa99718233d8fc18987f209e5e5a70a9aeb4f61bb872694f2966fb"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/resolution-barrier-probe.json",
+      "bytes": 1434,
+      "sha256": "389a97c277fe07718ba94669525bf098564405f539c3142b6030f31fa1aef32f"
+    },
+    {
+      "path": "tests/sol-qualified-units/claude-evidence/solc-report.json",
+      "bytes": 26163,
+      "sha256": "1adeb157cdd5593a21cde9704334ea89bfdaf3ddd96c6b8ef6947c7cf7ee7821"
+    }
+  ]
+}

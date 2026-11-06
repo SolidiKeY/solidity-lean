@@ -2,6 +2,11 @@
 """Qualified-unit scope audit. Default acceptance fails closed while work is pending.
 
 --claude-vm audits tests/sol-qualified-units/claude-evidence/ (claude-gates.py receipts).
+The evidence directory stays off git (H44); the committed claude-evidence-manifest.json
+names every file with its sha256 and the receipt outcomes. With the directory present
+each file must match the manifest and the full audit runs; without it the audit checks
+the manifest against the current sources, runner and pins (EVIDENCE_OFF_GIT).
+--write-claude-manifest rewrites that manifest from the local directory, then audits.
 
 --signature-foundation-only audits bounded H27 evidence and explicitly leaves G12 pending.
 --inventory-only checks the recorded source/declaration inventory, not completion.
@@ -28,6 +33,37 @@ from query_gate import lean_queries, compare_queries
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+CLAUDE_EV = ROOT / "tests/sol-qualified-units/claude-evidence"
+CLAUDE_MANIFEST = ROOT / "tests/sol-qualified-units/claude-evidence-manifest.json"
+CLAUDE_GATES = ["solc", "signature-probes", "resolution-probes", "axioms", "declarations", "queries", "build", "keysort", "repository"]
+
+
+def claude_files():
+    return sorted(p for p in CLAUDE_EV.rglob("*") if p.is_file()) if CLAUDE_EV.is_dir() else []
+
+
+def write_claude_manifest():
+    files = claude_files()
+    assert files, "no local claude-evidence directory to record"
+    receipts = {mode: json.loads((CLAUDE_EV / f"gate-{mode}.json").read_text()) for mode in CLAUDE_GATES}
+    sources = {receipt["sources"] == receipts["solc"]["sources"] for receipt in receipts.values()}
+    assert sources == {True}, "receipts recorded at different sources"
+    manifest = {
+        "decision": "H44",
+        "bulk_directory": str(CLAUDE_EV.relative_to(ROOT)),
+        "note": "VM-local, git-ignored; regenerate with tests/sol-qualified-units/claude-gates.py",
+        "recorded_head": receipts["build"]["head"],
+        "runner_sha256": receipts["solc"]["runner_sha256"],
+        "sources": receipts["solc"]["sources"],
+        "declaration_pins_sha256": sha(ROOT / "tests/sol-qualified-units/declaration-pins.json"),
+        "axiom_pins_sha256": sha(ROOT / "tests/sol-qualified-units/axiom-pins.json"),
+        "receipts": {mode: receipts[mode]["passed"] for mode in CLAUDE_GATES},
+        "files": [{"path": str(p.relative_to(ROOT)), "bytes": p.stat().st_size, "sha256": sha(p)} for p in files],
+    }
+    CLAUDE_MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n")
+    print(f"MANIFEST: {len(files)} files, {sum(f['bytes'] for f in manifest['files'])} bytes")
 
 
 
@@ -65,6 +101,30 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
     assert actual == scope["modules"], "module/declaration inventory drift"
     assert constructors == scope["inductive_constructors"], "inductive constructor inventory drift"
     declaration_pins = json.loads((ROOT / scope["reflection_pins"]).read_text())
+    if claude:
+        manifest = json.loads(CLAUDE_MANIFEST.read_text())
+        assert manifest["decision"] == "H44" and [r for r in manifest["receipts"]] == CLAUDE_GATES, "manifest shape"
+        present = claude_files()
+        if present:
+            listed = {f["path"]: f["sha256"] for f in manifest["files"]}
+            assert {str(p.relative_to(ROOT)) for p in present} == set(listed), "evidence files differ from manifest"
+            for p in present:
+                assert sha(p) == listed[str(p.relative_to(ROOT))], "evidence drift from manifest: " + str(p.relative_to(ROOT))
+            assert all(json.loads((ev / f"gate-{m}.json").read_text())["passed"] == manifest["receipts"][m] for m in CLAUDE_GATES), "manifest receipt outcome drift"
+        else:
+            sources = {path: sha(ROOT / path) for path in sorted([*actual, *scope["inputs"]])}
+            assert manifest["sources"] == sources, "sources changed since the manifest's evidence"
+            assert manifest["runner_sha256"] == sha(runner_file), "runner changed since the manifest's evidence"
+            assert manifest["declaration_pins_sha256"] == sha(ROOT / scope["reflection_pins"]), "declaration pins changed since the manifest"
+            assert manifest["axiom_pins_sha256"] == sha(ROOT / "tests/sol-qualified-units/axiom-pins.json"), "axiom pins changed since the manifest"
+            print(f"EVIDENCE_OFF_GIT: {len(manifest['files'])} manifest files not present; content audit needs {manifest['bulk_directory']}")
+            print(f"INVENTORY_PASS: {len(actual)} modules, {sum(map(len, actual.values()))} top-level declarations, {len(ctors)} constructor rows")
+            if not inventory_only:
+                gate_results = manifest["receipts"]
+                assert all(gate_results.values()), "required gate failures: " + ", ".join(k for k, v in gate_results.items() if not v)
+                pending = [q["id"] for q in scope["queue"] if q["status"] != "done"]
+                assert scope["acceptance_complete"] and not pending, "ACCEPTANCE_PENDING: " + ", ".join(pending)
+            return
     declaration_report = json.loads((ev / "declaration-report.json").read_text())
     assert {"modules": declaration_report["modules"], "declarations": declaration_report["declarations"]} == declaration_pins, "reflected declaration inventory drift"
     assert set(declaration_report["modules"]) == {p[:-5].replace("/", ".") for p in actual}, "reflected module scope mismatch"
@@ -244,11 +304,12 @@ if __name__ == "__main__":
     parser.add_argument("--signature-foundation-only", action="store_true", help="audit saved H27 foundation evidence; does not complete G12 acceptance")
     parser.add_argument("--audit-only", action="store_true", help="audit saved evidence without rerunning gates")
     parser.add_argument("--claude-vm", action="store_true", help="audit claude-evidence/ produced by tests/sol-qualified-units/claude-gates.py (no Docker runner)")
+    parser.add_argument("--write-claude-manifest", action="store_true", help="record the local claude-evidence/ in claude-evidence-manifest.json, then audit it")
     args = parser.parse_args()
     try:
         failures = []
         ev = ROOT / "tests/sol-qualified-units/evidence"
-        if not args.inventory_only and not args.audit_only and not args.signature_foundation_only and not args.claude_vm:
+        if not args.inventory_only and not args.audit_only and not args.signature_foundation_only and not args.claude_vm and not args.write_claude_manifest:
             gates = []
             for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "keysort", "repository"]:
                 command = [sys.executable, str(ROOT / "tests/sol-qualified-units/run-candidate-gates.py"), mode]
@@ -264,7 +325,9 @@ if __name__ == "__main__":
             with open("/tmp/solidity-lean-feature-groups-20261025/writer.lock", "a") as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 (ev / "acceptance-gates.json").write_text(json.dumps(gates, indent=2) + "\n")
-        audit(args.inventory_only, args.signature_foundation_only, args.claude_vm)
+        if args.write_claude_manifest:
+            write_claude_manifest()
+        audit(args.inventory_only, args.signature_foundation_only, args.claude_vm or args.write_claude_manifest)
         assert not failures, "gate failures: " + ", ".join(failures)
     except (AssertionError, OSError, ValueError) as error:
         print(str(error), file=sys.stderr)
