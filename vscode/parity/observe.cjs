@@ -7,7 +7,7 @@ const {LspFrames}=require('./core.cjs');
 const {sep}=require('node:path');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
-function observe(vscode, record, extensionPath, tracePath) {
+function observe(vscode, record, extensionPath, tracePath,workspacePath) {
   const controllers = [], profiles = [], decorations = [], finalizers=[];
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
@@ -47,6 +47,14 @@ function observe(vscode, record, extensionPath, tracePath) {
       showErrorMessage(...args) {record('error',{message:args[0]}); return vscode.window.showErrorMessage(...args);}
     })
   };
+  let restored=false;const executions=new WeakMap();let sequence=0;const identity=execution=>{if(!executions.has(execution))executions.set(execution,++sequence);return executions.get(execution);};
+  const terminalSupported=!!vscode.window.onDidStartTerminalShellExecution&&!!vscode.window.onDidEndTerminalShellExecution;
+  const ownedTerminals=new Set(),relevant=(execution,terminal)=>ownedTerminals.has(terminal)||workspacePath&&execution.commandLine.value.includes(workspacePath);
+  const terminalSubscriptions=[];
+  if(terminalSupported){
+    terminalSubscriptions.push(vscode.window.onDidStartTerminalShellExecution(event=>{if(!relevant(event.execution,event.terminal))return;if(restored)return;const commandLine=event.execution.commandLine.value,executionId=identity(event.execution);record('terminal.start',{commandLine,executionId});(async()=>{try{let bytes=0;for await(const data of event.execution.read()){if(restored)break;bytes+=Buffer.byteLength(data);if(bytes>32*1024*1024){record('terminal.output.error',{commandLine,executionId,message:'Terminal observation exceeds existing32MiB output bound'});return;}record('terminal.output',{commandLine,executionId,data});}if(!restored)record('terminal.output.end',{commandLine,executionId});}catch(error){if(!restored)record('terminal.output.error',{commandLine,executionId,message:error.message});}})();}));
+    terminalSubscriptions.push(vscode.window.onDidEndTerminalShellExecution(event=>{if(!restored&&relevant(event.execution,event.terminal))record('terminal.end',{commandLine:event.execution.commandLine.value,executionId:identity(event.execution),exitCode:event.exitCode});}));
+  }
   const original = Module._load;
   const spawnObserved=(...args)=>{
     const child=childProcess.spawn(...args);
@@ -80,6 +88,6 @@ function observe(vscode, record, extensionPath, tracePath) {
   const registration = vscode.languages.onDidChangeDiagnostics(event => {
     for (const uri of event.uris) record('diagnostics',{uri:uri.toString(),diagnostics:vscode.languages.getDiagnostics(uri)});
   });
-  return {controllers,profiles,decorations,restore() { finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
+  return {controllers,profiles,decorations,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
 }
 module.exports = {observe};

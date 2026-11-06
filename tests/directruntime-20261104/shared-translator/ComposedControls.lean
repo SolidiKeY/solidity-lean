@@ -20,7 +20,7 @@ private def sampleRun (C : Contract) (formula : Fml C []) : IO String := do
     | .error e => throw (IO.userError s!"unexpected intrinsic sample halt {repr e}")
   | _ => throw (IO.userError "unexpected zero-parameter obligation shape")
 private def controls : IO Unit := do
-  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/ComposedReaders.ast.json"))
+  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/ComposedReaders.ast.json"))
   let ast ← checked (fixture.getObjVal? "ast")
   let some source := (J.nodes ast).find? (fun n => J.kind n == "ContractDefinition")
     | throw (IO.userError "fixture contract missing")
