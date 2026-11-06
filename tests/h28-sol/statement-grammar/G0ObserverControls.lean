@@ -87,7 +87,32 @@ theorem g0_rejections_twin_actual :
       (.simpleStmt (.exprStmt (.ident "x")))) .nil))) = [] := by
   decide +kernel
 
+/-- The canonical rethrow body `revert(add(d, 32), mload(d'))`. -/
+def rethrowBody (fn d d' : String) (n : Nat) : Syn (.list .yulStmt) :=
+  .cons (.yulExprStmt (.yulCall fn (.cons (.yulCall "add" (.cons (.yulPath d [])
+    (.cons (.yulLit (.dec n)) .nil))) (.cons (.yulCall "mload" (.cons (.yulPath d' []) .nil))
+    .nil)))) .nil
+
+/-- The rethrow twin under the kernel: accepted exactly for the canonical
+shape with equal paths; a different call name, offset or path, a trailing
+statement and the empty body are refused. Assembly exclusions follow it. -/
+theorem g0_rethrow_twin_actual :
+    g0IsRethrow (rethrowBody "revert" "raw" "raw" 32) = true ∧
+    g0IsRethrow (rethrowBody "revert" "raw" "other" 32) = false ∧
+    g0IsRethrow (rethrowBody "return" "raw" "raw" 32) = false ∧
+    g0IsRethrow (rethrowBody "revert" "raw" "raw" 31) = false ∧
+    g0IsRethrow (.cons .yulLeave (rethrowBody "revert" "raw" "raw" 32)) = false ∧
+    g0IsRethrow .nil = false ∧
+    g0Rejections (Syn.assembly (k := .body) false [] (rethrowBody "revert" "raw" "raw" 32)) = [] ∧
+    g0Rejections (Syn.assembly (k := .body) false [] .nil) = [.inlineAssembly] := by
+  decide +kernel
+
+theorem g0_rethrow_twin_link (b : Syn (.list .yulStmt)) : g0IsRethrow b = isRethrow b :=
+  g0IsRethrow_eq b
+
 #print axioms g0_rejections_twin_actual
+#print axioms g0_rethrow_twin_actual
+#print axioms g0_rethrow_twin_link
 #print axioms g0_node_ctors_twin_actual_body
 #print axioms g0_node_ctors_twin_link
 #print axioms g0_typed_list_empty_and_cons

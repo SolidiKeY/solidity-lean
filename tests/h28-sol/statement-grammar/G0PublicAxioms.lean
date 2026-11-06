@@ -16,6 +16,8 @@ open Solidity.Source Solidity.Frontend.Checked
 #print axioms g0Nodes_eq
 #check g0Rejections_eq
 #print axioms g0Rejections_eq
+#check g0IsRethrow_eq
+#print axioms g0IsRethrow_eq
 #check statementFixtureCheck_profile
 #print axioms statementFixtureCheck_profile
 #check g0NodeCtors_eq_nodes

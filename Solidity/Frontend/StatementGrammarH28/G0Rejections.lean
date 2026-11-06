@@ -5,17 +5,18 @@ import Solidity.Frontend.StatementGrammarH28.G0List
 (`Source/Ctor.lean`), which the fixture controls evaluate by `decide +kernel`:
 `Syn.nodes`, `Syn.excl`, `Syn.placeholders` and `isLiteralBase` match on the
 indexed family. Their twins read syntax only through `Syn.casesOn` with
-category-generalising motives and structural recursion; apart from the
-`isRethrow` call below, `match` remains only on the parameter-free `Option`,
-`Lit`, `ShiftOp`, `AssignOp` and `Denom`. The twins are linked to their
-Source counterparts (`…_eq`; the views `identAt`/`litAt` only through
-them), and `g0Rejections_eq` links the whole.
+category-generalising motives and structural recursion;
+`match` remains only on the parameter-free `Option`, `List`, `Prod`, `Lit`,
+`YulLit`, `ShiftOp`, `AssignOp` and `Denom`. The twins are linked to their
+Source counterparts (`…_eq`; the views `identAt`/`litAt` and the Yul views
+only through them), and `g0Rejections_eq` links the whole.
 
-One residual: an `assembly` node's exclusion still calls Source's
-`isRethrow`, an indexed `match` with string-literal patterns for which Lean
-4.24 cannot generate equation lemmas ("failed to generate equality theorems
-for `match` expression `isRethrow.match_1`"), and no twin of it could be linked
-here. It runs only on `assembly` nodes (four accepted fixtures). -/
+`g0IsRethrow` is the twin of Source's `isRethrow` (an indexed `match` with
+string-literal patterns, for which Lean 4.24 generates no equation lemmas).
+It inspects the tree in the matcher's own preorder, so `g0IsRethrow_eq` is
+proved by case analysis in that order: a mismatched constructor reduces both
+sides, and a failed string or number test is discharged by unfolding the
+matcher (`delta`) and rewriting its `dite` with the negated test. -/
 namespace Solidity.Frontend.StatementGrammarH28
 open Solidity.Source
 
@@ -41,6 +42,151 @@ private def litAt {category : Cat} (tree : Syn category) : Option Lit := by
   apply Syn.casesOn (motive := fun _ _ => Option Lit) tree
   case lit => intro l; exact Option.some l
   all_goals intros; exact Option.none
+
+private def listViewResult : Cat → Type
+  | .list c => Option (Syn c × Syn (.list c))
+  | _ => PUnit
+
+private def listViewAt {category : Cat} (tree : Syn category) : listViewResult category := by
+  apply Syn.casesOn (motive := fun category _ => listViewResult category) tree
+  case nil => intro category; exact Option.none
+  case cons => intro category x xs; exact Option.some (x, xs)
+  all_goals intros; exact PUnit.unit
+
+def g0ListView {c : Cat} (xs : Syn (.list c)) : Option (Syn c × Syn (.list c)) := listViewAt xs
+
+private def yulExprStmtAt {category : Cat} (tree : Syn category) : Option (Syn .yulExpr) := by
+  apply Syn.casesOn (motive := fun _ _ => Option (Syn .yulExpr)) tree
+  case yulExprStmt => intro e; exact Option.some e
+  all_goals intros; exact Option.none
+
+private def yulCallAt {category : Cat} (tree : Syn category) :
+    Option (String × Syn (.list .yulExpr)) := by
+  apply Syn.casesOn (motive := fun _ _ => Option (String × Syn (.list .yulExpr))) tree
+  case yulCall => intro fn args; exact Option.some (fn, args)
+  all_goals intros; exact Option.none
+
+private def yulPathAt {category : Cat} (tree : Syn category) : Option (String × List String) := by
+  apply Syn.casesOn (motive := fun _ _ => Option (String × List String)) tree
+  case yulPath => intro head tail; exact Option.some (head, tail)
+  all_goals intros; exact Option.none
+
+private def yulLitAt {category : Cat} (tree : Syn category) : Option YulLit := by
+  apply Syn.casesOn (motive := fun _ _ => Option YulLit) tree
+  case yulLit => intro l; exact Option.some l
+  all_goals intros; exact Option.none
+
+/-- `isRethrow` through the eliminator views, inspecting the tree in the
+same preorder as the Source matcher. -/
+def g0IsRethrow (b : Syn (.list .yulStmt)) : Bool :=
+  match g0ListView b with
+  | Option.none => false
+  | Option.some (x, rest) =>
+  match yulExprStmtAt x with
+  | Option.none => false
+  | Option.some e =>
+  match yulCallAt e with
+  | Option.none => false
+  | Option.some (fn, args) =>
+  if fn = "revert" then
+  match g0ListView args with
+  | Option.none => false
+  | Option.some (a1, r1) =>
+  match yulCallAt a1 with
+  | Option.none => false
+  | Option.some (g, gargs) =>
+  if g = "add" then
+  match g0ListView gargs with
+  | Option.none => false
+  | Option.some (p, r3) =>
+  match yulPathAt p with
+  | Option.some (d, []) =>
+    match g0ListView r3 with
+    | Option.none => false
+    | Option.some (l, r4) =>
+    match yulLitAt l with
+    | Option.some (.dec n) =>
+      if n = 32 then
+      match g0ListView r4 with
+      | Option.some _ => false
+      | Option.none =>
+      match g0ListView r1 with
+      | Option.none => false
+      | Option.some (a2, r2) =>
+      match yulCallAt a2 with
+      | Option.none => false
+      | Option.some (m, margs) =>
+      if m = "mload" then
+      match g0ListView margs with
+      | Option.none => false
+      | Option.some (q, r5) =>
+      match yulPathAt q with
+      | Option.some (d', []) =>
+        match g0ListView r5, g0ListView r2, g0ListView rest with
+        | Option.none, Option.none, Option.none => d == d'
+        | _, _, _ => false
+      | _ => false
+      else false
+      else false
+    | _ => false
+  | _ => false
+  else false
+  else false
+
+local macro "rethrow_neg" h:ident : tactic => `(tactic|
+  (delta isRethrow isRethrow.match_1
+   simp only [g0IsRethrow, g0ListView, listViewAt, yulExprStmtAt, yulCallAt, yulPathAt,
+     yulLitAt, dif_neg $h:ident, if_neg $h:ident] <;> rfl))
+
+theorem g0IsRethrow_eq (b : Syn (.list .yulStmt)) : g0IsRethrow b = isRethrow b := by
+  cases b
+  · rfl
+  rename_i x rest
+  cases x <;> try rfl
+  rename_i e
+  cases e <;> try rfl
+  rename_i fn args
+  by_cases h1 : fn = "revert"
+  case neg => rethrow_neg h1
+  subst h1
+  cases args <;> try rfl
+  rename_i a1 r1
+  cases a1 <;> try rfl
+  rename_i g gargs
+  by_cases h2 : g = "add"
+  case neg => rethrow_neg h2
+  subst h2
+  cases gargs <;> try rfl
+  rename_i p r3
+  cases p <;> try rfl
+  rename_i d tl
+  cases tl <;> try rfl
+  cases r3 <;> try rfl
+  rename_i l r4
+  cases l <;> try rfl
+  rename_i lit
+  cases lit <;> try rfl
+  rename_i n
+  by_cases h3 : n = 32
+  case neg => rethrow_neg h3
+  subst h3
+  cases r4 <;> try rfl
+  cases r1 <;> try rfl
+  rename_i a2 r2
+  cases a2 <;> try rfl
+  rename_i m margs
+  by_cases h4 : m = "mload"
+  case neg => rethrow_neg h4
+  subst h4
+  cases margs <;> try rfl
+  rename_i q r5
+  cases q <;> try rfl
+  rename_i d' tl'
+  cases tl' <;> try rfl
+  cases r5 <;> try rfl
+  cases r2 <;> try rfl
+  cases rest <;> try rfl
+  done
 
 /-- `isLiteralBase` through the literal view. -/
 def g0IsLiteralBase (b : Syn .expr) : Bool :=
@@ -623,7 +769,7 @@ private def nodesAt {category : Cat} (tree : Syn category) : List Node := by
     exact ⟨Ctor.revert, Option.none⟩ :: (nodesAt s0 ++ nodesAt s1)
   case assembly =>
     intros; rename_i f0 f1 s2
-    exact ⟨Ctor.assembly, if isRethrow s2 then Option.none else Option.some .inlineAssembly⟩ :: (nodesAt s2)
+    exact ⟨Ctor.assembly, if g0IsRethrow s2 then Option.none else Option.some .inlineAssembly⟩ :: (nodesAt s2)
   case block =>
     intros; rename_i s0
     exact ⟨Ctor.block, Option.none⟩ :: (nodesAt s0)
@@ -744,6 +890,13 @@ private theorem excl_unchecked {l : Bool} (b : Syn (.block ⟨l, true⟩)) :
   rw [g0Placeholders_eq]
   rfl
 
+private theorem excl_assembly {k : SCtx} (evm : Bool) (flags : List String)
+    (body : Syn (.list .yulStmt)) :
+    (Syn.assembly (k := k) evm flags body).excl =
+      if g0IsRethrow body then Option.none else Option.some .inlineAssembly := by
+  rw [g0IsRethrow_eq]
+  rfl
+
 /-- The link of the node twin, exclusions included. -/
 theorem g0Nodes_eq {c : Cat} (s : Syn c) : g0Nodes s = s.nodes := by
   suffices h : s.nodes = nodesAt s from h.symm
@@ -755,12 +908,13 @@ theorem g0Nodes_eq {c : Cat} (s : Syn c) : g0Nodes s = s.nodes := by
   case litUnit n u =>
     cases u <;> rfl
   all_goals (simp only [Syn.nodes, Syn.node, excl_contract, excl_modifier,
-    excl_unchecked, *] <;> rfl)
+    excl_unchecked, excl_assembly, *] <;> rfl)
 
 /-- The link of the profile observation. -/
 theorem g0Rejections_eq {c : Cat} (s : Syn c) : g0Rejections s = s.rejections := by
   simp only [g0Rejections, Syn.rejections, g0Nodes_eq]
 
+#print axioms g0IsRethrow_eq
 #print axioms g0IsLiteralBase_eq
 #print axioms g0Placeholders_eq
 #print axioms g0Nodes_eq

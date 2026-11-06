@@ -15,7 +15,8 @@ run_cmd do
     "optionalBodyCtorsAt", "functionBodyCtorsAt", "topBodyCtorsAt",
     "fixtureBodyCtorsAt", "framedItemAt", "rootResult", "listCellResult",
     "listValuesResult", "framedItemResult", "nodeCtorsAt", "optValueAt", "optValueResult",
-    "identAt", "litAt", "placeholdersAt", "nodesAt"]
+    "identAt", "litAt", "placeholdersAt", "nodesAt", "listViewResult", "listViewAt",
+    "yulExprStmtAt", "yulCallAt", "yulPathAt", "yulLitAt"]
   let declarations := (← getEnv).constants.fold (init := #[]) fun acc name info =>
     if "_private.Solidity.Frontend.StatementGrammarH28.".isPrefixOf name.toString &&
         targets.any (fun suffix => name.toString.endsWith ("." ++ suffix)) then
