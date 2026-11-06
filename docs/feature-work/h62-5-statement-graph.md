@@ -148,3 +148,47 @@ merge, PR, pre-gate or publication was performed. Resume the same goal and branc
 do not create a replacement goal. The final saved handoff records committed head,
 patch/evidence paths and hashes. Registration advice is in the task's additive
 `REGISTRATION.md`; existing generated roots/maps remain read-only.
+
+## Saved checkpoint validation and fresh-thread handoff
+
+Implementation commit `0d29ea3685bc2d457f875482cfaabf98a186a8d3`, tree
+`283a46ec2b8e84f886ea5859620bb56c17f90b6d`, passed corrected clean-tree
+acceptance. Evidence: `/workspace/h62-statement-graph-evidence/final-acceptance/`.
+The final run passed all 30 Python tests, 12-process exclusivity, imported-overlay
+conflict checks, inhabited dependent Type-certificate controls and private-declaration
+coverage. Ten explicitly selected fixture declarations and a 34-declaration census
+matched byte-for-byte within one process and across fresh processes. Every selected
+fixture declaration's transitive axiom list was empty. These are fixture counts;
+they make no production G49/G50 claim.
+
+The unchanged KeySort seven-run median was 1.112130489 s before and 1.157862073 s
+after (+4.1121%, below 10%). Final MCP diagnostics for Exporter and Fixture
+returned success=true, partial=false, items=[], with its dependency's known
+shutdown warning. Layers reported 857 core modules and zero elaborator/parser
+adapter reachability; generated roots/fragments checks and git diff --check passed.
+Both independent reviewers confirmed all reported checkpoint code findings resolved
+at the implementation commit, including private-name recovery in the census.
+Neither reviewer ran Lean. Review summaries and exact commands are saved off git.
+
+Additional backfill is reproducible through
+`scripts/h62/item5/statement-graph/census.py` with the same four required arguments
+as verify.py. It compiles the exact inspected Roadmap dependencies serially with
+4.35, then exports the actual namespace including private declarations and generated
+constructors/recursors, without assigning proof ownership or progress. Its production
+run failed before exporting: unchanged `Solidity/Hash/CollisionBound.lean` has an
+unsolved goal at 407:56, omega failures at 660:4 and 680:4, then axiom-message guard
+mismatches at 950–968. The failure's elaboration-error sorryAx is not a checked or
+committed proof. No owner-file edits or trust-policy changes were made.
+Evidence: `/workspace/h62-statement-graph-evidence/roadmap-census/CollisionBound.log`.
+`B-MIGRATION-HASH` is an external owner/toolchain compatibility blocker, in addition
+to B-H55-INVENTORY, B-H55-RELAY, B-PRODUCTION-GRAPH and B-FINAL-GATE above.
+
+The implementation checkpoints are: tags/exporter done; per-area production DAG
+partial; exclusive claims done; production G49/G50 progress partial. Typed witness
+mapping/discharge, actual production census and all final/full gates remain binding.
+No RUNTIME_GATE_PASS or complete-goal assertion is made. This thread has reached
+its checkpoint/backfill handoff; coordinator should resume the exact original goal,
+VM and branch after supplying H55 inputs and a producer-approved migration fix.
+Do not launch another goal or reset/discard this branch. Final absolute patch,
+bundle, handoff and evidence paths/hashes are recorded at
+`/workspace/h62-statement-graph-handoff/`.
