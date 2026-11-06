@@ -275,13 +275,6 @@ theorem WalkD.splice_getD {X scope F n E c body m final}
   rw [hc]
   rfl
 
-/-- Exact reconstruction makes the independent typing certificate unique.
-This is about BlockTyping certificates, not the older separate ClosedPure
-certificate-uniqueness draft. -/
-theorem BlockD.unique {X scope F n E c body} (first second : @BlockD X scope F n E c body) :
-    first = second :=
-  Option.some.inj (first.complete.symm.trans second.complete)
-
 theorem BlockD.codeAt_unique {X scope F n E c body}
     (first second : @BlockD X scope F n E c body) (target : Control)
     (h₁ h₂ : ControlMap c target) :
