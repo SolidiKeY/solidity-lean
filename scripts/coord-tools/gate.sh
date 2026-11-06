@@ -69,7 +69,7 @@ PY
   [ -z "$targets" ] || LEAN_NUM_THREADS=1 lake build $targets
 }
 if [ "$mode" = per-file ]; then
-  for file in "${files[@]}"; do run_gate "lean:$file" lake env lean --tstack=131072 "$file"; done
+  for file in "${files[@]}"; do run_gate "lean:$file" lake lean "$file" -- --tstack=131072; done
 else
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
