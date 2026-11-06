@@ -507,3 +507,34 @@ coordinator/fresh thread to conduct controlled measurement under unchanged
 limits, without rerunning simply to obtain a passing sample. The fourth
 source-work item is reviewed and saved, with acceptance still partial; all
 original checkpoints and required performance/final gates remain unfinished.
+
+
+## H82 human retirement checkpoint
+
+Explicit human stop-and-handoff (and ordering correction) supersedes earlier
+H70 continuation text. This worker performs preservation only and stops after
+its final head acknowledgement. Handoff target: `solidity-parallel-20261103/memory-copies`.
+No new proof implementation, known-STOP rerun, producer edit or owner message.
+Full original visible assignment, original queues, goal objective, exact scope
+manifest, all open work/backfill/waits and pause capability are committed under
+`tests/h62/item2/audit-memory-operations/retirement/`. The captured assignment
+digest is separately recorded; byte identity with the renderer hash is not
+verified. No scope text is deliberately omitted.
+
+H82 standing agreements withdraw proof-only/additive/import/doc exact-file
+permission requests. CopyPaths ownership remains an accountability question,
+not such a permission barrier. Statement/definition/interface/budget/axiom/
+exclusion changes retain owner/H57 requirements. No further implementation
+is authorized for this retired worker, even if independent work exists.
+
+Existing goal PAUSED is requested by human instruction. The available goal
+API cannot express PAUSED (only complete|blocked); no substitute transition,
+reset, replacement or completion is made. Coordinator must apply the pause
+using trusted host capability. Worker execution stops independently.
+
+No H71 push permission is available in this thread or supplied input snapshot;
+original no-push authorization remains. Preserve VM/branch/evidence; do not
+delete. Cumulative patch, self-contained lane bundle, portable evidence/input
+archive and checksums are exported after the preservation commit. Final head
+and clean/dirty status live in that external final report to avoid a circular
+commit hash. All four checkpoints, required final gates and STOP remain open.
