@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Census changed Git content and reject large H44 data; no bypass flags."""
+"""Census changed Git content and reject large H44 data; no bypass flags.
+
+Guards parser-limit JSON disguises and additions hidden in merged root history.
+This prototype does not establish coordinator base approval or an atomic checkout.
+"""
 import argparse
 import hashlib
 import json
@@ -14,11 +18,12 @@ SOURCE_SUFFIXES = (b".lean", b".py", b".sh", b".js", b".mjs", b".ts", b".c", b".
 
 
 def git(*args):
-    return subprocess.check_output([b"git", *args])
+    return subprocess.check_output([b"git", b"--no-replace-objects", *args], env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"))
 
 
-def changes(*args):
-    fields = git(b"diff", b"--name-status", b"-z", b"--no-renames", b"--ignore-submodules=none", *args).split(b"\0")
+def changes(*args, root=False):
+    command = (b"diff-tree", b"--root", b"--no-commit-id", b"-r") if root else (b"diff",)
+    fields = git(*command, b"--name-status", b"-z", b"--no-renames", b"--ignore-submodules=none", *args).split(b"\0")
     return [(fields[i], fields[i + 1]) for i in range(0, len(fields) - 1, 2)]
 
 
@@ -37,8 +42,10 @@ def classify(path, content, approved):
                 source = False
             else:
                 try:
-                    json.loads(decoded)
-                except (ValueError, RecursionError):
+                    json.loads(decoded, parse_int=str, parse_float=str)
+                except RecursionError:
+                    source = False
+                except ValueError:
                     pass
                 else:
                     source = False
@@ -50,33 +57,71 @@ def classify(path, content, approved):
     return kind, size, limit, size <= limit
 
 
+def fingerprint(path):
+    try:
+        info = os.lstat(path)
+    except FileNotFoundError:
+        return None
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("base", help="base commit against which committed changes are checked")
     args = parser.parse_args()
-    root = git(b"rev-parse", b"--show-toplevel").rstrip(b"\n")
+    metadata = git(b"rev-parse", b"--show-toplevel", b"--is-shallow-repository", b"HEAD").splitlines()
+    if len(metadata) != 3:
+        raise RuntimeError("ambiguous repository metadata")
+    root, shallow, head = metadata
     os.chdir(root)
+    if shallow != b"false":
+        raise RuntimeError("shallow history cannot establish the full changed-content census")
+    if "GIT_GRAFT_FILE" in os.environ or "GIT_SHALLOW_FILE" in os.environ:
+        raise RuntimeError("custom graft/shallow history is not supported")
+    locations = git(b"rev-parse", b"--git-path", b"index", b"--git-path", b"info/grafts", b"--git-path", b"info/attributes").splitlines()
+    if len(locations) != 3:
+        raise RuntimeError("ambiguous Git metadata paths")
+    index, grafts, info_attributes = locations
+    if os.path.lexists(grafts):
+        raise RuntimeError("grafted history cannot establish the full changed-content census")
     base = git(b"rev-parse", b"--verify", os.fsencode(args.base) + b"^{commit}").strip()
-    merge = git(b"merge-base", base, b"HEAD").strip()
+    merge = git(b"merge-base", base, head).strip()
     if merge != base:
         raise RuntimeError("base must be an ancestor of HEAD")
     approval_spec = base + b":scripts/h55/result-size-cache/approved-source.json"
-    found = subprocess.run([b"git", b"cat-file", b"-e", approval_spec], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+    found = subprocess.run([b"git", b"--no-replace-objects", b"cat-file", b"-e", approval_spec], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
     approved = json.loads(git(b"cat-file", b"blob", approval_spec)) if found else {}
     if not isinstance(approved, dict) or any(not isinstance(k, str) or not isinstance(v, str) or len(v) != 64 or any(c not in "0123456789abcdef" for c in v) for k, v in approved.items()):
         raise RuntimeError("invalid trusted source approval list")
+    index_state = fingerprint(index)
+    info_attributes_state = fingerprint(info_attributes)
     flags = git(b"ls-files", b"-v", b"-z").split(b"\0")
     if any(row and (row[:1] != b"H") for row in flags):
         raise RuntimeError("index contains skip-worktree or assume-unchanged entries")
+    paths = [row[2:] for row in flags if row]
+    untracked_data = git(b"ls-files", b"--others", b"--exclude-standard", b"-z")
+    untracked_paths = [p for p in untracked_data.split(b"\0") if p]
+    watched = {path: fingerprint(path) for path in paths + untracked_paths}
+    autocrlf = git(b"config", b"--default", b"false", b"--get", b"core.autocrlf").strip().lower()
+    if autocrlf not in (b"false", b"no", b"0", b"off", b""):
+        raise RuntimeError("raw-byte census refuses core.autocrlf normalization")
+    if paths:
+        attributes = subprocess.check_output(
+            [b"git", b"--no-replace-objects", b"check-attr", b"-z", b"--stdin", b"filter", b"text", b"eol", b"ident", b"working-tree-encoding"],
+            input=b"\0".join(paths) + b"\0", env=dict(os.environ, GIT_OPTIONAL_LOCKS="0")).split(b"\0")
+        if any(value not in (b"unspecified", b"unset") for value in attributes[2::3]):
+            raise RuntimeError("raw-byte census refuses transforming Git attributes")
     snapshots = []
-    for commit in git(b"rev-list", b"--reverse", base + b"..HEAD").splitlines():
+    for commit in git(b"rev-list", b"--reverse", base + b".." + head).splitlines():
         parents = git(b"rev-list", b"--parents", b"-n", b"1", commit).split()[1:]
+        if not parents:
+            snapshots.append(("commit:" + commit.decode(), changes(commit, root=True), commit, None))
         for parent in parents:
             snapshots.append(("commit:" + commit.decode(), changes(parent, commit), commit, parent))
-    snapshots.extend([("committed", changes(merge, b"HEAD"), b"HEAD", merge),
-                      ("staged", changes(b"--cached", b"HEAD"), b":", b"HEAD"),
+    snapshots.extend([("committed", changes(merge, head), head, merge),
+                      ("staged", changes(b"--cached", head), b":", head),
                       ("tracked", changes(), None, b":")])
-    untracked = [(b"A", p) for p in git(b"ls-files", b"--others", b"--exclude-standard", b"-z").split(b"\0") if p]
+    untracked = [(b"A", p) for p in untracked_paths]
     snapshots.append(("untracked", untracked, None, None))
     failures = 0
     for scope, rows, revision, previous in snapshots:
@@ -123,6 +168,12 @@ def main():
                 ok = ok and size <= limit
             failures += not ok
             print(json.dumps(dict(scope=scope, status=os.fsdecode(status), path=display, kind=kind, bytes=size, limit=limit, result="pass" if ok else "fail"), ensure_ascii=True))
+    if (git(b"rev-parse", b"HEAD").strip() != head or fingerprint(index) != index_state or
+            fingerprint(info_attributes) != info_attributes_state or
+            git(b"ls-files", b"--others", b"--exclude-standard", b"-z") != untracked_data or
+            any(fingerprint(path) != state for path, state in watched.items()) or
+            git(b"config", b"--default", b"false", b"--get", b"core.autocrlf").strip().lower() != autocrlf):
+        raise RuntimeError("repository inputs changed during size census")
     print(json.dumps(dict(summary="fail" if failures else "pass", failures=failures)))
     return bool(failures)
 
