@@ -1,0 +1,19 @@
+{
+  "schema": "sol-numeric-literals-h44-v1",
+  "source_head": "dc787dca085a6813b62d2055071d102f01deeb89",
+  "base": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "directory": "/workspace/sol-numeric-literals-h44-dc787dca",
+  "file_count": 65,
+  "uncompressed_bytes": 492557,
+  "file_manifest": {
+    "path": "/workspace/sol-numeric-literals-h44-dc787dca/files.json",
+    "bytes": 22564,
+    "sha256": "7c52a619cc3fc1b0ded0c84733f89d99f99368cb86e13fdc6151bfdb3a84622a"
+  },
+  "archive": {
+    "path": "/workspace/sol-numeric-literals-h44-dc787dca/payload.tar.gz",
+    "bytes": 43413,
+    "sha256": "698e6234da33e282e9b241a0906fa86668e923a0203ef02be951fee1b97e5817"
+  },
+  "policy": "H44: bulk data stays on VM; commit only this hash manifest; unchanged gate inputs must be materialized at listed logical paths"
+}

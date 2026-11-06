@@ -33,7 +33,8 @@
   },
   {
     "id": "trust-inventory",
-    "status": "done"
+    "status": "done",
+    "evidence": "h55-owned-audit and h55-all-axioms: fresh991 kernel signatures and808 theorem axiom sets match exact pins; no new proof declaration or source change."
   },
   {
     "id": "independent-reviews",
@@ -42,16 +43,17 @@
   {
     "id": "target-import-closure",
     "status": "done",
-    "evidence": "evidence/recovered-full-gates/1.log: 49 jobs completed; source hashes match audit-validation.json"
+    "evidence": "h55-owned-build: all42 Numeric modules in49 cached jobs pass; Constants5 modules in133 cached jobs pass separately; Lean-j1/resources/source pins checked."
   },
   {
     "id": "static-gates",
     "status": "blocked",
-    "evidence": "Post-adoption fullsuite passes build/trust/layers/docs/axiompins/TestSuite/corpus/automation;37rootimports and38maprows remain coordinator-owned. H41 handoff verifiedcoordinator-pending."
+    "evidence": "4095 roots complete and KeySort0errors;34 joint module-map rows (33Numeric+1Constants) remain proposed, not applied; final shared gates remain open."
   },
   {
     "id": "coordinator-registration",
-    "status": "blocked"
+    "status": "blocked",
+    "evidence": "All42Numeric root imports present. Exact33Numeric missing map rows included with Constants.Controls in tests/primitive-packets-1105/Constants/registration-current.patch; coordinator-only application."
   },
   {
     "id": "full-runtime-gate",
@@ -60,6 +62,6 @@
   {
     "id": "immutable-handoff",
     "status": "pending",
-    "evidence": "H41 verified-pack handoff recorded coordinator-pending; transport question resolved. Final assignment seal still awaits original integration/runtime gates."
+    "evidence": "This unaffected checkpoint receives a sealed handoff; final original assignment handoff still requires registration/final runtime gates. Old seals/cache packs preserved."
   }
 ]

@@ -1,13 +1,38 @@
 """Shared read-only inventory logic for the numeric-literal acceptance gate."""
-import hashlib,json,pathlib,re,subprocess
+import hashlib,json,os,pathlib,re,subprocess
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 FOLDER=ROOT/'tests/sol-numeric-literals'
 BASE='6f3eedf0788ee1f8a3bcf230558c712ecdca04d5'
-ADOPTED_MASTER='b86ae4568cef6d6226f4d170360bbb089debe3fb'
+ADOPTED_MASTER='4095d848297d87e374b4f069692511cfe4a36cf7'
 PREFIX='Solidity.Frontend.NumericLiteralProofs.'
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def git(*args):return subprocess.check_output(['git',*args],cwd=ROOT,text=True).strip()
+def h44_bulk_bindings():
+ """Bind VM-only data through the exact H44 manifest committed in HEAD."""
+ relative='tests/primitive-packets-1105/Constants/h44-bulk-manifest.json'
+ result=subprocess.run(['git','show','HEAD:'+relative],cwd=ROOT,capture_output=True)
+ if result.returncode:return {}  # No uncommitted manifest can authorize data.
+ manifest=json.loads(result.stdout)
+ if (ROOT/relative).read_bytes()!=result.stdout:raise ValueError('uncommitted H44 manifest')
+ return verify_h44_bulk(manifest)
+
+def verify_h44_bulk(manifest):
+ if manifest['schema']!='sol-numeric-literals-h44-v1':raise ValueError('H44 manifest schema')
+ directory=pathlib.Path(os.environ.get('SOL_NL_BULK_DIR',manifest['directory']))
+ index=directory/'files.json';raw=index.read_bytes();spec=manifest['file_manifest']
+ if len(raw)!=spec['bytes'] or hashlib.sha256(raw).hexdigest()!=spec['sha256']:raise ValueError('H44 file manifest digest differs')
+ entries={}
+ for row in json.loads(raw)['files']:
+  name=row['logical_path'];parts=pathlib.PurePosixPath(name)
+  evidence=name.startswith(('tests/sol-numeric-literals/evidence/','tests/primitive-packets-1105/Constants/evidence/'))
+  special=name in ('tests/primitive-packets-1105/Constants/registration-current.json','tests/primitive-packets-1105/Constants/registration-current.patch','tests/primitive-packets-1105/Constants/reviews.json')
+  if parts.is_absolute() or '..' in parts.parts or str(parts)!=name or not (evidence or special) or name.endswith(('.py','.lean','.sh','.js','.mjs')):raise ValueError('H44 non-data path '+name)
+  if name in entries:raise ValueError('H44 duplicate data path '+name)
+  entries[name]=row
+ if len(entries)!=manifest['file_count']:raise ValueError('H44 data coverage differs')
+ return entries
+
 def blank_lean(s):
  out=list(s);i=0;depth=0
  while i<len(s):
@@ -72,4 +97,5 @@ def case_families():
  families += [dict(family='checksum length/case/nibble boundaries',theorems=['checksum_controls','checksum_length_controls','eip55_other_length']),dict(family='all fixed compiler spellings and lexical/compiler stage differences',fixtures=[r['id'] for r in json.loads((FOLDER/'spellings.json').read_text())],theorems=['fixture_observations_pass']),dict(family='all word-table prefix cases',prefix_proofs=439,theorems=['solWordTable_no_num'])]
  return families
 
-def permitted(path):return path.startswith(('Solidity/Frontend/NumericLiteralProofs/','tests/sol-numeric-literals/')) or path in ('scripts/check-sol-numeric-literals.py','docs/feature-work/numeric-literal-proofs.md')
+# Exact union of the original SOL-NL scope and human-assigned H10/H12 Constants scope.
+def permitted(path):return path.startswith(('Solidity/Frontend/NumericLiteralProofs/','tests/sol-numeric-literals/','Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/')) or path in ('scripts/check-sol-numeric-literals.py','docs/feature-work/numeric-literal-proofs.md','docs/feature-work/primitive-packets-1105-Constants.md')

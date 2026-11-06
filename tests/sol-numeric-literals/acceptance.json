@@ -1,6 +1,6 @@
 {
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "adopted_master": "4095d848297d87e374b4f069692511cfe4a36cf7",
   "modules": [
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/Audit.lean",
@@ -4014,10 +4014,14 @@
   ],
   "kernel_inventory_sha256": "c51f9c03712a18703c5fb94684ae63d6c2d676c90d1b15ad8b020cdd4f98f5ea",
   "gate_scripts": {
-    "scripts/check-sol-numeric-literals.py": "346329eb65c5553564f76a136b6d56efb1d8a165b9ad6129c106330aa98b2b5d",
-    "tests/sol-numeric-literals/packetlib.py": "3434e81f438c445e87d26ad88e58df4ae86c777e55cbb75daff84d9dabd9cb15",
-    "tests/sol-numeric-literals/make-manifest.py": "fd825fbddad36a7b4c08c4d24fc7870c8b18053246161428c48f3ff07a5a2f83",
-    "tests/sol-numeric-literals/adoption.json": "327f0f07d23dd1fd0fce599acf5bae2329e8d750795f16c439495010efb6a1c9",
+    "scripts/check-sol-numeric-literals.py": "27f2f6050c484197e72894f37703a6cfbc5f8f9527d786a90bdbd12c1a198f0f",
+    "tests/primitive-packets-1105/Constants/registration-plan.py": "ad7d45e4c79c0da4bb57c01839561bcfd9b6f77d6356f9e5850ab31f496ace59",
+    "tests/primitive-packets-1105/Constants/validate-fresh.py": "c04a8d30a0fe8f0d06e4212d8ef41307de9f51335a214c6fc17df5b5b32de6ea",
+    "tests/primitive-packets-1105/Constants/check.py": "41f29f00e41e7e4496aabef57bd3bad402de6ca10fe8ed17128d655b57fc61de",
+    "tests/primitive-packets-1105/Constants/manifest.json": "5f51e5e96bfe9ad17b33a44a0b327ce91120f9613190f05c0823eb91e76ce222",
+    "tests/sol-numeric-literals/packetlib.py": "1602a8f2ddba4b1f6df9524bed1fd15d1601f4b61a44707bbd5fceff7257c9bc",
+    "tests/sol-numeric-literals/make-manifest.py": "5a80779accd02a2186e39b9edf729132454eee9ae929610a9df177f14004682e",
+    "tests/sol-numeric-literals/adoption.json": "289cce4ff3b5c2c329864155eaf24aaa0ca3fe4117f804cb1b29c17f95715267",
     "tests/sol-numeric-literals/test-adoption.py": "01080db7de2fdde9f7d9ee87a9973a24914a5ee605457eb3d97e850a05ce4a90",
     "tests/sol-numeric-literals/generate-wordtable.py": "d4fea570f7aec72eb5f86ed3dca6751b3e8783b4933432441f3769276dc69483",
     "tests/sol-numeric-literals/generate-fixtures.py": "3262d2638ff1ad0076951f38decaa4195acfb305c672bcd0d8c81c5d9708ff88",
