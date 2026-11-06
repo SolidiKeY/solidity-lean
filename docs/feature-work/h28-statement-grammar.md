@@ -2175,3 +2175,58 @@ remaining true parser coverage, full repository gates and whole-scope acceptance
 remain open. SOL-EU remains excluded and SG-CEX-01/02 remain OPEN/REFUTED.
 Existing shared inventory/full-build holds remain separate. No goal was created,
 reset, replaced or marked complete by this checkpoint.
+
+
+## Checkpoint Z — inline-Yul continuation boundaries
+
+Adopted published master `38d38d87e74376d6b95daf9b792fa884333f20b3`
+by verified fast-forward, preserving the owned branch and its original base.
+This checkpoint is additive: no existing implementation or proof was refactored,
+no protected Yul helper file was edited, and no budget or premise changed.
+
+[The source](../../Solidity/Frontend/StatementGrammarH28/YulControlFree.lean)
+proves `yul_yield_controlFree` for every existing `Syn c` whose category is
+Yul statement, expression or case, with arbitrary nested list/option closure.
+`yul_yield_no_continuations` extracts absence of the exact three Solidity
+keyword tokens selected by `boundaryToken` from every actual successful yield.
+`assembly_yield_controlFree` covers arbitrary EVM flags, flag strings and Yul
+bodies under the immutable printer. The result does not require parser success,
+expression uniqueness, lexical validity, valid assembly flags or execution
+adequacy. Identifier/string payload spellings remain data. SG-CEX-01 is retained:
+this token-absence property does not establish flag injectivity or round-trip.
+
+The exhaustive constructor inventory is 11 Yul statements (`yulBlock`, `yulLet`,
+`yulAssign`, `yulExprStmt`, `yulIf`, `yulFor`, `yulSwitch`, `yulLeave`, `yulBreak`,
+`yulContinue`, `yulFun`), three expressions (`yulPath`, `yulCall`, `yulLit`),
+and one `yulCase`, plus `nil`, `cons`, `none`, `some` closure. The scalar literal
+proof covers all five `YulLit` alternatives: decimal, hexadecimal, string,
+hex string and Boolean. No constructor is represented by an empty relation.
+
+[Kernel controls](../../tests/h28-sol/statement-grammar/YulControlFreeControls.lean)
+have 10 theorems: exact constructor inventory; all 15 inhabited successful
+nonempty yields; all five literal alternatives; absent initializer/default and
+empty call/function alternatives; actual four list/option yields; atomic keyword
+payload spellings; all four EVM/nonempty-flag combinations; rejection of real
+Solidity continuation keywords; rejection of the Solidity-statement category;
+and the arbitrary-Yul-tree three-keyword corollary. The public source has four
+theorems and one category definition. [Public audit](../../tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean)
+prints all five source signatures and axiom sets; controls print all 10 theorem
+axiom sets. Only standard `propext`/`Quot.sound` are permitted; no new trust.
+
+Reproduction in the prepared bounded VM, serially:
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.YulControlFree
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreeControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Initial per-file diagnostics and build passed. Separate read-only finder and
+skeptic source reviews found no proof defects. Finder caught a premature receipt
+claim in this paragraph; it was corrected before commit. Acceptance still requires
+exact committed-head gates, cache, final review and seal receipts in the checkpoint
+handoff. External solc
+results are unchanged historical fixture evidence, not evidence for this universal
+kernel theorem. Original G11 remains partial: general compound framing, remaining
+parser coverage and final whole-repository acceptance are still outstanding.
