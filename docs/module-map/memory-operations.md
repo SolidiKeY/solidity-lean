@@ -540,5 +540,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedLocationPipeline.lean` | Two actual nested copy phases, retained heaps and separate capacity refusals. |
 | `Backend/MemoryCopies/NestedLocationPipelineObservations.lean` | Observable returned root, both parent headers, free cursor and machine framing. |
 | `Backend/MemoryCopies/NestedLocationPipelineControls.lean` | Inhabited empty/mixed 2/0/64 executions and distinct first/second allocation refusals. |
-
 | `Backend/MemoryCopies/SelectedDefaultDemandInterface.lean` | Existing default compiler selection implies exact intrinsic cell demand and checked capacity agreement. |
+| `Backend/MemoryCopies/SelectedDefaultDemand.lean` | Actual selected default cost equals live allocation demand; heap growth and checked guard agree without a capacity premise. |
+| `Backend/MemoryCopies/SelectedDefaultDemandControls.lean` | Selected/unselected cost controls, actual nested child snapshot, empty/long/unused-huge success, refusal and wrong cursor. |

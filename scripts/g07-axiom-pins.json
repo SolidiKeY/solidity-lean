@@ -4817,6 +4817,76 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selected_default_allocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selected_default_checked_demand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selected_default_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selectedDefaultDemand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_mixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_new_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.selected_demands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.selected_primitive_struct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.unselected_struct_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.unused_huge_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.wrong_cursor_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence_agrees": [
   "Classical.choice",
   "Quot.sound",
