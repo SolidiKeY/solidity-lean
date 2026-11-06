@@ -219,3 +219,31 @@ New follow-up exports and checksums are under
 `/workspace/v08-agreements-evidence/h67-waiting`; original evidence and the
 validated cache pack remain unchanged. No new cache pack or Lean run is needed
 for this documentation-only update. No second goal is created or reset.
+
+## H82 retirement — stopped handoff
+
+The human-approved retirement instruction supersedes implementation continuation.
+H82 standing agreements withdraw the old blanket exact-file permission request
+for statement-preserving work. No production edits were made before retirement;
+only read-only design and master ancestry inspection occurred in that turn.
+All remaining work, validation and dependencies are enumerated in the committed
+retirement queue and exact scope manifest under tests/h55/v08-agreements/retirement.
+The complete original user assignment, supplied goal objective, initial environment,
+coordination history and retirement notice are saved there for the survivor.
+The visible assignment's actual SHA256 is recorded; its bytes are not asserted
+identical to the renderer-specific hash declared in the supplied goal context.
+
+Handoff recipient: solidity-v07-v11-20261030/v08-world-lowering. Successor takeover
+is effective only after this worker's final stopped/head acknowledgement. The
+successor is responsible for integrating that final head. No new proof implementation,
+source semantics, budget, source observation, inventory or shared-registry edit.
+No push: explicit H71 branch-push permission was not supplied. VM, branch, original
+work and all bulk evidence/cache artifacts are preserved.
+
+PAUSED was requested by the human, but the available tools expose only
+stop_goal(complete|blocked), not a pause operation. No unsupported or substitute
+goal transition is attempted; no goal is completed, created or reset. This worker
+stops after the authenticated retirement handoff; no automatic implementation
+continuation is authorized. Exact final head and clean status are in the external
+retirement HANDOFF.md and CLOUDVM-RESULT.json, with cumulative patch/bundle and
+complete SHA256SUMS under /workspace/v08-agreements-evidence/retirement.
