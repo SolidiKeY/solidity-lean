@@ -1,0 +1,126 @@
+{
+ "lane": "SOL-CB constant-depth (G13)",
+ "base": "aec9adf1ad8666a7e591e42a537069a93dc858cb",
+ "modules": [
+  "Solidity.Frontend.ConstantDepth.Rank",
+  "Solidity.Frontend.ConstantDepth.Lookup",
+  "Solidity.Frontend.ConstantDepth.Complete",
+  "Solidity.Frontend.ConstantDepth.Determinism",
+  "Solidity.Frontend.ConstantDepth.Correspondence",
+  "Solidity.Frontend.ConstantDepth.Controls"
+ ],
+ "new_modules": [
+  "Solidity.Frontend.ConstantDepth.Determinism",
+  "Solidity.Frontend.ConstantDepth.Correspondence",
+  "Solidity.Frontend.ConstantDepth.Controls"
+ ],
+ "module_map_fragment": "docs/module-map/frontend.d/constant-depth.md",
+ "axiom_pins": "tests/sol-constant-depth/Axioms.lean",
+ "pin_registration": "coordinator-applied (Q-PIN-1): run `node scripts/check-axiom-pins.mjs --write` after integration to record the pins of tests/sol-constant-depth/Axioms.lean",
+ "headline": [
+  "nconst_rank_complete",
+  "nconst_levels_complete",
+  "evalConst_complete",
+  "evalConst_resolved_complete",
+  "evalConst_iff",
+  "evalConst_none_iff",
+  "arrayLenB_complete",
+  "arrayLenB_iff",
+  "arrayLenB_none_iff",
+  "arrayLenB_resolved_complete",
+  "rank_lt",
+  "rank_le_decls",
+  "rank_resolved_dependency_lt",
+  "constDeps_declared_iff",
+  "teval_unique",
+  "arrayLen_unique",
+  "teval_det",
+  "nconst_det",
+  "arrayLen_det"
+ ],
+ "control_families": {
+  "chain at declaration count": [
+   "chain_decls",
+   "chain_rank",
+   "chain_value",
+   "chain_rank_tight",
+   "chain_teval"
+  ],
+  "shared diamond": [
+   "diamond_rank",
+   "diamond_value",
+   "diamond_teval"
+  ],
+  "scopes and shadowing": [
+   "scoped_values",
+   "scoped_member_hidden",
+   "scoped_no_teval",
+   "scoped_teval"
+  ],
+  "duplicates": [
+   "duplicate_clashes",
+   "duplicate_refused"
+  ],
+  "cycles and unused cycles": [
+   "cyclic_refused",
+   "cyclic_values",
+   "unused_cycle_value",
+   "unused_cycle_teval"
+  ],
+  "overflow and exact conversion": [
+   "overflow_values",
+   "overflow_no_teval",
+   "overflow_lengths",
+   "overflow_length_refused"
+  ],
+  "chain near declaration count": [
+   "near_rank",
+   "near_rank_tight",
+   "near_teval"
+  ],
+  "qualified member reference": [
+   "qualified_no_edge",
+   "qualified_refused"
+  ]
+ },
+ "read_only_inputs": {
+  "Solidity/Frontend/Static/Consts.lean": "0f3ebc86fa5e719025f70bb7cdcef4f8faf3cc76a81cd42d6a68a6580d6f046d",
+  "Solidity/Frontend/Static/Closure.lean": "abf0e5f72ebeecb6330f47ece944b3f2724d1a680c4332e5963ac1ec1aef3faa",
+  "Solidity/Source/ConstCheck.lean": "7e8a6b2d979339469bb1ff1c59ece613580dbe62ec1a943ca383fd0ff75c9962",
+  "Solidity/Source/Resolve.lean": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1",
+  "Solidity/Source/Decls.lean": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9",
+  "Solidity/Source/WellFormed.lean": "7b1ed96f14f9ff91c34bca8150cdd657e12eb520c05c7c2aa463bba86e69189a",
+  "Solidity/Source/Typing.lean": "5a24a12af1f615864fea5e1397cef3944b4a6baffcee306a96ad2ab954175241"
+ },
+ "forbidden": [
+  "sorry",
+  "admit",
+  "native_decide",
+  "maxHeartbeats",
+  "axiom ",
+  "unsafe"
+ ],
+ "inline_pins": "Solidity/Frontend/ConstantDepth/Controls.lean",
+ "rawint": {
+  "namespace": "Solidity.Backend.CalldataPackets.RawInt",
+  "dir": "Solidity/Backend/CalldataPackets/RawInt",
+  "axiom_pins": "tests/calldata-packets-1105/RawInt/Axioms.lean",
+  "inline_pins": "Solidity/Backend/CalldataPackets/RawInt/Controls.lean",
+  "modules": [
+   "Solidity.Backend.CalldataPackets.RawInt.Execution",
+   "Solidity.Backend.CalldataPackets.RawInt.Controls"
+  ],
+  "headline": [
+   "range_iff_accepted",
+   "accepted_sign_bits",
+   "accepted_value",
+   "decode_ok_iff",
+   "values_ok_iff",
+   "values_frame",
+   "guarded_frame_run",
+   "copy_run",
+   "copy_observations",
+   "eval_copy"
+  ]
+ }
+}

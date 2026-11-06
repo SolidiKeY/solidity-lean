@@ -46,3 +46,8 @@ collector regex error before writes. Each repair has separate records in
 H12 full-lane gates were not replayed for this interface-only checkpoint.
 Historical documentation/source/native failures and the original assignment
 remain open. No integration or source-correctness claim follows.
+
+Conditional normal-only nil/cons execution composition and nonvacuous no-op
+clients are now in [source-normal-composition.md](source-normal-composition.md).
+That later increment keeps per-statement producer facts explicit; it does not
+turn the value/local checks above into full Source/model agreement.
