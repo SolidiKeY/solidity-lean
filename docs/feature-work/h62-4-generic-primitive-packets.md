@@ -455,3 +455,44 @@ that is distinct from the 1.908-second isolated new-file check. The guarded gate
 completed in 250.375 seconds with sampled workload-group RSS 1336217600 bytes.
 Imported baseline linter warnings are retained in its log; the new bridge is
 warning-free. This is affected-file validation, not a full-core or full-C4 pass.
+
+## Checked-multiplication typed fixture correspondence
+
+MulFixtures and MulCorrespondence add a separate checked uint256 family without
+editing the original producer or controls. Three generic arithmetic lemmas are
+axiom-free. Nine bridge theorems connect every typed operand pair in the existing
+populated CheckedMul fixture to actual Source evaluation and public-selected
+structured-EVM execution. A shared overflow-bounds lemma converts the natural
+product range to the real Source integer range. Physical StateRepr is constructed;
+no desired compiled value, run or poststate is a premise. Successful target runs
+retain the entire machine beneath a result pushed over any saved stack tail.
+Source evaluation quantifies over either pipeline and fuel+3; fuel zero remains
+a distinct timeout. Source overflow preserves its full initial state and exact
+arithmetic panic bytes, while target overflow remains the existing coarse revert.
+
+The seven table rows match the original minimum, zero-left, zero-right, maximum,
+overflow, regular and double-overflow inputs. Both zero-operand guard branches
+are retained. Reject-all and accept-overflow controls have genuine distinguishing
+runs. The nine bridge reports use only existing standard axioms; the shared bounds
+lemma and public selection use propext/Quot.sound. No new axioms, statements,
+budgets, exclusions or original definition bodies were changed.
+
+The first bridge attempt passed without warnings: 1.707 seconds and sampled
+workload peak 741740 KiB. Its 154-module incremental import closure completed in
+234.825 seconds; no individual module exceeded 60 seconds. Validated imports are
+not a new full build or a comparable historical timing baseline. Independent
+read-only finder and skeptic found no semantic or table defect; neither used
+Lean/server/build. Official per-file outcomes are recorded separately below.
+
+This remains one populated fixture family, not arbitrary Source/world maps,
+full session or fetched-EVM/gas adequacy, complete migration of the 476 controls,
+a pinned 4.35 result, or an H68 full PassCorrect bridge. Original-fidelity gates,
+upstream file/statement drift, global failures and timing STOPs remain open.
+H109 moving slow examples does not establish an original-baseline pass.
+
+The official per-file checks pass both new modules. The bridge invocation takes
+260 seconds including Lake import-trace rebuilding; the guarded two-file gate
+completes in 260.777 seconds with sampled workload-group RSS 1627312128 bytes.
+This is affected-file validation, not a full checkpoint or original-baseline
+performance pass. Imported baseline warnings remain in the log; the new bridge
+has no warnings. No individual import exceeds 60 seconds.
