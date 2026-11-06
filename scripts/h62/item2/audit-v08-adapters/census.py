@@ -14,13 +14,59 @@ from pathlib import Path
 BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 MAP = "docs/module-map/v08-adapters.md"
 
-# Q-WORLD-AUDIT-DRIFT-CURSOR: exact one-file reviewed VY5 baseline.
-# d83228dae5e6d141cd1ff454c75d544fc7f7cb60 adds the empty execution cursor;
-# e8247d9277190b71488387dac594e82b2b191942 is the approved integration snapshot.
-BASELINE_OVERRIDES = {
-    "Solidity/Backend/CalldataPackets/RawAddress/Controls.lean":
-        "e8247d9277190b71488387dac594e82b2b191942",
+# Q-WORLD-AUDIT-RAWINT (#54): fixed, whole-file reviewed correspondences.
+# Kinds: 1=mapFree argument/binder; 2=change-step && _; 3=lit_ok _ _;
+# 4=empty cursor field. Files with any other hunk are NOT included.
+# All rows cite the reviewed VY5 integration; kind 4 also cites its origin.
+VY5_INTEGRATION = "e8247d9277190b71488387dac594e82b2b191942"
+CURSOR_ORIGIN = "d83228dae5e6d141cd1ff454c75d544fc7f7cb60"
+BASELINE_CORRESPONDENCE = {
+    'Solidity/Backend/CalldataPackets/RawAddress/Controls.lean': (4,),
+    'Solidity/Backend/CalldataPackets/RawInt/Execution.lean': (2,),
+    'Solidity/Backend/CalldataPackets/RawUintN/Execution.lean': (1, 2),
+    'Solidity/Backend/Executable/ConstructorArgumentObservations.lean': (1,),
+    'Solidity/Backend/Executable/ConstructorLocalArguments.lean': (1,),
+    'Solidity/Backend/PrimitivePackets/Comparisons/Controls.lean': (4,),
+    'Solidity/Frontend/Admission/ModifierRoots.lean': (1,),
+    'Solidity/Frontend/Admission/TypedExpressionPolicy.lean': (1,),
+    'Solidity/Frontend/Admission/TypedObservationPolicy.lean': (1,),
+    'Solidity/Lowering/V08/CallableMetadata.lean': (1,),
+    'Solidity/Lowering/V08/LiteralFailureConvertedFields.lean': (1,),
+    'Solidity/Lowering/V08/LiteralFailureCopySequence.lean': (1,),
+    'Solidity/Lowering/V08/LiteralFailureMixedCustomError.lean': (1,),
+    'Solidity/Lowering/V08/MetadataControls.lean': (1,),
+    'Solidity/Lowering/V08/SourceCustomErrorFailures.lean': (1,),
+    'Solidity/Source/Preservation/AllocatingFragment.lean': (1,),
+    'Solidity/Source/Preservation/AllocationBodyControls.lean': (1,),
+    'Solidity/Source/Preservation/EncodingVariants.lean': (1,),
+    'Solidity/Source/Preservation/MemoryBodies.lean': (1,),
+    'Solidity/Source/Preservation/MemoryExpressions.lean': (1,),
+    'Solidity/Source/Preservation/ReferenceArguments.lean': (1,),
+    'Solidity/Source/Preservation/ValueConversions.lean': (1,),
+    'Solidity/Source/Progress/AllocationReturns.lean': (1,),
+    'Solidity/Source/Progress/ArithmeticBuiltins.lean': (1,),
+    'Solidity/Source/Progress/BoundParents.lean': (1,),
+    'Solidity/Source/Progress/BuiltinAdmission.lean': (1,),
+    'Solidity/Source/Progress/BuiltinStatements.lean': (1,),
+    'Solidity/Source/Progress/EffectBodies.lean': (1,),
+    'Solidity/Source/Progress/ForwardingChain.lean': (1,),
+    'Solidity/Source/Progress/ForwardingControls.lean': (1,),
+    'Solidity/Source/Progress/ForwardingReturns.lean': (1,),
+    'Solidity/Source/Progress/ParentArguments.lean': (1,),
+    'Solidity/Source/Progress/ReadyArguments.lean': (1,),
+    'Solidity/Source/Progress/ReadyBodies.lean': (1,),
+    'Solidity/Source/Progress/ReadyExpressions.lean': (1,),
+    'Solidity/Source/Progress/ReadyProgram.lean': (1,),
+    'Solidity/Source/Progress/ReadyProgramControls.lean': (1,),
+    'Solidity/Source/Progress/ReadyReturns.lean': (1,),
+    'Solidity/Source/Progress/RecoveryBuiltin.lean': (1,),
 }
+BASELINE_OVERRIDES = {path: VY5_INTEGRATION for path in BASELINE_CORRESPONDENCE}
+
+def correspondence_notes():
+    return {path: dict(kinds=kinds, citations=[VY5_INTEGRATION] +
+        ([CURSOR_ORIGIN] if 4 in kinds else []))
+        for path, kinds in BASELINE_CORRESPONDENCE.items()}
 
 def frozen_blobs(repo):
     tracked = subprocess.check_output(["git", "ls-tree", "-rz", BASE], cwd=repo)
@@ -189,7 +235,7 @@ def main():
         modules.append(dict(file=path, sha256=sha(data), theorem_candidates=len(rows)))
     ids = [r["id"] for r in declarations]
     if len(ids) != len(set(ids)): raise SystemExit("Duplicate declaration identifiers")
-    summary = dict(base=BASE, baseline_overrides=BASELINE_OVERRIDES, map=MAP, map_sha256=sha((repo/MAP).read_bytes()),
+    summary = dict(base=BASE, baseline_overrides=BASELINE_OVERRIDES, baseline_correspondence=correspondence_notes(), map=MAP, map_sha256=sha((repo/MAP).read_bytes()),
         references=len(references), unique_files=len(files), theorem_candidates=len(declarations),
         unresolved_references=[r for r in references if not r["resolved"]],
         unterminated_signatures=[r["id"] for r in declarations if r["signature_source"] is None],

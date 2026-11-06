@@ -45,7 +45,7 @@ class Guards(unittest.TestCase):
   with self.assertRaises(ValueError):m.require(False,'metadata rejection')
 
 class FrozenBaseline(unittest.TestCase):
- def test_exact_one_reviewed_override(self):
+ def test_reviewed_override_set_is_closed(self):
   spec=importlib.util.spec_from_file_location('audit_census',SCRIPTS/'census.py')
   c=importlib.util.module_from_spec(spec);spec.loader.exec_module(c)
   frozen=c.frozen_blobs(ROOT)
@@ -54,9 +54,12 @@ class FrozenBaseline(unittest.TestCase):
    if record:
     metadata,path=record.split(b'\t',1);baseline[path.decode()]=metadata.split()[2].decode()
   path='Solidity/Backend/CalldataPackets/RawAddress/Controls.lean'
-  self.assertEqual(set(c.BASELINE_OVERRIDES),{path})
-  self.assertEqual({p for p in set(frozen)|set(baseline) if frozen.get(p)!=baseline.get(p)},{path})
+  self.assertEqual(len(c.BASELINE_OVERRIDES),39)
+  self.assertEqual(hashlib.sha256('\n'.join(sorted(c.BASELINE_OVERRIDES)).encode()).hexdigest(),'5cf38703bcd9a1ce7b3d716503f750a2406e410dbe560a1a08bf2a8515718e12')
+  self.assertEqual({p for p in set(frozen)|set(baseline) if frozen.get(p)!=baseline.get(p)},set(c.BASELINE_OVERRIDES))
   c.verify_frozen(ROOT,frozen,path)
+  with self.assertRaises(SystemExit):
+   c.verify_frozen(ROOT,frozen,'Solidity/Lowering/V08/EnvironmentProjection.lean')
   with tempfile.TemporaryDirectory() as tmp:
    root=pathlib.Path(tmp);target=root/path;target.parent.mkdir(parents=True)
    target.write_bytes((ROOT/path).read_bytes()+b'\n-- unreviewed drift\n')
