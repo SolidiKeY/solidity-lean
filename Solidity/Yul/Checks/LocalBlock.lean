@@ -906,4 +906,8 @@ theorem recursiveNegationContrast : Solidity.Yul.RawFrame.Logic.holds .box Solid
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.recursiveNegationContrast
 
+/-- info: 'Solidity.Yul.RawFrame.Logic.holds_mono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.holds_mono
+
 end Solidity.Yul.Checks.LocalBlock
