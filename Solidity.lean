@@ -3816,6 +3816,8 @@ import Solidity.Source.Agreement.NormalDefaults
 import Solidity.Source.Agreement.NormalStatement
 import Solidity.Source.Agreement.NormalStep
 import Solidity.Source.Agreement.Primitive
+import Solidity.Source.Agreement.PrimitiveSlot
+import Solidity.Source.Agreement.PrimitiveSlotControls
 import Solidity.Source.Agreement.PrimitiveTypes
 import Solidity.Source.Calldata
 import Solidity.Source.CalldataExamples

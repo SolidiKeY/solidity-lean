@@ -31,3 +31,5 @@
 | `Source/Agreement/BoolSlotRepeatedControls.lean` | Both-run importing client, insufficient-horizon refusal and different-slot countercontrol. |
 | `Source/Agreement/BoolSlotSaved.lean` | Fixed-code saved old copy followed by computed inverse update of the shifted original slot, through actual Source/model runs. |
 | `Source/Agreement/BoolSlotSavedControls.lean` | Internally instantiated saved-copy client, horizon and polarity/liveness controls. |
+| `Source/Agreement/PrimitiveSlot.lean` | Actual arbitrary-slot primitive read/write transport and normal initialization agreement, retaining signed/unsigned range evidence. |
+| `Source/Agreement/PrimitiveSlotControls.lean` | Internally instantiated copy client, actual integer runs, insufficient horizon and wrong-value refusal. |
