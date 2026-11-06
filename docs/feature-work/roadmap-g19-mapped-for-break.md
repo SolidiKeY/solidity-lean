@@ -1,4 +1,6 @@
-# G19 mapped for-loop initializer and break
+# G19 context-related for-loop initializer and break
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 This component extends V07 ContextMap/operand execution for one actual Source shape: Boolean caller-local assignment initializer, omitted condition, immediate break body, and arbitrary typed optional post expression. The initializer executes once and its write is retained; break skips post. No new lowering relation, evaluator, carrier or admission predicate is introduced.
 
