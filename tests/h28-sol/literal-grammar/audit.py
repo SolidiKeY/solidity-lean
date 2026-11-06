@@ -8,12 +8,12 @@ parser.add_argument('axiom_log', type=pathlib.Path)
 parser.add_argument('--evidence-dir', type=pathlib.Path,
                     help='H44 external evidence directory (no files are copied into git)')
 parser.add_argument('--published-integration', action='store_true',
-                    help='audit the explicitly adopted 5f1459653 integration baseline')
+                    help='audit the explicitly adopted e8247d927 integration baseline')
 args = parser.parse_args()
 root = pathlib.Path(__file__).resolve().parents[3]
 evidence_dir = args.evidence_dir or root/'tests/h28-sol/literal-grammar/evidence'
 # This is a fixed human-published adoption, never a mutable origin/master exemption.
-integration = '5f14596531efea2be64f1a5e7a83afa5e151e865' if args.published_integration else None
+integration = 'e8247d9277190b71488387dac594e82b2b191942' if args.published_integration else None
 if integration:
     subprocess.run(['git', 'merge-base', '--is-ancestor', integration, 'HEAD'], cwd=root, check=True)
 pins = json.loads((pathlib.Path(__file__).with_name('pins.json')).read_text())
