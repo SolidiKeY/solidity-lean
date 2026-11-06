@@ -62,3 +62,11 @@ statement, proof, interface, budget or allowed axiom set changed. Fragment,
 root, orphan and layer checks pass. Documentation paths still report one
 unrelated missing external Mathlib citation; this is not a full-gate pass or
 fresh kernel validation of the inventory.
+
+The documentation-path failure was subsequently resolved without changing the
+cited document or checker: an independent source-only Mathlib checkout was
+restored under the ignored Bridge dependency directory at the exact manifest
+revision f897ebcf72cd16f89ab4577d0c826cd14afaafc7. The repeated documentation
+gate passes; the earlier failure and revision/checksum evidence are retained.
+This dependency preparation copies no compiled artifacts and implies no
+kernel, Bridge or full-runtime gate pass.
