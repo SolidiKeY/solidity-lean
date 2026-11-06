@@ -62,7 +62,7 @@ def main():
    result[exe+"_version"]=cmd(["exec",cid,"/toolchain/bin/"+exe,"--version"],text=True).strip();print(result[exe+"_version"],flush=True)
   build_start=time.monotonic()
   for i,m in enumerate(graph["build_order"]):
-   rel=m.replace(".","/");argv=["exec",cid,"/toolchain/bin/lean","-j1","--tstack=131072","-M=10240","-o","/out/artifacts/"+rel+".olean","-i","/out/artifacts/"+rel+".ilean","/src/"+rel+".lean"]
+   rel=m.replace(".","/");argv=["exec",cid,"/toolchain/bin/lean","-j1","--tstack=131072","-M10240","-o","/out/artifacts/"+rel+".olean","-i","/out/artifacts/"+rel+".ilean","/src/"+rel+".lean"]
    t=time.monotonic();peak=0;rss_peak=0;minimum=available();stop=None
    with (x.output/"logs"/(m+".log")).open("wb") as f:
     proc=subprocess.Popen(D+argv,env=ENV,stdout=f,stderr=subprocess.STDOUT)
