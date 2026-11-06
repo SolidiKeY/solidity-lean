@@ -272,6 +272,14 @@ def proof_classify(items, regions, affected, oracle_body, kind):
                 cascade.append(x)
             else:
                 other.append(dict(x, constructor=name))
+    # A failing hand lemma leaves an error-recovery `sorry` that its link then
+    # reports: a cascade of that constructor's attributed failure, nothing more.
+    failed = {x.get("constructor") for x in primary}
+    still = []
+    for x in other:
+        m = re.match(r"H28 TRUST: Solidity\.((?:Taclet|LeanTaclet)\.\w+)\.(?:toStep|h28link) depends on sorryAx", x["message"])
+        (cascade if m and m[1] in failed else still).append(x)
+    other = still
     if primary and not other:
         return {"outcome": "detected", "errors": len(errors),
                 "attributed": sorted({x.get("constructor", "") for x in primary}),
@@ -344,9 +352,12 @@ def source_link_rejection(items, regions, oracle_text, constructor=None):
     if len(idx) != 1:
         return {"ok": False, "reason": "no unique source_link"}
     link = regions["oracle"][0] + idx[0]
+    # the theorem's span: its header line and the indented lines of its proof
+    stop = next((j for j in range(idx[0] + 1, len(lines)) if not lines[j].startswith(" ")), len(lines))
+    span = range(link, regions["oracle"][0] + stop)
     errors = [x for x in items if x["severity"] == "error"]
     first = errors[0] if errors else None
-    if not first or first["line"] != link or "Taclet" not in first["message"] or \
+    if not first or first["line"] not in span or "Taclet" not in first["message"] or \
             not re.search(r"mismatch", first["message"], re.I):
         return {"ok": False, "reason": "rejection not attributed to source_link",
                 "errors": [{"line": x["line"], "message": x["message"][:300]} for x in errors[:5]], "link_line": link}
@@ -438,15 +449,37 @@ def run(args):
     free = list(bridges)
     lock = threading.Lock()
 
+    def reused(key, ttext, otext, target):
+        """A prior record of the identical scratch file: its Lean diagnostics
+        are reused and re-classified by this code."""
+        if not args.reuse:
+            return None
+        p = Path(args.reuse) / "checks" / (key + ".json")
+        if not p.exists():
+            return None
+        old = json.loads(p.read_text())
+        text, regions = assemble(target, ttext, otext)
+        if old.get("scratch_sha256") != sha(text) or old.get("status") != "complete" or "diagnostics" not in old:
+            return None
+        record = {k: old[k] for k in ("command", "bridge", "exit", "elapsed_s", "stderr", "status")}
+        record.update(name=key, scratch_sha256=old["scratch_sha256"], regions=regions,
+                      reused_from={"head": old.get("head"), "manifest_sha256": old.get("manifest_sha256"),
+                                   "record_sha256": sha(p.read_bytes())})
+        return record, old["diagnostics"]
+
     def work(job):
         key, target, ttext, otext, (phase, entry) = job
-        with lock:
-            bridge = free.pop()
-        try:
-            record, items = check(repo, scratch, bridge, key, target, ttext, otext)
-        finally:
+        prior = reused(key, ttext, otext, target)
+        if prior:
+            record, items = prior
+        else:
             with lock:
-                free.append(bridge)
+                bridge = free.pop()
+            try:
+                record, items = check(repo, scratch, bridge, key, target, ttext, otext)
+            finally:
+                with lock:
+                    free.append(bridge)
         record["phase"], record["entry"] = phase, entry["id"]
         record["manifest_sha256"], record["head"] = manifest_sha, head
         if "old" in entry:
@@ -505,7 +538,10 @@ def run(args):
         for b in bridges:
             b.stop()
     summary = summarize(manifest, out)
-    summary.update(manifest=str(rel), manifest_sha256=manifest_sha,
+    summary.update(reuse=args.reuse and str(Path(args.reuse).name),
+                   reused_checks=len([p for p in (out / "checks").glob("*.json")
+                                      if "reused_from" in json.loads(p.read_text())]),
+                   manifest=str(rel), manifest_sha256=manifest_sha,
                    head=head, dirty_development_run=bool(dirty))
     (out / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     print(json.dumps({k: v for k, v in summary.items() if k not in ("mutants", "semantic")}, indent=1))
@@ -610,6 +646,7 @@ if __name__ == "__main__":
     r.add_argument("--jobs", type=int, default=2)
     r.add_argument("--only", nargs="*")
     r.add_argument("--resume", action="store_true")
+    r.add_argument("--reuse", help="earlier run directory: reuse diagnostics of byte-identical scratch files")
     r.add_argument("--bridge-base", type=int, default=0, help="first daemon index (concurrent runs)")
     r.add_argument("--allow-dirty", action="store_true", help="development only; never for recorded runs")
     s = sub.add_parser("summarize")

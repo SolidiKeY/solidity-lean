@@ -15,7 +15,7 @@ def mutated : Premise C [] [] :=
   .split .block (.isBool (.lit true) false) (.isBool (.lit true) false) .nil (.cons .revert .nil)
 
 /-- This instance links the witness to the actual mutated production rule. -/
-theorem source_link : Taclet C 0 .diamond statement mutated := .ifElseSplit
+theorem source_link : Taclet C 0 .diamond statement mutated := .ifElseSplit (hj := rfl)
 
 /-- A concrete inhabited input, not an assumed or empty relation. -/
 theorem input_inhabited : Nonempty (State C []) := ⟨σ⟩

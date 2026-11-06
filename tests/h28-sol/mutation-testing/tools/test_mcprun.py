@@ -102,6 +102,12 @@ class Proof(unittest.TestCase):
         self.assertEqual(self.classify([item(104, "H28 TRUST: Solidity.Taclet.requireSimple.toStep depends on sorryAx")]),
                          "error")
 
+    def test_trust_cascade_only_after_attributed_failure(self):
+        hand_err = item(102, "unsolved goals")
+        trust = item(104, "H28 TRUST: Solidity.Taclet.ifElseSplit.h28link depends on sorryAx")
+        self.assertEqual(self.classify([hand_err, trust], ["Taclet.ifElseSplit"]), "detected")
+        self.assertEqual(self.classify([trust], ["Taclet.ifElseSplit"]), "error")
+
     def test_helper_wildcard(self):
         self.assertEqual(self.classify([
             item(104, "no proof that `Solidity.Taclet.localOpAssign` is `Stmt.step`'s rule")], ["*"]), "detected")
@@ -158,6 +164,9 @@ class Semantic(unittest.TestCase):
         link = REG["oracle"][0] + 1  # the source_link line of the stripped body
         ok = mcprun.source_link_rejection([item(link, "Type mismatch\n  Taclet.requireSimple")], REG, ORACLE)
         self.assertTrue(ok["ok"])
+        multi = ORACLE.replace("theorem source_link : True := trivial", "theorem source_link : True :=\n  trivial")
+        self.assertTrue(mcprun.source_link_rejection([item(link + 1, "Type mismatch\n  Taclet.c")], REG, multi)["ok"])
+        self.assertFalse(mcprun.source_link_rejection([item(link + 2, "Type mismatch\n  Taclet.c")], REG, multi)["ok"])
         self.assertFalse(mcprun.source_link_rejection([item(link, "Type mismatch\n  Taclet.revertBox")], REG, ORACLE,
                                                       "Taclet.requireSimple")["ok"])
         for bad in ([item(link + 1, "Type mismatch Taclet.x")], [item(link, "unknown identifier")], [],
