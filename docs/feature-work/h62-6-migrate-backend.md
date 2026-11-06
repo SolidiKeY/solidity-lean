@@ -364,3 +364,33 @@ The supplied summary is not treated as the full verified payload. The existing
 committed Linking proposal remains unapplied and Lean-unverified; owner
 coordination and complete validation remain pending. All four assignment
 checkpoints remain unfinished; no RUNTIME_GATE_PASS or timing verdict.
+
+## H82 retirement preservation checkpoint
+
+Human-approved stop-and-handoff names successor
+solidity-h62-6-20261106/migrate-root-gate. No new proof implementation,
+source repair or Lean job is authorized in this retirement checkpoint.
+All previously owned source drafts are committed explicitly unverified;
+generated copies and bulk evidence stay off Git in the authenticated export.
+The exact launcher original assignment, historical thread transcription,1919-file scope,
+original work/backfill queue, full unfinished accounting and pause capability
+record are committed under tests/h62/item6/migrate-backend/retirement/.
+Exact ORIGINAL-PROMPT.txt now matches launcher455fea after coordinator delivery;
+the earlier complete transcription remains separate historical evidence.
+Finder/skeptic corrected the G53 owner-map transcription; no other queue or
+scope omission was found. No original Solidity or root toolchain edit.
+
+The delivered Roadmap18260-byte receipt now verifies its advertised
+ced72d8eb459cd162ef9323cb38419eebcc321019bb46c0d127962e8012b08d9
+SHA256 and was read in full. It adds no accepted Backend migration or witness
+result. H82 withdraws old proof-only Q-LINKING-OWNER; retirement, not missing
+proof-only owner agreement, prevents new application here. Definition/body,
+interface, statement, budget, axiom and exclusion constraints remain.
+
+Coordinator explicitly confirms the later generic Continue does not revoke
+retirement. No retired implementation is resumed. Existing baseline/observer
+processes are preserved for successor disposition; no restart or new Lean job.
+The goal API has no PAUSED transition: only complete|blocked. Actual goal pause
+could not be set, and no completion/reset/replacement is attempted. Worker
+implementation stops after the final schema-v1 handoff acknowledgement.
+No H71 push permission is available; no push occurs.
