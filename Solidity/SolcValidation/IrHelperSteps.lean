@@ -287,6 +287,111 @@ theorem checked_mul_sim (k : Nat) (x y : Word) (s : σ) :
     · simp only [run_ok_map, Vals.drop_cons, Vals.drop_nil, toFn_single]
       rfl
 
+
+/-! ## Expressions without calls, at any sufficient fuel -/
+
+theorem var_gen {F : List FnSig} (E : FunEnv F) {L : List String} {n : String} (m : Mem L n)
+    (vs : Vals L) (s : σ) (j : Nat) :
+    evalExpr M ctx (j + 1) E (.var n m) vs s = .ok (s, fun _ => vs.get m) := rfl
+
+theorem lit_gen {F : List FnSig} (E : FunEnv F) {L : List String} (l : Lit) (vs : Vals L) (s : σ) (j : Nat) :
+    evalExpr M ctx (j + 1) E (.lit l) vs s = .ok (s, fun _ => l.value) := rfl
+
+theorem consFn_one (w : Word) : consFn w Fin.elim0 = fun _ => w := by
+  funext i
+  match i with
+  | ⟨0, _⟩ => rfl
+
+theorem op1_gen {F : List FnSig} (E : FunEnv F) (p : Solidity.Yul.Pure 1) {L : List String}
+    (e : Expr F L 1) (vs : Vals L) (s : σ) (v : Word) (d : Nat)
+    (h : ∀ j, evalExpr M ctx (j + d) E e vs s = .ok (s, fun _ => v)) (j : Nat) :
+    evalExpr M ctx (j + d + 3) E (.op (.evm (.pure p)) (.cons e .nil)) vs s =
+      .ok (s, fun _ => Solidity.Yul.Pure.eval p (fun _ => v)) := by
+  have h1 : evalExpr M ctx (j + d + 1) E e vs s = .ok (s, fun _ => v) := by
+    have := h (j + 1); rw [Nat.add_right_comm] at this; exact this
+  simp only [evalExpr.eq_4, evalArgs.eq_3, evalArgs.eq_2, evalOp, h1, run_ok_bind, run_pure, consFn_one]
+
+theorem op2_gen {F : List FnSig} (E : FunEnv F) (p : Solidity.Yul.Pure 2) {L : List String}
+    (e1 e2 : Expr F L 1) (vs : Vals L) (s : σ) (v1 v2 : Word) (d : Nat)
+    (h1 : ∀ j, evalExpr M ctx (j + d) E e1 vs s = .ok (s, fun _ => v1))
+    (h2 : ∀ j, evalExpr M ctx (j + d) E e2 vs s = .ok (s, fun _ => v2)) (j : Nat) :
+    evalExpr M ctx (j + d + 4) E (.op (.evm (.pure p)) (.cons e1 (.cons e2 .nil))) vs s =
+      .ok (s, fun _ => Solidity.Yul.Pure.eval p (word2 v1 v2)) := by
+  have g2 : evalExpr M ctx (j + d + 1) E e2 vs s = .ok (s, fun _ => v2) := by
+    have := h2 (j + 1); rw [Nat.add_right_comm] at this; exact this
+  have g1 : evalExpr M ctx (j + d + 2) E e1 vs s = .ok (s, fun _ => v1) := by
+    have := h1 (j + 2); rw [Nat.add_right_comm] at this; exact this
+  simp only [evalExpr.eq_4, evalArgs.eq_3, evalArgs.eq_2, evalOp, g1, g2, run_ok_bind, run_pure, consFn_two]
+
+/-! ## A panic that may return -/
+
+/-- solc's panic sequence when `b` holds; nothing otherwise. On a machine
+whose `revert` halts the sequence never returns; on others execution goes on. -/
+def panicIf {σ : Type} (M : Machine σ) (b : Bool) (code : Word) (s : σ) : Run σ σ :=
+  if b then panicRun M code s else .ok s
+
+/-- `if cond { panic() }` as a `panicIf`. -/
+theorem if_panic_as (v : Word) (code : Word) {L : List String} (vs : Vals L) (s : σ) :
+    (if v = 0 then (.ok (s, vs, .normal) : Run σ (σ × Vals L × Flow))
+      else (fun s => (s, vs, .normal)) <$> panicRun M code s) =
+      (fun s => (s, vs, .normal)) <$> panicIf M (v != 0) code s := by
+  by_cases z : v = 0
+  · simp only [z, ↓reduceIte, panicIf, bne_self_eq_false, Bool.false_eq_true, run_ok_map]
+  · have nz : (v != 0) = true := bne_iff_ne.mpr z
+    simp only [z, ↓reduceIte, panicIf, nz]
+
+/-- A statement whose result is a mapped machine run passes its values on after it. -/
+theorem items_stmt_map (k : Nat) {F : List FnSig} {c : Ctl} {L : List String} {g : Nat} (E : FunEnv F)
+    (st : Stmt F c L) (rest : Items F c L g) (vs vs' : Vals L) (s : σ) (R : Run σ σ)
+    (h : evalStmt M ctx k E st vs s = (fun s => (s, vs', .normal)) <$> R) :
+    evalItems M ctx (k + 1) E (.stmt st rest) vs s = R >>= fun s' => evalItems M ctx k E rest vs' s' := by
+  simp only [evalItems, h]
+  rcases R with e | s'
+  · simp only [run_error_map, run_error_bind]
+  · simp only [run_ok_map, run_ok_bind, ↓reduceIte]
+
+theorem truth_bne (b : Bool) : (Solidity.Yul.truth b != 0) = b := by
+  cases b <;> rfl
+
+theorem lit_min : (57896044618658097711785492504343953926634992332820282019728792003956564819968 : Word).val = 2 ^ 255 := rfl
+
+/-- `sub(0, 1)` is the all-ones word. -/
+theorem sub_zero_one : (Solidity.Yul.Pure.eval .«sub» (word2 0 1)).val = 2 ^ 256 - 1 := by
+  rw [pure_sub_val]
+  have v0 : (0 : Word).val = 0 := rfl
+  have v1 : (1 : Word).val = 1 := rfl
+  rw [v0, v1, Nat.zero_add, Nat.mod_eq_of_lt (Nat.sub_lt (Nat.two_pow_pos 256) Nat.one_pos)]
+
+/-- `checked_div_t_int256`'s body, from its entry values (parameters `x y`, return `r = 0`):
+`Panic(0x12)` for a zero divisor, then `Panic(0x11)` for `min / -1`, then `sdiv`. -/
+theorem checked_div_body (k : Nat) (x y : Word) (s : σ) :
+    evalBlock M ctx (k + 60) helperEnv bodyDiv (.cons x (.cons y (.cons 0 .nil))) s =
+      panicIf M (y.val == 0) 0x12 s >>= fun s =>
+        panicIf M (x.val == 2 ^ 255 && y.val == 2 ^ 256 - 1) 0x11 s >>= fun s =>
+          .ok (s, .cons x (.cons y (.cons (Solidity.Yul.Pure.eval .«sdiv» (word2 x y)) .nil)), .normal) := by
+  simp only [bodyDiv, evalBlock]
+  rw [items_stmt_normal M ctx _ _ _ _ _ _ _ _ (assign_cleanupI M ctx _ _ _ rfl _ _ _ _),
+    items_stmt_normal M ctx _ _ _ _ _ _ _ _ (assign_cleanupI M ctx _ _ _ rfl _ _ _ _)]
+  simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there]
+  rw [items_stmt_map M ctx (k + 56) _ _ _ _ _ _ _
+    ((if_panic12 M ctx (k + 39) _ _ _ _ _ _ _
+      (op1_gen M ctx _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (k + 51))).trans (if_panic_as M _ _ _ _))]
+  · rw [pure_iszero, truth_bne]
+    refine congrArg (bind (panicIf M (y.val == 0) 18 s)) (funext fun s' => ?_)
+    rw [items_stmt_map M ctx (k + 55) _ _ _ _ _ _ _
+      ((if_panic11 M ctx (k + 38) _ _ _ _ _ _ _
+        (op2_gen M ctx _ _ _ _ _ _ _ _ 9
+          (fun j => op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (lit_gen M ctx _ _ _ _) (j + 4))
+          (op2_gen M ctx _ _ _ _ _ _ _ _ 5 (fun j => var_gen M ctx _ _ _ _ (j + 4))
+            (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (lit_gen M ctx _ _ _ _) (lit_gen M ctx _ _ _ _))) (k + 41))).trans
+        (if_panic_as M _ _ _ _))]
+    · simp only [pure_and, pure_eq, word2_zero, word2_one, truth_and, sub_zero_one, lit_min, truth_bne]
+      refine congrArg (bind (panicIf M _ 17 s')) (funext fun s'' => ?_)
+      rw [items_last M ctx (k + 53), assign_pure2 M ctx (k + 49)]
+      simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there]
+    · rfl
+  · rfl
+
 end
 
 end Solidity.SolcValidation.IrSyntax
