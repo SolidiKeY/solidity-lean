@@ -65,3 +65,22 @@ The scripts derive the checkout root, use a fresh v4.35 artifact tree and preser
 ## H82 retirement update
 
 Human-authorized stop-and-handoff to `solidity-inline-assembly5-20261031/vy3-compilation`. No new proof implementation. Original assignment, queues, exact scope and retirement record are committed in `tests/h62/item4/generic-passes/handoff/` with their own SHA256SUMS. The original thread was transcribed; ownership JSON formatting is normalized, and the rendered-prompt SHA is provenance only. H82 withdraws earlier exact-file requests for statement-preserving proof-only work; statement/dependent-definition/interface/budget/axiom/exclusion changes still need the owner. Earlier blocker sections above describe the historical checkpoint, not permission requirements after H82. All unvalidated proof, final-gate and timing obligations pass to the successor. No H71 push permission is available, so nothing is pushed. No tool exposes PAUSED: only stop_goal(complete|blocked) is available; no completion/block substitution or replacement goal is created.
+
+## Scalar-passes successor adoption
+
+The successor merged exactly the acknowledged stopped head
+`98646221b6998afe688e105111a87c5d4af3111e` after verifying the committed
+original-assignment, queue and scope hashes against the coordinator receipt.
+The later remote merge was not included. The assignment is a thread
+transcription; no launcher byte-hash equivalence is asserted. External prior
+evidence and runtime results have not been independently verified here.
+
+Fresh source-only acceptance passed the lexer regressions, three exact
+execution source signatures and 36 control aliases. Reproducing the frozen
+census yielded the original manifest SHA256
+`9f5ba355c076e5328e8542a9d478b442a7dc4e6505c5c122b83750fa128c5c94`:
+313 files, 83 Controls modules, 3519 declarations and 1946 control declarations.
+The census check also confirmed every inventoried original source unchanged.
+These are lexical checks, not elaborated type, axiom, witness or generic-proof
+validation. Raw migration, additive Lean checks, affected/final gates and
+paired proof timings remain open; the failed baseline was not rerun unchanged.
