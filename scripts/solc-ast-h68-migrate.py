@@ -11,6 +11,7 @@ fixture's own recorded compiler (by sha256) and solkey commit, and classifies:
   exact      the regenerated AST equals the committed one after removing only
              the H68 fields (non-UDVT typeIdentifier, tryCall); header equal
   drift      other differences too (listed by key); not migrated by --apply
+             unless every drift key is named by --allow-drift
   no-source  the recorded source path is absent from this checkout
   failed     the producer refused (message kept)
 
@@ -83,6 +84,9 @@ def main():
     ap.add_argument("--work", required=True)
     ap.add_argument("--receipt")
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--allow-drift", action="append", default=[],
+                    help="also apply drift rows whose only added/removed keys are these "
+                         "(a decided scope extension, e.g. functionSelector under H102)")
     a = ap.parse_args()
     a.compiler, a.solkey_root, a.work = map(os.path.abspath, (a.compiler, a.solkey_root, a.work))
     if a.receipt:
@@ -136,6 +140,8 @@ def main():
         else:
             row["status"] = "drift"
             row["driftKeys"] = {**dict(extra), **({} if same_header else {"<header>": 1})}
+            if a.allow_drift and set(row["driftKeys"]) <= set(a.allow_drift):
+                row["applyApproved"] = sorted(row["driftKeys"])
     tracked = subprocess.check_output(["git", "ls-files", "-z"], text=True).split("\0")
     texts = {}
     for p in tracked:
@@ -153,7 +159,7 @@ def main():
         row["otherReferences"] = [p for p in mentions if not p.endswith(".lean")]
     if a.apply:
         for row in rows:
-            if row["status"] != "exact":
+            if row["status"] != "exact" and "applyApproved" not in row:
                 continue
             old = fnv1a64(open(row["fixture"], "rb").read())
             new_path = os.path.join(a.work, os.path.basename(row["fixture"]))
