@@ -407,3 +407,39 @@ previous timing pair remains valid only for its documented generated-build-cache
 conditioning; this artifact advice is separate full-gate memory housekeeping.
 The unchanged full gate will resume using retained completed artifacts and the
 same16hard/12RSS/4reserve/noSwap/onejob policy. Both failed attempts are retained.
+
+## Second authorized master update and portable evidence
+
+The coordinator reported ac9d8db2a merged our reviewed head and requested another
+fetch/continue, with a minor on VM-only artifact pins. At the next safe resource
+checkpoint, origin/master was706e36825929d6d0084dc08b88de9349abcd25aa; originalbase,
+ac9d and8354a254 ancestry verified, clean assignedbranch fast-forwarded. New
+upstream changes affect445 validation inputs, but all24 frozen ABI files/map
+remain byte-identical. No own Lean statement/proof/budget change was made.
+
+Old d96 receipts and failed full attempts are preserved separately. New input
+pinning covers7713 Lean files at706. All9 local modules+KeySort pass fresh full
+MCP checks; acceptance177/439/7/10, three adversarial/valid controls pass. New
+matched medians1.581863012→1.548157993s (−2.130717%, within10%) under identical
+recorded generated+artifact-cache conditioning. This replaces neither earlier
+comparison nor the outstanding full gate.
+
+Original frozen evidence.sha256 stays unchanged as Git-pinned legacy authority.
+New resume-evidence.sha256 and portable-evidence.sha256 use paths relative to the
+unpacked evidence root. portable-evidence-index.json commits the actual archive
+SHA and verification command. H44 bulk remains in the supplied archive off Git.
+portable_evidence.py pack deterministically creates the archive+relative manifest;
+verify streams all members, rejects unsafe/nonregular/duplicate/unexpected/missing
+entries or changed bytes, and requires neither Lean nor the original VM paths.
+Four controls pass. This verifies byte integrity, not theorem truth. Actual VM
+paths inside diagnostic records remain historical execution provenance.
+
+Legacy fixture lookup can use --frozen-evidence at a relocated archive path; its
+hashes still come from the unique original retirement-final manifest entries in
+the integration Git object, never an editable replacement authority. Both
+reviewers accepted this design and current accounting. No scope questions.
+
+The d96 full run reached all library/examples and TestSuite.Derived20 before a
+reserve stop at2088.577s, peak taskRSS9174859776bytes, noLeanerrors, noSwap,
+oneheavyjob, cleanuptrue. OpenLoops passed unchanged. The new706 full gate remains
+to run with retained artifacts; no failed attempt is counted as a pass.
