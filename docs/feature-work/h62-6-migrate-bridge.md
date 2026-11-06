@@ -235,3 +235,36 @@ timing, theorem-failure conclusion, exclusion or regression waiver. Both were
 read-only and used no Lean server. Their complete results and corrected handoff
 are preserved in the new versioned evidence export. The persistent goal must
 remain unfinished; request root/dependency/resource delivery before resuming.
+
+
+## H82 retirement handoff
+
+Human stop-and-handoff instruction names
+`solidity-h62-6-20261106/migrate-root-gate` as survivor. No new implementation
+or proof checking follows that instruction. A later general H82 message says
+"Continue now"; Q-H82-RETIRE requests clarification without resuming work.
+The specific retirement instruction is preserved pending that clarification.
+No new goal, VM, replacement continuation or completed-goal claim is created.
+
+The exposed goal tool accepts only complete/blocked, with no PAUSED action.
+Report this precise limitation and use a blocked stop to suppress automatic
+continuation; do not describe the tool state as successfully PAUSED. H71 push
+permission was not supplied, so preserve the original no-push restriction and
+export a cumulative patch plus portable lane bundle. No Claude-owned source
+edits or messages occur.
+
+H82 withdraws blanket exact-file agreement requirements for statement-preserving
+proof-only/additive/import/doc work. Earlier handoff permission language is
+historical and superseded for those edits. Existing-statement/definition-body/
+interface/budget/axiom/exclusion changes retain owner/H57 requirements. The
+common root/dependency overlay and actual resource waits remain unresolved.
+
+The retirement files under `tests/h62/item6/migrate-bridge/retirement/` preserve
+the original thread assignment transcription, complete original work/backfill
+queues and exact 836-entry pinned scope. The transcription hash differs from
+the launcher's rendered-prompt hash; provenance records the mismatch rather
+than claiming byte-exact authentication. The successor must retrieve the exact
+original rendering from the coordinator before relying on that authentication.
+Existing old/new full public generated API exports and shim records are absent;
+implemented shims remain empty. All four original checkpoint outcomes, backfill
+items and schema-v1 waits are recorded, with no full migration acceptance.
