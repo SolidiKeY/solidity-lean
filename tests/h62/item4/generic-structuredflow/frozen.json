@@ -1,0 +1,463 @@
+{
+  "audit_applicability": {
+    "11": "No named cons-revert, pushes_zero, allocationCostProg, sourceReverted, HRef split, Loc.data, HeapRepr/AllocatorRepr fixture copies in this family.",
+    "16": "Typed observation fixtures only; no Yul Raw/vector generator duplicated (H55).",
+    "9": "Loop twin and StructuredFlow controls census; Source conclusions remain distinct."
+  },
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "census_sha256": "badb6ddbb9776a6c0d265d779932501da1c5b71fddfd54b2edb8f9a1e2d2d1db",
+  "controls_counts": {
+    "#eval": 2,
+    "#guard_msgs": 2,
+    "abbrev": 2,
+    "def": 90,
+    "theorem": 179
+  },
+  "counts": {
+    "#eval": 2,
+    "#guard_msgs": 2,
+    "abbrev": 2,
+    "def": 115,
+    "theorem": 241
+  },
+  "files": [
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 2,
+      "path": "Solidity/Backend/StructuredFlow/AssignmentBlocksCompiler.lean",
+      "sha256": "f96eac4fd000d51341c4b40cc7a9b16cbbc03458fc87f941555ff921a541780c"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 14,
+      "path": "Solidity/Backend/StructuredFlow/AssignmentBlocksCompilerControls.lean",
+      "sha256": "75d3df6bbd2ae409a9f1d4ea4c8dc0b01932f178e32f0efe8cfbf1391dbd3de7"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 18,
+      "path": "Solidity/Backend/StructuredFlow/BranchControls.lean",
+      "sha256": "dfc6bedb97bc450b2e7e2c24dcb66e887fe930a906e2cb0c10cae5e5375812e4"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 9,
+      "path": "Solidity/Backend/StructuredFlow/BranchSelector.lean",
+      "sha256": "99b955320be737fdf94b3da39fe08ea7c2c1a7791b5aae524d68cdc9085f2048"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 2,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalContinuationCompiler.lean",
+      "sha256": "3b2d7d4c787c096cd1e2e485939d01f9292ad9e41f73417365e0fe8a76467b82"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 11,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalContinuationCompilerControls.lean",
+      "sha256": "205a15831386bbfa1714033042945e1880cfe146eac3d9446c2d1cbdecc464e2"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 2,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalReturnCompiler.lean",
+      "sha256": "db6a505cfa7513a42ff0cba9b453d3497138cb4eefbe68b16494ff9b99fc270f"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 11,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalReturnCompilerControls.lean",
+      "sha256": "00bcfb4343adf28683b801b35328c9dbb5434a7b360e9c48099ce8e1edbf6efc"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 4,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalSequenceCompiler.lean",
+      "sha256": "35affedf3a2962395db7cea08df4a196da8d5714203fb745722b72adbcf6ddd9"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 15,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean",
+      "sha256": "d57366557297d2a20960706ac6120c2cd520f475dfa77a587c707b0dc4120f15"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 3,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalSourceCompiler.lean",
+      "sha256": "16b8ef5c13a38b75857bf2ce2a470f5865a32f0e1b45b93c79738a6454cf1aa0"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 28,
+      "path": "Solidity/Backend/StructuredFlow/ConditionalSourceCompilerControls.lean",
+      "sha256": "c8f006dd6f3b407e38a62e1ce284b87da2a2497bc43bdec30e6f1436a5de0f5b"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 21,
+      "path": "Solidity/Backend/StructuredFlow/CoreScopeControls.lean",
+      "sha256": "da7a7e72053fc82efee47aee2ff0ca69fe10dc3a63f10132ad279fa1f0ac56db"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 8,
+      "path": "Solidity/Backend/StructuredFlow/CoreScopes.lean",
+      "sha256": "ee9405cffdfca843548329911929a25cc94f2299403dc80e1d7dba15a40dd6e8"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 3,
+      "path": "Solidity/Backend/StructuredFlow/CoreSequence.lean",
+      "sha256": "30d665bd98b270296dc77906ac4ef5cfa07a49cdd78518140c4f0c2a10fef2ee"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 21,
+      "path": "Solidity/Backend/StructuredFlow/CoreSequenceControls.lean",
+      "sha256": "6369986a3680a9433f3e4c544efc1415bf37a8128d44dc21cfb2b180de199d6b"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 1,
+      "path": "Solidity/Backend/StructuredFlow/DoWhileBreakCompiler.lean",
+      "sha256": "787ff841f1b010c99bbc236c7910c006deac95b88fe51c93432fd63cba8efa6b"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 4,
+      "path": "Solidity/Backend/StructuredFlow/DoWhileBreakCompilerControls.lean",
+      "sha256": "24aad011783c55853e3ffc5bfaf1369d62f6f829ce094369b93ab31badb537ab"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 1,
+      "path": "Solidity/Backend/StructuredFlow/DoWhileContinueCompiler.lean",
+      "sha256": "084c6f4436fa64e151f22735235bccb64d36f6b007c0b8b8c7705ff407fdb03b"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 4,
+      "path": "Solidity/Backend/StructuredFlow/DoWhileContinueCompilerControls.lean",
+      "sha256": "b0bdbdeb3668b6cfdcbdbe29cef38741c573b98ba82e88b51506d0ad9ce44be3"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 2,
+      "path": "Solidity/Backend/StructuredFlow/DoWhileReturnCompiler.lean",
+      "sha256": "3a4d4bb34a22bf3738e5f9968f2a73172ee0314740f44673792199a3f4598415"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 7,
+      "path": "Solidity/Backend/StructuredFlow/DoWhileReturnCompilerControls.lean",
+      "sha256": "5e8d3fe16e28dc197e4e293b49b01deebf27aaa4271fac7a893bf364995463b2"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 9,
+      "path": "Solidity/Backend/StructuredFlow/ExitControls.lean",
+      "sha256": "e434393be828e44779a40f30277bfb28623be0db1fe919bf53b5b392a12cb8e0"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 4,
+      "path": "Solidity/Backend/StructuredFlow/ExitSelector.lean",
+      "sha256": "5c6e7032b6a64cef44fcd3ee7791cc8e55861d84e6cfeac81907c7d91cb0c5e6"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 5,
+      "path": "Solidity/Backend/StructuredFlow/ForBreakCompiler.lean",
+      "sha256": "150f99460cb491f1cb09737b4a8ad1d09b951c0e783124fbc05377a38db79eba"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 6,
+      "path": "Solidity/Backend/StructuredFlow/ForBreakCompilerControls.lean",
+      "sha256": "c72c15637455690e90c939848d3b549a2414c9a14e09f10b03a55dd8e2a49d43"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 3,
+      "path": "Solidity/Backend/StructuredFlow/ForContinueCompiler.lean",
+      "sha256": "9b0cd5dd8d750a5cce21e67ac0a64de701e9fd62b954598d2168c4b587281d69"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 7,
+      "path": "Solidity/Backend/StructuredFlow/ForContinueCompilerControls.lean",
+      "sha256": "b6f9ad9465f8d1f385fb41df7e3881bec419f26c8851d6918b842f33e4f592f4"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 3,
+      "path": "Solidity/Backend/StructuredFlow/ForReturnCompiler.lean",
+      "sha256": "c7777f6942cb6e2cb6fe9a6e63f5df175c79de41579a324c45fddd7f6601ee03"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 7,
+      "path": "Solidity/Backend/StructuredFlow/ForReturnCompilerControls.lean",
+      "sha256": "404ab24153db9db1e77f799d18e50a6f4e3a10657b216b5feaf82144668b26c0"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 10,
+      "path": "Solidity/Backend/StructuredFlow/MappedBranch.lean",
+      "sha256": "8613917c1f7a505b6713955aba743861418be97d660f113aa72fba32ee7e5786"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 16,
+      "path": "Solidity/Backend/StructuredFlow/MappedBranchControls.lean",
+      "sha256": "dcbd9fd3f241711e3cff96d7219806c5c12be32c61781f3d893492e95350726e"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 7,
+      "path": "Solidity/Backend/StructuredFlow/MappedCondition.lean",
+      "sha256": "9e80a871da4eaff2f619f7cd4fc25e37a9cebbb2b31dd13689aedf2e4355c041"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 16,
+      "path": "Solidity/Backend/StructuredFlow/MappedConditionControls.lean",
+      "sha256": "8f4c201130f3a0dc5fce7124f51b04c56bb991a823b009f65f025c35dbfdc5cc"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 2,
+      "path": "Solidity/Backend/StructuredFlow/ReturnPairCompiler.lean",
+      "sha256": "88d42928eeb1593435852c9ebf0c2407947db82fcae77d9a0c3dfba3332a4030"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 8,
+      "path": "Solidity/Backend/StructuredFlow/ReturnPairCompilerControls.lean",
+      "sha256": "9f30da987b3f7842d9d64982eddcf546ccdb8ac7b3f2c00e0e8fcecd48c3c335"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 3,
+      "path": "Solidity/Backend/StructuredFlow/ReturnTailCompiler.lean",
+      "sha256": "0bfdf1336291317eb29ac1ab0c232bac6db15ed28be30c0fdcd359c6adf89655"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 14,
+      "path": "Solidity/Backend/StructuredFlow/ReturnTailCompilerControls.lean",
+      "sha256": "1d1f660dc4293d159fc2f9517f5a0c58580188a403ad0e96b9e33c2bb5d9e44c"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 6,
+      "path": "Solidity/Backend/StructuredFlow/ScopedMappedSequence.lean",
+      "sha256": "90e72070c56610b4fb95f53ce28863cae3d2f53ffb5b061159f7a5f35866eed7"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 16,
+      "path": "Solidity/Backend/StructuredFlow/ScopedMappedSequenceControls.lean",
+      "sha256": "6ccd37977c62a7a653e3bb9340502a1ce59797777357d647b3711b6ddb6b473a"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 1,
+      "path": "Solidity/Backend/StructuredFlow/WhileBreakCompiler.lean",
+      "sha256": "e88e428a4d78888d7685e15515775cd5c2d77973814921e76005b76f0f613067"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 6,
+      "path": "Solidity/Backend/StructuredFlow/WhileBreakCompilerControls.lean",
+      "sha256": "d611f5b3c20af8190869fb8998878cb0ed7611c96c2a641509be8de3b1aef0a7"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 5,
+      "path": "Solidity/Backend/StructuredFlow/WhileContinueCompiler.lean",
+      "sha256": "d094b7015ba8a524e5bdfa511377afbc4dd340ede873199315185667a05d16f8"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 9,
+      "path": "Solidity/Backend/StructuredFlow/WhileContinueCompilerControls.lean",
+      "sha256": "9d472d782f3e490b8bad11f4326cadcaaa086b73b54e1d0a4cf0138381f548de"
+    },
+    {
+      "audit_items": [
+        9
+      ],
+      "controls": false,
+      "declarations": 1,
+      "path": "Solidity/Backend/StructuredFlow/WhileReturnCompiler.lean",
+      "sha256": "757cfc94bd86d452e0c0ef561fe746d64c11142b117c57d80b9ec90192bc82a2"
+    },
+    {
+      "audit_items": [
+        9,
+        16
+      ],
+      "controls": true,
+      "declarations": 7,
+      "path": "Solidity/Backend/StructuredFlow/WhileReturnCompilerControls.lean",
+      "sha256": "5fefe7cba06f1dd172b1e8ec0f80aa0dfba9aa57c5bd383e39bd78dbaf990236"
+    }
+  ],
+  "schema": 1
+}
