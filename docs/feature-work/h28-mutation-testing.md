@@ -1040,3 +1040,54 @@ accounting replay passed before sealing. Actual published-entrypoint replay
 and all eight fault controls are next; no current full replay acceptance is
 claimed until their results are recorded. H41 delivery remains coordinator
 pending. Whole repository gates and whole-assignment acceptance remain pending.
+
+
+The fresh current receipt's published entrypoints subsequently passed at
+07885141f: normal/optimized 94 controls, bulk authentication, selected proof
+replay, and all eight real-evidence fault refusals. Optimized fault replay also
+passed all eight refusals; the guarded touched gate passed with no production
+targets. Both reviewers independently passed the five primary saved gates.
+These are actual replay results for the aab receipt, not the historical f8 pin.
+
+Published master `6cf853aea0417155aca29ddb91f1767d3f3a3cc4` is adopted after
+those checks. Its three non-blocking follow-ups are implemented: count tables
+are mandatory; the standalone proof verifier authenticates every declared H44
+member manifest; and absent case results produce an explicit checked refusal.
+Controls cover omitted counts, tampered member manifests through the standalone
+entrypoint, and a ninth real-evidence fault for a missing case result. Engine
+and bulk delivery anchors advance together to 6cf; semantic/cache and snapshot
+pins remain immutable. Cases, theorem statements and frozen proof inputs are
+unchanged, so the fresh aab proof receipt is preserved. Replays and controls
+for these stricter guards must pass before their checkpoint is complete.
+
+The standalone member-map check runs only after archive size/SHA authentication,
+preserving authentication before decompression. A real-Git malformed-archive
+control verifies that rejection precedes even member-map parsing.
+
+
+### Validated replay handoff after 6cf
+
+All seven checkpoint commands passed at `50a5679e38aeaf468850d8f46645bdf5e71aa706`: normal and optimized
+96-test suites, strict bulk/member authentication, current selected proof replay,
+nine real-evidence fault refusals in normal and optimized modes, and the
+guarded touched gate with no production targets. The current selected entrypoint
+actually replayed 113 checks, 78 objects and 321 axiom exports plus the complete
+294-export census and source-derived ledger. Missing count tables, member-map
+tampering, unauthenticated archives and missing case records are checked
+refusals. No historical receipt is substituted for the current aab proof pack.
+
+Separate finder and skeptic saved-gate reviews PASS, with no outstanding findings.
+Commands, exits, timings, reported RSS, raw logs and fault results are sealed in
+`/workspace/h28-final-replay-after-6cf/validation.tar.gz`: 2746 bytes, SHA256
+`dc3e3c3a11e3c4acbdb87541aec7c0960b87eecd658fd17cc54c8ec1f0a92466`; its per-member manifest is committed. There are no new Lean
+objects from these Python-only guard changes. The unchanged H41 proof pack
+remains `/workspace/h28-selected-export-aab23327/proof-worlds.tar.gz` with SHA256
+`32625cd27ee6171cf5d206417d0ae491b6837649521fcd11e9b9de4a2cdc3748`, ready for coordinator pull; transfer
+is not claimed.
+
+Queue accounting: exhaustive candidate/source/selection inventory, disposable
+runner, selected-family inhabited semantic witnesses, whole declared 19-case
+execution, and false-pass controls are complete. Full repository validation and
+its final handoff remain pending, so whole-assignment acceptance and the
+persistent goal remain unfinished. The selected score proves no whole compiler
+correctness claim. No theorem, premise, exclusion or proof budget changed.
