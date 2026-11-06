@@ -269,5 +269,17 @@
     "gate_head": "6f2390eecd3d62655f8a0042134e1e1307f78233",
     "commands": 8,
     "scope_complete": false
+  },
+  "repository_gate_validation": {
+    "archive": "/workspace/h28-repository-gate-export-60a068dd/validation.tar.gz",
+    "sha256": "ee9db32fa3169d78b7e69ba91414c41aa8d6bda2c8bf62a581f7e214f3f40d81",
+    "bytes": 90180,
+    "full_gate_head": "60a068ddf3d32e2a41244fe44f7ce5ed14eb5b82",
+    "full_gate_exit": 1,
+    "updated_master": "812aeb301f27d70dad4acc3b3bd92d1c41d7c948",
+    "follow_up_head": "d9687ad3f29fda805977de9ba1c749771f21da50",
+    "status": "blocked",
+    "members": 50,
+    "scope_complete": false
   }
 }
