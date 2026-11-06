@@ -47,3 +47,7 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean` | Actual head/allocation receipts, malformed-declaration refusals and the existing public allocation compiler-leaf link. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViews.lean` | Executable allocating conditional-root recognition retaining the actual guard, continuation and alternative with an exact syntax reconstruction; child/guard/whole-selector checks remain open. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean` | Actual recursive-turn acceptance, preserved arbitrary continuation/alternative, and malformed root/allocation/extended-branch refusals. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingValueViews.lean` | Generalized typed simple/local/binary value views retaining actual primitive indices, operands and constructor equations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeaves.lean` | Exact allocating-family guard/zero/increment syntax recognition from actual value/assignment views; no indexed statement/argument match or semantic premise. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingGuardedTurn.lean` | Actual allocating root recognition checks original guard and zero arm, retains original continuation, and checks exact increment suffix independently. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean` | Populated guard/zero/increment/root/suffix receipts and actual wrong-operator/slot/literal/destination/alternative/extra-tail refusals. |
