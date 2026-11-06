@@ -5,6 +5,7 @@ from pathlib import Path
 
 HELPER="tests/h62/item2/audit-calculus/KernelCensus.lean"
 CHUNK_HELPER="tests/h62/item2/audit-calculus/ChunkCensus.lean"
+DAG_HELPER="tests/h62/item2/audit-calculus/ExprDagCensus.lean"
 
 
 def sha(path):
@@ -79,6 +80,36 @@ def probe_total_or_tombstone(record, limit, save):
         raise RuntimeError("chunk probe failed; older export superseded") from failure
 
 
+def validate_statement_encoding(row):
+    """Check complete DAG structure; original Expr fields remain unnormalized."""
+    encoding=row.get("type_expression_format","repr-v1")
+    if encoding=="repr-v1":
+        if not isinstance(row["type_expression"],str):raise RuntimeError("invalid repr encoding")
+        return
+    if encoding!="expr-dag-v1":raise RuntimeError("unknown exact expression encoding")
+    graph=row["type_expression"];nodes=graph["nodes"];root=graph["root"]
+    if not isinstance(nodes,list) or not nodes or type(root) is not int or root!=len(nodes)-1:
+        raise RuntimeError("invalid expression graph root")
+    for i,node in enumerate(nodes):
+        if not isinstance(node,list) or not node:raise RuntimeError("invalid expression node")
+        tag=node[0]
+        arities={"leaf":2,"app":3,"lam":5,"forall":5,"let":6,"mdata":3,"proj":4}
+        if tag not in arities or len(node)!=arities[tag]:raise RuntimeError("invalid expression constructor")
+        refs={"leaf":[],"app":[1,2],"lam":[2,3],"forall":[2,3],"let":[2,3,4],"mdata":[2],"proj":[3]}[tag]
+        for index in refs:
+            if type(node[index]) is not int or not 0<=node[index]<i:raise RuntimeError("non-topological expression edge")
+        fields={"leaf":[1],"app":[],"lam":[1,4],"forall":[1,4],"let":[1],"mdata":[1],"proj":[1]}[tag]
+        if any(not isinstance(node[index],str) for index in fields):raise RuntimeError("invalid expression scalar field")
+        if tag=="let" and type(node[5]) is not bool:raise RuntimeError("invalid let annotation")
+        if tag=="proj" and (type(node[2]) is not int or node[2]<0):raise RuntimeError("invalid projection index")
+    cursor=root
+    for binder in row["binders"]:
+        node=nodes[cursor]
+        if node[0]!="forall" or type(binder["domain_node"]) is not int or binder["domain_node"]!=node[2]:raise RuntimeError("dependent binder domain mismatch")
+        cursor=node[3]
+    if nodes[cursor][0]=="forall":raise RuntimeError("missing dependent telescope binder")
+
+
 def validate_export(record, root, current_compile, current_helper):
     if record.get("schema")!=2 or record.get("kind")!="kernel-census" or record.get("exit")!=0:
         raise RuntimeError("no current successful schema2 kernel export")
@@ -86,7 +117,7 @@ def validate_export(record, root, current_compile, current_helper):
     for field in ("log","json","scratch","artifact","helper_artifact"):
         if sha(record[field])!=record[field+"_sha256"]:raise RuntimeError("stale/tampered export "+field)
     helper_file=record.get("helper_file",HELPER)
-    if helper_file not in {HELPER,CHUNK_HELPER}:raise RuntimeError("unknown census helper")
+    if helper_file not in {HELPER,CHUNK_HELPER,DAG_HELPER}:raise RuntimeError("unknown census helper")
     if record["helper_source_sha256"]!=sha(root/helper_file):raise RuntimeError("stale helper source")
     if current_compile.get("kind")=="compile-cache" and not current_compile.get("source_compilation_verified"):
         raise RuntimeError("legacy artifact adoption is not a verified source compile")
@@ -100,4 +131,8 @@ def validate_export(record, root, current_compile, current_helper):
     if item["module"]!=record["module"]:raise RuntimeError("wrong exported module")
     logged=parse_export_log(Path(record["log"]).read_text(),record["module"],record.get("export_format","module-v1"))
     if logged!=item:raise RuntimeError("export JSON differs from passing log")
+    for theorem in item["theorems"]:
+        validate_statement_encoding(theorem)
+        if helper_file==DAG_HELPER and theorem.get("type_expression_format")!="expr-dag-v1":
+            raise RuntimeError("DAG helper returned another expression encoding")
     return item

@@ -142,5 +142,46 @@ class ProbeFreshnessControls(unittest.TestCase):
             self.assertEqual(receipts.probe_total_or_tombstone({"module":"M","log":str(log)},16,history.append),1)
             self.assertEqual(history,[])
 
+class DagStructureControls(unittest.TestCase):
+    def row(self):
+        return {"type_expression_format":"expr-dag-v1",
+                "type_expression":{"root":1,"nodes":[["leaf","P"],["forall","x",0,0,"default"]]},
+                "binders":[{"domain_node":0}]}
+
+    def test_valid_dependent_domain_graph(self):
+        self.assertIsNone(receipts.validate_statement_encoding(self.row()))
+
+    def test_forward_edge_rejected(self):
+        row=self.row();row["type_expression"]["nodes"][1][2]=1
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
+    def test_missing_binder_rejected(self):
+        row=self.row();row["binders"]=[]
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
+    def test_wrong_domain_rejected(self):
+        row=self.row();row["binders"][0]["domain_node"]=1
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
+    def test_boolean_domain_rejected(self):
+        row=self.row();row["binders"][0]["domain_node"]=False
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
+    def test_incomplete_constructor_rejected(self):
+        row=self.row();row["type_expression"]["nodes"][1].pop()
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
+    def test_unbound_root_rejected(self):
+        row=self.row();row["type_expression"]["root"]=0
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
+    def test_unknown_encoding_rejected(self):
+        row=self.row();row["type_expression_format"]="unknown"
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
+    def test_repr_dag_confusion_rejected(self):
+        row=self.row();row["type_expression_format"]="repr-v1"
+        with self.assertRaises(RuntimeError):receipts.validate_statement_encoding(row)
+
 
 if __name__=="__main__":unittest.main()

@@ -11,7 +11,7 @@ sys.dont_write_bytecode=True
 from owners import inventory
 from receipts import HELPER, sha, validate_export, find_direct_compile, validate_dependency_edge
 from bounded_lean import imports
-from reconcile import reconcile_sources
+from reconcile import reconcile_sources, verification_requests
 
 BASE="c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 
@@ -73,15 +73,17 @@ def main():
             if sha(artifact)!=digest:raise RuntimeError("stale proof dependency: "+dep)
         log=Path(receipt["log"]).read_text()
         if re.search(r"(?m)^.*\.lean:\d+:\d+: (?:error|warning):",log):raise RuntimeError("proof diagnostics: "+relative)
-        expected=re.findall(r"^#verify_joint (\S+) with (\S+)",file.read_text(),re.M)
+        expected=verification_requests(file.read_text())
         verified=[json.loads(line.split("H62_JOINT_VERIFIED ",1)[1]) for line in log.splitlines() if "H62_JOINT_VERIFIED " in line]
         if len(expected)!=len(verified):raise RuntimeError("joint verification count mismatch")
-        for (original,short),record in zip(expected,verified):
+        for (original,short,encoding),record in zip(expected,verified):
             if record["original"]!=original or record["witness"].split(".")[-1]!=short:raise RuntimeError("joint identity mismatch")
             key=(record.get("original_module"),original)
             if key in witnesses:raise RuntimeError("original statement counted twice")
             if set(record["axioms"])-{"propext","Classical.choice","Quot.sound"}:raise RuntimeError("unexpected witness axiom")
             if key not in kernel:raise RuntimeError("joint proof lacks a fresh module export: "+str(key))
+            if encoding!=record.get("original_type_expression_format","repr-v1") or encoding!=kernel[key].get("type_expression_format","repr-v1"):
+                raise RuntimeError("joint/kernel expression encoding differs")
             if record["original_type_expression"]!=kernel[key]["type_expression"]:
                 raise RuntimeError("exact joint/kernel statement expression differs: "+str(key))
             witnesses[key]=dict(record,file=relative)
@@ -98,7 +100,10 @@ def main():
             record["hypotheses"]="exact dependent telescope exported; semantic role classification pending"
         if key in witnesses:
             record["joint_witness"]=witnesses[key];matched_keys.add(key)
-            record["hypotheses"]="joint telescope verified; semantic role reviewed for this bounded fixture"
+            record["hypotheses"]=("all leading inputs jointly checked; fixture-level feasibility only"
+                if kernel[key]["binders"] else
+                "closed input telescope checked; semantic conditions inside the conclusion remain pending")
+            record["semantic_conclusion_audit"]="pending; joint feasibility does not clear embedded preconditions or admission"
         accounted.append(record)
     supporting={key:value for key,value in witnesses.items() if key not in matched_keys}
     for key in supporting:
@@ -112,6 +117,9 @@ def main():
             "source_candidates_uncovered":len(accounted)-len(matched_keys),"fresh_kernel_modules":len(exported),
             "kernel_theorems_in_fresh_modules":len(scoped_kernel),"additional_kernel_candidates_uncovered":len(additional),
             "writer_contacts_resolved_files":len(files)-len(unresolved),"writer_contacts_unresolved_files":len(unresolved)}
+    counts["verified_source_input_bearing_witnesses"]=sum(bool(kernel[key]["binders"]) for key in matched_keys)
+    counts["verified_source_closed_telescope_checks"]=sum(not kernel[key]["binders"] for key in matched_keys)
+    counts["distinct_witness_theorems"]=len({row["witness"] for row in witnesses.values()})
     result={"base":BASE,"audit_status":"partial","source_candidates":accounted,"additional_kernel_theorems":additional,
             "supporting_dependency_witnesses":list(supporting.values()),"owner_inventory":ownership,"unresolved_writer_files":unresolved,"kernel_export_pending_files":unrefreshed,
             "counts":counts,"limitations":["full statement census and semantic premise classification unfinished",

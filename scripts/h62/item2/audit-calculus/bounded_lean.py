@@ -20,7 +20,7 @@ import sys
 import time
 sys.dont_write_bytecode = True
 from census import mask
-from receipts import find_direct_compile, parse_export_log, probe_total_or_tombstone, CHUNK_HELPER
+from receipts import find_direct_compile, parse_export_log, probe_total_or_tombstone, validate_statement_encoding, CHUNK_HELPER, DAG_HELPER
 
 GIB = 1024**3
 BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
@@ -143,10 +143,12 @@ def main():
     parser.add_argument("--export-only", action="store_true")
     parser.add_argument("--chunked-export", action="store_true")
     parser.add_argument("--chunk-size", type=int, default=16)
+    parser.add_argument("--dag-export", action="store_true")
     parser.add_argument("files", nargs="+")
     args = parser.parse_args()
     root, evidence, lean = args.root.resolve(), args.evidence.resolve(), args.lean.resolve()
     if evidence.is_relative_to(root): parser.error("H44: outputs must be outside git")
+    if args.dag_export and not (args.export_census and args.chunked_export): parser.error("--dag-export requires --export-census --chunked-export")
     if args.chunked_export and not args.export_census: parser.error("--chunked-export requires --export-census")
     if not 1 <= args.chunk_size <= 64: parser.error("chunk size must be in 1..64")
     if args.export_only and not args.export_census: parser.error("--export-only requires --export-census")
@@ -217,7 +219,7 @@ def main():
                     raise SystemExit(receipt["exit"])
             seen.add(relative);pending.remove(relative)
 
-        helper=CHUNK_HELPER if args.chunked_export else HELPER
+        helper=DAG_HELPER if args.dag_export else CHUNK_HELPER if args.chunked_export else HELPER
         if args.export_census:check(helper,force=True)
         for relative in args.files:
             check(relative)
@@ -231,8 +233,9 @@ def main():
             helper_binding=dict(helper_file=helper,helper_source_sha256=sha(root/helper),
                 helper_artifact=str(artifact(helper)),helper_artifact_sha256=sha(artifact(helper)))
             if args.chunked_export:
+                chunk_command="#audit_module_dag_chunk" if args.dag_export else "#audit_module_chunk"
                 probe=scratch.with_suffix(".probe.lean")
-                probe.write_text(preamble+f'#audit_module_chunk "{module}" from 0 count {args.chunk_size}\n')
+                probe.write_text(preamble+f'{chunk_command} "{module}" from 0 count {args.chunk_size}\n')
                 probe_log=run/"probe"/Path(relative).with_suffix(".log");probe_log.parent.mkdir(parents=True,exist_ok=True)
                 execution=execute([str(lean),"-j1","--tstack=131072","--memory=12288","--root=/workspace",str(probe)],root,env,probe_log)
                 probe_record=dict(execution,kind="kernel-census-probe",file=relative,module=module,
@@ -246,7 +249,7 @@ def main():
                 except RuntimeError:
                     raise SystemExit(89)
                 offsets=list(range(0,total,args.chunk_size)) or [0]
-                scratch.write_text(preamble+"".join(f'#audit_module_chunk "{module}" from {offset} count {args.chunk_size}\n' for offset in offsets))
+                scratch.write_text(preamble+"".join(f'{chunk_command} "{module}" from {offset} count {args.chunk_size}\n' for offset in offsets))
             else:
                 scratch.write_text(preamble+'#audit_module "'+module+'"\n')
             log=run/"kernel"/Path(relative).with_suffix(".log");log.parent.mkdir(parents=True,exist_ok=True)
@@ -258,6 +261,10 @@ def main():
             if receipt["exit"]==0:
                 try:
                     data=parse_export_log(log.read_text(),module,export_format)
+                    for theorem in data["theorems"]:
+                        validate_statement_encoding(theorem)
+                        if args.dag_export and theorem.get("type_expression_format")!="expr-dag-v1":
+                            raise RuntimeError("DAG helper returned another expression encoding")
                 except (RuntimeError,ValueError,KeyError,TypeError) as failure:
                     save(dict(receipt,exit=89,assembly_error=str(failure)))
                     raise SystemExit(89)

@@ -1,5 +1,6 @@
 """Exact source-to-kernel identity reconciliation, independent of witnesses."""
 from collections import defaultdict
+import re
 
 
 def reconcile_sources(sources, kernel):
@@ -28,3 +29,17 @@ def reconcile_sources(sources, kernel):
         if candidates:
             matched[row["id"]] = candidates[0]
     return matched
+
+def verification_requests(text):
+    """Preserve public/private verification order and actual private identity."""
+    result=[]
+    for line in text.splitlines():
+        public=re.fullmatch(r"#verify_joint(_dag)? (\S+) with (\S+)",line)
+        private=re.fullmatch(r"#verify_private_joint (\S+) (\S+) with (\S+)",line)
+        if public:
+            result.append((public[2],public[3],"expr-dag-v1" if public[1] else "repr-v1"))
+        elif private:
+            result.append(("_private."+private[1]+".0."+private[2],private[3],"repr-v1"))
+        elif line.startswith(("#verify_joint ","#verify_joint_dag ","#verify_private_joint ")):
+            raise RuntimeError("malformed verification request")
+    return result

@@ -8,8 +8,8 @@ Repository: /workspace/solidity-lean.
 ## Status: partial, persistent assignment unfinished
 
 None of the four assignment checkpoints is complete. This handoff commits
-three bounded items: 35 additional joint proofs, exact source/kernel identity
-reconciliation, and bounded large-module export recovery. No original producer
+three bounded items: 26 creation witnesses, 33 scope witnesses, and bounded
+JoinWalk structural export/closed-telescope verification. No original producer
 file, frozen interface, premise, observation, exclusion, generated root, central
 module map or axiom pin was edited. No H55 work was duplicated. No merge, push,
 PR or publication was performed. New axioms and sorry: zero.
@@ -23,10 +23,10 @@ candidates, including 110 private declarations, and three replay commands.
 No literal path is missing. Raw source signatures, hashes and section directive
 history are retained. Directive history is not effective Lean context.
 
-The current fresh census covers 235 of 361 mapped files. All 3,824 source
+The current fresh census covers 295 of 361 mapped files. All 4,483 source
 candidates in these files uniquely match an actual kernel identity and full
-structural type; 1,459 signatures await export. The 14,138 kernel constants
-include 10,314 additional generated/private/projection candidates still requiring
+structural type; 800 signatures await export. The 16,384 kernel constants
+include 11,901 additional generated/private/projection candidates still requiring
 classification. Source signatures alone are never the statement authority.
 
 Reconciliation joins module, Lean's canonical user name and privacy, retaining
@@ -62,8 +62,21 @@ Checked files:
   remain shared across each complete telescope. Thirty-four are axiom-free;
   getBytes_congr uses propext/Quot.sound.
 
-Total: 66 exact joint proofs = 65 mapped + one supporting; 5,218 source
-candidates remain uncovered. No source/native opaque-call authentication is
+CreationAdditionalWitnesses adds 26 exact joint checks, including two private
+ArtifactLaws source helpers, using actual nonempty link and immutable regions,
+rotated sites, provenance ranges and PUSH-width transition layouts.
+ScopeWitnesses adds 33 exact checks across TermWk/Shift: a real uint7 local,
+a newly added Boolean local, declared storage roots and memory-array paths.
+Memory paths are syntax witnesses, not claims of successful heap reads.
+
+JoinWalkWitnesses checks eleven genuinely closed input telescopes with ONE
+shared axiom-free True theorem. Quantified validity or negation is their
+conclusion; it is not unfolded into artificial inputs. Semantic preconditions
+inside those conclusions are NOT cleared by this closed-telescope check.
+
+Total: 136 exact joint verifications using126 distinct fixture theorems:
+123 mapped input-bearing witnesses,12 mapped closed-telescope checks and one
+supporting dependency witness. 5,148 source candidates remain uncovered. No source/native opaque-call authentication is
 inferred from these fixtures. Broader global premise structures remain pending.
 
 The unchanged failure emitter satisfies an additive component contract requiring
@@ -118,8 +131,8 @@ Receipts bind source, actual Lean binary, object, direct import objects, helper,
 immutable logs, scratch and JSON. Reuse requires an actual schema2 direct
 compile; no legacy promotion. Acceptance recursively certifies dependency
 provenance and enforces one binary across each edge. It invalidates old output
-before validation. Partial acceptance now passes with65 mapped witnesses and
-235 current exports. --require-complete must fail while obligations remain.
+before validation. Partial acceptance now passes with135 mapped checks and
+295 current exports, with input-bearing and closed checks counted separately. --require-complete must fail while obligations remain.
 
 The full refresh stopped at TermSize EXPORT, after source compilation passed:
 one export command hit the default200000-heartbeat limit in17.655seconds.
@@ -135,13 +148,34 @@ and partial runs remain recorded and do not establish full gates.
 
 Passing bounded checks: KeySort prerequisite (latest corrected-bound run3.065s),
 66 joint verifications, partial current transitive acceptance, six scanner
-controls,21 freshness/chunk/probe controls and seven identity controls. External
+controls,30 freshness/chunk/probe/DAG controls and ten identity/request controls. External
 Python controls test audit tooling; they are not Lean proofs. Layer and generated
 root/fragment checks preserve the frozen core and central outputs.
 
 Full affected validation, final run-lean.sh with a real SolKey rules path,
 complete census acceptance and matching-tree/cache/resource performance remain
 pending. No >10% performance acceptance or RUNTIME_GATE_PASS is asserted.
+
+
+The next serial run stopped at JoinWalk EXPORT with exit88 when available
+memory fell below the required4GiB reserve (peak owned RSS8,253,288,448 bytes).
+Its unchanged source compilation had passed. No cap/reserve was relaxed.
+ExprDagCensus uses ExprStructMap, retaining binder names and annotations that
+ExprMap alpha equivalence would ignore. Constructor fields and raw leaf/metadata
+representations are preserved in a topological structural graph without
+reduction. The recovered374-record export passed in62.403seconds, peak RSS
+1,575,198,720 bytes. This again compares a failed attempt with a successful
+recovery, not two passing controlled-performance runs.
+
+Eleven executed Lean metaprogram controls distinguish binder names/info,
+numeric name components, levels, metadata, projection indices, literals and
+bound variables; these are tooling controls, not a general injectivity proof.
+Receipt validation checks constructors, backward edges, roots and dependent
+domain references before success is written. DagJoint reuses the unchanged
+joint extractor and axiom/type gate, then emits the same exact representation.
+A mismatched input-bearing theorem is rejected by a separate guarded command,
+without introducing a failed theorem or proof placeholder. Explicit format
+equality prevents textual/DAG receipts from being silently mixed.
 
 ## Independent reviews and committed handoff
 
@@ -151,8 +185,11 @@ multiline variables, mutual scope, prose paths) and receipt defects (stale JSON/
 helpers, legacy promotion, SDK mismatch) were fixed and tested. Both reviewed
 the additional35 fixtures, exact identity reconciliation and actual1057-record
 chunk result. Both found the malformed-probe freshness path; its tombstone fix
-and prior-success refusal control were confirmed. Saved test evidence is
-refreshed to the actual21-test result.
+and prior-success refusal control were confirmed. Further independent review confirmed all59 new input-bearing fixtures and the
+374-record recovery. Review required encoding validation before export success
+and a matching witness format; both were added. Closed-check wording explicitly
+keeps semantic conditions inside conclusions pending. Saved external controls
+now show30 receipt tests and ten reconciliation tests.
 
 Evidence: /workspace/h62-audit-calculus-evidence.
 Handoff exports: /workspace/h62-audit-calculus-handoff.
@@ -160,13 +197,12 @@ Immutable per-command receipts are under baseline/runs; bulk evidence stays off
 Git with a SHA256 manifest. Preserve the same VM, branch and original active
 goal. Do not create/reset/complete a replacement goal.
 
-Next: continue serial exports after TermSize (126 mapped files), resolve owner
+Next: continue serial exports after JoinWalk (66 mapped files), resolve owner
 routes and semantic premise classification, prove all remaining joint witnesses,
 classify generated declarations, add actual source-compiler success and gas/
 fork/world boundaries, then reviews, full gates and controlled measurements.
 No assignment checkpoint is complete.
 
-Coordinator registration proposal only: KernelCensus, ChunkCensus,
-CreationWitnesses, FailureWitnesses, FailureAdditionalWitnesses and
-StaticTransportWitnesses remain additive tests modules. No area registration or
+Coordinator registration proposal only: all fourteen audit Lean modules remain
+additive tests modules under the exclusive tests scope. No area registration or
 relocation is authorized by this note.

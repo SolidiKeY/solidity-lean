@@ -61,6 +61,19 @@ class ReconciliationControls(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             module.reconcile_sources([source(), source()], {})
 
+class VerificationRequestControls(unittest.TestCase):
+    def test_private_and_two_formats_preserve_order(self):
+        text="#verify_private_joint M N.t with p\n#verify_joint_dag A.t with d\n#verify_joint B.t with b\n"
+        self.assertEqual(module.verification_requests(text),[
+            ("_private.M.0.N.t","p","repr-v1"),("A.t","d","expr-dag-v1"),("B.t","b","repr-v1")])
+
+    def test_malformed_verification_fails_closed(self):
+        with self.assertRaises(RuntimeError):
+            module.verification_requests("#verify_joint_dag missing")
+
+    def test_comments_do_not_add_requests(self):
+        self.assertEqual(module.verification_requests("-- #verify_joint M.t with p"),[])
+
 
 if __name__ == "__main__":
     unittest.main()
