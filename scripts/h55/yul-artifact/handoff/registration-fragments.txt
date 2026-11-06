@@ -1,0 +1,10 @@
+FOR CENTRAL INTEGRATION ONLY; NOT APPLIED; BOTH MODULES UNVALIDATED.
+Root imports:
+import Solidity.Yul.Compilation.CompletionControls
+import Solidity.Yul.Compilation.Artifact
+CORE exact module names:
+Solidity.Yul.Compilation.CompletionControls
+Solidity.Yul.Compilation.Artifact
+Module map draft rows:
+| `Yul/Compilation/CompletionControls.lean` | Shared intrinsic closed-normal completion/frame reasoning; unvalidated retirement draft. |
+| `Yul/Compilation/Artifact.lean` | Closed-normal statement certificate and exact provenance Image; unvalidated, not all38adapters. |

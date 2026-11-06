@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "requested_by": "Human-approved H82 stop-and-handoff",
+  "requested_goal_state": "PAUSED",
+  "requested_existing_goal_only": true,
+  "available_goal_tools": [
+    {
+      "name": "mcp__codex_apps__codex_goals_stop_goal",
+      "outcome_enum": [
+        "complete",
+        "blocked"
+      ]
+    }
+  ],
+  "pause_callable_exposed": false,
+  "pause_applied": false,
+  "failure_code": "PAUSE_CAPABILITY_UNAVAILABLE",
+  "precise_failure": "No pause_goal/get_goal/update_goal capability is exposed. The only goal transition tool, stop_goal, accepts complete or blocked and cannot express PAUSED. No invalid or substitute transition was attempted.",
+  "last_known_goal_state": "blocked from last successful goal-context transition; not freshly queried",
+  "prior_router_error_provenance": "/workspace/scratch/migrate-theory/h70-routing/goal-tool-error.json",
+  "goal_created_reset_or_completed": false,
+  "automatic_implementation_continuation_authorized": false,
+  "worker_action": "Finish H82 preservation checkpoint, acknowledge stopped final head, and stop. Coordinator/survivor must preserve the explicit user pause using trusted goal control.",
+  "coordinator_pause_plan": "Explicit coordinator resolution: coordinator will set existing goal paused after final exact head report and idle turn; worker cannot apply PAUSED and must stop.",
+  "retirement_revocation": false
+}
