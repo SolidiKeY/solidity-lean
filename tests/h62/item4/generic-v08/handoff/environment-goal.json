@@ -1,0 +1,14 @@
+{
+  "environment_id": "ccarenv_b64_Y2NhcmVudl85ZWRjYzhmNjc0Y2M4MTkxOTY3Y2E3Y2MyZjc5YjFlYQ",
+  "repository": "/workspace/solidity-lean",
+  "cwd": "/workspace",
+  "branch": "codex/solidity-h62-4-20261106/generic-v08",
+  "goal_id": null,
+  "goal_id_availability": "No get_goal or goal-list capability exposed; existing goal ID not available; never created/reset a goal.",
+  "goal_state_current": "Unknown to tool: no inspect/pause capability; saved task execution STOPPED under explicit H82 retirement.",
+  "pause_requested": "PAUSED",
+  "pause_applied": false,
+  "pause_error": "Exposed stop_goal schema permits complete|blocked only; no PAUSED action. Prior stop_goal call failed InvalidArguments: trusted CCA goal/source-turn context unavailable.",
+  "automatic_implementation_continuation_authorized": false,
+  "handoff_to": "solidity-v07-v11-20261030/v08-world-lowering"
+}

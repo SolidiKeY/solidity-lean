@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "Full visible original worker user turn and launcher goal_objective transcribed from this original thread; no original assignment file existed locally",
+  "original_rendered_prompt_sha256": "ef334e40480cb8325ca7943fbc986e0d359a7b8928d753133302e731e3f266f2",
+  "raw_renderer_bytes_available": false,
+  "rendered_digest_verification": "Not independently possible from exported raw bytes; coordinator previously reported verification. File hashes below authenticate this visible-thread transcription, not a claimed equality to renderer digest.",
+  "files": {
+    "original-goal-objective.txt": "1e3de65ae0d638227b8b2e9a48959e230d902d06a0c413f960fa87fcce3be09e",
+    "original-work-and-backfill-queue.md": "aaa5bee87290dfa4f3c1c10def26d91601f13df4080a8e6b017d33ff2922aa78",
+    "original-assignment.txt": "d0bd5596ba50cb5d9cf1685bdad04e56cb1a16ddc6997c1df4cee56e73db313c",
+    "original-scope-manifest.json": "1dc5a288924480af786c845dcb7beffabb6562aff6037d4f30ada401f1109ede"
+  },
+  "preservation_note": "Later policy is explicitly separate from original scope. Final H82 resolution is KEEP RETIREMENT, not an unresolved question.",
+  "queue_extract_normalization": "Trailing separator blank lines only are normalized to one final LF in the separate Markdown extract; full original-assignment.txt remains unchanged and contains the exact original queue/separators."
+}
