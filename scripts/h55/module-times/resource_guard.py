@@ -136,6 +136,11 @@ def locked_controlled_process(argv, output):
     try:
         with lock_path.open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            return controlled_process(argv, output, timeout_seconds=300)
+            result = controlled_process(argv, output, timeout_seconds=300)
+            # Process groups are escapable: a successful experimental run
+            # is never a production timing pass without cgroup containment.
+            if result.get("status") == "ok":
+                result = {**result, "status": "untrusted-prototype-success"}
+            return result
     except (OSError, ValueError):
         return {"status": "lock-or-control-error"}

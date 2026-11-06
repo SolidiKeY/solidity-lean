@@ -204,3 +204,13 @@ and rejects selected dynamic-loader and Lean-option environment variables.
 The 21-method synthetic suite passes after all current backfill changes. This
 is not an environment allowlist or proof that the supplied executable hash,
 import path, cache and runtime are trustworthy; no production pass is claimed.
+
+## H70 containment status
+
+The fixed-budget prototype wrapper now returns `untrusted-prototype-success`
+rather than a passing status even when its child exits successfully. This
+prevents an experimental process-group run from being mistaken for production
+acceptance. A process can still escape the group; kernel-enforced dedicated
+containment and independent acceptance remain unimplemented. This change does
+not establish timeout cleanup for escaped descendants and does not authorize a
+Lean measurement.

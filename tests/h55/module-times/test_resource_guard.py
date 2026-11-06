@@ -56,6 +56,15 @@ class LockAndClock(unittest.TestCase):
         with open("/dev/null", "w") as out, patch.object(guard, "sample", return_value=safe), patch.object(guard, "_clock_pair", side_effect=[(0, 0), (1, 2000000000)]):
             self.assertEqual("invalid-clock", guard.controlled_process([sys.executable, "-c", "import time; time.sleep(1)"], out, 2)["status"])
 
+    def test_success_remains_untrusted_without_process_containment(self):
+        lock_path = pathlib.Path("/tmp/solidity-lean-feature-groups-20261025/writer.lock")
+        if not lock_path.parent.is_dir():
+            self.skipTest("writer lock directory unavailable")
+        with open("/dev/null", "w") as out, patch.object(guard, "controlled_process", return_value={"status": "ok"}) as controlled:
+            result = guard.locked_controlled_process(["ignored"], out)
+            self.assertEqual("untrusted-prototype-success", result["status"])
+            controlled.assert_called_once_with(["ignored"], out, timeout_seconds=300)
+
     def test_lock_refusal_does_not_spawn(self):
         import fcntl
         lock_path = pathlib.Path("/tmp/solidity-lean-feature-groups-20261025/writer.lock")
