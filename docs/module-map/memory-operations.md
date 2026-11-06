@@ -570,3 +570,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Executable/CreationReturnPartition.lean` | Actual constructor-return byte classification with immutable/link/outside certificates and cross-region exclusion. |
 | `Backend/Executable/CreationReturnPartitionControls.lean` | Direct classification at an adjacent library boundary, populated patch boundaries and argument-leak negatives. |
 | `Backend/Executable/CreationReturnPartitionAudit.lean` | Complete classification signatures and scoped axiom guards. |
+| `Backend/MemoryCopies/SelectedDefaultDemandInterface.lean` | Existing default compiler selection implies exact intrinsic cell demand and checked capacity agreement. |
+| `Backend/MemoryCopies/SelectedDefaultDemand.lean` | Actual selected default cost equals live allocation demand; heap growth and checked guard agree without a capacity premise. |
+| `Backend/MemoryCopies/SelectedDefaultDemandControls.lean` | Selected/unselected cost controls, actual nested child snapshot, empty/long/unused-huge success, refusal and wrong cursor. |
