@@ -62,3 +62,17 @@ found no blocking defect and four minor ones, all fixed: "every sign"
 overclaimed (`regular_both_positive`, `7 * 9`, added); `regular_exact` was
 listed as negative; the doc did not name the product sign; and the guard tied
 to `sTail .mul` only by inspection (`guard_is_sTail` added).
+
+The skeptic found no refutation. It confirmed four things:
+
+- `U` is signed 256-bit (`lo = -2^255`, `hi = 2^255-1`).
+- The premises are only the local reads, the ranges, the side condition,
+  `IntegerLocalFamily` and `StateRepr`. None is vacuous or circular; they are
+  instantiated in Controls.
+- The target `.mul` on `int` classifies by `PrimTy.int.ofInt?`, and the
+  certificate is indexed by exactly `binaryCode .int .mul`, that is `sTail .mul`,
+  which is solc's `checked_mul_t_int256`.
+- The panic bytes are `0x4e487b71 ‖ word(0x11)`.
+
+It noted, and this document already states, that a target revert carries no
+payload.
