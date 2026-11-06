@@ -1,8 +1,16 @@
 # H62 item 2: read-only-call empty-statement audit
 
-Status: **blocked, not complete**. The frozen all-statements witness gate is
-impossible for two mapped dispatch cuts. No frozen statement, hypothesis,
-exclusion, observation, proof budget, interface file or library root was edited.
+Status: **partial, continuing under coordinator answers**. H69 assigns the two
+unreachable frozen dispatch cuts to RO as **pending RO v2**: a reachable
+versioned interface, explicit migration and consumer re-proofs. Their frozen
+refutations remain evidence; they are neither erased nor counted as witnesses.
+The separate compiler-success theorem is a pending deliverable of V13
+(`v12-v17/v13-abi-world`) for G42, with V15/P10 observation dependencies. It
+must prove success for that owner's compiler on the stated supported inputs;
+no frozen interface statement changes. Both previous scope questions are
+resolved. H70 supplies the exact H69 rule: checked joint-impossibility proofs are the audit result for intentional negative controls/separation/refutations; ordinary interfaces still need joint witnesses. RO, V13 and V15 have accepted the ticket relays. Independent census and original-rule joint fixture work continue.
+No frozen statement, hypothesis, exclusion, observation, proof budget,
+interface file or library root was edited.
 
 Assigned branch: `codex/solidity-h62-2-20261106/audit-readonly-calls`.
 Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
@@ -16,15 +24,12 @@ merge, PR, pre-gate, deployment, or replacement goal was performed.
 
 | Checkpoint | Result |
 |---|---|
-| 1. Frozen inventory and owners | Partial: 129 mapped files, 792 named theorems, frozen bytes checked, source signatures and lexical variable context saved. Full elaborated signatures, 33 private kernel names and remaining premise classifications are pending. |
-| 2. Simultaneous witnesses | Blocked: four concrete simultaneous clients; two hypothesis conjunctions refuted; 786 entries still pending. |
-| 3. Success/totality and negative controls | Blocked: Source success/failure/timeout and both-pipeline gas refusal checked; reject-all and nonempty target-revert controls checked. General compiler success and executable gas/fork adequacy remain unproved. |
-| 4. Fidelity census and uncovered owners | Partial: every named source declaration accounted exactly once, six outcomes bound to signature hashes; remaining entries retain pending status and owners. Full all-witness acceptance and final integration gates have not passed. |
+| 1. Frozen inventory and owners | Exact type/identity census complete: 129 files, 792 elaborated theorem types, all 33 private names resolved, owners retained. Semantic global-vs-input feasibility continues with the witness queue. |
+| 2. Simultaneous witnesses | Partial: 16 concrete joint clients, two pending RO v2 with checked refutations retained, 774 entries pending semantic/witness accounting (including 339 syntactically binder-free types). |
+| 3. Success/totality and negative controls | Partial, owner deliverable pending: Source success/failure/timeout and both-pipeline gas refusal checked; reject-all and nonempty target-revert controls checked. General compiler success and executable gas/fork adequacy remain unproved. |
+| 4. Fidelity census and uncovered owners | Partial: every named source declaration accounted exactly once, 18 explicit outcomes bound to signature hashes; all 792 bind to elaborated type hashes; remaining entries retain pending status and owners. Full all-witness acceptance and final integration gates have not passed. |
 
-The census intentionally includes controls and helpers with no explicit
-hypotheses. It makes no silent interface-theorem exclusion. Source headers and
-lexical `variable` commands are not elaborated binder exports; open/notation
-resolution and private-name mangling remain explicit limits.
+The census intentionally includes controls and helpers with no explicit hypotheses. It makes no silent interface-theorem exclusion. The new generated Lean query imports every unchanged mapped interface, checks exact theorem and owning-module identity, exports raw elaborated Expr plus readable type and actual binders, and resolves all private names. There are 339 syntactically binder-free types under nonreducing inspection. Definitions such as Not, Effect and CallbackHistories can hide premises, so those 339 remain pending; none is discharged by syntactic closure. Binder proposition/record shape alone never establishes feasibility.
 
 ## Kernel evidence and boundaries
 
@@ -54,7 +59,7 @@ payment-only EVM lacks gas and calldata, and neither its machine nor Source
 proof was introduced. General supported-program compiler totality remains an
 owner obligation.
 
-All three audit files passed separate bounded Lean checks. Their printed axiom
+All four audit proof files passed separate bounded Lean checks. JointClients.lean adds twelve exact applications covering callback frame/suffix/determinism/target uniqueness, raw-phase capture/storage, typed source storage/resume, raw uniqueness, depth refusal and inherited-static value refusal. Their printed axiom
 sets contain only `propext`, `Classical.choice`, and `Quot.sound`; no added
 `axiom`, `sorry`, `native_decide`, trust shortcut, or raised heartbeat limit.
 Failed intermediate attempts are retained separately and are not certificates.
@@ -64,10 +69,7 @@ H55-G49 where applicable, even though these consumer files belong to V13.
 ## Owner escalations
 
 Each affected original declaration appears once below. The structured tickets
-are saved in `tests/h62/item2/audit-readonly-calls/owner-tickets.json` for the
-local coordinator to retrieve. No relay script exists in this VM; delivery to
-external producer sessions is pending coordinator retrieval. No existing-file
-write request or permission is implied by these questions.
+are saved in `tests/h62/item2/audit-readonly-calls/owner-tickets.json`. H70 confirms accepted relays to RO, V13 and V15. The host-only relay.sh is not a worker installation task. Coordinator answers now resolve both historical questions; the owner deliverables remain pending. No original-file write permission is implied.
 
 ESCALATE: Solidity.Lowering.Readonly.SourceHistory.dispatch_getter_empty_succ — RO; proof-impossible-final.log/getter_empty_infeasible proves empty input contradicts selected getter. Options: owner versions a reachable dispatch partition; or preserve frozen statement and retain the witness blocker.
 ESCALATE: Solidity.Lowering.Readonly.SourceHistory.dispatch_special_empty_succ — RO; proof-impossible-final.log/function_empty_infeasible proves empty input cannot match a four-byte function selector. Options: owner versions a reachable dispatch partition; or preserve frozen statement and retain the witness blocker.
@@ -107,7 +109,7 @@ coordinator; the original goal was neither recreated nor reset.
 | bounded runner: same direct Lean flags on `SupportedCalls.lean` | Pass, proof-supported.log/json, 2.006 s. |
 | `PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item2/audit-readonly-calls/test_census.py` | Pass, test-census.log: five acceptance tests, including frozen-header and unmapped-core mutation rejection. |
 | `python3 scripts/h62/item2/audit-readonly-calls/test_bounded.py /workspace/h62-audit-readonly-calls/evidence` | Pass, test-bounded-final.log: timeout and zero-exit parent controls rejected; no live descendant. These intentional negative gates are expected to fail, not passing runtime gates. |
-| census generator with `--coverage tests/h62/item2/audit-readonly-calls/coverage.json` | Pass: 129 modules, 792 declarations, statuses 1 joint witness / 3 target-failure joint witnesses / 2 refutations / 786 pending. |
+| census generator with `--coverage tests/h62/item2/audit-readonly-calls/coverage.json` | Pass: 129 modules, 792 declarations, with elaborated census: 13 joint / 3 target-failure joint / 2 pending RO v2 (refutations retained) / 774 pending. |
 | `./run-lean.sh` and full all-witness acceptance | Pending, not RUNTIME_GATE_PASS. No full completion claim while frozen witness obligations are impossible. |
 
 Before/after timing samples repeat the same unchanged frozen Premises file,
@@ -134,10 +136,31 @@ preflight, and lock retention until descendant drain. The finder identified the
 two impossible cuts; the skeptic proposed and reviewed the nonempty target
 failure. Final review evidence is exported separately.
 
-Remaining obligations: 786 witness entries; full elaborated signature/private
-kernel-name export; remaining global-vs-input classifications; owner decisions
-on the two impossible cuts; independently fixed compiler success/totality,
+Remaining obligations: 774 pending semantic/witness entries; remaining semantic global-vs-input feasibility classifications; RO v2 publication/migration and consumer re-proofs for the two cuts; independently fixed compiler success/totality,
 P10 observation, gas/fork boundary; full repository final gate and all-statement
 acceptance. Save/relay these typed blockers, preserve the exact original goal,
 VM and branch, and resume only under authorized owner scope. This handoff is
 not completion of the four-checkpoint assignment or the 8–10 hour work queue.
+
+## Coordinator continuation decisions
+
+Verbatim answers are retained in the scoped coordinator-decisions.json. H69
+selects versioned reachable RO interfaces, explicit migration and consumer
+re-proofs; the two original declarations remain listed as pending RO v2. The
+compiler-success requirement is assigned to V13 as a separate theorem for its
+compiler, with V15/P10 producer coordination. Frozen signatures stay untouched.
+H70 supplies the exact H69 rule: for intentional negative controls/separation/refutations, a checked joint-impossibility proof IS the audit result; ordinary interfaces still need joint witnesses; no statement changes. The previous clarification request is resolved. Relays to all three owner sessions are accepted.
+
+## H69/H70 continuation evidence
+
+Continuation artifacts are under /workspace/h62-audit-readonly-calls/continuation-h69/. The earlier root-level handoff/report describes the historical pre-H69 checkpoint and must not be used as current decision state. The current report and handoff are refreshed after this checkpoint commit.
+
+The full mapped-surface build passed 341 jobs in 488.577 s, peak aggregate RSS 1,126,240,256 bytes. The elaborated query passed for all 792 declarations in 173.865 s, peak RSS 1,082,789,888 bytes, with no budget increase. JointClients.lean passed in 3.510 s with only the standard three axiom dependencies. These are affected-area validations; full run-lean.sh remains a final-goal gate.
+
+The export collector requires successful bounded-gate status, exact query/log hashes, command, toolchain file and actual Lean/Lake binary/version identity. It validates all kernel names, source-signature hashes, owning modules, raw type hashes and exact membership. It rejects complete-looking output followed by Lean errors. Five source-census tests and twelve export acceptance tests pass, including missing/duplicate declarations, wrong private/kernel/module identity, failed gate, late error and stale query/log/binary receipts. This external metadata validation does not prove joint hypotheses.
+
+No scope questions remain. Owner items are explicitly pending RO v2 and V13 compiler success with V15/P10 fixed outcomes. Continue the 774 pending semantic/witness entries under the original joint-witness requirement and H69's intentional-refutation rule, without modifying frozen interfaces.
+
+Review correction: syntactic binder-free metadata never removes a witness obligation. Full exported records, including binder arrays, are reparsed from their successful hash-bound Lean log at census ingestion. Mutation tests reject binder-array tampering and separately exercise private kernel identity. The 339 syntactically binder-free rows remain among the 774 pending entries until semantic/H69 accounting is supplied.
+
+Continuation checking-repeatability capsule: five samples of the identical unchanged Premises file measured median 1.149105 s before and 1.093362 s after, delta -4.850972%. No >10% slowdown stop was triggered. This is not a whole-build migration performance claim.

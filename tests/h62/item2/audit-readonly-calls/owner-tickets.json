@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "delivery": "Saved for local coordinator retrieval; relay.sh not present in this VM; no original-file edit requested or performed",
+  "delivery": "H70 confirms owner ticket relays accepted by RO, V13 and V15; relay.sh is host-only and is not a worker installation task.",
   "blockers": [
     {
       "id": "FROZEN-DISPATCH-EMPTY",
@@ -16,7 +16,10 @@
       "options": [
         "Owner prepares a separately versioned reachable dispatch partition and explicit contract migration; frozen audit remains blocked until authorized scope is supplied.",
         "Keep the frozen signatures unchanged and retain the proven witness blocker; no all-witness completion claim."
-      ]
+      ],
+      "question_resolved": true,
+      "status": "pending RO v2",
+      "resolution": "H69 human: RO owner publishes a new versioned interface (H57 versioned pairs), reachable dispatch split and explicit migration; consumers re-prove. Preserve frozen originals and refutations."
     },
     {
       "id": "G42-NONEMPTY-TARGET-REVERT",
@@ -37,7 +40,35 @@
         "Add a separate supported-program compiler totality/success theorem with independently fixed Source/target outcome observations.",
         "Publish a new producer interface version enforcing independent input coverage and fixed P10 outcome/returndata correspondence.",
         "Retain these as conditional transport consumers and keep public compiler adequacy blocked pending genuine producer contracts."
-      ]
+      ],
+      "question_resolved": true,
+      "status": "pending owner compiler-success theorem",
+      "resolution": "Coordinator: totality is a separate compiler-success theorem proved for the owner compiler on stated inputs; frozen interfaces stay unchanged.",
+      "responsible_lane": "V13 (v12-v17/v13-abi-world)",
+      "required_deliverable": "A separate theorem proving owner compiler success on supported stated inputs, excluding reject-all and always-revert behavior; no frozen-interface amendment."
     }
+  ],
+  "pending_items": [
+    {
+      "id": "RO-V2-MIGRATION",
+      "owner": "solidity-compiler10-20261028/readonly-external",
+      "status": "pending RO v2",
+      "deliverable": "H57 versioned reachable dispatch split, explicit migration, then consumer re-proofs; frozen originals unchanged"
+    },
+    {
+      "id": "V13-COMPILER-SUCCESS",
+      "owner": "solidity-v12-v17-20261031/v13-abi-world",
+      "dependencies": [
+        "solidity-v12-v17-20261031/v15-evm-agreement (P10 fixed outcomes)"
+      ],
+      "status": "pending separate owner theorem",
+      "deliverable": "Separate success/totality theorem for the owner compiler on stated supported inputs, excluding reject-all/always-revert; no frozen statement changes"
+    }
+  ],
+  "witness_rule": "For intentional negative controls/separation/refutations, a checked joint-impossibility proof is the audit result; ordinary interfaces still require joint witnesses; no frozen statement changes.",
+  "accepted_relays": [
+    "solidity-compiler10-20261028/readonly-external",
+    "solidity-v12-v17-20261031/v13-abi-world",
+    "solidity-v12-v17-20261031/v15-evm-agreement"
   ]
 }

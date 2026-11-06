@@ -7,6 +7,7 @@ Outputs (including the alternate Lake config) stay in an off-git directory.
 """
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -75,6 +76,15 @@ def main():
     assert int((cg/"memory.swap.current").read_text()) == 0
     assert all(int(x.split()[1]) == 0 for x in Path("/proc/meminfo").read_text().splitlines() if x.startswith("SwapTotal:")), "swap must be disabled"
     assert int((cg/"memory.current").read_text()) < int(limit)-RESERVE, "insufficient preflight reserve"
+    tool_versions = {
+        "lean_version": subprocess.check_output([str(TOOL/"lean"), "--version"], text=True).strip(),
+        "lake_version": subprocess.check_output([str(TOOL/"lake"), "--version"], text=True).strip(),
+        "lean_binary_sha256": hashlib.sha256((TOOL/"lean").read_bytes()).hexdigest(),
+        "lake_binary_sha256": hashlib.sha256((TOOL/"lake").read_bytes()).hexdigest(),
+        "toolchain_file_sha256": hashlib.sha256((ROOT/"lean-toolchain").read_bytes()).hexdigest(),
+    }
+    input_hashes = {str((ROOT/arg).resolve()): hashlib.sha256((ROOT/arg).read_bytes()).hexdigest()
+        for arg in command if arg.endswith(".lean") and (ROOT/arg).is_file()}
     def setup():
         os.setsid()
         resource.setrlimit(resource.RLIMIT_AS, (CAP, CAP))
@@ -142,7 +152,8 @@ def main():
     result = dict(command=command, child_exit=code, gate_exit=gate_exit, status="pass" if gate_exit == 0 else "fail", seconds=round(time.monotonic()-start, 3),
         peak_aggregate_rss_bytes=peak, stop_reason=reason, log=str(logpath),
         resource_flags="LEAN_NUM_THREADS=1; package weakLeanArgs=-j1; RLIMIT_AS=12GiB; VM=16GiB; swap=0; reserve=4GiB",
-        config=str(config))
+        config=str(config), log_sha256=hashlib.sha256(logpath.read_bytes()).hexdigest(),
+        input_source_sha256=input_hashes, **tool_versions)
     (args.evidence/(args.tag+".json")).write_text(json.dumps(result, indent=2)+"\n")
     print(json.dumps(result))
     raise SystemExit(gate_exit)

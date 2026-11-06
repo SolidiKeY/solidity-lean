@@ -199,13 +199,50 @@ def census():
         boundary="Frozen source headers and lexical variable context only; open/notation resolution, elaborated binders, private kernel names and witnesses require Lean export")
 
 
+def attach_elaboration(result, exported):
+    # Reparse the complete log under its successful, hash-bound Lean receipt.
+    # A copied provenance dictionary or raw Expr hash does not bind binder data.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("signature_export_verifier", Path(__file__).with_name("export_signatures.py"))
+    verifier = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(verifier)
+    verifier.verify_artifact(exported, result)
+    rows = result["declarations"]
+    items = exported["declarations"]
+    by_name = {r["source_name"]: r for r in items}
+    if len(by_name) != len(items) or set(by_name) != {r["source_name"] for r in rows}:
+        raise ValueError("elaborated census identity mismatch")
+    if exported["base"] != BASE:
+        raise ValueError("elaborated census base mismatch")
+    for row in rows:
+        item = by_name[row["source_name"]]
+        module = row["file"][:-5].replace("/", ".")
+        expected = ("_private."+module+".0." if "private" in row["visibility"] else "")+row["source_name"]
+        if item["kernel_name"] != expected or item["module"] != module or item["signature_sha256"] != row["signature_sha256"]:
+            raise ValueError("elaborated statement binding mismatch: " + row["source_name"])
+        if sha(item["raw_type_expr"]) != item["raw_type_sha256"]:
+            raise ValueError("elaborated type hash mismatch")
+        row["kernel_name"] = item["kernel_name"]
+        row["elaborated"] = {k: item[k] for k in ["raw_type_sha256", "level_parameters", "forall_binders"]}
+        row["premise_assessment"] = "Elaborated binder shape exported; no structure-inhabitance or per-input feasibility inferred"
+        if not item["forall_binders"]:
+            row["premise_assessment"] = "Syntactically binder-free under nonreducing telescope; definitions may hide premises. Semantic/H69 refutation accounting remains pending."
+        row["binder_inspection"] = "nonreducing; never discharges an audit obligation"
+    result["elaboration_boundary"] = "Exact imported theorem identities/types with successful hash-bound Lean receipt; binder shape is not a joint witness"
+    result["elaboration_provenance"] = exported["provenance"]
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--check", type=Path)
     parser.add_argument("--coverage", type=Path)
+    parser.add_argument("--elaborated", type=Path)
     args = parser.parse_args()
     result = census()
+    if args.elaborated:
+        result = attach_elaboration(result, json.loads(args.elaborated.read_text()))
     if args.coverage:
         entries = json.loads(args.coverage.read_text())["entries"]
         by_name = {r["source_name"]: r for r in result["declarations"]}
