@@ -258,3 +258,34 @@ them; compiler Build supports the existing compiler configuration.
 
 Human H49 excludes the proof-help action. Ordinary output and issue reporting
 remain separate actions; no proof-help destination is selected.
+
+Build uses **Ctrl+Shift+B** (**⇧⌘B** on macOS); Run uses **F5**; concrete Test uses
+**Shift+F5**. These bindings apply only to a focused, file-backed Solidity editor
+in a trusted workspace and invoke the documented compiler-AST/concrete typed-model
+commands. They do not turn compilation or concrete tests into proof results.
+Custom-build and verification-trace shortcuts remain unavailable.
+
+The existing parity launcher supports `--suite commands --targets local` for a
+native Linux Ctrl+Shift+B observation in real VS Code. It starts with an unsaved
+buffer containing Unicode text, checks saving as UTF-8 with CRLF line endings,
+verifies compiler AST source identity, and captures the renderer. UTF-16 describes
+LSP position units, not the file encoding. Automatic verification is disabled.
+This suite does not measure proof
+performance or establish Dafny compile/run/test equivalence; Run/Test and macOS
+key dispatch still require native observations.
+
+**Build Compiler Artifact with Import Options** (**F6**) accepts a JSON object
+containing only `includePaths` and `remappings`, initially populated from this
+resource's settings. For example:
+
+```json
+{"includePaths":["vendor with spaces"],"remappings":["alias/=lib/"]}
+```
+
+Omitted fields retain resource defaults; an empty array clears that field for
+this invocation. Relative include paths resolve against the project root and
+are passed as absolute paths. The command does not modify workspace settings.
+Unknown fields, runtime/proof options and malformed values are rejected; no
+shell string is executed. The artifact is a compiler AST, not a binary or proof.
+This finite JSON contract differs from Dafny's arbitrary custom CLI string;
+full custom-build equivalence and native F6/macOS observations remain open.

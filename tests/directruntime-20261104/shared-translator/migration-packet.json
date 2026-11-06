@@ -1,7 +1,7 @@
 {
   "status": "concrete API and observation packet; producer migration pending",
-  "sourceHead": "70845978ab616a63b13d0dee8b31b28893ccf591",
-  "adoptedMaster": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "sourceHead": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "adoptedMaster": "4095d848297d87e374b4f069692511cfe4a36cf7",
   "entrypoint": "Solidity.Frontend.ExecutableAst.Shared.executableReader",
   "publicRoots": [
     "Shared.function executableReader",
@@ -52,12 +52,11 @@
   "signatures": "tests/directruntime-20261104/shared-translator/artifacts/composed-gates/3.log",
   "comparison": "tests/directruntime-20261104/shared-translator/reader-comparison.json",
   "coverage": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
-  "metadataQuestion": "DR-A-META",
   "callbackContract": "Plain BodyLoopLowerer receives existing renameStmts output; same-scope original declarations checked by Scope.validateScopes. Reference parameter/return guards remain.",
   "producerAcceptance": [
     "CR migrates the actual existing SolcJson printer/parser/macro import route, preserving admission/settings/provenance; an optional wrapper is insufficient.",
     "Preserve declaration identity, scope/shadowing, evaluation order, overloads, modality/reference premises and unsupported diagnostics; no frozen Source/Core changes.",
-    "Resolve required typeIdentifier/tryCall retention alongside existing builtin normalization/loop annotations, or owner-reviewed checked compatibility adapter.",
+    "H68 requires producer retention of typeDescriptions.typeIdentifier and tryCall, preserving builtin-ID normalization and loop annotations; migrate compatibility fixtures. No compatibility adapter alternative is selected.",
     "Deliver exact reviewed CR commit for A consumption; D supplies fresh compiled native/WASM closure and source/binary provenance."
   ],
   "boundary": "Every modern AST kind has selected source-anchored observations or explicit no-standalone-entry status in each reader/suite; this is not exhaustive per-form parity, intrinsic/source proof closure or backend support. Legacy Throw and Yul remain separately inventoried/refused.",
@@ -90,5 +89,55 @@
     "comparisons": 18,
     "failClosed": 2,
     "boundary": "18exact saved native-vs-Lean-harness outcomes+2failclosed,rerun after mandatede684 rebase. No serialized env/frontend library/external frontend exec observed in those runs. 14origin candidates reviewed6emptyinitializers/8generichelpers;not exhaustive binary closure,WASM,source preservation or full migration."
+  },
+  "metadataDecision": {
+    "authority": "H68, human, 2026-11-06",
+    "decision": "Keep required typeIdentifier/tryCall metadata in producer output and migrate compatibility fixtures (option 1). Preserve existing normalization and loop annotations.",
+    "consumers": [
+      "CR actual existing AST import producer",
+      "DR-D native/browser fixture producers"
+    ],
+    "delivery": "Coordinator relay through this packet; producer changes remain owner-only, exact reviewed commit pending."
+  },
+  "metadataCompatibility": {
+    "authority": "H68 option 1",
+    "generator": "tests/directruntime-20261104/shared-translator/compatibility-fixtures.mjs",
+    "receipt": "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/evidence/h68/metadata-compilation.json",
+    "preflight": "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/evidence/h68/metadata-preflight.json",
+    "fixtures": [
+      "ReaderFixtures",
+      "UnsupportedContract",
+      "YulKinds",
+      "ComposedReaders",
+      "ModalityControls"
+    ],
+    "compiler": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "typeIdentifiers": 424,
+    "tryCallFlags": 27,
+    "boundary": "Required raw compiler metadata retained. All other JSON values match recorded4095 publication; same normalized builtin IDs and loop annotations. Five fresh external compiler runs; not a second AST translator. CR/D producer migration remains owner-only."
+  },
+  "dataDelivery": {
+    "authority": "H44",
+    "manifest": "tests/directruntime-20261104/shared-translator/bulk-manifest.json",
+    "restore": "Copy the recorded archive into its archiveRelative path, extract at tests/directruntime-20261104/shared-translator/artifacts/h68-bulk, then run verify-bulk.py. Required data is external, with no fallback.",
+    "historical": "Tracked fixture/census/matrix/coverage files retain their4095 baseline bytes; they do not describe current migrated packet hashes. Original57-kind controls intentionally retain their frozen baseline inputs."
+  },
+  "observedVariants": {
+    "cases": 806,
+    "fixtures": 49,
+    "default": {
+      "decoded": 165,
+      "refused": 388,
+      "noStandalone": 253
+    },
+    "composed": {
+      "decoded": 172,
+      "refused": 381,
+      "noStandalone": 253
+    },
+    "unknownRootNegativesEachReader": 553,
+    "changedOutcomes": 25,
+    "boundary": "Observed selected-field variants, including intentional mutations. Not exhaustive grammar, authenticated compilation, intrinsic closure or source/backend preservation."
   }
 }
