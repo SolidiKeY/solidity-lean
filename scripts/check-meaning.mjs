@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // H64: source policy, optional bounded artifact preparation, and live axiom checks.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { blankLean, findings } from './check-trust.mjs';
+import { blankLean, blankLeanHeader, findings } from './check-trust.mjs';
 import { collect } from './check-axiom-pins.mjs';
 const STANDARD = ['propext', 'Classical.choice', 'Quot.sound'];
 
@@ -79,31 +79,77 @@ ${Array.from({length: Math.ceil(frozen.length / 100)}, (_, i) => '  let frozen :
 // facets avoid unrelated executables, native code and optional package roots.
 export function productionPackages(root, files) {
   return [
-    [root, [...new Set(files.filter(p => /^Solidity\//.test(p) && !p.startsWith('Solidity/Scratch/')).map(p => p.slice(0, -5).replaceAll('/', '.')))].sort()],
-    [join(root, 'Bridge'), [...new Set(files.filter(p => /^Bridge\/Solidity(?:Bridge|Velvet)\//.test(p)).map(p => p.slice(7, -5).replaceAll('/', '.')))].sort()],
+    [root, [...new Set(files.filter(p => p.endsWith('.lean') && /^Solidity\//.test(p) && !p.startsWith('Solidity/Scratch/')).map(p => p.slice(0, -5).replaceAll('/', '.')))].sort()],
+    [join(root, 'Bridge'), [...new Set(files.filter(p => p.endsWith('.lean') && /^Bridge\/Solidity(?:Bridge|Velvet)\//.test(p)).map(p => p.slice(7, -5).replaceAll('/', '.')))].sort()],
   ];
 }
 
-// Read import headers, including 4.24's public/meta/all forms and multiline
-// module lists. Stop at the first non-header command; comments are blanked.
+// Lean.Parser.Module.import takes exactly one module identifier, even when
+// whitespace/comments split it from `import`. Never consume arbitrary command
+// identifiers after that module (e.g. register_simp_attr close_rw_s).
 export function headerImports(src) {
-  const tokens = blankLean(src).match(/«[^»]*»|[\p{L}_][\p{L}\p{N}_'.]*|[^\s]/gu) ?? [];
+  const ident = /^(?:«[^»]*»|[\p{L}_][\p{L}\p{N}_']*)(?:\.(?:«[^»]*»|[\p{L}_][\p{L}\p{N}_']*))*$/u;
+  const tokens = blankLeanHeader(src).match(/(?:«[^»]*»|[\p{L}_][\p{L}\p{N}_']*)(?:\.(?:«[^»]*»|[\p{L}_][\p{L}\p{N}_']*))*|[^\s]/gu) ?? [];
   const out = [];
   let i = 0;
   if (tokens[i] === 'module') i++;
   if (tokens[i] === 'prelude') i++;
-  const keywords = new Set(['import', 'public', 'meta', 'namespace', 'section', 'open', 'export',
-    'set_option', 'attribute', 'variable', 'universe', 'noncomputable', 'private', 'protected',
-    'def', 'abbrev', 'theorem', 'lemma', 'instance', 'class', 'structure', 'inductive',
-    'axiom', 'opaque', 'example', 'initialize', 'builtin_initialize', 'syntax', 'macro', 'elab']);
   while (i < tokens.length) {
     if (tokens[i] === 'public') i++;
     if (tokens[i] === 'meta') i++;
     if (tokens[i++] !== 'import') break;
     if (tokens[i] === 'all') i++;
-    while (i < tokens.length && !keywords.has(tokens[i]) && /^[\p{L}_«]/u.test(tokens[i])) out.push(tokens[i++]);
+    if (!tokens[i] || !ident.test(tokens[i])) throw new Error('invalid import header module');
+    out.push(tokens[i++]);
   }
   return out;
+}
+
+// This check runs before any Lake invocation. Production names come exclusively
+// from real .lean files beneath the configured library roots, never source text.
+// Lake still checks external dependency availability and artifact freshness.
+export function validateProductionInventory(packages) {
+  let total = 0;
+  for (const [cwd, names] of packages) {
+    const config = readFileSync(join(cwd, 'lakefile.toml'), 'utf8');
+    const libraries = [...config.matchAll(/^\[\[lean_lib\]\]\s*\nname\s*=\s*"([^"]+)"/gmu)].map(m => m[1]);
+    for (const name of names) {
+      if (!libraries.some(lib => name.startsWith(lib + '.'))) throw new Error(`meaning: no library owns target ${name} in ${cwd}`);
+      const file = join(cwd, name.replaceAll('.', '/') + '.lean');
+      if (!statSync(file, { throwIfNoEntry: false })?.isFile()) throw new Error(`meaning: target ${name} has no module file: ${file}`);
+      total++;
+    }
+  }
+  return total;
+}
+
+// Resolve prerequisite targets from package manifests and configured source
+// directories, without lake query/build. Missing dependency checkouts fail closed.
+export function validatePrerequisites(cwd, names) {
+  if (!names.length) return;
+  const roots = new Set(), visited = new Set();
+  const visit = dir => {
+    dir = resolve(dir);
+    if (visited.has(dir)) return;
+    visited.add(dir);
+    roots.add(dir);
+    const config = join(dir, 'lakefile.toml');
+    if (statSync(config, { throwIfNoEntry: false })?.isFile()) {
+      for (const m of readFileSync(config, 'utf8').matchAll(/^srcDir\s*=\s*"([^"]+)"/gmu)) roots.add(resolve(dir, m[1]));
+    }
+    const manifest = join(dir, 'lake-manifest.json');
+    if (!statSync(manifest, { throwIfNoEntry: false })?.isFile()) return;
+    const data = JSON.parse(readFileSync(manifest, 'utf8'));
+    for (const pkg of data.packages ?? []) visit(pkg.type === 'path'
+      ? resolve(dir, pkg.dir) : resolve(dir, data.packagesDir ?? '.lake/packages', pkg.name, pkg.subDir ?? ''));
+  };
+  visit(cwd);
+  for (const name of names) {
+    const relative = name.replaceAll('.', '/') + '.lean';
+    if (![...roots].some(dir => statSync(join(dir, relative), { throwIfNoEntry: false })?.isFile())) {
+      throw new Error(`meaning: prerequisite ${name} has no module file in configured packages`);
+    }
+  }
 }
 
 // Include roots as traversal vertices even though only audited modules are
@@ -147,6 +193,14 @@ export function touchedProduction(root, files, changed) {
   return new Set([...selected].filter(name => production.has(name)));
 }
 
+export function productionPrerequisites(cwd, imports) {
+  const selected = new Set(imports), prerequisites = new Set();
+  for (const name of imports) for (const dep of headerImports(readFileSync(join(cwd, name.replaceAll('.', '/') + '.lean'), 'utf8'))) {
+    if (!selected.has(dep) && !/^(?:Init|Lean|Std)(?:\.|$)/u.test(dep)) prerequisites.add(dep);
+  }
+  return [...prerequisites].sort();
+}
+
 // weakLeanArgs preserve artifact hashes. Both Lake's scheduler and each Lean
 // child are single-threaded. The temporary config lives beside lakefile.toml
 // so relative dependency paths retain their meaning.
@@ -161,6 +215,7 @@ export function serialConfig(text) {
 
 export function buildProduction(cwd, imports, run) {
   if (!imports.length) return 0;
+  validateProductionInventory([[cwd, imports]]);
   const dir = mkdtempSync(join(cwd, '.coord-h64-'));
   const config = dir + '.toml';
   // Keep the config in the package root, including for Bridge path dependencies.
@@ -169,12 +224,10 @@ export function buildProduction(cwd, imports, run) {
     // Never compile external libraries or a path dependency with its original
     // threading options. They must already be fresh. This also prevents a
     // Bridge build from silently rebuilding core outside its serial config.
-    const selected = new Set(imports), prerequisites = new Set();
-    for (const name of imports) for (const dep of headerImports(readFileSync(join(cwd, name.replaceAll('.', '/') + '.lean'), 'utf8'))) {
-      if (!selected.has(dep) && !/^(?:Init|Lean|Std)(?:\.|$)/u.test(dep)) prerequisites.add(dep);
-    }
-    if (prerequisites.size) {
-      const fresh = run(cwd, ['-f', config, '--rehash', '--no-build', 'build', ...[...prerequisites].sort().map(m => '+' + m + ':olean')]);
+    const prerequisites = productionPrerequisites(cwd, imports);
+    if (prerequisites.length) {
+      validatePrerequisites(cwd, prerequisites);
+      const fresh = run(cwd, ['-f', config, '--rehash', '--no-build', 'build', ...prerequisites.map(m => '+' + m + ':olean')]);
       if (fresh) return fresh;
     }
     return run(cwd, ['-f', config, '--rehash', 'build', ...imports.map(m => '+' + m + ':olean')]);
@@ -182,15 +235,27 @@ export function buildProduction(cwd, imports, run) {
 }
 
 export function main(args = process.argv.slice(2)) {
-  if (args.some(x => !['--source-only', '--build', '--touched'].includes(x) && !x.startsWith('--base='))) throw new Error('usage: check-meaning.mjs [--base=REF] [--source-only | --build [--touched]]');
+  if (args.some(x => !['--source-only', '--inventory-only', '--build', '--touched'].includes(x) && !x.startsWith('--base='))) throw new Error('usage: check-meaning.mjs [--base=REF] [--inventory-only | --source-only | --build [--touched]]');
   if (args.includes('--touched') && !args.includes('--build')) throw new Error('--touched requires --build');
   if (args.includes('--source-only') && args.includes('--build')) throw new Error('--source-only cannot build');
   const start = performance.now();
   const base = args.find(x => x.startsWith('--base='))?.slice(7) ?? process.env.GATE_BASE ?? 'origin/master';
   const sourceOnly = args.includes('--source-only');
+  if (args.includes('--inventory-only') && (sourceOnly || args.includes('--build'))) throw new Error('--inventory-only cannot scan or build');
   const root = git('rev-parse', '--show-toplevel').trim(); process.chdir(root);
   const merge = git('merge-base', base, 'HEAD').trim();
   const files = git('ls-files', '-z', '--cached', '--others', '--exclude-standard').split('\0').filter(p => p.endsWith('.lean'));
+  const packages = productionPackages(root, files);
+  const targetCount = validateProductionInventory(packages);
+  console.log(`meaning: inventory verified (${targetCount} file-backed production targets; no Lake invocation)`);
+  if (args.includes('--inventory-only')) {
+    for (const [cwd, imports] of packages) {
+      const prerequisites = productionPrerequisites(cwd, imports);
+      validatePrerequisites(cwd, prerequisites);
+      console.log(`meaning: inventory verified (${prerequisites.length} file-backed foreign prerequisites in ${cwd})`);
+    }
+    return 0;
+  }
   const errors = [];
   const changed = new Set(git('diff', '--name-only', merge, '--').split('\n'));
   const tracked = new Set(git('ls-tree', '-r', '--name-only', merge).split('\n'));
@@ -215,7 +280,6 @@ export function main(args = process.argv.slice(2)) {
     if (roots.status !== 0) return roots.status ?? 1;
     const dir = mkdtempSync(join(tmpdir(), 'h64-meaning-'));
     try {
-      const packages = productionPackages(root, files);
       const run = (cwd, args) => {
         const result = spawnSync('lake', args, { cwd, stdio: 'inherit', env: { ...process.env, LEAN_NUM_THREADS: '1' } });
         if (result.error) throw result.error;

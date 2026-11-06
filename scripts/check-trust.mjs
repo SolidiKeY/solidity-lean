@@ -63,6 +63,10 @@ function lexLean(src, mode) {
   return out.join('');
 }
 
+// Import headers need the ordinary lexical view: string contents are never code.
+// The conservative policy union below deliberately exposes string contents.
+export function blankLeanHeader(src) { return lexLean(src, 'ordinary'); }
+
 export function blankLean(src) {
   // Lean macros may choose interpolatedStr after arbitrary syntax. Keep the
   // union of ordinary, potentially interpolated, and literal-text views.

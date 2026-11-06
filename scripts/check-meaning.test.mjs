@@ -4,7 +4,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { sourceErrors, auditCommand, productionPackages, touchedProduction, buildProduction, serialConfig, headerImports } from './check-meaning.mjs';
+import { sourceErrors, auditCommand, productionPackages, touchedProduction, buildProduction, serialConfig, headerImports, validateProductionInventory, validatePrerequisites } from './check-meaning.mjs';
 
 test('planted source escapes fail, including quoted macros and attributes', () => {
   for (const src of [
@@ -94,7 +94,7 @@ test('production build inventory and touched closure include separate libraries 
       writeFileSync(join(dir, file), file.includes('Basic') ? 'import Solidity.Core\n' :
         file.includes('Bridge/Use') ? 'import Solidity.Corpus.Basic\n' :
         file.includes('Velvet/Use') ? 'public meta import\nall SolidityBridge.Use\n' :
-        file === 'SolidityCorpus.lean' ? 'import Solidity.Corpus.Basic Solidity.Corpus.Other\n' : '-- leaf\n');
+        file === 'SolidityCorpus.lean' ? 'import Solidity.Corpus.Basic\nimport Solidity.Corpus.Other\n' : '-- leaf\n');
     }
     const packages = productionPackages(dir, files);
     assert.deepEqual(packages.map(([, ms]) => ms.length), [3, 2]);
@@ -103,7 +103,7 @@ test('production build inventory and touched closure include separate libraries 
     assert.equal(touchedProduction(dir, files, new Set(['docs/Change.md'])).size, 0);
     assert.deepEqual([...touchedProduction(dir, files, new Set(['Bridge/SolidityBridge/Use.lean']))].sort(),
       ['Solidity.Core', 'Solidity.Corpus.Basic', 'SolidityBridge.Use', 'SolidityVelvet.Use']);
-    assert.deepEqual(headerImports('module\npublic import all\nFoo.Bar Baz\nmeta import Qux\nopen Namespace'), ['Foo.Bar', 'Baz', 'Qux']);
+    assert.deepEqual(headerImports('module\npublic import all\nFoo.Bar\nmeta import Qux\nopen Namespace'), ['Foo.Bar', 'Qux']);
     writeFileSync(join(dir, 'SolidityCorpus.lean'), 'import Solidity.Corpus.Basic\n');
     writeFileSync(join(dir, 'Solidity/Corpus/Other.lean'), 'import SolidityCorpus\n');
     assert.ok(touchedProduction(dir, files, new Set(['Solidity/Core.lean'])).has('Solidity.Corpus.Other'));
@@ -140,5 +140,64 @@ test('preparation rebuilds a stale audited olean, leaves unrelated targets stale
     writeFileSync(join(dir, 'Solidity/Wanted.lean'), 'theorem broken : False := True.intro\n');
     assert.notEqual(buildProduction(dir, ['Solidity.Wanted'], run), 0);
     assert.equal(serialConfig(config).includes('"-j1"'), true);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+
+test('import headers stop at arbitrary commands and ignore docstrings, comments and strings', () => {
+  for (const comment of [
+    '/-! A docstring mentioning import foo and `close_rw_s`. -/',
+    '/-- A docstring mentioning import foo and `close_rw_s`. -/',
+    '/- Nested /- import foo -/ `close_rw_s` -/',
+    '-- import foo `close_rw_s`',
+  ]) {
+    assert.deepEqual(headerImports(`import Solidity.Update\n${comment}\nregister_simp_attr close_rw_s\n`), ['Solidity.Update']);
+    assert.deepEqual(headerImports(`${comment}\nimport Solidity.Update\n`), ['Solidity.Update']);
+  }
+  assert.deepEqual(headerImports('import Lean\ndef text := "import foo `close_rw_s`"\nimport Hidden'), ['Lean']);
+  assert.deepEqual(headerImports('import Lean\n#eval s!"import foo {0}"'), ['Lean']);
+  assert.deepEqual(headerImports('import Lean\n#eval r#"import foo"#'), ['Lean']);
+  assert.deepEqual(headerImports('import /- comment -/ Lean\nimport\n Std\ncustom_command close_rw_s'), ['Lean', 'Std']);
+  assert.deepEqual(headerImports('import Lean register_simp_attr close_rw_s'), ['Lean']);
+});
+
+test('production inventory rejects non-files and unknown library roots before Lake runs', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'h64-inventory-'));
+  try {
+    mkdirSync(join(dir, 'Solidity'));
+    mkdirSync(join(dir, 'Bridge/SolidityBridge'), { recursive: true });
+    writeFileSync(join(dir, 'lakefile.toml'), 'name = "fixture"\n[[lean_lib]]\nname = "Solidity"\n');
+    writeFileSync(join(dir, 'Bridge/lakefile.toml'), 'name = "bridge"\n[[lean_lib]]\nname = "SolidityBridge"\n');
+    writeFileSync(join(dir, 'Solidity/Real.lean'), 'import Lean\n/-! import foo `close_rw_s` -/\ntheorem good : True := True.intro');
+    writeFileSync(join(dir, 'Bridge/SolidityBridge/Real.lean'), 'import Solidity.Real');
+    const packages = productionPackages(dir, ['Solidity/Real.lean', 'Solidity/Fake.txt', 'Bridge/SolidityBridge/Real.lean', 'Bridge/SolidityBridge/Fake.md']);
+    assert.equal(validateProductionInventory(packages), 2);
+    assert.throws(() => validateProductionInventory([[dir, ['Solidity.Missing']]]), /no module file/);
+    assert.throws(() => validateProductionInventory([[dir, ['Unregistered.Real']]]), /no library owns/);
+    let calls = 0;
+    assert.throws(() => buildProduction(dir, ['Solidity.Missing'], () => { calls++; return 0; }), /no module file/);
+    assert.equal(calls, 0);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+
+test('foreign prerequisite preflight rejects missing modules and resolves manifest srcDir', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'h64-prerequisites-'));
+  try {
+    mkdirSync(join(dir, 'Solidity'));
+    mkdirSync(join(dir, 'dep/src/Foreign'), { recursive: true });
+    writeFileSync(join(dir, 'lakefile.toml'), 'name = "fixture"\n[[lean_lib]]\nname = "Solidity"\n');
+    writeFileSync(join(dir, 'lake-manifest.json'), JSON.stringify({ packages: [{ type: 'path', dir: 'dep' }] }));
+    writeFileSync(join(dir, 'dep/lakefile.toml'), 'name = "dep"\n[[lean_lib]]\nname = "Foreign"\nsrcDir = "src"\n');
+    writeFileSync(join(dir, 'dep/src/Foreign/Real.lean'), '-- prerequisite');
+    validatePrerequisites(dir, ['Foreign.Real']);
+    assert.throws(() => validatePrerequisites(dir, ['Foreign.Missing']), /no module file/);
+    writeFileSync(join(dir, 'Solidity/Use.lean'), 'import Foreign.Missing\n');
+    let calls = 0;
+    assert.throws(() => buildProduction(dir, ['Solidity.Use'], () => { calls++; return 0; }), /no module file/);
+    assert.equal(calls, 0);
+    writeFileSync(join(dir, 'Solidity/Use.lean'), 'import Foreign.Real\n');
+    assert.equal(buildProduction(dir, ['Solidity.Use'], () => { calls++; return 0; }), 0);
+    assert.equal(calls, 2);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

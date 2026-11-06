@@ -80,3 +80,35 @@ full-gate log at `a348ff024` (merged with master `bfbabcaee`) records **18 s**
 for meaning, stopping at seven stale Corpus modules before the live audit.
 Neither duration is a passing source + build + live-audit measurement; that
 measurement still requires a coordinator rerun with a writable cache.
+
+H64c fixes production import parsing after the coordinator's 84-second failed
+meaning run reported unknown module `close_rw_s`. The concrete false imports
+came from `ReadWrite.lean`'s `register_simp_attr` commands after its final import.
+The header reader now follows `Lean.Parser.Module.import`: exactly one module
+identifier per import, including multiline/public/meta/all headers. It uses the
+ordinary lexical view, blanking nested comments, docstrings and strings without
+changing the conservative source-policy lexer.
+
+Inventory names come only from `.lean` paths under the production library roots.
+Before Lake is invoked, targets must have real source files and a configured
+owning library. Foreign prerequisites must resolve through package manifests and
+TOML source directories. `--inventory-only` checks the production targets and
+all direct foreign prerequisites without invoking Lake; it remains diagnostic,
+not a meaning-gate pass. This resolver covers the current production library
+layouts, not arbitrary future Lake configuration programs.
+
+At master `36ccddf38`, the dry-run verified 6,918 production targets (6,395 core,
+523 Bridge), 13,155 import edges and 141 foreign prerequisites (1 core, 140
+Bridge). No `foo`, `register_simp_attr` or `close_rw_s` tokens were requested.
+Nine meaning test groups pass, including comment/docstring/string regressions,
+missing-module rejection before Lake, and manifest/path/srcDir resolution.
+Existing trust-lexer tests, generated-root checks and syntax/whitespace checks
+also pass. Source policy passes over 7,325 files in 5.224 seconds; this is not
+passing live-audit timing. No full build or live master audit was attempted in
+this 4 GiB job scope. The coordinator must rerun the corrected meaning gate in
+its writable-cache environment to establish that separate acceptance result.
+
+Read-only finder and skeptic reviews used no Lean server or builds. Both found
+no remaining concrete issue for the current configuration. Their requested
+prerequisite-resolver regression was added, covering valid path/srcDir imports
+and missing prerequisites rejected before the Lake callback.
