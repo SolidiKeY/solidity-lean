@@ -2230,3 +2230,67 @@ handoff. External solc
 results are unchanged historical fixture evidence, not evidence for this universal
 kernel theorem. Original G11 remains partial: general compound framing, remaining
 parser coverage and final whole-repository acceptance are still outstanding.
+
+
+## Checkpoint AA — universal list measures and iteration budgets
+
+Rebased onto published `c61eac233747385d1b76aff6c9af72eb7923f43b`.
+The coordinator cherry-picked Z as `bc417f403bd7c26b52c0a9dc924e49269302bd24`;
+owned files were verified byte-identical before Git skipped duplicate `dcbe2ebf`.
+The recovery ref `refs/backup/statement-grammar/pre-c61eac233` preserves that head.
+Z's root registration is now integrated. This checkpoint adds a module and local
+registration only; no old proof or implementation was refactored.
+
+[ListMeasures](../../Solidity/Frontend/StatementGrammarH28/ListMeasures.lean)
+contains exactly nine public theorems:
+
+| Theorem | Exact scope |
+| --- | --- |
+| `list_length_values` | Every intrinsic list has the same G0 length and typed-values length. |
+| `list_yield_length` | Every successful list yield has exactly one output chunk per element, for every category. |
+| `list_yield_chunks_nonempty` | Under the explicit universal nonempty-element-yield premise, each actual output chunk is nonempty. |
+| `nonempty_chunks_token_bound` | The number of nonempty token chunks is bounded by flattened token length. |
+| `list_yield_token_bound` | The generic premise yields the intrinsic list-count bound. |
+| `statement_list_yield_token_bound` | The premise is discharged for arbitrary statement syntax in every context. |
+| `item_list_yield_token_bound` | The premise is discharged for arbitrary item syntax, including unchecked blocks. |
+| `item_list_many_iteration_budget` | The actual located-input token-length-plus-one counter accommodates every item plus stopping, for arbitrary suffix states. |
+| `statement_list_many_iteration_budget` | The corresponding universal statement-list iteration bound. |
+
+These are universal structural measures, not parser-success assumptions.
+The final inequalities establish the loop counter's capacity only; they do not
+establish the per-element parser's success, nesting fuel or general completeness.
+The exact generic premise is necessary: a present optional expression containing
+`none` yields one empty chunk. The statement/item specializations use existing
+unconditional nonempty-yield theorems, covering all 13 statement constructors and
+both item forms without expression uniqueness or a framed-root restriction.
+Existing G0 list observers supply all computational measures; indexed cases are
+proof-only. Budgets and immutable producers are unchanged.
+
+[Controls](../../tests/h28-sol/statement-grammar/ListMeasuresControls.lean)
+contain exactly 10 theorems. They enumerate and inhabit all 13 statement roots
+in an actual successful list and all 14 corresponding statement/unchecked items;
+exercise attribute and fragment layouts; reject missing layout; prove actual
+yields/count/budget for arbitrary natural-number width; check both empty lists
+and one stopping iteration; and retain the inhabited generic empty-chunk
+counterexample and its failed nonempty check. All four list/option constructors
+occur in controls. The generic arity theorem still applies to that negative
+example; only the nonempty-derived bound is unavailable.
+
+[Public audit](../../tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean)
+prints all nine signatures and axiom sets. Controls print all 10 theorem axiom
+sets. Per-file diagnostics and the initial owned build passed. Separate finder
+and skeptic source reviews found no defects. Exact committed-head gate, final
+review, cache and seal receipts remain acceptance requirements in the handoff;
+this text does not claim they already exist.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ListMeasures
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+This is assigned block/list decomposition and fuel backfill. It does not close
+the remaining general compound framing, structural parser coverage or final
+whole-repository acceptance obligations. SG-CEX-01/02 stay explicit and SOL-EU
+remains excluded. External solc fixture results are separate historical evidence.
