@@ -1,4 +1,6 @@
-# G19 mapped for-loop immediate return
+# G19 context-related for-loop immediate return
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 [AssignmentForReturn](../../Solidity/Lowering/G19/AssignmentForReturn.lean) extends V07's existing ContextMap/assignment operand with one concrete statement shape: `for (; i=a; post) { return; }`. The initializer is skip. A false condition falls through after writing i; a true condition propagates bare return. The arbitrary typed post expression is never evaluated in either case. Source fuel+4 suffices for every remaining fuel; this is a theorem about this terminating shape, not a source-profile unrolling limit. Source zero resource still times out.
 
