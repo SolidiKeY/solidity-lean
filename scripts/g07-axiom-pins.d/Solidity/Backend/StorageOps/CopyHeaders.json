@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/StorageOps/CopyHeaders.lean:Solidity.Backend.StorageOps.CopyHeaders.graph_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaders.lean:Solidity.Backend.StorageOps.CopyHeaders.graph_header_compatible": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaders.lean:Solidity.Backend.StorageOps.CopyHeaders.header_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaders.lean:Solidity.Backend.StorageOps.CopyHeaders.numeric_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaders.lean:Solidity.Backend.StorageOps.CopyHeaders.represented_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

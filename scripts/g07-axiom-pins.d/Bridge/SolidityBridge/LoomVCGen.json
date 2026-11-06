@@ -1,0 +1,17 @@
+{
+ "Bridge/SolidityBridge/LoomVCGen.lean:Solidity.Bridge.Loom.runWithPost_wp": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomVCGen.lean:Solidity.Bridge.Loom.runWithPostGenerator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomVCGen.lean:Solidity.Bridge.Loom.runWithPostGenerator_get": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

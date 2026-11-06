@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/StackLoopChecks.lean:Solidity.Evm.External.Assembly.StackLoop.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/StackLoopChecks.lean:Solidity.Evm.External.Assembly.StackLoop.simulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

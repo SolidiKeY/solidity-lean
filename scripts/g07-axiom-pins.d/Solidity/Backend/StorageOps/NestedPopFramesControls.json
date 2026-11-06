@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopFramesControls.lean:Solidity.Backend.StorageOps.NestedPopFrames.Controls.bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopFramesControls.lean:Solidity.Backend.StorageOps.NestedPopFrames.Controls.failed_query_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopFramesControls.lean:Solidity.Backend.StorageOps.NestedPopFrames.Controls.live_alias_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopFramesControls.lean:Solidity.Backend.StorageOps.NestedPopFrames.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopFramesControls.lean:Solidity.Backend.StorageOps.NestedPopFrames.Controls.wrong_last_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopFramesControls.lean:Solidity.Backend.StorageOps.NestedPopFrames.Controls.wrong_nonalias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

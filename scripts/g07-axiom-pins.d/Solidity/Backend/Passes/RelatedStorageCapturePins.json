@@ -1,0 +1,63 @@
+{
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.aligned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.certificate": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.numeric_slot_collapse_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.public_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.skipped_capture_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.wrong_alias_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.wrong_certificate": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.Controls.wrong_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedStorageCapturePins.lean:Solidity.Backend.Passes.RelatedStorageCapture.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

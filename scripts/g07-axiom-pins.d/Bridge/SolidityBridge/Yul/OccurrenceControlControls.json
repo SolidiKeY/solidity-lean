@@ -1,0 +1,98 @@
+{
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.byteAt": [
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.combine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.conditional": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.conditional_classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.scalar_classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.selectBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.Selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.Selected.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceControlControls.lean:SolidityBridge.Yul.OccurrenceControl.statement": [
+  "propext"
+ ]
+}

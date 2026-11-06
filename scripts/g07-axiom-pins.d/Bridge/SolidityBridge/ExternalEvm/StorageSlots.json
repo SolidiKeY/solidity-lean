@@ -1,0 +1,17 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/StorageSlots.lean:Solidity.Evm.StorageSlots.array_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/StorageSlots.lean:Solidity.Evm.StorageSlots.bounded_refinement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/StorageSlots.lean:Solidity.Evm.StorageSlots.map_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

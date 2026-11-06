@@ -1,0 +1,74 @@
+{
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.ancestor_header_frame": [
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.ancestor_observation_frame": [
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Apart.observe_save": [
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Controls.empty_numeric_deep": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Controls.empty_represented_deep": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Controls.recursive_numeric_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Controls.represented_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Controls.represented_written": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.inlineSize_legacy": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.inlineSize_node": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.keypath_header_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.keypath_subvalue_rep": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.keypath_word_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Represented.header_write_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Represented.prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/GraphControls.lean:Solidity.Storage.Representation.Graph.Represented.write_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

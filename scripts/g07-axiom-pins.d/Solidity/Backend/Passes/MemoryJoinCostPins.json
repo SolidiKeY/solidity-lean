@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/Passes/MemoryJoinCostPins.lean:Solidity.Backend.Passes.MemoryJoinCost.Controls.failed_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinCostPins.lean:Solidity.Backend.Passes.MemoryJoinCost.Controls.reached_budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinCostPins.lean:Solidity.Backend.Passes.MemoryJoinCost.cost_join": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinCostPins.lean:Solidity.Backend.Passes.MemoryJoinCost.failed_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinCostPins.lean:Solidity.Backend.Passes.MemoryJoinCost.public_join": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinCostPins.lean:Solidity.Backend.Passes.MemoryJoinCost.successful_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinCostPins.lean:Solidity.Backend.Passes.MemoryJoinCost.suffix_allocation_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

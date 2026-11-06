@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DomainTransport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DomainTransport.probe_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

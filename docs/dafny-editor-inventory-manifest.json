@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
+  "sourceHead": "421ce2379080737824d4ab78eef01dffe645a37d",
+  "repository": "/workspace/solidity-lean",
+  "fileCount": 1,
+  "uncompressedBytes": 670902,
+  "rowCount": 484,
+  "frozenRowCount": 270,
+  "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
+  "archive": {
+    "path": "/workspace/dafny-parity-digest-fix-20261106/bulk.tar.gz",
+    "bytes": 38462,
+    "sha256": "976ec0994dc661ea9cad7fcd1141b248f09f6f658d3b2f8425443fdc5ba01fa8"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-digest-fix-20261106/files.json",
+    "bytes": 186,
+    "sha256": "d5e0f8908d5bbff85c4ac077c9de1396436d6a60349721965b6d2258356ca848"
+  },
+  "rawInventory": {
+    "path": "/workspace/dafny-parity-digest-fix-20261106/inventory.json",
+    "bytes": 670902,
+    "sha256": "6f2ad1a9b5eccdb145e01d122676d97e6ca4b399fc7f22f7c116c1102f5e50fe"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
+  "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
+  "gateBoundary": "Tracked docs/dafny-editor-features.json is a small digest descriptor. Every executable consumer verifies the restored full inventory against its sha256/size/counts. Missing/corrupt inventory fails explicitly; original484 rows and all gate/judge predicates unchanged."
+}

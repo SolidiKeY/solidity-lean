@@ -1,7 +1,7 @@
 {
   "status": "concrete API and observation packet; producer migration pending",
-  "sourceHead": "d3a79031a17de96359f75617a77475b15c468d7d",
-  "adoptedMaster": "e6849d3bdf516099d20c33d3581d523449764018",
+  "sourceHead": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "adoptedMaster": "70845978ab616a63b13d0dee8b31b28893ccf591",
   "entrypoint": "Solidity.Frontend.ExecutableAst.Shared.executableReader",
   "publicRoots": [
     "Shared.function executableReader",

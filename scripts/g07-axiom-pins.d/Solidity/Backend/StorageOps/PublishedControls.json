@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.copy_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.delete_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.dynamic_copy_rejected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.pop_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.push_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.read_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.rebind_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PublishedControls.lean:Solidity.Backend.StorageOps.Published.write_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

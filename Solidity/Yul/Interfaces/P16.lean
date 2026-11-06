@@ -1,3 +1,4 @@
+import Solidity.Yul.RawHorizon
 import Solidity.Yul.RawContinueLoop
 import Solidity.Yul.RawU8ForAbsent
 import Solidity.Yul.RawU8For

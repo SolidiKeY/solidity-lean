@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/StorageOps/TargetRetainedCycle.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.after_reuse": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetRetainedCycle.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.run_pop_regrow_pop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetRetainedCycle.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.run_reuse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

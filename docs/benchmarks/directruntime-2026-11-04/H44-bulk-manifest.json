@@ -1,0 +1,14 @@
+{
+  "decision": "H44",
+  "repository": "/workspace/solidity-lean",
+  "preSplitHead": "98e691bac16115c5c1f36e0cbf06185bd11da8c3",
+  "reviewBase": "260441fd82852fc1c294e62f6818e15de6375ceb",
+  "archive": "/workspace/solidity-lean/.lake/native-browser-h44-bulk-98e691ba/bulk-evidence.tar.gz",
+  "archiveBytes": 3203135,
+  "archiveSha256": "ef69a1e29e183e00c1a2070e5573604dada2f1c6dea4ed226b9a4bc490676e24",
+  "files": 1530,
+  "uncompressedBytes": 31651117,
+  "removedFromIndex": 1404,
+  "originalFilesPreserved": true,
+  "boundary": "Bulk evidence retained locally and archived, not changed or regenerated. Historical git objects remain reachable; merge diff excludes bulk. No theorem/gate/budget changes."
+}

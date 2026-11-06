@@ -1,0 +1,81 @@
+{
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.aligned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.corrupted_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.eager_false_arm_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.eager_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.initial_vector": [],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.readback_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.recapture_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.recaptured_condition_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.Controls.target_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulConditionalPins.lean:Solidity.Backend.Passes.EffectfulConditionalAssignment.payment_free": [
+  "propext"
+ ]
+}

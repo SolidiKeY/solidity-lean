@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/Yul/DirectMemoryControls.lean:SolidityBridge.Yul.DirectMemory.Controls.prefix_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemoryControls.lean:SolidityBridge.Yul.DirectMemory.Controls.prefix_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemoryControls.lean:SolidityBridge.Yul.DirectMemory.Controls.typed_image_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemoryControls.lean:SolidityBridge.Yul.DirectMemory.Controls.unaligned_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemoryControls.lean:SolidityBridge.Yul.DirectMemory.Controls.unaligned_refinement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

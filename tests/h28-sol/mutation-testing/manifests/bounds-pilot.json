@@ -1,0 +1,104 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "One type-preserving array-read skip mutant with dynamic-empty/fixed-length boundary counterexamples and concrete nonempty live-read controls; one denominator entry. Prototype only: full index clauses/operators and nine-family acceptance pending. Original helper inventory remains partial as errata states.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+  "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/cache-bootstrap/manifest.json",
+  "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec",
+  "cache_root": "/workspace/h28-runtime/prepared-base-6f3eedf0",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "bounds.array-read-skipped",
+      "kind": "mutant",
+      "family": "index-bounds",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := find(storage, arr[ie]) } \u27e8[ ]\u27e9 }",
+      "new": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := v } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storageIndexReadArrayFind",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/BoundsBaseline.lean",
+      "oracle_sha256": "059db341369f65869183ce8c422d2852b4fd9c2cf102678ee7641a1252e91cdc",
+      "oracle_declarations": [
+        "H28.BoundsBaseline.source_link",
+        "H28.BoundsBaseline.input_inhabited",
+        "H28.BoundsBaseline.dynamic_boundary_reverts",
+        "H28.BoundsBaseline.fixed_boundary_reverts",
+        "H28.BoundsBaseline.dynamic_positive_read",
+        "H28.BoundsBaseline.fixed_positive_read"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/BoundsSkippedKill.lean",
+      "witness_sha256": "debc07e078ca0938447de5bdc97c655a8b3ed9f51e211dc400751feb2910965e",
+      "witness_declarations": [
+        "H28.BoundsSkippedKill.source_link",
+        "H28.BoundsSkippedKill.input_inhabited",
+        "H28.BoundsSkippedKill.checked_kill",
+        "H28.BoundsSkippedKill.checked_fixed_kill",
+        "H28.BoundsSkippedKill.typed_landing"
+      ],
+      "constructor_id": "Taclet.storageIndexReadArrayFind",
+      "mutant_sha256": "46e49b09e8ce2d676ff0c27f176bdcf8d463b3ccb092c7bd552729d71373c407",
+      "oracle_signature_sha256": {
+        "H28.BoundsBaseline.source_link": "831b459270784e4774f117d4023fe299023f17373838e0ae1f4b329f21d9b6a0",
+        "H28.BoundsBaseline.input_inhabited": "fd76689a83d0fa7c09306e081155df791622380fde2af2ffa762b2171019ff06",
+        "H28.BoundsBaseline.dynamic_boundary_reverts": "9b287bd9e84703e549bc0dbb737a1bdd8cb1e11114cef324145de8b0f0d727de",
+        "H28.BoundsBaseline.fixed_boundary_reverts": "476a159ce58d3ed3ecf856216276d61cb57eb97fde30f1591dcf79a5804b97e6",
+        "H28.BoundsBaseline.dynamic_positive_read": "a0ed22848f80b981d5b01dcaa84b841794bcca1e7d1144e50072f770fff19c81",
+        "H28.BoundsBaseline.fixed_positive_read": "7b03d657b63dffe11519f721bf33bb8f7a12ab15ab8de8e23b44016daf3c63a0"
+      },
+      "witness_signature_sha256": {
+        "H28.BoundsSkippedKill.source_link": "ad284bd97ca4d7872cdd6f415f76470de632328d594f791ef4eb6bb7398359a6",
+        "H28.BoundsSkippedKill.input_inhabited": "947f7d3571dd7b7c2c3e3a7f572beb44cba0a7c7d2b945e5b19ea5530b0cabed",
+        "H28.BoundsSkippedKill.checked_kill": "12b1e187cd93e40f9805a118b78e27f1df3fd1faccff1d6acbf3b11f7c752b9c",
+        "H28.BoundsSkippedKill.checked_fixed_kill": "2a8ed2b77ff6c34d922986c01f15be4668fc8c8c87de950b5e501945f79df1ff",
+        "H28.BoundsSkippedKill.typed_landing": "9e943f1381b3542745a748e954265959b18e103da85bfadc184f5d59a4b8e5a5"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ]
+}

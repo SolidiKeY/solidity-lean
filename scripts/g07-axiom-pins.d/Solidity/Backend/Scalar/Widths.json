@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/Scalar/Widths.lean:Solidity.Backend.Scalar.signed_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Widths.lean:Solidity.Backend.Scalar.unsigned_chain": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Widths.lean:Solidity.Backend.Scalar.unsigned_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
