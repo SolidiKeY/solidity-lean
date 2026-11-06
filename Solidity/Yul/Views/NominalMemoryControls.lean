@@ -74,7 +74,7 @@ def placement : Placement heap where
 
 def state : Source.EMState env [arrayTy,arrayTy] :=
   ⟨.cons (.memRef rfl 0) (.cons (.memRef rfl 0) .nil),
-    ⟨⟨⟨fun _ => Source.Account.empty _⟩,.empty,[]⟩,heap,[],[],⟨[],.nil⟩⟩⟩
+    ⟨⟨⟨fun _ => Source.Account.empty _⟩,.empty,[]⟩,heap,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def oldRaw : ByteView := mstore (mstore (fun _=>165) 128 ⟨2^256-1,by decide⟩) 160 32767
 def newRaw : ByteView := mstore (mstore oldRaw 128 ⟨2^256-32768,by decide⟩) 160 0
 def newValues : Fin 2 → Source.Val env.layout (.udvt small) := fun i =>

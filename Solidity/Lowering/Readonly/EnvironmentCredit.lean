@@ -1,3 +1,4 @@
+import Solidity.Source.Hoare
 import Solidity.Lowering.Readonly.EnvironmentSteps
 
 /-! Exact source environment-credit and callback-credit failure equations.
@@ -8,16 +9,6 @@ open Solidity.Source
 open Solidity.Roadmap (Address Word Outcome)
 open EM EnvironmentSteps
 variable {E : Env}
-private theorem run_bind {α β : Type} (m : EM E Γ α) (k : α → EM E Γ β)
-    (x : Locals E.layout Γ × St E) :
-    (m >>= k).run x = match m.run x with
-      | (.ok a, y) => (k a).run y
-      | (.error e, y) => (.error e, y) := by
-  rw [ExceptT.run_bind]
-  show StateT.bind (ExceptT.run m) _ x = _
-  simp only [StateT.bind]
-  rcases m.run x with ⟨r, y⟩
-  cases r <;> rfl
 
 
 private theorem run_st (state : St E) :
@@ -44,10 +35,10 @@ theorem known (global : Glob E) (n depth : Nat) (mode : Bool)
     (envLoop global (n + 1) depth mode).run (L0 E, state) =
       (envLoop global n depth mode).run (L0 E, final) := by
   rw [envLoop]
-  simp only [run_bind, run_st, choice, run_emit]
+  simp only [Solidity.Source.Hoare.run_bind, run_st, choice, run_emit]
   dsimp only [recorded] at instanceRun creditRun
   rw [instanceRun]
-  simp only [Option.isSome, ↓reduceIte, run_bind, creditRun]
+  simp only [Option.isSome, ↓reduceIte, Solidity.Source.Hoare.run_bind, creditRun]
 
 theorem unknown (global : Glob E) (n depth : Nat) (mode : Bool)
     (state : St E) (target : Address) (value : Word)
@@ -57,10 +48,10 @@ theorem unknown (global : Glob E) (n depth : Nat) (mode : Bool)
     (envLoop global (n + 1) depth mode).run (L0 E, state) =
       (envLoop global n depth mode).run (L0 E, recorded state target value) := by
   rw [envLoop]
-  simp only [run_bind, run_st, choice, run_emit]
+  simp only [Solidity.Source.Hoare.run_bind, run_st, choice, run_emit]
   dsimp only [recorded] at instanceRun
   rw [instanceRun]
-  simp only [Option.isSome, Bool.false_eq_true, ↓reduceIte, run_bind, run_pure, recorded]
+  simp only [Option.isSome, Bool.false_eq_true, ↓reduceIte, Solidity.Source.Hoare.run_bind, run_pure, recorded]
 
 theorem failed (global : Glob E) (n depth : Nat) (mode : Bool)
     (state final : St E) (target : Address) (value : Word) (code : String) (halt : Halt)
@@ -71,10 +62,10 @@ theorem failed (global : Glob E) (n depth : Nat) (mode : Bool)
       (.error halt, (L0 E, final))) :
     (envLoop global (n + 1) depth mode).run (L0 E, state) = (.error halt, (L0 E, final)) := by
   rw [envLoop]
-  simp only [run_bind, run_st, choice, run_emit]
+  simp only [Solidity.Source.Hoare.run_bind, run_st, choice, run_emit]
   dsimp only [recorded] at instanceRun creditRun
   rw [instanceRun]
-  simp only [Option.isSome, ↓reduceIte, run_bind, creditRun]
+  simp only [Option.isSome, ↓reduceIte, Solidity.Source.Hoare.run_bind, creditRun]
 
 /-- Credit failure precedes entering the callback and bypasses this enclosing
 step's completion/continuation, keeping any existing nested events unchanged. -/
@@ -90,9 +81,9 @@ theorem callback_credit_failed (global : Glob E) (n depth : Nat) (mode requested
       (L0 E, entered state target sender value input requested) = (.error halt, (L0 E, final))) :
     (envLoop global (n + 1) depth mode).run (L0 E, state) = (.error halt, (L0 E, final)) := by
   rw [envLoop]
-  simp only [run_bind, run_st, choice, run_emit, guard, Bool.false_eq_true, ↓reduceIte]
+  simp only [Solidity.Source.Hoare.run_bind, run_st, choice, run_emit, guard, Bool.false_eq_true, ↓reduceIte]
   dsimp only [entered] at instanceRun creditRun
   rw [instanceRun]
-  simp only [run_bind, run_mark, checkpoint, creditRun]
+  simp only [Solidity.Source.Hoare.run_bind, run_mark, checkpoint, creditRun]
 
 end Solidity.Lowering.Readonly.EnvironmentCredit

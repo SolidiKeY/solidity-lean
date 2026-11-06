@@ -1,0 +1,53 @@
+import «tests».h62.item4.«generic-yul-views».GenericByteObjects
+import Solidity.Yul.Views.ReadControls
+
+/-! Typed table, original-statement instances, and additional boundary coverage.
+The original Controls declarations remain read-only and are checked below. -/
+namespace Solidity.Yul.Views.H62
+open Controls
+
+def unaligned : ByteObjectFixture layout :=
+  ⟨[0xaa, 0xbb], by decide, ascending, 129⟩
+
+def fixtures : List (ByteObjectFixture layout) := [
+  ⟨[], by decide, zero, 96⟩,
+  ⟨[0xaa, 0xbb], by decide, ascending, 129⟩,
+  ⟨[0], by decide, (fun _ => 0xa5), 0⟩,
+  ⟨List.replicate 31 0xff, by decide, ascending, 127⟩,
+  ⟨List.replicate 32 0xaa, by decide, ascending, 128⟩,
+  ⟨List.replicate 33 0xbb, by decide, (fun _ => 0xa5), 129⟩,
+  ⟨List.replicate 64 0xcc, by decide, ascending, 256⟩]
+
+theorem all_fixtures : ∀ f ∈ fixtures, ByteObjectFacts f := by
+  intro f _
+  exact byteObjectFacts f
+
+/-- Exact original statement from ReadControls.byte_component_decode. -/
+theorem original_byte_component_decode :
+    decodeBytesObject layout unalignedBytes 129 = byteObject :=
+  (byteObjectFacts unaligned).bytes
+
+/-- Exact original statement, including both live bytes and residual positions. -/
+theorem original_byte_component : mload unalignedBytes 129 = 2 ∧ unalignedBytes 162 = 0xbb ∧
+    unalignedBytes 163 = 163 ∧ unalignedBytes 128 = 128 := by
+  refine ⟨(byteObjectFacts unaligned).header, ?_, ?_, ?_⟩
+  · exact (byteObjectFacts unaligned).payload 1 (by decide)
+  · exact (byteObjectFacts unaligned).residual 163 (Or.inr (by decide))
+  · exact (byteObjectFacts unaligned).residual 128 (Or.inl (by decide))
+
+/-- Correspondence is at the exact existing declaration types, not a weaker
+observation or a Bool acceptance flag. -/
+example : decodeBytesObject layout unalignedBytes 129 = byteObject := byte_component_decode
+example : mload unalignedBytes 129 = 2 ∧ unalignedBytes 162 = 0xbb ∧
+    unalignedBytes 163 = 163 ∧ unalignedBytes 128 = 128 := byte_component
+
+/-- Retain existing refusal/negative coverage unchanged. -/
+example (f : Field) : ¬ (f.offset = 31 ∧ f.width = 2) := crossing_slot_refused f
+example : boolBytes.decode (fun _ => 2) = none := dirty_bool_not_canonical
+example : readBytes (mstore zero 128 ⟨0x12345678, by decide⟩) 156 4 ≠
+    [0x78, 0x56, 0x34, 0x12] := not_little_endian
+
+#print axioms all_fixtures
+#print axioms original_byte_component
+#print axioms original_byte_component_decode
+end Solidity.Yul.Views.H62

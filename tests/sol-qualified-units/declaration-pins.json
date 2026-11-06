@@ -7,8 +7,10 @@
     "Solidity.Frontend.QualifiedUnits.DifferentialControls",
     "Solidity.Frontend.QualifiedUnits.Inheritance",
     "Solidity.Frontend.QualifiedUnits.Layout",
+    "Solidity.Frontend.QualifiedUnits.Linearization",
     "Solidity.Frontend.QualifiedUnits.Lookup",
     "Solidity.Frontend.QualifiedUnits.MergeSpecification",
+    "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
     "Solidity.Frontend.QualifiedUnits.NormalizationControls",
     "Solidity.Frontend.QualifiedUnits.ReferenceControls",
     "Solidity.Frontend.QualifiedUnits.ReferenceCoverage",
@@ -22,6 +24,8 @@
     "Solidity.Frontend.QualifiedUnits.SignatureResolution",
     "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls",
     "Solidity.Frontend.QualifiedUnits.Specification",
+    "Solidity.Frontend.QualifiedUnits.Target",
+    "Solidity.Frontend.QualifiedUnits.TargetControls",
     "Solidity.Frontend.QualifiedUnits.TypePaths",
     "Solidity.Frontend.QualifiedUnits.UnitPaths"
   ],
@@ -3563,6 +3567,584 @@
     {
       "axiom": false,
       "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Bases",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.First.available",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.acyclic",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.below",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.below.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.below.mk",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.below.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.bounded",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.bounded._proof_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.bounded._proof_1_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.brecOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.head",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.members",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.mk",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.precedence",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.recOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Linear.unique",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Merge.sublist",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.below",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.below.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.below.cons",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.below.nil",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.below.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.brecOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.cons",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.nil",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.Routes.recOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.base_in_merged",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.bases_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.bases_iff._simp_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.bases_unique",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.linearize_complete",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.linearize_complete._proof_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.linearize_complete._proof_1_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.linearize_complete._proof_1_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.linearize_complete._proof_1_4",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.linearize_complete._proof_1_5",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.linearize_sound",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.mapM_pairs",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.mapM_pairs.match_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.merged_in_base",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.order_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.order_iff._proof_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.pairs_mapM",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.pairs_snd_unique",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.pairs_snd_unique.match_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.routes_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.Linearization.routes_unique",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
       "kind": "inductive",
       "module": "Solidity.Frontend.QualifiedUnits.Relation",
       "name": "Solidity.Frontend.QualifiedUnits.Member",
@@ -4322,6 +4904,534 @@
       "kind": "constructor",
       "module": "Solidity.Frontend.QualifiedUnits.Specification",
       "name": "Solidity.Frontend.QualifiedUnits.NamespaceStep.unit",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.LeafComplete",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.LeafSound",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported._sunfold",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported._unsafe_rec",
+      "partial": true,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.eq_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.eq_4",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.eq_5",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.eq_6",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.child_refs",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.declName",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.declName.match_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.elementary_erase",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase._sunfold",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase._unsafe_rec",
+      "partial": true,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_10",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_11",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_12",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_13",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_14",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_4",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_5",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_6",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_7",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_8",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.eq_9",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList._sunfold",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList._unsafe_rec",
+      "partial": true,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList.match_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList_eq",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList_eq.match_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.fields_refused",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_complete",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_sound",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.root_refs",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_adequate",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_complete",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_complete.match_1_36",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_complete.match_1_38",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_complete.match_1_40",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_33",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_36",
       "partial": false,
       "unsafe": false
     },
@@ -6263,6 +7373,39 @@
       "module": "Solidity.Frontend.QualifiedUnits.SignatureMembers",
       "name": "Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize._unsafe_rec",
       "partial": true,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.eq_def",
+      "partial": false,
       "unsafe": false
     },
     {
@@ -8458,6 +9601,28 @@
     },
     {
       "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
       "axioms": [],
       "kind": "definition",
       "module": "Solidity.Frontend.QualifiedUnits.SignatureNormalization",
@@ -10391,6 +11556,941 @@
       "kind": "constructor",
       "module": "Solidity.Frontend.QualifiedUnits.Relation",
       "name": "Solidity.Frontend.QualifiedUnits.Step.unit",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.below",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.below.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.below.next",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.below.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.below.terminal",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.brecOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.next",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.recOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Admits.terminal",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Collected",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Head",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Head.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Head.global",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Head.member",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Head.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Head.recOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Member",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Member.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Member.plain",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Member.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Member.recOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Member.signature",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.SafeOwners",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "inductive",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Step",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Step.casesOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Step.decl",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "recursor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Step.rec",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Step.recOn",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "constructor",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Step.unit",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Target.identity",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.Target.noClash",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.admits_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.collected_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.collected_iff._simp_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.collected_iff._simp_1_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.head_eq",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.member_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.refused_no_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.resolved_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.safeOwners_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.safeOwners_iff._simp_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.step_eq",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Target",
+      "name": "Solidity.Frontend.QualifiedUnits.Target.target_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacyEnv",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacyInput",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacySig",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_instance",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_complete",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_sound",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_nominal",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_references",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.ambiguous_no_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.callable_erases",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.cycle_no_linear",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.cycle_no_linear._proof_1_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.cycle_no_linear.match_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.diamond_linear",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.diamond_local_precedence",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.diamond_local_precedence._proof_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.diamond_shared_base_once",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.failed_signature_no_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.inherited_overload_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.local_shadow_no_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.missing_base_no_linear",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.missing_base_no_linear._proof_1_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.missing_base_no_linear.match_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.missing_symbol_no_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.multi_hop_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.qualified_parameter_overload_target",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.struct_member_refused",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.visible_barrier_no_target",
       "partial": false,
       "unsafe": false
     },
@@ -12815,6 +14915,24 @@
       "axiom": false,
       "axioms": [],
       "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Env.keyTy.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Env.keyTy.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
       "module": "Solidity.Frontend.QualifiedUnits.ReferenceCoverage",
       "name": "Solidity.Source.Syn.paths.eq_1",
       "partial": false,
@@ -13821,6 +15939,175 @@
     },
     {
       "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_10",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_11",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_12",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_13",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_4",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_5",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_6",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_7",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_8",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Source.Syn.tys.eq_9",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
       "axioms": [],
       "kind": "theorem",
       "module": "Solidity.Frontend.QualifiedUnits.Relation",
@@ -14019,6 +16306,94 @@
     },
     {
       "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.Linearization.length_le_of_nodup_subset",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.Linearization.length_le_of_nodup_subset._proof_1_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.Linearization.length_le_of_nodup_subset.match_1_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.match_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.match_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.match_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.match_3.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.match_3.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.Linearization",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.Linearization.0.Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize.match_3.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
       "axioms": [],
       "kind": "theorem",
       "module": "Solidity.Frontend.QualifiedUnits.MergeSpecification",
@@ -14068,6 +16443,627 @@
       "kind": "definition",
       "module": "Solidity.Frontend.QualifiedUnits.MergeSpecification",
       "name": "_private.Solidity.Frontend.QualifiedUnits.MergeSpecification.0.Solidity.Frontend.QualifiedUnits.SignatureMembers.mergeOwners.match_3.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1.eq_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1.eq_4",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1.eq_5",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1.eq_6",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported.match_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_10",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_11",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_12",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_13",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_14",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_4",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_5",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_6",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_7",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_8",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.eq_9",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase.match_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList.match_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList.match_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList.match_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_33.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_33.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_33.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_36.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_36.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound.match_1_36.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.match_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.match_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.match_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.match_3.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.match_3.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Frontend.QualifiedUnits.SignatureNormalization.keyType.match_3.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Env.keyTy.match_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Env.keyTy.match_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Env.keyTy.match_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Env.keyTy.match_3.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Env.keyTy.match_3.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Env.keyTy.match_3.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_1.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_1.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_1.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_3.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_3.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_3.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_5.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_5.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_5.splitter",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_1",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_10",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_11",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_12",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_13",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_2",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_3",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_4",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_5",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_6",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_7",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_8",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.eq_9",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "_private.Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.0.Solidity.Source.Syn.tys.match_7.splitter",
       "partial": false,
       "unsafe": false
     },

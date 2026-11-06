@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceLocalReferenceDelete.lean:Solidity.Backend.MemoryOps.source_bool_local_delete_rebind_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceLocalReferenceDelete.lean:Solidity.Backend.MemoryOps.source_bool_local_delete_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
