@@ -204,3 +204,24 @@ patch, bundle, evidence archive, final committed head and SHA256 manifest are
 recorded in `/workspace/generic-v08-export/HANDOFF.md`. Overall status remains
 blocked with all four original queue obligations preserved; no full completion
 or runtime-gate pass is asserted.
+
+## Successor lexical drift accounting (2026-11-06)
+
+The acknowledged final member head `4a78ae839e026e1a9f8f575cd10fec4478e52305`
+was merged only after the captured assignment and scope/retirement hashes were
+verified. This is source adoption, not independent validation of external gates.
+`drift.py` retains all 4428 baseline and 4430 current declaration rows plus both
+full file-hash inventories. It reports 4355 equal lexical-header groups, 2 added
+groups, 5 unpaired anonymous groups and 27 ambiguous duplicate-name groups. Group
+counts are not declaration counts. Named keys omit namespace/section context;
+no lexical equality establishes elaborated statement or semantic preservation.
+
+Independent read-only finder and skeptic reviewed without Lean/server/builds.
+Finder identified unstable anonymous-ordinal pairing; anonymous rows now remain
+unpaired, and an insertion regression checks ordinal reuse. Both reviewers
+confirmed the fix. Five tests pass in normal and optimized Python. A file-only
+hash-change control preserves imports/body/context drift visibility. Original
+and corrected reports remain separately under the successor evidence directory.
+These checks do not close execution correspondence, semantic refusal acceptance,
+complete family census, proof validation or same-condition Lean timing. No Lean
+source, theorem, admission, toolchain, resource guard or frozen pin changed.
