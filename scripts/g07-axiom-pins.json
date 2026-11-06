@@ -57746,6 +57746,57 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.deploy_code_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.deploy_open_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.edgeState_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_account_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_sameBalance_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_wordBalance_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.empty_balancesFit": [],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.set_fit": [],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSource_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSource_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSourceChecked?_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSourceChecked?_of_fits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.St.init_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.transferNat_hypotheses_satisfiable": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.unguarded_write_breaks": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.wideAuthority_writeSource_breaks": [
+  "propext"
+ ],
  "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.credit_success_fits": [
   "propext"
  ],
@@ -64721,6 +64772,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_exact_int": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_wide": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Yul/Views/SourceBalanceInputs.lean:Solidity.Yul.Views.sourceObservedBalance_system": [
   "Classical.choice",
   "Quot.sound",
@@ -64739,6 +64805,13 @@
  "Solidity/Yul/Views/StorageBalanceInputs.lean:Solidity.Yul.Views.packedSourceStep_observed_balance": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.destructTransfer_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.finish_balancesFit": [],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.selfBeneficiary_balancesFit": [
   "propext"
  ],
  "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits": [
