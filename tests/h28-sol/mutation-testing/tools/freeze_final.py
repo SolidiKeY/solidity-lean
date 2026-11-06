@@ -7,8 +7,10 @@ the pilot and census semantic cases, the controls), plus:
 * the clause-level inventory of the 98 constructors the census does not reach
   (`clauses.py`) with its 119 one-change fixtures, run through the proof oracle;
 * per-family census witnesses for the families whose semantic verdict rested
-  on a pilot edit only (index-bounds, division-minimum, push-tail-length,
-  alias-capture-once);
+  on a pilot or helper edit only (index-bounds, push-tail-length and
+  alias-capture-once on census sites; division-minimum on a clause fixture,
+  since its only compiled census site, the `Tms.Term.binop` operand swap,
+  reaches length arithmetic, not a division);
 * per-family negative controls: a family's real kill witness checked against
   another mutant of the same constructor (or, for alias, of another
   constructor), which must not kill.
@@ -46,7 +48,7 @@ def main():
     data = copy.deepcopy(full)
     rows, fixtures = clauses.inventory(ROOT)
     clauses.check(rows)
-    census = {m["id"]: m for m in full["mutants"]}
+    census = {m["id"]: m for m in full["mutants"] + fixtures}
     cases = {c["id"]: c for c in full["semantic_cases"]}
 
     new = []
@@ -55,8 +57,8 @@ def main():
     for cid, fam, kind, base, wit in [
             ("storageIndexReadArrayFind.index-constant-zero.1", "index-bounds", "mutant",
              "BoundsBaseline", "BoundsZeroKill"),
-            ("binop.helper-binop-args-swapped.1", "division-minimum", "mutant",
-             "DivPushBaseline", "DivPushSwapKill"),
+            ("clause.binopAssignment.operands-swapped.1", "division-minimum", "mutant",
+             "DivAssignBaseline", "DivisionOperandsKill"),
             ("storagePushAddAssign.last-slot-is-length.1", "push-tail-length", "mutant",
              "PushOrderBaseline", "PushLastSlotKill"),
             ("storageLengthRead_unfold_rightFst.receiver-reevaluated.1", "alias-capture-once", "sound-survivor",
@@ -64,8 +66,6 @@ def main():
         m = census[cid]
         assert m["family"] == fam, (cid, m["family"])
         extra = {"census_id": cid}
-        if m["constructor"].startswith("Tms."):
-            extra["linked_constructor"] = "Taclet.storagePushDivAssign"
         new.append(case("census." + cid, kind, fam, m, base, wit, **extra))
 
     # Negative controls: a real kill witness, a different mutant.  Each must
