@@ -403,3 +403,55 @@ is retained. No H71 lane-push permission was supplied, so no push is performed.
 All seven existing rows specialize the same target theorem. Concrete success/underflow and reject-all/accept-underflow controls are included. This covers that fixture family, not arbitrary Source worlds, every packet family, whole-language adequacy, gas/fork semantics or the pinned 4.35 migration. Original production controls remain untouched. The bridge reports only the existing standard axioms `propext`, `Classical.choice`, `Quot.sound`; public selection reports `propext`, `Quot.sound`. Two proof-only fixture edits replace unavailable live-toolchain tactic lemmas with `dif_pos`/`dif_neg`, preserving all statements.
 
 `live_inventory.py` regenerates lexical accounting from the authenticated Git base and current source. It checks byte identity for all 82 original files/826 declarations and explicitly records the canonical helper addition: 83 live files/829 declarations. The 18 original control files and 476 control declarations remain unchanged. Four tests reject missing/changed/duplicate originals and check addition separation. This is source-byte/lexical evidence, not semantic coverage; the original frozen checker is unchanged. Complete semantic case accounting, other family migrations, full validation and comparable pinned-toolchain timing remain open.
+
+## Checked-add typed fixture correspondence
+
+The additive AddFixtures/AddCorrespondence test modules guard against checked
+addition silently wrapping or rejecting every input. The classifier has three
+axiom-free parameterized lemmas; the bridge has eight checked theorems covering
+every pair of typed uint256 operands in the populated CheckedAdd fixture,
+arbitrary saved target tails, both Source pipelines and fuel+3. It constructs
+physical StateRepr, proves selection through public compileVal, and derives the
+actual Source and selected-code runs. The five existing concrete target-input
+rows specialize that theorem. Reject-all, accept-overflow and fuel-zero timeout
+controls retain genuine distinct outcomes. Source overflow carries exact panic
+bytes and unchanged Source state; target overflow remains coarse revert without
+a payload or post-machine. This is not general session/world/gas adequacy or
+migration of the other original control declarations.
+
+The 240-module import closure was checked serially on the adopted live master.
+The first bridge attempt failed on the unavailable Nat.cast_add identifier;
+that failure is retained. MCP diagnostics failed to return a usable result and
+its owned server/worker were stopped; no proof or complete resource credit is
+claimed for that diagnostic. The tactic helper confirmed the integer cast
+equation. A fresh bounded check with Int.natCast_add then passed without warnings
+in 1.908 seconds, sampled workload peak 811752 KiB. The eight bridge axiom reports
+contain only propext, Classical.choice and Quot.sound (selection uses propext and
+Quot.sound); no new axiom, budget, premise or existing statement was added or
+changed. No module in this import-closure attempt exceeded 60 seconds. The first
+aggregate closure attempt took 721.726 seconds and ended with the bridge error;
+that is not a passing timing baseline. No comparable speed improvement is
+claimed. Independent read-only finder and skeptic found no semantic defect in
+the typed table, general quantifiers, selection, representation and failure
+boundaries; neither ran Lean/server/build.
+
+Four inventory regression tests still pass. The unchanged strict original-byte
+inventory now fails on three files changed upstream: Comparisons/Controls,
+Constants/Source and UnsignedCast/Controls. This increment edits none of those
+files, and does not waive their original-byte check or claim its historical
+826/476 counts are newly verified against this changed tree. Full original case
+accounting, remaining packet families, migration, comparable timings and full
+C4 gates remain open.
+
+The retained core checkpoint independently timed out in protected Source.Horizon
+at 300 seconds and recorded a thread-creation failure in Checked.UnitExamples.
+The guarded failed run was stopped and its receipt records interruption, not a
+full-gate pass. Protected Source was not edited and its unchanged STOP was not
+retried by this packet work; this packet closure does not import Source.Horizon.
+
+The official repository per-file gate passes both new files. Its checked-add
+bridge invocation took 250 seconds including Lake import-trace rebuilding;
+that is distinct from the 1.908-second isolated new-file check. The guarded gate
+completed in 250.375 seconds with sampled workload-group RSS 1336217600 bytes.
+Imported baseline linter warnings are retained in its log; the new bridge is
+warning-free. This is affected-file validation, not a full-core or full-C4 pass.
