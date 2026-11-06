@@ -530,3 +530,75 @@ pins externally retained logs and metadata. This clears the IDE-fix validation
 wait; the overall workflow was still running its Solidity job at inspection.
 No default-branch deployment, original timing STOP resolution or whole-goal
 completion is inferred. This documentation increment changes no tested code.
+
+## Reviewed primitive-return intake and fresh regressions
+
+[Results manifest](../../tests/directruntime-20261104/native-browser/primitive-return/results-manifest.json)
+records source build `1e8b4cee884df7f90bf711abfddce5a6f8957d10`. After adopting
+published master33eb46304, this consumes exactly the listed production file
+`Shared/Intrinsic.lean` from reviewed producer957e5def, SHA74c01bac…4577.
+It does not consume the unpublished H90 Translate/Compose changes or qualify
+the whole producer branch. No producer definition was manually rewritten.
+
+Fresh native and WASM builds pass in294.26s/268.69s, sampled RSS1.74GB/1.47GB.
+All heavy checks use serial12GiB/no-swap scopes, thread1/-j1 and the4GiB reserve.
+The206-module selected C/object inventory matches across backends:9963functions
+and4988closed values. Request-specific traces show no forbidden environment
+loads; this inventory is not a universal purity or machine-correctness theorem.
+
+| Functional corpus | Per-backend observations | Boundary |
+|---|---|---|
+| C construct fixture,13functions |9proved,4unsupported |Exact reviewed refusal strings retained |
+| A primitive-return fixture,8functions |6proved,2refuted |Defaults,tuple,earlyexit,shadow,falseassert,division |
+| B exact delivered journal,84requests |64proved,16refuted,4pending |All64required positives and Identitydiamond both compiler modes pass |
+| Existing83functions |83proved in each backend |One functional pass;no timing comparison |
+
+C and A each also execute a separate positive addition guard, so raw reports
+have14 and9 rows respectively. All four corpora have exact native/browser
+result-object parity. The B corpus removed by published H44 cleanup was recovered
+from exact Git0140 bytes: its manifest SHAe492ab28…ddd35 matches the prior
+receipt and all84case fields match the authenticated original handoff. Its
+original537822-byte journal is unchanged; no regenerated substitution was used.
+
+The18finite modal cases, return side-effect check and2refusal guards pass.
+`#check` preserves explicit callback signatures; both obligation definitions
+print only `propext` and `Quot.sound`. The existing12intrinsic memory controls
+also pass read-only. These model controls do not prove compiler/source transport.
+Five per-file MCP diagnostics report zero errors. The supplied H44 verifier runs
+unmodified in an isolated layout and verifies all50files/3229786data bytes.
+
+Fresh native negatives/specs pass14verdicts. Fresh browser negatives retain
+13/14: invariantCountsToBound still raises a stack error. Edited-source,
+counterexample and offline UI controls pass. The original native median and
+browser startup STOPs remain; no stopped83-function timing benchmark was rerun.
+
+Setup failures are retained individually: missing output parent; B live manifest
+removal and a subsequent non-overwrite guard;109-byte MCP socket path; the
+retired check-solkey helper; symbol postprocessing filename. Recovery does not
+relabel those failed receipts. Eighteen unit checks and syntax pass before the
+retired-helper failure; on-demand KeySort separately passes377/131/131 matching
+annotations on actual Lean4.24.0/Lake5.0.0-src+797c613.
+
+| Local registration proposal | Role | Central action |
+|---|---|---|
+| `tests/directruntime-20261104/native-browser/primitive-return/FiniteControls.lean` |Standalone per-file model driver |No generated library root addition |
+
+## OT-STACK-SYMBOLS exact historical mapping
+
+A diagnostic relink of retained H81objects with `--emit-symbol-map` reproduces
+the historical WASM byte-for-byte, SHA6ae1d6db…b563. Its3939-entry symbol map
+binds indices2203/2205 to `Solidity.Decide.LTm.fitsM` and its boxed lambda,
+2208/2210 to `Solidity.Decide.LFml.fitsM` and its boxed lambda,3126 to
+`lean_apply_1`, and3207 to `emscripten_builtin_malloc`. The historical source
+anchor is Calculus/ReadBounds.lean. This identifies active routines, not a
+complete causal explanation or algorithm repair. No source algorithm was edited.
+
+The relink itself succeeded; postprocessing first looked for direct.symbols
+instead of the emitted direct.js.symbols. A post-only recovery verifies whole
+binary equality and reads the existing map, without another relink or request
+run. Exact trace/map/source bytes are packaged for A. The map qualifies only
+the historical6ae binary, not the fresh19e or whole H90 reader.
+
+Final read-only finder and skeptic reviews pass with these limits. They
+independently checked both archive hashes/counts, gate exits and the exact
+historical binary equality; neither ran Lean, builds or timing reruns.

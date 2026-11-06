@@ -67,6 +67,8 @@ private def narrow : Contract := { vars := [], funs := [("f",
 #guard match assertionObligation lowerBodyLoops (fun _ _ => .tt) narrow "f" true with
   | .error "plain return obligation" => true | _ => false
 
+#check primitiveReturnObligation
+#check assertionObligation
 #print axioms primitiveReturnObligation
 #print axioms assertionObligation
 end PrimitiveReturnControls

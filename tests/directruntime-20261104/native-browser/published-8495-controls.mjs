@@ -1,17 +1,20 @@
-// Fresh fixture and baseline backend inventory, not producer semantic acceptance.
+// Guard primitive-return regression outcomes on fresh source and both backends.
+// Fresh fixture and baseline backend inventory, not source-preservation acceptance.
 import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';import {spawnSync} from 'node:child_process';import {createRequire} from 'node:module';
 import {compileFixture} from '../../../scripts/solc-ast.mjs';
 const require=createRequire(import.meta.url),root=path.resolve('.'),out=path.resolve(process.env.NATIVE_BROWSER_CONTROL_OUTPUT||'docs/benchmarks/directruntime-2026-11-04/published-8495');
 const sha=b=>createHash('sha256').update(b).digest('hex');
+fs.mkdirSync(out,{recursive:true});
 const destination=path.join(out,'control-inventory-with-guard.json');assert.ok(!fs.existsSync(destination));
 for(const name of ['control-native-with-guard.strace','native-replies-with-guard.jsonl','browser-attempts-with-guard.jsonl'])assert.ok(!fs.existsSync(path.join(out,name)),'Refusing raw output overwrite');
 const dir=path.join(out,'controls-with-guard');assert.ok(!fs.existsSync(dir));fs.mkdirSync(dir);
-const original='tests/directruntime-20261104/control-tuples/Controls.sol',source=path.join(dir,'Controls.sol'),fixture=path.join(dir,'Controls.ast.json');
-fs.copyFileSync(original,source);const bytes=fs.readFileSync(source);
+const suitePath=process.env.NATIVE_BROWSER_CONTROL_SUITE||null,suiteBytes=suitePath?fs.readFileSync(suitePath):null,suite=suiteBytes?JSON.parse(suiteBytes):null;
+const original=suite?.source||'tests/directruntime-20261104/control-tuples/Controls.sol',source=path.join(dir,'Controls.sol'),fixture=path.join(dir,'Controls.ast.json');
+fs.copyFileSync(original,source);const bytes=fs.readFileSync(source);if(suite)assert.equal(sha(bytes),suite.sourceSha256);
 const compiled=compileFixture({args:['--source',source,'--out',fixture,'--no-wrapper'],quiet:true});assert.equal(compiled.fixture.header.sourceSha256,sha(bytes));
-const ast=compiled.primaryAst??compiled.fixture.ast,contract=ast.nodes.find(n=>n.nodeType==='ContractDefinition');assert.equal(contract.name,'ControlTuples');
-const names=contract.nodes.filter(n=>n.nodeType==='FunctionDefinition'&&n.kind==='function'&&['public','external'].includes(n.visibility)).map(n=>n.name);assert.equal(names.length,13);
+const ast=compiled.primaryAst??compiled.fixture.ast,contract=ast.nodes.find(n=>n.nodeType==='ContractDefinition');assert.equal(contract.name,suite?.contract||'ControlTuples');
+const names=contract.nodes.filter(n=>n.nodeType==='FunctionDefinition'&&n.kind==='function'&&['public','external'].includes(n.visibility)).map(n=>n.name);assert.equal(names.length,suite?.expected.length||13);if(suite){assert.deepEqual([...names].sort(),suite.expected.map(x=>x.name).sort());assert.equal(compiled.fixture.header.compilerSha256,suite.compilerSha256);}
 let trials=names.map(name=>{const request={contract,function:name},wire=JSON.stringify(request);return {name,request,wire,wireSha256:sha(Buffer.from(wire))};});
 const baseline=JSON.parse(fs.readFileSync('docs/benchmarks/directruntime-2026-11-04/before/inputs/inputs.json'));
 const known=baseline.trials.find(t=>t.name==='additionSimple');assert.ok(known);
@@ -24,10 +27,10 @@ const nativeDir=process.env.NATIVE_BROWSER_NATIVE_OUTPUT||'.lake/native-browser-
 const binaries={native:path.join(nativeDir,'direct-check'),wasm:path.join(wasmDir,'direct.wasm')};
 const manifests={native:JSON.parse(fs.readFileSync(path.join(nativeDir,'build.json'))),wasm:JSON.parse(fs.readFileSync(path.join(wasmDir,'build.json')))};
 const freshness={};for(const mode of ['native','wasm']){const m=manifests[mode];for(const e of m.sourceFiles)assert.equal(sha(fs.readFileSync(e.module.replaceAll('.','/')+'.lean')),e.sourceSha256,e.module);assert.equal(sha(fs.readFileSync('web/browser/direct-bridge.c')),m.bridgeSha256);assert.equal(sha(fs.readFileSync('scripts/direct-runtime-closure.py')),m.closureScriptSha256);assert.equal(sha(fs.readFileSync(binaries[mode])),mode==='native'?m.executable:m.wasm);freshness[mode]={sourceFiles:m.sourceFiles.length,binarySha256:sha(fs.readFileSync(binaries[mode])),manifestSha256:sha(fs.readFileSync(path.join(mode==='native'?nativeDir:wasmDir,'build.json')))};}
-const report={original,sourceSha256:sha(bytes),fixtureSha256:sha(fs.readFileSync(fixture)),compilerHeader:compiled.fixture.header,names,expectedControlRequests:13,expectedRequestsPerBackend:14,positiveHarnessGuard:{name:"additionSimple",sourceSha256:sha(fs.readFileSync(wheatSource)),fixtureSha256:sha(fs.readFileSync(wheatFixture)),compilerHeader:wheatCompiled.fixture.header},freshness,native:[],browser:[],assetRequests:[],errors:[],semanticAcceptanceComplete:false,identityNonVacuityComplete:false,boundary:'Freshly compiled current C fixture, real pinned native/WASM requests. Pinned runtime bindings are verified; build freshness is evidenced separately by build receipts. Completion of this inventory is not admission/proof/backend acceptance, and no Identity substitute is used.'};
+const report={suite:suite?{path:path.resolve(suitePath),sha256:sha(suiteBytes),spec:suite}:null,original,sourceSha256:sha(bytes),fixtureSha256:sha(fs.readFileSync(fixture)),compilerHeader:compiled.fixture.header,names,expectedControlRequests:names.length,expectedRequestsPerBackend:trials.length,positiveHarnessGuard:{name:"additionSimple",sourceSha256:sha(fs.readFileSync(wheatSource)),fixtureSha256:sha(fs.readFileSync(wheatFixture)),compilerHeader:wheatCompiled.fixture.header},freshness,native:[],browser:[],assetRequests:[],errors:[],semanticAcceptanceComplete:false,identityNonVacuityComplete:false,boundary:'Freshly compiled selected fixture, real pinned native/WASM requests. Pinned runtime bindings are verified; build freshness is evidenced separately by build receipts. Completion of this inventory is not admission/proof/backend acceptance, and no Identity substitute is used.'};
 const trace=path.join(out,'control-native-with-guard.strace'),input=trials.map(t=>t.wire+'\n').join('');
 const run=spawnSync('strace',['-f','-qq','-e','trace=%file,%process,%network','-o',trace,path.resolve(binaries.native)],{input,encoding:'utf8',timeout:120000,maxBuffer:16*1024*1024});
-fs.writeFileSync(path.join(out,'native-replies-with-guard.jsonl'),run.stdout||'');assert.equal(run.status,0,run.stderr);const lines=run.stdout.trim().split('\n').map(line=>JSON.parse(line));assert.deepEqual(lines.shift(),{ready:true});assert.equal(lines.length,14);
+fs.writeFileSync(path.join(out,'native-replies-with-guard.jsonl'),run.stdout||'');assert.equal(run.status,0,run.stderr);const lines=run.stdout.trim().split('\n').map(line=>JSON.parse(line));assert.deepEqual(lines.shift(),{ready:true});assert.equal(lines.length,trials.length);
 for(const [i,reply]of lines.entries()){assert.equal(reply.results?.length,1);assert.equal(reply.results[0].function,trials[i].name);report.native.push({name:trials[i].name,wireSha256:trials[i].wireSha256,reply});}
 report.forbiddenNativeLoads=fs.readFileSync(trace,'utf8').split('\n').filter(s=>/\.(olean|ilean)(\W|$)|execve\("[^"]*\/(lean|lake)"/.test(s));assert.equal(report.forbiddenNativeLoads.length,0);
 const {chromium}=require(path.join(root,'web/node_modules/playwright')),{createStaticServer}=require(path.join(root,'web/tools/serve-static.cjs'));
@@ -41,6 +44,12 @@ let context;try{
  }
  report.forbiddenBrowserAssets=report.assetRequests.filter(s=>/\.(olean|ilean)(\W|$)|kernel-worker|\/lean\//.test(s));report.externalRequests=report.assetRequests.filter(s=>!s.startsWith(url)&&!/^(blob:|data:)/.test(s));assert.equal(report.errors.length,0);assert.equal(report.forbiddenBrowserAssets.length,0);assert.equal(report.externalRequests.length,0);
  assert.equal(report.native[0].reply.results[0].status,'proved','native positive harness guard');assert.equal(report.browser[0].reply.results[0].status,'proved','browser positive harness guard');
- report.positiveHarnessGuard.passed=true;report.inventoryCompleted=report.native.length===14&&report.browser.length===14;
+ if(suite)for(let i=1;i<trials.length;i++){
+  const expected=suite.expected.find(x=>x.name===trials[i].name);assert.ok(expected);
+  assert.deepEqual(report.native[i].reply.results,report.browser[i].reply.results,'backend result parity');
+  for(const backend of ['native','browser']){const actual=report[backend][i].reply.results[0];assert.equal(actual.status,expected.status,trials[i].name);if(expected.reason!==undefined)assert.equal(actual.reason||'',expected.reason,trials[i].name);}
+ }
+ report.expectedObservationChecks=suite?names.length:null;
+ report.positiveHarnessGuard.passed=true;report.inventoryCompleted=report.native.length===trials.length&&report.browser.length===trials.length;
 }catch(error){report.failure=error.stack;throw error;}finally{await context?.close();await app.close();fs.rmSync(profile,{recursive:true,force:true});fs.writeFileSync(destination,JSON.stringify(report,null,2)+'\n');}
 console.log(JSON.stringify({inventoryCompleted:report.inventoryCompleted,native:report.native.map(r=>[r.name,r.reply.results[0].status]),browser:report.browser.map(r=>[r.name,r.reply.results[0].status]),semanticAcceptanceComplete:false}));
