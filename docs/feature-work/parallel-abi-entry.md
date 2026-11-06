@@ -150,3 +150,26 @@ wall time, serial Lean-j1 under 12GiB virtual-memory limit). Full checkpoint
 gates remain pending; no RUNTIME_GATE_PASS is claimed. Retiring audit member
 head/stopped acknowledgement and authenticated frozen prompt/scope remain
 absent, and its scope remains untouched.
+
+
+## Second cf1 decoder replay: saved bounds outcomes
+
+The generator now also replays the six saved observations for
+`array_exceeds_calldatasize_no_revert_string.sol`: two accepted empty arrays
+and four exact empty reverts for lengths one/two with absent element bytes.
+These are retained cf1 model observations, not a new solc/EVM run. Each failure
+is checked against actual entry `.error .revert`; arbitrary body failures are
+not reclassified as decoder failures. Exact fixture path, signature, Boolean
+failure field, empty recorded outcome bytes and six/four inventory are checked.
+The original 34 acceptance/length observations and eight derived truncations
+still pass. All saved JSON bytes remain unchanged.
+
+Fresh current decoder checking took 1.874s and the expanded runtime replay
+23.410s. The earlier 18.189s replay had six fewer checks, so these are different
+workloads, not a same-workload proof-checking slowdown measurement. No production
+Lean proof, interface, definition, axiom or budget changed. Finder passed with
+no findings; skeptic requested that the docstring name both fixtures, now fixed.
+Both reviews were read-only, with no Lean server/build/write. The remaining
+40 fixture files are unreplayed; this is not full body/native correspondence
+or a new kernel theorem. Full checkpoint gates and all original proof queues
+remain open, and the audit-member retirement barrier remains in force.

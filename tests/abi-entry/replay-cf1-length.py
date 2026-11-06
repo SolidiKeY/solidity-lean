@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Generate decoder-only length checks from the immutable first cf1 fixture.
+"""Generate decoder-only checks from the saved cf1 length and bounds fixtures.
 Includes exact empty-revert controls for one-byte-truncated uint256 arrays.
 No body execution, return-byte equality, or full-fixture replay is claimed.
 """
 import hashlib, json, pathlib, sys
 root = pathlib.Path(__file__).resolve().parents[2]
 source = root / "tests/upstream/cf1-abi-entry-results.json"
-fixture = json.loads(source.read_text())["fixtures"][0]
+fixtures = json.loads(source.read_text())["fixtures"]
+fixture = fixtures[0]
 def require(condition, message):
     if not condition:
         raise ValueError(message)
@@ -29,6 +30,22 @@ for variant in fixture["after"]["result"]["variants"]:
         expected = int(returned[2:66], 16)
         rows.append((variant["pipeline"], shape, list(bytes(4) + raw), expected))
 require(bool(rows), "no observations")
+bounds_fixture = fixtures[4]
+require(bounds_fixture["path"].endswith("/array_exceeds_calldatasize_no_revert_string.sol"),
+        "wrong bounds fixture")
+bounds = []
+for variant in bounds_fixture["after"]["result"]["variants"]:
+    for observed in variant["observed"]:
+        require(observed["signature"] == "f(uint256[])", "unexpected bounds signature")
+        require(observed["returnBytes"] == "0x" and observed["revertBytes"] == "0x",
+                "bounds outcome bytes changed")
+        encoded = observed["calldataBytes"]
+        require(encoded.startswith("0x"), "missing calldata prefix")
+        raw = list(bytes(4) + bytes.fromhex(encoded[2:]))
+        require(type(observed["failed"]) is bool, "non-Boolean failure outcome")
+        bounds.append((variant["pipeline"], raw, observed["failed"]))
+require(len(bounds) == 6 and sum(failed for _, _, failed in bounds) == 4,
+        "unexpected bounds observation inventory")
 header = """import Solidity.Semantics.AbiEntry
 open Solidity.AbiEntry
 -- Runtime regression only: actual entry acceptance and outer calldata length.
@@ -57,8 +74,14 @@ for index, (pipeline, shape, raw, expected) in enumerate(rows):
         body.append(f'  unless uintArrayEmptyRevert {raw[:-1]} do throw (IO.userError "truncated vector {index} {pipeline}: expected exact empty revert")')
         truncated += 1
 require(truncated == 8, "unexpected single-dimensional vector inventory")
-body.append(f'  IO.println "PASS: {len(rows)} saved pipeline observations; entry accepted and dynamic outer / declared fixed lengths match; {truncated} one-byte truncations empty-revert"')
+for index, (pipeline, raw, failed) in enumerate(bounds):
+    if failed:
+        body.append(f'  unless uintArrayEmptyRevert {raw} do throw (IO.userError "bounds vector {index} {pipeline}: expected exact empty revert")')
+    else:
+        body.append(f'  unless (replay (.array (.word (.uint 256))) {raw}).toOption == some 0 do throw (IO.userError "bounds vector {index} {pipeline}: expected accepted empty array")')
+body.append(f'  IO.println "PASS: {len(rows)} saved pipeline observations; entry accepted and dynamic outer / declared fixed lengths match; {truncated} one-byte truncations empty-revert; {len(bounds)} saved bounds outcomes match"')
 pathlib.Path(sys.argv[1]).write_text(header + "\n".join(body) + "\n")
 print("fixture_sha256=" + hashlib.sha256(source.read_bytes()).hexdigest())
 print("vectors=" + str(len(rows)))
 print("truncated_controls=" + str(truncated))
+print("bounds_observations=" + str(len(bounds)))
