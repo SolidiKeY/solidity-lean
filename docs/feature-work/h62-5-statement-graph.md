@@ -1,0 +1,150 @@
+# H62 item 5: statement graph
+
+Owner: `solidity-h62-5-20261106/statement-graph`. Base:
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Branch:
+`codex/solidity-h62-5-20261106/statement-graph`.
+
+This is an isolated implementation checkpoint, not completion of the frozen
+assignment. Production G49/G50 declaration selection, census, typed premise
+witness/discharge mapping, owner coordination and the final full gate remain
+outstanding. No production progress count is claimed.
+
+## Implemented contract
+
+The optional exporter under `tests/h62/item5/statement-graph/` imports Lean;
+no core module imports it. `h62_statement`, `h62_premise` and `h62_helper` are
+persistent Lean attributes. `#h62_tag "statement" Imported.declaration` adds
+read-only overlay metadata to an imported declaration without editing its
+producer. Imported overlays with conflicting classifications reject at export.
+`#h62_export "filename.json" [declarations]` resolves names in Lean and reads
+`ConstantInfo.type`, telescope binders, structure constructor field types and
+actual projection declarations. It verifies reference existence in the elaborated
+environment, exports type expressions with closed local contexts, fixes printer
+options, and records transitive axioms. `H62_GRAPH_OUTPUT_DIR` must identify an
+off-git output directory. Export selection is explicit; it is not a whole-repository
+census. No prose/regular-expression reconstruction supplies statement edges.
+
+The Python catalog assigns stable IDs, areas, node kinds, owners and binder roles.
+Every exported declaration must appear, and every typed binder must be classified
+explicitly. Ordinary data parameters need an audited reason; propositions,
+structure fields and cataloged premise interfaces cannot be classified as ordinary
+data. Every premise needs a separate producer owner. In production, each node and
+premise owner references an item in the supplied ownership snapshot and must match
+its owner. The snapshot hash is included in the graph. Fixtures are explicitly
+marked and cannot claim production ownership.
+
+`dependencies` come from elaborated types, including structure field types.
+`proofDependencies` come from declaration bodies and never control readiness;
+`proofHelpers` is their helper-classified subset. Dead selections, omitted tagged
+dependencies, conflicting tags, cycles, missing owners and unsupported completion
+claims reject. Base/tree IDs, export/catalog/ownership hashes and the graph digest
+bind output provenance. The acceptance runner requires clean committed sources
+and verifies that HEAD and source cleanliness remain unchanged.
+
+Status definitions are disjoint: `done` requires an explicitly completed checked
+theorem, allowed axiom evidence, no open named premises and completed dependencies;
+`blocked` means open premises or dependencies; `ready` means an unfinished
+statement/premise has no such blockers; `open` covers unfinished helper nodes.
+Every area and selected progress-root closure has numeric counts for these states,
+node totals and open typed premises. All discovered logical/certificate premises
+currently remain open. There is no typed witness discharge yet: these are
+conservative inventories, not actual producer-premise completion measurements.
+
+Claims run beside the prose registry. Each state is bound to one immutable graph
+digest. A POSIX advisory lock serializes cooperating writers; a fsynced temporary
+file, atomic replacement and directory fsync publish one transaction. Claims
+require the catalog's producer owner, unique unexpired tokens and finite bounded
+leases. Graph changes, double claims, expired renewals, stale tokens and attempts
+to claim completed nodes reject. Expiry permits a new token for the same assigned
+producer; it never transfers producer ownership. Production time is sampled after
+lock acquisition. Tokens are coordination capabilities, not an authentication
+boundary for mutually hostile filesystem users.
+
+## Validation and trust boundary
+
+The official Lean 4.35.0 Linux archive matches coordinator SHA256
+`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
+Actual versions: Lean 4.35.0, commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`; Lake 5.0.0-src+eb6cafb.
+Initial 4.24 checks preceded the coordinator pin and do not establish a final gate.
+
+Before this checkpoint, pinned serial fixture acceptance passed 30 Python tests,
+12-process exclusive-claim contention, stale-owner/double-claim negative controls,
+Lean unknown/duplicate/conflicting-declaration controls, structure-field export,
+and same-process/fresh-process byte equality. MCP diagnostics for both Lean files
+returned success=true, partial=false, items=[]; the installed MCP dependency emits
+its known event-loop-close warning during shutdown. The unchanged KeySort control
+passed; the second provisional seven-run median changed from 1.260098 s to
+1.212763 s (-3.76%). These provisional runs preceded clean-tree enforcement and
+are not committed-tree attestations. Final checkpoint evidence is recorded in the
+off-git handoff after committing and rerunning the corrected harness.
+
+Run from this checkout, substituting the saved absolute evidence directory:
+
+```sh
+python3 -B scripts/h62/item5/statement-graph/verify.py \
+  --lean-bin /workspace/.setup/tools/lean-4.35.0-linux/bin \
+  --pin /workspace/h62-coordinator-inputs/toolchain-pin.json \
+  --archive /workspace/.setup/tools/lean-4.35.0-linux.tar.zst \
+  --evidence /workspace/h62-statement-graph-evidence/committed-acceptance
+/workspace/solidity-lean/.venv/bin/python -B \
+  scripts/h62/item5/statement-graph/mcp_check.py \
+  --lean-bin /workspace/.setup/tools/lean-4.35.0-linux/bin \
+  --pin /workspace/h62-coordinator-inputs/toolchain-pin.json \
+  --archive /workspace/.setup/tools/lean-4.35.0-linux.tar.zst \
+  --evidence /workspace/h62-statement-graph-evidence/committed-acceptance
+```
+
+The runner enforces one heavy job, `LEAN_NUM_THREADS=1`, explicit `-j1`, a
+12 GiB virtual-memory bound, no swap, a continuing 4 GiB available reserve and
+bounded individual commands. Python optimization is rejected. It generates
+large outputs, command/exit logs, timings and a checksum manifest off git.
+No v4.24 per-master cache or systemd-run is used. Core source is unchanged;
+KeySort timing measures an unchanged control, not whole-project performance.
+
+Lean checks the isolated fixture theorem terms. Python regressions test graph
+and filesystem coordination behavior; their synthetic models are not kernel
+proofs, and JSON/catalog input is trusted external tooling input. No new axiom,
+sorry, native_decide, heartbeat increase, frozen-statement edit, axiom pin edit,
+module-root edit or change to H55's theorem is present. Required full
+`./run-lean.sh` and production census/progress validation remain pending before
+RUNTIME_GATE_PASS or assignment completion.
+
+## Independent reviews
+
+Independent read-only finder and skeptic agents used no Lean server/process.
+Both found missing structure fields, Type-valued certificates, tagged dependency
+coverage, stable binder expression contexts and correct producer ownership.
+These were corrected and covered by negative tests. The finder also found the
+pre-lock lease clock; the skeptic found optional axiom evidence. Both were fixed.
+Their second pass found dirty-source provenance, imported-overlay conflicts,
+MCP resource gaps and Python optimization bypasses. Corrections are included in
+this checkpoint; final re-review and committed-tree evidence belong in the saved
+handoff. Premise discharge remains explicitly unfinished rather than hidden by
+an assertion of completion.
+
+## Coordinator handoff and blockers
+
+Repository: `/workspace/solidity-h62-statement-graph`; original clean checkout
+`/workspace/solidity-lean` is preserved. Exact published base was fetched and
+verified as an ancestor of origin/master before this isolated branch was created.
+Verified coordinator inputs are at `/workspace/h62-coordinator-inputs/`.
+All five G49/G50 items belong to H55-G49 in its ownership snapshot.
+
+- `B-H55-INVENTORY` (producer-data dependency): no committed declaration/premise
+  inventory or typed witness mapping is supplied for H55's final theorem.
+- `B-H55-RELAY` (coordination dependency): no relay.sh is present in the pinned
+  tree or discovered workspace. A coordinator relay path or producer inventory
+  was requested. No absence of reply is treated as permission.
+- `B-PRODUCTION-GRAPH` depends on those inputs: area census, production DAG,
+  actual G49/G50 counts and declaration/owner compatibility acceptance remain.
+- `B-FINAL-GATE`: final affected/full repository validation and timing evidence
+  remain mandatory after production integration; no runtime pass is claimed.
+
+Backfill completed here is limited to isolated type/field/certificate controls,
+malformed-input controls, deterministic reproduction, timing and claim races.
+There is no continuous-cleanup scope claim or duplicate H55 proof work. No push,
+merge, PR, pre-gate or publication was performed. Resume the same goal and branch;
+do not create a replacement goal. The final saved handoff records committed head,
+patch/evidence paths and hashes. Registration advice is in the task's additive
+`REGISTRATION.md`; existing generated roots/maps remain read-only.
