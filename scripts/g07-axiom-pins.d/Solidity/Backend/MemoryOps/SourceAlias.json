@@ -1,0 +1,23 @@
+{
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_local_alias_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_local_alias_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_local_alias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceAlias.lean:Solidity.Backend.MemoryOps.source_locals_get_set": []
+}

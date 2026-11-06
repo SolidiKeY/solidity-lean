@@ -13,7 +13,7 @@ private def fixtureContract (path : String) : IO Json := do
     | throw (IO.userError "fixture has no contract")
   return c
 private def fixtureControls : IO Unit := do
-  let source ← fixtureContract "tests/directruntime-20261104/shared-translator/ReaderFixtures.ast.json"
+  let source ← fixtureContract "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/ReaderFixtures.ast.json"
   let _ ← checked (contract reader source)
   let mut rows : Array Json := #[]
   let mut overloadIds : List Int := []
@@ -40,7 +40,7 @@ private def fixtureControls : IO Unit := do
   unless rows.size == 9 do throw (IO.userError "fixture function count changed")
   unless overloadIds.length == 2 && overloadIds[0]! != overloadIds[1]! do
     throw (IO.userError "overload source identities were lost")
-  let unsupported ← fixtureContract "tests/directruntime-20261104/shared-translator/UnsupportedContract.ast.json"
+  let unsupported ← fixtureContract "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/UnsupportedContract.ast.json"
   match contract reader unsupported with
   | .error "contract member" => pure ()
   | _ => throw (IO.userError "unsupported contract sibling was ignored")

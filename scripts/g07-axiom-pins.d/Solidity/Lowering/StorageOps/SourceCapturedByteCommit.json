@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCapturedByteCommit.lean:Solidity.Lowering.StorageOps.SourceCapturedByteCommit.commit_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

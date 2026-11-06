@@ -49,12 +49,12 @@ async function capture(client,directory,screenshot=false) {
   writeFileSync(join(directory,'accessibility.json'),JSON.stringify(accessibility));
   const dom=await client.request('DOMSnapshot.captureSnapshot',{computedStyles:[]});
   writeFileSync(join(directory,'dom.json'),JSON.stringify(dom));
-  const inspection=await client.request('Runtime.evaluate',{expression:`JSON.stringify({title:document.title,editorCount:document.querySelectorAll('.monaco-editor').length,notifications:[...document.querySelectorAll('.notification-list-item')].map(e=>e.textContent),bodyText:document.body.innerText.slice(0,24000)})`,returnByValue:true});
+  const inspection=await client.request('Runtime.evaluate',{expression:`JSON.stringify({title:document.title,editorCount:document.querySelectorAll('.monaco-editor').length,notifications:[...document.querySelectorAll('.notification-list-item')].map(e=>e.textContent),visibleHovers:[...document.querySelectorAll('.monaco-hover')].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>e.innerText),bodyText:document.body.innerText.slice(0,24000)})`,returnByValue:true});
   const visible=JSON.parse(inspection.result.value);
   if(!visible.editorCount||!accessibility.nodes?.length||!dom.documents?.length)throw new Error('Renderer has no inspectable editor, DOM or accessibility tree');
   writeFileSync(join(directory,'visible-state.json'),inspection.result.value);
   if(screenshot) {const result=await client.request('Page.captureScreenshot',{format:'png'});writeFileSync(join(directory,'screenshot.png'),Buffer.from(result.data,'base64'));}
-  return {captured:true,elapsedMs:performance.now()-start,screenshot,editorCount:visible.editorCount,accessibilityNodes:accessibility.nodes.length};
+  return {captured:true,elapsedMs:performance.now()-start,screenshot,hoverCount:visible.visibleHovers.length,editorCount:visible.editorCount,accessibilityNodes:accessibility.nodes.length};
 }
 async function inputProbe(client) {
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
@@ -65,4 +65,12 @@ async function inputProbe(client) {
   return {started,finished:Date.now(),roundTripMs:performance.now()-clock,focusedEditor:focused.result.value,
     scope:'Arrow-key dispatch and next renderer animation frame; includes DevTools transport and does not isolate paint time.'};
 }
-module.exports={availablePort,DevTools,connect,capture,inputProbe};
+async function buildKeybinding(client) {
+  const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
+  if(!focused.result.value)throw Error('No focused source editor for build keybinding');
+  const started=Date.now();
+  await client.request('Input.dispatchKeyEvent',{type:'keyDown',key:'B',code:'KeyB',windowsVirtualKeyCode:66,modifiers:10});
+  await client.request('Input.dispatchKeyEvent',{type:'keyUp',key:'B',code:'KeyB',windowsVirtualKeyCode:66,modifiers:10});
+  return {started,finished:Date.now(),focusedEditor:true,chord:'ctrl+shift+b',scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
+}
+module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding};

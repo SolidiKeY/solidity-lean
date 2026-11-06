@@ -1,0 +1,7 @@
+{
+  "commit": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "authority": "H68 DR-A-NITS-2010: pin the audit baseline to a recorded commit",
+  "publication": "Coordinator sched-20261105T2010Z; adopted before H68",
+  "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref."
+}

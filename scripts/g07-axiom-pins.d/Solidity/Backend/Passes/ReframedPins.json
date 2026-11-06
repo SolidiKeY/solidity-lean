@@ -1,0 +1,141 @@
+{
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.compilation_reframed_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.compilation_reframed_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.compilation_reframed_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.memory_shrinking_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.memory_state_shrink": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.memoryCalls_shrinking_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.reframed_same": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.bad_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.frame_gap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.ordered_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.physical_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.prefix_refused_at_suffix_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.reached_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.short_suffix_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedControls.skipped_consumer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Immediate.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Immediate.link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Immediate.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Immediate.stops_before_unreachable_resource": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Immediate.suffix_input_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Panic.link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Panic.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Panic.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Spin.link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedPins.lean:Solidity.Backend.Passes.ReframedTerminals.Spin.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

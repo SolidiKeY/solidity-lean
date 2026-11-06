@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/Passes/P12ConditionExecution.lean:Solidity.Backend.Passes.P12ConditionExecution.empty_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/P12ConditionExecution.lean:Solidity.Backend.Passes.P12ConditionExecution.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

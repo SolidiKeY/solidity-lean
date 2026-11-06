@@ -1,0 +1,65 @@
+{
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.block_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.block_stmt_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.dropped": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.outer_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.receiver_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.reused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.scope_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.source_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.whole_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScope.lean:Solidity.Backend.Passes.UnsignedDependentScope.whole_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

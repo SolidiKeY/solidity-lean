@@ -93,14 +93,14 @@ test('independent audit keeps all upstream registration sites explicitly unexami
   assert.ok(validate(audit).length);
 });
 test('unsupported and untested capabilities cannot be marked complete',()=>{
-  const inventory=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-features.json'),'utf8'));
+  const inventory=require('../parity/inventory.cjs').loadInventory();
   assert.deepEqual(validate(inventory),[]);
   inventory.features[0].assessment.status='complete';assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
   inventory.features[0].assessment.testEvidence=[{status:'skipped',assertion:'something',artifact:'fake.json'}];
   assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
 });
 test('inventory shrinkage and invented upstream evidence fail the offline gate',()=>{
-  const original=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-features.json'),'utf8'));
+  const original=require('../parity/inventory.cjs').loadInventory();
   const fewer=structuredClone(original);fewer.features.pop();assert.ok(validate(fewer).some(e=>e.includes('feature set changed')));
   const tampered=structuredClone(original);tampered.features[0].upstream[0].sha256='0'.repeat(64);
   assert.ok(validate(tampered).some(e=>e.includes('unregistered upstream evidence')));
@@ -192,4 +192,43 @@ test('long artifact paths do not become long editor IPC/profile paths',async()=>
     assert.equal(data.portable.startsWith(trial),false);
     assert.equal(require('node:fs').existsSync(data.portable),false,'temporary editor state is removed');
   }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test('visual suite retains all phase gaps without requiring the separate benchmark scenario',()=>{
+  const config={runId:'visual-fresh',target:'dafny',suite:'visual'};
+  const ids=['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'];
+  const base={schemaVersion:1,runId:config.runId,target:config.target,status:'passed-with-gaps',checks:[],
+    scenarios:ids.map(id=>({id,status:id==='visual-open'?'missing':'partial'}))};
+  assert.deepEqual(hostEvidenceErrors(base,config),[]);
+  for(const id of ids)assert.ok(hostEvidenceErrors({...base,scenarios:base.scenarios.filter(s=>s.id!==id)},config).length,'missing '+id+' cannot pass report validation');
+  assert.ok(hostEvidenceErrors({...base,status:'passed'},config).length,'visual gaps cannot become a pass');
+  assert.ok(hostEvidenceErrors({...base,runId:'stale'},config).length);
+  assert.ok(hostEvidenceErrors({...base,checks:['visual-verified']},config).length,'partial phases are not passed checks');
+  assert.ok(hostEvidenceErrors(base,{...config,suite:'full'}).length,'full suite still requires initial verification');
+});
+
+
+test('visual launcher passes suite identity to report validation (injected editor)',async()=>{
+  if(process.platform==='win32')return;
+  const dir=mkdtempSync(join(tmpdir(),'parity-visual-suite-'));
+  try {
+    const code=join(dir,'code');
+    writeFileSync(code,`#!${process.execPath}\nconst fs=require('node:fs');const c=JSON.parse(fs.readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));fs.writeFileSync(c.result,JSON.stringify({schemaVersion:1,runId:c.runId,target:c.target,status:'passed-with-gaps',checks:[],scenarios:['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'].map(id=>({id,status:'missing'}))}));\n`,{mode:0o700});
+    const trial=join(dir,'trial');
+    const config={dir:trial,target:'local',workers:1,cache:'basic',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
+    const run=await launch(config,{code,suite:'visual',operationTimeoutMs:1000,timeoutMs:2000,obligations:1});
+    assert.equal(run.status,'passed-with-gaps');assert.equal(run.result.scenarios.every(s=>s.status==='missing'),true);assert.deepEqual(run.result.checks,[]);
+  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('compiler command suite cannot masquerade as full proof evidence',()=>{
+ const config={runId:'commands-only',target:'local',suite:'commands'},report={schemaVersion:1,runId:config.runId,target:'local',status:'passed',checks:['command-build-keybinding'],scenarios:[{id:'command-build-keybinding',status:'passed'}]};
+ assert.deepEqual(hostEvidenceErrors(report,config),[]);assert.ok(hostEvidenceErrors(report,{...config,suite:'full'}).length);assert.ok(hostEvidenceErrors({...report,scenarios:[]},config).length);assert.ok(hostEvidenceErrors({...report,runId:'old'},config).length);assert.ok(hostEvidenceErrors({...report,checks:[]},config).length);
+ assert.throws(()=>parse(['--suite','commands','--targets','dafny']),/requires --targets local/);assert.equal(parse(['--suite','commands','--targets','local']).suite,'commands');
+});
+test('native build key dispatch refuses an unfocused editor (injected CDP boundary)',async()=>{
+ const {buildKeybinding}=require('../parity/renderer.cjs'),calls=[];
+ await assert.rejects(buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:false}};}}),/No focused source editor/);assert.equal(calls.length,1);
+ calls.length=0;const value=await buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:true}};}});assert.equal(value.chord,'ctrl+shift+b');assert.deepEqual(calls.slice(1).map(c=>[c.method,c.params.type,c.params.code,c.params.modifiers]),[['Input.dispatchKeyEvent','keyDown','KeyB',10],['Input.dispatchKeyEvent','keyUp','KeyB',10]]);
 });

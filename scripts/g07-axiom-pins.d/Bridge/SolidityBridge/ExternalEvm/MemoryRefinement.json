@@ -1,0 +1,77 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.capacity_load_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.control_represents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.fixed_roundtrip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.load_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.load_refines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.load_state_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.loadAt_refines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.lookup_represents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.roundtrip_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.store_lookup_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.store_lookup_same": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.store_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.store_refines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.storeAt_refines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryRefinement.lean:Solidity.Evm.External.Memory.unaligned_store_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

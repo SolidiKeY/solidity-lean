@@ -27,6 +27,8 @@ async function run() {
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
   const result = {schemaVersion:1,runId:config.runId,target,startedWallTime:Date.now(),metrics,scenarios,observations:{},checks:[],status:'running'};
   let api, client, activeScenario = null;
+  let localStatus;
+  const visual=config.suite==='visual';
   const timeout = config.operationTimeoutMs;
   async function bounded(promise,label) {
     let timer;
@@ -101,6 +103,66 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
+    if(config.suite==='commands'){
+      assert.equal(target,'local','compiler command evidence only');
+      await scenario('command-build-keybinding',async()=>{
+        const doc=await open('commands',1);const lineEnding=new vscode.WorkspaceEdit();lineEnding.set(doc.uri,[vscode.TextEdit.setEndOfLine(vscode.EndOfLine.CRLF)]);assert.equal(await vscode.workspace.applyEdit(lineEnding),true);assert.equal(doc.eol,vscode.EndOfLine.CRLF);await replace(doc,doc.getText()+'\r\n// unsaved UTF16 edit 🦀\r\n');assert.equal(doc.isDirty,true,'keyboard build begins with unsaved source');const source=doc.getText(),version=doc.version;
+        await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+        const requestId=require('node:crypto').randomUUID();
+        writeFileSync(join(config.dir,'keybinding-request.json'),JSON.stringify({runId:config.runId,requestId,uri:doc.uri.toString(),version,sourceHash:createHash('sha256').update(source).digest('hex')}));
+        await until(()=>existsSync(join(config.dir,'keybinding-reply.json')),'renderer keybinding dispatch');
+        const reply=JSON.parse(readFileSync(join(config.dir,'keybinding-reply.json'),'utf8'));assert.equal(reply.runId,config.runId);assert.equal(reply.requestId,requestId,reply.error);assert.equal(reply.observation.focusedEditor,true);
+        let report;
+        await until(()=>{for(const event of events.filter(e=>e.kind==='output')){try{const value=JSON.parse(event.data.text);if(value.operation==='build'&&value.source===doc.uri.fsPath){report=value;return true;}}catch{}}return false;},'native compiler Build output after key dispatch');
+        assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.equal(doc.isDirty,false,'Build saved the current buffer');assert.equal(readFileSync(doc.uri.fsPath,'utf8'),source);assert.equal(report.sourceHash,createHash('sha256').update(source).digest('hex'));assert.equal(report.kind,'compiler-ast');assert.equal(report.verification,'not-run');
+        const artifact=JSON.parse(readFileSync(report.artifact,'utf8'));assert.ok(artifact.ast||artifact.sourceUnits,'actual compiler artifact has source AST');assert.equal(artifact.header?.sourceSha256,report.sourceHash,'artifact header binds exact current source');writeFileSync(join(config.dir,'compiler.ast.json'),readFileSync(report.artifact));
+        result.observations.commandScope='Actual Linux keyboard -> registered Build -> native solc AST, with no proof execution. Run/Test/macOS bindings remain unevidenced.';
+        return {request:reply,report,version,source,scope:result.observations.commandScope};
+      });
+    }else if(visual){
+      const {requestPhase,phaseObserved}=require('./phase-capture.cjs');
+      const localStates=new Map();
+      if(target==='local'){
+        assert.ok(api.service,'Visual lifecycle needs the real persistent service');
+        localStatus=p=>{localStates.set(p.uri,p);record('localStatus',p);};api.service.on('status',localStatus);
+      }
+      let visualDoc;
+      const native=()=>{const s=target==='local'?localStates.get(visualDoc.uri.toString()):current(visualDoc);return s?.version===visualDoc.version?s:null;};
+      const capture=async phase=>{
+        const before=native(),version=visualDoc.version,source=visualDoc.getText();
+        // Request overview pixels before awaiting a language provider: provider latency can miss early phases.
+        const value=await requestPhase(config.dir,config.runId,phase,{state:snapshot(visualDoc),source,uri:visualDoc.uri.toString(),nativeBefore:before},timeout);
+        const after=native();assert.equal(visualDoc.version,version,'capture source version stable');assert.equal(visualDoc.getText(),source,'capture source text stable');
+        const observed=phaseObserved(phase,before,after);
+        const observation={status:observed?'partial':'missing',capture:value,nativeBefore:before,nativeAfter:after,phaseObserved:observed,
+          scope:observed?'Native state brackets this capture; actual visible differences still require independent inspection.':'Requested early phase was missed or ambiguous; this image is not evidence for that phase.'};
+        if(['verified','proof-broken','proof-fixed'].includes(phase)){
+          const pos=symbolPosition(target,source),editor=vscode.window.activeTextEditor;
+          assert.equal(editor?.document,visualDoc,'hover capture uses the same active file');editor.selection=new vscode.Selection(pos.line,pos.character,pos.line,pos.character);
+          const hover=await vscode.commands.executeCommand('vscode.executeHoverProvider',visualDoc.uri,new vscode.Position(pos.line,pos.character));
+          await vscode.commands.executeCommand('editor.action.showHover');
+          const hoverCapture=await requestPhase(config.dir,config.runId,phase+'-hover',{version,source,uri:visualDoc.uri.toString(),hover},timeout);
+          observation.hover={status:hoverCapture.capture.hoverCount>0?'partial':'missing',capture:hoverCapture,provider:hover,
+            scope:'Only a rendered visible hover widget can evidence appearance; provider data alone cannot.'};
+          const hide=(await vscode.commands.getCommands(true)).find(c=>c==='hideHover'||c==='editor.action.hideHover');if(hide)await vscode.commands.executeCommand(hide);
+          assert.equal(visualDoc.version,version,'hover source version stable');assert.equal(visualDoc.getText(),source,'hover source text stable');
+        }
+        writeFileSync(join(config.dir,'phases',phase,'observation.json'),JSON.stringify(observation,null,2));return observation;
+      };
+      const automatic=async(expected,count)=>{
+        await until(()=>target==='local'?
+          localStates.get(visualDoc.uri.toString())?.version===visualDoc.version&&localStates.get(visualDoc.uri.toString())?.state==='complete'&&api.reports.has(visualDoc.uri.toString()):
+          current(visualDoc)?.namedVerifiables?.length===count&&current(visualDoc).namedVerifiables.every(s=>s.status>=4),'automatic current-version verification');
+        const report=target==='local'?api.reports.get(visualDoc.uri.toString()):current(visualDoc);verificationOutcomes(target,report,count,expected);
+      };
+      await scenario('visual-open',async()=>{visualDoc=await open('visual',config.obligations);return capture('open');});
+      await scenario('visual-first-feedback',async()=>{
+        await until(()=>target==='local'?localStates.get(visualDoc.uri.toString())?.version===visualDoc.version:!!current(visualDoc),'first native status feedback');return capture('first-feedback');
+      });
+      await scenario('visual-verified',async()=>{await automatic('proved',config.obligations);return capture('verified');});
+      await scenario('visual-proof-broken',async()=>{await replace(visualDoc,workload(target,config.obligations+1,true));await automatic('failed',config.obligations+1);return capture('proof-broken');});
+      await scenario('visual-proof-fixed',async()=>{await replace(visualDoc,workload(target,config.obligations+2));await automatic('proved',config.obligations+2);return capture('proof-fixed');});
+    }else{
     const initialStart=performance.now();
     let doc;
     await scenario('initial-verification',async()=>{
@@ -291,6 +353,7 @@ async function run() {
       return {status:'partial',definitions:definition.value,references:references.value,completionLabels:completion.value.items.map(i=>i.label),signature:signature.value,secondParameter:secondParameter.value,renameEdits:rename.get(languageDoc.uri),
         scope:'Paired real call-site APIs; additional language-specific behavior remains unexamined.'};
     });
+    }
     result.observations.commands=(await vscode.commands.getCommands(true)).filter(c=>c.startsWith(target==='local'?'solidityLean.':'dafny.'));
     result.observations.decorations=observation.decorations;
     result.observations.testEvents=events.filter(e=>e.kind.startsWith('test.'));
@@ -302,6 +365,7 @@ async function run() {
       scenarios.every(s=>s.status==='passed')?'passed':'passed-with-gaps';
   } catch(error) {result.status=error.code==='TIMEOUT'?'timeout':'broken';result.error=error.stack;}
   finally {
+    if(localStatus)api.service.removeListener('status',localStatus);
     clearInterval(timer);observation.restore();result.elapsedMs=performance.now()-started;
     writeFileSync(config.result,JSON.stringify(result,null,2));
     if(target==='local') api?.cancel();

@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.Controls.not_state_idempotent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.Controls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.Controls.short_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.Controls.witnessed_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.Controls.witnessed_second": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.readLen_after_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.repeated_array_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayReadback.lean:Solidity.Backend.StorageOps.SourceArrayReadback.source_array_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

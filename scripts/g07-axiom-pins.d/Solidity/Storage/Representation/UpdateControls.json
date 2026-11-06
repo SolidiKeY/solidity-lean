@@ -1,0 +1,57 @@
+{
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.FieldsRep.set": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.keyWord_inj": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.mapping_save": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.UpdateControls.alias_rejects_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.UpdateControls.negative_key_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.UpdateControls.nested_alias_rejects_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.UpdateControls.nested_save_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.UpdateControls.scalar_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.UpdateControls.wallet_save_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.ValueRep.congr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/UpdateControls.lean:Solidity.Storage.Representation.word_normalized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

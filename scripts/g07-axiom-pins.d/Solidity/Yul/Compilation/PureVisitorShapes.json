@@ -1,0 +1,21 @@
+{
+ "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.byte_expansion": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.packet": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapes.lean:Solidity.Yul.Compilation.PureVisitorShapes.visit_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
