@@ -515,3 +515,50 @@ classification, joint witnesses and all affected gates remain pending. The
 existing 37-file uninspected elaborated-census count is not reduced by source
 program generation. No proof option, theorem, premise, exclusion, producer or
 live Bridge source changed.
+
+
+## H70 static linkage and obligation classification
+
+The additive `scripts/h62/item2/audit-bytecode-selection/linkage_manifest.py`
+checks the frozen source census against all 227 original Git blobs, then checks
+the exact 190-core and 37-Bridge inspection programs and their manifests. It
+reconstructs each generated program from the unchanged retired template; source,
+module membership, package-prefix, tool hash, fingerprint and program mutations
+are refused. It does not execute Lean or accept a kernel inspection log.
+
+The resulting static join plan retains all 1,660 theorem candidates and their
+source IDs, signatures, name-token lines and proposed package/module join keys.
+It classifies 764 explicit private declarations, 75 record candidates and 248
+direct field candidates. Seven records have nine source `extends` edges. Every
+private kernel identity, field proof type and kernel parent projection remains
+pending. A unique lexical parent candidate is not a resolved kernel parent.
+
+Conditional parent graphs deduplicate by source-field identity, retaining every
+route through a diamond. Distinct origins with the same field name stay distinct.
+Ambiguous, external, cyclic or unsupported source syntax stays explicit rather
+than becoming verified coverage. Quoted/Unicode fields and unparsed body lines
+are retained. All 1,660 source anchors are available; verified kernel links and
+simultaneous witnesses both remain zero.
+
+The output is off Git under
+`/workspace/parallel-20261103/executable-bytecode/h70-static-linkage/evidence/`.
+Eleven new regression tests and all 33 affected scanner tests pass. The new
+script and test docstrings name the guarded regression: promoting private or
+inherited source guesses to kernel coverage. No production source, frozen
+statement, proof option, axiom set, interface or exclusion changes.
+
+The H77-delivered generic-P10 pending answer was verified at SHA256
+`c5cee71e67b17641a0eb7c58268d1164c9dd82c1d3b9d60b1f6957e8c3bb689b`.
+It reports no new owner delivery; definition-body/signature application still
+belongs to V15. No retired lane was woken and no failed send retried.
+H81 is now clarified: host pre-gates allow 16 GiB and at most two parallel jobs;
+reported VY2 split/reversion acceptance remains unverified. This does not enlarge
+this lane's serial proof/migration budgets or release the prior timing STOP.
+H86 makes unavailable historical raw/MCP bytes a limitation to regenerate,
+not a reason to wait for those old artifacts. Required kernel, correspondence,
+package and performance evidence remains unfinished.
+
+The label final head's Hash/CollisionBound and Yul/ReservedNames migration repairs
+belong only in the isolated migration overlay; they remain out of the live branch.
+The current producer wait is the H82 memory-copies successor's checked paired-load
+ByteWorld/emission provenance. Static classification discharges none of it.
