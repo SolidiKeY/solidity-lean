@@ -59,7 +59,7 @@ theorem copy_joint : FiniteRun 8 1 1 hash [] locations ∧
   refine ⟨state_endpoint.run, state_endpoint.transport, rfl, rfl, base_fits,
     state_endpoint.represented, True.intro, ?_, ?_, List.mem_singleton_self _,
     List.mem_singleton_self _, ?_, state_endpoint.fitting, state_endpoint.observations⟩
-  all_goals intro q impossible; exact False.elim (List.not_mem_nil _ impossible)
+  all_goals intro q impossible; exact False.elim (List.not_mem_nil impossible)
 
 theorem self_copy_execution : Evm.run (TargetOperations.copyCode (.root 0) (.root 0)) after =
     .ok after 0 :=
