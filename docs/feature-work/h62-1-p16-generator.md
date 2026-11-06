@@ -1,60 +1,93 @@
-# H62 item 1: P16 generator — partial handoff
+# H62 item 1: P16 generator — partial handoff, H70
 
 Base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`; branch
-`codex/solidity-h62-1-20261106/p16-generator`. This is a prototype, not an
-accepted checkpoint or authorization to edit the VY1/VY3-owned interface.
-Original P16 remains unchanged. The generator retains its 39 import nodes in
-original order and all 33 documentation blocks byte for byte. The render and
-original both have SHA-256
-`d766f5f4edd680fbfdc79f207a6776a0c87e6f93c18c93ba34c991dd09edaec7`.
-No Lean declarations, frozen statements, premises, axioms, or sorries were
-changed. There is no new theorem or claim of proof from the Python controls.
+`codex/solidity-h62-1-20261106/p16-generator`. The VY1/VY3-owned
+`Solidity/Yul/Interfaces/P16.lean` remains unchanged. Its pinned bytes and
+published `origin/master` at `96788a95383b6295dc13774ef681297adf1337a7` both
+hash to `d766f5f4edd680fbfdc79f207a6776a0c87e6f93c18c93ba34c991dd09edaec7`.
+The pinned and published files each contain the same 39 imports and 33 doc
+blocks. The owner VMs/heads are not published here, so this is not a census of
+their unpublished changes. H70 says both owner ticket relays were accepted;
+that is not their approval of ordering, integration, or an original-file edit.
 
-`python3 scripts/h62/item1/p16-generator/generate.py --check` verifies the
-base interface against the fragment inventory and source-file existence;
-`--render` prints the reconstructed file, including when the target is absent.
-`--migration --patch` proposes the marker in
-`tests/h62/item1/p16-generator/proposed-owner-p16.patch`; the separate
-`proposed-gate.patch` proposes a checkpoint gate. Neither is applied. An owner
-would update the relevant fragments, allocate a unique order prefix in
-coordination with concurrent producers, regenerate P16, and run
-`--migration --check` plus the fixture tests. The ordering policy and gate
-integration require owner/coordinator agreement; current ordinal fragment names
-can collide across parallel additions. Resolve such conflicts before regeneration.
+## Prototype and acceptance boundary
 
-The inventory is explicit, not an independent census: a producer omitted from
-both inventory and output, or a removed fragment followed by regeneration,
-will not be detected. New producer registration and membership reconciliation
-against the live VY1/VY3 state are outstanding. This limitation is material to
-acceptance and must not be described as complete missing-node coverage.
-`--check` without `--migration` deliberately checks the unmodified baseline;
-the proposed marker requires the migration flag. Both patches are proposals
-against the pinned base, not a validated integration on live owner branches.
+`generate.py --check` compares output with the unchanged base file; `--render`
+prints output without editing it; `--migration --patch` prints the proposed
+owner-only marker patch. `census.py` checks every registered import and block
+against the target, including exact bytes and ordering; `--target PATH` accepts
+an owner snapshot. `census.py --baseline` independently compares the frozen
+fragment collection to the exact base commit in Git. Baseline file names and
+hashes are inventoried. Missing, changed, extra, malformed and unregistered
+fragments are rejected. Documentation accepts one nonempty balanced Lean doc
+comment per fragment. These are external checks, not kernel proofs.
 
-Read-only finder and skeptic reviews used no Lean server. Both found the initial
-monolithic inputs, lack of independent census, missing negative controls and
-empty migration patch. Inputs were split into fragments, controls added and a
-marker patch prepared. Their second reviews found missing migration-mode tests,
-render dependence on target existence, numerical ordering collisions, missing
-gate integration, owner acknowledgement and the census limitation. The first
-two were fixed and a separate gate patch proposed; the others remain open.
-Both reviewers rechecked the fixes read-only and found the remaining acceptance
-blockers above; the skeptic also requested an extra-fragment control, which was
-then added. The reviewers did not run the temporary-fixture tests in their
-read-only environments. `relay.sh` was not found under
-`/workspace`; no owner request or acknowledgement was obtained.
+Proposed owner-qualified registrations and deterministic order are documented
+in `scripts/h62/item1/p16-generator/registrations/README.md`. Independent owner
+additions use separate paths and sort after the frozen baseline; a disposable Git
+fixture merges actual registration/import/documentation triples in both orders,
+then renders them, and demonstrates a same-path conflict. The fixture does not
+prove that the order is appropriate for future owner changes, nor that imports
+are acyclic. A producer omitted from both owner registrations and the interface
+is inherently invisible without reconciling live owner diffs. Names do not
+authenticate ownership. Edits to the inventory or baseline require review.
 
-Validation observed: six Python unittest cases passed; baseline reproduction
-passed; each proposed patch passed `git apply --check`. These tests are external
-checks, not Lean kernel proofs. The official Lean 4.35.0 archive SHA-256 matched
-`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`;
-Lean reported `4.35.0` commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`,
-Lake `5.0.0-src+eb6cafb`. The KeySort MCP diagnostic reported `diag: 0 errors`
-with `LEAN_NUM_THREADS=1`, server `-j1`, 12 GiB virtual-memory limit, writer
-lock and no swap. This is not the full runtime gate. No before/after timing,
-affected validation, complete acceptance, or full build has passed. Keep the
-four checkpoint queue and in-scope backfill open; do not declare completion.
+The marker patch is `tests/h62/item1/p16-generator/proposed-owner-p16.patch`.
+The separate `tests/h62/item1/p16-generator/proposed-gate.patch` proposes checks
+for generated output, live-target census and pinned baseline census in the
+checkpoint/full gate. Neither patch is applied; both are pinned-base proposals
+and must be regenerated/reviewed against live integration heads. The gate uses
+`--migration`, whereas unmodified baseline checks omit that option. The
+baseline gate needs the pinned commit in the object database.
 
-Setup note: the initial extraction of scoped prototype inputs was performed
-before acquiring the repository writer lock. Subsequent writes and Lean checks
-used the lock; no other writer was observed, and no owned original was changed.
+## Coordinator and owner requests
+
+H70 confirms relay acceptance by `solidity-inline-assembly5-20261031/vy1-words`
+and `solidity-inline-assembly5-20261031/vy3-compilation`. Please relay to both:
+
+* Provide exact live head SHAs and read-only snapshots or diffs for
+  `Solidity/Yul/Interfaces/P16.lean` and the P16 producer additions, so the
+  registered inventory can be reconciled without editing owner files.
+* Review `scripts/h62/item1/p16-generator/registrations/README.md`, specifically
+  the owner-qualified naming, uniqueness, and lexical extension order; state
+  agreement or the exact required ordering changes.
+* Review the two proposed patches at the paths above and identify the owner who
+  will apply the P16 marker and the integrator who will apply the gate patch.
+  Relay acceptance alone is not approval to apply either patch.
+
+## Verification, reviews and outstanding gates
+
+The scoped Python suite currently has 14 tests. It covers exact baseline
+reproduction, missing/extra/order/body drift, removed and tampered baseline
+fragments, joint fragment/hash tampering against the pinned Git source, bad
+registration and missing source, invalid/injected comments, unexpected files,
+nested comments, CRLF, proposed patch application, actual independent Git
+merges in both orders and a same-name conflict. Passing tests do not establish
+Lean elaboration or semantic correctness. Commands and output are exported in
+`/workspace/h62-p16-evidence/` with checksums.
+
+Independent read-only finder and skeptic reviews used no Lean server. They
+identified monolithic inputs, missing independent reconciliation, malicious doc
+text, ignored entries, byte-fidelity and nesting issues; fixes and controls were
+added. Their remaining substantive concerns are live producer reconciliation,
+owner agreement, gate adoption and full validation. Both reviewers rechecked the final CRLF and merged-fragment fixes read-only and
+found no further concrete defect in those fixes; neither ran fixture tests in
+their read-only environment. Their reviews do not close the outstanding gates.
+
+The coordinator-pinned official archive SHA-256 matches
+`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
+Lean reports 4.35.0 (commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`),
+Lake 5.0.0-src+eb6cafb. The earlier bounded KeySort MCP diagnostic returned
+zero errors. The attempted affected P16 diagnostic was stopped when dependency
+build processes were observed without the required explicit `-j1`; its result
+was `diagnostics_unavailable`, not a pass. The first attempt also failed because
+`/usr/bin/time` was unavailable. No affected build, acceptance gate, or
+before/after timing comparison has passed. Configure the dependency build to
+pass `-j1` explicitly before retrying, maintain no swap and 4 GiB headroom,
+and stop for a greater than 10% slowdown. No declarations, statements,
+premises, axioms or sorries changed; no Lean proof is claimed by this work.
+
+Setup note: initial extraction of scoped prototype inputs before the prior
+checkpoint did not acquire the writer lock. Subsequent writes and Lean checks
+used the lock; no other writer was observed and no owned original was changed.
+Keep all four work-queue checkpoints and in-scope backfill open until accepted.
