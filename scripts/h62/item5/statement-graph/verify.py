@@ -36,7 +36,31 @@ def available():
 
 
 def bounds():
-    resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))
+    resource.setrlimit(resource.RLIMIT_AS,(8*1024**3,8*1024**3))
+
+
+def error_diagnostics(log):
+    """Read compiler error bodies only; never count filenames or warnings."""
+    bodies = []
+    for line in log.splitlines():
+        try:
+            message = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(message,dict) and message.get('severity')=='error' and isinstance(message.get('data'),str):
+            bodies.append(message['data'])
+    return bodies
+
+
+def has_error_diagnostic(log, expected):
+    return any(body.strip()==expected for body in error_diagnostics(log))
+
+
+def is_witness_conflict_diagnostic(log):
+    helper = 'H62.CheckedWitness.H62Fixture.root.binder_1'
+    return any(body.strip()=='conflicting imported H62 witnesses' or
+               ('environment already contains' in body and helper in body)
+               for body in error_diagnostics(log))
 
 
 def main():
@@ -98,7 +122,7 @@ def main():
         for i in range(7):
             baseline.append(run('keysort-before-'+str(i),[lean,*flags,'Solidity/KeySort.lean'])['seconds'])
         run('exporter',[lean,*flags,'-o',str(build/SCOPE/'Exporter.olean'),str(SCOPE/'Exporter.lean')])
-        run('fixture',[lean,*flags,str(SCOPE/'Fixture.lean')])
+        run('fixture',[lean,*flags,'-o',str(build/SCOPE/'Fixture.olean'),str(SCOPE/'Fixture.lean')])
         original = (evidence/'fixture.json').read_bytes()
         exported = {r['declaration']:r for r in json.loads(original)['declarations']}
         assert [f['name'] for f in exported['H62Fixture.Certificate']['fields']] == ['resource','valid']
@@ -114,6 +138,49 @@ def main():
         run('fixture-fresh',[lean,*flags,str(SCOPE/'Fixture.lean')])
         assert original == (evidence/'fixture.json').read_bytes(), 'fresh-process nondeterminism'
         assert census == (evidence/'fixture-census.json').read_bytes(), 'fresh-process census nondeterminism'
+        run('witness-fixture',[lean,*flags,'-o',str(build/SCOPE/'WitnessFixture.olean'),str(SCOPE/'WitnessFixture.lean')])
+        witness_bytes = (evidence/'witness-fixture.json').read_bytes()
+        witness_exports = {r['declaration']:r for r in json.loads(witness_bytes)['declarations']}
+        assert not witness_exports['H62WitnessFixture.useCertificate']['binders'][0]['isProp']
+        assert witness_exports['H62WitnessFixture.Certificate']['typeExpr'] == 'Lean.Expr.sort (Lean.Level.succ (Lean.Level.zero))'
+        assert ' '.join(witness_exports['H62WitnessFixture.Pair']['typeExpr'].split()) == 'Lean.Expr.forallE `n (Lean.Expr.const `Nat []) (Lean.Expr.sort (Lean.Level.succ (Lean.Level.zero))) (Lean.BinderInfo.default)'
+        assert witness_bytes == (evidence/'witness-fixture-repeat.json').read_bytes(), 'same-process witness nondeterminism'
+        run('witness-fixture-fresh',[lean,*flags,str(SCOPE/'WitnessFixture.lean')])
+        assert witness_bytes == (evidence/'witness-fixture.json').read_bytes(), 'fresh-process witness nondeterminism'
+        # Each negative driver must fail for its intended witness check, not a setup error.
+        witness_negatives = {
+            'witness-wrong-type': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 H62WitnessFixture.trueProducer', 'H62 witness type does not match the exact universal premise closure'),
+            'witness-wrong-index': ('#h62_witness "binder" H62WitnessFixture.consumer 99 H62WitnessFixture.naturalReflexive', 'H62 witness binder index is out of range'),
+            'witness-unsafe': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 unsafeCast', 'unsafe H62 witness is forbidden'),
+            'witness-axiom-dependent': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 Classical.choice', 'H62 witness must be axiom-free'),
+            'witness-duplicate': ('#h62_witness "binder" H62WitnessFixture.consumer 1 H62WitnessFixture.naturalReflexive', 'duplicate H62 witness registration'),
+            'witness-universe-specialization': ('universe v\ntheorem mono (α : Type) (x : α) : x = x := rfl\ntheorem broad (α : Type v) (x : α) (same : x = x) : x = x := same\n#h62_witness "binder" broad 2 mono', 'H62 witness type does not match the exact universal premise closure')
+        }
+        witness_negatives.update({
+            'witness-kernel-skip': ('set_option debug.skipKernelTC true in\n#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 H62WitnessFixture.trueProducer', 'H62 witness requires kernel checking'),
+            'witness-unresolved-universe': ("""run_cmd Lean.Elab.Command.liftCoreM <| Lean.addAndCompile <| .defnDecl {
+  name := `phantom
+  levelParams := [`v]
+  type := Lean.mkConst ``True
+  value := Lean.mkConst ``True.intro
+  hints := .opaque
+  safety := .safe }
+theorem need (h : True) : True := h
+#h62_witness "binder" need 0 phantom""", 'H62 witness is not closed or has unresolved metavariables')})
+        for label,(body,expected_text) in witness_negatives.items():
+            driver = evidence/(label+'.lean')
+            driver.write_text('import tests.h62.item5.«statement-graph».WitnessFixture\n/-! Guard regression: '+label+' must be refused by the H62 exporter. -/\n'+body+'\n')
+            run(label,[lean,*flags,'--json',str(driver)],expected=1)
+            assert has_error_diagnostic((evidence/(label+'.log')).read_text(), expected_text), 'wrong negative-control failure: '+label
+        for label,producer in (('WitnessOverlayA','H62Fixture.leaf'),('WitnessOverlayB','H62Fixture.reflexive')):
+            driver = evidence/(label+'.lean')
+            driver.write_text('import tests.h62.item5.«statement-graph».Fixture\n#h62_witness "binder" H62Fixture.root 1 '+producer+'\n')
+            run(label,[lean,*flags,'-R',str(evidence),'-o',str(build/(label+'.olean')),str(driver)])
+        conflict = evidence/'witness-overlay-conflict.lean'
+        conflict.write_text('import WitnessOverlayA\nimport WitnessOverlayB\n#h62_export "negative-imported-witness.json" [H62Fixture.root]\n')
+        run('witness-overlay-conflict',[lean,*flags,'--json',str(conflict)],expected=1)
+        failure = (evidence/'witness-overlay-conflict.log').read_text()
+        assert is_witness_conflict_diagnostic(failure), 'wrong imported-witness failure'
         # Unknown/dead declaration and conflicting roles must fail elaboration.
         for label,body in {
             'dead-declaration':'#h62_export "negative-dead.json" [H62Missing.declaration]',
@@ -146,6 +213,20 @@ def main():
         assert pending['counts']['blocked']==5 and pending['counts']['pendingInputs']==5
         assert pending['counts']['typedDeclarations']==0 and pending['counts']['openPremises'] is None
         assert not pending['counts']['premiseInventoryComplete']
+        run('witness-graph',[sys.executable,'-B','scripts/h62/item5/statement-graph/graph.py','build',
+             '--export',str(evidence/'witness-fixture.json'),'--catalog',str(SCOPE/'witness-catalog.json'),
+             '--base',BASE,'--tree',tree,'--output',str(evidence/'witness-graph.json')])
+        witness_graph = json.loads((evidence/'witness-graph.json').read_text())
+        rows = {n['id']:n for n in witness_graph['nodes']}
+        assert rows['consumer']['status']=='done' and rows['polyConsumer']['status']=='done'
+        assert rows['Certificate']['status']!='done' and rows['useCertificate']['status']=='blocked'
+        assert rows['useCertificate']['premises'][0]['status']=='done'
+        assert [p['status'] for p in rows['Pair']['premises']]==['done','done']
+        assert rows['Pair']['status']!='done'
+        assert rows['conditional']['status']=='blocked' and rows['conditional']['controlRole']=='intentional-contradiction'
+        assert rows['conditional']['premises'][1]['blockedByPremises']==['conditional#0']
+        assert witness_graph['progress']['positiveWitness']['openPremises']==0
+        assert witness_graph['progress']['intentionalContradiction']['openPremises']==2
         for i in range(7):
             candidate.append(run('keysort-after-'+str(i),[lean,*flags,'Solidity/KeySort.lean'])['seconds'])
         import statistics
