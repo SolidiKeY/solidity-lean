@@ -1,189 +1,187 @@
-# H62 item 6: Solkey migration overlay
+# H62 item 6: migrate-solkey handoff
 
-Owner: `solidity-h62-6-20261106/migrate-solkey`.
-Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+Status: **blocked, not complete**. Owner: `solidity-h62-6-20261106/migrate-solkey`.
 Branch: `codex/solidity-h62-6-20261106/migrate-solkey`.
-Checkout: `/workspace/migrate-solkey`; original clean checkout preserved at
-`/workspace/solidity-lean` on `work`.
+Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+Repository: `/workspace/migrate-solkey`. Original clean checkout at
+`/workspace/solidity-lean` was preserved. The pinned base was fetched and verified
+as an ancestor of published origin/master before branch creation.
 
-## Scope and current status
+## Checkpoints
 
-All four checkpoints remain binding. This is an isolated migration overlay,
-not a transfer of live producer ownership. No push, merge, generated root,
-module registry, axiom pin or tracked toolchain edit is authorized here.
-The five assigned original files remain byte-identical to the pinned base.
-There is no proof refactor, new axiom, `sorry`, `native_decide`, or raised budget.
+1. **Done:** census at pinned base and clean old source-import closure build.
+2. **Blocked:** exact official toolchain verified; external Syntax.Raw migration
+   prevents elaborating every assigned module on 4.35.0.
+3. **Blocked:** new full build and comparable clean wall/RSS acceptance unavailable.
+4. **Partial:** reviewable patch/bundle/export tooling, source hashes, 759 old
+   elaborated interface hashes and cross-directory report supplied. New interface
+   hashes/comparison and final runtime gates remain outstanding.
 
-1. Census implemented; clean old source-closure measurement in progress.
-2. Exact official new toolchain downloaded and identity verified; compatibility
-   elaboration pending the serial baseline.
-3. Complete new build and comparable timings pending. Any regression escalates;
-   a wall-time or RSS increase above 10% stops acceptance.
-4. Kernel-interface inventory fixture and source/fixture hashing implemented;
-   successful execution on both compilers, exact comparison and final gates
-   remain pending. A final bundle must not claim these are complete.
+No assigned original file or frozen statement was edited. All five originals,
+lean-toolchain, generated roots, central module maps and axiom pins remain
+byte-identical to base. No new axiom declaration, sorry, native_decide, trust
+shortcut, changed premise/exclusion/observation or raised heartbeat budget.
+This overlay does not transfer live producer ownership. No push, merge, PR,
+cut-over or freeze announcement. Final lean-toolchain change belongs to root.
 
-## Reproduction and evidence
+## Accepted old baseline and resources
 
-Bulk evidence stays off Git at `/workspace/migrate-solkey-evidence`.
-The scripts under `scripts/h62/item6/migrate-solkey` are deterministic generators.
+Command (exit 0):
 
 ```
-python3 scripts/h62/item6/migrate-solkey/census.py
-python3 tests/h62/item6/migrate-solkey/test_census.py
-python3 tests/h62/item6/migrate-solkey/test_compare.py
-python3 scripts/h62/item6/migrate-solkey/measure.py --root /workspace/migrate-solkey --toolchain /workspace/.setup/tools/lean-4.24.0-linux --out /workspace/migrate-solkey-evidence/old-clean-1
+python3 scripts/h62/item6/migrate-solkey/measure.py --root /workspace/migrate-solkey --toolchain /workspace/.setup/tools/lean-4.24.0-linux --out /workspace/migrate-solkey-evidence/old-clean-final
 ```
 
-The initial measurement process loaded the runner before review hardening.
-It uses serial standalone `lean -j1 --tstack=131072`, fresh `.olean` output,
-no Lake artifact cache, no configured swap, a 12 GiB per-process address-space
-limit, and a 4 GiB cgroup reserve guard. Its original termination wait is
-unbounded after TERM; the revised runner fixes this and checks host reserve
-before starting each child. Preserve the original measurement as a pilot;
-use the final revised runner identically for the accepted old/new comparison.
+All **285 modules**, including all five assigned modules, pass.
+Wall **1776.720861 s**; maximum child RSS **3,280,612 KiB**;
+peak cgroup memory **9,659,658,240 bytes** (includes file cache).
+Each module's exact command, exit, wall time, source SHA256 and output OLean
+SHA256 are in `old-clean-final/measurement.json`. This narrow source-import
+closure build does not substitute for final `./run-lean.sh`.
 
-The runner checks the complete topologically ordered assigned source-import
-closure. This narrow gate is distinct from the repository-required final
-`./run-lean.sh` and affected validation. Each module's command, exit, wall time,
-and aggregate maximum child RSS are recorded. The 250 ms polling loop adds
-measurement overhead; fresh outputs do not imply a cold OS page cache. Do not
-interpret a borderline timing ratio without repeat measurement.
+Fresh outputs; no Lake/per-master cache restored. Official standard library is
+provided by each release. OS page cache is uncontrolled. Serial LEAN_NUM_THREADS=1
+and explicit -j1, --tstack=131072; VM physical cap 16 GiB, CPU quota 4, no configured
+swap, 4 GiB reserve checked against host availability and cgroup headroom, bounded
+TERM/KILL cleanup, no artificial virtual-address cap. Both releases default to
+maxHeartbeats=200000; no budget was raised. Polling adds up to 250 ms per module.
 
-The census covers five assigned modules, seven distinct direct imports,
-280 local dependency modules and 16 standard-library imports. It records eleven
-fixture-import occurrences, including the intentional stale-hash import,
-three explicit theorems, two private definitions, commands and their locations.
-Full source and fixture SHA256 values preserve every frozen expected-message
-block. They are lexical evidence, not elaborated interface equivalence.
+The failed initial pilot is retained: 1462.017 s before TermSize exited -6 with
+“failed to create thread.” Its extra RLIMIT_AS=12 GiB incorrectly restricted
+virtual stack reservations. An unchanged TermSize recheck without that extra cap
+passed in 29.830 s; a live sample showed 13,404,156 KiB virtual size versus
+1,051,480 KiB RSS. The accepted clean run later passed it in 29.607 s. No OOM
+was recorded. The failed pilot is not a baseline or proof failure.
 
-`tests/h62/item6/migrate-solkey/FrozenInterfaces.lean` inventories all constants
-owned by the five modules, including private and command-generated constants,
-with declaration kind, universe parameters, kernel type expressions and definition,
-proof and opaque value expressions. It requires entries for
-every module and all three named theorems. It also prints the three theorem
-axiom sets. Output belongs off Git. This helper has not yet been elaborated;
-no successful semantic interface or axiom audit is claimed.
+## Official pinned build
 
-## Toolchain identity
+All coordinator inputs passed `/workspace/h62-coordinator-inputs/sha256.json`.
+The required toolchain-pin.json and downloaded release match:
 
-Coordinator inputs at `/workspace/h62-coordinator-inputs` passed their complete
-`sha256.json` manifest. `toolchain-pin.json` requires:
+- leanprover/lean4:v4.35.0, official lean-4.35.0-linux.tar.zst.
+- SHA256 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
+- Lean 4.35.0, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release.
+- Lake 5.0.0-src+eb6cafb (Lean version 4.35.0).
+- Old Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release.
+- Old Lake 5.0.0-src+797c613 (Lean version 4.24.0).
 
-- `leanprover/lean4:v4.35.0`, official `lean-4.35.0-linux.tar.zst`.
-- Archive SHA256: `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
-- Lean: `4.35.0`, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, Release.
-- Lake: `5.0.0-src+eb6cafb (Lean version 4.35.0)`.
-- Old Lean: `4.24.0`, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, Release.
-- Old Lake: `5.0.0-src+797c613 (Lean version 4.24.0)`.
+Actual versions, archive identity and resource observations are in toolchain.json,
+resources.json and measurement reports. KeySort passes on both exact releases.
+No RUNTIME_GATE_PASS is asserted.
 
-Archive and versions are recorded in off-Git `toolchain.json`. No per-master
-v4.24 artifact cache is used. No RUNTIME_GATE_PASS is asserted.
+## External dependency blocker
 
-## Cross-directory dependencies and coordination
+Command (exit 1):
 
-Direct imports: `Solidity.Frontend.Import`, `Solidity.Frontend.Problems`,
-`Solidity.Tools.Run`, `Solidity.Calculus.Close`, `Solidity.Calculus.Closers`,
-`Solidity.Calculus.Deploy`, and `Solidity.Calculus.Surface`.
-Every dependency outside `Solidity/Solkey/` is read-only to this lane. The
-source census includes the full closure and its hashes for migrate-root-gate.
+```
+python3 scripts/h62/item6/migrate-solkey/measure.py --root /workspace/migrate-solkey --toolchain /workspace/migrate-solkey-evidence/lean-4.35.0-linux --out /workspace/migrate-solkey-evidence/new-clean-1
+```
 
-Typed coordination blocker `OWNER_RELAY_UNAVAILABLE`: the required `relay.sh`
-is absent from the actual checkout and workspace. No owner reply or permission
-is inferred. No assigned original has been edited. Once an elaboration failure
-identifies a specific external dependency, record its exact file and error as
-an owner migration request; never repair that dependency here.
+KeySort, AST and SpecSyntax pass. Solidity/Syntax/Raw.lean then fails at lines
+597, 650, 665, 682 and 684: String.drop now returns String.Slice; Slice.toList
+and String.dropRight are unavailable at those uses; passing endsWith directly
+fails overloaded-pattern inference. Deprecated String.mk/Slice.dropRight also
+produce warnings. Complete diagnostics and shortest import chains proving that
+**all five** assigned modules reach Raw are in dependency-blockers.json.
 
-The additive test inventory is deliberately absent from generated library roots.
-Suggested registration for the root migration owner: run the fixture explicitly
-against each clean build's `LEAN_PATH`; no production-module registration is
-needed unless the owner chooses a maintained integration location.
+Typed blocker: **EXTERNAL_DEPENDENCY_MIGRATION**. Request to Syntax migration
+owner via migrate-root-gate: provide owner-approved compatible prerequisite
+migration artifacts/overlay on the exact pin, preserving statements/semantics/
+budgets. Raw is read-only here. Required relay.sh is absent; request is saved for
+local coordinator retrieval, with no owner reply or permission inferred.
 
-## Independent reviews and controls
+The comparison command exits 1 with “new run is incomplete or failed”:
 
-The finder and skeptic worked independently, read-only, without Lean or a server.
-Finder found incomplete legal import parsing and missing host-memory/prelaunch
-checks plus unbounded stop cleanup. Skeptic found incorrect command locations,
-unbounded cleanup, polling overhead and the distinction between source and
-semantic interface hashes. Confirmed defects were repaired; both reviewers
-confirmed the repairs by inspection. Finder additionally requested fail-closed
-checks for module/theorem omissions in the interface fixture; these were added.
+```
+python3 scripts/h62/item6/migrate-solkey/compare.py /workspace/migrate-solkey-evidence/old-clean-final/measurement.json /workspace/migrate-solkey-evidence/new-clean-1/measurement.json
+```
 
-Five scanner controls pass: module-system import modifiers, nested comments/string delimiters, exact five-file
-and eleven-import census, command locations, and source/fixture/dependency
-mutations. Four acceptance controls pass: finite positive metrics, incomplete/failed runs, resource or
-input drift, and wall/RSS regression thresholds. These are external Python tests,
-not Lean theorem proofs. Final fixture elaboration, Lean gates and measured
-acceptance remain outstanding.
+**Full-build timing delta: unavailable.** No performance acceptance or claim of
+no regression. The comparator rejects incomplete runs, diagnostic modes, changed
+settings/tooling/inputs, nonfinite metrics and module-order drift. It escalates
+any positive wall/RSS regression and stops strictly above 10%.
 
-## Static validation evidence
+## Census, interfaces and finite backfill
 
-`node scripts/check-layers.mjs`: exit 0; 857 core modules, zero reaching
-either elaborators or checked parser adapters. Generated-root and fragment
-checks: exit 0. Census comparison: exit 0, all source/fixture/dependency hashes
-unchanged. `bash scripts/check-testsuite.sh --solkey
-tests/migration/solkey/keyext.solidity.examples`: exit 0; trust clean across
-54 modules and 564 public functions = 552 derived + 11 refuted + 1 excluded,
-zero pending, plus 2 skips. This checks pinned rows, not new Lean elaboration.
-The initially attempted default and setup-snapshot paths failed; the explicit
-repository-pinned snapshot resolves those setup failures without source edits.
+Census: five modules, seven direct imports, 280 local dependency modules and
+16 standard imports. Eleven fixture-import occurrences include the deliberate
+stale-hash rejection. All source commands, guards and fixtures are hashed. These
+lexical hashes alone are not semantic interface equivalence.
 
-`bash scripts/check-doc-paths.sh`: exit 1 for a pre-existing missing reference
-in `docs/feature-work/after-roadmap-va1.md` to the optional Bridge Mathlib
-checkout. The new handoff introduces no missing Lean path. No fix outside the
-assigned scope is attempted. Logs are under off-Git `static-gates/`.
+Old FrozenInterfaces.lean check exits 0 in 44.100 s with **759
+declarations**: ComputedRevert21, Constructors42, QuantifiedDiamond46, ScopedFlip11,
+TestSuite639. Original declaration kinds, universe parameters, kernel type/value
+expressions (including opaque bodies) are captured. All module-owned theorem
+axioms are checked; module-owned axioms are rejected. Three public originals use
+only propext, Classical.choice and Quot.sound. Normalized hashes are in
+old-interfaces.json; new execution/comparison remains blocked by Raw.
 
-## Corrected physical-memory measurement bounds
+Eight isolated String API cases pass on both releases with identical source
+SHA256 `053bd25334527afb97c85f6df741afee0b9ee2f0aecc8f36dfecea71186407b7` and default
+heartbeat budgets. No premise/conclusion changed during proof repair. Old positive
+suffix proof uses explicit eight loop transitions; new proofs use public string
+list-model equations. These are finite cases, **not parser correctness or Solkey
+migration completion**. check-api.py checks compilation then all eight axiom sets
+through StringApiAxioms.lean. Old axioms: six empty, two propext. New axioms: only
+propext, Classical.choice and Quot.sound. No nonstandard axiom/trust shortcut.
 
-The initial old pilot failed at `Solidity.Calculus.TermSize` with exit -6:
-`libc++abi: terminating due to uncaught exception of type lean::exception:
-failed to create thread`. It ran for 1462.017 s before stopping; maximum child
-RSS was 3,296,560 KiB. This is a failed partial pilot, not an accepted baseline.
-The extra RLIMIT_AS cap incorrectly limited virtual stack reservations. The
-repository explicitly distinguishes these reservations from RSS.
+Only these isolated cases enable experimental.module=true equally on both
+versions to allow import-all of standard implementation details. Assigned build
+measurements use stock options. This private test option does not edit the
+tracked toolchain. MCP goal and multi-attempt tools were used for the difficult
+case; a diagnostic request after module-header changes timed out. Only this
+lane's daemon tree/scratch files were stopped/removed. Final bounded compiler
+and axiom checks are authoritative; no successful final MCP diagnostic is claimed.
 
-A diagnostic recheck without that extra virtual-address limit passed TermSize
-in 29.830 s under the actual VM cgroup. A live sample showed 13,404,156 KiB
-virtual size versus 1,051,480 KiB RSS. No cgroup OOM event was recorded. The first
-diagnostic attempt failed because the new output root shadowed the supplied
-import root; the runner now places the existing import root first. Both failed
-attempts are retained as evidence, without theorem/source changes.
+**ESCALATE: diagnostic RSS regression.** API case/audit RSS is
+208,396 → 468,140 KiB (**+124.64%**),
+wall 1.091012 → 1.072779 s. This is an isolated SDK
+fixture, not the complete assigned build. It exceeds 10%; further Lean work and
+performance acceptance stop for root/gate investigation. No waiver requested.
 
-Accepted measurements use the existing physical cgroup cap of 17,179,869,184
-bytes (16 GiB), no configured swap, a 4 GiB reserve checked against both host
-availability and cgroup headroom before launch and during each job, serial
-explicit `-j1`, bounded TERM/KILL cleanup, and no artificial virtual-address
-limit. Old and new comparisons require identical runner/census hashes, resource
-settings, module order and source/fixture hashes. Per-file and inventory modes
-cannot count as clean-build acceptance.
+## Validation and reviews
 
-Every completed module records its output OLean SHA256. Inventory mode requires
-a complete assigned-closure report, matching source identity and Lean/Lake
-versions, and verifies every imported OLean hash. Diagnostic per-file mode is
-explicitly separate and can use a partial closure to reproduce provisioning
-failures. Five scanner, five acceptance, and five interface controls currently
-pass; these Python controls do not replace Lean elaboration.
+- Five scanner, five timing-acceptance, five interface and one archive controls:
+  **16 external Python tests pass**. These do not prove Lean statements.
+- Layer check exits0: 857 core modules, zero reaching elaborators or checked
+  parser adapters. Generated-root and fragment checks exit0. Census comparison
+  exits0; all five original/dependency/fixture hashes remain unchanged.
+- check-testsuite.sh --solkey tests/migration/solkey/keyext.solidity.examples
+  exits0: trust clean across54 modules;564 public functions =552 derived+11
+  refuted+1 existing excluded, zero pending, plus2 skips. This audits pinned rows.
+- check-doc-paths.sh exits1 for a pre-existing missing optional Bridge Mathlib
+  path in docs/feature-work/after-roadmap-va1.md. No new missing path or external
+  file repair. Default/setup TestSuite snapshot attempts failed; explicit pinned
+  snapshot resolves that setup issue. All attempts retained.
+- Full new ./run-lean.sh, all assigned new modules, new interfaces and clean
+  before/after acceptance remain pending. No failed/pending required gate is done.
 
-## External prerequisite migration request
+Independent finder and skeptic worked read-only without Lean/server. Their
+findings fixed command locations/import forms, reserve/termination handling,
+NaN/exact10%/tool identity/mode acceptance, opaque/original-kind coverage, unused
+axiom rejection, and stale-import provenance. They verified final repairs and
+finite-case statement preservation. Skeptic identified the diagnostic RSS rise;
+it is escalated above. reviews.json retains outcomes and boundaries.
 
-The exact official 4.35.0 attempt passes KeySort, AST and SpecSyntax, then fails
-`Solidity/Syntax/Raw.lean` with five errors at lines 597, 650, 665, 682 and 684.
-`String.drop` now yields `String.Slice`; direct String consumers and Slice.toList
-fail, String.dropRight is unavailable, and passing endsWith without eta expansion
-fails overloaded-pattern inference. Warnings also report deprecated String.mk
-and Slice.dropRight. This dependency is outside this lane's write scope.
+## Artifacts and continuation
 
-Typed blocker: `EXTERNAL_DEPENDENCY_MIGRATION`. Recipient: Syntax migration
-owner through migrate-root-gate. Request an owner-approved compatible prerequisite
-overlay/artifacts on the coordinator's official pin, preserving exact types,
-semantics and budgets. No edit to Raw is made here, and no reply is inferred.
-The complete diagnostic and shortest dependency chains for all five assigned
-modules are saved in off-Git `dependency-blockers.json`. Every assigned module
-reaches Raw, so none can currently complete on the new compiler.
+Bulk remains outside Git at `/workspace/migrate-solkey-evidence`; deterministic
+generators are committed under scripts/h62/item6/migrate-solkey. The committed
+checksum manifest covers a reproducible bulk archive and the exact release.
+export.py produces a verified base..HEAD patch/bundle, exact committed identity,
+handoff and matching evidence archive with checksums. Mutable goal/head reports
+are excluded from the bulk archive to avoid circular hashes.
 
-`StringApiControls.lean` adds eight isolated case controls for the reported API
-boundaries, including Unicode, hash-name prefix stripping, function/return
-spelling, positive and negative location suffixes. These are finite case proofs,
-not a proof of Raw's parser correctness or a dependency migration. They are
-awaiting serial per-file checks on both toolchains. No original statement,
-premise, exclusion, observation or budget is changed.
+See tests/h62/item6/migrate-solkey/registration-fragment.md: explicit fixture
+checks only; no production roots/module maps/axiom pin edits. Root owns final
+registration/toolchain cut-over. Original producer ownership remains intact.
+
+Resume this **same VM, branch and original launcher goal**, preferably through
+the coordinator's fresh thread after this handoff. Do not create/reset a goal.
+Original prompt reference SHA256:
+`ab866875b0fdd2e67bb60485af9eb65d4e10e08992421bac2438d6c726b34b55`.
+get_goal is not exposed; coordinator confirmed optional inspection absence is not
+a blocker. Remaining obligations: owner Syntax migration, complete new closure,
+new frozen-interface comparison, full required gates, full clean wall/RSS
+comparison and root/gate resolution of diagnostic RSS. Keep goal blocked, not
+complete. No push, merge or deployment authorization is implied.

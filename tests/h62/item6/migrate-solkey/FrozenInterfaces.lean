@@ -21,9 +21,11 @@ run_elab do
   for (name, info) in env.constants.toList do
     if let some index := env.getModuleIdxFor? name then
       if modules.contains env.header.moduleNames[index.toNat]! then
-        if let .axiomInfo _ := info then
+        let some originalKind := Lean.getOriginalConstKind? env name
+          | throwError "missing original declaration kind: {name}"
+        if originalKind == .axiom then
           throwError "module-owned axiom declaration: {name}"
-        if info.isTheorem then
+        if originalKind == .thm then
           let axioms ← Lean.collectAxioms name
           let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
           unless axioms.all allowed.contains do
@@ -32,34 +34,35 @@ run_elab do
     let index ← env.getModuleIdxFor? name
     let owner := env.header.moduleNames[index.toNat]!
     if !modules.contains owner then none else
-      let kind : String := match info with
-        | .axiomInfo _ => "axiom"
-        | .defnInfo _ => "definition"
-        | .thmInfo _ => "theorem"
-        | .opaqueInfo _ => "opaque"
-        | .quotInfo _ => "quotient"
-        | .inductInfo _ => "inductive"
-        | .ctorInfo _ => "constructor"
-        | .recInfo _ => "recursor"
+      let originalKind ← Lean.getOriginalConstKind? env name
+      let kind : String := match originalKind with
+        | .axiom => "axiom"
+        | .defn => "definition"
+        | .thm => "theorem"
+        | .opaque => "opaque"
+        | .quot => "quotient"
+        | .induct => "inductive"
+        | .ctor => "constructor"
+        | .recursor => "recursor"
       some (name.toString, Json.mkObj [
         ("kind", toJson kind),
         ("name", toJson name.toString),
         ("module", toJson owner.toString),
-        ("isTheorem", toJson info.isTheorem),
+        ("isTheorem", toJson (originalKind == .thm)),
         ("levelParams", toJson (info.levelParams.map Name.toString)),
         ("typeExpr", toJson (reprStr info.type)),
         ("valueExpr", toJson ((info.value? (allowOpaque := true)).map (fun value => reprStr value)))])
-  for module in modules do
+  for expectedModule in modules do
     unless env.constants.toList.any (fun (name, _) =>
         (env.getModuleIdxFor? name).any fun index =>
-          env.header.moduleNames[index.toNat]! == module) do
-      throwError "assigned module has no inventoried constants: {module}"
+          env.header.moduleNames[index.toNat]! == expectedModule) do
+      throwError "assigned module has no inventoried constants: {expectedModule}"
   for required in ["counterDeploy", "Solkey.EtherWallet.constructor.proved",
       "Solkey.ScopedFlip.additionStorageWrite.proved"] do
     unless entries.any (fun entry => entry.1 == required) do
       throwError "missing frozen theorem: {required}"
   let sorted := entries.toArray.qsort fun a b => a.1 < b.1
-  liftIO <| IO.println (Json.arr (sorted.map Prod.snd)).compress
+  liftM <| IO.println (Json.arr (sorted.map Prod.snd)).compress
 
 #print axioms counterDeploy
 #print axioms Solkey.EtherWallet.constructor.proved
