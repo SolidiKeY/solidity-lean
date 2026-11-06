@@ -46,6 +46,19 @@ class ScannerControls(unittest.TestCase):
         self.assertNotEqual(scanner.normalize("(x : Nat) : x' = x"),
                             scanner.normalize("(y : Nat) : y' = y"))
 
+    def test_identifier_punctuation_does_not_conflate_binders(self):
+        for suffix in ("?", "!", "?foo", "!!"):
+            with self.subTest(suffix=suffix):
+                left = "(x : Nat) : x" + suffix + " = x"
+                right = "(y : Nat) : y" + suffix + " = y"
+                self.assertNotEqual(scanner.normalize(left), scanner.normalize(right))
+                self.assertEqual(scanner.normalize("(x" + suffix + " : Nat) : x" + suffix + " = x" + suffix),
+                                 scanner.normalize("(y" + suffix + " : Nat) : y" + suffix + " = y" + suffix))
+        self.assertEqual(scanner.tokenize("x?foo x!! x ? Nat.x? 1?"),
+                         ["x?foo", "x!!", "x", "?", "Nat.x?", "1", "?"])
+        self.assertIsNone(scanner.raw_literal('x?r#"s"#', 2))
+        self.assertIsNone(scanner.char_literal("x?'a'", 2))
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))

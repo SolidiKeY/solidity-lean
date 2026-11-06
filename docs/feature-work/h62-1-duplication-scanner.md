@@ -403,3 +403,24 @@ performance pair and do not constitute a matched before/after performance gate.
 Finder and skeptic independently checked the input selection and interpretation
 without Lean. Full reports, commands and timing records are outside Git at
 `/workspace/h62-duplication-scanner-evidence/environment-incremental/`.
+
+## Retirement checkpoint: identifier continuation fix (unfinished)
+
+A finder identified that splitting `?` and `!` from Lean identifier
+continuations can conflate a free name such as `x?` with binder `x` during
+normalization. This checkpoint changes the lexical token and binder patterns
+and adds negative and alpha-renaming controls. The acceptance suite passed 31
+Python tests, but the change has not had its required final independent
+finder/skeptic reviews or its matched after timing and full-tree differential
+scan. Do not treat this checkpoint as validated or promote its output. Lean's
+full identifier grammar includes Unicode cases beyond these patterns. The
+same review also found selected symlink aliases and broken symlinks can be
+silently omitted by input selection; that issue remains unfixed.
+
+The matched before run, using the previous caller-pinned baseline and 8 GiB
+virtual limit, exited 0 in 96.882 seconds. Its command, output and test log
+are outside Git under
+`/workspace/h62-duplication-scanner-evidence/suffix-fix/`. The coordinator
+ordered this worker retired before the after run. The successor must check the
+fix, complete negative controls and reviews, measure the matched after run
+and stop if slowdown exceeds 10%; no passing performance gate is claimed.

@@ -9,13 +9,13 @@ import re
 from pathlib import Path
 
 DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
-TOKEN = re.compile(r"""r(#+)"[\s\S]*?"\1|'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'|«[^»]*»|"(?:\\.|[^"\\])*"|[\w\']+(?:\.[\w\']+)*|[^\s]""")
+TOKEN = re.compile(r"""r(#+)"[\s\S]*?"\1|'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'|«[^»]*»|"(?:\\.|[^"\\])*"|(?:[^\W\d]|_)[\w\'!?]*(?:\.(?:[^\W\d]|_)[\w\'!?]*)*|[\w\']+(?:\.[\w\']+)*|[^\s]""")
 RAW_START = re.compile(r'r(#+)"')
 CHAR = re.compile(r"'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'")
-BINDER = re.compile(r"([({\[])\s*((?:[^\W\d]|_)[\w']*(?:\s+(?:[^\W\d]|_)[\w']*)*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
+BINDER = re.compile(r"([({\[])\s*((?:[^\W\d]|_)[\w'!?]*(?:\s+(?:[^\W\d]|_)[\w'!?]*)*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
 
 def raw_literal(text, i):
-    if text[i] != "r" or (i and (text[i-1].isalnum() or text[i-1] in "_'")): return None
+    if text[i] != "r" or (i and (text[i-1].isalnum() or text[i-1] in "_'!?")): return None
     match = RAW_START.match(text, i)
     if not match: return None
     close = '"' + match.group(1)
@@ -24,7 +24,7 @@ def raw_literal(text, i):
     return end + len(close)
 
 def char_literal(text, i):
-    if text[i] != "'" or (i and (text[i-1].isalnum() or text[i-1] in "_'")): return None
+    if text[i] != "'" or (i and (text[i-1].isalnum() or text[i-1] in "_'!?")): return None
     return CHAR.match(text, i)
 
 def mask(text):
