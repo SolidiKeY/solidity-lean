@@ -21,10 +21,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Source/StateExamples.lean:Solidity.Source.StateExamples.transfers": [
-  "Quot.sound",
-  "propext"
- ],
+ "Solidity/Source/StateExamples.lean:Solidity.Source.StateExamples.transfers": [],
  "Solidity/Source/StateExamples.lean:Solidity.Source.Storage.write_read": [
   "Classical.choice",
   "Quot.sound",

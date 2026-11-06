@@ -1,0 +1,19 @@
+{
+ "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysical.write_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.applied": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.initial": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.stale_bytes": [],
+ "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.word_fit_is_not_byte_fit": [],
+ "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.wrong_scale": []
+}

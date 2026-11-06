@@ -1,0 +1,52 @@
+{
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.Checks.LocalBoolItemRepresentation.afterDeclaration": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.Checks.LocalBoolItemRepresentation.beforeDeclaration": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.Checks.LocalBoolItemRepresentation.completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.Checks.LocalBoolItemRepresentation.haltProjection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.Checks.LocalBoolItemRepresentation.normalProjectionRefused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.Checks.LocalBoolItemRepresentation.reachedContextDistinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.Checks.LocalBoolItemRepresentation.zeroFuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.LocalBoolItemRepresentation.finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.LocalBoolItemRepresentation.initialization": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean:Solidity.Yul.LocalBoolItemRepresentation.items": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -127,7 +127,7 @@ theorem source_expr_statement_error {E : Source.Env} {Γ : Source.RCtx} {τ : So
   have hsub : (Source.EM.sub (Γ := []) y.1 (Source.evalE G F horizon e)).run (.nil,y.2)=
       (.error halt,(.nil,z.2)) := by
     unfold Source.EM.sub
-    have he' : (Source.evalE G F horizon e) (y.1,y.2)=(.error halt,z) := he
+    have he' : (Source.evalE (plan := none) G F horizon e) (y.1,y.2)=(.error halt,z) := he
     cases z
     simp only [ExceptT.run,ExceptT.mk,he']
   rw [Source.execS,Source.Hoare.run_bind,hsub]

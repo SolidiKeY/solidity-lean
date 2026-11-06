@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompoundBounds.lean:Solidity.Backend.MemoryOps.source_uint_add_low": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompoundBounds.lean:Solidity.Backend.MemoryOps.source_uint_slice_bind_add_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompoundBounds.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.compound_add_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

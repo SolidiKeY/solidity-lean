@@ -1,0 +1,8 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopeView.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopeView.assemble": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopeView.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopeView.closeBlock": [
+  "propext"
+ ]
+}
