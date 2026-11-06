@@ -141,3 +141,11 @@ its required hash cannot be verified from this reconstruction. Obtain the
 original from the coordinator. All extraction checkpoints, fixture proofs,
 independent reviews, timing, acceptance and full validation remain open.
 The bounded P12 MCP baseline was interrupted on retirement and did not pass.
+
+## Successor intake and lexical controls (2026-11-06)
+
+H82b authenticated metadata and all package checksums were verified. Final control-tuples `2366c57f099b27d4673dda504d258ba77ff3fcaf` and binding-fixtures `d1fcc57d78356fbdf38cbb12d4dd89df074c1295` were merged; coordinator confirms both stopped, paused and quiescent. The former frozen-assignment metadata wait is resolved by that authenticated package. Referenced external evidence archives remain separate delivery dependencies. Published master `5f14596531efea2be64f1a5e7a83afa5e151e865` was subsequently merged without discarding owned work.
+
+The earlier comment false-positive controls above describe the historical scanner. The current shared lexical filter masks nested comments, strings, raw strings including zero hash delimiters, and character literals while preserving character positions and newlines. Quoted identifiers are masked and explicitly listed as unknown with original text and line in census, reconciliation and interval reports. Declaration/reference/import accounting is therefore incomplete for quoted identifiers; this remains a lexical inventory, not a Lean parser. Original interval text remains untouched and all 17 files still reconstruct byte for byte.
+
+Six lexical, four reconciliation and two reconstruction controls passed. Independent read-only finder and skeptic used no Lean/server; their raw-string, trailing-escape and quoted-name findings were fixed and re-reviewed. `lexical-controls-manifest.json` records actual commands, exits, elapsed times and off-Git evidence hashes. No Lean statement, proof, interface, axiom, budget or exclusion changed. All four fixture-extraction checkpoints, proof gates, before/after Lean timings and full acceptance remain open. H81 policy clarification still gates heavy validation.

@@ -97,6 +97,7 @@ def build(export, catalog, base, tree, ownership=None):
     mapping = {n['declaration']: n['id'] for n in specs}
     require(set(by_decl).issubset(set(mapping)), 'catalog must cover every exported declaration')
     nodes = {}
+    checked_helper_targets = {}
     for spec in sorted(specs, key=lambda n: n['id']):
         name = spec['declaration']
         require(name in by_decl and by_decl[name].get('exists') is True, 'dead declaration: '+name)
@@ -115,7 +116,7 @@ def build(export, catalog, base, tree, ownership=None):
         inventory.update({'field:'+str(i): b for i,b in enumerate(row['fields'])})
         roles = spec.get('binderRoles', {})
         require(set(roles) == set(inventory), 'unclassified/missing typed binder: '+name)
-        for key, binder in inventory.items():
+        for position,(key, binder) in enumerate(inventory.items()):
             assignment = roles[key]
             require(assignment.get('kind') in ('parameter','premise'), 'invalid binder role')
             known_premise = any(r in mapping and next(s['kind'] for s in specs if s['declaration']==r)=='premise' for r in binder['references'])
@@ -125,18 +126,48 @@ def build(export, catalog, base, tree, ownership=None):
                 require(assignment.get('reason'), 'data parameter needs an audited reason')
             else:
                 require(assignment.get('owner'), 'typed premise needs producer owner')
-                premises.append({'id': spec['id']+'#'+key, 'name': binder['name'],
-                                 'type': binder['type'], 'typeExpr': binder['typeExpr'],
-                                 'owner': assignment['owner'], 'status': 'open'})
+                premise = {'id': spec['id']+'#'+key, 'name': binder['name'],
+                           'type': binder['type'], 'typeExpr': binder['typeExpr'],
+                           'owner': assignment['owner'], 'status': 'open'}
+                evidence = binder.get('witness')
+                if evidence is not None:
+                    expected_scope = 'field' if key.startswith('field:') else 'binder'
+                    expected_index = int(key.split(':')[-1])
+                    require(evidence['consumer']==name and evidence['scope']==expected_scope and
+                            type(evidence['index']) is int and evidence['index']==expected_index,
+                            'witness consumer/location mismatch')
+                    require(evidence['kernelChecked'] is True, 'witness lacks kernel check')
+                    require(evidence['axioms']==[], 'witness must be axiom-free')
+                    require(all(isinstance(evidence[k],str) and evidence[k] for k in
+                                ('declaration','checkedDeclaration','binderTypeExpr','expectedTypeExpr','helperTypeExpr')),
+                            'missing checked witness identity/type')
+                    require(evidence['binderTypeExpr']==binder['typeExpr'] and
+                            evidence['expectedTypeExpr']==evidence['helperTypeExpr'], 'witness type evidence mismatch')
+                    expected_prior = list(inventory)[:position]
+                    require(evidence['priorBinders']==expected_prior, 'witness prerequisite inventory mismatch')
+                    producer = next((s for s in specs if s['declaration']==evidence['declaration']),None)
+                    require(producer is not None and producer['kind'] in ('statement','helper'), 'dead/unclassified witness declaration')
+                    require(producer['owner']==assignment['owner'], 'witness producer owner mismatch')
+                    producer_row = by_decl.get(evidence['declaration'])
+                    require(producer_row is not None and producer_row.get('exists') is True and producer_row['axioms']==[],
+                            'witness producer missing or axiom-dependent')
+                    helper = evidence['checkedDeclaration']
+                    require(helper not in checked_helper_targets, 'duplicate checked witness helper')
+                    checked_helper_targets[helper]=(name,key)
+                    blocked_by = [p['id'] for p in premises if p['status']!='done']
+                    premise.update(witness=evidence,blockedByPremises=blocked_by,
+                                   status='open' if blocked_by else 'done')
+                premises.append(premise)
         completed = spec.get('completed', False)
         require(isinstance(completed, bool), 'completed must be Boolean')
         if completed:
             require(row.get('isTheorem') is True, 'completion requires a checked theorem: '+name)
             require(not (set(row['axioms'])-{'propext', 'Classical.choice', 'Quot.sound'}), 'unapproved axiom: '+name)
-            require(not premises, 'cannot complete a theorem with open named premises: '+name)
+            require(all(p['status']=='done' for p in premises), 'cannot complete a theorem with open named premises: '+name)
         nodes[spec['id']] = dict(spec, dependencies=deps, proofDependencies=proof,
                                  proofHelpers=[p for p in proof if next(n['kind'] for n in specs if n['id']==p)=='helper'],
-                                 premises=premises, type=row['type'], typeExpr=row['typeExpr'])
+                                 premises=premises, witnessDependencies=sorted({mapping[p['witness']['declaration']] for p in premises if 'witness' in p}),
+                                 type=row['type'], typeExpr=row['typeExpr'])
     for entry in sorted(pending, key=lambda n:n['id']):
         required = {'id','area','owner','ownerReference','inputArtifact','reason','source'}
         require(set(entry) == required and all(isinstance(v,str) and v for v in entry.values()),
@@ -144,7 +175,7 @@ def build(export, catalog, base, tree, ownership=None):
         nodes[entry['id']] = dict(entry, kind='pending-input', inputStatus='pending-input',
                                  declaration=None, exists=None, type=None, typeExpr=None,
                                  dependencies=[], dependenciesKnown=False,
-                                 proofDependencies=[], proofHelpers=[], premises=[],
+                                 proofDependencies=[], proofHelpers=[], witnessDependencies=[], premises=[],
                                  premiseInventoryComplete=False)
     # A premise/helper can appear in a type. It remains a typed edge, not a proof edge.
     colors, order = {}, []
@@ -162,7 +193,7 @@ def build(export, catalog, base, tree, ownership=None):
         visit(key)
     for key in order:
         node = nodes[key]
-        blocked = node.get('inputStatus') == 'pending-input' or bool(node['premises']) or any(nodes[d]['status'] != 'done' for d in node['dependencies'])
+        blocked = node.get('inputStatus') == 'pending-input' or any(p['status']!='done' for p in node['premises']) or any(nodes[d]['status'] != 'done' for d in node['dependencies'])
         if node.get('completed'):
             require(not blocked, 'completion has unresolved dependencies: '+key)
             status = 'done'
@@ -179,10 +210,11 @@ def build(export, catalog, base, tree, ownership=None):
             counts[nodes[key]['status']] += 1
         counts['total'] = len(keys)
         pending_count = sum(nodes[k].get('inputStatus') == 'pending-input' for k in keys)
-        known = sum(len(nodes[k]['premises']) for k in keys)
+        known = sum(p['status']!='done' for k in keys for p in nodes[k]['premises'])
         counts['typedDeclarations'] = len(keys)-pending_count
         counts['pendingInputs'] = pending_count
         counts['knownOpenPremises'] = known
+        counts['dischargedPremises'] = sum(p['status']=='done' for k in keys for p in nodes[k]['premises'])
         counts['premiseInventoryComplete'] = pending_count == 0
         counts['openPremises'] = None if pending_count else known
         return counts
