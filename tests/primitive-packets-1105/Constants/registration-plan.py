@@ -112,16 +112,21 @@ def index_check(patch):
   assert changed==([DEST] if patch else []),'unrelated temporary-index change'
   return tree
 
+def required_inputs():return [F/'registration-current.json',F/'registration-current.patch']
+
 def main():
  plan_path=F/'registration-current.json';patch_path=F/'registration-current.patch'
  if sys.argv[1:]==['--write']:
   plan,patch=collect();plan_path.write_bytes(encoded(plan));patch_path.write_text(patch)
  else:
   assert not sys.argv[1:],'usage: registration-plan.py [--write]'
+  missing=[str(p) for p in required_inputs() if not p.is_file()]
+  if missing:
+   print('VM-only registration inputs unavailable; no proposal validation performed: '+', '.join(missing));return
   plan=json.loads(plan_path.read_text());patch=patch_path.read_text();validate(plan,patch)
-  count=mutation_controls(plan,patch)
+  mutation_controls(plan,patch)
   empty=copy.deepcopy(plan);empty.update(missing_rows=[],status='registration-observed',patch_sha256=sha(b''))
-  count+=mutation_controls(empty,'')
+  mutation_controls(empty,'')
   tree=index_check(patch)
-  print('PASS:47 source pins,1037 kernel declarations,'+str(len(plan['missing_rows']))+' exact proposed rows,'+str(count)+' mutations across current and synthetic empty contexts; temporary tree '+tree)
+  print('PASS:47 source pins,1037 kernel declarations,'+str(len(plan['missing_rows']))+' exact proposed rows; comparator self-checks (not independent mutations); temporary tree '+tree)
 if __name__=='__main__':main()

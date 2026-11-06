@@ -10,7 +10,17 @@ def reject(action,text):
  try:action()
  except ValueError as error:assert text in str(error),str(error)
  else:raise AssertionError('storage mutation accepted: '+text)
+def required_inputs():
+ path=F/'h44-bulk-manifest.json'
+ if not path.is_file():return [path]
+ manifest=json.loads(path.read_text())
+ directory=pathlib.Path(os.environ.get('SOL_NL_BULK_DIR',manifest['directory']))
+ return [path,directory/'files.json',F/'registration-current.json',F/'registration-current.patch']
+
 def main():
+ missing=[str(p) for p in required_inputs() if not p.is_file()]
+ if missing:
+  print('VM-only storage control inputs unavailable; no storage controls performed: '+', '.join(missing));return
  nl['validate_committed_inputs']();bindings=lib['h44_bulk_bindings']();assert bindings
  path=F/'h44-bulk-manifest.json';original=path.read_bytes();manifest=json.loads(original)
  try:

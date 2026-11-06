@@ -1,19 +1,19 @@
 {
   "schema": "sol-numeric-literals-h44-v1",
-  "source_head": "c805bf3a07e030aa12401ebc6ced7cdef4294dc3",
+  "source_head": "a96c0d6c0aec4d46bffed7061f372c720b3d1974",
   "base": "4095d848297d87e374b4f069692511cfe4a36cf7",
-  "directory": "/workspace/sol-numeric-literals-h44-portable-c805bf3a",
+  "directory": "/workspace/sol-numeric-literals-h44-inputs-a96c0d6c",
   "file_count": 65,
   "uncompressed_bytes": 492557,
   "file_manifest": {
-    "path": "/workspace/sol-numeric-literals-h44-portable-c805bf3a/files.json",
-    "bytes": 23149,
-    "sha256": "a7a292b07ccdc05d9b46ebe47c989bce8bed567b6968e3ec0ae87ac629e54bed"
+    "path": "/workspace/sol-numeric-literals-h44-inputs-a96c0d6c/files.json",
+    "bytes": 23019,
+    "sha256": "65fcd278864fdc3f7c8fcfae9424b0569d51f2bb679a8db14037274da0e15123"
   },
   "archive": {
-    "path": "/workspace/sol-numeric-literals-h44-portable-c805bf3a/payload.tar.gz",
-    "bytes": 43430,
-    "sha256": "a12126d79d001eb23c9a1da71b9822cbee5dca218a569297eea11fc6a266d08d"
+    "path": "/workspace/sol-numeric-literals-h44-inputs-a96c0d6c/payload.tar.gz",
+    "bytes": 43467,
+    "sha256": "b5603eaf19641224c68587d3f753900a5e4d09632a9c9cfe84cf28ee5a6534f7"
   },
   "policy": "H44: bulk remains VM-only; absent off-VM binding is reported, not tree acceptance evidence; managed VM and explicit relocation fail closed"
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Fresh unaffected numeric proof evidence; never claims final runtime completion."""
-import copy,json,pathlib,re,runpy,hashlib,subprocess
+import copy,json,pathlib,re,runpy,hashlib,subprocess,tempfile
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 F=pathlib.Path(__file__).resolve().parent
 N=ROOT/'tests/sol-numeric-literals'
@@ -18,7 +18,16 @@ def validate_gate(label,row,diag,expected):
  assert row['minimum_parent_headroom_bytes']>=4*1024**3
  assert diag['success'] and not diag['partial'] and not diag['timed_out'] and not diag['failed_dependencies']
  assert not [i for i in diag['items'] if i['severity'] in ('error','warning')]
+def required_inputs():
+ paths=[N/'evidence/kernel-inventory.actual.json',F/'registration-current.json',F/'registration-current.patch',F/'evidence/h55-toolchain.log']
+ for folder,labels in [(N,list(TARGETS)+['h55-owned-build']),(F,['h55-constants-build'])]:
+  paths.extend(folder/'evidence'/(label+suffix) for label in labels for suffix in ['.json','.log'])
+ return paths
+
 def main():
+ missing=[str(p) for p in required_inputs() if not p.is_file()]
+ if missing:
+  print('VM-only diagnostic/build evidence unavailable; no evidence validation performed: '+', '.join(missing));return
  nl=runpy.run_path(str(ROOT/'scripts/check-sol-numeric-literals.py'))
  modules=nl['source_snapshot']();pins=json.loads((N/'kernel-inventory.json').read_text())
  actual=json.loads((N/'evidence/kernel-inventory.actual.json').read_text())
@@ -69,7 +78,9 @@ def main():
  toolchain=(F/'evidence/h55-toolchain.log').read_text()
  assert '12884901888\n0\n1\n' in toolchain
  assert 'Lake version 5.0.0-src+797c613' in toolchain and 'Lean (version 4.24.0' in toolchain
- result=dict(status='pass-scoped-validation',proof_sources=source_modules,numeric_kernel_declarations=len(pins),fresh_theorem_prints=len(printed),combined_pinned_kernel_declarations=expected_plan['kernel_declarations'],proposal_rows=len(expected_plan['missing_rows']),gates=evidence,owned_builds=builds,lean='4.24.0',lake='5.0.0-src+797c613',reserved_source_files_edited=[],diagnostic_binding_mutations=3,runtime_gate_pass=False,limits='12GiB aggregate/no swap/CPU1/Lean-j1/H1>=4GiB',boundary='Fresh numeric kernel/signature/axiom and KeySort checks plus pinned Constants inventory and coordinator-only registration proposal; prior full-runtime failures remain open.')
- (F/'evidence/h55-fresh-result.json').write_text(json.dumps(result,indent=2)+'\n')
- print('PASS: fresh991numeric declarations,808exact theorem axiom sets,KeySort0errors;47sourcepins/1037pinned declarations/'+str(result['proposal_rows'])+'proposalrows;3diagnostic-binding mutations; no RuntimeGatePass')
+ result=dict(status='pass-scoped-validation',proof_sources=source_modules,numeric_kernel_declarations=len(pins),fresh_theorem_prints=len(printed),combined_pinned_kernel_declarations=expected_plan['kernel_declarations'],proposal_rows=len(expected_plan['missing_rows']),gates=evidence,owned_builds=builds,lean='4.24.0',lake='5.0.0-src+797c613',reserved_source_files_edited=[],diagnostic_binding_mutations=3,runtime_gate_pass=False,limits='12GiB aggregate/no swap/CPU1/Lean-j1/H1>=4GiB',boundary='Validation of archived VM numeric kernel/signature/axiom and KeySort checks plus pinned Constants inventory and coordinator-only registration proposal; prior full-runtime failures remain open.')
+ with tempfile.NamedTemporaryFile(mode='w',prefix='sol-numeric-literals-validated-',suffix='.json',dir='/tmp',delete=False) as output:
+  output.write(json.dumps(result,indent=2)+'\n')
+ print('External validation result: '+output.name)
+ print('PASS: archived VM evidence binds 991 numeric declarations, 808 exact theorem axiom sets, KeySort 0 errors; 47 source pins/1037 pinned declarations/'+str(result['proposal_rows'])+'proposalrows;3diagnostic-binding mutations; no RuntimeGatePass')
 if __name__=='__main__':main()
