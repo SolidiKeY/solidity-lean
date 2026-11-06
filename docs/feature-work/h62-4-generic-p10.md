@@ -3,7 +3,8 @@
 The full four-checkpoint assignment remains **unfinished**. Source accounting,
 an intrinsic BYTE execution lemma, a typed nine-row table, all 21 original public
 proposition correspondences, and full affected standalone-package validation
-now pass. Timing acceptance and V15's original-file migration remain pending.
+now pass. Timing acceptance passes with a 5.009% slowdown, within the 10% limit.
+V15's original-file migration and integration gates remain pending.
 No original declaration or frozen interface changed.
 
 The assigned branch is `codex/solidity-h62-4-20261106/generic-p10`, based exactly
@@ -85,7 +86,7 @@ the repository. All commands, exits, durations, and log hashes are recorded in
 | Frozen-family diff / `git diff --check` | PASS: no family diff, no whitespace errors |
 | Generic lemma / typed fixture proofs / correspondence | PASS in the additive test package; original-file migration pending |
 | KeySort prerequisite / full affected package checks | PASS; 48 headline axiom guards checked; assignment-wide integration remains pending |
-| Same-condition original versus migrated proof timings | PENDING; no slowdown percentage asserted |
+| Same-condition original versus proposed proof timings | PASS: 5.777562s before, 6.066986s after, +5.009452%; 10% limit |
 
 Independent read-only finder `/root/census_finder` and skeptic
 `/root/census_skeptic` used source/Python inspection, no Lean server or heavy
@@ -132,7 +133,7 @@ optional absence as nonblocking. No replacement goal was created.
 | `OWNER_RELAY_REQUIRED` | V15 owns original family files. No `relay.sh` or exact-file owner agreement is available locally. Additive work is permitted; original-file migration remains prohibited. The saved exact-file request identifies the proposed ByteObservation control file. This is coordination, not a request to the human to waive ownership. |
 | `ADDITIVE_PROOFS_PASS` | Intrinsic word-parameterized execution and typed fixtures are proved using actual native semantics. No whole execution is decided by the table. |
 | `ADDITIVE_CORRESPONDENCE_PASS` | Kernel proposition equalities cover all 21 public originals, with all negative/refusal/resource-order controls retained. |
-| `VALIDATION_PARTIAL` | Version/KeySort, per-file diagnostics, 48 transitive headline guards and the full affected package pass. Same-condition timing and owner-applied integration/full gates remain pending. Stop for slowdown above 10%. |
+| `VALIDATION_PARTIAL` | Version/KeySort, per-file diagnostics, 48 transitive headline guards, full affected package and matched timing pass. Owner-applied migration/integration/full gates remain pending. No gate is waived. |
 
 Historical `Q-TOOLCHAIN-01` (now resolved), sources: coordinator toolchain update and base
 `lean-toolchain`. Does “Migration ONLY” apply the pinned v4.35.0 requirement
@@ -148,8 +149,8 @@ The coordinator selected option 1: “Your lane stays on master's toolchain
 v4.24.0; do not install or overlay v4.35.” No exclusion, premise, theorem statement,
 interface, resource budget, axiom allowance, or proof budget is weakened.
 New Lean helpers and proposition comparisons are listed below. Frozen statements
-touched: zero. New axioms/sorry/native_decide: zero. The 10% proof-time gate
-remains unmeasured.
+touched: zero. New axioms/sorry/native_decide: zero. The measured 5.009% checking
+slowdown is below the 10% gate; no speedup is claimed.
 
 The original patch, committed-head receipt, handoff, complete inventory,
 individual gate logs, review record, and checksum manifest are saved under
@@ -284,10 +285,66 @@ patch is `tests/h62/item4/generic-p10/owner-migration.patch`; it has not been
 applied. V15 must explicitly agree to the exact file and apply/review migration.
 No new production module registration is required for this inline proposal.
 
-The next gate is `measure.py`: a predeclared five-pair, alternating-order
+The completed timing gate is `measure.py`: a predeclared five-pair, alternating-order
 comparison, with both warmups, identical native imports, full original controls
 and helper/trust-command costs, equal-length fresh namespaces, one guarded MCP
 backend and scratch slot, and strict complete Lean-success checks. Median wall
 times measure elaboration/kernel checking only. A backend change or timeout
 rejects the run; cleanup signals only the originally captured owned guard.
-Any slowdown above 10% stops the refactor. No timing verdict is claimed yet.
+Any slowdown above 10% stops the refactor.
+
+## Timing acceptance and original-VM handoff
+
+The valid run is saved in
+`/workspace/generic-p10-artifacts/evidence/timing-fresh`. All ten measured
+trials and both warmups reported complete Lean success on the same captured
+MCP daemon, guard and Lean watchdog. Both independent reviewers recomputed
+the medians, checked all 12 result payloads plus header priming, and verified
+the source/trial/driver/plan/recovery hashes.
+
+| Checking measurement | Median |
+|---|---:|
+| All original BYTE controls | 5.777561817 seconds |
+| Inline helper/table plus all retained BYTE controls | 6.066985985 seconds |
+| Slowdown | 5.009451689% |
+| Maximum authorized slowdown | 10% |
+
+This is elaboration/kernel checking with warm identical imports and fresh body
+namespaces. It includes the new helper/table and trust commands. It is not a
+native compilation or whole-repository timing claim. The dedicated session's
+observed peak RSS was 3,761,250,304 bytes, minimum available memory
+10,138,951,680 bytes, no swap and no resource stop. It was administratively
+terminated after completing the run; no live Lean job remains.
+
+The first attempt is preserved separately under `evidence/timing`. Its initial
+original-control warmup hit the 300-second client bound without producing a
+sample. Cleanup confirmed no remaining owned workers. Source inspection by
+both reviewers found that changing the reused scratch document's import header
+crosses Lean 4.24's worker-restart/barrier path; this is a plausible infrastructure
+boundary, not a proved timeout cause or a measured slowdown. A stale stopped
+backend also produced one startup broken-pipe response before the fresh daemon
+started. The valid recovery uses a fresh dedicated session and explicitly
+primes the identical common header before warmups. It preserves the exact
+source hashes, five-pair order, metric and threshold, links the old plan hash,
+and discards no measured samples. No completed failed verdict was retried.
+
+The four requested checkpoints have additive evidence: the complete original
+inventory, intrinsic lemma/typed table, exact correspondence with retained
+negative coverage and deterministic acceptance, and bounded matched timings.
+The **entire assignment is still blocked**, because no exact-file V15 relay
+agreement has been received, the original source has not been migrated, and
+owner-applied integration/final gates (including the repository's required
+`./run-lean.sh --bridge` confirmation) have not run. Only the BYTE packet is
+proposed for migration; all other inventoried P10 files remain unchanged.
+
+This is the fresh-thread handoff after the reviewed census/proof/correspondence/
+timing work items. Continue the existing original goal on this same VM and
+branch; do not create/reset a goal or launch a replacement. Original environment:
+`ccarenv_b64_Y2NhcmVudl9iNzZmYzNjOWFjYjg4MTkxODMwOWQ1NGZjYjVlYmM5Nw`.
+Original frozen prompt SHA256:
+`17aa1362ea9e9c3746093f07c4d24c34d17f86a684d229b1506f5d604c66d8de`.
+The remaining next action is coordinator relay of the saved exact-file request
+to V15, followed by owner application/review and complete integration gates.
+The committed timing receipt and off-git handoff record the exact committed
+head, artifact hashes, commands and remaining obligations. Questions are empty;
+the v4.24 toolchain question was resolved by the coordinator.

@@ -1,7 +1,7 @@
 {
   "id": "V15-GENERIC-P10-BYTE-01",
   "owner": "V15 (v12-v17/v15-evm-agreement)",
-  "state": "kernel-validated additive proposal; timing pending; no owner permission received",
+  "state": "all additive proof/timing gates pass; exact-file V15 agreement absent; original source not migrated",
   "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "exact_files": [
     {
@@ -22,7 +22,7 @@
   ],
   "requested_action": "V15 reviews the exact single-file patch and proof/evidence, explicitly agrees to the exact file, and applies/reviews migration only after timing acceptance. This request grants no edit permission and transfers no ownership.",
   "excluded": "All other original files, generated roots/module maps/axiom pins, frozen-interface changes, H55 Yul Raw/vector generation.",
-  "implementation_state": "Generic lemma,typed table,all21public correspondences and48headline guards pass; full affected standalone package passes; owner source remains untouched.",
+  "implementation_state": "Intrinsic lemma/table,all21complete public correspondences,48headline guards,full affected package pass; paired checking medians5.777562s to6.066986s (+5.009452%,within10%). Actual owner migration/integration outstanding.",
   "patch": "tests/h62/item4/generic-p10/owner-migration.patch",
   "proposed_source_sha256": "ae0f960bf933aca562e15eaeb90586d081ea90943e87752f38e0d6d1cf5e729b",
   "layout": "Single existing owner file, inline ByteTable namespace; no new production module/root registration",
@@ -38,5 +38,7 @@
     "maximum_index",
     "zero_word",
     "maximum_word"
-  ]
+  ],
+  "timing_evidence": "/workspace/generic-p10-artifacts/evidence/timing-fresh/result.json",
+  "patch_sha256": "4e6983dbadf157b80fdd502f914d230b3c47bd571a486f08024a1c1f4d04b50b"
 }

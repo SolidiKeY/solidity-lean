@@ -67,14 +67,28 @@ def quiesce(identity,output):
         signal_owned(known,signal.SIGKILL)
         time.sleep(0.2)
         known,live,_=process_tree(-1,known)
-    (output/'quiescence.json').write_text(json.dumps(dict(stopped=not live,remaining_owned_pids=sorted(live)),indent=2)+'\n')
-    if live: raise SystemExit('BLOCKED: own MCP worker not quiescent; no further heavy gates')
+    # The repository daemon can remain idle with a dead stdio backend. Stop
+    # only its captured identity, so a later session cannot reuse that socket.
+    daemon_stopped=None
+    if not live and 'daemon_pid' in identity:
+        daemon=identity['daemon_pid']; daemon_start=identity['daemon_started']
+        signal_owned({daemon:daemon_start},signal.SIGTERM)
+        deadline=time.monotonic()+2
+        while time.monotonic()<deadline:
+            row=process_table().get(daemon)
+            if row is None or row['started']!=daemon_start or row['state']=='Z': break
+            time.sleep(.1)
+        row=process_table().get(daemon)
+        daemon_stopped=row is None or row['started']!=daemon_start or row['state']=='Z'
+    (output/'quiescence.json').write_text(json.dumps(dict(stopped=not live and daemon_stopped is not False,remaining_owned_pids=sorted(live),daemon_stopped=daemon_stopped),indent=2)+'\n')
+    if live or daemon_stopped is False: raise SystemExit('BLOCKED: own MCP worker not quiescent; no further heavy gates')
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[4])
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--recover-from',type=Path,help='only an incomplete failed warmup with no measured samples')
     args=parser.parse_args()
     repo,output=args.repo.resolve(),args.output.resolve()
     if not output.is_relative_to(repo.parent/'generic-p10-artifacts'): parser.error('timings must remain in this lane artifact directory')
@@ -90,14 +104,46 @@ def main():
     sources={'before':before,'after':after}
     order=[['before','after'],['after','before'],['before','after'],['after','before'],['before','after']]
     plan=dict(metric='ratio of median wall times; stop if after/before > 1.10',pairs=5,
+        driver_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        committed_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),
         warmups=['before','after'],order=order,tool='lean_run_code',version=version,
         conditions='same guarded MCP process; warm identical native imports; fresh equal-length namespace every trial; single scratch slot; explicit -j1; full original 32 declarations plus proposed helpers; trust commands retained',
         boundary='Lean elaboration/kernel checking only; no native compilation or whole-repository timing claim',
         before_sha256=sha(before),after_sha256=sha(after),backend_identity=identity,
         scope='one existing BYTE control module; all original21public propositions retained')
+    if args.recover_from:
+        previous=args.recover_from.resolve()
+        old=json.loads((previous/'plan.json').read_text())
+        oldruns=json.loads((previous/'runs.json').read_text())
+        if (previous/'result.json').exists() or not oldruns or any(not row.get('warmup') for row in oldruns):
+            parser.error('recovery cannot discard any measured sample or completed verdict')
+        for key in ['metric','pairs','warmups','order','before_sha256','after_sha256']:
+            if old[key]!=plan[key]: parser.error(f'recovery changed frozen timing input: {key}')
+        plan['infrastructure_recovery']=dict(previous=str(previous),previous_plan_sha256=hashlib.sha256((previous/'plan.json').read_bytes()).hexdigest(),
+            reason='incomplete warmup after import-header transition; fresh dedicated backend and explicit identical-header priming; no measured samples discarded')
     (output/'plan.json').write_text(json.dumps(plan,indent=2)+'\n')
     (output/'before.lean').write_text(before)
     (output/'after.lean').write_text(after)
+    # Prime this exact header before changing only body namespaces. Lean4.24
+    # restarts file workers on import-header changes; that path is not timed.
+    prime='import SolidityBridge.RoadmapV15.P10.ByteObservation\n#check SolidityBridge.RoadmapV15.P10.byte_fetched\n'
+    try:
+        preflight=subprocess.run(['scripts/coord-tools/lean-mcp','call','lean_run_code',json.dumps(dict(code=prime))],cwd=repo,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=300)
+    except subprocess.TimeoutExpired as error:
+        (output/'header-prime-timeout.log').write_bytes(error.stdout or b'')
+        quiesce(identity,output)
+        raise SystemExit('STOP: common-header priming timeout; no samples or verdict')
+    (output/'header-prime.json').write_bytes(preflight.stdout)
+    try:
+        if preflight.returncode: raise ValueError('header priming transport failed')
+        require_success(json.loads(preflight.stdout))
+    except (ValueError,UnicodeDecodeError):
+        quiesce(identity,output)
+        raise SystemExit('STOP: common-header priming failed; no timing acceptance')
+    if backend(repo)!=identity:
+        quiesce(identity,output)
+        raise SystemExit('STOP: backend changed during priming')
+    print('common-header priming PASS; fixed backend identity; no measured samples yet',flush=True)
     runs=[]
     def trial(variant,index,warmup=False):
         if backend(repo)!=identity: raise SystemExit('STOP: MCP backend changed before trial; no mixed-cache acceptance')
