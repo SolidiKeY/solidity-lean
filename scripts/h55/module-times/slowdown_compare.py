@@ -43,7 +43,7 @@ def compare(before, after):
             errors.append(f"{side}: invalid provenance")
         if row.get("status") != "ok" or type(row.get("exit_code")) is not int or row["exit_code"] != 0 or row.get("fresh") is not True:
             errors.append(f"{side}: measurement failed or not fresh")
-        if type(row.get("wall_ns")) is not int or row["wall_ns"] <= 0:
+        if type(row.get("wall_ns")) is not int or not 0 < row["wall_ns"] <= 300_000_000_000:
             errors.append(f"{side}: invalid wall time")
         if type(row.get("peak_rss_kib")) is not int or row["peak_rss_kib"] <= 0:
             errors.append(f"{side}: invalid RSS")
@@ -62,13 +62,58 @@ def compare(before, after):
     return {"verdict": "within-bound", "errors": []}
 
 
+
+def compare_all(expected_paths, before, after):
+    """Check every supplied expected path; inputs remain unauthenticated."""
+    if (not isinstance(expected_paths, list) or not expected_paths or
+            any(not isinstance(path, str) or not path.endswith(".lean") or path.startswith("/")
+                or "\\" in path or any(part in ("", ".", "..") for part in path.split("/"))
+                for path in expected_paths) or len(set(expected_paths)) != len(expected_paths) or
+            not isinstance(before, list) or not isinstance(after, list)):
+        return {"verdict": "invalid", "errors": ["invalid expected paths or records"], "slowdowns": []}
+    expected = set(expected_paths)
+    errors = []
+    indexed = []
+    for label, records in (("before", before), ("after", after)):
+        found = {}
+        for row in records:
+            if not isinstance(row, dict) or not isinstance(row.get("path"), str):
+                errors.append(f"{label}: malformed row")
+                continue
+            path = row["path"]
+            if path in found:
+                errors.append(f"{label}: duplicate {path}")
+            found.setdefault(path, []).append(row)
+            if path not in expected:
+                errors.append(f"{label}: unexpected {path}")
+        errors.extend(f"{label}: missing {path}" for path in sorted(expected - found.keys()))
+        indexed.append(found)
+    slowdowns = []
+    for path in sorted(expected & indexed[0].keys() & indexed[1].keys()):
+        # Do not hide a valid slowdown behind a duplicated faster row.
+        stop = False
+        for first in indexed[0][path]:
+            for second in indexed[1][path]:
+                result = compare(first, second)
+                if result["verdict"] == "stop-slowdown":
+                    stop = True
+                elif result["verdict"] != "within-bound":
+                    errors.extend(f"{path}: {error}" for error in result["errors"])
+        if stop:
+            slowdowns.append(path)
+    verdict = "stop-slowdown" if slowdowns else "invalid" if errors else "within-bound"
+    return {"verdict": verdict, "errors": errors, "slowdowns": slowdowns}
+
 def main():
     if len(sys.argv) != 2:
         print("usage: slowdown_compare.py INPUT.json", file=sys.stderr)
         return 2
     try:
         data = json.loads(pathlib.Path(sys.argv[1]).read_text())
-        result = compare(data["before"], data["after"])
+        if "expected_paths" in data:
+            result = compare_all(data["expected_paths"], data["before"], data["after"])
+        else:
+            result = compare(data["before"], data["after"])
     except (OSError, ValueError, KeyError, TypeError) as exc:
         print(f"invalid input: {exc}", file=sys.stderr)
         return 1

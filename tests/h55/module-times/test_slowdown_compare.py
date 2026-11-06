@@ -1,4 +1,8 @@
 import copy
+import json
+import subprocess
+import sys
+import tempfile
 import importlib.util
 import pathlib
 import unittest
@@ -24,6 +28,41 @@ class Slowdown(unittest.TestCase):
         self.assertEqual("within-bound", module.compare(self.before, self.after)["verdict"])
         self.after["wall_ns"] = 111
         self.assertEqual("stop-slowdown", module.compare(self.before, self.after)["verdict"])
+
+    def test_full_expected_set_and_stop_precedence(self):
+        paths = ["Solidity/A.lean", "Solidity/B.lean"]
+        before_b = copy.deepcopy(self.before)
+        after_b = copy.deepcopy(self.after)
+        before_b["path"] = after_b["path"] = paths[1]
+        result = module.compare_all(paths, [before_b, self.before], [self.after, after_b])
+        self.assertEqual("within-bound", result["verdict"])
+        self.assertEqual("invalid", module.compare_all(paths, [self.before], [self.after, after_b])["verdict"])
+        self.assertEqual("invalid", module.compare_all(paths, [self.before, self.before], [self.after, after_b])["verdict"])
+        after_b["wall_ns"] = 111
+        result = module.compare_all(paths, [self.before, before_b], [after_b])
+        self.assertEqual("stop-slowdown", result["verdict"])
+        self.assertEqual([paths[1]], result["slowdowns"])
+        self.assertTrue(result["errors"])
+        duplicate_slow = copy.deepcopy(self.after)
+        duplicate_slow["wall_ns"] = 111
+        result = module.compare_all([paths[0]], [self.before], [self.after, duplicate_slow])
+        self.assertEqual("stop-slowdown", result["verdict"])
+        self.assertTrue(result["errors"])
+
+    def test_cli_checks_expected_set(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = pathlib.Path(tmp) / "input.json"
+            payload.write_text(json.dumps({"expected_paths": ["Solidity/A.lean", "Solidity/B.lean"],
+                                           "before": [self.before], "after": [self.after]}))
+            process = subprocess.run([sys.executable, str(path), str(payload)], capture_output=True, text=True)
+            self.assertNotEqual(0, process.returncode)
+            self.assertEqual("invalid", json.loads(process.stdout)["verdict"])
+
+    def test_over_budget_measurements_are_invalid(self):
+        before = copy.deepcopy(self.before)
+        after = copy.deepcopy(self.after)
+        before["wall_ns"] = after["wall_ns"] = 300_000_000_001
+        self.assertEqual("invalid", module.compare(before, after)["verdict"])
 
     def test_failures_and_unmatched_conditions_never_pass(self):
         for key, value in [("path", "../A.lean"), ("status", "timeout"), ("exit_code", True),

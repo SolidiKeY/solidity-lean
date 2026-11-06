@@ -429,3 +429,20 @@ production acceptance. No split or Lean job was performed. Independent reviews,
 H56 and the full gate remain pending. The H28 member pause and quiescence are
 confirmed by the coordinator, but its final bundle, exact rendered prompt and
 scope bytes remain unavailable on this VM.
+
+## Synthetic full-set slowdown control
+
+The slowdown comparator now accepts an explicit expected path set and checks
+that each side has exactly one row for every path. Missing, extra, duplicate,
+failed or over-300-second records cannot pass. A valid over-10% slowdown
+retains the stop verdict even if another row is missing or duplicated; a
+faster duplicate cannot conceal it. The command exposes this full-set mode.
+The 45-method synthetic suite passes, including a command-level missing-path
+control. A timeout is not converted into an invented baseline measurement.
+
+This remains a comparison of supplied data. It does not prove the expected
+set is complete, authenticate any VM or measurement, or establish identical
+source, cache or toolchain state. It is not an actual H56 run, production
+acceptance, a split or a Lean proof. Independent reviews and the full gate
+remain pending. The H28 paused-member final bundle and exact original prompt
+remain unavailable on this VM.
