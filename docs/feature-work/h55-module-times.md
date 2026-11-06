@@ -253,3 +253,26 @@ incomplete or malformed records, with synthetic regression controls. The
 21-method unit suite passes, and `sha256sum -c` passes for the committed
 containment evidence manifest. This is a local finding, not either independent
 review, and it does not authenticate the recorded identities.
+
+## Synthetic automatic container deadline
+
+An additive `container_watch.py` prototype monitors an explicitly labeled,
+owned fixture container using the local Docker socket, compares monotonic and
+boot-time clocks and kills the container on a synthetic deadline. The
+repeatable containment script now drives a 0.3-second deadline against a
+64 MiB, no-swap, no-network fixture whose child escapes its process group with
+`setsid`. Runs 03 and 04 returned `timeout`, container exit 137 without OOM,
+and showed both original process identities absent. Their files and hashes are
+recorded in `tests/h55/module-times/deadline-evidence.sha256`; bulk data remains
+under `/workspace/h55-module-times-evidence/containment-control-03` and
+`/workspace/h55-module-times-evidence/containment-control-04`.
+
+Twenty-five synthetic unit test methods passed, including invalid identifier,
+ownership mismatch, unverifiable ownership and inconsistent-clock controls.
+This is not production acceptance or H56 evidence. Docker inspect/kill calls
+can delay cleanup after the deadline or fail; cleanup is attempted only after
+ownership is verified. The watcher does not continuously enforce resource
+headroom, authenticate image or daemon, bind source/tool/cache, prove the
+300-second production bound or orchestrate actual Lean. Both clocks can be
+falsified together. The full runner, independent finder/skeptic reviews and
+all assigned runtime and migration gates remain pending. No Lean was run.

@@ -28,6 +28,7 @@ cc -static -O2 "$out/fixture.c" -o "$out/rootfs/fixture"
 docker_local() { env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH docker --host=unix:///var/run/docker.sock "$@"; }
 tag="h55-module-times-fixture-${RANDOM}-${RANDOM}:local"
 container_id=
+nonce=$(python3 -c "import secrets; print(secrets.token_hex(16))")
 image_created=0
 if docker_local image inspect "$tag" >/dev/null 2>&1; then
   printf "fixture image tag already exists; refusing to alter it\n" >&2
@@ -40,7 +41,7 @@ cleanup() {
 trap cleanup EXIT
 tar -C "$out/rootfs" -cf - fixture | docker_local import --change 'ENTRYPOINT ["/fixture"]' - "$tag" > "$out/image-id.txt"
 image_created=1
-container_id=$(docker_local create --network none --memory 64m --memory-swap 64m --pids-limit 16 --cpus 1 --read-only "$tag")
+container_id=$(docker_local create --label "org.solidity-lean.h55-fixture=$nonce" --network none --memory 64m --memory-swap 64m --pids-limit 16 --cpus 1 --read-only "$tag")
 docker_local start "$container_id" >/dev/null
 docker_local inspect --format 'memory={{.HostConfig.Memory}} swap={{.HostConfig.MemorySwap}} network={{.HostConfig.NetworkMode}} pids={{.HostConfig.PidsLimit}}' "$container_id" > "$out/inspect.txt"
 test "$(cat "$out/inspect.txt")" = "memory=67108864 swap=67108864 network=none pids=16"
@@ -55,7 +56,7 @@ read -r parent child < <(awk 'NR==2 {p=$1} NR==3 {print p,$1}' "$out/processes.t
 parent_start=$(awk '{print $22}' "/proc/$parent/stat")
 child_start=$(awk '{print $22}' "/proc/$child/stat")
 printf "parent=%s start=%s child=%s start=%s\n" "$parent" "$parent_start" "$child" "$child_start" > "$out/identities.txt"
-docker_local kill "$container_id" >/dev/null
+PYTHONDONTWRITEBYTECODE=1 python3 tests/h55/module-times/watch_fixture.py "$container_id" "$nonce" > "$out/watch.json"
 docker_local inspect --format 'running={{.State.Running}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}}' "$container_id" > "$out/stopped.txt"
 test "$(cat "$out/stopped.txt")" = "running=false exit=137 oom=false"
 for attempt in {1..30}; do
@@ -65,5 +66,5 @@ for attempt in {1..30}; do
   sleep 0.05
 done
 [ "$parent_now" != "$parent_start" ] && [ "$child_now" != "$child_start" ]
-printf "both original process identities absent after container kill\n" > "$out/cleanup.txt"
-printf "PASS: isolated synthetic containment control (no Lean, no timing receipt)\n"
+printf "both original process identities absent after automatic deadline cleanup\n" > "$out/cleanup.txt"
+printf "PASS: isolated synthetic deadline and containment control (no Lean, no timing receipt)\n"
