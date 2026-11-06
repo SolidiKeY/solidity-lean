@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "status": "retired_incomplete",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "original_snapshot_head": "e00f678eca36a40636653174638460da9ca5e092",
+  "original_assignment": "original-frozen-assignment.txt",
+  "exact_scope": "exact-scope-manifest.json",
+  "original_queue": "original-work-and-backfill-queue.txt",
+  "work_queue": [
+    {
+      "id": "C1",
+      "historical_status": "done",
+      "item": "Pinned census, clean old build and old environment inventory. Preserve limitations; H78/new visibility and cross-version coverage are unfinished."
+    },
+    {
+      "id": "C2",
+      "status": "open",
+      "item": "Complete4.35Frontend adaptation preserving all types/semantics/budgets; Token/Parser candidates are unapplied; dependency/integration, H78 and axiom work open."
+    },
+    {
+      "id": "C3",
+      "status": "open",
+      "item": "Build all assigned modules on4.35, full affected/root acceptance, frozen API/axiom validation, clean comparison; any regression escalates, >10% wall STOP."
+    },
+    {
+      "id": "C4",
+      "status": "partial",
+      "item": "Preparation patch/bundle/evidence exist; final accepted migration overlay and full frozen-interface comparison still required."
+    }
+  ],
+  "backfill_queue": [
+    {
+      "item": "Scanner/census",
+      "finished": "495scope entries,492production files,490Lean modules,984local closure,20,218old constants; exact source hashes preserved",
+      "open": "Complete new/public-generated visibility/signature/shim census under H78."
+    },
+    {
+      "item": "Negative controls",
+      "finished": "33Python/OS controls historically passed, including provenance/timing/primed-name guards",
+      "open": "Add only meaningful controls for remaining actual migration changes; no padding."
+    },
+    {
+      "item": "Isolated fixture proofs",
+      "finished": "12unique named kernel controls plusoneobserver; Tokenall-byte/high-byte controls and9Parser cases acrossoldoriginal/oldcandidate/newcandidate",
+      "open": "Universal Parser equivalence and production Check/full acceptance are not established; remaining246not-Ctor-blocked targets can expose further API failures."
+    },
+    {
+      "item": "Reproduction/timing tooling",
+      "finished": "Committed generators and old clean baseline3676.983463s/RSS3333246976bytes; new attemptfailed7thtarget; comparator correctlyblocks incomplete data",
+      "open": "Fresh complete after run and full same-settings comparison; do not rerun known timing STOP unchanged."
+    },
+    {
+      "item": "Continuous cleanup",
+      "status": "unclaimed_only",
+      "open": "Only newly unclaimed coordinator/registry candidates; never duplicateH55 or take producer scope."
+    }
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-source",
+      "item": "Source.Ctor: Syn.nodes_eq line641 hit unchanged200000 heartbeats and Syn.excl_ctor line715 dependent elimination on4.35. Supply/replay a statement- and budget-preserving integration repair; H82 proof-only changes do not require exact-file agreement."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Complete H78 inventory/visibility and compatibility-shim plan for every original public generated API. Existing raw old exports cover490 modules; new exports cover only Token/Parser fixtures. No shims implemented;271 selected types are incomplete coverage."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Review ascii and66Parser declaration standard-axiom dependency changes against existing per-declaration allowlists; unchanged global union is not equivalence. No pin/premise/exclusion relaxation."
+    },
+    {
+      "lane": "migration root/gate and applicable definition owners",
+      "item": "Disposition/application of unapplied Token/Parser definition-body proposals under H82/H57; no permission implied by H70 delivery."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "String API compatibility dependencies identified statically; other consumers reported Syntax.Raw failures. These external reports were not locally replayed."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Complete all new-toolchain targets, production Check, affected acceptance, run-lean.sh, full interface/axiom checks and clean before/after comparison;244Ctor-dependent and246otherFrontend targets remain uncertified."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Investigate preliminary fixture RSS increase; no valid full after timing exists and no full performance pass was declared."
+    },
+    {
+      "lane": "root gate/document owner",
+      "item": "Existing optional Mathlib reference in after-roadmap-va1.md fails global doc-path gate; citing document unchanged. H82 doc-only fixes need no owner agreement, but retirement performs no new implementation."
+    },
+    {
+      "lane": "coordinator goal controller",
+      "item": "Enforce PAUSED with a supported backend operation. Available worker tool accepts only complete|blocked; pause cannot be expressed. No automatic implementation continuation authorized."
+    }
+  ],
+  "policy_overrides": "H82-retirement-and-policy.md",
+  "implementation_continuation_authorized": false,
+  "goal_pause": {
+    "requested": "PAUSED",
+    "supported": false,
+    "exposed_tool": "mcp__codex_apps__codex_goals_stop_goal",
+    "supported_outcomes": [
+      "complete",
+      "blocked"
+    ],
+    "failure": "No callable pause operation or paused outcome; cannot perform requested backend PAUSED transition. No substitute state mutation sent.",
+    "prior_confirmed_backend_status": "blocked",
+    "current_backend_PAUSED_verified": false,
+    "coordinator_resolution": "Coordinator will set existing goal paused after final head report and idle turn; no human decision needed."
+  },
+  "push": {
+    "attempted": false,
+    "reason": "No H71 authorization supplied or discoverable; original no-push remains binding."
+  },
+  "new_proof_runs_this_checkpoint": 0,
+  "new_source_implementation": 0,
+  "questions": []
+}

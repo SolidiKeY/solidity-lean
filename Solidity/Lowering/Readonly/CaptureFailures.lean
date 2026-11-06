@@ -1,3 +1,4 @@
+import Solidity.Source.Hoare
 import Solidity.Lowering.Readonly.CapturePhases
 
 /-! Failure transport for the actual source external-call capture. Exact
@@ -8,16 +9,6 @@ open Solidity.Source Solidity.Backend.Passes.SourceTypedCall
 open Solidity.Roadmap (Address Bytes)
 open EM
 variable {E : Env} {Γ : RCtx} {dn : DeclName} {ps rs : List STy}
-private theorem run_bind {α β : Type} (m : EM E Γ α) (k : α → EM E Γ β)
-    (x : Locals E.layout Γ × St E) :
-    (m >>= k).run x = match m.run x with
-      | (.ok a, y) => (k a).run y
-      | (.error e, y) => (.error e, y) := by
-  rw [ExceptT.run_bind]
-  show StateT.bind (ExceptT.run m) _ x = _
-  simp only [StateT.bind]
-  rcases m.run x with ⟨r, y⟩
-  cases r <;> rfl
 
 private theorem get_plain {τ : STy} (v : Val E.layout τ) :
     (getV (.val v) : EM E Γ _) = pure v := rfl
@@ -39,7 +30,7 @@ theorem target_failed (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
       (.error halt, s₁) := by
   apply external_capture_failure _ _ _ _ _ _ _ _ _ _
   unfold capture
-  simp only [run_bind, failed]
+  simp only [Solidity.Source.Hoare.run_bind, failed]
 
 theorem value_failed (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
     (signature : d.fnSig E = some (ps, rs))
@@ -52,7 +43,7 @@ theorem value_failed (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
       (.error halt, s₂) := by
   apply external_capture_failure _ _ _ _ _ _ _ _ _ _
   unfold capture
-  simp only [run_bind, targetRun, get_plain, run_pure, failed]
+  simp only [Solidity.Source.Hoare.run_bind, targetRun, get_plain, run_pure, failed]
 
 theorem arguments_failed (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
     (signature : d.fnSig E = some (ps, rs))
@@ -67,7 +58,7 @@ theorem arguments_failed (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
       (.error halt, s₃) := by
   apply external_capture_failure _ _ _ _ _ _ _ _ _ _
   unfold capture
-  simp only [run_bind, targetRun, get_plain, run_pure, valueRun, failed]
+  simp only [Solidity.Source.Hoare.run_bind, targetRun, get_plain, run_pure, valueRun, failed]
 
 theorem encoding_failed (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
     (signature : d.fnSig E = some (ps, rs))
@@ -83,7 +74,7 @@ theorem encoding_failed (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
       (.error halt, s₄) := by
   apply external_capture_failure _ _ _ _ _ _ _ _ _ _
   unfold capture
-  simp only [run_bind, targetRun, get_plain, run_pure, valueRun, argsRun, failed]
+  simp only [Solidity.Source.Hoare.run_bind, targetRun, get_plain, run_pure, valueRun, argsRun, failed]
 
 theorem code_rejected (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
     (signature : d.fnSig E = some (ps, rs))
@@ -102,7 +93,7 @@ theorem code_rejected (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
       (.error (.revert []), s₅) := by
   apply external_capture_failure _ _ _ _ _ _ _ _ _ _
   unfold capture
-  simp only [run_bind, targetRun, get_plain, run_pure, valueRun, argsRun,
+  simp only [Solidity.Source.Hoare.run_bind, targetRun, get_plain, run_pure, valueRun, argsRun,
     encodingRun, instanceRun, run_st, rejected, ↓reduceIte, run_halt]
 
 end Solidity.Lowering.Readonly.CaptureFailures
