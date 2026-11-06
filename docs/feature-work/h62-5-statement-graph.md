@@ -367,3 +367,38 @@ existing 37-test and isolated-overlay evidence remains bounded to its recorded
 implementation/source hashes; this routing-only update is not a new proof gate.
 New exports are saved under `/workspace/h62-statement-graph-handoff-h70-routing/`.
 Continue the same original VM/goal/branch when owner-reviewed inputs arrive.
+
+## H82 registry-tooling consolidation intake
+
+The human-approved consolidation adds all six retiring member queues to this
+same original goal. No replacement goal or VM is created. The survivor stays on
+its assigned branch. Full frozen assignments and exact member scope manifests
+must arrive in authenticated final handoffs before any member task execution;
+quoted summaries and host receipt paths are not substitutes for those bytes.
+
+`h82-chain.json` records schema-v1 waits and announced/published heads. The two
+published branches were fetched for read-only reconciliation: trust-fragments
+matches its announced head; pin-fragments has advanced to 7587ff4e7d0c39eb46db95a37080106b9919d08d,
+a descendant of announced 578d7d41508856c54984be665e7e954212f1d521. Neither is
+assumed final or merged. Other member branches were not advertised by origin.
+All six final authenticated handoffs and explicit stopped/goal-paused
+acknowledgements are missing locally; result-size-cache's uncommitted work must
+be preserved. No successor relay acceptance or retirement stop request is sent.
+Pin-fragments' explicit pause and +46.58% writer STOP remain binding; no rerun or
+proposal resumption is allowed by this intake.
+
+Retiring scopes remain untouched until the barrier clears, then each verified
+final head must merge first before its task work. The authoritative H82 scope
+manifest and H81 resource policy were requested as VM-readable inputs. While
+waiting, work continues only in this lane's original unpaused scope. No heavy
+Lean check is launched without the current resource policy. Claude-owned
+implementations remain read-only and no messages are sent to Claude lanes.
+The physical G49 producer is now a Claude external dependency; metadata retains
+the logical owner reference until an authoritative ownership/input relay arrives.
+
+H82 supersedes exact-file agreement demands for allowed statement-preserving
+Codex work; it does not authorize a statement, definition-dependency, signature,
+budget, axiom-set or exclusion change. The specific Contracts:1104 wait still
+stands, with its exact empty guard preserved: H30 standard-axiom re-pinning does
+not authorize changing it. Full PassCorrect, witness/vacuity, public-shim/editor
+requirements and all member frozen acceptance/STOP constraints remain binding.
