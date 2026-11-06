@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/FixedReferenceMemoryLoopInterface.lean` | Contract only for actual fixed-parent memory child traversal with heap-derived rows, exact demand, headerless stores, source snapshot preservation and total capacity refusal. |
