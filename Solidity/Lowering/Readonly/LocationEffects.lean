@@ -63,6 +63,9 @@ theorem readLoc_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCt
       · exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
       · exact Solidity.Lowering.Readonly.SourceHistory.Effect.lift mode _
   case cd off => exact Solidity.Lowering.Readonly.SourceHistory.Effect.lift mode _
+  all_goals first
+    | exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
+    | exact Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (Solidity.Lowering.Readonly.SourceHistory.Effect.lift mode _) (fun ⟨_, _⟩ => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _)
 
 
 theorem writeLoc_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx} {τ : Solidity.Source.STy} (F : Solidity.Source.Fr) (n : Nat)
@@ -97,6 +100,7 @@ theorem writeLoc_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RC
         all_goals exact Solidity.Lowering.Readonly.SourceHistory.Effect.halt F.static _
     all_goals contradiction
   case cd off => exact Solidity.Lowering.Readonly.SourceHistory.Effect.halt F.static _
+  all_goals exact Solidity.Lowering.Readonly.SourceHistory.Effect.halt F.static _
 
 theorem lengthOf_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx} {τ : Solidity.Source.STy} (mode : Bool) (F : Solidity.Source.Fr) (v : Solidity.Source.Val E.layout τ), Solidity.Lowering.Readonly.SourceHistory.Effect mode (Solidity.Source.lengthOf (Γ := Γ) F v) := by
   intro E Γ τ mode F v
@@ -135,7 +139,7 @@ theorem indexLoc_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RC
   · exact Solidity.Lowering.Readonly.SourceHistory.lengthOf_effect mode F a
   · intro len
     split
-    · cases a <;> exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
+    · cases a <;> first | exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _ | (dsimp only; split <;> exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _)
     · exact Solidity.Lowering.Readonly.SourceHistory.Effect.lift mode _
 
 end Solidity.Lowering.Readonly.SourceHistory

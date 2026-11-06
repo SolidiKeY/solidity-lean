@@ -255,6 +255,7 @@ theorem stmt_paid : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} 
   | _, _, .ite c t e => fun hm hw hL => by
     obtain ⟨hwc, F₁, F₂, ht, he, rfl⟩ := ite_frag hw
     have hL' : _ + (Prog.pushes t + Prog.pushes e) ≤ Lmax := hL
+    have hite : Stmt.pushes (.ite c t e) = Prog.pushes t + Prog.pushes e := rfl
     exact ite_flags (p₁ := false) (p₂ := false) c t e hm hwc
       ((prog_paid t hm ht (by omega)).mono (by omega) hL')
       ((prog_paid e hm he (by omega)).mono (by omega) hL')
@@ -272,15 +273,11 @@ theorem stmt_paid : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} 
   | _, _, .assignNew a0 a1 a2 => outside_paid (.assignNew a0 a1 a2) rfl
   | _, _, .tryCall .. => fun _ hw _ => by rw [inFrag_tryCall] at hw; cases hw
   | _, _, .loop a c body => fun hm hw hL => by
-    obtain ⟨hwc, hpush, -, hshr, G, hb, hG, rfl⟩ := loop_frag hw
-    have hLb : _ + Prog.pushes body ≤ Lmax := by rw [hpush]; exact hL
-    have h := loop_sim a c body hm hwc hG fun {τ} {m'} hm' => by
-      have h' := prog_paid body hm' hb hLb
-      rw [hpush, hshr, Nat.add_zero] at h'
-      exact h'
-    have e₁ : Stmt.shrinks (Solidity.Stmt.loop a c body) = false := hshr
-    have e₃ : Stmt.pushes (Solidity.Stmt.loop a c body) = 0 := rfl
-    rw [e₁, e₃, Nat.add_zero]
+    obtain ⟨-, -, hpay, -⟩ := loop_frag hw
+    have h := loop_family a c body hm hw hL @fun _ hb hLb _ _ hm' => by
+      rw [hpay]; exact prog_paid body hm' hb hLb
+    have e₂ : Stmt.pays (Solidity.Stmt.loop a c body) = false := hpay
+    rw [e₂] at h
     exact h
   | _, _, .assignLocalPush a0 a1 => outside_paid (.assignLocalPush a0 a1) rfl
   | _, _, .pushOpAssign a0 a1 a2 a3 a4 => outside_paid (.pushOpAssign a0 a1 a2 a3 a4) rfl
