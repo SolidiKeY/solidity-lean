@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "worker_disposition": "H82 RETIRED / STOP AFTER HANDOFF; do not resume without explicit instruction",
+  "original_verbatim_queue_file": "original-work-and-backfill-queue.txt",
+  "checkpoints": [
+    {
+      "id": "C1",
+      "name": "Pinned census and CLEAN old4.24 baseline",
+      "status": "done",
+      "evidence": "/workspace/migrate-language-evidence/old-clean-final/results.json; census and baseline1721constants"
+    },
+    {
+      "id": "C2",
+      "name": "Identical official4.35 and directory adaptation",
+      "status": "partial",
+      "finished": "Official archive SHA verified;5 proof-only files;8 modules pass;345source declarations+279 data members normalized types match;44 anonymous prefixes reviewed.",
+      "remaining": "H78 all-public generated compatibility shims and exact signature/visibility provenance; axiom drift disposition; no blanket generated exclusion."
+    },
+    {
+      "id": "C3",
+      "name": "New builds and before/after acceptance",
+      "status": "partial",
+      "finished": "Clean8/8 pass without warnings;45.30031436->22.889750584s; directory sampledRSS879906816->786042880B; Frontend.Source passes; isolated Hash fixture passes.",
+      "remaining": "Full affected/default-target/meaning/trust acceptance;7individualRSS escalations; Source/Ctor and Hash/Syntax.Raw dependency integration."
+    },
+    {
+      "id": "C4",
+      "name": "Reviewed overlay, frozen hashes and root handoff",
+      "status": "partial",
+      "finished": "Reviewed production commitd8e1d9721455d3671882f19aa7155fbbd2d91415, exact language andFixedPoint-only patches, bundle, hashes, dependency report and independent reviews saved.",
+      "remaining": "Successor integration/final full gates, exact public API shims and root toolchain edit; assignment never marked complete."
+    }
+  ],
+  "completed_backfill": [
+    "Eight-file import/source census with389declaration index rows and19direct consumer edges including tests; complete old/new module constant snapshots1721/1739.",
+    "Canonical type comparison345source declarations+279constructors/fields;44anonymous statement prefixes; full generated15removals33additions29typechanges and88standard axiom-graph changes recorded.",
+    "Census mutation/deletion/addition/generated-root refusal controls;4corrupted frozen-snapshot controls; old-pass/new-fail range fixture and corrected old/new-pass fixture.",
+    "Immutable-head reproduction of both producer patches on fresh pinned-source copies; deterministic serial measurement/export tools and manifests.",
+    "Exact SHA-authenticated Hash receipt, fresh off-Git fixture, wrong-checksum refusal control, isolated4.1354s compiler pass and independent read-only review."
+  ],
+  "remaining_backfill": [
+    "Public generated declaration visibility/signature inventory and shims are unfinished required work for successor; no new implementation by retired worker.",
+    "No additional unclaimed audit candidate accepted. No padding, scope stealing or unreported future queue claimed complete.",
+    "Existing fixture/source evidence is supplementary where lexical; successor must retain kernel/semantic/axiom validation boundaries and every original case."
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78 complete PUBLIC generated API preservation:6 removed toCtorIdx names and all public noConfusion/recOn/casesOn/matchers/other generated declarations; individual old/new/shim signatures, universes/binder kinds/order/visibility, versioned pairs where required. No shims implemented by this lane; source-declared normalized-type equality is not exhaustive public API preservation."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Standard axiom dependency drift:88 shared constant changes,8 source declarations gaining standard axioms. Existing union unchanged is not acceptance; preserve original axiom policy and use owner/H57 approval for axiom-set changes. No guard/pin edits or trust waiver."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Seven per-module sampled-RSS regressions remain escalated despite lower directory peak and faster wall times. Preserve all existing performance/resource holds; no unchanged timing-STOP rerun."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "Exact CollisionBound owner patch passes one off-Git file fixture; full Hash/Adaptive/Syntax.Raw integration and affected acceptance still pending. Root repository Hash originals remain unchanged."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-source",
+      "item": "Source/Ctor.lean641 reaches original200000 heartbeat limit and715 dependent elimination fails; RootObservations/Standalone acceptance incomplete. H82 removes proof-only exact-file agreement prerequisite, but retired worker does no repair."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Integrate authenticated final lane head and prerequisites; rerun complete affected consumers, full run-lean.sh/default targets/TestSuite/solkeycheck, trust/meaning/axiom/public-API acceptance and final root toolchain pin. No full runtime gate passed."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Apply requested PAUSED state to existing goal: worker has no callable PAUSED API and no known goal ID; explicitly stopped/no automatic implementation continuation. Preserve VM/branch/evidence; no new/reset goal."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Historical launcher rendered-prompt envelope SHA49614dcb... cannot be independently matched to copied full original thread assignment; all visible original content is committed with its actual SHA and provenance. Retrieve launcher envelope if byte-level envelope identity is required."
+    },
+    {
+      "lane": "coordinator",
+      "item": "H71/H80/H81 full operative texts not present on this VM; no push or new workloads under assumed policies. Successor must obtain authoritative current policy before new work. H68/H69 bridges and witness/intentional-contradiction distinctions remain binding; none changed here."
+    }
+  ]
+}

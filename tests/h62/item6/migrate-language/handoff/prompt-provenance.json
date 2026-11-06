@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source": "Complete original full assignment user turn and original frozen goal-objective context copied from this thread; no local launcher prompt file or original-thread API available.",
+  "assignment_path": "original-user-assignment.txt",
+  "assignment_bytes": 16176,
+  "assignment_sha256": "75be61c027b7e27c931c416f6aee380fa9b6ee61ab2bb98a112ac29e917e6cb7",
+  "historical_launcher_rendered_prompt_sha256": "49614dcbf5206fd9d87987193e4b3b0aa7533efd1b7ff837fc5ffe3d9620ffa5",
+  "byte_identity_to_launcher_rendered_envelope": "UNVERIFIED: saved thread-text digest differs; do not substitute or claim a match to the historical launcher envelope.",
+  "complete_thread_assignment_included": true,
+  "work_queue_extracted_without_abridgement": true,
+  "scope_matches_authenticated_registry": true,
+  "goal_id": null,
+  "goal_creation_or_reset": false
+}

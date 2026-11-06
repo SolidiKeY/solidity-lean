@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "authority": "Human-approved H82 stop-and-handoff user retirement instruction",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "pre_retirement_head": "d26e9b1180d1e745668dd501d6b6d055b0532322",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-language",
+  "repository": "/workspace/migrate-language",
+  "environment": "ccarenv_b64_Y2NhcmVudl9kMTgwY2UzNjkyMGM4MTkxODQxNDVkY2I3NjYwNTc4Mg",
+  "worker_action": "Finish smallest metadata/authenticated-artifact checkpoint, then STOPPED; no new implementation or Lean runs.",
+  "automatic_implementation_continuation_authorized": false,
+  "goal_requested_state": "PAUSED",
+  "goal_pause_confirmed": false,
+  "pause_failure": "No callable get_goal/pause_goal API. The only goal mutation tool, codex_goals_stop_goal, accepts outcome complete or blocked, not PAUSED. Private automation lookup returned no exact matching existing task. No wrong-state mutation or new goal used.",
+  "goal_marked_complete": false,
+  "goal_reset_or_created": false,
+  "push_attempted": false,
+  "push_reason": "H71 operative permission was not supplied in this thread or received decisions file (which ends at H63); original lane no-push restriction retained. Bundle retrieval is available. No master push.",
+  "later_routing_disposition": "Subsequent generic H70/standing H82 continue-queue broadcasts do not explicitly rescind the lane-specific retirement/no-resume instruction; preserved as provenance only.",
+  "scope_takeover": "Successor integrates final acknowledged stopped head; no worker takeover or producer transfer before final stopped acknowledgement."
+}

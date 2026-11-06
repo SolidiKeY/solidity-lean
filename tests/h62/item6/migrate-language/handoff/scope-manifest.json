@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-6-20261106",
+  "slug": "migrate-language",
+  "owner": "solidity-h62-6-20261106/migrate-language",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-language",
+  "write_scope": [
+    "tests/h62/item6/migrate-language/**",
+    "scripts/h62/item6/migrate-language/**",
+    "docs/feature-work/h62-6-migrate-language.md",
+    "Solidity/Language/FeatureInfo.lean",
+    "Solidity/Language/Features.lean",
+    "Solidity/Language/FixedPoint.lean",
+    "Solidity/Language/FixedPoint/Abi.lean",
+    "Solidity/Language/FixedPoint/Conformance.lean",
+    "Solidity/Language/FixedPoint/Laws.lean",
+    "Solidity/Language/FixedPoint/Literals.lean",
+    "Solidity/Language/FixedPoint/Storage.lean"
+  ],
+  "lean_modules": [
+    "Solidity/Language/FeatureInfo.lean",
+    "Solidity/Language/Features.lean",
+    "Solidity/Language/FixedPoint.lean",
+    "Solidity/Language/FixedPoint/Abi.lean",
+    "Solidity/Language/FixedPoint/Conformance.lean",
+    "Solidity/Language/FixedPoint/Laws.lean",
+    "Solidity/Language/FixedPoint/Literals.lean",
+    "Solidity/Language/FixedPoint/Storage.lean"
+  ],
+  "original_outside_scope_read_only": true,
+  "live_producer_ownership_transferred": false,
+  "original_registry_row": {
+    "id": "H62-6-MIGRATE-LANGUAGE",
+    "owner": "solidity-h62-6-20261106/migrate-language",
+    "status": "reserved",
+    "writeScope": "tests/h62/item6/migrate-language/**; scripts/h62/item6/migrate-language/**; docs/feature-work/h62-6-migrate-language.md; Solidity/Language/FeatureInfo.lean; Solidity/Language/Features.lean; Solidity/Language/FixedPoint.lean; Solidity/Language/FixedPoint/Abi.lean; Solidity/Language/FixedPoint/Conformance.lean; Solidity/Language/FixedPoint/Laws.lean; Solidity/Language/FixedPoint/Literals.lean; Solidity/Language/FixedPoint/Storage.lean",
+    "model": "gpt-6.1-sol",
+    "baseRevision": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "evidence": "receipts/h62-20261106/scopes/6-migrate-language.json",
+    "writeMode": "isolated-migration-overlay-no-live-owner-transfer"
+  },
+  "source_registry_vm_path": "/workspace/h62-coordinator-inputs/ownership.json",
+  "source_registry_sha256": "7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce",
+  "policy_note": "Original exact-file-agreement wording is historical; superseded by H82 standing agreements. This retirement authorizes handoff packaging only, no new proof implementation. H82 stop remains effective until an explicit resume."
+}

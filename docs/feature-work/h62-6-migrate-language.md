@@ -1,3 +1,10 @@
+> H82 RETIREMENT: worker stops after the minimum handoff checkpoint. No new
+> implementation or automatic continuation is authorized. Handoff to
+> solidity-h62-6-20261106/migrate-root-gate; assignment unfinished. See the complete
+> original assignment/scope/queue and retirement files in
+> tests/h62/item6/migrate-language/handoff/. PAUSED was requested but no callable
+> goal PAUSED operation exists. No goal completion/reset and no push.
+
 # H62 item 6: Language migration overlay
 
 The five-file proof migration is committed and locally validated. The entire

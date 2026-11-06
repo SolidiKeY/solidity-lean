@@ -83,8 +83,19 @@ if relay.exists():
     data=json.loads(relay.read_text())
     with (out/'HANDOFF.md').open('a') as f:
         f.write("\nH70 Hash relay update: exact owner patch3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff passes an isolated CollisionBound fixture with no diagnostics. The original repository Hash source remains unchanged. This does not supersede historical full-gate failure or grant full Hash/consumer/root acceptance, owner agreement or any STOP waiver. Full Hash/Syntax.Raw, Source/Ctor and root generated-API/RSS disposition remain pending. See hash-relay-evidence.json and dependency-relay/ for exact source/patch hashes, commands, exits, resource evidence, negative control and independent reviews.\n")
+retirement=root/'tests/h62/item6/migrate-language/handoff'
+if (retirement/'retirement.json').exists():
+    import shutil
+    target=out/'retirement';target.mkdir(exist_ok=True)
+    for source in retirement.iterdir():
+        if source.is_file():shutil.copy2(source,target/source.name)
+    handoff=(out/'HANDOFF.md').read_text()
+    handoff=handoff.replace('# Original-VM migration handoff: root acceptance blocked','# H82 STOPPED retirement handoff: assignment unfinished',1)
+    handoff=handoff.replace('Continue the SAME existing goal/VM/branch. No goal creation/reset. Coordinator\nowns any fresh-thread handoff after completed items.','H82 RETIRED: worker stops after this handoff. No automatic implementation continuation.\nHandoff_to solidity-h62-6-20261106/migrate-root-gate; successor integrates final head.\nExisting goal PAUSED requested, backend update unavailable: no callable PAUSED API.\nNo goal completion/reset/replacement; preserve original VM/branch/evidence.')
+    handoff+='\nFull original assignment, original goal context, unabridged work/backfill queue, exact scope manifest, H82 orders, all open-item/wait dispositions and prompt provenance are committed under tests/h62/item6/migrate-language/handoff/ and copied into retirement/. See retirement/SHA256SUMS for each actual file digest. Historical launcher rendered-envelope digest is not claimed equal to the captured full thread-text digest. H71 permission unavailable: no push attempted. All prior evidence statements are historical validation boundaries, not instructions to resume this retired worker.\n'
+    (out/'HANDOFF.md').write_text(handoff)
 excluded={'build','cache','__pycache__','serial-sysroot','shims','previous-blocked','patch-verification'}
-files=sorted(p for p in out.rglob('*') if p.is_file() and not p.is_symlink() and not excluded.intersection(p.relative_to(out).parts) and p.name not in {'SHA256SUMS','evidence.tar.gz'})
+files=sorted(p for p in out.rglob('*') if p.is_file() and not p.is_symlink() and not excluded.intersection(p.relative_to(out).parts) and p not in {out/'SHA256SUMS',out/'evidence.tar.gz'})
 with (out/'evidence.tar.gz').open('wb') as f,gzip.GzipFile(filename='',mode='wb',fileobj=f,mtime=0) as gz,tarfile.open(fileobj=gz,mode='w') as tar:
     for p in files:
         info=tar.gettarinfo(str(p),arcname=str(p.relative_to(out)))
