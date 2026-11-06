@@ -144,3 +144,43 @@ Reviews (read-only, no Lean, server or build):
   fixture. The doc names the three path-reading modules and the
   `solc_world_factory` pins that the comparison does not cover. The rerun
   receipt is byte-identical.
+
+## Decisions H90 (2026-11-06) and the H68 apply
+
+Coordinator relay of user decisions on this lane's questions:
+
+- **Q1, extend the reader.** The shared-translator owner adds narrow-integer,
+  `address`, `bytes`, `string`, enum and struct support to the shared reader
+  (owner ticket sent with the census above). CR does not migrate the
+  `solc_import` route until parity holds on the pinned witnesses. There is no
+  coverage reduction.
+- **Q2, claim none.** CR claims none of the three reserved path controls; V11
+  and the H55 lane keep them. OT-CR-4 is closed on that basis.
+- **Q3, CR applies and re-pins (H82).** Done on top of master `a897dac76`:
+  - `scripts/solc-ast-h68-migrate.py --apply` replaced the 34 `exact` fixtures,
+    with receipt `tests/cr-canonical-reader/h68-migration-applied.json`. The
+    merged-tree dry run first confirmed the same 34/1/7/4 classification and old
+    hashes.
+  - 128 `hash 0x…` pin lines in 20 modules were rewritten, covering
+    `solc_import` and `solc_world_factory` pins. No old FNV hash remains in any
+    `.lean` file.
+  - A first apply exposed a script bug: a module pinning two fixtures kept only
+    the second rewrite. It was fixed (`82da8c08`) before the committed apply.
+  - Shared-translator sha256 pins were re-pinned in `construct-reader-cases.json`,
+    `coverage-inventory.json`, `fixture-census.json`, `fixture-variants.json` and
+    `reader-comparison.json`: 44 (file, fixture) entries, 861 occurrences.
+    Every entry is in `tests/cr-canonical-reader/shared-translator-repins.json`
+    for owner verification.
+  - `preflight-construct-cases.py` passes every fixture sha256, pointer, node id
+    and `src` assertion for both 57-kind suites (existing 11/26/20, fresh 14/23/20).
+    It then stops at its compiler-binary check, which needs the external H44
+    `artifacts/compiler/` file absent here. `preflight-variants.py` needs the
+    external `artifacts/h68-bulk/` data and was not run.
+  - **For the owner:** the frozen reader-outcome matrices and variant
+    observations were recorded on the pre-H68 bytes, and only their fixture
+    hashes changed here. Now that identifiers and `tryCall` are present,
+    re-observing them may change outcomes; for example, the memory reader
+    requires `typeIdentifier`. That re-observation is the owner's.
+  - Not rewritten: the historical `tests/upstream/*.json` validation receipts
+    (10 files) and the two h28-terra manifests. They record what was validated
+    at their time.
