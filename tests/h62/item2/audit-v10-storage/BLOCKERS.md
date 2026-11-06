@@ -28,7 +28,8 @@ Dependency reproduction exited 1, elapsed 54.7867672 seconds, observed peak grou
 
 1. Preserve the assigned branch and exact frozen inputs. Do not cherry-pick repairs
    to owned originals without coordinator authorization; review overlay ancestry.
-2. Re-run pinned version/KeySort prerequisite and affected dependencies. Then use
+2. After explicit coordinator hold release, re-run pinned version/KeySort prerequisite
+   and affected dependencies. Then use
    per-file MCP diagnostics or repository run-lean policy for additive proof modules.
 3. Obtain elaborated declaration names/types and classify every interface statement:
    global premise structures versus per-input feasibility, retaining all binders.
@@ -37,8 +38,9 @@ Dependency reproduction exited 1, elapsed 54.7867672 seconds, observed peak grou
 4. First witness candidates: LoopLaws.turn_step (same rc/rb/machine/result/flag must
    satisfy nonzero, condition and step together); LoopLaws.turn_exit (actual zero
    condition); LoopLaws.run_single_loop (actual terminating run, not merely a separate
-   inhabited structure). SourceWordRead.read_total/complete must use the same env,
-   frame/path/value/state/machine/slot and discharge ordinary/present/coherent together.
+   inhabited structure). SourceWordRead.read_total needs one shared E/Γ/frame/path/
+   locals/state tuple and ordinary. SourceWordRead.complete adds value/machine/slot
+   and must discharge ordinary/present/coherent together on its single shared tuple.
    Existing controls are possible inputs, not replacements for new simultaneous proofs.
 5. Prove supported-program success/totality; negative reject-all/always-revert controls
    must fail the same success contract. Preserve observable failure and distinguish
@@ -57,3 +59,30 @@ B-TIMING-REPEAT: final repeated KeySort 1.814585664 s versus prior guarded
 1.617805099 s (+12.163%). Further Lean runs stopped under the threshold rule.
 This is not an attribution to a proof change (there is none); proper comparable
 before/after timing remains required after migration blockers are resolved.
+
+## H70 routed disposition (2026-11-06 worker continuation)
+
+The coordinator reports accepted relays for migrate-hash, migrate-root-gate,
+migrate-source and migrate-syntax. This records router acknowledgment, not a fetched
+repair or authority to edit their files. Some VM reads failed in the router receipt;
+no unavailable file is claimed retrieved or forwarded here. relay.sh is host-only;
+no installation request is needed on this VM.
+
+**HOLD: no further Lean runs**, including the reproduction command above, until the
+coordinator resolves Syntax/Raw, Hash/CollisionBound, Source/Ctor and the repeated
+KeySort timing sample. B-TIMING-REPEAT disposition owner:
+solidity-h62-6-20261106/migrate-root-gate. Original write scope remains unchanged.
+
+H70 requested source classification is saved in
+[candidate-bundles.json](candidate-bundles.json). Five bundles retain all binders,
+dependent data and joint per-input obligations. They are not verified witnesses and
+do not promote any census row. Bulk exact frozen-signature attachments are generated
+by scripts/h62/item2/audit-v10-storage/classify_candidates.py outside Git.
+
+Coordinator requests remain attached to these exact original-file paths:
+/workspace/solidity-lean/Solidity/Syntax/Raw.lean,
+/workspace/solidity-lean/Solidity/Hash/CollisionBound.lean,
+/workspace/solidity-lean/Solidity/Source/Ctor.lean.
+Timing evidence remains /workspace/audit-v10-storage-handoff/evidence/reproduce/keysort.json
+and /workspace/audit-v10-storage-handoff/evidence/final-prerequisite/keysort.json.
+No missing VM file or unstated repair is needed to review the source classification.

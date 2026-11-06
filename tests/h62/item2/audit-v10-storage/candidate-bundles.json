@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "classification_boundary": "Manual frozen-source analysis, not Lean elaboration, satisfiability proof, or coverage promotion. All original 3281 rows remain uncovered.",
+  "hold": "H70: no Lean runs pending migrate-syntax/hash/source and migrate-root-gate timing disposition.",
+  "bundles": [
+    {
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.turn_step",
+      "path": "Solidity/Backend/StorageOps/LoopLaws.lean",
+      "binder_order": [
+        "rc",
+        "rb",
+        "machine",
+        "result",
+        "flag",
+        "nonzero",
+        "cond",
+        "step"
+      ],
+      "shared_inputs": {
+        "rc": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.yes",
+        "rb": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.body",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial",
+        "result": "Solidity.Backend.StorageOps.LoopLawsControls.after",
+        "flag": "Evm.wmod 1"
+      },
+      "hypotheses": [
+        {
+          "name": "nonzero",
+          "classification": "per-input scalar feasibility",
+          "obligation": "flag.val ≠ 0"
+        },
+        {
+          "name": "cond",
+          "classification": "per-input execution equation",
+          "obligation": "rc machine = .ok { machine with stack := .val flag :: machine.stack } 0"
+        },
+        {
+          "name": "step",
+          "classification": "per-input execution equation",
+          "obligation": "rb machine = .ok result 0"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Conditional single-turn success adapter; condition/body success are premises.",
+      "proof_plan": "After hold release: one existential tuple over rc/rb/machine/result/flag, followed by nonzero ∧ cond ∧ step; discharge on the SAME assignments using the frozen definitions. Do not prove three unrelated existential claims.",
+      "negative_candidate": "Changing only flag to Evm.wmod 0 must invalidate nonzero; malformed condition must invalidate cond.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.turn_exit",
+      "path": "Solidity/Backend/StorageOps/LoopLaws.lean",
+      "binder_order": [
+        "rc",
+        "rb",
+        "machine",
+        "cond"
+      ],
+      "shared_inputs": {
+        "rc": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.no",
+        "rb": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.pending",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [
+        {
+          "name": "cond",
+          "classification": "per-input execution equation",
+          "obligation": "rc machine = .ok { machine with stack := .val ⟨0,by decide⟩ :: machine.stack } 0"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Conditional zero-guard exit adapter; rb is unrestricted.",
+      "proof_plan": "After hold release: one existential tuple rc/rb/machine with its sole cond equation. The chosen body faults if executed but is not run on this exit. Do not add a body-success premise.",
+      "negative_candidate": "Replacing only rc with Evm.run LoopLawsControls.yes invalidates the zero-condition equation.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.run_single_loop",
+      "path": "Solidity/Backend/StorageOps/LoopLaws.lean",
+      "binder_order": [
+        "cond",
+        "body",
+        "machine",
+        "result",
+        "finished"
+      ],
+      "shared_inputs": {
+        "cond": "Solidity.Backend.StorageOps.LoopLawsControls.no",
+        "body": "Solidity.Backend.StorageOps.LoopLawsControls.pending",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial",
+        "result": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [
+        {
+          "name": "finished",
+          "classification": "per-input whole-loop success feasibility",
+          "obligation": "Evm.loopRun (Evm.run cond) (Evm.run body) machine = .ok result 0"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Conditional execution wrapper. Whole-loop success is explicitly assumed; this theorem alone is not an independent termination/totality proof.",
+      "proof_plan": "After hold release: one existential tuple cond/body/machine/result plus finished, deriving finished with Evm.loopRun_of_iterN (n:=1) and the actual frozen zero-guard loopIterN equation. Source precedent: LoopLawsControls.single_loop_actual.",
+      "negative_candidate": "Positive candidate exits without body execution. It establishes no general nonzero-loop termination; nonzero-guard/body-fault cases require separate failure controls.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordRead.read_total",
+      "path": "Solidity/Lowering/StorageOps/SourceWordRead.lean",
+      "binder_order": [
+        "E",
+        "Γ",
+        "frame",
+        "path",
+        "locals",
+        "state",
+        "_ordinary"
+      ],
+      "shared_inputs": {
+        "E": "Solidity.Lowering.StorageOps.SourceWordWriteControls.env",
+        "Γ": "[]",
+        "frame": "Solidity.Lowering.StorageOps.SourceWordWriteControls.frame",
+        "path": "Solidity.Lowering.StorageOps.SourceWordWriteControls.left",
+        "locals": ".nil (at Source.Locals E.layout [])",
+        "state": "Solidity.Lowering.StorageOps.SourceWordWriteControls.state"
+      },
+      "hypotheses": [
+        {
+          "name": "_ordinary",
+          "classification": "per-input raw environment observation",
+          "obligation": "E.transientRoot path = false"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Total outcome equation, including missing-cell failure; not an all-input success theorem.",
+      "proof_plan": "After hold release: one existential tuple E/Γ/frame/path/locals/state plus ordinary. Value and target machine/slot are NOT binders of this theorem. Keep both match branches in the frozen signature.",
+      "negative_candidate": "The same environment/frame with missing path is a candidate for the explicit missing-cell outcome; this does not falsify read_total or establish complete.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordRead.complete",
+      "path": "Solidity/Lowering/StorageOps/SourceWordRead.lean",
+      "binder_order": [
+        "E",
+        "Γ",
+        "frame",
+        "path",
+        "locals",
+        "state",
+        "_ordinary",
+        "value",
+        "_present",
+        "machine",
+        "slot",
+        "_coherent"
+      ],
+      "shared_inputs": {
+        "E": "Solidity.Lowering.StorageOps.SourceWordWriteControls.env",
+        "Γ": "[]",
+        "frame": "Solidity.Lowering.StorageOps.SourceWordWriteControls.frame",
+        "path": "Solidity.Lowering.StorageOps.SourceWordWriteControls.left",
+        "locals": ".nil (at Source.Locals E.layout [])",
+        "state": "Solidity.Lowering.StorageOps.SourceWordWriteControls.state",
+        "value": "Source.Val.int 11 (by decide)",
+        "machine": "Solidity.Lowering.StorageOps.SourceWordWriteControls.machine",
+        "slot": "Evm.Slot.root 0"
+      },
+      "hypotheses": [
+        {
+          "name": "_ordinary",
+          "classification": "per-input raw environment observation",
+          "obligation": "E.transientRoot path = false"
+        },
+        {
+          "name": "_present",
+          "classification": "per-input raw storage observation",
+          "obligation": "(state.ex.world.accounts frame.this).storage.read path = some value"
+        },
+        {
+          "name": "_coherent",
+          "classification": "per-input raw source/target observation",
+          "obligation": "value.word = some (machine.store.cells slot)"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Source and fixed readCode target success derived from input observations; neither success is a premise. No arbitrary compiler selection contract occurs in the signature.",
+      "proof_plan": "After hold release: one existential tuple preserving dependent env/path/value/local/state types and the SAME frame/state/machine/slot, with ordinary ∧ present ∧ coherent together. Existing SourceWordReadControls.certificate applies complete using this shared tuple and rfl observations. New audit module must still prove the simultaneous bundle and be checked.",
+      "negative_candidate": "The stored read value is 11, NOT SourceWordWriteControls.value (53). Changing only slot to root 1 (17), or value to 53, invalidates coherent or present. A missing path invalidates present.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    }
+  ],
+  "name_boundary": "Fully qualified names are read from the frozen explicit namespaces; Lean elaboration/name verification remains held."
+}

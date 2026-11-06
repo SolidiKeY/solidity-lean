@@ -98,3 +98,57 @@ Final static boundary checks passed: layers (857 core modules, zero frontend/par
 reaches), register.sh --check and fragments.sh --check. Independent final finder and
 skeptic reviews found no concrete handoff status/scope mismatch. No full gate was run
 past the known failed dependency boundary.
+
+## H70 candidate classification while Lean is held
+
+The coordinator acknowledged accepted migration-owner relays and explicitly held all
+further Lean runs pending Syntax/Raw, Hash/CollisionBound, Source/Ctor and root-gate's
+KeySort timing disposition. No Lean/Lake/MCP, build, runtime gate or timing check was
+run for this continuation. No repair was fetched or original-file permission inferred.
+
+The five candidate bundles are recorded in
+[candidate-bundles.json](../../tests/h62/item2/audit-v10-storage/candidate-bundles.json).
+Their complete frozen source signatures and hashes are attached by the deterministic
+classify_candidates.py generator to off-Git evidence. Shared inputs are a single tuple
+per theorem, with binder order retained; existing fixture definitions are referenced
+without editing or replacing them. Exact names come from explicit frozen namespaces,
+not a new Lean elaboration. All five signatures have zero global premise-structure
+arguments: Env, functions and machine/state values are data parameters, while the
+listed hypotheses are per-input observations or execution feasibility.
+
+| Exact namespace suffix | Joint hypotheses on the same inputs | Contract role |
+|---|---|---|
+| LoopLaws.turn_step | nonzero, cond and step for the same rc/rb/machine/result/flag | Conditional single-turn adapter |
+| LoopLaws.turn_exit | cond on the same rc/rb/machine; rb remains unrestricted | Zero-guard exit; no body-success premise |
+| LoopLaws.run_single_loop | finished on the same cond/body/machine/result | Assumes whole-loop success; no independent termination claim |
+| SourceWordRead.read_total | ordinary on the same E/context/frame/path/locals/state | Total outcome equation, retaining missing-cell failure |
+| SourceWordRead.complete | ordinary, present and coherent on one shared dependent tuple | Source/fixed-readCode success derived from raw input observations |
+
+LoopLaws means Solidity.Backend.StorageOps.LoopLaws; SourceWordRead means
+Solidity.Lowering.StorageOps.SourceWordRead. The loop candidates use frozen populated
+controls: turn_step uses yes/body/initial/after and flag 1; turn_exit and run_single_loop
+use no/pending/initial. The latter loop exits without executing its faulting body.
+The read candidates use the same frozen environment, frame, left path, nil locals and
+initial state. complete adds read value 11, the frozen machine and root slot 0.
+SourceWordWriteControls.value is 53 and must not be substituted for that read value.
+Negative candidates record exactly which input premise would fail after such changes;
+these are unproved case plans, not executed controls or results.
+
+No compiler parameter/selection contract, gas cost or EVM fork appears in these five
+signatures. Their classification does not finish checkpoint 3: supported compiler
+success, reject-all/always-revert negatives and observable failure/gas/fork boundaries
+still need the originally required separate proofs and controls. Conditional adapters
+are not classified as vacuous merely because they assume successful executions.
+
+All 3281 original census rows remain uncovered and all four checkpoints unfinished.
+This source-only classification adds zero Lean declarations, proofs, axioms or sorry.
+The original failed dependency and timing holds are unchanged. Finder/skeptic review
+and deterministic consistency evidence for this continuation are exported separately.
+
+H70 review closure: independent read-only finder and skeptic confirmed all five binder
+orders, joint input assignments, source roles and zero-promotion status. The finder
+identified an older combined resume sentence that wrongly attributed complete-only
+binders/premises to read_total; it was split into the exact two bundles above, and the
+resume command now explicitly requires coordinator hold release. The skeptic found
+no status/scope/path mismatch. Neither reviewer used Lean or edited files. Generator
+consistency and two byte-identical outputs passed; no witness satisfiability was checked.
