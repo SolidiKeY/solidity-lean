@@ -24,14 +24,16 @@ compiler's code:
   (`locIn`).
 
 The others are this domain's choices, not refusals: an alias is declared
-with an initializer and bound only to index-free paths (the compiler accepts
-an unset alias or one through an array index, but then a later read depends
-on fragment state: dead, or forgotten at a `pop`), and the core branch also
+with an initializer (solc rejects reading an unset storage pointer) and bound
+only to index-free paths (the compiler accepts one through an array index as
+fragile, but a branch meet or the loop fixed-point check refuses mixing it
+with a plain binding, so its acceptance depends on fragment state), and the
+core branch also
 compiles transfers, `push`/`pop`/`delete`, `assignIncDec` and static storage
 copies, which are outside this domain.
 
 `compile_core` proves every program of the domain is compiled, from every
-fragment whose locals are all readable (`Readable`, e.g. `Frag.init`) and
+fragment whose storage aliases are all plain (`Readable`, e.g. `Frag.init`) and
 every base, by the core branch; `compile_agrees` composes it with the
 existing `Compilation.correct`. -/
 namespace Solidity.Backend.AbiWorld.PublicCompilerTotal
@@ -148,31 +150,44 @@ end
 
 /-! ## Readable fragments -/
 
-/-- Every local of `Γ` is known readable: the fragment of a fresh frame. -/
+/-- Every storage alias of `Γ` is known readable as a plain alias, as in a
+fresh frame (`Frag.init`). Value locals are not constrained. -/
 def Readable {Γ : Ctx} (F : Frag Γ) : Prop :=
-  Γ.length ≤ F.fl.length ∧ ∀ f ∈ F.fl, f = .ok
+  ∀ {R : RefTy} (i : Idx Γ (.alias R)), F.get i = .ok
 
 theorem Readable.init (Γ : Ctx) : Readable (Frag.init Γ) := by
-  refine ⟨by simp only [Frag.init, List.length_map, Nat.le_refl], fun f hf => ?_⟩
-  obtain ⟨_, _, rfl⟩ := List.mem_map.mp hf
-  rfl
+  intro R i
+  simp only [Frag.get, Frag.init, List.getD_eq_getElem?_getD, List.getElem?_map,
+    Idx.getElem?_toNat, Option.map_some, Option.getD_some]
 
-theorem Readable.get {Γ : Ctx} {F : Frag Γ} (hF : Readable F) {t : LTy} (i : Idx Γ t) :
-    F.get i = .ok := by
-  have hi : i.toNat < F.fl.length := Nat.lt_of_lt_of_le (Idx.toNat_lt i) hF.1
-  simp only [Frag.get, List.getD_eq_getElem?_getD, List.getElem?_eq_getElem hi,
-    Option.getD_some]
-  exact hF.2 _ (List.getElem_mem hi)
+theorem Readable.get {Γ : Ctx} {F : Frag Γ} (hF : Readable F) {R : RefTy}
+    (i : Idx Γ (.alias R)) : F.get i = .ok := hF i
 
-theorem Readable.set {Γ : Ctx} {F : Frag Γ} (hF : Readable F) {t : LTy} (i : Idx Γ t) :
-    F.set i .ok = F := by
+theorem Readable.push {Γ : Ctx} {F : Frag Γ} (hF : Readable F) (t : LTy) :
+    Readable (F.push t .ok) := by
+  intro R i
+  cases i with
+  | here => rfl
+  | there j =>
+    simp only [Frag.get, Frag.push, Idx.toNat, List.getD_cons_succ]
+    exact hF j
+
+/-- Rebinding a plain alias as plain leaves the fragment unchanged. -/
+theorem Frag.set_of_get {Γ : Ctx} {F : Frag Γ} {t : LTy} {i : Idx Γ t}
+    (h : F.get i = .ok) : F.set i .ok = F := by
   cases F with
   | mk fl =>
+    simp only [Frag.get, List.getD_eq_getElem?_getD] at h
     simp only [Frag.set, Frag.mk.injEq]
-    have hi : i.toNat < fl.length := Nat.lt_of_lt_of_le (Idx.toNat_lt i) hF.1
-    have same : fl[i.toNat] = Fl.ok := hF.2 _ (List.getElem_mem hi)
-    rw [← same]
-    exact List.set_getElem_self hi
+    match e : fl[i.toNat]? with
+    | none =>
+      rw [e, Option.getD_none] at h
+      cases h
+    | some f =>
+      rw [e, Option.getD_some] at h
+      obtain ⟨hi, hv⟩ := List.getElem?_eq_some_iff.mp e
+      rw [← h, ← hv]
+      exact List.set_getElem_self hi
 
 /-! ## Values are accepted from every readable fragment -/
 
@@ -316,17 +331,6 @@ theorem Grows.restrict {Γ Γ' : Ctx} {F : Frag Γ} {G : Frag Γ'} (fg : Grows F
     simp only [Frag.restrict, fg.1]
     rw [List.drop_left' (List.length_replicate ..)]
 
-theorem Grows.readable {Γ Γ' : Ctx} {F : Frag Γ} {G : Frag Γ'} (fg : Grows F G)
-    (hF : Readable F) : Readable G := by
-  refine ⟨?_, fun f hf => ?_⟩
-  · rw [fg.1, List.length_append, List.length_replicate]
-    have := hF.1
-    omega
-  · rw [fg.1, List.mem_append] at hf
-    rcases hf with hf | hf
-    · exact List.eq_of_mem_replicate hf
-    · exact hF.2 f hf
-
 theorem Frag.meet_self {Γ : Ctx} (F : Frag Γ) : F.meet F = F := by
   cases F with
   | mk fl =>
@@ -339,53 +343,57 @@ theorem Frag.meet_self {Γ : Ctx} (F : Frag Γ) : F.meet F = F := by
 
 mutual
 theorem StmtOk.frag : {Γ Γ' : Ctx} → {s : Solidity.Stmt C Γ Γ'} → StmtOk s →
-    ∀ F : Frag Γ, Readable F → ∃ G, inFrag F s = some G ∧ Grows F G
+    ∀ F : Frag Γ, Readable F → ∃ G, inFrag F s = some G ∧ Grows F G ∧ Readable G
   | _, _, _, .assign hl hv, F, hF => ⟨F, by
       simp only [Evm.inFrag, assignIn, hl.locIn hF, hv.valIn hF, Bool.and_self, Frag.guard,
-        ite_true], Grows.refl F⟩
+        ite_true], Grows.refl F, hF⟩
   | _, _, _, .assignLocal _ hv, F, hF => ⟨F, by
-      simp only [Evm.inFrag, hv.valIn hF, Frag.guard, ite_true], Grows.refl F⟩
-  | _, _, _, .declNone p _, F, _ => ⟨F.push (.val p) .ok, by
-      simp only [Evm.inFrag, Option.all, Frag.guard, ite_true], Grows.push F _⟩
+      simp only [Evm.inFrag, hv.valIn hF, Frag.guard, ite_true], Grows.refl F, hF⟩
+  | _, _, _, .declNone p _, F, hF => ⟨F.push (.val p) .ok, by
+      simp only [Evm.inFrag, Option.all, Frag.guard, ite_true],
+      Grows.push F _, hF.push _⟩
   | _, _, _, .declSome p _ hv, F, hF => ⟨F.push (.val p) .ok, by
-      simp only [Evm.inFrag, Option.all, hv.valIn hF, Frag.guard, ite_true], Grows.push F _⟩
+      simp only [Evm.inFrag, Option.all, hv.valIn hF, Frag.guard, ite_true],
+      Grows.push F _, hF.push _⟩
   | _, _, _, .declStorage R _ hq, F, hF => ⟨F.push (.alias R) .ok, by
-      simp only [Evm.inFrag, declStorageIn, hq.bindFl hF, Option.map_some], Grows.push F _⟩
+      simp only [Evm.inFrag, declStorageIn, hq.bindFl hF, Option.map_some],
+      Grows.push F _, hF.push _⟩
   | _, _, _, .rebind i hq, F, hF => ⟨F, by
-      simp only [Evm.inFrag, hq.bindFl hF, Option.map_some, hF.set i], Grows.refl F⟩
+      simp only [Evm.inFrag, hq.bindFl hF, Option.map_some, Frag.set_of_get (hF.get i)],
+      Grows.refl F, hF⟩
   | _, _, _, .opAssign _ _ _ hl hv, F, hF => ⟨F, by
       simp only [Evm.inFrag, hl.opLocIn hF, hv.valIn hF, Bool.and_self, Frag.guard, ite_true],
-      Grows.refl F⟩
+      Grows.refl F, hF⟩
   | _, _, _, .incDec _ _ hl, F, hF => ⟨F, by
-      simp only [Evm.inFrag, hl.opLocIn hF, Frag.guard, ite_true], Grows.refl F⟩
+      simp only [Evm.inFrag, hl.opLocIn hF, Frag.guard, ite_true], Grows.refl F, hF⟩
   | _, _, _, .require hc, F, hF => ⟨F, by
-      simp only [Evm.inFrag, hc.valIn hF, Frag.guard, ite_true], Grows.refl F⟩
+      simp only [Evm.inFrag, hc.valIn hF, Frag.guard, ite_true], Grows.refl F, hF⟩
   | _, _, _, .assert hc, F, hF => ⟨F, by
-      simp only [Evm.inFrag, hc.valIn hF, Frag.guard, ite_true], Grows.refl F⟩
-  | _, _, _, .revert, F, _ => ⟨F, by simp only [Evm.inFrag], Grows.refl F⟩
+      simp only [Evm.inFrag, hc.valIn hF, Frag.guard, ite_true], Grows.refl F, hF⟩
+  | _, _, _, .revert, F, hF => ⟨F, by simp only [Evm.inFrag], Grows.refl F, hF⟩
   | _, _, _, .ite hc ht he, F, hF => by
     obtain ⟨F₁, h₁, g₁⟩ := ht.frag F hF
     obtain ⟨F₂, h₂, g₂⟩ := he.frag F hF
-    refine ⟨F, ?_, Grows.refl F⟩
+    refine ⟨F, ?_, Grows.refl F, hF⟩
     simp only [Evm.inFrag, hc.valIn hF, ite_true, h₁, h₂, g₁.restrict, g₂.restrict,
       Frag.meet_self]
   | _, _, _, .block hb, F, hF => by
     obtain ⟨G, h, g⟩ := hb.frag F hF
-    exact ⟨F, by simp only [Evm.inFrag, h, Option.map_some, g.restrict], Grows.refl F⟩
+    exact ⟨F, by simp only [Evm.inFrag, h, Option.map_some, g.restrict], Grows.refl F, hF⟩
   | _, _, _, .loop _ hc hb, F, hF => by
     obtain ⟨G, h, g⟩ := hb.frag F hF
     have q := hb.quiet
-    refine ⟨F, ?_, Grows.refl F⟩
+    refine ⟨F, ?_, Grows.refl F, hF⟩
     simp only [Evm.inFrag, hc.valIn hF, q.1, q.2.1, q.2.2, h, g.restrict, beq_self_eq_true,
       Bool.not_false, Bool.and_self, ite_true]
   | _, _, _, .callNone _ ha hb, F, hF => by
     obtain ⟨G, h, _⟩ := hb.frag (Frag.init _) (Readable.init _)
-    refine ⟨F, ?_, Grows.refl F⟩
+    refine ⟨F, ?_, Grows.refl F, hF⟩
     simp only [Evm.inFrag, ha.argsIn hF, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn,
       Bool.false_eq_true, ite_false]
   | _, _, _, .callVal _ _ _ _ ha hb, F, hF => by
     obtain ⟨G, h, _⟩ := hb.frag (Frag.init _) (Readable.init _)
-    refine ⟨F, ?_, Grows.refl F⟩
+    refine ⟨F, ?_, Grows.refl F, hF⟩
     simp only [Evm.inFrag, ha.argsIn hF, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn,
       Bool.false_eq_true, ite_false]
 
@@ -393,8 +401,8 @@ theorem ProgOk.frag : {Γ Γ' : Ctx} → {P : Solidity.Prog C Γ Γ'} → ProgOk
     ∀ F : Frag Γ, Readable F → ∃ G, inFragP F P = some G ∧ Grows F G
   | _, _, _, .nil, F, _ => ⟨F, by simp only [Evm.inFragP], Grows.refl F⟩
   | _, _, _, .cons hs hP, F, hF => by
-    obtain ⟨F₁, h₁, g₁⟩ := hs.frag F hF
-    obtain ⟨G, h, g⟩ := hP.frag F₁ (g₁.readable hF)
+    obtain ⟨F₁, h₁, g₁, r₁⟩ := hs.frag F hF
+    obtain ⟨G, h, g⟩ := hP.frag F₁ r₁
     exact ⟨G, by simp only [Evm.inFragP, h₁, h], g₁.trans g⟩
 end
 

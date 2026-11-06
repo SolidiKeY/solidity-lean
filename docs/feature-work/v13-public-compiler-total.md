@@ -27,9 +27,16 @@ two kinds:
   mapping keys and word-overflowing offsets (`locIn`), `send`, memory
   statements outside the core branch, multiple returns, recursion and
   external/self/library calls;
-- compiled by the core branch but outside this domain: aliases left unset or
-  bound through an array index (later reads depend on fragment state),
-  transfers, `push`/`pop`/`delete`, `assignIncDec` and static storage copies.
+- compiled by the core branch but outside this domain: aliases left unset
+  (solc rejects reading an unset storage pointer) or bound through an array
+  index (accepted as fragile, but a branch meet or the loop fixed-point check
+  refuses mixing fragile and plain bindings, so acceptance depends on
+  fragment state), transfers, `push`/`pop`/`delete`, `assignIncDec`
+  (`x = l++`) and static storage copies.
+
+Array-indexed aliases (`S storage s = arr[i];`) are a common pattern; covering
+them needs a per-alias kind judgement in the domain. This is raised as a scope
+question (Q1 of the H87 CLOUD-RESULT) rather than decided here.
 
 The domain is not widened to G01 `S.Admitted`.
 
@@ -49,8 +56,9 @@ of the operator on the words (via `wordOf_sgn`, `signedOf_eq_sgn`), the result
 stays an `int256`, and `sword_sgn` matches the pushed word. Every consumer of
 `tail_simT` (core, memory, object backends) inherits it. This closes R12's
 signed-bitwise half (`roadmap-g04-restrictions.md`; the signed `>>` half was
-already compiled through `sarCode`). The Bitwise packet control that asserted
-the old refusal is now the acceptance fact
+already compiled through `sarCode`). Two other lanes' controls asserted the
+old refusal and are now the acceptance fact (hand-off to their owners,
+diamond-try checkpoint and v09-compiler-passes)
 (`PrimitivePackets/Bitwise/Selected.signed_accepted`,
 `Passes/BitwiseValueContextControls.signed_acceptance`; pin renamed).
 Stale records, proposed for their owners and not edited here: R12 in
@@ -66,9 +74,11 @@ library once; no proof became slower by design.
 ## Compiler-success (totality) theorem
 
 - `compile_core b hF hP : ∃ G h, Compiler.compile b F P = some (.core G h)` for
-  every base `b`, every `Readable F` (all locals known readable, e.g.
-  `Frag.init Γ`, the fragment of a whole program or call body) and every
-  `ProgOk P`.
+  every base `b`, every `Readable F` (every storage alias of `Γ` known plain;
+  value locals unconstrained; e.g. `Frag.init Γ`, the fragment of a whole
+  program or call body) and every `ProgOk P`. Against the pre-H87 version,
+  which held for every `F` on alias-free programs, this excludes only
+  fragments in which some alias of `Γ` is dead or fragile.
 - `compile_isSome`: the same as `isSome`; `compile_init` at `Frag.init Γ`.
 - `compile_agrees`: the selected result satisfies the fixed observation
   `Agrees L frame base σ m` from every `Sim C L b F σ m` with `L ≤ Lmax`
@@ -79,13 +89,14 @@ from every readable fragment, that programs push, pay and shrink nothing, and
 that `inFragP` only pushes readable locals (`Grows`) and rebinds leave a
 readable fragment unchanged (`Readable.set`), so branch meets, scope
 restriction and the loop fixed-point check hold. Axioms: `propext`, `Classical.choice`, `Quot.sound` (the library standard)
-(guarded in the Controls). H87 changed the compiler (signed bitwise, above)
-and this lane's own theorems (the `Readable F` premise, which the alias cases
-need; alias-free programs from an arbitrary fragment are no longer stated
-separately). No frozen statement changed; no `maxHeartbeats` option is used.
+(guarded in the Controls). H87 changed the compiler (signed bitwise, above),
+two other lanes' controls (below) and this lane's own theorems (the
+`Readable F` premise, which the alias cases need). No frozen statement
+changed; no `maxHeartbeats` option is used.
 
 Controls: an inhabited program using a storage read, a storage alias with a
-rebind, a mapping write through it, storage `+=` and `++`, a signed `&`, a
+rebind, a mapping write through it, root and indexed storage `+=`, `++`,
+signed `&`, `|`, `^`, a
 `while` loop with `+=`, a branch with a `revert`, and a value internal call
 is accepted through the theorem at every base and, independently, by kernel
 evaluation; its code is nonempty. `program_agrees_fresh` meets the `Sim` premise
@@ -150,3 +161,19 @@ a Lean declaration; the domain's dependence on `Evm.offset` and its being a
 restatement of the core fragment are stated explicitly (framing left to the
 user as a scope question). The skeptic confirmed `compile_agrees` adds no
 premise to `Compilation.correct` and that `Sim.init` meets its premise.
+
+### H87 widening reviews
+
+Read-only finder and skeptic reviews of the H87 commits. The finder confirmed
+the signed-bitwise semantics (two's-complement AND/OR/XOR, result always an
+`int256`, matching solc) and that every backend inherits `tail_simT`.
+Confirmed findings, fixed: alias restrictions were mislabelled compiler
+refusals (now domain choices, with the actual obstruction stated); the domain
+was overclaimed as the core fragment minus alias bookkeeping (now a stated
+subset, with transfers, `push`/`pop`/`delete`, `assignIncDec` and static copies
+listed as compiled but outside); a stale "nothing changed" sentence; the
+`Readable` premise constrained value locals (now only aliases); controls
+lacked indexed storage `op=` and signed `|`/`^` (added). Recorded as proposals
+for owners: R12, the V09 note and the G03 ledger. Raised as a question:
+array-indexed aliases. No runtime-value control for signed `&` beyond the
+general `stail_simT` proof.

@@ -2,7 +2,7 @@ import Solidity.Backend.AbiWorld.PublicCompilerTotal
 
 /-! Controls for `PublicCompilerTotal`: an inhabited domain program using a
 storage read, a storage alias with a rebind, a mapping write through it,
-storage `+=` and `++`, a signed `&`, a loop, a branch, a revert and a
+root and indexed storage `+=`, `++`, signed `&`, `|`, `^`, a loop, a branch, a revert and a
 single-value internal call is accepted through the theorem and,
 independently, by kernel evaluation of the public entry. A signed `&`
 formerly refused is now accepted. Negative controls kernel-observe refusals
@@ -40,8 +40,9 @@ def fArgs : Solidity.Args C Γ₂ [.val .uint] := .snoc .nil .uint (.user "p") x
 
 /-- `uint x = total; mapping(uint => uint) storage bs = balances;
 while (x < 3) { x += 1; }
-if (x == 3) { bs[x] = x; total += x; bs = balances; } else { revert(); }
-++total; require((int(x) & int(x)) == int(x)); x = f(x);` -/
+if (x == 3) { bs[x] = x; total += x; bs = balances; bs[x] += 1; } else { revert(); }
+++total; require((int(x) & int(x)) == int(x));
+require((int(x) | (int(x) ^ int(x))) == int(x)); x = f(x);` -/
 def program : Solidity.Prog C Γ₀ Γ₂ :=
   .cons (.declLocal .uint (.user "x") (some (.read (.root "total" rfl)))) <|
   .cons (.declStorage M (.user "bs") (some (.path (.loc (.root "balances" rfl))))) <|
@@ -50,10 +51,12 @@ def program : Solidity.Prog C Γ₀ Γ₂ :=
   .cons (.ite (.binop .eqB rfl rfl x (lit 3))
     (.cons (.assign (.index .map bs x) (.val x)) <|
      .cons (.opAssign .add rfl rfl (.root "total" rfl) x) <|
-     .cons (.rebind .here (.path (.loc (.root "balances" rfl)))) .nil)
+     .cons (.rebind .here (.path (.loc (.root "balances" rfl)))) <|
+     .cons (.opAssign .add rfl rfl (.index .map bs (.local (.there .here))) (lit 1)) .nil)
     (.cons .revert .nil)) <|
   .cons (.incDec .preInc rfl (.root "total" rfl)) <|
   .cons (.require (.binop .eqB rfl rfl (.binop .band rfl rfl sx sx) sx)) <|
+  .cons (.require (.binop .eqB rfl rfl (.binop .bor rfl rfl sx (.binop .bxor rfl rfl sx sx)) sx)) <|
   .cons (.call "f" fArgs (.val .uint (.user "r") (some (.there .here))) fBody) .nil
 
 theorem program_ok : ProgOk program :=
@@ -64,11 +67,14 @@ theorem program_ok : ProgOk program :=
   .cons (.ite (.binop _ _ _ (.local _) (.lit _ _))
     (.cons (.assign (.map (.alias _) (.local _)) (.local _)) <|
      .cons (.opAssign _ _ _ (.root _ _) (.local _)) <|
-     .cons (.rebind _ (.root _ _)) .nil)
+     .cons (.rebind _ (.root _ _)) <|
+     .cons (.opAssign _ _ _ (.index (.map (.alias _) (.local _))) (.lit _ _)) .nil)
     (.cons .revert .nil)) <|
   .cons (.incDec _ _ (.root _ _)) <|
   .cons (.require (.binop _ _ _ (.binop _ _ _ (.unop _ _ _ (.local _)) (.unop _ _ _ (.local _)))
     (.unop _ _ _ (.local _)))) <|
+  .cons (.require (.binop _ _ _ (.binop _ _ _ (.unop _ _ _ (.local _))
+    (.binop _ _ _ (.unop _ _ _ (.local _)) (.unop _ _ _ (.local _)))) (.unop _ _ _ (.local _)))) <|
   .cons (.callVal _ _ _ _ (.snoc _ _ .nil (.local _))
     (.cons (.assignLocal _ (.binop _ _ _ (.local _) (.lit _ _))) .nil)) .nil
 
