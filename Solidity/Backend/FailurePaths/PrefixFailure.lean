@@ -123,7 +123,7 @@ initial Source/target representation or failure-frame transport is inferred. -/
 theorem source_terminal {E : Source.Env} {Γ : RCtx} {τ : STy} {R : List STy}
     (global : Glob E) (frame : Fr) (extra parameters offset : Nat)
     (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial finalSource : St E) (data : Roadmap.Bytes)
     (encoded : Premises.EncodingAt frame (extra+2) (EncodedError.values (locals.get i)).toR initial finalSource data)
     (headCode suffix : Backend.Program) (entry ready : Machine)
@@ -148,7 +148,7 @@ theorem source_terminal {E : Source.Env} {Γ : RCtx} {τ : STy} {R : List STy}
 theorem source_writer {E : Source.Env} {Γ : RCtx} {τ : STy} {R : List STy}
     (global : Glob E) (frame : Fr) (extra parameters offset : Nat)
     (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial finalSource : St E) (data : Roadmap.Bytes)
     (encoded : Premises.EncodingAt frame (extra+2) (EncodedError.values (locals.get i)).toR initial finalSource data)
     (entry : Machine) (suffix : Backend.Program)
