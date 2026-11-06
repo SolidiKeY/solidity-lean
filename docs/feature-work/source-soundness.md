@@ -561,6 +561,15 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   runs, and a `storage`/`calldata` type has no default, so
   `function g() internal view returns (uint[] storage r) { r = a; }` is
   `stuck` at entry although solc accepts it.
+- **`calldata` to memory copies of arrays with dynamically encoded
+  elements** (new, 2026-11-06): once `STy.implicit` compares array elements
+  at the target's location, `bytes[] calldata`, `string[] calldata` and
+  `uint256[][] calldata` convert to memory as in solc, but `cdToMem` copies
+  only one-word and statically encoded elements, so these copies are
+  `stuck` (`CalldataNestedCopyControls.dynamic_elements_stuck`). Storage
+  arrays of structs holding a mapping now also convert to memory and stop
+  at `loadMem`'s mapping arm, as the one-level struct conversion already
+  did (solc refuses both).
 
 **Typing gaps** (S01 types them, solc refuses them, the semantics is
 `stuck`), fixed in S01's rules and G13's checker:
@@ -1023,7 +1032,8 @@ Horizon's step proofs take them without new lemmas, except
   (G18.05): inner arrays are allocated before the outer one, as `zeroData`
   allocates (solc allocates the outer first; heap addresses are abstract
   indices, so no observation here depends on the order). An element that is
-  not statically encoded is not inline and stays `stuck`. The nested copy
+  not statically encoded is not inline and stays `stuck`, and is now
+  reachable (census above). The nested copy
   is reachable from typed source: `STy.implicit` compares array elements
   at the target's location (`STy.withLoc`, as `copiesTo` does; user
   decision 2026-11-06), so `uint256[2][] calldata` converts to

@@ -12,7 +12,8 @@ from a typed declaration. The element type, the static length and the
 target location are still compared exactly.
 
 - `nested_implicit` … `to_storage_refused`: the conversion and its
-  refusals.
+  refusals. `dynamic_elements_stuck`: `bytes[] calldata` also converts,
+  but its copy is `stuck` (no dynamic element copy; a recorded gap).
 - `w_copy`: the typing derivation of `uint256[2][] memory c = xs;` for a
   `uint256[2][] calldata` parameter; its elaborated form converts with
   `convRV`, which runs `cdToMem`'s nested arm (`convRV_nested`) and keeps
@@ -60,6 +61,16 @@ theorem to_calldata_refused (B : DeclName → DeclName → Bool) : memNested.imp
 is an assignment, `STy.copiesTo`). -/
 theorem to_storage_refused (B : DeclName → DeclName → Bool) :
     cdNested.implicit B (.array .storage (.array .storage u (some 2)) none) = false := rfl
+
+/-- **A recorded gap** (`docs/feature-work/source-soundness.md`, census):
+`bytes[] calldata` now converts to `bytes[] memory`, as in solc, but
+`cdToMem` copies no dynamically encoded element, so the copy is `stuck`. -/
+def dynElems := (convRV frame 0 (.array .memory (.bytes .memory) none)
+  (σ := .array .calldata (.bytes .calldata) none) (.val (.cdRef rfl 0 1)) : EM EB [] _).run (L0 EB, sB)
+
+theorem dynamic_elements_stuck (B : DeclName → DeclName → Bool) :
+    STy.implicit B (.array .calldata (.bytes .calldata) none) (.array .memory (.bytes .memory) none) = true ∧
+    dynElems.1 = .error (.stuck "dynamic ABI decoding is not modelled") := ⟨rfl, rfl⟩
 
 /-! ## The conversion arm -/
 
