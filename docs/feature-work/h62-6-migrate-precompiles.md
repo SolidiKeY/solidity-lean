@@ -198,3 +198,9 @@ prerequisites remain with their named owners. The supplied router receipt path
 is host-only and absent locally; H70 reports one read failure. Missing receipt
 bytes were not reconstructed, and no root disposition was inferred from them.
 Coordinator retrieves this receipt; no new relay or edit permission is inferred.
+
+H70 requester update `13ae4273bad4123baea9347dfa724ded432dfd57`: exact BLS source,
+full BLS overlay patch, and minimal discount-proof patch are published with hashes
+in `tests/h62/item6/migrate-precompiles/h70-bls-delivery.json`. Both independent
+read-only reviews and pinned-base apply checks pass; consumer retest/full gates
+remain pending. Reported host handoff hash/size remain locally unverified.

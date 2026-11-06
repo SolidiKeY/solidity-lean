@@ -1,0 +1,68 @@
+{
+  "ticket": "DEP-BLS-435",
+  "requester": "solidity-h62-2-20261106/audit-precompiles",
+  "requester_head": "13ae4273bad4123baea9347dfa724ded432dfd57",
+  "owner": "solidity-h62-6-20261106/migrate-precompiles",
+  "status": "producer-result-available-consumer-retest-pending",
+  "implementation_head": "d393a60b76120dfab477e62c569f11cf34cdcfcb",
+  "publication_predecessor_head": "d1682a23ec2b21b2e8cb19dfb2d34cd1ae27fdce",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "source_file": "Solidity/Precompiles/Bls12381.lean",
+  "source_sha256": "50112ce74787363c94a6e9e34abe406bfaf6452375dd94c173ee2be21b9d4f46",
+  "declarations": [
+    "Solidity.Precompiles.Bls12381.g1Discount_length",
+    "Solidity.Precompiles.Bls12381.g2Discount_length"
+  ],
+  "result": "Exact original types/tables; both proof bodies use allowed kernel-checked decide +kernel. Original proof budgets unchanged.",
+  "artifacts": [
+    {
+      "path": "/workspace/h62-migrate-precompiles/delivery-bls-h70/Bls12381.lean",
+      "sha256": "50112ce74787363c94a6e9e34abe406bfaf6452375dd94c173ee2be21b9d4f46",
+      "bytes": 50798
+    },
+    {
+      "path": "/workspace/h62-migrate-precompiles/delivery-bls-h70/bls-directory-overlay.patch",
+      "sha256": "0ccaa88cd990d2b4f424e4fb4bea1afc1b40ac5326444e9a374c3d3f29e97bde",
+      "bytes": 1949
+    },
+    {
+      "path": "/workspace/h62-migrate-precompiles/delivery-bls-h70/discount-lengths-only.patch",
+      "sha256": "0db132473eb155631f222873507f860a1ecf4c60432acc1566c063dfaef89a6b",
+      "bytes": 564
+    }
+  ],
+  "evidence": {
+    "summary": "/workspace/h62-migrate-precompiles/evidence/authorized-new-final/summary.json",
+    "log": "/workspace/h62-migrate-precompiles/evidence/authorized-new-final/Solidity.Precompiles.Bls12381.log",
+    "module_result": {
+      "module": "Solidity.Precompiles.Bls12381",
+      "command": [
+        "/workspace/h62-migrate-precompiles/toolchains/lean-4.35.0-linux/bin/lean",
+        "-j1",
+        "--tstack=131072",
+        "-o",
+        "/workspace/h62-migrate-precompiles/evidence/authorized-new-final/olean/Solidity/Precompiles/Bls12381.olean",
+        "Solidity/Precompiles/Bls12381.lean"
+      ],
+      "exit": 0,
+      "wall_seconds": 11.871125679000215,
+      "peak_rss_kib": 601608,
+      "resource_stop": null
+    }
+  },
+  "boundaries": [
+    "Module success was measured with the full four-file producer overlay, not by applying either patch alone to requester bytes.",
+    "The minimal lengths patch addresses the reported recursion failures; separate exact-table fixtures passed both official toolchains.",
+    "Requester head13ae4273 bytes and import closure have not been delivered or retested here.",
+    "No full Osaka acceptance: original run_eq_none_iff assertion still fails through external Secp256k1.recover. Root recovery disposition/RSS review/full gates remain pending.",
+    "OBL-SUCCESS, Raw and Bridge requests remain with their named owners. No frozen interface edit or routing acceptance inferred."
+  ],
+  "new_lean_runs": 0,
+  "new_production_edits": 0,
+  "host_handoff": {
+    "expected_bytes": 20624,
+    "reported_sha256": "924ccb11b2d40e45380435753378350a36d68cea907a64648819cb2f52e4da1e",
+    "locally_verified": false,
+    "missing_contents_reconstructed": false
+  }
+}
