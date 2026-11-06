@@ -1,0 +1,7 @@
+/-! RawCheckedForPost.run/correct provide same-context checked Source.forIter
+execution with a present supported boolean condition/post and an actual
+checked body producer. Real fuel induction preserves exact error/control
+frames and Source observations under checked/coherent premises. Initializer
+composition and context-growing initialization are separate obligations.
+Concrete normal/continue/post-timeout/break controls are in
+Solidity.Yul.Checks.RawCheckedForPost. -/
