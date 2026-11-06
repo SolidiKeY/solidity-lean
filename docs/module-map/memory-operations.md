@@ -550,6 +550,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/BudgetedReference.lean` | Division-based runtime budget checking and total complete allocator success/refusal for the unchanged reference constructor. |
 | `Backend/MemoryCopies/BudgetedReferenceControls.lean` | Populated empty/long/reference defaults, oversized unused-child success, overflow/strict-budget refusals and same-heap child contents. |
 | `Backend/MemoryCopies/FixedReferenceDeclareInterface.lean` | Contract only for checked fixed-reference declarations with actual successful TRun/StateRepr and separate machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceDeclare.lean` | Proved actual intrinsic TRun declaration and checked word-machine local binding with full object StateRepr, allocator and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceDeclareControls.lean` | Inhabited declaration/post-state/local-pointer controls with retained shadows, empty/64-element child and machine capacity refusal. |
 | `Backend/MemoryCopies/FixedReferenceLiveInterface.lean` | Signature-only live normalization contract for all fixed primitive-array children, retaining original copy/representation despite storage shadows. |
 | `Backend/MemoryCopies/FixedReferenceLive.lean` | Inhabited intrinsic live normalization preserving exact original storage copy, representation and stripped contents for arbitrary child shadows. |
 | `Backend/MemoryCopies/FixedReferenceLiveControls.lean` | Arbitrary-shadow, zero/long/many controls and represented fixed-parent execution retaining original copied heap and stored shadows. |
