@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[4]
 BASE = 'c6f550e281a7e5affa9a99bc2cdaed556dec00e4'
 BRANCH = 'codex/solidity-h62-6-20261106/migrate-frontend'
 EVIDENCE = Path('/workspace/h62-migrate-frontend-evidence')
-OUT = EVIDENCE / 'retirement-h82'
+OUT = EVIDENCE / 'retirement-h82-final'
 MANDATORY = 'tests/h62/item6/migrate-frontend/retirement'
 
 def git(*args):

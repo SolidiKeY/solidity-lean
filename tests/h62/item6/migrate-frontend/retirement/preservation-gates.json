@@ -27,5 +27,6 @@
       "scope": "Global baseline failure retained; no doc or source implementation undertaken to repair it."
     }
   ],
-  "historical_gate_evidence": "Prior evidence/handoff archive preserved unchanged; old 984/984 build passed, new clean failed Source.Ctor. No full new acceptance or performance pass."
+  "historical_gate_evidence": "Prior evidence/handoff archive preserved unchanged; old 984/984 build passed, new clean failed Source.Ctor. No full new acceptance or performance pass.",
+  "formatting_correction": "First staged check found a trailing blank line in the separate queue transcript. Removed it, preserving all queue content; subsequent full base-to-head diff check passes. The full original assignment transcript bytes are unchanged."
 }
