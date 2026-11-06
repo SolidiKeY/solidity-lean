@@ -1,0 +1,19 @@
+{
+ "Solidity/Yul/Compilation/SourceLoopInitializer.lean:Solidity.Yul.Compilation.SourceLoopInitializer.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopInitializer.lean:Solidity.Yul.Compilation.SourceLoopInitializer.finite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopInitializer.lean:Solidity.Yul.Compilation.SourceLoopInitializer.phase_of_completed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopInitializer.lean:Solidity.Yul.Compilation.SourceLoopInitializer.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

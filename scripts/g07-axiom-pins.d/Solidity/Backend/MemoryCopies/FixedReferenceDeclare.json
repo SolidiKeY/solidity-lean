@@ -1,15 +1,15 @@
 {
- "Solidity/Backend/MemoryCopies/FixedReferenceDeclare.lean:Solidity.Backend.MemoryCopies.fixedReferenceDeclare": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryCopies/FixedReferenceDeclare.lean:Solidity.Backend.MemoryCopies.fixed_reference_declare_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/FixedReferenceDeclare.lean:Solidity.Backend.MemoryCopies.fixed_reference_declare_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceDeclare.lean:Solidity.Backend.MemoryCopies.fixedReferenceDeclare": [
   "Classical.choice",
   "Quot.sound",
   "propext"

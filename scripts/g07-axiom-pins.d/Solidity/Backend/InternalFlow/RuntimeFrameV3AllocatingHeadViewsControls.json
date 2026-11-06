@@ -1,0 +1,34 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.allocation_root": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.compiler_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.conditional_root": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.extra_statement": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.missing_initializer": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.recursive_root": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.unsupported_refused": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.wrong_length": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.wrong_name": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingHeadViews.Controls.wrong_reference": [
+  "propext"
+ ]
+}

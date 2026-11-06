@@ -1,0 +1,17 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean:SolidityBridge.RoadmapV15.P10.address_fetched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean:SolidityBridge.RoadmapV15.P10.caller_fetched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean:SolidityBridge.RoadmapV15.P10.callvalue_fetched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
