@@ -14,3 +14,6 @@ and register there; no original producer ownership is transferred.
 
 The HypothesisDomains audit imports the Lean frontend. Keep it audit-only under
 tests; it is not proposed for intrinsic library registration.
+
+FailurePathsWitnesses also imports the audit elaborator through HypothesisDomains.
+Keep it audit-only under tests; no intrinsic registration is proposed.

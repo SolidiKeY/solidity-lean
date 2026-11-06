@@ -1,9 +1,10 @@
 # H62 item 2: audit-bytecode-selection
 
-Retired by explicit H82 stop-and-handoff; the full four-checkpoint assignment remains unfinished.
+Resumed by the subsequent explicit coordinator instruction; the full four-checkpoint assignment remains unfinished.
 This is additive audit work on the assigned branch, based on
-`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. No original interface, generated
-root, module map, axiom pin, or toolchain was edited. No H55/G49 proof is supplied.
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Audit-owned changes leave original interfaces, generated
+roots, module maps, axiom pins and toolchain untouched; explicitly merged upstream
+changes are separate. No general H55/G49 proof is supplied.
 
 ## State and reproducible commands
 
@@ -453,3 +454,93 @@ goal mutation accepts only complete|blocked, with no pause/get/update endpoint.
 No invalid completion/block transition, reset or new goal is used as a substitute.
 The human's explicit retirement governs: this worker stops after the final saved
 head acknowledgement and will not automatically resume this assignment.
+
+
+## Resumed after upstream merge
+
+The later explicit coordinator instruction authorizes continuation and merging
+origin/master into this original lane. Fetch verified master20e492ee99a3fa8679aa526de0b6e731d85e4134
+contains bd740a170984c03f8fedc92c4de1d5a52174ddef and the frozen original base.
+The merge fast-forwarded cleanly; no default branch, goal, remote publication or
+interface was changed by this action. Historical retirement files remain intact;
+resume-instruction.txt and resume-state.json under the tracked handoff directory
+record the newer authorization and complete updated queue. No new goal was created
+or reset, and get_goal remains unavailable. All four checkpoints remain partial.
+
+Three audit work items follow the authorized merge. The expanded inspector keeps
+all4224constants from190frozen core files, including63proposition-valued constants.
+It omits theorem/proof-valued bodies while preserving every declaration and exact
+type, and keeps available predicate-definition bodies. All3111prior record names
+and raw kernel type hashes remain identical. The old three-module proof-definition
+records also remain present. The expanded data do not infer role satisfaction or
+exclude data helpers from subsequent review. Direct fields remain154, including
+130proof fields. The37Bridge files remain uninspected.
+
+The source scanner now records Unicode codepoint name positions. The reporter
+requires a unique module, normalized user name, original theorem kind and selection
+position match. All1402named core theorem candidates map uniquely; no candidate is
+unmatched or ambiguous. Generated/private-origin records still require review;
+source attribution does not prove hypothesis feasibility. Regressions cover private
+names, generated auxiliaries, ambiguous/duplicate locations, wrong positions and a
+multibyte attribute before the declaration name. Exact signatures and source hashes
+remain anchored to the original frozen base. Predicate bodies and inherited/global
+versus input roles remain separate unfinished classification work.
+
+The same expanded inspection ran in163.195s and164.794s (+0.98%) with byte-identical
+normalized results. This is audit-data reproduction, not a whole-package proof
+performance gate or a comparison to the smaller former census. The authenticated
+import context retains703original source hashes at the frozen base and5audit files
+at commit9a0c1b2bd, with every output rehashed before use. Current master differs
+from that context only at Scalar/PowerBounds, where upstream added Elab.async false.
+No upstream speed/resource change was undone. Results are explicitly frozen-base
+inspection, NOT current-tree source validation. The current-tree/full gates remain
+pending. Lean4.24.0/Lake5.0.0-src+797c613 and bounded settings remain unchanged;
+no migration or RUNTIME_GATE_PASS is claimed.
+
+`tests/h62/item2/audit-bytecode-selection/FailurePathsWitnesses.lean` adds three
+closed audit theorems. Two derive the entire frozen literal_statement and
+encoded_return domains, including concrete selection/encoding, states and fit/room.
+The third ties every source pipeline to the same selected actual program, Emits,
+admitted machine geometry, source revert and checked terminal-slice execution.
+It is neither general compiler totality nor a charged/native/fork theorem or a
+success-side always-revert control. Literal/ValueGate controls remain separate.
+Final per-file checking passed in1.405s, with only propext, Classical.choice and
+Quot.sound. Initial import-search shadowing and a multiline record-update parser
+failure were fixed without statement/budget weakening; failed logs remain off Git.
+No source sorry was introduced or accepted from the failed parser recovery.
+
+The optional failure ledger group adds two exact links while preserving the
+original five and rejecting duplicate targets across groups. Combined coverage is
+6positive domains,1refuted intentional control and4217unlinked RAW records; the raw
+count includes data/helpers and is not an asserted theorem count. Cumulative audit
+proofs are28named theorems plus2closed proof definitions. No new axiom, sorry,
+native_decide, frozen statement, dependent definition, exclusion or budget change.
+The evidence linker continues to trust genuine upstream journals/inventory and is
+not an independent proof authenticator. Independent read-only finder and skeptic
+found no blocking fidelity or scope issue and confirmed the fixture boundaries;
+neither ran Lean or wrote files. Focused regressions pass19tests.
+
+New evidence: expanded-core-gates.json, expanded-core-repeat-gates.json,
+expanded-core-inventory-1.json, expanded-census-acceptance.json,
+failure-linked-check.json, expanded-witness-ledger.json and reviews-resume.md
+under the existing off-Git evidence root. Actual commands, outputs, hashes and
+reproducible generators are preserved. The next independent work includes remaining
+positive witnesses, global/input/inherited obligation classification, Bridge import
+validation and charged/fork acceptance. The existing P6 producer and legacy V1
+owner-ticket waits remain typed dependencies; H82 exact-file permission waits
+remain withdrawn. Continue the SAME VM/branch/original goal in coordinator fresh
+context after these three work items; no replacement goal or completion claim.
+
+
+The post-merge global doc-path gate initially found five pre-existing references
+outside this lane. Under H82, four minimal verification-only file fixes retain a
+duplicate-map test using an existing file and describe two proposed unregistered
+modules with dotted module names and identify an off-Git experiment as an artifact
+filename. No production source, proof, registration,
+owner agreement or proposal-adoption state changes. The affected ABI-world scanner
+regressions and the global doc gate are checked separately; initial failure logs
+are preserved. These fixes do not claim an additional audit/proving scope.
+
+Final global documentation checking passes after the four file fixes. The19audit
+regressions and4affected ABI-world scanner regressions pass. The complete227file
+source census repeats identically and retains all1660original signature hashes.

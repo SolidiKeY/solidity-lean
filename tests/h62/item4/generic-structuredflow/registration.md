@@ -11,14 +11,14 @@ not registered in any Lake library; the patch is an unvalidated proof proposal,
 not a drop-in migration. `git apply --check` proves textual applicability only.
 
 Suggested owner integration (requires exact-file agreement before edits): move
-the helper to the new area module `Solidity/Backend/StructuredFlow/GenericMapped.lean`,
+the helper to the new area module `Solidity.Backend.StructuredFlow.GenericMapped`,
 retain axiom prints in a separate test, change the proposal import to
 `Solidity.Backend.StructuredFlow.GenericMapped`, register through the repository
 coord-tools, and supply this area module-map fragment:
 
 | Module | Purpose |
 |---|---|
-| `Backend/StructuredFlow/GenericMapped.lean` | Intrinsic typed mapped Boolean fixture and universal actual-compiler execution lemma; no new Source semantics. |
+| `Solidity.Backend.StructuredFlow.GenericMapped` | Intrinsic typed mapped Boolean fixture and universal actual-compiler execution lemma; no new Source semantics. |
 
 The exact original-file relay request is limited to these six paths:
 
