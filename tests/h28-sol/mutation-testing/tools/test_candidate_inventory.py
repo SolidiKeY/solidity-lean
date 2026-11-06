@@ -59,7 +59,7 @@ class CandidateInventoryControls(unittest.TestCase):
         self.assertIn("Loc.isTarget", {r["id"] for r in data["declarations"]})
         self.assertIn("CallbackTaclet.toTaclet", {r["id"] for r in data["declarations"]})
         self.assertEqual(len(data["fixtures"]), 30)
-        self.assertEqual(len(data["frozen_manifests"]), 9)
+        self.assertEqual(len(data["frozen_manifests"]), 10)
         self.assertEqual(len(data["case_variants"]), 17)
         self.assertEqual(len(data["binop_acceptance"]), 69)
         self.assertTrue(all(r["clauses"] for r in data["declarations"]))
