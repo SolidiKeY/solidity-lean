@@ -2418,3 +2418,11 @@ control now checks the root constructors through the G0 twin
 redundant but harmless, and are kept as stated: the `(` head of
 `emitS`/`revertS` follows from `ArgsAtom`, and `isPathExpr` follows from
 `PathAtom`.
+
+Final gate on `6bcbf5d7`. `./run-lean.sh`: "Build completed successfully
+(5831 jobs)". The new modules were replayed from artifacts whose Lake traces
+match the current sources. The script exits 1 only in the same solkey step,
+which predates this lane (`167 mismatch(es)`). `check-orphans`:
+5815 reachable, 0 orphaned. `check-trust`: 0 findings. Axiom pins: no lane
+entries. Doc paths: the same reference that predates this lane, and nothing
+new.
