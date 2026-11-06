@@ -141,26 +141,32 @@ H68 asks V13 for `p1_frame_bridge` in its P1-REVERT variant: a
 `plan.code` session, with `Local` the original `PendingBareRevertProducer`
 fields (`RevertingEntry`, `BareRevertClaim`).
 
-It cannot be delivered without inventing endpoints, which H68 forbids:
+Status after the G49 merge (origin/master `706e36825`, 2026-11-06):
 
-1. `Solidity.Roadmap.G49Final.PassCorrect`/`Behaviour` exist only on
-   `origin/cloud/move6-20261106/g49-base` (head `191bce52`), not on master;
-   `BridgeGoal`/`p1_frame_bridge` are H68 schema names in that branch's doc,
-   not Lean declarations;
-   importing it would make this lane depend on an unmerged lane.
-2. No canonical G01 `Lang Event Outcome` exists for intrinsic call sessions or
-   emitted-code sessions; the g49 document itself records that
-   `typedRunPrefixes` is not one. Any `A`/`B` built here would be a new
-   language chosen by this lane — an "arbitrary Behaviour", explicitly
-   rejected by the request.
-3. `BareRevertClaim` covers bare revert only; PassCorrect's `need_ok`/`back`
-   need all outcomes and prefixes, i.e. the success transport
-   (`ReturnClaim`) and panic/exhaustion/divergence producers that are absent
-   for the failure-only producer.
+1. **Resolved.** `Solidity.Roadmap.G49Final.PassCorrect`, `Behaviour`,
+   `BridgeGoal` (`G49Final/BridgeGoal.lean`), `PassChain` and `FoldedPublic`
+   are on master; this lane merged them.
+2. **Still missing: the canonical endpoints.** `BridgeGoal A B ps pt beta nu
+   Local` needs the canonical `Lang Event Outcome` for the source call session
+   (`A`) and for the emitted `plan.code` session (`B`). Neither exists on
+   master, nor on V12's latest P1 branch (`cloud/move5-20261106/v12-p1`, head
+   `207bb483`; its `Lang Event Outcome` occurrences are the generic G01
+   contracts, Source sessions and Yul composition, none a P1 call-session
+   language). The coordinator's instruction is not to define a second one but
+   to use V12's; any `A`/`B` built here would be an "arbitrary Behaviour",
+   which H68 rejects.
+3. **Still missing: all-outcome transports.** `PendingBareRevertProducer`
+   supplies only `RevertingEntry` and `BareRevertClaim`; `PassCorrect.need_ok`
+   and `back` need every outcome and prefix (success via `ReturnClaim`,
+   panic, exhaustion, divergence), which are V12/MRS/V17 producers.
 
-No frozen statement was changed and no premise was added. Owners of the
-missing pieces: G49 (merge of PassCorrect), the G01/P1 canonical intrinsic
-session language, and the P1 success producers (V12/MRS/V17).
+So the P1-REVERT bridge stays pending on V12's canonical P1 languages (and the
+success/other-outcome producers). Once V12 publishes `A_frame`/`B_frame`
+with their programs, `beta` and `nu`, this lane's delivery is the factory
+`p1_revert_bridge : (x : NativeContext_frame) → Approved_frame x →
+BridgeGoal (A_frame x) (B_frame x) (ps x) (pt x) (beta x) (nu x) (Local x)`
+with `Local` the original failure-only fields. No frozen statement was changed
+and no premise was added.
 
 ## Remaining V13 queue
 
