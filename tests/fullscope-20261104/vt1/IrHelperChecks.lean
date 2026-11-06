@@ -1,4 +1,5 @@
 import Solidity.SolcValidation.IrHelperSource
+import Solidity.SolcValidation.IrPushSim
 open Solidity Solidity.SolcValidation Solidity.SolcValidation.IrSyntax
 
 /-! Executable cross-check of all four imported helpers against the source
@@ -165,3 +166,28 @@ in the saved `Census` IR. -/
     n := n + 1
   unless n == 6 do throw (IO.userError s!"expected 6 functions, found {n}")
   IO.println s!"IR_EXP_PROVENANCE_PASS {n} whole functions verbatim from the saved IR"
+
+/-! Provenance of `abiHelpersText` and `pushHelpersText`: each is its extracted
+fixture, and each of its functions (cut by name) is verbatim in the saved
+`Census` IR. -/
+def checkGroup (label file : String) (text : String) (sigs : List FnSig) : IO Unit := do
+  let dir := "tests/fullscope-20261104/vt1/fixtures"
+  unless text == (← IO.FS.readFile s!"{dir}/{file}") do
+    throw (IO.userError s!"{label} text differs from fixtures/{file}")
+  let census ← IO.FS.readFile s!"{dir}/Census.unoptimized.yul"
+  let names := sigs.map (·.name)
+  let mut n := 0
+  for (name, i) in names.zipIdx do
+    let start := "function " ++ name ++ "("
+    let after := ((text.splitOn start).drop 1).headD ""
+    let upto := match names[i + 1]? with
+      | some next => ((after.splitOn ("function " ++ next ++ "(")).headD "")
+      | none => after.dropRight "    }\n}\n".length
+    let whole := start ++ upto.dropRightWhile (· != '}')
+    unless (census.splitOn whole).length > 1 do
+      throw (IO.userError s!"{label}: not a verbatim fixture substring: {whole.take 60}")
+    n := n + 1
+  IO.println s!"IR_{label}_PROVENANCE_PASS {n} whole functions verbatim from the saved IR"
+
+#eval checkGroup "ABI" "abi-helpers.yul" abiHelpersText abiSigs
+#eval checkGroup "PUSH" "push-helpers.yul" pushHelpersText pushSigs
