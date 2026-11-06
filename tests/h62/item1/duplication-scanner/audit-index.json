@@ -1,0 +1,119 @@
+{
+  "audit_sha256": "31ab16906906a9b22fd28700aacc72d2ee0ffe81cea723ae209eb28e5299286a",
+  "items": [
+    {
+      "id": 1,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol: one shared Yul/Compilation `Artifact` with `source_to_model`/`model_to_source` (now restated in 10 families: LetBranch, Switch, ZeroControl, MultiSwitchCompletion, SwitchCompletion, LetControl, LetScope, LetSequence, ScopedFor, ScopedControl, StructuredSequence; 38 Artifact/Compiled defs in 23 files) + shared CompletionControls header.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 2,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: shared support files for copied private helpers (267 names, 1,282 copies): `extract_failure` (V08 CreationSuccess/Handler/LibraryHandler/Prefix Controls), `run_bind` (Readonly Capture*, EnvironmentCredit), `fitting` (8× StorageOps), `capacity_exact` (4× Yul/Compilation); fixtures `uintSyntax` 22×, `initial` 28×, `frame` 21×.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 3,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol (before G49 composes them): one `FrameAgreement` (V08 ConstructorScalarTransport.lean:34 Nat/address vs LibraryFrameTransport.lean:31 Int/caller) and one `OriginWitness` (V08 CreationPremises.lean:35 params, LibraryPremises.lean:54 ∃, V07 P8Bindings.lean:33 accepted_profile); glob/program agreement one term vs three fields (LibraryPremises 52–54); one shared \"missing producer\" obligation type (ssNew_body, g42_body). Consume P8a.SourceOrigins, do not change it.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 4,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: parametrise StorageOps near-copies by element type (Source{Bool,Int}ArrayDeleteNumericControls; Source{Bool,Signed,}StorageCopyTargetControls).",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 5,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: shared Source fixture module per V08/G19/V07 family (execS/evalE frame-static statements 18–22×).",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 6,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: delete no-op guard `first | (simp only;done) | decide | omega | rfl | skip` (321× in 168 files; ends in skip).",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 7,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: commit the generator + reproduction check for the 6,903 vector theorems (Yul/Checks Shifts Part00–03, Arithmetic Part00–02, Bytes, Powers).",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 8,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol, needs P8/P8b pause: merge `Producer` of P8/FrozenInterface.lean:96 and P8b/Frozen.lean:32.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 9,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol/Terra: parametrise twin files — Passes/Assignment{Addition,Multiplication,Subtraction}{Pass,Controls}; PrimitivePackets/{Checked,SignedChecked}{Add,Sub,Mul}/{Agreement,Target,Controls} (`exact_panic_bytes`/`panic_not_truncated` 5×); InternalFlow RuntimeFrameV3OrderedEffectful{Scalar,Storage} (90%), RecursiveScopeCompiler/ScalarSourceCompiler, EffectfulRuntime/EffectfulStorageRuntime, AllocatingArguments/MutatingCaller; StructuredFlow {For,While,DoWhile}{Continue,Return,Break}Compiler*; MemoryCopies path-copy controls.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 10,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol: collapse versioned interface pairs to one statement + conversion: Selection Interface/InterfaceV2 `FrameCertificate`, Premises/PremisesV2, MemoryCopies Interface/InterfaceV2 `StorageWordCertificate`, Passes BoundaryLink/MappedBoundaryLink, FixedPathRoom/MemoryPathRoom; one stack-room predicate (109 ad-hoc `≤ 1024`); one capacity guard (4 `*CapacityGuard`).",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 11,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: shared Evm/Backend lemma file — cons-revert (10×, MemoryCompile.lean:863 …), StmtFrag/ProgFrag.pushes_zero (7×), allocationCostProg_{zero,cons}, `sourceReverted` (15× in *Examples), HRef split (5×), `Loc.data base i ≠ base` (4×); shared HeapRepr/AllocatorRepr fixtures (8× in MemoryCopies controls).",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 12,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol: one word type onto G01 `Roadmap.Word` (now also Fin Evm.W, Semantics.Word, BitVec 256, Fin (256^32), Evm.Word); one byte `Memory` (Environment/ByteConstants.lean:13, Failure/Slice.lean:15), one `WordStore`; `selectorWord`/`resultWord` 4× each. APPROVED (user 2026-11-06), short P1-consumer pause: merge P1 V3 AdmissionAgreement/FamilyAdmissionAgreement.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 13,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol: merge the two type inferencers — Source/Infer.lean (Option, Typed.inferN :154) and Frontend/Static/Infer.lean (list Res + InferComplete); copied helpers isMapping/payableArg/convLoc.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 14,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol: one Source↔model value relation — PrimitiveRel (Source/Agreement/PrimitiveTypes.lean:24), IntValueRel (Lowering/V07/Scalar.lean:33), ValueRel (Backend/Scalar/Typed.lean:20); LocalsRel (Source/Agreement/Locals.lean:21) vs ContextMap.Related (V07/ContextMap.lean:87); 10 controls with private BindingRel. Place beside P12NextInterface.ValueRelation.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 15,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Sol: fold non-Roadmap outcome types (Backend/Creation/Execution.lean:22, StaticInvocation.Outcome) into Roadmap.Outcome with converters in one place. APPROVED (user 2026-11-06): unify all outcome and word types onto Roadmap.Outcome/Roadmap.Word, changing the G01 types where needed (43 importers; pause them).",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 16,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: per-case packets to data table + one lemma (StatementGrammarH28 FixtureControls 45 one-decide files, NumericLiteralProofs WordTable 30 parts; duplicate requireTyped fixture); parametrise Yul Raw* (102 files) by element type.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 17,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Terra: split conflict hotspots — TrustAudit.lean (41 edits) into per-lane fragments; generate Yul/Interfaces/P16.lean like the roots; split scripts/g07-axiom-pins.json per lane.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 18,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "Build risk: TestSuite Derived15/17/20/21 600–720 s, OpenLoops ~586 s, Decision* near/over 300 s; unmeasured kernel-decide-heavy controls (StorageOps/TargetNestedArrayTransportControls 3977 lines/522 decide, MemoryOps/SourceReferenceReadControls, PhysicalStructChildControls, P10 InstructionSelectionRefusal) are outside the 300 s gate — APPROVED: Terra extends the module-time gate to all modules, measures on the Codex gate VM, splits modules over 300 s.",
+      "unowned_mechanical_opportunity": "not-established"
+    },
+    {
+      "id": 19,
+      "ownership": "requires-live-coordinator-verification",
+      "source_text": "APPROVED (user 2026-11-06), short P10/V15 pause: retire P10 Interface V1 (Interface/FrozenInterface/IndexedRefusalInterfaceV1).",
+      "unowned_mechanical_opportunity": "not-established"
+    }
+  ]
+}
