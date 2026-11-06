@@ -73,3 +73,36 @@ fixture proofs, not integration, closed-state existence, external tests, or
 before/after performance evidence. The owner-delivery routing now identifies
 `claudecloud/move5-20261106/v14-g43` for the seven EVM consumers and V10 for
 the staged StorageOps consumers; delivery is not owner agreement.
+
+
+## Fresh-thread coordinator handoff
+
+Four backfill items are committed after base: census `67374c2d0`, source case
+accounting `752b1cda0`, isolated proofs `224fc8a75`, and boundary cases
+`62678f7d7`. Continue in the same VM environment
+`ccarenv_b64_Y2NhcmVudl9jYThlOGFmZmQ3OWM4MTkxOGM0YjllODhhNDY4OGU1OA`,
+checkout `/workspace/evm-lemmas`, branch
+`codex/solidity-h62-1-20261106/evm-lemmas`, base
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The original persistent goal
+concerns the whole frozen H62/H63 assignment; do not create or reset it. Its
+`get_goal` interface was unavailable in this worker. A previous `stop_goal`
+reported blocked; a later invocation lacked trusted source-turn context, so no
+new transition should be inferred from this handoff. The coordinator must
+resume the original goal and inspect its actual state.
+
+H70 latest routing: V10 received the StorageOps request; delivery to current
+`claudecloud/move5-20261106/v14-g43` is pending for seven EVM consumers.
+Routing is not agreement. Exact paths and symbolic/word distinctions are in
+`tests/h62/item1/evm-lemmas/case-accounting.md`. Await both owners before
+editing their originals. The supplemental five-file lease remains as supplied;
+the H55 EVM Examples and MemoryCopies Controls exclusions remain binding.
+All four production extraction checkpoints, registration, affected/final
+validation, acceptance, independent post-extraction reviews, and same-resource
+before/after timings remain open; stop for a slowdown over 10%. No production
+proof or interface was changed. The isolated fixture evidence and SHA256
+manifest are at `/workspace/h62-evm-lemmas-h70-boundaries/`; its patch ends at
+`62678f7d7839f515b152e462386bb51bd2d2e961`, before this handoff-only commit.
+Lean 4.24.0 / Lake 5.0.0-src+797c613 were used for this non-migration lane.
+The migration-only official 4.35 pin is separate. Use the writer lock, serial
+Lean `-j1`, no systemd-run, no swap and the stated 4 GiB reserve. A missing
+cache object issue and repair are recorded above. No merge, push or publish.
