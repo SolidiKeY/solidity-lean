@@ -146,4 +146,18 @@ example : expressionPolicy .C (call "gas" []) = some (.error (.compilerDependent
 example : expressionPolicy .A (call "mload" [lit 0]) = some (.error (.needsTier .B)) := rfl
 example : expressionPolicy .A (call "add" [lit 257, lit 1]) = some (.ok ()) := rfl
 
+/- Packed results retain declaration growth, final bindings and scope closure. -/
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl (zero "x")).map (·.1) = some 1
+#guard (checkWalk ClosedSyntax.rootEnv ClosedSyntax.rootControl (list [zero "x",zero "y"])).map (·.1) = some 2
+#guard (checkWalk ClosedSyntax.rootEnv ClosedSyntax.rootControl (list [zero "x",zero "y"])).map
+  (fun result => result.2.1.locals.map (·.1)) = some ["y","x"]
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl (block [zero "x"])).map (·.1) = some 0
+
+/-- info: 'Solidity.Yul.ScopedBlockTyping.StatementD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.StatementD.result_unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.WalkD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.WalkD.result_unique
+
 end Solidity.Yul.Checks.BlockTyping
