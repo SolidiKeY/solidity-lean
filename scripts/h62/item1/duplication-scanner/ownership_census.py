@@ -9,6 +9,7 @@ import argparse
 from collections import Counter
 import fnmatch
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -56,6 +57,16 @@ def load_authority(receipt):
         if not re.fullmatch(r"[0-9a-f]{40}",result["base"]):raise ValueError("member base")
         members[lane]={"head":item["head"],"base":result["base"]}
     if len(members)!=5 or scope["write_namespace"]!="live":raise ValueError("wrong cleanup allocation")
+    foreign=[]
+    for chain,allocation in manifest["chains"].items():
+        if chain=="cleanup":continue
+        name=allocation["assignment_directory"]+"/scope.json"
+        other=json.loads(load(name))
+        if other["write_namespace"]!="live":continue
+        for pattern in other["exclusive_files"]:
+            foreign.append({"chain":chain,"pattern":pattern,"scope_file":name,
+                            "scope_sha256":manifest["files"][name]})
+    scope["_foreign_live_allocations"]=foreign
     return scope,members
 
 
@@ -63,10 +74,14 @@ def in_new_scope(path,scope):
     return any(fnmatch.fnmatchcase(path,p) for p in scope["new_file_scope"])
 
 
-def classify(path,clean,scope,claimants,provenance_bound=True,tracked=True):
+def classify(path,clean,scope,claimants,provenance_bound=True,tracked=True,foreign=False):
     if Path(path).is_absolute() or ".." in Path(path).parts:raise ValueError("unsafe census path")
     if not tracked:return {"allocation_status":"untracked-or-ignored-owner-review","owner":"unknown"}
     if not clean:return {"allocation_status":"working-tree-drift-owner-review","owner":"unknown"}
+    if foreign:
+        if path in scope["exclusive_files"] or (in_new_scope(path,scope) and claimants and provenance_bound):
+            return {"allocation_status":"conflicting-authenticated-allocations-owner-review","owner":"unknown"}
+        return {"allocation_status":"foreign-chain-allocation-read-only","owner":"unknown"}
     if len(claimants)>1:return {"allocation_status":"ambiguous-member-provenance","owner":"unknown"}
     if path in scope["exclusive_files"]:
         return {"allocation_status":"authenticated-cleanup-exclusive","owner":SELF}
@@ -94,6 +109,18 @@ def tree_blobs(root,head):
 def blob_provenance(path,blob,claims,member_blobs,checkpoint_blobs):
     return bool(claims) and (checkpoint_blobs.get(path)==blob or
            any(member_blobs.get(lane,{}).get(path)==blob for lane in claims))
+
+
+def scanner_inputs(root):
+    """Guard nested-repository omission by using the scanner's own selection rules."""
+    path=Path(__file__).with_name("scan.py")
+    spec=importlib.util.spec_from_file_location("ownership_selector",path)
+    selector=importlib.util.module_from_spec(spec);spec.loader.exec_module(selector)
+    errors=[];paths=set()
+    for pattern in ("Solidity/**/*.lean","Bridge/**/*.lean","tests/**/*.lean","*.lean"):
+        for file in selector.selected_paths(root,pattern,errors):
+            if file.suffix==".lean":paths.add(file.relative_to(root).as_posix())
+    return paths,errors
 
 
 def census(root,receipt):
@@ -129,6 +156,13 @@ def census(root,receipt):
             lean_input=path.endswith(".lean") and (path.startswith(("Solidity/","Bridge/","tests/")) or "/" not in path)
             if lean_input or in_new_scope(path,scope) or path in scope["exclusive_files"]:
                 entries.setdefault(path,(None,None,False))
+    selected,selection_errors=scanner_inputs(root)
+    for path in selected:entries.setdefault(path,(None,None,False))
+    foreign_exact={};foreign_patterns=[]
+    for hint in scope["_foreign_live_allocations"]:
+        pattern=hint["pattern"]
+        if any(c in pattern for c in "*?["):foreign_patterns.append(hint)
+        else:foreign_exact.setdefault(pattern,[]).append(hint)
     rows=[]
     for path,(mode,blob,tracked) in sorted(entries.items()):
         if not (path.endswith(".lean") or in_new_scope(path,scope) or path in scope["exclusive_files"]):continue
@@ -146,10 +180,15 @@ def census(root,receipt):
         except (OSError,ValueError) as exc:row["source_error"]=str(exc)
         bound=blob_provenance(path,blob,row["member_provenance"],member_blobs,checkpoint_blobs)
         row["member_or_authenticated_checkpoint_blob_matches"]=bound
-        row.update(classify(path,clean,scope,row["member_provenance"],bound,tracked));rows.append(row)
+        hints=foreign_exact.get(path,[])+[r for r in foreign_patterns if fnmatch.fnmatchcase(path,r["pattern"])]
+        row["foreign_allocation_hints"]=hints
+        row.update(classify(path,clean,scope,row["member_provenance"],bound,tracked,bool(hints)));rows.append(row)
     expected=set(scope["exclusive_files"])
     return {"schema":1,"head":head,"receipt_manifest_sha256":MANIFEST_SHA256,"trusted_cleanup_checkpoint":TRUSTED_CLEANUP_HEAD,"rows":rows,
             "counts":dict(Counter(r["allocation_status"] for r in rows)),
+            "scanner_input_count":len(selected),"selection_errors":selection_errors,
+            "foreign_hint_boundary":"Authenticated H82b live-chain allocation exclusions only, not current producer routing, scope transfer or an unowned grant; migration-only allocations are ignored.",
+            "selector_sha256":hashlib.sha256(Path(__file__).with_name("scan.py").read_bytes()).hexdigest(),
             "missing_member_git_provenance":missing,
             "absent_exclusive_files":sorted(expected-{r["path"] for r in rows}),
             "checkout_status":git(root,"status","--porcelain").decode(),
@@ -160,8 +199,8 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,required=True);p.add_argument("--receipt",type=Path,required=True);p.add_argument("--output",type=Path,required=True)
     a=p.parse_args();result=census(a.root.resolve(),a.receipt.resolve());a.output.write_text(json.dumps(result,indent=2)+"\n")
-    print(json.dumps({"rows":len(result["rows"]),"counts":result["counts"],"missing_member_git_provenance":result["missing_member_git_provenance"],"unowned_opportunities":0}))
-    return 1 if any("source_error" in r or r["allocation_status"]=="working-tree-drift-owner-review" for r in result["rows"]) else 0
+    print(json.dumps({"rows":len(result["rows"]),"counts":result["counts"],"missing_member_git_provenance":result["missing_member_git_provenance"],"unowned_opportunities_established":0}))
+    return 1 if result["selection_errors"] or any("source_error" in r or r["allocation_status"]=="working-tree-drift-owner-review" for r in result["rows"]) else 0
 
 
 if __name__=="__main__":raise SystemExit(main())

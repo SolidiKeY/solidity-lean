@@ -70,5 +70,26 @@ class OwnershipControls(unittest.TestCase):
         self.assertEqual(result["owner"],"unknown")
         self.assertEqual(result["allocation_status"],"untracked-or-ignored-owner-review")
 
+    def test_nested_git_sources_are_not_silently_omitted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            subprocess.run(["git","init","-q",str(root)],check=True)
+            nested=root/"tests/nested";nested.mkdir(parents=True)
+            subprocess.run(["git","init","-q",str(nested)],check=True)
+            (nested/"Fixture.lean").write_text("theorem fixture : True := by trivial\n")
+            git_other=subprocess.check_output(["git","ls-files","--others","--exclude-standard"],cwd=root).decode()
+            self.assertNotIn("Fixture.lean",git_other)
+            selected,errors=owner.scanner_inputs(root)
+            self.assertIn("tests/nested/Fixture.lean",selected)
+            self.assertEqual(errors,[])
+
+    def test_foreign_allocation_hints_never_transfer_ownership(self):
+        outside=owner.classify("Solidity/Source/Producer.lean",True,self.scope,["member"],True,True,True)
+        self.assertEqual(outside["allocation_status"],"foreign-chain-allocation-read-only")
+        self.assertEqual(outside["owner"],"unknown")
+        conflicting=owner.classify("tools/exclusive.py",True,self.scope,[],True,True,True)
+        self.assertEqual(conflicting["allocation_status"],"conflicting-authenticated-allocations-owner-review")
+        self.assertEqual(conflicting["owner"],"unknown")
+
 
 if __name__=="__main__":unittest.main()
