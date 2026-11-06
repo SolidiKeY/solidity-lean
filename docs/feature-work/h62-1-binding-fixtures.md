@@ -97,3 +97,18 @@ proof, resource, timing, acceptance, and full validation gates remain pending.
 The coordinator has stated V07 is Claude-owned and that no original-file
 permission is inferred; any required exact-file request must go through the
 coordinator, not a VM installation of `relay.sh`.
+
+## H71 census controls
+
+Run `PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item1/binding-fixtures/test_reconciliation.py`.
+The controls compare the 17 named relation paths with the separate lexical
+census, check the 18-file/105-declaration inventory and all seven alias texts,
+and exercise a synthetic reachable cycle, a missing path, an unrelated path,
+and a block-comment line that the scanner intentionally misreads as an import.
+All three controls passed. These are external Python checks of census behavior,
+not Lean proofs, a completeness proof of the lexer, or independent reviews.
+A separate scan of the 191 files in the current lexical closure found no
+missing `Solidity.*` module paths and no `public import`, `private import`, or
+`import` followed by a tab. This check does not rule out other syntax or a
+comment that resembles an import. V07 exact-file coordination is awaited from
+its current Claude owner; the host-only relay is not installed or invoked here.
