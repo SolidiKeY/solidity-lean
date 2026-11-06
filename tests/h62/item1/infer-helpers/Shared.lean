@@ -3,8 +3,8 @@ import Solidity.Source.Types
 /-!
 Candidate shared definitions for the mechanically copied inference helpers.
 This additive, unregistered module changes neither existing inferencer. Its
-location and namespace are provisional pending owner review. It has not been
-Lean checked and is not evidence of production compatibility.
+location and namespace are provisional pending owner review. A per-file
+Lean check does not establish production compatibility or full validation.
 -/
 
 namespace Solidity.H62.InferHelpers.Shared
@@ -40,3 +40,7 @@ theorem convLoc_rule (σ : STy) :
     convLoc σ = (match σ with | .bytes l => l | .string l => l | _ => .memory) := rfl
 
 end Solidity.H62.InferHelpers.Shared
+
+#print axioms Solidity.H62.InferHelpers.Shared.isMapping_rule
+#print axioms Solidity.H62.InferHelpers.Shared.payableArg_rule
+#print axioms Solidity.H62.InferHelpers.Shared.convLoc_rule
