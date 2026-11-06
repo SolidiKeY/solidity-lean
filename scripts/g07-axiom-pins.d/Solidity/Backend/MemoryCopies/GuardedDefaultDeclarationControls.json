@@ -1,0 +1,62 @@
+{
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.adapter_is_not_selected_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.empty_dynamic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.full_declaration_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.full_new_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.long_fixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.nested_two_three": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.saturated_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.selected_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.token_default": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.unsupported_reference_field": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean:Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.wrong_binding_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
