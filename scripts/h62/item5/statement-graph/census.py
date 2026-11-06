@@ -53,6 +53,19 @@ def main():
         if args.hash_owner_overlay:
             overlay_source,overlay = prepare(evidence/'owner-overlay-source')
             (evidence/'owner-overlay.json').write_text(json.dumps(overlay,indent=2)+'\n')
+        original_hashes = {str(p):sha(ROOT/p) for p in modules+[driver]}
+        validation_hashes = dict(original_hashes)
+        if overlay is not None:
+            validation_hashes[str(REL_PATH)] = overlay['targetSha256']
+        import hashlib
+        input_material = dict(tree=subprocess.check_output(['git','rev-parse','HEAD^{tree}'],cwd=ROOT,text=True).strip(),
+                              sources=validation_hashes,pinSha256=sha(args.pin),
+                              patchSha256=overlay['patchSha256'] if overlay else None)
+        input_digest = hashlib.sha256(json.dumps(input_material,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        inputs = dict(base=BASE,head=head,tree=input_material['tree'],area=args.area,leanVersion=version.strip(),
+                      pinSha256=sha(args.pin),archiveSha256=sha(args.archive),ownerOverlay=overlay,
+                      sourceSha256=original_hashes,validationSourceSha256=validation_hashes,validationInputSha256=input_digest)
+        (evidence/'inputs.json').write_text(json.dumps(inputs,sort_keys=True,indent=2)+'\n')
         logs = []
         def run(src,output=None,package_root=None):
             assert available() >= 4*1024**3, '4GiB reserve missing'
@@ -78,8 +91,13 @@ def main():
                     os.killpg(proc.pid,signal.SIGKILL)
                     proc.wait()
                     raise
-            logs.append(dict(command=cmd,exit=proc.returncode,seconds=time.monotonic()-started,log=str(logfile)))
+            originals_match = all(sha(ROOT/p)==h for p,h in original_hashes.items())
+            same_head = head == subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+            clean = not subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],cwd=ROOT)
+            logs.append(dict(command=cmd,exit=proc.returncode,seconds=time.monotonic()-started,log=str(logfile),
+                             originalSourcesUnchanged=originals_match,headUnchanged=same_head,checkoutClean=clean))
             (evidence/'commands.json').write_text(json.dumps(logs,indent=2)+'\n')
+            assert originals_match and same_head and clean, 'source checkout changed during validation'
             assert proc.returncode == 0, logs[-1]
         for src in modules:
             if overlay_source is not None and src == REL_PATH:

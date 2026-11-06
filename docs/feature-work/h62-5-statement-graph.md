@@ -281,3 +281,26 @@ inside-checkout and unexpected-copy preservation controls are included.
 `relay.sh` is host-only; no local relay script or original-file permission is
 inferred from routing. G49 full production inventory remains pending coordinator
 relay. Metadata and census records remain separate from discharged proofs.
+
+### H70 boundary after exact overlay validation
+
+The exact copied CollisionBound module compiled on pinned 4.35 with exit 0;
+its original checkout blob remains `b54c93a5b24340a19160c1fb378d057ccee60f84`.
+The next unchanged module, `Solidity/Roadmap/Contracts.lean`, failed at 1104:
+its `PublicCorrectness.transfer` axiom-message guard expects no axioms but reports
+`propext`, `Classical.choice`, `Quot.sound` under 4.35. This is an owner/trust-policy
+boundary, not permission to update a pin or expected guard message. No Contracts
+proof, statement, guard or trust policy has been changed. The full Roadmap census
+is still unsuccessful; no production census or compatibility pass is claimed.
+
+`census.py` now saves input provenance before compilation, including original and
+validation source hashes, owner overlay and combined input digest, so failed gates
+are bound to their precise inputs too. Each completed compiler invocation records
+original-source, HEAD and checkout-cleanliness checks. The skeptic's destination
+finding was fixed by rejecting every registered worktree and any other Git checkout
+before writes, with a preserved-original-checkout negative control. Both read-only
+reviewers confirmed the fix without Lean/server use. The exact decoded patch is
+stored in JSON to preserve unified-diff spaces while passing whitespace checks.
+Q-H70-CONTRACTS requests an owner-reviewed fix preserving statements/trust policy,
+or continued waiting for the fleet/G49 migration. Host-only routing creates no
+local file-edit authorization. G49 producer inventory remains pending input.
