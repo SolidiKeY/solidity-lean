@@ -126,9 +126,25 @@ theorem wrong_reference_no_realization :
     ¬ Nonempty (SourceRealization alwaysSucceeds planOrigins planFailures) := by
   rintro ⟨R⟩
   have h := (R.exact (.fail [7]) quietEnv ⟨0, quietPlan⟩ _).2 rfl
-  have hf := congrArg Prefix.final h
-  simp only [planSource, planLang, Toy.run, PlanBound.exhausted, quietPlan,
-    Option.isSome_none, Option.some.injEq, reduceCtorEq] at hf
+  have h3 : (some (Outcome.revert [7]) : Option Outcome) = some (.success [1]) :=
+    congrArg Prefix.final h
+  cases h3
+
+/-- A reference that ignores the plan (always the unexhausted run) admits no
+realization: `exact` is checked at the failing plan. -/
+def ignoresPlan : OperationalReference where
+  Resource := PlanBound
+  points := PlanBound.plan
+  Executes := fun sp _ _ out => Toy.run (decode (bytesOf sp.2.main)) false = out
+
+theorem plan_ignoring_reference_no_realization :
+    ¬ Nonempty (SourceRealization ignoresPlan planOrigins planFailures) := by
+  rintro ⟨R⟩
+  have h1 := (R.exact (.quiet [1]) quietEnv ⟨0, quietPlan⟩ _).2 rfl
+  have h2 := (R.exact (.quiet [1]) quietEnv ⟨0, failingPlan⟩ _).2 rfl
+  have h3 : (some (Outcome.success [1]) : Option Outcome) = some (.revert []) :=
+    congrArg Prefix.final (h1.symm.trans h2)
+  cases h3
 
 /-- A source that parses nothing is vacuous, so it admits no Producer. -/
 def emptyPlanSource : SourceSpec := { planSource with Parses := fun _ _ => False }
@@ -157,5 +173,7 @@ theorem bad_emit_no_certificate :
 #guard_msgs (whitespace := lax) in #print axioms toySource_no_producer
 /-- info: 'Solidity.Lowering.P8b.MergedControls.wrong_reference_no_realization' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms wrong_reference_no_realization
+/-- info: 'Solidity.Lowering.P8b.MergedControls.plan_ignoring_reference_no_realization' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms plan_ignoring_reference_no_realization
 
 end Solidity.Lowering.P8b.MergedControls

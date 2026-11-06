@@ -1,6 +1,7 @@
 import Solidity.Lowering.P8.FrozenInterface
 import Solidity.Lowering.P8b.Domain
 import Solidity.Roadmap.Controls
+import Solidity.Source.FailureResources
 
 /-!
 # An inhabited frozen P8a `Producer` (H60)
@@ -25,10 +26,16 @@ source with the real P8b `assemble`/`pass`/`dom`/`agrees` and a G01 `Cert`.
 
 Scope (not overstated). The programs are G07's toy programs and the
 reference is a MODEL reference: `planReference.Executes` decodes the toy
-program from the deployed contract name of an actual intrinsic
-`Source.SrcProg` (over the empty environment) and runs the G07 toy machine
-under the plan. It is defined below independently of the producer's fields,
-but it is not `Source.sessionAt`. This is a satisfiability witness for the
+program from the deployed contract name of a `Source.SrcProg` whose program
+is EMPTY (no declarations, no contracts; the name denotes no contract) and
+runs the G07 toy machine under the plan, ignoring the environment and the
+horizon. It is defined below from `decode` alone, but it is not
+`Source.sessionAt`. The origins coincide with the realization's program map
+(`meaning_origin` is `rfl`), so they are not independent of the producer.
+The root model has one execution root per program and features listed per
+toy program, and the toy profile is everything, so extraction is exact by
+construction rather than evidence of a real feature scan. Resources are
+ordered only within one plan, which makes consistency immediate. This is a satisfiability witness for the
 frozen interface (H60, H62 (2)); it is NOT actual-Source adequacy, G15 or
 S05 completion, and it does not make any statement about Solidity programs.
 -/
@@ -45,13 +52,17 @@ structure PlanBound where
 instance : LE PlanBound := ⟨fun a b => a.horizon ≤ b.horizon ∧ a.plan = b.plan⟩
 
 /-- The transaction's frame fails as if out of gas exactly when the plan
-gives the first external frame a failure point. -/
-def PlanBound.exhausted (r : PlanBound) : Bool := (r.plan.frame 0).isSome
+makes the first frame fail after `0` of its events (G06: `frame k = some n`
+fails the frame after `n` events). Toy runs emit no events, so a later failure
+point never fires. Request fates (`tx`) are not read by the toy machine: it
+models one transaction frame, not dropped requests or request-level failure
+points; they enter only through `NoFail`. -/
+def PlanBound.exhausted (r : PlanBound) : Bool := decide (r.plan.frame 0 = some 0)
 
-/-- A plan without resource failures: every request runs to completion and
-no frame has a failure point (exactly G06's reading, nothing weaker). -/
-def PlanNoFail (f : Evm.FailurePoints) : Prop :=
-  (∀ i, ∃ balance, f.tx i = .runs balance none) ∧ ∀ k, f.frame k = none
+/-- A plan without resource failures: the EXISTING G06 reading
+`Source.FailureResources.NoFail` (every request runs without a failure point,
+no frame has one), not an alternative definition. -/
+abbrev PlanNoFail (f : Evm.FailurePoints) : Prop := Source.FailureResources.NoFail f
 
 /-- The failure-free plan: every request runs with balance 0, no frame fails. -/
 def quietPlan : Evm.FailurePoints := ⟨fun _ => .runs 0 none, fun _ => none⟩
@@ -60,7 +71,7 @@ theorem quietPlan_noFail : PlanNoFail quietPlan := ⟨fun _ => ⟨0, rfl⟩, fun
 
 theorem exhausted_false_of_noFail {r : PlanBound} (h : PlanNoFail r.plan) :
     r.exhausted = false := by
-  simp only [PlanBound.exhausted, h.2 0, Option.isSome_none]
+  simp only [PlanBound.exhausted, h.2 0, reduceCtorEq, decide_false]
 
 /-! ## The plan-carrying source -/
 
@@ -271,7 +282,7 @@ theorem bytesOf_nameOf (b : Bytes) : bytesOf (nameOf b) = b := by
     simp only [List.map_cons, byte_char, List.cons.injEq, true_and]
     exact ih
 
-/-- A toy program as an actual intrinsic Source program over the empty
+/-- A toy program as an intrinsic Source program with an EMPTY program over the empty
 environment, deploying the contract named by its text. -/
 def sourceOf (t : Toy) : SourceProgram :=
   ⟨emptyEnv, ⟨emptyProgram, .legacy, toyFixed, nameOf t.text⟩⟩
