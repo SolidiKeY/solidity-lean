@@ -2664,6 +2664,10 @@ import Solidity.Frontend.Checked.TypePrintExamples
 import Solidity.Frontend.Checked.TypePrintRoundtrip
 import Solidity.Frontend.Checked.TypePrintText
 import Solidity.Frontend.Checked.UnitExamples
+import Solidity.Frontend.Checked.UnitExamples.Corpus
+import Solidity.Frontend.Checked.UnitExamples.Parsed
+import Solidity.Frontend.Checked.UnitExamples.ProfileExprParsed
+import Solidity.Frontend.Checked.UnitExamples.ProfileParsed
 import Solidity.Frontend.Cli
 import Solidity.Frontend.ConstantDepth.Complete
 import Solidity.Frontend.ConstantDepth.Controls
