@@ -199,3 +199,15 @@ The coordinator retrieves the original patch, bundle, handoff, evidence and SHA2
 manifest from `/workspace/migrate-tools-evidence/`. The exported patch is currently
 tooling/backfill only, not a completed Tools migration. The original persistent
 goal remains unfinished and is blocked, not complete; do not create/reset a goal.
+
+## H70 requester disposition
+
+Coordinator disposition for audited head
+`f5866fe2b02d4297ce0b71ae3000d7c4e5613af8`: wait for migrate-syntax's
+`Solidity/Syntax/Raw.lean` migration and migrate-root-gate's disposition of
+PERF-PREFIX-435 (+20.09% shared-prefix sample). Preserve STOP and all thirty
+original Tools files. Owner ticket destinations in this routing pass: none.
+Current-owner delivery pending: none. These routing fields do not establish
+owner agreement, dependency availability or validation. Host relay journals
+determine delivery acceptance; a relay itself grants none of those approvals.
+The original goal, branch and limits remain unchanged. No Lean checks resume.
