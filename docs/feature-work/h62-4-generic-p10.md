@@ -348,3 +348,17 @@ to V15, followed by owner application/review and complete integration gates.
 The committed timing receipt and off-git handoff record the exact committed
 head, artifact hashes, commands and remaining obligations. Questions are empty;
 the v4.24 toolchain question was resolved by the coordinator.
+
+## H82 retirement preservation
+
+The lane-specific stop-and-handoff names successor
+`solidity-parallel-20261103/executable-bytecode`. No new proof implementation
+was performed. H82 standing permission withdraws the old exact-file agreement
+wait for the proof-only BYTE proposal; actual production integration and final
+gates remain open. A subsequent standing-rules message said continue, so its
+relationship to the explicit retirement was queried without resuming proofs.
+See `tests/h62/item4/generic-p10/retirement-handoff.md`, the complete original
+thread assignment in `original-assignment.txt`, and the full original queue and
+scope in `queue-and-scope.json`. These files travel in the cumulative patch and
+bundle; bulk evidence stays off git with SHA256SUMS. The exposed goal tool
+cannot set PAUSED, and no available H71 permission authorizes a lane push.
