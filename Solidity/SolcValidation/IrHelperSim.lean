@@ -4,9 +4,13 @@ import Solidity.SolcValidation.IrHelpers
 # Simulation of solc's checked-arithmetic helpers
 
 For the helper terms of `SolcValidation/IrHelpers.lean` (certified readings of
-the real solc 0.8.38 IR), calling a helper on any two words, on any machine and
-in any state, either returns the mathematical result or runs solc's panic
-sequence (`mstore(0, Panic selector)`, `mstore(4, code)`, `revert(0, 0x24)`).
+the real solc 0.8.38 IR): calling `checked_add_t_uint256` (`checked_add_sim`),
+and running the body of `checked_mul_t_uint256` from its entry values
+(`checked_mul_body`), on any two words, any machine and any state, either
+returns the mathematical result or runs solc's panic sequence
+(`mstore(0, Panic selector)`, `mstore(4, code)`, `revert(0, 0x24)`).
+`checked_sub_t_uint256` and `checked_div_t_int256` have no kernel proof yet
+(see `docs/feature-work/fullscope-vt1.md`, C08).
 -/
 namespace Solidity.SolcValidation.IrSyntax
 open Solidity.SolcValidation
@@ -128,8 +132,8 @@ theorem word_val (n : Nat) : (Solidity.Yul.word n).val = n % 2 ^ 256 := rfl
 /-- The wrapped sum is below an operand exactly when the sum overflows. -/
 theorem add_wraps (x y : Word) :
     (Solidity.Yul.word (x.val + y.val)).val < x.val ↔ ¬ x.val + y.val < 2 ^ 256 := by
-  have hx := x.isLt
-  have hy := y.isLt
+  have hx : x.val < 2 ^ 256 := x.isLt
+  have hy : y.val < 2 ^ 256 := y.isLt
   rw [word_val]
   constructor
   · intro h ok
@@ -155,8 +159,8 @@ theorem add_wraps (x y : Word) :
 /-- The wrapped difference exceeds the minuend exactly when the subtraction underflows. -/
 theorem sub_wraps (x y : Word) :
     x.val < (Solidity.Yul.word (x.val + 2 ^ 256 - y.val)).val ↔ x.val < y.val := by
-  have hx := x.isLt
-  have hy := y.isLt
+  have hx : x.val < 2 ^ 256 := x.isLt
+  have hy : y.val < 2 ^ 256 := y.isLt
   rw [word_val]
   by_cases le : y.val ≤ x.val
   · have red : (x.val + 2 ^ 256 - y.val) % 2 ^ 256 = x.val - y.val := by
@@ -183,7 +187,7 @@ theorem sub_wraps (x y : Word) :
 theorem mul_fits (x y : Word) :
     ((x.val == 0) || (y.val == (Solidity.Yul.word (x.val * y.val)).val / x.val)) = true ↔
       x.val * y.val < 2 ^ 256 := by
-  have hy := y.isLt
+  have hy : y.val < 2 ^ 256 := y.isLt
   rw [word_val]
   simp only [Bool.or_eq_true, beq_iff_eq]
   constructor
@@ -220,23 +224,27 @@ theorem checked_add_sim (k : Nat) (x y : Word) (s : σ) :
   simp only [addCall, argPair, argVals, evalArgs, evalExpr, Vals.get, bind, Except.bind, pure,
     Except.pure, lookup_add, lookup_empty_group, lookup_cleanupU, lookup_panic11, bodyAdd, bodyCleanupU,
     bodyPanic11, evalBlock, evalItems, evalStmt, Vals.ofFn, Vals.append, Vals.zeros, Vals.set,
-    assignAll, consFn, evalOp, Vals.drop, Vals.toFn]
-  simp [Vals.get, Vals.set, Vals.toFn, Vals.drop, Solidity.Yul.Pure.eval, panicRun, consFn_two]
+    assignAll, consFn, evalOp, Vals.drop]
+  simp only [↓reduceIte, List.cons_append, List.nil_append, List.append_eq, List.length_cons,
+    List.length_nil, Nat.reduceAdd, Vals.drop, toFn_single, Fin.zero_eta, Fin.isValue,
+    Fin.succ_zero_eq_one, Vals.get, Vals.set, Solidity.Yul.Pure.eval, Nat.reducePow, consFn_zero_lit,
+    consFn_two, word2_one, Vals.get_here, Vals.get_there, panicRun, run_pure, map_bind, run_ok_map]
   by_cases ok : x.val + y.val < 2 ^ 256
   · have keep : ¬ (Solidity.Yul.word (x.val + y.val)).val < x.val := fun h => (add_wraps x y).mp h ok
     rw [if_pos ((truth_eq_zero _).mpr (decide_eq_false keep))]
-    simp [ok, Vals.drop]
+    simp only [↓reduceIte, Vals.drop, toFn_single, List.length_cons, List.length_nil, Nat.reduceAdd, ok]
   · have wraps : (Solidity.Yul.word (x.val + y.val)).val < x.val := (add_wraps x y).mpr ok
-    rw [if_neg (fun h => absurd ((truth_eq_zero _).mp h) (by simp [wraps]))]
+    rw [if_neg (fun h => absurd ((truth_eq_zero _).mp h) (by simp only [wraps, decide_true, Bool.true_eq_false, not_false_eq_true]))]
     simp only [ok, if_false]
     simp only [panicSelector] at *
     rcases h1 : M.run .«mstore» (word2 0 _) s with e | ⟨s1, r1⟩
-    · simp [h1, bind, Except.bind]
+    · simp only [bind, Except.bind]
     · rcases h2 : M.run .«mstore» (word2 4 17) s1 with e | ⟨s2, r2⟩
-      · simp [h1, h2, bind, Except.bind]
+      · simp only [↓reduceIte, Fin.isValue, h2, bind, Except.bind]
       · rcases h3 : M.run .«revert» (word2 0 36) s2 with e | ⟨s3, r3⟩
-        · simp [h1, h2, h3, bind, Except.bind, Functor.map, Except.map]
-        · simp [h1, h2, h3, Vals.drop, bind, Except.bind, Functor.map, Except.map]
+        · simp only [↓reduceIte, Fin.isValue, h2, h3, bind, Except.bind]
+        · simp only [↓reduceIte, Fin.isValue, h2, h3, Vals.drop, toFn_single, List.length_cons,
+            List.length_nil, Nat.reduceAdd, bind, Except.bind]
 
 /-- The owner's `sub` on two words, by value (kept folded in the proofs below). -/
 theorem pure_sub_val (x y : Word) :

@@ -2,8 +2,9 @@ import Solidity.SolcValidation.IrParse
 open Solidity.SolcValidation Solidity.SolcValidation.IrSyntax
 
 /-! Prints a parsed IR tree as a Lean term (used to generate
-`Solidity/SolcValidation/IrHelpers.lean`; the module re-checks by `rfl` that its
-terms are exactly the parse of the quoted fixture text). -/
+`Solidity/SolcValidation/IrHelpers.lean`, where the term is split into named
+bodies; nothing compares the two textually: the module's `helpers_certified`
+re-checks its term against the quoted fixture text by kernel evaluation). -/
 
 def q (s : String) : String := s.quote
 def strs (xs : List String) : String := "[" ++ ", ".intercalate (xs.map q) ++ "]"
@@ -90,7 +91,8 @@ def genCode (text : String) : String :=
   | .ok p => blockL p.parts.code
   | .error e => s!"PARSE ERROR {e}"
 
--- Regenerates the term; `IrHelpers.lean` must contain exactly this output.
+-- Regenerates the term that `IrHelpers.lean` was built from (split into named
+-- bodies there); `helpers_certified` re-checks the module against the text.
 #eval show IO Unit from do
   let term := genCode (← IO.FS.readFile "tests/fullscope-20261104/vt1/fixtures/helpers.yul")
   IO.FS.writeFile "tests/fullscope-20261104/vt1/fixtures/helpers.term" (term ++ "\n")

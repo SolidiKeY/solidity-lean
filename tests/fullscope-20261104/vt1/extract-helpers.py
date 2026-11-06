@@ -23,7 +23,8 @@ chunks = []
 for fixture, name in HELPERS:
     text = (here / "fixtures" / fixture).read_text()
     chunk = cut(text, name)
-    assert text.count(chunk) >= 1
+    # a whole definition: from its keyword to the brace at its own indent
+    assert chunk.lstrip().startswith(f"function {name}(") and chunk.rstrip().endswith("}")
     chunks.append(chunk)
 out = 'object "Helpers" {\n    code {\n' + "\n".join(chunks) + '    }\n}\n'
 target = here / "fixtures/helpers.yul"

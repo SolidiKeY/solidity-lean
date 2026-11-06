@@ -589,14 +589,28 @@ axioms [propext]) — the same certificate a parse of that text carries.
 - `checked_mul_matches_source` (same shape for the body of `checked_mul_t_uint256`).
 Axioms [propext, Classical.choice, Quot.sound]. The relation between the
 source's revert and the panic's return data is G01's and is not asserted.
+What "simulation" means here, exactly: on success the helper returns the
+source's value as a word with the machine state unchanged; on a source revert
+the helper runs solc's panic sequence on the machine (it reverts only on a
+machine whose `revert` halts). `checked_mul_matches_source` is about the
+body entered with `product = 0`; the call-site form (lookup, argument binding)
+is proved for add only. All proofs are about the helper group `helperEnv` of
+the extracted `"Helpers"` object, not the contracts' own function groups:
+transferring them needs a lemma that lookup in the parsed Census/LinkedMath
+environment yields these bodies (open). The generated term carries the
+parser's certificate, but uniqueness of a well-formed tree for a token stream
+is not proved, so "these terms are the parse" rests on that certificate.
 
-Tests (`IrHelperChecks.lean`): 576 helper/source agreements on 12×12 edge
-words for add, sub, mul and signed div (division by zero `Panic(0x12)`,
-`min / -1` and every unsigned overflow `Panic(0x11)`, exact effect log);
-`helpersText` equals the fixture and its blocks are verbatim substrings.
+Tests (`IrHelperChecks.lean`, run by `check-ir.sh`): 576 helper/source
+agreements on 12×12 edge words for add, sub, mul and signed div with the exact
+effect log (for div the source gives only "reverts"; the panic codes 0x12 for
+a zero divisor and 0x11 for `min / -1` are solc's, stated in the test);
+`helpersText` equals the fixture and each of its 8 whole functions is a
+verbatim substring of the saved IR.
 
-Open (kernel): `checked_sub_t_uint256` and `checked_div_t_int256`. Their proofs
-elaborate, but the kernel reports deep recursion: the owner's `Pure.sub`
+Open (kernel): `checked_sub_t_uint256` and `checked_div_t_int256`. A proof
+of the same shape as `checked_mul_body` elaborated for sub, but the kernel
+reported deep recursion (the attempt is not committed): the owner's `Pure.sub`
 (`word (x + 2^256 - y)`) and `sdiv` (`signed`, `x - 2^256`) put a symbolic sum
 with the literal `2^256` where a defeq check unfolds it in unary — the same
 family as Gate G0's `ofInt?` pitfall, which `IrHelperSource.lean` avoids with
@@ -605,3 +619,37 @@ characterization (as `pure_sub_of_le`), or ask VY1 for `rw`-friendly `Pure.eval`
 lemmas. Also open: `checked_exp_*` (the loop; would generalize `Evm/Exp.lean`),
 ABI and storage helpers, `fun_<name>_<id>` bodies and dispatcher/constructor
 composition (need G01), and the remaining helpers of the census.
+
+Reviews (read-only, no Lean server). Finder: no defect in the proved
+theorems (fuel cannot make them vacuous, the panic sequence and selector match
+solc's `panic_error_0x11`, the certificate does tie `helperBodies` to the
+text, the source side is `BinOp.evalNum` as `BinOp.evalT` uses it, the test
+oracle is independent); findings on the provenance test (split on blank lines
+skipped `cleanup_t_uint256` and every overflow check), a tautological Python
+assert, `IrLeanGen` and `IrHelperSim` docstrings claiming more than is
+proved, the hard-coded 0x12 expectation, and no runner. Skeptic: the same
+provenance and runner findings; "simulation" must be read as "runs the panic
+sequence", mul is body-level only, everything is about the extracted
+`helperEnv` rather than the contracts' function groups, tree uniqueness is not
+proved, full `simp` in finished proofs and untyped `have`s (AGENTS.md),
+global `@[simp]` attributes.
+
+Fixed: whole-function provenance check (8 functions, object closers
+stripped), Python assert replaced by a whole-definition check, `check-ir.sh`
+runs both fixture derivations and the three Lean check files, docstrings and
+this section state exactly what is proved (body-level mul, synthetic
+environment, no uniqueness, panic-sequence reading, solc's panic codes in the
+div test). Then fixed with the Lean server: every finished proof in `IrHelperSim.lean`
+uses `simp only` (from `simp?`), and the `have`s carry explicit types. The
+global `@[simp]` attributes stay: all are `rfl`/`rw` facts about this lane's
+own definitions (`Vals`, `Run`, `word2`) plus `rfl` restatements of `Pure.eval`
+cases; they are recorded here for importers.
+
+## Gates for C06–C08 (Claude VM)
+
+Evidence: `tests/fullscope-20261104/vt1/evidence/claude-c06-c08/README.md`.
+Per-file Lean diagnostics clean on all eight modules and four check files;
+`check-ir.sh` (fixture derivations) passes; axioms standard only. The full
+`./run-lean.sh` passed its static stages but its cold `lake build` (3808
+modules, no Lake cache on this VM) was stopped at 143 modules: the full build
+gate is not passed here and is open for the integrator's cached build.

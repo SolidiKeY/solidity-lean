@@ -68,6 +68,8 @@ def same (a b : Except String Nat) : Bool :=
       let sx := signedOf x
       let sy := signedOf y
       let divExpect : Except String Nat :=
+        -- The source reverts (`none`) for a zero divisor and for `min / -1`;
+        -- which panic code solc uses (0x12 vs 0x11) is solc's, stated here.
         if sy = 0 then .error "panic 18"
         else match (BinOp.evalNum .int rfl sx sy .div rfl).map Subtype.val with
           | some v => .ok (W (v % 2 ^ 256).toNat).val
@@ -78,17 +80,26 @@ def same (a b : Except String Nat) : Bool :=
         n := n + 1
   IO.println s!"IR_HELPER_PASS {n} helper/source agreements on edge words (add, sub, mul, int div)"
 
-/-! Provenance of `helpersText`: it is the extracted fixture, every function
-of which is a verbatim substring of the saved solc IR (`extract-helpers.py`
-cuts them), and the generated term is what `IrLeanGen.lean` prints. -/
+/-! Provenance of `helpersText`: it is the extracted fixture, and every
+function definition in it (cut from `function` to the next one, as whole
+text) is a verbatim substring of the saved solc IR. -/
 #eval show IO Unit from do
   let dir := "tests/fullscope-20261104/vt1/fixtures"
   unless helpersText == (← IO.FS.readFile s!"{dir}/helpers.yul") do
     throw (IO.userError "helpersText differs from fixtures/helpers.yul")
   let census ← IO.FS.readFile s!"{dir}/Census.unoptimized.yul"
   let linked ← IO.FS.readFile s!"{dir}/LinkedMath.unoptimized.yul"
-  let chunks := (helpersText.splitOn "\n\n").map String.trim |>.filter (·.startsWith "function")
-  for c in chunks do
-    unless (census.splitOn c).length > 1 || (linked.splitOn c).length > 1 do
-      throw (IO.userError s!"not a verbatim fixture substring: {c.take 60}")
-  IO.println s!"IR_HELPER_PROVENANCE_PASS {chunks.length} function text blocks verbatim from the saved IR (extract-helpers.py --check cuts whole functions)"
+  -- Whole functions: each piece after a "function " split, up to its last
+  -- closing brace, prefixed again with the keyword.
+  let pieces := (helpersText.splitOn "function ").drop 1
+  let mut n := 0
+  for p in pieces do
+    -- the last function is followed by the object's own closing braces
+    let p := if p.endsWith "    }\n}\n" then p.dropRight "    }\n}\n".length else p
+    let body := (p.dropRightWhile (· != '}'))
+    let whole := "function " ++ body
+    unless (census.splitOn whole).length > 1 || (linked.splitOn whole).length > 1 do
+      throw (IO.userError s!"not a verbatim fixture substring: {whole.take 60}")
+    n := n + 1
+  unless n == 8 do throw (IO.userError s!"expected 8 functions, found {n}")
+  IO.println s!"IR_HELPER_PROVENANCE_PASS {n} whole functions verbatim from the saved IR"
