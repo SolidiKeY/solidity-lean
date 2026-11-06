@@ -167,6 +167,7 @@ def main():
             row["pathReaders"] = [p for p in row["leanPins"] if rewrites[p] == texts[p]]
             for p in row["pinnedModules"]:
                 open(p, "w").write(rewrites[p])
+                texts[p] = rewrites[p]  # a module may pin several fixtures
             os.replace(new_path, row["fixture"])
             row["applied"] = True
     counts = collections.Counter(r["status"] for r in rows)
