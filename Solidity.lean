@@ -708,6 +708,8 @@ import Solidity.Backend.MemoryCopies.FixedReferencePathCopy
 import Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls
 import Solidity.Backend.MemoryCopies.FixedReferencePathCopyInterface
 import Solidity.Backend.MemoryCopies.FixedReferencePathInterface
+import Solidity.Backend.MemoryCopies.FixedReferenceRebind
+import Solidity.Backend.MemoryCopies.FixedReferenceRebindControls
 import Solidity.Backend.MemoryCopies.FixedReferenceRebindInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoop
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls

@@ -569,6 +569,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/FixedReferencePath.lean` | Proved actual compiled path selection of original fixed-reference storage operands with live canonical representation. |
 | `Backend/MemoryCopies/FixedReferencePathControls.lean` | Inhabited represented root selection with retained child shadows, empty/64-element child and wrong-slot negative controls. |
 | `Backend/MemoryCopies/FixedReferenceRebindInterface.lean` | Contract only for checked fixed-reference local rebinding with intrinsic TRun/post-StateRepr, old-object preservation and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceRebind.lean` | Proved checked intrinsic fixed-reference local rebinding, full post-state/allocator, old-heap and fresh-root preservation, and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceRebindControls.lean` | Populated old-parent/child alias-separation controls, preserved live words, empty/64-element child successes and capacity refusal after path success. |
 | `Backend/MemoryCopies/FixedReferenceStorageTurnInterface.lean` | Headerless fixed-parent storage-child step with actual checked copying, allocator/gap/framing and refusal contracts. |
 | `Backend/MemoryCopies/FixedReferenceStorageTurn.lean` | Actual checked child copying and header0 pointer-store with complete allocator/gap/framing and total refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean` | Actual fixed reservations, empty/pair/64-element child payloads, headerless-pointer negative and represented saturated refusals. |
