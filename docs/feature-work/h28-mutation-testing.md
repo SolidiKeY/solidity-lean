@@ -780,8 +780,8 @@ the uncorrected full-gate log are retained separately. Finder and skeptic
 confirmed the actual outcomes and source attribution without Lean-server use.
 
 A fresh fetch then found published `812aeb301f27d70dad4acc3b3bd92d1c41d7c948`;
-it was merged without resetting history, producing `d9687ad3f`. Its generated
-root repairs the missing imports. Fresh root/orphan checks pass (6334 reachable,
+it was merged without resetting history, producing `d9687ad3f`. The fetched tree contains the Catch imports introduced by earlier integration
+work (for example `9f49dbe41`); this records tree contents, not authorship. Fresh root/orphan checks pass (6334 reachable,
 zero orphans); the axiom check still fails with zero errors and 4293 unrecorded
 changes. Default-build validation on this newer source remains pending. The
 delivery-only boundary now advances to that published commit; semantic/cache
@@ -793,3 +793,20 @@ reviews. The normal mutable build cache stays in the detached worktree; it is
 not a sealed whole-repository passing cache. Existing H41 semantic proof-world
 packs remain unchanged and ready for coordinator pull. Full assignment
 acceptance, broader candidate scope and the shared axiom inventory remain open.
+
+The c75 integration review nits are addressed separately from proof acceptance:
+the H44 gate split now has a committed per-member manifest at
+`tests/h28-sol/mutation-testing/evidence/repository-gate-60a068dd/manifest.json`.
+It lists all 50 members with byte counts and SHA256, plus the absolute archive
+path and archive SHA. Bulk verification authenticates that manifest from HEAD
+and checks every actual archive member. The archive remains off Git.
+`bulk-data.json.delivery_base` now matches the current engine write-scope
+boundary; `snapshot_delivery_base` preserves the immutable older snapshot's
+86253aba provenance. Neither field changes semantic base 6f3eedf0.
+
+The acceptance review clarified that the original task authorizes bounded
+selection (each selected family, whole declared manifest). Q-H28-FINAL-SCOPE
+therefore needs no additional approval merely to retain explicit unselected
+candidates. Remaining implementation work is an exhaustive selection/oracle
+ledger and direct rollback-state and frame/capture-effect mutants; existing
+send-flag witnesses keep their narrower claims until those additions pass.

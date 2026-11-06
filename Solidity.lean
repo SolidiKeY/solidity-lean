@@ -2928,6 +2928,7 @@ import Solidity.Frontend.SourceUnits
 import Solidity.Frontend.StatementGrammarH28.Balance
 import Solidity.Frontend.StatementGrammarH28.BalanceAtoms
 import Solidity.Frontend.StatementGrammarH28.BalancePr
+import Solidity.Frontend.StatementGrammarH28.BlockHeaderBoundary
 import Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage
 import Solidity.Frontend.StatementGrammarH28.BoolCompound
 import Solidity.Frontend.StatementGrammarH28.BoundaryHead

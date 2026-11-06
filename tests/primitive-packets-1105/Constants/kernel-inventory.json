@@ -588,7 +588,7 @@
   },
   {
     "signature": "\u2200 (z : Int) (bits : Nat),\n  And (Eq.{1} (HMod.hMod.{0, 0, 0} bits 8) 0) (And (LE.le.{0} 8 bits) (LE.le.{0} bits 256)) \u2192\n    And (LE.le.{0} 0 z) (LT.lt.{0} z \u2191(HPow.hPow.{0, 0, 0} 2 256)) \u2192 Not (Eq.{1} z \u2191(Int.toNat z)) \u2192 False",
-    "name": "Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_3",
+    "name": "Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_2",
     "module": "Solidity.Backend.PrimitivePackets.Constants.Target",
     "levels": [],
     "kind": "theorem",
@@ -602,7 +602,7 @@
   {
     "signature": "\u2200 (n : Int), Eq.{1} (Solidity.Evm.sword n) (Solidity.Evm.wmod (Solidity.Evm.toWord n))",
     "name": "Solidity.Evm.sword.eq_1",
-    "module": "Solidity.Backend.PrimitivePackets.Constants.Target",
+    "module": "Solidity.Evm.Signed",
     "levels": [],
     "kind": "theorem",
     "isUnsafe": false,
