@@ -231,3 +231,15 @@ none. Host journals determine delivery acceptance; relay is not agreement or
 validation. Continue waiting for the Raw prerequisite and PERF-PREFIX-435
 disposition. STOP, all thirty original Tools files, the original goal/branch and
 all resource/proof limits remain preserved. No Lean checks resume.
+
+## H82 final stop-and-handoff
+
+Retirement takes precedence over generic continue wording. No further proof
+implementation or unchanged timing STOP rerun is authorized. Successor is
+solidity-h62-6-20261106/migrate-root-gate, responsible for integration after final
+stopped/head acknowledgement. Complete original visible assignment, original
+queues, exact scope, open schema-v1 waits, latest policy/provenance and verified
+review-only Raw patch are committed under tests/h62/item6/migrate-tools/handoff/.
+Originals remain unchanged. No H71 push permission was supplied; no push is made.
+Available goal tool exposes only complete/blocked, not PAUSED; operational pause
+is preserved, with no goal reset/replacement/completion or automatic continuation.
