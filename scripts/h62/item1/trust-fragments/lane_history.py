@@ -6,13 +6,13 @@ must select the coordinator-approved prior commit; this script cannot decide
 which commit or owner claims are authoritative.
 """
 import json
-import pathlib
 import re
 import subprocess
 
 import collect
 
 PREFIX = 'tests/h62/item1/trust-fragments/lanes/'
+LANE_ROOT = PREFIX.rstrip('/')
 OWNER = r'[a-z0-9]+(?:-[a-z0-9]+)*'
 FILE = OWNER + r'\.json'
 
@@ -43,7 +43,7 @@ def add(inventory, owner, data):
         row['headlines'].add(name)
 
 
-def read_commit(commit):
+def read_commit_files(commit):
     if not re.fullmatch(r'[0-9a-f]{40}', commit):
         raise ValueError('prior commit must be a full lowercase 40-character SHA')
     if subprocess.check_output(['git', 'cat-file', '-t', commit], cwd=collect.ROOT).strip() != b'commit':
@@ -52,7 +52,7 @@ def read_commit(commit):
                               cwd=collect.ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     if ancestry.returncode != 0:
         raise ValueError('prior commit must be an ancestor of HEAD')
-    data = subprocess.check_output(['git', 'ls-tree', '-r', '-z', commit, '--', PREFIX], cwd=collect.ROOT)
+    data = subprocess.check_output(['git', 'ls-tree', '-r', '-z', commit, '--', LANE_ROOT], cwd=collect.ROOT)
     inventory = {}
     for entry in filter(None, data.split(b'\0')):
         metadata, raw_path = entry.split(b'\t', 1)
@@ -62,8 +62,24 @@ def read_commit(commit):
         if mode not in (b'100644', b'100755') or kind != b'blob' or not match:
             raise ValueError(f'invalid committed lane entry: {path}')
         content = subprocess.check_output(['git', 'cat-file', 'blob', oid.decode('ascii')], cwd=collect.ROOT)
-        add(inventory, match.group(1), content.decode('utf-8'))
+        inventory[path[len(PREFIX):]] = content
     return inventory
+
+
+def read_commit(commit):
+    inventory = {}
+    for path, content in read_commit_files(commit).items():
+        add(inventory, path.split('/', 1)[0], content.decode('utf-8'))
+    return inventory
+
+
+def read_current_files(lane_root):
+    result = {}
+    if lane_root.exists():
+        for lane in sorted(lane_root.iterdir(), key=lambda p: p.name):
+            for path in sorted(lane.iterdir(), key=lambda p: p.name):
+                result[f'{lane.name}/{path.name}'] = path.read_bytes()
+    return result
 
 
 def read_current(lane_root):

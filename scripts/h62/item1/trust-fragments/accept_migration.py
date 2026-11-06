@@ -68,12 +68,27 @@ def accept(lane_root, candidate=None, require_installed=False, prior_commit=None
         raise ValueError('generated migration is not installed in the checkout')
     if require_installed and prior_commit is None:
         raise ValueError('installed gate requires the coordinator-approved prior commit')
+    head = None
+    committed = None
+    if require_installed:
+        if lane_root.resolve() != collect.LANES.resolve():
+            raise ValueError('installed gate requires the canonical lane directory')
+        head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=collect.ROOT).decode().strip()
+        committed = lane_history.read_commit_files(head)
+        if committed != lane_history.read_current_files(lane_root):
+            raise ValueError('lane inputs do not match committed HEAD')
     if prior_commit is not None:
         prior = lane_history.read_commit(prior_commit)
         lane_history.preserve(prior, lane_history.read_current(lane_root))
     if candidate is not None and candidate != generated:
         raise ValueError('candidate does not match generated migration')
     result = coverage(original, generated if candidate is None else candidate, lane_root)
+    if collect.AUDIT.read_bytes() != checked_in:
+        raise ValueError('checkout audit changed during acceptance')
+    if require_installed:
+        final_head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=collect.ROOT).decode().strip()
+        if final_head != head or lane_history.read_current_files(lane_root) != committed:
+            raise ValueError('HEAD or lane inputs changed during acceptance')
     result['checkout_state'] = 'original' if checked_in == original else 'migrated'
     result['prior_commit'] = prior_commit
     return result

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a positive audit fixture and two isolated failure controls serially.
+"""Run isolated audit and generated-import controls serially.
 
 Caller holds the repository writer lock. LEAN must name the coordinator-pinned
 Lean binary. This is an external test of the audit mechanism, not a proof of the
@@ -19,6 +19,7 @@ import collect
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 FIXTURE = ROOT / 'tests/h62/item1/trust-fragments/Fixture.lean'
+ADDON = ROOT / 'tests/h62/item1/trust-fragments/FixtureAddon.lean'
 ALLOW = '[``propext, ``Classical.choice, ``Quot.sound]'
 NAME = '``Solidity.TrustFragmentsFixture.usesPropext'
 
@@ -58,22 +59,19 @@ def main():
         data['headlines'] = ['Solidity.TrustFragmentsFixture.missing']
         (lane_dir / 'extra.json').write_text(json.dumps(data))
         generated_missing = collect.collect_lanes(source.encode(), pathlib.Path(lane_tmp)).decode()
-    controls = [
-        ('positive', source, True, 'fixture passed'),
-        ('generated_lane', generated, True, 'fixture passed'),
-        ('generated_lane_missing', generated_missing, False, 'Unknown constant'),
-        ('unexpected_dependency', source.replace(ALLOW, '[]'), False, 'unexpected axioms'),
-        ('missing_declaration', source.replace(NAME, 'Name.mkSimple "missing_fixture_declaration"'), False, 'Unknown constant'),
-    ]
-    with tempfile.TemporaryDirectory() as tmp:
-        for label, text, expect_success, diagnostic in controls:
+    with tempfile.TemporaryDirectory(prefix='h62-trust-fixture-') as tmp:
+        tmp_root = pathlib.Path(tmp)
+        module_dir = tmp_root / 'Solidity'
+        module_dir.mkdir()
+        addon = module_dir / 'FixtureAddon.lean'
+        addon.write_bytes(ADDON.read_bytes())
+        env = dict(os.environ, LEAN_NUM_THREADS='1', LEAN_PATH=str(tmp_root))
+
+        def run(label, arguments, expect_success, diagnostic):
             headroom()
-            file = pathlib.Path(tmp) / (label + '.lean')
-            file.write_text(text)
-            env = dict(os.environ, LEAN_NUM_THREADS='1')
-            process = subprocess.Popen([str(args.lean), '-j1', '--tstack=131072', str(file)],
-                                       env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                       text=True, preexec_fn=limit_memory)
+            process = subprocess.Popen([str(args.lean), '-j1', '--tstack=131072', *arguments],
+                                       cwd=tmp_root, env=env, stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT, text=True, preexec_fn=limit_memory)
             deadline = time.monotonic() + 120
             try:
                 while True:
@@ -92,6 +90,30 @@ def main():
             if (process.returncode == 0) != expect_success or diagnostic not in output:
                 print(output)
                 raise SystemExit(1)
+
+        run('build_addon', ['-o', str(module_dir / 'FixtureAddon.olean'), str(addon)], True, '')
+        with tempfile.TemporaryDirectory() as lane_tmp:
+            lane_dir = pathlib.Path(lane_tmp) / 'fixture-lane'
+            lane_dir.mkdir()
+            data = {'imports': ['Solidity.FixtureAddon'], 'headlines': ['Solidity.TrustFragmentsAddon.witness']}
+            (lane_dir / 'extra.json').write_text(json.dumps(data))
+            imported = collect.collect_lanes(source.encode(), pathlib.Path(lane_tmp)).decode()
+            data['imports'] = ['Solidity.MissingImport']
+            (lane_dir / 'extra.json').write_text(json.dumps(data))
+            missing_import = collect.collect_lanes(source.encode(), pathlib.Path(lane_tmp)).decode()
+        controls = [
+            ('positive', source, True, 'fixture passed'),
+            ('generated_lane', generated, True, 'fixture passed'),
+            ('generated_lane_with_import', imported, True, 'fixture passed'),
+            ('generated_lane_missing_import', missing_import, False, 'Solidity.MissingImport'),
+            ('generated_lane_missing', generated_missing, False, 'Unknown constant'),
+            ('unexpected_dependency', source.replace(ALLOW, '[]'), False, 'unexpected axioms'),
+            ('missing_declaration', source.replace(NAME, 'Name.mkSimple "missing_fixture_declaration"'), False, 'Unknown constant'),
+        ]
+        for label, text, expect_success, diagnostic in controls:
+            file = tmp_root / (label + '.lean')
+            file.write_text(text)
+            run(label, [str(file)], expect_success, diagnostic)
     print('fixture controls passed')
 
 

@@ -75,7 +75,21 @@ class CollectorTests(unittest.TestCase):
             with mock.patch.object(COLLECTOR, 'AUDIT', installed):
                 with self.assertRaisesRegex(ValueError, 'prior commit'):
                     MIGRATION.accept(lanes, require_installed=True)
-                self.assertEqual(MIGRATION.accept(lanes, require_installed=True, prior_commit=ACCEPT.BASE)['checkout_state'], 'migrated')
+                with self.assertRaisesRegex(ValueError, 'canonical lane directory'):
+                    MIGRATION.accept(lanes, require_installed=True, prior_commit=ACCEPT.BASE)
+                tracked = {'owner-a/extra.json': (lane / 'extra.json').read_bytes()}
+                with mock.patch.object(COLLECTOR, 'LANES', lanes), \
+                     mock.patch.object(HISTORY, 'read_commit_files', return_value=tracked):
+                    self.assertEqual(MIGRATION.accept(lanes, require_installed=True, prior_commit=ACCEPT.BASE)['checkout_state'], 'migrated')
+                with mock.patch.object(COLLECTOR, 'LANES', lanes), \
+                     mock.patch.object(HISTORY, 'read_commit_files', return_value={}):
+                    with self.assertRaisesRegex(ValueError, 'committed HEAD'):
+                        MIGRATION.accept(lanes, require_installed=True, prior_commit=ACCEPT.BASE)
+                with mock.patch.object(COLLECTOR, 'LANES', lanes), \
+                     mock.patch.object(HISTORY, 'read_commit_files', return_value=tracked), \
+                     mock.patch.object(HISTORY, 'read_current_files', side_effect=[tracked, {}]):
+                    with self.assertRaisesRegex(ValueError, 'changed during acceptance'):
+                        MIGRATION.accept(lanes, require_installed=True, prior_commit=ACCEPT.BASE)
                 self.assertEqual(TIMING.audit_inputs(lanes), (base, candidate))
                 installed.write_bytes(candidate + b'-- changed\n')
                 with self.assertRaises(ValueError):
@@ -105,6 +119,7 @@ class CollectorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             HISTORY.read_commit('master')
         self.assertEqual(HISTORY.read_commit(ACCEPT.BASE), {})
+        self.assertEqual(HISTORY.read_commit_files(ACCEPT.BASE), {})
 
     def test_prior_commit_tree_is_read_and_symlinks_rejected(self):
         commit = '1' * 40
@@ -115,6 +130,8 @@ class CollectorTests(unittest.TestCase):
             if args[1:3] == ['cat-file', '-t']:
                 return b'commit\n'
             if args[1] == 'ls-tree':
+                if args[-1] != HISTORY.LANE_ROOT:
+                    raise AssertionError('lane root must be included in pathspec')
                 return f'100644 blob {blob}\t{path}\0'.encode()
             if args[1:3] == ['cat-file', 'blob']:
                 return data
@@ -127,6 +144,20 @@ class CollectorTests(unittest.TestCase):
             value = output(args, **kwargs)
             return value.replace(b'100644 blob', b'120000 blob') if args[1] == 'ls-tree' else value
         with mock.patch.object(HISTORY.subprocess, 'check_output', side_effect=bad_mode), \
+             mock.patch.object(HISTORY.subprocess, 'run', return_value=mock.Mock(returncode=0)):
+            with self.assertRaisesRegex(ValueError, 'invalid committed lane entry'):
+                HISTORY.read_commit(commit)
+        def root_symlink(args, **kwargs):
+            value = output(args, **kwargs)
+            return f'120000 blob {blob}\t{HISTORY.LANE_ROOT}\0'.encode() if args[1] == 'ls-tree' else value
+        with mock.patch.object(HISTORY.subprocess, 'check_output', side_effect=root_symlink), \
+             mock.patch.object(HISTORY.subprocess, 'run', return_value=mock.Mock(returncode=0)):
+            with self.assertRaisesRegex(ValueError, 'invalid committed lane entry'):
+                HISTORY.read_commit(commit)
+        def root_gitlink(args, **kwargs):
+            value = output(args, **kwargs)
+            return f'160000 commit {blob}\t{HISTORY.LANE_ROOT}\0'.encode() if args[1] == 'ls-tree' else value
+        with mock.patch.object(HISTORY.subprocess, 'check_output', side_effect=root_gitlink), \
              mock.patch.object(HISTORY.subprocess, 'run', return_value=mock.Mock(returncode=0)):
             with self.assertRaisesRegex(ValueError, 'invalid committed lane entry'):
                 HISTORY.read_commit(commit)

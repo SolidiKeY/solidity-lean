@@ -52,3 +52,15 @@ python3 -B scripts/h62/item1/trust-fragments/accept_migration.py --require-insta
 ```
 
 The placeholder must be replaced with the full lowercase SHA of the appropriate approved prior lane state. The script requires that commit to be an ancestor of the checkout, but does not establish that it is the correct protected prior state, authorize owner claims, or register the command in CI. The coordinator must establish those facts and review integration. The baseline audit still must be elaborated with the prescribed toolchain and the unchanged allowlist; the acceptance command is an external byte and input-coverage check, not a Lean proof. Real elaboration and before/after timings continue to wait on `H62-6-MIGRATE-SYNTAX` for `Solidity/Syntax/Raw.lean`.
+
+## H82 independent acceptance hardening
+
+The author review found that the proposed installed gate could be pointed at untracked or noncanonical lane inputs. Strict mode now requires the canonical lane directory and exact file bytes and paths from committed `HEAD`, rechecks the snapshot and central file before returning, and rejects noncanonical, uncommitted or changed inputs. The previous-history Git pathspec now includes the lane root itself, so a root symlink or gitlink is rejected rather than silently omitted. The coordinator still must choose the authoritative prior commit and verify producer ownership: ancestry and committed bytes alone do not establish either. Preflight remains separate from the strict post-migration gate.
+
+These are author-reviewed external acceptance safeguards, not an independent finder or skeptic review, and not a Lean proof. The H82 standing agreements do not supply the awaited `migrate-syntax` artifact or the coordinator's prior-commit/ownership choice. No central audit, theorem, axiom allowlist or proof budget was changed.
+
+## H82 retirement checkpoint
+
+The latest isolated fixture adds a generated lane import and theorem: its module build and positive generated audit passed under the pinned Lean 4.35 binary, while a missing import, missing declaration and non-allowlisted dependency were rejected. This is a small external fixture, not the project audit. The strict installed gate also checks lane paths and bytes against committed HEAD and rejects a lane-root symlink or gitlink in prior history. Independent finder and skeptic reviews remain outstanding.
+
+Human instruction requests retirement and handoff to `solidity-h62-5-20261106/statement-graph`. The complete original rendered prompt bytes were not available through any exposed tool or located file; `tests/h62/item1/trust-fragments/handoff/original-prompt-provenance.md` records the missing SHA-verified artifact. The scope manifest and coordinator-provided decisions, audit and toolchain pin are committed under that handoff directory; the full ownership snapshot remains outside Git in the evidence directory, with checksums. H71 is absent from the available decisions snapshot, and the original explicit no-push rule remains in force. No push was made.
