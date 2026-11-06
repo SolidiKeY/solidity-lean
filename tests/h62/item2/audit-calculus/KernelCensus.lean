@@ -23,6 +23,9 @@ private def theoremRecord (name : Name) (info : ConstantInfo) : MetaM Json := do
         ("binder_info", toJson (reprStr decl.binderInfo))]
   return Json.mkObj [
     ("name", toJson name.toString),
+    ("user_name", toJson ((privateToUserName? name).getD name).toString),
+    ("is_private", toJson (isPrivateName name)),
+    ("is_internal_detail", toJson name.isInternalDetail),
     ("level_params", toJson (info.levelParams.map Name.toString)),
     ("type_pretty", toJson typeText),
     ("type_expression", toJson (reprStr info.type)),
@@ -84,12 +87,15 @@ elab "#verify_joint " original:ident " with " witness:ident : command => do
     let expected ← jointPremises originalInfo
     unless ← isDefEq expected witnessInfo.type do
       throwError "witness type does not match the exact joint telescope"
+  let env ← getEnv
+  let originalModule := (env.getModuleIdxFor? original.getId).map (fun idx => env.header.moduleNames[idx.toNat]!.toString)
   let axioms ← collectAxioms witnessName
   for axiomName in axioms do
     unless #[``propext, ``Classical.choice, ``Quot.sound].contains axiomName do
       throwError "unapproved axiom {axiomName}"
   logInfo m!"H62_JOINT_VERIFIED {Json.mkObj [
     ("original", toJson original.getId.toString),
+    ("original_module", toJson originalModule),
     ("witness", toJson witnessName.toString),
     ("original_type_expression", toJson (reprStr originalInfo.type)),
     ("axioms", toJson (axioms.toList.map Name.toString))] |>.compress}"
