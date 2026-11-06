@@ -1,4 +1,6 @@
-# G19 mapped conditional assignment statements
+# G19 context-related conditional assignment statements
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 This component consumes the published V07 ConditionalAssignments producer in a Source ifElse statement: assign the Boolean condition local, execute exactly one local-assignment branch, then close the branch scope. It uses V07 ContextMap/Related and intrinsic Source/target syntax. It introduces no separate lowering relation, evaluator, admission predicate or state carrier.
 
