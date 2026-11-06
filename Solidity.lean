@@ -3986,6 +3986,7 @@ import Solidity.Source.Monetary
 import Solidity.Source.MonetaryAuthority
 import Solidity.Source.MonetaryAuthoritySource
 import Solidity.Source.MonetaryExecution
+import Solidity.Source.MonetaryFit
 import Solidity.Source.MonetaryLaws
 import Solidity.Source.MonetaryRollback
 import Solidity.Source.MonetaryRollbackControls
@@ -5932,6 +5933,7 @@ import Solidity.Yul.Views.SlotTranslation
 import Solidity.Yul.Views.SnapshotHashBinding
 import Solidity.Yul.Views.SnapshotHashBindingControls
 import Solidity.Yul.Views.SourceBalanceControls
+import Solidity.Yul.Views.SourceBalanceExact
 import Solidity.Yul.Views.SourceBalanceInputs
 import Solidity.Yul.Views.SourceBalanceOperandControls
 import Solidity.Yul.Views.SourceBalanceOperands
@@ -6013,6 +6015,7 @@ import Solidity.Yul.World.Frames
 import Solidity.Yul.World.Lifecycle
 import Solidity.Yul.World.LifecycleAdapter
 import Solidity.Yul.World.LifecycleAdapterChecks
+import Solidity.Yul.World.LifecycleBalancesFit
 import Solidity.Yul.World.LifecycleFrameControls
 import Solidity.Yul.World.LifecycleFrames
 import Solidity.Yul.World.LogBuiltin
