@@ -28,7 +28,7 @@ This is reviewed additive backfill, not acceptance of the frozen assignment.
 | 3. Supported compiler success/totality | blocked | Actual compiler contracts, reject-all and always-revert compiler controls, observable gas/fork/failure boundaries |
 | 4. Fidelity and coverage verification | blocked | Exact-once elaborated census, witness reconciliation, full affected/final validation and owner report |
 
-No weakened or vacuous frozen statement was established by this backfill.
+No statement was weakened by this backfill. The H70 source-supported legacy V1 capacity finding below retains its blocker; kernel replay is still pending.
 No statement repair, new premise, axiom, trust shortcut, or budget increase was
 introduced. There are **zero new `sorry`, `axiom`, or `native_decide` commands**.
 Failed dependency elaborations print temporary `sorryAx` in error diagnostics;
@@ -121,7 +121,7 @@ statements or edited axiom expectations by this audit lane.
   reviewed owner overlay. Failed temporary `sorryAx` is not a source theorem.
 - **AUDIT-REST**: all remaining exact signatures/owners, simultaneous witnesses,
   compiler success, gas/fork controls and final gates remain open. Primary
-  memory-operation owner V11; copy-recovery owner CR; mapped ABI family V13;
+  memory-operation roadmap owner V11; mapped ABI family V13; MemoryCopies live producer identity is unresolved (H70 routing below supersedes any attribution inferred from the CR lane name);
   other mapped aggregate/byte families require exact ownership reconciliation
   against the supplied snapshot. Do not infer all 550 files belong to V11.
 
@@ -198,3 +198,150 @@ verify ancestry and input hashes again, reconcile exact kernel signatures and
 owners/fields, prove all remaining simultaneous witnesses, add real compiler
 success/negative/gas/fork controls, run fidelity and full affected/final gates,
 and repeat finder/skeptic reviews. Keep all four checkpoints open until then.
+
+
+## H70 continuation: area routes and remaining premise bundles
+
+Third reviewed backfill item; full frozen assignment remains **blocked** and all
+four checkpoints remain unfinished. H70 reports the owner relays accepted by
+`solidity-h62-6-20261106/migrate-syntax`, `migrate-hash`, and `migrate-backend`.
+The referenced host receipt and failed VM reads were not supplied here; no
+unavailable source, remote repair or owner overlay is treated as retrieved.
+`relay.sh` is host-only, not a VM installation task. No failing prerequisite was
+rerun, no migration changes imported, and no new passing Lean/final gate claimed.
+
+### Area responsibility versus live producer ownership
+
+New `owner-routes.json` records evidence-backed routing rules from the pinned
+ownership snapshot, module-map fragments and existing producer documentation.
+`reconcile.py` checks those references and exact evidence substrings and hashes,
+then enriches every existing source row. Source identities remain unchanged and
+ordered; no candidate is filtered out. These routes establish where audit tickets
+belong, not who may write each file. Every exact live-file-owner confirmation
+remains pending; H62 migration overlays do not take producer ownership.
+
+| Source area | Modules | Responsibility evidence |
+|---|---:|---|
+| MemoryCopies | 300 | V11 roadmap G33/G35; producer documentation also references historical `parallel-20261103/memory-copies`; exact live producer identity unresolved |
+| MemoryOps except StructDefaults | 191 | V11 G32/G34/P6 and V11 source provenance |
+| StructDefaults | 12 | MRS: documented memory-reference-structs lane and G33 split |
+| G18 aggregate family | 22 | V16 G18.02/.03 |
+| Byte parameter aggregate family | 2 | V14 G18.04/.05 |
+| ABI entry core | 10 | V13 G40 |
+| ABI calldata-view premise files | 2 | V11 G34 boundary; V13 discharges actual decoder view coherence |
+| ABI mixed-premise file | 1 | CalldataSlice/CopyAgreement V11; Statement V09 G24.03 |
+| FunctionValues | 6 | V13 G42.05 |
+| Bounded known-self TryCall | 4 | DT H8 producer documentation; no reassignment of generic G36/G42 |
+
+Seven declaration overrides distinguish the mixed ABI boundary, the MRS
+S03-PANIC41 responsibility with VY5 Source writer/dependency role, joint V10 G27.05/V11 G35.02/.03 reached steps,
+and the V13 caller discharging V11's view-coherence schema. The prior broad
+reference to CR was not exact file ownership: CR's P8a ownership does not assign
+MemoryCopies files. No CR, H55, migration, or helper scope is taken over here.
+The historical memory-copies producer hint remains a hint until the coordinator
+confirms it against its live registry.
+
+All 4,141 declarations now carry an area route. Counts by routed key are V11
+3,749; V16 200; V13 86; MRS 51; V14 33; DT 20; V09 1; joint V10+V11 1.
+The two panic-premise rows retain VY5 as a separate Source dependency/discharger
+role, supported by H16 single-writer authorization; the S03 snapshot names MRS
+as area owner. The old S03 serialization note does not override H16.
+A joint boundary is counted once, not once per owner. `uncovered-statements.tsv`
+contains one row per original source identity with area keys and pending status;
+these are source spellings, not kernel FQNs.
+
+### Bundle classification and its limits
+
+The enrichment retains exact source spans for 711 own-field candidates and
+19,796 recognized header binders. It does not count them as exact kernel
+hypotheses. All record fields must be satisfied together with their shared
+parameters and all per-input assumptions. Field/source parsing does not establish
+Prop-versus-Type, section generalization, inherited fields or satisfiability.
+Twenty-three ambiguous header boundaries stay explicitly unresolved, with full
+source regions retained. No-header-binders-recognized never means no hypotheses.
+
+| Source bundle candidate | Rows |
+|---|---:|
+| Global uniform obligation | 99 |
+| Global obligation with explicit input witness | 5 |
+| Global dependent function bundle | 2 |
+| Named contract plus input binders | 11 |
+| Per-input binders | 2,541 |
+| Per-input data and predicates carrier | 45 |
+| Per-input parameterized record | 39 |
+| Record bundle unresolved | 19 |
+| No header binders recognized; conclusion/implicit premises pending | 1,380 |
+
+For example, V1 `StorageWordCertificate` is a global conditional obligation;
+V2 adds its actual fitting `AllocatorWitness`. `AllocatorWitness` is itself an
+input carrier: represented heap/machine and strict fit must hold simultaneously
+for the same fields. `SourceDefaultCertificate` concerns a particular reached
+input/output state. `CopyAgreement` quantifies over states through its supplied
+operation and reference; those nested function arguments are not supplied input
+states. Candidate labels alone prove none of these bundles inhabited.
+
+EntryAudit remains **a local fixture only**, byte-identical to the preceding
+commit. No public-contract or census witness credit is added by this source
+reconciliation. The enriched counts explicitly retain zero verified kernel
+signatures, exact live-file-owner confirmations, and public compiler credits.
+
+### Existing V1 capacity finding and owner request
+
+`source-findings.json` records exactly one qualified conditional-field finding:
+`Solidity.Backend.MemoryCopies.StorageWordCertificate.correct`. At `cost = W`,
+its strict capacity antecedent has no natural cursor witness. The unchanged
+memory-copies documentation explicitly describes the resulting empty-code
+vacuity. This is source-supported evidence of that field's vacuity, **not** a
+new pinned-toolchain replay or a complete bad-compiler certificate proof.
+`escalations.txt` contains exactly one ESCALATE line for that qualified statement,
+including evidence and two owner repair options. No frozen statement, exclusion,
+interface, axiom pin, or proof budget is edited. The first option explicitly
+reuses/audits existing V2; no H55 interface-pairs conversion or repair work is
+implemented. Source evidence is not used to waive a required failing gate.
+
+Coordinator requests, with exact existing source paths:
+
+- Confirm the live producer for the 300 MemoryCopies files listed individually
+  in the new census; route this legacy finding for
+  `Solidity/Backend/MemoryCopies/Interface.lean` without inferring CR ownership.
+- Keep waiting for migrate-syntax's `Solidity/Syntax/Raw.lean`, migrate-hash's
+  `Solidity/Hash/CollisionBound.lean`, and migrate-backend's
+  `Solidity/Backend/Scalar/Slice.lean` and
+  `Solidity/Backend/AbiEntry/RawFreeTransport.lean` prerequisites.
+- Supply compatible reviewed owner results and exact hashes via the existing
+  coordinator channel; no overlay or unavailable artifact is assumed received.
+
+### H70 acceptance, review and handoff
+
+Bulk outputs are off git in `/workspace/h62-audit-memory-h70-evidence`:
+`reconciled-census.json`, `uncovered-statements.tsv`, `escalations.txt`, acceptance,
+reviews, command records and checksums. Their small SHA256 manifest is committed
+under the assigned tests directory. The deterministic generator and all routing
+and finding inputs are in git. The old evidence/patch/manifest remains intact.
+
+Acceptance uses `PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item2/audit-memory-operations/check-reconcile.py`
+and two identical `reconcile.py` invocations followed by byte comparison.
+Regressions cover global versus actual input carriers, existential output versus
+supplied witness fields, let/equation/match boundaries, exact source identities
+and spans, mixed owner/caller roles, missing/ambiguous area routes, missing source
+evidence, frozen hash drift, and duplicate escalation rejection. These are
+external source-processing tests; they are not Lean proofs.
+
+Independent read-only finder and skeptic reviews used no Lean server/builds or
+writes. Skeptic found carrier-by-name classification and equation-proof header
+contamination; both were fixed and covered by regression acceptance. The
+quantifier flag was renamed to accurately describe the whole recognized header.
+Both final reviews accepted the source boundaries, routing, no proof credits,
+and the limited legacy finding. Exact kernel reconciliation remains pending.
+
+There are no Lean or EntryAudit changes, no new axioms/sorry/trust shortcuts,
+and no budget changes. No Lean performance refactor or new Lean timing claim;
+full before/after timings and final gates remain pending behind owner repairs.
+H70 timings measure the Python enrichment only. Original prerequisite failures
+and their historical passing KeySort/fixture checks remain in the prior evidence.
+
+This is the third reviewed backfill work item. Coordinator fresh-thread handoff
+is due within the requested 3–5-item window using this same VM, branch and existing
+goal. No replacement goal/thread, competing continuation, push, merge, pre-gate,
+publication or deployment is created. Exact new committed head and patch hashes
+will be saved in the external H70 handoff/report after committing this item.
