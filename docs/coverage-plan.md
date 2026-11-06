@@ -120,9 +120,10 @@ with a refusal, a new exclusion or a promise of a later proof.
   `MemoryMax=12G` and `MemorySwapMax=0`; leave the remaining RAM for the OS.
   Use disk-backed private caches, monitor aggregate RSS and available memory,
   and stop before exhausting the VM. Run Lean MCP or a build, not both.
-- A cold build is a prerequisite to measure, not a free operation hidden in
-  every estimate. Publish a reproducible dependency cache with source/toolchain
-  identities; if clean validation exceeds one timebox, split validation targets
+- Seed the build first: `bash scripts/ci/fetch-lake-cache.sh` installs
+  master's Lake artifacts from the `lake-cache` release (H88), so unchanged
+  modules are fetched; a cold build is needed only if that download fails.
+  If clean validation still exceeds one timebox, split validation targets
   into VM groups and check their final joint import closure.
 - Use [module-map.md](module-map.md), the feature's `localEvidence` and current
   source before editing. Reproduce current behavior and audit existing proofs;
@@ -526,7 +527,9 @@ must hold roughly three times more work than estimated.
   - or a resource limit stops it.
 - **Backfill before stopping.** A blocked or empty lane takes the next ready
   item from the [backfill queue](#backfill-queue) before it stops.
-- **One cold build per lane.** The cold build is paid once. Later
+- **Seed, then build warm.** A lane seeds the Lake cache from the
+  `lake-cache` release before its first build and after each merge of
+  master ([contributing.md](contributing.md#build-cache-and-ci)); later
   checkpoints use per-file Lean server diagnostics and warm rebuilds.
 - **Handoff per checkpoint.** Each checkpoint records its own handoff
   (revision, theorems, premises, checks, remaining obligations) in its

@@ -115,7 +115,7 @@ def check (n : Nat) (w : 1 ≤ n ∧ n ≤ 32) (p : Roadmap.Pipeline) (checked :
     let other := value e n w (other_underlying n w) bs (Source.fitBytes_length n [0,1])
     match Source.convVal (.udvt e) v with
     | .error (.stuck why) => v.key == other.key && why == "user-defined value type" &&
-        !(Source.STy.udvt d).implicit (E n w).isBase (.udvt e)
+        !(Source.STy.udvt d).implicit (E n w).isBase (E n w).mapFree (.udvt e)
     | _ => false
   else true))
 

@@ -1,0 +1,25 @@
+{
+ "Solidity/Yul/Compilation/LetControlCompletion.lean:Solidity.Yul.Compilation.LetControlCompletion.artifact_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletion.lean:Solidity.Yul.Compilation.LetControlCompletion.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletion.lean:Solidity.Yul.Compilation.LetControlCompletion.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletion.lean:Solidity.Yul.Compilation.LetControlCompletion.source_false": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletion.lean:Solidity.Yul.Compilation.LetControlCompletion.source_true": [
+  "Quot.sound",
+  "propext"
+ ]
+}

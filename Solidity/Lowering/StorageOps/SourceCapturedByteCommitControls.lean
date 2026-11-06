@@ -123,7 +123,7 @@ def journalRows (s : Source.St env) := s.ex.journal.map fun e=>
    (a.val,[left,child left 0,child left 1,child left 2,child left 3].map (word old.storage),
     [child (child left 0) 0,child (child left 0) 1,child (child left 1) 0,child (child left 1) 1,
      child (child left 2) 0,child (child left 2) 1,child (child left 0) 3,child (child left 3) 0].map (raw old.storage),
-    targetHeaders old.storage,targetBytes old.storage,old.balance.val,old.nonce,old.code)
+    targetHeaders old.storage,targetBytes old.storage,old.balance,old.nonce,old.code)
  | .transient a _ => (a.val,[],[],[],[],0,0,none)
 def originalRow : List (Option Nat) × List (Option (List Nat)) :=
  ([some 1,some 1,some 0,some 0,some 0],[some [17],none,none,none,none,none,none])
@@ -251,7 +251,7 @@ theorem dirty_observations :
 
 theorem dirty_journal_observations : dirtyRun.2.2.ex.journal.map (fun e=>
  match e with
- | .account a old => (a.val,tailRow old.storage,old.balance.val,old.nonce,old.code)
+ | .account a old => (a.val,tailRow old.storage,old.balance,old.nonce,old.code)
  | .transient a _ => (a.val,(none,[]),0,0,none))=
  (List.replicate 6 (some 1,[some [53],none,none,some [97]]) ++
  [(some 3,[some [53],none,none,some [97]]),

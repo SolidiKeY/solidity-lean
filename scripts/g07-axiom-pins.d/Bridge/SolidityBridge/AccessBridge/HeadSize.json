@@ -1,0 +1,25 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/HeadSize.lean:SolidityBridge.AccessBridge.HeadSize.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSize.lean:SolidityBridge.AccessBridge.HeadSize.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSize.lean:SolidityBridge.AccessBridge.HeadSize.classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSize.lean:SolidityBridge.AccessBridge.HeadSize.early_revert": [
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSize.lean:SolidityBridge.AccessBridge.HeadSize.size_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

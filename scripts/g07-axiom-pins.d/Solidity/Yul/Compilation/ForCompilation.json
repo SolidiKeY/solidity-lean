@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/ForCompilation.lean:Solidity.Yul.Compilation.ForCompilation.Artifact.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ForCompilation.lean:Solidity.Yul.Compilation.ForCompilation.Artifact.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ForCompilation.lean:Solidity.Yul.Compilation.ForCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ForCompilation.lean:Solidity.Yul.Compilation.ForCompilation.lower": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -39,7 +39,7 @@ def frame (checked : Bool) : Source.Fr :=
 
 def sourceState : Source.St E :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩, Source.Transient.empty, []⟩,
-    Source.Heap.empty,[],[],⟨[],.nil⟩⟩
+    Source.Heap.empty,[],[],⟨[],.nil⟩,Source.FailureExecution.Cursor.empty⟩
 
 def source (n : Int) (range : Source.IntTy.u256.lo ≤ n ∧ n ≤ Source.IntTy.u256.hi) :
     Source.EMState E [.int Source.IntTy.u256] := (.cons (.int n range) .nil,sourceState)
