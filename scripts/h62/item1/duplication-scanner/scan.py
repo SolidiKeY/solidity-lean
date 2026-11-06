@@ -3,6 +3,7 @@
 import argparse
 import fnmatch
 import hashlib
+import hmac
 import json
 import re
 from pathlib import Path
@@ -247,15 +248,91 @@ def scan(path, root, source=None):
 def digest(obj):
     return hashlib.sha256(json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
 
+MAX_PREVIOUS_BYTES = 512 * 1024 * 1024
+
+def unique_previous_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result: raise ValueError("duplicate previous JSON key")
+        result[key] = value
+    return result
+
+def reject_previous_number(_):
+    raise ValueError("non-integer previous JSON number")
+
+def load_previous(path, expected):
+    if not re.fullmatch(r"[0-9a-f]{64}", expected):
+        raise ValueError("previous SHA256 must be 64 lowercase hexadecimal digits")
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_PREVIOUS_BYTES + 1)
+    if len(raw) > MAX_PREVIOUS_BYTES:
+        raise ValueError("previous report exceeds byte limit")
+    actual = hashlib.sha256(raw).hexdigest()
+    if not hmac.compare_digest(actual, expected):
+        raise ValueError("previous report SHA256 mismatch")
+    return json.loads(raw.decode("utf-8"), object_pairs_hook=unique_previous_object,
+                      parse_constant=reject_previous_number, parse_float=reject_previous_number)
+
+def prior_map(records, key, label):
+    if not isinstance(records, list): raise ValueError("malformed previous " + label)
+    result = {}
+    for row in records:
+        if not isinstance(row, dict) or not isinstance(row.get(key), str) or row[key] in result:
+            raise ValueError("malformed or duplicate previous " + label)
+        result[row[key]] = row
+    return result
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
     parser.add_argument("paths", nargs="+")
     parser.add_argument("--owners", type=Path, help="JSON mapping exact relative paths to owner labels")
     parser.add_argument("--previous", type=Path, help="previous scanner JSON report")
+    parser.add_argument("--previous-sha256", help="caller-supplied SHA256 pin for previous report")
     parser.add_argument("--registry", type=Path, help="coordinator ownership snapshot; references are advisory")
     args = parser.parse_args()
     root = args.root.resolve()
+    if (args.previous is None) != (args.previous_sha256 is None):
+        parser.error("--previous and --previous-sha256 must be supplied together")
+    selection = dict(root=str(root), patterns=sorted(set(args.paths)))
+    previous = None
+    old_inputs, old_statements, old_bodies = {}, {}, {}
+    if args.previous is not None:
+        try:
+            previous = load_previous(args.previous, args.previous_sha256)
+            if (not isinstance(previous, dict) or type(previous.get("version")) is not int or
+                previous.get("version") != 2 or previous.get("selection") != selection):
+                raise ValueError("incompatible version or selection")
+            if previous.get("errors") != [] or previous.get("unmatched_patterns") != []:
+                raise ValueError("previous report is incomplete")
+            old_inputs = prior_map(previous.get("inputs"), "path", "inputs")
+            if any(not isinstance(row.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", row["sha256"])
+                   for row in old_inputs.values()):
+                raise ValueError("malformed previous input hash")
+            old_statements = prior_map(previous.get("candidates"), "lexical_key", "statement candidates")
+            old_bodies = prior_map(previous.get("body_candidates"), "body_hash", "body candidates")
+            if any(not re.fullmatch(r"[0-9a-f]{64}", key) for key in (*old_statements, *old_bodies)):
+                raise ValueError("malformed previous candidate key")
+            for label, groups in (("statement", old_statements), ("body", old_bodies)):
+                for row in groups.values():
+                    if (not isinstance(row.get("members"), list) or len(row["members"]) < 2 or
+                        not isinstance(row.get("reject_reasons"), list) or
+                        any(not isinstance(reason, str) for reason in row["reject_reasons"]) or
+                        not isinstance(row.get("action"), str) or any(
+                            not isinstance(member, dict) or
+                            not isinstance(member.get("path"), str) or
+                            type(member.get("line")) is not int or member["line"] < 1 or
+                            not isinstance(member.get("name"), str) or
+                            not isinstance(member.get("kind"), str) or
+                            not isinstance(member.get("owner"), str)
+                            for member in row["members"])):
+                        raise ValueError("malformed previous " + label + " candidate")
+            for field in ("owner_config_sha256", "registry_sha256", "scanner_sha256"):
+                value = previous.get(field)
+                if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+                    raise ValueError("malformed previous " + field)
+        except (OSError, UnicodeError, ValueError, RecursionError) as exc:
+            parser.error("previous report: " + str(exc))
     matched = {pat: sorted(f.resolve() for f in root.glob(pat) if f.is_file() and f.suffix == ".lean") for pat in args.paths}
     unmatched = sorted(pat for pat, paths in matched.items() if not paths)
     files = sorted({f for paths in matched.values() for f in paths})
@@ -317,28 +394,9 @@ def main():
                     if len({digest([row["kind"], row["qualifiers"], row["statement"], row["context_hash"]]) for row in group}) > 1 or
                        any(row["statement"] is None for row in group) else set())),
                 action="weak-lexical-lead-review-signatures-and-ownership"))
-    selection = dict(root=str(root), patterns=sorted(set(args.paths)))
-    previous = json.loads(args.previous.read_text()) if args.previous else None
-    if previous is not None and (not isinstance(previous, dict) or previous.get("version") != 2 or
-                                 previous.get("selection") != selection or not isinstance(previous.get("inputs"), list)):
-        parser.error("previous report has incompatible version or selection")
-    if previous is not None and (previous.get("errors") != [] or previous.get("unmatched_patterns") != []):
-        parser.error("previous report is incomplete")
-    def prior_map(records, key, label):
-        if not isinstance(records, list): parser.error("malformed previous " + label)
-        result = {}
-        for row in records:
-            if not isinstance(row, dict) or not isinstance(row.get(key), str) or row[key] in result:
-                parser.error("malformed or duplicate previous " + label)
-            result[row[key]] = row
-        return result
-    old_inputs = prior_map(previous["inputs"], "path", "inputs") if previous else {}
-    if any(not isinstance(row.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", row["sha256"])
-           for row in old_inputs.values()): parser.error("malformed previous input hash")
     old = {path: row["sha256"] for path, row in old_inputs.items()}
     new = {x["path"]: x["sha256"] for x in inputs}
-    def candidate_delta(old_rows, new_rows, key, label):
-        old_groups = prior_map(old_rows, key, label)
+    def candidate_delta(old_groups, new_rows, key):
         new_groups = {row[key]: row for row in new_rows}
         def stable(row):
             return hashlib.sha256(json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
@@ -348,8 +406,11 @@ def main():
                                    if stable(old_groups[k]) != stable(new_groups[k])))
     changes = None
     if previous is not None and not errors and not unmatched:
-        changes = dict(statements=candidate_delta(previous.get("candidates"), candidates, "lexical_key", "statement candidates"),
-                       bodies=candidate_delta(previous.get("body_candidates"), body_candidates, "body_hash", "body candidates"))
+        try:
+            changes = dict(statements=candidate_delta(old_statements, candidates, "lexical_key"),
+                           bodies=candidate_delta(old_bodies, body_candidates, "body_hash"))
+        except (RecursionError, ValueError) as exc:
+            parser.error("previous candidate comparison: " + str(exc))
     scanner_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     incomplete = bool(errors or unmatched)
     incremental = dict(added=None if incomplete else sorted(new.keys()-old.keys()),
@@ -358,6 +419,8 @@ def main():
         owner_config_changed=previous is not None and previous.get("owner_config_sha256") != digest(owners),
         registry_changed=previous is not None and previous.get("registry_sha256") != hashlib.sha256(registry_bytes).hexdigest(),
         scanner_changed=previous is not None and previous.get("scanner_sha256") != scanner_sha256,
+        previous_sha256=args.previous_sha256,
+        previous_provenance="caller-pin-unverified" if previous is not None else "no-baseline",
         comparison_status=("current-incomplete" if incomplete else
                            "no-baseline" if previous is None else "scanner-output-comparable"),
         candidate_groups=changes)

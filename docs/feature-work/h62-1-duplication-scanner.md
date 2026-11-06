@@ -5,7 +5,7 @@ incomplete scanner checkpoint. It is not a complete audit, proof, ownership
 decision, or RUNTIME_GATE_PASS.
 
 `scripts/h62/item1/duplication-scanner/scan.py ROOT GLOB... [--owners JSON]
-[--registry JSON] [--previous REPORT]` emits deterministic JSON, including input
+[--registry JSON] [--previous REPORT --previous-sha256 SHA256]` emits deterministic JSON, including input
 hashes, recognized declaration inventory, lexical statement and body leads,
 rejection reasons and incremental input/configuration changes. An unmatched glob
 fails. Missing ownership is unknown; registry path, directory and glob references
@@ -311,3 +311,42 @@ integration needs a verified binding among the record, exact source,
 compiled module and dependency environment before using elaborated signatures.
 The live ownership dependency, unsupported declarations, remaining backfill
 and final repository gates remain open.
+
+## Caller-pinned incremental baseline
+
+Incremental comparisons now require `--previous REPORT` together with
+`--previous-sha256 SHA256`. The scanner reads at most 512 MiB of prior
+report bytes, checks the supplied lowercase SHA256 against those exact bytes,
+then strictly decodes and parses them before scanning. It rejects duplicate
+JSON keys, nonfinite or floating numbers, incompatible selections, malformed
+candidate members and incomplete reports. Deeply nested or oversized inputs
+fail closed. The input-byte ceiling is not a bound on JSON's in-memory
+expansion; the caller must still impose process resource limits.
+
+A matching caller pin identifies bytes only. It does not authenticate the
+producer or establish that the prior report accurately represented a scan;
+the result explicitly labels its baseline provenance
+`caller-pin-unverified`. Existing version 2 reports can be reused with their
+actual SHA256, but invocations that omit the new paired argument now fail.
+
+The pinned-baseline change was measured on the same 6,661-file selection,
+previous-report bytes, machine and resource ceiling. The committed scanner
+took 97.394 seconds before; the pinned version took 98.262 seconds after,
+a 0.89% increase. A repeat took 96.393 seconds and was byte-identical to the
+first pinned output, SHA256
+`f4b482c802f30ede222422119fca124c591aea4e07aa0d8864f0a6ff03ad8a2a`.
+The complete before and after reports matched after normalizing only the
+intentional pin fields and scanner-identity fields. The exact prior pin was
+`01e696eee1f088dc3e1482b6a4362a76f9e320cf1a0d8f1a83455b7a8a35ad63`.
+A preliminary after run was deliberately interrupted to fix an independently
+found malformed-member case; its timing is not a passing measurement.
+
+Finder and skeptic reviews, without Lean, found and rechecked the exact-byte
+pin, duplicate/deep JSON and malformed-member cases. Controls include a
+one-byte mutation against the original pin, changed selection, incomplete and
+oversized baselines, a targeted late serialization failure, and a fabricated
+well-shaped prior with a fresh caller pin. That last case remains explicitly
+unverified. The scanner acceptance suite passed 21 tests and the audit index
+suite passed 2. This is external tool validation, not a Lean proof. Full Lean
+signature binding, declaration coverage, live ownership, backfill and final
+repository gates remain pending.

@@ -1,4 +1,6 @@
 import contextlib
+import copy
+import hashlib
 import importlib.util
 import io
 import json
@@ -14,6 +16,9 @@ SCRIPT = ROOT / "scripts/h62/item1/duplication-scanner/scan.py"
 spec = importlib.util.spec_from_file_location("h62_scanner", SCRIPT)
 scanner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(scanner)
+
+def pinned(path):
+    return ["--previous", str(path), "--previous-sha256", hashlib.sha256(path.read_bytes()).hexdigest()]
 
 class ScannerControls(unittest.TestCase):
     def test_binder_scope_and_intrinsic_types(self):
@@ -270,6 +275,27 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(data["incremental"]["comparison_status"], "current-incomplete")
             self.assertIsNone(data["incremental"]["added"])
 
+    def test_late_candidate_serialization_failure_is_reported(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text("theorem a (x : Nat) : x = x := by rfl\ntheorem b (y : Nat) : y = y := by rfl\n")
+            base_cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]
+            previous = root / "previous.json"
+            previous.write_bytes(subprocess.check_output(base_cmd))
+            args = [str(SCRIPT), str(root), "*.lean"] + pinned(previous)
+            original = json.dumps
+            def checked_dumps(value, *pos, **kwargs):
+                if isinstance(value, dict) and "lexical_key" in value and kwargs.get("sort_keys"):
+                    raise RecursionError("simulated late nesting")
+                return original(value, *pos, **kwargs)
+            errors = io.StringIO()
+            with mock.patch.object(sys, "argv", args), mock.patch.object(scanner.json, "dumps", side_effect=checked_dumps), contextlib.redirect_stderr(errors):
+                with self.assertRaises(SystemExit) as outcome:
+                    scanner.main()
+            self.assertNotEqual(outcome.exception.code, 0)
+            self.assertIn("previous candidate comparison", errors.getvalue())
+            self.assertNotIn("Traceback", errors.getvalue())
+
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -296,35 +322,97 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual({r["pattern"] for r in data["candidates"][0]["members"][2]["registry_references"]}, {"Solidity/", "Solidity/C.lean"})
             previous = root / "previous.json"
             previous.write_bytes(first)
-            stable = json.loads(subprocess.check_output(cmd + ["--previous", str(previous)]))
+            stable_bytes = subprocess.check_output(cmd + pinned(previous))
+            self.assertEqual(stable_bytes, subprocess.check_output(cmd + pinned(previous)))
+            stable = json.loads(stable_bytes)
+            self.assertEqual(stable["incremental"]["previous_provenance"], "caller-pin-unverified")
+            self.assertEqual(stable["incremental"]["previous_sha256"], hashlib.sha256(first).hexdigest())
+            self.assertNotEqual(subprocess.run(cmd + ["--previous", str(previous)], capture_output=True).returncode, 0)
+            self.assertNotEqual(subprocess.run(cmd + ["--previous-sha256", "0" * 64], capture_output=True).returncode, 0)
+            bad_pin = subprocess.run(cmd + ["--previous", str(previous), "--previous-sha256", "0" * 64], capture_output=True)
+            self.assertNotEqual(bad_pin.returncode, 0)
+            self.assertIn(b"SHA256 mismatch", bad_pin.stderr)
+            original_pin = hashlib.sha256(first).hexdigest()
+            previous.write_bytes(first + b" ")
+            changed_bytes = subprocess.run(cmd + ["--previous", str(previous), "--previous-sha256", original_pin], capture_output=True)
+            self.assertNotEqual(changed_bytes.returncode, 0)
+            self.assertIn(b"SHA256 mismatch", changed_bytes.stderr)
+            previous.write_bytes(first)
+            malformed_pin = subprocess.run(cmd + ["--previous", str(previous), "--previous-sha256", "G" * 64], capture_output=True)
+            self.assertNotEqual(malformed_pin.returncode, 0)
+            self.assertIn(b"64 lowercase hexadecimal", malformed_pin.stderr)
+            with mock.patch.object(scanner, "MAX_PREVIOUS_BYTES", 16):
+                with self.assertRaisesRegex(ValueError, "byte limit"):
+                    scanner.load_previous(previous, hashlib.sha256(first).hexdigest())
+            invalid = root / "invalid.json"
+            invalid.write_bytes(b"null")
+            null_result = subprocess.run(cmd + pinned(invalid), capture_output=True)
+            self.assertNotEqual(null_result.returncode, 0)
+            self.assertIn(b"incompatible version or selection", null_result.stderr)
+            duplicate_json = first.replace(b'"version": 2', b'"version": 2, "version": 2', 1)
+            invalid.write_bytes(duplicate_json)
+            duplicate_result = subprocess.run(cmd + pinned(invalid), capture_output=True)
+            self.assertNotEqual(duplicate_result.returncode, 0)
+            self.assertIn(b"duplicate previous JSON key", duplicate_result.stderr)
+            nonfinite_json = first.replace(b'"version": 2', b'"version": NaN', 1)
+            invalid.write_bytes(nonfinite_json)
+            nonfinite_result = subprocess.run(cmd + pinned(invalid), capture_output=True)
+            self.assertNotEqual(nonfinite_result.returncode, 0)
+            self.assertIn(b"non-integer previous JSON number", nonfinite_result.stderr)
+            invalid.write_bytes(b"[" * 2000 + b"]" * 2000)
+            deep_result = subprocess.run(cmd + pinned(invalid), capture_output=True)
+            self.assertNotEqual(deep_result.returncode, 0)
+            self.assertNotIn(b"Traceback", deep_result.stderr)
+            malformed_group = json.loads(first)
+            malformed_group["candidates"][0]["members"] = "not-a-list"
+            invalid.write_text(json.dumps(malformed_group))
+            malformed_result = subprocess.run(cmd + pinned(invalid), capture_output=True)
+            self.assertNotEqual(malformed_result.returncode, 0)
+            self.assertIn(b"malformed previous statement candidate", malformed_result.stderr)
+            malformed_group["candidates"][0]["members"] = [None, None]
+            invalid.write_text(json.dumps(malformed_group))
+            malformed_result = subprocess.run(cmd + pinned(invalid), capture_output=True)
+            self.assertNotEqual(malformed_result.returncode, 0)
+            self.assertIn(b"malformed previous statement candidate", malformed_result.stderr)
+            malformed_group["candidates"][0]["members"] = copy.deepcopy(data["candidates"][0]["members"])
+            malformed_group["candidates"][0]["members"][0]["line"] = True
+            invalid.write_text(json.dumps(malformed_group))
+            malformed_result = subprocess.run(cmd + pinned(invalid), capture_output=True)
+            self.assertNotEqual(malformed_result.returncode, 0)
+            self.assertIn(b"malformed previous statement candidate", malformed_result.stderr)
+            forged = json.loads(first)
+            forged["inventory"][0]["name"] = "caller-fabricated"
+            invalid.write_text(json.dumps(forged))
+            forged_result = json.loads(subprocess.check_output(cmd + pinned(invalid)))
+            self.assertEqual(forged_result["incremental"]["previous_provenance"], "caller-pin-unverified")
             self.assertEqual(stable["incremental"]["candidate_groups"]["statements"]["changed"], [])
-            mismatch = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "*.lean", "--previous", str(previous)], capture_output=True)
+            mismatch = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"] + pinned(previous), capture_output=True)
             self.assertNotEqual(mismatch.returncode, 0)
             self.assertIn(b"incompatible version or selection", mismatch.stderr)
             corrupt = json.loads(first)
             corrupt["inputs"].append(corrupt["inputs"][0])
             bad = root / "bad.json"
             bad.write_text(json.dumps(corrupt))
-            self.assertNotEqual(subprocess.run(cmd + ["--previous", str(bad)], capture_output=True).returncode, 0)
+            self.assertNotEqual(subprocess.run(cmd + pinned(bad), capture_output=True).returncode, 0)
             owner.write_text(json.dumps({"A.lean": "lane-b"}))
-            changed_owner = json.loads(subprocess.check_output(cmd + ["--previous", str(previous)]))
+            changed_owner = json.loads(subprocess.check_output(cmd + pinned(previous)))
             self.assertTrue(changed_owner["incremental"]["owner_config_changed"])
             self.assertEqual(len(changed_owner["incremental"]["candidate_groups"]["statements"]["changed"]), 1)
             self.assertEqual(len(changed_owner["incremental"]["candidate_groups"]["bodies"]["changed"]), 1)
             corrupt["inputs"].pop()
             corrupt["errors"] = [{"path": "A.lean", "reason": "unreadable"}]
             bad.write_text(json.dumps(corrupt))
-            bad_result = subprocess.run(cmd + ["--previous", str(bad)], capture_output=True)
+            bad_result = subprocess.run(cmd + pinned(bad), capture_output=True)
             self.assertNotEqual(bad_result.returncode, 0)
             self.assertIn(b"previous report is incomplete", bad_result.stderr)
             corrupt["errors"] = []
             corrupt["unmatched_patterns"] = ["missing/*.lean"]
             bad.write_text(json.dumps(corrupt))
-            bad_result = subprocess.run(cmd + ["--previous", str(bad)], capture_output=True)
+            bad_result = subprocess.run(cmd + pinned(bad), capture_output=True)
             self.assertNotEqual(bad_result.returncode, 0)
             self.assertIn(b"previous report is incomplete", bad_result.stderr)
             (root / "B.lean").write_text("/- unterminated")
-            incomplete = subprocess.run(cmd + ["--previous", str(previous)], capture_output=True)
+            incomplete = subprocess.run(cmd + pinned(previous), capture_output=True)
             self.assertNotEqual(incomplete.returncode, 0)
             self.assertEqual(json.loads(incomplete.stdout)["incremental"]["comparison_status"], "current-incomplete")
             self.assertIsNone(json.loads(incomplete.stdout)["incremental"]["candidate_groups"])
@@ -333,12 +421,12 @@ class ScannerControls(unittest.TestCase):
             self.assertIsNone(json.loads(incomplete.stdout)["incremental"]["changed"])
             (root / "B.lean").write_text("theorem b (y : Nat) : y = y := by rfl\n")
             registry.write_text(json.dumps({"items": []}))
-            changed_registry = json.loads(subprocess.check_output(cmd + ["--previous", str(previous)]))
+            changed_registry = json.loads(subprocess.check_output(cmd + pinned(previous)))
             self.assertTrue(changed_registry["incremental"]["registry_changed"])
             (root / "A.lean").unlink()
             (root / "B.lean").write_text("theorem b : True := by trivial\n")
             (root / "D.lean").write_text("def d : Int := 0\ndef e : Int := 0\n")
-            data = json.loads(subprocess.check_output(cmd + ["--previous", str(previous)]))
+            data = json.loads(subprocess.check_output(cmd + pinned(previous)))
             self.assertEqual(data["incremental"]["removed"], ["A.lean"])
             self.assertEqual(data["incremental"]["changed"], ["B.lean"])
             self.assertTrue(data["incremental"]["candidate_groups"]["statements"]["removed"])
