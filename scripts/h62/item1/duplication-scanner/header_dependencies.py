@@ -56,6 +56,7 @@ def frozen_targets():
 
 
 def source_roots(config):
+    if PurePosixPath(config.get("srcDir","."))!=PurePosixPath("."):raise ValueError("unsupported non-default core package source root")
     roots=set()
     for lib in config.get("lean_lib",[]):
         folder=lib.get("srcDir",".")

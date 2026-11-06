@@ -1,44 +1,48 @@
 {
   "schema": 1,
-  "guarded_regression": "Regex dependency guesses, dropped headers, mutable snapshot/config roots or accidental inventory code execution",
+  "guarded_regression": "Unverified/overlapping package roots or mutable snapshot/header capture promoted to dependency evidence",
   "predecessor_head": "f235cd1ac49220d6679a66c16482ca4b927e0d95",
+  "captured_source_head": "bb9a9c899b3719db8940cb3b4dc66f04c0c764b5",
   "source_sha256": {
-    "scripts/h62/item1/duplication-scanner/header_dependencies.py": "3dd65c21c54b0b70c5cb286d0e56e3371eee38d519777f7703da1f3542b269ad",
+    "scripts/h62/item1/duplication-scanner/header_dependencies.py": "83f28690e061d31412d501a2c5ad7a263f83b2f5fdb42fd14991d390ed475d63",
     "tests/h62/item1/duplication-scanner/HeaderImports.lean": "54feef9989f7f19248eda9155b721a63476ccd095b01384d6edcb5527b384aba",
     "tests/h62/item1/duplication-scanner/header-controls.json": "27be7cd760ef06c6f7f810832893de1f2bcf8e065f1c86f2623735681cf958d4",
     "tests/h62/item1/duplication-scanner/header-dependency-pins.json": "ae2dd32b9e2c87736f52ad1a63c5a2487b4ecc94c68fb1beab32f49e07a6d69b",
-    "tests/h62/item1/duplication-scanner/test_header_dependencies.py": "ca56c33562c7944ccdc26b6127596a7801eec87590b1a2d52d69d81f0905c816"
+    "tests/h62/item1/duplication-scanner/test_header_dependencies.py": "e285468ae8bb5b8a82f63754aa95a1e0a39eecf8bb6b2b01c98f00487a724c94"
   },
   "accepted": {
-    "accepted-two": {
-      "receipt_sha256": "102fd8a2c480a06e02be8d42b72b302c7e0155978e204d065f61850de52e6ea3",
-      "inventory_sha256": "e972c2f5fed035a267538f303dbc9d55edee1d3e6811b45a0af30cf866c4efc2"
+    "accepted-four": {
+      "receipt_sha256": "ba8d2b2898f447111f8f820bcc4d56af1e92085b7f203cacb4df98ec96643c79",
+      "inventory_sha256": "ef0412efb3abd21803ffc4d75fe492d6002cd9ee1356d197aed2dfbaaef7010c"
     },
-    "accepted-three": {
-      "receipt_sha256": "4304194e7a464028c7e581532cace2ae431aaac1dff007f009cba076eb9192b8",
-      "inventory_sha256": "e972c2f5fed035a267538f303dbc9d55edee1d3e6811b45a0af30cf866c4efc2"
+    "accepted-five": {
+      "receipt_sha256": "df5c6870977f329a5d6cfcf5283d7b62e723bc8fcfa980bea48e3265b835d45d",
+      "inventory_sha256": "ef0412efb3abd21803ffc4d75fe492d6002cd9ee1356d197aed2dfbaaef7010c"
     }
   },
   "evidence_sha256": {
-    "evidence/acceptance.json": "e847931babcc2b9f4aabc669c3ac8bf57b22aeaaf18dd4657dcfcd982582e925",
-    "evidence/development-failures.json": "7557d0ad08caa85b1d3b0be489ab4c9306289e692585d0db9f5572613d7cc6c3",
+    "evidence/acceptance.json": "d510d0d138723a401650416c47ec834d45ec4e4b5d4bce75ec7546670ae7fb47",
+    "evidence/accepted-five.log": "accb69a867bc0abc428255a1203ebf3ddc60238fcb2005cf8bf6341e3fb4b086",
+    "evidence/accepted-four.log": "accb69a867bc0abc428255a1203ebf3ddc60238fcb2005cf8bf6341e3fb4b086",
+    "evidence/development-failures.json": "76cad4bdf9e45cc4888fca8de28a5e06f23e90241415887faa5704779ce7ad5b",
     "evidence/doc-paths.log": "9b9d1eeb362a394a3d960c0c3f6d76786217dd8cde0bd81d7345a051bdf769e0",
+    "evidence/existing-helper-review.json": "fb51ebf595fa20c45b05c5eac3af82fe73f6090c1c7ce4291da38bc8f627334a",
+    "evidence/final-capture-gates.json": "c5a4cd032d5479ac036b0e070826a34413863f998f1632b99a4d5a82cddcde97",
     "evidence/gates.json": "2ae7dd7d7b43ea1fec0a665805e52b5507eb77991435f1b32d9aa145a0b23f01",
     "evidence/lake-version.log": "c85e307da5a93d910b4e69f751e292f34737a4dda56f275387c4309c31fca131",
     "evidence/lean-version.log": "36c0bbaf090c97bc8217c6ff497ff9144fd83d9003f12cd505162b943aaaee77",
-    "evidence/reviews.md": "791b6a586bf9722f873743dd0888bc4ee2196946ac82a94976174ac7ba4d355a",
-    "evidence/tests.log": "a40268f32f6d8c81ebc86dc6079e2c058e72962f26fa98db1cb95d1acaf40490"
+    "evidence/reviews.md": "55b8b1e06ce2b24c9cc53ac44930cfb98d81d12e6f7f80a572e160a14cd40fdf",
+    "evidence/tests.log": "5107d37ec600f15e82cebbc4d32e6bfded4e43a225b212c66dd305523d3f3424"
   },
-  "external_tests": 129,
+  "external_tests": 130,
   "live_controls": 8,
   "source_nodes": 6454,
   "frozen_target_files": 129,
   "reference_original_obligations": 792,
   "declared_held_paths": 25,
   "no_declared_path": 104,
-  "new_formal_theorems_axioms_sorry": 0,
-  "production_frozen_budget_exclusion_changes": 0,
+  "production_frozen_budget_axiom_exclusion_changes": 0,
   "original_timing_STOP_retained": true,
   "stopped_workload_rerun": false,
-  "boundary": "Declared header observations only; no body/dynamic/private/registration/ownership/signature binding or compilation permission. SDK observations do not process inventoried imports."
+  "boundary": "Only default package layout with nonoverlapping additional roots. Declared headers do not establish body/private/dynamic/registration/signature coverage, ownership or compilation permission. SDK resolution is observation only."
 }

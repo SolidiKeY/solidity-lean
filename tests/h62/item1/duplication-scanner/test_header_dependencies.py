@@ -94,6 +94,13 @@ class HeaderDependencyControls(unittest.TestCase):
             roots=graph.source_roots({"lean_lib":[{"srcDir":spelling},{"srcDir":"vendor/A"}]})
             self.assertEqual(roots,[graph.PurePosixPath("vendor/A")])
 
+    def test_nondefault_package_root_is_explicitly_unsupported(self):
+        for folder in ("src","../other","/outside"):
+            with self.assertRaisesRegex(ValueError,"unsupported non-default"):
+                graph.source_roots({"srcDir":folder})
+        for folder in (".","./",""):
+            self.assertEqual(graph.source_roots({"srcDir":folder}),[])
+
     def git_fixture(self,root,*args):
         return subprocess.check_output(["git","-C",str(root),*args],stderr=subprocess.DEVNULL)
 
