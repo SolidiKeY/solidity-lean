@@ -6,11 +6,22 @@ Branch: `codex/solidity-h62-6-20261106/migrate-frontend`.
 Checkout: `/workspace/solidity-h62-migrate-frontend`.
 Evidence: `/workspace/h62-migrate-frontend-evidence` (bulk files outside Git).
 
-Status: blocked. Checkpoint 1 now has a passing clean old build and complete
-elaborated environment census; checkpoints 2–4 remain open until their
-required build, review, compatibility and timing gates pass. No runtime-gate
-pass, migration completion, producer ownership transfer, cut-over, root edit,
-push or merge is claimed.
+Status: retired incomplete under the explicit H82 stop-and-handoff to
+`solidity-h62-6-20261106/migrate-root-gate`. No further proof implementation is
+authorized for this worker. The committed retirement directory under
+`tests/h62/item6/migrate-frontend/retirement` preserves the complete original
+assignment transcript, exact scope, queues, policy, receipts and remaining waits.
+Its prompt provenance distinguishes preserved content from unverified renderer
+byte identity. The original production files remain unchanged; Token/Parser
+proposals are unapplied, and full H78 generated API, trust, build and performance
+gates remain open. No migration/runtime pass is claimed. The worker cannot pause
+with the exposed goal schema; the coordinator will pause after the final head
+report and idle turn. No push is authorized by the available H71 evidence.
+
+This retirement notice supersedes earlier continuation and exact-file-agreement
+language below. H82 permits statement-preserving proof-only/additive/import/doc
+edits without owner agreement; definition-body and frozen-interface changes
+retain their applicable owner, meaning and trust requirements.
 
 ## Census tooling checkpoint
 
