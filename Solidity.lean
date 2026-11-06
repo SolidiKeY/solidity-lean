@@ -600,6 +600,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionalityControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV4Migration
+import Solidity.Backend.InternalFlow.RuntimeFrameV4MigrationControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
