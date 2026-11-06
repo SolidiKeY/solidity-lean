@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "aspects", "differences", "missing_evidence"],
+  "properties": {
+    "verdict": {"type": "string", "enum": ["yes", "no", "unclear"]},
+    "aspects": {"type": "array", "items": {"type": "string"}},
+    "differences": {"type": "array", "items": {"type": "string"}},
+    "missing_evidence": {"type": "array", "items": {"type": "string"}}
+  }
+}
