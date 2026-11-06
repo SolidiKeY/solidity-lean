@@ -2,13 +2,13 @@ import Solidity.Source.Calls.BoundRecognizer
 import Solidity.Source.Progress.BoundParentControls
 import Solidity.Source.Progress.BoundCatalogueParentControls
 
-/-! The bound-body catalogue checker on two actually elaborated units. The
-hand-built `BoundMemoryCatalogue` proofs of the existing controls are replaced
-by one Boolean evaluation; the body, its return types and its admission are
-read from the actual dispatch target. The only supplied equations are the
-existing evaluations of elaboration and dispatch (`source_body`, `dispatch`),
-which do not reduce by `rfl`. Refusals: insufficient default fuel and an
-undeclared function. -/
+/-! The bound-body catalogue checker on two actually elaborated units. Each
+catalogue is derived by one Boolean evaluation; the body, its return types and
+its admission are read from the actual dispatch target. To reduce the check the
+controls rewrite with the fixtures' proved evaluations of dispatch and body
+lookup (`dispatch`, `source_body`), which do not reduce by `rfl`. Refusals:
+insufficient default fuel, the declaration-membership guard, and body admission
+of a string-literal statement. -/
 namespace Solidity.Source.Calls.RecognizerControls
 open EM Solidity.Lowering.P9 Solidity.Source.Progress Recognize
 
@@ -48,6 +48,12 @@ theorem undeclared_refused (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   simp only [catalogueB, entryB, List.all_cons, List.all_nil, Bool.and_true]
   rw [show decide (undeclared ∈ E.decls) = false by decide +kernel, Bool.false_and]
 
+/-- Body admission refuses an item outside the bound-parent fragment: a string
+literal expression statement is neither `ValFragC` nor a ready shape. -/
+def strayItems : RItems E [Aty] false .body [] [] := .stmt (.expr (.str [1])) .nil
+
+theorem stray_refused : boundB [] strayItems = false := by decide
+
 end Local
 
 namespace Parent
@@ -67,6 +73,11 @@ theorem catalogue (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   catalogueB_from_elaborate resolution actual_elaboration (globals p fixed) rfl "C" [] [d] 1
     (checked p fixed) (accepted p fixed)
 
+theorem whole (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
+    ReadyProgramCalls resolution (globals p fixed) "C" :=
+  checked_program_calls resolution actual_elaboration (globals p fixed) rfl "C" [] [d] 1
+    (checked p fixed) (accepted p fixed) (by decide +kernel)
+
 end Parent
 
 #print axioms Local.accepted
@@ -76,4 +87,6 @@ end Parent
 #print axioms Local.undeclared_refused
 #print axioms Parent.accepted
 #print axioms Parent.catalogue
+#print axioms Parent.whole
+#print axioms Local.stray_refused
 end Solidity.Source.Calls.RecognizerControls
