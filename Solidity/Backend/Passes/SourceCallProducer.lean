@@ -10,8 +10,11 @@ Target side: one fixed emission `push receiver; push value; CALL; POP` of the
 existing core interpreter. Its CALL is reached on every machine, and the whole
 code returns on every machine with stack, storage and memory restored (only
 balances may move). The core CALL is payment-only: selector/argument bytes are
-not passed and no callee code or RETURNDATA exists. So `FetchedPremises` is
-built from exactly one remaining duty, the CALL/RETURNDATA relation (V15). The
+not passed and no callee code or RETURNDATA exists, and the target returns
+whatever the source outcome is. `Step` is the graph of the produced source
+outcome and the actual target run, so the `Premises` duties hold by
+construction; their content is `rawAt` and `history`. `FetchedPremises` takes
+one `ReturndataDuty`, whose relation is unconstrained (inherited). The
 physical P1 frame contract (`InterfaceV3.Pending*`) remains a separate
 compiler-consumer parameter; nothing here instantiates it. -/
 namespace Solidity.Backend.Passes.SourceCallProducer
@@ -132,8 +135,10 @@ theorem step_unique (i : InvocationFrame.Invocation E Γ dn ps rs) {key : Identi
 
 /-! ## `FetchedPremises` from the single CALL/RETURNDATA duty -/
 
-/-- What remains for V15: relate each fetched CALL of this emission, its
-target run and the produced source outcome. -/
+/-- Placeholder for V15's CALL/RETURNDATA correspondence. The relation is
+chosen by the supplier and unconstrained, as in `FetchedPremises.Returndata`,
+so `fun _ _ _ _ => True` meets it (`Controls.trivial_duty`); it carries content
+only once the relation is pinned to a validated correspondence. -/
 structure ReturndataDuty (i : InvocationFrame.Invocation E Γ dn ps rs) where
   Returndata : Identity → {m : Evm.Machine} → FetchedCall (code i).full m →
     Evm.Out → Except Halt Outcome → Prop

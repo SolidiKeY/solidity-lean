@@ -228,6 +228,3 @@ commands; it never enters the core import graph.
 | `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned: soundness, the rule table against the strategy (`rule_exists`, `rule_of_step`), the solkey fragment at the rule level (`solkey_rule_exists`, `solkey_rule_lt_calculus`, `solkey_step_taclet`) and at the judgement level (`solkey_eq_calculus`, `solkey_lt_calculus`), the compiler (`σ ≈[C, L, b, F] m`: `Evm.Sim` of the typed state). |
 
 | `Semantics/StaticCallState.lean` | Existing-frame resumption and exact visible havoc equality; no execution producer. |
-| `Lowering/Readonly/SourceDispatchInterfaceV2.lean` | H69 reachable three-way dispatch selection and total classification, with frozen V1 unchanged. |
-| `Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean` | Actual branch witnesses, empty-selection refusals and migrated V2 history controls. |
-| `Lowering/Readonly/SourceAllHistoriesV2.lean` | Versioned mutual Source history induction through reachable V2 dispatch. |

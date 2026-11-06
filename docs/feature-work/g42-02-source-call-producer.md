@@ -17,11 +17,21 @@ invocation `i : InvocationFrame.Invocation E Γ dn ps rs`.
 | `Premises i` | `premises i` | all five duties proved; `step_total` inhabits `Step` on every machine; `step_unique` pins identity, raw outcome and final state |
 | `FetchedPremises i (premises i)` | `fetchedPremises i duty` | everything except `ReturndataDuty i` |
 
-`ReturndataDuty i` is the single remaining premise: a relation between each
-fetched CALL of this emission, its target run and the produced source outcome,
-and its proof for every machine. It is V15's CALL/RETURNDATA correspondence.
-It is not instantiated here, and nothing is fabricated from payment status or
-decoder success (`ExternalControls` keeps that rule).
+`Step` is defined as the graph of (`raw i`, `final i`, the actual target run),
+so the five `Premises` duties hold by construction; their content is the
+reused `rawAt` and `history`, plus `step_total` (non-vacuity on every machine).
+`Observed` adds nothing beyond `Step`: the fetched CALL exists on every machine.
+The target returns `.ok` whatever `raw i` is (revert, timeout or success): the
+source outcome is not related to the target run.
+
+`ReturndataDuty i` is a placeholder for V15's CALL/RETURNDATA correspondence.
+Its relation is chosen by the supplier and unconstrained, inherited from
+`FetchedPremises.Returndata` (`Premises.lean`, outside this lane's write
+scope), so the trivial relation meets it (`Controls.trivial_duty`), and
+`fetchedPremises` then carries no RETURNDATA content. It gains content only
+once the interface pins the relation to a validated correspondence; that
+interface change is V15's / the interface owner's. Nothing here is fabricated
+from payment status or decoder success.
 
 ## Controls
 
@@ -29,8 +39,11 @@ decoder success (`ExternalControls` keeps that rule).
 invocation `WorldCalls.PaymentControl.origin`: the produced raw outcome and
 final state equal the independently computed control (`produced_raw`), the
 step is inhabited on the control machine, the CALL is reached, and the frame
-is restored. Negative controls refuse a spoofed static identity, an unrelated
-raw outcome and an unrelated target result (`.revert`).
+is restored. `produced_raw` is the substantive control: it cross-checks the
+produced outcome against an independently computed one. The negative controls
+(spoofed static identity, unrelated raw outcome, unrelated target `.revert`)
+only re-read `Step`'s own conjuncts and the determinism of `Evm.run`.
+`trivial_duty` is a disclosure that `ReturndataDuty` is trivially met.
 
 ## Limits
 
@@ -47,3 +60,22 @@ raw outcome and an unrelated target result (`.revert`).
   its `Pending*` instances. Waiting on that lane.
 - Whole-body embedding of the invocation, Source/Core representation and
   compiler adequacy remain separate obligations.
+
+## Reviews (2026-11-06)
+
+Read-only finder and skeptic reviews, neither using the Lean server, covered
+this producer and the H69 V2 interface. They confirmed that V1 is frozen, that
+the V2 partition and joint-satisfiability witnesses are about the right
+hypotheses, and that there is no `sorry`, axiom, heartbeat or layering change.
+Confirmed findings and their fixes:
+
+- `ReturndataDuty` is trivially satisfiable (inherited from
+  `FetchedPremises.Returndata`). This is now disclosed (`trivial_duty`), and
+  the docs call it a placeholder rather than V15's correspondence.
+- `Step` is the graph of the produced outcome and the target run, `Observed`
+  is content-free and the negative controls only re-read `Step`. All three
+  are now stated above.
+- 25 bare `#print axioms` in `SourceDispatchInterfaceV2Controls` were pinned
+  with `#guard_msgs` and recorded.
+- The V2 module-map rows moved from the language-area fragment to this lane's
+  `readonly-calls.d/ro-v2.md`.

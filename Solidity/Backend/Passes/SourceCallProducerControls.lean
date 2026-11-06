@@ -51,6 +51,11 @@ theorem unrelated_target_refused :
   have eq := h.2.2.2.trans run
   cases eq
 
+/-- Disclosure, not a witness: `ReturndataDuty` inherits the unconstrained
+`FetchedPremises.Returndata` relation, so the trivial relation meets it. Any
+`FetchedPremises` built from it carries no RETURNDATA content. -/
+def trivial_duty : ReturndataDuty origin := ⟨fun _ _ _ _ _ => True, fun _ => trivial⟩
+
 end Solidity.Backend.Passes.SourceCallProducerControls
 
 /-- info: 'Solidity.Backend.Passes.SourceCallProducerControls.produced_raw' depends on axioms: [propext,
