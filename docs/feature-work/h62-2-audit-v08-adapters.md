@@ -313,3 +313,7 @@ acceptance run, kernel type, witness, H69 classification, axiom footprint,
 resource enforcement or full-family timing is established by these tests.
 All ordinary joint witnesses, intentional-refutation distinctions, semantic
 census, supported compiler/failure/gas/fork coverage and final gates remain open.
+
+### Successor metadata refusal backfill
+
+After adopting published master `71c5963f3`, the unchanged acceptance predicates are exercised against an empty run, a matching version with the wrong toolchain commit, and mixed successful/failed or stopped records in both orders. Synthetic metadata tests remain separate from joint premise witnesses and kernel proof acceptance. No acceptance predicate, Lean statement, budget or trust requirement changes.

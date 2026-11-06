@@ -28,7 +28,13 @@ class Guards(unittest.TestCase):
     (run/'results.json').write_text(json.dumps(data))
     (run/'source-sha256.json').write_text(json.dumps({'fixture.txt':sha or hashlib.sha256(source.read_bytes()).hexdigest()}))
    write(good);m.checked_run(root,run)
-   bads=[{**good,'versions':['wrong toolchain']},{**good,'records':[dict(exit=1,stop=None)]},{**good,'records':[dict(exit=0,stop='STOP')]},{**good,'no_swap':False},{**good,'cap_bytes':0},{**good,'reserve_bytes':0}]
+   bads=[{**good,'versions':['wrong toolchain']},{**good,'records':[dict(exit=1,stop=None)]},{**good,'records':[dict(exit=0,stop='STOP')]},{**good,'no_swap':False},{**good,'cap_bytes':0},{**good,'reserve_bytes':0},
+    {**good,'versions':['Lean (version 4.24.0, wrong-commit)']},
+    {**good,'records':[]},
+    {**good,'records':[dict(exit=0,stop=None),dict(exit=1,stop=None)]},
+    {**good,'records':[dict(exit=1,stop=None),dict(exit=0,stop=None)]},
+    {**good,'records':[dict(exit=0,stop=None),dict(exit=0,stop='headroom')]},
+    {**good,'records':[dict(exit=0,stop='timeout'),dict(exit=0,stop=None)]}]
    for bad in bads:
     with self.subTest(bad=bad):
      write(bad)
