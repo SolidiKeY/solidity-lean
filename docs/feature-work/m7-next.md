@@ -20,10 +20,12 @@ not presented as one here, in its docstring or in `docs/automation.md`.
 
 `Calculus/DecisionResidue.lean`:
 
-* `RouteRefusal`: the routes of `decideGoal` in order (`dependent`, `quant`,
-  `array`, `ledger`, `ledgerBlock`, `arrayBlock`, `memory`, `kint`, `kenc`,
-  `quantLedger`, `hash`), each with a one-line reason.
-* The refusals, computed from each route's front end, never from
+* `RouteRefusal`: the routes of `decideGoal`, each with a one-line reason.
+  On a leaf without a hash the first ten are tried in order (`dependent`,
+  `quant`, `array`, `ledger`, `ledgerBlock`, `arrayBlock`, `memory`, `kint`,
+  `kenc`, `quantLedger`: `leafRoutes`); on a leaf with a hash `decideGoal`
+  tries only `hash`, in their place.
+* The refusals, computed from each leaf route's front end, never from
   `decideGoal`: `Fml.leafARefuses` (the six reductions return `none`),
   `Fml.memRefuses`, `Fml.kintRefuses`, `Fml.kencRefuses`,
   `Fml.quantLedgerRefuses`, `Fml.leafRefuses`, `Fml.hashRefuses` (every
@@ -42,19 +44,38 @@ not presented as one here, in its docstring or in `docs/automation.md`.
   fragment).
 * `decideGoal_proved_iff_off_residue` (the verdict is exact off the residue)
   and `decisionTheorem_iff_residue_disjoint` (the unchanged `DecisionTheorem w`
-  holds exactly when no in-target leaf is in the residue; later milestones
-  may only shrink it).
+  holds exactly when no in-target leaf is in the residue; that later rounds
+  only shrink it is the milestone policy, not enforced by the code).
 * `Fml.sourceReasons`: VA1's source classes decidable from the leaf alone
   (two-binder and primitive-prefix normalization budget, mapping-bearing
-  reversed field, array path kinds); `Fml.routeRefusals`; `Fml.residueReasons`
-  (source reasons then route reasons, empty exactly off the residue,
-  `residueReasons_eq_nil_iff`). VA1's halting-`||` class is parameterized by
+  reversed field, array path kinds), attached to residue leaves as labels:
+  they are not residue tests, and no class is proved to lie in the residue;
+  `Fml.routeRefusals`; `Fml.residueReasons` (labels then route reasons, empty
+  exactly off the residue, `residueReasons_eq_nil_iff`). VA1's halting-`||` class is parameterized by
   contract roots and is not reported (its fixtures are residue members below).
   `DecisionTheorem`, `Fml.inTarget`, `Fml.Covered`, `Waivers` and every route
   are unchanged.
 
-`Examples/DecisionResidue.lean`: residue members per reason, witness
-controls per route family (item 5), and the negative control.
+`Examples/DecisionResidue.lean` (item 5):
+
+* Residue members in target: `floorClaim 1` (valid) and `floorBad` (false),
+  a halting `||` guard in an APF block, no VA1 label; `mappingReversed`, VA1's
+  mapping-field label, with `routeRefusals = leafRoutes` (every leaf route's
+  refusal named on one leaf); `exhausted`, both normalization-budget labels;
+  `sibling` (1025 visits), in the residue with no label (a label is not a
+  residue test); `hashBudget`, a leaf with hashes every hash try refuses.
+* Witness controls (the hypotheses are jointly satisfiable): twelve in-target
+  non-residue feature fixtures of earlier milestones (quantified linear
+  arithmetic proved and refuted, a `bool`-quantified APF leaf, a storage-array
+  block, fixed arrays proved and refuted, a storage-array column, a ledger
+  write, a ledger block, a given-heap parameter, a reversed struct field
+  refuted at its exact state, KeY `int` binders of features 26 and 30/31, a
+  quantified ledger leaf, hashes of one kind), each answer certified through
+  `DecisionTheorem'`. Which route answers each is not pinned.
+* Negative control `residue_not_claimed`: `floorClaim 1` valid,
+  `floorBad` not valid, both residue, the theorem's conclusion fails at each.
+* Axioms of every fixture and of the four headline theorems are pinned with
+  `#guard_msgs` (Lean's three only).
 
 ## Q1 evidence (kept for the record)
 
@@ -107,7 +128,7 @@ which the assignment reserves for the user.
 * **Route-refusal Residue.** `Fml.Residue` is the conjunction, per route in
   `decideGoal`'s order, of a named refusal (for example "no dependent
   reduction", "fresh-array cut refuses and no struct answer", "no hash try
-  covers"), each with an in-target fixture; where an existing VA1 source
+  covers"; question text as asked, the implemented wording is above), each with an in-target fixture; where an existing VA1 source
   classifier (normalization budget, halting `||`, mapping-field reversal,
   array reasons) applies it is reported as the finer reason. Exact and
   decidable; `DecisionTheorem′` then proves correctness (sound, certified
@@ -124,9 +145,43 @@ which the assignment reserves for the user.
 
 ## Gates
 
-See the CLOUD-RESULT marker commit for the gate lines of this checkpoint.
+Checkpoint 1 (MCP, per file): `Calculus/DecisionResidue.lean` and
+`Examples/DecisionResidue.lean` have no errors or warnings;
+`#print axioms DecisionTheorem'` is `[propext, Classical.choice, Quot.sound]`
+(pinned). `hashBudget_residue` costs about 24 s of kernel checking (profiler,
+language server). The base commit failed `fragments.sh --check` (a README row
+without its fragment); this lane adds the fragment row. Full-gate results
+are in the final section below.
 
 ## Reviews
 
-None yet: no Lean or decision source changed; the finder/skeptic reviews are
-due with the first source checkpoint.
+Checkpoint 1, read-only finder and skeptic (soundness area, no Lean server):
+both confirmed that every refusal predicate copies its route's branches in
+`Calculus/Decision.lean`, that the per-route `*_unknown_iff` lemmas tie them
+to the code, that the only circular part of `DecisionTheorem'` is the agreed
+totality and is disclosed, that the hash premise stays per goal, and that no
+`sorry`, axiom or `maxHeartbeats` change was added. Confirmed findings, all
+fixed:
+
+1. "Source reasons answer the structural question" overclaimed: VA1's classes
+   are now described as labels, not proved to lie in the residue.
+2. "Later milestones may only shrink the residue" was stated as a property: now
+   a policy the code does not enforce.
+3. The hash refusal is a try's verdict, not a front end: disclosed in the
+   module docstring, `docs/automation.md` and the module-map row.
+4. `RouteRefusal.memory` prose described a conjunction the code does not
+   take (struct answer only when there is no cut): fixed.
+5. Route order: `hash` replaces the leaf routes rather than following them.
+6. "Quantifier-free" for the dependent route: it takes a universal prefix.
+7. Fixture header misstated how membership is obtained (several fixtures run
+   `decide +kernel`): fixed.
+8. Witness coverage: "each route family" overclaimed and the answering route
+   was not pinned; four witnesses added (storage-array column, ledger write,
+   ledger block, KeY `int` binder) and docstrings no longer name routes.
+9. The negative control did not prove `floorBad` false: `floorBad_notValid`
+   added.
+10. `hashBudget` docstring claimed an unproved cause and a timing: removed.
+11. Fixture axioms were printed, not pinned: now `#guard_msgs`.
+12. `docs/automation.md`'s next paragraph ("does not introduce a `Residue`")
+    read as contradicting the new one: scoped to the ledger lane.
+13. Stale m7-next sections (this one, gates): updated; docs index row added.

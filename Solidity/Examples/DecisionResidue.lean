@@ -16,18 +16,24 @@ import Solidity.Examples.DecisionGaps
 `DecisionTheorem'`'s totality off it holds by definition and is not a
 completeness result. These fixtures show what the statement does carry:
 
-* **Residue members, one per named reason** (in target, every route refuses):
-  a halting `||` guard in an APF block, valid (`floorClaim 1`) and false
-  (`floorBad`); VA1's mapping-bearing reversed field (`mappingReversed`); VA1's
-  normalization budget (`exhausted`); every hash try refusing (`hashBudget`).
+* **Residue members** (in target, every route refuses): on leaves without a
+  hash, a halting `||` guard in an APF block, valid (`floorClaim 1`) and false
+  (`floorBad`), with no VA1 label; leaves carrying VA1's mapping-bearing
+  reversed-field label (`mappingReversed`, every leaf route's refusal listed)
+  and normalization-budget labels (`exhausted`); a leaf in no labelled class
+  (`sibling`). On a leaf with a hash, every hash try refusing (`hashBudget`).
 * **Witness controls**: the theorem's hypotheses are jointly satisfiable, by
-  an in-target, non-residue leaf of each route family, each with its answer
-  certified by `DecisionTheorem'`.
+  in-target, non-residue leaves from the feature fixtures of earlier
+  milestones (quantified arithmetic, APF blocks, storage and fixed arrays,
+  ledger reads and blocks, memory, KeY `int`, quantified ledger, hashes), each
+  answer certified by `DecisionTheorem'`. Which route answers each is not
+  pinned here.
 * **Negative controls**: a residue leaf is not claimed; a valid one and a
   false one sit in the residue alike, and the theorem's conclusion fails there.
 
-Residue membership is derived from the existing kernel-checked `unknown` pins
-through `residue_iff_unknown`; nothing is evaluated twice.
+Membership comes from the existing kernel-checked `unknown` pins through
+`residue_iff_unknown` where one exists (`floorClaim 1`, `floorBad`,
+`mappingReversed`), and from `decide +kernel` on `Fml.Residue` otherwise.
 -/
 
 namespace Solidity.Examples.DecisionResidue
@@ -115,13 +121,15 @@ def doubled {Γ : Ctx} (atom : Fml Names Γ) : Nat → Fml Names Γ
   | n + 1 => .and (doubled atom n) (doubled atom n)
 
 /-- **`∀ fresh s t. keccak256(s) != keccak256(t) → ∀ x y. (x + y == 5) ∧ …`**
-(1024 copies): hashes compared against their kind, so in target; every hash
-try refuses, its swapped leaf over the normalizer budget. -/
+(1024 copies of the atom, as `exhausted`'s body under the two strings): hashes
+compared against their kind, so in target. Built from constructors, as
+`DecisionHashes` builds its leaves: `dl!` has no fresh-string notation. -/
 def hashBudget : Fml Names [] :=
   strings (.imp (.not (.eq hS hT))
     (.all (.user "x") .uint (.all (.user "y") .uint (doubled hashAtom 10))))
 
-/-- In target, with a hash, and every hash try refuses (kernel, about 24 s). -/
+/-- In target, with a hash, and every hash try answers `unknown` (`Fml.Residue`
+on a leaf with a hash). Why each try refuses is not shown here. -/
 theorem hashBudget_residue : hashBudget.inTarget {} = true ∧ hashBudget.hasHash = true ∧
     hashBudget.Residue := by decide +kernel
 
@@ -129,12 +137,13 @@ end Hash
 
 /-! ## Witness controls: the hypotheses are jointly satisfiable
 
-An in-target, non-residue leaf of each route family, its answer certified by
-`DecisionTheorem'` (not merely evaluated). -/
+In-target, non-residue leaves from earlier milestones' feature fixtures, each
+answer certified by `DecisionTheorem'` (not merely evaluated). The route that
+answers is not pinned. -/
 
 section Witnesses
 
-/-- Quantifier-free arithmetic (`dependentReduction?`): proved and refuted. -/
+/-- `∀ uint` prefixes over linear arithmetic: proved and refuted. -/
 theorem dependent_witnesses :
     Answered DecisionNormalizationResidue.reflexive ∧ Answered DecisionNormalizationResidue.small :=
   ⟨DecisionTheorem' {} _ _ DecisionNormalizationResidue.nonresidual_targets.2.1
@@ -142,17 +151,17 @@ theorem dependent_witnesses :
     DecisionTheorem' {} _ _ DecisionNormalizationResidue.nonresidual_targets.1
       (not_residue_of_ne (by rw [DecisionNormalizationResidue.small_decision_refuted]; exact nofun))⟩
 
-/-- A Boolean-guarded APF block (`quantReduction?`). -/
+/-- A `bool`-quantified APF fixture. -/
 theorem quant_witness : Answered DecisionHaltingOrGaps.guarded :=
   DecisionTheorem' {} _ _ (by decide +kernel)
     (not_residue_of_ne (by rw [DecisionHaltingOrGaps.guarded_proved]; exact nofun))
 
-/-- Blocks over storage arrays (`arrayBlockReduction?`). -/
+/-- A block over a storage array (feature 32's fixture). -/
 theorem arrayBlock_witness : Answered Decision.gapArrayBlock :=
   DecisionTheorem' {} _ _ Decision.gapArrayBlock_inTarget
     (not_residue_of_ne Decision.gapArrayBlock_answers)
 
-/-- Bounded fixed-array instances (the array-block route): proved and refuted. -/
+/-- Bounded fixed-array instances: proved and refuted. -/
 theorem fixedArray_witnesses : Answered DecisionArrayGaps.fixedBlock ∧
     Answered DecisionArrayGaps.fixedBad :=
   ⟨DecisionTheorem' {} _ _ DecisionArrayGaps.fixedBlock_target
@@ -162,27 +171,47 @@ theorem fixedArray_witnesses : Answered DecisionArrayGaps.fixedBlock ∧
         obtain ⟨σ, h, _⟩ := DecisionArrayGaps.fixedBad_refuted
         rw [h]; exact nofun))⟩
 
-/-- The memory route: a given-heap parameter (proved) and a reversed fresh
-struct field (refuted at its exact child-heap state). -/
+/-- Memory: a given-heap parameter (proved) and a reversed fresh struct field
+(refuted at its exact child-heap state). -/
 theorem memory_witnesses : Answered Decision.memParamSame ∧ Answered Decision.memStructReversed :=
   ⟨DecisionTheorem' {} _ _ DecisionGapCensus.hiddenParameter_target
       (not_residue_of_ne (by rw [DecisionGapCensus.hiddenParameter_proved]; exact nofun)),
     DecisionTheorem' {} _ _ DecisionGapCensus.reversedStruct_target
       (not_residue_of_ne (by rw [DecisionGapCensus.reversedStruct_exact_state]; exact nofun))⟩
 
-/-- KeY `int` binders over two words (`decideKEnc`). -/
+/-- KeY `int` binders with two anchors (feature 30/31's fixture). -/
 theorem kenc_witness : Answered DecisionKInt.gapKIntTwoAnchors :=
   DecisionTheorem' {} _ _ DecisionKInt.gapKIntTwoAnchors_inTarget
     (not_residue_of_ne (by rw [DecisionKInt.gapKIntTwoAnchors_goal_verdict]; exact nofun))
 
-/-- Quantified ledger leaves (`decideQuantLedger`, feature 33). -/
+/-- A quantified ledger leaf (feature 33's fixture). -/
 theorem quantLedger_witness : Answered DecisionKInt.gapQuantLedger :=
   DecisionTheorem' {} _ _ DecisionKInt.gapQuantLedger_inTarget
     (not_residue_of_ne (decideGoal_complete DecisionQuantLedger.original_covered (by decide +kernel)))
 
-/-- A leaf with hashes (`decideHash`, one kind). -/
+/-- A leaf with hashes of one kind. -/
 theorem hash_witness : Answered DecisionHashes.namesSet :=
   DecisionTheorem' {} _ _ (by decide +kernel) (not_residue_of_ne DecisionHashes.namesSet_answers)
+
+/-- A positive KeY `int` binder (feature 26's fixture). -/
+theorem kint_witness : Answered Decision.gapKIntBinder :=
+  DecisionTheorem' {} _ _ Decision.gapKIntBinder_inTarget
+    (not_residue_of_ne Decision.gapKIntBinder_answers)
+
+/-- A write to the starting ledger (feature 9's fixture). -/
+theorem ledger_witness : Answered Decision.gapLedgerWrite :=
+  DecisionTheorem' {} _ _ Decision.gapLedgerWrite_inTarget
+    (not_residue_of_ne Decision.gapLedgerWrite_answers)
+
+/-- A block over the ledger (feature 21's fixture). -/
+theorem ledgerBlock_witness : Answered Decision.gapLedgerBlock :=
+  DecisionTheorem' {} _ _ Decision.gapLedgerBlock_inTarget
+    (not_residue_of_ne (decideGoal_complete Decision.gapLedgerBlock_covered rfl))
+
+/-- A storage array column read at a symbolic index (feature 10's fixture). -/
+theorem storageArray_witness : Answered Decision.gapColumn :=
+  DecisionTheorem' {} _ _ Decision.gapColumn_inTarget
+    (not_residue_of_ne Decision.gapColumn_answers)
 
 end Witnesses
 
@@ -191,25 +220,74 @@ end Witnesses
 /-- A valid leaf and a false leaf of one shape are both in target and in the
 residue; the theorem's conclusion fails at each, so it claims neither. -/
 theorem residue_not_claimed :
-    Fml.Valid (DecisionHaltingOrGaps.floorClaim 1) ∧
+    Fml.Valid (DecisionHaltingOrGaps.floorClaim 1) ∧ ¬ Fml.Valid DecisionHaltingOrGaps.floorBad ∧
       ¬ Answered (DecisionHaltingOrGaps.floorClaim 1) ∧
       ¬ Answered DecisionHaltingOrGaps.floorBad :=
-  ⟨DecisionHaltingOrGaps.floorClaim_one_valid, not_answered_of_residue floorValid_residue.2,
-    not_answered_of_residue floorBad_residue.2⟩
+  ⟨DecisionHaltingOrGaps.floorClaim_one_valid, DecisionHaltingOrGaps.floorBad_notValid,
+    not_answered_of_residue floorValid_residue.2, not_answered_of_residue floorBad_residue.2⟩
 
-#print axioms dependent_witnesses
-#print axioms quant_witness
-#print axioms arrayBlock_witness
-#print axioms fixedArray_witnesses
-#print axioms memory_witnesses
-#print axioms kenc_witness
-#print axioms quantLedger_witness
-#print axioms hash_witness
-#print axioms residue_not_claimed
-#print axioms mapping_residue
-#print axioms exhausted_residue
-#print axioms hashBudget_residue
-#print axioms mapping_routeRefusals
+/-- info: 'Solidity.Examples.DecisionResidue.dependent_witnesses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms dependent_witnesses
 
+/-- info: 'Solidity.Examples.DecisionResidue.quant_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms quant_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.arrayBlock_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms arrayBlock_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.fixedArray_witnesses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms fixedArray_witnesses
+
+/-- info: 'Solidity.Examples.DecisionResidue.memory_witnesses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms memory_witnesses
+
+/-- info: 'Solidity.Examples.DecisionResidue.kenc_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms kenc_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.quantLedger_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms quantLedger_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.hash_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms hash_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.kint_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms kint_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.ledger_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms ledger_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.ledgerBlock_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms ledgerBlock_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.storageArray_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms storageArray_witness
+
+/-- info: 'Solidity.Examples.DecisionResidue.residue_not_claimed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms residue_not_claimed
+
+/-- info: 'Solidity.Examples.DecisionResidue.floorValid_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms floorValid_residue
+
+/-- info: 'Solidity.Examples.DecisionResidue.floorBad_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms floorBad_residue
+
+/-- info: 'Solidity.Examples.DecisionResidue.mapping_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms mapping_residue
+
+/-- info: 'Solidity.Examples.DecisionResidue.mapping_routeRefusals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms mapping_routeRefusals
+
+/-- info: 'Solidity.Examples.DecisionResidue.exhausted_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms exhausted_residue
+
+/--
+info: 'Solidity.Examples.DecisionResidue.sibling_residue_without_reason' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms sibling_residue_without_reason
+
+/-- info: 'Solidity.Examples.DecisionResidue.hashBudget_residue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms hashBudget_residue
 
 end Solidity.Examples.DecisionResidue

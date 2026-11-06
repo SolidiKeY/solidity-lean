@@ -8,10 +8,13 @@ import Solidity.Calculus.DecisionArrayReasons
 # The residue and `DecisionTheorem'` (M7-next, AU01)
 
 `Fml.Residue` is the set of leaves on which **every route of `decideGoal`
-refuses**, each route's refusal named (`RouteRefusal`) and computed from the
-route's own front end: a reduction returning `none`, a source answer
-returning `none`, a guard that does not hold, or a hash try answering
-`unknown`. It is decidable and evaluates in the kernel.
+refuses**, each route's refusal named (`RouteRefusal`). A leaf route's refusal
+is computed from its own front end, never from `decideGoal`: a reduction
+returning `none`, a source answer returning `none`, or a guard that does not
+hold. The one exception is the hash route: a hash try is itself a decision
+(it runs `decideLeaf` on its swapped leaf and instances), so `Fml.hashRefuses`
+is stated on each try's own verdict. The residue is decidable and evaluates
+in the kernel.
 
 The user chose this form on 2026-11-06 (question Q1 of the `m7-decision`
 lane, `docs/feature-work/m7-next.md`). **It is exact by construction**:
@@ -22,9 +25,10 @@ answered. What it does prove beyond the definition is that every answer
 off the residue is correct (a proof is validity under the goal's own hash
 premise, a refutation a certified countermodel) and that the verdict is
 exact there (`decideGoal_proved_iff_off_residue`). The structural question,
-which source shapes fall in the residue, is answered only for the finer
-source reasons VA1 named (`Fml.residueReasons`), which refine but do not
-replace the route refusals.
+which source shapes fall in the residue, stays open: VA1's source classes
+(`Fml.sourceReasons`) are attached as labels to residue leaves
+(`Fml.residueReasons`), but nothing proves that a member of a class is in the
+residue.
 -/
 
 namespace Solidity.Decide
@@ -43,10 +47,12 @@ theorem LeafVerdict.isUnknown_iff {v : LeafVerdict C} : v.isUnknown = true ↔ v
 
 /-! ## The routes and their refusals -/
 
-/-- **The routes of `decideGoal`**, in the order it tries them, each named by
-what refuses. -/
+/-- **The routes of `decideGoal`**, each named by what refuses. On a leaf
+without a hash the first ten are tried in this order (`leafRoutes`); on a leaf
+with a hash `decideGoal` tries only `hash`, in their place. -/
 inductive RouteRefusal where
-  /-- `dependentReduction?` returns `none` (M4's exact fragment). -/
+  /-- `dependentReduction?` returns `none` (M4's exact fragment: a universal
+  prefix over quantifier-free arithmetic). -/
   | dependent
   /-- `quantReduction?` returns `none` (Presburger quantifiers, APF blocks). -/
   | quant
@@ -58,8 +64,9 @@ inductive RouteRefusal where
   | ledgerBlock
   /-- `arrayBlockReduction?` returns `none` (blocks over storage arrays). -/
   | arrayBlock
-  /-- The memory route refuses: the fresh-array cut's leaf refuses every
-  reduction above and no fresh-struct answer, or no given-heap answer. -/
+  /-- The memory route refuses: with fresh allocation, the fresh-array cut's
+  leaf refuses every reduction above, or there is no cut and no fresh-struct
+  answer; without, no given-heap answer. -/
   | memory
   /-- The KeY `int` route refuses: its guard fails or the ledger reading
   refuses every reduction above. -/
@@ -75,17 +82,17 @@ inductive RouteRefusal where
 
 /-- One-line reason per route. -/
 def RouteRefusal.reason : RouteRefusal → String
-  | .dependent => "dependentReduction? refuses: outside M4's exact quantifier-free fragment."
+  | .dependent => "dependentReduction? refuses: outside M4's exact fragment (universal prefix, quantifier-free body)."
   | .quant => "quantReduction? refuses: a quantifier left that is neither Presburger nor an APF block."
   | .array => "arrayReduction? refuses: storage array reads it cannot cut."
   | .ledger => "ledgerReduction? refuses: ledger reads it cannot cut."
   | .ledgerBlock => "ledgerBlockReduction? refuses: no instantiable block over the ledger."
   | .arrayBlock => "arrayBlockReduction? refuses: no instantiable block over storage arrays."
-  | .memory => "The memory route refuses: no covered fresh-array cut, struct or given-heap answer."
+  | .memory => "The memory route refuses: its fresh-array cut, fresh-struct or given-heap branch refuses."
   | .kint => "The KeY int route refuses: its guard fails or the ledger reading is refused."
   | .kenc => "The two-word KeY int route refuses: no encoding or the encoded leaf is refused."
   | .quantLedger => "quantLedgerReduction? refuses: no ledger cut before abstraction."
-  | .hash => "Every hash try refuses: no swap, family instance or written-memory realization answers."
+  | .hash => "Every hash try (one, two, three kinds, written memory) answers unknown."
 
 /-- The routes tried on a leaf without a hash, in order. -/
 def leafRoutes : List RouteRefusal :=
@@ -303,7 +310,8 @@ theorem decideGoal_proved_iff_off_residue {φ : Fml C []} (hr : ¬ φ.Residue) :
   | unknown => exact absurd (residue_iff_unknown.2 hd) hr
 
 /-- The original, unchanged goal `DecisionTheorem` says exactly that the
-residue meets no in-target leaf. Later milestones may only shrink the residue. -/
+residue meets no in-target leaf. The milestone policy is that later rounds
+shrink the residue; nothing here enforces it (a changed route can grow it). -/
 theorem decisionTheorem_iff_residue_disjoint (w : Waivers) :
     DecisionTheorem w ↔ ∀ (C : Contract) (φ : Fml C []), φ.inTarget w = true → ¬ φ.Residue := by
   unfold DecisionTheorem
@@ -313,9 +321,11 @@ theorem decisionTheorem_iff_residue_disjoint (w : Waivers) :
 /-! ## Finer source reasons (VA1)
 
 Where a source class VA1 named applies to a residue leaf, it is reported
-before the route refusals. These classes are decidable from the source alone
-and consult no route; they are not unknown tests (a member of a class may be
-answered by another route), so they are reported only for residue leaves. -/
+before the route refusals, as a label. These classes are decidable from the
+source alone and consult no route; they are not unknown tests (a member of a
+class may be answered by another route, and none is proved to be in the
+residue), so they are reported only for residue leaves. VA1's halting-`||`
+class is parameterized by contract roots and is not reported. -/
 
 /-- The finer source reasons that hold of the leaf, VA1's names. -/
 def _root_.Solidity.Fml.sourceReasons (φ : Fml C []) : List String :=

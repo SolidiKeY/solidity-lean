@@ -88,6 +88,7 @@ history is in git.
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
 | [lifetime.md](lifetime.md) | Transaction traces from the constructor, whole-contract safety, invariant induction. |
 | [automation.md](automation.md) | The deciding closer: M0–M8, the decision theorem's features and gaps, M7-next. |
+| [feature-work/m7-next.md](feature-work/m7-next.md) | M7-next lane handoff: the route-refusal `Fml.Residue`, `DecisionTheorem'` (not a completeness result), fixtures, reviews and gates. |
 | [complete-verification.md](complete-verification.md) | The exact-reduction pipeline, its stages, tools and limits. |
 | [assurance.md](assurance.md) | Trust gates, the memory compiler's invariants, remaining assurance work. |
 | [rule-repair.md](rule-repair.md) | How to repair a broken rule: semantics first, rejection gates, soundness. |
