@@ -1280,3 +1280,28 @@ root identity for unsampled private-session readback and fails on retirement or
 survivors. Native process fixtures are not proof or rendered-editor evidence.
 [The small H80 manifest](dafny-h80-provision-evidence-manifest.json) binds VM-only
 logs, reviews and immutable installed artifact copies; bulk remains offgit.
+
+
+### H80 full-gate resource STOP; H82b intake and next CI queue
+
+At `d1ec2a900024f5b0a74d4deb87a66464ce5698b5`, the unchanged full gate
+passed build-touched, then stopped in `Solidity.Source.Horizon` at the original
+12GiB available-memory reserve. Command exit -9 (shell247), sampled aggregate
+RSS4,875,681,792bytes, available12,880,228,352bytes, swap0, owned survivors none.
+The [H80 manifest](dafny-h80-provision-evidence-manifest.json) binds the complete
+failed receipt. No unchanged heavy retry, source/budget change or runtime pass.
+Full build/TestSuite/timed strict remain unpassed. The source is Claude-owned;
+its resource-compatible proof check is an external dependency.
+
+H82b intake hashes and per-file checks passed; the editor member list is empty.
+Goal identity/status is untouched. H80 metadata requires a producer-owned typed
+candidate hook and per-clause source identity/span through serialization; a
+whole-obligation refutation does not establish a particular failed clause.
+No guessed spans or display-triggered proof search were added.
+
+OT-CI-PARITY is the next independent item: preserve strict mandatory parity
+failure without full inputs while allowing explicitly labeled digest-only CI
+checks, repair stale H49 tests under H80, and retain fresh-checkout failures.
+All486 rows/frozen270 remain; paired native/rendered/proof/performance/scaling
+and independent row judgments remain unfinished. KeySort's saved success is a
+source check, not a full runtime gate. No integration or completion claim.
