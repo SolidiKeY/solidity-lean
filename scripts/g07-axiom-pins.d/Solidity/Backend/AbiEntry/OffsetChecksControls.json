@@ -1,0 +1,36 @@
+{
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.height_boundaries": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.inhabited_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.lazy_negative_reference": [],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.region_edges": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.signed_not_unsigned": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.signed_relative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.tail_edges": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.wrapped_product": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/OffsetChecksControls.lean:Solidity.Backend.AbiEntry.OffsetChecksControls.zero_extent": [
+  "Quot.sound",
+  "propext"
+ ]
+}

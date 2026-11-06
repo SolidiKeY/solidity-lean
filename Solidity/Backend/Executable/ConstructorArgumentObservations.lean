@@ -20,8 +20,8 @@ theorem successful_numeric_agreement :
 ∀ {E : Solidity.Source.Env} {C : Solidity.Contract} {Γ : Solidity.Ctx} {tail : Solidity.Source.RCtx}
  (G : Solidity.Source.Glob E) (F : Solidity.Source.Fr) (fuel : Nat)
  (a b : Solidity.Source.IntTy)
- (ha : (Solidity.Source.STy.int a).implicit E.isBase (.int a) = true)
- (hb : (Solidity.Source.STy.int b).implicit E.isBase (.int b) = true)
+ (ha : (Solidity.Source.STy.int a).implicit E.isBase E.mapFree (.int a) = true)
+ (hb : (Solidity.Source.STy.int b).implicit E.isBase E.mapFree (.int b) = true)
  (x y : Int) (hx : a.lo ≤ x ∧ x ≤ a.hi) (hy : b.lo ≤ y ∧ y ≤ b.hi)
  (rest : Solidity.Source.Locals E.layout tail) (s : Solidity.Source.St E)
  (target : Solidity.State C Γ)

@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataSlice.lean:Solidity.Backend.MemoryOps.source_uint_slice_copy_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSlice.lean:Solidity.Backend.MemoryOps.source_uint_slice_copy_window": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSlice.lean:Solidity.Backend.MemoryOps.source_uint_slice_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSlice.lean:Solidity.Backend.MemoryOps.source_uint_slice_value": []
+}

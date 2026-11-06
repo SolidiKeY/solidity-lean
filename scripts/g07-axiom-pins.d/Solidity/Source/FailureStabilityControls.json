@@ -1,0 +1,57 @@
+{
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.frame_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.PlannedBelow.belowAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.requestScope_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.runTxWithPlan_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.attempt_not_below": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.panic_bytes_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.request_stop_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.revert_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.stuck_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureStabilityControls.lean:Solidity.Source.FailureExecution.StabilityControls.timeout_not_equal_completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
