@@ -211,3 +211,23 @@ Current-owner delivery pending: none. These routing fields do not establish
 owner agreement, dependency availability or validation. Host relay journals
 determine delivery acceptance; a relay itself grants none of those approvals.
 The original goal, branch and limits remain unchanged. No Lean checks resume.
+
+## H70 partial Raw owner ticket and requester relay
+
+The coordinator supplied a partial prerequisite ticket from migrate-syntax head
+`72441d298484976c48dd14b4e095c9149b852025`, source commit
+`074e62c1840dd2d7ab19c95ca5d437ebfe57dbb8`, source SHA256
+`a463aa0f978da5d5bae6ba5cffdfa95861a495a8d69942502b706b7b157ec506`.
+The reported host Raw patch SHA256 is
+`34fc66ea93a8a2c956ebb51f225b03593109239c5b46631aaa28bfb24efb2a9a`.
+Its host receipt path is not present on this VM, so its bytes/hash have not been
+independently verified here. The supplied diff is not applied. Thirty reported
+axiom-growth entries require root review; this ticket grants no trust acceptance
+and lifts no hold.
+
+For requester head `1aa579a535f1f5e6445822acdbef2934613933e7`, the coordinator
+reports relay to migrate-root-gate and migrate-syntax, with current-owner pending
+none. Host journals determine delivery acceptance; relay is not agreement or
+validation. Continue waiting for the Raw prerequisite and PERF-PREFIX-435
+disposition. STOP, all thirty original Tools files, the original goal/branch and
+all resource/proof limits remain preserved. No Lean checks resume.
