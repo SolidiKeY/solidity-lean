@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded serial run-lean gate, with compiler serialization and off-git receipts.
+"""Bounded Bridge measurement or full run-lean gate, with serial compiler calls.
 No toolchain or tracked configuration edits. Never treat a resource stop as pass.
 """
 import argparse, fcntl, hashlib, json, os, pathlib, shlex, signal, subprocess, time
@@ -10,6 +10,7 @@ def main():
     ap.add_argument("--toolchain",type=pathlib.Path,required=True)
     ap.add_argument("--evidence",type=pathlib.Path,required=True)
     ap.add_argument("--solkey-rules",type=pathlib.Path,required=True)
+    ap.add_argument("--bridge-measurement",action="store_true",help="measure Bridge package; final full run-lean gate remains required")
     args=ap.parse_args(); root=args.root.resolve(); tc=args.toolchain.resolve(); out=args.evidence.resolve()
     if out.exists() and any(out.iterdir()): raise SystemExit("Refusing nonempty evidence directory; preserve each attempt separately")
     out.mkdir(parents=True,exist_ok=True)
@@ -40,7 +41,7 @@ def main():
         lake.write_text("#!/bin/sh\nexec "+shlex.quote(str(tc/"bin/lake"))+" --no-cache \"$@\"\n"); lake.chmod(0o755)
         env=dict(os.environ,PATH=str(mirror/"bin")+os.pathsep+os.environ["PATH"],LEAN_SYSROOT=str(mirror),LAKE_OVERRIDE_LEAN="true",LEAN_NUM_THREADS="1",LAKE_CACHE_DIR="",LAKE_NO_CACHE="true",SOLKEY_RULES=str(rules))
         versions={x:subprocess.check_output([str(tc/"bin"/x),"--version"],text=True).strip() for x in ("lean","lake")}
-        command=["bash","./run-lean.sh","--bridge"]; start=time.monotonic(); stopped=None; peak=0
+        command=["bash","./scripts/check-bridge.sh"] if args.bridge_measurement else ["bash","./run-lean.sh","--bridge"]; start=time.monotonic(); stopped=None; peak=0
         with (out/"build.log").open("w") as log:
             proc=subprocess.Popen(command,cwd=root,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
             try:
@@ -66,7 +67,7 @@ def main():
                 try: os.killpg(proc.pid,signal.SIGKILL)
                 except ProcessLookupError: pass
                 proc.wait()
-        receipt={"command":command,"root":str(root),"head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=root,text=True).strip(),"versions":versions,"exit":proc.returncode,"elapsed_seconds":time.monotonic()-start,"resource_stop":stopped,"peak_vm_cgroup_bytes":peak,"compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","status":"command-pass" if proc.returncode==0 and not stopped else "fail","full_gate_acceptance":"pending independent decisive-output review","solkey_rules_sha256":hashlib.sha256(rules.read_bytes()).hexdigest()}
+        receipt={"command":command,"measurement_scope":"Bridge" if args.bridge_measurement else "full-root-and-Bridge","root":str(root),"head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=root,text=True).strip(),"versions":versions,"exit":proc.returncode,"elapsed_seconds":time.monotonic()-start,"resource_stop":stopped,"peak_vm_cgroup_bytes":peak,"compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","status":"command-pass" if proc.returncode==0 and not stopped else "fail","full_gate_acceptance":"pending independent decisive-output review","solkey_rules_sha256":hashlib.sha256(rules.read_bytes()).hexdigest()}
         (out/"receipt.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n"); print(json.dumps(receipt))
         return 0 if receipt["status"]=="command-pass" else 1
 if __name__=="__main__": raise SystemExit(main())

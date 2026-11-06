@@ -10,7 +10,7 @@ class TimingControls(unittest.TestCase):
     def write(self,path,version,elapsed,**changes):
         data={"status":"command-pass","exit":0,"resource_stop":None,"elapsed_seconds":elapsed,
               "versions":{"lean":"Lean (version "+version+", fixture)","lake":"Lake fixture (Lean version "+version+")"},
-              "command":["bash","./run-lean.sh","--bridge"],"compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","solkey_rules_sha256":"f"*64}
+              "command":["bash","./run-lean.sh","--bridge"],"measurement_scope":"full-root-and-Bridge","compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","solkey_rules_sha256":"f"*64}
         data.update(changes); (path/"receipt.json").write_text(json.dumps(data))
     def test_equal_and_faster(self):
         self.assertEqual(timing.compare(self.old,self.new)["action"],"no-regression")
@@ -65,4 +65,16 @@ class TimingControls(unittest.TestCase):
         for malformed in ([],None):
             (self.new/"receipt.json").write_text(json.dumps(malformed))
             proc=subprocess.run(cli,capture_output=True,text=True); self.assertEqual(proc.returncode,2); self.assertEqual(json.loads(proc.stdout)["action"],"blocked")
+    def test_bridge_measurement_scope(self):
+        for path,version in ((self.old,"4.24.0"),(self.new,"4.35.0")):
+            self.write(path,version,100,command=["bash","./scripts/check-bridge.sh"],measurement_scope="Bridge")
+        result=timing.compare(self.old,self.new)
+        self.assertEqual(result["action"],"no-regression"); self.assertEqual(result["measurement_scope"],"Bridge"); self.assertEqual(result["command"],["bash","./scripts/check-bridge.sh"])
+    def test_cross_scope_comparison_rejected(self):
+        self.write(self.new,"4.35.0",100,command=["bash","./scripts/check-bridge.sh"],measurement_scope="Bridge")
+        with self.assertRaises(timing.Blocked): timing.compare(self.old,self.new)
+    def test_wrong_scope_label_rejected(self):
+        for path,version in ((self.old,"4.24.0"),(self.new,"4.35.0")):
+            self.write(path,version,100,command=["bash","./scripts/check-bridge.sh"])
+        with self.assertRaises(timing.Blocked): timing.compare(self.old,self.new)
 if __name__=="__main__": unittest.main()

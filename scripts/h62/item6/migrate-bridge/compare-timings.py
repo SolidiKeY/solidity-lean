@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare completed bounded timings; this never certifies proof/full-gate acceptance."""
 import argparse, decimal, fractions, json, pathlib, re
-PROFILE=("command","compiler_args","module_timeout_seconds","reserve_gib","swap_bytes","cache","solkey_rules_sha256")
+PROFILE=("command","measurement_scope","compiler_args","module_timeout_seconds","reserve_gib","swap_bytes","cache","solkey_rules_sha256")
 class Blocked(ValueError): pass
 
 def load_run(directory, version):
@@ -12,7 +12,9 @@ def load_run(directory, version):
         if receipt.get("status")!="command-pass" or type(receipt.get("exit")) is not int or receipt["exit"]!=0 or receipt["resource_stop"] is not None:
             raise Blocked("run did not complete successfully: "+str(directory))
         if any(k not in receipt for k in PROFILE): raise Blocked("missing resource/cache profile")
-        expected={"command":["bash","./run-lean.sh","--bridge"],"compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache"}
+        if receipt["command"] not in (["bash","./run-lean.sh","--bridge"],["bash","./scripts/check-bridge.sh"]): raise Blocked("unsupported measurement command")
+        scope="Bridge" if receipt["command"]==["bash","./scripts/check-bridge.sh"] else "full-root-and-Bridge"
+        expected={"measurement_scope":scope,"compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache"}
         if any(type(receipt[k]) is not type(v) or receipt[k]!=v for k,v in expected.items()): raise Blocked("invalid bounded-run profile")
         if not isinstance(receipt["solkey_rules_sha256"],str) or not re.fullmatch("[0-9a-f]{64}",receipt["solkey_rules_sha256"]): raise Blocked("invalid rules-input hash")
         if not isinstance(receipt.get("versions"),dict): raise Blocked("missing versions")
@@ -43,7 +45,7 @@ def compare(old_dir,new_dir):
     ratio=fractions.Fraction(new_time)/fractions.Fraction(old_time)
     delta=(new_time/old_time-1)*100
     action="stop" if ratio>fractions.Fraction(11,10) else "escalate" if ratio>1 else "no-regression"
-    return {"schema":1,"old_seconds":str(old_time),"new_seconds":str(new_time),"delta_percent":str(delta),"delta_percent_exact_fraction":str((ratio-1)*100),"action":action,
+    return {"schema":1,"measurement_scope":old["measurement_scope"],"command":old["command"],"old_seconds":str(old_time),"new_seconds":str(new_time),"delta_percent":str(delta),"delta_percent_exact_fraction":str((ratio-1)*100),"action":action,
             "proof_and_full_gate_acceptance":"not assessed; independent acceptance remains required",
             "old_versions":old["versions"],"new_versions":new["versions"]}
 
