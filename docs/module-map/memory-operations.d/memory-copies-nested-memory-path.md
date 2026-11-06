@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/NestedMemoryPathInterface.lean` | Contract only for selected nested memory paths, checked deep snapshot copying/binding, preserved old contents and distinct path/capacity refusals. |

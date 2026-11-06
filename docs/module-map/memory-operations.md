@@ -577,6 +577,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/GuardedDefaultDeclarationInterface.lean` | Guard the actual selected declaration code; explicit frame/representation inputs and capacity-free success-or-refusal contract. |
 | `Backend/MemoryCopies/GuardedDefaultDeclaration.lean` | Guard the actual selected declaration with complete success state/allocator contract and explicit capacity refusal. |
 | `Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean` | Actual body selection, local bindings, stack/payload, full new contents, represented saturation refusal and unsupported-domain controls. |
+| `Backend/MemoryCopies/NestedMemoryPathInterface.lean` | Contract only for selected nested memory paths, checked deep snapshot copying/binding, preserved old contents and distinct path/capacity refusals. |
 | `Backend/MemoryCopies/NestedStorageLiveInterface.lean` | Contract only for live normalization and existing checked dynamic-outer-array copying with arbitrary outer and child storage shadows. |
 | `Backend/MemoryCopies/NestedStorageLive.lean` | Proved exact live normalization, ReprAt transport and existing checked dynamic nested runtime copying for original arbitrary outer/child shadows. |
 | `Backend/MemoryCopies/NestedStorageLiveControls.lean` | Populated-heap mixed-length dynamic execution, retained outer/child shadows, 64-empty-child success and represented capacity refusal. |
