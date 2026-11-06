@@ -666,3 +666,26 @@ three recovered Python scripts, node --check of the JavaScript script, and
 git diff --cached --check pass. Reader and the three Lean controls are
 byte-identical against both parents. The unnecessary recovered whitespace
 exemptions were omitted; existing configuration is unchanged.
+
+## H82b final metadata intake
+
+The final intake archive, manifest and SHA256SUMS match the dispatched hashes;
+all557 member-file hashes verify. The frozen assignment and live exclusive
+scope are present and read. This chain has no retiring members and no missing
+final retirements. Its merge-first head618dda88 is already an ancestor of
+ce8653db. The earlier missing-metadata wait is resolved; no other chain scope
+is absorbed. intake-receipt.json records exact input paths, sizes and hashes.
+
+The original untracked native executable and executable-cache archive remain
+unavailable. The restored D-HANDOFF is ready for existing coordinator routing;
+no browser relay acceptance or execution is inferred. Browser validation,
+conditional storage-diamond proof closure and final validation remain open.
+A fresh setup probe found Docker28.4.0 available with no running containers
+and no local images; Reader OLean is absent. No Lean/build ran outside a bounded
+scope, and no historical gate was relabelled as fresh.
+
+Independent read-only finder and skeptic each verified all557 hashes, five
+receipt input sizes/hashes, merge ancestry and the limited metadata scope;
+no findings, no Lean/build invocation. check-doc-paths.sh exits0: all Lean
+references resolve, with115 ambiguous references reported. git diff --check
+passes. No statement, definition, axiom, gate or budget changed.

@@ -48,10 +48,10 @@
   "theorems_and_budgets_unchanged": true,
   "missing": [
     "Original untracked native-isolated/direct-check binary",
-    "Original runtime/consumer-708/cache-c9230cc9/cache.tar.zst executable cache",
-    "Separately indexed frozen-assignment/scope H82 package"
+    "Original runtime/consumer-708/cache-c9230cc9/cache.tar.zst executable cache"
   ],
   "restore": "Verify archive SHA256, then tar --zstd -xf ARCHIVE -C a fresh checkout root; paths remain unchanged. Existing fixtures.cjs and prepare-admission.cjs regenerate fixture/admission files. Gates are not skipped if data is absent.",
   "recovered_worker_head": "618dda88b2096d807508090a81fe54e8b440b96d",
-  "retained_config_note": "The newer branch .gitattributes is retained; recovered additions only relaxed whitespace checks on now-untracked bulk and are unnecessary."
+  "retained_config_note": "The newer branch .gitattributes is retained; recovered additions only relaxed whitespace checks on now-untracked bulk and are unnecessary.",
+  "authenticated_metadata_receipt": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/intake-receipt.json"
 }
