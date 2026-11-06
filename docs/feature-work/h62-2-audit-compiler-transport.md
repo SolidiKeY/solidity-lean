@@ -200,3 +200,33 @@ bundle and evidence. The full gate is pending, so no RUNTIME_GATE_PASS is claime
 No H55 producer work is duplicated. No push, merge, PR, pre-gate, deployment
 or publication occurred. Only the coordinator may register area modules;
 the committed test-only import fragment does not change a central root/map.
+
+## H82 retirement: stopped, incomplete
+
+The human explicitly retired this worker and assigned handoff to
+`solidity-v12-v17-20261031/v16-correctness-transfer`. Implementation stopped.
+The unvalidated Boolean-write draft is preserved byte-for-byte as
+`tests/h62/item2/audit-compiler-transport/handoff/Totality.lean.pending`; its
+single check exited1 at public_accepts (dependent compiler match), so it adds
+no validated witness or totality result. No repair followed retirement.
+
+Complete original thread assignment, original work/backfill queue, exact scope
+manifest, later decisions and local checksums are committed under the same
+`handoff` directory. The launcher-rendered goal object itself cannot be retrieved:
+get_goal is unavailable. Its coordinator-reported hash is retained distinctly
+from the saved thread-assignment byte hash. Remaining498 constants,91 producers,
+semantic domains, broader success/gas/fork and final gates stay unfinished.
+
+The only goal mutation exposed accepts complete or blocked, with no PAUSED
+operation. The requested PAUSED state cannot be set via this API; no substitute
+state, new goal or automatic continuation is authorized. This worker stops.
+No H71 push permission is available here, so the original no-push restriction
+remains in force. No branch or master was pushed. waits=[]; no external owner
+wait is invented for unfinished work. Final head and exported patch/bundle,
+handoff and evidence hashes are in the retirement result and SHA256SUMS.
+
+Independent retirement finder and skeptic reviews passed with no preservation
+findings: original queue/scope/owner routing and all seven handoff-file hashes
+were verified read-only, without Lean/compiler/server calls. Review limitations:
+pre-move draft byte identity has no separate independent snapshot; final commit
+and export checks occur after review. No failed proof is upgraded by the review.
