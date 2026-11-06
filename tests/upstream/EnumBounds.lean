@@ -2,7 +2,7 @@ import Solidity.Tools.Upstream
 
 open Solidity Solidity.Semantics
 
-solc_import "../solc/EnumDeclarationBounds.ast.json" hash 0xe94035f3ffc089f4 as BoundsLegacy.EnumDeclarationBounds testing
+solc_import "../solc/EnumDeclarationBounds.ast.json" hash 0xbd473578e1732291 as BoundsLegacy.EnumDeclarationBounds testing
 
 private def LegacyReject : Blk BoundsLegacy.EnumDeclarationBounds [] := ⟨_, sol[BoundsLegacy.EnumDeclarationBounds]{ foreignRead(2); }⟩
 theorem LegacyReject_checked : (match Prog.run (State.init BoundsLegacy.EnumDeclarationBounds) LegacyReject.2 with | .error .panic => true | _ => false) = true := by decide +kernel
@@ -16,7 +16,7 @@ private def LegacyLocal : Blk BoundsLegacy.EnumDeclarationBounds [] := ⟨_, sol
 theorem LegacyLocal_checked : (Prog.run (State.init BoundsLegacy.EnumDeclarationBounds) LegacyLocal.2).isOk = true := by decide +kernel
 #print axioms LegacyLocal_checked
 
-solc_import "../solc/EnumDeclarationBounds-viaIR.ast.json" hash 0xb0381165d0dad385 as BoundsIR.EnumDeclarationBounds testing
+solc_import "../solc/EnumDeclarationBounds-viaIR.ast.json" hash 0x88b2a163ed98532c as BoundsIR.EnumDeclarationBounds testing
 
 private def IRReject : Blk BoundsIR.EnumDeclarationBounds [] := ⟨_, sol[BoundsIR.EnumDeclarationBounds]{ foreignRead(2); }⟩
 theorem IRReject_checked : (match Prog.run (State.init BoundsIR.EnumDeclarationBounds) IRReject.2 with | .error .panic => true | _ => false) = true := by decide +kernel

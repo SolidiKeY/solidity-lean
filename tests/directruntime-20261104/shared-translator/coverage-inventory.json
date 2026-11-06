@@ -116,7 +116,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/4/members/2/typeName",
             "nodeId": null,
             "src": "262:6:0",
@@ -166,7 +166,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/4/members/2/typeName",
             "nodeId": null,
             "src": "262:6:0",
@@ -307,7 +307,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression",
             "nodeId": null,
             "src": "393:17:0",
@@ -365,7 +365,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression",
             "nodeId": null,
             "src": "393:17:0",
@@ -558,7 +558,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/1/expression/arguments/0",
             "nodeId": null,
             "src": "419:25:0",
@@ -615,7 +615,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/1/expression/arguments/0",
             "nodeId": null,
             "src": "419:25:0",
@@ -748,7 +748,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body",
             "nodeId": null,
             "src": "391:57:0",
@@ -799,7 +799,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body",
             "nodeId": null,
             "src": "391:57:0",
@@ -1493,7 +1493,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1",
             "nodeId": 171,
             "src": "56:1027:0",
@@ -1545,7 +1545,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1",
             "nodeId": 171,
             "src": "56:1027:0",
@@ -1892,7 +1892,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/2/typeName/keyType",
             "nodeId": null,
             "src": "152:4:0",
@@ -1942,7 +1942,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/2/typeName/keyType",
             "nodeId": null,
             "src": "152:4:0",
@@ -2070,7 +2070,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/8/body/statements/1/expression/rightHandSide/expression",
             "nodeId": null,
             "src": "677:7:0",
@@ -2130,7 +2130,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/8/body/statements/1/expression/rightHandSide/expression",
             "nodeId": null,
             "src": "677:7:0",
@@ -2426,7 +2426,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/0",
             "nodeId": 5,
             "src": "86:29:0",
@@ -2470,7 +2470,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/0",
             "nodeId": 5,
             "src": "86:29:0",
@@ -2570,7 +2570,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/0/members/0",
             "nodeId": 2,
             "src": "99:4:0",
@@ -2614,7 +2614,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/0/members/0",
             "nodeId": 2,
             "src": "99:4:0",
@@ -3061,7 +3061,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0",
             "nodeId": null,
             "src": "393:17:0",
@@ -3111,7 +3111,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0",
             "nodeId": null,
             "src": "393:17:0",
@@ -3474,7 +3474,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/1/expression",
             "nodeId": null,
             "src": "412:33:0",
@@ -3532,7 +3532,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/1/expression",
             "nodeId": null,
             "src": "412:33:0",
@@ -3683,7 +3683,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/3/nodes/0/body/statements/1/initialValue/expression",
             "nodeId": null,
             "src": "1319:36:0",
@@ -3743,7 +3743,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/3/nodes/0/body/statements/1/initialValue/expression",
             "nodeId": null,
             "src": "1319:36:0",
@@ -3953,7 +3953,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6",
             "nodeId": 51,
             "src": "362:86:0",
@@ -4005,7 +4005,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6",
             "nodeId": 51,
             "src": "362:86:0",
@@ -4135,7 +4135,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/7/nodes/0/body/statements/0/declarations/0/typeName",
             "nodeId": null,
             "src": "2375:44:0",
@@ -4187,7 +4187,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/7/nodes/0/body/statements/0/declarations/0/typeName",
             "nodeId": null,
             "src": "2375:44:0",
@@ -4502,7 +4502,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression/leftHandSide",
             "nodeId": null,
             "src": "393:5:0",
@@ -4558,7 +4558,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression/leftHandSide",
             "nodeId": null,
             "src": "393:5:0",
@@ -4699,7 +4699,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/1/typeName/pathNode",
             "nodeId": null,
             "src": "120:5:0",
@@ -4743,7 +4743,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/1/typeName/pathNode",
             "nodeId": null,
             "src": "120:5:0",
@@ -5209,7 +5209,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/7/body/statements/0/expression/leftHandSide",
             "nodeId": null,
             "src": "509:9:0",
@@ -5265,7 +5265,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/7/body/statements/0/expression/leftHandSide",
             "nodeId": null,
             "src": "509:9:0",
@@ -5400,7 +5400,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/SliceReferenceCopies.ast.json",
-            "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+            "fixtureSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
             "pointer": "/ast/nodes/2/nodes/4/body/statements/0/initialValue",
             "nodeId": null,
             "src": "303:7:0",
@@ -5458,7 +5458,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/SliceReferenceCopies.ast.json",
-            "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+            "fixtureSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
             "pointer": "/ast/nodes/2/nodes/4/body/statements/0/initialValue",
             "nodeId": null,
             "src": "303:7:0",
@@ -5574,7 +5574,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/3/baseContracts/0",
             "nodeId": null,
             "src": "1222:12:0",
@@ -5618,7 +5618,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/3/baseContracts/0",
             "nodeId": null,
             "src": "1222:12:0",
@@ -5991,7 +5991,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/7/body/statements/0/expression/leftHandSide/indexExpression",
             "nodeId": null,
             "src": "516:1:0",
@@ -6047,7 +6047,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/7/body/statements/0/expression/leftHandSide/indexExpression",
             "nodeId": null,
             "src": "516:1:0",
@@ -6174,7 +6174,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/2/typeName",
             "nodeId": null,
             "src": "144:22:0",
@@ -6226,7 +6226,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/2/typeName",
             "nodeId": null,
             "src": "144:22:0",
@@ -6680,7 +6680,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression/rightHandSide",
             "nodeId": null,
             "src": "401:9:0",
@@ -6737,7 +6737,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression/rightHandSide",
             "nodeId": null,
             "src": "401:9:0",
@@ -6862,7 +6862,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/14/nodes/0",
             "nodeId": 637,
             "src": "4101:25:0",
@@ -6906,7 +6906,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/14/nodes/0",
             "nodeId": 637,
             "src": "4101:25:0",
@@ -7015,7 +7015,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/14/nodes/1/modifiers/0",
             "nodeId": null,
             "src": "4158:7:0",
@@ -7059,7 +7059,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/14/nodes/1/modifiers/0",
             "nodeId": null,
             "src": "4158:7:0",
@@ -7380,7 +7380,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/11/nodes/0/overrides",
             "nodeId": null,
             "src": "3626:8:0",
@@ -7424,7 +7424,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/11/nodes/0/overrides",
             "nodeId": null,
             "src": "3626:8:0",
@@ -7522,7 +7522,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/parameters",
             "nodeId": null,
             "src": "381:2:0",
@@ -7566,7 +7566,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/parameters",
             "nodeId": null,
             "src": "381:2:0",
@@ -7682,7 +7682,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/14/nodes/0/body/statements/0",
             "nodeId": null,
             "src": "4122:1:0",
@@ -7734,7 +7734,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/14/nodes/0/body/statements/0",
             "nodeId": null,
             "src": "4122:1:0",
@@ -7871,7 +7871,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/0",
             "nodeId": null,
             "src": "32:23:0",
@@ -7915,7 +7915,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/0",
             "nodeId": null,
             "src": "32:23:0",
@@ -8034,7 +8034,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/6/nodes/0/body/statements/0",
             "nodeId": null,
             "src": "2256:8:0",
@@ -8085,7 +8085,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/6/nodes/0/body/statements/0",
             "nodeId": null,
             "src": "2256:8:0",
@@ -8408,7 +8408,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast",
             "nodeId": 1249,
             "src": "32:8393:0",
@@ -8452,7 +8452,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast",
             "nodeId": 1249,
             "src": "32:8393:0",
@@ -8563,7 +8563,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/TransientSource.ast.json",
-            "fixtureSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+            "fixtureSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
             "pointer": "/ast/nodes/1/storageLayout",
             "nodeId": null,
             "src": "83:12:0",
@@ -8607,7 +8607,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/TransientSource.ast.json",
-            "fixtureSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+            "fixtureSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
             "pointer": "/ast/nodes/1/storageLayout",
             "nodeId": null,
             "src": "83:12:0",
@@ -8728,7 +8728,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/4",
             "nodeId": 29,
             "src": "219:90:0",
@@ -8772,7 +8772,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/4",
             "nodeId": 29,
             "src": "219:90:0",
@@ -8891,7 +8891,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/documentation",
             "nodeId": null,
             "src": "338:19:0",
@@ -8935,7 +8935,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/6/documentation",
             "nodeId": null,
             "src": "338:19:0",
@@ -9118,7 +9118,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/8/body/statements/2/clauses/0",
             "nodeId": null,
             "src": "717:84:0",
@@ -9162,7 +9162,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/8/body/statements/2/clauses/0",
             "nodeId": null,
             "src": "717:84:0",
@@ -9287,7 +9287,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/8/body/statements/2",
             "nodeId": null,
             "src": "700:134:0",
@@ -9339,7 +9339,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/8/body/statements/2",
             "nodeId": null,
             "src": "700:134:0",
@@ -9723,7 +9723,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/31/nodes/0/body/statements/2/expression/arguments/0",
             "nodeId": null,
             "src": "8129:3:0",
@@ -9780,7 +9780,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/31/nodes/0/body/statements/2/expression/arguments/0",
             "nodeId": null,
             "src": "8129:3:0",
@@ -9913,7 +9913,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/Group07.ast.json",
-            "fixtureSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+            "fixtureSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
             "pointer": "/ast/nodes/1/nodes/7/body/statements/0",
             "nodeId": null,
             "src": "470:34:0",
@@ -9965,7 +9965,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/Group07.ast.json",
-            "fixtureSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+            "fixtureSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
             "pointer": "/ast/nodes/1/nodes/7/body/statements/0",
             "nodeId": null,
             "src": "470:34:0",
@@ -10118,7 +10118,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/1/typeName",
             "nodeId": null,
             "src": "120:5:0",
@@ -10170,7 +10170,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/1/typeName",
             "nodeId": null,
             "src": "120:5:0",
@@ -10289,7 +10289,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SliceReferenceCopies.ast.json",
-            "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+            "fixtureSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
             "pointer": "/ast/nodes/1",
             "nodeId": 3,
             "src": "61:20:0",
@@ -10333,7 +10333,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SliceReferenceCopies.ast.json",
-            "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+            "fixtureSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
             "pointer": "/ast/nodes/1",
             "nodeId": 3,
             "src": "61:20:0",
@@ -10714,7 +10714,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/1",
             "nodeId": 8,
             "src": "120:18:0",
@@ -10758,7 +10758,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/1/nodes/1",
             "nodeId": 8,
             "src": "120:18:0",
@@ -10880,7 +10880,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/3/nodes/0/body/statements/1",
             "nodeId": null,
             "src": "1306:53:0",
@@ -10931,7 +10931,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/3/nodes/0/body/statements/1",
             "nodeId": null,
             "src": "1306:53:0",

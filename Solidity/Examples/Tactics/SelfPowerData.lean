@@ -9,9 +9,9 @@ These concrete certificates do not assert general source/compiler equivalence.
 Compiler/EVM controls: `scripts/check-self-power-data.mjs`.
 -/
 
-solc_import "../../../tests/solc/SelfPowerData.legacy.ast.json" hash 0x7a70c1359061adec
+solc_import "../../../tests/solc/SelfPowerData.legacy.ast.json" hash 0x3e9a5cfc465ec152
   as Imported.Legacy.SelfPowerData testing
-solc_import "../../../tests/solc/SelfPowerData.viaIR.ast.json" hash 0xbb1ca579b2c9db53
+solc_import "../../../tests/solc/SelfPowerData.viaIR.ast.json" hash 0x01f0a33c580914fd
   as Imported.IR.SelfPowerData testing
 
 namespace Solidity.Examples.Tactics.SelfPowerData

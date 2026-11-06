@@ -4,7 +4,7 @@ import Solidity.Frontend.Import
 local aliases and slices. Synthetic memory parameter declarations must not
 shadow the original calldata names. The written-copy refusal stays in force. -/
 
-solc_import "../../tests/solc/CalldataValidation.ast.json" hash 0xbc741802a7ad102c as Calldata testing
+solc_import "../../tests/solc/CalldataValidation.ast.json" hash 0xa4a917e81d8b43b9 as Calldata testing
 
 #guard (Calldata.report.find? (·.sourceName == "first")).any (·.status == .elaborated)
 #guard (Calldata.report.find? (·.sourceName == "localAlias")).any (·.status == .elaborated)

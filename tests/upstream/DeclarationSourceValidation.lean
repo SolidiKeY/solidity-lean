@@ -2,7 +2,7 @@ import Solidity.Frontend.Testing
 import Solidity.Tools.Counterexample
 open Solidity Solidity.Frontend
 open scoped Solidity.Scoped
-solc_import "../solc/CalldataValidation.ast.json" hash 0xbc741802a7ad102c as Group08SourceValidation.Calldata testing
+solc_import "../solc/CalldataValidation.ast.json" hash 0xa4a917e81d8b43b9 as Group08SourceValidation.Calldata testing
 solc_scoped_problems Group08SourceValidation.Calldata decl
 namespace Solidity.Tests.Upstream.DeclarationSourceValidation
 

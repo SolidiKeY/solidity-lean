@@ -2,77 +2,77 @@ import Solidity.Tools.Upstream
 
 /-! Declaration-lowering controls: local deletion uses the existing assignment
 semantics, for every primitive type and typed state. No rule is added. -/
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.DeclarationsLowering testing
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.EffectfulImmutable testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.InvalidTransitive testing
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.DynamicDiscard testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.ModifierAdmission testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.ExcludedImmutable testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.InitSequence testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.DeclarationsLowering testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.EffectfulImmutable testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.InitSequence testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.ExcludedImmutable testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.ForwardImmutable testing
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.IndirectForwardImmutable testing
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.UnsupportedImmutable testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.ForwardImmutable testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.IndirectForwardImmutable testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.UnsupportedImmutable testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.ForwardDerived testing
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.EntryDerived testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.ForwardDerived testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.EntryDerived testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.EffectfulForwardDerived testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.EffectfulForwardDerived testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.ArgumentDerived testing
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.ImplicitPhaseDerived testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.ArgumentDerived testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.ImplicitPhaseDerived testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.StringArrayERC testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.StringArrayERC testing
 
-solc_import "../solc/DeclarationsLowering.ast.json" hash 0xf1c9786256bb1433
+solc_import "../solc/DeclarationsLowering.ast.json" hash 0xd73315a11be846f3
   as Imported.ImplicitUnsupportedInitialization testing
-solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x93167cd6ec08cde8
+solc_import "../solc/DeclarationsLoweringIR.ast.json" hash 0x777e43854b507af0
   as Imported.IR.ImplicitUnsupportedInitialization testing
 
 namespace Solidity.Upstream.Declarations

@@ -2,9 +2,9 @@ import Solidity.Tools.Upstream
 
 open Solidity Solidity.Semantics
 
-solc_import "../solc/CloudIntegration.ast.json" hash 0xc345662e8c262923 as Combined.CloudIntegration testing entrypoints
+solc_import "../solc/CloudIntegration.ast.json" hash 0xb2d840eaa9b0815e as Combined.CloudIntegration testing entrypoints
 
-solc_import "../solc/CloudIntegrationIR.ast.json" hash 0x13121b6acaf879f6 as CombinedIR.CloudIntegration testing entrypoints
+solc_import "../solc/CloudIntegrationIR.ast.json" hash 0x0586ace8a3b1698f as CombinedIR.CloudIntegration testing entrypoints
 
 /-- Inherited entries appear once, with both enum carrier widths executable. -/
 private def checkCombined (C : Contract) (rows : List Frontend.ImportRow) : IO Unit := do

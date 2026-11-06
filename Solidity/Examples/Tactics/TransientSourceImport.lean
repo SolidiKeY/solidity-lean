@@ -5,8 +5,8 @@ import Solidity.Syntax.Splice
 /-! The actual pinned-source lowering, executed at a concrete deployed address.
 Safety formulas and successful execution are separate controls. -/
 namespace Solidity.Examples.Tactics.TransientSourceImport
-solc_import "../../../tests/solc/TransientSource.ast.json" hash 0xaddcbeb9d907ef4d as Imported.TransientSource testing
-solc_import "../../../tests/solc/TransientSource.ast.json" hash 0xaddcbeb9d907ef4d as Imported.TransientDerived testing
+solc_import "../../../tests/solc/TransientSource.ast.json" hash 0x9c06fbbddde3efe7 as Imported.TransientSource testing
+solc_import "../../../tests/solc/TransientSource.ast.json" hash 0x9c06fbbddde3efe7 as Imported.TransientDerived testing
 private def entry : State Imported.TransientSource [] :=
   { State.init Imported.TransientSource with tx := { selfAddress := ⟨1, rfl⟩ } }
 

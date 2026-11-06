@@ -9,15 +9,15 @@ open Solidity.ContractWorld
 
 namespace Legacy
 noncomputable section
-solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0xd1b660dd56e1e5f3
+solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0x0eb44a110717867f
   contract "TransientFactory" function "make" as Direct
-solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0xd1b660dd56e1e5f3
+solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0x0eb44a110717867f
   contract "TransientFactory" function "caught" as Caught
-solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0xd1b660dd56e1e5f3
+solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0x0eb44a110717867f
   contract "TransientFactory" function "failMake" as Failed
 /-- error: solidity.worldFactory.owner: transient state needs the shared world transaction interface -/
 #guard_msgs in
-solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0xd1b660dd56e1e5f3
+solc_world_factory "../../../tests/solc/TransientFactory.ast.json" hash 0x0eb44a110717867f
   contract "TransientProduct" function "write" as RefusedOwner
 
 private def alice : Address := ⟨⟨1, by decide +kernel⟩, by decide +kernel⟩
@@ -188,15 +188,15 @@ end Legacy
 
 namespace ViaIR
 noncomputable section
-solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0xfc47fbb30573dd6e
+solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0x6213d3ab7e6283c8
   contract "TransientFactory" function "make" as Direct
-solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0xfc47fbb30573dd6e
+solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0x6213d3ab7e6283c8
   contract "TransientFactory" function "caught" as Caught
-solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0xfc47fbb30573dd6e
+solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0x6213d3ab7e6283c8
   contract "TransientFactory" function "failMake" as Failed
 /-- error: solidity.worldFactory.owner: transient state needs the shared world transaction interface -/
 #guard_msgs in
-solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0xfc47fbb30573dd6e
+solc_world_factory "../../../tests/solc/TransientFactory.viaIR.ast.json" hash 0x6213d3ab7e6283c8
   contract "TransientProduct" function "write" as RefusedOwner
 
 private def alice : Address := ⟨⟨1, by decide +kernel⟩, by decide +kernel⟩

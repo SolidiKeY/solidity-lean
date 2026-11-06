@@ -7,7 +7,7 @@ The fixture hash pins its compiler/source/settings provenance. -/
 namespace Solidity.Tests.GetterEvaluationSharing
 open Lean Elab Command Meta Solidity Solidity.Frontend
 
-solc_import "../solc/PublicGetters.ast.json" hash 0x968ad03a36798cc3 as PublicGetters testing
+solc_import "../solc/PublicGetters.ast.json" hash 0x6a499756be427a70 as PublicGetters testing
 solc_scoped_problems PublicGetters decl
 
 private def probe (row : Lean.Name) : TermElabM Unit := do

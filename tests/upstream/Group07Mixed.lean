@@ -6,8 +6,8 @@ import Solidity.Calculus.Closers
 
 /-! Typed mixed-reference joins: source controls in both required evaluation
 modes and universal emitted-program proofs. Runtime agreement is observational. -/
-solc_import "../solc/Group07Mixed.ast.json" hash 0xfea5f10915fc5cd7 as Legacy.Group07Mixed testing
-solc_import "../solc/Group07MixedIR.ast.json" hash 0x8e844db3f2587f64 as ViaIR.Group07Mixed testing
+solc_import "../solc/Group07Mixed.ast.json" hash 0xc4fc214a1cdcace0 as Legacy.Group07Mixed testing
+solc_import "../solc/Group07MixedIR.ast.json" hash 0x02a4135c658942d3 as ViaIR.Group07Mixed testing
 
 namespace Group07MixedChecks
 open Solidity
