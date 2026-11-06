@@ -757,6 +757,7 @@ import Solidity.Backend.MemoryCopies.MemoryPathCopyInterface
 import Solidity.Backend.MemoryCopies.NestedDefaultControls
 import Solidity.Backend.MemoryCopies.NestedDefaultInterface
 import Solidity.Backend.MemoryCopies.NestedDefaults
+import Solidity.Backend.MemoryCopies.NestedLivePipelineInterface
 import Solidity.Backend.MemoryCopies.NestedLocationPipeline
 import Solidity.Backend.MemoryCopies.NestedLocationPipelineControls
 import Solidity.Backend.MemoryCopies.NestedLocationPipelineInterface
