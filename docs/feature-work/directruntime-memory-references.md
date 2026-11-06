@@ -689,3 +689,39 @@ receipt input sizes/hashes, merge ancestry and the limited metadata scope;
 no findings, no Lean/build invocation. check-doc-paths.sh exits0: all Lean
 references resolve, with115 ambiguous references reported. git diff --check
 passes. No statement, definition, axiom, gate or budget changed.
+
+## Integrated-master VM development gates (H86 regeneration)
+
+Fresh origin/master fetch and merge report already up to date at2e7c1228,
+which contains coordinator publication5f1459653 and prior lane7f207811.
+No owned source or gate changed. Docker fallback verified memory.max=12GiB,
+memory.swap.max=0; Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613.
+Every Lean process uses explicit-j1 under the writer lock and headroom guard.
+
+The first build exited1 after1527.182s, peak3442104KiB aggregate RSS, because
+Admission needed generated normalized fixture bytes. Reader and both kernel
+controls built successfully. The unchanged generator regenerated106 inputs;
+the retry passed in2.407s, peak1044512KiB. Explicit per-file Admission,
+KernelControls and KernelMatrix gates passed in64.256s, peak1489104KiB.
+Both readers check86 admitted and20 malformed cases;84 compatible obligations
+and two incompatible initializers are distinguished. All54 theorem axiom
+reports contain only propext,Classical.choice,Quot.sound. KeySort passes:
+377 taclets,131 read-bearing,table covers131;10.870s,620252KiB. No guard stop.
+
+H41 pickup pack verifies complete archive readback:1653 artifacts,555 mappings,
+569342298bytes; all four owned-module output mappings are included. Eight
+other traces were omitted, so this is not full-tree cache freshness. Receipt
+and absolute archive/evidence paths,commands,hashes and source fingerprints
+are in vm-validation-receipt.json. Delivery is coordinator-pending; no
+ship-cache.sh ran. Bulk logs remain outside Git.
+
+H86 supersedes recovery waits: original untracked executable/cache bytes are
+unrecoverable provenance gaps, not outstanding artifact requests. Regenerate
+needed runtime outputs. Fresh native/browser execution, four historical
+storage-diamond pending cases and full final gates remain open; these fresh
+development gates do not establish RUNTIME_GATE_PASS or source adequacy.
+
+Independent read-only finder and skeptic found no defects: both checked the
+raw gate records, initial failure and retry,54 axiom reports, KeySort output,
+source fingerprints and cache/evidence archive hashes. Neither used Lean
+or changed files. Documentation/whitespace checks pass; no source was edited.
