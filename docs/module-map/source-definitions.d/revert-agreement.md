@@ -18,3 +18,5 @@
 | `Source/Agreement/BoolSlotReadControls.lean` | Concrete read-copy/write histories and importing client; horizon and primitive-copy-versus-alias controls. |
 | `Source/Agreement/BoolSlotNot.lean` | Actual local-read boolean negation initializer producer with internally derived operand and factored checked monad runs. |
 | `Source/Agreement/BoolSlotNotControls.lean` | Total-initial-locals client, Source horizon and both negation polarity controls. |
+| `Source/Agreement/BoolSlotConditional.lean` | Actual local-conditioned boolean literal initializer, with internally derived guard and preserved primitive locals. |
+| `Source/Agreement/BoolSlotConditionalControls.lean` | Concrete conditional client, branch/horizon controls and separately scoped Source selected/unselected-write traces. |

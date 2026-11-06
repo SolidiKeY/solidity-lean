@@ -11,7 +11,9 @@ theorem bool_related_eq (D : Layout) (v : Source.Val D .bool) (b : Bool)
   cases related
   rfl
 
-private theorem em_bind_ok {Γ : RCtx} {α β : Type}
+/-- Forward execution law for the existing Source monad, retaining its actual
+intermediate locals/state; this does not select a computation. -/
+theorem source_run_bind_ok {Γ : RCtx} {α β : Type}
     (m : EM E Γ α) (f : α → EM E Γ β)
     (initial middle : Locals E.layout Γ × St E) (a : α)
     (out : Except Halt β × (Locals E.layout Γ × St E))
@@ -38,17 +40,17 @@ theorem bool_not_init_source (pre tail : List PrimTy) (b : Bool)
     rw [read]
   have hu : (evalE G F (n+2) (.unary .not (.local (sourceBoolSlot tail pre)))).run
       (ls, st) = (.ok (.val (.bool (!b))), (ls, st)) :=
-    em_bind_ok _ _ (ls, st) (ls, st) (.val (.bool b)) _ hr (by rfl)
+    source_run_bind_ok _ _ (ls, st) (ls, st) (.val (.bool b)) _ hr (by rfl)
   have hb : (do getV (← convRV F (n+2) .bool
       (← evalE G F (n+2) (.unary .not (.local (sourceBoolSlot tail pre)))))).run
       (ls, st) = (.ok (.bool (!b)), (ls, st)) :=
-    em_bind_ok _ _ (ls, st) (ls, st) (.val (.bool (!b))) _ hu (by rfl)
+    source_run_bind_ok _ _ (ls, st) (ls, st) (.val (.bool (!b))) _ hu (by rfl)
   dsimp only [ExceptT.run] at hb
   have hs : (EM.sub (Γ := []) ls (do getV (← convRV F (n+2) .bool
       (← evalE G F (n+2) (.unary .not (.local (sourceBoolSlot tail pre))))))).run
       (.nil, st) = (.ok (.bool (!b), ls), (.nil, st)) := by
     simp only [EM.sub, ExceptT.run, ExceptT.mk, hb]
-  exact em_bind_ok _ _ (.nil, st) (.nil, st) (Source.Val.bool (!b), ls) _ hs (by rfl)
+  exact source_run_bind_ok _ _ (.nil, st) (.nil, st) (Source.Val.bool (!b), ls) _ hs (by rfl)
 
 /-- Existing model negation reads the actual old environment and pushes its inverse. -/
 theorem bool_not_init_model (pre tail : List PrimTy) (name : Var)
