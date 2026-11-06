@@ -281,3 +281,24 @@ production Lean source changed in these merges. Semantic case accounting,
 meaningful Lean preservation, substantive table migration, independent full
 acceptance and same-resource before/after timings remain incomplete.
 The previous failed v4.35 prerequisite build was not rerun unchanged.
+
+## Reproducible frozen-input validation runner
+
+`python3 -B scripts/h55/vectors-tables/validate_frozen.py --report REPORT`
+runs current tooling and its complete discovered Python suite against an isolated
+snapshot of the authenticated frozen Git base. REPORT must be a new path outside
+the checkout. The runner records the source archive hash, actual tooling head
+and per-file tooling hashes, exits with the suite result, removes its disposable
+snapshot and never edits production inputs. Git environment overrides are
+cleared, and symlinked tooling inputs are refused. This is deliberately not a
+live-tree coverage check, a Lean gate or a migration acceptance claim.
+
+The first read-only skeptic review found that directory-root symlinks were
+not covered by descendant checks. The runner now rejects every tooling-area
+path component before Git access. Two focused isolation tests cover root,
+parent and descendant symlinks and require refusal before a Git call. Both
+reviewers passed the fix read-only. The complete frozen suite, now 27 tests,
+passed twice with identical JSON reports and verified snapshot cleanup.
+Existing-report and in-checkout report destinations were refused without
+overwriting or creating those files. Logs are under
+`/workspace/vy1-words-evidence/h55-frozen-runner-*`.
