@@ -514,3 +514,29 @@ The goal remains unfinished and acceptance **blocked**. Wait for owner-complete
 migration inputs and root-gate handling of the old full-baseline resource stop.
 Do not restart the same unpatched full builds, edit owner files, merge/push,
 relax budgets, create a new goal or schedule a competing continuation.
+
+
+## H82 final retirement checkpoint
+
+Stopped for human-approved handoff to `solidity-h62-6-20261106/migrate-root-gate`.
+No new proof implementation, Lean rerun, owner patch application or push occurred.
+The committed retirement directory under tests/h62/item6/migrate-solcvalidation
+contains the complete original visible assignment/objective, full original work
+and backfill queues, exact scope/owner manifest, schema-v1 open waits, retirement
+authority and all existing-evidence hashes. Its SHA256SUMS is carried in the
+cumulative patch/bundle. The original renderer hash is provenance, not a falsely
+asserted match to unavailable renderer bytes.
+
+H78 public generated API preservation remains OPEN: prior static classification
+and zero textual references do not waive any original public generated name/type.
+Existing raw per-declaration signatures and axiom records are preserved off Git;
+public visibility/completeness and compatibility shims remain successor work.
+Implemented shims: none. Do not rewrite project consumers to evade those shapes.
+
+The original task is not complete. The worker is retired/stopped, the requested
+goal state is PAUSED, and no automatic implementation continuation is authorized.
+The tool surface provides no pause action (only complete/blocked), so the worker
+cannot set PAUSED and does not substitute another outcome or reset/create a goal.
+H71 push permission text is unavailable; no push was attempted. Final exact head,
+clean status, cumulative artifacts and hashes are in the retirement handoff JSON.
+The successor is responsible for integration after the final stopped/head ack.
