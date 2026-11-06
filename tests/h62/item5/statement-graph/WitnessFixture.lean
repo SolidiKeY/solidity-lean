@@ -8,7 +8,7 @@ universe u
 @[h62_statement] theorem consumer (n : Nat) (same : n = n) : n = n := same
 #h62_witness "binder" consumer 1 naturalReflexive
 
-@[h62_premise] structure Certificate where
+@[h62_premise] structure Certificate : Type where
   proof : True
 @[h62_helper] theorem trueProducer : True := True.intro
 @[h62_helper] def certificateProducer : Certificate := ⟨True.intro⟩
@@ -16,7 +16,7 @@ universe u
 #h62_witness "field" Certificate 0 trueProducer
 #h62_witness "binder" useCertificate 0 certificateProducer
 
-@[h62_statement] structure Pair (n : Nat) where
+@[h62_statement] structure Pair (n : Nat) : Type where
   first : n = n
   second : n = n
 @[h62_helper] theorem secondProducer (n : Nat) (first : n = n) : n = n := first

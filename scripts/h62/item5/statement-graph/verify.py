@@ -136,6 +136,10 @@ def main():
         assert census == (evidence/'fixture-census.json').read_bytes(), 'fresh-process census nondeterminism'
         run('witness-fixture',[lean,*flags,'-o',str(build/SCOPE/'WitnessFixture.olean'),str(SCOPE/'WitnessFixture.lean')])
         witness_bytes = (evidence/'witness-fixture.json').read_bytes()
+        witness_exports = {r['declaration']:r for r in json.loads(witness_bytes)['declarations']}
+        assert not witness_exports['H62WitnessFixture.useCertificate']['binders'][0]['isProp']
+        assert not witness_exports['H62WitnessFixture.Certificate']['isProp']
+        assert not witness_exports['H62WitnessFixture.Pair']['isProp']
         assert witness_bytes == (evidence/'witness-fixture-repeat.json').read_bytes(), 'same-process witness nondeterminism'
         run('witness-fixture-fresh',[lean,*flags,str(SCOPE/'WitnessFixture.lean')])
         assert witness_bytes == (evidence/'witness-fixture.json').read_bytes(), 'fresh-process witness nondeterminism'
