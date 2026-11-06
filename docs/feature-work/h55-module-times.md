@@ -81,8 +81,8 @@ termination of the spawned process group and comparisons of monotonic and
 boot-time clocks. Its tests exercise successful execution, nonzero exit,
 spawn failure, real timeout, invalid configuration and injected clock
 inconsistency. `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s
-tests/h55/module-times -p 'test_*.py' -v` passed 11 methods after this
-work. These are synthetic controls, not H56 measurements or a Lean proof.
+tests/h55/module-times -p 'test_*.py' -v` passed nine methods for the committed control files; an 11-method run
+also included the then-uncommitted mapping tests. These are synthetic controls, not H56 measurements or a Lean proof.
 The runner is deliberately not a production gate: it discards process output,
 does not authenticate clocks or execution environment, cannot detect clocks
 falsified consistently, and does not impose the required memory/no-swap/serial
@@ -90,3 +90,19 @@ or source/cache binding conditions. Its process timeout begins after process
 creation; the later clock check includes creation time. In particular no gate
 may accept its output as authenticated measurement evidence. Independent
 finder and skeptic reviews remain outstanding.
+
+
+## Candidate context mapping
+
+`mapping.py` preserves every census row and supplies a candidate module name
+and context where path shape permits. On the base tree it identifies 6,896
+candidate names and retains 270 unresolved rows, without selecting exclusions.
+It reports same-context collisions; none were found in this census. All names
+remain marked for review: the mapping does not establish that a path is a Lake
+target, that its imports resolve, or which test inputs are intentionally
+negative. Bridge vendor paths use a separate candidate context and still need
+actual Lake-glob inspection. The source hashes are worktree hashes, not a
+verified clean-tree or cache identity. Tests compare all paths against the
+tracked-file census and cover Bridge, example, standalone and ambiguous names.
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/h55/module-times -p test_*.py -v`
+passed 11 methods. Independent finder and skeptic reviews are pending.
