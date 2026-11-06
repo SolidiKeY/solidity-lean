@@ -203,6 +203,15 @@
       "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
       "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
     },
-    "coordinator_pull_observed": false
+    "coordinator_pull_observed": false,
+    "validation": {
+      "archive": "/workspace/h28-candidate-export-b85da7eb/validation.tar.gz",
+      "sha256": "1c8b50d29e5ad8925bec4ecb7488e6b7e34734ec2d8057b86cbd255f2491a54e",
+      "bytes": 2932,
+      "files": 10,
+      "gate_head": "c78b96cac48b23c75cfd75782f56c7f8e2021ff0",
+      "finder": "PASS",
+      "skeptic": "PASS"
+    }
   }
 }
