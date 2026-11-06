@@ -168,3 +168,27 @@ Bulk logs, source fingerprints, reviews and cache packs remain off Git under
 will record their exact paths and SHA256 values. The final external HANDOFF.md,
 original.patch, source.bundle and SHA256SUMS identify the final committed head
 and pinned base. No push, merge, PR, cache shipment or HOLD refactor is performed.
+
+## Saved checkpoint and export receipt
+
+Source checkpoint: `769bf7d5b1304642ac1995ee4a9c3a770cd948ce`.
+The final `checkpoint-769bf7d` gate checked all four unchanged production inputs
+and the complete standalone helper together at this commit: FILE_CHECKS_PASS,
+KEYSORT_PASS, no diagnostics, all source hashes unchanged, 173678592-byte inner
+peak and zero swap/OOM events. It is still not production adoption acceptance.
+The subsequent manifest commit changes documentation/evidence metadata only;
+the Lean source and guard match the checked checkpoint byte for byte.
+
+Cache pack: `/workspace/v08-agreements-evidence/lake-cache.tar.zst`.
+Its SHA256, source pins and complete saved evidence file hashes are committed in
+`tests/h55/v08-agreements/evidence-manifest.json`. Both zstd integrity and the
+pack checksum passed (`cache-validation.log`). No ship-cache.sh or relay ran.
+Final source patch and Git bundle are generated from the pinned base to the
+final manifest commit; their exact hashes and the full final head are in the
+external HANDOFF.md and SHA256SUMS. No empty marker commit is used.
+
+Checkpoint state: standalone interface/backfill done and independently reviewed;
+production migrations, owner acceptance before g49, adoption speed gate and
+full assignment acceptance blocked. The inherited pin inventory gate is a
+reported failure, not a pass. This handoff requests coordinator action only;
+it does not request a human to find owners or approve a changed premise.
