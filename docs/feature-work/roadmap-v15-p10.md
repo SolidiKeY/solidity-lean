@@ -1989,3 +1989,33 @@ DUP1 through DUP16 short-stack consumers connect the actual indexed certificates
 `InstructionSelectionRefusal` proves insufficient-stack refusal for all sixteen SWAP depths against IR, selected Scalar code, the fetched driver and native reference execution. The clauses retain the input representation, three-gas admission and distinct driver/native fuel indices. Controls distinguish SWAP15 success from SWAP16 refusal on sixteen populated words, gas-before-stack ordering, permission flags and insufficient driver fuel. The populated observation retains account, memory, calldata and return-byte fields. These instruction-local results do not establish source frame origin, CALL/world composition or complete opcode-row adequacy.
 
 `IndexedRefusalWitnessV1.producer` packages the kernel-checked DUP and SWAP shortage theorems into the unchanged `IndexedRefusalInterfaceV1.Producer` fields. Focused checks of the witness and `InstructionSelectionRefusal` pass with guarded standard-only axiom reports. The contract is instruction-local: source frame origin, successful execution and full opcode-row adequacy remain open.
+
+
+## CALL/RETURNDATA correspondence validation (move6)
+
+`CallReturndata` validates the fetched CALL/RETURNDATA relation that
+[G42](g42-world-call-consumers.md) names as the P10 input of
+`WorldCalls.FetchedPremises.Returndata`. Each CALL law rewrites with the frozen
+`FrozenV1.api.charged.checked_call` field, so it exercises the version-1 API
+consumers import, then evaluates the pinned `EVM.call`, including the callee's
+own code under `Θ`/`Ξ`. Callee 31 either returns `0x2a`
+(`PUSH1 0x2a PUSH1 0 MSTORE8 PUSH1 1 PUSH1 0 RETURN`), reverts with `0x2b`, or is
+absent. The caller's stale return buffer `[0xcc, 0xdd]` differs from every
+callee output.
+
+| Law | Observation |
+|---|---|
+| `returning_call` | flag 1, return buffer `[0x2a]`, output window writes `0x2a` over caller memory byte 0. |
+| `reverting_call` | flag 0, yet the revert bytes `[0x2b]` become the return buffer and reach the output window. |
+| `absent_call` | flag 1, stale buffer cleared, memory unchanged. |
+| `returning_then_size`, `absent_then_size` | the following RETURNDATASIZE pushes the callee's output size (1 or 0), never the stale size 2. |
+| `returndata_needs_callee` | two states that agree on environment, PC, stack, gas, memory, stale buffer and the caller account produce different post-CALL return data. |
+
+Verdict for the G42 adapter: the return data after a CALL is a function of the
+callee's code. The core `Evm.Machine` has no code map and no return buffer, and
+its `CALL` is a two-operand payment (`ExternalEvm.Obstructions.call_arity_mismatch`).
+So a `FetchedPremises.Returndata` instance built from `FrozenV1.API` needs both a
+callee/world execution producer (V13 WorldCalls steps) and a core-to-reference
+CALL representation. This module supplies neither and assumes neither; the
+frozen API is unchanged. Gas values, `Site` origin, resource, Osaka and
+transaction adequacy are not asserted.
