@@ -393,7 +393,22 @@ corrected above:
 
 ## Gates
 
-GATES-PENDING
+Run on head 2ae5b586, whose Lean and production files are identical to
+those of the run head `20d7b77c`. The lane changes only
+`tests/h28-sol/mutation-testing/**` and `docs/**`.
+
+| Gate | Result | Decisive output |
+|---|---|---|
+| `./run-lean.sh` (layers, register, fragments, `lake build` of the default targets and `SolkeyTestSuite`) | build pass | `Build completed successfully (5824 jobs).`, 0 error lines |
+| `./run-lean.sh` final step `check-solkey.sh` against the default `../solkey` checkout | fail, environmental | the checkout is at `b8d5f88` ("added polymorphic save"), not the pin `473da89` in `tests/migration/solkey.pin.json`: `parsed 392 taclets … table covers 131`, with READ DRIFT / UNKNOWN SORT lines for the new polymorphic `save` |
+| `solkeycheck --key` on `solidityProgramRules.key` at the pinned `473da89` | pass | `OK — annotations match`, `parsed 377 taclets, 131 read-bearing, table covers 131` |
+| `bash scripts/coord-tools/register.sh --check` | pass | exit 0 |
+| `bash scripts/coord-tools/fragments.sh --check` | pass | exit 0 |
+| `node scripts/check-orphans.mjs` | pass | `5808 reachable, 0 orphaned, 0 not allowed` |
+| doc-path check | fail, existing only | `1 reference(s) name a file that does not exist` (in `after-roadmap-va1.md`); no finding in this lane's files |
+| `python3 -m unittest test_mcprun` | pass | 29 tests OK |
+| legacy unit tests | 65 of 71 pass | the 6 failures need the Codex VM `/workspace` data |
+| Lean MCP diagnostics on the new oracle files | pass | 0 errors (recorded per check in `runs/full-20d7b77c`) |
 
 ## Limits
 
