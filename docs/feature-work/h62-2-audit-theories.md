@@ -1,6 +1,16 @@
 # H62 item 2: audit-theories — continuing audit
 
 This is a reviewable partial audit, not completion of the frozen assignment.
+
+RETIREMENT OVERRIDE (latest human H82 stop-and-handoff): this worker is stopped.
+No new implementation or automatic continuation is authorized. Successor:
+solidity-v12-v17-20261031/v17-validation-release. Earlier next-work/owner-request
+text below is historical. H82 removes exact-file agreement for statement-
+preserving edits; statement/dependent-definition/interface/budget/axiom/exclusion
+changes still require owner approval and frozen H57 versioned pairs.
+Existing-goal PAUSED was requested, but the exposed tool has no PAUSED operation;
+this limitation is recorded without claiming a successful goal transition.
+
 The strict acceptance command exits 1. No RUNTIME_GATE_PASS is claimed.
 Latest receipts cover95 additive proof theorems and60 original joint witnesses;
 Paths41/41 and MemMirror13/13 explicit declarations are fully witnessed.
@@ -459,3 +469,55 @@ live routing (nine typed-area files unconfirmed); H55/area coordination remains
 required before touching producer-owned symbols. Fetch/check master before
 starting the next item and consume landed work instead of duplicating it.
 Current immutable evidence: /workspace/h62-audit-theories-mirrors-evidence.
+
+## Final retirement handoff (supersedes continuation guidance above)
+
+The latest human instruction retires this worker and prohibits new proof
+implementation. No new proof/fixture was written after the83a0135c3 snapshot.
+This final checkpoint adds only mandatory handoff documents and this retirement
+notice. The successor solidity-v12-v17-20261031/v17-validation-release is
+responsible for integrating the final exported head. No scope takeover is
+asserted before the stopped/head acknowledgement. No goal/VM was created/reset
+or marked complete, no master merge/push or Claude-source edit/message occurred.
+
+H82 supersedes earlier exact-file agreement requirements for statement-preserving
+proof/additive/import/module-split/doc work. Earlier T-OWNERS approval waits of
+that kind are withdrawn; owner census remains informational unfinished work.
+Statements/dependent definitions/interfaces/budgets/axioms/exclusions still need
+owner authorization; frozen interfaces use H57 versioned pairs. None changed.
+
+The existing goal must be PAUSED by coordinator control. The only exposed goal
+API is codex_goals_stop_goal(outcome complete|blocked), with no pause/get/state
+endpoint. Neither permitted outcome represents PAUSED, so no false substitute
+was attempted. The worker is stopped locally and must not automatically resume.
+No applicable H71 original-lane push authorization was supplied or found in
+available decisions; the original no-push rule is retained. Patch/bundle are
+the delivery mechanism. Original VM, branch and all evidence remain intact.
+
+Mandatory authenticated scope files under
+scripts/h62/item2/audit-theories/handoff/: original-frozen-assignment.txt
+(complete first user assignment transcribed from this thread),
+original-work-and-backfill-queue.md (verbatim extraction), scope-manifest.json
+(all25 mapped frozen files/hashes, owner keys, original/updated constraints),
+session-authorizations-and-retirement.txt, OPEN-QUEUE.md, pause-capability.json
+and SHA256SUMS. The newly saved transcription has its own hash; it is not
+asserted byte-identical to an unavailable historical rendered-goal wrapper.
+These files are part of the cumulative patch and Git bundle, not just
+coordinator-local references. A sealed external retirement archive includes
+prior bulk evidence and coordinator input snapshots for cross-VM retrieval.
+
+All four original checkpoints remain partial:416 public/3 private inputs and
+986 generated candidates (1,405 unique pending), premise-role/owner census,
+broader compiler branches, actual target ABI/gas/Fitted/Enforced/physical-fork
+agreement and full final gates.95 proof receipts,60 original joint inputs,
+18 empty telescopes and3 H69 intentional-control certificates are preserved.
+Full acceptance remains fail-closed; no RUNTIME_GATE_PASS is claimed. Original
+Work/backfill queues and every open obligation are in OPEN-QUEUE.md. The only
+actual retirement control wait is coordinator setting the existing goal PAUSED;
+no missing producer was established for independent proof work before stopping.
+
+Finder and skeptic reviewed the complete scope/queue/hash preservation without
+Lean/server/build jobs. The skeptic found obsolete continuation guidance in
+this document; the explicit top and final retirement notices resolve it.
+Final head, clean status, artifact/manifest hashes and validation commands are
+recorded in /workspace/h62-audit-theories-retirement-evidence/handoff.json.
