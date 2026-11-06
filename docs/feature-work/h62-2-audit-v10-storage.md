@@ -511,3 +511,20 @@ fails with five missing and 126 ambiguous references. These receipts remain
 separate from historical baseline failures and do not establish a checkpoint
 or whole-lane pass. Independent read-only finder and skeptic confirmed the
 timeout/infrastructure distinction without running Lean or changing files.
+
+## Generated nonempty operation families
+
+GeneratedFamilyWitnesses checks both original OperationTransport contracts at
+the same finite inputs. The left touched list contains two repeated addresses
+(stride zero, count two); the separate right list is a singleton. Every bound,
+recursive preimage, region, separation and performed-result premise is retained
+in its joint bundle. Both selected cells change under the combined effects,
+and the left-only successful effect preserves the outside query. A distinct
+additional preimage breaks the constant-hash region premise. This supplies no
+global injectivity, physical execution or Source compiler bridge.
+
+All 17 theorem axiom guards passed at the unchanged Lean4.24 resource limits.
+Independent read-only finder and skeptic found no semantic or coverage issue.
+The frozen reference ledger now maps 30 of 3281 conservative rows: 25 joint
+bundles and five data inhabitants, leaving 3251 unmapped. This is additive
+test-only progress; the failed C203 full checkpoint is not superseded.

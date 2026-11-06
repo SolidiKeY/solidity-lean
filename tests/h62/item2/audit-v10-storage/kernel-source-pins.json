@@ -30,6 +30,10 @@
     "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean": {
       "sha256": "c21eb09f4facc7a5ef86cbfb96ec1e1420af95aef1915b06360154d453bd75f4",
       "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint202-final/1.log"
+    },
+    "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean": {
+      "sha256": "455a123ef3cce3ba992f8804309fe4a71a217b226e71936eaffab887d33dc01e",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint204-focused-9bf66bb7b100.log"
     }
   }
 }
