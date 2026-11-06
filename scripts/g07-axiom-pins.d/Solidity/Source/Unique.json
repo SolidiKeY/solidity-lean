@@ -1,0 +1,32 @@
+{
+ "Solidity/Source/Unique.lean:Solidity.Source.ItemsD.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Unique.lean:Solidity.Source.RBody.ofDerivation_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Unique.lean:Solidity.Source.StmtD.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Unique.lean:Solidity.Source.Typed.constShape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Unique.lean:Solidity.Source.Typed.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Unique.lean:Solidity.Source.zeroLength_illTyped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

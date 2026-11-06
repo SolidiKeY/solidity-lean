@@ -1,0 +1,27 @@
+{
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.arguments_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.conversions_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.expression_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.lvalue_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/TypedExpressionPolicy.lean:Solidity.Frontend.Admission.TypedObservationPolicy.optional_allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

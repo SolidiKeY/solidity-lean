@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/Yul/SwitchControl.lean:SolidityBridge.Yul.SwitchControl.Derivation.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SwitchControl.lean:SolidityBridge.Yul.SwitchControl.Derivation.structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

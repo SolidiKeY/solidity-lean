@@ -685,3 +685,126 @@ cache964484bytes,SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e5
 Local/coordinator-pending,not shipment/installation. H41 no ship-cache.sh invocation.
 Current source/compiled fingerprints and cache/gate receipt are under adoption-708.
 No get_goal capability is exposed;the existing goal is not reset or completed.
+
+
+## Published1ae rebase and durable ownership audit
+
+Coordinator integrated19f8973d through source-equivalent cherry-picks1dcfab2e/
+79dca631,not original commit ancestry. All owned files matched the published tree.
+Required rebase onto1aeaf276 completed cleanly,skipping already-applied8f03f212/
+19f8973d;old identities remain in recovery ref
+refs/codex-recovery/shared-translator/pre-1aeaf276. No runtime source changed.
+
+The optional static ownership audit now uses the unique merge base of HEAD and
+fetched refs/remotes/origin/master,requiring pinnedb419 ancestry. This prevents a
+new hard-coded SHA edit for each publication and continues checking unpublished
+tracked/untracked tree deviations. Ambiguous ancestry fails closed. Caller MUST
+still establish authorized fetch/rebase;the audit grants no authorization and is
+not an audit of every historical edit. Original decoder/proof-search/builder/
+wrapper comparisons remain pinned to their original bases and are unchanged.
+No runtime API,semantic exclusion,premise,proof budget or trust boundary changed.
+
+Fresh344-job owned build,axiom inventory,modal/direct controls,native18+2 and new
+ownership audit passed38.161s,RSS1250152KiB,min5537415168bytes. Native binary source/
+C bindings remain exact;no Source AST importer migration was delivered. Independent
+read-only finder/skeptic(no Lean/server/writes) found no scope-guard defect and
+confirmed source-equivalence versus ancestry distinction. Remaining CR/DR-A-META,
+complete form/source parity,exhaustive binary closure,WASM,before-after and final
+full gates remain open. No RUNTIME_GATE_PASS or whole-goal completion is claimed.
+
+
+Post-commit audit with local HEAD1b55edee ahead of publication still selected1ae,
+so unpublished local work was not hidden. Output/source proof checks passed.
+Fresh KeySort/SolKey377/131/131 and6module18artifact cache verification passed:
+17.005s,RSS251532KiB,min5508968448bytes;actual scope12GiB/swap0/CPU1. Lean4.24.0/
+Lake5.0.0-src+797c613 remain actual. Current964484-byte cache SHA256
+ eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519 is locally verified:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/1b55edee9249/owned-delta.tar.zst
+H41 delivery remains coordinator-pending;no ship-cache.sh invoked. Native archive
+dc2e7041 remains immutable. Full goal/CR metadata decision/WASM/closure are unchanged.
+
+
+## H68: fixed audit publication and metadata policy
+
+H68 supersedes the moving-reference ownership audit described above: ownership-baseline.json records publication 4095d848297d87e374b4f069692511cfe4a36cf7. The audit verifies both ancestry edges and never reads origin/master to select its baseline. Original b419/fcdd decoder, builder, proof-search and wrapper comparisons remain unchanged.
+
+Human H68 selected DR-A-META option 1: retain required typeIdentifier/tryCall metadata in producer output and migrate compatibility fixtures, preserving existing normalization and loop annotations. migration-packet.json and API-HANDOFF.md relay the concrete decision to CR/D; producer changes and exact reviewed migration commits remain owner dependencies. Prior pending-choice statements are superseded.
+
+H68 audit checkpoint gates passed on this VM: owned serial build344 jobs; axiom inventory; modality/direct-result controls; KeySort; SolKey377/131/131; fixed audit and isolated Git regression. Combined37.386s,RSS1250672KiB; memory.max12884901888/swap.max0, outer minimum15216594944bytes. Exact commands/output and independent read-only finder/skeptic(no findings, no Lean/server) are in evidence/h68. No Lean declarations changed. Cache bytes remain source-identical; current-head packaging follows the commit under H41. Full runtime gate remains pending.
+
+
+## H68 compatibility fixture checkpoint
+
+Five fresh pinned0.8.34 compiler executions migrated all five owned .ast.json source fixtures to required metadata retention.424 typeIdentifier values and27 tryCall flags are bound to raw compiler nodes by kind/source span and retained declaration IDs. ComposedReaders was already retained and remains byte-identical; four other fixtures change. All other normalized JSON values match recorded4095, including builtin IDs and loop annotations. Fresh raw compiler output and exact source/compiler/fixture hashes are saved under evidence/h68. No producer-owned code changed.
+
+The shared retention helper only copies authenticated compiler metadata onto existing normalization output; it performs no executable AST translation. Helper and independent preflight fail closed on missing/conflicting identity, type information or required metadata. Dedicated composed/modality/Yul generators retain the policy. Finder identified a stale dedicated modality receipt consumer; both generation routes now emit the dedicated receipt and its preflight consumes it. Skeptic requested missing-typeDescriptions coverage, now enforced in both paths. Both independent read-only re-reviews pass, no Lean/server/writes.
+
+Owned build344 jobs,axiom inventory and eight affected per-file controls passed. Controls preserve exact admission/refusal diagnostics, declaration/overload selection, unsupported siblings,Yul refusal,eight finite intrinsic samples,public direct/modality outcomes.114 existing source witness identities and two compiler pins still pass. Native18exact comparisons+2failclosed passed against binary1d327a56; instrumented runtime0.126s is not a before/after benchmark. Combined33.774s,RSS1256288KiB;scope12GiB/swap0/CPU1;outer reserve minimum15028285440bytes. Review repair aggregate+dedicated regeneration/preflight passed3.457s,RSS172672KiB. No Lean declaration,axiom,premise,refusal or budget changed.
+
+This completes the H68-owned fixture backfill, not the full lane. CR still owns actual existing importer migration and must deliver its exact reviewed commit; DR-D owns WASM delivery. No emcc/wasm-opt was on the current VM PATH. Existing import still uses printer/parser/macro construction. Exhaustive per-form/source preservation,full binary closure,WASM,before/after benchmark and final full gates remain open;RUNTIME_GATE_PASS pending.
+
+
+## H44 source-only split and retained data
+
+H44 supersedes the H68 data locations above. Held a073878cf3dd1bd8fb82cfc067ca4cedcb711bb1 is preserved by refs/codex-recovery/shared-translator/pre-h44-a073878c. Generated fixtures,raw compiler ASTs,logs,receipts,variant cases/matrices and current ledgers live only under ignored /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h68-bulk. Tracked fixture/ledger/inventory files are restored exactly to4095. Historical coverage-inventory.json/inventory.py and earlier evidence references retain baseline provenance; they do not claim migrated hashes. Current receipt paths are in migration-packet.json.
+
+The source-only increment carries scripts,Lean control changes,docs,small policy configuration and bulk-manifest.json. Its recorded archive has absolute VM path,size,SHA-256 and an internally pinned per-file inventory. Copy the archive into archiveRelative,extract with tar --zstd -xf ARCHIVE -C tests/directruntime-20261104/shared-translator/artifacts/h68-bulk,and run verify-bulk.py before tests. There is no data download or fallback to legacy fixtures. H41 cache transfer remains separate;no ship-cache.sh.
+
+Owned backfill now observes all806 inventoried selected-field variants from49 existing corpus fixtures through the same test driver: default165decoded/388refused/253noStandalone;composed172/381/253.553 unknown-root refusals per reader;25 natural differences are18 refusal reasons and7 newly decoded witnesses. Case hashes,source pointers/IDs/spans and field labels are independently checked. This corpus includes intentional mutations and unauthenticated compiler-header claims;it does not establish exhaustive grammar coverage,intrinsic proof closure,source preservation or backend support. No new translator is introduced.
+
+Checking cost was warned and measured: original57-kind driver3.198s;uncached806 capture39.646s;invocation-local parsed-fixture caching reduces frozen extended per-file replay to5s(rounded toolkit duration),with identical old/new matrices. Whole ownedbuild+axiom+frozen/preflight/audit11.002s,RSS1192416KiB,min13983961088B. Those are different test workloads and timing boundaries,not a production runtime benchmark. Final cached-driver MCP0errors27.290s;post-relocation checks are recorded in retained evidence. No budgets,theorems,refusals or producer paths change.
+
+H44 final VM gates PASS: all10affected-file MCP diagnostics0errors(280.760s,scopepeak2277277696B,minreserve11911069696B);server stopped. Owned344-job build,axiom inventory,11per-file controls including original57-kind plus806variant suites,metadata/modality/114witness preflights,native18+2,audit defect regression and SolKey377/131/131 all pass39.992s,RSS1254016KiB,minreserve12709044224B. Actual Lean4.24.0/Lake5.0.0-src+797c613;12GiB/no-swap,-j1,threads1. Exact commands/outputs are in retained evidence/h44.
+
+Frozen archive: /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h44/bulk-0de09096a654c43c.tar.zst
+207427bytes;SHA256 0de09096a654c43ce6ecf6bf2ae958bffca8dbc2732273b4db881ffba28978a5;50datafiles/3229786bytes. verify-bulk.py and independent actual extraction roundtrip passed. Independent final finder/skeptic read-only reviews found no hidden bulk,scope or completion defect. Manifest is committed;archive stays on this VM for coordinator pull. No publication or shipment is claimed. Full lane and RUNTIME_GATE_PASS remain pending CR migration,D WASM,full parity/closure and final gates.
+
+
+## Adopt published5f7 checkpoint
+
+Coordinator2026-11-06 published5f7bb1441566aaad64a34436904afc61de762fd2,including e778 through fb30388ff. Fetch and both original-base/e778 ancestry checks passed. Startup checkout da74bc6b contained two automatic publication merges and matched5f7 byte-for-byte;refs/codex-recovery/shared-translator/pre-5f7bb1441 preserves it. Requested rebase completed cleanly to5f7 without source/data loss. No runtime Shared/DirectRuntime source differs from4095.
+
+H68 ownership-baseline.json is explicitly updated to that exact recorded5f7 commit;no moving reference determines the pin. The disposable regression now reads this recorded pin for its checkout and receipt. Its old moving-audit control still uses the original4095 code,so the reported defect remains independently reproduced after future authorized recorded-pin updates. H44 archive/data inventory remain immutable. Existing Import.lean still uses printer/parser/macro;no CR migration was delivered by this publication. Full-lane limits remain unchanged.
+
+Fresh post-adoption gates PASS45.133s,RSS1257256KiB,minouter12611284992B. Owned344-job build,exact axiom inventory,old57-kind/806variant suites,modal/direct controls,KeySort,native18+2,pinned-audit regression and SolKey377/131/131 annotations OK. Actual Lean4.24.0/Lake5.0.0-src+797c613;12GiB/swap0,CPU1,threads1/-j1. No Lean source changed;no new theorem or axiom. Independent finder/skeptic read-only,no Lean/server,verified ancestry,pin behavior and unchanged runtime/data;no findings.
+
+H44 external evidence manifest: tests/directruntime-20261104/shared-translator/adoption-5f7-manifest.json. Archive /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/adoption-5f7/evidence-7ea5df486b5f1f3a.tar.zst;9179bytes;SHA256 7ea5df486b5f1f3a06475e14e0464623a7ddfd4952b9f0da8f1a9a91a15ca9f7. Commands/exits/wall/RSS,axiom signatures,rebase and review receipts are retained there. H41 exact-head cache preparation follows this commit;delivery remains coordinator-pending. Original CR migration/WASM/full-closure obligations remain open.
+
+
+## H70 exhaustive observed-corpus census
+
+New corpus-inventory.py accounts for every occurrence in a pinned finite input set:77existing corpus fixtures,5H68 normalized and5raw packets,8retained H41raw packets.95documents,55218nodes,73kinds,1926immediate-field structural forms and12899explicit identity-reference slots. All57modern Solidity and16Yul kinds occur;legacyThrow remains modern-compiler-negative/unobserved. Source/header bytes match88documents;7lack matching binding. Neither status proves compiler authenticity or AST/source equivalence.
+
+Node rows preserve exact fixture/node hashes,JSON pointer,parent/source-unit links,ID/scope presence and raw values. Fourteen declared reference fields have explicit policies;operator function aliases apply only to Unary/BinaryOperation. The five actual function fields are UsingFor child containers with nested IdentifierPath references. Opaque internalFunctionIDs/typeIdentifier and externalReferences semantics remain gaps;candidate-key heuristics include false positives.10374slots uniquely match an input node ID;2451negative and57unsigned-negative candidates plus17null slots remain classified separately. Structural ID match does not prove lexical scope,shadowing,overload selection or intrinsic/source correctness.
+
+Existing selected reader observations are joined only by exact fixture SHA/pointer and verified case/kind/route identity:330of1926forms have an observed occurrence;1596have none. No whole-form semantic verdict is inherited. Independent verification reconstructs every input occurrence and reference slot,checks all field schemas,complete pinned Git/H44 input set,receipt hashes,source-anchor claims and binding counts. Eleven identity controls cover missing/ambiguous/cross-root/bool/null/unsigned cases;three altered observation identities fail closed. All bulk remains outsideGit.
+
+Finder/skeptic confirmed and fixed join/source-completeness/source-binding verification gaps,then re-reviewed with no remaining findings;no Lean/server/writes. VM owned344-job build,axiom inventory,existing57+806/modal/direct controls,KeySort,native18+2,census and SolKey377/131/131 pass31.984s,RSS1256536KiB,minreserve12451889152B. Final strengthened verifier/controls pass5.644s,RSS111616KiB. Lean4.24.0/Lake5.0.0-src+797c613;12GiB/no swap,CPU1,threads1/-j1. No Lean declaration,theorem,axiom,producer API or proof budget changes.
+
+Manifest: tests/directruntime-20261104/shared-translator/corpus-inventory-manifest.json. Archive /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/corpus-5528aeccfdfe4ba5.tar.zst;2749030bytes;SHA2565528aeccfdfe4ba5703a6e16b39b79dee1e690613bd41d2f40a071cadfee1645. Extract under artifacts/corpus-inventory before verifier;inputs require the recordedbc997source tree plus immutableH44 packet. This closes finite occurrence accounting,not exhaustive semantic language coverage. CR existing importer migration and DR-D entrypoint/WASM closure remain waits;no relay constitutes owner agreement. RUNTIME_GATE_PASS and original full queue stay open.
+
+
+## H70 all observed structural-form reader controls
+
+The existing ConstructReaderControls observer now also runs one exact witness for each1926frozen structural forms/73kinds;no translator code is copied. Source fixtures and IDs are checked against the immutable census. Default reader408decoded/1224refused/294noStandalone;canonical composed469/1163/294.1632unknown-root mutations per reader refuse.213differences comprise61refused-to-decoded witnesses and152changed refusal reasons;no decoded witness became refused. General-producer expression printing751printed/112refused is recorded separately;this is not the actual importer migration. Original57-kind and806selected-field matrices remain byte-identical.
+
+Five retained H68 compiler executions provide738unique raw/normalized kind/span/retained-ID pairs. ID field presence92both/565raw-only/81neither;missing IDs are not called preserved. ReferencedDeclaration presence98both/640neither:80exact numeric identities,18existingu32-signed normalizations. Retained name/member/operator/kind/prefix/tryCall/type metadata compare to raw source fields. Unique matching does not establish lexical scope,shadowing,overload/type adequacy or source semantics. Arbitrary literal values and contexts remain outside a one-witness structural-form claim.
+
+Independent finder/skeptic requested mandatory verifier integrity chaining and separate presence counts;both fixed and re-reviewed without remaining findings. New corpus_packet.py verifies portable archive/index/perfile/exactmembership/count/bytes for both generator and verifier;H44inputs separately reverified. No integrity fallback. Census manifest gains only archiveRelative;its archive bytes remain unchanged. All generated reader cases/matrices,identity ledgers/logs stay outsideGit.
+
+Checking slowdown warned/measured:previous driverabout4s;extended frozen replay8s rounded while old matrices remain unchanged. Actual capture8.296s,RSS634636KiB;per-fileMCP0errors18.414s,scopepeak978710528B;server stopped. Owned344-job build,axiom inventory,frozen all suites and independent checks PASS12.340s,RSS1192420KiB,minreserve12408795136B. Final integrity checksPASS0.533s,RSS65836KiB.12GiB/no swap,CPU1,threads1/-j1;no proof/heartbeat changes,new axioms or runtime API changes. These are different test workloads,not before/after production runtime evidence.
+
+Manifest: tests/directruntime-20261104/shared-translator/corpus-readers-manifest.json. Archive /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/corpus-readers-68b78f8ac2ad9719.tar.zst;159929bytes;SHA25668b78f8ac2ad97199eaa54b83a0f19870acb56bf3ca965f29bcf17a908abe0be. Restore census+H44 archives and this packet,run verification,then the frozen per-file test. H41exact-head cache stays on VM for coordinator pull. Original CR migration/native-browser WASM/native closure waits remain;no relay establishes agreement or validation. RUNTIME_GATE_PASS and whole queue remain pending.
+
+
+## Published002f manifest-verification follow-up
+
+Remote002f4f1786a5378f7e06dced5548d714f3e73a38 contains f04;originalb419/f04 ancestry verified. Startup ec924 automatic-merge head preserved at refs/codex-recovery/shared-translator/pre-002f4f178;locked fetch/rebase passed. Ephemeral writer-lock directory was initially absent(exit66),recreated before successful fetch. Ownership audit explicitly pins recorded002f;no moving-ref selection.
+
+verify-corpus-readers.py now authenticates its own archive/index/extracted files through the same packet helper and compares all published case/outcome/refusal/transition/pair/field-presence counts to corpus-readers-manifest.json. verify-corpus-inventory.py compares manifest counts/sourceBindingCounts and independently reconstructed full totals,including document/kind counts. adoption-5f7-manifest.json gains archiveRelative. Existing archive/data bytes remain unchanged.
+
+manifest-controls.py executes both healthy verifiers,then12read-only in-memory manifest mutations:archive hash,index hash,census counts/source bindings and every reader count group. Every mutation refuses;both frozen packets reauthenticate afterward. No fixture/manifest bytes are changed by controls. Finder/skeptic read-only,no Lean/server,confirmed no remaining defect.
+
+VM owned344-job build,axiom inventory,57/806/1926frozen suites,modal/direct controls,KeySort,native18+2,audit regression and SolKey377/131/131 annotations OK pass43.694s,RSS1251300KiB,minreserve14984622080B. Final controls pass10.247s,RSS330724KiB,min14682075136B. Actual Lean4.24.0/Lake5.0.0-src+797c613;12GiB/swap0/CPU1,threads1/-j1. No Lean source or proof/signature changes;per-fileMCP not needed for Python/JSON-only edits.
+
+H44 external evidence manifest:tests/directruntime-20261104/shared-translator/manifest-followup-manifest.json. Archive /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/manifest-followup/evidence-8e6e9df3e718dd9e.tar.zst;10092bytes;SHA2568e6e9df3e718dd9e50e0b01c7b4d0706124703d4c9e5646cb554bc5f9bdd5c07. Exact commands/exits/axioms/reviews/setup receipts retained there;no new bulk data inGit. H41 exact-head cache prepared locally after commit,no ship-cache.sh. H77 producer packet remains unchanged. Original CR importer migration,native-browser parity/WASM/native closure,full source/semantic preservation and final gates remain open;RUNTIME_GATE_PASS pending.

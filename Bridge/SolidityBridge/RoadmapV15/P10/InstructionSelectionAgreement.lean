@@ -1,3 +1,7 @@
+import SolidityBridge.RoadmapV15.P10.SignedDivisionConsumer
+import SolidityBridge.RoadmapV15.P10.SignedLePrimitive
+import Solidity.Backend.Selection.SignedSelection
+import SolidityBridge.RoadmapV15.P10.SignedGeConsumer
 import SolidityBridge.RoadmapV15.P10.UintNotConsumer
 import SolidityBridge.RoadmapV15.P10.BitwiseConsumer
 import SolidityBridge.RoadmapV15.P10.UnsignedOrderConsumer
@@ -583,4 +587,152 @@ theorem bitNot (valid : Array UInt256) (site : Site .NOT) (a : Scalar.Word) (tai
  Quot.sound] -/
 #guard_msgs in
 #print axioms bitNot
+theorem selected_slt : Selection.selectSigned .slt=some Selection.sltCertificate := by
+  rfl
+
+theorem slt (valid : Array UInt256) (site : Site .SLT) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := Scalar.flag (decide (a.toInt < b.toInt))
+    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .slt m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.sltCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) valid input=.ok next ∧
+    EVM.X (fuel+2) valid input=EVM.X (fuel+1) valid next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.sltCertificate.code (a::b::tail)=some (Scalar.flag (decide (a.toInt < b.toInt))::tail) := by rfl
+    have ir := (Selection.sltCertificate.success _ _ m represented).mpr scalar
+    have native := signed_lt_agreement valid site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_slt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_slt
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.slt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms slt
+theorem selected_sgt : Selection.selectSigned .sgt=some Selection.sgtCertificate := by
+  rfl
+
+theorem sgt (site : Site .SGT) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := Scalar.flag (decide (b.toInt < a.toInt))
+    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .sgt m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.sgtCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) #[] input=.ok next ∧
+    EVM.X (fuel+2) #[] input=EVM.X (fuel+1) #[] next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.sgtCertificate.code (a::b::tail)=some (Scalar.flag (decide (b.toInt < a.toInt))::tail) := by rfl
+    have ir := (Selection.sgtCertificate.success _ _ m represented).mpr scalar
+    have native := signed_gt_agreement site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_sgt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_sgt
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.sgt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sgt
+theorem selected_sdiv : Selection.selectSigned .sdiv=some Selection.sdivCertificate := by
+  rfl
+
+theorem sdiv (site : Site .SDIV) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 5≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := (if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tdiv b.toInt))
+    let next := (Assembly.chargedPrepare input 5).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .sdiv m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.sdivCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) #[] input=.ok next ∧
+    EVM.X (fuel+2) #[] input=EVM.X (fuel+1) #[] next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.sdivCertificate.code (a::b::tail)=some ((if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tdiv b.toInt))::tail) := by rfl
+    have ir := (Selection.sdivCertificate.success _ _ m represented).mpr scalar
+    have native := sdiv_agreement site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_sdiv' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_sdiv
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.sdiv' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sdiv
+theorem selected_smod : Selection.selectSigned .smod=some Selection.smodCertificate := by
+  rfl
+
+theorem smod (site : Site .SMOD) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 5≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := (if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tmod b.toInt))
+    let next := (Assembly.chargedPrepare input 5).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .smod m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.smodCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) #[] input=.ok next ∧
+    EVM.X (fuel+2) #[] input=EVM.X (fuel+1) #[] next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.smodCertificate.code (a::b::tail)=some ((if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tmod b.toInt))::tail) := by rfl
+    have ir := (Selection.smodCertificate.success _ _ m represented).mpr scalar
+    have native := smod_agreement site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_smod' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_smod
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.smod' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms smod
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement

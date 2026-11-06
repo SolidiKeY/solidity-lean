@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.intGe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.intGt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.intLe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.intLt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.uintGe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.uintGt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.uintLe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Comparisons.lean:Solidity.Backend.Scalar.uintLt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

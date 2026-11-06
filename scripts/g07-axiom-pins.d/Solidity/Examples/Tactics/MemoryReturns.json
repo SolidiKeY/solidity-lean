@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/Tactics/MemoryReturns.lean:Solidity.Examples.Tactics.MemoryReturns.bothAlias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/MemoryReturns.lean:Solidity.Examples.Tactics.MemoryReturns.valueAlias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

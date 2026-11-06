@@ -1,0 +1,13 @@
+{
+ "Solidity/Backend/StorageOps/RootCopyAccess.lean:Solidity.Backend.StorageOps.RootCopyAccess.live_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RootCopyAccess.lean:Solidity.Backend.StorageOps.RootCopyAccess.retained_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RootCopyAccess.lean:Solidity.Backend.StorageOps.RootCopyAccess.sourceQueries": []
+}

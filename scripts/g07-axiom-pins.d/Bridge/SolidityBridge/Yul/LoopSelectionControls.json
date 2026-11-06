@@ -1,0 +1,22 @@
+{
+ "Bridge/SolidityBridge/Yul/LoopSelectionControls.lean:SolidityBridge.Yul.LoopClassification.classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopSelectionControls.lean:SolidityBridge.Yul.LoopClassification.iter_classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopSelectionControls.lean:SolidityBridge.Yul.LoopClassification.turn_classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopSelectionControls.lean:SolidityBridge.Yul.LoopSelection.selectBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.selectable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.value_nonzero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.value_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCapture.lean:Solidity.Backend.Passes.SignedRemainderCapture.whole_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

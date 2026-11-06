@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/TheoryRead.lean:Solidity.Tm.toLT_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

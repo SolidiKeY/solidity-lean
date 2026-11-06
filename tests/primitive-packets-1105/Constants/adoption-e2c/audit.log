@@ -1,0 +1,85 @@
+Constants audit: 46 declarations recorded
+'Solidity.Evm.sword.eq_1' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.Constants.conversion_refused' depends on axioms: [propext]
+'Solidity.Backend.PrimitivePackets.Constants.public_selection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.selected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.selected_push' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.signed_read' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.source_refused' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.source_success' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.success' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.target_success' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.unsigned_read' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.value' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.word_agreement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.above_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.below_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.endpoints' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.fractional_refused' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.i8' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.Constants.Controls.low_fuel' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.lower' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.signed_max' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.signed_min' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.signed_minus_one_read' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.signed_minus_one_word' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.Constants.Controls.u16' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.Constants.Controls.unsigned_max' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.unsigned_max_read' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.upper' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.wider_positive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_sign_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_signed_result' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_width_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_word' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.zero_fits' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.selected._proof_1' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_1' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_2' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.above_refused._proof_1_1' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.below_refused._proof_1_1' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.endpoints._proof_1_1' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.i8._proof_1' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.Constants.Controls.u16._proof_1' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_word.match_1_1' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.Constants.Controls.zero_fits._proof_1_1' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.Constants.Controls.zero_fits._proof_1_2' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

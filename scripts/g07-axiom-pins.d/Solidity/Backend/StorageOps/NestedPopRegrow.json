@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopRegrow.lean:Solidity.Backend.StorageOps.NestedPopRegrow.collected_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrow.lean:Solidity.Backend.StorageOps.NestedPopRegrow.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrow.lean:Solidity.Backend.StorageOps.NestedPopRegrow.push_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrow.lean:Solidity.Backend.StorageOps.NestedPopRegrow.run_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

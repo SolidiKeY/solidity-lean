@@ -1,0 +1,17 @@
+{
+ "Solidity/Frontend/Admission/ModifierRoots.lean:Solidity.Frontend.Admission.ModifierRoots.derived_modifier_membership": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ModifierRoots.lean:Solidity.Frontend.Admission.ModifierRoots.external_overload_membership": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ModifierRoots.lean:Solidity.Frontend.Admission.ModifierRoots.modifier_registered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

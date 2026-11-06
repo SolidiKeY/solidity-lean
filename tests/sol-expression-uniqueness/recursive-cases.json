@@ -1,0 +1,99 @@
+[
+  {
+    "constructor": "nil",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.nil_vector_unique",
+    "categories": [
+      "list.expr",
+      "list.param",
+      "list.namedArg",
+      "list(opt.expr)"
+    ]
+  },
+  {
+    "constructor": "cons",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.cons_vector_unique",
+    "categories": [
+      "list.expr",
+      "list.param",
+      "list.namedArg",
+      "list(opt.expr)"
+    ]
+  },
+  {
+    "constructor": "none",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.none_expr_word_unique",
+    "categories": [
+      "opt.expr"
+    ]
+  },
+  {
+    "constructor": "some",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.some_expr_word_unique",
+    "categories": [
+      "opt.expr"
+    ]
+  },
+  {
+    "constructor": "positional",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.positional_word_unique",
+    "categories": [
+      "callArgs"
+    ]
+  },
+  {
+    "constructor": "named",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.named_word_unique",
+    "categories": [
+      "callArgs"
+    ]
+  },
+  {
+    "constructor": "namedArg",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.namedArg_word_unique",
+    "categories": [
+      "namedArg"
+    ]
+  },
+  {
+    "constructor": "param",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.parameter_word_unique",
+    "categories": [
+      "param"
+    ]
+  },
+  {
+    "constructor": "elem",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.elementary_type_word_unique",
+    "categories": [
+      "typeName"
+    ]
+  },
+  {
+    "constructor": "userType",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.user_type_word_unique",
+    "categories": [
+      "typeName"
+    ]
+  },
+  {
+    "constructor": "mapping",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.mapping_type_word_unique",
+    "categories": [
+      "typeName"
+    ]
+  },
+  {
+    "constructor": "fnType",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.fn_type_word_unique",
+    "categories": [
+      "typeName"
+    ]
+  },
+  {
+    "constructor": "array",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.array_type_word_unique",
+    "categories": [
+      "typeName"
+    ]
+  }
+]

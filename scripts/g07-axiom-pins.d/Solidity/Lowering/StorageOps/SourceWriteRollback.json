@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceWriteRollback.lean:Solidity.Lowering.StorageOps.SourceWriteRollback.rollback_once": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollback.lean:Solidity.Lowering.StorageOps.SourceWriteRollback.static_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

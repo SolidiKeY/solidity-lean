@@ -1,0 +1,52 @@
+{
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.actual_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.capacity_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.overflow_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.shifted_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapesControls.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.Controls.trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
