@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "source_parent": "b6019bd1a3b9908af3d74700ae62660c6e3ce6cc",
+  "member_integrated": "bd86434e0f193422309f15bad579c171cac2eb3b",
+  "target": "frozen v4.24; v4.35 holds not lifted",
+  "counts": {
+    "full_type_fidelity": 97,
+    "joint_witness": 13,
+    "data_domain_sample": 21,
+    "closed_fidelity": 25,
+    "case_accounted": 59
+  },
+  "pending_original_cases": 79,
+  "original_statement_or_definition_edits": 0,
+  "new_public_witness_control_theorems": 13,
+  "new_axioms": 0,
+  "new_sorry": 0,
+  "private_original_constants_checked": 4,
+  "new_python_tests": 21,
+  "inherited_python_tests_reproduced": 14,
+  "proof_timing_boundary": "Final same-guard proof cleanup2.538s ->2.542s (+0.16%); later source-bound receipts use a different monitor and are not a comparable regression baseline. All per-file checks<60s. No unchanged timing STOP rerun.",
+  "remaining_ready": [
+    {
+      "area": "Bridge Bytes",
+      "cases": 10
+    },
+    {
+      "area": "Bridge Gas",
+      "cases": 11
+    },
+    {
+      "area": "Bridge Header",
+      "cases": 16
+    },
+    {
+      "area": "Bridge malformed membership",
+      "cases": 1
+    },
+    {
+      "area": "BLS/PointEval/Osaka frozen424",
+      "cases": 29
+    },
+    {
+      "area": "Stipend original cases frozen424",
+      "cases": 12
+    }
+  ],
+  "waits": [
+    {
+      "lane": "precompile-agreement",
+      "item": "H45 full Bridge build permission on host."
+    },
+    {
+      "lane": "claudecloud/move5-20261106/v14-g43",
+      "item": "Separate actual compiler-success theorem; abstract controls are not that artifact."
+    },
+    {
+      "lane": "migrate-syntax/coordinator-root-review",
+      "item": "Accepted v4.35 Raw prerequisite and review of30reported producer axiom-growth entries; no acceptance from424 cache refresh."
+    },
+    {
+      "lane": "migrate-precompiles",
+      "item": "Accepted v4.35 BLS prerequisite."
+    },
+    {
+      "lane": "migrate-bridge",
+      "item": "Compatible v4.35 Bridge dependencies and requester installation."
+    },
+    {
+      "lane": "coordinator/artifact-intake",
+      "item": "Optional reproduction of historical retiree gates requires absent off-git evidence/archive and Raw inline receipt; source head and new receipts are independently verified."
+    },
+    {
+      "lane": "V09/integrator",
+      "item": "Previously exported Exp registration patch remains preserved; no takeover of unrelated shared production paths."
+    }
+  ],
+  "imported_bridge_declarations_axiom_audited": 204,
+  "continuation": "ready: fresh-thread handoff requested after five completed items; same original VM/branch/goal; no new goal/stop/scheduler"
+}
