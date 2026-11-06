@@ -45,12 +45,13 @@
       "scope": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/scope.json",
       "scopeSha256": "4dabcb4842b5cb926b8164cf373f1c061c3874e5d43e8121729f2ccc1a550560",
       "proofEvidenceAdopted": false,
-      "integration": "not-merged",
+      "integration": "approved-owned-only-preservation",
       "objectRetrieved": true,
-      "blocker": "Whole-head merge rejected by automatic review: unvalidated out-of-live-scope LinearCountermodel proof edit.",
+      "blocker": "Core candidate excluded; full member head remains unmerged; original timing STOP and evidence waits remain.",
       "ownedOnlyReviewPatch": "/workspace/scratch/h82-successor-exact-review-20261106/owned-only.patch",
       "ownedOnlyPatchSha256": "15f828d27d05894d5b0ce1114ccb66ade4d08b8d8c91d861724276b4bf805d59",
-      "ownedOnlyPatchApplied": false
+      "ownedOnlyPatchApplied": true,
+      "approval": "Coordinator answer Q-H82-EXACT-INTAKE: approved exact prepared patch; Core unchanged; e889 left unmerged."
     },
     {
       "lane": "solidity-h62-2-20261106/audit-theories",
