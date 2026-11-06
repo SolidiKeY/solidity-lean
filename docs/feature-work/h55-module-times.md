@@ -246,3 +246,10 @@ containment backend, and the control does not demonstrate an automated timeout,
 resource-stop cleanup, cache/provenance binding or behavior on H56. No hard
 resource limit was raised. Independent finder and skeptic reviews remain
 pending; no production timing pass is claimed.
+
+A local review also found that `provenance.unchanged` accepted any equal
+nonempty dictionaries, even when they lacked identity fields. It now rejects
+incomplete or malformed records, with synthetic regression controls. The
+21-method unit suite passes, and `sha256sum -c` passes for the committed
+containment evidence manifest. This is a local finding, not either independent
+review, and it does not authenticate the recorded identities.

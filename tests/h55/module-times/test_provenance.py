@@ -26,6 +26,9 @@ class Provenance(unittest.TestCase):
             before = module.snapshot(root, head, tool, "A.lean")
             self.assertTrue(module.unchanged(before, module.snapshot(root, head, tool, "A.lean")))
             self.assertFalse(module.unchanged(before, {}))
+            self.assertFalse(module.unchanged({"unrelated": 1}, {"unrelated": 1}))
+            malformed = {**before, "source_sha256": "not-a-hash"}
+            self.assertFalse(module.unchanged(malformed, malformed))
             tool.write_bytes(b"changed tool")
             self.assertFalse(module.unchanged(before, module.snapshot(root, head, tool, "A.lean")))
             with self.assertRaises(ValueError):

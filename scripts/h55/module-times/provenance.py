@@ -38,4 +38,14 @@ def snapshot(root, expected_head, tool, source):
 
 
 def unchanged(before, after):
-    return isinstance(before, dict) and bool(before) and before == after
+    keys = {"head", "tree", "source", "source_sha256", "tool_sha256"}
+    if not isinstance(before, dict) or set(before) != keys or before != after:
+        return False
+    if any(not isinstance(before[k], str) for k in keys):
+        return False
+    source = before["source"]
+    return bool(COMMIT.fullmatch(before["head"]) and COMMIT.fullmatch(before["tree"])
+                and re.fullmatch(r"[0-9a-f]{64}", before["source_sha256"])
+                and re.fullmatch(r"[0-9a-f]{64}", before["tool_sha256"])
+                and source.endswith(".lean") and not source.startswith("/")
+                and "\\" not in source and all(p not in ("", ".", "..") for p in source.split("/")))
