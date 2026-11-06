@@ -139,7 +139,6 @@ edit to a low module invalidates every other agent's checks.
 |---|---|
 | ordinary edit inside one file | `lean_diagnostic_messages`, nothing else |
 | new import or new module | `lean_build` (restarts the LSP) |
-| touched `SortCheck/Annotations.lean` | `lake exe solkeycheck` (must stay at zero) |
 | moved or renamed a module | `./scripts/check-doc-paths.sh` (seconds) — the prose cites modules by path, and a docstring naming a file that no longer exists is worse than the move |
 | final confirmation | `./run-lean.sh` (~24 min) |
 

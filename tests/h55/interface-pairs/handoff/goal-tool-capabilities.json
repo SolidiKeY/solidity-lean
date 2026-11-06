@@ -1,0 +1,16 @@
+{
+  "requested": "PAUSED existing goal",
+  "available_tools": [
+    {
+      "name": "mcp__codex_apps__codex_goals_stop_goal",
+      "allowed_outcomes": [
+        "complete",
+        "blocked"
+      ]
+    }
+  ],
+  "pause_supported": false,
+  "failure": "No pause/get_goal operation or PAUSED outcome exposed by ALL_TOOLS discovery; cannot record requested PAUSED state through available goal tools.",
+  "action": "No unsupported tool call, goal completion/reset/create, schedule or continuation. Execution stopped by explicit retirement instruction.",
+  "previously_observed_goal_state": "blocked from prior successful stop_goal call; not reclassified as PAUSED"
+}
