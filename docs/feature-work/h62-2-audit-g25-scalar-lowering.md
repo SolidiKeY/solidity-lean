@@ -6,8 +6,11 @@ Batch `solidity-h62-2-20261106`, lane
 `codex/solidity-h62-2-20261106/audit-g25-scalar-lowering`, frozen base
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 
-**Assignment unfinished:** inventory and all simultaneous witnesses pass;
-final repository validation, measurements and final reviews are still pending. No full-goal or final runtime-gate completion claim.
+**RETIRED / STOPPED by explicit human H82 instruction.** C1/C2/C3 are
+complete and reviewed; C4 is partial. No automatic implementation continuation
+is authorized. Successor: `solidity-compiler10-20261028/memory-reference-structs`.
+The original launcher goal is not complete. PAUSED cannot be set through the
+exposed tool, which accepts only complete/blocked; neither substitute was called.
 
 ## Authorization, scope and provenance
 
@@ -176,12 +179,55 @@ source/output hashes and timings are retained in the private receipts/logs.
 Final affected acceptance and checkpoint4 remain pending. Scope questions=[];
 no active producer/interface-repair blocker and no frozen statement modified.
 
-## Checkpoint 4: remaining final obligations
+## Checkpoint 4: partial, preserved at retirement
 
-Pending: final affected validation, unchanged ./run-lean.sh, comparable original
-module timings with the >10% stop rule, final finder/skeptic review closure,
-committed final handoff and cumulative patch/checksum exports. The persistent
-full assignment remains unfinished until those obligations pass.
+Census/fidelity remains311 exact-once joint witnesses across48 unchanged modules,
+zero uncovered. Both read-only reviewers independently accepted the original48
+recheck: wall313.914 ->319.745 seconds (+1.858%), CPU313.649152 ->319.326654.
+All commands, source/fingerprints/output hashes/resource policy match. The
+immutable baseline manifest830102ff... and all164 entries are verified, with
+indexed receipt hashes, duplicate rejection, exact module-set checks and fresh
+measurement-log/receipt agreement. No >10% timing STOP occurred.
+
+The first recheck hit the4GiB reserve guard at PowerBounds216.288s and receives
+no passing credit. Read-only POSIX_FADV_DONTNEED on owned unused historical
+files released cached pages without deleting data or changing bounds. Current
+memory dropped4,628,021,248 ->717,115,392 bytes. Retry passed PowerBounds238.548s,
+sampled peak8,225,436KiB, under identical active cache/flags/source/policy.
+
+The normal native4.24 ./run-lean.sh was explicitly stopped at retirement, after
+last completed job776/5999. No build error appeared before stopping. Supervisor
+exit143, outer wrapper exit1; queued post-gate acceptance was canceled exit143.
+No full-gate or RUNTIME_GATE_PASS credit is given. Bounded KeySort passed first,
+and actual Lean4.24.0/Lake5.0.0-src+797c613 are logged. Partial native artifacts
+and all original VM evidence remain on disk; nothing was deleted.
+
+Open original obligations: finish full normal gate and actual SolKey sort check;
+final affected acceptance; final C4 finder/skeptic closure; successor integration.
+No extra backfill candidate was assigned. No new proof implementation after the
+retirement instruction. H82 standing permission does not override the stop.
+
+### Retirement handoff and operational limits
+
+The complete original first task message was read from this thread and saved
+as original-rendered-assignment.md under tests/h62/item2/audit-g25-scalar-lowering/handoff/.
+That directory also contains the complete work/backfill queue, exact scope
+manifest, subsequent toolchain/H82/retirement messages and stopped-state record.
+They are committed into the cumulative patch and bundle. Bulk evidence and
+checksums remain off git. Coordinator-local paths are provenance, not assumed
+accessible to a survivor VM; export packages include actual VM copies.
+
+No H71 push permission text was available in this thread or coordinator inputs;
+original no-push authorization therefore remains. Only the original isolated
+branch is committed; no push, master operation, PR, replacement goal or VM.
+No Claude-owned original source was edited and no message sent to its owners.
+
+Goal pause failure is precise: the only exposed goal transition tool accepts
+complete|blocked, not PAUSED. No unsupported parameter or substitute state was
+sent. The worker has stopped and must not resume automatically; coordinator
+must perform any missing PAUSED transition externally. Schema-v1 validation is
+limited to the visible task contract because no authoritative schema/validator
+was present; the format question was unanswered before retirement.
 
 ## Resource policy and measurements
 
@@ -206,8 +252,8 @@ in 232.044 seconds, sampled peak 7,910,508 KiB. No proof budget/source was chang
 Normal receipts record actual command, source/dependency/distribution hashes,
 exit, wall/CPU times, sampled RSS and the correctly labeled cumulative maximum
 child RSS. Exception/interruption cleanup does not append a normal result row.
-Original-module before/after timing comparison is still pending; no slowdown
-claim is inferred from failed or differently bounded runs.
+Original48 recheck passes at +1.858% wall time. Failed/differently bounded
+attempts receive no passing timing credit.
 
 ## Reviews and reproducibility
 

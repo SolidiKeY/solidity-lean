@@ -36,6 +36,7 @@ def main():
    PATH=str(proxy/'bin')+':'+str(tool/'bin')+':'+os.environ['PATH'],
    SOLKEY_RULES='/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key')
  versions={name:subprocess.check_output([str(tool/'bin'/name),'--version'],text=True).strip() for name in ['lean','lake']}
+ print(json.dumps({'versions':versions}),flush=True)
  if not versions['lean'].startswith('Lean (version 4.24.0,'): raise RuntimeError(versions)
  swap=[x for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('SwapTotal:')][0]
  if swap.split()[1]!='0': raise RuntimeError('system swap enabled')
