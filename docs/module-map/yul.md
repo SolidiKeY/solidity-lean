@@ -203,5 +203,17 @@
 | `Yul/Compilation/NormalFramedTransport.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/NormalFramedTransportControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/RawFrameLogic.lean` | Intrinsic raw-local frame logic and transport used by P16; retained typed frame obligations remain explicit. |
+| `Yul/Views/MemberDynamicLayout.lean` | Concrete member-dynamic environment, declarations and computed layout; serial elaboration piece. |
+| `Yul/Views/MemberDynamicInitial.lean` | Original concrete member coordinates, headers, initial state, views and encoding. |
+| `Yul/Views/MemberDynamicGrowth.lean` | Original checked first-growth operation and ownership plan. |
+| `Yul/Views/MemberDynamicControls.lean` | Compatibility import for the member-dynamic fixture, initial facts and growth controls. |
+| `Yul/Views/MemberDynamicSequencePrefix.lean` | Original signed and Boolean follow-up ownership-plan controls. |
+| `Yul/Views/MemberDynamicSequenceClear.lean` | Original zero-length follow-up ownership-plan controls. |
+| `Yul/Views/MemberDynamicSequenceRegrow.lean` | Original regrowth follow-up ownership-plan controls. |
+| `Yul/Views/MemberDynamicSequence.lean` | Original complete-sequence MemOK, recovery, rollback, static and end-transaction facts. |
+| `Yul/Views/DynamicJournalPrepare.lean` | Original dynamic journal registry, requests and preparation facts. |
+| `Yul/Views/DynamicJournalCaller.lean` | Original actual dynamic caller sequence and observations. |
+| `Yul/Views/DynamicJournalChild.lean` | Original actual child sequence, rollback, static, error and MemOK facts. |
+| `Yul/Views/DynamicJournalControls.lean` | Original dynamic journal reencoding, reset, account, padding and path-isolation facts. |
 | `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
 | `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |

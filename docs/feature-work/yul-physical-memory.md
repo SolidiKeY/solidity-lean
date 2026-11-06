@@ -1340,3 +1340,33 @@ owned and reserved agreement is proved from real image bounds. Length `65`
 executes a physical store but exceeds the original string allocation and gives
 preparation `None`. No sequential combination, language length syntax, dirty
 cleaning policy or target allocator/compiler adequacy is inferred.
+
+
+## H73 control-module memory split
+
+The member-dynamic fixture, ownership sequence and dynamic journal controls
+are split into dependency-ordered modules. Original declaration names,
+statements, proof bodies and irreducibility attributes are preserved; the
+original import paths still expose the complete APIs. Each piece explicitly
+serializes elaboration. No heartbeat, recursion or trust budget changes.
+
+Matched Lean v4.24.0 checks used LEAN_NUM_THREADS=1, -j1 and --tstack=131072.
+Peak process VmHWM was sampled from /proc at 10 ms intervals (KiB):
+
+| Original module | Before | After |
+|---|---:|---:|
+| `Yul/Views/MemberDynamicControls.lean` | 1743264 | 474008 |
+| `Yul/Views/MemberDynamicSequence.lean` | 1767224 | 484600 |
+| `Yul/Views/DynamicJournalControls.lean` | 1782592 | 1751728 |
+
+All 12 split-module checks and the three transitive consumer checks passed.
+The largest new piece measured 1771396 KiB; the largest affected consumer
+measured 1817308 KiB. Both are below 4 GiB. The original declaration streams reconstruct byte-for-byte.
+All 134 original axiom sets match; 133 types match structurally, and the one
+generated record-update binder rename was checked definitionally equal.
+The scheduling-only experiment did not materially reduce memory and is not
+counted as the split's improvement.
+
+The coordinator's reported 6.3–8.0 GB host peaks were not reproduced on this
+VM. These local measurements do not claim a passing host integration rebuild,
+whole-lane completion or migration validation.
