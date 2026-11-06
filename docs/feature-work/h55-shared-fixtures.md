@@ -141,3 +141,27 @@ This is a review of those named public statements only. Private helper facts,
 all other declarations, full signed-copy/fixed-copy families, proofs, and
 exact statement equivalence after a migration remain to be audited. The case
 matrix is not an acceptance result.
+
+## Dynamic storage-copy semantic review (partial)
+
+Manual reading of the public Bool and Signed dynamic-copy controls gives the
+following original obligations. These remain separate statements and cases
+unless a later, checked migration preserves each one exactly.
+
+| Declaration | Original observations to preserve |
+|---|---|
+| `certificate` | Ordered Source copy log, actual target run, represented overlay and numeric transport, every listed Source/target cell and query readback. Bool and Signed instantiate different element types. |
+| `ordered` | Complete Source, graph, numeric and target before/after vectors and journal length 4, including the retained older element. The Signed vector contains negative encoded words. |
+| `full_target_context` | Exact equality of target context before and after the target run. |
+| `grow_certificate`, `empty_certificate` | Actual Source and target executions for growth and empty source, with the header and all four specified element comparisons. |
+| `varied_ordered` | Complete Source and target vectors for growth and empty-source cases, including journal lengths 4 and 5 and retained older words. |
+| `bad_old_agreements` | Two actual target runs independently distinguish an incorrect retained older word and an incorrect payload word, both before and after the copy. Signed uses wrong positive magnitudes against negative encodings. |
+| `readbacks` | Actual Source header and element reads and actual target reads for header, copied, cleared and retained positions. |
+| Bool `absent_and_false` | Raw absence versus explicitly present false, typed default read and canonical false/true words. |
+| Bool `fuel_static` | Timeout retains the specified partial write prefix and journal length 1; static execution reverts at the initial state. The theorem does not claim rollback for the timeout. |
+| Bool `live_alias` | Alias remains readable after copy while a fresh index operation fails with the exact index-panic data. |
+| Signed `signed_words_presence` | The two negative words have values `2^256-17` and `2^256-71`; preserve absent zero, explicitly stored zero, cleared absence and the retained negative read. |
+
+This covers the named public statements in these two files only. It does not
+review every private fact, all related files, or an actual replacement proof;
+it is not scope-complete acceptance.
