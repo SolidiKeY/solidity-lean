@@ -367,3 +367,12 @@ and recursive physical emission, aggregate target lifecycle and compiler/world
 rollback composition remain open. G27.01–G27.05, G28, G29.01–G29.03, G30 and
 Backfill A/B therefore remain partial. Published owner results are reused with
 explicit premises; no missing representation or target bridge is assumed closed.
+
+## Snapshot fixture extraction boundary
+
+A shared initial-store fixture was evaluated without changing control statements
+or observations. Both implementation variants passed affected kernel checks, but
+the sequence fixture runtime increased by 22.7%, then by 10.5% after a
+reducibility optimization, exceeding the 10% limit in both trials. The original fixture definitions remain
+in production. Candidate patches and raw measurements are retained separately;
+this result is not migration or performance acceptance.
