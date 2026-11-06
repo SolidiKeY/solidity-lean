@@ -1,16 +1,24 @@
 # H28 semantic mutation testing
 
-Status: done for the declared manifest (queue items 1–5 and the backfill),
-with the limits listed under [Limits](#limits).
+Status: the declared 30-operator manifest is fully run: no entry is unrun and
+none is in error. The remaining queue obligations are not claimed:
+
+- the clause-level inventory (dispositions are per constructor and per
+  declared operator site);
+- `scope_complete` acceptance;
+- an immutable seal.
+
+The repository gates are reported under [Gates](#gates). See also
+[Limits](#limits).
 
 | Recorded run | `runs/full-20d7b77c` |
 |---|---|
 | Head | `20d7b77c2e0c9e97559e8f3e8332ad9f4487edc4` |
 | Manifest | `manifests/h28-full.json`, schema 3, sha256 `bb3f1f97…` (full value in `summary.json`) |
-| Census | 215 constructors, 198 mutants on 117 constructors |
+| Census | 215 constructors; 194 site mutants on 117 constructors plus 4 `Tms` helper edits (198) |
 | Proof oracle (census) | 146 detected, 5 equivalent-certified, 47 invalid-compilation, 0 error, 0 unrun |
-| Semantic witnesses | 20 of 20 scored cases killed, 0 witness-failed, 0 error, 0 unrun |
-| Controls | 5 of 5 as declared (`controls_pass: true`) |
+| Semantic witnesses | 20 of 20 scored cases killed, 0 witness-failed, 0 error, 0 unrun. The cases were chosen because a witness exists, so this is witness validation, not a census score |
+| Controls | 4 manifest controls plus 1 pilot control (label renamed), all as declared (`controls_pass: true`) |
 | Baselines | full `Calculus/Taclet.lean`, every row and link alone, `CallbackTaclet.toTaclet`: all pass |
 
 The lane moved from a Codex VM to a Claude VM on 2026-11-05. Its earlier
@@ -43,7 +51,7 @@ only through the repository's language-server bridge,
 `scripts/coord-tools/lean-mcp` (three daemons, one open file each). It reads
 only committed inputs, so queue item 1 (self-contained tooling) is met
 without the H44 bulk digests. The old Docker tools and `bulk-data.json` stay
-as a record and are marked legacy. 85 of their 91 unit tests still pass here.
+as a record and are marked legacy. 65 of their 71 unit tests still pass here.
 The other six need the Codex VM's off-Git evidence or its runtime.
 
 A check is one scratch file in the ignored `.scratch/`:
@@ -74,21 +82,23 @@ constructor's premise text (after `⇝`). Each match is one mutant, whose edit
 replaces the whole constructor span, so it is attributed to exactly one
 constructor. Four `Tms` helper edits come on top.
 
-"Exhaustive" means every match of these 30 declared operators, not every
-conceivable fault. The operators are:
+The census covers every match of these 30 declared operators, not every
+conceivable fault. The operators, with their census sites, are:
 
 | Family | Operators (sites) |
 |---|---|
-| guard-polarity | branch guard `true`↔`false` (5), loop guard `b = TRUE`↔`FALSE` (7), assert check (1) |
-| overflow | push-arithmetic operator swaps (7), `± 1` step dropped (12), compound/inc-dec operand swaps (2 helpers) |
-| division-minimum | `/`→`*`, `%`→`/`, zero guard negated (4), fixed binop operand swap (helper) |
-| index-bounds | index `[ie]`→`[0]` on arrays (32) |
-| push-tail-length | length `+ 1`→`+ 2` (19), new slot / last slot shifted (6+19), recycled tail cleared (helper) |
-| pop-delete | storage and memory deletion dropped (9), pop length `- 1`→`- 2` (2), popped slot shifted |
-| alias-capture-once | each receiver capture's later uses re-evaluate the receiver (39) |
-| rollback-payment | revert/transfer/try/send closings flipped (5), send flags flipped (4), amount zeroed (6), `0 <= se`→`0 < se` (2) |
-| callback-frames | the same payment and flag edits on the `CallbackTaclet` table (8) |
-| other (kept, outside the nine) | loop-invariant `inv = TRUE` and `¬broke` edits (9), other closings (3) |
+| Family | Operators (sites) | Total |
+|---|---|---|
+| guard-polarity | branch guard `true`↔`false` (5), loop guard `b = TRUE`↔`FALSE` (7), assert check (1) | 13 |
+| overflow | push-arithmetic operator swaps (7), `± 1` step dropped (12), compound and inc/dec operand swaps (2 helpers) | 21 |
+| division-minimum | `/`→`*` (1), `%`→`/` (1), zero guard negated (2), fixed binop operand swap (1 helper) | 5 |
+| index-bounds | index `[ie]`→`[0]` on arrays (32) | 32 |
+| push-tail-length | length `+ 1`→`+ 2` (19), new slot shifted (6), last slot shifted (18), recycled tail cleared (1 helper) | 44 |
+| pop-delete | storage deletion dropped (5), memory deletion dropped (4), pop length `- 1`→`- 2` (2), popped slot shifted (1) | 12 |
+| alias-capture-once | each receiver capture's later uses re-evaluate the receiver (39) | 39 |
+| rollback-payment | revert/transfer/try closings flipped (4), send flags flipped (4), amount zeroed (3), `0 <= se`→`0 < se` (1) | 12 |
+| callback-frames | the same payment and flag edits on the `CallbackTaclet` table (8) | 8 |
+| other (kept, outside the nine) | loop-invariant `inv = TRUE` and `¬broke` edits (9), other closings (3) | 12 |
 
 Per-constructor dispositions are in `runs/full-20d7b77c/dispositions.json`:
 
@@ -124,8 +134,11 @@ How a mutant is classified:
   that cascade from it (unknown lemma, closing theorems, error-recovery
   `sorry`) are allowed.
 - **error, never detected:** heartbeat, recursion or timeout messages, and
-  any lemma that depends on `sorryAx`. The `H28 TRUST` guard reports the
-  latter.
+  a lemma that depends on `sorryAx` (the `H28 TRUST` guard reports it).
+  There is one exception: the `sorry` that error recovery leaves after a
+  hand lemma fails in a way already attributed to the same constructor. That
+  is a cascade of that failure. In the record, a trust error's internal
+  reason reads "runtime limit"; the label is inexact, the outcome is not.
 - **equivalent-certified:** the unchanged evidence still passes. The
   mutant's premise is then provably `Stmt.step`'s for every admitted
   instance, hence the original's.
@@ -157,25 +170,27 @@ survivor.
 
 ## Results
 
-### Census by family (`runs/full-20d7b77c/summary.json`)
+### Census by family (census entries only, `runs/full-20d7b77c/summary.json`)
 
 | Family | detected | equivalent-certified | invalid-compilation |
 |---|---|---|---|
-| alias-capture-once | 37 | 0 | 3 |
+| alias-capture-once | 36 | 0 | 3 |
 | callback-frames | 8 | 0 | 0 |
-| division-minimum | 2 | 0 | 4 |
-| guard-polarity | 9 | 1 | 5 |
-| index-bounds | 33 | 0 | 0 |
-| overflow | 15 | 0 | 7 |
-| pop-delete | 10 | 1 | 2 |
-| push-tail-length | 22 | 4 | 19 |
+| division-minimum | 1 | 0 | 4 |
+| guard-polarity | 9 | 0 | 4 |
+| index-bounds | 32 | 0 | 0 |
+| overflow | 14 | 0 | 7 |
+| pop-delete | 9 | 1 | 2 |
+| push-tail-length | 21 | 4 | 19 |
 | rollback-payment | 12 | 0 | 0 |
 | other:closing | 3 | 0 | 0 |
 | other:loop-invariant | 1 | 0 | 8 |
 
-Totals include the four helper edits. The 8 extra proof entries (6 pilot
-cases that are not census mutants, the label-equivalence control and the
-invalid-syntax control) are listed apart.
+Totals include the four helper edits. `summary.json`'s `by_family` and
+`all_entry_counts` also include 8 extra proof entries: the 6 pilot cases
+that are not census mutants, the label-renaming control and the
+invalid-syntax control. Together these give 152 detected, 6
+equivalent-certified and 48 invalid.
 
 What the run found:
 
@@ -194,13 +209,17 @@ What the run found:
     invariant and guard edits that leave the accepted `inv = TRUE` /
     `b = TRUE` forms, some division edits, and three receiver re-evaluations
     whose receiver is not a path.
+  - Two `whileInvariantBox` `¬broke` deletions are plain parse errors
+    (`unexpected token '∧'`). They are artifacts of the operator, not
+    evidence about the DSL.
   - None is scored.
 - **No error and no unrun entry.**
 
 ### Semantic kills (20 scored, all killed)
 
-These are the 16 earlier hand-selected cases, rechecked fresh, plus new
-ones:
+The scored set is 13 earlier hand-selected cases, rechecked fresh, plus 7
+new ones; the earlier known-kill and equivalence controls are not scored.
+The new ones are:
 
 - `ifElseSplit` then-guard and else-guard flips: `IfThenPolarityKill`,
   `IfElsePolarityKill`;
@@ -217,8 +236,23 @@ ones:
   uses `holds`, as `toTaclet` makes that premise the no-callback one. The
   holdsC theorem `checked_callback_frames` is required too.
 
-14 census mutants carry one of these witnesses. The 6 helper and hand-typed
-pilot edits carry the rest.
+14 census mutants carry a scored witness: 13 table sites and the `pushSlot`
+helper edit. The other 6 scored cases are pilot edits that are not census
+mutants: 2 `binopC` helper edits and 4 hand-typed rules. The known-kill
+control covers the census mutant `revertDiamond`.
+
+The tool does not compare the source links of helper-linked kills: `binopC`
+linked to `localOpAssign`, and `pushSlot` linked to
+`storagePushLengthSaveReferenceElement`.
+
+Per family, these semantic verdicts are thin:
+
+- index-bounds, alias-capture-once and division-minimum each rest on one
+  hand-typed or helper pilot edit, not on a census site;
+- push-tail-length has the census `pushSlot` helper edit and one hand-typed
+  pilot;
+- guard, rollback/payment, callback, pop/delete and overflow have census
+  mutants with witnesses.
 
 This is a witness-validation rate over cases chosen because a witness
 exists. It is not a semantic mutation score of the census: the other 132
@@ -254,7 +288,24 @@ cover false kills and false passes:
 
 ### Run provenance
 
-`full-20d7b77c` re-classified every check with the final code:
+`full-91c9631d` (head `91c9631d`, manifest sha256 `e243fdd3…`) ended with 2
+proof errors and 4 semantic errors:
+
+- the `binop` and `pushSlot` helper mutants, whose hand-lemma cascade was
+  reported through the trust guard;
+- the two `transfer*` cases, whose rejection lay on the second line of a
+  multi-line `source_link`;
+- the two `ifElseSplit` cases.
+
+The classifier fixes turned the first four into detections and kills
+without re-running Lean. The two `ifElseSplit` witnesses were edited
+(`hj := rfl`) and re-run.
+
+`full-20d7b77c`, with a different manifest (the two edited witness hashes),
+re-classified every check with the final code. Reuse is matched by scratch
+file hash, which covers import names but not the imported modules. It is
+valid here because `git diff 91c9631d 20d7b77c` touches no `Solidity/`
+file. Reused records keep their original elapsed time and bridge.
 
 - 297 checks reuse the diagnostics of byte-identical scratch files from
   `full-91c9631d` (`--reuse`, matched by scratch sha256);
@@ -266,8 +317,11 @@ predate a container restart; the remaining 193 resumed from the same head
 
 Both runs' compact records (`checks.jsonl`), summaries and full-record
 archives (`runs/*-checks-full.tar.gz`, with sha256 in each `summary.json`)
-are committed. 3.42 hours of check time ran on three bridges; the longest
-single check took 229 s.
+are committed. They were compacted after the run by `tools/compact.py` as of
+`a3716f4b`, which differs from `20d7b77c`'s only in the `in_git` flag and a
+docstring. The 3.42 hours of check time are almost all `full-91c9631d`'s
+Lean time, carried over by reuse. The checks ran on three bridges, and the
+longest single check took 229 s.
 
 ## Reviews
 
@@ -299,7 +353,47 @@ Two further defects surfaced in the first recorded run and were fixed before
 the final one: the rejection checker read only the `source_link` header line,
 and a failing hand lemma's cascade was reported through the trust guard.
 
-The final evidence and doc review is recorded below.
+A second finder and skeptic pair reviewed the evidence and this document at
+`e0f5c8bf`. Their outcomes are recorded under
+[Final reviews](#final-reviews).
+
+## Final reviews
+
+Separate read-only finder and skeptic reviews at `e0f5c8bf`; neither used
+the Lean server.
+
+The **finder** recomputed the evidence and found it consistent:
+
+- recomputing `summarize` gives exactly the stored summary;
+- all 301 records exist, with none missing or extra;
+- every scratch hash and region rebuilds from the files at `20d7b77c`;
+- re-running the classifiers changes 0 of 301 decisions;
+- all 297 reused records are byte-consistent with `full-91c9631d`;
+- every invalid compilation's first error is within two lines of its edit;
+- every scored kill has no error or warning, only the three permitted
+  axioms, and exactly one normal-table error, inside its `source_link` span.
+
+Its remaining findings were documentation-level and are fixed above:
+
+- the trust-cascade exception;
+- the `¬broke` parse artifacts;
+- unchecked helper links;
+- reuse validity;
+- the version of `compact.py`.
+
+The **skeptic** found wrong numbers and overclaims in this document, all
+corrected above:
+
+- the per-family table had summed the pilot and control entries;
+- several operator counts in the census table were wrong;
+- the Status line had claimed queue items 1–5 done;
+- the run-provenance section had hidden the six errors of `full-91c9631d`;
+- the limits on per-family semantic coverage, the backfill, timeouts and
+  survivors were missing.
+
+## Gates
+
+GATES-PENDING
 
 ## Limits
 
@@ -317,11 +411,19 @@ The final evidence and doc review is recorded below.
   - the variant clause of `whileInvariantDiamond`;
   - `tryCall*` branches and binders;
   - the term-built premises of the 13 no-premise-text constructors;
-  - 26 of the 30 `Tms` helpers.
 - **Not re-certified here:** the Codex VM's evidence, caches, seals and H35
   transport. The pilots were re-run fresh instead.
+- **Runner outcome coverage.** Timeouts fold into `error`; the runner keeps
+  no separate timeout class. No real survivor (`witness-failed`) occurs in
+  the run: that outcome is exercised only by the unit tests. The
+  cross-witness control ends in `link-mismatch`, which the runner checks
+  before running the witness.
+- **Backfill.** The negative controls cover only the guard and
+  rollback/payment families. The other seven families have none of their
+  own.
+- **Census, helpers.** 51 of the 55 `Tms` helpers have no operator.
 - **Resource measurement.** No per-process RSS is available through the
-  language-server bridge.
+  language-server bridge, and VM memory was observed by hand, not recorded.
 
 
 ## History (Codex VM)
