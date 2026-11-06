@@ -1995,16 +1995,24 @@ DUP1 through DUP16 short-stack consumers connect the actual indexed certificates
 
 This validates the fetched CALL/RETURNDATA relation that
 [G42](g42-world-call-consumers.md) names as the P10 input of
-`WorldCalls.FetchedPremises.Returndata`. Both modules use only the frozen
-`FrozenV1.api` CALL field and the pinned reference `EVM.call`; the frozen API
-is unchanged.
+`WorldCalls.FetchedPremises.Returndata`. The general law and the single-step
+controls go through the frozen `FrozenV1.api` CALL field and the pinned
+reference `EVM.call`; the frozen API is unchanged.
 
-`CallReturndataLaw` holds for every CALL site and fuel:
+`CallReturndataLaw` holds for every CALL site and fuel. `calleeRun` is the
+exact `Θ` invocation `EVM.call` makes, with every input pinned: callee code
+`toExecute .EVM σ t`, substate with `t` accessed, source, origin, recipient,
+`Ccallgas` gas, gas price, values, the input window read with padding,
+depth + 1, header and permission. `entered` is the entry condition (enough
+caller balance, depth below 1024).
 
 | Law | Statement |
 |---|---|
-| `call_returnData` | A successful `EVM.call` leaves a return buffer that is either empty (the callee is not entered) or exactly the output of `Θ` on `toExecute .EVM σ t`, the callee's code in the caller's account map. |
-| `fetched_call_returnData` | Lifted through `FrozenV1.api.charged.checked_call`: a successful fetched CALL step exposes the actual gate and seven popped operands, and its buffer is empty or that `Θ` output. The caller's previous buffer is never kept. |
+| `call_returnData` | A non-erroring `EVM.call` result has the return buffer of `calleeRun` when `entered` holds, and an empty buffer when it fails. |
+| `fetched_call_returnData` | Lifted through `FrozenV1.api.charged.checked_call`: a non-erroring fetched CALL step exposes the actual gate, the seven popped operands and positive call fuel, and its buffer is given by `call_returnData` on the state `EVM.call` receives. |
+
+The conclusion is stated without reference to the caller's previous buffer;
+nothing rules out a callee output equal to it. `Θ` stays unevaluated.
 
 `CallReturndata` evaluates populated cases in the kernel. The caller has
 memory `[0xaa, 0xbb]` and a stale buffer `[0xcc, 0xdd]`; callee 31 is absent or
@@ -2014,20 +2022,27 @@ has the one-byte body INVALID.
 |---|---|
 | `absent_call` | flag 1, stale buffer cleared, memory unchanged. |
 | `invalid_call` | flag 0, stale buffer still cleared. |
-| `absent_then_size` | the following RETURNDATASIZE pushes 0, not the stale size 2. |
-| `outcome_needs_callee` | two states that agree on environment, PC, stack, gas, memory, stale buffer and caller account push different CALL flags. |
+| `absent_then_size` | the following RETURNDATASIZE pushes 0, not the stale size 2 (direct driver evaluation, not through the frozen API). |
+| `outcome_needs_callee` | two states that agree on environment, PC, stack, gas, memory, stale buffer and the caller's nonce and balance push different CALL flags. |
 
-No populated control returns nonempty data. Kernel evaluation of callee
-instructions is the limit: a three-instruction callee peaked above 14 GB and
-was killed, beyond the 8 GiB module budget, and the identity precompile does
-not reduce in the kernel. Nonempty output is covered only symbolically, by
-`call_returnData`.
+Nonempty output is not exercised; `call_returnData` only constrains it. Kernel
+evaluation of callee instructions is the limit: a three-instruction callee
+peaked above 14 GB and was killed, beyond the 8 GiB module budget, and the
+identity precompile does not reduce in the kernel.
 
-Verdict for the G42 adapter: post-CALL return data is the callee's `Θ` output,
-a function of callee code and world. The core `Evm.Machine` has no code map
-and no return buffer, and its `CALL` is a two-operand payment
-(`ExternalEvm.Obstructions.call_arity_mismatch`). A `FetchedPremises.Returndata`
+Verdict for the G42 adapter: post-CALL return data is the output of the
+callee's `Θ` run, a function of callee code, world and the caller's input
+window. Flag dependence alone is expressible in the core through its free
+`Machine.accepts` oracle, but the core `Evm.Machine` has no return buffer and no
+code map, and its `CALL` is a two-operand payment
+(`Solidity.Evm.External.call_arity_mismatch`). A `FetchedPremises.Returndata`
 instance from `FrozenV1.API` therefore needs a callee/world execution producer
 (V13 WorldCalls steps) and a core-to-reference CALL representation. Neither is
 supplied or assumed here. Gas values, `Site` origin, resource, Osaka and
 transaction adequacy are not asserted.
+
+Read-only finder and skeptic reviews found that the first version of the law
+left most `Θ` inputs existential, its empty branch unguarded, and the docs
+overstated buffer replacement, nonempty output and the flag control. The law
+now pins every input and guards the empty branch, and the wording above is
+corrected.

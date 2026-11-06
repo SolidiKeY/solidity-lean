@@ -4,20 +4,22 @@ import SolidityBridge.RoadmapV15.P10.FrozenWitness
 G42's `WorldCalls.FetchedPremises.Returndata` names as its P10 input; the
 general law is `CallReturndataLaw`.
 
-Each CALL control rewrites with the frozen `FrozenV1.api.charged.checked_call`
-field, so it exercises the version-1 API consumers import, and then evaluates
-the pinned `EVM.call`, including `Θ`/`Ξ` on the callee, in the kernel. The
-caller has memory `[0xaa, 0xbb]` and a stale return buffer `[0xcc, 0xdd]`.
-Callee 31 is either absent or carries the one-byte body INVALID. Kernel
-evaluation of longer callee bodies exceeds the module memory budget (a
-three-instruction callee peaked above 14 GB), and the identity precompile
-does not reduce in the kernel, so no populated control returns nonempty data.
+The single-step CALL controls rewrite with the frozen
+`FrozenV1.api.charged.checked_call` field and then evaluate the pinned
+`EVM.call`, including `Θ`/`Ξ` on the callee, in the kernel; the two-step
+`absent_then_size` evaluates `Assembly.driverSteps` directly. The caller has
+memory `[0xaa, 0xbb]` and a stale return buffer `[0xcc, 0xdd]`. Callee 31 is
+either absent or carries the one-byte body INVALID. Kernel evaluation of
+longer callee bodies exceeds the module memory budget (a three-instruction
+callee peaked above 14 GB), and the identity precompile does not reduce in the
+kernel, so no populated control returns nonempty data.
 
 `outcome_needs_callee`: two states that agree on the execution environment,
-PC, stack, gas, memory, stale buffer and the caller's account push different
-CALL flags, so the CALL outcome depends on callee code, which the core
-`Evm.Machine` (no code map, no return buffer, two-operand payment `CALL`,
-`ExternalEvm.Obstructions.call_arity_mismatch`) does not carry.
+PC, stack, gas, memory, stale buffer and the caller's nonce and balance push
+different CALL flags. Flag dependence alone is expressible in the core through
+its free `Machine.accepts` oracle; what the core lacks is a return buffer and a
+code map (and its `CALL` is a two-operand payment,
+`Solidity.Evm.External.call_arity_mismatch`).
 
 `Site` remains a constructed state (no compiler/source origin); gas, resource,
 Osaka and transaction adequacy are not asserted. -/
