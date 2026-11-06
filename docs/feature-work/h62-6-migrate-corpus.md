@@ -1,5 +1,45 @@
 # H62/H63 Corpus toolchain migration
 
+## H82 preservation checkpoint: current disposition
+
+The lane-specific H82 instruction orders retirement after preserving a final
+checkpoint for `solidity-h62-6-20261106/migrate-root-gate`; the coordinator reports
+that successor queue relay accepted. A later generic H82 standing-rules relay
+says continue. Q-H82-RESUME was explicitly resolved: KEEP RETIREMENT AND HANDOFF. Generic
+continue broadcasts do not revoke this lane-specific stop; no new proof
+implementation starts. The coordinator will set the existing goal PAUSED after
+the final head report and idle turn because the worker tool lacks pause. This checkpoint preserves work and acknowledges
+stopped implementation; the goal is not complete. No automatic implementation
+continuation is authorized by the retirement instruction.
+
+Current H82 standing agreements supersede this document's earlier exact-file
+agreement prose for statement-preserving proof-only changes, additive
+lemmas/definitions, splits, imports and documentation fixes. Any pending request
+solely for that permission is withdrawn. Existing dependency failures are actual
+unrepaired/unvalidated inputs, not proof-only permission waits. Changes to an
+existing statement, a depended-on definition body, interface, budget, axiom set
+or exclusion still require the owner; frozen changes require H57 versioned pairs.
+Earlier paragraphs below are retained as historical evidence, not current
+proof-only permission policy. No Claude-owned source edits or owner messages
+have been made in this preservation checkpoint.
+
+The full original assignment, objective, queues, scope and subsequent relays are
+committed under [h82-handoff](../../tests/h62/item6/migrate-corpus/h82-handoff/README.md).
+The original rendered-prompt digest is preserved as coordinator provenance;
+unavailable raw renderer bytes are not falsely equated to the transcript hash.
+
+H71 push permission is absent from supplied local inputs and the visible thread;
+therefore no push is performed under the conditional H82 permission. The original
+lane branch remains local and is exported as a cumulative patch and bundle.
+The PAUSED state is requested, but no callable goal pause/set-state tool exists:
+the sole goal operation only accepts complete or blocked. It is not used as a
+substitute for pause; no goal is completed, created or reset. Earlier relay turns
+also lacked trusted goal/source-turn context. Goal pause requires host support;
+implementation is stopped locally regardless. No new Lean check, timing STOP
+rerun or resource-policy assumption is introduced; H81's full text is not locally
+available and the prior measurements remain historical H62 evidence.
+
+
 This isolated overlay remains **blocked and incomplete**. No producer ownership
 was transferred, no original Lean file or root toolchain pin was edited, and no
 push, merge, PR, deployment or cut-over was performed.
