@@ -1,0 +1,14 @@
+{
+  "requested_state": "PAUSED",
+  "pause_supported": false,
+  "exposed_goal_tools": [
+    {
+      "name": "codex_goals_stop_goal",
+      "allowed_outcomes": [
+        "complete",
+        "blocked"
+      ]
+    }
+  ],
+  "action": "No unsupported argument submitted; no substitute completion/block transition, no reset/create. Stop implementation per explicit retirement."
+}

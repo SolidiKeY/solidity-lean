@@ -204,3 +204,10 @@ full BLS overlay patch, and minimal discount-proof patch are published with hash
 in `tests/h62/item6/migrate-precompiles/h70-bls-delivery.json`. Both independent
 read-only reviews and pinned-base apply checks pass; consumer retest/full gates
 remain pending. Reported host handoff hash/size remain locally unverified.
+
+H82 explicit retirement: implementation STOPPED, handoff_to
+`solidity-h62-6-20261106/migrate-root-gate`. Complete visible original assignment,
+objective, original queues, exact scope registry, open-work ledger and pause-tool
+limitation are committed under `tests/h62/item6/migrate-precompiles/retirement/`.
+No H71 push permission is available; no push performed. Goal is not complete;
+exposed tool cannot set PAUSED. No automatic implementation continuation authorized.

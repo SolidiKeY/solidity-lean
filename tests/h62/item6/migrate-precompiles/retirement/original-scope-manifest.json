@@ -1,0 +1,10 @@
+{
+  "id": "H62-6-MIGRATE-PRECOMPILES",
+  "owner": "solidity-h62-6-20261106/migrate-precompiles",
+  "status": "reserved",
+  "writeScope": "tests/h62/item6/migrate-precompiles/**; scripts/h62/item6/migrate-precompiles/**; docs/feature-work/h62-6-migrate-precompiles.md; Solidity/Precompiles/Basic.lean; Solidity/Precompiles/Blake2f.lean; Solidity/Precompiles/Bls12381.lean; Solidity/Precompiles/Bls12381Iso.lean; Solidity/Precompiles/Bn254.lean; Solidity/Precompiles/Field.lean; Solidity/Precompiles/Modexp.lean; Solidity/Precompiles/Osaka.lean; Solidity/Precompiles/P256.lean; Solidity/Precompiles/Pairing.lean; Solidity/Precompiles/PointEval.lean",
+  "model": "gpt-6.1-sol",
+  "baseRevision": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "evidence": "receipts/h62-20261106/scopes/6-migrate-precompiles.json",
+  "writeMode": "isolated-migration-overlay-no-live-owner-transfer"
+}
