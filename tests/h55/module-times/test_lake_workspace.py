@@ -56,6 +56,28 @@ class LakeWorkspace(unittest.TestCase):
             with self.assertRaises(ValueError):
                 module.capture(files, {}, command)
 
+    def test_explicit_xdg_cache_must_match_selected_tree(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp).resolve()
+            config = root / "lakefile.toml"
+            config.write_text("fixture")
+            cache, other = root / "cache", root / "other"
+            cache.mkdir()
+            other.mkdir()
+            command = {"argv": ["lake"], "cwd": str(root),
+                       "env": {"XDG_CACHE_HOME": str(cache)}, "tool_sha256": {}}
+            with self.assertRaisesRegex(ValueError, "XDG cache home"):
+                module.capture({"config": config}, {"xdg_cache_home": other}, command)
+            with self.assertRaisesRegex(ValueError, "XDG cache home"):
+                module.capture({"config": config}, {"other": cache}, command)
+            before = module.capture({"config": config}, {"xdg_cache_home": cache}, command)
+            (cache / "lake").mkdir()
+            after = module.capture({"config": config}, {"xdg_cache_home": cache}, command)
+            self.assertFalse(module.unchanged(before, after))
+            command["env"]["XDG_CACHE_HOME"] = "relative"
+            with self.assertRaisesRegex(ValueError, "XDG cache home"):
+                module.capture({"config": config}, {"xdg_cache_home": cache}, command)
+
     def test_symlink_and_missing_paths_fail(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp).resolve()

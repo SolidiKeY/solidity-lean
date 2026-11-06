@@ -708,3 +708,21 @@ or prevent workspace loading and dependency materialization. Paths and labels
 in the observation remain visible; its digest is not a confidentiality or
 authentication guarantee. No production runner, H56 measurement, bounded
 KeySort, runtime gate or Lean proof pass is claimed.
+
+## Explicit XDG observation binding
+
+When the candidate command supplies `XDG_CACHE_HOME`, the selected-path
+observer now requires an absolute canonical matching `xdg_cache_home` tree
+and fingerprints it. Synthetic controls reject missing, mismatched and
+relative bindings, and detect a mutation in the selected tree. Independent
+read-only finder and skeptic reviews rechecked the narrow binding without
+Lean, a server or builds.
+
+This is not effective-cache authentication: Lake may prefer an Elan
+toolchain cache or another configuration, and the HOME fallback when XDG is
+absent is not bound. The skeptic also identified that one-pass sequential
+tree scans can combine observations of states that never coexisted. A second
+sweep would still not establish atomicity and would add cache scanning; it
+has not been imposed or benchmarked. Discovery of actual dependency/cache
+inputs, their simultaneous authenticated identity, runner integration and
+H56 timing remain open. No production, runtime or Lean proof pass is claimed.

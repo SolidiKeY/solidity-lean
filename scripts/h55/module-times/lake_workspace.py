@@ -52,6 +52,14 @@ def capture(config_files, selected_trees, command):
     allowed = {"PATH", "HOME", "TMPDIR", "LANG", "LC_ALL", "TZ", "XDG_CACHE_HOME", "LEAN_NUM_THREADS"}
     if not isinstance(env, dict) or set(env) - allowed or any(not isinstance(v, str) for v in env.values()):
         raise ValueError("command environment is not allowlisted")
+    # If supplied, bind this explicit environment location to the selected
+    # observation. Lake may nevertheless select a different cache (e.g. Elan).
+    if "XDG_CACHE_HOME" in env:
+        xdg = pathlib.Path(env["XDG_CACHE_HOME"])
+        selected = selected_trees.get("xdg_cache_home")
+        if (not xdg.is_absolute() or xdg.resolve() != xdg or
+                selected is None or pathlib.Path(selected) != xdg):
+            raise ValueError("XDG cache home is not bound to the selected tree")
     # Exact command binding is observation, not validation or attestation.
     import json
     serialized = json.dumps(command, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False)
