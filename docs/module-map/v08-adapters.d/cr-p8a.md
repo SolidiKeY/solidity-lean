@@ -1,0 +1,1 @@
+| `Frontend/Admission/CanonicalReaderContract.lean` | CR/H68 control: one fixture through the existing `solc_import` route (all six rows elaborated) and `Shared.executableReader` (two `uint8` shapes refused with exact diagnostics); observation, no migration or fallback. |
