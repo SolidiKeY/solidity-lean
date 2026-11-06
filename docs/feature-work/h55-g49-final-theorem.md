@@ -10,16 +10,18 @@ Historical H68 identity: `/workspace/h68-g49-evidence/identity.json`.
 
 The full assignment is unfinished. H68 resolves both prior questions: owning
 lanes supply additive full-certificate bridges, and one proof-only optimization
-was authorized and checked. The retry still exceeds 10%, so further proof work
-is stopped again. H64/H65 supplies the common template, folded conditional
+was authorized and checked. The H68 retry measured +14.46% on the Codex VM
+and stopped further proof work there. H64/H65 supplies the common template, folded conditional
 public/specification theorem and typed owner accounting. Concrete producer/residual proofs, adapters for
 incompatible lane shapes, exhaustive lane coverage and full acceptance remain
-open. The timing gate exceeded its threshold and further proof expansion stopped.
-The current section below supersedes older H55 statements about missing public
+open. The H64 timing gate exceeded its threshold on the Codex VM.
+The H64/H65 section below supersedes older H55 statements about missing public
 theorem syntax or unavailable typed counts; the older checkpoint remains history.
 No partial checkpoint or prerequisite pass is full completion.
-The cloud move6 section below supersedes the timing HOLD: the paired rerun
-on one machine measured +2.39%, below the 10% stop.
+The cloud move6 section (next) reports a paired same-machine timing rerun at
++2.39%, below the 10% stop. Its comparison method differs from the H64/H68
+single-sample protocol, so the HOLD's release is left to the human; the
+older timing statements in this introduction are history.
 
 ## Cloud move6 (H75): ownership move, registration and H68 timing rerun
 
@@ -28,8 +30,8 @@ H75 (human decision 2026-11-06) moves this lane from the Codex VM lane
 task `g49-final`, branch `cloud/move6-20261106/g49-final`. The Codex head
 `191bce52` is the base; `origin/master` `0b2a648b` merged into it without
 conflicts. No `registry/ownership.json` exists in this checkout; the write scope
-stays the G49.01-.03/G50.01-.02 modules (`Solidity/Roadmap/G49Final/**`,
-`Solidity/Roadmap/V16/CalculusConsumer.lean`), `tests/h55/g49-final-theorem/**`
+stays the G49.01-.03/G50.01-.02 modules (`Solidity/Roadmap/G49Final/**`),
+`tests/h55/g49-final-theorem/**`
 and this document. The Codex lane's off-Git evidence under `/workspace/` is not
 on this VM; nothing here relies on it except as noted under limitations.
 
@@ -42,7 +44,7 @@ remain unresolved.
 
 **Queue item 3 (H68 bridges).** [bridge-requests.json](../../tests/h55/g49-final-theorem/bridge-requests.json)
 now lives in Git (it was off-Git on the Codex VM): the common result type, the
-five factory signatures, relays, required bindings and surviving facts, copied
+generic owner requirements (`genericRequirements`), the five factory signatures, relays, required bindings and surviving facts, copied
 from the H68 section below, with `status: pending` for every family. The common
 type is now an elaborated declaration,
 [BridgeGoal](../../Solidity/Roadmap/G49Final/BridgeGoal.lean), so owners can import
@@ -60,12 +62,13 @@ out of a nine-module closure of about 17 s. Two proof-only rewrites of
 were indistinguishable from the H68 proof, so no Lean proof changed; the
 statement and every signature are byte-identical to the H68 head.
 
-The timing protocol was rerun on this VM with the unchanged
+The timing was rerun on this VM with the unchanged checker script
 `scripts/h55/g49-final-theorem/check-pass-correct.py` (fresh cache per run,
 `-j1`, `LEAN_NUM_THREADS=1`, 8 GiB cap, 300 s, 4 GiB reserve, no swap), Lean
 4.24.0 from elan. The Codex 13.280 s baseline came from another machine, so the
 baseline was re-measured here: the same tree with `FoldStatement`, its conjunct
-and `have folded` removed (the pre-fold statement). The comparison was fixed in
+and `have folded` removed (the pre-fold statement); its source is committed as
+[h68-timing-baseline-FoldedPublic.lean.txt](../../tests/h55/g49-final-theorem/h68-timing-baseline-FoldedPublic.lean.txt). The comparison was fixed in
 advance as five interleaved baseline/current pairs, nine modules each, controls
 excluded as before, decided on the medians:
 
@@ -76,18 +79,39 @@ excluded as before, decided on the medians:
 | 3 | 16.722 | 16.916 | +1.16% |
 | 4 | 17.333 | 17.547 | +1.23% |
 | 5 | 17.016 | 16.722 | -1.73% |
-| Median | 17.016 | 17.422 | **+2.39%** |
+| Medians | 17.016 | 17.422 | **+2.39%** (of medians; median pair delta +1.16%) |
 
 `FoldedPublic` itself took a median 0.505 s before and 0.509 s after (the
 checker polls at 0.1 s). Every pair is below the 10% stop, so no single sample
-would have failed either; the earlier +15.9%/+14.46% readings compared runs
-across sessions, where unchanged dependencies moved by similar amounts.
-**Timing: PASS (+2.39%)**; the HOLD is lifted. Per-run records: [h68-timing-rerun.json](../../tests/h55/g49-final-theorem/h68-timing-rerun.json). All ten runs passed every module
+would have failed against its paired same-VM baseline (the first pair alone
+is -1.65%). Against the recorded 13.280 s Codex baseline every current sample
+here (16.7-17.5 s) would fail, because this VM is slower overall; the earlier
++15.9%/+14.46% readings also compared runs from different sessions, and the
+H64 record notes that unchanged dependencies ran slower too.
+**Measured: +2.39%, below the 10% stop.** **Protocol difference (for the human):** H64/H68 compared one sample against
+a baseline recorded on the Codex VM; this rerun re-measures the baseline on
+the same machine and takes five predeclared pairs. Same script, limits and
+module set; the comparison method changed, so this is reported as a
+measurement, not as a self-granted lifting of the HOLD. Per-run records: [h68-timing-rerun.json](../../tests/h55/g49-final-theorem/h68-timing-rerun.json). All ten runs passed every module
 and the controls (`H64_SOURCE_AND_CONTROLS_CHECK_PASS`).
 
-**Registration.** The six lane modules (the five above plus `BridgeGoal`) are
-now in the generated `Solidity.lean` via `scripts/coord-tools/register.sh`, with
-rows in [roadmap.d/g49-final.md](../module-map/roadmap.d/g49-final.md).
+**Registration.** The five G49Final modules (`PassCorrect`, `PassCorrectAdapters`,
+`FoldedPublic`, `PassChain` and the new `BridgeGoal`) are now in the generated
+`Solidity.lean` via `scripts/coord-tools/register.sh`, with rows in
+[roadmap.d/g49-final.md](../module-map/roadmap.d/g49-final.md).
+
+**Staged port moved out of the library.** The historical H55 port
+module `Solidity.Roadmap.V16.CalculusConsumer` and its controls
+(formerly under tests/roadmap-v16) import `Solidity.Roadmap.V16.CompilerConsumer`, one of the four absent
+prerequisites listed under "Remaining staging and producer prerequisites".
+Once `register.sh` adds every `Solidity/` module to the root, that file made
+`lake build Solidity` fail (no such file or directory: the CompilerConsumer source),
+for this branch and for any integrator regeneration. Both files moved unchanged
+(byte-identical, `git mv`) to
+[staging/](../../tests/h55/g49-final-theorem/staging/CalculusConsumer.lean),
+outside the library tree; they return to `Solidity/Roadmap/V16/` when the
+prerequisite closure is delivered. No theorem in them changed and none is claimed
+checked. `staging-manifest.json` keeps the original historical paths.
 
 **Limitations.** The two Python accounting suites
 (`test_h64_account.py`, `test_premise_tools.py`) read the Codex VM's off-Git
