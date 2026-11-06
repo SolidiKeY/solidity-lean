@@ -52,7 +52,8 @@ The representation is compiler-dependent observation, not semantic equality proo
 
 `build.py --root ROOT --toolchain TC --census CENSUS --out FRESH_DIRECTORY`
 runs one compiler at a time, explicit `-j1`, LEAN_NUM_THREADS=1, 10,000 MiB Lean
-heap bound, 12 GiB address-space ceiling and a 4 GiB available-memory guard.
+heap bound, sampled 12 GiB group-RSS stop and a 4 GiB available-memory guard.
+The kernel-enforced hard bound is the VM cgroup; no virtual-address cap is used.
 The VM has a 16 GiB cgroup cap, four CPU quota and no system swap. No systemd-run.
 The repository writer lock spans every build. Fresh private import paths are
 forced *after* lake env. Both Lake and Lean executables are absolute.
@@ -62,7 +63,7 @@ Reports record each command/exit/wall time and sampled process-group RSS at 50 m
 Resource stops preserve the failing module and are never passing checks.
 
 Initial old-clean-01 was interrupted to fix finder/skeptic tooling findings.
-Old-clean-02 stopped safely in Horizon at 389.706 s and 4,834,746,368 sampled RSS
+Old-clean-02 stopped safely in Horizon at a per-module 389.706 s and 4,834,746,368 sampled RSS
 bytes because provisioning left 7.3 GB clean file cache. It is failed evidence.
 Task-private clean-page eviction via cold-cache.py reduced cgroup usage from
 7.7 GB to 0.55 GB without changing files, limits or global cache settings.
@@ -116,3 +117,24 @@ RUNTIME_GATE_PASS is asserted. Required work still includes owner coordination,
 external dependency overlays, applying/rechecking the owned proof repair, full
 old/new clean comparison, elaborated interface reconciliation, final affected
 validation/reviews, and the root/gate migration handoff. No goal completion claimed.
+
+## Resource instrumentation correction (checkpoint 2)
+
+Old-clean-03 failed at Horizon after 461.294 s (whole failed run 1013.790 s),
+5,606,068,224 sampled RSS bytes, std::bad_alloc and zero cgroup OOM/max events.
+Its self-imposed 12 GiB RLIMIT_AS was an incorrect proxy for resident RAM.
+Finder and skeptic supported removing that virtual restriction while retaining
+all resident/proof budgets. The corrected Horizon single-file feasibility probe
+passed at 715.030 s, 8,110,936,064 sampled RSS bytes and 16,827,170,816 diagnostic
+virtual bytes; inherited RLIMIT_AS is unlimited. The original source SHA256 is
+f579466b9b961c899a4cb2bbe3948a8143284b186e8035c30395c6b89a7d9cd4.
+This probe reused exact private imports and cannot establish a clean full build.
+Only a new complete clean run under the corrected harness can establish baseline.
+The earlier address-limited results are failed diagnostic evidence.
+
+Final fixture reports now bind input SHA256 and actual compiler version before
+launch, check the input remains unchanged, and retain RSS/VMS/failure data.
+compare.py rejects failed/incomplete builds, changed module order/resource
+profiles and invalid metrics. Any regression returns escalation; >10% returns
+STOP. Synthetic negative controls are acceptance of that refusal logic, not
+measured source performance. The actual comparison remains blocked.

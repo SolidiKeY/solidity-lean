@@ -82,7 +82,7 @@ def census(root, revision=BASE):
                         "native_decide_tokens": len(re.findall(r"\bnative_decide\b", clean))})
     direct = sorted({d for m in assigned for d in graph[m] if d not in assigned})
     reverse = sorted((m,d) for m in graph if m not in assigned for d in graph[m] if d in assigned)
-    return {"schema": 1, "base": revision,
+    return {"schema": 1, "base": BASE, "revision": revision,
             "boundary": "Exact file hashes freeze all bytes, including statements and proof budgets. Lexical candidates are navigational, not elaborated declarations or API equivalence.",
             "assigned_count":len(assigned), "closure_count":len(closure), "files": entries,
             "external_direct_imports": direct, "nonlocal_imports": sorted({d for m in closure for d in graph[m] if d not in modules}), "external_transitive_local_modules":sorted(closure-set(assigned)),

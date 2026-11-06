@@ -4,6 +4,12 @@ import json
 from pathlib import Path
 import sys
 c=json.loads(Path(sys.argv[1]).read_text())
+files=c["files"]
+if len(sys.argv)>3:
+    result=json.loads(Path(sys.argv[3]).read_text())
+    passed={r["module"] for r in result["modules"] if r.get("exit")==0}
+    files=[f for f in files if f["module"] in passed]
+    if not files: raise SystemExit("no passing Source imports")
 body="""
 open Lean Elab Command
 run_cmd do
@@ -30,4 +36,4 @@ run_cmd do
   liftIO <| IO.FS.writeFile output (Json.arr rows).compress
   logInfo m!"H62 Source constant/type ledger: {rows.size} entries"
 """
-Path(sys.argv[2]).write_text("import Lean\n"+"".join("import "+f["module"]+"\n" for f in c["files"])+body)
+Path(sys.argv[2]).write_text("import Lean\n"+"".join("import "+f["module"]+"\n" for f in files)+body)

@@ -28,3 +28,19 @@ for m in order:
 assert not [m for m in census["nonlocal_imports"] if not m.startswith(("Lean", "Std", "Init"))],census["nonlocal_imports"]
 assert len(order)==len(set(order))
 print(f"PASS scanner negative controls; all {len(tracked)} Source files; all {len(order)} import headers reconciled; acyclic build order; no unresolved local imports")
+
+spec=importlib.util.spec_from_file_location("comparison",root/"scripts/h62/item6/migrate-source/compare.py")
+m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+import copy
+r={"status":"pass","clean":True,"base":c.BASE,"modules":[{"module":"fixture","exit":0}],"wall_seconds":100,"sampled_peak_group_rss_bytes":100}
+r.update({k:1 for k in m.PROFILE})
+assert m.compare(r,r,["fixture"])["status"]=="pass"
+for value,want in [(110,"escalate"),(110.01,"stop"),(99,"pass")]:
+    t=copy.deepcopy(r);t["wall_seconds"]=value
+    assert m.compare(r,t,["fixture"])["status"]==want
+for change in ({"status":"fail"},{"modules":[]},{"lean_threads":2},{"wall_seconds":float("nan")}):
+    t=copy.deepcopy(r);t.update(change)
+    try: m.compare(r,t,["fixture"])
+    except ValueError: pass
+    else: raise AssertionError("unsafe comparison accepted")
+print("PASS comparison negative controls: incomplete/order/profile/NaN rejection; 10% escalation and >10% STOP")

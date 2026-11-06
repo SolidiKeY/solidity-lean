@@ -38,6 +38,19 @@ def group_rss(pgid):
         except (OSError,ValueError,IndexError): pass
     return total
 
+def group_vms(pgid):
+    """Diagnostic summed VMS and largest sampled per-process VmPeak; not RAM."""
+    total, largest_peak = 0, 0
+    for p in Path("/proc").glob("[0-9]*/stat"):
+        try:
+            fields=p.read_text().rsplit(")",1)[1].split()
+            if int(fields[2]) != pgid: continue
+            total += int(fields[20])
+            for line in (p.parent/"status").read_text().splitlines():
+                if line.startswith("VmPeak:"): largest_peak=max(largest_peak,int(line.split()[1])*1024)
+        except (OSError,ValueError,IndexError): pass
+    return total, largest_peak
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--root",type=Path,required=True); ap.add_argument("--toolchain",type=Path,required=True)
@@ -56,7 +69,7 @@ def main():
         out.mkdir(parents=True); lib=out/"lib"; lib.mkdir(); logs=out/"logs"; logs.mkdir()
         env=os.environ.copy(); env.update(LEAN_NUM_THREADS="1",LEAN_PATH=str(lib),PATH=str(tc/"bin")+":"+env["PATH"])
         versions={n:subprocess.check_output([str(tc/"bin"/n),"--version"],text=True).strip() for n in ("lean","lake")}
-        report={"effective_lean_path":str(lib),"schema":1,"base":census["base"],"versions":versions,"clean":True,"cache":"fresh private LEAN_PATH; no master cache", "lean_threads":1,"lean_heap_mib":10000,"address_limit_bytes":12*GIB,"reserve_bytes":4*GIB,"stack_kib":131072,"modules":[],"status":"running"}
+        report={"cgroup_memory_max":Path("/sys/fs/cgroup/memory.max").read_text().strip(),"cpu_quota":Path("/sys/fs/cgroup/cpu.max").read_text().strip(),"cpuset":Path("/sys/fs/cgroup/cpuset.cpus.effective").read_text().strip(),"census_revision":census.get("revision",census["base"]),"effective_lean_path":str(lib),"schema":1,"base":census["base"],"versions":versions,"clean":True,"cache":"fresh private LEAN_PATH; no master cache", "lean_threads":1,"lean_heap_mib":10000,"sampled_rss_stop_bytes":12*GIB,"parent_rlimit_as":resource.getrlimit(resource.RLIMIT_AS),"reserve_bytes":4*GIB,"stack_kib":131072,"modules":[],"status":"running"}
         print(json.dumps(versions),flush=True); start=time.monotonic(); peak=0
         order=["Solidity.KeySort"] if a.keysort_only else census["serial_build_order"]
         failed=set()
@@ -68,13 +81,15 @@ def main():
                 if blocked:
                     failed.add(m); report["modules"].append({"module":m,"status":"blocked","blocked_by":blocked}); continue
                 headroom(); file=m.replace(".","/")+".lean"; artifact=lib/(m.replace(".","/")+".olean"); artifact.parent.mkdir(parents=True,exist_ok=True)
-                cmd=["prlimit","--as="+str(12*GIB),"--",str(tc/"bin/lake"),"env","env","LEAN_PATH="+str(lib),str(tc/"bin/lean"),"--tstack=131072","-j1","-M10000","-o",str(artifact),file]
-                then=time.monotonic(); rss=0; proc=None; error=None
+                cmd=[str(tc/"bin/lake"),"env","env","LEAN_PATH="+str(lib),str(tc/"bin/lean"),"--tstack=131072","-j1","-M10000","-o",str(artifact),file]
+                then=time.monotonic(); rss=0; vms=0; vmpeak=0; proc=None; error=None
                 try:
                     with (logs/(m+".log")).open("w") as log:
                         proc=subprocess.Popen(cmd,cwd=root,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
                         while proc.poll() is None:
-                            rss=max(rss,group_rss(proc.pid)); headroom(); time.sleep(0.05)
+                            rss=max(rss,group_rss(proc.pid)); mem=group_vms(proc.pid); vms=max(vms,mem[0]); vmpeak=max(vmpeak,mem[1])
+                            if rss > 12*GIB: raise RuntimeError("12 GiB sampled group RSS threshold exceeded")
+                            headroom(); time.sleep(0.05)
                 except BaseException as exc:
                     error=type(exc).__name__+": "+str(exc)
                     if proc and proc.poll() is None:
@@ -82,7 +97,7 @@ def main():
                     raise
                 finally:
                     peak=max(peak,rss)
-                    row={"module":m,"command":cmd,"exit":None if proc is None else proc.returncode,"wall_seconds":time.monotonic()-then,"sampled_peak_group_rss_bytes":rss,"monitor_error":error}
+                    row={"module":m,"command":cmd,"exit":None if proc is None else proc.returncode,"wall_seconds":time.monotonic()-then,"sampled_peak_group_rss_bytes":rss,"monitor_error":error,"sampled_peak_group_vms_bytes":vms,"sampled_largest_process_vmpeak_bytes":vmpeak}
                     report["modules"].append(row)
                     print(f"{i+1}/{len(order)} {m} exit={row['exit']} wall={row['wall_seconds']:.3f}s rss={rss}",flush=True)
                 if proc.returncode:

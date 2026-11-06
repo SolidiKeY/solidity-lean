@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+"""Fail closed on incomplete/different runs; metrics do not prove API equivalence."""
+from decimal import Decimal
+import json
+from pathlib import Path
+import sys
+
+PROFILE=("lean_threads","lean_heap_mib","sampled_rss_stop_bytes","reserve_bytes","stack_kib","parent_rlimit_as","cgroup_memory_max","cpu_quota","cpuset")
+def compare(old,new,expected):
+    for r in (old,new):
+        if r.get("status")!="pass" or r.get("clean") is not True: raise ValueError("complete passing clean builds required")
+        if [x["module"] for x in r["modules"]]!=expected or any(x.get("exit")!=0 for x in r["modules"]): raise ValueError("complete identical module order required")
+    if old["base"]!=new["base"]: raise ValueError("different pinned bases")
+    if any(k not in old or k not in new or old[k]!=new[k] for k in PROFILE): raise ValueError("different or missing resource profile")
+    deltas={}
+    for key in ("wall_seconds","sampled_peak_group_rss_bytes"):
+        a,b=Decimal(str(old[key])),Decimal(str(new[key]))
+        if not a.is_finite() or not b.is_finite() or a<=0 or b<=0: raise ValueError("invalid measurement")
+        deltas[key]=100*(b/a-1)
+    status="stop" if any(v>10 for v in deltas.values()) else "escalate" if any(v>0 for v in deltas.values()) else "pass"
+    return {"status":status,"delta_percent":{k:str(v) for k,v in deltas.items()},"boundary":"complete build metrics only; API/proof/review gates separate"}
+if __name__=="__main__":
+    try:
+        a,b,c=map(lambda p:json.loads(Path(p).read_text()),sys.argv[1:])
+        result=compare(a,b,c["serial_build_order"])
+    except (ValueError,KeyError) as e:
+        print(json.dumps({"status":"blocked","reason":str(e)}));sys.exit(4)
+    print(json.dumps(result));sys.exit({"pass":0,"escalate":2,"stop":3}[result["status"]])
