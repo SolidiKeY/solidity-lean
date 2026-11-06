@@ -9,7 +9,7 @@ generator=repo/"scripts/h62/item6/migrate-testsuite/generate-interface.py"
 env=os.environ.copy()
 for key in ("LEAN_PATH","LEAN_SRC_PATH","LAKE_HOME","LEAN_SYSROOT"): env.pop(key,None)
 env.update(PATH=str(toolchain/"bin")+":"+env["PATH"],LEAN_NUM_THREADS="1",LEAN_PATH=str(lean_path),XDG_CACHE_HOME=str(out/"cache"))
-summary={"status":"running","boundary":"compiled interface export only; not full-build timing","runtime_image":os.environ.get("H62_RUNTIME_IMAGE"),"generator_sha256":hashlib.sha256(generator.read_bytes()).hexdigest(),"versions":{t:subprocess.check_output([str(toolchain/"bin"/t),"--version"],env=env,text=True).strip() for t in ("lean","lake")},"requested_modules":sorted(census["owned"]),"results":[]}
+summary={"status":"running","boundary":"compiled interface export only; not full-build timing","runtime_image":os.environ.get("H62_RUNTIME_IMAGE"),"generator_sha256":hashlib.sha256(generator.read_bytes()).hexdigest(),"encoder_sha256":hashlib.sha256((generator.parent/"expr_dag.py").read_bytes()).hexdigest(),"schema":"expr-dag-v2","versions":{t:subprocess.check_output([str(toolchain/"bin"/t),"--version"],env=env,text=True).strip() for t in ("lean","lake")},"requested_modules":sorted(census["owned"]),"results":[]}
 os.chdir(out);start=time.monotonic()
 with (out/"raw.log").open("wb") as combined:
     for index,module in enumerate(summary["requested_modules"]):

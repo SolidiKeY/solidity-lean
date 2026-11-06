@@ -71,7 +71,7 @@ classes. It cannot establish Solidity obligation validity or imported API
 compatibility. The Python controls cover nested/line comments, strings,
 import ordering/cycles, source identity and mutation, incomplete builds,
 config mismatches/tampering, wrong versions, NaN/zero metrics and timing/RSS
-thresholds. Twenty-two Python controls pass; both official toolchains pass the isolated Lean fixture.
+thresholds. At that checkpoint twenty-two Python controls passed; both official toolchains pass the isolated Lean fixture.
 
 Independent read-only finder and skeptic reviews ran without Lean/server
 or edits. Confirmed findings were fixed: unsafe arbitrary subset probes,
@@ -147,6 +147,65 @@ sources, summaries, compressed logs and checksums are retained off git in
 A compact structural expression graph is required before accepting interface
 hashes. This diagnostic work does not change the passed old build result.
 
-The next required lane action is the fresh full v4.35.0 build using identical
-resources/configuration and no old cache reuse. Full clean timing comparison,
-compiled interfaces and final migration acceptance remain pending.
+The fresh full v4.35.0 build has now been attempted with identical resources
+and fresh private outputs; its external dependency failure is recorded below.
+Full timing comparison and final migration acceptance remain pending.
+
+## New-toolchain dependency and compact interface checkpoint
+
+The fresh official v4.35.0 full build `new-clean-01` fails at
+`Solidity/Syntax/Raw.lean` after KeySort, AST and SpecSyntax pass. There are five
+source error locations (597, 650, 665, 682, 684), involving String/Slice APIs
+and a dependent-pattern `endsWith` predicate. No assigned TestSuite module was
+attempted. Total partial wall time is 15.293478 s; it is not a full-build timing.
+`full-build-comparison.json` correctly reports pending/INCOMPLETE_FULL_BUILD.
+The per-module report has 333 rows and three comparable successful modules;
+it records individual growth without stopping the lane.
+
+Typed blocker `B-DEPENDENCY-SYNTAX-RAW` requests the Syntax migration owner,
+through migration root/gate, to provide an approved exact-file adaptation.
+The full request and original error log are saved off git. This worker did not
+edit the parser or assume permission from an absent relay tool.
+
+`StringApiBoundary.lean` supplies seven kernel-checked conversion witnesses
+(ASCII, Unicode, empty/overrun boundaries) and two explicitly runtime suffix
+checks. Both official releases pass the identical fixture. This is scoped
+API evidence, not a proof of parser equivalence or any Solidity obligation.
+
+The compact interface format records every module-owned kernel declaration,
+including internal declarations, with exact structured names, universe
+parameters and constructor-based type fingerprints. It also records all 563
+problem definition values and the complete problems table (564 values total).
+Proof values are excluded. Binder names, binder information, let annotations,
+levels, literal contents and projection fields are retained. Syntax source
+positions/raw substring backing, metadata order and identical redundant keys
+are normalized; syntax content, names and preresolution are retained.
+Conflicting metadata keys fail closed. SHA256 covers full constructor payloads
+and child fingerprints; Lean's cached hash only indexes collision-checked
+structural sharing. Node numbers do not affect fingerprints.
+
+The deterministic encoder controls run on both releases and check sharing,
+binder names, let annotations, metadata content/order/source positions,
+redundancy and nested conflict refusal after memoization. Matching old/new
+fingerprints are recorded separately from TestSuite compatibility acceptance.
+The 46 Python controls cover the codec, census, collector and reporting.
+No source declarations or original proof statements have been changed.
+
+These fingerprints capture selected expression bodies and references. They do
+not establish transitive dependency semantics or cross-version equivalence.
+
+The accepted old snapshot covers all 49 modules and 8068 kernel declarations
+(4316 definitions, 3752 theorems), with 552 proved, 563 problem and 11 refuted
+cases and 564 selected definition values. Canonical JSONL SHA256:
+`c1c32f44a134169b2dc3586400accd6923ec862292dcec67607de53430391e12`.
+No module-owned axiom declarations were found; this inventory is separate from
+the original Report proof-audit gate. The new snapshot remains blocked.
+
+Final read-only finder and skeptic reviews confirmed the compact encoder and
+collector. The skeptic requested exact matching of the expected metadata
+conflict error; the control now rethrows unrelated errors. The corrected
+identical fixture passes both releases, with matching canonical fingerprints.
+All 46 Python controls and final syntax/source/ancestry checks pass.
+Old interface export exit 0: 243.493156 s, sampled peak RSS 1113288704 bytes.
+Checkpoint 1 is complete; checkpoints 2–4 retain the external dependency
+blocker and unfinished new-interface/full-comparison/root-gate obligations.

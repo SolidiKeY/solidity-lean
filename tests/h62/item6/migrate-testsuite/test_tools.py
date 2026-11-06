@@ -17,16 +17,21 @@ class InterfaceControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'INTERFACE_COMPILER_FAILED'): collector.collect({'owned':{'M':{}}},'',1)
     def test_empty_output_refused(self):
         with self.assertRaisesRegex(ValueError,'INCOMPLETE_INTERFACE_OUTPUT'): collector.collect({'owned':{'M':{}}},'',0)
-    def test_missing_raw_type_refused(self):
+    def test_missing_expression_roots_refused(self):
         log='H62-INTERFACE '+json.dumps({'name':'Solkey.TestSuite.additionStorageWrite.proved','module':'M','kind':'theorem'})
         with self.assertRaisesRegex(ValueError,'INVALID_INTERFACE_ROW'): collector.collect({'owned':{'M':{}}},log,0)
     def test_representatives_alone_not_full_case_inventory(self):
+        def parts(name):
+            value=['anonymous']
+            for piece in name.split('.'): value=['str',value,piece]
+            return value
         names=['Solkey.TestSuite.additionStorageWrite.proved','Solkey.TestSuite.storageRootReadWrite.proved','Solkey.TestSuite.additionStorageWrite.problem']
-        rows=[{'name':n,'module':'M','kind':'theorem','raw_type':'synthetic parser control','levels':[],'internal':False} for n in names]
-        log='\n'.join('H62-INTERFACE '+json.dumps(r) for r in rows)+'\nH62-MODULE '+json.dumps({'module':'M','count':3})
+        rows=[{'name':n,'name_parts':parts(n),'module':'M','kind':'definition' if n.endswith('.problem') else 'theorem','level_params':[],'type_root':0,'value_root':0 if n.endswith('.problem') else None,'internal':False} for n in names]
+        node={'module':'M','id':0,'tag':'const','data':[parts('True'),[]],'children':[]}
+        log='H62-NODE '+json.dumps(node)+'\n'+'\n'.join('H62-INTERFACE '+json.dumps(r) for r in rows)+'\nH62-MODULE '+json.dumps({'module':'M','count':3,'nodes':1,'schema':'expr-dag-v2'})
         with self.assertRaisesRegex(ValueError,'FROZEN_CASE_COUNT_MISMATCH'): collector.collect({'owned':{'M':{}}},log,0)
     def test_zero_rows_refused(self):
-        log='H62-MODULE '+json.dumps({'module':'M','count':0})
+        log='H62-MODULE '+json.dumps({'module':'M','count':0,'nodes':0,'schema':'expr-dag-v2'})
         with self.assertRaisesRegex(ValueError,'INCOMPLETE_INTERFACE_OUTPUT'): collector.collect({'owned':{'M':{}}},log,0)
 
 class CensusControls(unittest.TestCase):
