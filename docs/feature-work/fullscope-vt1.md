@@ -653,3 +653,31 @@ Per-file Lean diagnostics clean on all eight modules and four check files;
 `./run-lean.sh` passed its static stages but its cold `lake build` (3808
 modules, no Lake cache on this VM) was stopped at 143 modules: the full build
 gate is not passed here and is open for the integrator's cached build.
+
+## Continuation after the coordinator's follow-up (2026-11-06)
+
+Merged origin/master `771a5fed` (merge `20078929`, no conflicts); after it
+`register.sh --check`, `fragments.sh --check` and `check-layers.mjs` ("857 core
+modules, 0 reach the elaborator") pass, and master changed nothing in this
+lane's import closure (`AST`, `Yul/Builtins`, `Yul/Words`, `Semantics/**`,
+`Roadmap/**`, `Syntax.lean`, `Hash/**`).
+
+Full build: this VM's Lake cache holds only the 294 MB this lane built; no
+master artifacts were delivered, so `./run-lean.sh` would again be a cold
+~3800-module build (the earlier run reached 143 modules in ten minutes with
+2 GB free). It was not rerun; the full-build gate stays open for a cached
+environment.
+
+`checked_sub_t_uint256` kernel proof, second attempt (not committed): the
+body proof was restructured as the coordinator suggested — `Pure.eval .sub`
+generalized to an opaque `f` (with its value lemma `pure_sub_val` as a
+hypothesis) before any `if` is reduced, no `consFn_two`, `if_true`/`reduceIte`
+replaced by `ite_normal`/`ite_self`. The kernel still reports deep recursion,
+and bisection pins it to the first `ite_self`+`run_ok_bind` step that collapses
+the `cleanup_t_uint256` call — the identical step succeeds in
+`checked_mul_body`. So the cause is not `Pure.sub`'s `2^256` as first
+diagnosed above; it is still unidentified. Next step: replace the one-shot
+`simp` by per-statement lemmas (cleanup call, panic call, assignment) proved
+once and composed with `rw`, so each kernel check is small. `checked_div_t_int256`,
+`checked_exp_*`, ABI and storage helpers were not started in this
+continuation.
