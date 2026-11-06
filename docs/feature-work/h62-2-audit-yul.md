@@ -1,3 +1,13 @@
+# H82 retirement — stopped, assignment incomplete
+
+This worker has stopped implementation under the explicit human retirement instruction. Handoff to `solidity-inline-assembly5-20261031/vy2-physical`; successor integrates the final isolated branch head. No push is authorized by available H71 evidence. No original statement changed and no new Lean work was performed for retirement.
+
+[Original assignment](../../tests/h62/item2/audit-yul/handoff/original-assignment.txt), [original queue](../../tests/h62/item2/audit-yul/handoff/original-work-backfill-queue.md), [scope descriptor](../../tests/h62/item2/audit-yul/handoff/scope-manifest.json), [capture provenance](../../tests/h62/item2/audit-yul/handoff/provenance.json) and [all remaining obligations](../../tests/h62/item2/audit-yul/handoff/remaining-queue.md) are committed. The complete enumerated scope, cumulative patch/bundle, portable evidence and checksums are in `/workspace/h62-audit-yul-artifacts/retirement/` and its authenticated archive. Bulk evidence remains off git.
+
+The human requested the existing goal PAUSED. The exposed goal API supports only complete/blocked, so no PAUSED transition can be issued; neither substitute was called. No automatic implementation continuation is authorized. All four checkpoints remain partial; Source/Horizon gate-VM timing validation remains a wait. Final head, clean status, artifact hashes and read-only retirement reviews are recorded in the off-git retirement handoff. Earlier continuation language below is superseded by this stopped retirement notice.
+
+---
+
 # H62 item 2 — audit-yul
 
 Status: **partial; original goal remains unfinished**. H69 resolves the former
