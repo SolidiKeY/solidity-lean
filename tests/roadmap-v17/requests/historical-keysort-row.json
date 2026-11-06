@@ -1,0 +1,67 @@
+{
+  "originRevision": "186fa591869bc886bb4d1ca73fa2afd2271b2442",
+  "boundary": "Historical actual metadata used only as test data; current proof requires validation and live replay.",
+  "row": {
+    "axioms": [
+      "Quot.sound",
+      "propext"
+    ],
+    "binderCount": 5,
+    "kind": "theorem",
+    "module": "Solidity.KeySort",
+    "name": "Solidity.KeySort.le_trans",
+    "propositionBinders": [
+      3,
+      4
+    ],
+    "typeDependencies": [
+      "Bool",
+      "Bool.true",
+      "Eq",
+      "Solidity.KeySort",
+      "Solidity.KeySort.le"
+    ],
+    "typeProjectionDependencies": [],
+    "typeSha256": "db781870e36da2338f5e9354755dac15360f50919cf7b987ead34b3eb9d764fe",
+    "valueDependencies": [
+      "BEq.beq",
+      "Bool",
+      "Bool.or",
+      "Bool.or_eq_true",
+      "Bool.true",
+      "Eq",
+      "Eq.mp",
+      "Eq.mpr",
+      "Eq.ndrec",
+      "Eq.refl",
+      "Eq.trans",
+      "List",
+      "List.all",
+      "List.contains",
+      "List.instMembership",
+      "Membership.mem",
+      "Or",
+      "Or.casesOn",
+      "Or.inr",
+      "Solidity.KeySort",
+      "Solidity.KeySort.ancestors",
+      "Solidity.KeySort.ancestors_closed",
+      "Solidity.KeySort.le",
+      "Solidity.KeySort.le_trans._simp_1_2",
+      "Solidity.KeySort.le_trans._simp_1_3",
+      "Solidity.KeySort.le_trans._simp_1_4",
+      "Solidity.instDecidableEqKeySort",
+      "congr",
+      "congrArg",
+      "forall_congr",
+      "id",
+      "implies_congr",
+      "instBEqOfDecidableEq",
+      "instLawfulBEq"
+    ],
+    "valueProjectionDependencies": [],
+    "valueSha256": "dd7413cb77191038b4987abbb4d9632fd842b24beb2fd66dbf48ae43d0b5f984"
+  },
+  "originRecordSha256": "a7676f8e3bb322ef3876d7c4d61f9cf640b517ed9d0e5ffb2b8bda52f34959fd",
+  "originRecord": "v17-kernel/reserved-final/record.json"
+}

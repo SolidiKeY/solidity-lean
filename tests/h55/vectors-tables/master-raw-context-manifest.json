@@ -1,0 +1,520 @@
+{
+  "master": "5f7bb1441566aaad64a34436904afc61de762fd2",
+  "files": {
+    "RawAdapterLoopHorizon.lean": {
+      "declarations": 3,
+      "nodes": 25,
+      "sha256": "23fbec9f2102793802a011debcab611ba9519c433c1a4c247f34282e5baf6504"
+    },
+    "RawAdapterSequenceLoopHorizon.lean": {
+      "declarations": 4,
+      "nodes": 26,
+      "sha256": "e56643bae59d8cc18299b87e957788671120ddad7412e51d4428c1ed1a09ada4"
+    },
+    "RawBoolFailure.lean": {
+      "declarations": 5,
+      "nodes": 55,
+      "sha256": "f8dd3c1e4556bd2e1a5b5c2559ba72748dd0fb7b52bed83b1131a6ea0cb59b05"
+    },
+    "RawBoundary.lean": {
+      "declarations": 23,
+      "nodes": 60,
+      "sha256": "da252cdba1be96a0dfe365d849052410f26b2098907eef5f168ff82302011284"
+    },
+    "RawCheckedAdapter.lean": {
+      "declarations": 4,
+      "nodes": 0,
+      "sha256": "d4db7aa162b651186ce1dd6a655c8444f3d866f5c91d7390f179a486e63e0712"
+    },
+    "RawCheckedAdapterAbsent.lean": {
+      "declarations": 1,
+      "nodes": 0,
+      "sha256": "fd07b0d7367e61d428137bd5e9d95ba20521915eaea293ba103fe2541e7a6ad9"
+    },
+    "RawCheckedAdapterDoWhile.lean": {
+      "declarations": 4,
+      "nodes": 19,
+      "sha256": "e833aa67f60e4b16279a5a9a2bdbc322db95c8d4ea886de7fa41f11d2efb9cdd"
+    },
+    "RawCheckedAdapterFor.lean": {
+      "declarations": 4,
+      "nodes": 18,
+      "sha256": "320caccdfff3e453ad635ca4f89e1d07d9329eb34030c471dfb06a92469ab3e1"
+    },
+    "RawCheckedAdapterIfElse.lean": {
+      "declarations": 3,
+      "nodes": 21,
+      "sha256": "ec8e9db0a318d91009032dc1abe1c08bc5187ce3fec2d78403694d21af0416e1"
+    },
+    "RawCheckedAdapterLoop.lean": {
+      "declarations": 4,
+      "nodes": 35,
+      "sha256": "40a98fcb6d2d2236c5dfe5eceb5b36aae4080f3f00147934fefd9cb9f192680a"
+    },
+    "RawCheckedAdapterSequence.lean": {
+      "declarations": 10,
+      "nodes": 27,
+      "sha256": "61dd9bd8b6754715eb32c150f504db34c5adcf033283086bc92a1b79708c8fc3"
+    },
+    "RawCheckedControlDoWhile.lean": {
+      "declarations": 2,
+      "nodes": 19,
+      "sha256": "b08b3f1684b4fdf5f5d63a9fcee0143f587ffda0900074ad1b1c8aae7085f7a2"
+    },
+    "RawCheckedControlDoWhileHorizon.lean": {
+      "declarations": 3,
+      "nodes": 25,
+      "sha256": "763f79c7ea4962defbf14714fbf6d14bc0c96ebfb267679302fd7f9029c0ad5a"
+    },
+    "RawCheckedControlIfElse.lean": {
+      "declarations": 2,
+      "nodes": 21,
+      "sha256": "ca1d4fde89d61b4b93fb14eaa1c4427a5af93027761bc43bf1808fb94ab6fdc5"
+    },
+    "RawCheckedControlSequence.lean": {
+      "declarations": 7,
+      "nodes": 57,
+      "sha256": "30e5c1d8fdfff7a4e9586d6d73d8c0bdd805ebb092d21ce97b4e92615ee7963e"
+    },
+    "RawCheckedControlSequenceHorizon.lean": {
+      "declarations": 6,
+      "nodes": 38,
+      "sha256": "f31dadf6f4d8ec0759f54a0bd894e35051c369336ee1d9143848ac4cffe02332"
+    },
+    "RawCheckedControlWhile.lean": {
+      "declarations": 2,
+      "nodes": 35,
+      "sha256": "6840e34340fd4b8f33ee1804282ccd1cebb90a901875a3bb527f5a4440a62a3e"
+    },
+    "RawCheckedControlWhileHorizon.lean": {
+      "declarations": 3,
+      "nodes": 25,
+      "sha256": "831c6709574261f3ba6c1ae408e438e7873237acd867b2058b05b04d139a34db"
+    },
+    "RawCheckedDoWhile.lean": {
+      "declarations": 2,
+      "nodes": 11,
+      "sha256": "9ab3e43c64663c2d379ecea546b9b8807ca72a4e9170c39a7020ee5b43c916e9"
+    },
+    "RawCheckedDoWhileHorizon.lean": {
+      "declarations": 3,
+      "nodes": 20,
+      "sha256": "25c443c6e81af533cf0ed862f4ee925f9b086e9995ebf479a3b632b1b43e2cab"
+    },
+    "RawCheckedForPost.lean": {
+      "declarations": 2,
+      "nodes": 35,
+      "sha256": "f9beb051b9f4e6331c10a9ee2a2c52bec35e9e54786ab29093b9adca38cb4d9c"
+    },
+    "RawCheckedGrowingAbsent.lean": {
+      "declarations": 2,
+      "nodes": 0,
+      "sha256": "7df61e0da233821673b31be212a15eb8b3b9af31141b400c2edc9878a0180987"
+    },
+    "RawCheckedIf.lean": {
+      "declarations": 2,
+      "nodes": 21,
+      "sha256": "75e836dbd5d81f337e0b003df06fe6a7a9b2ff90f49b48a1801bc44f52dfc6b9"
+    },
+    "RawCheckedIfElse.lean": {
+      "declarations": 2,
+      "nodes": 21,
+      "sha256": "a0efdad0beba4243ef8efd1f9e19550b054934a57af3a12ffb0b90a27febfe65"
+    },
+    "RawCheckedIfElseHorizon.lean": {
+      "declarations": 3,
+      "nodes": 15,
+      "sha256": "ef91eff19f3dee4e4e7b9678e9e841195dfb48ed801ceba138e22ef3723d0127"
+    },
+    "RawCheckedIfHorizon.lean": {
+      "declarations": 3,
+      "nodes": 15,
+      "sha256": "7524988547b487bb970c819b37ee6801a7b73d0672df5ddad15c897d49132d4a"
+    },
+    "RawCheckedInitializedForPost.lean": {
+      "declarations": 3,
+      "nodes": 18,
+      "sha256": "db3b2a0e712d710110130f3b54d3d8b9def5c2c621e3f5ef65775c7089b273df"
+    },
+    "RawCheckedSequence.lean": {
+      "declarations": 7,
+      "nodes": 45,
+      "sha256": "055390e4f698656e5e832d6f88516878ac172704cec199ccf08411635dbd2933"
+    },
+    "RawCheckedSequenceHorizon.lean": {
+      "declarations": 5,
+      "nodes": 31,
+      "sha256": "1a8dfd0310cb622f38fc7e821a4528a3f653373359528573176112cec1278c30"
+    },
+    "RawCheckedWhile.lean": {
+      "declarations": 2,
+      "nodes": 27,
+      "sha256": "ed6c3ae4be85d21cd733938fcb627d88030bcc28847ae145f40d56b7915931f5"
+    },
+    "RawCheckedWhileHorizon.lean": {
+      "declarations": 3,
+      "nodes": 20,
+      "sha256": "cbedc8274bc1d2eb2c69e758f0c59bfea3f078e45a05a6865b78405d6740adbc"
+    },
+    "RawCoherent.lean": {
+      "declarations": 19,
+      "nodes": 9,
+      "sha256": "6d53102e42f3b9d274469d068979a9f1233d42eae8f7132ce9e1b969ab00a643"
+    },
+    "RawCondition.lean": {
+      "declarations": 6,
+      "nodes": 0,
+      "sha256": "9d935f7c57b05ccbaf64ee3c2508123d1f7f35ffb0902fd20a6856cf8e5a66fb"
+    },
+    "RawContinueLoop.lean": {
+      "declarations": 34,
+      "nodes": 150,
+      "sha256": "391f1346f5ff2ff409703286f39232b1340068e576afd77de8b490dd50447862"
+    },
+    "RawControlDeclaration.lean": {
+      "declarations": 2,
+      "nodes": 24,
+      "sha256": "6882947f7fa491b3a2bb08e53c65f5cc118dbc2fb0b80656e19f6c962a83b3b6"
+    },
+    "RawControlForPost.lean": {
+      "declarations": 3,
+      "nodes": 13,
+      "sha256": "310887dd04c37e918acb6548ef13e588be05c72bfb6133f0b6c23395776ca669"
+    },
+    "RawControlGrowingBlock.lean": {
+      "declarations": 3,
+      "nodes": 10,
+      "sha256": "bfb814c5d94159307658f07d2b1c51a2b43267aee5abe15136c1815455ec057c"
+    },
+    "RawControlGrowingSequence.lean": {
+      "declarations": 2,
+      "nodes": 19,
+      "sha256": "36bb1ddbe104328e6146efe595c3c14a6f5ef60b64e99ca3a2ff9543a3cf6d1d"
+    },
+    "RawControlSequence.lean": {
+      "declarations": 9,
+      "nodes": 61,
+      "sha256": "89fbd40672b786f2e36e9cae6ac30daaf6acd207cbd83a78c4a64aee3c734edc"
+    },
+    "RawControlSequenceHorizon.lean": {
+      "declarations": 4,
+      "nodes": 29,
+      "sha256": "8f4a2945f286018d9689eefb7df6a6e814355cd7483375d0d78e9d53da1999bd"
+    },
+    "RawControlledWhile.lean": {
+      "declarations": 6,
+      "nodes": 49,
+      "sha256": "96af885e50f1c79fe6262f1c5269a5a57a2d7b78dca99dcf02fe1861b2c10fb0"
+    },
+    "RawControlledWhileHorizon.lean": {
+      "declarations": 2,
+      "nodes": 25,
+      "sha256": "b2d963681acd87c80e8fd7ae4a5dcfa3b23bd0d9592b1c4176e4c5d7dddd54e1"
+    },
+    "RawDeclarationFrame.lean": {
+      "declarations": 12,
+      "nodes": 6,
+      "sha256": "41f430f3fc205686dfa5a7af2cc2ea6414aa2b0a1e4da7815a7cd67928690397"
+    },
+    "RawDefaultDeclaration.lean": {
+      "declarations": 10,
+      "nodes": 14,
+      "sha256": "4afcdd7521af0685c116cac1f8f75746d1f6c08122cc8a1e4fb3e9486d47886c"
+    },
+    "RawDefaultScope.lean": {
+      "declarations": 9,
+      "nodes": 26,
+      "sha256": "be20de17d0d8634bd9cf4ed05d6a02b14d66fda153c3d613acd10d4a7c90de49"
+    },
+    "RawDoWhileHorizon.lean": {
+      "declarations": 4,
+      "nodes": 27,
+      "sha256": "fc3ebc0bf3557bedf0b9a790b152cda7f1d09d0226723eeb00421d1f415f8c29"
+    },
+    "RawForPostHorizon.lean": {
+      "declarations": 3,
+      "nodes": 29,
+      "sha256": "c8dbbd840d2eb6c9cd246e95b05967bee7c8bed3cbfa680a24d7bd870759d4dc"
+    },
+    "RawFrame.lean": {
+      "declarations": 28,
+      "nodes": 23,
+      "sha256": "ea644e4677bf541dc54c4cdfd6d273fda33e41d6395515ca037c9dee71a3ca0e"
+    },
+    "RawFrameLogic.lean": {
+      "declarations": 19,
+      "nodes": 25,
+      "sha256": "2079ccf06ed4035ec63702b6295fce892168722894acf2d2ba1cc8427d0a5dee"
+    },
+    "RawGrowingBlock.lean": {
+      "declarations": 8,
+      "nodes": 24,
+      "sha256": "d49afec6c9f71301b8c960cfb54d9867b09d4ee1ac4c41e70cb8d46070b0aef9"
+    },
+    "RawGrowingForPost.lean": {
+      "declarations": 3,
+      "nodes": 13,
+      "sha256": "639e20d07cc80c5e019adf128725e882b8eaa15415310994a31632e667a70f74"
+    },
+    "RawGrowingSequence.lean": {
+      "declarations": 6,
+      "nodes": 24,
+      "sha256": "cd48d1a287911d730ccdd996e6942a34585253917df6696ec17f0f77d63247d2"
+    },
+    "RawHorizon.lean": {
+      "declarations": 5,
+      "nodes": 24,
+      "sha256": "46c20940963ae752c73c7496daf7cd15454785371618dd39700a244480e388fe"
+    },
+    "RawIfElse.lean": {
+      "declarations": 5,
+      "nodes": 30,
+      "sha256": "9c474408a7a9b7af6f7b9f870d8f16e007904ed07f6ea01c3b5cd0df66fb763c"
+    },
+    "RawIfThen.lean": {
+      "declarations": 6,
+      "nodes": 24,
+      "sha256": "1c7d98ada365306fdadfde808131f28e394cc3eb4936974193510f6e3e360905"
+    },
+    "RawInitializedForHorizon.lean": {
+      "declarations": 4,
+      "nodes": 19,
+      "sha256": "320b671c0487201c310c8b56313bf8940f264261df815133467eee590111e28c"
+    },
+    "RawInitializedForPostHorizon.lean": {
+      "declarations": 4,
+      "nodes": 19,
+      "sha256": "e47c6da11e97577ab2d502622d3acb8db4051a94301b369ae8f9742c5cf1a808"
+    },
+    "RawIntegerBlock.lean": {
+      "declarations": 5,
+      "nodes": 15,
+      "sha256": "f1e6e31b613cf0437929f4c38d8a9dc1138079d845b130523408cceedab65880"
+    },
+    "RawIntegerInitialization.lean": {
+      "declarations": 6,
+      "nodes": 10,
+      "sha256": "476e01809d8833cccf331398af4ba02a51b2865bc1ec93e672d02428f38ae55a"
+    },
+    "RawIntegerScope.lean": {
+      "declarations": 5,
+      "nodes": 26,
+      "sha256": "242d4dbf69b928974a168b233d074c4174806258e8aa62b8404fde5489b9cf3a"
+    },
+    "RawIntegerSequence.lean": {
+      "declarations": 5,
+      "nodes": 23,
+      "sha256": "c3df79d94cdfb021d36e89b3855904e3adc8f8734f6b7771d3e57d0ffcd54bff"
+    },
+    "RawLiteralInitialization.lean": {
+      "declarations": 3,
+      "nodes": 10,
+      "sha256": "ff6a37848419d7e0da2603ec76fe6e2b282955759911d486e3d9b450d38783d4"
+    },
+    "RawLiteralScope.lean": {
+      "declarations": 5,
+      "nodes": 26,
+      "sha256": "046550016a203fba055b1b47a9de373971268d556dc3b14044993ddbabc860c7"
+    },
+    "RawLocalDeclaration.lean": {
+      "declarations": 7,
+      "nodes": 12,
+      "sha256": "583dd10f6eaa82e5477bc5bc9f96436174ab58203dfba35a771d439246e59412"
+    },
+    "RawLocalScope.lean": {
+      "declarations": 8,
+      "nodes": 26,
+      "sha256": "11cc640cd852a4a08f3c7a084ac67e293c7c6c2d7026bf606c285b0ed0028591"
+    },
+    "RawLoopBody.lean": {
+      "declarations": 11,
+      "nodes": 62,
+      "sha256": "bea9e548883992646b863b729b0a9ade63ca2d5e89d4f978403b59253b88613e"
+    },
+    "RawLoopBodyHorizon.lean": {
+      "declarations": 4,
+      "nodes": 32,
+      "sha256": "bf1e56b13c3e6d0af957c6f8537d14d75d400c93c4abd31d25e5ee4523a16d75"
+    },
+    "RawLoopFailure.lean": {
+      "declarations": 6,
+      "nodes": 96,
+      "sha256": "c849ef7be6544afa74de3e0708529f046ea72fce96b9b22d8c6d2e76bc99df92"
+    },
+    "RawNoGuardFailure.lean": {
+      "declarations": 6,
+      "nodes": 87,
+      "sha256": "25caf6c2419402d383484bb57e7c55af2f1eaf425e9928084cc10b93891bd53a"
+    },
+    "RawNoGuardSource.lean": {
+      "declarations": 3,
+      "nodes": 14,
+      "sha256": "e5dcd98674cfc4f89711fbfd035c9528846c1af5a73e8b976cc772f0ace1095f"
+    },
+    "RawNoPostFailure.lean": {
+      "declarations": 6,
+      "nodes": 59,
+      "sha256": "cfd6a13365db583f67f230b98bf46d6d1d3eb1f02ddfede70abe086e2b01c064"
+    },
+    "RawPreparedDeclaration.lean": {
+      "declarations": 9,
+      "nodes": 18,
+      "sha256": "ef4f16d5fdc359ac5da11ce9d8b8d3a2c9cfa5a56d36b5116389fe10aa47d27f"
+    },
+    "RawPreparedInteger.lean": {
+      "declarations": 7,
+      "nodes": 16,
+      "sha256": "e8394bc1bfecaca871abe6c617e903ac53b381c47ac438930d603c0253e9b137"
+    },
+    "RawPureInitTimeout.lean": {
+      "declarations": 6,
+      "nodes": 20,
+      "sha256": "e58fa4bdfba55381179833e2072b28adcc25ef38fd951809f69d8fb814260333"
+    },
+    "RawReadOnlyViews.lean": {
+      "declarations": 3,
+      "nodes": 35,
+      "sha256": "7cb5def5b09637f8af2b93347b51d2d338f96273cd0462d81c30faa8f8864499"
+    },
+    "RawSequence.lean": {
+      "declarations": 11,
+      "nodes": 40,
+      "sha256": "29c7de5bf7f7c08210ea3d391315272d2dfc71f178081db635f456022b8f7670"
+    },
+    "RawSequenceDoWhileHorizon.lean": {
+      "declarations": 4,
+      "nodes": 27,
+      "sha256": "383094cf310ae4a6f10ede4c7706a3b01dee24ab3319b9604a2222f243c918d2"
+    },
+    "RawSequenceHorizon.lean": {
+      "declarations": 4,
+      "nodes": 23,
+      "sha256": "96efd296669c9a2a32b748f1494f317bbd18f1a2361cf88b4f5b56ba9e13f977"
+    },
+    "RawSequenceWhile.lean": {
+      "declarations": 3,
+      "nodes": 35,
+      "sha256": "b97c911649c9cf2cd1675f42e25ac98f1f88981877d11effa9b455b5718cc201"
+    },
+    "RawSequenceWhileHorizon.lean": {
+      "declarations": 2,
+      "nodes": 25,
+      "sha256": "5e592dba2f61140dac9e3bdb789c5be41f8074ca495e279270e4b1acd4f4269c"
+    },
+    "RawSource.lean": {
+      "declarations": 14,
+      "nodes": 3,
+      "sha256": "d0d751b196a5d625169a177a0a08a2d0a2863c03fd157412bd2799dfac803051"
+    },
+    "RawSourceAdapter.lean": {
+      "declarations": 10,
+      "nodes": 48,
+      "sha256": "8ea4f781db17ce714558d598549847ff162332cf941ef09b27f7dac024140fde"
+    },
+    "RawSourceAdapterDoWhile.lean": {
+      "declarations": 10,
+      "nodes": 60,
+      "sha256": "cca0b29e5f6740d6d992c4b869deddcaad657c4fcbe1a9e734632a33e9047be3"
+    },
+    "RawSourceAdapterFor.lean": {
+      "declarations": 4,
+      "nodes": 34,
+      "sha256": "b42593ed55a9d42d1c8afbf5719714f8311ffa8764aef729d13758a6c0802ce7"
+    },
+    "RawSourceAdapterIfElse.lean": {
+      "declarations": 6,
+      "nodes": 26,
+      "sha256": "dc7caaf6b6504ae1ddfebc859369ea47017590f43b22213d2302e01a18df888b"
+    },
+    "RawSourceAdapterLoop.lean": {
+      "declarations": 5,
+      "nodes": 35,
+      "sha256": "14c6011c0c1259c37297bac5e51359777115b799162aa7c649c9c52e6acc73e5"
+    },
+    "RawSourceAdapterUnchecked.lean": {
+      "declarations": 2,
+      "nodes": 32,
+      "sha256": "c1906e2dbddf0500a0b89d020eba9dc3f8172be0aa2f3902233f1d83d7630354"
+    },
+    "RawSourceForIter.lean": {
+      "declarations": 2,
+      "nodes": 8,
+      "sha256": "784ac131e584957ed957cc64626b1ac0e978ed0ef0d94eda4f00b73fde125cbf"
+    },
+    "RawSourceForPost.lean": {
+      "declarations": 17,
+      "nodes": 108,
+      "sha256": "533fbbbd4880918d7c0959387f5aa4c0f28bd58a2c988eb1dfa8f667247bc5d7"
+    },
+    "RawSourceLoopTimeout.lean": {
+      "declarations": 4,
+      "nodes": 0,
+      "sha256": "13372ed968ad6dc381f16ba792a2b18ac208bff9aac1f3de61a462df929bc50e"
+    },
+    "RawSourceReturnControl.lean": {
+      "declarations": 7,
+      "nodes": 24,
+      "sha256": "969687f496a1abf06088ba261e343998f6c1eee2d51f794fc6b60fa215f68e9e"
+    },
+    "RawSourceVoidReturn.lean": {
+      "declarations": 7,
+      "nodes": 18,
+      "sha256": "72995348f7e29be2cc5a5a5b522c985386641a92d6bd4cf2f7ebf13d63be712f"
+    },
+    "RawStatementHorizon.lean": {
+      "declarations": 5,
+      "nodes": 13,
+      "sha256": "d1e7ed5548ec19f2b4c4fac59326b189ab181796b7a45ed731c4d1e7b35dbaf1"
+    },
+    "RawTypedScope.lean": {
+      "declarations": 24,
+      "nodes": 13,
+      "sha256": "e4a798d3865ecb5a1f0026192fd3b27591a11d798059a55ea9f46613a91c3a0b"
+    },
+    "RawU8Declaration.lean": {
+      "declarations": 2,
+      "nodes": 16,
+      "sha256": "330bc29adadbd20f2d7565e403c1ea9b6133614c5cd4d076ad7409d42455869b"
+    },
+    "RawU8For.lean": {
+      "declarations": 3,
+      "nodes": 13,
+      "sha256": "e705eee85aacd543aaf6b408063c12e0f01c4a9f3146d23d96984ae8ce216c40"
+    },
+    "RawU8ForAbsent.lean": {
+      "declarations": 3,
+      "nodes": 0,
+      "sha256": "53e2833d16b36aa8a7c201bcb2e396483889b47e4db861dc7f312d7c3de71e44"
+    },
+    "RawU8ForPost.lean": {
+      "declarations": 3,
+      "nodes": 13,
+      "sha256": "abe543d233421cb726e7d273613ec8444fde46b0057e2850b7d8dc9b26390beb"
+    },
+    "RawU8GrowingBlock.lean": {
+      "declarations": 3,
+      "nodes": 10,
+      "sha256": "f6be07a68a1ac1d3e8630a6340cb21a89db2d0b9d70467cde1d19d4d6ce4aeab"
+    },
+    "RawU8GrowingSequence.lean": {
+      "declarations": 2,
+      "nodes": 19,
+      "sha256": "e33df3c33cfeaf1ddb03cfdd4379f75b578cfa49b1699cab6aaf1c995aa29be6"
+    },
+    "RawU8Horizon.lean": {
+      "declarations": 4,
+      "nodes": 3,
+      "sha256": "c15766fe8c95eaddbf3d7868f4408e80efd8c42548f21fbb5edea05a6b9eeede"
+    },
+    "RawU8Statement.lean": {
+      "declarations": 7,
+      "nodes": 3,
+      "sha256": "13a5b7c31d5fb9acf8a3108ad675c984c262627df143aff8279b9dab38725ca1"
+    },
+    "RawWhile.lean": {
+      "declarations": 6,
+      "nodes": 33,
+      "sha256": "8f9d267229f6b8133e434dc6a42fd33204610c2af099eed03dc305f1b8f6289a"
+    }
+  }
+}
