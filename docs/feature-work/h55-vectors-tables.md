@@ -225,3 +225,32 @@ alternatives; source labels do not establish the number or type of those goals.
 The built-in parser run does not elaborate project imports. Full semantic
 accounting and preservation by parametrisation require elaborated Lean evidence,
 owner handoff, and validation of the actual migration. No owner files changed.
+
+## H82 retirement checkpoint
+
+`vector_generator.py` extracts an operand-only external input and independently
+computes finite integer results before rendering all 6,903 theorem declarations.
+All nine complete generated module bytes equal the frozen originals. A second
+operand extraction matched byte-for-byte; the input data stays off Git with its
+committed SHA-256. The 25 Python tests pass, including complete inventory,
+signed and boundary examples, and missing, extra, order, schema and operand
+mutations. The external integer oracle is finite testing, not a Lean theorem of
+universal opcode agreement.
+
+`compile_oracle.py` compiled six local dependencies and all nine independently
+generated modules in an isolated object tree with Lean 4.24.0, `-j1`,
+`LEAN_NUM_THREADS=1`, one process and a 4 GiB host/cgroup memory guard. The log
+is `/workspace/scratch/h55-vectors-tables/oracle-compile.log`. Earlier failed
+and successful runs are retained. Independent finder and skeptic reviews, full
+final gates, timing comparisons and other queue items remain incomplete.
+
+Retirement is directed to successor `solidity-inline-assembly5-20261031/vy1-words`.
+The original exact rendered prompt is not available through the worker tools;
+`tests/h55/vectors-tables/FROZEN-ASSIGNMENT-RECOVERY.md` and
+`FROZEN-SCOPE-BASE-DERIVED.txt` are explicitly labeled reconstructions, not
+substitutes authenticated against the requested prompt digest. The coordinator
+must supply the exact original prompt and backfill details. Raw interface changes
+and owner-retained table migrations await their owner handoffs. No H71 lane-push
+permission was available; the original no-push rule remains in force.
+
+The isolated oracle compile cache pack is `/workspace/scratch/h55-vectors-tables/oracle-lean-objects.tar.gz` with SHA-256 `1be228d4e98c915bdc7628d5f5d3ccd1078fd0564da16fd7a82e4369f4b3a9bf`. The worker exposed no goal-pause API; its only goal tool accepts complete or blocked. PAUSED could not be set here. No goal was reset or marked complete.
