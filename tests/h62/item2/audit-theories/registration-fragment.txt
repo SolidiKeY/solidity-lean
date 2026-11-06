@@ -35,3 +35,8 @@ source tests/h62/item2/audit-theories/PathRemaining.lean
 candidate Solidity/Theory/Audit/H62/PathRemaining.lean
 import Solidity.Theory.Audit.H62.PathRemaining
 row Theory/Audit/H62/PathRemaining.lean | Twenty-five remaining joint path/observation/storage inputs; all41 explicit Paths statements covered with prior16. Adjust its local test import only after owner approval.
+
+source tests/h62/item2/audit-theories/MirrorWitnesses.lean
+candidate Solidity/Theory/Audit/H62/MirrorWitnesses.lean
+import Solidity.Theory.Audit.H62.MirrorWitnesses
+row Theory/Audit/H62/MirrorWitnesses.lean | Joint inputs for all thirteen explicit memory-mirror theorems, using populated heap and nonempty field/vector fixtures.

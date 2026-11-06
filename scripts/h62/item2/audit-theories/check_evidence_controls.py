@@ -33,7 +33,17 @@ def main():
             result=subprocess.run(base+[str(case)],cwd=ROOT,env=env,capture_output=True,text=True)
             assert result.returncode==1 and "AssertionError" in result.stderr,(name,result.stdout,result.stderr)
             results.append({"case":name,"exit":result.returncode,"rejected":True})
-    payload={"valid_receipt_exit":positive.returncode,"negative_controls":results,"lean_runs":0}
+    complete=["--require-complete-explicit-module","Solidity/Theory/Typed/Obs/Paths.lean",
+              "--require-complete-explicit-module","Solidity/Theory/Typed/MemMirror.lean"]
+    completed=subprocess.run(base+[str(evidence)]+complete,cwd=ROOT,env=env,capture_output=True,text=True)
+    assert completed.returncode==0 and completed.stdout.count("EXPLICIT_MODULE_PASS:")==2,(completed.stdout,completed.stderr)
+    module_controls=[]
+    for module,marker in [("Solidity/Theory/Typed/Mem.lean","EXPLICIT_MODULE_BLOCKED:"),
+                          ("Solidity/Theory/NotMapped.lean","EXPLICIT_MODULE_UNKNOWN:")]:
+        result=subprocess.run(base+[str(evidence),"--require-complete-explicit-module",module],cwd=ROOT,env=env,capture_output=True,text=True)
+        assert result.returncode==1 and marker in result.stdout,(module,result.stdout,result.stderr)
+        module_controls.append({"module":module,"exit":result.returncode,"rejected":True,"decisive":result.stdout.splitlines()[-1]})
+    payload={"complete_explicit_module_exit":completed.returncode,"module_rejection_controls":module_controls,"valid_receipt_exit":positive.returncode,"negative_controls":results,"lean_runs":0}
     (evidence/"evidence-controls.json").write_text(json.dumps(payload,indent=2)+"\n")
     print(json.dumps(payload))
 

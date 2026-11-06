@@ -82,6 +82,21 @@ WITNESSES.update({
  'Solidity.SVal.saveM_append': ('PathRemaining', 'sval_saveM_append_joint_witness'),
  'Solidity.SVal.saveM_at_n': ('PathRemaining', 'sval_saveM_at_n_joint_witness'),
 })
+WITNESSES.update({
+ 'Solidity.SVal.Mirrors.mono': ('MirrorWitnesses', 'mirror_val_mono_joint_witness'),
+ 'Solidity.SFields.Mirrors.mono': ('MirrorWitnesses', 'mirror_fields_mono_joint_witness'),
+ 'Solidity.SVec.Mirrors.mono': ('MirrorWitnesses', 'mirror_vec_mono_joint_witness'),
+ 'Solidity.SVal.Mirrors.wk': ('MirrorWitnesses', 'mirror_val_wk_joint_witness'),
+ 'Solidity.SFields.Mirrors.wk': ('MirrorWitnesses', 'mirror_fields_wk_joint_witness'),
+ 'Solidity.SVec.Mirrors.wk': ('MirrorWitnesses', 'mirror_vec_wk_joint_witness'),
+ 'Solidity.SVal.mirrors_copyStToM': ('MirrorWitnesses', 'mirror_val_copy_joint_witness'),
+ 'Solidity.SFields.mirrors_copyStToM': ('MirrorWitnesses', 'mirror_fields_copy_joint_witness'),
+ 'Solidity.SVec.mirrors_copyStToM': ('MirrorWitnesses', 'mirror_vec_copy_joint_witness'),
+ 'Solidity.SVal.Mirrors.prim': ('MirrorWitnesses', 'mirror_prim_joint_witness'),
+ 'Solidity.SVal.Mirrors.id_ge': ('MirrorWitnesses', 'mirror_id_ge_joint_witness'),
+ 'Solidity.SFields.Mirrors.get': ('MirrorWitnesses', 'mirror_fields_get_joint_witness'),
+ 'Solidity.SVec.Mirrors.getElem': ('MirrorWitnesses', 'mirror_vec_getElem_joint_witness'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
@@ -123,6 +138,7 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--evidence",type=Path,required=True)
     ap.add_argument("--require-full",action="store_true",help="Fail closed on pending witness/compiler obligations")
+    ap.add_argument("--require-complete-explicit-module",action="append",default=[],help="Fail unless every explicit declaration in this frozen module has an accepted input disposition; generated candidates remain separate")
     a=ap.parse_args(); out=a.evidence.resolve()
     if out.is_relative_to(ROOT): raise SystemExit("Evidence must be off Git")
     global VERSION
@@ -223,6 +239,8 @@ def main():
        "Logical-vs-data binders are typed; global-vs-per-input obligations still require individual review.",
        "Additional generated theorem constants are retained as pending candidates, not silently excluded.",
        "This census verifies original theory inputs only. Separate verify_totality.py receipts cover core compiler success/control packets; target ABI/gas/fork and other compiler branches remain unproved."]}
+    module_counts={file:dict(Counter(r["status"] for r in rows if r["file"]==file)) for file in files}
+    payload["explicit_module_dispositions"]=module_counts
     payload["intentional_impossibility_policy"]=H69_POLICY
     (out/"verified-census.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n")
     gaps=[{"theorem":r["elaborated"]["name"],"file":r["file"],"line":r["line"],
@@ -235,6 +253,16 @@ def main():
     (out/"uncovered.json").write_text(json.dumps(gaps,indent=2)+"\n")
     generated=sum(r["name"] not in used for r in typed)
     print("STATEMENT_CENSUS_PASS "+json.dumps(counts,sort_keys=True)+f"; generated candidates pending={generated}; full assignment acceptance=false")
+    accepted={"joint-witness-checked","no-inputs","intentional-impossibility-checked"}
+    for file in a.require_complete_explicit_module:
+        if file not in module_counts:
+            print("EXPLICIT_MODULE_UNKNOWN: "+file)
+            raise SystemExit(1)
+        pending=sum(n for status,n in module_counts[file].items() if status not in accepted)
+        if pending:
+            print(f"EXPLICIT_MODULE_BLOCKED: {file}: {pending} pending explicit declarations")
+            raise SystemExit(1)
+        print(f"EXPLICIT_MODULE_PASS: {file}: {sum(module_counts[file].values())} explicit declarations; generated candidates remain separately pending")
     if a.require_full:
         print(f"FULL_ACCEPTANCE_BLOCKED: {len(gaps)} pending/blocked statements or candidates; separate compiler evidence and remaining target ABI/gas/fork obligations require full-assignment verification")
         raise SystemExit(1)

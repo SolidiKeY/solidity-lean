@@ -2,6 +2,10 @@
 
 This is a reviewable partial audit, not completion of the frozen assignment.
 The strict acceptance command exits 1. No RUNTIME_GATE_PASS is claimed.
+Latest receipts cover95 additive proof theorems and60 original joint witnesses;
+Paths41/41 and MemMirror13/13 explicit declarations are fully witnessed.
+Latest evidence: /workspace/h62-audit-theories-mirrors-evidence. Earlier
+sections retain historical checkpoint details; continuations below update them.
 
 ## Frozen scope and continuation identity
 
@@ -35,14 +39,14 @@ they have not been silently excluded from the assignment.
 
 | Explicit declaration disposition | Count |
 |---|---:|
-| Simultaneous witness checked | 47 |
+| Simultaneous witness checked | 60 |
 | Empty elaborated input telescope | 18 |
 | H69 intentional impossibility checked and accepted | 3 |
-| Public inputs not yet witnessed | 429 |
+| Public inputs not yet witnessed | 416 |
 | Private declarations retained, witness pending | 3 |
 | Total | 500 |
 
-Current uncovered.json contains 1,418 unique pending records: 429 public,
+Current uncovered.json contains 1,405 unique pending records: 416 public,
 3 private and 986 generated candidates. The three H69-accepted boundaries are
 reported separately, each with its rationale and checked certificate. It gives
 names, source/module locations, documented producer routing and unresolved live
@@ -91,8 +95,8 @@ is present in those statements. These are not proofs of Storage.obs/SVal.obs
 realizability or successful runtime reads. Ordinary compiler/program totality
 obligations remain separate.
 
-There are 31 proved audit theorems, 3 fixture definitions, 1 private type
-abbreviation and 1 census metaprogram. Sixteen witness packets are new in this
+At the historical H69 checkpoint4ddb1e3a, there were31 proved audit theorems, 3 fixture definitions, 1 private type
+abbreviation and 1 census metaprogram. Sixteen witness packets were new in that
 continuation; the original 15 proofs remain unchanged.
 Final axiom reports use only propext, Classical.choice and Quot.sound, or subsets;
 no new custom axiom, sorry, native_decide, trust option or increased heartbeat
@@ -120,7 +124,8 @@ ESCALATE: Solidity.Theory.Progress.Val.not_tuple — Tuple.lean:40 assumes a pla
 ESCALATE: Solidity.Theory.Progress.Controls.no_tuple_local — Controls.lean:141 assumes locals headed by a tuple and concludes False; H62.AuditTheories.no_tuple_locals_input proves its input telescope empty. Options: accept its checked impossibility disposition without editing the statement; retain the literal witness criterion and blocker. Resolved by H69: the checked impossibility disposition is accepted; statement unchanged.
 ESCALATE: Solidity.Ty.Finite.not_array — Leaves.lean:305 requires a finite shape plus a direct path to a dynamic array and concludes False; H62.AuditTheories.no_finite_array_path_input refutes that conjunction. Options: accept its checked impossibility disposition while retaining the theorem; retain the literal witness criterion and blocker. Resolved by H69: the checked impossibility disposition is accepted; statement unchanged.
 
-T-PUBLIC-LINK records unfinished compiler-linkage investigation; it is not yet
+The following is the historical4ddb1e3a T-PUBLIC-LINK investigation,
+partly discharged by the compiler continuation below. It was not yet
 a demonstrated producer dependency. The coordinator/area producer and H55-G49
 should be consulted if shared final-contract linkage or an owned-file repair
 is needed; do not duplicate H55 implementation work. Source Ends permits
@@ -140,7 +145,7 @@ No interface repair or new premise is authorized.
 
 ## Validation and resource evidence
 
-Current off-Git evidence: /workspace/h62-audit-theories-h69-evidence.
+H69 historical off-Git evidence: /workspace/h62-audit-theories-h69-evidence.
 Historical immutable evidence: /workspace/h62-audit-theories-evidence.
 The final external handoff adds exact committed head, patch paths and checksums.
 Bulk JSON and compiled artifacts are not committed; generators are committed.
@@ -157,6 +162,8 @@ was acquired before writes/checks. No systemd-run or heartbeat increase.
 The initial 118 dependency checks took 771.790s, peak sampled process RSS
 1,714,769,920 bytes. KeySort originally passed in 2.008s at 256,262,144 bytes; the fresh matched-pair prerequisite passed in 2.015889s at 260,485,120 bytes. Runtime labels
 are not proofs and no full runtime gate pass is claimed.
+
+Historical H69 gate snapshot (current milestones appear below):
 
 | Command / gate | Outcome and decisive evidence |
 |---|---|
@@ -376,3 +383,79 @@ corrupted receipt controls are rejected. Layers pass857/0/0; register and
 fragments checks pass. No new core import was registered. The unchanged global
 doc-path failure and full run-lean gate remain as recorded above. No extra
 timing pair was run; the authorized +2.073826% measurement is unchanged.
+
+## Continuation: all explicit memory-mirror inputs and handoff
+
+The mandated fresh fetch advanced origin/master to
+0b2a648b32335f35ff323ff468f75907e926fc13. Git log and actual MemMirror/Mem/Heap
+comparisons found no relevant prerequisite change or duplicate audit. The
+latest master change was coordination tooling; the isolated frozen-base
+branch therefore remains unchanged in ancestry. master-check.json records
+the commands and decision. No rebase, merge or push was performed.
+
+MirrorWitnesses adds13 joint-input theorem packets, accounting for every
+explicit declaration in Solidity/Theory/Typed/MemMirror.lean exactly once.
+Fixtures mirrorHeap and mirrorRoot supply a populated heap with a live bool
+array object and an in-bounds reference. Field/vector packets use singleton
+containers. Bound/prefix/full Heap.Keeps premises coexist with their mirrors;
+field-copy packets retain the complete quantified map-free premise. Named
+member lookup and post-premise type/index binders are included. Reflexive
+prefixes satisfy the frozen statements, which require no strict heap growth.
+The id_ge packet uses the actual object; its proof rewrites the existing
+irreducible MObj.elems accessor through MObj.elems_dyn. No representation or
+speed change was undone. Final Lean check:1.607s,583,983,104 sampled peak RSS,
+exit0, no resource stop and only the standard axiom set. Earlier failed
+elaboration attempts are historical and never accepted as proof receipts.
+
+verify_census now has --require-complete-explicit-module: it accepts only
+checked joint/no-input/H69 dispositions for every explicit declaration in the
+selected frozen file, rejects unknown or incomplete files, and explicitly
+leaves generated candidates pending. Paths41/41 and MemMirror13/13 pass.
+Controls reject incomplete Mem (107 pending declarations), an unknown module,
+and all three corrupt-receipt fixtures. Full acceptance still exits1 with
+1,405 gaps:416 public,3 private and986 generated. Other dispositions are
+60 joint,18 empty telescopes and3 H69 certificates, totaling500 originals.
+
+verify_helpers recursively discovers every additive proof module and checks
+all95 source theorem names against accepted source/transitive/artifact/log
+receipts and printed axiom sets. It confirms9 proof modules,15 definitions
+and5 private type abbreviations. It skips the census metaprogram only after
+checking that it declares no theorem. These checks verify receipt/axiom
+provenance, not semantic coverage. The finder caught an initial nonrecursive
+glob; recursive discovery was fixed, rechecked and independently reviewed.
+Both read-only reviewers confirmed13/13 source fidelity, all proof receipts,
+new coverage/rejection controls and corrected helper discovery. No residual
+findings; neither reviewer used Lean/server/build jobs.
+
+Milestone gates in checkpoint-gates.json:11 Python tests pass; explicit-module
+census gates pass; helper verification95 and compiler verification26 pass;
+five negative receipt/module controls reject as intended; layers857/0/0 and
+register/fragments pass. The previous unchanged off-scope doc-path failure
+still prevents a global documentation PASS. Full run-lean and whole-assignment
+acceptance remain unfinished. Actual Lean4.24.0/797c613 and Lake5.0.0-src+797c613
+were read again. The bounded KeySort check passes (2.015889s) with exact source
+and artifact hashes; every serial invocation checks that prerequisite first.
+No RUNTIME_GATE_PASS, new custom axiom/sorry/native_decide, maxHeartbeats
+increase, toolchain migration, frozen statement edit or registration is claimed.
+The authorized same-input census timing pair remains +2.073826%; no extra pair
+was run and new modules have no fictitious before/after comparison.
+
+This completes three reviewed work items in the current continuation:
+compiler-family admission/totality/controls, remaining Paths inputs and all
+MemMirror inputs. Per the required3–5-item fresh-thread rule, hand off to the
+coordinator using this same original VM/repository/branch and existing goal;
+do not self-launch a replacement or mark the goal complete. Goal inspection
+is not exposed; no goal was created/reset and no unsupported completion
+transition was attempted. The exact committed head/base, complete original
+patch, branch bundle and SHA256 manifest are in the external handoff.
+
+Pending work is substantive:416 public plus3 private joint inputs,986
+generated-candidate dispositions, remaining per-statement global-vs-input
+interpretations and live owner confirmation, broader supported compiler
+branches, target ABI failure bytes/gas/Fitted/Enforced/physical-fork agreement,
+and full required final gates. No new missing-producer dependency has been
+established for the next independent proof item. T-OWNERS retains unresolved
+live routing (nine typed-area files unconfirmed); H55/area coordination remains
+required before touching producer-owned symbols. Fetch/check master before
+starting the next item and consume landed work instead of duplicating it.
+Current immutable evidence: /workspace/h62-audit-theories-mirrors-evidence.
