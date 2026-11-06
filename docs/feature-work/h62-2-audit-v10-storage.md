@@ -672,3 +672,22 @@ other parent-cgroup usage exceeded the existing headroom allowance. The
 prospective command sets only the stack limit as authorized by H111; the
 preflight refused before that shell or Lean executed. No proof budget,
 memory cap, guard or historical failed receipt was changed.
+
+## Focused Source witness revalidation after H113
+
+C222 freshly kernel-checks the two unchanged Source witness files after adopting
+the published Source/Ctor proof update. SourceReadWitnesses passes after rebuilding
+its changed imports (235.99 seconds); SourceWriteWitnesses then passes serially
+(1.85 seconds). All sixteen existing axiom guards pass. Peak sampled aggregate
+RSS is 1696296960 bytes, with no resource stop under the H113 accounting formula.
+These are separate import/cache states, not a matched performance comparison.
+
+Only the two source-specific checked_head/kernel_log receipts change. The
+validated_dependency_head field continues to name the historical complete
+nine-module check; seven unaffected modules retain their original receipts.
+No source-identity comparison is promoted to a fresh kernel run. The reference
+ledger remains 49 mapped rows (38 joint bundles,11 data inputs),3232 unmapped.
+This checks the selected Source word-read/write premises and existing controls,
+not general Source compiler admission, physical adequacy, world rollback, or
+release of any separate v4.35 timing/trust/compatibility hold. No Source producer
+or witness statement was edited.
