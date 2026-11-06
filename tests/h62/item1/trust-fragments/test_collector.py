@@ -18,11 +18,25 @@ sys.modules['accept_baseline'] = ACCEPT
 CENSUS_SPEC = importlib.util.spec_from_file_location('census', ROOT / 'scripts/h62/item1/trust-fragments/census.py')
 CENSUS = importlib.util.module_from_spec(CENSUS_SPEC)
 CENSUS_SPEC.loader.exec_module(CENSUS)
+sys.modules['census'] = CENSUS
+FIXTURE_SPEC = importlib.util.spec_from_file_location('check_fixture', ROOT / 'scripts/h62/item1/trust-fragments/check_fixture.py')
+FIXTURE = importlib.util.module_from_spec(FIXTURE_SPEC)
+FIXTURE_SPEC.loader.exec_module(FIXTURE)
+sys.modules['check_fixture'] = FIXTURE
+TIMING_SPEC = importlib.util.spec_from_file_location('time_audit', ROOT / 'scripts/h62/item1/trust-fragments/time_audit.py')
+TIMING = importlib.util.module_from_spec(TIMING_SPEC)
+TIMING_SPEC.loader.exec_module(TIMING)
 
 
 class CollectorTests(unittest.TestCase):
     def test_reproduces_frozen_audit(self):
         self.assertEqual(COLLECTOR.collect(COLLECTOR.FRAGMENTS), COLLECTOR.AUDIT.read_bytes())
+
+    def test_timing_gate_boundary(self):
+        self.assertFalse(TIMING.is_slow(100.0, 110.0))
+        self.assertTrue(TIMING.is_slow(100.0, 110.001))
+        with self.assertRaises(ValueError):
+            TIMING.is_slow(0, 1)
 
     def test_census_accounts_for_each_original_occurrence(self):
         data = COLLECTOR.AUDIT.read_bytes()
