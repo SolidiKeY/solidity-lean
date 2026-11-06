@@ -820,3 +820,25 @@ archive and its committed 11-member checksum manifest. No Lean source changed.
 The coordinator published this fix in a91a6cca; the current delivery-only
 anchor follows that published head while frozen snapshot provenance remains
 86253aba and semantic inputs remain 6f3eedf0. Full assignment work continues.
+
+
+### Direct rollback-state checkpoint (frozen input)
+
+The rollback pilot adds `payment.failure-books-payment`: only the failed arm of
+`Taclet.sendNoCallbackBox` books a payment. Its Boolean result remains false.
+The normal funded/refused controls retain the real rollback behavior. The mutant
+proof supplies inhabited typed update landings for both arms, proves the ledger
+postcondition for every update landing, and proves that the real refused send
+rejects it. `checked_kill` negates `Premise.Sound` without an added premise.
+All 19 new theorem signatures and axiom inventories are pinned; the independent
+revert control is unchanged. Development checks are not scored as a frozen run.
+
+`DELIVERY_BASE` and the current bulk delivery anchor advance together to the
+verified published `5c407a0ba004d8cf234c2600283f582a91789b76`. This only
+accounts for upstream integration in the owned-write guard; semantic/cache base
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5` and the historical snapshot
+delivery base remain unchanged. The new pilot explicitly declares its two
+VM-only H44 inputs in its manifest and `bulk-data.json`. Current source census
+now sees 32 fixtures, 11 profiles and 18 distinct case variants; historical
+census receipts remain immutable. Frame-effect witnesses, final selection
+ledger, expanded combined execution and final repository gates remain pending.

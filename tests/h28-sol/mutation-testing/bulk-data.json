@@ -2,7 +2,7 @@
   "schema": 1,
   "authorization": "H44",
   "source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
-  "delivery_base": "a91a6cca07ec493fae8dc8c318bad4fd3f543dff",
+  "delivery_base": "5c407a0ba004d8cf234c2600283f582a91789b76",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
   "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
@@ -248,6 +248,20 @@
   },
   "frozen_manifest_inputs": {
     "tests/h28-sol/mutation-testing/manifests/combined-pilot.json": [
+      {
+        "role": "inventory",
+        "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+        "sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+        "bytes": 106323
+      },
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528
+      }
+    ],
+    "tests/h28-sol/mutation-testing/manifests/rollback-pilot.json": [
       {
         "role": "inventory",
         "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
