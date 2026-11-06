@@ -668,6 +668,7 @@ C216 resource-stop receipt is retained; no unchanged Lean retry was performed.
 Coordinator option 1 for V10-R217 authorized recovery of the same bounded
 runtime. It recovered with the original 12 GiB memory cap, zero swap and serial
 threads. The fresh unchanged preflight exited 1 before Lean started because
-other parent-cgroup usage exceeded the existing headroom allowance. Only the
-prospective shell stack limit was raised as authorized by H111. No proof budget,
+other parent-cgroup usage exceeded the existing headroom allowance. The
+prospective command sets only the stack limit as authorized by H111; the
+preflight refused before that shell or Lean executed. No proof budget,
 memory cap, guard or historical failed receipt was changed.
