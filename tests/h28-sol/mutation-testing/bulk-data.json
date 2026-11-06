@@ -306,5 +306,31 @@
     "members": 11,
     "scope_complete": false,
     "member_manifest": "tests/h28-sol/mutation-testing/evidence/member-manifest-fix-4418c39a/manifest.json"
+  },
+  "rollback_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-rollback-export-ade0ec29/proof-worlds.tar.gz",
+    "sha256": "8a080a1e83ef060b50de077b77703a55f08cf3ff1b63216e030e3c53e537ec37",
+    "bytes": 5976656,
+    "members": 41,
+    "input_head": "ade0ec29779a21e2b71841e40f7d90b5691a87ad",
+    "check_count": 12,
+    "axiom_export_count": 27,
+    "compiled_artifact_count": 8,
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "coordinator_pull_observed": false,
+    "archive_seconds": 5.760611116998916,
+    "process_maxrss_kib": 23024,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/rollback-pilot-ade0ec29/manifest.json"
   }
 }
