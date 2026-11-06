@@ -1,0 +1,61 @@
+{
+  "nodes": [],
+  "pendingInputs": [
+    {
+      "id": "G49.01",
+      "area": "G49",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G49.01",
+      "inputArtifact": "h64-shapes.json",
+      "reason": "Coordinator confirms producer inventory is not published; await relay before declaration mapping.",
+      "source": "Coordinator answer Q-H55-INVENTORY, received 2026-11-06; H55-G49 VM"
+    },
+    {
+      "id": "G49.02",
+      "area": "G49",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G49.02",
+      "inputArtifact": "h64-shapes.json",
+      "reason": "Coordinator confirms producer inventory is not published; await relay before declaration mapping.",
+      "source": "Coordinator answer Q-H55-INVENTORY, received 2026-11-06; H55-G49 VM"
+    },
+    {
+      "id": "G49.03",
+      "area": "G49",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G49.03",
+      "inputArtifact": "h64-shapes.json",
+      "reason": "Coordinator confirms producer inventory is not published; await relay before declaration mapping.",
+      "source": "Coordinator answer Q-H55-INVENTORY, received 2026-11-06; H55-G49 VM"
+    },
+    {
+      "id": "G50.01",
+      "area": "G50",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G50.01",
+      "inputArtifact": "h64-shapes.json",
+      "reason": "Coordinator confirms producer inventory is not published; await relay before declaration mapping.",
+      "source": "Coordinator answer Q-H55-INVENTORY, received 2026-11-06; H55-G49 VM"
+    },
+    {
+      "id": "G50.02",
+      "area": "G50",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G50.02",
+      "inputArtifact": "h64-shapes.json",
+      "reason": "Coordinator confirms producer inventory is not published; await relay before declaration mapping.",
+      "source": "Coordinator answer Q-H55-INVENTORY, received 2026-11-06; H55-G49 VM"
+    }
+  ],
+  "roots": {
+    "G49": [
+      "G49.01",
+      "G49.02",
+      "G49.03"
+    ],
+    "G50": [
+      "G50.01",
+      "G50.02"
+    ]
+  }
+}

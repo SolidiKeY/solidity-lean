@@ -23,7 +23,7 @@ private def sample (C : Contract) (formula : Fml C []) (box : Bool) : IO String 
   | _ => throw (IO.userError "unexpected obligation shape")
 private def controls : IO Unit := do
   let owned := "tests/directruntime-20261104/shared-translator/"
-  let fixture ← checked (Json.parse (← IO.FS.readFile (owned ++ "ModalityControls.ast.json")))
+  let fixture ← checked (Json.parse (← IO.FS.readFile (owned ++ "artifacts/h68-bulk/ModalityControls.ast.json")))
   let ast ← checked (fixture.getObjVal? "ast")
   let some source := (J.nodes ast).find? (fun n => J.kind n == "ContractDefinition")
     | throw (IO.userError "fixture contract missing")

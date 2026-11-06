@@ -1,0 +1,5 @@
+/-! RawContinueLoop.initialized_clean and initialized_view_coherent close the
+concrete read-uint8 initializer/continue-loop/binder-close path at every horizon
+for genuinely coherent inputs. Controls use both clean frames and explicitly
+populated coherent overlays. Arbitrary dirty initialized-view preservation
+and general initializer/admission/Source-readback remain separate obligations. -/
