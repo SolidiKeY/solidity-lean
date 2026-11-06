@@ -2294,8 +2294,14 @@ import Solidity.Evm.MemoryLoopHorizonObjectCoverage
 import Solidity.Evm.MemoryLoopHorizonObjectCursorControls
 import Solidity.Evm.MemoryLoopHorizonObjectFinite
 import Solidity.Evm.MemoryLoopHorizonObjectFiniteControls
+import Solidity.Evm.MemoryLoopHorizonObjectHeapControls
 import Solidity.Evm.MemoryLoopHorizonObjectHeapGrowth
+import Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps
+import Solidity.Evm.MemoryLoopHorizonObjectHeapTypes
 import Solidity.Evm.MemoryLoopHorizonObjectObservedRoom
+import Solidity.Evm.MemoryLoopHorizonObjectOldElements
+import Solidity.Evm.MemoryLoopHorizonObjectOldHeaders
+import Solidity.Evm.MemoryLoopHorizonObjectOldStructs
 import Solidity.Evm.MemoryLoopHorizonObjectOutcomes
 import Solidity.Evm.MemoryLoopHorizonObjectPendingAllocator
 import Solidity.Evm.MemoryLoopHorizonObjectPrefix
