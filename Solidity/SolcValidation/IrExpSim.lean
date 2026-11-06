@@ -149,7 +149,7 @@ abbrev HL : List String := ["_power", "_base", "exponent", "max", "power", "base
 abbrev EF : List FnSig := [] ++ (expSigs ++ [])
 
 /-- The environment of a body of the group. -/
-def expE1 : FunEnv EF := .group [] .nil expEnv
+abbrev expE1 : FunEnv EF := .group [] .nil expEnv
 
 def loopCond : Expr EF HL 1 :=
   (.op (.evm (.pure .«gt»)) (.cons (.var "exponent" (.there (.there .here))) (.cons (.lit ⟨.num 1, 1, rfl⟩) .nil)))
@@ -567,6 +567,167 @@ theorem u4_run (k : Nat) (b e mx p : Word) (s : σ) (hmx : mx.val = maxWord) :
   · intro no
     rw [u4, uv, if_of_eq M ctx (k + 44) _ _ _ _ _ _ hc _]
     exact (truth_eq_zero _).mpr no
+
+theorem u5_run (j : Nat) (b e : Nat) (mx p : Word) (bW : b < 2 ^ 256) (eW : e < 2 ^ 256)
+    (hmx : mx.val = maxWord) (s : σ) :
+    match expLoop 1 b e with
+    | some (p', b', _) => evalStmt M ctx (j + steps e + 60) expE1 u5
+        (uv (Solidity.Yul.word b) (Solidity.Yul.word e) mx p) s =
+        .ok (s, uv (Solidity.Yul.word b') (Solidity.Yul.word e) mx (Solidity.Yul.word p'), .normal)
+    | none => ∃ cont, evalStmt M ctx (j + steps e + 60) expE1 u5
+        (uv (Solidity.Yul.word b) (Solidity.Yul.word e) mx p) s = panicRun M 0x11 s >>= cont := by
+  have hl : expE1.lookup (s := ⟨"checked_exp_helper", ["_power", "_base", "exponent", "max"], ["power", "base"]⟩)
+      (.there (.there (.there .here))) = ⟨_, expEnv, expExpHelper⟩ := rfl
+  have hr := helper_run M ctx (j + 7) b e mx eW bW hmx s
+  rw [u5, uv]
+  simp only [evalStmt, evalExpr, evalArgs, run_ok_bind, run_pure, Vals.get_here, Vals.get_there]
+  rw [hl]
+  simp only [Vals.ofFn, consFn_zero, consFn_succ, Vals.zeros, Vals.append_cons', Vals.append_nil']
+  rcases hE : expLoop 1 b e with _ | ⟨p', b', e'⟩
+  · rw [hE] at hr
+    obtain ⟨cont, hc⟩ := hr
+    simp only [hv, one_word] at hc
+    rw [show j + steps e + 58 = j + 7 + steps e + 51 by omega, one_word, hc]
+    simp only [bind_assoc]
+    exact ⟨_, rfl⟩
+  · rw [hE] at hr
+    simp only [hv, one_word] at hr
+    rw [show j + steps e + 58 = j + 7 + steps e + 51 by omega, one_word, hr]
+    simp only [run_ok_bind, Vals.drop_cons, Vals.drop_nil, assignAll, Vals.set_here, Vals.set_there]
+    rfl
+
+theorem gt_div_bne' (mx b p : Word) :
+    (Solidity.Yul.Pure.eval .«gt» (word2 p (Solidity.Yul.Pure.eval .«div» (word2 mx b))) != 0) =
+      decide (mx.val / b.val < p.val) := by
+  rw [pure_gt, word2_zero, word2_one, pure_div, word2_zero, word2_one, word_div_val, truth_bne]
+
+theorem u6_run (k : Nat) (b e mx p : Word) (s : σ) :
+    evalStmt M ctx (k + 40) expE1 u6 (uv b e mx p) s =
+      (fun s => (s, uv b e mx p, .normal)) <$> panicIf M (decide (mx.val / b.val < p.val)) 0x11 s := by
+  rw [u6, uv, exp_if_panic M ctx (k + 23) _ _ _ rfl _ _ _
+    (op2_gen M ctx _ _ _ _ _ _ _ _ 5 (fun j => var_gen M ctx _ _ _ _ (j + 4))
+      (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (var_gen M ctx _ _ _ _)) (k + 30))]
+  simp only [Vals.get_here, Vals.get_there, gt_div_bne']
+
+theorem u7_run (k : Nat) (b e mx p : Word) (s : σ) :
+    evalStmt M ctx (k + 5) expE1 u7 (uv b e mx p) s =
+      .ok (s, uv b e mx (Solidity.Yul.word (p.val * b.val)), .normal) := by
+  rw [u7, uv, assign_pure2]
+  simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there, pure_mul, word2_zero, word2_one]
+  rfl
+
+theorem items_stmt_bind (k : Nat) {F : List FnSig} {c : Ctl} {L : List String} {g : Nat} (E : FunEnv F)
+    (st : Stmt F c L) (rest : Items F c L g) (vs : Vals L) (s : σ) (R : Run σ σ)
+    (h : ∃ cont, evalStmt M ctx k E st vs s = R >>= cont) :
+    ∃ cont, evalItems M ctx (k + 1) E (.stmt st rest) vs s = R >>= cont := by
+  obtain ⟨cont, h⟩ := h
+  simp only [evalItems, h, bind_assoc]
+  exact ⟨_, rfl⟩
+
+theorem exp_word (a : Word) (e : Nat) (eW : e < 2 ^ 256) :
+    Solidity.Yul.Pure.eval .«exp» (word2 a (Solidity.Yul.word e)) = Solidity.Yul.word (a.val ^ e % 2 ^ 256) := by
+  apply Fin.ext
+  have h : Solidity.Yul.Pure.eval .«exp» (word2 a (Solidity.Yul.word e)) =
+      Solidity.Yul.powWord a (Solidity.Yul.word e).val := rfl
+  rw [h, Solidity.Yul.powWord_correct, word_val_lt e eW, word_val, Nat.mod_mod]
+
+/-- The body of `checked_exp_unsigned(base, exponent, max)` (with `max = 2^256 - 1`) runs as
+`expUnsigned`: the returned `power` is the model's value, or the first machine effect is the panic. -/
+theorem unsigned_run (j : Nat) (b e : Nat) (mx : Word) (bW : b < 2 ^ 256) (eW : e < 2 ^ 256)
+    (hmx : mx.val = maxWord) (s : σ) :
+    match expUnsigned b e with
+    | some r => ∃ vs fl, evalBlock M ctx (j + 400) expEnv expExpUnsigned
+        (uv (Solidity.Yul.word b) (Solidity.Yul.word e) mx 0) s = .ok (s, vs, fl) ∧
+        vs.get (.there (.there (.there .here))) = Solidity.Yul.word r
+    | none => ∃ cont, evalBlock M ctx (j + 400) expEnv expExpUnsigned
+        (uv (Solidity.Yul.word b) (Solidity.Yul.word e) mx 0) s = panicRun M 0x11 s >>= cont := by
+  have wb : (Solidity.Yul.word b).val = b := word_val_lt b bW
+  have we : (Solidity.Yul.word e).val = e := word_val_lt e eW
+  rw [unsigned_eq, block_empty]
+  unfold expUnsigned
+  by_cases e0 : e = 0
+  · rw [if_pos e0]
+    dsimp only
+    rw [items_stmt_flow M ctx (j + 398) _ _ _ _ _ _ _ _ (u1_zero M ctx (j + 388) _ _ _ _ s (by rw [we, e0])) (by decide)]
+    exact ⟨_, _, rfl, rfl⟩
+  rw [if_neg e0, items_stmt_normal M ctx (j + 398) _ _ _ _ _ _ _ (u1_ne M ctx (j + 388) _ _ _ _ s (by rw [we]; exact e0))]
+  by_cases b0 : b = 0
+  · rw [if_pos b0]
+    dsimp only
+    rw [items_stmt_flow M ctx (j + 397) _ _ _ _ _ _ _ _ (u2_zero M ctx (j + 387) _ _ _ _ s (by rw [wb, b0])) (by decide)]
+    exact ⟨_, _, rfl, rfl⟩
+  rw [if_neg b0, items_stmt_normal M ctx (j + 397) _ _ _ _ _ _ _ (u2_ne M ctx (j + 387) _ _ _ _ s (by rw [wb]; exact b0))]
+  by_cases b1 : b = 1
+  · rw [if_pos b1]
+    dsimp only
+    rw [items_stmt_flow M ctx (j + 396) _ _ _ _ _ _ _ _ (u3_one M ctx (j + 386) _ _ _ _ s (by rw [wb, b1])) (by decide)]
+    exact ⟨_, _, rfl, rfl⟩
+  rw [if_neg b1]
+  by_cases b2 : b = 2
+  · rw [if_pos b2]
+    have t := u3_two M ctx (j + 351) (Solidity.Yul.word b) (Solidity.Yul.word e) mx 0 s (by rw [wb, b2]) hmx
+    rw [we] at t
+    by_cases big : 255 < e
+    · rw [if_pos big]
+      dsimp only
+      exact items_stmt_bind M ctx (j + 396) _ _ _ _ s _ (t.1 big)
+    · rw [if_neg big]
+      dsimp only
+      rw [items_stmt_flow M ctx (j + 396) _ _ _ _ _ _ _ _ (t.2 big) (by decide)]
+      refine ⟨_, _, rfl, ?_⟩
+      have two : (Solidity.Yul.word b) = 2 := Fin.ext (by rw [wb, b2]; rfl)
+      show Solidity.Yul.Pure.eval .«exp» (word2 2 (Solidity.Yul.word e)) = _
+      rw [exp_word 2 e eW]
+      rfl
+  rw [if_neg b2, items_stmt_normal M ctx (j + 396) _ _ _ _ _ _ _
+    (u3_other M ctx (j + 386) _ _ _ _ s (by rw [wb]; exact b1) (by rw [wb]; exact b2))]
+  have t4 := u4_run M ctx (j + 350) (Solidity.Yul.word b) (Solidity.Yul.word e) mx 0 s hmx
+  simp only [wb, we] at t4
+  by_cases small : (b < 11 ∧ e < 78) ∨ (b < 307 ∧ e < 32)
+  · rw [if_pos small]
+    dsimp only
+    have sm : ((decide (b < 11) && decide (e < 78)) || (decide (b < 307) && decide (e < 32))) = true := by
+      rcases small with ⟨h1, h2⟩ | ⟨h1, h2⟩
+      · simp only [h1, h2, decide_true, Bool.and_self, Bool.true_or]
+      · simp only [h1, h2, decide_true, Bool.and_self, Bool.or_true]
+    rw [items_stmt_flow M ctx (j + 395) _ _ _ _ _ _ _ _ (t4.1 sm) (by decide)]
+    refine ⟨_, _, rfl, ?_⟩
+    show Solidity.Yul.Pure.eval .«exp» (word2 (Solidity.Yul.word b) (Solidity.Yul.word e)) = _
+    rw [exp_word _ e eW, wb]
+  have sm : ((decide (b < 11) && decide (e < 78)) || (decide (b < 307) && decide (e < 32))) = false := by
+    apply Bool.eq_false_iff.mpr
+    intro h
+    apply small
+    simp only [Bool.or_eq_true, Bool.and_eq_true, decide_eq_true_eq] at h
+    exact h
+  rw [if_neg small, items_stmt_normal M ctx (j + 395) _ _ _ _ _ _ _ (t4.2 sm)]
+  have st : steps e ≤ 255 := steps_le 255 e eW
+  obtain ⟨j', hj⟩ : ∃ j', j + 395 = (j' + steps e + 60) + 1 := ⟨j + 334 - steps e, by omega⟩
+  have t5 := u5_run M ctx j' b e mx 0 bW eW hmx s
+  have spec := expLoop_spec e 1 b (by omega) (Nat.le_refl 1) (by omega) bW
+  rw [hj]
+  revert t5 spec
+  rcases expLoop 1 b e with _ | ⟨p', b', e'⟩
+  · intro t5 _
+    exact items_stmt_bind M ctx _ _ _ _ _ s _ t5
+  · intro t5 ⟨_, _, h3, h4, _⟩
+    have pW : p' < 2 ^ 256 := by omega
+    have b'0 : 0 < b' := by omega
+    dsimp only
+    dsimp only at t5
+    rw [items_stmt_normal M ctx _ _ _ _ _ _ _ _ t5]
+    have fuel : j' + steps e + 60 = (j' + steps e + 19) + 40 + 1 := rfl
+    rw [fuel, items_stmt_map M ctx _ _ _ _ _ _ _ _ (u6_run M ctx (j' + steps e + 19) _ _ _ _ s)]
+    simp only [hmx, word_val_lt b' h4, word_val_lt p' pW]
+    by_cases over : maxWord / b' < p'
+    · rw [if_pos over, decide_eq_true over, panicIf_true]
+      exact ⟨_, rfl⟩
+    · rw [if_neg over, decide_eq_false over, panicIf_false, run_ok_bind]
+      have fuel2 : j' + steps e + 19 + 40 = (j' + steps e + 57) + 2 := by omega
+      rw [fuel2, items_last, show j' + steps e + 57 + 1 = (j' + steps e + 53) + 5 by omega, u7_run]
+      refine ⟨_, _, rfl, ?_⟩
+      show Solidity.Yul.word ((Solidity.Yul.word p').val * (Solidity.Yul.word b').val) = _
+      rw [word_val_lt p' pW, word_val_lt b' h4, word_mod]
 
 end
 
