@@ -1,3 +1,15 @@
+# H82 RETIRED — no implementation continuation authorized
+
+Successor: `solidity-h62-6-20261106/migrate-root-gate`.
+The accepted H82 stop-and-handoff supersedes this document's earlier next-work
+instructions. Full stopped handoff, original assignment/queues/scope, policies
+and every open wait are committed under
+`tests/h62/item6/migrate-examples/handoff/`. Both full old builds are incomplete;
+replacement2 was intentionally interrupted for retirement at7103.8784s.
+No PAUSED setter is exposed; only complete/blocked stop outcomes exist. Actual
+non-completion stop response is preserved off Git; no completion claim.
+No H71 push permission text was delivered, so no push is attempted.
+
 # H62 item 6: examples migration overlay
 
 Full assignment remains unfinished. This is a reviewed tooling/backfill handoff,
@@ -134,8 +146,8 @@ Owner: `solidity-h62-6-20261106/migrate-sortcheck`; integration owner:
 `solidity-h62-6-20261106/migrate-root-gate`.
 Exact-file request: `owner-requests.json`, saved for coordinator relay; no owner
 patch received or applied. relay.sh is absent here. No absence of reply is
-permission to edit owned originals. Transitive examples closure has 713 external
-local modules; source/API changes there remain owner migration work.
+permission to edit owned originals. Transitive examples closure has 721 external
+local modules (713 Solidity plus 8 vendored LeanTeX); source/API changes there remain owner migration work.
 
 ## Interface and case accounting
 
@@ -159,7 +171,7 @@ scanner, cleanup and provenance issues fixed. Resource/collector follow-ups fixe
 see `review-initial.md` and `review-resource-v2.md`. Final checks are recorded
 above; full milestone acceptance/review waits for successful required gates.
 
-Next replacement clean baseline command (six arguments, fresh cache/results):
+Historical replacement clean command (not authorization to resume this retired worker):
 
 ```sh
 bash scripts/h62/item6/migrate-examples/measure.sh \
@@ -170,8 +182,8 @@ bash scripts/h62/item6/migrate-examples/measure.sh \
   /workspace/h62-migrate-examples-evidence/cache-roots.json
 ```
 
-If running, inspect `.log`, `.json`, settings, cache-preparation and source/tree
-hash files; do not launch another heavy job or write while writer lock is held.
+The run was stopped for H82 retirement. Inspect its `.log`, `.json`, settings,
+cache-preparation and source/tree hashes; do not resume this worker.
 On success, collect complete old interfaces, then resume new-toolchain directory
 builds/owner requests, matched comparison, final policy and full handoff.
 No unfinished obligation is complete merely because a checkpoint was committed.
