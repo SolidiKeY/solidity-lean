@@ -49,3 +49,9 @@ Q1 is an owner wait, routed to `solidity-compiler10-20261028/memory-internal-cal
 ## Post-merge Q1 continuation
 
 The coordinator explicitly requested continuation and a merge from published master; the assigned branch fast-forwarded to `5f14596531efea2be64f1a5e7a83afa5e151e865`, whose history contains the lane head via merge `5ca6d3315e3d76a7da28ed0831f69a8383a51efb`. Q1 was answered YES for the MIC `panic_not_empty` proof-only proposal. The current review-only Mul and Sub patch generators include all three unchanged Source propositions; neither applies edits to excluded producer files or establishes the still-missing real helper proof, registration, equivalence, axiom checks, case coverage or timing. Details and independent reviews are recorded in `tests/h62/item1/packet-panic/H71-CANDIDATE.md`.
+
+## Post-merge timing receipt controls
+
+The offline `evaluate_timings.py` checker compares caller-declared paired groups and includes a separately declared extracted-helper cost in the after total; the strict stop condition is greater than 10%, not equal to 10%. After independent review, its non-slow status is named `declared_receipts_within_limit` and malformed receipts are rejected before any delta is emitted. This status is not a build, proof, memory, cache, timing, or acceptance gate: component completeness, logs, actual commands, cache/resource descriptions, and prerequisite outcomes still require independent verification. `test_evaluate_timings.py` uses synthetic fixtures only. No actual before/after measurement or slowdown conclusion exists.
+
+Independent read-only finder and skeptic reviews identified malformed top-level JSON, boolean schema and non-string version fields as potential unstructured errors or false acceptance. These were rejected explicitly and covered by synthetic controls; both reviewers confirmed the fixes without Lean. The declared-receipt limitation remains.
