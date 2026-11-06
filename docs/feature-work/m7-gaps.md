@@ -22,6 +22,7 @@ verdict. None of them may be in `Fml.Residue`.
 | `floorClaim 0` (key zero) | unknown, not covered | refuted | partial-OR floor | `zeroAPF_refuted` |
 | `floorBad` | unknown, not covered | refuted | partial-OR floor | `falseAPF_refuted` |
 | every `PartialOrBlockAt sp v k r φ` over any contract's uint and `uint ⇒ uint` roots | unknown | proved iff `0 < k ∧ r = v`, else refuted | partial-OR floor | `Examples/DecisionGapPartialOrFloor.lean`, `Examples/DecisionHaltingOrCertificate.lean` |
+| every `PartialOrSub` member: the same block with `s - c` for any literal `c` whose subtraction from zero halts (`cap - 3`, `cap - 7`), any roots/literals | unknown, not covered | proved iff `0 < k ∧ r = v`, else refuted | partial-OR at any subtraction literal (round 2) | `Examples/DecisionGapPartialOrSub.lean` |
 | negative companions of the five array source shapes: reads past the bound and wrong values, below mapping keys (`rows[k][3]`, `rows[k][1] = 5`), fixed arrays below keys (`fixedRows[k][2]`), below struct fields (`box.xs[3]`), at struct elements (`cells[3].v`), nested arrays (`grid[k][3]`) | unknown, not covered | refuted | block refuter | `Examples/DecisionGapArrayNegatives.lean` |
 
 The five positive array shapes (`belowKey`, `fixedBelowKey`, `belowField`,
@@ -90,16 +91,29 @@ exact answers and counterstates; `Covered`, `inTarget`, `Waivers` and
 
 | Shape | Reason | Fixture |
 |---|---|---|
-| Two uint binders over a numeric body past the normalizer budget (`TwoUIntPrefixOverNormalizationBudget`: `exhausted`; `sibling` past the 511-node cap) | resource bound: deciding needs a larger normalization/node budget, a performance decision not taken here | `Examples/DecisionNormalizationResidue.lean`, `Examples/DecisionPrefixNormalizationResidue.lean` |
-| False literal-bounded blocks the region search misses (bound above 64, non-uint leaves that need a value other than default/one, conclusions needing two different past-bound values) | no candidate region certifies them; the search is sound, not complete | none beyond the controls in `Examples/DecisionGapArrayNegatives.lean` |
-| Partial guards in APF blocks outside the partial-OR floor family | the APF OR reconstruction needs left-operand definedness (`partialOrBlockReason`) | `Examples/DecisionHaltingOrReason.lean` |
-| KeY-`int` remainders past about `2^511` in the two-word encoding (`zMul n ≤ 2^256`) | the encoding's multiplier exceeds a word | not pinned; a probe of `∀ int z; z > 2^600 → z > 2^600 - 1` (and its `+ 1` false variant) found both in target, covered and decided (proved/refuted), so large literals alone do not reach this residue |
+| Normalizer-budget shapes, exactly: `TwoUIntPrefixOverNormalizationBudget` — two uint binders over a `QFUIntLinear` body with `2048 < normalizationWork + 2` (`exhausted`: work 2049, normalizer returns none, `exhausted_normalizer_none`); `PrimitivePrefixNormalizationResidue` for primitive prefixes; and bodies that normalize but exceed the 511-node leaf cap (`sibling`: work 1025, normalizes, still unknown) | resource bounds of the public pipeline (2048 normalizer visits, 511 leaf nodes); deciding them means raising those budgets, which is not done here | `Examples/DecisionNormalizationResidue.lean`, `Examples/DecisionPrefixNormalizationResidue.lean` |
+| False literal-bounded blocks the region search misses (bound above 64, an index literal past `lenCap`, non-uint leaves that need a value other than default/one, conclusions needing two different past-bound values, a body that is not a quantifier-free storage/arithmetic formula `Fml.checkMemoryAt` reads) | the search is sound, not complete. No completeness fragment is proved: stating one needs read lemmas for threshold regions along arbitrary storage paths, not done in this lane | none beyond the controls in `Examples/DecisionGapArrayNegatives.lean` |
+| Partial guards in APF blocks outside the decided partial-OR families: a right disjunct other than `i ≤ i` (e.g. `j ≤ i`), or a partial left conjunct other than `i < s - c` | the APF OR reconstruction needs left-operand definedness (`partialOrBlockReason`); the decided families rely on the right disjunct being total and true | `otherClaim` (`other_residue`) in `Examples/DecisionGapPartialOrSub.lean`, `Examples/DecisionHaltingOrReason.lean` |
+| A negative KeY-`int` binder compared against literals past about `2^511`: `(∀ int z. z > 0 → z > -2^600) → false` (false), `(… → z > 2^600) → false` and `(∀ int z. ∀ int y. y > z + 2^600) → false` (valid) | the two-word encoding (`Fml.kencB`) needs its multiplier `zMul n` to fit a word, so it refuses them; no other route covers a negative binder. Positive binders with such literals are covered (`∀ int z; z > 2^600 → z > 2^600 - 1`) | `big_residue` and the covered small-literal control in `Examples/DecisionGapKIntResidue.lean` |
 
 Outside the target (decisions c, c′, d, e3″), so not Residue: `twoAnchorNonlinear`,
 `gapHashNegForall`, `notApf`, `namesBound`, `&`/`|`/`^` with two symbolic
 operands and `addmod`/`mulmod` with a symbolic modulus or two symbolic
 factors (checked: `inTarget {} = false`). `addmod(x, y, 7)` with two symbolic
 addends is in the target and already covered.
+
+## Round 2 (coordinator request, queue item 4)
+
+* Partial APF guards: the floor family is generalized to any halting
+  subtraction literal (`Calculus/DecisionPartialOrSub.lean`, wired after the
+  floor family in `gapAnswer?`); the remaining shape is narrowed and pinned.
+* KeY-`int` past the encoding: in-target uncovered members pinned
+  (`Examples/DecisionGapKIntResidue.lean`); not decided. A one-binder
+  test-point decision (thresholds `c`, `c ± 1`, and one point beyond each end)
+  would decide the single-binder members; the two-binder member needs
+  elimination. Neither is implemented.
+* Block refuter completeness: not proved on any fragment (see the table).
+* Normalizer budgets: characterised above; no budget changed.
 
 ## Reviews
 
