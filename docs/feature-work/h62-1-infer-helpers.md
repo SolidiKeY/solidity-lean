@@ -157,3 +157,34 @@ count as diagnostics or proofs; logs are in the evidence directory. A retry
 must ensure the dependency setup uses the serial configuration before running.
 The existing Lean source was not changed. Independent finder and skeptic
 reviews, all checkpoint gates and timing comparisons remain pending.
+
+## H70 typed owner compatibility inventory
+
+The owner-facing boundary includes the inline premises of the original
+relation, not just helper-to-helper equality. Source observations at the
+frozen base are:
+
+| Relation constructor | Source inferencer | Static inferencer | Completeness consumer |
+| --- | --- | --- | --- |
+| `Typed.delete` (`Solidity/Source/Typing.lean:849`) requires a non-mapping test and `Γ.deleteRefused τ e = false` | `STy.isMapping` in `Solidity/Source/Infer.lean:217` | `isMappingTy` in `Solidity/Frontend/Static/Infer.lean:202` | `delete_res` in `Solidity/Frontend/Static/InferComplete.lean:306` preserves both premises |
+| `Typed.payable` (`Solidity/Source/Typing.lean:921`) requires an address-or-contract test | `STy.isPayableArg` in `Solidity/Source/Infer.lean:320` | `payableArg` in `Solidity/Frontend/Static/Infer.lean:591` | `payable_mem` in `Solidity/Frontend/Static/InferComplete.lean:721` preserves the true premise |
+| `Typed.convElem` (`Solidity/Source/Typing.lean:912`) fixes the result location and requires `σ.explicit Γ.isBase τ = true` | `STy.convLoc` in `Solidity/Source/Infer.lean:298` | `convLoc` in `Solidity/Frontend/Static/Infer.lean:572` | `convElem_mem` in `Solidity/Frontend/Static/InferComplete.lean:700` retains the conversion test and the constructed result type |
+
+The in-scope candidate now includes two non-mapping premise equivalences and
+six typed constructor applications, one per helper copy. The delete
+applications retain `deleteRefused`; payable retains the true premise;
+elementary conversion retains the explicit-conversion premise and exact
+result type. These terms have not been elaborated or kernel checked. They do
+not authorize editing any original inferencer or prove the owner agreement.
+
+The coordinator supplied partial owner patches for Hash CollisionBound and
+Language FixedPoint with respective claimed SHA-256 values
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff` and
+`a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82`.
+The local source blob IDs match the patch base IDs:
+`b54c93a5b24340a19160c1fb378d057ccee60f84` and
+`e2d7e18f385707bd375f9b326314b51b9b583b57`, respectively. The named patch
+files were not found in the available coordinator-input or shared folders,
+so their byte hashes were not independently verified and neither patch was
+applied. Their full migration gates and the H55 source-relations agreement
+remain pending.

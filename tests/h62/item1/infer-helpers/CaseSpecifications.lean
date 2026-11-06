@@ -108,4 +108,59 @@ theorem location_array_default (loc : DataLoc) (elem : STy) (len : Option Nat) :
     Solidity.Frontend.Static.convLoc (.array loc elem len) = .memory := by
   exact ⟨rfl, rfl⟩
 
+
+/-! ## Candidate compatibility with the existing typed constructors
+
+These terms retain the original relation, constructor shapes and premises.
+Their acceptance still requires a successful bounded Lean check.
+-/
+
+/-- The source mapping helper exposes the premise used by `Typed.delete`. -/
+theorem source_mapping_premise (τ : STy) :
+    (τ.isMapping = false) ↔ ((τ matches .mapping _ _) = false) := Iff.rfl
+
+/-- The static mapping helper exposes the same inline premise. -/
+theorem static_mapping_premise (τ : STy) :
+    (Solidity.Frontend.Static.isMappingTy τ = false) ↔
+      ((τ matches .mapping _ _) = false) := Iff.rfl
+
+/-- Preserve the delete refusal premise while using the source helper. -/
+def source_delete {Γ : Ctx} {e : Syn .expr} {τ : STy}
+    (d : LVal Γ e τ) (hm : τ.isMapping = false) (hp : Γ.deleteRefused τ e = false) :
+    Typed Γ (.unaryPrefix .delete e) (.tuple []) :=
+  .delete d hm hp
+
+/-- Preserve the delete refusal premise while using the static helper. -/
+def static_delete {Γ : Ctx} {e : Syn .expr} {τ : STy}
+    (d : LVal Γ e τ) (hm : Solidity.Frontend.Static.isMappingTy τ = false)
+    (hp : Γ.deleteRefused τ e = false) : Typed Γ (.unaryPrefix .delete e) (.tuple []) :=
+  .delete d hm hp
+
+/-- Preserve the source payable premise when constructing its derivation. -/
+def source_payable {Γ : Ctx} {x : Syn .expr} {σ : STy}
+    (d : Typed Γ x σ) (hp : σ.isPayableArg = true) :
+    Typed Γ (.payableConv (.positional (.cons x .nil))) (.address true) :=
+  .payable d hp
+
+/-- Preserve the static payable premise when constructing its derivation. -/
+def static_payable {Γ : Ctx} {x : Syn .expr} {σ : STy}
+    (d : Typed Γ x σ) (hp : Solidity.Frontend.Static.payableArg σ = true) :
+    Typed Γ (.payableConv (.positional (.cons x .nil))) (.address true) :=
+  .payable d hp
+
+/-- Preserve the conversion check and result type with the source location helper. -/
+def source_conv_elem {Γ : Ctx} {x : Syn .expr} {σ : STy}
+    (el : Elem) (h : el ≠ .addressPayable) (d : Typed Γ x σ)
+    (he : σ.explicit Γ.isBase (el.ty σ.convLoc) = true) :
+    Typed Γ (.call (.elemType el h) (.positional (.cons x .nil))) (el.ty σ.convLoc) :=
+  .convElem d rfl he
+
+/-- Preserve the conversion check and result type with the static location helper. -/
+def static_conv_elem {Γ : Ctx} {x : Syn .expr} {σ : STy}
+    (el : Elem) (h : el ≠ .addressPayable) (d : Typed Γ x σ)
+    (he : σ.explicit Γ.isBase (el.ty (Solidity.Frontend.Static.convLoc σ)) = true) :
+    Typed Γ (.call (.elemType el h) (.positional (.cons x .nil)))
+      (el.ty (Solidity.Frontend.Static.convLoc σ)) :=
+  .convElem d rfl he
+
 end Solidity.H62.InferHelpers
