@@ -1,0 +1,52 @@
+{
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.budget_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.mixed_lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.mixed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.mixed_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.old_root_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.old_scoped_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.tail_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilationControls.lean:Solidity.Yul.Compilation.SequenceCompilation.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

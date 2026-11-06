@@ -139,11 +139,15 @@ theorem actual_fresh_revert (p : Pipeline) (suffix : Backend.Program) :
   rw [hp] at h
   exact h
 
-#print axioms actual_fresh_store
-#print axioms actual_fresh_revert
+/-- info: 'Solidity.Yul.Composition.P6FrameControls.actual_fresh_store' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms actual_fresh_store
+/-- info: 'Solidity.Yul.Composition.P6FrameControls.actual_fresh_revert' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms actual_fresh_revert
 
-#print axioms represented_fresh_after_store
-#print axioms fresh_full_payload
+/-- info: 'Solidity.Yul.Composition.P6FrameControls.represented_fresh_after_store' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms represented_fresh_after_store
+/-- info: 'Solidity.Yul.Composition.P6FrameControls.fresh_full_payload' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms fresh_full_payload
 
 theorem carried_state_key (p : Pipeline) :
     (reached p).st = (image p).st ∧ (reached p).key = key p :=

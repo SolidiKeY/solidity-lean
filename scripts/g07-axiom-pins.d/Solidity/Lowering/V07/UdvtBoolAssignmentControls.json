@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.key_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.read_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.related_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.self_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean:Solidity.Lowering.V07.UdvtBoolAssignmentControls.underlying": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

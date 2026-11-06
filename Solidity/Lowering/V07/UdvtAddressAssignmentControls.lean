@@ -119,7 +119,7 @@ def check (p : Bool) (pipeline : Roadmap.Pipeline) (checked : Bool) (old rhs : R
   let w := value e p (other_underlying p) a17
   match Source.convVal (.udvt e) v with
   | .error (.stuck why) => v.key == w.key && why == "user-defined value type" &&
-      !(Source.STy.udvt d).implicit (E p).isBase (.udvt e)
+      !(Source.STy.udvt d).implicit (E p).isBase (E p).mapFree (.udvt e)
   | _ => false))
 
 -- Execute the incorrect typed uint8 truncation on the actual fresh capture.

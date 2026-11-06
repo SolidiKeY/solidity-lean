@@ -1,0 +1,43 @@
+{
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.body_rejection_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.bool_payable_all_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.bool_raw_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.uint_payable_all_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.uint_raw_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.value_before_any_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.zero_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean:Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.zero_value_still_validates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

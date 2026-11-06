@@ -524,7 +524,7 @@ private abbrev WE := Lowering.V08.SourceEnvironmentControls.E
 private def originalWorld := Lowering.V08.SourceEnvironmentControls.populated
 private def beforeWorld : Source.St WE := {originalWorld with ex := originalWorld.ex.run WorldControls.ops}
 private def dirtyOps : List (Source.Op WE.layout WE.lay WE.lay) :=
-  [.account Lowering.V08.SourceEnvironmentControls.sender (fun account => {account with balance := ⟨66,by decide⟩}),
+  [.account Lowering.V08.SourceEnvironmentControls.sender (fun account => {account with balance:=66}),
    .account Lowering.V08.SourceEnvironmentControls.self (fun account => {account with storage := account.storage.write Lowering.V08.SourceEnvironmentControls.saved (.bool true)}),
    .transient Lowering.V08.SourceEnvironmentControls.self (fun store => store.write Lowering.V08.SourceEnvironmentControls.scratch (.bool true))]
 private def dirtyWorld : Source.St WE := {beforeWorld with ex := beforeWorld.ex.run dirtyOps}
@@ -617,9 +617,9 @@ theorem wrong_initial_checkpoint :
       exact Failure.Local.execute_failure _ 544 (Semantics.encodeError WorldControls.reason) _
         (by unfold Failure.Fits;decide) (by decide)
     · intro same
-      have balances := congrArg (fun world => (world.accounts Lowering.V08.SourceEnvironmentControls.sender).balance.val) same
+      have balances := congrArg (fun world => (world.accounts Lowering.V08.SourceEnvironmentControls.sender).balance) same
       change 93=88 at balances
-      omega
+      exact absurd balances (by decide)
     · intro same
       have observed := congrArg (fun memory => Environment.readMemory memory 384 3) same
       have old : Environment.readMemory bytes 384 3=[0,0,0] := by

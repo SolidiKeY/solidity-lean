@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreSequence.lean:Solidity.Backend.MemoryOps.Physical.word_byte_store_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
