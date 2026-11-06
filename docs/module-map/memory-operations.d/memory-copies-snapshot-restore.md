@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/SnapshotRestoreInterface.lean` | Contract only for typed captured-array copy-back after an explicitly executed memory-preserving intervention, with reached-store cleanup and framing. |
