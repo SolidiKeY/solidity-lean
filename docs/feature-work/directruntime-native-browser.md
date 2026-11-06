@@ -397,3 +397,49 @@ budget changed in the split. Existing reproduction scripts require the archived
 evidence at its original relative paths; extract the archive at repository root
 when reproducing elsewhere. Earlier artifact receipts retain their original heads.
 Required runtime/Identity/semantic/full-gate obligations remain open.
+
+## H81 fresh native/browser checkpoint (partial)
+
+[Compact manifest](../../tests/directruntime-20261104/native-browser/h81-progress-manifest.json)
+records the externally retained, individually hash-verified evidence and cache.
+Fresh builds at source head0140eb13 use206 matching extracted C modules.
+All343 runtime Lean source hashes also match B head64796174; all9 source pins
+in the delivered A packet match. Exact B external journal delivery is still
+pending; independently regenerated requests do not constitute its receipt.
+
+The exact published Identity diamond twin, both compiler modes, proves through
+fresh native and real Chromium WASM workers. The84-case matrix has exact result
+object parity:64 proved,16 refuted,4 pending per backend; all64 required-positive
+cases and72 concrete halt expectations pass. The four storage diamond pending
+cases remain undecided. All13 C construct functions remain unsupported with
+`plain return obligation`; the addition guard passes. Admission is not proof.
+
+Both83-function benchmarks complete249/249 requests over3 rounds. Native median
+1.017780ms versus0.838905ms is a21.32% STOP. Browser median191.497978ms and
+p95235.344016ms rise3.00% and4.88%, while fresh-page startup4531.930874ms
+versus3428.200938ms is a32.20% STOP. Startup is not machine-cold. No unchanged
+stopped candidate was rerun; H68 metadata/runtime/UI differences confound cause.
+Existing browser negative controls complete13/14 verdicts: invariantCountsToBound
+still throws a traversal stack overflow. Offline/edit/staleness/spec controls
+pass. No budgets, metadata requirements or refusals changed.
+
+The selected206-module C/object/import/export inventory agrees across builds.
+Three coarse frontend-origin flags remain visible; exact-body and machine-call
+classification matches previously reviewed generic helpers. The original audit
+source/execution is archived; review strengthened exact-label/direct-jump checks
+against its retained disassembly without overwriting the original run. This
+inventory and request-specific no-environment traces are not a universal purity
+or compiler/source-preservation proof. Twelve existing intrinsic model controls
+and their axiom inventory pass read-only; no worker Lean theorem was changed.
+
+Actual Lean4.24.0 (797c613), Lake5.0.0-src+797c613; KeySort377/131/131
+annotations match. Gates used serial12GiB/no-swap scopes with4GiB outer reserve.
+Native/WASM builds took289.45s/278.82s, sampled RSS1.81GB/1.47GB. MCP checks
+have zero errors; builder/closure regressions pass. The343-module verified cache
+pack stays on this VM for coordinator pull under H41; no ship-cache was run.
+H44 bulk stays out of Git. Full acceptance, semantic/source transport, owner
+repairs, timing resolution and final combined gates remain open.
+
+Final independent read-only finder and skeptic reviews pass with the stated
+limits. Their archive denominator clarification was fixed:453 payload files plus
+the index,454 archive members. Neither reviewer used Lean or reran benchmarks.
