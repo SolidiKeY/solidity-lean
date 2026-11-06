@@ -211,3 +211,11 @@ The Codex VM's adoption, cache and blocked-registration narrative, and its
 receipts, live in `tests/h28-sol/literal-grammar/evidence/` and in git
 history before this section. They are historical. The bulk logs, the cache
 pack and `codex/h28-preserved-6492f34c` stayed on the Codex VM.
+
+Master's `4492e6ed9` ("Audit external H44 evidence after published
+integration") added `--evidence-dir`/`--published-integration` modes to the
+Codex-era `audit.py` for evidence under the Codex VM's `/workspace/scratch`
+and recorded a PASS there; `bulk-artifacts-h44.json` lists those off-git
+artifacts. The 2026-11-07 merge kept this branch's rewritten `audit.py`,
+which checks the committed `evidence/axioms.log` and scopes to the merge
+base, so those two flags are gone; that historical PASS stays in git history.

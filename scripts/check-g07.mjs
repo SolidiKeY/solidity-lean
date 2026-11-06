@@ -100,10 +100,7 @@ if (i > 0) {
   report("run-lean errors", errs.length === 0, `${errs.length} error lines outside the baselined out-of-memory kills`, errs.slice(0, 20));
   const done = log.filter((l) => /Build completed successfully/u.test(l)).length;
   report("run-lean completion", done >= 1, `${done} "Build completed successfully" lines`);
-  const mm = log.map((l) => l.match(/(\d+) mismatch\(es\)/u)).filter(Boolean).map((m) => +m[1]);
-  const n = mm.at(-1);
-  report("check-solkey mismatches", n !== undefined && n <= baseline.build.solkeyMismatches,
-    n === undefined ? "no count in log" : `${n} (baseline ${baseline.build.solkeyMismatches}; compared by count only)`);
+  // check-solkey is no longer part of run-lean.sh (user, 2026-11-06), so no mismatch count is checked.
   console.log(`old  known out-of-memory kills: ${log.filter(oomLine).length}`);
 }
 

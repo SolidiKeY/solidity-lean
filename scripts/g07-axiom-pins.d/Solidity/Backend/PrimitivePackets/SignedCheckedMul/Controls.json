@@ -1,0 +1,180 @@
+{
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.exact_panic": [],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.guard_classification": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.low_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.lower": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.lower_maximum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.lower_swapped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.maximum_minus": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_minus": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_minus_not_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minus_maximum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minus_minimum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minus_minimum_not_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.one_minimum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_both_positive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_positive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_swapped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.upper": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.upper_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.wrong_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.zero_minimum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.guard_is_sTail": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.original_guard": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.overflow_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.public_selection": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.target_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.target_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Controls.lean:Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

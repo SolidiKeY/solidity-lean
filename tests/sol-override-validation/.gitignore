@@ -1,0 +1,25 @@
+runtime/
+evidence/soljson-*.js
+__pycache__/
+evidence/checkpoint.patch
+evidence/checkpoint-handoff.json
+evidence/checkpoint-artifacts.sha256
+evidence/final-bundle/
+evidence/resume-20261104/bundle/
+evidence/central-registration-20261104/bundle/
+evidence/adoption-20261104T122441Z/bundle/
+evidence/adoption-20261104T182351Z/bundle/
+evidence/adoption-20261105T0200Z/bundle/
+evidence/adoption-f77cf60d/bundle/
+evidence/adoption-9584f9e7/bundle/
+evidence/adoption-b86ae456/bundle/
+evidence/adoption-8bf83218/bundle/
+evidence/adoption-3ad22f66/bundle/
+evidence/adoption-e6849d3b/bundle/
+
+# H44: bulk remains local; the committed manifest identifies its archive.
+evidence/
+fixtures/
+*.json
+getter-pipelines/*.json
+getter-pipelines/*.sol

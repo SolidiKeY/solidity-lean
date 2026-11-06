@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "decision": "H44 (human,2026-11-05): bulk stays on this VM; commit checksums only",
+  "repository": "/workspace/solidity-lean",
+  "sourceHead": "996369b39d9ec009b6c09aab325573be2a7bad36",
+  "fileCount": 376,
+  "uncompressedBytes": 18137755,
+  "archive": {
+    "path": "/workspace/dafny-parity-bulk-h44/bulk.tar.gz",
+    "bytes": 2245508,
+    "sha256": "c3806cb96939587ee4ee4a6af560632ff78537535baad8f3cba30146e2314316"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-bulk-h44/files.json",
+    "bytes": 71400,
+    "sha256": "7519113cf8d1e72413d341b99b509ac1681f4911cee9279690584b5327919bb7"
+  },
+  "restore": "flock /tmp/solidity-lean-feature-groups-20261025/writer.lock python3 scripts/coord-tools/dafny-parity-bulk.py --restore",
+  "relocation": "Copy both archive and index to a provisioned directory; pass --directory DIR. No download/upload is performed.",
+  "gateBoundary": "Required480-row inventory/control metadata remains tracked. All original predicates and test assertions are unchanged; bulk must be restored before checks.",
+  "archiveSnapshot": "After unchanged packaging checks; prior snapshot preserved separately.",
+  "preservedOriginal": {
+    "archive": {
+      "path": "/workspace/dafny-parity-bulk-h44/bulk-before.tar.gz",
+      "bytes": 2245529,
+      "sha256": "c09201438ad241c48f751f2c34c37f37ca6faa5ec96768ccb9f748cf8258bd7b"
+    },
+    "index": {
+      "path": "/workspace/dafny-parity-bulk-h44/files-before.json",
+      "bytes": 71400,
+      "sha256": "45f48b90c92a4c4a1b52b47a09e7bbc6c4651148b6b138c023916de9f7fe76d2"
+    },
+    "gitBundle": {
+      "path": "/workspace/dafny-parity-bulk-h44/prior-lane.bundle",
+      "bytes": 10775008,
+      "sha256": "7d843b8ced00e47480c566df7d660a95a6f564c2f2d1ba70b30372aba17e71e5"
+    }
+  },
+  "archivedGitRef": "refs/archive/solidity-dafny-20261105/dafny-parity-pre-h44",
+  "integrationParent": "260441fd82852fc1c294e62f6818e15de6375ceb",
+  "ciProvisioning": "Hosted ubuntu-latest CI is blocked until coordinator copies/mounts the verified bundle onto its runner. A path variable alone cannot provision bytes. No publication/upload/fetch endpoint selected."
+}

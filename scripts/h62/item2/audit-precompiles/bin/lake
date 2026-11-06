@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+: "${H62_LEAN_BIN:?point to pinned release bin}"
+: "${H62_AUDIT_CONFIG:?point to audit serial.toml}"
+exec "$H62_LEAN_BIN/lake" --no-cache -f "$H62_AUDIT_CONFIG" "$@"
