@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Exact Constants scope, source, diagnostics, kernel and control acceptance."""
-import copy,hashlib,json,pathlib,re,subprocess
+import copy,hashlib,json,pathlib,re,subprocess,os
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 F=pathlib.Path(__file__).resolve().parent
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
@@ -8,6 +8,10 @@ M=json.loads((F/'manifest.json').read_text())
 def validate_inventory(rows):
  assert len(rows)==46 and len({r['name'] for r in rows})==46,'kernel cardinality'
  names={r['name']:r for r in rows}
+ owned=[r for r in rows if r['module'].startswith('Solidity.Backend.PrimitivePackets.Constants.')]
+ continuity=[r for r in rows if r not in owned]
+ assert len(owned)==45 and len(continuity)==1,'owned/continuity coverage drift'
+ assert continuity[0]['name']==M['continuity']['name'] and continuity[0]['module']==M['continuity']['actual_module'],'continuity ownership drift'
  for d in M['declarations']: assert d['name'] in names and names[d['name']]['module']==d['module'],'authored declaration absent'
  for family in M['coverage'].values():
   if isinstance(family,list):
@@ -16,6 +20,24 @@ def validate_inventory(rows):
   assert r['signature'] and r['kind'] not in ('axiom','opaque'),'invalid kernel declaration'
   assert not r['isUnsafe'] and not r['isPartial'],'unsafe or partial'
   assert set(r['axioms']) <= {'propext','Classical.choice','Quot.sound'},'unapproved axiom'
+def validate_current_execution(row,kind):
+ assert row['exit']==0 and not row['resource_stop'],'current execution failed'
+ assert row['limits']==dict(memory_max=12884901888,memory_swap_max=0,lean_num_threads=1)
+ assert row['minimum_parent_headroom_bytes']>=4*1024**3
+ audit='tests/primitive-packets-1105/Constants/Audit.lean'
+ assert row['dependency_sources']==dict(M['modules'],**{audit:M['current_audit']['script_sha256']}),'current source stamps differ'
+ numeric=json.loads((ROOT/'tests/sol-numeric-literals/acceptance.json').read_text())
+ assert row['proof_sources']=={m['path']:m['sha256'] for m in numeric['modules']}
+ if kind=='audit':
+  assert len(row['command'])==6 and row['command'][0]=='env' and row['command'][1].startswith('GATE_LOGS=')
+  assert row['command'][2:]==['bash','scripts/coord-tools/gate.sh','per-file',audit]
+ else:assert row['command']==['lake','build','Solidity.Backend.PrimitivePackets.Constants.Controls']
+
+def current_record(spec):
+ path=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))/spec['path']
+ raw=path.read_bytes();assert hashlib.sha256(raw).hexdigest()==spec['sha256'],'current execution digest differs'
+ return json.loads(raw)
+
 def scope_candidates(diff,untracked): return set(diff)|set(untracked)
 def validate_scope(paths):
  for p in paths:
@@ -82,8 +104,11 @@ def main():
  expected=json.loads((F/'kernel-inventory.json').read_text());actual=json.loads((F/'evidence/kernel-inventory.actual.json').read_text())
  assert sorted(actual,key=lambda x:x['name'])==expected,'fresh kernel inventory drift'
  validate_inventory(actual)
- # Both the frozen signatures and the generated namespace-outside sword.eq_1
- # belong to their actual defining modules, rather than a name-prefix filter.
+ history=M['historical_inventory']
+ raw=subprocess.check_output(['git','show',history['commit']+':'+history['path']],cwd=ROOT)
+ assert hashlib.sha256(raw).hexdigest()==history['sha256'],'historical inventory drift'
+ historical=json.loads(raw)
+ # Historical diagnostics stay bound to their original exact inventory.
  for label in ['source-diagnostics','selected-diagnostics','target-diagnostics','agreement-diagnostics','controls-final-diagnostics','axioms-diagnostics','rebase-axioms','integrated-axioms','latest-integration-axioms']:
   printed={}
   row=json.loads((F/'evidence'/ (label+'.json')).read_text());diag=json.loads((F/'evidence'/ (label+'.log')).read_text())
@@ -95,7 +120,22 @@ def main():
    if match: printed[match[1]]=set(x.strip() for x in match[2].split(',') if x.strip())
    match=re.fullmatch(r"'([^']+)' does not depend on any axioms",item['message'])
    if match: printed[match[1]]=set()
-  if label in ('axioms-diagnostics','rebase-axioms','integrated-axioms','latest-integration-axioms'):assert printed=={r['name']:set(r['axioms']) for r in actual},'actual axiom prints differ'
+  if label in ('axioms-diagnostics','rebase-axioms','integrated-axioms','latest-integration-axioms'):assert printed=={r['name']:set(r['axioms']) for r in historical},'historical axiom prints differ'
+ current=M['current_audit']
+ audit_row=current_record(current['gate']);validate_current_execution(audit_row,'audit')
+ build_row=current_record(current['build']);validate_current_execution(build_row,'build')
+ for kind,row in [('audit',audit_row),('build',build_row)]:
+  for field,value in [('exit',137),('resource_stop',True),('minimum_parent_headroom_bytes',0)]:
+   bad=copy.deepcopy(row);bad[field]=value
+   try:validate_current_execution(bad,kind)
+   except AssertionError:pass
+   else:raise AssertionError('current execution mutation accepted '+kind+'/'+field)
+ audit=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))/current['log']
+ text=audit.read_text();assert hashlib.sha256(text.encode()).hexdigest()==current['sha256'],'current audit digest differs'
+ assert sha(F/'Audit.lean')==current['script_sha256'],'audit script drift'
+ printed={name:{a.strip() for a in axioms.split(',') if a.strip()} for name,axioms in re.findall(r"'([^']+)' depends on axioms: \[([^\]]*)\]",text,re.S)}
+ printed.update({name:set() for name in re.findall(r"'([^']+)' does not depend on any axioms",text)})
+ assert printed=={r['name']:set(r['axioms']) for r in actual},'current exact axiom prints differ'
  for label,module in [('source-build-corrected','Source'),('selected-build','Selected'),('target-build','Target'),('agreement-build','Agreement'),('controls-build','Controls')]:
   row=json.loads((F/'evidence'/ (label+'.json')).read_text());p='Solidity/Backend/PrimitivePackets/Constants/'+module+'.lean'
   assert row['exit']==0 and not row['resource_stop'] and row['proof_sources'][p]==M['modules'][p]
@@ -124,5 +164,5 @@ def main():
  else:raise AssertionError('unlisted module mutation accepted')
  for p in M['modules']:
   text=(ROOT/p).read_text();assert not re.search(r'\b(sorry|admit|axiom|unsafe|native_decide|maxHeartbeats)\b',text),'forbidden proof token'
- print('PASS: five modules, 34 authored and46 kernel declarations, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and eight mutation controls')
+ print('PASS: five modules, 34 authored,45 owned kernel declarations and1 imported continuity entry, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and eight mutation controls')
 if __name__=='__main__':main()

@@ -1,5 +1,5 @@
 {
-  "adopted_master": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "adopted_master": "e2c8268ec917f4080d438da52e1adad7bb085029",
   "missing_root_imports": [],
   "module_map_rows_to_add": [
     "| `Backend/PrimitivePackets/Constants/Controls.lean` | Kernel integer-constant controls for every legal width/sign, endpoints, saved stack and invalid values. |",
@@ -37,8 +37,8 @@
     "| `Frontend/NumericLiteralProofs/WordTable/Part28.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |",
     "| `Frontend/NumericLiteralProofs/WordTable/Part29.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |"
   ],
-  "desired_module_map_sha256": "aad57737c5d9a5742104412474bc7c889a43e5d675b81ea53a1b791b75444f2e",
-  "module_map_patch_sha256": "8dc34396f080a22f9ba66aca7cdd4ecf17a7f43385afa43e4f83ae56e77c9c92",
+  "desired_module_map_sha256": "050a1b4d29b61884f32aaaff3ba75e41c30190064463b3ad7e891ca7605526fb",
+  "module_map_patch_sha256": "29d8ba4183d16e90b7b779cfdaa72c32ea08ed5874ba9405838f84446796e641",
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "owner": "coordinator at integration (H21 freeze)",
   "modules": [
@@ -86,8 +86,8 @@
     "Solidity.Frontend.NumericLiteralProofs.WordTable"
   ],
   "generated_root": "Solidity.lean",
-  "current_root_sha256": "5d98c4f811a9a662387947eb09f8f9fe7b0165d9477886d51e82b9876028e46a",
-  "desired_root_sha256": "5d98c4f811a9a662387947eb09f8f9fe7b0165d9477886d51e82b9876028e46a",
+  "current_root_sha256": "f057659a9f182ffba5e11cc788c4d9a760600ce51478f85d0b9b6e8135024d79",
+  "desired_root_sha256": "f057659a9f182ffba5e11cc788c4d9a760600ce51478f85d0b9b6e8135024d79",
   "root_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "module_map_file": "docs/module-map/frontend.md",
   "module_map_rows": [
