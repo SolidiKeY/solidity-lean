@@ -1,0 +1,376 @@
+{
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.finiteTimeoutAndDiamond": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicBox": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicCompletes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicConjoined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicDiamond": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicDisjoined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicFactored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicFalseBox": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicFalseDiamond": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicFinished": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicNegatedPostRejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicPremiseWitness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.logicValid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveConjunctionContrast": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveDisjunctionContrast": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveFalseBox": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveNegationContrast": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveNoDiamond": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveNone": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveNoSelection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootBreakCompletes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootBreakRun": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootContinueCompletes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootContinueRun": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootFinished": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootInputSnapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootLeaveCompletes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootLeaveRun": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootModal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootRejectWrong": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootValid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.rootWriteSnapshot": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.sparseRefusalWithCompletion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.transferBreakCompletes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.transferContinueCompletes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.transferFinished": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.transferLeaveCompletes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.transferModal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.transferRejectNormal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.firstDone_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.firstDone_minimal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.firstDone_none_iff_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.firstDone_none_iff_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.box_captured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.box_false_iff_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.box_not_iff_not_diamond": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.box_not_sparse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.diamond_iff_termination_and_box": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.diamond_implies_box": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.diamond_not_iff_not_box": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.formula_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.holds_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.holds_and": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.holds_completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.holds_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.holds_or": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.holds_skip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.holds_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.rule_premise_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.Logic.skip_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.returnBool_clean_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.returnBool_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.returnU8_clean_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.returnU8_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_captured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_completed_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_not_sparse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_returnBool_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_returnU8_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_some_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_some_iff_firstDone": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.run_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

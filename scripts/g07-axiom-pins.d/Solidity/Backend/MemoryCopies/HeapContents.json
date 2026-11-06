@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryCopies/HeapContents.lean:Solidity.Backend.MemoryCopies.mirror_contents": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/HeapContents.lean:Solidity.Backend.MemoryCopies.mirror_elements": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/HeapContents.lean:Solidity.Backend.MemoryCopies.mirror_fields": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/HeapContents.lean:Solidity.Backend.MemoryCopies.mirrorContents": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/HeapContents.lean:Solidity.Backend.MemoryCopies.storageHeapContents": [
+  "Quot.sound",
+  "propext"
+ ]
+}

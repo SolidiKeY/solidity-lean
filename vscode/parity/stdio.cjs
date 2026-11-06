@@ -12,9 +12,11 @@ const {randomUUID,createHash}=require('node:crypto');
 const {performance}=require('node:perf_hooks');
 const {RpcPeer}=require('../src/rpc.cjs');
 const {terminateTree}=require('../src/backend.cjs');
+const {processState,groupMembers,running}=require('../src/process-state.cjs');
+const {waitForGroup}=require('../src/child-lifetime.cjs');
 const {ProcessSampler,summarize,scaling,normalize,differences,protocol}=require('./core.cjs');
 const {activity}=require('./analyze.cjs');
-const {workload,servicesWorkload,verificationOutcomes,assertServiceResponse}=require('./workloads.cjs');
+const {workload,servicesWorkload,verificationOutcomes,assertServiceResponse,assertServiceSymbols}=require('./workloads.cjs');
 const repo=resolve(__dirname,'../..');
 
 function parse(args) {
@@ -45,7 +47,8 @@ async function trial(target,workers,options,dir) {
   fs.writeFileSync(join(dir,'config.json'),JSON.stringify({runId,target,workers,...options,command,args,workspace,
     runtimeEnvironment:Object.fromEntries(['LEAN_NUM_THREADS','SOLKEY_ROOT'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]))},null,2));
   const child=spawn(command,args,{cwd:repo,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']});
-  const sampler=new ProcessSampler(child.pid),peer=new RpcPeer(child.stdout,child.stdin);
+  child.ownedGroup=process.platform!=='win32';child.processBirth=processState(child.pid)?.birth;
+  const ownedGroups=new Map(),sampler=new ProcessSampler(child.pid),peer=new RpcPeer(child.stdout,child.stdin);
   const log=fs.openSync(join(dir,'server.log'),'w');child.stderr.on('data',b=>fs.writeSync(log,b));
   let exited=false,resourceStop=false,exitCode,exitSignal,forcedShutdown=false,shutdownAcknowledged=false;
   const closed=new Promise(resolve=>child.once('close',(code,signal)=>{exited=true;exitCode=code;exitSignal=signal;resolve();}));
@@ -57,6 +60,8 @@ async function trial(target,workers,options,dir) {
   const record=(kind,data)=>events.push({ms:performance.now()-begin,kind,data});
   for(const method of ['dafny/textDocument/symbolStatus','solidityLean/status','solidityLean/report','textDocument/publishDiagnostics','dafny/compilation/status'])
     peer.onNotification(method,p=>{record(method,p);if(method.includes('symbolStatus'))states.set(p.uri,p);if(method==='textDocument/publishDiagnostics')diagnostics.set(p.uri,p);});
+  if(target==='local')peer.onRequest('solidityLean/registerOwnedProcess',params=>{const owned=require('../src/process-state.cjs').ownedProcess(params,child);ownedGroups.set(owned.pid,owned);sampler.seen.set(owned.pid,owned.processBirth);record('owned-process-registration',{...params});return true;});
+  if(target==='local')peer.onNotification('solidityLean/ownedProcess',params=>{const owned=ownedGroups.get(params.pid);if(params.event==='closed'&&owned?.processBirth===params.birth&&!groupMembers(owned).some(running))ownedGroups.delete(params.pid);});
   peer.onRequest('workspace/configuration',p=>p.items.map(()=>null));
   peer.onRequest('client/registerCapability',()=>null);peer.onRequest('window/workDoneProgress/create',()=>null);
   const request=(method,params)=>peer.request(method,params,{timeoutMs:options.timeoutMs});
@@ -103,7 +108,7 @@ async function trial(target,workers,options,dir) {
   let initialization;
   try{
     const start=performance.now();
-    initialization=await request('initialize',{processId:process.pid,rootUri:pathToFileURL(workspace).href,capabilities:{
+    initialization=await request('initialize',{processId:process.pid,rootUri:pathToFileURL(workspace).href,capabilities:{experimental:target==='local'?{solidityLeanOwnedProcess:true}:undefined,
       workspace:{configuration:true,workspaceFolders:true},textDocument:{documentSymbol:{hierarchicalDocumentSymbolSupport:true},publishDiagnostics:{versionSupport:true},
         completion:{completionItem:{snippetSupport:true}},codeAction:{codeActionLiteralSupport:{codeActionKind:{valueSet:['quickfix']}}}}},
       initializationOptions:target==='local'?{backendPath:repo,settings:{projectRoot:workspace,workers,automaticVerification:'never',timeoutMs:options.timeoutMs}}:undefined});
@@ -157,10 +162,156 @@ async function trial(target,workers,options,dir) {
       const start=performance.now(),values=await Promise.all(Array.from({length:8},()=>request('textDocument/hover',at(doc,fixture.call))));
       values.forEach(v=>assertServiceResponse('hover',fixture,doc.uri,v));metrics.concurrentRequestsMs=performance.now()-start;return {responses:values.length};
     });
+    await require('./hover-observations.cjs').run({target,open,change,request,peer,scenario,workspace,diagnostics,until});
+    if(target==='local')await scenario('compiler-secondary-locations',async()=>{
+      const source='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\n// 😀 source offsets\ncontract Duplicate {\n  function same() public {}\n  function same() public {}\n}\n';
+      const duplicate=open('duplicate-locations',source);
+      try{
+        await request('textDocument/documentSymbol',{textDocument:{uri:duplicate.uri,version:duplicate.version}});
+        await until(()=>diagnostics.get(duplicate.uri)?.version===duplicate.version&&diagnostics.get(duplicate.uri).diagnostics.some(d=>d.severity===1),'current duplicate-declaration diagnostics');
+        const values=diagnostics.get(duplicate.uri),error=values.diagnostics.find(d=>String(d.code)==='1686');
+        assert.ok(error,'native solc duplicate declaration code');
+        assert.deepEqual(error.range,{start:{line:4,character:2},end:{line:4,character:27}});
+        assert.ok(error.relatedInformation?.some(r=>r.location.uri===duplicate.uri&&JSON.stringify(r.location.range)===JSON.stringify({start:{line:5,character:2},end:{line:5,character:27}})),'other declaration location retains UTF8-to-UTF16 mapping');
+        change(duplicate,source.replace('function same() public {}\n}', 'function different() public {}\n}'));
+        await request('textDocument/documentSymbol',{textDocument:{uri:duplicate.uri,version:duplicate.version}});
+        await until(()=>diagnostics.get(duplicate.uri)?.version===duplicate.version&&diagnostics.get(duplicate.uri).diagnostics.every(d=>d.severity!==1),'fixed declaration clears current-version error');
+        return{status:'partial',before:values,after:diagnostics.get(duplicate.uri),scope:'Real solc related locations and versioned fix; no rendered VS Code, proof diagnostics or Dafny equivalence claim.'};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:duplicate.uri}});}
+    });
+    if(target==='local')await scenario('compiler-foreign-related-locations',async()=>{
+      const parentPath=join(workspace,'RelatedParent.sol'),parentUri=pathToFileURL(parentPath).href;
+      const parent='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\n// 😀 foreign source\ncontract Parent {\n  function check() public virtual {}\n}\n';
+      fs.writeFileSync(parentPath,parent);
+      const childSource='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\nimport "./RelatedParent.sol";\ncontract Child is Parent {\n  function check() public {}\n}\n';
+      const inherited=open('inherited-related',childSource);
+      try{
+        await request('textDocument/documentSymbol',{textDocument:{uri:inherited.uri,version:inherited.version}});
+        await until(()=>diagnostics.get(inherited.uri)?.diagnostics.some(d=>String(d.code)==='9456'),'native missing-override error');
+        const before=diagnostics.get(inherited.uri),error=before.diagnostics.find(d=>String(d.code)==='9456');
+        assert.deepEqual(error.range,{start:{line:4,character:2},end:{line:4,character:28}});
+        assert.ok(error.relatedInformation?.some(r=>r.location.uri===parentUri&&JSON.stringify(r.location.range)===JSON.stringify({start:{line:4,character:2},end:{line:4,character:36}})),'overridden declaration keeps its own source range');
+        change(inherited,childSource.replace('check() public {}','check() public override {}'));
+        await request('textDocument/documentSymbol',{textDocument:{uri:inherited.uri,version:inherited.version}});
+        await until(()=>diagnostics.get(inherited.uri)?.version===inherited.version&&diagnostics.get(inherited.uri).diagnostics.every(d=>d.severity!==1),'override fix clears error');
+        const fixed=diagnostics.get(inherited.uri);
+        fs.writeFileSync(parentPath,parent.replace('\n}\n','\n  function check() public virtual {}\n}\n'));
+        peer.notify('workspace/didChangeWatchedFiles',{changes:[{uri:parentUri,type:2}]});
+        await request('textDocument/documentSymbol',{textDocument:{uri:inherited.uri,version:inherited.version}});
+        await until(()=>diagnostics.get(inherited.uri)?.diagnostics.some(d=>String(d.code)==='import:1686'),'foreign primary duplicate declaration');
+        const imported=diagnostics.get(inherited.uri),duplicate=imported.diagnostics.find(d=>String(d.code)==='import:1686');
+        assert.deepEqual(duplicate.range,{start:{line:0,character:0},end:{line:0,character:0}});
+        assert.deepEqual(duplicate.relatedInformation.map(r=>r.location),[
+          {uri:parentUri,range:{start:{line:4,character:2},end:{line:4,character:36}}},
+          {uri:parentUri,range:{start:{line:5,character:2},end:{line:5,character:36}}}
+        ],'foreign primary and secondary retain distinct exact source ranges');
+        return{status:'partial',before,fixed,imported,scope:'Real solc primary/secondary imported ranges, fix and watched-file invalidation; no proof or rendered editor equivalence.'};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:inherited.uri}});}
+    });
+    if(target==='local')await scenario('lookup-migration-incomplete-edit',async()=>{
+      const initial='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\n// 😀 UTF16 positions\ncontract Lookup {\n  uint public field;\n  function read() public view returns(uint) { return field; }\n  function later() public pure returns(uint) { return 1; }\n}\n';
+      const lookup=open('lookup-migration',initial),point={line:5,character:initial.split('\n')[5].indexOf('field')};
+      const params=()=>({textDocument:{uri:lookup.uri,version:lookup.version},position:point});
+      try{
+        const before=await request('textDocument/definition',params());assert.deepEqual(before,{uri:lookup.uri,range:{start:{line:4,character:14},end:{line:4,character:19}}});
+        const insertion='  function broken( {\n',lines=initial.split('\n');lookup.text=lines.slice(0,6).join('\n')+'\n'+insertion+lines.slice(6).join('\n');lookup.version++;
+        peer.notify('textDocument/didChange',{textDocument:{uri:lookup.uri,version:lookup.version},contentChanges:[{range:{start:{line:6,character:0},end:{line:6,character:0}},text:insertion}]});
+        const migrated=await request('textDocument/definition',params());assert.deepEqual(migrated,before);
+        const hover=await request('textDocument/hover',params());assert.equal(hover.contents.value,'Outdated: field: uint256');
+        const symbols=await request('textDocument/documentSymbol',{textDocument:{uri:lookup.uri,version:lookup.version}});
+        const later=symbols[0].children.find(s=>s.name==='later');assert.deepEqual(later.selectionRange,{start:{line:7,character:11},end:{line:7,character:16}});assert.ok(later.detail.startsWith('Outdated: '));
+        assert.equal(await request('textDocument/prepareRename',params()),null);
+        assert.equal(await request('textDocument/rename',{...params(),newName:'changed'}),null);
+        change(lookup,lookup.text+'\n// full replacement\n');const cleared=await request('textDocument/definition',params());assert.equal(cleared,null);
+        return{status:'partial',before,migrated,hover,symbols,cleared,scope:'Real compiler-backed historical readonly lookup; no current compiler/proof/edit authority or rendered parity.'};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:lookup.uri}});}
+    });
+    if(target==='local')await scenario('lookup-migration-foreign-dependency',async()=>{
+      const libPath=join(workspace,'LookupLib.sol'),libUri=pathToFileURL(libPath).href,library='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\nlibrary LookupLib {\n  function value(uint a) internal pure returns(uint) { return a; }\n}\n';fs.writeFileSync(libPath,library);
+      const initial='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\nimport "./LookupLib.sol";\ncontract LookupUser {\n  function run(uint a) public pure returns(uint) { return LookupLib.value(a); }\n}\n',lookup=open('lookup-foreign',initial),point={line:4,character:initial.split('\n')[4].indexOf('.value')+1};
+      const params=()=>({textDocument:{uri:lookup.uri,version:lookup.version},position:point});
+      try{
+        const before=await request('textDocument/definition',params());assert.deepEqual(before,{uri:libUri,range:{start:{line:3,character:11},end:{line:3,character:16}}});
+        const insertion='  function broken( {\n';lookup.text=initial.replace('\n}\n','\n'+insertion+'}\n');lookup.version++;
+        peer.notify('textDocument/didChange',{textDocument:{uri:lookup.uri,version:lookup.version},contentChanges:[{range:{start:{line:5,character:0},end:{line:5,character:0}},text:insertion}]});
+        const migrated=await request('textDocument/definition',params());assert.deepEqual(migrated,before);
+        fs.writeFileSync(libPath,library+'// external change without watcher\n');
+        const invalidated=await request('textDocument/definition',params());assert.equal(invalidated,null);
+        change(lookup,initial);const restored=await request('textDocument/definition',params());assert.deepEqual(restored,before);
+        return{status:'partial',before,migrated,invalidated,restored,scope:'Real imported URI/ranges and dependency-byte invalidation without a watcher event; no proof or full Dafny/UI parity.'};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:lookup.uri}});}
+    });
+    if(target==='local')await scenario('lookup-structural-provenance',async()=>{
+      const initial='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract AncestorA { uint internal field; }\ncontract AncestorB { uint internal field; }\ncontract Child is AncestorA {\n  function read() public view returns(uint) { return field; }\n}\n';
+      const doc=open('lookup-structural',initial),point={line:5,character:initial.split('\n')[5].indexOf('field')},observations=[];
+      const params=()=>({textDocument:{uri:doc.uri,version:doc.version},position:point});
+      const incremental=(range,text)=>{doc.text=require('../src/language-services.cjs').applyChanges(doc.text,[{range,text}]);doc.version++;peer.notify('textDocument/didChange',{textDocument:{uri:doc.uri,version:doc.version},contentChanges:[{range,text}]});};
+      try{
+        const before=await request('textDocument/definition',params());assert.deepEqual(before,{uri:doc.uri,range:{start:{line:2,character:35},end:{line:2,character:40}}});observations.push({phase:'initial',version:doc.version,definition:before});
+        incremental({start:{line:6,character:0},end:{line:6,character:0}},'  function broken( {\n');
+        const safe=await request('textDocument/definition',params());assert.deepEqual(safe,before);observations.push({phase:'safe-incomplete-sibling',version:doc.version,definition:safe});
+        incremental({start:{line:4,character:18},end:{line:4,character:27}},'AncestorB');
+        const invalidated=await request('textDocument/definition',params());observations.push({phase:'base-changed-while-incomplete',version:doc.version,definition:invalidated});assert.equal(invalidated,null,'changed inheritance must not retain AncestorA.field binding');
+        const restoredText=initial.replace('Child is AncestorA','Child is AncestorB');change(doc,restoredText);
+        const recovered=await request('textDocument/definition',params());assert.deepEqual(recovered,{uri:doc.uri,range:{start:{line:3,character:35},end:{line:3,character:40}}});observations.push({phase:'valid-recompile',version:doc.version,definition:recovered});
+        return{status:'partial',observations,scope:'Ordered real solc inherited-member binding, safe migration, structural invalidation and new compiler binding; no proof or rendered parity.'};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:doc.uri}});}
+    });
+    if(target==='local')await scenario('lookup-moved-block-binding',async()=>{
+      const initial='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Scope {\n  uint internal field;\n  function read() public view returns(uint) {\n    { uint field=1;\n    }\n    return field;\n  }\n}\n';
+      const doc=open('lookup-block',initial),observations=[];
+      const params=line=>({textDocument:{uri:doc.uri,version:doc.version},position:{line,character:11}});
+      const edit=changes=>{doc.text=require('../src/language-services.cjs').applyChanges(doc.text,changes);doc.version++;peer.notify('textDocument/didChange',{textDocument:{uri:doc.uri,version:doc.version},contentChanges:changes});};
+      try{
+        const before=await request('textDocument/definition',params(7));assert.deepEqual(before,{uri:doc.uri,range:{start:{line:3,character:16},end:{line:3,character:21}}});observations.push({phase:'initial-state-member',version:doc.version,definition:before});
+        edit([{range:{start:{line:6,character:0},end:{line:7,character:0}},text:''},{range:{start:{line:7,character:0},end:{line:7,character:0}},text:'    }\n'},{range:{start:{line:9,character:0},end:{line:9,character:0}},text:'  function broken( {\n'}]);
+        const invalidated=await request('textDocument/definition',params(6));observations.push({phase:'moved-close-brace-while-incomplete',version:doc.version,definition:invalidated});assert.equal(invalidated,null,'occurrence moved inside local field scope must not retain state member');
+        change(doc,doc.text.replace('  function broken( {\n',''));
+        const recovered=await request('textDocument/definition',params(6));assert.deepEqual(recovered,{uri:doc.uri,range:{start:{line:5,character:11},end:{line:5,character:16}}});observations.push({phase:'valid-recompile-local-member',version:doc.version,definition:recovered});
+        return{status:'partial',observations,scope:'Real solc scope ownership, invalidation and recovery; no proof or rendered parity.'};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:doc.uri}});}
+    });
+    if(target==='local')await scenario('lookup-overload-expression-provenance',async()=>{
+      const initial='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Calls {\n  function choose(uint a) internal pure returns(uint) { return a; }\n  function choose(bool a) internal pure returns(uint) { return a ? 1 : 0; }\n  function run() public pure returns(uint) { return choose(1); }\n}\n';
+      const doc=open('lookup-overload',initial),point={line:5,character:initial.split('\n')[5].indexOf('choose')},observations=[];
+      const params=()=>({textDocument:{uri:doc.uri,version:doc.version},position:point});
+      try{
+        const before=await request('textDocument/definition',params());assert.deepEqual(before,{uri:doc.uri,range:{start:{line:3,character:11},end:{line:3,character:17}}});observations.push({phase:'initial-uint-overload',version:doc.version,definition:before});
+        const column=initial.split('\n')[5].indexOf('(1)')+1,changes=[{range:{start:{line:5,character:column},end:{line:5,character:column+1}},text:'true'},{range:{start:{line:6,character:0},end:{line:6,character:0}},text:'  function broken( {\n'}];
+        doc.text=require('../src/language-services.cjs').applyChanges(doc.text,changes);doc.version++;peer.notify('textDocument/didChange',{textDocument:{uri:doc.uri,version:doc.version},contentChanges:changes});
+        const invalidated=await request('textDocument/definition',params());observations.push({phase:'changed-call-argument-while-incomplete',version:doc.version,definition:invalidated});assert.equal(invalidated,null,'argument change must retire overload binding');
+        change(doc,initial.replace('choose(1)','choose(true)'));const recovered=await request('textDocument/definition',params());assert.deepEqual(recovered,{uri:doc.uri,range:{start:{line:4,character:11},end:{line:4,character:17}}});observations.push({phase:'valid-bool-overload',version:doc.version,definition:recovered});
+        return{status:'partial',observations,scope:'Native compiler overload, expression invalidation and recovery; not proof or rendered parity.'};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:doc.uri}});}
+    });
     await scenario('rapid-edits-language-services',async()=>{
       change(doc,fixture.text.replaceAll('helper','obsolete'));change(doc,fixture.text.replaceAll('helper','newest'));
-      const value=await request('textDocument/documentSymbol',{textDocument:{uri:doc.uri,version:doc.version}}),serialized=JSON.stringify(value);
-      assert.ok(serialized.includes('newest')&&!serialized.includes('obsolete')&&!serialized.includes('helper'),'latest symbol set only');return {version:doc.version,value};
+      const value=await request('textDocument/documentSymbol',{textDocument:{uri:doc.uri,version:doc.version}});
+      assertServiceSymbols(value,'newest',['obsolete','helper']);return {version:doc.version,value};
+    });
+    await scenario('close-reopen-language-services',async()=>{
+      peer.notify('textDocument/didClose',{textDocument:{uri:doc.uri}});
+      doc.version=1;doc.text=fixture.text.replaceAll('helper','reopened');
+      peer.notify('textDocument/didOpen',{textDocument:{uri:doc.uri,languageId:target==='dafny'?'dafny':'solidity',version:doc.version,text:doc.text}});
+      const value=await request('textDocument/documentSymbol',{textDocument:{uri:doc.uri,version:doc.version}});
+      assertServiceSymbols(value,'reopened',['newest','obsolete','helper']);return{version:doc.version,value};
+    });
+    await scenario('multi-file-language-services',async()=>{
+      const other=open('isolated-services',fixture.text.replaceAll('helper','isolated'));
+      try{
+        const values=await Promise.all([doc,other].map(d=>request('textDocument/documentSymbol',{textDocument:{uri:d.uri,version:d.version}})));
+        assertServiceSymbols(values[0],'reopened',['isolated']);
+        assertServiceSymbols(values[1],'isolated',['reopened']);return{uris:[doc.uri,other.uri],values};
+      }finally{peer.notify('textDocument/didClose',{textDocument:{uri:other.uri}});}
+    });
+    await scenario('cancel-service-request',async()=>{
+      const abort=new AbortController(),start=performance.now();
+      const pending=peer.request('textDocument/documentSymbol',{textDocument:{uri:doc.uri,version:doc.version}},{signal:abort.signal,timeoutMs:options.timeoutMs});
+      abort.abort();await assert.rejects(pending,error=>error.code===-32800);
+      const clientAcknowledgementMs=performance.now()-start;
+      const value=await request('textDocument/documentSymbol',{textDocument:{uri:doc.uri,version:doc.version}});
+      assertServiceSymbols(value,'reopened',['newest','obsolete']);
+      return{status:'partial',clientAcknowledgementMs,value,scope:'Real request and $/cancelRequest recorded; client rejection and follow-up service success, not proof-worker quiescence.'};
     });
     if(options.scope==='full'){
       let proof;
@@ -201,13 +352,14 @@ async function trial(target,workers,options,dir) {
       const samples=resources.samples.filter(p=>p.ms+resources.clockOffsetMs>=from&&p.ms+resources.clockOffsetMs<=to);
       return {scenario:s.id,fromMs:from,toMs:to,sampleCount:samples.length,activity:samples.length>=2?activity({platform:resources.platform,samples}):{status:'unexamined',reason:'Too few samples in phase'}};
     });
-    for(const p of sampler.survivors())if(sampler.survivors().some(r=>r.pid===p.pid&&r.start===p.start))terminateTree({pid:p.pid});
+    for(const p of sampler.survivors())if(sampler.survivors().some(r=>r.pid===p.pid&&r.start===p.start))terminateTree({pid:p.pid,processBirth:p.start});
     await Promise.race([closed,new Promise(r=>setTimeout(r,1000))]);
-    peer.close();resources.cleanup={remaining:sampler.survivors()};
-    scenarios.push({id:'server-lifecycle',status:shutdownAcknowledged&&exited&&exitCode===0&&!forcedShutdown?'passed':'broken',observation:{shutdownAcknowledged,exited,exitCode,exitSignal,forcedShutdown}});
+    const groupErrors=[];const groupDeadline=Date.now()+1000;for(const owned of ownedGroups.values())try{await waitForGroup(owned,{deadline:groupDeadline,kill:true});}catch(error){groupErrors.push(error.message);}
+    peer.close();resources.cleanup={remaining:sampler.survivors(),groupErrors};
+    scenarios.push({id:'server-lifecycle',status:shutdownAcknowledged&&exited&&exitCode===0&&!forcedShutdown&&!groupErrors.length?'passed':'broken',observation:{shutdownAcknowledged,exited,exitCode,exitSignal,forcedShutdown}});
     fs.writeFileSync(join(dir,'resources.json'),JSON.stringify(resources));fs.closeSync(log);
     fs.writeFileSync(join(dir,'events.jsonl'),events.map(e=>JSON.stringify(e)).join('\n')+'\n');
-    const status=resourceStop?'resource-stop':resources.cleanup.remaining.length?'broken':scenarios.some(s=>s.status==='timeout')?'timeout':scenarios.some(s=>s.status==='broken')?'broken':scenarios.every(s=>s.status==='passed')?'passed':'passed-with-gaps';
+    const status=resourceStop?'resource-stop':resources.cleanup.remaining.length||groupErrors.length?'broken':scenarios.some(s=>s.status==='timeout')?'timeout':scenarios.some(s=>s.status==='broken')?'broken':scenarios.every(s=>s.status==='passed')?'passed':'passed-with-gaps';
     const result={schemaVersion:1,runId,target,status,metrics,scenarios,checks:scenarios.filter(s=>s.status==='passed').map(s=>s.id),serverCapabilities:initialization?.capabilities};
     fs.writeFileSync(join(dir,'result.json'),JSON.stringify(result,null,2));
     return {target,workers,cache:'none',suite:'stdio-'+options.scope,status,result,artifacts:dir,protocol:protocol(trace),resources:{...resources,samples:undefined}};
@@ -231,7 +383,7 @@ async function main(args=process.argv.slice(2)){
   const lock=join(tmpdir(),'solidity-lean-editor-parity.lock');fs.mkdirSync(lock);fs.writeFileSync(join(lock,'owner.json'),JSON.stringify({pid:process.pid,output}));
   const save=()=>{
     report.summary=summarize(report.runs);report.parallelScaling=options.scope==='full'?scaling(report.summary):[];
-    const inventory=JSON.parse(fs.readFileSync(join(repo,'docs/dafny-editor-features.json'),'utf8'));
+    const inventory=require('./inventory.cjs').loadInventory();
     report.featureParity=inventory.features.map(f=>{
       const evidence=report.runs.filter(r=>!r.warmup).flatMap(r=>r.result.scenarios.filter(s=>f.assessment.scenarioIds.includes(s.id)).map(s=>({target:r.target,scenario:s.id,status:s.status,artifact:join(r.artifacts,'result.json')})));
       return {id:f.id,sourceAssessment:f.assessment.status,status:evidence.some(e=>['broken','timeout'].includes(e.status))?'broken':f.assessment.status,

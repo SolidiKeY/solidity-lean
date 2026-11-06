@@ -714,3 +714,79 @@ Both guarded modules pass, and an incorrect empty expected inventory is
 rejected. Short-circuit and poisoned-right observations, theorem statements
 and proof terms are unchanged. Read-only finder and skeptic reviews found no
 confirmed defect; the pin check reports zero errors and no unrecorded changes.
+
+## Local custom-error arguments under explicit producer contracts
+
+EncodedError derives a real singleton local argument evaluation and custom-error
+statement run from the existing Premises.EncodingAt equation. Argument type and
+implicit identity conversion remain intrinsic. Parameter count and return
+signature are retained, and selector bytes come from the actual Source global.
+No completed statement run or target run is assumed as the encoder premise.
+
+Emission derives actual checked byte execution, exact readback, saved-stack
+preservation, terminal suffix absorption and a disjoint numeric/byte WordFrame.
+That frame is not a whole Source/world representation. World unwind separately
+derives Source journal rollback and local checkpoint restoration from an
+explicit actual operation-list witness. It does not restore Source heap, logs,
+events or function locals implicitly.
+
+| Consumer | Explicit fact | Producer or discharge |
+|---|---|---|
+| source_run, emitted_frame, world_unwind | Existing Premises.EncodingAt for the actual value and reached state | G41 general encoder; Boolean controls discharge it |
+| source_incomplete | Existing Premises.IncompleteAt for the actual encoder | H16 failure-point producer; no general instance supplied |
+| arguments_incomplete | Existing Premises.IncompleteAt for the actual arguments and reached state | H16; actual zero-fuel local control supplies an instance |
+| world_unwind | reached.ex = caller.ex.run ops | Caller operation-list witness; dirty-journal control discharges it |
+| transient_transport | Existing Premises.TransientPayloadAt | P7 nonempty transport remains an explicit hypothesis |
+
+Boolean controls quantify over both pipelines, using populated Source state,
+a nonempty physical frame and saved stack. They derive nonempty custom failures
+from local values, distinguish bytes, reject a false encoder equation, preserve
+zero/one-horizon timeout and prove timeout is not revert. A dirty persistent
+and transient journal is actually unwound by the component checkpoint.
+The old literal selector still refuses this local argument, and the existing
+P7 nonempty-adapter counterexample remains.
+
+This is an encoder/emitter-boundary consumer, not new public compiler admission,
+frontend lowering, whole Source/physical/world adequacy or internal-call frame
+transport. The P7 theorem supplies no nonempty producer instance. The journal
+components do not establish Source/target dirty-prefix correspondence.
+All 21 theorem inventories are guarded against actual standard-only reports.
+Independent read-only finder and skeptic reviews found no confirmed defect.
+Registration and pin proposals are left for coordinator-owned shared files.
+
+The final guarded general module passed in 18.468 seconds and its control module
+in 2.854 seconds, with 1,220,100,096 bytes peak aggregate RSS. Neither owned
+module exceeded 60 seconds. The checks use one Lean thread and unchanged proof
+budgets; these focused results do not assert that the full lane gates pass.
+
+## Nonhalting encoder prefixes and terminal failure
+
+`PrefixFailure` derives checked execution of a REVERT suffix from an actual
+nonhalting checked prefix, its offset/length stack layout, payload readback,
+and existing capacity bounds. It preserves reached memory and restores the
+saved stack; later instructions are absorbed by the terminal outcome.
+`source_terminal` combines this with the local Source error evaluation under
+the existing explicit encoding premise. It does not assume the completed
+terminal run. The public writes/PUSH emitter supplies an inhabited prefix
+witness, and `public_emitter` identifies its code with the existing emitter.
+
+The G41/V11 adapter must supply a runtime encoder's actual prefix execution,
+layout and readback; G41 supplies Source encoding. Automatic runtime compiler
+selection, initial Source/target representation, dirty-prefix world coherence,
+bytecode adequacy and internal-frame failure transport remain open. These
+results do not construct those producers.
+
+Both-pipeline controls retain populated Source state, a saved stack and a
+disjoint live word. They reject early terminal prefixes, unsupported instructions
+and swapped offset/length operands, and preserve timeout and compiler refusals.
+All 21 theorem axiom reports are guarded; only the existing standard axioms occur.
+Independent read-only finder and skeptic reviews found no confirmed defect.
+The final general and control checks passed in 1.94 and 1.42 seconds respectively
+under the unchanged serial resource/proof limits; full-lane completion is not claimed.
+
+The generated Solidity library root now imports EncodedError,
+EncodedErrorControls, PrefixFailure and PrefixFailureControls. All 42 axiom
+reports across these modules are guarded, including every PrefixFailure report.
+Fresh per-file elaboration executes these guards and the controls successfully.
+Registration is checked with the repository generator; no proof statement,
+producer boundary, execution result or refusal changes in this repair.
