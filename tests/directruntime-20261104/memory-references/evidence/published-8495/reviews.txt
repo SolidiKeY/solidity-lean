@@ -1,3 +1,0 @@
-Independent read-only finder and skeptic; neither used Lean/server/builds or edited files.
-Finder: no findings. Verified merge includes8495f1de, Reader unchanged, registration passes,628 core modules zero forbidden reaches,54 standard-only reports,84 model controls. Runtime private reader still rejects refs. Full/native/browser/cache freshness left open.
-Skeptic: no concrete adoption defect. Verified Reader matches published, registration,54 axiom reports,84 typed/two typing-refusal/20 schema-refusal distinctions,KeySort377/131. Ordinary and full merged gate pending.

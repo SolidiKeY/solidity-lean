@@ -624,3 +624,7 @@ gate is not bypassed. Failed draft checks and the two rejected proposal-count
 assumptions remain explicitly failed evidence. Final committed-head gates,
 independent reviews and cache/seal evidence are recorded in the local
 `sealed/loop-backfill-e684-<head>` handoff after this commit.
+
+### Human H82 retirement and H44 packaging split
+
+Implementation remains stopped; the accepted successor is `solidity-v12-v17-20261031/v17-validation-release`. The reviewable retirement increment keeps the complete original rendered prompt, original work/backfill queue and human-readable handoff under `tests/h28-sol/non-vacuity/retirement-h82/`. `BULK-MANIFEST.json` authenticates an off-git archive of every original retirement file, including the full scope/open-queue data, drafts, unfinished patch and evidence records. The held head remains preserved on a backup ref and its earlier immutable seal. No theorem, gate, budget, scope or live implementation changes. The PAUSED tool transition was rejected by its enum; human STOP remains binding. No applicable H71 push grant was available, so no push occurs. The coordinator/successor integrates the split head after review.

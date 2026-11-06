@@ -101,6 +101,19 @@ private def variantControls : IO Unit := do
       let expected ← checked (Json.parse (← IO.FS.readFile expectedPath))
       unless observed == expected do throw (IO.userError s!"{variant}variant reader observation changed")
       IO.println s!"Reader {variant}806 observed subvariants: exact outcomes/unknown-root refusals matched; corpus observations only."
+private def corpusControls : IO Unit := do
+  let owned := "tests/directruntime-20261104/shared-translator/artifacts/corpus-readers/"
+  for (name, read) in [("default", reader), ("composed", executableReader)] do
+    let observed ← observe read (owned ++ "cases.json") 1926 false
+    let expectedPath := owned ++ name ++ ".json"
+    if (← IO.getEnv "SHARED_CORPUS_CAPTURE") == some "1" then
+      IO.FS.writeFile expectedPath (observed.pretty ++ "\n")
+      IO.println s!"Captured {name}1926 structural-form witnesses; frozen replay required."
+    else
+      let expected ← checked (Json.parse (← IO.FS.readFile expectedPath))
+      unless observed == expected do throw (IO.userError s!"{name}corpus reader observation changed")
+      IO.println s!"Reader {name}1926 structural forms: exact witness outcomes and callable unknown-root refusals matched; no source/semantic proof."
 #eval controls
 #eval variantControls
+#eval corpusControls
 end SharedTranslatorConstructControls

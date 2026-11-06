@@ -559,6 +559,13 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/FixedReferenceStorageLoopInterface.lean` | Headerless storage-child traversal with exact intrinsic row copying, pointer/framing/gap guarantees and total capacity refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageLoop.lean` | Finite headerless child-loop execution, exact allocator growth and pointer/framing transport, total size refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean` | Mixed 2/0/64-element children, retained pointers/payloads, suffixes, actual later-refusal prefix and zero-count padded reservation. |
+| `Backend/MemoryCopies/FixedReferenceMemoryLoopInterface.lean` | Contract only for actual fixed-parent memory child traversal with heap-derived rows, exact demand, headerless stores, source snapshot preservation and total capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceMemoryRows.lean` | Heap-derived fixed child rows, exact length and demand bounds, and snapshot-preserving row transport through actual checked child copies. |
+| `Backend/MemoryCopies/FixedReferenceMemoryLoop.lean` | Proved headerless fixed-memory child traversal with exact runtime demand, total capacity refusal, old-source snapshot preservation and fresh sibling copies. |
+| `Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean` | Represented shared-child and zero-outer fixed sources; actual empty/pair/64-element traversal, fresh pointers, later-child refusal and empty-parent padding preservation. |
+| `Backend/MemoryCopies/FixedReferenceMemoryTurnInterface.lean` | Contract only for a headerless fixed-memory parent child read, checked deep copy and header0 reservation store, with distinct access/capacity refusals. |
+| `Backend/MemoryCopies/FixedReferenceMemoryTurn.lean` | Proved actual fixed-parent memory child selection, checked deep child copy and header0 store preserving allocator, source graph, snapshot and reserved gap, with distinct refusals. |
+| `Backend/MemoryCopies/FixedReferenceMemoryTurnControls.lean` | Represented fixed source with shared child aliases; actual empty/pair/64-element copies, distinct access/capacity refusals and header-shift/alias/payload negatives. |
 | `Backend/MemoryCopies/FixedReferenceStorageParentInterface.lean` | Signature-only fixed-parent storage-copy contract: source representation, typed adoption, exact demand/growth and refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageParent.lean` | Full fixed storage representation, existing reservation/traversal/typed adoption, exact demand/growth and total size refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageParentControls.lean` | Empty/mixed/64-child typed parents, exact payloads/growth, alias retention, static code refusal and real reservation-prefix child failure. |
@@ -597,6 +604,9 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SelectedDefaultDemandInterface.lean` | Existing default compiler selection implies exact intrinsic cell demand and checked capacity agreement. |
 | `Backend/MemoryCopies/SelectedDefaultDemand.lean` | Actual selected default cost equals live allocation demand; heap growth and checked guard agree without a capacity premise. |
 | `Backend/MemoryCopies/SelectedDefaultDemandControls.lean` | Selected/unselected cost controls, actual nested child snapshot, empty/long/unused-huge success, refusal and wrong cursor. |
+| `Backend/MemoryCopies/SnapshotRestoreInterface.lean` | Contract only for typed captured-array copy-back after an explicitly executed memory-preserving intervention, with reached-store cleanup and framing. |
+| `Backend/MemoryCopies/SnapshotRestore.lean` | Proved typed captured-array restoration after an explicit memory-preserving intervention, with reached-old cleanup and reached-store framing. |
+| `Backend/MemoryCopies/SnapshotRestoreControls.lean` | Executed length-changing storage intervention on empty, pair and 64-element captures; actual captured-memory write refutes preservation. |
 | `Backend/MemoryCopies/StorageRoundTripInterface.lean` | Contract only for actual primitive-array storage/memory/deep-memory/storage composition with represented destination, cleanup, framing and ordered allocation refusals. |
 | `Backend/MemoryCopies/StorageRoundTrip.lean` | Proved actual primitive-array copy-back from the reached two-copy allocator, preserving typed destination overlay, cleanup, storage/memory framing and ordered refusals. |
 | `Backend/MemoryCopies/StorageRoundTripControls.lean` | Closed round-trip runs, executable length-first cleanup mutant, same-slot snapshot restoration after explicit changed contents, framing observations and ordered refusals. |
