@@ -415,3 +415,24 @@ original base. The off-Git JSONL and the exact source/OLean inputs are hashed in
 `tests/h55/shared-fixtures/source-abi-evidence.sha256`. This establishes a
 comparison baseline for these modules only; it is not a migrated-source check,
 case-equivalence proof, independent review or complete original-scope census.
+
+### V08 Source-execution candidate declaration baseline
+
+`source_exec_inventory.py` selects the 74 original V08 `*Controls.lean` files
+containing lexical `execS` or `evalE` references, and verifies each selected
+source byte-for-byte against the original base. All 74 candidate modules built
+serially under Lean 4.24.0. `generate_source_exec_audits.py` generated ten
+small serial Lean batches, which recorded 3,103 owned kernel constants (2,083
+theorems), with elaborated type expressions, universe parameters, axiom
+dependencies and safety flags. `summarize_source_exec_audits.py` verified all
+74 modules are present without duplicate declaration rows. No declaration was
+flagged unsafe or as an axiom. Two original generated declarations have the
+`partial` flag: `BoolErrorControls.parameters._unsafe_rec` and
+`LiteralFailureDynamicListErrorControls.parameters._unsafe_rec`; both recorded
+empty axiom lists. These are baseline observations, not newly introduced facts.
+
+The batch sources, JSONL outputs, build log and module inputs are off Git and
+hashed in `tests/h55/shared-fixtures/source-exec-evidence.sha256`. This lexical
+candidate set can include comments and miss indirect execution calls. It is
+not the entire original Source family, semantic case review, a comparison with
+future migrations, independent review or completion of any queue item.
