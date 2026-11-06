@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "source": "Complete first task user turn transcribed from the available original thread; no original prompt file found in supplied workspace/input directories. Original environment and goal-objective context are preserved separately.",
+  "assignment_file": "tests/h62/item6/migrate-hash/retirement/original-user-assignment.txt",
+  "assignment_sha256": "944ce307dc7abcd00620091a1ec3b28cf1c0b0827ac7e8e66ea2f34e1ecf8389",
+  "advertised_frozen_rendered_prompt_sha256": "ad33d9e45ed428aee7f115e217aad206f5abea91ecbfd4873033cd065f17c50c",
+  "advertised_render_digest_reproduced": false,
+  "boundary": "The thread task text is included in full and authenticated by final Git patch/bundle and its own SHA256. Its bytes do not reproduce the separate advertised rendered-prompt digest; no byte-identical original renderer/envelope was available. Successor/coordinator must retain this provenance limitation, not infer digest equality.",
+  "standalone_queue_normalization": "Trailing empty lines trimmed from standalone queue excerpt for repository whitespace policy; all queue/backfill content preserved. Full captured task text remains unchanged."
+}

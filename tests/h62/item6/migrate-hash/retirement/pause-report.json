@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "requested_goal_state": "PAUSED",
+  "worker_execution_state": "STOPPED_AFTER_FINAL_H82_HANDOFF",
+  "goal_marked_complete": false,
+  "goal_created_or_reset": false,
+  "automatic_implementation_continuation_authorized": false,
+  "available_goal_tools": [
+    {
+      "name": "mcp__codex_apps__codex_goals_stop_goal",
+      "supported_outcomes": [
+        "complete",
+        "blocked"
+      ]
+    }
+  ],
+  "pause_operation": "UNAVAILABLE",
+  "pause_failure": "No pause/get/update-goal tool is exposed. The only goal mutation tool supports complete or blocked, neither of which sets PAUSED. No substitute transition is attempted.",
+  "backend_goal_state": "unknown; PAUSED could not be set by this worker",
+  "resume_requires_explicit_human_or_coordinator_authorization": true
+}

@@ -9,8 +9,8 @@ The exported result records the full committed head after this document's commit
 
 | Checkpoint | State | Evidence / remaining work |
 |---|---|---|
-| 1. Pinned census and clean old build | done | 125 declarations; native old-toolchain Hash build passes with fresh cache and canonical names |
-| 2. Identical new toolchain and adaptation | done | Official pin verified; exact production patch applied under coordinator authorization; direct production APIs/axioms/controls pass |
+| 1. Pinned census and clean old build | partial | Source census and directory baseline pass; complete public/generated API inventory and full old baseline remain pending |
+| 2. Identical new toolchain and adaptation | partial | Official pin and applied proof patch pass named checks; H78 complete public generated exports and shim assessment remain pending |
 | 3. New build and performance | blocked | Production Hash passes; clean full gate fails outside Hash in Syntax.Raw; old full baseline and matched comparison pending |
 | 4. Patch, hashes and root handoff | partial | Exported candidate and evidence ready for retrieval; root-gate acceptance pending |
 
@@ -256,3 +256,35 @@ All current STOPs, trust requirements and budgets are retained. The old supervis
 and its outputs remain untouched; no baseline restart. Full assignment remains
 blocked on Syntax.Raw, old-baseline disposition, matched full comparison and final
 affected/root gates.
+
+## H82 final retirement: supersedes all implementation continuation text
+
+Human-approved stop-and-handoff retires this worker to successor
+solidity-h62-6-20261106/migrate-root-gate. No new proof work, Lean run, baseline
+restart, budget change or source application. The successor is responsible for
+integrating the final committed head after the final stopped/head acknowledgement.
+This worker must not auto-resume. Existing goal PAUSED is authorized, but no exposed
+goal tool supports PAUSED; only complete/blocked are available. No substitute
+transition and no goal completion/reset/creation is performed. Precise pause
+capability failure is in retirement/pause-report.json.
+
+The full first task user turn from this original thread, original queue/backfill,
+original goal/environment and exact scope manifest are committed under
+tests/h62/item6/migrate-hash/retirement/. The task text's own checksum is recorded;
+it does not reproduce the separately advertised rendered-prompt digest ad33d9e4.
+No original renderer/envelope was found. Preserve that provenance limitation.
+
+All open work, backfill and schema-v1 waits are in retirement/successor-state.json
+and waits.json. H78 includes all original public generated declarations; existing
+121 named APIs/97 theorem audits do not establish that coverage. Exact old/new
+exports and shim records remain pending. No shims are guessed or implemented.
+The original four checkpoints remain incomplete overall, notwithstanding the
+reviewed Hash proof patch and retained passing directory checks.
+
+No H71 branch-push permission text was supplied to this VM/session, so the original
+no-push rule is retained. Local cumulative patch, Git bundle and authenticated
+artifact handoff are exported to /workspace/migrate-hash-h82-handoff. The original
+VM/branch/worktrees/toolchains/bulk evidence remain intact. No master push/merge.
+Coordinator-local source paths are provenance only; actual copied mandatory input
+files are included in the handoff. Future successor checks require current H81
+policy and applicable trust/performance/public-API dispositions.

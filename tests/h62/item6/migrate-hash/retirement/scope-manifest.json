@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "owner": "solidity-h62-6-20261106/migrate-hash",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-hash",
+  "write_scope": [
+    "tests/h62/item6/migrate-hash/**",
+    "scripts/h62/item6/migrate-hash/**",
+    "docs/feature-work/h62-6-migrate-hash.md",
+    "Solidity/Hash/Adaptive.lean",
+    "Solidity/Hash/CollisionBound.lean"
+  ],
+  "production_migration_directory": "Solidity/Hash/ ONLY",
+  "original_scope_snapshot": {
+    "id": "H62-6-MIGRATE-HASH",
+    "owner": "solidity-h62-6-20261106/migrate-hash",
+    "status": "reserved",
+    "writeScope": "tests/h62/item6/migrate-hash/**; scripts/h62/item6/migrate-hash/**; docs/feature-work/h62-6-migrate-hash.md; Solidity/Hash/Adaptive.lean; Solidity/Hash/CollisionBound.lean",
+    "model": "gpt-6.1-sol",
+    "baseRevision": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "evidence": "receipts/h62-20261106/scopes/6-migrate-hash.json",
+    "writeMode": "isolated-migration-overlay-no-live-owner-transfer"
+  },
+  "original_restrictions": [
+    "No producer ownership transfer",
+    "No generated root/central module map/axiom pin edits",
+    "No H55 duplicate work",
+    "Private toolchain override only for testing; final root toolchain edit owned by migration root",
+    "No push/merge/master change/PR or scope expansion without authorization"
+  ],
+  "retirement_successor": "solidity-h62-6-20261106/migrate-root-gate",
+  "scope_transfer_effective_only_after_final_stopped_head_ack": true
+}

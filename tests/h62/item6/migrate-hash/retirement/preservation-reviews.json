@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "finder": "Read-only preservation review passed: assignment hash, exact queue excerpts, five waits, H78 gaps, incomplete gates, pause-tool limitation and unreproduced rendered digest explicit. Export preserves cumulative patches/bundle, actual VM inputs and prior evidence. No edits or Lean/server calls.",
+  "skeptic": "Read-only preservation review found top handoff table1/2 done vs partial inconsistency; corrected to partial before export. Otherwise queue/scope/limits and no false PAUSED/completion/push/continuation claims confirmed. No edits or Lean/server calls.",
+  "finding_resolution": "Updated opening checkpoint table1/2 to partial due H78 public/generated API gap. No production/Lean/resource/policy implementation change.",
+  "reviewers_stopped": true
+}
