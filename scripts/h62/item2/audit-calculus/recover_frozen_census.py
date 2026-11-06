@@ -15,9 +15,9 @@ import tempfile
 
 sys.dont_write_bytecode = True
 from census import BASE, generate
+from bulk_inputs import bulk_bytes
 
 MEMBER_HEAD = "4abcd439b60c63a6f02e91115599e6a730cd9bc9"
-SCOPE = "scripts/h62/item2/audit-calculus/handoff/SCOPE-MANIFEST.json"
 SCOPE_SHA256 = "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
 
 
@@ -65,7 +65,7 @@ def recover(repo, output):
     repo, output = repo.resolve(), output.resolve()
     if output.is_relative_to(repo):
         raise ValueError("H44: output must be outside repository")
-    scope_bytes = git_blob(repo, MEMBER_HEAD, SCOPE)
+    scope_bytes = bulk_bytes("frozen_scope")
     if sha(scope_bytes) != SCOPE_SHA256:
         raise ValueError("authenticated member scope checksum mismatch")
     scope = json.loads(scope_bytes)

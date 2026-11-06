@@ -19,9 +19,10 @@ only complete/blocked, with no pause or get_goal operation. Neither unsupported
 state substitution was attempted. Worker implementation is stopped and the
 coordinator must pause the existing goal externally.
 
-The complete original prompt, original queues, exact361-path scope manifest,
-subsequent steering and retirement state are committed under
-scripts/h62/item2/audit-calculus/handoff/. H44 bulk and unimplemented drafts
+The original prompt, queues, steering and retirement notes are retained under
+scripts/h62/item2/audit-calculus/handoff/. The exact361-path scope inventory
+is external under H44; its absolute path, size and SHA256 are in
+tests/h62/item2/audit-calculus/bulk-inputs-manifest.json. Other bulk and unimplemented drafts
 remain off Git in the authenticated evidence archive. Coordinator-local paths
 are provenance, not assumed successor access. H71 push permission was not
 available, so no push was attempted. No new proof implementation occurred after

@@ -12,9 +12,10 @@ from pathlib import Path
 import sys
 
 sys.dont_write_bytecode = True
+from bulk_inputs import bulk_bytes
+
 EXPECTED_CENSUS = "a2aa6d5e5837eac11ad80fc4eb59e4c3903e9d7f9d52e41bcbccb1e24dccc2da"
 REPO = Path(__file__).resolve().parents[4]
-CURATED = REPO / "tests/h62/item2/audit-calculus/lifetime-semantic-roles.json"
 
 
 def authenticated_census(path):
@@ -71,7 +72,7 @@ def main():
     if output.is_relative_to(REPO):
         parser.error("H44: output must be outside repository")
     source = authenticated_census(args.census)
-    curated_bytes = CURATED.read_bytes()
+    curated_bytes = bulk_bytes("lifetime_roles")
     curated = json.loads(curated_bytes)
     if curated["source_census_sha256"] != EXPECTED_CENSUS or curated["base"] != source["base"]:
         raise ValueError("curation census/base provenance differs")
