@@ -125,3 +125,16 @@ empty Source program, non-independent origins, tautological extraction,
 merged-pairing coherence and the V07 H24 conjecture; new plan-ignoring
 reference control. Stale docstrings in other lanes' files are listed in §4,
 not edited.
+
+## 6. Gates
+
+- Per-file (`gate.sh per-file` on the three new modules): PASS. A negative
+  probe importing `MergedControls` fails as expected (missing `.olean`), so the
+  PASS is real elaboration.
+- Static gates (layers, trust, orphans, roots, fragments): PASS.
+  `doc-paths` and `axiom-pins` fail on inherited findings that this lane does
+  not touch (`after-roadmap-va1.md` Mathlib path; 0 errors, 4385 unrecorded
+  pins, the same on `master`).
+- `gate.sh checkpoint` library build: stopped by the 2 h session limit at
+  2641/5999 modules with no errors. The cold build continues incrementally
+  under `./run-lean.sh`.
