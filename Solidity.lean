@@ -2884,6 +2884,8 @@ import Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage
 import Solidity.Frontend.StatementGrammarH28.BoolCompound
 import Solidity.Frontend.StatementGrammarH28.BoundaryHead
 import Solidity.Frontend.StatementGrammarH28.BoundaryHeadPr
+import Solidity.Frontend.StatementGrammarH28.CatchCoverage
+import Solidity.Frontend.StatementGrammarH28.CatchListCoverage
 import Solidity.Frontend.StatementGrammarH28.ConditionalCoverage
 import Solidity.Frontend.StatementGrammarH28.ConditionalFuel
 import Solidity.Frontend.StatementGrammarH28.ConditionalList
