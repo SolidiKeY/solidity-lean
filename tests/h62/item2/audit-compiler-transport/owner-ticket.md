@@ -32,17 +32,9 @@ Two private support negatives also occur in the conservative source census:
 remain explicitly accounted for; private support is distinguished from public
 interfaces. Their exact kernel names require the elaborated census.
 
-Question: how should the literal instruction to produce a simultaneous witness
-for every theorem treat these intentional negative controls?
-
-1. Retain frozen statements and accept checked joint-impossibility certificates
-   for negative controls, while positive interfaces still require simultaneous
-   witnesses. This changes the requested acceptance criterion and requires an
-   explicit coordinator/human decision; it is not assumed here.
-2. Retain the literal universal witness criterion and keep checkpoint 2 blocked
-   until the owners supply an authorized interface plan. No interface repair is
-   proposed as an authorized action by this ticket.
-
-No option recommends excluding premises or weakening a statement. No option has
-been selected. The additive `memory_joint_impossible`/`storage_joint_impossible`
-proofs are prepared as evidence, not substitutes for the required witnesses.
+Resolved by H69 (human, 2026-11-06): checked joint-impossibility is the audit
+result for deliberate negative controls; ordinary interfaces still require
+joint witnesses. No statement is changed. Q-NEG-01 is closed, with no request
+to edit an owner file. The two public proofs and the two private refutations
+are checked. The exact 68-case registry additionally includes reviewed generated
+False-branch helpers; their ordinary parents retain independent obligations.

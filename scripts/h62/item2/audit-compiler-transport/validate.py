@@ -68,9 +68,7 @@ for name in ['JointHypotheses','Reflect','Audit','Witnesses']:
     target.parent.mkdir(parents=True, exist_ok=True)
     checked([str(LEAN),'-j1','-DElab.async=false','--tstack=131072','-o',str(target),str(source)], 'check-'+name)
 checked([str(LEAN),'-j1','-DElab.async=false','--tstack=131072','--root='+str(E),str(E/'ReflectionDriver.lean')], 'reflection')
-subprocess.run([sys.executable,str(SCRIPTS/'reconcile.py'),'--census',str(E/'census.json'),
-                '--reflected',str(E/'elaborated'),'--output',str(E/'coverage.json'),
-                '--witness-metrics',str(E/'check-Witnesses.json')],check=True)
+# Expanded reconciliation and H69 cases are checked by h69_validate.py.
 cache_after = hashlib.sha256()
 for row in build:
     path = O/(row['module'].replace('.', '/')+'.olean')

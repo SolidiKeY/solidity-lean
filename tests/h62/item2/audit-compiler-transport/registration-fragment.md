@@ -13,6 +13,12 @@ import tests.h62.item2.«audit-compiler-transport».JointHypotheses
 import tests.h62.item2.«audit-compiler-transport».Reflect
 import tests.h62.item2.«audit-compiler-transport».Audit
 import tests.h62.item2.«audit-compiler-transport».Witnesses
+import tests.h62.item2.«audit-compiler-transport».H69
+import tests.h62.item2.«audit-compiler-transport».NilFixture
+import tests.h62.item2.«audit-compiler-transport».OptimizerFixture
+import tests.h62.item2.«audit-compiler-transport».ExplicitCases
+import tests.h62.item2.«audit-compiler-transport».AutoWitness
+import tests.h62.item2.«audit-compiler-transport».CarrierInventory
 ```
 
 Do not copy these into the generated intrinsic core root. Promotion to an area

@@ -6,7 +6,7 @@ Assigned branch: `codex/solidity-h62-2-20261106/audit-compiler-transport`.
 Only additive owned test/script/document paths are changed. No frozen interface,
 root, module map, trust pin, heartbeat or dependency is changed.
 
-## Current result: incomplete, scope decision pending
+## Current result: partial; H69 decision applied
 
 The source inventory accounts for all 122 first-column module-map entries and
 560 declarations exactly once (539 public, 21 private). A prose reference to
@@ -21,13 +21,24 @@ and its exact hypothesis coverage is reconciled with the original statement.
 Per-input feasibility and global premise structure inhabitation remain distinct;
 Prop-versus-data reflection alone does not classify a semantic producer premise.
 
-## Scope conflict and owner ticket
+## H69: intentional negative hypotheses
 
-The [saved owner ticket](../../tests/h62/item2/audit-compiler-transport/owner-ticket.md)
-records Q-NEG-01, exact frozen signature hashes, V09 consumer and V07/P12 producer
-routing, and two decision options. These are intentional negative controls;
-their incompatibility does not prove a positive interface vacuous. No criterion
-change or owner edit is assumed authorized.
+The human decision H69 (2026-11-06) resolves Q-NEG-01: checked joint
+impossibility is the audit result for deliberately contradictory hypotheses.
+Ordinary interfaces still require joint satisfiability. No statement changes.
+The [owner ticket](../../tests/h62/item2/audit-compiler-transport/owner-ticket.md)
+is closed by that decision; no owner edit is requested.
+
+The checked registry `tests/h62/item2/audit-compiler-transport/h69-classification.json`
+classifies every one of 68 intentional negatives by exact name, reason and
+impossibility proof: two public P12 incompatibility controls, private empty-heap
+and stale-pointer refutations, and 64 generated False-branch helpers under 35
+source parents. The ordinary parent obligations remain independent records.
+Only the original telescope and a literal False conclusion (metadata stripped)
+are used. A negated conclusion does not add its refuted proposition as a premise.
+The registry includes the verbatim H69 decision.
+
+Historical escalation lines below are resolved by H69, retained once for traceability:
 
 ESCALATE: Solidity.Backend.Passes.P12MemoryCapture.nonempty_revert_incompatible — frozen P12MemoryCapture.lean:75 concludes False, so simultaneous witnesses for its full hypothesis tuple are impossible; options: retain the exact statement and authorize joint-impossibility evidence for negative controls, or retain the literal witness criterion and await an owner-authorized interface plan (Q-NEG-01; V09/V07).
 ESCALATE: Solidity.Backend.Passes.P12StorageCapture.nonempty_revert_incompatible — frozen P12StorageCapture.lean:64 concludes False, so simultaneous witnesses for its full hypothesis tuple are impossible; options: retain the exact statement and authorize joint-impossibility evidence for negative controls, or retain the literal witness criterion and await an owner-authorized interface plan (Q-NEG-01; V09/V07).
@@ -50,14 +61,39 @@ ESCALATE: Solidity.Backend.Passes.P12StorageCapture.nonempty_revert_incompatible
   universe parameters and binder types for imported theorem constants. Private
   kernel names and auxiliary declarations must be reconciled separately.
 
-All four additive modules pass bounded serial Lean diagnostics. Their eleven
-new theorems report only `[propext, Classical.choice, Quot.sound]`. No new
-axiom, sorry, native_decide or raised heartbeat is present. The success family is finite and
-intrinsic. It does not prove totality for every compiler-supported Source
-program, inhabited global P12 producers, or the rest of the 560 statements.
-The frozen abstract `Evm.Machine` explicitly has no gas or fork parameter;
-its success/revert/resource results cannot establish bytecode gas/fork
-adequacy. The final Nat in `Evm.Out.ok` is a pending jump skip, not gas. That boundary remains uncovered in this audit.
+The H69 additions `H69.lean`, `NilFixture.lean`, `OptimizerFixture.lean`,
+`ExplicitCases.lean`, `AutoWitness.lean` and `CarrierInventory.lean` pass
+bounded checks. The explicit optimizer fixtures use `ULift.{u} Nat` at the
+original universe, a validator accepting equal inputs and rejecting unequal
+inputs, and nonempty pass/proposal lists. Original optimizer premises are
+inhabited together; no reject-all validator is used as a success witness.
+
+The constructive generator preserves each original universe parameter and
+rejects unresolved expression or universe metavariables. Successful tuples go
+through normal kernel declaration checking outside the search-failure catch.
+Each candidate has a smaller search budget inside the original declaration
+budget; no heartbeat limit is raised. Search failure remains uncovered.
+
+The final expanded census matches all 560 source theorems once and records
+1,134 proof constants: 1,114 theorem constants and 20 proof-valued definitions.
+Three proof-field projections remain semantic interface obligations. It also
+records 91 proof-bearing data producers separately; direct proof fields alone
+do not establish their coupled domain inhabitation or exhaust nested carriers.
+
+The reconciled statuses are 5 correlated compiler-boundary joint witnesses,
+97 additional syntactic joint witnesses, 466 checked empty syntactic premise
+tuples, 68 checked intentional impossibilities, and 498 uncovered constants.
+Empty telescopes certify only the empty conjunction, not feasibility inside a
+defined universal predicate. Global-versus-input semantic review remains pending
+except where the existing correlated physical fixture is explicitly recorded.
+All 46 named owned theorems and successful generated declarations have at most existing standard axioms
+`propext`, `Classical.choice`, `Quot.sound`; no new axiom, sorry, native_decide
+or trust shortcut is introduced.
+
+The existing success family is finite and intrinsic. It does not prove totality
+for every supported Source program or inhabited global P12 producers. The
+abstract `Evm.Machine` explicitly has no gas or fork parameter; `Evm.Out.ok`'s
+final Nat is pending jump skip, not gas. Bytecode gas/fork adequacy remains pending.
 
 ## Checks and resources
 
@@ -97,11 +133,14 @@ core modules; zero paths to elaborators or checked parser adapters). Generated
 root and fragment checks pass. The first 327 successful modules used async-default elaboration; the
 remaining 323 use explicit serial elaboration after recovery. Every command
 used `-j1`, and exact historical commands are retained in metrics.
-Fresh diagnostics pass for the entire 650-module dependency closure and all
-four additive modules. Reflection passes for all 122 mapped modules: 560
-source theorems match exactly once; 554 additional kernel-generated theorem
-constants are separately recorded. The optimized collector matches all 22
-completed prior module outputs exactly. Final `./run-lean.sh` remains pending. No RUNTIME_GATE_PASS is claimed.
+Fresh original diagnostics pass for the entire 650-module dependency closure.
+H69 reflection passes for all 122 mapped modules (42.418 s); carrier scanning
+and all 21 generated driver checks pass. Expanded once-only reconciliation
+passes with the counts above. H69 KeySort passes in 1.408 s, Lean 4.24.0,
+Lake 5.0.0-src+797c613. A first carrier-reflection attempt panicked on a
+nonstructure; the optional structure-info guard fixed it. A generated-driver
+attempt exposed unresolved universe metavariables; those now remain uncovered
+and every final driver passes. Earlier failed attempts are retained externally. Final `./run-lean.sh` remains pending. No RUNTIME_GATE_PASS is claimed.
 
 No production refactor is made. Original modules are byte-for-byte frozen.
 The matched original-file median is 3.127804369 s before and 3.427619808 s
@@ -123,22 +162,41 @@ requested explicit right-associated source success; it has been added. All new L
 that resume records current artifact hashes and requested symmetric timing
 warmup; both evidence corrections are applied. No review is represented as a proof.
 
-## Remaining queue and handoff
+Both H69 reviewers independently found inherited source-scan feasibility fields
+that contradicted checked statuses. The reconciler now retains those only as
+`source_scan_*` observations and supplies proof-qualified feasibility and witness
+pointers. No semantic domain is upgraded by a syntactic tuple. Final read-only
+follow-up checks found no unresolved defect; both accept this as a partial H69
+checkpoint. Findings and dispositions are retained with the evidence.
 
-1. Complete semantic interface/global/input classification. Exact elaborated
-   types and owner records are available for 1,114 theorem constants, but
-   reflection is syntactic and does not classify proof-valued definitions or
-   distinguish every global semantic premise from input feasibility.
-2. Obtain a criterion decision for Q-NEG-01 and prove remaining joint positive
-   feasibility. Coverage currently records 5 verified joint witnesses, 2
-   verified public impossibility certificates, 2 private negative controls,
-   and 1,105 uncovered theorem constants (551 explicit, 554 generated).
-3. Complete supported-family success/totality coverage and gas/fork boundary
-   obligations. The finite family and both trivial-compiler controls pass.
-4. Extend the existing once-only witness/type reconciliation to remaining
-   statements, retain every uncovered declaration/owner, and finish full
-   affected/final gates, end-to-end measurements and milestone reviews.
+## Remaining queue and original-VM handoff
 
-No H55 producer work is duplicated. No push, merge, PR, pre-gate, deployment or
-publication occurred. The coordinator must register any eventual additive area
-module; no central registration is performed by this audit lane.
+1. Complete semantic global/input classification for the 1,134 proof records
+   and coupled domain review for the 91 proof-bearing producers. Reflection
+   and empty syntactic tuples do not finish that work.
+2. Prove the 498 remaining joint tuples or classify further genuine intentional
+   contradictions with checked evidence under H69; do not weaken an ordinary
+   statement. Preserve parent obligations and owner routing V09, V12, VO1,
+   with V07/P12 dependencies and H55 owner work left intact.
+3. Extend supported-program success/totality beyond the finite fixture family,
+   retain reject-all/always-revert controls, and resolve observable failure,
+   bytecode gas and fork boundary obligations without invented premises.
+4. Complete full `./run-lean.sh`, affected/end-to-end measurements and final
+   finder/skeptic reviews. The narrow passing timing comparison is unchanged.
+
+This H69 checkpoint covers four work items: intentional controls, expanded
+proof/carrier inventory, empty-telescope checks, and universe-preserving
+constructive cases. After committing, hand off for the required fresh thread
+on the exact original VM, branch and existing persistent goal. Do not create
+or reset a goal; keep it unfinished. There is no open scope question.
+
+Reproduction uses the fresh external OLean cache built by `build_serial.py`,
+then `h69_validate.py` under the repository writer lock. Bulk proof drivers,
+per-declaration outputs, failed attempts and exact commands/exits/resources
+live at `/workspace/h62-audit-compiler-transport/evidence/h69/`; deterministic
+generators remain committed. Checksums cover the original patch, handoff,
+bundle and evidence. The full gate is pending, so no RUNTIME_GATE_PASS is claimed.
+
+No H55 producer work is duplicated. No push, merge, PR, pre-gate, deployment
+or publication occurred. Only the coordinator may register area modules;
+the committed test-only import fragment does not change a central root/map.
