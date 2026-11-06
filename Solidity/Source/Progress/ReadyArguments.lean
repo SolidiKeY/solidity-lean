@@ -25,7 +25,7 @@ theorem getV_plain_ns {Γ : RCtx} {τ : STy} (plain : PlainResultType τ) (v : R
 inductive ReadyArgs (A : Decl → Prop) {Γ : RCtx} : {ts : List STy} → RConvArgs E Γ ts → Prop
   | nil : ReadyArgs A .nil
   | cons {τ ts} {e : RExpr E Γ τ} {es : RConvArgs E Γ ts}
-      (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ) :
+      (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ) :
       ReadyExpr A e → ReadyArgs A es → ReadyArgs A (.cons e same es)
 
 theorem ReadyArgs.exact {A : Decl → Prop} {Γ : RCtx} {ts : List STy}

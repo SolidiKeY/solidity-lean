@@ -1,0 +1,55 @@
+{
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.assignment_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.capture_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.cast_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.code_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.code_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.condition_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.guard_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.guard_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.operand_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.operand_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumGuard.lean:Solidity.Lowering.V07.SignedEnumGuard.uint_range": [
+  "propext"
+ ]
+}
