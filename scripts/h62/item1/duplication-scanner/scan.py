@@ -351,74 +351,11 @@ def main():
                     raise ValueError("malformed previous " + field)
         except (OSError, UnicodeError, ValueError, RecursionError) as exc:
             parser.error("previous report: " + str(exc))
-    # Keep logical selected paths. A leaf or traversed parent symlink would
-    # otherwise collapse aliases and attribute declarations to the target.
-    matched, selection_errors, checked_components = {}, {}, {}
-    for pat in args.paths:
-        selected = []
-        # pathlib glob may silently skip inaccessible wildcard directories.
-        # Refuse uncertain traversal below the literal prefix, conservatively
-        # including links not necessarily selected by the final pattern.
-        parts = Path(pat).parts
-        if "**" in parts or any(any(c in part for c in "*?[") for part in parts[:-1]):
-            prefix = []
-            for part in parts:
-                if any(c in part for c in "*?["):
-                    break
-                prefix.append(part)
-            anchor = root.joinpath(*prefix)
-            for ancestor in (anchor, *anchor.parents):
-                if ancestor == root:
-                    break
-                if ancestor.is_symlink():
-                    selection_errors[str(ancestor)] = "recursive selection traverses a symlink"
-            def walk_error(exc):
-                selection_errors[str(exc.filename)] = str(exc)
-            try:
-                anchor_mode = anchor.lstat().st_mode
-            except FileNotFoundError:
-                anchor_mode = None
-            except OSError as exc:
-                selection_errors[str(anchor)] = str(exc)
-                anchor_mode = None
-            if anchor_mode is not None and stat.S_ISDIR(anchor_mode):
-                max_depth = None if "**" in parts else len(parts[:-1]) - len(prefix)
-                for directory, dirs, names in os.walk(anchor, followlinks=False, onerror=walk_error):
-                    if max_depth is not None and len(Path(directory).relative_to(anchor).parts) >= max_depth:
-                        dirs.clear()
-                        continue
-                    for dirname in list(dirs):
-                        child = Path(directory) / dirname
-                        if child.is_symlink():
-                            selection_errors[str(child)] = "recursive selection omits a symlink directory"
-                            dirs.remove(dirname)
-                    # Broken directory links occur in os.walk's files list;
-                    # conservatively refuse every link under the prefix.
-                    for name in names:
-                        child = Path(directory) / name
-                        if child.is_symlink():
-                            selection_errors[str(child)] = "recursive selection encounters a symlink"
-        for path in root.glob(pat):
-            if path.suffix != ".lean":
-                continue
-            try:
-                rel = path.relative_to(root)
-                component = root
-                for part in rel.parts:
-                    component = component / part
-                    if component not in checked_components:
-                        checked_components[component] = component.lstat().st_mode
-                    if stat.S_ISLNK(checked_components[component]):
-                        raise ValueError("selected path traverses a symlink: " + str(component))
-                if not stat.S_ISREG(checked_components[path]):
-                    raise ValueError("selected .lean path is not a regular file")
-                selected.append(path)
-            except (OSError, ValueError) as exc:
-                selection_errors[str(path)] = str(exc)
-        matched[pat] = sorted(selected)
+    matched = {pat: sorted(f for f in root.glob(pat) if f.suffix == ".lean") for pat in args.paths}
     unmatched = sorted(pat for pat, paths in matched.items() if not paths)
     files = sorted({f for paths in matched.values() for f in paths})
-    rows, errors, inputs = [], [dict(path=p, reason=selection_errors[p]) for p in sorted(selection_errors)], []
+    rows, errors, inputs, aliases = [], [], [], []
+    resolved_inputs = {}
     owners = json.loads(args.owners.read_text()) if args.owners else {}
     if not isinstance(owners, dict) or not all(isinstance(k, str) and isinstance(v, str) and v for k, v in owners.items()):
         parser.error("owners must be a path-to-owner JSON object")
@@ -440,7 +377,18 @@ def main():
     for path in files:
         try:
             rel = path.relative_to(root).as_posix()
+            if ".." in path.relative_to(root).parts:
+                raise ValueError("selected path contains parent traversal")
+            resolved = path.resolve(strict=True)
+            if not resolved.is_relative_to(root):
+                raise ValueError("selected Lean path resolves outside root")
+            if not resolved.is_file():
+                raise ValueError("selected Lean path is not a regular file")
             source = path.read_bytes()
+            target = resolved.relative_to(root).as_posix()
+            resolved_inputs[rel] = target
+            if target != rel:
+                aliases.append(dict(path=rel, resolved_path=target))
             inputs.append(dict(path=rel, sha256=hashlib.sha256(source).hexdigest()))
             found = scan(path, root, source)
             references = [dict(pattern=p, id=i, owner=o, status=st) for p, i, o, st in sorted(refs)
@@ -449,8 +397,12 @@ def main():
                 row["owner"] = owners.get(rel, "unknown")
                 row["registry_references"] = references
             rows.extend(found)
-        except (OSError, ValueError, UnicodeError) as exc:
+        except (OSError, ValueError, UnicodeError, RuntimeError) as exc:
             errors.append(dict(path=str(path), reason=str(exc)))
+    def alias_reasons(group):
+        paths = {row["path"] for row in group}
+        return (["shared-resolved-source"]
+                if len({resolved_inputs[path] for path in paths}) < len(paths) else [])
     groups = {}
     for row in rows:
         if row["statement"] is not None:
@@ -458,7 +410,7 @@ def main():
     candidates = []
     for key, group in sorted(groups.items()):
         if len(group) > 1:
-            candidates.append(dict(lexical_key=key, reject_reasons=["intrinsic-signature-unresolved", "ownership-requires-live-verification"],
+            candidates.append(dict(lexical_key=key, reject_reasons=["intrinsic-signature-unresolved", "ownership-requires-live-verification"] + alias_reasons(group),
                 members=[{k:v for k,v in row.items() if k not in ("statement", "body")} for row in group],
                 body_hashes=sorted({digest(row["body"]) for row in group}),
                 action="weak-lexical-lead-review-signatures-and-ownership"))
@@ -471,7 +423,7 @@ def main():
         if len(group) > 1:
             body_candidates.append(dict(body_hash=key,
                 members=[{k:v for k,v in row.items() if k not in ("statement", "body")} for row in group],
-                reject_reasons=sorted({"intrinsic-signature-unresolved", "ownership-requires-live-verification"} |
+                reject_reasons=sorted({"intrinsic-signature-unresolved", "ownership-requires-live-verification"} | set(alias_reasons(group)) |
                     ({"different-or-unsupported-statements"}
                     if len({digest([row["kind"], row["qualifiers"], row["statement"], row["context_hash"]]) for row in group}) > 1 or
                        any(row["statement"] is None for row in group) else set())),
@@ -513,7 +465,7 @@ def main():
         reason = row["reject_reason"]
         rejection_counts[reason] = rejection_counts.get(reason, 0) + 1
     print(json.dumps(dict(version=2, selection=selection, inputs=inputs, declarations=len(rows), inventory=inventory, candidates=candidates, rejected_declarations=rejected,
-        body_candidates=body_candidates, incremental=incremental, unmatched_patterns=unmatched,
+        body_candidates=body_candidates, incremental=incremental, unmatched_patterns=unmatched, input_aliases=aliases,
         owner_config_sha256=digest(owners), registry_sha256=hashlib.sha256(registry_bytes).hexdigest(), scanner_sha256=scanner_sha256,
         rejections=dict(by_reason=rejection_counts,
                         unknown_ownership=sum(r["owner"] == "unknown" for r in rows)), errors=errors),

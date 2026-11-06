@@ -565,3 +565,10 @@ for this snapshot, not complete census, Lean signature equivalence or live
 ownership. Independent finder and skeptic reviewed the replay without Lean;
 full reports and timing records are outside Git in the multiline-context
 evidence directory.
+## H82 successor: selected path identities
+
+The inherited identifier-continuation fix passes its full 31-test suite. Selected symlink paths now retain their lexical identity and owner/registry lookup instead of collapsing into resolved targets. Strict containment is checked separately. Broken, outside-root, looping and non-regular selected Lean paths report errors and suppress incremental completeness. An input_aliases list records internal aliases, and candidate families warn shared-resolved-source when distinct selected paths resolve to the same source. Overlapping globs deduplicate lexical paths.
+
+The expanded suite passes 35 tests with real filesystem fixtures. A serial same-VM/corpus/resource pair measured 129.793310s before and 118.114590s after (-8.997937%), peak child RSS 3,325,784,064 and 3,325,313,024 bytes. Whole-scope reports match except scanner_sha256 and the new empty input_aliases field. Input hashes, declarations, candidates and errors match exactly. This is external lexical checking, not Lean coverage, signature equivalence, live ownership or a runtime gate.
+
+Independent read-only finder and skeptic confirmed the selected-path fix. The skeptic identified a separate inherited limitation: pathlib glob can suppress directory enumeration errors. That remains a pending scanner item; implicit recursive symlink-directory traversal, hardlink identity and full Lean signature accounting are not established by these controls. Evidence is off Git under /workspace/h62-audit-readonly-calls/h82b-intake/evidence/.
