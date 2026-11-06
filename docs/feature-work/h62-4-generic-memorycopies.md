@@ -42,10 +42,74 @@ exhaustive semantic classification. Every case is protected by full-file pins.
 No H55 Yul Raw/vector generator was copied or replaced. Audit 16's H55 part
 remains outside this lane.
 
+## H70: reviewed semantic per-case grouping
+
+The H70 routing message accepts owner tickets at CR, V11 and migrate-syntax.
+It explicitly leaves the Raw prerequisite and exact-file permission pending.
+No original-file edits or passing semantic gates are implied.
+
+`semantic_groups.py` now assigns every original declaration to a reviewed
+source-operation family and a separate declaration role. The complete output is
+`/workspace/h62-generic-memorycopies-evidence/semantic-inventory.json`, SHA256
+`cb5a9efc35593899b995f98f63971a62f58a93875e6df41b0a3f82b8044f4acd`.
+It contains **300 module rows, 3,905 declaration rows, 26 operation groups,
+13,177 exact statement-evidence spans and 40 curated exception cases**.
+Import-only `SourceInterface` is retained as a module with zero declarations.
+The original frozen inventory and all old audit candidates remain unchanged.
+
+Roles separate control fixtures/types, control-support lemmas, public control
+statements and witnesses, contract predicates/data, and semantic definitions
+and support lemmas. Each declaration keeps its original path, line, name,
+header hash and source-region hash; grouping neither discards nor combines
+statements. Multiple literal evidence axes and observations remain together.
+Statements in structures/Prop predicates include body clauses; theorem proof
+bodies never supply statement evidence.
+
+The registry separates alias binding from allocating rebinding; it preserves
+arbitrary map-free element types for empty-reference arrays. Family domains
+separate Source execution, intrinsic typed heaps/scoped statement execution,
+word targets and byte targets. Source bytes/string traversal is not labelled
+as byte-EVM execution. Constructor equalities use neutral syntax names because
+`.ok` occurs in several semantic layers. Evidence may occur in hypotheses;
+its presence is not an assertion that a hypothesis is inhabited.
+
+The curated cases retain distinctions among actual target revert, intrinsic
+Option refusal, Source stuck, Source timeout with unchanged or partially
+allocated state, certificate/witness impossibility, arithmetic room failure,
+compiler-selection refusal, absent-path observations, successful corruption,
+wrong-success observations and code-only huge-demand refusals. Mixed
+success/refusal statements remain mixed. Aliases, shallow capture, fresh deep
+children, shadow noninterference, old frames and successful prefixes are
+recorded separately; an EVM revert is not said to return an intermediate state.
+
+The output indexes **615 refusal/negative-related declarations** and **468
+alias/identity-related declarations**. These overlapping navigation indexes
+retain all 402 original negative-name signals, including positive cases with
+negative-looking names. They are not counts of runtime refusals or aliasing
+executions. Reviewed family/role routing maps 1,011 rows to audit 9, 1,743
+fixture/support rows to audit 11 and 1,093 public control/witness rows to audit
+16; prior heuristic routes remain available as a separate field.
+
+Acceptance with `--semantic` verifies exact base blobs, regenerates both
+inventories and audit data, and runs nine census plus eight grouping tests.
+The grouping tests independently check every identity/hash join and all evidence
+byte spans, empty aggregators, overloaded constructors, result distinctions,
+mixed observations, alias/refusal retention and rejection of an unreviewed new
+family. `semantic-acceptance.json` records exit 0 for both suites and
+`EXTERNAL_ACCEPT_PASS`. A separately saved tamper check rejects a changed
+semantic row. Finder and skeptic independently checked the source grouping
+without Lean servers and their confirmed findings were fixed.
+
+This completes source-family/per-case grouping. It is not exhaustive semantic
+terminal-result classification, a correspondence proof, proof replay, owner
+permission or refactor performance acceptance. The remaining three checkpoints
+keep their proof and validation obligations unchanged.
+
 ## Checkpoint state
 
-1. **Partial:** complete source inventory and candidate audit 9/11/16 matching;
-   semantic per-case grouping and owner-approved migration remain pending.
+1. **Done (source classification):** complete census, reviewed semantic-family
+   grouping and audit 9/11/16 routes with exact preservation of all original
+   declarations. This does not prove terminal behavior or migration equivalence.
 2. **Blocked:** no new intrinsic generic copy lemma or typed semantic fixture
    table is claimed. Existing declarations have not been replaced.
 3. **Partial:** deterministic external reproduction acceptance passes and all
@@ -109,9 +173,12 @@ The saved exact-file relay request for CR/V11 is:
 `Solidity/Backend/MemoryCopies/MemoryPathCopyControls.lean`, and
 `Solidity/Backend/MemoryCopies/FixedPathCopyControls.lean` for a first
 path-copy fixture migration review. This is a request for owner coordination,
-not permission inferred from silence. No agreement or owner-applied migration
-patch is present. A `relay.sh` tool is absent from this checkout; the local
-coordinator can relay this saved request. Owners retain live producer ownership.
+not permission inferred from silence. H70 confirms that CR, V11 and
+migrate-syntax accepted the tickets, but no
+exact-file edit agreement or owner-applied migration patch is present.
+`relay.sh` is host-only; its absence is not a VM installation task. Keep the
+exact-file requests in the saved result for the coordinator. Owners retain live
+producer ownership.
 Other family controls remain inventoried and in scope for later groups.
 
 **B-SEMANTIC-GATES / dependent:** generic proofs, typed data tables, exact
@@ -129,7 +196,8 @@ python3 -B scripts/h62/item4/generic-memorycopies/check_modules.py \
 python3 -B scripts/h62/item4/generic-memorycopies/accept.py \
   --frozen /workspace/h62-generic-memorycopies-evidence/frozen-inventory.json \
   --audit /workspace/h62-generic-memorycopies-evidence/audit-candidates.json \
-  --output /workspace/h62-generic-memorycopies-evidence/acceptance.json
+  --semantic /workspace/h62-generic-memorycopies-evidence/semantic-inventory.json \
+  --output /workspace/h62-generic-memorycopies-evidence/semantic-acceptance.json
 ```
 
 After an approved original-file migration, preserve the original frozen
@@ -150,8 +218,9 @@ archive and actual Lean/Lake versions, and describe resource peaks as sampled.
 Review records are saved in `reviews.md` in evidence. All accepted findings
 were fixed; semantic checkpoints remain explicitly unfinished.
 
-This is the handoff after three independent backfill items (census, audit
-mapping, deterministic acceptance) and the prerequisite diagnosis. Continue the
+The first handoff covered three independent backfill items (census, audit
+mapping, deterministic acceptance) and the prerequisite diagnosis. H70 adds
+complete source grouping as the fourth additive work item. Continue the
 same original VM, branch and goal; do not create a replacement goal/thread.
 The coordinator must arrange the next thread after resolving the blockers.
 Artifact metadata records the full committed head, patch, evidence archive and
