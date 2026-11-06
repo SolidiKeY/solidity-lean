@@ -15,7 +15,9 @@ Mandatory authenticated source files:
   from this thread; no original prompt file or get_goal API was available.
 - WORK-AND-BACKFILL-QUEUE.md: full original queue plus every remaining obligation.
 - SCOPE-MANIFEST.json: original scope, H82 standing authorization, all361 exact
-  mapped paths/hashes and portable evidence references.
+  mapped paths/hashes and portable evidence references. Successor H44 handling
+  preserves this inventory externally; see
+  tests/h62/item2/audit-calculus/bulk-inputs-manifest.json for its path and hash.
 - STEERING.md: subsequent supplied coordinator instructions, including H82 stop.
 
 Original repository: /workspace/solidity-lean.
