@@ -548,3 +548,23 @@ The frozen registry now records 38 mapped rows: 31 joint bundles and seven
 data inhabitants, with 3243 rows unmapped. These finite test witnesses do not
 close general compiler success, physical adequacy, migration STOP holds or the
 failed C203 full validation. Existing production statements remain unchanged.
+
+## Push lifecycle premise witnesses
+
+PushWitnesses maps the six original OperationPush contracts: four checked
+joint-premise bundles and two data-only inputs. Primitive reuse resets the
+newly live scalar from true to false while an older retained slot remains
+true. Aggregate reuse preserves the captured child identity and changes the
+selected live read from unavailable to available; another retained raw child
+remains nonlive. Fresh allocation supplies the existing primitive default.
+A saturated length of 2^256−1 fails the original push capacity check, while
+the fresh case succeeds; no new admitted-source cap is introduced.
+
+The initial Extent/Index mismatch and reflexivity-tactic failure are retained
+as rejected elaborations. The corrected source passes all 14 axiom guards at
+unchanged limits. Both independent read-only reviews found no fidelity issue.
+The frozen reference ledger now maps 44 of 3281 conservative rows: 35 joint
+bundles and nine data inhabitants, with 3237 unmapped and nine pinned witness
+modules. These graph lifecycle inputs do not establish Source allocation
+identity, physical target lifecycle, compiler adequacy or world rollback.
+The failed full checkpoint and all original producer holds remain open.
