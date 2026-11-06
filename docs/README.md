@@ -173,7 +173,7 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
 
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
-- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
-- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
 V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
+- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
