@@ -28,7 +28,7 @@ private def state (payloads : List (Fin W)) (bounded : payloads.length < 128) : 
 private def store (payloads : List (Fin W)) : WordStore := ⟨fun slot => match slot with
   | .root 0 => wmod 1
   | .data (.root 0) index => if index = 0 then wmod payloads.length else wmod 99
-  | .data (.data (.root 0) index) offset => payloads[offset]?.getD (wmod 83)
+  | .data (.data (.root 0) _index) offset => payloads[offset]?.getD (wmod 83)
   | _ => wmod 0⟩
 private def machine (cursor : Fin W) (payloads : List (Fin W)) : Machine :=
   {Machine.init with
