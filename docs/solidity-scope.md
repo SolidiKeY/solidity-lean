@@ -421,6 +421,37 @@ from Codex Cloud VMs, worktrees and branches, with delivery to `origin/master`.
 That authorizes serial integration after the existing reviews and validation;
 it does not establish that any assembly implementation is complete.
 
+VY5's [composition backfill](feature-work/inline-assembly-vy5.md)
+changes no admission, observations, feature status, proof budget or prerequisite.
+
+### VY5 human amendments relayed 2026-11-02
+
+H1, resources (verbatim): **“Free disk + 4 GiB reserve”**. The human permits
+removal of VY5-owned stopped containers/regenerable duplicate data; latest sealed
+handoff and all commits remain preserved. RAM reserve is4GiB; hard12GiB cap and
+no-swap remain. Disk headroom is assessed after cleanup, without single-MB holds.
+
+H3, optimized-rethrow-journal-contract (verbatim): **“Per-pipeline”**. Implement a
+reviewed pinned compiler-aware per-pipeline trace contract and validate fresh:
+optimized viaIR omits reverted persistent99/8 stores; record the difference,
+consistent with YQ4. This does not waive bytes/world/log/memory/rollback checks,
+approve compiler-dependent source observations or prove G01/compiler adequacy.
+Original strict report/validator and failed exits remain immutable. See
+`tests/yul-composition/rethrow-trace-contract.json` and the VY5 lane handoff.
+VY5-DISK1 is resolved by H1; no filesystem growth/migration requested.
+
+### H3 continuation: LIB1 and unchecked-add (2026-11-02)
+
+The coordinator relayed that human H3 **“Per-pipeline”** also answers
+LIB1/library-viaIR-error-1834 and unchecked-add. Approved unchecked-add
+expectations are legacy512 and viaIR0; LIB1 requires a reviewed per-pipeline
+library-codegen contract and fresh validation. VY1 owns both implementations.
+VY5 will consume their exact committed results; it does not duplicate the owner,
+re-ask the decisions, assume package availability or mark these gates passed.
+Their status is pending committed producer evidence, not pending human choice.
+Earlier unanswered wording remains historical. Other original decisions/gates
+remain unchanged.
+
 ## Automation lane decisions (2026-10-31)
 
 The human approved the after-roadmap automation lanes in the originating chat

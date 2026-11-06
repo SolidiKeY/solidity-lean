@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeDescentHeapControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeDescentHeap.Controls.actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

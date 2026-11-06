@@ -1062,3 +1062,417 @@ see [the lane record](inline-assembly-vy3.md).
 - VY3 statement visitor operand producer: actual skip/assignment/sequence visitor/emission derives balanced CodeShape with no public child metadata or slot-range premises. Dependent sequential-write source/target and shifted-prefix/capacity controls remain kernel preparation, not full G24/native adequacy. See [lane handoff](inline-assembly-vy3.md#recursive-statement-visitor-operand-producer).
 
 - VY3 word visitor operand producer: actual recursive word compiler/emission derives metadata for its arithmetic/quotient/comparison/unary domain. Mixed DIV/MOD/EQ/NOT source/target and universal zero-divisor/full-word-complement controls remain kernel preparation, not full G24/native adequacy. See [lane handoff](inline-assembly-vy3.md#recursive-word-visitor-operand-producer).
+
+### VY5 partial backfill handoff (2026-10-31)
+
+The [VY5 lane record](inline-assembly-vy5.md) and
+[G03 assembly extension](../../tests/yul-composition/ledger.json) record pinned
+inventory/extraction, both-pipeline compiler/reference probes, combination and
+negative controls, exact pending child/dependency rows and independent reviews.
+Base `0b078cefaf7daad79007b87b72df64eb6936420f`; branch
+`codex/solidity-inline-assembly5-20261031/vy5-composition`.
+Full committed head and artifacts are in `/workspace/vy5-composition/handoff.json`.
+Y10/G48–G51 concrete composition, complete G52 observations and final joint
+proof closure remain pending actual V16/VY3/VY4 and other recorded inputs.
+The authorization is recorded in [scope](../solidity-scope.md#inline-assembly-decisions-2026-10-31);
+the older proposal status above is historical, not a revocation of YQ1–YQ7.
+
+### VY5 reference recovery — 2026-10-31
+
+The [lane recovery record](inline-assembly-vy5.md#reference-adapter-recovery--2026-10-31)
+and [per-fixture ledger](../../tests/yul-composition/reference-recovery.json)
+record repaired raw ABI vectors, ordered anonymous logs/call sequences, pinned
+host inputs and exact required runtime profiles. 227 profiles match; 21 retain
+old-fork incompatibilities. Separate four-way probes retain eight intended
+mutant mismatches. Full Y10/G48–G51 and world/memory/source correspondence remain
+pending; the existing goal stays blocked. Original checkpoint/artifacts remain
+preserved; new full head, commands, reviews and checksums are in
+`/workspace/vy5-composition/recovery-20261031/handoff.json`.
+
+### VY5 state observation checkpoint — 2026-10-31
+
+The [lane observation record](inline-assembly-vy5.md#state-and-memory-observation-checkpoint--2026-10-31)
+and [coverage ledger](../../tests/yul-composition/observation-coverage.json)
+record public-API touched-account/slot worlds, frame memory and last-call buffers.
+Four source-bound controlled fixtures match16 state-oracle profiles; the227
+upstream byte/log matches retain pending independent state comparisons and21
+older-fork blocks. Source/correspondence and Y10/G48–G51 proofs remain pending.
+Original checkpoints/artifacts are preserved; new full committed identity,
+commands, reviews and checksums are in
+`/workspace/vy5-composition/observations-20261031/handoff.json`.
+
+### VY5 finite state oracles — 2026-10-31
+
+The [finite-oracle lane record](inline-assembly-vy5.md#finite-state-oracles--2026-10-31)
+and [coverage ledger](../../tests/yul-composition/observation-coverage.json)
+record seven independently specified local fixtures (28 profile matches) and
+five pinned upstream fixtures (15 profile/30 call matches). CREATE identities are
+predicted from nonce inputs; log windows and failed deployment use explicit
+frame/phase/runCall boundaries. The227 byte/log matches,21 older-fork blocks and
+eight intended mutants remain. Unselected state expectations and all concrete
+Y10/G48–G51 proof obligations stay pending. New committed identities/artifacts:
+`/workspace/vy5-composition/oracles-20261031/handoff.json`; earlier manifests remain
+preserved and the existing goal remains blocked.
+
+### VY5 physical and ordered-state backfill — 2026-10-31
+
+The [lane backfill record](inline-assembly-vy5.md#physical-and-ordered-state-backfill--2026-10-31)
+and [coverage ledger](../../tests/yul-composition/observation-coverage.json)
+record source-derived storage pointers, MCOPY, ordered transient/cleanup and
+additional control/calldata assertions.39 upstream sources cover121 runtime
+profiles/275 calls;106 working profiles remain unselected, and CREATE2 target/
+deferred cleanup domains stay explicit.227 byte/log matches,21 fork blocks and
+eight intended mutants are unchanged. Published-master owner exports were read
+without integration; all concrete Y10/G48–G51 proofs remain pending. New committed
+identities/artifacts: `/workspace/vy5-composition/physical-20261031/handoff.json`.
+Earlier artifacts are preserved and the original goal remains blocked.
+
+### VY5 remaining finite-oracle backfill — 2026-10-31
+
+From ec708bf11d7fd6f0b5abf521d9fab58b4d47bf1a, the
+[VY5 handoff](inline-assembly-vy5.md#remaining-finite-oracle-backfill--2026-10-31)
+adds source-derived finite assertions for the remaining34 working sources:
+all73 working sources/227 profiles/458 calls now have selected assertions;
+21 older-fork profiles remain blocked. Original ordered observations/settings
+are unchanged. CREATE2 checks use independently predicted right-padded bytes32
+salts and compiler-receipted initcode/runtime; five separate host beginFrame
+cleanup records preserve the runCall versus runTx distinction. Neither proves
+whole-world or source/target correspondence.183 JS+2 Python tests and final
+pinned reference/integrated checks passed; the initial wrong-salt oracle exit1
+is retained. Independent finder/skeptic reviews and versioned artifacts reside
+at `/workspace/vy5-composition/remaining-20261031/`. Work2/BackfillA/B remain
+partial, Work1/3 blocked: all24 proof obligations/six combinations and final
+Y10/G48–G51 closure await actual assembly owner interfaces. No Lean/import or
+shared owner code changed; prior kernel gates retain their original tested-tree
+attribution and historical docs/G03 exit1 failures are preserved.
+
+
+### VY5 parallel interface — 2026-11-01
+
+The [VY5 consumer interface](inline-assembly-vy5.md#parallel-consumer-interface--2026-11-01)
+uses hash-verified VY3/VY4 bodies in a private dependency worktree. Concrete
+rollback/window/materialization and numeric ADD laws plus inhabited controls
+pass affected kernel/MCP checks. These are supplied-completion and target-only
+laws, not source try/catch, RETURNDATACOPY lowering or full EVM adequacy.
+All24 obligations/six combinations stay pending; the early package permits
+parallel consumers without duplicating producer semantics.
+
+
+### VY5 parallel concrete components — 2026-11-01
+
+The [VY5 concrete handoff](inline-assembly-vy5.md#parallel-concrete-components--2026-11-01)
+adds actual target repetition, computed outer-slot transport and lossless
+world/target word adapters;13 component facts are registered without closing
+any of24full obligations/six source combinations. Actual peer VY3/VY4 modules
+and compatible V16 certificate interfaces are checked in a private joint tree.
+KeySort2jobs, library1005jobs, TestSuite262jobs, annotations, per-file MCP and
+strict/trust checks pass.192JS+2Python, four pinned component profiles and exact
+encoded target pass; original227byte/log matches,21fork blocks and eight intended
+mutants remain intact. Concrete source/world/compiler adequacy still needs
+specific producer inputs; neither generic V16 laws nor finite external tests
+replace those proofs. New artifacts are versioned under
+`/workspace/vy5-composition/parallel-20261101/final/`.
+
+
+### VY5 actual physical/source consumer — 2026-11-01
+
+Verified VY2 checkpoint2bb7bb20852e986f81a44aaaadfda104cac9c3f4 now feeds four
+consumer modules with26named kernel laws: actual represented source writes,
+three-journal child-success/outer rollback, physical/returndata/target byte
+copying and typed heap-byte image agreement over valid placements. Private
+validated tree a3b983b7abafbf299a0b2ac4452a55c849d6e37b passes KeySort/fullpolicy/
+TestSuite/import closure/scoped axiom checks; trust invocation failures are
+retained and the exact-inventory trust retry passes.247JS+2Python and32ordered
+calls across4pinned compiler profiles pass. Read-only finder/skeptic findings
+were fixed and rereviewed. All24full obligations/sixsource combinations remain
+pending; physical-world journals/logs, dirty locals, allocation/G01 and actual
+compiler/world/V16 assembly certificates still need concrete producer facts.
+See [lane handoff](inline-assembly-vy5.md#actual-physicalsource-consumer-checkpoint--2026-11-01).
+New artifacts: `/workspace/vy5-composition/physical-source-20261101/final/`.
+
+
+### VY5 actual raw-local/physical/scoped-loop consumer — 2026-11-01
+
+Sealed VY1 c7b128fd10df2fa51929cb68bdba020cf2ca07a5 now feeds the existing actual
+VY2/VY3/VY4/V16 private tree.43new kernel laws cover halt-preserving physical-first
+raw-local execution, dirty/two-Fn/nonword/source preservation, coupled rollback
+transport, typed heap/target byte agreement and concrete scoped Yul loops.
+Private validated head c6c529aaa6075488ff84b8606af508432dd50053 passes full kernel/
+import/TestSuite/strict gates and43scoped axiom reports. The initial six-site trust
+audit failure is retained; independently reviewed private-only ordinary .admit
+method registrations make the unchanged checker pass.328JS+2Python and4profiles/
+20native calls pass unchanged expectations. All24full obligations/six Source
+combinations remain open: no raw ordinary-Source resume, full loop/compiler/world
+adequacy, log conversion or G01 refinement is inferred. See the
+[lane handoff](inline-assembly-vy5.md#actual-raw-local--physical--scoped-loop-consumer--2026-11-01).
+Fresh sealed artifacts: `/workspace/vy5-composition/dirty-source-20261101/final/`.
+
+
+### VY5 scoped function/loop component — 2026-11-01
+
+Using only already-staged inputs, FunctionPhysical adds26actual kernel laws for
+normal return, nested calls/leave from a scoped Yul loop, arity/refusal controls,
+full physical result/two-journal retention and heap/nonword/raw/source agreement.
+Raw uint8 results1793/1025/0 distinguish normal/wrong-callee/missing-leave cases.
+Four pinned compiler profiles pass28orderedcalls;410JS+2Python, full private
+1222-job library/262-job TestSuite/KeySort and scoped axiom/trust gates pass.
+Private validated head cb325c26a3c9be45f41506d23fe60555369ace92 preserves all
+previous checkpoints. All24full obligations/six Source combinations, full
+Source/compiler/world/G01 closure and the two VY1 compiler-expectation questions
+remain open. No new producer retrieval or goal change occurred. See
+[lane handoff](inline-assembly-vy5.md#scoped-functionloop-composition--2026-11-01).
+Artifacts: `/workspace/vy5-composition/function-source-20261101/final/`.
+
+### VY5 recursive component handoff — 2026-11-01
+
+VY5 adds an actual scoped self-call after the represented physical action, with
+18kernel laws, inhabited32horizon/raw1025 result, bounded missing-decrement
+control, full physical/journal/heap-window preservation and4finite native
+profiles/24orderedcalls. Existing28call function evidence remains unchanged.
+Reviewed parent-provenance omission is fixed and mutation-tested. Joint
+KeySort/build/TestSuite/strict/trust gates pass;492JS+2Python pass.
+All24full obligations/sixSource combinations and missing producer adequacy remain
+open; no goal status change. See [lane details](inline-assembly-vy5.md#genuine-recursive-physical-composition--2026-11-01) and immutable artifacts
+at `/workspace/vy5-composition/recursive-source-20261101/final/`.
+
+### VY5 raw-local catch transport handoff — 2026-11-01
+
+VY5 adds26kernel laws for actual completed raw caller-prefix continuation across
+coupled physical rollback and exact supplied failure-byte copying. The separate
+finite Solidity try/catch control passes4profiles/32orderedcalls, preserving
+caller prefixes and observing reverted persistent/transient/log/frame effects.
+586JS+2Python and joint KeySort/build/TestSuite/strict/trust/axiom gates pass.
+Raw locals remain a companion to the actual old EMState physical carrier; this
+is not general Source try/catch dispatch or full physical/world adequacy.
+All24full obligations/sixSource combinations stay pending; see
+[lane detail](inline-assembly-vy5.md#raw-local-catchrollback-transport--2026-11-01).
+Versioned evidence is at `/workspace/vy5-composition/raw-catch-20261101/final/`.
+
+### VY5 scoped functions after raw catch — 2026-11-01
+
+VY5 directly consumes actual raw catch state in existing scoped function bodies,
+without initialization/clean conversion.24new component laws include arbitrary
+input/all-horizon transport and actual1793/1537/poison0/reset513 controls.
+Four pinned native profiles pass40orderedcalls;690JS+2Python and joint
+KeySort/build/TestSuite/strict/trust/scoped-axiom gates pass. All24 ORIGINAL
+full obligations/sixSource combinations remain pending; no new source dispatch
+or final adequacy is inferred. See [lane details](inline-assembly-vy5.md#scoped-functions-after-raw-catch--2026-11-01)
+and versioned artifacts `/workspace/vy5-composition/catch-function-20261101/final/`.
+
+### VY5 actual Source attempt consumer — 2026-11-01
+
+VY5 consumes actual EM.attempt with explicit old callee locals/raw caller
+companion.28component laws retain all outcome/poststate branches, bind only
+actual revert-byte length into existing raw continuation, and distinguish
+post-log99 retention from separate physical/native rollback. New4profile24call
+finite controls and781JS+2Python pass; joint KeySort/build/TestSuite/strict/trust/
+scoped-axiom gates pass. All24 ORIGINAL full obligations and six full Source
+combinations remain pending; no Source.tryStmt/heapcatch/frame adequacy inferred.
+See [lane details](inline-assembly-vy5.md#actual-source-halt-capture-with-raw-companion--2026-11-01) and immutable artifacts
+at `/workspace/vy5-composition/attempt-20261101/final/`.
+
+### VY5 captured-byte typed heap consumer — 2026-11-01
+
+VY5 uses actual allocRef/heap allocation/bytesOfRV/heapBytes for full captured
+revert bytes while preserving the raw caller.38component laws prove exact
+reference/content/length/frame changes, readback continuation and refusal effects;
+physical copying retains real placement premises, not heap-index/EVM equality.
+148focused tests and required joint KeySort/build/TestSuite/strict/trust/axiom
+gates pass.16new Source byte comparisons reuse four sealed native profiles; no
+compiler/EVM rerun is claimed. All24 ORIGINAL full obligations/six Source
+combinations remain pending. See [lane details](inline-assembly-vy5.md#typed-heap-allocation-of-captured-bytes--2026-11-01)
+and immutable artifacts `/workspace/vy5-composition/heap-catch-20261101/final/`.
+
+
+### VY5 typed catch-local scope consumer (2026-11-01)
+
+[Lane handoff](inline-assembly-vy5.md#typed-catch-local-scope-consumer-2026-11-01):
+actual captured/allocated reference bound via indexed Source locals/EM.sub, read
+through readLoc/bytesOfRV, outer restoration on any halt without rollback, raw
+companion retention and subsequent continuation;28 component laws/123focusedJS.
+Existing canonical resolved rethrow is checked distinctly from missing general
+Source try selection. New Source readback links16 full bytes across four profiles
+to fully validated historical24call evidence; no fresh native execution. All24
+original obligations/six Source combinations and final adequacy remain pending.
+Incremental artifacts: `/workspace/vy5-composition/scope-catch-20261101/final/`.
+
+
+### VY5 captured typed scope to canonical rethrow (2026-11-01)
+
+[Lane handoff](inline-assembly-vy5.md#captured-typed-scope-to-canonical-rethrow-2026-11-01):
+actual returned allocated catch-local scope feeds existing resolved execS rethrow,
+with exact full bytes/state/restoration for every positive fuel, zero timeout,
+wrong-index/dangling refusal and raw caller retention;20 component laws/129JS.
+New Source driver12cases/6controls; historical24nativecalls are regression only,
+ZERO new native rethrow comparisons. No general Source.try selector or final
+adequacy claim; all24 original obligations/sixSourcecombinations remain pending.
+Resource incident/ENOSPC and recovered verified current metadata copies are
+explicit; old protected data and failing baseline gates preserved.
+Artifacts: `/workspace/vy5-composition/rethrow-20261101/final/`.
+
+
+### VY5 fresh finite native rethrow evidence (2026-11-01)
+
+[Lane handoff](inline-assembly-vy5.md#fresh-finite-native-canonical-rethrow-2026-11-01):
+actual pinned solc/Osaka try/catch canonical rethrow. Original fixture retains
+STRICTFAIL five optimized viaIR journal checks/all36calls captured. Separate
+pre-frozen externally audited fixture passes36calls/four profiles,20 finite
+Source failure/fullbyte projections/eight executed negatives; native state
+independently checked, no SourceSt/compiler proof inferred.138JS tests pass.
+No kernel/import change; all24 obligations/sixSourcecombinations remain pending.
+Artifacts: `/workspace/vy5-composition/native-rethrow-20261101/final/`.
+
+
+### VY5 actual Source runtime block/error consumers (2026-11-02)
+
+[Lane handoff](inline-assembly-vy5.md#actual-source-runtime-block-and-abi-error-consumers-2026-11-02):
+28 new kernel laws execute real typed declInit/evalE/execItems/block rethrow and
+reraise/attempt/heap allocation, then actual extReturn full-revert/short-return
+error transport. Inhabited dirty caller/heap/prefix and fullbytes/alias/fuel/error
+controls;130JS, joint1230/TestSuite262/signatures/strict/trust/MCP pass.
+Exact VY4 ordinary typed-function packet requested, not assumed. No new native
+fixture/comparison, five native strictFAILs retained. All24/six/fulladequacy pending.
+Artifacts: `/workspace/vy5-composition/runtime-block-20261102/final/`.
+
+
+### VY5 actual modifier/internal rethrow (2026-11-02)
+
+[Lane handoff](inline-assembly-vy5.md#actual-modifier-and-internal-call-rethrow-2026-11-02):
+30kernel laws consume real runMods/placeholder/callInternal, fullbyte alias-body
+rethrow and arbitrary savedframe restoration across both Sourcepipelines.
+42Sourcecases/two directplaceholders/138JS; selected resolvedprogram ONLY, not
+frontendderived/generalmodifier/Source.try/compiler/world adequacy. Actual
+joint1231/TestSuite262/KeySort/signature/strict/trust gate passes. Original five
+native journal FAILs and all24/six remain open. Capacity approval rejection and
+separate safe resolution retained, no guard or protecteddata cleanup.
+Artifacts: `/workspace/vy5-composition/modifier-body-20261102/final/`.
+
+### VY5 selected returning decoder (2026-11-02)
+
+The [VY5 lane](inline-assembly-vy5.md#actual-selected-returning-callstaticcall-decoder-2026-11-02)
+adds19 actual selected CALL/STATICCALL→Source.extReturn laws using verified VY4
+`fd3da385f5e4ada7aa889821d3ae59a34833d235`, real heap inputs/full carrier and
+separate bounded output-copy decoding.23 provenance/mutation tests pass; finder
+and skeptic's coordinated-provenance finding was repaired. Private joint
+KeySort/full1283/TestSuite262/axioms/strict pass; initial combined command EXIT1
+from incomplete trust stdin remains failure, corrected full trust passes
+separately. No fresh native evidence or nonempty-revert producer inferred.
+All24 obligations/six full Source combinations/G01/compiler/world/V16 remain
+pending; original five native journal FAILs, historical docs/G03 EXIT1 and
+unanswered semantic holds remain unchanged. Exact sealed incremental handoff:
+`/workspace/vy5-composition/return-consumer-20261102/final/`.
+
+### VY5 actual unchecked/while constructors (2026-11-02)
+
+The [VY5 lane](inline-assembly-vy5.md#actual-unchecked-and-while-constructors-2026-11-02)
+adds24 selected Source kernel component laws: actual unchecked alias/rethrow,
+normal scope restoration/rest under original frame, actual false/true while,
+break and all-horizon literal-true/continue timeout. Existing represented source
+state/raw companion and journals are retained explicitly, not a new rollback.
+44ordered actual Source cases/two pipelines match a pre-execution frozen oracle;
+56script mutation/receipt tests pass. Correct complete-input joint gate EXIT0
+includes KeySort, full1284/TestSuite262, signatures/axioms/strict/trust. No native
+execution or frozen unchecked-add decision. All24 ORIGINAL full obligations and
+six general Source combinations remain pending; five original native journal
+FAILs and historical docs/G03 EXIT1 remain unchanged. Immutable handoff:
+`/workspace/vy5-composition/unchecked-loop-20261102/final/`.
+
+### VY5 actual Source for-loop (2026-11-02)
+
+The [VY5 lane](inline-assembly-vy5.md#actual-source-for-loop-composition-2026-11-02)
+adds30 selected actual Source.forLoop/forIter component laws: typed init/false
+scope exit, full-byte rethrow/post/rest suppression, real break/bodytail versus
+AFTER-loop rest, actual continue/post bool changes/next test and all-horizon
+missing-post timeout. Old raw callers/journals remain explicit companions.
+56ordered Source cases/two pipelines and72script mutation/receipt tests pass;
+ZERO new native comparisons. Private joint KeySort/full1285/TestSuite262/scoped
+axioms/strict/complete-trust EXIT0. All24 ORIGINAL full obligations/six general
+Source combinations and missing raw/selector/producer/G01/compiler/world/V16
+adequacy stay pending; original native5FAILs/docs/G03 EXIT1 and semantic holds
+unchanged. Immutable reviewed incremental handoff:
+`/workspace/vy5-composition/for-loop-20261102/final/`.
+
+
+VY5 (2026-11-02): selected actual ordinary nonempty CALL/STATICCALL failure now
+composes through full-byte decoding, heap allocation and typed alias rethrow,
+with actual refusal/timeout/copy controls. 29 component laws,30 ordered Source
+cases,107 tests; no fresh native comparisons. All24 original obligations/six
+general combinations remain pending. See [lane handoff](inline-assembly-vy5.md#vy5-selected-ordinary-failure-consumer-2026-11-02)
+and `/workspace/vy5-composition/failure-consumer-20261102/final/` for exact
+producer premises, source hashes, failed diagnostics and sealed evidence.
+
+
+VY5 (2026-11-02): actual Source doWhile body-first, normal scope restoration,
+break/continue/return and timeout consumers add20 component laws,50 ordered
+Source cases and74 mutation tests. No fresh native comparison; all24 original
+obligations/six full combinations stay pending. See [lane handoff](inline-assembly-vy5.md#vy5-actual-source-dowhile-consumer-2026-11-02)
+and `/workspace/vy5-composition/do-while-20261102/final/` for exact premises,
+source signatures, resource receipts and retained failures.
+
+
+VY5 (2026-11-02): the earlier real ModifierPhysical placeholder branch was
+already complete. New actual bytes-parameter/alias/postlude consumer adds37
+component facts,48 ordered Source cases and80 mutation tests, distinguishing
+normal/return postludes from body-revert suppression. Native comparisons0; all24
+original obligations/six combinations pending. See [lane handoff](inline-assembly-vy5.md#vy5-actual-modifier-argument-and-postlude-consumer-2026-11-02)
+and `/workspace/vy5-composition/modifier-post-20261102/final/`.
+
+
+VY5 (2026-11-02): H1 cleanup resolves disk admission (99own exited containers;
+commits/latest handoffs/data retained;4GiBOSreserve/12GiBcap/no swap). H3 reviewed
+pinned per-pipeline trace contract passes fresh36calls/4profiles/20Sourcebyte
+projections/8intended negatives and175tests. Original strict report remains
+FAILED, unchanged. All24original/six full combinations pending. See
+[lane handoff](inline-assembly-vy5.md#vy5-h1-resource-recovery-and-h3-per-pipeline-traces-2026-11-02)
+and `/workspace/vy5-composition/pipeline-contract-20261102/final-v2/`.
+
+
+VY5 (2026-11-02): actual nested modifier/placeholder composition adds23component
+facts,78ordered Source cases and91tests, with complete caller/raw/journal
+retention and late-timeout frame restoration. Native comparisons0; all24original
+obligations/six general combinations pending. H3LIB1/unchecked decisions are
+answered; VY1 committed inputs still required, no re-ask/duplicate implementation.
+See [lane handoff](inline-assembly-vy5.md#vy5-actual-nested-modifiers-and-answered-vy1-h3-inputs-2026-11-02)
+and `/workspace/vy5-composition/nested-modifier-20261102/final/`.
+
+
+VY5 (2026-11-02): actual represented write→indexed caller-local Source.emit→
+pre-write outer rollback adds31 component facts, real full heap/log agreement,
+three-journal restoration and operational wrong-owner/slot/encoding/mark controls.
+Private joint gate EXIT0;35 new receipt mutation tests/92 relevant regressions;
+no new native comparisons. All24 original obligations/six full combinations remain
+pending. Remaining ready-input audit is blocked on explicit producer contracts,
+not whole-lane publication. See [lane handoff](inline-assembly-vy5.md#vy5-indexed-write-and-emit-2026-11-02)
+and `/workspace/vy5-composition/indexed-write-20261102/final/`.
+VY5 moved to a Claude VM (2026-11-05, H37). The lane was merged with master.
+MonetaryLifecycleControls and `Monetary.wide` are in no ref on origin (checked 2026-11-05), so they stay
+out of this checkpoint. Three modules that import unpublished VY4 producers are
+held outside the library. See [the lane handoff](inline-assembly-vy5.md#move-to-a-claude-vm-2026-11-05-h37).
+VY5 consumer checkpoint: actual published Source try/catch bytes allocation
+and canonical rethrow are composed with complete-state/all-byte/horizon≥3
+kernel laws in `Yul/Composition/SourceCatchBinding.lean`. See
+[the lane record](vy5-composition.md). This is not general Yul/compiler
+adequacy or native execution; the24 full obligations/six combinations stay open.
+
+VY5/H16 producer checkpoint: actual scheduled Source root dispatch, rollback,
+full-state/error-byte controls and measured legacy-path preservation; see
+[the lane record](vy5-composition.md). General assembly and P8 closure remain open.
+
+VY5 H16 request-admission child: rebased on published6f3eedf0; actual
+requestValueScope reuses unchanged requestScope with exact-Nat sender-value
+admission, four general/preservation laws and eleven full-state controls.
+Checkpoint at674cc1797b911fbf5bf3d626cc4a44e2af949ec1 passes library3359,
+trust/layers/roots/doc-paths/axiom-pins and strict classification. V17 WhileReturn
+needs only one proof-side legacy None disambiguation. Evidence/interface:
+`/workspace/vy5-composition/request-admission-20261104/final`. The held
+factored-core timing candidate is not landed. H16 session/P8, H19 and all24/six
+remain open; no new native evidence or full-lane/runtime-gate pass.
+
+VY5 H16 no-cut primitive child: eight cursor/check laws, one actual emitter
+execution law and eleven complete-state/negative controls;21 exact axiom
+guards. Checkpoint at6889b6dc686f15492df703e5b550614505bc3898 passes
+library3362, strict classification and all checkpoint static gates. Structural
+CutFree is an explicit real premise; NoFail plan alone is insufficient on
+arbitrary cursors. Existing evaluator/cursor bodies unchanged. Interface and
+receipts: `/workspace/vy5-composition/no-cuts-20261104/final`. Full Source
+coherence/NoFail/session/P8, H19 and all24/six remain open. No native pass.

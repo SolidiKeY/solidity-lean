@@ -1,0 +1,71 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.checkpoint_world_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.dirty_pointer_checkpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.dirty_pointer_complete_tables": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.dirty_pointer_table_not_saved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.final_byte_vector": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.initial_byte_vector": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.late_endpoint_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.materialize_mixed_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.materialize_pointer_overlap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.materialize_world_checkpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.middle_byte_vector": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.redirect_write_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.stale_base_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.typed_vectors": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.word_vectors": [],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequenceControls.lean:Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.wrong_initial_checkpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
