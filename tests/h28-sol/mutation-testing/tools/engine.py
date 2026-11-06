@@ -16,10 +16,10 @@ import checked
 from runner import mutate, relative, digest
 
 BASE = "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5"
-# Published origin/master c75cae56 is included in the owned integration head.
+# Published origin/master a91a6cca is included in the owned integration head.
 # Only the delivery/write-scope boundary advances; BASE remains the immutable
 # semantic/cache trust pin. No input hash, theorem or proof budget changes.
-DELIVERY_BASE = "c75cae56226543c331618f9f8936d2893b9edb32"
+DELIVERY_BASE = "a91a6cca07ec493fae8dc8c318bad4fd3f543dff"
 BRANCH = "codex/solidity-h28-sol-20261104/mutation-testing"
 PREFIX = "tests/h28-sol/mutation-testing/"
 KINDS = {"mutant", "negative-control", "known-kill", "equivalent-control", "invalid-control", "runner-survivor-control"}
