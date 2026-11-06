@@ -1,0 +1,234 @@
+{
+  "boundary": "Authored source-review overrides only; no elaborated or checked-proof assertion.",
+  "rules": {
+    "Solidity.Roadmap.Lang": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.Cert": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.SourceSpec": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.Admission": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.CheckedFrontend": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.IntrinsicSpec": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.Lowering": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.EvmSpec": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.Compilation": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.Execution": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.StateExport": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.Fixed": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields or nested interface records carry semantic proof obligations; Type-valued does not mean proof-free."
+    },
+    "Solidity.Roadmap.PublicCorrectness": {
+      "category": "proposition-record-type",
+      "reason": "The structure explicitly lives in Prop and states the public correctness contract."
+    },
+    "Solidity.Roadmap.Frontend.Named": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields contain recomputation, soundness, or completeness laws, including nested checkers."
+    },
+    "Solidity.Roadmap.Frontend.Checker": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields contain recomputation, soundness, or completeness laws, including nested checkers."
+    },
+    "Solidity.Roadmap.Frontend.Chain": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields contain recomputation, soundness, or completeness laws, including nested checkers."
+    },
+    "Solidity.Roadmap.Frontend.Checked": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields contain recomputation, soundness, or completeness laws, including nested checkers."
+    },
+    "Solidity.Roadmap.Evm.Fixed": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields include bound, consistency, or two-sided semantic certificate laws."
+    },
+    "Solidity.Roadmap.Evm.Pinned": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields include bound, consistency, or two-sided semantic certificate laws."
+    },
+    "Solidity.Roadmap.Evm.Certificate": {
+      "category": "proof-bearing-record-type",
+      "reason": "Source fields include bound, consistency, or two-sided semantic certificate laws."
+    },
+    "Solidity.Roadmap.Pass": {
+      "category": "predicate-indexed-interface-data-type",
+      "reason": "Dom is predicate data; run is indexed by feasibility. This structure does not by itself certify refinement."
+    },
+    "Solidity.Roadmap.Frontend.Chain.Cert": {
+      "category": "opaque-checker-certificate-data-type",
+      "reason": "Stage certificate types are opaque data; their inhabitants do not establish check acceptance."
+    },
+    "Solidity.Roadmap.Evm.StipendRule": {
+      "category": "predicate-container-type",
+      "reason": "fits stores a predicate; it does not prove fitted code meets the gas stipend."
+    },
+    "Solidity.Roadmap.Cert.comp": {
+      "category": "proof-carrying-constructor",
+      "reason": "Declared result is a certificate/interface object containing laws; this is not a proof merely because its name suggests one."
+    },
+    "Solidity.Roadmap.Evm.Certificate.refl": {
+      "category": "proof-carrying-constructor",
+      "reason": "Declared result is a certificate/interface object containing laws; this is not a proof merely because its name suggests one."
+    },
+    "Solidity.Roadmap.Frontend.Chain.frontend": {
+      "category": "proof-carrying-constructor",
+      "reason": "Declared result is a certificate/interface object containing laws; this is not a proof merely because its name suggests one."
+    },
+    "Solidity.Roadmap.V16.SourceSizeControls.premise": {
+      "category": "proof-carrying-constructor",
+      "reason": "Declared result is a certificate/interface object containing laws; this is not a proof merely because its name suggests one."
+    },
+    "Solidity.Roadmap.Controls.toyFixed": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toyLang": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toySource": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toyIntrinsic": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.idCert": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toyLowering": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toyEvmLang": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toyEvm": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toyExport": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.toyAdmission": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Roadmap.Controls.emptySource": {
+      "category": "proof-carrying-constructor",
+      "reason": "Source constructs an interface record with semantic-law fields; whole-record and per-input feasibility remain separate."
+    },
+    "Solidity.Tools.Witness": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.Tools.Search": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.Tools.SpecProblem": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.Tools.LongCand": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.Tools.Refutation": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.Peeled": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.ProgramTrace.Trace": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.Latex.Step": {
+      "category": "operational-or-syntax-data-record",
+      "reason": "Contains state/formula/syntax/status data; e.g certified:Bool and proof:Expr are not dependent kernel certificates."
+    },
+    "Solidity.Tools.provedTheorem": {
+      "category": "formatter-data-function",
+      "reason": "Declared String result formats theorem text; string content does not establish a theorem."
+    },
+    "Solidity.Tools.certifyRefl": {
+      "category": "proof-producing-or-checking-metaprogram",
+      "reason": "Returns elaboration/checker status or Expr syntax; it is not a declaration-level semantic proof."
+    },
+    "Solidity.Tools.certifyPremise": {
+      "category": "proof-producing-or-checking-metaprogram",
+      "reason": "Returns elaboration/checker status or Expr syntax; it is not a declaration-level semantic proof."
+    },
+    "Solidity.Tools.certifyDeclarations": {
+      "category": "proof-producing-or-checking-metaprogram",
+      "reason": "Returns elaboration/checker status or Expr syntax; it is not a declaration-level semantic proof."
+    },
+    "Solidity.Tools.rflTrue": {
+      "category": "proof-producing-or-checking-metaprogram",
+      "reason": "Returns elaboration/checker status or Expr syntax; it is not a declaration-level semantic proof."
+    },
+    "Solidity.Tools.proveMembersAllB": {
+      "category": "proof-producing-or-checking-metaprogram",
+      "reason": "Returns elaboration/checker status or Expr syntax; it is not a declaration-level semantic proof."
+    },
+    "Solidity.Tools.certifyLong": {
+      "category": "proof-producing-or-checking-metaprogram",
+      "reason": "Returns elaboration/checker status or Expr syntax; it is not a declaration-level semantic proof."
+    },
+    "Solidity.Tools.evalSolRefute": {
+      "category": "proof-producing-or-checking-metaprogram",
+      "reason": "Returns elaboration/checker status or Expr syntax; it is not a declaration-level semantic proof."
+    },
+    "Solidity.Automation.H28.codegenContext": {
+      "category": "operational-context-update",
+      "reason": "Updates option data in Core.Context; preservation laws are separate theorems. Budget fields here are data, not new checker budgets."
+    }
+  },
+  "non_proof_field_types": [
+    "Bool",
+    "Expr",
+    "Lean.Expr",
+    "Option Expr",
+    "Option Lean.Expr",
+    "String"
+  ],
+  "predicate_fields_are_data": true
+}
