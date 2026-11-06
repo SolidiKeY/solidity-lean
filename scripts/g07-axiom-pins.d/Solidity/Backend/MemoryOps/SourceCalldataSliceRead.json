@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceRead.lean:Solidity.Backend.MemoryOps.source_array_slice_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceRead.lean:Solidity.Backend.MemoryOps.source_slice_index_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

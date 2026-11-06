@@ -1,0 +1,53 @@
+{
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.bound_argument_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.bytes_raw_value_and_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.dirty_bytes_padding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.enum_out_of_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.enum_raw_value_and_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.insufficient_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.large_enum_accepts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.short_before_malformed_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.wide_bytes_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean:Solidity.Backend.AbiEntry.WordCarrierBindingControls.zero_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

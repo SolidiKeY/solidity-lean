@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/AbiEntry/SourceRoutes.lean:Solidity.Backend.AbiEntry.SourceRoutes.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutes.lean:Solidity.Backend.AbiEntry.SourceRoutes.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutes.lean:Solidity.Backend.AbiEntry.SourceRoutes.lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutes.lean:Solidity.Backend.AbiEntry.SourceRoutes.predicate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutes.lean:Solidity.Backend.AbiEntry.SourceRoutes.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

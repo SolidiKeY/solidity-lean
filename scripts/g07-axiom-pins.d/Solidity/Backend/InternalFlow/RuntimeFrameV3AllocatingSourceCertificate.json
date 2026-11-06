@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.bare_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.call_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.canonical": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.scoped_certificate": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.step_congr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
