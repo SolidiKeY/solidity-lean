@@ -119,3 +119,25 @@ fixtures are retained in the proposal. The generator checks original bytes;
 `git apply --check` is textual only. The helper, consumer files, import,
 proof reducibility, timing and registration all need owner agreement and Lean
 checks. No completeness claim is made for other initial/frame fixtures.
+
+## Array deletion semantic review (partial)
+
+Manual reading of the Bool and Int array-deletion controls identifies these
+original public observations that any shared parameterisation must preserve:
+
+| Declaration | Original cases or observations to retain |
+|---|---|
+| `certificate` | Ordered Source child clears and header clear, actual EVM run, representation and transport, all listed target/source words, and query readbacks. Bool and Int instantiate different primitive types. |
+| `ordered` | Complete Source, graph, numeric and target before/after vectors, including retained older elements and journal length 4. Int retains the encoded negative values; Bool retains its true values. |
+| `full_target_context` | Exact equality of the full target context before and after. |
+| `empty_retained` | Already-empty Source and target run, retained before/after vectors and journal length 2. |
+| `fuel_static` | Short fuel times out with the specified partial Source view and journal length 1; a static delete reverts with the initial state. |
+| `live_alias_restore` | Live alias read after deletion, out-of-bounds reindexing and exact panic bytes, plus rollback to the original state. |
+| `wrong_extent` | Actual wrong-header target execution, complete correct/wrong target vectors and mismatch with the retained Source value. |
+| `readbacks_presence` | Source header and retained-element reads, absent storage cells, and actual target read execution. |
+| Bool `false_and_absent` | Distinguishes an explicitly stored false from absence after partial deletion, while retaining true at another position. There is no theorem of this name in the Int controls. |
+
+This is a review of those named public statements only. Private helper facts,
+all other declarations, full signed-copy/fixed-copy families, proofs, and
+exact statement equivalence after a migration remain to be audited. The case
+matrix is not an acceptance result.
