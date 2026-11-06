@@ -1,0 +1,19 @@
+{
+  "boundary": "Off-git source evidence; no Lean/runtime/performance proof acceptance.",
+  "sha256": {
+    "evidence/census-check.log": "f9d1dfbf45257205fc714ed8ed3e416ded79206dbca3e63d612919efa2dca152",
+    "evidence/census-generate.log": "f9d1dfbf45257205fc714ed8ed3e416ded79206dbca3e63d612919efa2dca152",
+    "evidence/census-tests.log": "06d365f419b592479e3427ec6be75711e97809d9418c2743e236dfddc48370a4",
+    "evidence/census.json": "cebfec3bed84f25c1fb612a436d144e8ab86263a8a6dd2b99bf4fe187ab1655e",
+    "evidence/diff-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/final-source-acceptance.log": "6f793d9a6f57df67c629f8c400605f2fd9e3f1fd88c0a7dca0190a45b6892fc8",
+    "evidence/frozen-family-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/gates.json": "ddd6a0f236914a617d133cafedf0f69506a6683ee52bec1b7c3105a3a1a50308",
+    "evidence/layers.log": "8cf3b28ff9ff623f43c5ea8563222a4d671b8abfbc57dd1b4395942fc8ec1e85",
+    "evidence/negative-acceptance.log": "fa5b96525f3ac2d2f6f592d14e39a4ca6a61f4d87a47367126b384f4a649b450",
+    "evidence/postcommit-source-acceptance.log": "6f793d9a6f57df67c629f8c400605f2fd9e3f1fd88c0a7dca0190a45b6892fc8",
+    "evidence/reviews.txt": "39c9bc7c35ea057bab3c7f7a988f44a4371c05d3147c24db4ab96c3f1cfed691",
+    "evidence/setup.json": "7f9a1e036238464098ed9c0ef9112f0e467b2267cfcff56881f558b65a78ca30",
+    "evidence/source-acceptance.log": "dc558adcddfe99c32d678dbe31d93f59ab0afeebf37e311881c780ffea3070f3"
+  }
+}
