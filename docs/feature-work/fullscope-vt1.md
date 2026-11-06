@@ -843,3 +843,19 @@ Not changed: the `have`s that instantiate a lemma (`body`, `hr`, `hu`, `hc`,
 cited lemma's statement and spelling it out would repeat large `match` terms.
 The short ones are now typed, and the `have := …; rw … at this` patterns were
 replaced by `rw`; exact.
+
+### C09 gates
+- Per-file Lean diagnostics (MCP), 0 errors: IrHelperSteps, IrExpHelpers,
+  IrExpModel, IrExpSim, IrAbiHelpers, IrAbiSim, IrPushHelpers, IrPushSim,
+  IrHelperSource, IrHelperSim, tests IrHelperChecks/IrLeanGen.
+- `./run-lean.sh` (warm rerun after a cold run that hit the 2 h session limit;
+  the cold run's two OOM kills, exit 137 in other lanes' `Yul/Views/MemberDynamicSequence`
+  and `Examples/Tactics/OpenLoops`, came from running it next to the Lean server):
+  static stages pass; `lake build` "Build completed successfully (6163 jobs)", 0
+  errors; then `check-solkey.sh` against the unpinned sibling `../solkey`
+  (b8d5f883) fails: "167 mismatch(es)" (taclets newer than the pinned table).
+  Rerun with the pinned rules,
+  `SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key scripts/check-solkey.sh`:
+  "OK — annotations match" (377 taclets, 131 read-bearing, table covers 131), exit 0.
+- `VT1_SKIP_LEAN=1 check-ir.sh`: VT1_IR_CHECKS_PASS. `check-doc-paths.sh`: 1
+  failure, in another lane's `tests/calldata-packets-1105/RawUintN/README.md`.
