@@ -544,3 +544,20 @@ V08 control files, with the four changed files compared separately. It is not
 semantic review of all cases, the whole assignment's exact scope, independent
 review, or acceptance of future changes; non-control modules and other areas
 remain outside this particular partition.
+
+## Remaining backend control census: resource stop
+
+`backend_remaining_inventory.py` selected 58 original backend controls outside
+the 26 named fitting candidates and checked their source bytes against the
+original base. All 58 modules built serially. Their one-module kernel
+expression audits then passed for 20 modules, but `GraphRetainedCycleControls`
+and `LifecyclePathControls` independently hit `INTERNAL PANIC: out of memory`
+under the unchanged 10 GiB virtual-memory cap. The run stopped after the two
+failures; 36 candidates were not audited. No cap was increased and neither
+failed configuration should be rerun unchanged. Return this backend-census
+remainder to Sol alongside the fitting census and implementation attempts.
+The successful partial outputs, failure logs, generated batch files and build
+log are off Git and hashed in
+`tests/h55/shared-fixtures/backend-remaining-evidence.sha256`. This is not a
+complete backend semantic census, full declaration audit, performance pass or
+acceptance of any migration.
