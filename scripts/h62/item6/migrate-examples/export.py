@@ -9,10 +9,16 @@ assert branch=="codex/solidity-h62-6-20261106/migrate-examples",branch
 assert not subprocess.check_output(["git","status","--porcelain"],text=True),"commit checkpoint before exporting"
 base="c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 subprocess.run(["git","merge-base","--is-ancestor",base,"HEAD"],check=True)
+# Scope the cumulative patch after upstream integration: the bundle retains
+# ancestry, while the review patch must not attribute other lanes' changes here.
+scope=subprocess.check_output(["git","ls-tree","-r","--name-only",base,"--","Solidity/Examples"],text=True).splitlines()
+scope=[path for path in scope if path.endswith(".lean")]
+assert len(scope)==354,"frozen original scope changed"
+patch_paths=["scripts/h62/item6/migrate-examples","tests/h62/item6/migrate-examples","docs/feature-work/h62-6-migrate-examples.md"]+scope
 head=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
-(e/"committed-state.json").write_text(json.dumps({"head":head,"base":base,"branch":branch,"repository":str(pathlib.Path.cwd().resolve())},indent=2)+"\n")
+(e/"committed-state.json").write_text(json.dumps({"head":head,"base":base,"branch":branch,"repository":str(pathlib.Path.cwd().resolve()),"patch_boundary":"cumulative committed diff restricted to original assigned paths; bundle also includes integrated upstream ancestry","original_example_files":len(scope)},indent=2)+"\n")
 (e/"handoff.md").write_bytes(pathlib.Path("docs/feature-work/h62-6-migrate-examples.md").read_bytes())
-(e/"original.patch").write_bytes(subprocess.check_output(["git","format-patch","--stdout",base+".."+head]))
+(e/"original.patch").write_bytes(subprocess.check_output(["git","diff","--binary","--full-index",base,head,"--",*patch_paths]))
 bundle=e/("overlay-"+head+".bundle")
 if not bundle.exists():subprocess.run(["git","bundle","create",str(bundle),branch,"^"+base],check=True)
 census=json.loads((e/"census-base.json").read_text())
