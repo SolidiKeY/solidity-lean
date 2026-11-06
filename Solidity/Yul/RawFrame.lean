@@ -191,4 +191,18 @@ theorem run_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Con
   rw [viewEq]
   rfl
 
+/-- Every actual completed raw outcome is fixed by full snapshot capture.
+The completion premise is retained; arbitrary input overlays need not be fixed. -/
+theorem run_captured : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx) (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy fuel state = some result →
+ Solidity.Yul.RawFrame.capture result.state (Solidity.Yul.RawFrame.view result.state) = result.state := by
+  intro ctx control code policy fuel state result done
+  obtain ⟨wordResult,_finished,captured⟩ :=
+    (run_some_iff ctx control code policy fuel state result).mp done
+  cases captured
+  rfl
+
 end Solidity.Yul.RawFrame

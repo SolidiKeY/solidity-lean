@@ -305,4 +305,15 @@ theorem holds_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.C
     fun fuel => RawFrame.run_agrees ctx control code policy fuel first second cleanEq worldEq viewEq
   cases mode <;> simp only [holds, same]
 
+/-- Every completed outcome has full snapshot metadata; this box does not assert completion. -/
+theorem box_captured : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds .box code policy
+ (fun result => Solidity.Yul.RawFrame.capture result.state
+ (Solidity.Yul.RawFrame.view result.state) = result.state) state := by
+  intro ctx control code policy state fuel result done
+  exact RawFrame.run_captured ctx control code policy fuel state result done
+
 end Solidity.Yul.RawFrame.Logic
