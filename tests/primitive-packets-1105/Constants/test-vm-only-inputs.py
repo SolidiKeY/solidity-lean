@@ -10,17 +10,19 @@ for script in ['registration-plan.py','validate-fresh.py','h44-storage-check.py'
  for absent in required:
   output=io.StringIO()
   with patch.object(pathlib.Path,'is_file',lambda p:p!=absent),patch.object(sys,'argv',[script]),contextlib.redirect_stdout(output):
-   assert ns['main']() is None
-  text=output.getvalue()
-  assert 'VM-only' in text and 'unavailable' in text and str(absent) in text,text
+   try:ns['main']()
+   except SystemExit as error:message=str(error)
+   else:raise AssertionError('missing evidence accepted')
+  text=message
+  assert 'FAIL:' in text and 'missing' in text and str(absent) in text,text
   assert 'PASS:' not in text,text
   count+=1
 with tempfile.TemporaryDirectory(prefix='numeric-portable-tree-') as td:
  root=pathlib.Path(td);source=F.parents[2]
- paths=['scripts/check-sol-numeric-literals.py','tests/sol-numeric-literals/packetlib.py']+['tests/primitive-packets-1105/Constants/'+s for s in ['registration-plan.py','validate-fresh.py','h44-storage-check.py']]
+ paths=['scripts/check-sol-numeric-literals.py','tests/sol-numeric-literals/packetlib.py','tests/primitive-packets-1105/Constants/h44-bulk-manifest.json']+['tests/primitive-packets-1105/Constants/'+s for s in ['registration-plan.py','validate-fresh.py','h44-storage-check.py']]
  for relative in paths:
   target=root/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source/relative,target)
- for script in paths[2:]:
+ for script in paths[3:]:
   result=subprocess.run([sys.executable,str(root/script)],cwd=root,capture_output=True,text=True)
-  assert result.returncode==0 and 'VM-only' in result.stdout and 'PASS:' not in result.stdout,(script,result.stdout,result.stderr)
-print('PASS: 3 actual standalone no-bulk script runs and '+str(count)+' individual missing-input cases report VM-only without claiming validation; no VM data mutated')
+  assert result.returncode!=0 and 'FAIL:' in result.stderr and 'PASS:' not in result.stdout,(script,result.stdout,result.stderr)
+print('PASS: 3 actual standalone no-bulk script runs and '+str(count)+' individual missing-input cases fail closed without claiming validation; no VM data mutated')

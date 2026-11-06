@@ -5,6 +5,8 @@ ROOT=pathlib.Path(__file__).resolve().parents[3]
 F=pathlib.Path(__file__).resolve().parent
 BASE='4095d848297d87e374b4f069692511cfe4a36cf7'
 DEST='docs/module-map/frontend.md'
+INPUT_ROOT=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))
+INPUT_FOLDER=INPUT_ROOT/'tests/primitive-packets-1105/Constants'
 sha=lambda data:hashlib.sha256(data).hexdigest()
 def read_json(path):return json.loads((ROOT/path).read_text())
 def encoded(obj):return (json.dumps(obj,sort_keys=True,indent=2)+'\n').encode()
@@ -112,17 +114,17 @@ def index_check(patch):
   assert changed==([DEST] if patch else []),'unrelated temporary-index change'
   return tree
 
-def required_inputs():return [F/'registration-current.json',F/'registration-current.patch']
+def required_inputs():return [INPUT_FOLDER/'registration-current.json',INPUT_FOLDER/'registration-current.patch']
 
 def main():
- plan_path=F/'registration-current.json';patch_path=F/'registration-current.patch'
+ plan_path,patch_path=required_inputs()
  if sys.argv[1:]==['--write']:
   plan,patch=collect();plan_path.write_bytes(encoded(plan));patch_path.write_text(patch)
  else:
   assert not sys.argv[1:],'usage: registration-plan.py [--write]'
   missing=[str(p) for p in required_inputs() if not p.is_file()]
   if missing:
-   print('VM-only registration inputs unavailable; no proposal validation performed: '+', '.join(missing));return
+   raise SystemExit('FAIL: required registration inputs missing: '+', '.join(missing))
   plan=json.loads(plan_path.read_text());patch=patch_path.read_text();validate(plan,patch)
   mutation_controls(plan,patch)
   empty=copy.deepcopy(plan);empty.update(missing_rows=[],status='registration-observed',patch_sha256=sha(b''))

@@ -6,7 +6,7 @@ integration gates without claiming assignment completion. Never updates a pin.
 import argparse,copy,importlib.util,json,os,pathlib,re,subprocess,sys,tempfile
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests/sol-numeric-literals'))
-from packetlib import BASE,ADOPTED_MASTER,FOLDER,PREFIX,CONSTRUCTOR_CONTROLS,REQUIRED_THEOREMS,blank_lean,case_families,controls,git,h44_bulk_bindings,normalized_inventory,permitted,sha,source_snapshot
+from packetlib import BASE,ADOPTED_MASTER,FOLDER,PREFIX,CONSTRUCTOR_CONTROLS,REQUIRED_THEOREMS,blank_lean,case_families,controls,git,normalized_inventory,permitted,sha,source_snapshot
 
 def require(condition,message):
  if not condition:raise ValueError(message)
@@ -53,19 +53,9 @@ def validate_registration(registration):
  run([sys.executable,'scripts/coord-tools/module-map.py',BASE])
 
 def validate_committed_inputs():
- # Code/direct inputs must match HEAD. H44 data must match the byte digests
- # in HEAD's committed manifest; missing or modified direct inputs fail closed.
+ # Every tracked and untracked input must match sealed HEAD, including evidence.
  changed=set(git('diff','HEAD','--name-only').splitlines())|set(git('ls-files','--others','--exclude-standard').splitlines())
- generated=('tests/sol-numeric-literals/evidence/','tests/primitive-packets-1105/Constants/evidence/')
- bound=h44_bulk_bindings()
- for relative,entry in bound.items():
-  # Preserve the existing generated-evidence exception. Every formerly direct
-  # direct input moved by H44 must still be present with the committed bytes.
-  if relative.startswith(generated) and relative!='tests/sol-numeric-literals/evidence/final-reviews.json':continue
-  path=ROOT/relative
-  require(path.is_file() and not path.is_symlink() and path.stat().st_size==entry['bytes'] and sha(path)==entry['sha256'],'H44 required data differs '+relative)
- dirty={p for p in changed if (not p.startswith(generated) or p=='tests/sol-numeric-literals/evidence/final-reviews.json') and p not in bound}
- require(not dirty,'checked inputs differ from sealed commit: '+str(sorted(dirty)))
+ require(not changed,'checked inputs differ from sealed commit: '+str(sorted(changed)))
 
 def validate_h35_completion():
  # H35 VM gates remain required; H41 replaces VM shipping with pack handoff.

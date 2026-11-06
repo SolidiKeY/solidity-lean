@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Fresh unaffected numeric proof evidence; never claims final runtime completion."""
-import copy,json,pathlib,re,runpy,hashlib,subprocess,tempfile
+import copy,json,pathlib,re,runpy,hashlib,subprocess,tempfile,os
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 F=pathlib.Path(__file__).resolve().parent
 N=ROOT/'tests/sol-numeric-literals'
+INPUT_ROOT=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))
+def input_path(path):return INPUT_ROOT/path.relative_to(ROOT)
 TARGETS={
  'h55-owned-audit':('Solidity/Frontend/NumericLiteralProofs/Audit.lean',180),
  'h55-all-axioms':('tests/sol-numeric-literals/h35/PrintAllAxioms.lean',180),
@@ -22,23 +24,23 @@ def required_inputs():
  paths=[N/'evidence/kernel-inventory.actual.json',F/'registration-current.json',F/'registration-current.patch',F/'evidence/h55-toolchain.log']
  for folder,labels in [(N,list(TARGETS)+['h55-owned-build']),(F,['h55-constants-build'])]:
   paths.extend(folder/'evidence'/(label+suffix) for label in labels for suffix in ['.json','.log'])
- return paths
+ return [input_path(p) for p in paths]
 
 def main():
  missing=[str(p) for p in required_inputs() if not p.is_file()]
  if missing:
-  print('VM-only diagnostic/build evidence unavailable; no evidence validation performed: '+', '.join(missing));return
+  raise SystemExit('FAIL: required diagnostic/build evidence missing: '+', '.join(missing))
  nl=runpy.run_path(str(ROOT/'scripts/check-sol-numeric-literals.py'))
  modules=nl['source_snapshot']();pins=json.loads((N/'kernel-inventory.json').read_text())
- actual=json.loads((N/'evidence/kernel-inventory.actual.json').read_text())
+ actual=json.loads(input_path(N/'evidence/kernel-inventory.actual.json').read_text())
  nl['validate_inventory'](actual,pins,modules)
  expected={m['path']:m['sha256'] for m in modules}
  evidence={}
  for label in ['h55-owned-audit','h55-all-axioms','h55-keysort']:
-  row=json.loads((N/'evidence'/(label+'.json')).read_text());diag=json.loads((N/'evidence'/(label+'.log')).read_text())
+  row=json.loads(input_path(N/'evidence'/(label+'.json')).read_text());diag=json.loads(input_path(N/'evidence'/(label+'.log')).read_text())
   validate_gate(label,row,diag,expected)
   evidence[label]=dict(seconds=row['seconds'],errors=0,source_modules=len(expected))
- row=json.loads((N/'evidence/h55-keysort.json').read_text());diag=json.loads((N/'evidence/h55-keysort.log').read_text())
+ row=json.loads(input_path(N/'evidence/h55-keysort.json').read_text());diag=json.loads(input_path(N/'evidence/h55-keysort.log').read_text())
  for kind in ['wrong-file','wrong-method','wrong-log']:
   bad=copy.deepcopy(row)
   if kind=='wrong-file':
@@ -48,7 +50,7 @@ def main():
   try:validate_gate('h55-keysort',bad,diag,expected)
   except AssertionError:pass
   else:raise AssertionError('diagnostic binding mutation accepted '+kind)
- raw=json.loads((N/'evidence/h55-all-axioms.log').read_text());printed={}
+ raw=json.loads(input_path(N/'evidence/h55-all-axioms.log').read_text());printed={}
  for item in raw['items']:
   assert item['severity']=='info'
   m=re.fullmatch(r"'(.+)' depends on axioms: \[(.*?)\]",item['message'],re.S)
@@ -60,22 +62,22 @@ def main():
  theorems={r['name']:set(r['axioms']) for r in pins if r['kind']=='theorem'}
  assert printed==theorems and len(printed)==808,'fresh theorem/axiom coverage drift'
  plan=runpy.run_path(str(F/'registration-plan.py'));expected_plan,patch=plan['collect']()
- plan['validate'](json.loads((F/'registration-current.json').read_text()),(F/'registration-current.patch').read_text())
+ plan['validate'](json.loads(input_path(F/'registration-current.json').read_text()),input_path(F/'registration-current.patch').read_text())
  source_modules={m['path']:m['sha256'] for m in expected_plan['owned_modules']}
  builds={}
  for label,folder,target,source_pins in [
   ('h55-owned-build',N,'Solidity.Frontend.NumericLiteralProofs.Audit',expected),
   ('h55-constants-build',F,'Solidity.Backend.PrimitivePackets.Constants.Controls',{p:h for p,h in source_modules.items() if p.startswith('Solidity/Backend/')})]:
-  row=json.loads((folder/'evidence'/(label+'.json')).read_text())
+  row=json.loads(input_path(folder/'evidence'/(label+'.json')).read_text())
   assert row['command']==['lake','build',target] and row['log']==str(folder/'evidence'/(label+'.log')),'wrong owned build binding'
   assert row['exit']==0 and not row['resource_stop'] and row['proof_sources']==source_pins
   assert row['limits']==dict(memory_max=12884901888,memory_swap_max=0,lean_num_threads=1)
   assert row['minimum_parent_headroom_bytes']>=4*1024**3
-  assert 'Build completed successfully' in (folder/'evidence'/(label+'.log')).read_text()
+  assert 'Build completed successfully' in input_path(folder/'evidence'/(label+'.log')).read_text()
   builds[label]=dict(seconds=row['seconds'],modules=len(source_pins),boundary='matching-cache replay, not a clean compile')
  changed=subprocess.check_output(['git','diff','--name-only',plan['BASE'],'--'],cwd=ROOT,text=True).splitlines()
  assert not any(p.startswith('Solidity/Yul/') for p in changed),'reserved-area source changed'
- toolchain=(F/'evidence/h55-toolchain.log').read_text()
+ toolchain=input_path(F/'evidence/h55-toolchain.log').read_text()
  assert '12884901888\n0\n1\n' in toolchain
  assert 'Lake version 5.0.0-src+797c613' in toolchain and 'Lean (version 4.24.0' in toolchain
  result=dict(status='pass-scoped-validation',proof_sources=source_modules,numeric_kernel_declarations=len(pins),fresh_theorem_prints=len(printed),combined_pinned_kernel_declarations=expected_plan['kernel_declarations'],proposal_rows=len(expected_plan['missing_rows']),gates=evidence,owned_builds=builds,lean='4.24.0',lake='5.0.0-src+797c613',reserved_source_files_edited=[],diagnostic_binding_mutations=3,runtime_gate_pass=False,limits='12GiB aggregate/no swap/CPU1/Lean-j1/H1>=4GiB',boundary='Validation of archived VM numeric kernel/signature/axiom and KeySort checks plus pinned Constants inventory and coordinator-only registration proposal; prior full-runtime failures remain open.')

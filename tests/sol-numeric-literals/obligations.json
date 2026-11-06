@@ -34,7 +34,7 @@
   {
     "id": "trust-inventory",
     "status": "done",
-    "evidence": "h55-owned-audit and h55-all-axioms: fresh991 kernel signatures and808 theorem axiom sets match exact pins; no new proof declaration or source change."
+    "evidence": "Archived VM-reported inventory: 991 kernel signatures and 808 theorem axiom sets match exact pins when required evidence is supplied. Owned builds are matching-cache replays, not fresh evidence generation."
   },
   {
     "id": "independent-reviews",
