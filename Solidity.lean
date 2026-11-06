@@ -604,6 +604,7 @@ import Solidity.Backend.MemoryCopies.AllocationPanicInterface
 import Solidity.Backend.MemoryCopies.BudgetedDefault
 import Solidity.Backend.MemoryCopies.BudgetedDefaultControls
 import Solidity.Backend.MemoryCopies.BudgetedDefaultInterface
+import Solidity.Backend.MemoryCopies.BudgetedFiniteInterface
 import Solidity.Backend.MemoryCopies.BudgetedReference
 import Solidity.Backend.MemoryCopies.BudgetedReferenceControls
 import Solidity.Backend.MemoryCopies.BudgetedReferenceInterface
