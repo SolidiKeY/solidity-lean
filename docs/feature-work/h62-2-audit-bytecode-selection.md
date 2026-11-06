@@ -589,3 +589,43 @@ MCP transport evidence, expanded inspection acceptance, a performance gate or
 `RUNTIME_GATE_PASS`. Those required gates remain open. No prior timing STOP was
 released and no stopped full gate was rerun. Frozen sources and proof budgets
 were unchanged; no raw historical MCP payload was fabricated or relabelled.
+
+
+## H86 terminal source-check stop and metadata refusal helpers
+
+The guarded frozen-source run ended RED with container exit 1 after 625 of 703
+planned files passed. Each completed record retained its frozen source and output
+hash. The watchdog saved `owned Lean proof/group clock bound`; the supervisor
+saved proof-group exit -15. The next planned file and last observed native command
+were Scalar/PowerBounds. The abort receipt does not retain the final PID, argv or
+elapsed age, and the final watchdog receipt is absent. Thus the exact numeric
+stop age is not asserted. No source-stage completion or metadata inspection ran,
+and no new kernel links or simultaneous witnesses are accepted. The stopped
+PowerBounds gate is not rerun unchanged. The original aggregate deadline and
+12 GiB/no-swap/serial limits were retained.
+
+The source run and the four earlier monitoring failures remain off Git under
+`/workspace/parallel-20261103/executable-bytecode/h86-core-dual/` and its recorded
+predecessor directories. Independent read-only finder and skeptic reviews
+confirmed the prefix and terminal limitations. Master adoption used published
+33eb46304; a generated pin conflict followed its retirement of
+`source_cd_uint_fixed_stuck`. Protected Source files were preserved exactly from
+upstream, including the whitespace reported by the adoption diff check.
+
+The additive `kernel_metadata.py` helpers refuse malformed records, unsupported
+metadata values, empty logs, mixed fingerprints and duplicate source identities.
+Ambiguous name/range matches are retained without unique acceptance. They retain type/record hashes and explicit gaps in
+parent records, cycles, ownership and instantiated inherited types. Candidate
+matches establish neither frozen-statement correspondence nor witness coverage;
+execution/program/source binding remains required before accepting actual links.
+Pinned Lean's Prop-valued parent projections can be theorems, so that legitimate
+combination is retained and has a positive regression test. No Lean statement,
+producer definition, interface, proof budget, axiom set or exclusion is edited by
+this helper checkpoint. Full closure, executed inspections, source correspondence,
+remaining witnesses, Bridge/package gates and performance acceptance remain open.
+
+Checkpoint verification: all 44 affected Python tests pass, including 11 new
+metadata cases. Independent read-only finder and skeptic reviews found no
+material issues; their ambiguity-wording refinement is incorporated. Generated
+roots and fragment checks pass. Required executed-inspection, checkpoint/full
+build and performance gates remain pending; this is not whole-lane completion.
