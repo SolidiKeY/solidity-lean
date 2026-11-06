@@ -158,7 +158,7 @@ def Owned {fs : List (Name × Ty)} (fields : Fields E fs) (owner : String) : Pro
   | nil => exact True
   | field name p d declared named signature typed persistent notConst tail ih =>
     exact (∃ declaredOwner, d.scope = some declaredOwner ∧
-      E.isBase E.mapFree ⟨none, owner⟩ ⟨none, declaredOwner⟩ = true) ∧ ih
+      E.isBase ⟨none, owner⟩ ⟨none, declaredOwner⟩ = true) ∧ ih
 
 structure CallLayout {Γ : RCtx} {dn : DeclName} {ps rs : List STy}
     (i : Invocation E Γ dn ps rs) (C : Contract) where
