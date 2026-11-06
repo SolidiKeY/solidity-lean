@@ -30,7 +30,9 @@ run_cmd do
           ("levels", toJson (ci.levelParams.map Name.toString)),
           ("typeExpr", toJson (reprStr ci.type))]
         rows := rows.push (n.toString, row)
-  let sorted := rows.qsort (fun a b => a.1 < b.1)
-  for (_, row) in sorted do
-    IO.println row.compress
+  let sorted := rows.qsort (fun a b => decide (a.1 < b.1))
+  let some output ← IO.getEnv "H62_INTERFACE_OUTPUT"
+    | throwError "H62_INTERFACE_OUTPUT is required"
+  let lines := sorted.toList.map (fun row => row.2.compress)
+  IO.FS.writeFile output (String.intercalate "\\n" lines ++ "\\n")
 """)

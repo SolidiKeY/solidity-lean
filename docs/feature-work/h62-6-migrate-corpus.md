@@ -24,7 +24,7 @@ The full 774-row expected table is also hash-pinned.
 [Source hashes](../../tests/h62/item6/migrate-corpus/frozen-sources.json) freeze all
 source bytes, including unnamed examples, program bodies and proof budgets.
 They are not elaborated API compatibility evidence. The interface probe generator
-is supplied for a separate type-expression inventory once imports build.
+is supplied for a separate type-expression inventory for all nine modules on the old toolchain. New-version imports remain blocked.
 [Case summary](../../tests/h62/item6/migrate-corpus/frozen-case-summary.json) is
 small; full census/case/dependency outputs stay off Git with final checksums.
 
@@ -59,7 +59,7 @@ use isolated output directories; they must not enter the final patch.
   failure at Calculus.TermSize. This attempt is **invalid as a baseline**.
 * Removing that inappropriate address-space cap: TermSize passed in
   34.209311049 s, sampled RSS 1267032064 bytes. This focused run is not a clean
-  full build. A fresh full old retry remains required.
+  full build. The fresh full old retry result follows below.
 * Clean new diagnostic build: exit 1 after 60.376878436 s, sampled RSS
   1675653120 bytes; no resource stop. Outside-scope dependency failures are
   recorded below. This failed run supplies no valid performance delta.
@@ -99,7 +99,7 @@ Both are actual transitive corpus prerequisites. Requests are prepared for
 coordinator retrieval; relay.sh is absent, so no delivery/acknowledgement is
 invented. No existing owner file was edited.
 
-Still required: successful fresh clean old baseline; owner dependency overlays
+Still required: owner dependency overlays
 and any resulting exact-file coordination; successful new build of all nine
 modules; cross-version elaborated interface comparison; deterministic corpus
 acceptance and full affected/final repository gates; valid paired timings with
@@ -110,3 +110,123 @@ Evidence directory: `/workspace/migrate-corpus-evidence`.
 Reproduction tools: `scripts/h62/item6/migrate-corpus/`.
 Final committed head, artifact hashes and all command outcomes will be recorded
 in the external HANDOFF.md and final-state.json after the final local commit.
+
+## Completed baseline checkpoint and backfill handoff
+
+Checkpoint 1 is complete. The corrected **fresh clean old build passed**:
+`lake -f .h62-migrate-corpus-old.toml --no-cache build SolidityCorpus`, with
+`LEAN_NUM_THREADS=1`, worker `-j1`, no AS cap, existing hard VM cap and headroom
+policy above. Wall: **3983.395159041 seconds**; sampled aggregate RSS:
+**5872992256 bytes (5.47 GiB)**. Exit 0, no resource stop. The output directory
+was verified absent before launch, artifact caches were disabled, and all
+base-tracked current input bytes were fingerprinted before timing.
+Input tree fingerprint:
+`5ceac4d6694ee027a20fbe53ce94581319825a52c893e68fe6fce5363d47a50e`.
+Common configuration policy fingerprint:
+`0661d945df37f0cd5c2e8c14b9bcf6229512dfec9f57ee73b142b3ea984fcd71`.
+Clean means fresh project outputs with artifact-cache retrieval disabled;
+OS page-cache contents were not purged. RSS is sampled, not a kernel-exact
+simultaneous high-water measurement.
+
+All nine assigned modules and the standard corpus root passed. The compiler's
+setup manifests exactly match the scanner's 340-module closure. The root also
+checks 13 additional validation dependencies; all have unique migration owners
+and are included separately in the dependency report. All 354 timed modules
+were below 300 seconds; maximum: Derived20, 181 seconds.
+
+The generated old-interface probe passed complete one-file MCP diagnostics and
+exported **703 environment constants owned by the nine corpus modules**,
+including compiler-generated auxiliary constants. These are not 703 source
+functions. JSONL SHA256:
+`fc7fec3db0468a46df98246a685fe242cde1042f32e41349ed4fe5457dc10db4`.
+Per-constant representation hashes and module counts remain off Git. Expression
+representation hashes are baseline evidence; no cross-version equivalence is
+claimed while new imports fail. The generated probe is test-only, ignored by
+Git, and recreated by export-interfaces.py; no production registration is
+requested and no library/module-map fragment was modified.
+
+`bash scripts/check-corpus.sh` also passed under the old private toolchain and
+configuration: 774 obligations, no source/verdict/scoreboard drift, exit 0;
+38.878758036 seconds and 1087324160 sampled RSS bytes. This is a separate warm
+acceptance check, not the clean benchmark. It preserves the scoped 639 rows and
+the full table (including four Net proof mappings outside Corpus). Kernel proofs
+and interpreter outcome pins retain their existing boundaries; this is not
+Solidity compiler/extractor or EVM equivalence evidence.
+
+Final static checks pass: layers, generated roots/fragments, whitespace, original
+corpus/toolchain/lakefile equality to the base, local report links, and byte-stable
+summary regeneration. New Lean source contains five finite examples, zero new
+axiom declarations, zero sorry, zero native_decide and zero heartbeat raises.
+Original declarations, premises, exclusions and frozen statements touched: zero.
+
+The old result is valid; the new build still exits 1. compare.py therefore emits
+BLOCKED with both deltas null. The failed 60-second new build must never be
+reported as a speedup. The preliminary KeySort RSS regression remains escalated
+for migrate-root-gate. Full successful new builds, new acceptance/final gates,
+new type hashes, and an admissible paired comparison remain outstanding.
+
+| Queue checkpoint | State |
+|---|---|
+| 1: census, pinned old compatibility and clean measurement | done |
+| 2: exact official new pin and directory adaptation | blocked on two owner migrations |
+| 3: all new modules, final gates and comparison | blocked |
+| 4: reviewable overlay and root-gate evidence | partial: artifacts prepared; new interface/gate evidence absent |
+
+Backfill completed: full source/case/dependency census, adversarial negative
+controls, five old-toolchain finite fixture proofs, deterministic regeneration,
+source/proof-budget preservation checks, and reproducible timing/interface
+instrumentation. Additional production work requires the named owner inputs;
+there is no authorized substitute for those dependencies.
+
+## Reproduction and continuation
+
+Use the original VM context
+`ccarenv_b64_Y2NhcmVudl80NzJkZGIzYjRmNDQ4MTkxODkzMTUzNDBmZjRiNDYzOQ`,
+the existing launcher goal identified above, this same branch, and the committed
+head recorded in external final-state.json. No replacement goal/thread was
+created. The coordinator should resume the original goal after supplying the
+exact owner migrations; this is a fresh-thread handoff, not completion.
+
+Recreate testing configuration with prepare-config.py MODE OFFICIAL_DIR
+EVIDENCE_DIR under the repository writer lock. Use a fresh evidence/output
+location for a new clean measurement; existing benchmark output is intentionally
+refused. serial-toolchain.py OFFICIAL_DIR PRIVATE_SYSROOT creates a private
+symlink tree over the unchanged official release. Set LEAN_SYSROOT to that tree,
+LAKE_OVERRIDE_LEAN=true, and LEAN_NUM_THREADS=1. For MCP also set
+H62_LAKE_WRAPPER to the generated commands-MODE/lake wrapper and put that command
+directory first on PATH, preserving the private configuration in setup-file.
+
+The actual old benchmark command, excluding its safe environment prefix, is:
+
+```sh
+python3 scripts/h62/item6/migrate-corpus/bounded.py \
+  --out /workspace/migrate-corpus-evidence/clean-old-retry \
+  --benchmark-config .h62-migrate-corpus-old.toml -- \
+  /workspace/.setup/tools/lean-4.24.0-linux/bin/lake \
+  -f .h62-migrate-corpus-old.toml --no-cache build SolidityCorpus
+```
+
+That output path now exists and must be preserved, not reused as a clean run.
+The corresponding new command and exact environments/versions are recorded in
+HANDOFF.md and the gate result JSONs. Paired comparison requires matching
+source/config/cache/resource provenance and successful builds. Source-changing
+owner overlays require re-establishing comparable workloads, not disabling the
+provenance check. Any regression escalates; strictly above 10% wall slowdown
+stops. No root toolchain edit, integration, push, freeze announcement or cut-over
+is authorized to this lane.
+
+All bulky census, case, module-time, type-expression and build outputs remain
+outside Git. Deterministic generators are committed; final SHA256SUMS covers
+saved artifacts and evidence. Absolute final artifact paths and committed head
+are in the external handoff and CLOUDVM-RESULT.
+
+## Final independent milestone review
+
+The final finder and skeptic independently checked the completed old baseline,
+all 340 compiler/scanner modules, unique ownership of 13 validation extras,
+703 old constants and their hash, distinct 354 module timings, deterministic old
+acceptance, scope and proof boundaries. Neither used Lean/server or wrote files.
+Both found no remaining concrete defect. Both explicitly retained states
+**done / blocked / blocked / partial**; neither approved a completed migration.
+Export/checksum verification is recorded in external final-state.json and
+HANDOFF.md after this local commit. No private root TOML is exported.

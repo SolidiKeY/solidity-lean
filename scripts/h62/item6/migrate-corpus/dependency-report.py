@@ -11,5 +11,9 @@ for module in census["external_dependencies"]:
     rows.append(dict(module=module,path=path,migration_owner=owners[0]))
 result=dict(base=census["base"],ownership_sha256=hashlib.sha256(ownership.read_bytes()).hexdigest(),
  direct_external_imports=sorted({i for f in census["files"] for i in f["imports"] if not i.startswith("Solidity.Corpus.")}),dependencies=rows)
+if len(sys.argv)>4:
+    extra=json.loads(pathlib.Path(sys.argv[4]).read_text())["root_extra_modules"]
+    result["validation_root_extra_dependencies"]=[dict(module=m,path=m.replace(".","/")+".lean",
+        migration_owners=[x["owner"] for x in lanes if any(fnmatch.fnmatchcase(m.replace(".","/")+".lean",s.strip()) for s in x.get("writeScope", "").split(";"))]) for m in extra]
 pathlib.Path(sys.argv[3]).write_text(json.dumps(result,indent=2)+"\n")
 print(f"{len(rows)} dependencies mapped; no missing or ambiguous owner")
