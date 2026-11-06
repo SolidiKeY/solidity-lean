@@ -40,6 +40,9 @@ def parse(log):
     for number, line in enumerate(log.splitlines(), 1):
         match = ROW.fullmatch(line)
         if match:
+            if line.lstrip().startswith("✖"):
+                errors.append(f"line {number}: failed build row")
+                continue
             try:
                 duration = seconds(match[3])
             except ValueError:
@@ -59,8 +62,10 @@ def coverage(inventory, parsed, exit_code):
     if not isinstance(inventory, list) or not inventory:
         return ["empty or invalid module inventory"]
     if any(not isinstance(row, dict) or not isinstance(row.get("module"), str)
-           or not row["module"] or not isinstance(row.get("path"), str)
-           or not row["path"].endswith(".lean") for row in inventory):
+           or not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*", row["module"])
+           or not isinstance(row.get("path"), str) or not row["path"].endswith(".lean")
+           or row["path"].startswith("/") or "\\" in row["path"]
+           or any(part in ("", ".", "..") for part in row["path"].split("/")) for row in inventory):
         return ["invalid module mapping"]
     modules = [row["module"] for row in inventory]
     paths = [row["path"] for row in inventory]

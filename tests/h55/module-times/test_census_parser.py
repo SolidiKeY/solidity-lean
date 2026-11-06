@@ -41,7 +41,7 @@ class CensusParser(unittest.TestCase):
         inventory = [{"module": "Solidity.A", "path": "Solidity/A.lean"}]
         good = parser.parse("ℹ [1/1] Built Solidity.A (300s)")
         self.assertEqual([], parser.coverage(inventory, good, 0))
-        for log in ["", "✔ [1/1] Replayed Solidity.A (1s)",
+        for log in ["", "✖ [1/1] Built Solidity.A (1s)", "✔ [1/1] Replayed Solidity.A (1s)",
                     "✔ [1/1] Replayed Solidity.A", "✔ [1/1] Built Solidity.A (300.1s)",
                     "✔ [1/1] Built Solidity.A (x)",
                     "✔ [1/1] Built Solidity.A (1s)\n✔ [1/1] Built Solidity.A (1s)",
@@ -51,6 +51,8 @@ class CensusParser(unittest.TestCase):
         self.assertTrue(parser.coverage(inventory, good, 124))
         self.assertTrue(parser.coverage(inventory + inventory, good, 0))
         self.assertTrue(parser.coverage([], good, 0))
+        self.assertTrue(parser.coverage([{"module": "Solidity.A", "path": "../A.lean"}], good, 0))
+        self.assertTrue(parser.coverage([{"module": "A..B", "path": "A.lean"}], good, 0))
 
 if __name__ == "__main__":
     unittest.main()

@@ -106,3 +106,12 @@ verified clean-tree or cache identity. Tests compare all paths against the
 tracked-file census and cover Bridge, example, standalone and ambiguous names.
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/h55/module-times -p test_*.py -v`
 passed 11 methods. Independent finder and skeptic reviews are pending.
+
+## Parser failure-row correction
+
+A local review found that the initial parser could accept a `✖` Built row if a
+caller supplied zero process status. The parser now rejects such a row, and
+rejects traversal or malformed module/path mappings. Regression controls and
+the full 11-method synthetic suite pass. This local check is not a substitute
+for either required independent review. The parser remains a log consumer,
+not authenticated proof that any measurement occurred.
