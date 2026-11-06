@@ -35,3 +35,5 @@
 | `Source/Agreement/PrimitiveSlotControls.lean` | Internally instantiated copy client, actual integer runs, insufficient horizon and wrong-value refusal. |
 | `Source/Agreement/PrimitiveSlotAssign.lean` | Actual primitive old-head-to-deeper-slot assignment, concrete normal producer/client and exact insufficient-horizon control. |
 | `Source/Agreement/PrimitiveSlotAssignControls.lean` | Mixed-type neighbor preservation, actual signed/unsigned writes and reversed-copy controls. |
+| `Source/Agreement/PrimitiveSavedAssign.lean` | Actual primitive save-and-shifted-copy sequence, composed normal agreement/client and exact horizon-four timeout. |
+| `Source/Agreement/PrimitiveSavedAssignControls.lean` | Saved/original head liveness, mixed neighbors and overwritten-target refusal controls. |

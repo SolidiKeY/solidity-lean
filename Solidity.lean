@@ -3819,6 +3819,8 @@ import Solidity.Source.Agreement.NormalDefaults
 import Solidity.Source.Agreement.NormalStatement
 import Solidity.Source.Agreement.NormalStep
 import Solidity.Source.Agreement.Primitive
+import Solidity.Source.Agreement.PrimitiveSavedAssign
+import Solidity.Source.Agreement.PrimitiveSavedAssignControls
 import Solidity.Source.Agreement.PrimitiveSlot
 import Solidity.Source.Agreement.PrimitiveSlotAssign
 import Solidity.Source.Agreement.PrimitiveSlotAssignControls
