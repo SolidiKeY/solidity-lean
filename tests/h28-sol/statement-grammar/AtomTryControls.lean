@@ -209,12 +209,38 @@ theorem rethrow_asm_kernel :
       some ([], [.assembly, .cons, .yulExprStmt], 0) := by
   decide +kernel
 
+/-- The rethrow statement of the accepted fixture as an `AtomStmt`, through the
+compositional `rethrow_yul_body`, with coverage at every suffix. -/
+theorem rethrow_asm_relation :
+    AtomStmt (k := .body) (.assembly false ["memory-safe"] (.cons (.yulExprStmt rethrowCall) .nil))
+      ([.kw .assembly] ++ evmToks false ++
+        ([.punct .lparen] ++ [.str (ascii "memory-safe")] ++ [.punct .rparen]) ++
+        (.punct .lbrace :: rethrowCallToks ++ [.punct .rbrace])) 7 :=
+  .asm (.some memory_safe_flag_atom) rethrow_yul_body rfl
+
+theorem rethrow_asm_coverage (n : Nat) (s : St) :
+    stmt (n + 7 + 6) .body (locatedInput ([.kw .assembly] ++ evmToks false ++
+        ([.punct .lparen] ++ [.str (ascii "memory-safe")] ++ [.punct .rparen]) ++
+        (.punct .lbrace :: rethrowCallToks ++ [.punct .rbrace])) s) =
+      .ok (.assembly false ["memory-safe"] (.cons (.yulExprStmt rethrowCall) .nil), s) :=
+  atom_stmt_coverage rethrow_asm_relation n s (Or.inl rfl) (Or.inl rfl)
+
 /-- Negative: an unknown dialect string is not `"evmasm"`; it is neither a
 flag list nor a Yul body, and the actual parser fails. -/
 theorem asm_unknown_dialect_refused :
     (stmt 10 .body (locatedInput [.kw .assembly, .str (ascii "other"), .punct .lbrace,
       .punct .rbrace] ⟨[], [], 0⟩)).toOption.isNone = true := by
   decide +kernel
+
+/-- A `try`-free block needs no catch frame: the general lemma, with the
+node inventory checked by the kernel. -/
+theorem revert_block_coverage_no_try (n : Nat) (s : St) :
+    stmt (n + 16 + 6) .body (locatedInput (braces revertParts.flatten) s) =
+      .ok (.blockStmt (.block revertItems), s) :=
+  atom_stmt_coverage_no_try (.block revert_items_relation) (by decide +kernel) n s (Or.inl rfl)
+
+/-- Negative: the lemma does not apply to a tree with a `try` node. -/
+theorem try_tree_has_try : Ctor.tryStmt ∈ g0NodeCtors tryTree := by decide +kernel
 
 #print axioms try_relation
 #print axioms try_coverage
@@ -237,7 +263,11 @@ theorem asm_unknown_dialect_refused :
 #print axioms revert_ident_not_expr
 #print axioms catch_not_simple_head
 #print axioms asm_items_relation
+#print axioms revert_block_coverage_no_try
+#print axioms try_tree_has_try
 #print axioms asm_block_coverage
 #print axioms rethrow_asm_kernel
+#print axioms rethrow_asm_relation
+#print axioms rethrow_asm_coverage
 #print axioms asm_unknown_dialect_refused
 end Solidity.Frontend.StatementGrammarH28

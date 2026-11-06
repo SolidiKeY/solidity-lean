@@ -1,4 +1,5 @@
 import Solidity.Frontend.StatementGrammarH28.AtomAsm
+import Solidity.Frontend.StatementGrammarH28.G0Nodes
 
 /-! Arbitrarily nested statements and item lists over expression atoms.
 
@@ -760,6 +761,44 @@ theorem atom_items_unchecked_coverage {l : Bool} {xs : Syn (.list (.item ⟨l, t
   rw [uncheckedInput_eq, item_unchecked_prefix, atom_items_block_coverage h]
   rfl
 
+/-- A statement with no `try` node anywhere is not catch-open. -/
+theorem catchOpen_false_of_no_try : {k : SCtx} → (x : Syn (.stmt k)) →
+    Ctor.tryStmt ∉ x.nodes.map Node.ctor → catchOpen x = false
+  | _, .ifStmt c t .none, h => catchOpen_false_of_no_try t (fun ht => h (by
+      simp only [Syn.nodes, Syn.node, Syn.ctor, List.map_cons, List.map_append, List.mem_cons,
+        List.mem_append, ht, true_or, or_true]))
+  | _, .ifStmt c t (.some e), h => catchOpen_false_of_no_try e (fun he => h (by
+      simp only [Syn.nodes, Syn.node, Syn.ctor, List.map_cons, List.map_append, List.mem_cons,
+        List.mem_append, he, or_true]))
+  | _, .forStmt i c u b, h => catchOpen_false_of_no_try b (fun hb => h (by
+      simp only [Syn.nodes, Syn.node, Syn.ctor, List.map_cons, List.map_append, List.mem_cons,
+        List.mem_append, hb, or_true]))
+  | _, .whileStmt c b, h => catchOpen_false_of_no_try b (fun hb => h (by
+      simp only [Syn.nodes, Syn.node, Syn.ctor, List.map_cons, List.map_append, List.mem_cons,
+        List.mem_append, hb, or_true]))
+  | _, .tryStmt .., h => absurd (by
+      simp only [Syn.nodes, Syn.node, Syn.ctor, List.map_cons, List.mem_cons, true_or]) h
+  | _, .blockStmt _, _ => rfl
+  | _, .simpleStmt _, _ => rfl
+  | _, .doWhile _ _, _ => rfl
+  | _, .continueStmt, _ => rfl
+  | _, .breakStmt, _ => rfl
+  | _, .returnStmt _, _ => rfl
+  | _, .emit _ _, _ => rfl
+  | _, .revert _ _, _ => rfl
+  | _, .assembly _ _ _, _ => rfl
+
+/-- The catch frame of every `try`-free statement, at every suffix. -/
+theorem catch_frame_of_no_try {k : SCtx} (x : Syn (.stmt k)) (s : St)
+    (h : Ctor.tryStmt ∉ g0NodeCtors x) : CatchFrame x s :=
+  Or.inl (catchOpen_false_of_no_try x (by rw [← g0NodeCtors_eq_nodes]; exact h))
+
+/-- Coverage of a `try`-free statement needs only the else frame. -/
+theorem atom_stmt_coverage_no_try {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
+    (hx : AtomStmt x ts d) (h : Ctor.tryStmt ∉ g0NodeCtors x) (n : Nat) (s : St)
+    (hf : StatementFrame x s) : stmt (n + d + 6) k (locatedInput ts s) = .ok (x, s) :=
+  atom_stmt_coverage hx n s hf (catch_frame_of_no_try x s h)
+
 /-- The root keeps the immutable precedence node contract. -/
 theorem atom_stmt_node {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
     (h : AtomStmt x ts d) : x.precNode = true := by
@@ -852,6 +891,9 @@ theorem atom_items_of_leaf_items {k : SCtx} {xs : Syn (.list (.item k))} {ts : L
 #print axioms atom_items_no_catch
 #print axioms atom_items_block_coverage
 #print axioms atom_items_unchecked_coverage
+#print axioms catchOpen_false_of_no_try
+#print axioms catch_frame_of_no_try
+#print axioms atom_stmt_coverage_no_try
 #print axioms atom_stmt_node
 #print axioms atom_stmt_nearest_else
 #print axioms atom_stmt_token_unique

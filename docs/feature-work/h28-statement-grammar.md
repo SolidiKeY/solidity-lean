@@ -3179,3 +3179,42 @@ the script's last step, was therefore not reached in either run.
 | `check-orphans` | 6384 reachable, 0 orphaned |
 | `check-trust` | 0 findings |
 | `check-doc-paths` | one missing reference, the same one that predates this lane (`after-roadmap-va1.md`) |
+
+## Moved-lane checkpoint AH: coordinator follow-up (catch frame, rethrow body)
+
+The coordinator asked for four more steps on 2026-11-06.
+
+1. **General catch frame.** `catchOpen_false_of_no_try`: a statement with no
+   `try` node (`Ctor.tryStmt ∉ x.nodes.map Node.ctor`) is not catch-open.
+   It is proved by structural recursion on the statement. `catch_frame_of_no_try`
+   states the same over the G0 node twin, so the hypothesis can be checked by
+   the kernel. `atom_stmt_coverage_no_try` is coverage of a `try`-free
+   statement under the else frame alone. Controls:
+   `revert_block_coverage_no_try` (node inventory by `decide +kernel`) and
+   `try_tree_has_try` (the lemma does not apply to a tree with a `try`). This
+   removes the weakening recorded in checkpoint AD: every `try`-free witness
+   gets its catch frame from the lemma.
+2. **Rethrow Yul body.** `rethrow_yul_body : YulBodyAtom … 6` proves the
+   canonical body `{ revert(add(raw, 32), mload(raw)) }` at every fuel of at
+   least 6 and every suffix. Heartbeats are not raised. Small `rfl` steps are
+   composed by rewriting:
+   - the two inner calls (`yul_add_call`, `yul_mload_call`);
+   - the argument list (`rethrow_call_args`, through `sepByAux_comma` and
+     `sepByAux_rparen`);
+   - the outer call (`yul_call_prefix`, `rethrow_call_expr`);
+   - the statement (`yul_stmt_call_prefix`);
+   - the body loop (`yul_body_prefix`, `yulItemStep`, `many_aux_cons`).
+
+   `AtomStmt.asm` now covers the accepted rethrow fixture's statement
+   `assembly ("memory-safe") { … }` (`rethrow_asm_relation`, budget 7, with
+   coverage at every suffix). The note in checkpoint AE that this body is
+   only a fixed-fuel kernel parse is superseded.
+3. **`AtomStmtP` from `AtomStmt`: not derived, and why.** The parse premises
+   (`ExprAtomSemi`, `SimpleAtom`, `ArgsAtom`, …) say that a sub-parser reads
+   the tokens back to the tree. They say nothing about the printer. Deriving
+   the print premises from them needs a printer-after-parser round trip for
+   expressions, simple statements, arguments, parameters and Yul bodies. That
+   round trip belongs to the expression lanes (it implies SOL-EU-type facts),
+   so it is outside this lane. The two relations stay separate, and
+   uniqueness needs both witnesses.
+4. **Full gate:** below.
