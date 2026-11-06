@@ -28,3 +28,7 @@ import tests.h62.item2.«audit-typing».ValuesHeredWitnesses
 /-- error: full-input mismatch for Solidity.SVal.all_mono -/
 #guard_msgs in
 #audit_full_inputs Solidity.SVal.all_mono via H62.AuditTyping.ValuesHeredWitnesses.val_decides
+
+#print axioms H62.AuditTyping.ValuesHeredWitnesses.capability_without_feasible_input
+
+#print axioms H62.AuditTyping.ValuesHeredWitnesses.empty_fields_feasible

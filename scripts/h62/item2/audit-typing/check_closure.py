@@ -177,7 +177,7 @@ def main():
             row["historical_last_change"] = provenance["historical_last_change"]
             row["witness"] = witnesses.get(row["name"])
             row["status"] = "witness-checked" if row["witness"] else "uncovered-interface-classification-and-witness-pending"
-            row["hypothesis_roles"] = "pending; see reviewed witness modules for covered statement classification"
+            row["hypothesis_roles"] = "reviewed-in-hypothesis-roles.json" if row["witness"] else "pending"
         all_rows.sort(key=lambda row: row["name"])
         result = dict(base=BASE, modules=len(provisioned), module_counts=module_counts, declarations=all_rows,
             witnessed=len(witnesses), unprovisioned_modules=module_inventory["unprovisioned"],
@@ -186,6 +186,8 @@ def main():
         uncovered = [r for r in all_rows if not r["witness"]]
         (EVIDENCE/"uncovered-statements.tsv").write_text("name\tmodule\towner_status\n"+"".join(
             r["name"]+"\t"+r["module"]+"\tlive-producer-identity-unconfirmed\n" for r in uncovered))
+        from classify_roles import classify
+        classify()
         print(f"{len(all_rows)} exact theorem constants in {len(provisioned)} modules; 58 witnessed; {len(uncovered)} pending; full assignment pending")
 
 if __name__ == "__main__":

@@ -81,4 +81,33 @@ theorem reject_node_test_not_decides : ¬ rejectB.Decides truthH := by
   have bad : false = true := (h.fix (.prim .bool) 0).mpr True.intro
   cases bad
 
+-- The actual global Mono capability can exist while no value input meets G T.
+def falseG : Ty → Prop := fun _ => False
+
+def monoFalseG : truthH.Mono truthH falseG where
+  gs := fun _ h _ _ => h
+  ga := fun _ h => h
+  gf := fun _ _ h => h
+  gm := fun _ _ h => h
+  arr := fun _ _ _ _ _ => True.intro
+  fix := fun _ _ _ _ => True.intro
+  map := fun _ _ _ _ => True.intro
+
+theorem capability_without_feasible_input :
+    ∃ (P Q : Hered) (G : Ty → Prop) (_hm : P.Mono Q G),
+      ¬ (∃ (T : Ty) (v : SVal T), G T ∧ v.All Q) := by
+  refine ⟨truthH, truthH, falseG, monoFalseG, ?_⟩
+  intro h
+  obtain ⟨_T, _v, hG, _hAll⟩ := h
+  exact hG
+
+-- Do not overgeneralize the value boundary: empty field lists have no
+-- member requiring G, so their universal member condition remains feasible.
+theorem empty_fields_feasible : ∃ (fs : List (Solidity.Name × Ty)) (x : SFields fs),
+    (∀ nt ∈ fs, falseG nt.2) ∧ x.All truthH := by
+  refine ⟨[], .nil, ?_, ?_⟩
+  · intro _nt h
+    cases h
+  · simp only [SFields.All_nil]
+
 end H62.AuditTyping.ValuesHeredWitnesses
