@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h55-sol-20261106",
+  "slug": "source-relations",
+  "original_base": "4d3790eadb8a5212233bc7d5e345817476b2f590",
+  "branch": "codex/solidity-h55-sol-20261106/source-relations",
+  "repository": "/workspace/solidity-lean",
+  "handoff_to": "solidity-v12-v17-20261031/v16-correctness-transfer",
+  "original_existing_paths": [
+    "Solidity/Backend/Scalar/Typed.lean",
+    "Solidity/Frontend/Static/Infer.lean",
+    "Solidity/Lowering/V07/ContextMap.lean",
+    "Solidity/Lowering/V07/Scalar.lean",
+    "Solidity/Source/Agreement/Locals.lean",
+    "Solidity/Source/Agreement/PrimitiveTypes.lean",
+    "Solidity/Source/Infer.lean"
+  ],
+  "original_new_helper_locations": [
+    "tests/h55/source-relations/",
+    "scripts/h55/source-relations/",
+    "docs/feature-work/h55-source-relations.md",
+    "additive same-area helpers with recorded original owner agreement"
+  ],
+  "not_in_original_existing_list": [
+    "Solidity/Frontend/Static/InferComplete.lean",
+    "Solidity/Source/Typing.lean",
+    "Solidity/Lowering/V07/P12NextInterface.lean"
+  ],
+  "current_authority": "H82 standing statement-preserving agreement superseded the blanket exact-file protocol; later explicit stop-and-handoff now prohibits further implementation by this worker",
+  "withdrawn_requests": [
+    "Exact-file approvals for additive lemmas/definitions, proof-only edits, module splits, imports and docs: withdrawn under H82; not real waits."
+  ],
+  "remaining_owner_controls": [
+    "existing statement or depended-on definition body changes",
+    "interface signature changes",
+    "proof budget, axiom-set and exclusion changes",
+    "frozen interfaces require H57 versioned pairs"
+  ],
+  "preserved_constraints": [
+    "intrinsic dependency-free core and Gate G0",
+    "no weakening theorem/premise/exclusion/refusal/observation",
+    "no new axiom/sorry/trust shortcut or maxHeartbeats increase",
+    "no H16 Source/Core ExtCall edits",
+    "H58 HOLD: git-ref relays, single-state-file rewrite, generated axiom audit, Roadmap.Word/Outcome unification",
+    "audit item15 outcome folding HELD pending G49 premise mismatches; no Outcome/Word edits or HOLD pause",
+    "H44 bulk evidence off git with committed manifests",
+    "H41 cache path+sha on VM; no ship-cache.sh",
+    "Lean -j1 LEAN_NUM_THREADS=1, one heavy job, 4GiB reserve, no swap/cap increase, no systemd-run",
+    "matched before/after; stop >10% checking slowdown; no unchanged timing STOP rerun",
+    "independent read-only finder/skeptic, no Lean server",
+    "Terra acceptance covers complete assignment; two failed attempts return to Sol, no effort increase",
+    "preserve H68 full PassCorrect bridges, H69 witness/intentional-contradiction distinction, H78 generated public API shims, H80 editor requirements and H81 current resource policy; full external decision texts not independently retrieved",
+    "no Claude-owned source edits/messages",
+    "no new goal/VM, goal reset/replacement/completion, PR, default-branch push or merge"
+  ],
+  "push": {
+    "attempted": false,
+    "reason": "No H71 push permission was supplied in this thread or available task records; original no-push rule remains. No master push."
+  },
+  "prompt_provenance": {
+    "source": "complete original user assignment and goal-objective text transcribed from original thread; original rendering file not present",
+    "claimed_original_rendered_sha256": "c5222bb554f0fd6ca23005ac052d81a5720cc6d9656c85109d44844326343cbf",
+    "assignment_file_sha256": "427c2220d903c541a8b6d5ff51a9a60f15890830fb5beb6877c6b43b86b1d0f7",
+    "rendered_byte_identity_confirmed": false,
+    "note": "Preserves complete visible original assignment contents. This UTF-8 transcription with trailing newline is authenticated by its own hash; do not claim equality to the frozen rendered-prompt digest unless it matches."
+  },
+  "goal_pause": {
+    "requested_state": "PAUSED",
+    "confirmed": false,
+    "failure": "Only stop_goal(outcome=complete|blocked) is exposed; no pause/state=PAUSED API. Prior stop_goal calls also rejected missing trusted CCA goal/source-turn context. No complete/blocked substitute or new goal attempted for retirement."
+  }
+}

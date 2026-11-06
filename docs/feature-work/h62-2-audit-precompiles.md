@@ -1,5 +1,14 @@
 # H62 item 2: precompile empty-statement audit
 
+**H82 retirement: STOPPED / PAUSED BY USER INSTRUCTION.** No implementation continuation
+is authorized in this worker. Handoff target: solidity-sol-20261103/precompile-agreement.
+Successor integrates final committed head after the final stopped/head acknowledgement.
+No H82 proof edit was started. The exposed goal tool cannot set PAUSED (only complete/blocked);
+no substitute transition, completion or goal reset was performed. Original assignment, full queues,
+exact scope and retirement state are committed under tests/h62/item2/audit-precompiles/handoff/.
+No branch push: H71 authorization content is unavailable and the original no-push rule remains.
+
+
 Status: blocked; this is a committed partial audit, not completion of the four-checkpoint queue.
 Owner: solidity-h62-2-20261106/audit-precompiles. Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-precompiles`.
@@ -246,13 +255,17 @@ fix, separate witness counts, and the coordinator-resolved separate owner theore
 The sole caution improvement (Val C in pow_not_fits) was added and regression-tested.
 Their final review text is saved off git in reviews.md.
 
-Continue the existing goal only; never create/reset a replacement. Original prompt digest:
+The original assignment remains unfinished, but this worker is explicitly retired/paused.
+Only the successor/coordinator may arrange authorized continuation after the final handoff;
+this worker must not resume, create/reset a goal or launch a replacement. Original prompt digest:
 39585f8ffb6629c51fc8d1e0fca1808807d9cb06983d0c558dcdc019112450f3.
 Original VM/environment:
 ccarenv_b64_Y2NhcmVudl83YjM2Yzc3YzA3Njg4MTkxODg3Yjc3MTBhZWVkNzdhMg.
 get_goal is not exposed; the goal objective in this thread is authoritative.
-Ask the coordinator for a fresh thread on this same VM/branch/goal after this saved handoff.
-Do not self-launch another goal. Resume with the migration overlays and the pending G43/V14 compiler-success theorem, then
+The final stopped/head acknowledgement transfers the saved scope to the named successor,
+who is responsible for integration and any authorized continuation. This is not permission for
+automatic implementation in the retired worker. Successor open work includes the migration
+prerequisites and pending actual compiler-success theorem from the current Claude G43 owner, then
 finish 30 joint proof-premise cases, 56 data-domain cases and 28 closed fidelity checks,
 complete exact kernel types/private names,
 Bridge/gas/fork/compiler boundaries, independent milestone reviews and all final passing gates.
