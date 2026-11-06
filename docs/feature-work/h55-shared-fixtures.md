@@ -36,7 +36,7 @@ backfill, and all production gates remain open. H58 HOLD remains in force.
 
 ## Unapplied owner proposal
 
-`scripts/h55/shared-fixtures/extract-failure-owner.patch` is an exact-base
+`python3 scripts/h55/shared-fixtures/extract_failure_packet.py` emits an exact-base
 proposal for the four V08 `extract_failure` copies. Its generator checks every
 original file byte-for-byte against the base and refuses to run if the proposed
 helper already exists. The patch proposes a new same-area helper and edits four
