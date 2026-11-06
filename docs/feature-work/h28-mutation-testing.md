@@ -939,3 +939,16 @@ Published master `79e4972532b0628c539911dc80c4904d776e81ef` is integrated
 by rebase after verifying identical owned files in its rebased delivery. Engine
 and bulk delivery anchors advance together; immutable semantic/cache and
 historical snapshot pins remain unchanged.
+
+
+### Whole selected-suite freeze
+
+`manifests/selected-suite.json` composes all original 17 case payloads unchanged
+with the direct rollback and return-frame mutants: 19 IDs, 15 scored mutants
+and four controls. Its tracked source-attribution index lists every selected
+declaration span. This supplements the exhaustive 290-declaration/308-unit
+candidate census; unselected candidates are not exclusions, equivalences or
+proved soundness. The callback cache remains an explicit VM-only H44 pin,
+authenticated by the frozen bulk index and runner. Current accounting is
+34 fixtures, 13 profiles and 19 case variants. Whole execution and exhaustive
+selection/oracle ledger are pending; `scope_complete` remains false.
