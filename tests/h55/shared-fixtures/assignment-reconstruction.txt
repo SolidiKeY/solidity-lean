@@ -1,0 +1,42 @@
+RECONSTRUCTION ONLY — NOT THE FROZEN RENDERED PROMPT
+The original rendered prompt is identified in the supplied goal as SHA256
+1882f337bf47995576c794ae3ae8d841af0dd4201f20dcf4b5350e7596885839.
+No byte-exact copy or thread-read tool was available on this worker. Obtain
+and verify that original prompt before successor implementation. The adjacent
+candidate-paths.txt is a broad baseline superset, not the original exact list.
+
+Ordered queue: (1) shared private helper/fixture modules for extract_failure,
+fitting, uintSyntax/initial/frame in listed V08/StorageOps/G19 files;
+(2) parameterise Bool/Int/Signed storage delete/copy near-copies; (3) shared
+execS/evalE frame-static Source fixtures per listed family. Each requires
+scope-complete acceptance of original declarations and cases, exact statement
+preservation, full affected-file Lean checks and independent finder/skeptic
+reviews. Report unlisted Readonly run_bind and Yul capacity_exact migration
+to owners, with no unrelated edits. Explicit backfill: reuse and equivalence
+controls. Fresh thread after the three items.
+
+Pinned base 4d3790eadb8a5212233bc7d5e345817476b2f590. Core stays dependency-free
+and intrinsically typed. No maxHeartbeats increase, new axiom/sorry/trust
+shortcut, or weakened theorem, premise, exclusion, refusal or observation.
+No H16 Source/Core ExtCall changes or shared roots/maps/pins edits; supply
+registration fragments. H58 HOLD: git-ref relays, single-state-file rewrite,
+generated axiom audit, Roadmap.Word/Outcome unification. H44 bulk evidence
+stays off Git with a committed hash manifest. H41 retain cache pack and hash.
+Lean serial -j1, LEAN_NUM_THREADS=1, one heavy job, 4 GiB reserve, no swap or
+cap increase, no systemd-run. Record actual Lean/Lake versions and bounded
+passing KeySort before runtime gate; compare before/after identical conditions,
+stop and report slowdown above 10%. Terra scope-complete acceptance, one
+item/commit, two failed attempts return to Sol. Independent read-only finder
+and skeptic reviews without Lean server. Export committed source patch/bundle,
+base/head, complete evidence/checksums and cache path/hash, typed dependencies
+and limitations. No push or merge without applicable authorization.
+
+H82 permits statement-preserving proof-only, additive, split, import and
+prose changes without exact-file owner agreement. Changes to statements,
+definition bodies on which statements depend, interfaces, budgets, axiom sets
+or exclusions need owner approval; frozen interfaces need H57 versioning.
+G19 exact original scope still requires identification. The user ordered this
+worker to stop and hand off to solidity-h62-2-20261106/audit-readonly-calls;
+no automatic continuation is authorized. The exposed goal API has no pause
+operation. This reconstruction is incomplete; other original instructions,
+exact leases, observations, proof budgets and acceptance details remain binding.
