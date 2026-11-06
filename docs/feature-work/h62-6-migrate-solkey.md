@@ -1,6 +1,6 @@
 # H62 item 6: migrate-solkey handoff
 
-Status: **blocked, not complete**. Owner: `solidity-h62-6-20261106/migrate-solkey`.
+Status: **H82 retired; authorized PAUSED intent; not complete**. Owner: `solidity-h62-6-20261106/migrate-solkey`.
 Branch: `codex/solidity-h62-6-20261106/migrate-solkey`.
 Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Repository: `/workspace/migrate-solkey`. Original clean checkout at
@@ -185,3 +185,33 @@ a blocker. Remaining obligations: owner Syntax migration, complete new closure,
 new frozen-interface comparison, full required gates, full clean wall/RSS
 comparison and root/gate resolution of diagnostic RSS. Keep goal blocked, not
 complete. No push, merge or deployment authorization is implied.
+
+## H82 final retirement disposition
+
+H82 stop-and-handoff and the explicit H70/H82 ordering correction control this
+retirement. Generic standing-rule continuation does not revoke that specific
+instruction. No new proof work, Lean runs, timing reruns, source changes or shim
+implementation occurred in the retirement checkpoint. Successor integration is
+owned by `solidity-h62-6-20261106/migrate-root-gate` after final stopped/head
+acknowledgement. This worker stops; no automatic implementation continuation is
+authorized. Preserve the VM, branch and all evidence.
+
+The authenticated patch/bundle includes the original visible assignment copy,
+complete original work/backfill queue, exact scope manifest, schema-v1 waits,
+and later owner-ticket provenance under
+`tests/h62/item6/migrate-solkey/retirement/`; SHA256SUMS authenticates each file.
+Original renderer-byte equality to the supplied prompt reference cannot be
+asserted: no get_goal/history export tool is exposed. The full visible original
+user assignment, including owner table, is copied from this same thread and its
+actual digest is provided. Coordinator-local paths remain provenance only.
+
+Push not performed: no available H71 text establishes lane-push permission; the
+original no-push instruction therefore remains. No master push/merge.
+
+Goal PAUSED cannot be set through this session's exposed tools: only stop_goal
+with outcome complete|blocked exists, and no pause/get/update tool is available.
+Do not substitute complete/blocked for PAUSED, create/reset a goal, or resume.
+The local continuation state records authorized PAUSED intent and no active
+work. Coordinator must apply the backend pause using its trusted goal context.
+All outstanding migration/backfill obligations and waits transfer as recorded;
+none are silently complete or waived. Prior sealed handoff is retained.
