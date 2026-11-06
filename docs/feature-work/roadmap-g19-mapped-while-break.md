@@ -1,4 +1,6 @@
-# G19 mapped assignment-condition while/break
+# G19 context-related assignment-condition while/break
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 This checkpoint extends the existing V07 ContextMap and assignment operand for one source shape: `while (i = a) { break; }` with Boolean caller locals. It introduces no separate lowering relation or source evaluator. The assignment is evaluated once for either Boolean result; the target scopes away only its private Boolean capture.
 

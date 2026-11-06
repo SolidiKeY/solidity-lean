@@ -1,4 +1,6 @@
-# G19 mapped do-while assignment and break
+# G19 context-related do-while assignment and break
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 This component extends the existing V07 ContextMap/assignment operand with one actual source shape: a do-while body consisting of a Boolean local assignment followed by unconditional break. The trailing condition is any typed Source Boolean expression, including an effectful expression; the proof establishes that it is not evaluated. No second lowering relation, evaluator, admission predicate or source restriction is introduced.
 
