@@ -1,8 +1,7 @@
 {
   "schema": 1,
   "authorization": "H44",
-  "source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
-  "delivery_base": "af972480b7eb44498a7d754f0761dd3adf5e39eb",
+  "delivery_base": "6cf853aea0417155aca29ddb91f1767d3f3a3cc4",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
   "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
@@ -350,7 +349,7 @@
     }
   },
   "frame_proof_pack": {
-    "authorization": "H41",
+    "authorization": "H44",
     "status": "ready-for-coordinator-pull",
     "archive": "/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz",
     "bytes": 6363366,
@@ -373,6 +372,90 @@
     "member_manifest": "tests/h28-sol/mutation-testing/evidence/frame-pilot-e198e3fb/manifest.json",
     "coordinator_pull_observed": false,
     "archive_seconds": 5.854443480000555,
-    "process_maxrss_kib": 23556
+    "process_maxrss_kib": 23556,
+    "cache_delivery_authorization": "H41"
+  },
+  "snapshot_source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
+  "selected_proof_pack_f8b65736": {
+    "authorization": "H44",
+    "cache_delivery_authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-selected-export-f8b65736/proof-worlds.tar.gz",
+    "bytes": 56215388,
+    "sha256": "17836afbe0df1a8c3836a99a524363888716778d45158779f1a334400531350d",
+    "members": 285,
+    "input_head": "f8b657366fc38e1aad85ba080d14bb2c249448eb",
+    "check_count": 113,
+    "axiom_export_count": 321,
+    "compiled_artifact_count": 78,
+    "kernel_export_count": 294,
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/selected-suite-f8b65736/manifest.json",
+    "coordinator_pull_observed": false,
+    "archive_seconds": 51.20917440800258,
+    "process_maxrss_kib": 73652
+  },
+  "selected_proof_pack": {
+    "authorization": "H44",
+    "cache_delivery_authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-selected-export-aab23327/proof-worlds.tar.gz",
+    "bytes": 56216293,
+    "sha256": "32625cd27ee6171cf5d206417d0ae491b6837649521fcd11e9b9de4a2cdc3748",
+    "members": 288,
+    "input_head": "aab23327962bcc278dd8fee43cd85652f9377fc1",
+    "check_count": 113,
+    "axiom_export_count": 321,
+    "compiled_artifact_count": 78,
+    "kernel_export_count": 294,
+    "program_counts": {
+      "case_ids": 19,
+      "scored_ids": 15,
+      "distinct_scored_programs": 15,
+      "unscored_runner_controls": 4,
+      "distinct_programs_all_roles": 18,
+      "roles": {
+        "known-kill": 1,
+        "mutant": 11,
+        "invalid-control": 1,
+        "equivalent-control": 1,
+        "runner-survivor-control": 1,
+        "negative-control": 4
+      }
+    },
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/selected-suite-aab23327/manifest.json",
+    "coordinator_pull_observed": false,
+    "archive_seconds": 50.43605456399746,
+    "process_maxrss_kib": 75772
+  },
+  "final_replay_validation": {
+    "authorization": "H44",
+    "archive": "/workspace/h28-final-replay-after-6cf/validation.tar.gz",
+    "bytes": 2746,
+    "sha256": "dc3e3c3a11e3c4acbdb87541aec7c0960b87eecd658fd17cc54c8ec1f0a92466",
+    "members": 17,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/final-replay-50a5679e/manifest.json",
+    "gate_head": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+    "commands": 7,
+    "scope_complete": false
   }
 }

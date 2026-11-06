@@ -272,3 +272,41 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ExpressionUniqueness/YieldBalance.lean` | Balance algebra for the intrinsic expression printer These token and success-predicate lemmas support the recursive expression/type/ argument category closure. |
 | `Frontend/ExpressionUniqueness/YieldShape.lean` | Structural facts about successful intrinsic expression yields A small success-predicate calculus for the existing state printer proves facts about arbitrary inputs and arbitrary remaining layouts. |
 | `Frontend/ExpressionUniqueness/YieldSplit.lean` | Invert actual printer executions into successful child executions These are state-printer inversion facts. |
+
+### SOL-QN final target, C3 and normalization adequacy
+
+| Module | Purpose |
+|---|---|
+| `Frontend/QualifiedUnits/Linearization.lean` | Independent C3 hierarchy judgment on original declaration identities; `order_iff` (the `idUniverse` bound never refuses a hierarchy), precedence and acyclicity. |
+| `Frontend/QualifiedUnits/Target.lean` | The final SOL-QN target relation, including inherited overloads; `target_iff` against the public signature-aware resolver. |
+| `Frontend/QualifiedUnits/NormalizationAdequacy.lean` | Structural adequacy of signature normalization against Source elaboration on every supported signature category. |
+| `Frontend/QualifiedUnits/TargetControls.lean` | Kernel controls for the independent C3 judgment, the final target relation and normalization adequacy. |
+| `Frontend/QualifiedUnits/ConstructorFixtures.lean` | One typed specimen and literal expected traversal per existing Source constructor (all 112). |
+| `Frontend/QualifiedUnits/Layout.lean` | Original owner-body layout: universal frozen source-layout theorem and actual owner-body member correspondence. |
+| `Frontend/QualifiedUnits/MergeSpecification.lean` | Independent deterministic C3 merge judgment on original declaration identities; `merge_iff` against `mergeOwners`. |
+| `Frontend/QualifiedUnits/ReferenceCoverage.lean` | Universal preservation of frozen explicit references and all finite identifier/member paths. |
+| `Frontend/QualifiedUnits/SignatureResolution.lean` | Signature-aware declaration resolution over original Source identities (the public consumer `resolve`). |
+| `Frontend/QualifiedUnits/SignatureResolutionControls.lean` | Kernel observations for the actual signature-aware resolver, paired with each main compiler query. |
+| `Frontend/StatementGrammarH28/G0Nodes.lean` | Gate G0 twin of `Syn.nodes` constructors (`g0NodeCtors`, `Syn.casesOn` with structural recursion) read by the fixture observers, linked by `g0NodeCtors_eq_nodes`. |
+| `Frontend/StatementGrammarH28/AtomConditional.lean` | Statement-grammar `if`/`while`/`do`/empty-`for` coverage with arbitrary expression conditions under the exposed atom premise `ExprAtomRparen`; nearest else and token uniqueness inside the fragment. |
+| `Frontend/StatementGrammarH28/AtomNested.lean` | Mutual `AtomStmt`/`AtomItems`/`AtomCatch`/`AtomCatches` fragment: arbitrarily nested blocks, control leaves, `return e;`, `unchecked` items, atom-condition `if`/`while`/`do`/`for`, `for` initialisers, simple statements, `emit`/`revert`, contextual `revert` expression statements, `try`/`catch` and `assembly` (stated sub-parser premises); coverage by mutual structural recursion with syntax-derived budgets under the else and catch frames, nearest else, token and prefix uniqueness. |
+| `Frontend/StatementGrammarH28/G0Rejections.lean` | Gate G0 twins of the profile observation: `Syn.nodes` with exclusions, `Syn.placeholders`, `isLiteralBase` and `Syn.rejections` (`g0Rejections`), each linked to Source (`g0Rejections_eq`), and `g0IsRethrow`, the twin of `isRethrow` linked by `g0IsRethrow_eq`. |
+| `Frontend/StatementGrammarH28/AtomSimple.lean` | Simple statements through the stated `simple`-parser premise `SimpleAtom`: the dispatch lemma for `simpleHead` tokens, `simpleStmt` coverage, block-loop step and the `for`-header prefix with an initialiser. |
+| `Frontend/StatementGrammarH28/AtomCall.lean` | `emit`/`revert` statement steps under the stated path and argument premises `PathAtom`, `ArgsAtom`. |
+| `Frontend/StatementGrammarH28/AtomYield.lean` | Printer premise `AtomYield`, the yield relation `AtomYields` for the atom-condition fragment, `Derives` characterisation and yield uniqueness (`atom_statements_yield_unique`). |
+| `Frontend/StatementGrammarH28/AtomTry.lean` | `try`/catch premises `ExprAtomBrace`, `ExprAtomReturns`, `RetsAtom`, `ParamsAtom`; the catch-open spine `catchOpen` and `CatchFrame`; the actual `try` and catch-signature step equations. |
+| `Frontend/StatementGrammarH28/AtomAsm.lean` | `assembly` premises `YulBodyAtom` (on `yulBody`) and `FlagsAtom` (on the flag list); the actual `assembly` step `asm_step`; the canonical rethrow body `rethrow_yul_body` by composed parser steps. |
+| `Frontend/StatementGrammarH28/AtomDerives.lean` | Printer premises `Prints`/`PrintsTo`, the print relations `AtomStmtP`/`AtomItemsP`/`AtomCatchP`/`AtomCatchesP`, layout-free yields, `Derives` characterisation and yield uniqueness for the mutual fragment. |
+| `SolcValidation/IrSyntax.lean`, `SolcValidation/IrParse.lean` | Intrinsic object-dialect Yul syntax of solc `--ir` text and its certifying parser: a result carries proof that printing it reproduces the lexed tokens ([VT1](../feature-work/fullscope-vt1.md)). |
+| `SolcValidation/IrCensus.lean` | Function definitions and operation uses per object, read off the parsed tree. |
+| `SolcValidation/IrEval.lean`, `SolcValidation/IrEvalFuel.lean` | Fuelled interpreter of the parsed IR over a consumer-supplied EVM `Machine`: object operations through the checked data table, immutables and links; adapter laws and fuel stability. |
+| `SolcValidation/IrHelpers.lean`, `SolcValidation/IrHelperSim.lean`, `SolcValidation/IrHelperSource.lean` | Real solc checked-arithmetic helpers as certified terms; their simulation on any machine and match to the source operators `BinOp.evalNum` (T02 helper level). |
+| `SolcValidation/IrHelperSteps.lean` | Statement-level steps of the helpers (cleanup and panic calls, pure operations, `if` with a panic) composed by `rw`; kernel proofs of `checked_sub_t_uint256`/`checked_div_t_int256` and call-site forms. |
+| `SolcValidation/IrExpHelpers.lean`, `SolcValidation/IrExpModel.lean`, `SolcValidation/IrExpSim.lean` | solc's `checked_exp_t_uint256_t_uint256` group as a certified term, its arithmetic model (exact below `2^256`, panic otherwise) and its simulation on any machine. |
+| `SolcValidation/IrAbiHelpers.lean`, `SolcValidation/IrAbiSim.lean`, `SolcValidation/IrPushHelpers.lean`, `SolcValidation/IrPushSim.lean` | solc's `uint256` calldata decoder and storage-array push as certified terms, and their exact machine-effect sequences on any machine. |
+| `SolcValidation/IrRename.lean` | Renaming of call positions between function environments and its simulation: renamed IR code evaluates in the target environment exactly as the original (`evalExpr_ren`, `evalBlock_ren`, `Sim.flat`). |
+| `SolcValidation/IrCensusCreation.lean`, `SolcValidation/IrCensusDeployed.lean`, `SolcValidation/IrLinkedCode.lean`, `SolcValidation/IrCensusTree.lean` | The parsed `Census` and `LinkedMath` `--ir` trees as generated terms, certified against the quoted fixture texts by kernel evaluation (`census_certified`, `linked_certified`). |
+| `SolcValidation/IrCensusMaps.lean`, `SolcValidation/IrCensusTransfer.lean` | Each extracted helper group located in the parsed objects' groups; the lookup lemmas, environment simulations and the helper theorems restated for the parsed programs. |
+| `SolcValidation/IrCensusUnique.lean` | One definition per function name in every scope of the parsed Census/LinkedMath trees; name lookup lands on the transferred helpers; duplicate-definition negative controls. |
+| `SolcValidation/IrExpEvm.lean` | `checked_exp`'s model and imported IR body against this compiler's checked `**` code (`Evm/Exp.lean`'s `exp_tail`) and the EVM `EXP` value. |
+| `SolcValidation/IrErase.lean`, `SolcValidation/IrCensusParse.lean` | An injective, decidable erasure of the intrinsic IR tree; the parser's own result for the LinkedMath fixture pinned by kernel evaluation. |
