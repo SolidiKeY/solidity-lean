@@ -155,3 +155,17 @@ no artifact and does not drop system-global caches. This frees unused archive
 pages before the reserve guard; it does not establish a fully cold OS/source
 cache. Clean build means fresh isolated Lean artifacts with no artifact restores.
 The same cache-release procedure and resident-memory policy apply to both runs.
+
+## Build-facet correction
+
+Independent finder and skeptic confirmed that pinned Lake library `leanArts`
+emits `.olean`, `.ilean`, and C (`Lake/Build/Module.lean` and `Actions.lean`).
+The previous `-o`-only runs are checking-only experiments, not accepted library
+build timings. Old-clean-3 was intentionally interrupted for this correction.
+The runner now offers `--lean-arts` and checks that all three artifacts exist
+for every successful module. The clean matching-facet attempt is
+`old-lean-arts-1`, using the same serial bounds and cache-release policy.
+Both old/new timed attempts must use `--lean-arts`. Native object compilation
+and linking are additional executable facets; the repository final
+`./run-lean.sh` gate remains required. These serial measurements exclude Lake
+orchestration and hashing overhead, and do not replace that gate.
