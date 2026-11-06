@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryCopies/NestedLivePipeline.lean:Solidity.Backend.MemoryCopies.nested_live_pipeline_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipeline.lean:Solidity.Backend.MemoryCopies.nestedLivePipeline": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

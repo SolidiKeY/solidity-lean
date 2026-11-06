@@ -152,3 +152,16 @@
 | `Evm/MemoryLoopHorizonObjectOldHeaders.lean` | Physical preservation of every original dynamic-array header by the actual allocating loop target. |
 | `Evm/MemoryLoopHorizonObjectOldStructs.lean` | Actual allocating target execution preserves encoded primitive and reference fields in original typed struct objects. |
 | `Evm/MemoryLoopHorizonObjectRetainedNew.lean` | Retention of arrays created before a finite allocating-loop pause. |
+| `Evm/MemoryLoopHorizonObjectCheckedNested.lean` | Checked typed nested read selection after allocating-loop execution. |
+| `Evm/MemoryLoopHorizonObjectCheckedReads.lean` | Checked typed read selection after actual allocating-loop execution. |
+| `Evm/MemoryLoopHorizonObjectLocalAlias.lean` | Actual initialized memory locals survive the allocating loop. |
+| `Evm/MemoryLoopHorizonObjectLocalAliasControls.lean` | Inhabited stored-local aliases across genuine allocating-loop execution. |
+| `Evm/MemoryLoopHorizonObjectLocalBounds.lean` | Exact bounds reverts for loads through retained initialized array locals. |
+| `Evm/MemoryLoopHorizonObjectLocalLoadControls.lean` | Inhabited success and bounds-revert observations after allocating loops. |
+| `Evm/MemoryLoopHorizonObjectLocalLoads.lean` | Actual target loads through retained initialized array locals. |
+| `Evm/MemoryLoopHorizonObjectLocalReads.lean` | Reads through actual initialized array locals after allocating loops. |
+| `Evm/MemoryLoopHorizonObjectLocalRefLoads.lean` | Actual reference-valued loads through retained array locals. |
+| `Evm/MemoryLoopHorizonObjectNestedBounds.lean` | Exact parent- or child-stage bounds reverts after allocating loops. |
+| `Evm/MemoryLoopHorizonObjectNestedControls.lean` | Inhabited nested read success and two bounds-failure stages. |
+| `Evm/MemoryLoopHorizonObjectNestedLoads.lean` | Actual nested loads through a retained parent local after loop allocation. |
+| `Evm/MemoryLoopHorizonObjectRetainedRefs.lean` | Typed identities and pointer values retained across actual allocating loop resumption. |
