@@ -1,0 +1,34 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.checked_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.duplicate_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.empty_table": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.later_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.malformed_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.mutation_not_noop": [],
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean:Solidity.Backend.AbiEntry.SelectorRoutesControls.unmatched_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

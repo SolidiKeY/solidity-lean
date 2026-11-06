@@ -19,13 +19,13 @@ theorem typed : declaration.paramTys environment=some types := rfl
 
 def frame := SourceCustomErrorControls.frame
 def empty : St environment :=
- ⟨⟨⟨fun _=>Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩⟩
+ ⟨⟨⟨fun _=>Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩,Source.FailureExecution.Cursor.empty⟩
 def state (first second third : Roadmap.Bytes) : St environment :=
  {empty with
   heap:=((((Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [9,7]⟩).1.alloc
    ⟨.string .memory,.string first⟩).1.alloc ⟨.bytes .memory,.bytes second⟩).1.alloc
    ⟨.string .memory,.string third⟩).1
-  ex:=empty.ex.run [.account frame.this (fun account=>{account with balance:=⟨73,by decide +kernel⟩,nonce:=4,storage:=account.storage.write SourceCustomErrorControls.saved (.bool true)}),
+  ex:=empty.ex.run [.account frame.this (fun account=>{account with balance:=73,nonce:=4,storage:=account.storage.write SourceCustomErrorControls.saved (.bool true)}),
    .transient frame.this (fun transient=>transient.write SourceCustomErrorControls.scratch (.bool true))]
   events:=[.call frame.this ⟨7,by decide +kernel⟩ [0,255] false]
   logs:=[(frame.this,[171,0,255])]

@@ -6,7 +6,7 @@ namespace Solidity.Backend.CalldataPackets.RawAddress.Controls
 
 def E0 : Source.Env := ⟨[]⟩
 def initial : Source.EMState E0 [] := (.nil,⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
-    Source.Heap.empty,[],[],⟨[],.nil⟩⟩)
+    Source.Heap.empty,[],[],⟨[],.nil⟩,Source.FailureExecution.Cursor.empty⟩)
 def addr (n : Nat) : Source.Val E0.layout (.address false) :=
   .address ⟨n % 2^160,Nat.mod_lt _ (by decide)⟩
 def old : Source.EMState E0 [] :=
