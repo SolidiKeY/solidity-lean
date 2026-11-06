@@ -32,8 +32,8 @@
       "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint202-final/1.log"
     },
     "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean": {
-      "sha256": "455a123ef3cce3ba992f8804309fe4a71a217b226e71936eaffab887d33dc01e",
-      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint204-focused-9bf66bb7b100.log"
+      "sha256": "4ddf34ba7d724ef2ef3c7eb6dbcc4995378dc76a5dddf8bd10e6cd8552f32ac2",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint205-focused-78cda2072355.log"
     }
   }
 }

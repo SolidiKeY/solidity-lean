@@ -138,4 +138,118 @@ theorem extra_preimage_breaks_regions :
 #guard_msgs (whitespace := lax) in #print axioms both_cells_change
 /-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.extra_preimage_breaks_regions' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms extra_preimage_breaks_regions
+
+/-- Exact membership transport retains query coverage in the SAME run. -/
+theorem membership_joint : (∀ p, hash p < 32) ∧ 4 ≤ 32 ∧ 1 ≤ 32 ∧
+    RegionsDisjoint 32 4 hash (List.range 1) preimages ∧
+    (∀ l ∈ touched a 0 2, l.Bounded 4 1) ∧
+    (∀ l ∈ touched a 0 2, ∀ p ∈ l.pres 32 hash, p ∈ preimages) ∧
+    a.Bounded 4 1 ∧ (∀ p ∈ a.pres 32 hash, p ∈ preimages) := by
+  exact ⟨hash_bound, by decide, by decide, regions, bounded_left, hashed_left,
+    bounded_a, fun _ hp => hp⟩
+
+theorem membership_apply :
+    a.word 32 hash ∈ (touched a 0 2).map (Solidity.Storage.Loc.word 32 hash) ↔
+      a ∈ touched a 0 2 :=
+  touched_word_iff hash_bound (by decide) (by decide) regions a a 0 2 bounded_left
+    hashed_left bounded_a (fun _ hp => hp)
+
+/-- Distinctness is an additional premise, witnessed on a nonempty singleton. -/
+theorem nodup_joint : (∀ p, hash p < 32) ∧ 4 ≤ 32 ∧ 1 ≤ 32 ∧
+    RegionsDisjoint 32 4 hash (List.range 1) preimages ∧
+    (∀ l ∈ touched b 1 1, l.Bounded 4 1) ∧
+    (∀ l ∈ touched b 1 1, ∀ p ∈ l.pres 32 hash, p ∈ preimages) ∧
+    (touched b 1 1).Nodup := by
+  exact ⟨hash_bound, by decide, by decide, regions, bounded_right, hashed_right, by decide⟩
+
+theorem nodup_apply : ((touched b 1 1).map (Solidity.Storage.Loc.word 32 hash)).Nodup :=
+  touched_word_nodup hash_bound (by decide) (by decide) regions b 1 1 bounded_right hashed_right (by decide)
+
+theorem disjoint_joint : (∀ p, hash p < 32) ∧ 4 ≤ 32 ∧ 1 ≤ 32 ∧
+    RegionsDisjoint 32 4 hash (List.range 1) preimages ∧
+    (∀ l ∈ touched a 0 2, l.Bounded 4 1) ∧
+    (∀ l ∈ touched b 1 1, l.Bounded 4 1) ∧
+    (∀ l ∈ touched a 0 2, ∀ p ∈ l.pres 32 hash, p ∈ preimages) ∧
+    (∀ l ∈ touched b 1 1, ∀ p ∈ l.pres 32 hash, p ∈ preimages) ∧
+    (∀ l ∈ touched a 0 2, ∀ q ∈ touched b 1 1, l ≠ q) := families_joint
+
+theorem disjoint_apply : ∀ l ∈ touched a 0 2, ∀ q ∈ touched b 1 1,
+    l.word 32 hash ≠ q.word 32 hash :=
+  touched_disjoint_words hash_bound (by decide) (by decide) regions a b 0 2 1 1
+    bounded_left bounded_right hashed_left hashed_right separate
+
+theorem write_joint : (∀ p, hash p < 32) ∧ 4 ≤ 32 ∧ 1 ≤ 32 ∧
+    RegionsDisjoint 32 4 hash (List.range 1) preimages ∧
+    (∀ l ∈ touched a 0 2, l.Bounded 4 1) ∧
+    (∀ l ∈ touched b 1 1, l.Bounded 4 1) ∧
+    (∀ l ∈ touched a 0 2, ∀ p ∈ l.pres 32 hash, p ∈ preimages) ∧
+    (∀ l ∈ touched b 1 1, ∀ p ∈ l.pres 32 hash, p ∈ preimages) ∧
+    (∀ l ∈ touched a 0 2, ∀ q ∈ touched b 1 1, l ≠ q) ∧
+    a ∈ touched a 0 2 ∧ b ∈ touched b 1 1 := by
+  exact ⟨hash_bound, by decide, by decide, regions, bounded_left, bounded_right,
+    hashed_left, hashed_right, separate, by decide, by decide⟩
+
+theorem write_apply :
+    TypeGraph.Slots.write (TypeGraph.Slots.write slots (a.word 32 hash) (.prim false))
+      (b.word 32 hash) (.prim true) =
+    TypeGraph.Slots.write (TypeGraph.Slots.write slots (b.word 32 hash) (.prim true))
+      (a.word 32 hash) (.prim false) :=
+  generated_writes_commute hash_bound (by decide) (by decide) regions a b 0 2 1 1
+    bounded_left bounded_right hashed_left hashed_right separate a b (by decide)
+    (by decide) slots (.prim false) (.prim true)
+
+/-- Duplicate accesses are not removed or silently granted Nodup. -/
+theorem duplicate_retained :
+    (touched a 0 2).map (Solidity.Storage.Loc.word 32 hash) = [8, 8] ∧
+    ¬ (touched a 0 2).Nodup := by decide
+
+theorem positive_index_joint : 0 < (1 : Nat) := by decide
+
+theorem frame_joint : 0 < (1 : Nat) ∧ a.add (2 * 1) ∉ touched a 1 1 := by decide
+
+def target (_ : Fin 3) : TypeGraph.Slot graph (.prim .bool) := .present (.prim false)
+def initial (i : Fin 3) := slots i.val
+
+theorem frame_apply : visit target 1 initial ⟨2, by decide⟩ = initial ⟨2, by decide⟩ :=
+  visit_frame_of_not_touched target initial a 1 1 ⟨2, by decide⟩ (by decide) (by decide)
+
+theorem frame_changes_inside : visit target 1 initial ⟨0, by decide⟩ = .present (.prim false) ∧
+    initial ⟨0, by decide⟩ = .present (.prim true) ∧
+    visit target 1 initial ⟨2, by decide⟩ = initial ⟨2, by decide⟩ := by exact ⟨rfl, rfl, rfl⟩
+
+/-- These two contracts have data binders only; they are not logical bundles. -/
+theorem membership_inputs : Nonempty (Solidity.Storage.Loc × Solidity.Storage.Loc × Nat × Nat) :=
+  ⟨(a, b, 1, 2)⟩
+theorem length_inputs : Nonempty (Solidity.Storage.Loc × Nat × Nat) := ⟨(a, 0, 2)⟩
+
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.membership_joint' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms membership_joint
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.membership_apply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms membership_apply
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.nodup_joint' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms nodup_joint
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.nodup_apply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nodup_apply
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.disjoint_joint' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms disjoint_joint
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.disjoint_apply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms disjoint_apply
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.write_joint' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms write_joint
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.write_apply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_apply
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.duplicate_retained' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms duplicate_retained
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.positive_index_joint' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms positive_index_joint
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.frame_joint' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms frame_joint
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.frame_apply' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms frame_apply
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.frame_changes_inside' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms frame_changes_inside
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.membership_inputs' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms membership_inputs
+/-- info: 'H62.StorageAudit.GeneratedFamilyWitnesses.length_inputs' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_inputs
 end H62.StorageAudit.GeneratedFamilyWitnesses

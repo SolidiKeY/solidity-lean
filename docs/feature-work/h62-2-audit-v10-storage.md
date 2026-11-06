@@ -528,3 +528,23 @@ Independent read-only finder and skeptic found no semantic or coverage issue.
 The frozen reference ledger now maps 30 of 3281 conservative rows: 25 joint
 bundles and five data inhabitants, leaving 3251 unmapped. This is additive
 test-only progress; the failed C203 full checkpoint is not superseded.
+
+## Exact touched-set transport inputs
+
+The same finite generated-family packet now witnesses the six logical-premise
+contracts in Touched and classifies its two data-only contracts separately.
+Numeric membership retains query bounds and query preimages. Nodup uses a
+nonempty singleton; the repeated left list and its numeric duplicates are
+explicitly retained, rather than passed to the distinctness contract.
+Cross-family numeric separation and individual write commutation retain the
+original per-run region and footprint coverage premises. A positive-stride
+visit changes index zero and preserves index two outside its footprint.
+
+The extended module passes all 32 theorem axiom guards under unchanged limits.
+The initial strengthened conjunction proof failed elaboration; that recovery
+artifact was rejected, and the corrected explicit tuple passed before guard
+acceptance. Independent read-only finder and skeptic found no fidelity issue.
+The frozen registry now records 38 mapped rows: 31 joint bundles and seven
+data inhabitants, with 3243 rows unmapped. These finite test witnesses do not
+close general compiler success, physical adequacy, migration STOP holds or the
+failed C203 full validation. Existing production statements remain unchanged.
