@@ -1032,3 +1032,43 @@ explicitly authorized pushing this corrected lane head; no merge/PR/default
 branch change or goal mutation is authorized/performed. Whole original parity
 assignment remains partial with all previous kernel/runtime/rendered/performance/
 adversarial/paired-judge obligations and actual failed gates still outstanding.
+
+### Restored inputs and original command keybindings — 2026-11-06
+
+Explicit Q-PUSH-ADB authorization fast-forwarded only the remote lane from bca
+to adb; no force/master push. Restart had removed the temporary lock directory,
+so it was recreated before Git ran. Both committed checksum-bound input bundles
+were restored at their gate paths with local DAFNY_PARITY_BULK_DIR and
+DAFNY_PARITY_INVENTORY_DIR set. All376 evidence files and the484-row inventory
+were already present; only the generated gate report differed and was preserved
+before restoration. Unchanged gate still exited1,0/484,inventory passed: rows
+were incomplete, not rejected for absent bulk. Preserved raw report and restore
+receipts are under `/workspace/dafny-parity-resume-20261106/`.
+
+Original contribution slice: build/run/test keys copy pinned source chords,
+including macOS declarations, and invoke existing truthful local commands only
+in trusted file-backed Solidity editors. F6/custom and F7/F8 trace remain absent,
+not substituted with verification. Missing-binding regression retained.
+Existing headless harness now has `--suite commands --targets local`: actual
+Linux renderer Ctrl+Shift+B leads to fresh compiler output, exact current-source
+hash and AST header, with portable AST/rendered screenshot/DOM/accessibility
+captures. Dirty buffer is set to CRLF through actual VSCode edit API and contains
+Unicode; Build saves it and disk bytes must match exactly. Earlier mixed-EOL
+fixture failed because VSCode normalizes to its model EOL; failure retained and
+no exact-source predicate weakened. Ordinary Build sample also retained.
+
+This proves neither native Dafny compilation equivalence, concrete Run/Test,
+macOS dispatch nor kernel proof. Automatic verification is disabled. Linux
+compiler AST is not a binary/proof result. Status-bar cancellation display after
+Build remains visible and is not reclassified as proved. Source guards and full
+proof-suite requirements remain intact; unfocused key dispatch is rejected.
+Independent finder/skeptic final reviews found no defect.
+
+Two native scenarios are additive judged obligations:486 total, all previous484
+and frozen270 retained. Updated inventory bundle/index and new evidence archive
+remain VM-only, bound by committed inventory and keybindings manifests. Restore
+uses new inventory directory `/workspace/dafny-parity-resume-20261106`; previous
+archives/manifests/checksums remain untouched. Final exact-head receipts follow
+in that directory. Whole original implementation/proof/rendered/performance/
+adversarial/scaling/paired-judge/final-gate queue remains unfinished; no budgets,
+Lean sources/theorems, row requirements, judge prompts or goal status changed.

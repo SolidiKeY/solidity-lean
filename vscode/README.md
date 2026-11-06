@@ -258,3 +258,16 @@ them; compiler Build supports the existing compiler configuration.
 
 Human H49 excludes the proof-help action. Ordinary output and issue reporting
 remain separate actions; no proof-help destination is selected.
+
+Build uses **Ctrl+Shift+B** (**⇧⌘B** on macOS); Run uses **F5**; concrete Test uses
+**Shift+F5**. These bindings apply only to a focused, file-backed Solidity editor
+in a trusted workspace and invoke the documented compiler-AST/concrete typed-model
+commands. They do not turn compilation or concrete tests into proof results.
+Custom-build and verification-trace shortcuts remain unavailable.
+
+The existing parity launcher supports `--suite commands --targets local` for a
+native Linux Ctrl+Shift+B observation in real VS Code. It starts with a dirty
+CRLF/UTF16 buffer, checks save and compiler AST source identity, and captures the
+renderer. Automatic verification is disabled. This suite does not measure proof
+performance or establish Dafny compile/run/test equivalence; Run/Test and macOS
+key dispatch still require native observations.
