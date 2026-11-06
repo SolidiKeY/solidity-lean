@@ -104,3 +104,27 @@ integration; V15 canonical H68 P10 execution endpoints. These do not prevent
 continuing independent G40 controls or G46 branch work. G40 full composition,
 remaining fixture replay, G46.02 and G46.03 stay open. No pending exact-file
 request for these statement-preserving test additions is retained under H82.
+
+
+## H82 consolidation intake
+
+The surviving ABI-entry VM retains the existing goal and branch. The listed
+predecessor `af9915007218b3213ee500d54bd0b6b0103264d4` is already an ancestor;
+newer replay commit `3c20ce40590a18717ab802b516e8f06de9f9b24d` is preserved.
+Published master `41f8b61be` was adopted without discarding committed work.
+No audit-abi-world final relay exists under the local peer-input directory.
+Its final head, authenticated cumulative bundle/checksums, frozen rendered
+prompt, exact scope-manifest bytes and explicit stopped/goal-paused
+acknowledgement remain an intake wait. No member scope is edited or merged,
+no stop requested and no retirement acceptance asserted before that barrier.
+The coordinator was asked for the relay; host receipt paths are not treated
+as VM-readable files. No original audit scope is inferred from the summary.
+
+Independent checks continue on this lane. Actual Lean/Lake versions and a
+fresh successful `lake build Solidity.KeySort` are recorded in the intake
+evidence (two jobs, 0.141 seconds shell wall time). This prerequisite alone
+is not RUNTIME_GATE_PASS, full checkpoint validation or whole-lane completion.
+The first timing wrapper failed because /usr/bin/time is absent; Bash timing
+was used for the actual successful run. No known timing STOP was retried.
+Retiring-member work is queued only after authenticated intake; original
+G40 controls/replay/composition and G46 branch obligations remain open.
