@@ -550,6 +550,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/BudgetedReference.lean` | Division-based runtime budget checking and total complete allocator success/refusal for the unchanged reference constructor. |
 | `Backend/MemoryCopies/BudgetedReferenceControls.lean` | Populated empty/long/reference defaults, oversized unused-child success, overflow/strict-budget refusals and same-heap child contents. |
 | `Backend/MemoryCopies/FixedReferenceStorageTurnInterface.lean` | Headerless fixed-parent storage-child step with actual checked copying, allocator/gap/framing and refusal contracts. |
+| `Backend/MemoryCopies/FixedReferenceStorageTurn.lean` | Actual checked child copying and header0 pointer-store with complete allocator/gap/framing and total refusal. |
+| `Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean` | Actual fixed reservations, empty/pair/64-element child payloads, headerless-pointer negative and represented saturated refusals. |
 | `Backend/MemoryCopies/GuardedDefaultDeclarationInterface.lean` | Guard the actual selected declaration code; explicit frame/representation inputs and capacity-free success-or-refusal contract. |
 | `Backend/MemoryCopies/GuardedDefaultDeclaration.lean` | Guard the actual selected declaration with complete success state/allocator contract and explicit capacity refusal. |
 | `Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean` | Actual body selection, local bindings, stack/payload, full new contents, represented saturation refusal and unsupported-domain controls. |
