@@ -30,6 +30,15 @@ class Mapping(unittest.TestCase):
         self.assertEqual([r["path"] for r in rows], [r["path"] for r in result])
         duplicated = mapping.derive([{"path": "Solidity/X.lean"}, {"path": "Solidity/X.lean"}])
         self.assertTrue(all(r["collision"] for r in duplicated))
+        peers = mapping.derive([{"path": "Solidity/X.lean"},
+                                {"path": "Bridge/vendor/Solidity/X.lean"},
+                                {"path": "Bridge/Solidity/X.lean"},
+                                {"path": "vendor/LeanTeX/Solidity/X.lean"}])
+        self.assertEqual(["root", "bridge-vendor", "bridge", "root-vendor"], [r["context"] for r in peers])
+        self.assertTrue(all(r["collision"] for r in peers))
+        unique = mapping.derive([{"path": "Solidity/X.lean"},
+                                 {"path": "Bridge/vendor/Solidity/Y.lean"}])
+        self.assertTrue(all(not r["collision"] for r in unique))
 
 
 if __name__ == "__main__":

@@ -44,9 +44,11 @@ def candidate(row):
 
 def derive(rows):
     out = [candidate(row) for row in rows]
-    names = collections.Counter((row["context"], row["module"]) for row in out if row["module"])
+    # All contexts are potential search-path peers (Bridge depends on root);
+    # a collision is a conservative review warning, not a resolution claim.
+    names = collections.Counter(row["module"] for row in out if row["module"])
     for row in out:
-        row["collision"] = bool(row["module"] and names[(row["context"], row["module"])] > 1)
+        row["collision"] = bool(row["module"] and names[row["module"]] > 1)
     return out
 
 

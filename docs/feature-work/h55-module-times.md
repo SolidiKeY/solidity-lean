@@ -808,3 +808,16 @@ resolution, runnable acceptance, a measurement, or an authorization to drop
 any file. The exact contexts, expected outcomes, side effects, auxiliary
 inputs, containment and resource provenance remain to be reviewed and
 measured on the authenticated runner. No Lean server or builds were used.
+
+## Cross-context candidate-name warnings
+
+The candidate mapper previously counted duplicate module names separately by
+its root, root-vendor, Bridge and Bridge-vendor labels. Independent read-only
+finder and skeptic reviews confirmed that this could miss a name appearing in
+more than one potentially overlapping source area. It now marks repeated
+candidate names across all contexts for conservative review; synthetic tests
+cover all four labels. The current 7,592 tracked rows produce zero warnings.
+A warning is not proof that Lake resolves both paths, and no warning is not
+proof of unique resolution: globs, external packages, standalone paths,
+invalid candidate names and generated/untracked files remain outside this
+comparison. No Lean, server, build or H56 measurement was run.
