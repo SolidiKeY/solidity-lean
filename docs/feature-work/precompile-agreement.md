@@ -375,3 +375,21 @@ registration/validation obligations remain pending. Exp remains separate.
 Exact commands/results: `evidence/rebase-e684.json`; handoff and checksums:
 `evidence/HANDOFF-rebase-e684.md` and `evidence/SHA256SUMS-rebase-e684`.
 No whole-goal/runtime completion or cache freshness is claimed.
+
+## H70 DEP-BRIDGE-435 environment receipt, 2026-11-06
+
+The audit-precompiles owner relay at `13ae4273bad4123baea9347dfa724ded432dfd57`
+requests Bridge dependency evidence. On the unchanged frozen v4.24 setup,
+all 11 installed git packages match the Bridge manifest. The Mathlib Log
+artifact exists. Owned `H70BridgeProbe.lean` imports it, the actual vendored
+precompiles and existing IDENTITY proof; the bounded serial kernel check
+passes in 4.744s. This proves neither installation in the requester worktree
+nor v4.35 compatibility. Migration, RAW/BLS prerequisites and G43/V14's separate
+compiler-success theorem remain with their respective owners. No frozen
+configuration/interface/vendor/Source edit or re-pin was made.
+Both independent read-only finder/skeptic receipt reviews PASS, no findings.
+Receipt and handoff: `evidence/H70-bridge-receipt.json` and
+`evidence/HANDOFF-H70-bridge.md`; exact command/output:
+`evidence/H70-bridge-probe.log`; checksums: `evidence/SHA256SUMS-H70-bridge`.
+Original whole-lane and validation obligations remain open; no goal reset or
+completion, cache shipment or host relay is claimed.
