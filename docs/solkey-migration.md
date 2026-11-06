@@ -51,11 +51,12 @@ One reviewable change; do the steps in this order.
    above it. Re-partition `RuleShapes.taclets_partitioned` (claimed,
    `unclaimedTaclets`, `migrationPendingTaclets`).
 4. **The sorts.** Update `SortCheck/Annotations.lean` until
-   `./scripts/check-solkey.sh --key <rules>` reports zero, `<rules>` the
+   `lake exe solkeycheck --key <rules>` reports zero, `<rules>` the
    snapshot's
-   `keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key`. The script deletes the
-   built checker before building it: Lake 4.24 restores a cached executable
-   only when the destination is absent, so a stale one could otherwise run.
+   `keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key`
+   (a manual check: no gate runs it). Delete `.lake/build/bin/solkeycheck`
+   first: Lake 4.24 restores a cached executable only when the destination
+   is absent, so a stale one could otherwise run.
 5. **The fixtures.** Re-import `TestSuite.sol` and the other solc fixtures
    from the new snapshot (`node scripts/solc-ast.mjs --solkey tests/migration/solkey --soljson <dir>`;
    `docs/testsuite-proofs.md`, "The pipeline"), re-pin `Report.lean`, and

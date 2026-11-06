@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "work_queue_verbatim": "Controls to generic lemmas/data tables in Solidity/Backend/MemoryCopies. (1) Census all per-case controls and match audit items 9/11/16 as applicable; preserve all cases and statement hashes. (2) Prove one intrinsic parameterized lemma plus typed fixture table, with original declarations as exact instances where possible. (3) Prove correspondence and retain negative/refusal coverage; provide deterministic reproduction acceptance. (4) Measure before/after same conditions and report full original case inventory. OWNED FAMILY FILES ARE READ ONLY until explicit owner relay agreement for exact files; use additive modules/tests within your scope meanwhile, then owner applies migration patches. No frozen-interface change, no replacing semantic proof with decide table, no H55 overlap. Yul Raw/vector generator remains H55; family tools consume it rather than duplicate it.\n",
+  "backfill_queue_verbatim": "Use scanner/census, negative controls, isolated fixture proofs and reproduction/timing tooling within this exact scope while blocked. Account for all original declarations/cases, no padding. Continuous cleanup takes only newly unclaimed audit candidates via coordinator/registry; never steal scope.\n",
+  "items": [
+    {
+      "id": "1",
+      "status": "done",
+      "scope": "source census and grouping only"
+    },
+    {
+      "id": "2",
+      "status": "pending",
+      "remaining": "prove generic intrinsic lemma; implement typed fixtures and exact original instances"
+    },
+    {
+      "id": "3",
+      "status": "partial",
+      "remaining": "semantic correspondence; retained negative/refusal validation; full affected checks"
+    },
+    {
+      "id": "4",
+      "status": "pending",
+      "remaining": "matched before/after measurements; >10% STOP rule"
+    }
+  ],
+  "backfill": [
+    {
+      "item": "scanner/census and grouping",
+      "status": "done"
+    },
+    {
+      "item": "negative/refusal and alias source inventories",
+      "status": "done",
+      "remaining": "semantic proof/validation pending"
+    },
+    {
+      "item": "isolated fixture proofs",
+      "status": "pending",
+      "remaining": "proposal text unproved"
+    },
+    {
+      "item": "deterministic reproduction tooling",
+      "status": "done",
+      "remaining": "semantic migration acceptance pending"
+    },
+    {
+      "item": "timing tooling",
+      "status": "partial",
+      "remaining": "actual family before/after measurements pending"
+    }
+  ]
+}
