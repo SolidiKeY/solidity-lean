@@ -131,6 +131,46 @@ theorem unrestricted_mul_wrong (σ : State C []) :
   intro h
   cases h
 
+/-- `s * 0 → 0`, `a ** 1 → a` and `s < s → false` (added solc rules). -/
+theorem simp_mul_zero : (Val.binop .mul rfl rfl x (lit 0) : Val C G .uint).simp = lit 0 := rfl
+
+theorem simp_pow_one :
+    (Val.binop .pow rfl rfl (add x (lit 2)) (lit 1) : Val C G .uint).simp = add x (lit 2) := rfl
+
+theorem simp_lt_self : (Val.binop .lt rfl rfl x x : Val C G .bool).simp = .simple (.bool false) :=
+  rfl
+
+/-! ## Short circuit, dead loops, untouched statements -/
+
+/-- `false && (max + 1 > 0)` folds to `false` without the overflowing operand. -/
+theorem short_circuit :
+    (Val.binop .and rfl rfl (.simple (.bool false)) (gt (add maxU (lit 1)) (lit 0)) :
+      Val C [] .bool).cfold = .simple (.bool false) := rfl
+
+/-- `while (1 > 2) { revert; } revert;`: the dead loop is dropped. -/
+def deadLoop : Prog C [] [] :=
+  .cons (.loop .auto (gt (lit 1) (lit 2)) (.cons .revert .nil)) (.cons .revert .nil)
+
+theorem dead_loop_dropped : Prog.cfold deadLoop = .cons .revert .nil := rfl
+
+/-- `uint a = 5; while (a > 0) { a = a - 1; }`: entry facts are not used in the
+loop, so its condition and body still read `a`. -/
+def loopProg : Prog C [] [.val .uint] :=
+  .cons (.declLocal .uint (.user "a") (some (lit 5)))
+    (.cons (.loop .auto (gt (.simple (.local .here)) (lit 0))
+      (.cons (.assignLocal .here (.binop .sub rfl rfl (.simple (.local .here)) (lit 1))) .nil))
+      .nil)
+
+theorem loop_facts_discarded : Prog.cprop Facts.empty loopProg = loopProg := rfl
+
+/-- A storage write is left as written by every O02 pass. -/
+def storageProg : Prog C [] [] := .cons (.delete (.root (T := .prim .uint) "total" rfl)) .nil
+
+theorem storage_untouched :
+    Prog.cfold storageProg = storageProg ∧ Prog.cprop Facts.empty storageProg = storageProg ∧
+      Prog.simplify storageProg = storageProg ∧ Prog.uve storageProg = storageProg :=
+  ⟨rfl, rfl, rfl, rfl⟩
+
 /-! ## Unused-variable elimination -/
 
 /-- `{ uint y = 5; require(1 > 0); }`: `y` is unused and dropped. -/

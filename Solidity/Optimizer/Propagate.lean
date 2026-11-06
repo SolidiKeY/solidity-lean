@@ -9,11 +9,13 @@ value known to equal them: a literal (constant propagation) or another local
 expression is folded (`Val.cfold`), so a propagated constant feeds folding.
 
 Facts are created only by `x = e;` and `T x = e;` whose folded right-hand
-side is a literal or a local, and are kept only across `require`/`assert`
-(which leave the state as it is). Assigning a local kills every fact that
-reads it. Any other statement, and the exit of a branch, block or loop,
-forgets every fact; a loop body and its condition are processed with no
-facts, since they run in states the entry facts need not describe.
+side is a literal or a local. They survive local assignments (minus the ones
+an assignment kills: the fact for the assigned local and every fact reading
+it), declarations, `require` and `assert`. Any other statement, and the exit
+of a branch, block or loop, forgets every fact; a loop body and its condition
+are processed with no facts, since they run in states the entry facts need not
+describe. `transfer`/`send` operands are not rewritten here (they are folded
+by `Prog.cfold`).
 Environment values (`msg.sender`, …) are never recorded.
 
 The invariant is `Facts.Holds F σ`: each recorded local holds its value in

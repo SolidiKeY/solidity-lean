@@ -20,13 +20,18 @@ value (`Val.simple`), whose evaluation never fails.
 | `X / 1 → X` | `uint`, `int` | `DIV(X, 1)` |
 | `X && true → X`, `true && X → X` | `bool` | `AND(X, 1)` on booleans |
 | `X \|\| false → X`, `false \|\| X → X` | `bool` | `OR(X, 0)` on booleans |
+| `X ** 1 → X` | `uint` | `EXP(X, 1)` |
+| `X >> 0 → X` | `uint`, `int` | `SHR(0, X)` / `SAR(0, X)` |
+| `s * 0 → 0` (s simple) | `uint`, `int` | `MUL(X, 0)` |
 | `s - s → 0` (s simple) | `uint`, `int` | `SUB(X, X)` |
 | `s == s → true`, `s != s → false` (s simple) | any | `EQ(X, X)` |
+| `s < s`, `s > s → false`; `s <= s`, `s >= s → true` (s simple) | `uint`, `int` | `LT(X, X)` |
 
-A checked rule that would hide a failure is absent: `X * 0 → 0` for a
-compound `X`, `X - X` for a compound `X`, and every rule of the wrapping
-(`unchecked`) operators that solc states modulo `2^256` but which is not an
-identity under the checked range test. Preservation is `Val.simp_evalT`:
+A rule that would hide a failure is absent: `X * 0 → 0` and `X - X → 0` for a
+compound `X` (it may revert). Not implemented although valid: the bitwise and
+`<<` identities, `X % 1`, `X ** 0`, `!!X`, and the identities of the wrapping
+operators (`addW`, …), which hold exactly but are not yet proved here.
+Preservation is `Val.simp_evalT`:
 equal results (value or halt) in every typed state.
 -/
 namespace Solidity.Optimizer.ConstFold
@@ -143,11 +148,6 @@ theorem sameSimple_eq {p : PrimTy} {a b : Val C Γ p} (h : sameSimple a b = true
       exact ⟨s, simple?_eq ha, by rw [simple?_eq hb, Simple.beq_eq s t h]⟩
 
 /-! ## Arithmetic facts -/
-
-theorem ofInt?_val : (p : PrimTy) → p.isNumeric = true → (x : p.Denote) →
-    ∃ y : Int, ∃ hy, (x = PrimTy.ofLit p y hy) ∧ p.ofInt? y = some x
-  | .uint, _, ⟨y, hy⟩ => ⟨y, hy, rfl, by simp only [PrimTy.ofInt?, hy, dite_true]⟩
-  | .int, _, ⟨y, hy⟩ => ⟨y, hy, rfl, by simp only [PrimTy.ofInt?, hy, dite_true]⟩
 
 theorem add_zero_r_uint (σ : State C Γ) (a : Val C Γ .uint) (h : BinOp.add.accepts .uint = true)
     (hq : BinOp.add.ret .uint = .uint) (hn : PrimTy.uint.inRange 0 = true) :
@@ -342,15 +342,104 @@ theorem sub_self_int (σ : State C Γ) (s : Simple C Γ .int) (h : BinOp.sub.acc
 
 theorem eq_self (σ : State C Γ) {p : PrimTy} (s : Simple C Γ p) (h : BinOp.eqB.accepts p = true)
     (hq : BinOp.eqB.ret p = .bool) :
-    (Val.binop .eqB h hq (.simple s) (.simple s)).evalT σ = (Val.simple (.bool true) : Val C Γ .bool).evalT σ := by
+    (Val.binop .eqB h hq (.simple s) (.simple s)).evalT σ =
+      (Val.simple (.bool true) : Val C Γ .bool).evalT σ := by
   cases p <;> simp only [Val.evalT, bind, Except.bind, Simple.evalT, PrimTy.ofLit, BinOp.shortT,
     TRes.ofOpt, BinOp.evalT, BinOp.evalBool, BinOp.evalNum, decide_true]
 
 theorem ne_self (σ : State C Γ) {p : PrimTy} (s : Simple C Γ p) (h : BinOp.neB.accepts p = true)
     (hq : BinOp.neB.ret p = .bool) :
-    (Val.binop .neB h hq (.simple s) (.simple s)).evalT σ = (Val.simple (.bool false) : Val C Γ .bool).evalT σ := by
+    (Val.binop .neB h hq (.simple s) (.simple s)).evalT σ =
+      (Val.simple (.bool false) : Val C Γ .bool).evalT σ := by
   cases p <;> simp only [Val.evalT, bind, Except.bind, Simple.evalT, PrimTy.ofLit, BinOp.shortT,
     TRes.ofOpt, BinOp.evalT, BinOp.evalBool, BinOp.evalNum, decide_true, Bool.not_true]
+
+theorem pow_one_r (σ : State C Γ) (a : Val C Γ .uint) (h : BinOp.pow.accepts .uint = true)
+    (hq : BinOp.pow.ret .uint = .uint) (hn : PrimTy.uint.inRange 1 = true) :
+    (Val.binop .pow h hq a (.simple (.lit 1 hn))).evalT σ = a.evalT σ := by
+  cases ha : a.evalT σ with
+  | error e => simp only [Val.evalT, ha, bind, Except.bind]
+  | ok x =>
+    obtain ⟨y, hy⟩ := x
+    simp only [Val.evalT, bind, Except.bind, ha, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+      TRes.ofOpt, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Int.reduceLT, ↓reduceIte,
+      Int.toNat_one, Lean.Grind.Int.pow_one, Option.bind_some, PrimTy.ofInt?, hy, ↓reduceDIte]
+
+theorem shr_zero_r_uint (σ : State C Γ) (a : Val C Γ .uint) (h : BinOp.shr.accepts .uint = true)
+    (hq : BinOp.shr.ret .uint = .uint) (hn : PrimTy.uint.inRange 0 = true) :
+    (Val.binop .shr h hq a (.simple (.lit 0 hn))).evalT σ = a.evalT σ := by
+  cases ha : a.evalT σ with
+  | error e => simp only [Val.evalT, ha, bind, Except.bind]
+  | ok x =>
+    obtain ⟨y, hy⟩ := x
+    simp only [Val.evalT, bind, Except.bind, ha, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+      TRes.ofOpt, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Int.reduceLT, ↓reduceIte,
+      Int.toNat_zero, Int.pow_zero, Int.ediv_one, Option.bind_some, PrimTy.ofInt?, hy,
+      ↓reduceDIte]
+
+theorem shr_zero_r_int (σ : State C Γ) (a : Val C Γ .int) (h : BinOp.shr.accepts .int = true)
+    (hq : BinOp.shr.ret .int = .int) (hn : PrimTy.int.inRange 0 = true) :
+    (Val.binop .shr h hq a (.simple (.lit 0 hn))).evalT σ = a.evalT σ := by
+  cases ha : a.evalT σ with
+  | error e => simp only [Val.evalT, ha, bind, Except.bind]
+  | ok x =>
+    obtain ⟨y, hy⟩ := x
+    simp only [Val.evalT, bind, Except.bind, ha, BinOp.shortT, Simple.evalT, PrimTy.ofLit,
+      TRes.ofOpt, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Int.reduceLT, ↓reduceIte,
+      Int.toNat_zero, Int.pow_zero, Int.ediv_one, Option.bind_some, PrimTy.ofInt?, hy,
+      ↓reduceDIte]
+
+theorem mul_zero_r_uint (σ : State C Γ) (s : Simple C Γ .uint) (h : BinOp.mul.accepts .uint = true)
+    (hq : BinOp.mul.ret .uint = .uint) (hn : PrimTy.uint.inRange 0 = true) :
+    (Val.binop .mul h hq (.simple s) (.simple (.lit 0 hn))).evalT σ =
+      (Val.simple (.lit 0 hn) : Val C Γ .uint).evalT σ := by
+  simp only [Val.evalT, bind, Except.bind, Simple.evalT, PrimTy.ofLit, BinOp.shortT,
+    TRes.ofOpt, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Int.mul_zero, Option.bind_some,
+    PrimTy.ofInt?, hn, ↓reduceDIte]
+
+theorem mul_zero_r_int (σ : State C Γ) (s : Simple C Γ .int) (h : BinOp.mul.accepts .int = true)
+    (hq : BinOp.mul.ret .int = .int) (hn : PrimTy.int.inRange 0 = true) :
+    (Val.binop .mul h hq (.simple s) (.simple (.lit 0 hn))).evalT σ =
+      (Val.simple (.lit 0 hn) : Val C Γ .int).evalT σ := by
+  simp only [Val.evalT, bind, Except.bind, Simple.evalT, PrimTy.ofLit, BinOp.shortT,
+    TRes.ofOpt, BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Int.mul_zero, Option.bind_some,
+    PrimTy.ofInt?, hn, ↓reduceDIte]
+
+theorem lt_self (σ : State C Γ) {p : PrimTy} (s : Simple C Γ p) (h : BinOp.lt.accepts p = true)
+    (hq : BinOp.lt.ret p = .bool) :
+    (Val.binop .lt h hq (.simple s) (.simple s)).evalT σ =
+      (Val.simple (.bool false) : Val C Γ .bool).evalT σ := by
+  cases p <;> first
+    | exact absurd h (by decide)
+    | simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, TRes.ofOpt,
+        BinOp.evalT, BinOp.evalNum, Int.lt_irrefl, decide_false]
+
+theorem le_self (σ : State C Γ) {p : PrimTy} (s : Simple C Γ p) (h : BinOp.le.accepts p = true)
+    (hq : BinOp.le.ret p = .bool) :
+    (Val.binop .le h hq (.simple s) (.simple s)).evalT σ =
+      (Val.simple (.bool true) : Val C Γ .bool).evalT σ := by
+  cases p <;> first
+    | exact absurd h (by decide)
+    | simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, TRes.ofOpt,
+        BinOp.evalT, BinOp.evalNum, Int.le_refl, decide_true]
+
+theorem gt_self (σ : State C Γ) {p : PrimTy} (s : Simple C Γ p) (h : BinOp.gt.accepts p = true)
+    (hq : BinOp.gt.ret p = .bool) :
+    (Val.binop .gt h hq (.simple s) (.simple s)).evalT σ =
+      (Val.simple (.bool false) : Val C Γ .bool).evalT σ := by
+  cases p <;> first
+    | exact absurd h (by decide)
+    | simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, TRes.ofOpt,
+        BinOp.evalT, BinOp.evalNum, Int.lt_irrefl, decide_false]
+
+theorem ge_self (σ : State C Γ) {p : PrimTy} (s : Simple C Γ p) (h : BinOp.ge.accepts p = true)
+    (hq : BinOp.ge.ret p = .bool) :
+    (Val.binop .ge h hq (.simple s) (.simple s)).evalT σ =
+      (Val.simple (.bool true) : Val C Γ .bool).evalT σ := by
+  cases p <;> first
+    | exact absurd h (by decide)
+    | simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, TRes.ofOpt,
+        BinOp.evalT, BinOp.evalNum, Int.le_refl, decide_true]
 
 /-! ## The rewriter -/
 
@@ -368,6 +457,14 @@ theorem isLitB_true {b : Bool} {v : Val C Γ .bool} (h : isLitB b v = true) :
     v = .simple (.bool b) :=
   litBool?_eq (by simpa only [isLitB, beq_iff_eq] using h)
 
+def isSimp {p : PrimTy} (v : Val C Γ p) : Bool := (simple? v).isSome
+
+theorem isSimp_true {p : PrimTy} {v : Val C Γ p} (h : isSimp v = true) : ∃ s, v = .simple s := by
+  unfold isSimp at h
+  cases hv : simple? v with
+  | none => simp only [hv, Option.isSome_none, Bool.false_eq_true] at h
+  | some s => exact ⟨s, simple?_eq hv⟩
+
 /-- One binary node, operands already simplified. -/
 def simpBin : (op : BinOp) → (p : PrimTy) → {q : PrimTy} → op.accepts p = true →
     op.ret p = q → Val C Γ p → Val C Γ p → Val C Γ q
@@ -384,11 +481,28 @@ def simpBin : (op : BinOp) → (p : PrimTy) → {q : PrimTy} → op.accepts p = 
     else if sameSimple a b then castV hq (.simple (.lit 0 (by decide)))
     else .binop .sub h hq a b
   | .mul, .uint, _, h, hq, a, b =>
-    if isLitI 1 b then castV hq a else if isLitI 1 a then castV hq b else .binop .mul h hq a b
+    if isLitI 1 b then castV hq a else if isLitI 1 a then castV hq b
+    else if isLitI 0 b then
+      (if isSimp a then castV hq (.simple (.lit 0 (by decide))) else .binop .mul h hq a b)
+    else .binop .mul h hq a b
   | .mul, .int, _, h, hq, a, b =>
-    if isLitI 1 b then castV hq a else if isLitI 1 a then castV hq b else .binop .mul h hq a b
+    if isLitI 1 b then castV hq a else if isLitI 1 a then castV hq b
+    else if isLitI 0 b then
+      (if isSimp a then castV hq (.simple (.lit 0 (by decide))) else .binop .mul h hq a b)
+    else .binop .mul h hq a b
   | .div, .uint, _, h, hq, a, b => if isLitI 1 b then castV hq a else .binop .div h hq a b
   | .div, .int, _, h, hq, a, b => if isLitI 1 b then castV hq a else .binop .div h hq a b
+  | .pow, .uint, _, h, hq, a, b => if isLitI 1 b then castV hq a else .binop .pow h hq a b
+  | .shr, .uint, _, h, hq, a, b => if isLitI 0 b then castV hq a else .binop .shr h hq a b
+  | .shr, .int, _, h, hq, a, b => if isLitI 0 b then castV hq a else .binop .shr h hq a b
+  | .lt, _, _, h, hq, a, b =>
+    if sameSimple a b then castV hq (.simple (.bool false)) else .binop .lt h hq a b
+  | .gt, _, _, h, hq, a, b =>
+    if sameSimple a b then castV hq (.simple (.bool false)) else .binop .gt h hq a b
+  | .le, _, _, h, hq, a, b =>
+    if sameSimple a b then castV hq (.simple (.bool true)) else .binop .le h hq a b
+  | .ge, _, _, h, hq, a, b =>
+    if sameSimple a b then castV hq (.simple (.bool true)) else .binop .ge h hq a b
   | .and, .bool, _, h, hq, a, b =>
     if isLitB true b then castV hq a else if isLitB true a then castV hq b
     else .binop .and h hq a b
@@ -426,22 +540,17 @@ theorem simpBin_evalT (σ : State C Γ) (op : BinOp) (p : PrimTy) {q : PrimTy}
           | exact (and_true_l σ _ _ _).symm
           | exact (or_false_r σ _ _ _).symm
           | exact (or_false_l σ _ _ _).symm
-          | exact (sub_zero_r_uint σ _ _ _ _).symm)
+          | exact (pow_one_r σ _ _ _ _).symm
+          | exact (shr_zero_r_uint σ _ _ _ _).symm
+          | exact (shr_zero_r_int σ _ _ _ _).symm)
+      | (obtain ⟨hn, rfl⟩ := isLitI_true ‹isLitI _ _ = true›
+         obtain ⟨s, rfl⟩ := isSimp_true ‹isSimp _ = true›
+         first
+          | exact (mul_zero_r_uint σ s _ _ _).symm
+          | exact (mul_zero_r_int σ s _ _ _).symm)
       | (have hb := isLitB_true ‹isLitB _ _ = true›
          subst hb
          first
-          | exact (add_zero_r_uint σ _ _ _ _).symm
-          | exact (add_zero_r_int σ _ _ _ _).symm
-          | exact (add_zero_l_uint σ _ _ _ _).symm
-          | exact (add_zero_l_int σ _ _ _ _).symm
-          | exact (sub_zero_r_uint σ _ _ _ _).symm
-          | exact (sub_zero_r_int σ _ _ _ _).symm
-          | exact (mul_one_r_uint σ _ _ _ _).symm
-          | exact (mul_one_r_int σ _ _ _ _).symm
-          | exact (mul_one_l_uint σ _ _ _ _).symm
-          | exact (mul_one_l_int σ _ _ _ _).symm
-          | exact (div_one_r_uint σ _ _ _ _).symm
-          | exact (div_one_r_int σ _ _ _ _).symm
           | exact (and_true_r σ _ _ _).symm
           | exact (and_true_l σ _ _ _).symm
           | exact (or_false_r σ _ _ _).symm
@@ -451,7 +560,11 @@ theorem simpBin_evalT (σ : State C Γ) (op : BinOp) (p : PrimTy) {q : PrimTy}
           | exact (sub_self_uint σ s _ _ _).symm
           | exact (sub_self_int σ s _ _ _).symm
           | exact (eq_self σ s _ _).symm
-          | exact (ne_self σ s _ _).symm)
+          | exact (ne_self σ s _ _).symm
+          | exact (lt_self σ s _ _).symm
+          | exact (gt_self σ s _ _).symm
+          | exact (le_self σ s _ _).symm
+          | exact (ge_self σ s _ _).symm)
 
 /-- Bottom-up simplification. -/
 def _root_.Solidity.Val.simp : {p : PrimTy} → Val C Γ p → Val C Γ p

@@ -17,7 +17,9 @@ environment read), since dropping a failing initialiser would hide its halt.
 Strengthening covers local assignments and declarations, `require`, `assert`,
 `revert`, `assume(false)`, `transfer`, conditionals and blocks over value
 expressions without storage or memory paths; a body using any other form is
-left as written. One declaration is removed per block per run of the pass.
+left as written. Only an explicit `{ … }` block's first statement is a
+candidate (not `if` branches, loop bodies, call bodies or the top level); one
+declaration is removed per block per run of the pass.
 -/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
@@ -371,7 +373,8 @@ theorem blockDecl_runC {Γ₁ Γ' : Ctx} {p : PrimTy} (x : Var) (init : Option (
     congr 1
     show (⟨(o.st.drop P.ext).drop (.push .refl), o.ext⟩ : Out C σ.H Γ) =
       ⟨o.st.drop ((Stmt.declLocal p x init).ext.trans P.ext), _⟩
-    rw [Subsingleton.elim ((Stmt.declLocal p x init).ext.trans P.ext) ((Ext.push .refl).trans P.ext)]
+    rw [Subsingleton.elim ((Stmt.declLocal p x init).ext.trans P.ext)
+      ((Ext.push .refl).trans P.ext)]
     simp only [State.drop, drop_trans]
 
 end Drop
@@ -480,7 +483,8 @@ theorem blockUve_runC {Γ Γ₁ : Ctx} (P : Prog C Γ Γ₁) :
   | cons s P => exact blockCons_runC s P
 
 mutual
-/-- Unused-variable elimination in every block of a statement. -/
+/-- Unused-variable elimination at the head of every explicit `{ … }` block of a
+statement (not `if` branches, loop bodies or call bodies). -/
 def Stmt.uve : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, .ite c thn els => .ite c (Prog.uve thn) (Prog.uve els)
   | _, _, .block body => blockUve (Prog.uve body)
@@ -519,7 +523,7 @@ def Stmt.uve : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- Unused-variable elimination in every block of a sequence. -/
+/-- Unused-variable elimination at the head of every explicit block of a sequence. -/
 def Prog.uve : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
   | _, _, .cons s P => .cons (Stmt.uve s) (Prog.uve P)

@@ -15,6 +15,9 @@ run cannot observe:
 * `require(true);`, `assert(true);` and `while (false) …` are dropped from the
   sequence.
 
+No pass recurses into call, `try`/`catch` or receiver-call bodies.
+Dropping `while (false)` also drops its `LoopAnn` (which the run does not read).
+
 A failing condition (`require(false)`, `assert(false)` — its Panic) is never
 dropped. Every other statement is left as written. The preservation theorem
 is equality of the typed run, as a function of the typed state
