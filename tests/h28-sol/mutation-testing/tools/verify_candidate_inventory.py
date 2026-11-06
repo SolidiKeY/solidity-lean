@@ -40,6 +40,12 @@ def verify(repo):
         catalog_bytes = tar.extractfile("catalog.json").read()
         require(hashlib.sha256(catalog_bytes).hexdigest() == pin["catalog_sha256"], "catalog mismatch")
         catalog = json.loads(catalog_bytes); result = json.loads(tar.extractfile("result.json").read())
+        negative = result["checks"]["known-bad-table"]
+        negative_source = tar.extractfile("InventoryNegative.lean").read().decode()
+        line = next(i for i, text in enumerate(negative_source.splitlines(), 1) if text.startswith("theorem accepts_all"))
+        errors = [m for m in checked.messages(tar.extractfile("negative.log").read().decode()) if m["severity"] in {"error", "warning"}]
+        require(negative["kind"] == "exit" and negative["exit"] == 1 and len(errors) == 1, "negative control outcome changed")
+        require(errors[0]["severity"] == "error" and errors[0]["fileName"] == "InventoryNegative.lean" and errors[0]["pos"]["line"] == line and errors[0]["data"].startswith("Tactic `rfl` failed"), "negative control attribution changed")
         names = ["Solidity." + row["id"] for row in catalog["declarations"]] + ["H28.CandidateInventoryAudit." + name for name in ["accepts_all", "compound_all", "numeric_all", "increment_all"]]
         certificate = checked.success(result["checks"]["positive"], tar.extractfile("positive.log").read().decode(), names)
         require(certificate == catalog["kernel_certificate"] and len(names) == 294, "kernel certificate mismatch")
