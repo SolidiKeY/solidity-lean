@@ -13,7 +13,7 @@ spec.loader.exec_module(module)
 class ContainerSpec(unittest.TestCase):
     def setUp(self):
         self.plan = {"image": "sha256:" + "a" * 64, "argv": ["/tool/lean", "-j1", "--tstack=131072", "Solidity/A.lean"],
-                     "user": "1000:1000", "cwd": "/repo",
+                     "user": "1000:1000", "cwd": "/repo", "cgroup_parent": "",
                      "cpu": {"NanoCpus": 0, "CpuQuota": 0, "CpuPeriod": 0, "CpuShares": 0, "CpusetCpus": "", "CpusetMems": ""}, "env": {"LEAN_NUM_THREADS": "1", "LEAN_PATH": "/cache"},
                      "mounts": [{"source": "/host/repo", "destination": "/repo"}, {"source": "/host/cache", "destination": "/cache"}]}
         self.inspect = {"Image": self.plan["image"],
@@ -23,7 +23,7 @@ class ContainerSpec(unittest.TestCase):
                                        "NetworkMode": "none", "Privileged": False, "ReadonlyRootfs": True,
                                        "PidMode": "", "IpcMode": "private", "UTSMode": "", "CgroupnsMode": "private", "CapAdd": None,
                                        "Devices": [], "SecurityOpt": ["no-new-privileges"],
-                                       "RestartPolicy": {"Name": "no", "MaximumRetryCount": 0},
+                                       "RestartPolicy": {"Name": "no", "MaximumRetryCount": 0}, "CgroupParent": "",
                                        **self.plan["cpu"]},
                         "Mounts": [{"Type": "bind", "RW": False, "Source": "/host/repo", "Destination": "/repo"},
                                    {"Type": "bind", "RW": False, "Source": "/host/cache", "Destination": "/cache"}]}
@@ -37,7 +37,7 @@ class ContainerSpec(unittest.TestCase):
                    ("PidMode", "host"), ("CgroupnsMode", None),
                    ("RestartPolicy", {"Name": "always", "MaximumRetryCount": 0}),
                    ("RestartPolicy", {"Name": "no", "MaximumRetryCount": False}),
-                   ("NanoCpus", 100000000), ("CpusetCpus", "0"), ("DeviceRequests", ["device"]), ("CapAdd", ["SYS_ADMIN"]), ("SecurityOpt", [])]
+                   ("NanoCpus", 100000000), ("CpusetCpus", "0"), ("CgroupParent", "/different-cpu-limited-parent"), ("DeviceRequests", ["device"]), ("CapAdd", ["SYS_ADMIN"]), ("SecurityOpt", [])]
         for key, value in changes:
             obj = copy.deepcopy(self.inspect)
             obj["HostConfig"][key] = value

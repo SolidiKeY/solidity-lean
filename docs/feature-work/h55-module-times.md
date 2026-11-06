@@ -558,3 +558,12 @@ attestation, full inventory acceptance or Lean proof is claimed. H56 access
 and actual full-inventory measurements, final H28 Git artifact, production
 gates, split qualification, full acceptance and any needed further reviews
 remain outstanding.
+
+A further independent skeptic recheck found that a different Docker
+`CgroupParent` could pass the synthetic configuration control. The control now
+requires the reported parent to match the explicit plan, and the skeptic
+confirmed its exact counterexample is rejected. The reviewed input hash
+manifest was refreshed. A matching parent string does not authenticate the
+actual ancestor CPU quota, cpuset, namespace mapping or daemon identity. The
+pre-watch portion of runtime is still outside the watcher deadline. These
+remaining limitations preclude production acceptance; no H56 run was made.

@@ -57,6 +57,11 @@ def validate(inspect, plan):
         errors.append("container restart policy is not disabled")
     if "Healthcheck" not in config or config["Healthcheck"] not in (None, {"Test": ["NONE"]}):
         errors.append("container healthcheck is not explicitly disabled")
+    parent = plan.get("cgroup_parent")
+    if (not isinstance(parent, str) or (parent and (not parent.startswith("/") or
+            any(part in ("", ".", "..") for part in parent[1:].split("/"))))
+            or "CgroupParent" not in host or host["CgroupParent"] != parent):
+        errors.append("container cgroup parent differs or is missing")
     cpu_fields = ("NanoCpus", "CpuQuota", "CpuPeriod", "CpuShares", "CpusetCpus", "CpusetMems")
     cpu = plan.get("cpu")
     if (not isinstance(cpu, dict) or set(cpu) != set(cpu_fields) or
