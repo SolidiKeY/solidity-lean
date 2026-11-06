@@ -124,10 +124,10 @@ elab_rules : command
 
 syntax (name := censusGraph) "#h62_census " str ident : command
 elab_rules : command
-  | `(#h62_census $path:str $prefix:ident) => do
+  | `(#h62_census $path:str $ns:ident) => do
     let env ← getEnv
     let names := env.constants.toList.toArray.filterMap fun (name, _) =>
-      if prefix.getId.isPrefixOf name then some name else none
-    if names.isEmpty then throwError "empty H62 namespace census: {prefix.getId}"
-    writeExport path.getString names s!"all elaborated declarations in namespace {prefix.getId}; includes generated declarations"
+      if ns.getId.isPrefixOf name then some name else none
+    if names.isEmpty then throwError "empty H62 namespace census: {ns.getId}"
+    writeExport path.getString names s!"all elaborated declarations in namespace {ns.getId}; includes generated declarations"
 end H62
