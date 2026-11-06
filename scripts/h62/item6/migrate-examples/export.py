@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
 """Export committed overlay and small evidence; keep build/cache bulk off Git."""
-import argparse,hashlib,io,json,pathlib,subprocess,tarfile
+import argparse,fcntl,gzip,hashlib,io,json,pathlib,subprocess,tarfile
 p=argparse.ArgumentParser();p.add_argument("--evidence",type=pathlib.Path,required=True);a=p.parse_args();e=a.evidence.resolve()
+lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a")
+fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+branch=subprocess.check_output(["git","branch","--show-current"],text=True).strip()
+assert branch=="codex/solidity-h62-6-20261106/migrate-examples",branch
+assert not subprocess.check_output(["git","status","--porcelain"],text=True),"commit checkpoint before exporting"
 base="c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
+subprocess.run(["git","merge-base","--is-ancestor",base,"HEAD"],check=True)
 head=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
+(e/"committed-state.json").write_text(json.dumps({"head":head,"base":base,"branch":branch,"repository":str(pathlib.Path.cwd().resolve())},indent=2)+"\n")
+(e/"handoff.md").write_bytes(pathlib.Path("docs/feature-work/h62-6-migrate-examples.md").read_bytes())
 (e/"original.patch").write_bytes(subprocess.check_output(["git","format-patch","--stdout",base+".."+head]))
 bundle=e/("overlay-"+head+".bundle")
-if not bundle.exists():subprocess.run(["git","bundle","create",str(bundle),base+".."+head],check=True)
+if not bundle.exists():subprocess.run(["git","bundle","create",str(bundle),branch,"^"+base],check=True)
 census=json.loads((e/"census-base.json").read_text())
 (e/"source-base.sha256").write_text("".join(row["source_sha256"]+"  "+row["path"]+"\n" for row in census["modules"]))
 files=sorted(x for x in e.iterdir() if x.is_file() and x.name not in ("SHA256SUMS","evidence.tar.gz") and x.suffix in (".json",".log",".md",".txt",".sha256",".patch",".bundle"))
 # Normalized tar metadata makes a snapshot reproducible given its input bytes.
-with tarfile.open(e/"evidence.tar.gz","w:gz") as tar:
+with (e/"evidence.tar.gz").open("wb") as raw_archive, gzip.GzipFile(filename="",mode="wb",fileobj=raw_archive,mtime=0) as gz, tarfile.open(fileobj=gz,mode="w") as tar:
     for f in files:
         raw=f.read_bytes();info=tarfile.TarInfo(f.name);info.size=len(raw);info.mode=0o644;info.mtime=0;tar.addfile(info,io.BytesIO(raw))
 files.append(e/"evidence.tar.gz")

@@ -15,11 +15,14 @@ export LEAN_NUM_THREADS=1 LAKE_OVERRIDE_LEAN=true LEAN_SYSROOT="$private" LAKE_C
   cat /sys/fs/cgroup/memory.max; cat /sys/fs/cgroup/memory.swap.max
 } > "$evidence/$label-settings.txt"
 git ls-files -z -- Solidity/Examples | xargs -0 sha256sum > "$evidence/$label-source-before.sha256"
+git ls-files -z | xargs -0 sha256sum > "$evidence/$label-tree-before.sha256"
 lake clean
 set +e
 python3 scripts/h62/item6/migrate-examples/bounded-run.py --output "$evidence/$label.json" -- lake build SolidityExamples
 status=$?
 set -e
 git ls-files -z -- Solidity/Examples | xargs -0 sha256sum > "$evidence/$label-source-after.sha256"
+git ls-files -z | xargs -0 sha256sum > "$evidence/$label-tree-after.sha256"
+cmp "$evidence/$label-tree-before.sha256" "$evidence/$label-tree-after.sha256" || exit 3
 cmp "$evidence/$label-source-before.sha256" "$evidence/$label-source-after.sha256" || exit 3
 exit "$status"

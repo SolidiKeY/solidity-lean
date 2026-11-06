@@ -100,7 +100,8 @@ runtime prerequisite pass, complete timing comparison or full gate is claimed.
 The original persistent goal is unchanged and unfinished. Coordinator inputs are
 `/workspace/h62-coordinator-inputs/`; absence of get_goal is explicitly permitted
 by the coordinator. Never create a replacement goal or change producer ownership.
-Next clean baseline command (the script holds writer lock, cleans outputs and
+Next clean baseline command (the script holds writer lock, hashes the entire
+tracked tree before/after to include dependencies/configuration, cleans outputs and
 refuses reused cache/results):
 
 ```sh
@@ -123,5 +124,6 @@ Export a committed checkpoint with
 `python3 scripts/h62/item6/migrate-examples/export.py --evidence /workspace/h62-migrate-examples-evidence`.
 Exports contain full committed head/base, patch, thin overlay bundle, source blob
 hashes, evidence snapshot and SHA256 manifest. Re-export after final measurements;
-an initial snapshot never proves later or pending gates. Fresh-thread continuation
+an initial snapshot never proves later or pending gates. Export refuses a busy
+writer lock, wrong branch, missing base ancestry or uncommitted changes. Fresh-thread continuation
 belongs to coordinator/original goal, never a self-created replacement.
