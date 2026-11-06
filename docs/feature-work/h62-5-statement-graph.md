@@ -304,3 +304,38 @@ stored in JSON to preserve unified-diff spaces while passing whitespace checks.
 Q-H70-CONTRACTS requests an owner-reviewed fix preserving statements/trust policy,
 or continued waiting for the fleet/G49 migration. Host-only routing creates no
 local file-edit authorization. G49 producer inventory remains pending input.
+
+### H70 committed checkpoint handoff
+
+Validated implementation `2e563d9f5dc9f1d3552b20f702eeee8eefc4b7c6`, tree `b9e11e9a7270000705530a848607e9b38110d7a3`:
+37 isolated acceptance tests passed, including all original graph/claim cases
+and five owner-overlay controls. KeySort medians: 1.164584963s before,
+1.160787181s after (-0.3261%); this unchanged control is not whole-project
+migration timing. Layers/generated roots/fragments/diff checks passed.
+Evidence: `/workspace/h62-statement-graph-evidence/h70-acceptance/`.
+Both independent read-only reviewers confirmed the final overlay/provenance
+changes; neither ran Lean or a Lean server.
+
+The guarded isolated census run records input digest
+`29e283dee59e2888f577b5b4aa54c46bacbf955b67d1b87a5e5051f7a3d06797` before compilation.
+CollisionBound copy, Keccak and EVM exit 0; unchanged Contracts exits 1 at its
+1104 axiom guard. All four command records show original sources unchanged,
+stable HEAD and clean checkout. The original CollisionBound blob still equals
+the verified pinned base; the patched target exists only off checkout.
+Evidence: `/workspace/h62-statement-graph-evidence/h70-roadmap-final/`.
+
+B-MIGRATION-HASH is resolved for this exact isolated copy only; full migration
+and cut-over gates remain pending. B-H70-CONTRACTS now records the unchanged
+`PublicCorrectness.transfer` axiom-message guard mismatch. No guard, proof,
+axiom pin or trust policy was modified. Its owner-reviewed resolution and the
+actual G49 exported production inventory are still needed before production
+DAG/typed owner compatibility and witness discharge can complete. Pending
+G49/G50 entries remain metadata, not discharged proofs. Q-H70-CONTRACTS records
+the owner-routing question; host-only relay routing grants no original-file edit
+permission. No further scope is inferred from this checkpoint.
+
+New patch, bundle, evidence and handoff are saved under
+`/workspace/h62-statement-graph-handoff-h70/`. Earlier exports remain intact.
+The full original goal remains unfinished; continue the same VM/branch/goal
+when reviewed inputs arrive, without creating a replacement goal. No merge,
+push, PR, pre-gate, publication or original producer-file edit occurred.
