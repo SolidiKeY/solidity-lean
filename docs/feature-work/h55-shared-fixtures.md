@@ -108,3 +108,14 @@ copy source/target controls. The Bool deletion controls contain theorems named
 reports all matched theorem names and asymmetries for the selected pairs;
 common names do not establish equal statements or cases. It is a lexical
 review aid, not a complete semantic census or acceptance of the family.
+
+## Snapshot initial owner proposal
+
+`snapshot_initial_packet.py` emits an unapplied exact-base proposal for the
+identical private `initial` definitions in PrimitiveSnapshotDependent,
+PrimitiveSnapshotRepeat and PrimitiveSnapshotSequence controls, with a
+parameterised same-area helper. Local declared types and the bodies of the
+fixtures are retained in the proposal. The generator checks original bytes;
+`git apply --check` is textual only. The helper, consumer files, import,
+proof reducibility, timing and registration all need owner agreement and Lean
+checks. No completeness claim is made for other initial/frame fixtures.
