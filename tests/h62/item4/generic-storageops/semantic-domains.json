@@ -1,0 +1,927 @@
+{
+  "format": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "purpose": "Explicit source-scope classification; no theorem weakened, excluded or merged. Exact per-declaration contracts determine claims within each domain.",
+  "files": {
+    "AbsentRootQueries.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePop.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePopControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePopFrameControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePopFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePopPathControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePopPaths.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePopRootFrameControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AggregatePopRootFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "AlternatingLifecycle.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "AlternatingLifecycleControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "ClearDemandControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "ClearDemands.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CommonPrefix.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "Commutation.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "Controls.lean": {
+      "domain": "mixed-control-clients",
+      "boundary": "Concrete graph controls plus bounded hashed/numeric touched transport, reflection, commutation and bound negatives. Exact conclusion determines each claim."
+    },
+    "CopyAccess.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyCompatibility.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "CopyCompatibilityControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "CopyDefaults.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyDefaultsControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyDemandControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyDemands.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyHeaderControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyHeaders.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyLifecycle.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "CopyLifecycleControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "CopyOutput.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "CopyOutputControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "CopyOutputInduction.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "CopyReadCapture.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyReadCaptureControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyReadback.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyReadbackControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyTransport.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyWriteControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "CopyWrites.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "FieldOperations.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "FiniteRootComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FixedRootPrimitive.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FixedRootPrimitiveControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FixedSnapshotFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FixedSnapshotRoot.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshArrayHistory.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshArrayHistoryControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshCopyAccess.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshDefaultPush.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshDefaultPushControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshDefaultRoot.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshDefaultRootControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "FreshMappingHistory.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "FreshMappingHistoryControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "GraphRetainedCycle.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "GraphRetainedCycleControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "IndexedControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "IndexedOperations.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "LaterClearFrames.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "LayoutAccess.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "LayoutControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "Lifecycle.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "LifecycleNumeric.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "LifecycleNumericControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "LifecyclePathControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "LifecyclePaths.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "LifecycleScheduleControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "LifecycleSchedules.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "LivePrefix.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "LoopLaws.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "LoopLawsControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "MappingControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "MappingPaths.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "MixedLifecycle.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "MixedLifecycleControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "MixedLiveComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedClearFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedCopyObservations.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedFreshComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedLaterFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedOlderComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPhaseComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopCommutation.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopCommutationControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopFramesControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopRegrow.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopRegrowControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopTransport.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedPopTransportControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedRetainedCopy.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedRootComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedSnapshotFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NestedStaleComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "NumericClearCommutation.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericClearCommutationControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericCommutation.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericCopyCommutation.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericCopyCommutationControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericRetainedCycle.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericRetainedCycleControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericTraversal.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "NumericTraversalControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "OperationControls.lean": {
+      "domain": "mixed-control-clients",
+      "boundary": "Concrete controls with multiple graph/numeric/target layers; exact conclusion and source comments determine each claim."
+    },
+    "OperationDepth.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "OperationFamilies.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "OperationPush.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "OperationTransport.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "OutputRootComplete.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "OutputRootComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PathOperations.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "PathRepresentation.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PathRepresentationControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PopPush.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrefixControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "PrefixLaws.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "PrimitiveCycleMachine.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "PrimitiveCycleMachineControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "PrimitiveCycleNumeric.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "PrimitiveCycleNumericControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "PrimitiveCycleProgram.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveCycleProgramControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveCycleTransport.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveCycleTransportControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitivePop.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitivePopControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotCommutation.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotCommutationControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotDependent.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotDependentControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotFramesControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotNumeric.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotNumericControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotOwner.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotOwnerControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotRepeat.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotRepeatControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotRoot.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotRootControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotSelf.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotSelfControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotSequence.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PrimitiveSnapshotSequenceControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "ProducerInterface.lean": {
+      "domain": "reached-endpoint",
+      "boundary": "Explicit path/state/reached-state endpoint fields and local witness; no universal Producer instance inferred."
+    },
+    "ProducerInterfaceControls.lean": {
+      "domain": "reached-endpoint",
+      "boundary": "Explicit path/state/reached-state endpoint fields and local witness; no universal Producer instance inferred."
+    },
+    "PublishedControls.lean": {
+      "domain": "published-compiler-fragment",
+      "boundary": "Existing ordinary intrinsic compiler admission/refusal and source/target output relations; no extended fragment or external EVM validation inferred."
+    },
+    "PublishedOps.lean": {
+      "domain": "published-compiler-fragment",
+      "boundary": "Existing ordinary intrinsic compiler admission/refusal and source/target output relations; no extended fragment or external EVM validation inferred."
+    },
+    "PushControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "PushFrameControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PushFrames.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "PushPaths.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "PushTransport.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RecursiveClear.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveClearControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveCopy.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveCopyControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveLifecycleFacts.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveNumericCommutation.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "RecursiveNumericCommutationControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "RecursivePathRepresentation.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RecursivePathRepresentationControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RecursivePop.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveProgress.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveRepeatCopy.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveRepeatCopyControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveSelfCopy.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RecursiveSelfCopyControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "RepresentedControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RepresentedOperations.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RetainedPush.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RetainedPushControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RootCopyAccess.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RuntimeCopyComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RuntimeCopyCompositionControls.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "RuntimeCopyRepeat.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "RuntimeCopyRepeatControls.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "ShrinkRootComposition.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    },
+    "SnapshotCommutation.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "SnapshotControls.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "SourceSelfCopy.lean": {
+      "domain": "compatibility-import",
+      "boundary": "Historical compatibility import; preserve file even if declaration inventory is empty."
+    },
+    "SourceSelfCopyControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "StackWordWrite.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayClear.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayCopy.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayCopyControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayCopyTail.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayDeleteSequence.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayRead.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetArrayRepeat.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayRepeatControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetArrayWrite.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetClearRepresentation.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetCopyLifecycle.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetCopyRead.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetCopyRepresentation.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetCopyWrite.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetDefaultInit.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Actual structured-target instruction laws together with public Represented/FiniteRun/Transport composition; no Source/bytecode/world closure inferred."
+    },
+    "TargetDefaultInitControls.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Actual structured-target instruction laws together with public Represented/FiniteRun/Transport composition; no Source/bytecode/world closure inferred."
+    },
+    "TargetFixedArrayCopy.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetFixedArrayCopyControls.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Actual structured-target instruction laws together with public Represented/FiniteRun/Transport composition; no Source/bytecode/world closure inferred."
+    },
+    "TargetFixedArrayTransport.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetFixedPrimitive.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetFixedPrimitiveControls.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetFixedSnapshot.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetFixedSnapshotControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetFreshMapping.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetHeaderPush.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Actual structured-target instruction laws together with public Represented/FiniteRun/Transport composition; no Source/bytecode/world closure inferred."
+    },
+    "TargetNestedArrayClearLoop.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetNestedArrayControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetNestedArrayCopy.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetNestedArrayCopyLoop.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetNestedArrayRuntime.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetNestedArrayTransport.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetNestedArrayTransportControls.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetNestedPop.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetNestedPopControls.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetOperationControls.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetOperations.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetPrimitivePop.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetPrimitivePopPush.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetPrimitivePush.lean": {
+      "domain": "represented-target-adapter",
+      "boundary": "Typed/public representation and actual structured-target operations, with explicit transport and coverage premises; no general Source/compiler closure inferred."
+    },
+    "TargetRetainedCycle.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetRetainedCycleControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetSelfCopy.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetSnapshotCommutation.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetSnapshotCommutationControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetSnapshotRepeat.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "TargetSnapshotRepeatControls.lean": {
+      "domain": "structured-target",
+      "boundary": "Existing Evm instruction/Machine/structured-loop execution; no Source/bytecode/gas/world adequacy inferred."
+    },
+    "Touched.lean": {
+      "domain": "numeric-access-and-traces",
+      "boundary": "Generated demands/accesses, captured reads and Store/WordStore updates under explicit finite-run premises; no Source/world closure inferred."
+    },
+    "Traversal.lean": {
+      "domain": "intrinsic-graph",
+      "boundary": "Typed Value/Slot/Path operations and logical retained/live observations; no numeric/EVM/Source bridge inferred."
+    },
+    "TwoClearRepresentation.lean": {
+      "domain": "represented-composition",
+      "boundary": "Selected typed queries, independent graph observations and numeric/target composition under exact stated owners/coverage; each source contract retains its own layer boundary."
+    }
+  }
+}

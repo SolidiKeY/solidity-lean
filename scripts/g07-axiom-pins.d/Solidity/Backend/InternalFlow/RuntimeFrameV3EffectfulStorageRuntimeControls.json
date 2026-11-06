@@ -1,0 +1,71 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.arena": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_arena": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_root": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.bad_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.named_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.returned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.reverting_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.root": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.successful_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.Controls.violates_old_condition": []
+}

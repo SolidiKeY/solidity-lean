@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntime.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.bare_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntime.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.returned_of_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntime.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulStorageRuntime.returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

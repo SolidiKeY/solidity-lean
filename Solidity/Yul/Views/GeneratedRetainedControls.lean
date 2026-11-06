@@ -5,7 +5,7 @@ namespace Solidity.Yul.Views.Controls
 
 def generatedSparseState : Source.EMState mixedEnv [.bytes .memory,.string .memory] :=
   ⟨.cons (.memRef rfl 2) (.cons (.memRef rfl 2) .nil),
-    ⟨mixedState.2.ex,enumerationSparseHeap,[],[],⟨[],.nil⟩⟩⟩
+    ⟨mixedState.2.ex,enumerationSparseHeap,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem generated_sparse_MemOK : Source.MemOK mixedEnv enumerationSparseHeap.ty generatedSparseState := by
   obtain ⟨heap,top,inner⟩ := mixedHeap_owner_invariants enumerationSparsePlacement (generatedHeapEntries enumerationSparsePlacement) enumeration_sparse_coverage

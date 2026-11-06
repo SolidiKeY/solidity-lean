@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/AbiEntry/ValueGateBody.lean:Solidity.Backend.AbiEntry.ValueGateBody.body_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBody.lean:Solidity.Backend.AbiEntry.ValueGateBody.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBody.lean:Solidity.Backend.AbiEntry.ValueGateBody.composed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBody.lean:Solidity.Backend.AbiEntry.ValueGateBody.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBody.lean:Solidity.Backend.AbiEntry.ValueGateBody.whole_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
