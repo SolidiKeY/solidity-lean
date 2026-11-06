@@ -101,7 +101,7 @@ def collect(log, data):
         declaration_count=len(found), declarations=[found[r["source_name"]] for r in data["declarations"]])
 
 
-def verify_receipt(query, log, receipt, data):
+def verify_receipt(query, log, receipt, data, query_text=None):
     r = json.loads(receipt.read_text())
     if r.get("gate_exit") != 0 or r.get("status") != "pass" or r.get("stop_reason") is not None:
         raise ValueError("signature export Lean gate did not pass")
@@ -111,7 +111,7 @@ def verify_receipt(query, log, receipt, data):
     if r["log_sha256"] != hashlib.sha256(log.read_bytes()).hexdigest():
         raise ValueError("signature export log hash mismatch")
     actual_query = hashlib.sha256(query.read_bytes()).hexdigest()
-    expected_query = hashlib.sha256(generate(data).encode()).hexdigest()
+    expected_query = hashlib.sha256((generate(data) if query_text is None else query_text).encode()).hexdigest()
     if actual_query != expected_query or r["input_source_sha256"].get(str(query.resolve())) != actual_query:
         raise ValueError("signature export query hash mismatch")
     tool = Path("/workspace/.setup/tools/lean-4.24.0-linux/bin")

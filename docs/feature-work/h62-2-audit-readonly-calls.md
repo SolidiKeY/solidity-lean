@@ -1,14 +1,13 @@
 # H62 item 2: read-only-call empty-statement audit
 
-Status: **partial, continuing under coordinator answers**. H69 assigns the two
+Status: **blocked by mandatory performance stop; original goal unfinished**. The current frozen-file comparison exceeded the 10% stop threshold; no new proof work or remeasurement follows. Semantic/proof progress below is retained as a reviewable checkpoint, not completion. H69 assigns the two
 unreachable frozen dispatch cuts to RO as **pending RO v2**: a reachable
 versioned interface, explicit migration and consumer re-proofs. Their frozen
 refutations remain evidence; they are neither erased nor counted as witnesses.
 The separate compiler-success theorem is a pending deliverable of V13
 (`v12-v17/v13-abi-world`) for G42, with V15/P10 observation dependencies. It
 must prove success for that owner's compiler on the stated supported inputs;
-no frozen interface statement changes. Both previous scope questions are
-resolved. H70 supplies the exact H69 rule: checked joint-impossibility proofs are the audit result for intentional negative controls/separation/refutations; ordinary interfaces still need joint witnesses. RO, V13 and V15 have accepted the ticket relays. Independent census and original-rule joint fixture work continue.
+no frozen interface statement changes. Both previous scope questions are resolved; the semantic continuation adds Q-CALLBACK-INTENT below. H70 supplies the exact H69 rule: checked joint-impossibility proofs are the audit result for intentional negative controls/separation/refutations; ordinary interfaces still need joint witnesses. RO, V13 and V15 have accepted the ticket relays. Proof and inspection work is now paused by the performance stop; only read-only checkpoint preparation continues.
 No frozen statement, hypothesis, exclusion, observation, proof budget,
 interface file or library root was edited.
 
@@ -25,11 +24,11 @@ merge, PR, pre-gate, deployment, or replacement goal was performed.
 | Checkpoint | Result |
 |---|---|
 | 1. Frozen inventory and owners | Exact type/identity census complete: 129 files, 792 elaborated theorem types, all 33 private names resolved, owners retained. Semantic global-vs-input feasibility continues with the witness queue. |
-| 2. Simultaneous witnesses | Partial: 16 concrete joint clients, two pending RO v2 with checked refutations retained, 774 entries pending semantic/witness accounting (including 339 syntactically binder-free types). |
+| 2. Simultaneous witnesses | Partial: 27 joint clients; 42 checked intentional impossibility results under H69; 256 statements with no top-level input hypotheses; two pending RO v2; three pending callback-owner intent; 462 other entries pending. |
 | 3. Success/totality and negative controls | Partial, owner deliverable pending: Source success/failure/timeout and both-pipeline gas refusal checked; reject-all and nonempty target-revert controls checked. General compiler success and executable gas/fork adequacy remain unproved. |
-| 4. Fidelity census and uncovered owners | Partial: every named source declaration accounted exactly once, 18 explicit outcomes bound to signature hashes; all 792 bind to elaborated type hashes; remaining entries retain pending status and owners. Full all-witness acceptance and final integration gates have not passed. |
+| 4. Fidelity census and uncovered owners | Partial: every named source declaration accounted exactly once, 32 explicit outcomes bound to signature hashes; all 792 bind to elaborated type hashes; remaining entries retain pending status and owners. Full all-witness acceptance and final integration gates have not passed. |
 
-The census intentionally includes controls and helpers with no explicit hypotheses. It makes no silent interface-theorem exclusion. The new generated Lean query imports every unchanged mapped interface, checks exact theorem and owning-module identity, exports raw elaborated Expr plus readable type and actual binders, and resolves all private names. There are 339 syntactically binder-free types under nonreducing inspection. Definitions such as Not, Effect and CallbackHistories can hide premises, so those 339 remain pending; none is discharged by syntactic closure. Binder proposition/record shape alone never establishes feasibility.
+The census intentionally includes controls and helpers with no explicit hypotheses. It makes no silent interface-theorem exclusion. The new generated Lean query imports every unchanged mapped interface, checks exact theorem and owning-module identity, exports raw elaborated Expr plus readable type and actual binders, and resolves all private names. There are 339 syntactically binder-free types under nonreducing inspection. None is discharged by that fact. The semantic continuation now inspects reducing telescopes and proof axioms for all 339; only the narrow, reviewed classifications below advance their audit accounting. Binder proposition/record shape alone never establishes feasibility.
 
 ## Kernel evidence and boundaries
 
@@ -59,7 +58,7 @@ payment-only EVM lacks gas and calldata, and neither its machine nor Source
 proof was introduced. General supported-program compiler totality remains an
 owner obligation.
 
-All four audit proof files passed separate bounded Lean checks. JointClients.lean adds twelve exact applications covering callback frame/suffix/determinism/target uniqueness, raw-phase capture/storage, typed source storage/resume, raw uniqueness, depth refusal and inherited-static value refusal. Their printed axiom
+All five audit proof files passed separate bounded Lean checks. JointClients.lean adds twelve exact applications covering callback frame/suffix/determinism/target uniqueness, raw-phase capture/storage, typed source storage/resume, raw uniqueness, depth refusal and inherited-static value refusal. Their printed axiom
 sets contain only `propext`, `Classical.choice`, and `Quot.sound`; no added
 `axiom`, `sorry`, `native_decide`, trust shortcut, or raised heartbeat limit.
 Failed intermediate attempts are retained separately and are not certificates.
@@ -109,7 +108,8 @@ coordinator; the original goal was neither recreated nor reset.
 | bounded runner: same direct Lean flags on `SupportedCalls.lean` | Pass, proof-supported.log/json, 2.006 s. |
 | `PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item2/audit-readonly-calls/test_census.py` | Pass, test-census.log: five acceptance tests, including frozen-header and unmapped-core mutation rejection. |
 | `python3 scripts/h62/item2/audit-readonly-calls/test_bounded.py /workspace/h62-audit-readonly-calls/evidence` | Pass, test-bounded-final.log: timeout and zero-exit parent controls rejected; no live descendant. These intentional negative gates are expected to fail, not passing runtime gates. |
-| census generator with `--coverage tests/h62/item2/audit-readonly-calls/coverage.json` | Pass: 129 modules, 792 declarations, with elaborated census: 13 joint / 3 target-failure joint / 2 pending RO v2 (refutations retained) / 774 pending. |
+| census generator with `--coverage tests/h62/item2/audit-readonly-calls/coverage.json` | Pass: 129 modules, 792 declarations, with elaborated census: with current semantic stage: 24 joint / 3 target-failure joint / 42 intentional impossibility / 256 no-top-level-input / 2 RO v2 / 3 owner intent / 462 pending. |
+| bounded runner: `python3 scripts/h62/item2/audit-readonly-calls/measure.py --output /workspace/h62-audit-readonly-calls/continuation-semantic/evidence/timing-after-samples.json --compare /workspace/h62-audit-readonly-calls/continuation-semantic/evidence/timing-before-samples.json` | **FAIL, exit 1: +80.254967%; mandatory stop enforced**, timing-after.json and performance-stop-context.json. |
 | `./run-lean.sh` and full all-witness acceptance | Pending, not RUNTIME_GATE_PASS. No full completion claim while frozen witness obligations are impossible. |
 
 Before/after timing samples repeat the same unchanged frozen Premises file,
@@ -136,7 +136,7 @@ preflight, and lock retention until descendant drain. The finder identified the
 two impossible cuts; the skeptic proposed and reviewed the nonempty target
 failure. Final review evidence is exported separately.
 
-Remaining obligations: 774 pending semantic/witness entries; remaining semantic global-vs-input feasibility classifications; RO v2 publication/migration and consumer re-proofs for the two cuts; independently fixed compiler success/totality,
+Remaining obligations: 462 ordinary semantic/witness entries, three callback-intent decisions and two RO-v2 migrations; remaining semantic global-vs-input feasibility classifications; RO v2 publication/migration and consumer re-proofs for the two cuts; independently fixed compiler success/totality,
 P10 observation, gas/fork boundary; full repository final gate and all-statement
 acceptance. Save/relay these typed blockers, preserve the exact original goal,
 VM and branch, and resume only under authorized owner scope. This handoff is
@@ -159,8 +159,38 @@ The full mapped-surface build passed 341 jobs in 488.577 s, peak aggregate RSS 1
 
 The export collector requires successful bounded-gate status, exact query/log hashes, command, toolchain file and actual Lean/Lake binary/version identity. It validates all kernel names, source-signature hashes, owning modules, raw type hashes and exact membership. It rejects complete-looking output followed by Lean errors. Five source-census tests and twelve export acceptance tests pass, including missing/duplicate declarations, wrong private/kernel/module identity, failed gate, late error and stale query/log/binary receipts. This external metadata validation does not prove joint hypotheses.
 
-No scope questions remain. Owner items are explicitly pending RO v2 and V13 compiler success with V15/P10 fixed outcomes. Continue the 774 pending semantic/witness entries under the original joint-witness requirement and H69's intentional-refutation rule, without modifying frozen interfaces.
+The earlier H69/H70 questions were resolved. The current semantic continuation adds Q-CALLBACK-INTENT; owner items also remain pending RO v2 and V13 compiler success with V15/P10 fixed outcomes. After the performance stop is resolved, resume remaining ordinary entries without modifying frozen interfaces.
 
-Review correction: syntactic binder-free metadata never removes a witness obligation. Full exported records, including binder arrays, are reparsed from their successful hash-bound Lean log at census ingestion. Mutation tests reject binder-array tampering and separately exercise private kernel identity. The 339 syntactically binder-free rows remain among the 774 pending entries until semantic/H69 accounting is supplied.
+Review correction: syntactic binder-free metadata never removes a witness obligation. Full exported records, including binder arrays, are reparsed from their successful hash-bound Lean log at census ingestion. Mutation tests reject binder-array tampering and separately exercise private kernel identity. At the pre-semantic checkpoint, all 339 syntactically binder-free rows remained pending. Their current accounting is derived only from the separately verified reducing/axiom inspection, not the empty syntactic binder array.
 
 Continuation checking-repeatability capsule: five samples of the identical unchanged Premises file measured median 1.149105 s before and 1.093362 s after, delta -4.850972%. No >10% slowdown stop was triggered. This is not a whole-build migration performance claim.
+
+## Semantic continuation after published-master preflight
+
+Before selecting the new work item, git fetch origin master completed and history/code were inspected at 5f7bb1441566aaad64a34436904afc61de762fd2. The frozen read-only surface has no upstream changes and the audit tooling is not published there, so the duplicate-work rebase condition does not apply. A second fetch/code inspection preceded the hidden-input witness batch. No existing producer implementation was redone.
+
+The generated reducing query checks the original exact types/names and uses forallTelescopeReducing plus collectAxioms under unchanged budgets. It passed all 339 selected declarations in 110.737 s with peak aggregate RSS 1,123,995,648 bytes. Every collected proof axiom set is a subset of propext, Classical.choice and Quot.sound. The original raw Expr remains pinned to the exact 792-type export. Canonical receipt/query/log/toolchain verification is repeated at semantic ingestion. Binder, axiom and inspection fields cannot be modified independently of the checked log.
+
+The reviewed partition of these 339 is 256 rigid logical results with no top-level input hypotheses (211 Eq, 38 And, seven Exists), 42 deliberate Not/Ne control/separation/refutation results with one refused proposition leading to False, and 41 initially unresolved predicate/alias cases. The 256 label is deliberately narrow: it does not certify compiler success, nested semantic guards, representation feasibility or actual admitted executions. The 42 original checked proofs are H69 results, not newly created proof aliases or positive witnesses; their exact identities and frozen type/signature hashes are pinned in semantic-policy.json. Unreviewed negatives remain pending.
+
+HiddenClients.lean then supplies eleven ordinary joint clients for four Effect predicates, six SameStorage predicates and receiver injectivity, using populated existing source states and actual addresses. It also proves three callback-choice conjunctions impossible. All fourteen helpers passed in 4.012 s, peak RSS 915,017,728 bytes, with only standard proof axioms. The three new callback controls remain pending owner intent rather than being silently declared intentional negatives.
+
+Current exact accounting: 792 = 27 joint clients + 42 checked intentional impossibility results + 256 no-top-level-input statements + two pending RO v2 + three pending callback-owner intent + 462 other pending entries. Global record inhabitance is never substituted for per-input feasibility. Five original census, twelve exact-export and seven semantic mutation/acceptance tests pass. Tests reject altered semantic binder/axiom arrays, wrong type pins, nonstandard axiom policies, unreviewed negative acceptance and premature discharge of named predicates.
+
+### Q-CALLBACK-INTENT — new owner request
+
+The three fixed-strategy CallbackHistories declarations below have globally impossible callback-choice premises, despite their inhabited global certificates. The checked subset refutations establish impossibility of each full admitted-child conjunction. V13 owns these controls; RO owns the underlying source-history interface. Requests and exact paths are in the scoped owner-tickets.json, for coordinator relay. H70's prior accepted relays do not imply this new request has been delivered.
+
+Question: are these intentional no-callback separation controls, eligible for the checked-impossibility result under H69, or ordinary producer obligations that must await reachable versions/fixtures? Options: classify as intentional separation and accept the checked impossibility, never as a positive witness; or retain ordinary pending status until owners supply reachable versions/fixtures. No recommendation or frozen-interface edit is implied.
+
+ESCALATE: Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks — V13/RO; HiddenClients.closed_children_joint_impossible and continuation-semantic/evidence/hidden-clients.log prove the fixed answer strategy cannot satisfy the callback choice. Options: owner confirms intentional H69 no-callback separation; or owner supplies a reachable version/fixture and consumers re-prove.
+ESCALATE: Solidity.Backend.WorldCalls.UnknownSourceControls.children — V13/RO; HiddenClients.unknown_children_joint_impossible and continuation-semantic/evidence/hidden-clients.log prove its fixed answer strategy cannot satisfy the callback choice. Options: owner confirms intentional H69 no-callback separation; or owner supplies a reachable version/fixture and consumers re-prove.
+ESCALATE: Solidity.Backend.WorldCalls.UnknownRevertControls.children — V13/RO; HiddenClients.revert_children_joint_impossible and continuation-semantic/evidence/hidden-clients.log prove its credit/answer strategy cannot satisfy the callback choice. Options: owner confirms intentional H69 no-callback separation; or owner supplies a reachable version/fixture and consumers re-prove.
+
+Semantic continuation bulk evidence is off Git under /workspace/h62-audit-readonly-calls/continuation-semantic/evidence/. Its handoff/report supersede earlier status summaries while retaining earlier sealed artifacts as historical. Full run-lean.sh, remaining ordinary witness work, RO v2 publication/migration, V13 separate compiler success with V15/P10 fixed outcomes and final all-statement acceptance remain unfinished.
+
+## Mandatory performance stop
+
+The semantic-continuation comparison failed with median 1.042592 s before and 1.879323 s after, delta +80.254967% (threshold +10%). The benchmark process exited 1 with SLOWDOWN_STOP. New proof work and further measurements stopped immediately. The source hash, command, Lean/Lake binaries and recorded resource flags match; no cause is established and no code-regression claim is made. No threshold override or repeat-to-green is requested.
+
+Evidence: /workspace/h62-audit-readonly-calls/continuation-semantic/evidence/timing-before-samples.json, timing-after-samples.json, timing-after.json and performance-stop-context.json. The shell pipeline stopped before structural checks; those read-only non-Lean checks may be completed solely to prepare this blocked checkpoint. Full run-lean.sh and final witness acceptance remain pending. There are still 462 ordinary entries that may be worked after the performance stop is resolved; this report does not claim they all require missing producers. Prior RO-v2/compiler-success dependencies and Q-CALLBACK-INTENT remain separately pending.

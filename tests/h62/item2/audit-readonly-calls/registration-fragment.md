@@ -10,3 +10,4 @@ requires area-owner approval; the fragment is a proposal only.
 | tests/h62/item2/audit-readonly-calls/AlwaysRevert.lean | Exact nonempty target-revert consumer applications and empty-domain reject-all controls. |
 | tests/h62/item2/audit-readonly-calls/SupportedCalls.lean | Joint callback premise witness and actual Source success/failure/timeout/gas-refusal controls. |
 | tests/h62/item2/audit-readonly-calls/JointClients.lean | Twelve exact ordinary consumer applications with all inputs jointly supplied. |
+| tests/h62/item2/audit-readonly-calls/HiddenClients.lean | Eleven ordinary hidden-input clients and three callback-choice joint-impossibility proofs. |

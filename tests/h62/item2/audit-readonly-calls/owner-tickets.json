@@ -46,6 +46,40 @@
       "resolution": "Coordinator: totality is a separate compiler-success theorem proved for the owner compiler on stated inputs; frozen interfaces stay unchanged.",
       "responsible_lane": "V13 (v12-v17/v13-abi-world)",
       "required_deliverable": "A separate theorem proving owner compiler success on supported stated inputs, excluding reject-all and always-revert behavior; no frozen-interface amendment."
+    },
+    {
+      "id": "CALLBACK-HISTORY-INTENT",
+      "type": "JOINT_PREMISES_IMPOSSIBLE_PENDING_INTENT",
+      "owner": "solidity-v12-v17-20261031/v13-abi-world",
+      "dependencies": [
+        "solidity-compiler10-20261028/readonly-external"
+      ],
+      "declarations": [
+        "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks",
+        "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
+        "Solidity.Backend.WorldCalls.UnknownRevertControls.children"
+      ],
+      "status": "pending owner intent",
+      "evidence": "tests/h62/item2/audit-readonly-calls/HiddenClients.lean; continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "question_resolved": false,
+      "question": "The three fixed-strategy CallbackHistories declarations have checked callback-choice impossibility proofs. Are they intentional no-callback separation controls under H69, or ordinary producer obligations requiring reachable versions?",
+      "options": [
+        "Intentional no-callback separation controls: accept checked joint impossibility under H69, never as positive witnesses.",
+        "Ordinary producer obligations: retain pending status until owners publish reachable versions or fixtures."
+      ],
+      "delivery_status": "New request saved for coordinator relay; H70 acceptance applies to prior RO-v2/compiler-success tickets, not this new question."
+    },
+    {
+      "id": "SEMANTIC-CHECKING-PERFORMANCE-STOP",
+      "type": "PERFORMANCE_STOP",
+      "owner": "coordinator/runtime",
+      "status": "blocked; mandatory >10% stop",
+      "threshold_percent": 10,
+      "observed_delta_percent": 80.25496653564336,
+      "evidence": "/workspace/h62-audit-readonly-calls/continuation-semantic/evidence/performance-stop-context.json",
+      "action": "Investigate/restore comparable checking conditions; no threshold override, budget increase or repeat-to-green requested.",
+      "queued_work": "462 ordinary entries remain; not all are producer-blocked."
     }
   ],
   "pending_items": [

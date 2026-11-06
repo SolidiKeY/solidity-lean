@@ -182,6 +182,149 @@
       "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
       "evidence": "continuation-h69/evidence/joint-clients.log",
       "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.LocationControls.byte_effect",
+      "signature_sha256": "3881d12e327f703d52c817d1b62ad736fa59c2e121fb3d7db779d08f47053052",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.byte_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceDispatchControls.selected_at_zero",
+      "signature_sha256": "aec8b20258c5af54e2c81badd023ac87a0a8da65a5c61604ce7a2024aa95bff0",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.dispatch_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceEnvironmentControls.actual_answer_client",
+      "signature_sha256": "478af5b7eb54d3d357200ee405f3f6dd53ee14b8bc00ecffdc470409c6bb62ad",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.answer_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceStatementControls.actual_skip_client",
+      "signature_sha256": "981142d094bd821a842929e4caf20614dec5cc16bf282f7983c8ba69f70e388b",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.skip_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_storage",
+      "signature_sha256": "fb76634caa7749a0f858f07e5c5431f4f3e85805bfb401c8f63e2199d1963c6d",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.closed_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_reentrant_storage",
+      "signature_sha256": "fa25ce228e54915ab9b264abd5fd2e4f9d6fcf04db80303959244bd629ce5448",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.reentrant_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.actual_unknown_client",
+      "signature_sha256": "51df4a164efd4fde01be1922c751a44b9b0ee811e2bf2cc949509571d0062c93",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.actual_unknown_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.UnknownSourceControls.storage",
+      "signature_sha256": "81827a71627cc3da30609b4dca5931c40ff6d5a950d0f20f2b28d5b26adf04c5",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.unknown_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentHistoryControls.static_credit_storage",
+      "signature_sha256": "9d332a6c1eb1d067e60329bd7bf9ca4320c713ffbde4d9918cc12743ee916a0b",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.credit_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentHistoryControls.exhausted_callback_keeps_storage",
+      "signature_sha256": "16eb1c016aa6d6bca96e642de5c04da8dd414c5e3a58a5c070a66c9e4da2b514",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.exhausted_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ReceiverCapture.faithful",
+      "signature_sha256": "4aed00dac7000f9401116ed7aa4c006998eff2f7901a9648e1ba556c77fc2e72",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.injective_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks",
+      "signature_sha256": "ad533aeb84204dbd9a83c845c87897dd4ab518495ac70580bc29a1a323f46f8f",
+      "status": "pending-owner-intent",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.closed_children_joint_impossible",
+      "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
+      "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "witness_rule": "Pending owner intent: do not silently reclassify ordinary producer obligation as H69 intentional negative"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
+      "signature_sha256": "348dfdc87a989adccee3e85cab8a764781a59034fbf98ec210688f45bdcc3740",
+      "status": "pending-owner-intent",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.unknown_children_joint_impossible",
+      "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
+      "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "witness_rule": "Pending owner intent: do not silently reclassify ordinary producer obligation as H69 intentional negative"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.UnknownRevertControls.children",
+      "signature_sha256": "9eea72ce66994da99e2c4127baba726f4b88ea7d04b9c26868f713da3605f7d2",
+      "status": "pending-owner-intent",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.revert_children_joint_impossible",
+      "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
+      "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "witness_rule": "Pending owner intent: do not silently reclassify ordinary producer obligation as H69 intentional negative"
     }
   ]
 }

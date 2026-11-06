@@ -239,6 +239,8 @@ def main():
     parser.add_argument("--check", type=Path)
     parser.add_argument("--coverage", type=Path)
     parser.add_argument("--elaborated", type=Path)
+    parser.add_argument("--semantic", type=Path)
+    parser.add_argument("--semantic-policy", type=Path)
     args = parser.parse_args()
     result = census()
     if args.elaborated:
@@ -258,6 +260,14 @@ def main():
             row["witness_status"] = entry["status"]
             row["coverage"] = entry
         result["coverage_boundary"] = "Manual binding to saved successful Lean evidence; Python does not certify proofs"
+    if args.semantic:
+        if not args.elaborated or not args.semantic_policy:
+            raise ValueError("semantic classification requires exact export and reviewed policy")
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("semantic_export_verifier", Path(__file__).with_name("semantic_census.py"))
+        semantic = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(semantic)
+        semantic.attach(result, json.loads(args.semantic.read_text()), json.loads(args.elaborated.read_text()), json.loads(args.semantic_policy.read_text()))
     payload = json.dumps(result, indent=2, ensure_ascii=False) + "\n"
     if args.check:
         if args.check.read_text() != payload:
