@@ -1144,3 +1144,34 @@ wrapper injects the race; the compiler itself is real. Before/after results and
 read-only reviews are bound by the existing custom-build evidence manifest's
 provenanceFollowup entry. No IDs/row requirements or proof budgets changed;
 native macOS and full parity remain pending.
+
+### Native Linux custom F6 and pinned trace observation (2026-11-06)
+
+The first strict failure `submenus:dafny.context` remains partial. The existing
+headless observer now exercises actual F6 and its real input prompt. A native
+single-file default-options local build saves the dirty CRLF/Unicode source and
+returns a source-bound compiler AST. The separate imported/annotated case fails
+at the existing specification adapter boundary; its receipt remains failed.
+Pinned Dafny accepts its unchanged default build arguments, verifies one method,
+then exits 3 because its integrated terminal cannot find dotnet. No runtime or
+proof profile was substituted. Its actual positioned counterexample RPC drives
+show/copy/hide observations, clipboard equality and native menu/pixel captures.
+Local model-prestate data has no corresponding positioned verifier trace; no
+fake decoration or copy action was added. Menu branding/grouping/actions and
+finite JSON versus arbitrary CLI inputs differ; native macOS remains pending.
+
+[The small evidence manifest](dafny-native-f6-evidence-manifest.json) binds the
+VM-only archive and its COMPARISON.md/REVIEWS.md members. Read-only finder and
+skeptic found terminal-execution mixing, omitted trace-scenario validation and
+a post-terminal source-stability gap. Repairs bind exact command arguments and
+pinned executable hash, execution IDs, new/changed artifacts and current source;
+tests retain distinct-execution and omission regressions. Final reviews found no
+further concrete defect. Reviews are not paired row judgments.
+
+All 486 obligations/order and frozen 270 remain unchanged. Full build, TestSuite,
+timed strict, KeySort, positioned local verifier metadata, rendered lifecycle,
+performance/scaling/adversarial matrices and both fresh judges remain required.
+Classification-only strict is not timed strict; no RUNTIME_GATE_PASS. No heavy
+resource-failing gate retried, no goal state changed, no push/merge/PR. Exact-head
+lightweight gates and full-scope handoff are exported under
+`/workspace/dafny-parity-native-f6-20261106/`.

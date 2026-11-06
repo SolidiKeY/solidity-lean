@@ -236,3 +236,31 @@ test('native build key dispatch refuses an unfocused editor (injected CDP bounda
 test('context submenu observation refuses to click without a source editor (injected CDP boundary)',async()=>{
  const {contextSubmenu}=require('../parity/renderer.cjs'),calls=[];await assert.rejects(contextSubmenu({request:async(method,params)=>{calls.push({method,params});return{result:{value:null}};}},'/unused'),/No source editor/);assert.equal(calls.length,1);assert.equal(calls[0].method,'Runtime.evaluate');
 });
+
+for(const suite of ['custom-commands','custom-default-commands'])test(suite+' requires its own native action and cannot replace proof evidence',()=>{
+ const id=suite==='custom-commands'?'command-custom-build-keybinding':'command-custom-default-build-keybinding';
+ const config={runId:'custom-only',target:'local',suite},report={schemaVersion:1,runId:config.runId,target:'local',status:'passed',checks:[id],scenarios:[{id,status:'passed'}]};
+ assert.deepEqual(hostEvidenceErrors(report,config),[]);assert.ok(hostEvidenceErrors(report,{...config,suite:'full'}).length);assert.ok(hostEvidenceErrors({...report,scenarios:[{id:'command-build-keybinding',status:'passed'}],checks:['command-build-keybinding']},config).length);
+ assert.equal(parse(['--suite',suite,'--targets','local']).suite,suite);
+});
+test('F6 refuses wrong prompt contents before Enter (injected CDP boundary)',async()=>{
+ const {buildKeybinding}=require('../parity/renderer.cjs'),calls=[];let evaluations=0;
+ await assert.rejects(buildKeybinding({request:async(method,params)=>{calls.push({method,params});if(method==='Runtime.evaluate')return{result:{value:++evaluations===1?true:{focused:true,value:'wrong'}}};return{};}},{custom:true,input:'{}'}),/contents did not match/);
+ assert.deepEqual(calls.filter(c=>c.params.code==='F6').map(c=>[c.params.type,c.params.modifiers]),[['keyDown',0],['keyUp',0]]);assert.equal(calls.some(c=>c.params.code==='Enter'),false);
+});
+test('terminal observer retains real output/exit and stops subscriptions on restore (injected VS Code boundary)',async()=>{
+ let start,end,disposed=0;const records=[],vscode={tests:{},window:{onDidStartTerminalShellExecution:f=>(start=f,{dispose(){disposed++;}}),onDidEndTerminalShellExecution:f=>(end=f,{dispose(){disposed++;}})},languages:{onDidChangeDiagnostics:()=>({dispose(){}})}};
+ const observer=observe(vscode,(kind,data)=>records.push({kind,data}),'/not-an-extension',null,'/owned/workspace');
+ try{assert.equal(observer.terminalSupported,true);const execution={commandLine:{value:'build /owned/workspace/main.dfy'},async *read(){yield 'compiler output';}};start({execution});end({execution,exitCode:3});await new Promise(r=>setImmediate(r));assert.equal(records.find(r=>r.kind==='terminal.end').data.exitCode,3);assert.equal(records.find(r=>r.kind==='terminal.output').data.data,'compiler output');assert.ok(records.some(r=>r.kind==='terminal.output.end'));const length=records.length;start({execution:{...execution,commandLine:{value:'build /other/file'}}});await new Promise(r=>setImmediate(r));assert.equal(records.length,length);}finally{observer.restore();}assert.equal(disposed,2);
+});
+
+test('paired default custom suite cannot omit its partial native trace observation',()=>{
+ const id='command-custom-default-build-keybinding',config={runId:'pair',target:'dafny',suite:'custom-default-commands'},report={schemaVersion:1,...config,status:'passed',checks:[id],scenarios:[{id,status:'passed'}]};
+ assert.ok(hostEvidenceErrors(report,config).includes('missing native trace observation'));
+ assert.deepEqual(hostEvidenceErrors({...report,status:'passed-with-gaps',scenarios:[...report.scenarios,{id:'native-trace-show-copy-hide',status:'partial'}]},config),[]);
+});
+test('terminal execution IDs cannot combine output and exit from distinct executions (injected boundary)',async()=>{
+ let start,end;const records=[],vscode={tests:{},window:{onDidStartTerminalShellExecution:f=>(start=f,{dispose(){}}),onDidEndTerminalShellExecution:f=>(end=f,{dispose(){}})},languages:{onDidChangeDiagnostics:()=>({dispose(){}})}};
+ const observer=observe(vscode,(kind,data)=>records.push({kind,data}),'/unused',null,'/owned');
+ try{const make=()=>({commandLine:{value:'build /owned/main.dfy'},async *read(){yield 'data';}}),a=make(),b=make();start({execution:a});start({execution:b});end({execution:b,exitCode:3});end({execution:a,exitCode:0});await new Promise(r=>setImmediate(r));const starts=records.filter(r=>r.kind==='terminal.start');assert.notEqual(starts[0].data.executionId,starts[1].data.executionId);for(const [executionId,exit] of [[starts[0].data.executionId,0],[starts[1].data.executionId,3]]){assert.equal(records.find(r=>r.kind==='terminal.end'&&r.data.executionId===executionId).data.exitCode,exit);assert.ok(records.some(r=>r.kind==='terminal.output.end'&&r.data.executionId===executionId));}observer.restore();const length=records.length;start({execution:a});end({execution:a,exitCode:0});assert.equal(records.length,length);}finally{observer.restore();}
+});

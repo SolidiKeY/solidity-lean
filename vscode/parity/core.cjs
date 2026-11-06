@@ -190,7 +190,12 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='commands'){
+  if(config.suite==='custom-default-commands'){
+    if(!ids.includes('command-custom-default-build-keybinding'))errors.push('missing native default custom command scenario');
+    if(config.target==='dafny'&&!ids.includes('native-trace-show-copy-hide'))errors.push('missing native trace observation');
+  } else if(config.suite==='custom-commands'){
+    if(!ids.includes('command-custom-build-keybinding'))errors.push('missing native custom command scenario');
+  } else if(config.suite==='commands'){
     if(!ids.includes('command-build-keybinding'))errors.push('missing native command scenario');
   } else if(config.suite==='visual') {
     // Visual capture has its own five scenarios. Missing early phases remain
