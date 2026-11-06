@@ -301,3 +301,19 @@ Coordinator retrieval paths: `/workspace/h62-audit-evidence/original.patch`,
 `/workspace/h62-audit-evidence/evidence.tar.gz`, and
 `/workspace/h62-audit-evidence/SHA256SUMS`. No push, merge, PR, pre-gate or
 publication was performed. Large census/toolchain/cache outputs remain off git.
+
+## Successor census partition controls
+
+The additive `scripts/h62/item2/audit-exact-verification/census_partition.py`
+checks complete saved/raw name sets, exact retained kernel-field metadata,
+an independently supplied source-census digest and coverage membership derived
+from source candidate names. Six synthetic host-only tests in
+`tests/h62/item2/audit-exact-verification/test_partition.py` pass. These tests
+reject equal-count coverage swaps, substituted/duplicate names, field drift,
+unknown labels, corrupt digests and malformed JSON. Historical witness labels
+are checked for consistency only; they supply no witness evidence.
+
+This helper is not yet wired into the historical Core-dependent runner.
+Original raw artifacts remain UNVERIFIABLE; actual census replay and proof
+validation remain pending. No Lean or timing STOP was rerun, no Core change
+was made, and no original obligation or release row is closed.
