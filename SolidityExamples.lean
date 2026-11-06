@@ -54,6 +54,7 @@ import Solidity.Examples.DecisionFeatures
 import Solidity.Examples.DecisionFixedArrayPair
 import Solidity.Examples.DecisionFixedArrayPath
 import Solidity.Examples.DecisionFixedArrayStorage
+import Solidity.Examples.DecisionGapArrayNegatives
 import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionGapCore
 import Solidity.Examples.DecisionGapData

@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecisionPartialOrFloor
+import Solidity.Calculus.DecisionBlockRefute
 
 /-!
 # Certified answers for decided M7 gaps without fresh allocation
@@ -9,20 +10,35 @@ One extension point for gap families decided after the given-heap routes:
 A family added here brings its decidable source class, a proved answer or a
 constructive countermodel, and the `isSome` lemma; `Calculus/Decision.lean`
 need not change again. Families: the nested partial-OR floor
-(`Calculus/DecisionPartialOrFloor.lean`).
+(`Calculus/DecisionPartialOrFloor.lean`) and false literal-bounded blocks
+refuted at a threshold region (`Calculus/DecisionBlockRefute.lean`).
 -/
 namespace Solidity.Decide
 variable {C : Contract}
 
 /-- The decided gap families, tried in order. -/
 def gapAnswer? (φ : Fml C []) : Option (MemoryWitness.Answer φ) :=
-  ResidueReason.partialOrFloorAnswer? φ
+  (ResidueReason.partialOrFloorAnswer? φ).orElse fun _ => BlockRefute.answer? φ
 
-/-- Decidable membership in a decided gap family; no verdict is consulted. -/
-def _root_.Solidity.Fml.gapCovered (φ : Fml C []) : Bool := φ.partialOrFloor
+/-- Decidable membership: a source family, or a certified refutation found by the
+finite region search. No decision verdict function is consulted. -/
+def _root_.Solidity.Fml.gapCovered (φ : Fml C []) : Bool := φ.partialOrFloor || φ.blockRefutable
 
 /-- Every member of a decided gap family is answered. -/
-theorem gapAnswer_isSome {φ : Fml C []} (h : φ.gapCovered = true) : (gapAnswer? φ).isSome = true :=
-  ResidueReason.partialOrFloorAnswer_isSome h
+theorem gapAnswer_isSome {φ : Fml C []} (h : φ.gapCovered = true) : (gapAnswer? φ).isSome = true := by
+  unfold gapAnswer?
+  cases hp : ResidueReason.partialOrFloorAnswer? φ with
+  | some a => rfl
+  | none =>
+    simp only [Option.orElse_none]
+    unfold Fml.gapCovered at h
+    cases hf : φ.partialOrFloor with
+    | true =>
+      have := ResidueReason.partialOrFloorAnswer_isSome hf
+      rw [hp] at this
+      cases this
+    | false =>
+      rw [hf, Bool.false_or] at h
+      exact BlockRefute.answer_isSome h
 
 end Solidity.Decide

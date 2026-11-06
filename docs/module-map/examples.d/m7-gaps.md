@@ -1,2 +1,3 @@
 | `Examples/DecisionGapPartialOrFloor.lean` | The partial-OR floor family decided in both polarities over a contract with a second uint root: a valid member proved, key-zero and wrong-value members refuted at the region countermodel, a total-bound guard outside the family. |
 | `Examples/DecisionGapVoidBinder.lean` | Fresh binders of a mapping-bearing struct: the three former unknown pins and `∀ fresh Ledger l; l.nonce = 7` proved, the negated binder refuted (outside the target), a map-free control outside the family. |
+| `Examples/DecisionGapArrayNegatives.lean` | The false companions of the five array source shapes (past the bound, wrong value) refuted at threshold regions, covered, with certified states; the positive originals are not refuted. |
