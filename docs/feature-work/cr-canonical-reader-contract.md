@@ -114,3 +114,33 @@ The actual route migration, the in-place fixture migration, the seven `drift`
 and four `no-source` fixtures, and any canonical-reader support extension are
 not done. P8 Producer consumption waits for `cloud/move5-20261106/p8-producer`
 to land on master.
+
+## Handoff (2026-11-06)
+
+Gates on `d1e01212` (`gate.sh checkpoint`, elan on PATH): trust, orphans,
+layers, roots and fragments PASS. Lake built
+`Frontend/Admission/CanonicalReaderContract` (job 1132/5997, passed). The
+`Solidity` library build reached 3,035/5,997 jobs with zero errors, then hit
+the session's two-hour background limit. With no shared build cache on this
+VM, the full library build is not complete. doc-paths FAILs only on the
+pre-existing `Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean` citation in
+`after-roadmap-va1.md`. axiom-pins FAILs with 0 errors and the pre-existing
+4,379 foreign unrecorded changes; none is in this lane's module. Per-file MCP
+diagnostics on the final module are clean.
+
+Reviews (read-only, no Lean, server or build):
+
+- **Skeptic.** Confirmed the `uint8` trace (parameter through `Shared.params`/`prim`;
+  local through `ControlTuple` to `Shared.typeNameStep`), the no-fallback
+  rule, A's sha256 pins (`preflight-construct-cases.py` asserts them), and the
+  `SliceReferenceCopies` mechanism. Its wording findings were fixed: the
+  compiler versus fixture hash, `solc_world_factory` pins, the concrete
+  failing preflight, and the unpinned reason string.
+- **Finder.** Confirmed every count and found no policy issue. Fixed: the
+  script reads each tracked file once (instead of about 12 GB of reads),
+  matches basenames only after a path, quote or backtick, verifies each pin
+  before replacing a fixture and lists path readers, guards a null `source`,
+  and runs from the repo root. The docstring now limits its claim to this
+  fixture. The doc names the three path-reading modules and the
+  `solc_world_factory` pins that the comparison does not cover. The rerun
+  receipt is byte-identical.
