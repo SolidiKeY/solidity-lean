@@ -128,3 +128,32 @@ reviewers must also review the scanner and the Lean candidate; no independent
 review is claimed here. The 4.35 full gate, candidate elaboration, proof and
 axiom checks, before/after timing, migration patch and all checkpoint gates
 remain pending. No new original-file edits or weakened statement were made.
+
+## H70 semantic-specification continuation
+
+The 18-constructor candidate now also states separate universal equality of
+the two mapping, payable and conversion-location helpers, and positive and
+negative witnesses. These include a top-level mapping versus an array whose
+element is a mapping, both address payable flags, a contract name, a Boolean
+payable refusal, and location preservation/default behavior. These are
+unverified Lean statements and proof terms, not established theorems. The
+case and value scripts remain lexical controls, not a substitute for Lean.
+
+The reviewed hash owner overlay at
+`2a18afcdba00a85645b0b3079704f78ffcd78860` was delivered for isolated
+migration use. The checkout source blobs match its base prefixes exactly:
+`Solidity/Hash/Adaptive.lean` is `cb5d5a1c61f7350aa01d9d0c81c8f4403b19fab3`
+and `Solidity/Hash/CollisionBound.lean` is
+`b54c93a5b24340a19160c1fb378d057ccee60f84`. The overlay has not been applied;
+full hash migration gates, language migration and source-relations agreement
+remain pending. No owner-file permission or completion is inferred.
+
+A local Lean MCP package was discovered and two per-file diagnostic attempts
+were made under the writer lock and memory guard. Although the LSP server and
+worker were started with `-j1`, each attempt launched a `lake setup-file`
+dependency check using the original configuration, and its child Lean command
+lacked explicit `-j1`. Both attempts were stopped when observed. They do not
+count as diagnostics or proofs; logs are in the evidence directory. A retry
+must ensure the dependency setup uses the serial configuration before running.
+The existing Lean source was not changed. Independent finder and skeptic
+reviews, all checkpoint gates and timing comparisons remain pending.
