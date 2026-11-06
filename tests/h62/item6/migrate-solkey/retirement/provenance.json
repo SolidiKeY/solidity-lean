@@ -1,0 +1,14 @@
+{
+  "source": "Complete original visible user assignment copied from this same thread, including report template, all four checkpoints, backfill, scope and owner-key table",
+  "copy_sha256": "83745744fef68b4c6289918e97ede4f9a27bfe83d704e200485061c6b87242f8",
+  "original_rendered_prompt_reference_sha256": "ab866875b0fdd2e67bb60485af9eb65d4e10e08992421bac2438d6c726b34b55",
+  "rendered_hash_equivalence": "Not asserted: original renderer bytes/get_goal are unavailable; this authenticated transcript copy has its independently reported SHA256.",
+  "later_owner_ticket": {
+    "sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+    "root_head": "16d7e371a1e013f492784b596397cf500dbd7543",
+    "implemented_shims": [],
+    "scope": "existing evidence only; no new Lean/source permission; H82 retirement takes precedence",
+    "coordinator_local_paths": "provenance only, not assumed accessible on survivor VM"
+  },
+  "h71_push_permission": "No H71 authorization found in locally available decision files; original no-push constraint retained"
+}
