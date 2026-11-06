@@ -630,3 +630,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Executable/CreationReturnPartition.lean` | Actual constructor-return byte classification with immutable/link/outside certificates and cross-region exclusion. |
 | `Backend/Executable/CreationReturnPartitionControls.lean` | Direct classification at an adjacent library boundary, populated patch boundaries and argument-leak negatives. |
 | `Backend/Executable/CreationReturnPartitionAudit.lean` | Complete classification signatures and scoped axiom guards. |
+| `Backend/MemoryCopies/StorageRoundTripControls.lean` | Closed round-trip runs, executable length-first cleanup mutant, same-slot snapshot restoration after explicit changed contents, framing observations and ordered refusals. |
