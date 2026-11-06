@@ -278,3 +278,37 @@ and skeptic confirmed the counts/hashes and boundaries; skeptic's stronger
 inherited-default wording was corrected to no-explicit-source-option. Neither
 reviewer used Lean or changed files. The active supervisor/heartbeat is preserved;
 no extra Lean job, restart or original production-file edit was performed.
+
+## H70 partial Hash input receipt
+
+Received the coordinator's inline CollisionBound overlay from reported Hash
+owner head `a3f49ee0ec1829e63022c90194048d5a1ffe0d22`, reported source
+`2a18afcd`. Owner full affected gates remain pending. The host receipt path is
+not available in this VM; reconstructing the supplied bytes matched its exact
+advertised SHA256:
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`.
+This establishes payload identity, not host-journal acceptance or owner validation.
+
+The frozen original blob is
+`b54c93a5b24340a19160c1fb378d057ccee60f84`. `git apply --check` passed.
+A read-only in-memory replay of seven hunks produced
+`092971eda8c7d6997276a92ba19b25b7ce05844e`, matching the advertised target
+prefix. No production or test Lean source was patched. The reported owner
+commit identifiers were not independently verified as local Git objects.
+
+The exact raw patch is off Git at
+`/workspace/migrate-lowering-artifacts/evidence/owner-inputs/collision-bound-overlay.patch`.
+A small versioned JSON line-array fixture losslessly regenerates those bytes;
+normal whitespace checks remain intact. inspect_hash_overlay.py verifies the
+receipt SHA, single target, exact base, context/counts, applicability, candidate
+blob and unchanged production bytes. Its replay routine supports this fixed
+patch format, not arbitrary patches. Controls reject corrupted contexts/counts
+and empty patches, and verify the Git empty-blob identity.
+
+Read-only finder and skeptic found no visible statement/premise/budget/axiom or
+trust-shortcut change in the eight proof-body edits. Both confirmed that all
+Lean, API/axiom and performance acceptance stays pending. No Lean job was run
+for this receipt, and the existing serial supervisor was preserved. CollisionBound
+therefore changes from input missing to partial input received, awaiting affected
+validation; Raw and Ctor inputs/comparisons also remain pending. No routing or
+receipt check is treated as original-file edit permission.
