@@ -867,7 +867,7 @@ origin/master (no conflicts). All proofs are kernel-checked; no `sorry`, no new
 axiom, no `maxHeartbeats` change. `#print axioms` of the headline theorems gives
 a subset of `propext`, `Classical.choice`, `Quot.sound`.
 
-### 1. Lookup transfer onto the parsed Census tree
+### 1. Lookup transfer onto the certified Census tree
 - **The parsed trees as terms.** `IrCensusGen.lean` (test, Lean server) prints the
   parser's output for `fixtures/{Census,LinkedMath}.unoptimized.yul` as
   `fixtures/census-tree.txt`; `gen-census-modules.py` (`--check` in `check-ir.sh`)
@@ -897,31 +897,42 @@ a subset of `propext`, `Classical.choice`, `Quot.sound`.
   (all but `checked_mul_t_uint256`), Helpers→`LinkedMath_14_deployed` (`cleanup_t_uint256`,
   `panic_error_0x11`, `checked_mul_t_uint256`), exp→Census deployed (all 6), ABI→Census
   deployed and LinkedMath deployed (all 5), push→Census deployed and Census creation
-  (all 13). Unmapped functions are exactly those the object does not define.
-  `sim_<group>_<obj>` follow by `Sim.flat`.
-- **Headline theorems on the parsed programs** (`cdEnv` is what `runCode` installs,
-  `cdEnv_installed`): `census_checked_add_sim`, `census_checked_sub_sim`,
+  (all 13); "the object's body" is `Block.ren … = some …`, i.e. the same text up to
+  call positions. Every function a map sends to `none` is absent from the object's
+  group (`<group>_unmapped_<obj>`, `IrCensusUnique.lean`, kernel), so each listed
+  pair covers every helper the object defines. Pairs not stated: Helpers/ABI→`Census_134`
+  and exp→`LinkedMath_14_deployed`, whose objects define only a cleanup, a validator or
+  a panic of those groups. `sim_<group>_<obj>` follow by `Sim.flat`.
+- **Headline theorems on the fixtures' trees** (each environment is the one evaluating
+  that object's code installs: `cdEnv_installed`, `ccEnv_installed`, `ldEnv_installed`): `census_checked_add_sim`, `census_checked_sub_sim`,
   `linked_checked_mul_sim`, `census_checked_div_body`, the five `*_matches_source`
   forms, `census_checked_exp_body`, `census_checked_exp_overflow_halts`,
   `census_decodeTuple_body`, `linked_decodeTuple_body`, `census_decodeTuple_short_halts`,
   `census_push_body` (`push(uint256)`), `census_constructor_push_body` (the
   constructor's `values.push`). Call-site forms use `cdAddCall` etc., whose printed
   tokens are checked (`cdAddCall_toks`: `checked_add_t_uint256(a, b)`); body forms use
-  the parsed bodies `cdF72`, `cdF67`, `cdF8`, `cdF87`, `ccF25`, `ldF7`, whose names
-  are checked by `cd_bodies_named`. The C09 provenance caveat (groups mixing creation
+  the bodies `cdF72`, `cdF67`, `cdF8`, `cdF87`, `ccF25`, `ldF7`, whose names are
+  checked by `cd_bodies_named` and which are the group's bodies at the helpers'
+  positions (`cd_div_at`, `cd_exp_at`, `cd_decode_at`, `ld_decode_at`, `cd_push_at`,
+  `cc_push_at`). Not every C08/C09 lemma is restated (e.g. only `decodeTuple` of the
+  ABI group); any other one transfers the same way through `cd_*_eq`/`evalBlock_ren`. The C09 provenance caveat (groups mixing creation
   and runtime copies) no longer matters: each theorem is now about one object's own group.
 
 ### 2. Unique function tables (the option the T02 references need)
 T02 and G01 refer to functions by name in an object's scope, so the stated
 property is one definition per name per scope. `IrCensusUnique.lean`:
 `TablesUnique o` (every function group at every depth of `o` has distinct names),
-`census_tables_unique`, `linked_tables_unique` (kernel); `Mem.name_unique` (in such a
+`census_tables_unique`, `linked_tables_unique` (kernel; `objectWf`, which both trees
+pass, is stronger: it also forbids a nested group from reusing a visible function
+name and fixes each call to the innermost binder of its name); `Mem.name_unique` (in such a
 group the name fixes the signature and the position); `helpers_named_<obj>`: name
 lookup with the parser's resolver `findFn` lands exactly on the positions the
-transfer theorems use. Negative controls: `parse_rejects_duplicate` (a scope defining
-`f` twice is refused) and `duplicate_counterexample` (the two trees resolving `f()`
-to the first or the second definition print exactly the text's tokens yet differ,
-and both fail `TablesUnique` and `objectWf`). Not proved: printer injectivity under
+transfer theorems use. Negative controls: `parse_rejects_duplicate` and
+`parse_rejects_nested_duplicate` (a scope defining `f` twice, at top level or in a
+nested block of a child object, is refused with "tree violates scoping or static
+rules") and `duplicate_counterexample` (the two trees resolving `f()` to the first or
+the second definition print exactly the text's tokens yet differ, and both fail
+`TablesUnique` and `objectWf`: the tokens alone do not determine the tree). Not proved: printer injectivity under
 `objectWf` (that every certified tree for a text equals the parser's), so "the unique
 parse" of the Census text is not claimed; the parser's own result is pinned for
 LinkedMath only (`linked_is_the_parse`).
@@ -930,12 +941,16 @@ LinkedMath only (`linked_is_the_parse`).
 `IrExpEvm.lean` (imports `Evm/Exp.lean`, which is not edited):
 `expUnsigned_evm`: the model returns `v` exactly when this compiler's checked `**`
 code (`uTail .pow`, `exp_tail`) returns `v`, and fails exactly when it reverts;
-`expUnsigned_opcode`: a model value is the `EXP` instruction's value
-(`Pure.eval .exp`, `powWord`), and the model fails exactly when `EXP` wraps;
+`expUnsigned_opcode`: a model value is the value of the Yul `exp` builtin / EVM
+`EXP` (`Pure.eval .exp`, `powWord`; solc's helper does not call it), and the model
+fails exactly when `EXP` wraps;
 `checked_exp_vs_evm`, `census_checked_exp_vs_evm`: on equal operands the imported IR
 body (extracted, and the parsed Census body) returns the compiled code's value with no
-machine effect, and runs `Panic(0x11)` first when the compiled code reverts. The two
-machines are different models; what is related is the outcome on equal operands.
+machine effect, and runs `Panic(0x11)` first when the compiled code reverts;
+`checked_exp_vs_evm_halts`: under `RevertHalts M` the helper then ends with exactly the
+panic's fault. The two machines are different models and `uTail .pow` is this
+compiler's code, not solc's: what is related is the outcome on equal operands;
+revert payloads are not compared.
 This removes C09's "no lemma relates this to `Evm/Exp`".
 
 ### 4. ABI and storage meaning: waits on X01/G01
@@ -945,7 +960,36 @@ return data): `docs/feature-work/full-scope.md` still lists G01's contracts as
 VX1's stub is on owner-review hold. What exists are partial, unfrozen pieces: the
 source semantics' decoder (`Source/Eval.lean`: `wordAt`, `decodeArg`, `decodeArgs`),
 layout slot terms (`Evm/Layout.lean` `Occ`, `Storage/HashedLayout.lean` `Loc.word`)
-and `Yul/Views/DynamicElements.lean`'s `uint256[]` element path. The handoff forbids
+`Yul/Views/DynamicElements.lean`'s `uint256[]` element path, the calldata views
+`Yul/Views/{AbiCalldataAgreement,AbiWordInput,AbiDecodeSequence,AbiUintArray*}.lean`,
+and the first, unfrozen G01 statements in `Roadmap/Contracts.lean`. The handoff forbids
 substituting partial relations for D1–D6, so the ABI and storage helpers keep their
 exact machine-effect statements (C09) and their meaning waits on X01/G01, as do the
 `fun_<name>_<id>` simulations.
+
+### C10 reviews (read-only, no Lean server)
+Finder: no high-severity defect (indices of `cd_bodies_named`, the `none` entries and
+pair completeness checked against the generated signature lists). Findings: (1) "unmapped
+= not defined" was not stated in Lean; (2) the Census tree's tie to the parser is the
+generator's, and `check-ir.sh` did not compare the regenerated `census-tree.txt`;
+(3) `TablesUnique` is weaker than `objectWf`; (4) the duplicate control did not pin the
+rejection reason or cover a nested duplicate; (5) nothing tied `cdF72` etc. to the
+group's positions; (6) "every group the object defines" overclaimed the pairs;
+(7) stale names in docstrings (`eval_ren`, `sim_flat`, `eraseObject_inj`,
+`IrCensus{Text,…}`); (8) the vs-EVM revert branch had no `RevertHalts` form.
+Skeptic: no must-fix. Should-fix: "parsed" wording for Census (only LinkedMath's parse is
+proved); (2) as the finder's (1); `cdEnv_installed` named `runCode` and had no `cc`/`ld`
+versions; the negative control shows only that tokens without `objectWf` do not fix the
+tree; "EVM `EXP`" is the Yul builtin's value and payloads are not compared; §4's
+inventory missed the `Yul/Views/Abi*` modules and `Roadmap/Contracts.lean`; untyped
+`have`s; the kernel cost of `census_certified` is not discussed.
+Fixed: `<group>_unmapped_<obj>` (kernel); `check-ir.sh` runs `IrCensusGen.lean` first and
+fails on a changed `census-tree.txt` (regenerated here through the Lean server: unchanged);
+"certified Census tree" wording in the docstrings and this section; `ccEnv_installed`,
+`ldEnv_installed`; `*_at` position lemmas; pairs stated exactly; `objectWf` vs
+`TablesUnique` documented; pinned rejection reason and a nested/child-object duplicate
+control; `checked_exp_vs_evm_halts`; docstring names; `exp` wording and payload caveat;
+§4 inventory; typed `hs'`, `ih`, `ht`. Not changed: `have`s that instantiate a cited
+lemma (`h`, `body`, `hw`, `h₁`, `h₂`) stay untyped, as in C09. Kernel cost (warning,
+per AGENTS.md): `census_certified` takes about a minute and the generated Census
+modules elaborate in about a minute more; they are leaf modules of this lane.

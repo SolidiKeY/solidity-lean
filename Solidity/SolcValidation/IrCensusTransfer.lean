@@ -5,28 +5,32 @@ import Solidity.SolcValidation.IrAbiSim
 import Solidity.SolcValidation.IrPushSim
 
 /-!
-# The helper theorems on the parsed Census and LinkedMath programs
+# The helper theorems on the certified Census and LinkedMath trees
 
 The helper theorems of C08/C09 are about the extracted helper groups
 (`helperEnv`, `expEnv`, `abiEnv`, `pushEnv`). Here they are moved onto the
-function groups of the parsed fixtures (`censusRoot`, `linkedRoot`,
-`SolcValidation/IrCensusTree.lean`, certified against the fixture texts):
+function groups of the fixtures' trees (`censusRoot`, `linkedRoot`,
+`SolcValidation/IrCensusTree.lean`). Both trees carry the parser's certificate
+for their fixture text (`census_certified`, `linked_certified`); that the tree is
+the parser's own result is proved for LinkedMath only (`linked_is_the_parse`,
+`SolcValidation/IrCensusParse.lean`), and for Census rests on the generator.
 
-- `<group>_lookup_<obj>`: looking up any function of an extracted group in the
-  parsed object's group (`ren<Group><Obj>`, by its full signature) yields exactly
-  the extracted body, with its calls renamed to the object's positions — the
-  same text, up to the positions of the called functions. It is proved for
-  every function of every group the object defines; the only unmapped ones are
-  helpers the object does not define (`checked_mul_t_uint256` is LinkedMath's,
-  the other checked operators are Census's).
+- `<group>_lookup_<obj>`: looking up a function of an extracted group in the
+  object's group (`ren<Group><Obj>`, by its full signature) yields the extracted
+  body with its calls renamed to the object's positions (`Block.ren … = some …`):
+  the same text, up to the positions of the called functions. The pairs are
+  Helpers→`Census_134_deployed`/`LinkedMath_14_deployed`, exp→`Census_134_deployed`,
+  ABI→`Census_134_deployed`/`LinkedMath_14_deployed`, push→`Census_134_deployed`/`Census_134`;
+  a function the map sends to `none` is one the object does not define
+  (`<group>_unmapped_<obj>`, `SolcValidation/IrCensusUnique.lean`).
 - `sim_<group>_<obj>`: hence the two environments are related at every fuel
   (`Sim`, `SolcValidation/IrRename.lean`), and `evalExpr_ren`/`evalBlock_ren`
   give the same result, effects and faults for the renamed code.
-- `census_*`/`linked_*`: the headline helper theorems restated for the parsed
-  objects' own bodies and environments (`cdEnv`: `Census_134_deployed`,
-  `ccEnv`: `Census_134`, `ldEnv`: `LinkedMath_14_deployed`). The environment
-  `cdEnv` is the one `runCode` installs for that object's code
-  (`cdEnv_installed`).
+- `census_*`/`linked_*`: the headline helper theorems restated for the objects'
+  own bodies and environments (`cdEnv`: `Census_134_deployed`, `ccEnv`: `Census_134`,
+  `ldEnv`: `LinkedMath_14_deployed`); each environment is the one evaluating that
+  object's code installs (`cdEnv_installed`, …), and each body is the group's body
+  at the helper's position (`cd_div_at`, …).
 
 What a call site inside a `fun_<name>_<id>` passes to these helpers is T02's
 per-function layer, which waits on G01.
@@ -34,9 +38,13 @@ per-function layer, which waits on G01.
 namespace Solidity.SolcValidation.IrSyntax
 open Solidity.SolcValidation
 
-/-- Each parsed object's code installs exactly its top-level group. -/
+/-- Evaluating an object's code (as `runCode` does) installs exactly its top-level group. -/
 theorem cdEnv_installed {σ : Type} (M : Machine σ) (ctx : ObjectCtx) (k : Nat) (s : σ) :
     evalBlock M ctx (k + 1) .nil cdCode .nil s = evalItems M ctx k cdEnv cdItems .nil s := rfl
+theorem ccEnv_installed {σ : Type} (M : Machine σ) (ctx : ObjectCtx) (k : Nat) (s : σ) :
+    evalBlock M ctx (k + 1) .nil ccCode .nil s = evalItems M ctx k ccEnv ccItems .nil s := rfl
+theorem ldEnv_installed {σ : Type} (M : Machine σ) (ctx : ObjectCtx) (k : Nat) (s : σ) :
+    evalBlock M ctx (k + 1) .nil ldCode .nil s = evalItems M ctx k ldEnv ldItems .nil s := rfl
 
 /-- The objects whose groups are used below, at their paths in the parsed trees. -/
 theorem censusRoot_objects : ∃ children : List (Object Code),
@@ -172,6 +180,28 @@ theorem cd_bodies_named :
     (ccSigs.get ⟨25, by decide⟩).name = "array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr" ∧
     (ldSigs.get ⟨7, by decide⟩).name = "abi_decode_tuple_t_uint256" := by
   decide +kernel
+
+/-! Each body below is the object's group body at the position of its helper. -/
+theorem cd_div_at : ∃ m', renHelpersCd (s := ⟨"checked_div_t_int256", ["x", "y"], ["r"]⟩)
+    (.there (.there (.there (.there (.there (.there .here)))))) = some m' ∧
+      cdBodies.get (Mem.flat _ m') = cdF72 := ⟨_, rfl, rfl⟩
+theorem cd_exp_at : ∃ m', renExpCd (s := ⟨"checked_exp_t_uint256_t_uint256", ["base", "exponent"], ["power"]⟩)
+    (.there (.there (.there (.there (.there .here))))) = some m' ∧
+      cdBodies.get (Mem.flat _ m') = cdF67 := ⟨_, rfl, rfl⟩
+theorem cd_decode_at : ∃ m', renAbiCd (s := ⟨"abi_decode_tuple_t_uint256", ["headStart", "dataEnd"], ["value0"]⟩)
+    (.there (.there (.there (.there .here)))) = some m' ∧
+      cdBodies.get (Mem.flat _ m') = cdF8 := ⟨_, rfl, rfl⟩
+theorem ld_decode_at : ∃ m', renAbiLd (s := ⟨"abi_decode_tuple_t_uint256", ["headStart", "dataEnd"], ["value0"]⟩)
+    (.there (.there (.there (.there .here)))) = some m' ∧
+      ldBodies.get (Mem.flat _ m') = ldF7 := ⟨_, rfl, rfl⟩
+theorem cd_push_at : ∃ m', renPushCd
+    (s := ⟨"array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr", ["array", "value0"], []⟩)
+    (.there (.there (.there (.there (.there (.there (.there (.there (.there (.there (.there (.there .here))))))))))))
+      = some m' ∧ cdBodies.get (Mem.flat _ m') = cdF87 := ⟨_, rfl, rfl⟩
+theorem cc_push_at : ∃ m', renPushCc
+    (s := ⟨"array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr", ["array", "value0"], []⟩)
+    (.there (.there (.there (.there (.there (.there (.there (.there (.there (.there (.there (.there .here))))))))))))
+      = some m' ∧ ccBodies.get (Mem.flat _ m') = ccF25 := ⟨_, rfl, rfl⟩
 
 section
 variable {σ : Type} (M : Machine σ) (ctx : ObjectCtx)

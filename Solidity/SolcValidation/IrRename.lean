@@ -14,9 +14,9 @@ so a renamed term has the same shape and is evaluated with the same fuel.
 
 `Sim k ρ E E'` says that, up to fuel `k`, every function `ρ` maps is looked up
 in `E'` as the renaming of its body in `E`, with closure environments again
-related. `eval_ren` is the simulation: a renamed term evaluates in `E'`
+related. `evalExpr_ren`/`evalBlock_ren` are the simulation: a renamed term evaluates in `E'`
 exactly as the original evaluates in `E` (same machine effects, same result,
-same fault), at every fuel. `sim_flat` discharges `Sim` for a single top-level
+same fault), at every fuel. `Sim.flat` discharges `Sim` for a single top-level
 group (the shape of an object's code) from one equation per mapped function.
 -/
 namespace Solidity.SolcValidation.IrSyntax
@@ -356,7 +356,7 @@ include ih
 theorem step_expr : PExpr M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' L r e e' vs s hs he
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   cases e with
   | lit l => simp only [Expr.ren, Option.some.injEq] at he; subst he; rfl
   | var x m => simp only [Expr.ren, Option.some.injEq] at he; subst he; rfl
@@ -383,7 +383,7 @@ theorem step_expr : PExpr M ctx (k + 1) := by
 theorem step_args : PArgs M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' L n a a' vs s hs ha
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   cases a with
   | nil => simp only [Args.ren, Option.some.injEq] at ha; subst ha; rfl
   | cons e rest =>
@@ -400,7 +400,7 @@ theorem step_args : PArgs M ctx (k + 1) := by
 theorem step_stmt : PStmt M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' c L st st' vs s hs hst
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   cases st with
   | block b =>
     simp only [Stmt.ren] at hst
@@ -463,7 +463,7 @@ theorem step_stmt : PStmt M ctx (k + 1) := by
 theorem step_loop : PLoop M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' c L lp lp' vs s hs hl
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   cases lp with
   | stmt st rest =>
     simp only [Loop.ren] at hl
@@ -497,7 +497,7 @@ theorem step_loop : PLoop M ctx (k + 1) := by
 theorem step_iterate : PIter M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' c L cond cond' post post' body body' vs s hs h1 h2 h3
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   simp only [iterate]
   rw [iE ρ E E' cond cond' vs s hs' h1]
   refine bind_congr' _ _ _ fun p => ?_
@@ -522,7 +522,7 @@ theorem step_iterate : PIter M ctx (k + 1) := by
 theorem step_init : PInit M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' L xs i i' vs s hs hi
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   cases i with
   | none => simp only [initRen, Option.some.injEq] at hi; subst hi; rfl
   | some e =>
@@ -538,7 +538,7 @@ theorem step_init : PInit M ctx (k + 1) := by
 theorem step_items : PItems M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' c L g it it' vs s hs hit
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   cases it with
   | nil => simp only [Items.ren, Option.some.injEq] at hit; subst hit; rfl
   | stmt st rest =>
@@ -573,7 +573,7 @@ theorem step_items : PItems M ctx (k + 1) := by
 theorem step_block : PBlock M ctx (k + 1) := by
   obtain ⟨iE, iA, iS, iL, iI, iN, iT, iB⟩ := ih
   intro F G ρ E E' c L b b' vs s hs hb
-  have hs' := Sim.mono k ρ E E' hs
+  have hs' : Sim k ρ E E' := Sim.mono k ρ E E' hs
   cases b with
   | mk ss bodies items =>
     simp only [Block.ren] at hb

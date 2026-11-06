@@ -7,7 +7,7 @@ import Solidity.Yul.CatalogLaws
 The intrinsic tree (`SolcValidation/IrSyntax.lean`) has no decidable equality:
 its terms are indexed by scopes and carry literal proofs. `erase` maps it to a
 plain tree that keeps every name, every resolved position (`Mem.index`), every
-signature, operation and literal, and drops only the proofs; `eraseObject_inj`
+signature, operation and literal, and drops only the proofs; `objectErase_inj`
 proves that two trees with the same erasure are equal. Equalities of concrete
 trees can then be decided by kernel evaluation (`SolcValidation/IrCensusParse.lean`).
 -/

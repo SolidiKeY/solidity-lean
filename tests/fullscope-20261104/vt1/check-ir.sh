@@ -9,12 +9,14 @@ dir=tests/fullscope-20261104/vt1
 python3 -I "$dir/generate-artifacts.py" --check
 python3 -I "$dir/extract-helpers.py" --check
 python3 -I "$dir/gen-helper-modules.py" --check
-python3 -I "$dir/gen-census-modules.py" --check
 if [[ "${VT1_SKIP_LEAN:-0}" != 1 ]]; then
-  for f in IrParseChecks IrEvalChecks IrHelperChecks IrCensusGen; do
+  for f in IrCensusGen IrParseChecks IrEvalChecks IrHelperChecks; do
     out=$(lake env lean --tstack=131072 "$dir/$f.lean" 2>&1)
     echo "$out" | grep -E "IR_|error" || true
     if echo "$out" | grep -q "error"; then echo "FAIL $f"; exit 1; fi
   done
+  # IrCensusGen rewrote fixtures/census-tree.txt from the parser's output.
+  git diff --exit-code -- "$dir/fixtures/census-tree.txt"
 fi
+python3 -I "$dir/gen-census-modules.py" --check
 echo VT1_IR_CHECKS_PASS

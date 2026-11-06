@@ -12,8 +12,9 @@ Three exponentiations are related here, all on words below `2^256`:
 - this compiler's checked `**` code (`uTail .pow`, `Evm/Layout.lean`), whose run on
   the word-cell machine `exp_tail` (`Evm/Exp.lean`) gives: `a ^ b`, or a revert
   exactly when `a ^ b ≥ 2^256`;
-- the EVM `EXP` instruction's value, the owner's `Pure.eval .exp` (`powWord`,
-  `a ^ b mod 2^256`, `Yul/Words.lean`).
+- the value of the Yul `exp` builtin (the EVM `EXP` instruction), the owner's
+  `Pure.eval .exp` (`powWord`, `a ^ b mod 2^256`, `Yul/Words.lean`); solc's helper
+  does not call it, so this compares its result with what an unchecked `exp` gives.
 
 `expUnsigned_evm`: the model succeeds with `v` exactly when the compiled code
 returns `v`, and fails exactly when it reverts. `expUnsigned_opcode`: when the
@@ -22,9 +23,12 @@ exactly when `EXP` would wrap. `checked_exp_vs_evm`/`census_checked_exp_vs_evm`:
 on the same operands the imported IR helper (the extracted group, and the parsed
 Census program's own body) returns the compiled code's value with no machine
 effect when that code returns, and runs solc's panic sequence (`Panic(0x11)`)
-when it reverts. The two machines are different models (the IR runs on any
-`Machine`, `Evm/Exp.lean` on this compiler's word-cell machine): what is related
-is the outcome on equal operands, not their states. `Evm/Exp.lean` is not edited.
+when it reverts (`checked_exp_vs_evm_halts`: on a machine whose `revert` halts,
+the helper then ends with exactly the panic's fault). The two machines are
+different models (the IR runs on any `Machine`, `Evm/Exp.lean` on this compiler's
+word-cell machine, and `uTail .pow` is this compiler's code, not solc's): what is
+related is the outcome on equal operands, not their states, and revert payloads
+(solc's `Panic(0x11)` against this compiler's revert) are not compared. `Evm/Exp.lean` is not edited.
 All statements are over abstract words; no large numeral is reduced.
 -/
 namespace Solidity.SolcValidation.IrSyntax
@@ -41,7 +45,9 @@ theorem expUnsigned_evm (m : Solidity.Evm.Machine) (st : List Solidity.Evm.Word)
         .ok { m with stack := .val ⟨v, hv⟩ :: st } 0) ∧
     (expUnsigned a b = none →
       Solidity.Evm.run (Solidity.Evm.uTail .pow) { m with stack := w[b] :: w[a] :: st } = .revert) := by
-  have ht := Solidity.Evm.exp_tail m st (a := a) (b := b) haW hbW
+  have ht : Solidity.Evm.run (Solidity.Evm.uTail .pow) { m with stack := w[b] :: w[a] :: st } =
+      if _ : a ^ b < Solidity.Evm.W then .ok { m with stack := w[a ^ b] :: st } 0 else .revert :=
+    Solidity.Evm.exp_tail m st haW hbW
   rw [expUnsigned_correct a b haW]
   constructor
   · intro v hv
@@ -121,7 +127,21 @@ theorem checked_exp_vs_evm (j : Nat) (x y : Word) (s : σ)
       exact Solidity.Evm.Out.noConfusion hrun
     · exact body.2 h
 
-/-- The same for the parsed Census program's own `checked_exp_t_uint256_t_uint256`. -/
+/-- Under `RevertHalts M`, a revert of the compiled code is the helper ending with
+exactly the fault of solc's panic sequence, from the entry state. -/
+theorem checked_exp_vs_evm_halts (j : Nat) (x y : Word) (s : σ) (h : RevertHalts M)
+    (m : Solidity.Evm.Machine) (st : List Solidity.Evm.Word)
+    (hrun : Solidity.Evm.run (Solidity.Evm.uTail .pow) { m with stack := w[y.val] :: w[x.val] :: st } =
+      .revert) :
+    ∃ e, panicRun M 0x11 s = .error e ∧
+      evalBlock M ctx (j + 420) expEnv expExpU256 (.cons x (.cons y (.cons 0 .nil))) s = .error e := by
+  have ht := Solidity.Evm.exp_tail m st (a := x.val) (b := y.val) x.isLt y.isLt
+  by_cases hfit : x.val ^ y.val < 2 ^ 256
+  · rw [ht, dif_pos (show _ < Solidity.Evm.W from hfit)] at hrun
+    exact Solidity.Evm.Out.noConfusion hrun
+  · exact checked_exp_overflow_halts M ctx j x y s h hfit
+
+/-- The same for the certified Census tree's own `checked_exp_t_uint256_t_uint256`. -/
 theorem census_checked_exp_vs_evm (j : Nat) (x y : Word) (s : σ)
     (m : Solidity.Evm.Machine) (st : List Solidity.Evm.Word) :
     (∀ (v : Nat) (hv : v < Solidity.Evm.W),

@@ -10,7 +10,11 @@ That reference is meaningful only if each scope defines each name once.
 - `objectGroups` lists every function group of a tree (each block's hoisted
   group, at every depth); `TablesUnique o` says every group has pairwise
   distinct names. `census_tables_unique`/`linked_tables_unique` prove it for the
-  parsed fixtures by kernel evaluation.
+  fixtures' trees by kernel evaluation. `objectWf` (which both trees pass) is
+  stronger: its `declOk` also forbids a nested group from reusing a visible
+  function name (no shadowing) and fixes every call to the innermost binder of
+  its name (`Expr.wf`); `TablesUnique` is the per-group property stated on its
+  own so that a duplicate is visibly a counterexample.
 - `Mem.name_unique`: in such a group the name alone fixes the signature and the
   position, so any two calls to the same name are the same function.
 - `helpers_named_*`: name lookup (`findFn`, the parser's resolver) in the parsed
@@ -21,9 +25,13 @@ That reference is meaningful only if each scope defines each name once.
 Negative controls: a text defining `f` twice is refused by the parser
 (`parse_rejects_duplicate`), and the two trees that resolve its call `f()` to
 the first or the second definition print to the same tokens while differing
-(`duplicate_counterexample`): with a duplicate definition the token certificate
-no longer determines the program, and `TablesUnique` (as well as `objectWf`)
-is false on both.
+(`duplicate_counterexample`): with a duplicate definition the tokens no longer
+determine the program, and `TablesUnique` (as well as `objectWf`) is false on
+both. A duplicate in a nested block of a child object is refused as well
+(`parse_rejects_nested_duplicate`).
+- `<group>_unmapped_<obj>`: every function the maps of
+  `SolcValidation/IrCensusMaps.lean` send to `none` is absent from the object's
+  group, so the lookup lemmas cover every helper the object defines.
 
 Not proved here: that the certificate determines the whole tree (printer
 injectivity under `objectWf`, i.e. "the unique parse"); see
@@ -101,7 +109,7 @@ theorem Mem.name_unique : ∀ {F : List FnSig} {s₁ s₂ : FnSig}, namesNodup F
   | _ :: _, _, _, _, .here, .here, _ => ⟨rfl, rfl⟩
   | _ :: ss, _, _, h, .there m₁, .there m₂, hn => by
       simp only [namesNodup, Bool.and_eq_true] at h
-      have ih := Mem.name_unique h.2 m₁ m₂ hn
+      have ih : _ ∧ m₁.index = m₂.index := Mem.name_unique h.2 m₁ m₂ hn
       exact ⟨ih.1, by simp only [Mem.index, ih.2]⟩
   | a :: ss, _, s₂, h, .here, .there m₂, hn => by
       simp only [namesNodup, Bool.and_eq_true, Bool.not_eq_true'] at h
@@ -178,14 +186,81 @@ theorem push_named_cc : ∀ {s : FnSig} (m : Mem (pushSigs ++ []) s) (m' : Mem (
     | exact Option.noConfusion hm
     | rcases m with _ | m)
 
+/-! ## A function the maps leave out is one the object does not define -/
+
+theorem helpers_unmapped_cd : ∀ {s : FnSig} (m : Mem (helperSigs ++ []) s),
+    renHelpersCd m = none → (findFn (cdSigs ++ []) s.name).isNone = true := by
+  intro s m hm
+  repeat' (first
+    | (exact Option.noConfusion hm)
+    | decide +kernel
+    | rcases m with _ | m)
+
+theorem helpers_unmapped_ld : ∀ {s : FnSig} (m : Mem (helperSigs ++ []) s),
+    renHelpersLd m = none → (findFn (ldSigs ++ []) s.name).isNone = true := by
+  intro s m hm
+  repeat' (first
+    | (exact Option.noConfusion hm)
+    | decide +kernel
+    | rcases m with _ | m)
+
+theorem exp_unmapped_cd : ∀ {s : FnSig} (m : Mem (expSigs ++ []) s),
+    renExpCd m = none → (findFn (cdSigs ++ []) s.name).isNone = true := by
+  intro s m hm
+  repeat' (first
+    | (exact Option.noConfusion hm)
+    | decide +kernel
+    | rcases m with _ | m)
+
+theorem abi_unmapped_cd : ∀ {s : FnSig} (m : Mem (abiSigs ++ []) s),
+    renAbiCd m = none → (findFn (cdSigs ++ []) s.name).isNone = true := by
+  intro s m hm
+  repeat' (first
+    | (exact Option.noConfusion hm)
+    | decide +kernel
+    | rcases m with _ | m)
+
+theorem abi_unmapped_ld : ∀ {s : FnSig} (m : Mem (abiSigs ++ []) s),
+    renAbiLd m = none → (findFn (ldSigs ++ []) s.name).isNone = true := by
+  intro s m hm
+  repeat' (first
+    | (exact Option.noConfusion hm)
+    | decide +kernel
+    | rcases m with _ | m)
+
+theorem push_unmapped_cd : ∀ {s : FnSig} (m : Mem (pushSigs ++ []) s),
+    renPushCd m = none → (findFn (cdSigs ++ []) s.name).isNone = true := by
+  intro s m hm
+  repeat' (first
+    | (exact Option.noConfusion hm)
+    | decide +kernel
+    | rcases m with _ | m)
+
+theorem push_unmapped_cc : ∀ {s : FnSig} (m : Mem (pushSigs ++ []) s),
+    renPushCc m = none → (findFn (ccSigs ++ []) s.name).isNone = true := by
+  intro s m hm
+  repeat' (first
+    | (exact Option.noConfusion hm)
+    | decide +kernel
+    | rcases m with _ | m)
+
 /-! ## Negative controls: a duplicate definition -/
 
 /-- A scope defining `f` twice, and calling `f`. -/
 def dupText : String := "object \"Dup\" { code { f() function f() { } function f() { } } }"
 
-/-- The parser refuses it. -/
+/-- The parser refuses it, for its scoping check. -/
 theorem parse_rejects_duplicate :
-    (match parse dupText with | .ok _ => true | .error _ => false) = false := by decide +kernel
+    (match parse dupText with | .ok _ => "" | .error e => e) =
+      "tree violates scoping or static rules" := by decide +kernel
+
+/-- A duplicate inside a function body's nested block, in a child object. -/
+def dupNestedText : String :=
+  "object \"A\" { code { } object \"B\" { code { function g() { { function f() { } function f() { } } } } } }"
+
+theorem parse_rejects_nested_duplicate :
+    (match parse dupNestedText with | .ok _ => "" | .error e => e) =
+      "tree violates scoping or static rules" := by decide +kernel
 
 def dupSigs : List FnSig := [⟨"f", [], []⟩, ⟨"f", [], []⟩]
 
@@ -194,10 +269,11 @@ def dupTree (m : Mem (dupSigs ++ []) ⟨"f", [], []⟩) : Object Code :=
   .object "Dup" (.mk dupSigs (.cons (.mk [] .nil .nil) (.cons (.mk [] .nil .nil) .nil))
     (.stmt (.discard (.call m .nil)) (.fn ⟨0, by decide⟩ (.fn ⟨1, by decide⟩ .nil)))) []
 
-/-- With a duplicate definition the token certificate no longer fixes the
-program: the call resolved to the first or to the second `f` prints the same
-tokens (exactly `dupText`'s), yet the trees differ; both fail `TablesUnique`
-and `objectWf`. -/
+/-- With a duplicate definition the token stream no longer fixes the program:
+the call resolved to the first or to the second `f` prints the same tokens
+(exactly `dupText`'s), yet the trees differ; both fail `TablesUnique` and
+`objectWf`. This refutes "the tokens alone determine the tree"; that tokens
+together with `objectWf` do (printer injectivity) is not proved. -/
 theorem duplicate_counterexample :
     lex dupText = some (objectToks (dupTree .here)) ∧
     objectToks (dupTree .here) = objectToks (dupTree (.there .here)) ∧

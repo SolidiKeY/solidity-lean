@@ -3,8 +3,8 @@ open Solidity.SolcValidation Solidity.SolcValidation.IrSyntax
 
 /-! Prints the parsed trees of the saved `Census` and `LinkedMath` `--ir` fixtures
 as Lean terms, one line per piece (`fixtures/census-tree.txt`), from which
-`gen-census-modules.py` writes `Solidity/SolcValidation/IrCensus{Text,Creation,
-Deployed,Linked,Tree}.lean`. Nothing here is trusted: `census_certified` and
+`gen-census-modules.py` writes `Solidity/SolcValidation/IrCensusCreation.lean`,
+`IrCensusDeployed.lean`, `IrLinkedCode.lean`, `IrCensusTree.lean` and `IrCensusMaps.lean`. Nothing here is trusted: `census_certified` and
 `linked_certified` re-check the modules' trees against the quoted texts by kernel
 evaluation. The printers are those of `IrLeanGen.lean`. -/
 
