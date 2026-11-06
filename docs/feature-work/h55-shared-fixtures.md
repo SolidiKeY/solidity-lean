@@ -447,3 +447,21 @@ Its negative controls exercise changed types, definition bodies and axiom sets,
 removals and an unsafe addition; its self-comparison passed. This is an exact
 kernel-record comparison for this lexical candidate set, not semantic case
 acceptance for all assigned families or approval of owner-sensitive changes.
+
+## Fitting declaration census: resource stop
+
+`fitting_inventory.py` selected 34 original StorageOps controls with a named
+`fitting` declaration (26 backend, 8 lowering), and verified their source bytes
+against the original base. All 34 original modules built serially. An
+8-module Lean declaration/body audit then failed with `INTERNAL PANIC: out of
+memory` under the existing 10 GiB virtual-memory cap. Reducing to one module
+allowed the first two audits to pass, but `FreshDefaultPushControls` also ran
+out of memory at the same cap. Both failures are preserved off Git and the cap
+was not raised. The first two per-module outputs are partial census evidence;
+32 selected modules remain unaudited by this harness. Conservatively return
+this resource-limited fitting census to Sol under the two-failure rule, along
+with the earlier failed fitting implementation attempt. This is not a proof,
+performance pass, source migration or scope-complete acceptance. No unchanged
+failing configuration should be rerun. The off-Git logs, generated audit
+sources and successful outputs are hashed in
+`tests/h55/shared-fixtures/fitting-census-evidence.sha256`.
