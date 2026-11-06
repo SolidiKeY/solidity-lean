@@ -908,5 +908,5 @@
     }
   ],
   "reflection_pins": "tests/sol-qualified-units/declaration-pins.json",
-  "h27_status": "Signature-aware checked resolver integrated; final Target relation, independent C3 judgment and normalization adequacy proved; acceptance blocked on repository-wide gate failures outside this lane"
+  "h27_status": "Signature-aware checked resolver integrated; final Target relation, independent C3 judgment and normalization adequacy proved; fixture acceptance passed with the pinned solc 0.8.38 artifact (moved4 follow-up); repository-wide gate failures outside this branch are listed in the lane doc"
 }

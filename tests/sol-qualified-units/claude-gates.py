@@ -46,14 +46,16 @@ OUT = ROOT / "tests/sol-qualified-units/claude-evidence"
 # Base commit of this Claude lane (moved4 batch).
 REPOSITORY_BASE = "aec9adf1ad8666a7e591e42a537069a93dc858cb"
 LANE = ROOT / "Solidity/Frontend/QualifiedUnits"
-# gate.sh failures that master has independently of this lane (coordinator note,
-# moved4 follow-up). They stay listed in the repository receipt and the lane doc.
+# gate.sh failures that do not come from this branch (coordinator note, moved4
+# follow-up). Each has a guard in `gatelog`; they stay listed in the repository
+# receipt and the lane doc. The checker pins the same name set.
 MASTER_ONLY = {
-    "doc-paths": "missing-file references in h62 docs, scripts and tests (master)",
-    "axiom-pins": "repository-wide axiom-pin inventory has unrecorded pins outside this lane (master)",
-    "testsuite": "sibling solkey checkout's TestSuite.sol differs from the imported AST pin (master)",
-    "corpus": "same sibling solkey TestSuite.sol pin as testsuite (master)",
+    "doc-paths": "missing-file references in files this branch does not change from origin/master",
+    "axiom-pins": "repository-wide axiom-pin inventory: 0 errors, unrecorded pins outside this lane",
+    "testsuite": "environment: the sibling ../solkey TestSuite.sol is not the imported AST's revision",
+    "corpus": "environment: the same sibling ../solkey TestSuite.sol revision check as testsuite",
 }
+SIBLING_PIN = re.compile(r"^\S*/TestSuite\.sol has sha256 [0-9a-f]{64}, but tests/solc/TestSuite\.ast\.json was imported from [0-9a-f]{64}: ")
 
 
 def sha(path):
@@ -228,7 +230,8 @@ def gatelog(path):
     text = Path(path).read_text()
     rows = re.findall(r"^(PASS|FAIL) (\S+) (\d+)s (\S+)$", text, re.M)
     status = {name: result for result, name, _, _ in rows}
-    for required in ["build-touched", "run-lean", "trust", "orphans", "layers", "roots", "fragments", "doc-paths", "axiom-pins"]:
+    for required in ["build-touched", "run-lean", "trust", "orphans", "layers", "roots", "fragments", "doc-paths", "axiom-pins",
+                     "testsuite", "corpus", "automatic-strict"]:
         assert required in status, "gate.sh did not run " + required
     summary = OUT / "gate-sh-summary.log"
     summary.write_text("".join(f"{r} {n} {t}s\n" for r, n, t, _ in rows))
@@ -236,19 +239,38 @@ def gatelog(path):
     build_log = OUT / "candidate-build.log"
     lines = [l for l in logs["run-lean"].read_text().splitlines() if not l.startswith(("info:", "⚠", "warning:"))]
     build_log.write_text("\n".join(lines) + "\n")
-    built = set(re.findall(r"(?:Built|Replayed) (Solidity\.Frontend\.QualifiedUnits\.\w+)\b", logs["run-lean"].read_text()))
-    receipt("build", status["run-lean"] == "PASS", build_log, ["scripts/coord-tools/gate.sh", "full"], None,
-            {"gate_sh": status, "lane_modules_built_or_replayed": sorted(built)})
+    # Lane modules reached by the gated run: those run-lean built, replayed or fetched,
+    # plus the touched modules build-touched compiled (Lake then finds them up to date).
+    built = set(re.findall(r"(?:Built|Replayed|Fetched) (Solidity\.Frontend\.QualifiedUnits\.\w+)\b", logs["run-lean"].read_text()))
+    targets = re.search(r"^targets: (.*)$", logs["build-touched"].read_text(), re.M)
+    touched = {m for m in (targets[1].split() if targets else []) if m.startswith("Solidity.Frontend.QualifiedUnits.")}
+    lane = {str(p.relative_to(ROOT).with_suffix("")).replace("/", ".") for p in LANE.rglob("*.lean")}
+    covered = built | (touched if status["build-touched"] == "PASS" else set())
+    receipt("build", status["run-lean"] == "PASS" and status["build-touched"] == "PASS" and covered == lane, build_log,
+            ["scripts/coord-tools/gate.sh", "full"], None,
+            {"gate_sh": status, "lane_modules_built_or_replayed": sorted(built), "lane_modules_build_touched": sorted(touched),
+             "lane_modules_missing": sorted(lane - covered)})
     repo_log = OUT / "candidate-repository.log"
     failed = sorted(name for name, result in status.items() if result != "PASS")
     master_only = {name: MASTER_ONLY[name] for name in failed if name in MASTER_ONLY}
     lane_failures = [name for name in failed if name not in MASTER_ONLY]
     if "axiom-pins" in master_only:
-        # The repository-wide inventory fails on master; none of its findings may name this lane.
-        assert "QualifiedUnits" not in logs["axiom-pins"].read_text(), "axiom-pins finding inside the lane"
+        text = logs["axiom-pins"].read_text()
+        # 0 errors, and no finding names this lane.
+        assert re.search(r"^axiom-pins: .*, 0 errors, \d+ unrecorded changes$", text, re.M), "axiom-pins errors"
+        assert "QualifiedUnits" not in text, "axiom-pins finding inside the lane"
     if "doc-paths" in master_only:
         missing = [l for l in logs["doc-paths"].read_text().splitlines() if l.startswith("missing:")]
-        assert not [l for l in missing if "qualified" in l.lower()], "doc-paths finding inside the lane"
+        assert missing, "doc-paths failed without missing references"
+        for line in missing:
+            citing = re.match(r"missing:\s+(\S+) cites ", line)
+            assert citing, "unparsed doc-paths line: " + line
+            unchanged = subprocess.run(["git", "diff", "--quiet", "origin/master", "--", citing[1]], cwd=ROOT).returncode == 0
+            assert unchanged and "qualified" not in line.lower(), "doc-paths finding inside the branch: " + line
+    for name in ("testsuite", "corpus"):
+        if name in master_only:
+            lines = [l for l in logs[name].read_text().splitlines() if l.strip()]
+            assert lines and all(SIBLING_PIN.match(l) for l in lines), name + " failed for another reason"
     repo_log.write_text(summary.read_text() + "".join(f"MASTER_ONLY {n}: {r}\n" for n, r in master_only.items())
                         + f"LANE_FAILURES {json.dumps(lane_failures)}\n")
     # Repository-wide failures that master already has are recorded, not hidden: the

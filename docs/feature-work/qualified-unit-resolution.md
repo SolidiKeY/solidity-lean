@@ -818,40 +818,63 @@ evidence below was produced on this VM at d9146bb1 (sources unchanged since).
   resolution probes pass. All three reports record `6c74ffba…`.
 - The direct differential (17 queries against the Lean resolver) passes. It
   includes the multi-hop reference (`N.M.T`), the ambiguous refusal (`N.T`) and
-  the missing-symbol refusal (`N.M.Missing`).
+  the missing-symbol refusal (`N.M.Missing`, solc error 7920).
+- The agreement on the ambiguous case is accept/reject, not the reason. solc
+  rejects `ambiguous-namespace` with error 2333 at the second `import * as N`,
+  a duplicate declaration of the alias. The Lean resolver refuses the reference
+  `N.T` as `ambiguous`. `ambiguous-base` works the same way.
 
 ### H44 bulk manifest
 
-`verify_bulk_h44` in the checker re-verifies `bulk-evidence-H44.json` and
-prints `BULK_H44_MANIFEST_PASS`. It checks:
+`verify_bulk_h44` in the checker checks `bulk-evidence-H44.json` for
+internal consistency and prints `BULK_H44_MANIFEST_PASS`. It checks:
+- the file's sha256 (`4affb5e3…`, as committed by the Codex lane at f94495e3);
 - the 269 entries are unique, and each lies under `bulk_directory` with a
   `tests/sol-qualified-units/evidence/` original;
 - every digest is well formed;
 - the byte sizes add up to `total_bytes` (73851319);
 - nothing under `evidence/` is tracked by git.
 
-This is a structural check only. The files stay on the Codex VM. No tracked
-file and no git history object matches any of the 269 digests, so no file's
-content is verified here.
+This is a structural check only. The files stay on the Codex VM, and no file's
+content is verified here. A one-off search found that no tracked file matches
+any of the 269 digests, and that git history has no `evidence/` path. Neither
+result is recorded in an evidence file.
 
 ### Gate changes
 
 - **KeySort removed.** Master a897dac76 (H89) dropped the SolKey checker from
   every gate. `claude-gates.py` no longer has a `keysort` command, and the
   checker no longer requires that receipt.
-- **Repository receipt.** `gatelog` now lists gate.sh failures that master
-  already has in `MASTER_ONLY`. The repository receipt passes only when every
-  other gate passes. It keeps the full status table and the
-  `master_only_failures` and `lane_failures` fields. It also fails if the
-  axiom-pins log names `QualifiedUnits`, or if any missing doc path mentions
-  this lane.
+- **Repository receipt.** `gatelog` lists in `MASTER_ONLY` the gate.sh
+  failures that do not come from this branch. The repository receipt passes
+  only when every other gate passes. It keeps the full status table and the
+  `master_only_failures` and `lane_failures` fields.
+- Each exemption has a guard:
+  - axiom-pins must report 0 errors and must not name `QualifiedUnits`. No lane
+    theorem is in that inventory, so the name check cannot fail; the lane's own
+    414 pins are the axiom evidence.
+  - doc-paths: every `missing:` line must cite from a file that this branch
+    does not change against origin/master.
+  - testsuite and corpus: every log line must be the sibling `TestSuite.sol`
+    revision check.
+- All 12 gate.sh gates must be present in the run.
+- The checker re-checks the receipt. It pins the four exempt names, requires
+  every other gate to be PASS, and requires `lane_failures` to be empty.
+- **Build receipt.** It now requires every one of the 28 lane modules to be
+  covered:
+  - 23 are built, replayed or fetched by run-lean;
+  - the 5 changed modules are compiled by build-touched, then found up to date
+    by run-lean.
 - **Module map.** The master merge had duplicated a module-map row (a union
   merge in `v08-adapters.md`). `fragments.sh --resolve` repaired it.
 
 ### Gates at this checkpoint
 
-`scripts/coord-tools/gate.sh full`, with the Lake cache seeded from master's
-`lake-cache` release (pack master b7c3cc51):
+`scripts/coord-tools/gate.sh full` ran at d9146bb1, with the Lake cache seeded
+from master's `lake-cache` release (pack master b7c3cc51). After it, only
+the driver, the checker, the lane doc, `scope.json` and the manifest changed;
+the lane sources and inputs did not. The receipts were re-recorded from that
+run's logs.
 
 | Gate | Result | Note |
 |---|---|---|
@@ -859,7 +882,7 @@ content is verified here.
 | trust, orphans, layers, roots, fragments, automatic-strict | PASS | |
 | doc-paths | FAIL (master) | 5 missing references in h62 docs, scripts and tests; none in this lane |
 | axiom-pins | FAIL (master) | 0 errors; 4478 unrecorded repository-wide pins, none in `QualifiedUnits` |
-| testsuite, corpus | FAIL (master) | the sibling `../solkey` `TestSuite.sol` (`993bad1c…`) is not the imported pin (`12de663e…`) |
+| testsuite, corpus | FAIL (environment) | The VM's sibling `../solkey` `TestSuite.sol` (`993bad1c…`) is not the imported pin (`12de663e…`). It is not caused by this branch, but neither gate got past that check here. |
 
 Lane receipts, via `claude-gates.py`, all pass:
 - solc, signature-probes and resolution-probes;
@@ -882,9 +905,34 @@ are unchanged.
 
 ### Remaining limitations
 
-- The four master-only gate failures above remain.
+- The four exempt gate failures above remain. doc-paths and axiom-pins fail on
+  master's files. testsuite and corpus depend on this VM's sibling checkout.
+  No master baseline run was made.
+- The generated `Solidity.lean` root and `docs/module-map/frontend.md` carry
+  this lane's registrations. Under H21 they are produced by `register.sh` and
+  `fragments.sh`, not hand-edited.
+- The legacy Codex runner `run-candidate-gates.py` still has a `keysort` mode.
+  Nothing calls it.
 - The H44 bulk files cannot be content-verified from a Claude VM.
 - `test-signature-audit.py` and the default (non-`--claude-vm`) acceptance mode
   read the Codex-only `tests/sol-qualified-units/evidence/` directory. They
   cannot run here.
 - The Claude-driver limitations listed in the previous checkpoint still apply.
+
+### Reviews (follow-up)
+
+The finder and skeptic reviews were read-only and used no Lean server. The
+following findings were confirmed and fixed:
+- The checker did not re-check the exemption.
+- Nothing guarded the testsuite and corpus exemptions, and the doc blamed
+  master for them.
+- The build receipt named no lane module.
+- The H44 manifest digest was not pinned.
+- The required gate set was incomplete.
+- `h27_status` was stale.
+- The doc overstated the ambiguous-case agreement and the H44 check.
+
+Two findings were accepted as documented limitations, not fixed:
+- The acceptance flag is set by hand. The receipts are checked independently
+  of it.
+- The axiom-pins guard cannot fail for a lane name.

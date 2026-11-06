@@ -70,7 +70,10 @@ def write_claude_manifest():
 def verify_bulk_h44():
     """Structural check of the H44 bulk manifest. Its files stay on the Codex VM, so only the
     index itself is checkable here: no file content is verified by this function."""
-    bulk = json.loads((ROOT / "tests/sol-qualified-units/bulk-evidence-H44.json").read_text())
+    path = ROOT / "tests/sol-qualified-units/bulk-evidence-H44.json"
+    # Pinned: the manifest as committed by the Codex lane (f94495e3).
+    assert sha(path) == "4affb5e367ee9abdbf2064374c293ac437b14cbb095890e62ce35708672920be", "H44 manifest changed"
+    bulk = json.loads(path.read_text())
     assert bulk["decision"] == "H44" and bulk["preserved_head"] == "364bd1e47fa1267a05343e1130e0eb728a32fc77", "H44 identity"
     files = bulk["files"]
     assert len({f["path"] for f in files}) == len({f["original"] for f in files}) == len(files) == 269, "H44 file count"
@@ -300,6 +303,16 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
         if claude and mode in ("axioms", "declarations", "queries"):
             assert saved["diagnostics_sha256"] == sha(ev / f"probe-{mode}.diagnostics.json"), "diagnostics drift " + mode
             assert json.loads((ev / f"probe-{mode}.sources.json").read_text()) == sources, "probe source drift " + mode
+        if claude and mode == "repository":
+            # Re-check the exemption here: the name set is pinned in the checker, not only in the runner.
+            exempt = {"doc-paths", "axiom-pins", "testsuite", "corpus"}
+            required = {"build-touched", "run-lean", "trust", "orphans", "layers", "roots", "fragments",
+                        "doc-paths", "axiom-pins", "testsuite", "corpus", "automatic-strict"}
+            assert required <= set(saved["gate_sh"]), "gate.sh run incomplete"
+            assert set(saved["master_only_failures"]) <= exempt and not saved["lane_failures"], "unpinned gate exemption"
+            assert all(v == "PASS" for k, v in saved["gate_sh"].items() if k not in saved["master_only_failures"]), "repository gate failure"
+        if claude and mode == "build":
+            assert not saved["lane_modules_missing"] and saved["gate_sh"]["build-touched"] == "PASS", "lane modules not built"
         gate_results[mode] = saved["passed"]
     print("DIRECT_DIFFERENTIAL: " + ("pass" if recomputed["compiler_agreement"] else "fail " + ", ".join(recomputed["mismatches"])))
     for path in scope["inputs"]:
