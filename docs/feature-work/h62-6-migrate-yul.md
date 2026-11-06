@@ -312,3 +312,84 @@ Next full gate is a fresh `old-yul-clean-v3 --kind yul --clean`, using empty
 private build outputs and the reviewed v3 driver. No original source, frozen
 statement, toolchain pin, proof budget or numerical resource limit changed.
 All four migration checkpoints remain unfinished; B-KEYSORT-API remains open.
+
+## Completed clean old baseline and H70 B05 candidate
+
+`old-yul-clean-v3` passed all 2,143 census targets (1,774 Yul, 369 external
+closure dependencies), exact topological order, all exits 0, no resource stops.
+Wall 7,291.842443605 s; sampled peak process-group RSS 8,441,331,712 bytes;
+minimum estimated availability 7,060,635,648 bytes. Lean 4.24.0 and Lake
+5.0.0-src+797c613, unchanged 16 GiB cgroup, -j1, -M12288, stack 131072,
+4 GiB estimated reserve, no swap, cache disabled and fresh private build path.
+Both census-source checks passed. Command:
+`python3 scripts/h62/item6/migrate-yul/build.py --root /workspace/migrate-yul --toolchain /workspace/.setup/tools/lean-4.24.0-linux --artifacts /workspace/migrate-yul-artifacts --census /workspace/migrate-yul-artifacts/evidence/census.json --label old-yul-clean-v3 --kind yul --clean`.
+Evidence: `/workspace/migrate-yul-artifacts/old-yul-clean-v3/yul-result.json`
+and `yul.log`. Independent read-only finder and skeptic verified coverage,
+real fresh builds, hashes and bounds; no baseline findings remain. Earlier
+failed resource attempts remain failures, excluded from the baseline.
+`Solidity.Source.Horizon` took 665.844 s here: report to root/gate owner;
+this lane measurement does not establish a pass/fail for a different gate VM's
+300 s policy. Full old interface export is still pending.
+
+Latest H70 ticket requester head is d89b309029f9ad57f17711432aeef4990005994b;
+ticket SHA256 5f63fe1a9f15bdd857e4bd601f59a36886cc06477474bcbf80bedf6ce2cc6c3d.
+B05 is our migration reservation: `/workspace/migrate-yul/Solidity/Yul/ReservedNames.lean`.
+The original remains untouched. New-toolchain `b05-new-original` locally
+reproduced line 43 maximum recursion depth, exit 1. `b05-new-builtins` passed.
+Proposed exact-file patch (not applied):
+`scripts/h62/item6/migrate-yul/ReservedNames.proposed.patch`, replacing only
+`reservedNames_count`'s `rfl` with `by decide +kernel` (kernel evaluator,
+not native evaluation). Deterministic generator pins the original SHA and
+preserves all 157 table entries/order, both theorem statements and the other
+proof. It generates additive fixtures only. No depth/heartbeat/resource limit
+changed. The first exploratory `simp only` candidate added propext to the count
+proof and was rejected; its logs remain diagnostic, not accepted evidence.
+
+`b05-old-original` and `b05-old-kernel-candidate` passed in 0.502923 and
+0.502956 s respectively, sampled RSS 212,058,112 and 220,250,112 bytes.
+`b05-new-kernel-candidate` passed in 0.757696 s, RSS 518,397,952 bytes.
+These subsecond non-clean probes have 0.25 s sampling granularity and different
+release runtimes; they are not the required clean performance comparison.
+The new-release probe costs more wall/RSS; this provisional signal is reported
+for root/gate review and is not waived or called a performance pass. No full
+new timing delta is available; the >10% full-comparison stop rule remains.
+Fresh compiled candidate probes and snapshots also passed on both releases.
+`b05-old-original-axioms` confirms original count has no axioms, slotnum uses
+propext; the candidate preserves those exact dependencies on both releases.
+
+Three private-mode snapshots in `/workspace/migrate-yul-artifacts/evidence/`
+(`b05-old-original.json`, `b05-old-candidate.json`, `b05-new-candidate.json`,
+with deterministic gzip payloads) preserve all three original signatures and
+metadata exactly. Candidate snapshots are equal across releases; count proof
+changes and adds the kernel-generated theorem
+`Solidity.Yul.reservedNames_count._proof_1_1` (no new axiom). Original count
+snapshot has 3 declarations; candidate has 4, all accounted for. Table raw
+implementation hashes differ between original and fixture solely in 31 binder
+hygiene names containing their module paths; all other expression fields match.
+No raw hashes are erased, normalized away, or accepted as migration equivalence.
+The untouched original module and its downstream imports remain unvalidated
+on v4.35. Snapshot/fixture success is not migration acceptance.
+
+Reproduction: `python3 scripts/h62/item6/migrate-yul/generate-reserved-fixture.py --check`;
+`PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-yul/check-reserved-controls.py /workspace/migrate-yul-artifacts/evidence`.
+Actual bounded probe commands, exits, resource measurements and source/output
+hashes live in each `/workspace/migrate-yul-artifacts/b05-*/probe-result.json`.
+Exact-file coordinator/live-owner request is still required before applying
+the proposed patch; latest H70 routing grants no original-file permission.
+
+External v4.35 dependencies B01 Raw, B02 CollisionBound, B03 Scalar.Slice,
+B04 Source.Ctor, B06 Frontend.Checked.Token all occur in this closure and need
+owner overlays; their latest reported failures have not been locally replayed.
+B-KEYSORT-API is locally reproduced in SortCheck/Parser.lean. B07 optional
+Bridge package provisioning belongs its owner; core remains dependency-free.
+No source statement/premise/exclusion, original interface, axiom pin, toolchain
+pin, central module map or generated root has been edited. No runtime gate pass.
+
+B05 final reviews: finder verified source/table/signatures/trust/output bindings,
+no findings. Skeptic verified the same and found a diagnostic tag spelling
+(`lambda` versus exporter `lam`); fixed to `lam`, control rerun passes. Neither
+reviewer ran Lean or wrote files. This approves the additive checkpoint only.
+Initial tooling-suite retry under read-only sandbox failed solely because
+tempfile had no writable directory; corrected with an owned artifact TMPDIR.
+
+Current tooling controls: 31 tests passed in 22.742 s using owned artifact TMPDIR.
