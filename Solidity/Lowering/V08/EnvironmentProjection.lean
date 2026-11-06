@@ -1,4 +1,5 @@
 import Solidity.Source.World
+import Solidity.Source.Machine
 import Solidity.Semantics.ContractWorld
 import Solidity.Semantics.TransientWorld
 
@@ -249,4 +250,26 @@ theorem source_outer_rollback_funds {D : Source.Layout}
 #print axioms state_environment_reset
 #print axioms source_rollback_funds
 #print axioms source_outer_rollback_funds
+
+/-- Shared input relation, indexed by the reached storage address. Guarded
+regression: constructor Nat projections must not clip a negative intrinsic
+word, and delegated library agreement must use caller storage, not code identity.
+This certifies frame inputs only, not body or post-state preservation. -/
+structure FrameAgreement (f : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : Prop where
+  address : (f.this.val : Int) = address.1.1
+  sender : (f.sender.val : Int) = ctx.sender.1.1
+  value : (f.value.val : Int) = ctx.value.1
+  static : f.static = ctx.isStatic
+
+/-- Exact Nat/Int correspondence over the existing unsigned intrinsic word.
+No additional fit premise or changed word representation is introduced. -/
+theorem frame_nat_int_exact (n : Nat) (word : Semantics.Word) :
+    n = word.1.toNat ↔ (n : Int) = word.1 := by
+  have bound := word.2
+  simp only [PrimTy.inRange, decide_eq_true_eq] at bound
+  rw [← Int.natCast_inj, Int.toNat_of_nonneg bound.1]
+
+#print axioms frame_nat_int_exact
+
 end Solidity.Lowering.V08.EnvironmentProjection

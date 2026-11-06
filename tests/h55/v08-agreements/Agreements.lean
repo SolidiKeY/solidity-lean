@@ -1,8 +1,9 @@
 import Solidity.Lowering.V08.LibraryPremises
 import Solidity.Lowering.V08.SourceDispatchControls
 
-/-! Standalone H55 migration candidate. No production adoption or producer
-inhabitant is claimed. All four migration inputs and P8a remain unchanged. -/
+/-! Original H55 migration candidate with additive production-frame correspondence
+checks below. Full origin/body migration and concrete producer inhabitants remain
+open. Existing legacy input structures and P8a are unchanged. -/
 namespace Solidity.Lowering.V08.H55Agreements
 open Solidity ContractWorld
 open Solidity.Lowering.P8
@@ -383,5 +384,56 @@ theorem impossible_library_body (pipeline : Roadmap.Pipeline) :
 #print axioms impossible_constructor_body
 #print axioms populated_library_body
 #print axioms impossible_library_body
+
+
+/-! Guarded regression: publishing a common frame relation must preserve the
+legacy constructor/library contracts and reject a linked code address used in
+place of caller storage. These are frame witnesses, not whole producer inputs. -/
+def toProductionFrame {f : Source.Fr} {address : Address} {ctx : Context}
+    (p : FrameAgreement f address ctx) : EnvironmentProjection.FrameAgreement f address ctx :=
+  ⟨p.address, p.sender, p.value, p.static⟩
+
+def fromProductionFrame {f : Source.Fr} {address : Address} {ctx : Context}
+    (p : EnvironmentProjection.FrameAgreement f address ctx) : FrameAgreement f address ctx :=
+  ⟨p.address, p.sender, p.value, p.static⟩
+
+theorem production_frame_exact {f : Source.Fr} {address : Address} {ctx : Context} :
+    EnvironmentProjection.FrameAgreement f address ctx ↔ FrameAgreement f address ctx :=
+  ⟨fromProductionFrame, toProductionFrame⟩
+
+theorem production_constructor_correspondence {f : Source.Fr} {address : Address}
+    {ctx : Context} (p : ConstructorScalarTransport.FrameInputs f address ctx) :
+    fromProductionFrame (ConstructorScalarTransport.toFrameAgreement p) = fromConstructor p := rfl
+
+theorem production_library_correspondence {K : Type} {caller : K} {f : Source.Fr}
+    {owner : Handle caller} {ctx : Context} (p : LibraryFrameTransport.FrameInputs f owner ctx) :
+    fromProductionFrame (LibraryFrameTransport.toFrameAgreement p) = fromLibrary p := rfl
+
+theorem production_populated_frame :
+    EnvironmentProjection.FrameAgreement ConstructorScalarTransport.frame Controls.self
+      ConstructorScalarTransport.targetContext := toProductionFrame populated_frame
+
+theorem production_populated_static : EnvironmentProjection.FrameAgreement
+    {ConstructorScalarTransport.frame with value := SourcePayableDeploymentControls.word 0, static := true}
+    Controls.self {ConstructorScalarTransport.targetContext with mode := .readOnly} :=
+  toProductionFrame populated_static
+
+theorem production_wrong_sender : ¬ EnvironmentProjection.FrameAgreement
+    {ConstructorScalarTransport.frame with sender := SourcePayableDeploymentControls.self}
+    Controls.self ConstructorScalarTransport.targetContext :=
+  fun p => wrong_sender (fromProductionFrame p)
+
+theorem production_wrong_library_address : ¬ EnvironmentProjection.FrameAgreement
+    ConstructorScalarTransport.frame LibraryHandlerControls.link
+    ConstructorScalarTransport.targetContext :=
+  fun p => library_code_is_not_caller (fromProductionFrame p)
+
+#print axioms production_frame_exact
+#print axioms production_constructor_correspondence
+#print axioms production_library_correspondence
+#print axioms production_populated_frame
+#print axioms production_populated_static
+#print axioms production_wrong_sender
+#print axioms production_wrong_library_address
 
 end Solidity.Lowering.V08.H55Agreements

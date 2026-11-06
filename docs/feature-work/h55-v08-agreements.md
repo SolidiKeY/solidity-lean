@@ -1,3 +1,13 @@
+## Current bounded production-frame checkpoint
+
+`EnvironmentProjection.FrameAgreement (f : Source.Fr) (address : ContractWorld.Address) (ctx : ContractWorld.Context)` is now an additive production input relation for the original this/sender/value/static fields. `ConstructorScalarTransport` and `LibraryFrameTransport` export `toFrameAgreement`, `ofFrameAgreement`, both round trips and `frameAgreement_exact`. Both legacy `FrameInputs` structures and all pre-existing declaration text are preserved. Constructor conversion derives exact Nat/Int correspondence from the existing unsigned intrinsic word; it adds no fit premise. Library conversion uses the reached caller-storage address and has no new DecidableEq catalogue premise.
+
+The shared numeric lemma and constructor adapters report only `propext`; library adapters and their round trips are axiom-free. The inherited test module proves exact correspondence with its standalone relation, populated and static-zero frames, wrong-sender refusal and wrong-library-address refusal. It passed the approved per-file gate. Initial missing-import/projection elaboration failures are retained as failed diagnostics; their placeholder reports are not accepted axiom evidence.
+
+Matched warmed checks on the original file paths measured 6.172 seconds before and 6.423 after (+4.1% aggregate; each module below the unchanged 10% stop threshold). Earlier cold-import calls remain recorded separately. This focused comparison is not full-family performance or full production acceptance. Kernel/layer/trust/registration evidence and exact source/data hashes remain in the small production-frame manifest; bulk output stays off Git.
+
+This checkpoint does not migrate origin/body obligations, instantiate P8/SS-NEW/G42 producers, prove body/post-state preservation, or supply the H68 full certificate. Existing consumers can use exact adapters while all missing producer obligations remain explicit. Full scope acceptance, pin/full-lane gates and remaining H55 queues remain open. The read-only whole-checkout axiom-pin scan returns exit 1 with zero errors and 112 unrecorded changes. Existing pin records in the four changed Lean files are identical before/after this frame delta; the shared inventory was not edited. The whole-checkout doc-path check also returns exit 1 with five missing references in unchanged master files outside this frame delta; all five citing-file bytes match master and are retained in the baseline receipt. Neither failure is waived. Historical handoff records below retain their original status context.
+
 # Combined agreement handoff records
 
 ## Existing chain record
