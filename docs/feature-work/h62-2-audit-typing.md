@@ -199,3 +199,5 @@ Three saved items this continuation: ten hereditary global/input witnesses (de6d
 Remaining unblocked work exists: further source witnesses,293 unprovisioned modules, broad role/interface census, current producer ownership and supported compiler execution-success/failure/revert/gas/fork contracts. Do not mark this as full or8–10-hour queue completion; no blanket producer blocker or queue exhaustion is claimed. All four global checkpoints remain partial.
 
 Latest acceptance samples: Closure.lean=0.904s, DeclarationCensus.lean=1.606s, ClosureWitnesses.lean=0.502s, ClosureCensus.lean=1.006s, ClosureFidelity.lean=0.905s, ValuesListsWitnesses.lean=0.904s, ValuesListsFidelity.lean=1.907s, ValuesDefaultsWitnesses.lean=0.803s, ValuesDefaultsFidelity.lean=0.904s, UnitsSuccess.lean=0.803s, UnitsSuccessFidelity.lean=1.004s, ValuesHeredWitnesses.lean=0.803s, ValuesHeredFidelity.lean=0.903s, ValuesOpsWitnesses.lean=0.803s, ValuesOpsFidelity.lean=0.903s, ProvisionedCensus.lean=7.727s
+
+Housekeeping: moved generated classifier bytecode off Git and disabled future local import bytecode in the acceptance runner. No Lean source or proof behavior changed.

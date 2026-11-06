@@ -9,6 +9,10 @@ import resource
 import re
 import subprocess
 import time
+import sys
+
+# Keep generated Python bytecode out of the owned source tree.
+sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[4]
 EVIDENCE = Path("/workspace/h62-audit-typing-evidence/v4.24.0")
