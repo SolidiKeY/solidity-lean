@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "full_queue_binding": "Authenticated full original assignments/scopes in preserved H82b archive remain binding; these summaries do not replace or narrow them.",
+  "intake_archive": "/workspace/h82-handoffs/h82b-20261106T180909Z.tar.gz",
+  "intake_archive_sha256": "fab677d3e4ccbf57410c175c9665ac0fd689ddf574869e24d431e28de16f9ed4",
+  "members": {
+    "solidity-h28-sol-20261104/type-grammar": {
+      "final_head": "a6cb9553091e615aeea59bce3ecfdb333f9a17ea",
+      "integrated": true,
+      "stopped_pause_receipt_verified": true,
+      "full_assignment": "assignments/frontend-language/solidity-h28-sol-20261104__type-grammar.json",
+      "assignment_sha256": "9a67e078b97bf170726722b531a9e8588f1683b2f2ba9e2ec3dbba8d139318ea"
+    },
+    "solidity-h62-1-20261106/infer-helpers": {
+      "final_head": "9ced4aa2d8b7460e0a73ef897764d0ea8e619cb9",
+      "integrated": true,
+      "stopped_pause_receipt_verified": true,
+      "full_assignment": "assignments/frontend-language/solidity-h62-1-20261106__infer-helpers.json",
+      "assignment_sha256": "25a23b385247889732a4e71484eb6c0934837a8592dce307445f0bc09eee3cb5"
+    },
+    "solidity-h62-2-20261106/audit-language": {
+      "final_head": "a06d064670dc755496c520136d067b0aad429381",
+      "integrated": true,
+      "stopped_pause_receipt_verified": true,
+      "full_assignment": "assignments/frontend-language/solidity-h62-2-20261106__audit-language.json",
+      "assignment_sha256": "25631ba149cd245667a7e5176b79da1bde1594a3509aad07664e34ebafe63f57"
+    },
+    "solidity-h62-2-20261106/audit-v07-lowering": {
+      "final_head": "42e78a67e07fd786cb744036e7a4e53b0324ad65",
+      "integrated": true,
+      "stopped_pause_receipt_verified": true,
+      "full_assignment": "assignments/frontend-language/solidity-h62-2-20261106__audit-v07-lowering.json",
+      "assignment_sha256": "692d5ecb7288bf049e629bc7c207961d8844d2c431c79419dc9e03ab71f52c44"
+    },
+    "solidity-h62-4-20261106/generic-source-frontend": {
+      "final_head": "33b5001cc5cfa56445c7291a6492a2d7f16c5978",
+      "integrated": true,
+      "stopped_pause_receipt_verified": true,
+      "full_assignment": "assignments/frontend-language/solidity-h62-4-20261106__generic-source-frontend.json",
+      "assignment_sha256": "5859ee0d2ac3cd08e5c447ae182b994422ca2ec92ec9ddaaafdb490a61524378"
+    }
+  },
+  "open_queues": {
+    "numeric-literals": [
+      "Finish shared registration and final affected/runtime gates without rerunning unchanged timingSTOPs",
+      "Validate current-source cache; historical H41 approval retained and self-test remains failed",
+      "Preserve exact grammar/decoder/source-range/exclusion/checksum semantics and all final frozen obligations"
+    ],
+    "Constants carryover": [
+      "Fresh current audit/resource stamp and remaining full gates, preserving H44 manifests and exact46-item kernel inventory boundary",
+      "Shared registration and final handoff"
+    ],
+    "type-grammar": [
+      "Fresh integrated full/build/solkey validation; prior canceled full run was not a timingSTOP",
+      "Retain LengthAtom/external expression contracts and all original backfill categories"
+    ],
+    "infer-helpers": [
+      "Production helper integration proposal/owner definition-body agreement; no inferencer replacement",
+      "Full affected and4.35overlay gates, generated-helper inventory and valid before/after optimization timing"
+    ],
+    "generic-source-frontend": [
+      "Production45-control integration/registration via current owner; sources remain read-only",
+      "WordTable substantive consolidation coordinated with H55; no duplicate generator",
+      "Full affected/trust/generated-helper inventory and production timing gates; live45-case batched comparison is limited"
+    ],
+    "audit-language": [
+      "Complete all interface/telescope classification and authoritative producer inventory",
+      "Joint witnesses for all remaining statements; fresh verified subset has12 only",
+      "Supported compiler totality/success, reject-all/always-revert controls, failure/gas/fork boundaries",
+      "Full statement-fidelity reconciliation and final gates"
+    ],
+    "audit-v07-lowering": [
+      "Elaborate interface membership/constant resolution/inherited telescopes and4 unresolved result groups",
+      "Joint witnesses for every required statement",
+      "Compiler totality/success and negative/failure/gas/fork controls",
+      "Full fidelity and final affected gates"
+    ]
+  },
+  "waits": [
+    {
+      "lane": "coordinator artifact intake",
+      "item": "Original ownership.json at /workspace/h62-coordinator-inputs/ownership.json SHA2567f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce; full census replay fails without it"
+    },
+    {
+      "lane": "migration producers",
+      "item": "Hash CollisionBound, Language FixedPoint, Syntax Raw, Frontend Token4.35compatibility and full affected gates; no partial overlay applied"
+    },
+    {
+      "lane": "central registration",
+      "item": "Shared module-map registration and1304 unrecorded axiom-pin changes; no shared registry edits by successor"
+    },
+    {
+      "lane": "H55 vectors-tables",
+      "item": "Complete verified tool/manifest/handoff payloads for substantive WordTable coordination; no Raw or Claude-owned source changes"
+    }
+  ],
+  "handoff_rule": "Original H62 assignments require fresh thread handoff after3-5 completed work items; preserve same VM/branch/goal and entire queue, no replacement goal or master push."
+}

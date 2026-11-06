@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "previous_inherited_tree": "1f1d428a64231f3a2eeb160daaac7000aa54d05c",
+  "validated_chain_checkpoint": "1e624726817f03b3292cccf4058734fb245a5861",
+  "changed_paths": [
+    "docs/feature-work/h62-1-infer-helpers.md",
+    "docs/feature-work/h62-2-audit-language.md",
+    "docs/feature-work/h62-2-audit-v07-lowering.md",
+    "docs/feature-work/h62-4-generic-source-frontend.md",
+    "scripts/check-sol-numeric-literals.py",
+    "scripts/h62/item2/audit-language/check_live_witnesses.py",
+    "scripts/h62/item2/audit-language/verify_live_witnesses.py",
+    "scripts/h62/item4/generic-source-frontend/generate.py",
+    "tests/h62/item1/infer-helpers/audit_helpers.py",
+    "tests/h62/item1/infer-helpers/live-validation.json",
+    "tests/h62/item2/audit-language/live-validation.json",
+    "tests/h62/item2/audit-v07-lowering/live-source-reproduction.json",
+    "tests/h62/item4/generic-source-frontend/FixtureTable.lean",
+    "tests/h62/item4/generic-source-frontend/live-validation.json",
+    "tests/sol-numeric-literals/acceptance.json",
+    "tests/sol-numeric-literals/evidence/audit-validation.json",
+    "tests/sol-numeric-literals/evidence/audit-validation.log",
+    "tests/sol-numeric-literals/h82/current-cache-proposal.json",
+    "tests/sol-numeric-literals/h82/fresh-audit-checkpoint.json",
+    "tests/sol-numeric-literals/h82/integration-checkpoint.json",
+    "tests/sol-numeric-literals/h82/prepare-current-cache.py",
+    "tests/sol-numeric-literals/h82/provenance-acceptance-checkpoint.json",
+    "tests/sol-numeric-literals/test-adoption.py"
+  ],
+  "scope_manifest_sha256": "d976cfdceb02c7fd1d7bebd9d0872b4826b5fb8170b8aced28fcf6f7980458e2",
+  "boundary": "Every checkpoint delta path belongs to assigned exclusive/new-file scope. Does not expand future write scope or authorize producer changes."
+}

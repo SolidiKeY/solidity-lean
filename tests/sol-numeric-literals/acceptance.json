@@ -4014,7 +4014,7 @@
   ],
   "kernel_inventory_sha256": "c51f9c03712a18703c5fb94684ae63d6c2d676c90d1b15ad8b020cdd4f98f5ea",
   "gate_scripts": {
-    "scripts/check-sol-numeric-literals.py": "3e0c6d2e1d1098b26cbee855806c6ce2cd48e957df512923364182eaf83a5a60",
+    "scripts/check-sol-numeric-literals.py": "708ea53434e62fe8fd4d95db9a1d36f7cbc560d7524217e880132ff3f750060b",
     "tests/primitive-packets-1105/Constants/registration-plan.py": "8ac5a420593edc2b30a5adce0e18afdddaff5ab8fc0084d6006cd592f8bc52e1",
     "tests/primitive-packets-1105/Constants/validate-fresh.py": "d8e75b2a9071e32020ce50394c8b39fb1ca23a1a4900aa9d5a1695d7a8d4a410",
     "tests/primitive-packets-1105/Constants/check.py": "2cc3746b3fa30a15448c9cbca671fddb17d077feae62db3c6a6698baa9145a1d",

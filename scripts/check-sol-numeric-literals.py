@@ -39,8 +39,8 @@ def changed_paths(tree=None):
  target=[tree] if tree else []
  return set().union(*(set(git('diff','--no-renames','--name-only',reference,*target,'--').splitlines()) for reference in (BASE,ADOPTED_MASTER,INHERITED_TREE))) | set(git('ls-files','--others','--exclude-standard').splitlines())
 
-# Exact authenticated H82 consolidation checkpoint, separate from published master.
-INHERITED_TREE='1f1d428a64231f3a2eeb160daaac7000aa54d05c'
+# Exact validated H82 chain checkpoint, separate from published master.
+INHERITED_TREE='1e624726817f03b3292cccf4058734fb245a5861'
 
 def validate_foreign_paths(foreign,untracked,tree=None):
  require(not (set(foreign)&set(untracked)),'untracked foreign write')
