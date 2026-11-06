@@ -114,7 +114,16 @@ the preceding table, as `fragments.sh` generates it.
 
 ## Gates
 
-See the CLOUD-RESULT block in the final marker commit for the recorded runs.
+- Lean MCP diagnostics: the three new modules elaborate with no errors or
+  warnings; every new theorem's `#print axioms` is pinned by `#guard_msgs` and
+  lies within `propext`, `Classical.choice`, `Quot.sound`.
+- `node scripts/check-axiom-pins.mjs --write`: 22 new pins recorded, 0 errors.
+- `scripts/coord-tools/gate.sh checkpoint` (base
+  `origin/cloud/moved2-20261105/vy5-composition`): PASS on all nine gates
+  (build-touched, library — `Build completed successfully (6055 jobs)` —,
+  trust, orphans, layers, roots, fragments, doc-paths, axiom-pins). This VM had
+  no shipped Lake cache, so it was a from-scratch build (~2.5 h).
+- `./run-lean.sh`: see the CLOUD-RESULT marker commit.
 
 ## Limitations
 
