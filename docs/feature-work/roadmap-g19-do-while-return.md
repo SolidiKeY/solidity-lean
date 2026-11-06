@@ -1,4 +1,6 @@
-# G19 mapped do-while assignment followed by bare return
+# G19 context-related do-while assignment followed by bare return
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 [The new component](../../Solidity/Lowering/G19/AssignmentDoWhileReturn.lean)
 extends V07's existing `ContextMap` and assignment operand. Its actual Source
