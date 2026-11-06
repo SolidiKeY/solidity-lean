@@ -43,6 +43,15 @@ def contender(state, graph, queue):
 
 
 class GraphTests(unittest.TestCase):
+    def test_refusal_controls_require_exact_error_diagnostic_bodies(self):
+        expected = 'H62 witness requires kernel checking'
+        self.assertFalse(verifier.has_error_diagnostic('/tmp/'+expected+'.lean: unknown module', expected))
+        for message in [dict(severity='warning', data=expected),
+                        dict(severity='error', data='Unknown constant at /tmp/'+expected+'.lean'),
+                        dict(severity='error', data={'message': expected})]:
+            self.assertFalse(verifier.has_error_diagnostic(json.dumps(message), expected))
+        self.assertTrue(verifier.has_error_diagnostic(json.dumps(dict(severity='error', data=expected)), expected))
+
     def setUp(self):
         self.export, self.catalog = inputs()
         self.graph = g.build(self.export, self.catalog, BASE, TREE)

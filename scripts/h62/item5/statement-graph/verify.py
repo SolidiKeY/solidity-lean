@@ -39,24 +39,28 @@ def bounds():
     resource.setrlimit(resource.RLIMIT_AS,(8*1024**3,8*1024**3))
 
 
-def is_witness_conflict_diagnostic(log):
-    """Only compiler diagnostic bodies count; filenames/setup errors never do."""
-    helper = 'H62.CheckedWitness.H62Fixture.root.binder_1'
+def error_diagnostics(log):
+    """Read compiler error bodies only; never count filenames or warnings."""
+    bodies = []
     for line in log.splitlines():
         try:
             message = json.loads(line)
         except ValueError:
             continue
-        if not isinstance(message,dict) or message.get('severity')!='error':
-            continue
-        body = message.get('data')
-        if not isinstance(body,str):
-            continue
-        if body.strip()=='conflicting imported H62 witnesses':
-            return True
-        if 'environment already contains' in body and helper in body:
-            return True
-    return False
+        if isinstance(message,dict) and message.get('severity')=='error' and isinstance(message.get('data'),str):
+            bodies.append(message['data'])
+    return bodies
+
+
+def has_error_diagnostic(log, expected):
+    return any(body.strip()==expected for body in error_diagnostics(log))
+
+
+def is_witness_conflict_diagnostic(log):
+    helper = 'H62.CheckedWitness.H62Fixture.root.binder_1'
+    return any(body.strip()=='conflicting imported H62 witnesses' or
+               ('environment already contains' in body and helper in body)
+               for body in error_diagnostics(log))
 
 
 def main():
@@ -145,18 +149,29 @@ def main():
         assert witness_bytes == (evidence/'witness-fixture.json').read_bytes(), 'fresh-process witness nondeterminism'
         # Each negative driver must fail for its intended witness check, not a setup error.
         witness_negatives = {
-            'witness-wrong-type': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 H62WitnessFixture.trueProducer', 'type does not match'),
-            'witness-wrong-index': ('#h62_witness "binder" H62WitnessFixture.consumer 99 H62WitnessFixture.naturalReflexive', 'out of range'),
-            'witness-unsafe': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 unsafeCast', 'unsafe H62 witness'),
-            'witness-axiom-dependent': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 Classical.choice', 'must be axiom-free'),
-            'witness-duplicate': ('#h62_witness "binder" H62WitnessFixture.consumer 1 H62WitnessFixture.naturalReflexive', 'duplicate H62 witness'),
-            'witness-universe-specialization': ('universe v\ntheorem mono (α : Type) (x : α) : x = x := rfl\ntheorem broad (α : Type v) (x : α) (same : x = x) : x = x := same\n#h62_witness "binder" broad 2 mono', 'type does not match')
+            'witness-wrong-type': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 H62WitnessFixture.trueProducer', 'H62 witness type does not match the exact universal premise closure'),
+            'witness-wrong-index': ('#h62_witness "binder" H62WitnessFixture.consumer 99 H62WitnessFixture.naturalReflexive', 'H62 witness binder index is out of range'),
+            'witness-unsafe': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 unsafeCast', 'unsafe H62 witness is forbidden'),
+            'witness-axiom-dependent': ('#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 Classical.choice', 'H62 witness must be axiom-free'),
+            'witness-duplicate': ('#h62_witness "binder" H62WitnessFixture.consumer 1 H62WitnessFixture.naturalReflexive', 'duplicate H62 witness registration'),
+            'witness-universe-specialization': ('universe v\ntheorem mono (α : Type) (x : α) : x = x := rfl\ntheorem broad (α : Type v) (x : α) (same : x = x) : x = x := same\n#h62_witness "binder" broad 2 mono', 'H62 witness type does not match the exact universal premise closure')
         }
+        witness_negatives.update({
+            'witness-kernel-skip': ('set_option debug.skipKernelTC true in\n#h62_witness "binder" H62WitnessFixture.naturalReflexive 0 H62WitnessFixture.trueProducer', 'H62 witness requires kernel checking'),
+            'witness-unresolved-universe': ("""run_cmd Lean.Elab.Command.liftCoreM <| Lean.addAndCompile <| .defnDecl {
+  name := `phantom
+  levelParams := [`v]
+  type := Lean.mkConst ``True
+  value := Lean.mkConst ``True.intro
+  hints := .opaque
+  safety := .safe }
+theorem need (h : True) : True := h
+#h62_witness "binder" need 0 phantom""", 'H62 witness is not closed or has unresolved metavariables')})
         for label,(body,expected_text) in witness_negatives.items():
             driver = evidence/(label+'.lean')
-            driver.write_text('import tests.h62.item5.«statement-graph».WitnessFixture\n'+body+'\n')
-            run(label,[lean,*flags,str(driver)],expected=1)
-            assert expected_text in (evidence/(label+'.log')).read_text(), 'wrong negative-control failure: '+label
+            driver.write_text('import tests.h62.item5.«statement-graph».WitnessFixture\n/-! Guard regression: '+label+' must be refused by the H62 exporter. -/\n'+body+'\n')
+            run(label,[lean,*flags,'--json',str(driver)],expected=1)
+            assert has_error_diagnostic((evidence/(label+'.log')).read_text(), expected_text), 'wrong negative-control failure: '+label
         for label,producer in (('WitnessOverlayA','H62Fixture.leaf'),('WitnessOverlayB','H62Fixture.reflexive')):
             driver = evidence/(label+'.lean')
             driver.write_text('import tests.h62.item5.«statement-graph».Fixture\n#h62_witness "binder" H62Fixture.root 1 '+producer+'\n')

@@ -484,3 +484,29 @@ Next independent queue work remains integrated H55 local controls and trust
 registration acceptance after required inputs, plus original graph production
 inventory when relayed. Explicitly paused pin proposal remains stopped. No
 full-project gate, production proof discharge or whole-goal completion claimed.
+
+### H70/H90 continuation: independent refusal coverage
+
+Coordinator routed compatibility waits to migrate-root-gate (Contracts:1104 exact
+empty guard and Syntax.Raw); G49 inventory forwarding is staged for Claude and
+no stale/retired owner was contacted. Routing is not validation or owner agreement.
+No fresh-thread creation, goal reset or replacement is inferred from the router.
+H86 unavailable raw evidence remains an explicit regeneration limitation.
+
+Independent graph backfill now generates named regression docstrings for witness
+refusals, including disabled kernel checking and unresolved witness universes.
+A direct syntactic unused-universe fixture was rejected by Lean before reaching
+the exporter; a first low-level driver lacked the Command/Core monad lift. Those
+failed harness attempts are retained and not counted as intended refusals. The
+corrected control uses a safe kernel-checked True definition with an unused
+universe parameter, then confirms registerWitness refuses its unresolved level.
+The kernel-skip control confirms the command refuses before adding any helper.
+No theorem is accepted with kernel checking disabled; no axiom/sorry/native_decide
+or production declaration/budget/guard change was introduced.
+
+All witness negatives require exact JSON error bodies, never filename text,
+warnings or setup failures. Forty-five Python controls pass. The corrected direct
+probes pass; full clean-tree optional fixture acceptance remains pending at this
+commit. Existing production inventory/full gate waits remain. The separate H55
+size proposal hit +21.4335% timing STOP and is stopped/unaccepted; it was not
+rerun unchanged while these independent controls were developed.
