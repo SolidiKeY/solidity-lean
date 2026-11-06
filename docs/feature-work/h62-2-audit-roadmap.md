@@ -112,7 +112,7 @@ address space by min(12 GiB, host available minus 4 GiB, cgroup available minus
 4 GiB), with another 256 MiB margin; version failures abort. Writer lock held.
 Initial attempt used the simpler admission-only reserve guard; independent
 review identified and fixed it before the audit attempt. This correction does
-not retroactively certify the first guard. Neither attempt approached its cap.
+not retroactively certify the first guard. No peak-RSS measurement is claimed.
 No systemd invocation or proof-budget increase.
 
 No representation/refactor or existing proof edit occurred. Comparable same-tree,
@@ -121,6 +121,15 @@ KeySort observations have different resource guards and are not a slowdown test.
 No performance improvement or RUNTIME_GATE_PASS is claimed. Full `./run-lean.sh`,
 all affected validation, passing taclet comparison, proof/axiom census and final
 acceptance remain pending until external migration dependencies are supplied.
+
+Static checks: `node scripts/check-layers.mjs` passes (857 core modules,
+zero reach elaborator or checked parser adapters); generated-root and fragment
+`--check` commands pass. `bash scripts/check-doc-paths.sh` exits 1 on the existing
+`docs/feature-work/after-roadmap-va1.md` citation to missing optional
+Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean. The check ran before
+adding this lane's files to the Git index, so that failure is baseline evidence.
+All backticked Lean file paths introduced by this lane resolve in an incremental
+path check. No existing documentation or Bridge dependency was changed.
 
 ## Independent reviews and fixes
 
