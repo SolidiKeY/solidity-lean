@@ -10,11 +10,47 @@ ROOT = pathlib.Path(__file__).resolve().parents[4]
 SPEC = importlib.util.spec_from_file_location('collector', ROOT / 'scripts/h62/item1/trust-fragments/collect.py')
 COLLECTOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(COLLECTOR)
+sys.modules['collect'] = COLLECTOR
+ACCEPT_SPEC = importlib.util.spec_from_file_location('accept_baseline', ROOT / 'scripts/h62/item1/trust-fragments/accept_baseline.py')
+ACCEPT = importlib.util.module_from_spec(ACCEPT_SPEC)
+ACCEPT_SPEC.loader.exec_module(ACCEPT)
+sys.modules['accept_baseline'] = ACCEPT
+CENSUS_SPEC = importlib.util.spec_from_file_location('census', ROOT / 'scripts/h62/item1/trust-fragments/census.py')
+CENSUS = importlib.util.module_from_spec(CENSUS_SPEC)
+CENSUS_SPEC.loader.exec_module(CENSUS)
 
 
 class CollectorTests(unittest.TestCase):
     def test_reproduces_frozen_audit(self):
         self.assertEqual(COLLECTOR.collect(COLLECTOR.FRAGMENTS), COLLECTOR.AUDIT.read_bytes())
+
+    def test_census_accounts_for_each_original_occurrence(self):
+        data = COLLECTOR.AUDIT.read_bytes()
+        inventory = CENSUS.census(data)
+        blocks = inventory['audit_blocks']
+        names = [name for block in blocks for name in block['headlines']]
+        self.assertEqual(len(blocks), 44)
+        self.assertEqual(len(names), 1380)
+        self.assertEqual(len(set(names)), 1373)
+        self.assertEqual(len(inventory['imports']), 77)
+        self.assertEqual(len(inventory['print_axioms']), 17)
+        self.assertEqual(CENSUS.census(COLLECTOR.collect(COLLECTOR.FRAGMENTS)), inventory)
+        with self.assertRaises(ValueError):
+            CENSUS.census(data.replace(b'``Solidity.', b'``solidity.', 1))
+
+    def test_pinned_acceptance_detects_matching_mutations(self):
+        original = COLLECTOR.AUDIT.read_bytes()
+        ACCEPT.accept(original, original, original)
+        mutated = original.replace(b'``propext', b'``propExt', 1)
+        self.assertNotEqual(mutated, original)
+        with self.assertRaises(ValueError):
+            ACCEPT.accept(mutated, mutated, mutated)
+        with self.assertRaises(ValueError):
+            ACCEPT.accept(original, mutated, original)
+        with self.assertRaises(ValueError):
+            ACCEPT.accept(original, original, mutated)
+        with self.assertRaises(ValueError):
+            ACCEPT.accept(original, original.replace(b'#print axioms ', b'--print axioms ', 1), original)
 
     def test_missing_and_unexpected_fragments_refused(self):
         with tempfile.TemporaryDirectory() as directory:
