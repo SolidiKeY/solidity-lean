@@ -1,0 +1,12 @@
+{
+  "owner": "solidity-h62-6-20261106/migrate-hash",
+  "ownerCommit": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+  "authorization": "H70 coordinator owner relay; isolated migration use only; no original-file edit permission",
+  "path": "Solidity/Hash/CollisionBound.lean",
+  "baseBlob": "b54c93a5b24340a19160c1fb378d057ccee60f84",
+  "targetBlob": "092971eda8c7d6997276a92ba19b25b7ce05844e",
+  "publishedTargetPrefix": "092971eda",
+  "patchSha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+  "baseSha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce",
+  "targetSha256": "cfddc9e45edee7ac2f5a83c3212c741034d39a4e700a5384689b4ee6035565a0"
+}
