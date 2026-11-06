@@ -286,4 +286,24 @@ theorem inferExpr_iff {F X n} (E : ExprEnv F X n) (e : Syn .yulExpr) :
     rw [ExprD.complete d]
     rfl
 
+/-- Two derivations for the same grammar tree and intrinsic environment agree
+as packed results, including their inferred arity. -/
+theorem ExprD.result_unique : ∀ (F : List Solidity.Yul.Sig) (X : List Solidity.Yul.ExternalType) (n : Nat)
+ (E : Solidity.Yul.ExprEnv F X n) (tree : Solidity.Source.Syn .yulExpr) (firstCount secondCount : Nat)
+ (first : Solidity.Yul.ExprD E tree firstCount)
+ (second : Solidity.Yul.ExprD E tree secondCount),
+ (⟨firstCount,first⟩ : (count : Nat) × Solidity.Yul.ExprD E tree count) = ⟨secondCount,second⟩ := by
+  intro F X n E tree firstCount secondCount first second
+  exact Option.some.inj ((ExprD.complete first).symm.trans (ExprD.complete second))
+
+/-- Two derivations for the same grammar tree and intrinsic environment agree
+as packed results, including their inferred arity. -/
+theorem ArgsD.result_unique : ∀ (F : List Solidity.Yul.Sig) (X : List Solidity.Yul.ExternalType) (n : Nat)
+ (E : Solidity.Yul.ExprEnv F X n) (tree : Solidity.Source.Syn (.list .yulExpr)) (firstCount secondCount : Nat)
+ (first : Solidity.Yul.ArgsD E tree firstCount)
+ (second : Solidity.Yul.ArgsD E tree secondCount),
+ (⟨firstCount,first⟩ : (count : Nat) × Solidity.Yul.ArgsD E tree count) = ⟨secondCount,second⟩ := by
+  intro F X n E tree firstCount secondCount first second
+  exact Option.some.inj ((ArgsD.complete first).symm.trans (ArgsD.complete second))
+
 end Solidity.Yul
