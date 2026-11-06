@@ -75,11 +75,53 @@ This is incremental file checking, not a clean full-directory benchmark.
 | Combined wall seconds | 12.548547110 | 8.778410136 | -30.04% |
 | Peak child RSS KiB | 410744 | 560936 | +36.57% |
 
-ESCALATE: MEMORY_REGRESSION_OBSERVED. Heavy checks are held pending QMEM:
-does the >10% stop apply to this RSS increase or only wall slowdown? Options:
-hold while gate investigates, or coordinator clarifies wall-only threshold and
-proceeds within unchanged memory bounds. Neither full-directory wall delta nor
-resource acceptance is established. Later lightweight checks do not clear the hold.
+H76 resolves QMEM (per H69): continue toward matched clean full builds under
+unchanged resource limits; include this +36.57% RSS growth in the human cut-over
+report. This sample is not a full clean comparison. No memory hold remains.
+H76-decision.txt preserves the supplied coordinator answer verbatim.
+
+The fresh H76 clean new attempt (new-clean-h76-01) passes KeySort, all five ABI
+modules, AST and SpecSyntax, then fails Syntax.Raw. Nine attempted modules,
+eight pass, one fails; complete=false. Interrupted wall 59.729785591s, peak child
+RSS 1514316 KiB. This is an incomplete build, not a comparable full-build number.
+The old complete baseline and full before/after comparison remain unresolved.
+
+## Elaborated ABI type evidence (H76)
+
+ExportAbiTypes.lean serializes elaborated constant types (de Bruijn bound
+variables, binder visibility, constant names, universe structure/parameter order,
+literals and projections). Binder names, metadata and let optimization flags are
+ignored; this is syntax comparison, not definitional equivalence or value/trust
+auditing. Unknown universe parameters/free/metavariables fail closed; positive
+and negative universe controls run during export. Private names are omitted and
+the seven new private helpers remain independently reviewed.
+
+api_evidence.py rebuilds all five ABI modules from the exact pinned base with
+4.24, then exports those environments and the successful clean4.35 ABI artifacts.
+Both sides' source hashes, new OLean hashes, exporter/census hashes and versions
+are recorded. All seven Lean subprocesses in abi-api-h76-02 exit0; the comparison
+orchestrator exits1 with status=differences and compatibility_gate=fail:
+
+- 848 original non-private constants versus 917 new.
+- 761 exact type-AST matches, 54 changed, 33 removed, 102 added.
+- Changed/removed APIs are compiler-generated: noConfusion, equation, matcher and
+  proof helper declarations. Named authored types checked, including tailFits_of,
+  mdec_cval, cpart_agree and bodyValuesA_off, match.
+- Generated APIs are not excluded from the frozen-interface requirement. Full
+  API compatibility is unresolved. generated-api-owner-request.json sends the
+  exact differences to migrate-root-gate for a compatibility plan. No backward
+  compiler option, frozen pin, premise or statement was changed to hide drift.
+
+Commands (use a fresh output directory on repeat):
+
+```sh
+python3 scripts/h62/item6/migrate-semantics/measure.py --toolchain /workspace/h62-migrate-semantics-evidence/lean-4.35.0-linux --out /workspace/h62-migrate-semantics-evidence/new-clean-h76-01
+python3 scripts/h62/item6/migrate-semantics/api_evidence.py --out /workspace/h62-migrate-semantics-evidence/abi-api-h76-02
+```
+
+Independent finder/skeptic confirmed all counts, hashes and boundaries, and the
+serializer's fail-closed universe guard. Their provenance and explicit failing
+API-status findings were fixed. Neither reviewer used Lean/server or wrote fixes.
 
 ## External owner requests
 
@@ -89,8 +131,10 @@ migration overlays from corresponding owners/root gate:
 - Syntax.Raw: String/Slice API failures at lines 597, 650, 665, 682, 684.
   New drop returns Slice, Slice.toList/String.dropRight availability and endsWith
   method shape differ. Most assigned modules transitively depend on this.
-- Hash.CollisionBound: countP/contains goal at 407, omega failures at 660/680,
-  resulting axiom guard failures. Do not repin failures or weaken statements.
+- Hash.CollisionBound: prior failures are addressed by a supplied H70 owner
+  overlay. Owner ticket head 78c110f83dc1a30700acd1b5bd34b19f61da6ccd, source head
+  2a18afcdba00a85645b0b3079704f78ffcd78860. The isolated fixture below passes;
+  branch Hash source stays unchanged. Full owner/root integration remains pending.
 - Source.Ctor: original 200000-heartbeat exhaustion at 641 and dependent
   elimination failures at 715. Preserve that budget and all admission exclusions.
 - Old baseline Source.Horizon: original source exceeds diagnostic 300s bound.
@@ -101,6 +145,32 @@ survey-01 and old-clean-02, under `/workspace/h62-migrate-semantics-evidence/`.
 The original new-clean-01 failure is superseded only for the repaired files.
 old-clean-01 was invalid tooling (missing GNU time); sample-old-01 used a
 version-specific lemma alias and failed. Neither is a passing gate.
+
+## H70 owner ticket responses
+
+The solcvalidation request DEP-PRIOR-FULL-3 (requester head
+0bd9e2519c43f1757674d2051a7786ac5688c2bb) is covered by the existing AbiAccess
+repair and fresh H76 clean pass. AbiAccess-owner.patch, AbiEntryProofs-owner.patch
+and solcvalidation-owner-response.json are exported for coordinator relay. No
+additional production edits were made in response. Other forwarded SortCheck,
+Language and Backend requests remain their owners' work; not locally validated.
+
+owner_hash_fixture.py reproduces the supplied Hash overlay in an off-Git fixture
+only. Its normalized transport SHA256 matches the supplied
+3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff exactly, with
+full result Git blob 092971eda8c7d6997276a92ba19b25b7ce05844e. Fixture source SHA256
+cfddc9e45edee7ac2f5a83c3212c741034d39a4e700a5384689b4ee6035565a0. Its bounded
+4.35 compile exits0 in 4.512271412s, peak child RSS594348KiB, with original axiom
+guards unchanged. This establishes fixture compatibility, not full owner gates.
+No Hash file was changed in this branch. Original path normalization was corrected
+without repeating the passing Lean check. Reviews required exact full blob and
+transport SHA checks before compilation; these guards are now enforced and pass
+in a separate verification-only run (which is not itself a Lean check).
+
+```sh
+python3 scripts/h62/item6/migrate-semantics/owner_hash_fixture.py --out /workspace/h62-migrate-semantics-evidence/hash-owner-h70-01
+python3 scripts/h62/item6/migrate-semantics/owner_hash_fixture.py --out /workspace/h62-migrate-semantics-evidence/hash-owner-h70-verify-02 --verify-only
+```
 
 ## Reproduction, reviews and remaining work
 
@@ -137,9 +207,13 @@ No Lean MCP tools exposed; bounded serial CLI diagnostics were used. Final
 repository run-lean.sh, frozen SolKey conformance and affected validation remain
 pending, so no RUNTIME_GATE_PASS. VM cap is 16 GiB; no systemd-run used.
 
-Three work items completed this turn: AbiAccess repair, full compatibility survey,
+Prior checkpoint work items: AbiAccess repair, full compatibility survey,
 and AbiEntryProofs repair/review. Fresh-thread handoff goes to the coordinator
-with this same original VM/branch/goal, not a replacement goal. Resolve QMEM and
-external migration overlays, then repeat clean matched builds, verify elaborated
-interfaces, finish affected/final gates and root-gate handoff. Full assignment
+with this same original VM/branch/goal, not a replacement goal. QMEM is resolved. Resolve external migration overlays, the old baseline timeout
+and generated API drift; then complete clean matched builds, full interface
+verification, affected/final gates and root-gate handoff. Full assignment
 remains unfinished; maintain all original proof/resource budgets.
+
+H76/H70 continuation delivered three items: a fresh clean-build attempt, elaborated
+ABI interface evidence, and owner-ticket responses/Hash fixture validation. Fresh
+thread coordination retains the same VM, branch and original unfinished goal.
