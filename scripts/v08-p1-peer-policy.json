@@ -1,0 +1,16 @@
+{
+  "head": "f4fa6f12d54e5cfda235f9783fe6b9d19330d178",
+  "sources": {
+    "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV1.lean": "de6351e6e320e162cedeeec8e87af8e8b2f070349bd1b903953bc76ef376850b",
+    "Solidity/Backend/InternalFlow/RuntimeFrameContext.lean": "a22113f0c4d2a5e0e0d3ae1dc7a527d0c0c156797e099e7c9604f733f88941d1",
+    "Solidity/Backend/InternalFlow/RuntimeFrameRestore.lean": "33e4d5350412ab3a67e0d808e2d46d00b71ea6b371819514ec89572a1799173f",
+    "Solidity/Backend/InternalFlow/RuntimeFrameFootprint.lean": "593893b67af314bf144bde1ed0cc17b5ceb02b1de77c784d379f8923a329e55f",
+    "Solidity/Backend/InternalFlow/RuntimeFrameSaved.lean": "4b045f832a648dd7988ff199264b6169702274907ef0b0a1ca2e4b3bd4d50aef",
+    "Solidity/Backend/InternalFlow/RuntimeFrameStack.lean": "6e4b98585f8026ed5c2b994fd0999628533251e492130f0abf2895506fb67189",
+    "Solidity/Backend/InternalFlow/RuntimeFrameComposition.lean": "997827ccb397c86c05fc5c00b95b818df110c960890f975c2178a9371a712cac",
+    "Solidity/Backend/InternalFlow/RuntimeFrameTarget.lean": "0c57934d0bbdbb3eea70b49d18fa6086b2cbbd0c5abceb145028b3ff57e412ff",
+    "Solidity/Backend/InternalFlow/RuntimeFrameSemantics.lean": "afd7405f6e732e7fb62918d9cd4514e0b14002f31d289041a27048c5ef99ec3e",
+    "Solidity/Backend/InternalFlow/RuntimeFrameTransport.lean": "e0fcd7aafb9d70b842adfbd205059b6a226a78d4da71a853f0cf301d2559032e"
+  },
+  "meaning": "readonly frozen signatures; Pending fields unproved"
+}

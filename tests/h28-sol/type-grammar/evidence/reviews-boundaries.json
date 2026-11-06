@@ -1,0 +1,38 @@
+{
+  "scope": "Boundaries.lean all28theorems, structural scanner and independent grammars; local registration; actual-source signature coverage and bounded axiom audit; documentation",
+  "finder": {
+    "mode": "separate read-only, no Lean server",
+    "verdict": "boundary checkpoint content and evidence accepted",
+    "findings": [
+      "Save updated signature checker execution",
+      "Clarify disclaimer: generic delimiter uniqueness vs type-name syntax uniqueness"
+    ],
+    "resolutions": [
+      "Fresh check execution saved",
+      "Disclaimer corrected"
+    ]
+  },
+  "skeptic": {
+    "mode": "separate read-only, no Lean server",
+    "verdict": "boundary checkpoint accepted after evidence fix",
+    "findings": [
+      "Current proof bytes were not linked to cited axiom evidence"
+    ],
+    "resolution": "Current module hashes must match successful unchanged-source gate; all54 records cite fresh hash-bound audit"
+  },
+  "evidence": [
+    "h28-type-08ba07ac82d1.json",
+    "h28-type-08ba07ac82d1.log",
+    "mcp-Boundaries-minimized.json",
+    "h28-type-023b6776cc76.json",
+    "h28-type-023b6776cc76.log",
+    "signature-coverage-boundaries-reviewed.json"
+  ],
+  "remaining": [
+    "Actual type-yield region membership with explicit length atom balance",
+    "Type syntax uniqueness and exact layout equivalence integration",
+    "Independent parser completeness with sufficient fuel and parseType corollaries",
+    "All-constructor grammar/solc controls",
+    "Final gates and full-assignment acceptance"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.resolved_uint_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.resolved_uint_delete_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.delete_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintDelete.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_delete_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

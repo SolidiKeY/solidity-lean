@@ -1,0 +1,8 @@
+CWD: /workspace/solidity-lean
+COMMAND: python3 Bridge/tests/precompile-agreement/test_inventory.py
+................................
+----------------------------------------------------------------------
+Ran 32 tests in 9.239s
+
+OK
+EXIT=0 SECONDS=9.308

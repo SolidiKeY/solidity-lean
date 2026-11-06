@@ -1,0 +1,62 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.cell_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.copy_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.log_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.readAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.readCell": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.readLen": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.writes_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFrames.lean:Solidity.Backend.StorageOps.SourceCopyFrames.writes_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

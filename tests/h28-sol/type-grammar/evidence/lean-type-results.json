@@ -1,0 +1,6 @@
+{"proof_boundary":
+ "External execution of actual parseType; no universal proof or solc AST equivalence is established",
+ "positive": 13218,
+ "negative": 23,
+ "failures": [],
+ "case_count": 13241}

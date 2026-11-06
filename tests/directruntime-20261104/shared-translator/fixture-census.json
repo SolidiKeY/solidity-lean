@@ -1,0 +1,2883 @@
+{
+  "schemaVersion": 1,
+  "basis": "dc2718096308da55e57e713a4d3b37aec4d47606",
+  "publishedProducerApis": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "counts": {
+    "knownKinds": 58,
+    "existingFixtures": 77,
+    "sourceAnchoredFixtures": 70,
+    "selectedFixtures": 8,
+    "modernKindsWithAnchoredWitnesses": 57
+  },
+  "missingModernKinds": [],
+  "constructs": [
+    {
+      "nodeType": "ArrayTypeName",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/4/members/2/typeName",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "262:6:0",
+          "line": 8
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/0/typeName",
+          "function": null,
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Assignment",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "393:17:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/1/body/statements/0/expression",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "BinaryOperation",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/body/statements/1/expression/arguments/0",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "419:25:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/1/body/statements/0/expression/rightHandSide",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Block",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/body",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "391:57:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Break",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/9/body/statements/1/body/statements/0/trueBody",
+          "function": {
+            "id": 301,
+            "name": "invariantBreak",
+            "src": "2582:227:0",
+            "line": 96
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Conditional",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/6/nodes/7/body/statements/1/expression/expression/components/0",
+          "function": {
+            "id": 139,
+            "name": "moduleEffect",
+            "src": "705:108:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 183,
+            "name": "SourceUnits"
+          },
+          "nodeId": 128,
+          "src": "756:22:0",
+          "line": 15
+        },
+        {
+          "fixture": "tests/solc/Group07.ast.json",
+          "fixtureSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Group07.sol",
+              "sourceSha256": "f302d03b7bf944bd629cd4ce9444941a7d0179132509bcc08e4dd68da6d703ce"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/4/body/statements/0/expression",
+          "function": {
+            "id": 47,
+            "name": "lazyDiscard",
+            "src": "166:120:0",
+            "line": 7
+          },
+          "contract": {
+            "id": 344,
+            "name": "Group07"
+          },
+          "nodeId": null,
+          "src": "206:39:0",
+          "line": 8
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Continue",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/3/body/statements/1/body/statements/0/trueBody/statements/0",
+          "function": {
+            "id": 69,
+            "name": "forContinueStillUpdates",
+            "src": "749:269:0",
+            "line": 24
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "932:8:0",
+          "line": 29
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ContractDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": 171,
+          "src": "56:1027:0",
+          "line": 3
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1",
+          "function": null,
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": 334,
+          "src": "508:2608:0",
+          "line": 11
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "DoWhileStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/4/body/statements/1",
+          "function": {
+            "id": 94,
+            "name": "doWhileRunsBodyFirst",
+            "src": "1024:189:0",
+            "line": 36
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "1131:52:0",
+          "line": 39
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ElementaryTypeName",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/typeName/keyType",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "152:4:0",
+          "line": 6
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/0/typeName/baseType",
+          "function": null,
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ElementaryTypeNameExpression",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/8/body/statements/1/expression/rightHandSide/expression",
+          "function": {
+            "id": 128,
+            "name": "enumStruct",
+            "src": "599:241:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "677:7:0",
+          "line": 16
+        },
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/6/nodes/1/body/statements/0/expression/arguments/0/leftExpression/expression/expression/expression",
+          "function": {
+            "id": 38,
+            "name": "usingAlias",
+            "src": "292:65:0",
+            "line": 9
+          },
+          "contract": {
+            "id": 183,
+            "name": "SourceUnits"
+          },
+          "nodeId": 28,
+          "src": "335:4:0",
+          "line": 9
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "EmitStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/11/body/statements/0",
+          "function": {
+            "id": 134,
+            "name": "emitted",
+            "src": "976:51:0",
+            "line": 24
+          },
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": null,
+          "src": "1004:20:0",
+          "line": 24
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "EnumDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/0",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": 5,
+          "src": "86:29:0",
+          "line": 4
+        },
+        {
+          "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+          "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SliceReferenceCopies.sol",
+              "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/1",
+          "function": null,
+          "contract": {
+            "id": 1067,
+            "name": "SliceReferenceCopies"
+          },
+          "nodeId": 9,
+          "src": "150:22:0",
+          "line": 6
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "EnumValue",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/0/members/0",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": 2,
+          "src": "99:4:0",
+          "line": 4
+        },
+        {
+          "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+          "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SliceReferenceCopies.sol",
+              "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/1/members/0",
+          "function": null,
+          "contract": {
+            "id": 1067,
+            "name": "SliceReferenceCopies"
+          },
+          "nodeId": 7,
+          "src": "162:3:0",
+          "line": 6
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ErrorDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/1/ast/nodes/2",
+          "function": null,
+          "contract": null,
+          "nodeId": 192,
+          "src": "45:18:1",
+          "line": 3
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "EventDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/1",
+          "function": null,
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": 10,
+          "src": "135:20:0",
+          "line": 7
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ExpressionStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/body/statements/0",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "393:17:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/1/body/statements/0",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "693:9:0",
+          "line": 19
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ForStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/3/body/statements/1",
+          "function": {
+            "id": 69,
+            "name": "forContinueStillUpdates",
+            "src": "749:269:0",
+            "line": 24
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "859:129:0",
+          "line": 27
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "FunctionCall",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/body/statements/1/expression",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "412:33:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/2/expression",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "FunctionCallOptions",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/3/nodes/0/body/statements/1/initialValue/expression",
+          "function": {
+            "id": 218,
+            "name": "positive",
+            "src": "1265:131:0",
+            "line": 31
+          },
+          "contract": {
+            "id": 275,
+            "name": "InheritedReceiver"
+          },
+          "nodeId": null,
+          "src": "1319:36:0",
+          "line": 31
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/8/nodes/0/body/statements/0/initialValue/expression",
+          "function": {
+            "id": 302,
+            "name": "pay",
+            "src": "2743:86:0",
+            "line": 73
+          },
+          "contract": {
+            "id": 303,
+            "name": "InheritedPayment"
+          },
+          "nodeId": null,
+          "src": "2781:28:0",
+          "line": 73
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "FunctionDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": 51,
+          "src": "362:86:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": 31,
+          "src": "565:178:0",
+          "line": 15
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "FunctionTypeName",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/7/nodes/0/body/statements/0/declarations/0/typeName",
+          "function": {
+            "id": 403,
+            "name": "positive",
+            "src": "2341:166:0",
+            "line": 52
+          },
+          "contract": {
+            "id": 428,
+            "name": "RenamedExternal"
+          },
+          "nodeId": null,
+          "src": "2375:44:0",
+          "line": 52
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/5/body/statements/0/declarations/0/typeName",
+          "function": {
+            "id": 59,
+            "name": "storedFunctionKind",
+            "src": "370:151:0",
+            "line": 12
+          },
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": null,
+          "src": "422:21:0",
+          "line": 13
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Identifier",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression/leftHandSide",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "393:5:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/1/body/statements/0/expression/leftHandSide",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "IdentifierPath",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/1/typeName/pathNode",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "120:5:0",
+          "line": 5
+        },
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/5/functionList/0/function",
+          "function": null,
+          "contract": null,
+          "nodeId": 8,
+          "src": "194:3:0",
+          "line": 6
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "IfStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/3/body/statements/1/body/statements/0",
+          "function": {
+            "id": 69,
+            "name": "forContinueStillUpdates",
+            "src": "749:269:0",
+            "line": 24
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "902:53:0",
+          "line": 28
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ImportDirective",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/1",
+          "function": null,
+          "contract": null,
+          "nodeId": 2,
+          "src": "24:35:0",
+          "line": 2
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "IndexAccess",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/7/body/statements/0/expression/leftHandSide",
+          "function": {
+            "id": 73,
+            "name": "enumMapping",
+            "src": "477:93:0",
+            "line": 13
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "509:9:0",
+          "line": 13
+        },
+        {
+          "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+          "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SliceReferenceCopies.sol",
+              "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/4/body/statements/3/expression/leftHandSide",
+          "function": {
+            "id": 123,
+            "name": "copies",
+            "src": "217:327:0",
+            "line": 9
+          },
+          "contract": {
+            "id": 1067,
+            "name": "SliceReferenceCopies"
+          },
+          "nodeId": null,
+          "src": "386:7:0",
+          "line": 13
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "IndexRangeAccess",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+          "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SliceReferenceCopies.sol",
+              "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/4/body/statements/0/initialValue",
+          "function": {
+            "id": 123,
+            "name": "copies",
+            "src": "217:327:0",
+            "line": 9
+          },
+          "contract": {
+            "id": 1067,
+            "name": "SliceReferenceCopies"
+          },
+          "nodeId": null,
+          "src": "303:7:0",
+          "line": 10
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "InheritanceSpecifier",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/3/baseContracts/0",
+          "function": null,
+          "contract": {
+            "id": 275,
+            "name": "InheritedReceiver"
+          },
+          "nodeId": null,
+          "src": "1222:12:0",
+          "line": 29
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/4/baseContracts/0",
+          "function": null,
+          "contract": {
+            "id": 256,
+            "name": "ConstructorArguments"
+          },
+          "nodeId": null,
+          "src": "2344:26:0",
+          "line": 59
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "InlineAssembly",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/16/body/statements/0",
+          "function": {
+            "id": 180,
+            "name": "rethrow",
+            "src": "1487:111:0",
+            "line": 34
+          },
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": null,
+          "src": "1545:47:0",
+          "line": 35
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Literal",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/7/body/statements/0/expression/leftHandSide/indexExpression",
+          "function": {
+            "id": 73,
+            "name": "enumMapping",
+            "src": "477:93:0",
+            "line": 13
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "516:1:0",
+          "line": 13
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/0/initialValue",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Mapping",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/typeName",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "144:22:0",
+          "line": 6
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "MemberAccess",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/body/statements/0/expression/rightHandSide",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "401:9:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/6/nodes/0/body/statements/0/expression/arguments/0/leftExpression/expression",
+          "function": {
+            "id": 23,
+            "name": "ordinary",
+            "src": "232:59:0",
+            "line": 8
+          },
+          "contract": {
+            "id": 183,
+            "name": "SourceUnits"
+          },
+          "nodeId": 15,
+          "src": "273:6:0",
+          "line": 8
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ModifierDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/14/nodes/0",
+          "function": null,
+          "contract": {
+            "id": 644,
+            "name": "ModifiedReceiverBase"
+          },
+          "nodeId": 637,
+          "src": "4101:25:0",
+          "line": 90
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/9",
+          "function": null,
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": 115,
+          "src": "851:58:0",
+          "line": 22
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ModifierInvocation",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/14/nodes/1/modifiers/0",
+          "function": {
+            "id": 643,
+            "name": "",
+            "src": "4131:37:0",
+            "line": 91
+          },
+          "contract": {
+            "id": 644,
+            "name": "ModifiedReceiverBase"
+          },
+          "nodeId": null,
+          "src": "4158:7:0",
+          "line": 91
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/10/modifiers/0",
+          "function": {
+            "id": 125,
+            "name": "modified",
+            "src": "914:57:0",
+            "line": 23
+          },
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": null,
+          "src": "941:12:0",
+          "line": 23
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "NewExpression",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/ContractWorld.ast.json",
+          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/ContractWorld.sol",
+              "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+            }
+          ],
+          "pointer": "/ast/nodes/8/nodes/0/body/statements/0/expression/expression/expression",
+          "function": {
+            "id": 162,
+            "name": "make",
+            "src": "1092:109:0",
+            "line": 46
+          },
+          "contract": {
+            "id": 296,
+            "name": "WorldFactory"
+          },
+          "nodeId": null,
+          "src": "1165:16:0",
+          "line": 47
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "OverrideSpecifier",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/11/nodes/0/overrides",
+          "function": {
+            "id": 566,
+            "name": "",
+            "src": "3599:52:0",
+            "line": 78
+          },
+          "contract": {
+            "id": 601,
+            "name": "ReceiveOverride"
+          },
+          "nodeId": null,
+          "src": "3626:8:0",
+          "line": 78
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/10/nodes/0/overrides",
+          "function": {
+            "id": 324,
+            "name": "g",
+            "src": "2967:73:0",
+            "line": 80
+          },
+          "contract": {
+            "id": 340,
+            "name": "VirtualOwner"
+          },
+          "nodeId": null,
+          "src": "2992:8:0",
+          "line": 80
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "ParameterList",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/parameters",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "381:2:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/parameters",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "PlaceholderStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/14/nodes/0/body/statements/0",
+          "function": null,
+          "contract": {
+            "id": 644,
+            "name": "ModifiedReceiverBase"
+          },
+          "nodeId": null,
+          "src": "4122:1:0",
+          "line": 90
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/9/body/statements/1",
+          "function": null,
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": null,
+          "src": "905:1:0",
+          "line": 22
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "PragmaDirective",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/0",
+          "function": null,
+          "contract": null,
+          "nodeId": null,
+          "src": "32:23:0",
+          "line": 2
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/0",
+          "function": null,
+          "contract": null,
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Return",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/6/nodes/0/body/statements/0",
+          "function": {
+            "id": 367,
+            "name": "target",
+            "src": "2194:73:0",
+            "line": 48
+          },
+          "contract": {
+            "id": 368,
+            "name": "ExternalBase"
+          },
+          "nodeId": null,
+          "src": "2256:8:0",
+          "line": 48
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/5/body/statements/0/body/statements/0/body/statements/0/trueBody/statements/0",
+          "function": {
+            "id": 145,
+            "name": "loopNestedReturn",
+            "src": "1219:289:0",
+            "line": 45
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "1426:17:0",
+          "line": 49
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "RevertStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/6/nodes/4/body/statements/0",
+          "function": {
+            "id": 90,
+            "name": "qualified",
+            "src": "525:53:0",
+            "line": 12
+          },
+          "contract": {
+            "id": 183,
+            "name": "SourceUnits"
+          },
+          "nodeId": 88,
+          "src": "560:15:0",
+          "line": 12
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "SourceUnit",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast",
+          "function": null,
+          "contract": null,
+          "nodeId": 1249,
+          "src": "32:8393:0",
+          "line": 2
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast",
+          "function": null,
+          "contract": null,
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "StorageLayoutSpecifier",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/TransientSource.ast.json",
+          "fixtureSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/TransientSource.sol",
+              "sourceSha256": "c08a560914bff75f77891ff2074b9c4edd778e63df93a2db9b703182f84beb3e"
+            }
+          ],
+          "pointer": "/ast/nodes/1/storageLayout",
+          "function": null,
+          "contract": {
+            "id": 154,
+            "name": "TransientSource"
+          },
+          "nodeId": null,
+          "src": "83:12:0",
+          "line": 4
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "StructDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/4",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": 29,
+          "src": "219:90:0",
+          "line": 8
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/6/nodes/0",
+          "function": null,
+          "contract": {
+            "id": 275,
+            "name": "InvariantOwner"
+          },
+          "nodeId": 263,
+          "src": "2540:29:0",
+          "line": 66
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "StructuredDocumentation",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/6/documentation",
+          "function": {
+            "id": 51,
+            "name": "enumScalar",
+            "src": "362:86:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "338:19:0",
+          "line": 10
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/7/documentation",
+          "function": {
+            "id": 224,
+            "name": "invariantCountsToBound",
+            "src": "1884:226:0",
+            "line": 69
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "Throw",
+      "existingSourceWitnesses": [],
+      "status": "legacy-only; modern compiler/source negative control required",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "TryCatchClause",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/8/body/statements/2/clauses/0",
+          "function": {
+            "id": 128,
+            "name": "enumStruct",
+            "src": "599:241:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "717:84:0",
+          "line": 17
+        },
+        {
+          "fixture": "tests/solc/ContractWorld.ast.json",
+          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/ContractWorld.sol",
+              "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+            }
+          ],
+          "pointer": "/ast/nodes/8/nodes/1/body/statements/0/clauses/0",
+          "function": {
+            "id": 188,
+            "name": "trySuccess",
+            "src": "1206:213:0",
+            "line": 49
+          },
+          "contract": {
+            "id": 296,
+            "name": "WorldFactory"
+          },
+          "nodeId": null,
+          "src": "1304:65:0",
+          "line": 50
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "TryStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/8/body/statements/2",
+          "function": {
+            "id": 128,
+            "name": "enumStruct",
+            "src": "599:241:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "700:134:0",
+          "line": 17
+        },
+        {
+          "fixture": "tests/solc/ContractWorld.ast.json",
+          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/ContractWorld.sol",
+              "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+            }
+          ],
+          "pointer": "/ast/nodes/8/nodes/1/body/statements/0",
+          "function": {
+            "id": 188,
+            "name": "trySuccess",
+            "src": "1206:213:0",
+            "line": 49
+          },
+          "contract": {
+            "id": 296,
+            "name": "WorldFactory"
+          },
+          "nodeId": null,
+          "src": "1270:143:0",
+          "line": 50
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "TupleExpression",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/6/nodes/3/body/statements/1/initialValue/expression/expression",
+          "function": {
+            "id": 80,
+            "name": "receiverOnce",
+            "src": "425:99:0",
+            "line": 11
+          },
+          "contract": {
+            "id": 183,
+            "name": "SourceUnits"
+          },
+          "nodeId": 65,
+          "src": "484:5:0",
+          "line": 11
+        },
+        {
+          "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+          "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SliceReferenceCopies.sol",
+              "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/16/body/statements/0/initialValue/baseExpression",
+          "function": {
+            "id": 869,
+            "name": "inlineCopy",
+            "src": "2674:542:0",
+            "line": 63
+          },
+          "contract": {
+            "id": 1067,
+            "name": "SliceReferenceCopies"
+          },
+          "nodeId": null,
+          "src": "2762:9:0",
+          "line": 64
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "UnaryOperation",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/31/nodes/0/body/statements/2/expression/arguments/0",
+          "function": {
+            "id": 1211,
+            "name": "positive",
+            "src": "8026:131:0",
+            "line": 179
+          },
+          "contract": {
+            "id": 1212,
+            "name": "InheritedRollback"
+          },
+          "nodeId": null,
+          "src": "8129:3:0",
+          "line": 179
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/3/body/statements/1/loopExpression/expression",
+          "function": {
+            "id": 69,
+            "name": "forContinueStillUpdates",
+            "src": "749:269:0",
+            "line": 24
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": null,
+          "line": null
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "UncheckedBlock",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/Group07.ast.json",
+          "fixtureSha256": "79a5b86afd8baba0a5c9cea19febb94f7ecd5491658a2b98b5df5562cf410772",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Group07.sol",
+              "sourceSha256": "f302d03b7bf944bd629cd4ce9444941a7d0179132509bcc08e4dd68da6d703ce"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/7/body/statements/0",
+          "function": {
+            "id": 87,
+            "name": "uncheckedNegation",
+            "src": "427:79:0",
+            "line": 13
+          },
+          "contract": {
+            "id": 344,
+            "name": "Group07"
+          },
+          "nodeId": null,
+          "src": "470:34:0",
+          "line": 13
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "UserDefinedTypeName",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/1/typeName",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": null,
+          "src": "120:5:0",
+          "line": 5
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/8/body/statements/0/declarations/0/typeName",
+          "function": {
+            "id": 104,
+            "name": "aliasSelf",
+            "src": "701:145:0",
+            "line": 18
+          },
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": null,
+          "src": "759:15:0",
+          "line": 19
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "UserDefinedValueTypeDefinition",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+          "fixtureSha256": "b1a91f2715ad5f04e48dd902b8e2882ec715fd681c6ddf34f78734041ff4c729",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SliceReferenceCopies.sol",
+              "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+            }
+          ],
+          "pointer": "/ast/nodes/1",
+          "function": null,
+          "contract": null,
+          "nodeId": 3,
+          "src": "61:20:0",
+          "line": 3
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "UsingForDirective",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+          "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "lib/Math.sol",
+              "sourceId": 2,
+              "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "lib/Errors.sol",
+              "sourceId": 1,
+              "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            },
+            {
+              "sourceName": "app/Main.sol",
+              "sourceId": 0,
+              "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+              "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+              "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+            }
+          ],
+          "pointer": "/sourceUnits/2/ast/nodes/5",
+          "function": null,
+          "contract": null,
+          "nodeId": 10,
+          "src": "187:21:0",
+          "line": 6
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "VariableDeclaration",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/1",
+          "function": null,
+          "contract": {
+            "id": 171,
+            "name": "NominalGetters"
+          },
+          "nodeId": 8,
+          "src": "120:18:0",
+          "line": 5
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/0",
+          "function": null,
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": 4,
+          "src": "529:13:0",
+          "line": 12
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "VariableDeclarationStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/EntryPointsLeft.ast.json",
+          "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/EntryPointsLeft.sol",
+              "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+            }
+          ],
+          "pointer": "/ast/nodes/3/nodes/0/body/statements/1",
+          "function": {
+            "id": 218,
+            "name": "positive",
+            "src": "1265:131:0",
+            "line": 31
+          },
+          "contract": {
+            "id": 275,
+            "name": "InheritedReceiver"
+          },
+          "nodeId": null,
+          "src": "1306:53:0",
+          "line": 31
+        },
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/0",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "612:10:0",
+          "line": 16
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    },
+    {
+      "nodeType": "WhileStatement",
+      "existingSourceWitnesses": [
+        {
+          "fixture": "tests/solc/Loops.ast.json",
+          "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": null,
+          "anchors": [
+            {
+              "sourceName": "tests/solc/Loops.sol",
+              "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+            }
+          ],
+          "pointer": "/ast/nodes/1/nodes/2/body/statements/1",
+          "function": {
+            "id": 31,
+            "name": "whileCountsUp",
+            "src": "565:178:0",
+            "line": 15
+          },
+          "contract": {
+            "id": 334,
+            "name": "Loops"
+          },
+          "nodeId": null,
+          "src": "665:48:0",
+          "line": 18
+        },
+        {
+          "fixture": "tests/solc/SourceAdmission.ast.json",
+          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "anchors": [
+            {
+              "sourceName": "tests/solc/SourceAdmission.sol",
+              "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+            }
+          ],
+          "pointer": "/ast/nodes/2/nodes/21/body/statements/0",
+          "function": {
+            "id": 224,
+            "name": "loopExcluded",
+            "src": "1972:120:0",
+            "line": 47
+          },
+          "contract": {
+            "id": 236,
+            "name": "SourceAdmission"
+          },
+          "nodeId": null,
+          "src": "2070:16:0",
+          "line": 49
+        }
+      ],
+      "status": "source-anchored fixture occurrence",
+      "boundary": "Source/header hashes and AST location only. Fixture regeneration, per-construct admission, intrinsic closure and backend execution are separate gates."
+    }
+  ],
+  "selectedFixturePaths": [
+    "tests/solc/EntryPointsLeft.ast.json",
+    "tests/solc/Loops.ast.json",
+    "tests/solc/source-units/SourceUnits.ast.json",
+    "tests/solc/SourceAdmission.ast.json",
+    "tests/solc/SliceReferenceCopies.ast.json",
+    "tests/solc/ContractWorld.ast.json",
+    "tests/solc/Group07.ast.json",
+    "tests/solc/TransientSource.ast.json"
+  ],
+  "boundary": "Existing test fixtures may include deliberate mutations. Matching source/header hashes do not authenticate compiler execution or prove AST-to-source equivalence."
+}

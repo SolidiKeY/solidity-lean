@@ -1,0 +1,7 @@
+{
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "Solidity/Frontend/Checked/ExprExamples.lean:Solidity.Frontend.Checked.every_operator": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/ExprExamples.lean:Solidity.Frontend.Checked.parseExpr_prec_root": [
+  "propext"
+ ]
+}

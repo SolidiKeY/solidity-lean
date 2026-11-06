@@ -1,0 +1,30 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+const here=new URL('./',import.meta.url), compiler=new URL('./runtime/.cache/soljson-v0.8.38.js',here);
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const compilerSha256=hash(readFileSync(compiler));
+assert.equal(compilerSha256,'6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+const solc=createRequire(import.meta.url)(fileURLToPath(compiler));
+const version=solc.cwrap('solidity_version','string',[])();
+assert.equal(version,'0.8.38+commit.1835d247.Emscripten.clang');
+const compile=solc.cwrap('solidity_compile','string',['string','number','number']);
+const cases=JSON.parse(readFileSync(new URL('spellings.json',here)));
+const results=cases.map(c=>{
+ const statement=c.mode==='yul'?`assembly { let x := ${c.spelling} }`:`${c.spelling};`;
+ const source=`// SPDX-License-Identifier: UNLICENSED\npragma solidity 0.8.38; contract C { function f() external pure { ${statement} } }`;
+ const input={language:'Solidity',sources:{'Fixture.sol':{content:source}},settings:{outputSelection:{'*':{'':['ast']}}}};
+ const out=JSON.parse(compile(JSON.stringify(input),0,0));
+ const errors=(out.errors??[]).filter(e=>e.severity==='error').map(e=>({type:e.type,code:e.errorCode??null,message:e.message}));
+ const literals=[];
+ function walk(x){if(!x||typeof x!=='object')return;if(x.nodeType==='Literal'&&x.kind==='number')literals.push({value:x.value,type:x.typeDescriptions?.typeString??null});if(x.nodeType==='YulLiteral'&&x.kind==='number')literals.push({value:x.value,type:null,yul:true});for(const v of Object.values(x))if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==='object')walk(v);}
+ walk(out.sources?.['Fixture.sol']?.ast);
+ return {...c,sourceSha256:hash(source),accepted:errors.length===0,errors,literals};
+});
+const packet={version,compilerSha256,boundary:'External solc analysis of expression statements; rejection may be lexical, parsing or semantic. This is not a Lean proof or a lexer-only equivalence claim.',results};
+const expected=new URL('solc-0.8.38.json',here);
+if(process.argv.includes('--record'))writeFileSync(expected,JSON.stringify(packet,null,2)+'\n');
+else assert.deepEqual(packet,JSON.parse(readFileSync(expected)));
+console.log(`solc fixtures: ${results.length} exact results, ${results.filter(x=>x.accepted).length} accepted; ${version}`);

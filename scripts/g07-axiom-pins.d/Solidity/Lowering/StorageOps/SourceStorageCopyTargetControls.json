@@ -1,0 +1,38 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.bad_old_agreements": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.empty_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.full_target_context": [],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.grow_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceStorageCopyTarget.Controls.varied_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,68 @@
+{
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.array_header_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.header_element_ne": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.headerLength": [],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.headerLength_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.primitive_push_graph_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.primitive_push_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.primitive_push_points": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.primitive_push_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.pushHeader": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.pushHeader_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.pushPrimitive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.pushPrimitive_failure_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.pushPrimitive_failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumeric.lean:Solidity.Backend.StorageOps.LifecycleNumeric.pushPrimitive_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

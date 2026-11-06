@@ -1,0 +1,11 @@
+PASS	build-touched	6	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/1.log	build_touched 
+FAIL	run-lean	1	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/2.log	bash run-lean.sh 
+PASS	trust	12	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/3.log	bash scripts/check-trust.sh 
+FAIL	orphans	1	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/4.log	node scripts/check-orphans.mjs 
+PASS	layers	0	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/5.log	node scripts/check-layers.mjs 
+FAIL	roots	0	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/6.log	bash scripts/coord-tools/register.sh --check 
+PASS	doc-paths	11	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/7.log	bash scripts/check-doc-paths.sh 
+PASS	axiom-pins	14	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/8.log	node scripts/check-axiom-pins.mjs 
+PASS	testsuite	0	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/9.log	bash scripts/check-testsuite.sh 
+PASS	corpus	110	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/10.log	bash scripts/check-corpus.sh 
+PASS	automatic-strict	0	/workspace/scratch/h28-runtime/integration-broad-7985d1eb/full-gates/11.log	node scripts/check-automatic.mjs --strict 

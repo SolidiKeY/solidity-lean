@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+serial=/workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/lake-serial.lock
+# Serialize even repository probe scripts that launch concurrent Lake clients.
+case "$1" in
+  serve)
+    shift
+    # MCP may already supply an option separator. Keep resource flags parsed.
+    while [ "${1-}" = -- ]; do shift; done
+    exec flock "$serial" "$real" -f tests/sol-c3-exactness/lakefile.worker.toml serve -- "$@" -j1 --tstack=131072 ;;
+esac
+for arg in "$@"; do
+  if [ "$arg" = lean ]; then set -- "$@" -j1; break; fi
+done
+exec flock "$serial" "$real" -f tests/sol-c3-exactness/lakefile.worker.toml "$@"

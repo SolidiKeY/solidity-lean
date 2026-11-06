@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/evm-compiler.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The EVM compiler
 
 `docs/compiler-verification.md` has the theorem, the fragment and what is out.
@@ -136,3 +137,5 @@
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Bitwise/Selected.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |

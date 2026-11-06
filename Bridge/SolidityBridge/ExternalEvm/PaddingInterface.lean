@@ -13,10 +13,17 @@ theorem paddingCorrect_bounded (bound : Nat) (host : bound < USize.size)
   have he : (USize.ofNat n).toNat = n := Nat.mod_eq_of_lt fits
   simp only [ffi.ByteArray.zeroes,he]
 
+/-- The host-width bound already implies the 64-bit reader bound on every
+supported USize platform. Keep paddingCorrect_bounded for existing clients. -/
+theorem paddingCorrect_of_host_bound (bound : Nat) (host : bound < USize.size) :
+    PaddingCorrect bound := by
+  have host64 : USize.size ≤ 2^64 := by
+    rcases USize.size_eq with h | h <;> rw [h] <;> decide
+  exact paddingCorrect_bounded bound host (Nat.lt_of_lt_of_le host host64)
+
 theorem paddingCorrect32 : PaddingCorrect 32 := by
-  apply paddingCorrect_bounded
-  · rcases USize.size_eq with h | h <;> rw [h] <;> decide
-  · decide
+  apply paddingCorrect_of_host_bound
+  rcases USize.size_eq with h | h <;> rw [h] <;> decide
 
 theorem readWithoutPadding_zero (source : ByteArray) (addr : Nat) :
     source.readWithoutPadding addr 0 = ByteArray.empty := by

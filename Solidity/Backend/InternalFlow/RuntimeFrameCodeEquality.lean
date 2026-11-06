@@ -44,6 +44,7 @@ def instruction : Instr → Instr → Bool
   | .shl,right => match right with | .shl => true | _ => false
   | .shr,right => match right with | .shr => true | _ => false
   | .exp,right => match right with | .exp => true | _ => false
+  | .sar,right => match right with | .sar => true | _ => false
   | .caller,right => match right with | .caller => true | _ => false
   | .callvalue,right => match right with | .callvalue => true | _ => false
   | .timestamp,right => match right with | .timestamp => true | _ => false

@@ -1,0 +1,20 @@
+{
+  "container_id": "454723131c0d84eb64ec5e3aeb89227d92cc6c11dba05d69d58ef98c671346e3",
+  "command": [
+    "scripts/coord-tools/lean-mcp",
+    "diag",
+    "Solidity/Frontend/NumericLiteralProofs/Audit.lean"
+  ],
+  "exit": 0,
+  "seconds": 33.122,
+  "container_memory_peak_bytes": 4108398592,
+  "minimum_parent_headroom_bytes": 12486148096,
+  "resource_stop": false,
+  "log": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/audit-paired-inventory.log",
+  "container": "sol-nl-proof-worker",
+  "limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "lean_num_threads": 1
+  }
+}

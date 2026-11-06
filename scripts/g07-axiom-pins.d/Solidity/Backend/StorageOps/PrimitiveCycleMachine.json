@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachine.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.after_reuse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachine.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.pop_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachine.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.run_cycle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachine.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.run_reuse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

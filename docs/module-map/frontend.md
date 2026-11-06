@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/frontend.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The solc front end
 
 `SolkeyTestSuite` (`lake build SolkeyTestSuite`): solkey's `TestSuite.sol` from
@@ -88,3 +89,90 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/QualifiedUnits/Inheritance.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/Specification.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/UnitPaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/CallMetadataPath.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/CallMetadataPathControls.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/CallMetadataSound.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/ReferenceControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/References.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Compatibility.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/OverrideLists.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/NumericLiteralProofs/WordTable/Part01.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/NumericLiteralProofs/WordTable/Part02.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ConstantDepth/Complete.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ConstantDepth/Lookup.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Admission.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Linearization.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/ElsePosition.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/NearestElse.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/TypeGrammarH28/Counterexamples.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/TypeGrammarH28/Layouts.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/Shared/Boundary.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/Shared/Translate.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/Hex.lean` | Bounded hexadecimal-body grammar and encoding checkpoint; full literal parsing remains open. |
+| `Frontend/LiteralGrammarH28/HexEncoding.lean` | Bounded hexadecimal-body grammar and encoding checkpoint; full literal parsing remains open. |
+| `Frontend/NumericLiteralProofs/WordTable/Part03.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/NumericLiteralProofs/WordTable/Part04.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/DifferentialControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/SignatureGap.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Selection.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Validity.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/GraphControls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Identity.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/OrderObstruction.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Renaming.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/Memory/Reader.lean` | Bounded memory-references checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/Body.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/BodyControls.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/ControlTuple/Adapter.lean` | Bounded control-tuples checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/ControlTuple/AdmissionControls.lean` | Bounded control-tuples checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/TypeGrammarH28/ParserBasics.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/TypeGrammarH28/ParserChecks.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/Shared/Intrinsic.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExpressionUniqueness/Statement.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Extraction.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Validator.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/NumericLiteralProofs/WordTable/Part05.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/NumericLiteralProofs/WordTable/Part06.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExpressionUniqueness/Fixtures.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/FixtureControls/Case00.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/FixtureData.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/G0List.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/TypeGrammarH28/Composition.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/BoundaryControls.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/Quoted.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/Scanner.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/Shared/Scope.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/ControlTuple/IntrinsicControls.lean` | Bounded control-tuples checkpoint; typed scope and retained obligations are stated in the module. |
+| `SolcValidation/Dialect.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/NormalizationControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/SignatureHiding.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/SignatureNormalization.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/TypePaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Audit.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Controls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Memoized.lean` | Materialized typed relation tables, proved equivalent to the original candidate. |
+| `Frontend/NumericLiteralProofs/WordTable/Part07.lean` | Generated direct structural word-table proof. |
+| `Frontend/NumericLiteralProofs/WordTable/Part08.lean` | Generated direct structural word-table proof. |
+| `Frontend/ExpressionUniqueness/SeparatorSplit.lean` | Comma-separated token span reconstruction The result allows empty component words, as intrinsic tuple holes require. |
+| `Frontend/ExpressionUniqueness/TokenSplit.lean` | Delimiter execution and token splitting for expression uniqueness The machine reads the existing checked tokens. |
+| `Frontend/StatementGrammarH28/Balance.lean` | Balanced brace boundaries and intrinsic block witnesses BraceBalanced is a token predicate, not an AST. |
+| `Frontend/StatementGrammarH28/YieldSplit.lean` | Exact block/list yield decomposition These lemmas expose the actual state-threaded yield of existing Syn lists and blocks, including the intermediate layout. |
+| `Frontend/TypeGrammarH28/ParserArrays.lean` | Array spine parser composition. |
+| `Frontend/TypeGrammarH28/ParserPaths.lean` | Independent qualified-name parsing contracts, with arbitrary locations. |
+| `Frontend/LiteralGrammarH28/HexControls.lean` | Hex body kernel controls Rows are enumerated independently from the decoder recursion: empty; every pair digit category and case; adjacent and separated groups; odd counts;. |
+| `Frontend/LiteralGrammarH28/HexPins.lean` | Exact hex theorem signatures and transitive axiom reports. |
+| `SolcValidation/DataLayout.lean` | Checked object-data references into assembled artifact bytes This is the label-resolution/data-size boundary of the solc dialect adapter. |
+| `SolcValidation/DataResolution.lean` | Unique object-data resolution A checked per-object table resolves a present label to its exact reference, not merely to some reference. |
+| `Frontend/QualifiedUnits/SignatureMemberControls.lean` | Kernel controls for executed collection, not an assumed owner order or supplied collection result. |
+| `Frontend/QualifiedUnits/SignatureMembers.lean` | Identity-based inherited overload collection. |
+| `Frontend/ExecutableAst/Shared/Compose.lean` | One executable callback composition for producer-owned memory and control packets. |
+| `Backend/PrimitivePackets/UnsignedCast/Boundaries.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Compiler.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Controls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Semantics.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Transport.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Selected.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Source.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Agreement.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Target.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/TryPanicCallMetadata.lean` | Typed H22 call metadata from the retained whole-source resolution. |

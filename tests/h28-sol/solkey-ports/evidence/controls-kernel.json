@@ -1,0 +1,17 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "--tstack=131072",
+    "tests/h28-sol/solkey-ports/Controls.lean"
+  ],
+  "exit": 0,
+  "seconds": 2.736179118000109,
+  "max_rss_kib": 1025252,
+  "lean_num_threads": "1",
+  "memory.max": "12884901888",
+  "memory.swap.max": "0",
+  "memory.peak": "1123676160",
+  "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+}

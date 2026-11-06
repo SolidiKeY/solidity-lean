@@ -1,0 +1,75 @@
+{
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.actual_peak": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.actual_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.addFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.balanced_caller": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.balanced_length": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.balanced_peak": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.balancedFrame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.caller_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.empty_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.final_fits_but_peak_fails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.frame_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.no_fake_overfull": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.operand_refusal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.overfull_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.pushRun": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean:Solidity.Yul.Compilation.TraceFrameCapacity.Controls.transient_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

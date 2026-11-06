@@ -1,0 +1,21 @@
+{
+  "command": [
+    "bash",
+    "scripts/coord-tools/ship-cache.sh",
+    "/workspace/solidity-lean"
+  ],
+  "environment_overrides": {
+    "SHIP_ALLOW_HEAD": "1",
+    "LAKE_CACHE_DIR": "/workspace/scratch/h28-type-grammar/master8495-cache",
+    "SHIP_STATE": "/workspace/scratch/h28-type-grammar/master8495-cache/shipments",
+    "SHIP_LANES": "/workspace/scratch/h28-type-grammar/master8495-cache/lanes.txt"
+  },
+  "exit": 1,
+  "elapsed_s": 0.419246610996197,
+  "stdout": "shipment 20261105T033006Z-020d1a8f: 54 artifacts (0.01 GB), 18 mappings, delta vs nothing: 54 (0.01 GB); 0 traces without cached outputs skipped\nsolidity-h28-sol-20261104/type-grammar\tFAILED\t[Errno 2] No such file or directory: '/home/agent/.local/share/cloudvm/batches/solidity-h28-sol-20261104/catalog.json'\nreceipts: /workspace/scratch/h28-type-grammar/master8495-cache/shipments/20261105T033006Z-020d1a8f/receipts.tsv\n",
+  "stderr": "",
+  "shipping_complete": false,
+  "module_mappings": 18,
+  "artifacts": 54,
+  "artifact_bytes": 12779136
+}

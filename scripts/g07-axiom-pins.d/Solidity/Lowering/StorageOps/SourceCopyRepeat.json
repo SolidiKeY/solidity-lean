@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCopyRepeat.lean:Solidity.Backend.StorageOps.SourceCopyRepeat.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyRepeat.lean:Solidity.Backend.StorageOps.SourceCopyRepeat.header_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyRepeat.lean:Solidity.Backend.StorageOps.SourceCopyRepeat.word_repeat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

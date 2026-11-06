@@ -1,0 +1,39 @@
+import Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls
+import Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.components
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.scalar
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.expressionStep
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.values
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.preserveDiscarded
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.target
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.declaration
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.statementsStep
+#check @Solidity.Frontend.ExecutableAst.ControlTuple.reader
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.doOnceDiamond
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.doOnceDiamond
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.whileZeroBox
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.whileZeroBox
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.continueTestsCondition
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.continueTestsCondition
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.breakStopsLoop
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.breakStopsLoop
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.simultaneousSwap
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.simultaneousSwap
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.repeatedPrimitiveWrites
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.repeatedPrimitiveWrites
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.holePreservesPosition
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.holePreservesPosition
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.tupleDeclaration
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.tupleDeclaration
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedEffectRetained
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedEffectRetained
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedFailureBox
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedFailureBox
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedFailureNotDiamond
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedFailureNotDiamond
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.wrongSwapBoxRefuted
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.wrongSwapBoxRefuted
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.earlyReturnEscapes
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.earlyReturnEscapes
+#check Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.tupleReturn
+#print axioms Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.tupleReturn

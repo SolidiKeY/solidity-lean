@@ -1,0 +1,432 @@
+{
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.absent_code_not_absent_funds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.actual_reset_probe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.actual_source_probes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.actual_wrong_kind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.code_present_wrong_kind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.no_extra_installation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.reflected_after_reset": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.reflected_before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.stale_transient_relation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.two_kind_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.CatalogueReflectionControls.wrong_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.allocation_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.funded_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.halt_cases": [],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.halt_data": [],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.ordered_states": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.paid_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.payload_results": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.raw_state_and_heap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.restored_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.rollback_fields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.source_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.source_rollback_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.statement_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.target_atomic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.target_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.wrong_heap_undo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.wrong_mark": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.FundedRethrowRollbackControls.wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.actual_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.after_accounts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.enter_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.finish_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.frame_inputs": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.initial_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.locate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.nonworld_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.opened_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.other_accounts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.owner_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.owner_accounts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.owner_funds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.paid_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.post_accounts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.post_funds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.post_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.reset_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.reset_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.sender_funds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.settle_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.source_payment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.source_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.target_payment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.wrong_funds_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.InstalledPaymentImageControls.wrong_skipped_payment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.complete_time_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.LibraryClient.missing_library": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.LibraryClient.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.LibraryClient.runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.LibraryClient.snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.LibraryClient.source_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.LibraryClient.wrong_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.LibraryClient.wrong_role": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.located": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.no_sender_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.related_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.reset_located": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.reset_related_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.same_image_wrong_clock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.storage_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.timestamp_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.timestamp_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.wrong_clock_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldImageAccessControls.wrong_clock_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.account_images": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.actual_payment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.end_without_refund": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.explicit_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.journal_entries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.not_whole_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.other_accounts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.source_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.wrong_end_refund": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccessControls.lean:Solidity.Lowering.V08.WorldPaymentImageControls.wrong_journal_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

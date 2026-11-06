@@ -1,0 +1,37 @@
+{
+ "Bridge/SolidityBridge/Yul/ForPrefixesControls.lean:SolidityBridge.Yul.ForPrefixes.Controls.every_macro_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForPrefixesControls.lean:SolidityBridge.Yul.ForPrefixes.Controls.finite_guard_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForPrefixesControls.lean:SolidityBridge.Yul.ForPrefixes.Controls.forever_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForPrefixesControls.lean:SolidityBridge.Yul.ForPrefixes.Controls.invariant": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForPrefixesControls.lean:SolidityBridge.Yul.ForPrefixes.Controls.loop_no_finite_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForPrefixesControls.lean:SolidityBridge.Yul.ForPrefixes.Controls.source_all_horizons": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForPrefixesControls.lean:SolidityBridge.Yul.ForPrefixes.Controls.whole_model_no_finite_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "name": "mutations",
+    "command": "python3 Bridge/tests/precompile-agreement/test_inventory.py",
+    "exit": 1,
+    "seconds": 9.565439875000266,
+    "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/mutations-checkpoint.log"
+  },
+  {
+    "name": "scope-evidence",
+    "command": "python3 scripts/check-precompile-agreement.py",
+    "exit": 0,
+    "seconds": 0.194174385000224,
+    "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/scope-evidence-checkpoint.log"
+  },
+  {
+    "name": "trust",
+    "command": "bash scripts/check-trust.sh",
+    "exit": 0,
+    "seconds": 10.835117353999522,
+    "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/trust-checkpoint.log"
+  },
+  {
+    "name": "central-axioms",
+    "command": "node scripts/check-axiom-pins.mjs",
+    "exit": 1,
+    "seconds": 11.703527633000704,
+    "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/central-axioms-checkpoint.log"
+  },
+  {
+    "name": "module-map",
+    "command": "python3 scripts/coord-tools/module-map.py 8495f1deb0a95dd6b9301822d8649ab76b217681",
+    "exit": 1,
+    "seconds": 0.07134711500020785,
+    "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/module-map-checkpoint.log"
+  },
+  {
+    "name": "run-lean",
+    "command": "./run-lean.sh --bridge",
+    "exit": 1,
+    "seconds": 0.4383874770001057,
+    "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/run-lean-checkpoint.log"
+  }
+]

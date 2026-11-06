@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/BooleanLinear.lean:Solidity.Decide.StorageEncoding.boolEq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/BooleanLinear.lean:Solidity.Linear.CheckedBool.and_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

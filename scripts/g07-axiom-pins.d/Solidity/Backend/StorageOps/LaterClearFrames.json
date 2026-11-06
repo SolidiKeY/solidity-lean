@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/StorageOps/LaterClearFrames.lean:Solidity.Backend.StorageOps.LaterClearFrames.owner_interval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LaterClearFrames.lean:Solidity.Backend.StorageOps.LaterClearFrames.target_interval": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LaterClearFrames.lean:Solidity.Backend.StorageOps.LaterClearFrames.word_interval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

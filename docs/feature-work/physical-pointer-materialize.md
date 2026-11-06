@@ -1,0 +1,9 @@
+# Byte materialization with numeric and scaled-pointer frames
+
+PhysicalPointerMaterialize derives pointer-frame preservation from the initial PointerFrame and actual byte interval separation. Pointer bytes encode32 times the logical base, so this is proved independently of numeric WordFrame transport. ReferenceArrayAt.materialize_outside retains the typed parent header and reference slots; materialize_checked_revert combines the existing exact checked execution with both numeric and pointer footprints. All returned representations are derived from initial facts, not supplied postconditions. No global address injectivity or unique child ownership is required.
+
+The inhabited client reuses the original repeated-left-child fixture, with a byte payload at384 outside the parent, child and neighbour spans. Its complete twelve-word physical vector includes the free pointer, both child contents, parent header/repeated slots and neighbour. Every caller stack is classified by the existing guard; actual returned machines retain the typed parent, numeric child word frame, caller tail and repeated-child byte equality. Earlier controls and vectors remain byte-preserved.
+
+A separate actual emission writes byte7 at575, replacing the last byte of a represented pointer32. It succeeds in the byte-slice API but disproves the unchanged typed parent representation. This is a concrete counterexample, not a claim that every overlap fails or that separation is universally necessary.
+
+Failure.Slice.checkedRun explicitly exposes a machine with a REVERT outcome; these observations use that published API. They do not invent an Evm.run revert machine or assert outer transaction rollback. No physical recursive graph/liveness, allocation, Source/world/compiler, gas or full concrete ByteWorld producer is supplied. Original full-lane gates and obligations remain open.
