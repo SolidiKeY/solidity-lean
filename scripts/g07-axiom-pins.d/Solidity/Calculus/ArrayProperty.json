@@ -1,0 +1,17 @@
+{
+ "Solidity/Calculus/ArrayProperty.lean:Solidity.Decide.ApfFml.apfInst_refute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/ArrayProperty.lean:Solidity.Decide.apfPrep_valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/ArrayProperty.lean:Solidity.Decide.LFml.apfInst_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,106 @@
+{
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.actual_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.aligned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.eager_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.eager_rhs_wrong": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.eager_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.eager_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.executed_stack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.initial_observations": [],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.reversed_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.reversed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.reversed_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.saved_tail_wrong": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.source_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.stale_alias_wrong": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.Controls.target_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean:Solidity.Backend.Passes.EffectfulShortCircuit.payment_free": [
+  "propext"
+ ]
+}

@@ -1,0 +1,6 @@
+{
+  "proof_stem": "checkpoint-proof-complete-final",
+  "proof_gate_dir": "checkpoint-gates-complete-final",
+  "signature_stem": "signature-audit-complete-final",
+  "signature_gate_dir": "signature-gates-complete-final"
+}

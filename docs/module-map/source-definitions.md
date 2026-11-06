@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/source-definitions.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Independent source definitions
 
 | Module | What it defines |
@@ -75,15 +76,62 @@
 | `Source/DecodeExamples.lean` | FU2-B controls: `abi.decode` elaborated from syntax and run, malformed payloads reverting as solc's decoder (empty revert, Panic `0x41`), named refusals. |
 | `Source/Calldata.lean` | FU2-B `calldata` references: entry decoding, element/byte reads, slices and copies are never stuck and keep `MemOK` (`decodeArgs_entry_ok`, `readLoc_cd_ok`, `sliceR_ok`, `cdToMem_ok`); the `x.length`, `x[j]`, `x[s:e]` arms on locals (`evalE_cdLength_ok`, `evalE_cdIndex_ok`, `evalE_cdSlice_ok`). |
 | `Source/CalldataExamples.lean` | FU2-B controls: `calldata` parameters elaborated and run, elements validated at the read, entry checks, slices and copies reverting as solc's. |
-| `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
-| `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
-| `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly (not yet reachable from typed source). |
 | `Source/InlineExamples.lean` | FU2-B controls: inline arrays elaborated and run at solc's common type, an index past the length panicking, refusals without a common type or with reference elements; `new T[](n)`, `new bytes(n)`, `new string(n)` zeroed, panicking `0x41` at `2^64`. |
 | `Source/TryExamples.lean` | FU2-B controls: `try`/`catch` between two deployed contracts, success with returns bound, a caught revert (plain and `bytes memory` clauses), no code at the target not caught. |
 | `Source/ValueProgress.lean` | V04b progress, value layer: `binVal`/`cmpVal`/`shiftVal`/`unaryVal`/`incDecVal`/`convVal`/`constVal` are never stuck in their domains (`NotStuckR`); every elaborated term is in them (`RExpr.OpsOK`, `Typed.toR_opsOK`, `Elaborated.body_opsOK`). |
 | `Source/ExprProgress.lean` | V04b progress, expressions: `NS`/`NSP`; the value fragment (`RExpr.ValFrag`, `RExpr.MapRef`, `RLVal.IsSimple`: locals, value-type state variables, mappings) is never stuck (`exprNSAt`, `evalE_valFrag_ns`; `readAt_ns`, `writeAt_ns`, `keyStep_nsp`, `convRV_ns`); the fragment parameterized by allowed callees (`RExpr.ValFragC`, `CallNS`, `exprNSAt_step`) |
 | `Source/StmtProgress.lean` | V04b progress, statements: the statement value fragment in a body frame is never stuck (`stmtNSAt`, `stmtNS`, `itemsNS`, `ItemsD.toR_ns`; `RStmt.ext`, `Locals.restore_ok`, `BodyFrame`); calls inside expressions by the joint induction `FragAt`/`fragAt` under `CallsOK` (`evalE_callFrag_ns`); elaborated frames (`Elaborated.body_locals`, `Glob.dispatchFn_params`) |
 | `Source/SoundnessExamples.lean` | V04b controls: value-layer witnesses and stuck negative controls; fragment witnesses evaluated in the kernel (a loop, a storage update), an unframed `return` stuck; call witnesses (`callF_ns`, `recF_ns`, `callF_badFrame_stuck`) |
+| `Source/Agreement/PrimitiveTypes.lean` | SS-AGREE typed bool/uint/int value relation; no execution claim. |
+| `Source/Agreement/Primitive.lean` | Total model-to-source primitive producer, range proofs and discriminating value controls. |
+| `Source/Agreement/Locals.lean` | Intrinsic primitive contexts, total related local environment producer and locals-only state projection. |
+| `Source/Agreement/NormalStatement.lean` | Unproved one-way normal-result locals obligation over actual source/model evaluators; whole-step simulation remains VY5 H16 work. |
+# Source agreement producers
+
+| `Source/Agreement/NormalBoolBindings.lean` | Actual boolean literal initializer normal-step producer and two-initializer composition, retaining primitive locals only. |
+| `Source/Agreement/NormalBoolControls.lean` | Concrete two-literal importing client, actual Source horizon controls and false-versus-true initializer countercontrol. |
+| `Source/Agreement/NormalStep.lean` | Explicit per-statement normal-result producer premise over existing Source and model evaluators. |
+| `Source/Agreement/NormalCuts.lean` | Actual Source sequence/journal decomposition; normal-tail inversion without chosen intermediate state. |
+| `Source/Agreement/NormalComposition.lean` | Conditional nil/cons/two-statement proof of the existing normal-locals agreement obligation. |
+| `Source/Agreement/NormalControls.lean` | Concrete no-op producer/importer and timeout, early-return and incompatible-association controls. |
+| `Source/Agreement/NormalDefaults.lean` | Concrete bool/uint256/int256 default-declaration step producers and actual two-step composition. |
+| `Source/Agreement/NormalDefaultControls.lean` | Both evaluator histories, ordered local-tail/state preservation, horizon and wrong-default controls. |
+| `Source/Agreement/NormalStatement.lean` | One-way normal-locals target; conditional sequence proofs are separate, and general Source/model agreement remains open. |
+| `Source/Agreement/NormalBoolAssign.lean` | Concrete head-local boolean assignment and initializer-overwrite normal-step producers; actual local tail retained. |
+| `Source/Agreement/NormalBoolAssignControls.lean` | Both interpreter histories, total initial-locals client, Source horizon failures and wrong-value countercontrol. |
+| `Source/Agreement/BoolSlot.lean` | Existing intrinsic indices at an arbitrary typed primitive prefix and actual local-set correspondence. |
+| `Source/Agreement/BoolSlotAssign.lean` | Arbitrary-position boolean assignment producer, internally instantiated normal client and short-horizon control. |
+| `Source/Agreement/BoolSlotControls.lean` | Actual middle-slot Source/model preservation and a wrong-slot countercontrol. |
+| `Source/Agreement/BoolSlotRead.lean` | Actual arbitrary-slot get correspondence, local-read initialization and later original-slot write producers. |
+| `Source/Agreement/BoolSlotReadControls.lean` | Concrete read-copy/write histories and importing client; horizon and primitive-copy-versus-alias controls. |
+| `Source/Agreement/BoolSlotNot.lean` | Actual local-read boolean negation initializer producer with internally derived operand and factored checked monad runs. |
+| `Source/Agreement/BoolSlotNotControls.lean` | Total-initial-locals client, Source horizon and both negation polarity controls. |
+| `Source/Agreement/BoolSlotConditional.lean` | Actual local-conditioned boolean literal initializer, with internally derived guard and preserved primitive locals. |
+| `Source/Agreement/BoolSlotConditionalControls.lean` | Concrete conditional client, branch/horizon controls and separately scoped Source selected/unselected-write traces. |
+| `Source/Agreement/BoolSlotAnd.lean` | Actual short-circuit conjunction initializer with corresponding local left operand and literal right operand. |
+| `Source/Agreement/BoolSlotAndControls.lean` | Internally instantiated conjunction client, Source selected/skipped right-hand effects and fuel, and operator-distinction controls. |
+| `Source/Agreement/BoolSlotOr.lean` | Actual short-circuit disjunction initializer with corresponding local left operand and literal right operand. |
+| `Source/Agreement/BoolSlotOrControls.lean` | Internally instantiated disjunction client, reversed selected/skipped right-hand effects/fuel and operator-distinction controls. |
+| `Source/Agreement/BoolSlotToggle.lean` | Actual computed-RHS boolean read-modify-write expression/statement producer, returning the new value and retaining exact local/state history. |
+| `Source/Agreement/BoolSlotToggleControls.lean` | Internally instantiated computed-assignment client, low fuel/new-result controls and actual Source/model two-head-update restoration. |
+| `Source/Agreement/BoolSlotReadWrite.lean` | Actual paired-index get/set, last-write and read-after-write restoration laws over existing locals/environments. |
+| `Source/Agreement/BoolSlotRepeated.lean` | Both actual two-computed-update executions at arbitrary slots, with internally derived intermediate reads and normal composition. |
+| `Source/Agreement/BoolSlotRepeatedControls.lean` | Both-run importing client, insufficient-horizon refusal and different-slot countercontrol. |
+| `Source/Agreement/BoolSlotSaved.lean` | Fixed-code saved old copy followed by computed inverse update of the shifted original slot, through actual Source/model runs. |
+| `Source/Agreement/BoolSlotSavedControls.lean` | Internally instantiated saved-copy client, horizon and polarity/liveness controls. |
+| `Source/Agreement/PrimitiveSlot.lean` | Actual arbitrary-slot primitive read/write transport and normal initialization agreement, retaining signed/unsigned range evidence. |
+| `Source/Agreement/PrimitiveSlotControls.lean` | Internally instantiated copy client, actual integer runs, insufficient horizon and wrong-value refusal. |
+| `Source/Agreement/PrimitiveSlotAssign.lean` | Actual primitive old-head-to-deeper-slot assignment, concrete normal producer/client and exact insufficient-horizon control. |
+| `Source/Agreement/PrimitiveSlotAssignControls.lean` | Mixed-type neighbor preservation, actual signed/unsigned writes and reversed-copy controls. |
+| `Source/Agreement/PrimitiveSavedAssign.lean` | Actual primitive save-and-shifted-copy sequence, composed normal agreement/client and exact horizon-four timeout. |
+| `Source/Agreement/PrimitiveSavedAssignControls.lean` | Saved/original head liveness, mixed neighbors and overwritten-target refusal controls. |
+| `Source/Agreement/PrimitiveSlotReverse.lean` | Actual deeper-slot-to-head primitive assignment with internally derived operand, normal client and timeout. |
+| `Source/Agreement/PrimitiveSlotReverseControls.lean` | Retained source/tail/neighbors and real opposite-direction controls. |
+| `Source/Agreement/PrimitiveCopySequence.lean` | Both orders of concrete primitive copies, actual intermediate reads, normal agreements/clients and horizon-four timeouts. |
+| `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, same-input model noncommutation and swap refusal controls. |
+| `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
+| `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
+| `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly (not yet reachable from typed source). |
 | `Source/FailureMachine.lean` | Explicit-plan Source frame operations (H16 execution leaf) These operations run in the actual Source EM and use its existing event emitter. |
 | `Source/FailureMachineControls.lean` | Independent expected actual-EM controls. |
 | `Source/FailurePrimitives.lean` | Shared actual-EM failure primitives below Eval. |
@@ -149,7 +197,3 @@
 | `Source/FailureRequestAdmissionLaws.lean` | Existing requestValueScope nonconstant-plan arbitrary-cursor admission equations, unchanged funded-plan identity and exact dependent frame/counter retention on rejection. |
 | `Source/FailureRequestAdmissionHorizon.lean` | Existing exact-Nat admission API Grow/Below/Approx transport with explicit actual body relations; no second runtime admission operation. |
 | `Source/FailureRequestAdmissionHorizonControls.lean` | Nonconstant fate at ordinal37/frame counter11, exact wide balance and typed caller alias readback, timeout/cut/wrong-index/full-byte controls and17 exact axiom pins. |
-| `Source/Agreement/PrimitiveTypes.lean` | SS-AGREE typed bool/uint/int value relation; no execution claim. |
-| `Source/Agreement/Primitive.lean` | Total model-to-source primitive producer, range proofs and discriminating value controls. |
-| `Source/Agreement/Locals.lean` | Intrinsic primitive contexts, total related local environment producer and locals-only state projection. |
-| `Source/Agreement/NormalStatement.lean` | Unproved one-way normal-result locals obligation over actual source/model evaluators; whole-step simulation remains VY5 H16 work. |

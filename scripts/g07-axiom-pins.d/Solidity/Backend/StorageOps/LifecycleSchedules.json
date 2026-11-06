@@ -1,0 +1,120 @@
+{
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.graphPops": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.graphPushes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pop_accesses_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pop_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pop_failed_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pop_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pop_log_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pop_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pop_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.popAccesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.popLog": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.popMany": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.push_accesses_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.push_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.push_failed_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.push_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.push_log_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.push_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.push_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pushAccesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pushLog": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.pushMany": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.repeated_pop_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleSchedules.lean:Solidity.Backend.StorageOps.LifecycleSchedules.repeated_push_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

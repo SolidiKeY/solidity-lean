@@ -1,0 +1,44 @@
+{
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.arbitrary_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.arbitrary_depth_covered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.arbitrary_depth_fresh_copy": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.dynamic_default_barrier": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.fresh_copy_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.mapping_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.recursive_node_demands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.represented_initialization": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaultsControls.lean:Solidity.Backend.StorageOps.CopyDefaultsControls.wrong_absent_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

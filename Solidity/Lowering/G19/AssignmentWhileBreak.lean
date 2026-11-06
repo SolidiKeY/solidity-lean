@@ -1,8 +1,9 @@
 import Solidity.Lowering.G19.AssignmentReturnFlag
 
-/-! One mapped effectful while shape: a Boolean local-assignment condition
-and an immediate break body. Reuses V07's actual operand through the existing
-G19 map projection. No new lowering relation, evaluator or source carrier. -/
+/-! One effectful while shape: a Boolean local-assignment condition and an
+immediate break body. The hand-written target program reuses V07's operand
+through the existing G19 map projection; this is not a mapped lowering
+endpoint. No new lowering relation, evaluator or source carrier. -/
 namespace Solidity.Lowering.G19.AssignmentWhileBreak
 open Solidity.Lowering.V07
 open AssignmentReturnFlag (boolSlot)

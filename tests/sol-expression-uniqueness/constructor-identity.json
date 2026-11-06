@@ -1,0 +1,147 @@
+[
+  {
+    "constructor": "index",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.index_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "slice",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.slice_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "member",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.member_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "callOptions",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.callOptions_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "call",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.call_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "payableConv",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.payableConv_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "metaType",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.metaType_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "unaryPrefix",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.unaryPrefix_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "unarySuffix",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.unarySuffix_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "exp",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.exp_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "mulDivMod",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.mulDivMod_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "addSub",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.addSub_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "shift",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.shift_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "bitAnd",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.bitAnd_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "bitXor",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.bitXor_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "bitOr",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.bitOr_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "order",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.order_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "equality",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.equality_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "and",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.and_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "or",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.or_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "cond",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.cond_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "assign",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.assign_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "new",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.new_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "tuple",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.tuple_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "inlineArray",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.inlineArray_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "ident",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.ident_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "lit",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.literal_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "litUnit",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.unit_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  },
+  {
+    "constructor": "elemType",
+    "theorem": "Solidity.Frontend.ExpressionUniqueness.elementary_expr_word_unique",
+    "assembly": "Solidity.Frontend.ExpressionUniqueness.recursive_yield_property"
+  }
+]

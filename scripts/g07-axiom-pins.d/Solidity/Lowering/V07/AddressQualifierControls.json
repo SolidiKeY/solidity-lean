@@ -1,0 +1,68 @@
+{
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.allowed_client": [],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.copy_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.equal_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.erase_assignment_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.erase_run_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.erase_transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.payable_assignment_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.payable_run_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.payable_transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.self_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifierControls.lean:Solidity.Lowering.V07.AddressQualifierControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

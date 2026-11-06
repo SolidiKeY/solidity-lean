@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTarget.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

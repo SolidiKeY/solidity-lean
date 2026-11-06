@@ -1,0 +1,63 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUint_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUint_sourceUint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUint_values": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUints_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.calldataUints_slice_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_no_payload": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataUints_some": [
+  "Quot.sound",
+  "propext"
+ ]
+}

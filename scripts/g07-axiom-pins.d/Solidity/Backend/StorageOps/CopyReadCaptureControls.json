@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.duplicate_addresses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.entire_nested_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.finite_capture_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.finite_overlap_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.finite_owner_fixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.outside_source_log_stability": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.overlap_source_provenance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.represented_input_log": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean:Solidity.Backend.StorageOps.CopyReadCaptureControls.wrong_destination_cache": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

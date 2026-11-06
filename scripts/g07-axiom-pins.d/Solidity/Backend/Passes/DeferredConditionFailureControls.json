@@ -1,0 +1,113 @@
+{
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.correlated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.corrupt_prefix_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.failed_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.halt_separation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.immediate_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.immediate_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.immediate_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.immediate_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.native_terminal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.observations": [],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.panic_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.panic_memory_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.panic_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.panic_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.prefix_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.prefix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.prefix_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.reached_reader": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.skipped_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailureControls.lean:Solidity.Backend.Passes.DeferredConditionFailure.Controls.wrong_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

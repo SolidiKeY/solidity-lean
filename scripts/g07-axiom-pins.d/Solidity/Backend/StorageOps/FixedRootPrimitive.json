@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/FixedRootPrimitive.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedRootPrimitive.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

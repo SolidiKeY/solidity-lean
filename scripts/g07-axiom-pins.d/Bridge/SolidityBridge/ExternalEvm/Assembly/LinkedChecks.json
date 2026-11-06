@@ -1,0 +1,7 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/LinkedChecks.lean:Solidity.Evm.External.Assembly.LinkedChecks.ready": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,3 +1,4 @@
+<!-- Generated from docs/README.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The documents
 
 Open [module-map.md](module-map.md) first. Each fact lives in one document;
@@ -49,8 +50,6 @@ history is in git.
 | [feature-work/source-s00-s01.md](feature-work/source-s00-s01.md) | Source definitions S00/S01: the pinned grammar as intrinsic syntax, constructor index, upstream mapping, precise rejection and declaration graph; static typing, resolution and constants. |
 | [feature-work/frontend-static.md](feature-work/frontend-static.md) | Static frontend checkers G12–G14: import resolution and identities, type checking against S01, inheritance; their G05 checker instances. |
 | [feature-work/source-s04-state.md](feature-work/source-s04-state.md) | Source definitions S04.01–S04.03: source state (values, aggregates, memory, calldata, storage), ABI and revert observations, world, transient storage, call frames and rollback. |
-| [feature-work/source-s04-funds.md](feature-work/source-s04-funds.md) | S04.04: actual request-boundary sender-funds validation, invalid-drop laws, measured current Source release and remaining H19 boundary. |
-| [feature-work/vy5-composition.md](feature-work/vy5-composition.md) | VY5: scoped composition proofs, actual Source catch binding and explicit remaining full-lane obligations. |
 | [feature-work/source-s02.md](feature-work/source-s02.md) | Source semantics S02: resolved bodies in elaborated units, closed typing gaps, run-time values, arithmetic, effect order per pipeline, references and failures. |
 | [feature-work/source-s03.md](feature-work/source-s03.md) | Source semantics S03: statements, modifiers with repeated placeholders, constructor order, internal/external/callback call frames, horizons and divergence. |
 | [feature-work/source-s05.md](feature-work/source-s05.md) | Source semantics S05: the composition into G01's `Lang`, the source-constructor ledger, controls, reviews and the lane's handoff. |
@@ -72,6 +71,10 @@ history is in git.
 | [feature-work/primitive-return-projection.md](feature-work/primitive-return-projection.md) | Primitive return-byte validation before binding/discard, checked controls and the remaining O1 operational boundary. |
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
+| [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
+| [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
+| [feature-work/source-s04-funds.md](feature-work/source-s04-funds.md) | S04.04: actual request-boundary sender-funds validation, invalid-drop laws, measured current Source release and remaining H19 boundary. |
+| [feature-work/vy5-composition.md](feature-work/vy5-composition.md) | VY5: scoped composition proofs, actual Source catch binding and explicit remaining full-lane obligations. |
 
 **The calculus and its proofs**
 
@@ -168,10 +171,10 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [Executable bytecode selection](feature-work/executable-bytecode-selection.md) and [memory defaults and copies](feature-work/memory-copies.md): G45 and G33/G35 statement-only interfaces and premises.
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
 
+G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
 | Assembly lane | Document |
 |---|---|
 | VY5 raw-local/physical, indexed-write/emit composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
 - [P8a SourceSpec and failure resources](feature-work/p8-source-spec.md): actual Source execution anchor, unchanged failure-resource transfer, and the proved bare-horizon obstruction; full producer remains open.
 
 H16: [typed failure interface, current-master measurements and deferred runtime migration](feature-work/source-failure-execution.md).
-G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).

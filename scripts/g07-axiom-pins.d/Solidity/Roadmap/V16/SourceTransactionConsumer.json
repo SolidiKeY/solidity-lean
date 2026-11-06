@@ -1,0 +1,47 @@
+{
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.after_revert_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.after_success_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.revert_success_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.success_revert_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.success_revert_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_event_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_original_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

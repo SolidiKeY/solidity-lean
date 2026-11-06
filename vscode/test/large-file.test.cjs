@@ -1,0 +1,9 @@
+// Actual recorded native compiler symbols; mutations test harness rejection, not kernel proof.
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {largeFileWorkload,assertLargeFileSymbols}=require('../parity/workloads.cjs');
+const directory=path.resolve(__dirname,'../../tests/editor-parity/recovery-large-file/native-corrected'),source=fs.readFileSync(path.join(directory,'LargeFile.sol'),'utf8'),rows=fs.readFileSync(path.join(directory,'traffic.jsonl'),'utf8').trim().split('\n').map(line=>JSON.parse(line)),symbols=rows.find(row=>row.direction==='server'&&row.message.result?.[0]?.name==='LargeFile')?.message.result;
+test('large-file native fixture has exactly thousand compiler-derived functions and ranges',()=>{assert.equal(source,largeFileWorkload());assertLargeFileSymbols(symbols,source);assert.equal(source.split('\n').length,1005);assert.equal(/assume|axiom|@custom:key/.test(source),false);});
+test('large-file harness rejects missing and duplicated native declarations',()=>{const missing=structuredClone(symbols);missing[0].children.splice(500,1);assert.throws(()=>assertLargeFileSymbols(missing,source));const duplicate=structuredClone(symbols);duplicate[0].children[999]=duplicate[0].children[0];assert.throws(()=>assertLargeFileSymbols(duplicate,source));});
+test('large-file harness rejects unshifted ranges after hundred real newline prepends',()=>{assert.throws(()=>assertLargeFileSymbols(symbols,'// added this comment\n'.repeat(100)+source));});
+test('historical symbol data cannot certify current compiler symbols',()=>{const old=structuredClone(symbols);for(const symbol of [old[0],...old[0].children])symbol.detail='Outdated: '+symbol.detail;assert.throws(()=>assertLargeFileSymbols(old,source));assertLargeFileSymbols(old,source,{historical:true});});

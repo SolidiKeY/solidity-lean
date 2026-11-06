@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.booleanAnd": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.booleanEq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.booleanNe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.booleanNot": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.booleanOr": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.encode_int_injective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.encode_int_toInt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.encode_uint_injective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.encode_uint_toNat": [
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Typed.lean:Solidity.Backend.Scalar.literal_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

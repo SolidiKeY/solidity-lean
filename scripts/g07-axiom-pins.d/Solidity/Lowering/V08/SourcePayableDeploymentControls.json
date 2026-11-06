@@ -1,0 +1,53 @@
+{
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.concrete_observation_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.payable_metadata": [],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.saved_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.source_complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.source_construct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.source_deployment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.source_observation_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.source_other_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.target_funding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.wrong_installation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean:Solidity.Lowering.V08.SourcePayableDeploymentControls.wrong_skipped_payment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

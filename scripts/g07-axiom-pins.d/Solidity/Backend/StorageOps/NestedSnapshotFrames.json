@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/NestedSnapshotFrames.lean:Solidity.Backend.StorageOps.NestedSnapshotFrames.copy_word_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedSnapshotFrames.lean:Solidity.Backend.StorageOps.NestedSnapshotFrames.represented_copy_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.decoded_and_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.entry_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBinding.lean:Solidity.Backend.AbiEntry.UIntBinding.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
