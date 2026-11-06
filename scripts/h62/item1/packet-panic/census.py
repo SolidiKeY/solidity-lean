@@ -14,7 +14,7 @@ root = args.root.resolve()
 registry = json.loads(args.ownership.read_text())
 items = registry["items"]
 pattern = re.compile(
-    r"^[ \t]*(?:@\[[^\]\n]*\][ \t]*)?(?:(?:private|protected)[ \t]+)?"
+    r"^[ \t]*(?:(?:private|protected)[ \t]+)?"
     r"theorem[ \t\n]+(exact_panic_bytes|panic_not_truncated|exact_panic|panic_not_empty)(?![\w'.!?])", re.M)
 
 
@@ -73,6 +73,26 @@ def mask_comments_and_strings(source):
             i += 1
     if depth or string:
         raise ValueError("unterminated comment or string")
+    masked = "".join(chars)
+    i = 0
+    while i < len(masked):
+        if masked[i:i + 2] != "@[":
+            i += 1
+            continue
+        start = i
+        depth = 1
+        i += 2
+        while i < len(masked) and depth:
+            if masked[i] == "[":
+                depth += 1
+            elif masked[i] == "]":
+                depth -= 1
+            i += 1
+        if depth:
+            raise ValueError("unterminated attribute")
+        for j in range(start, i):
+            if masked[j] != "\n":
+                chars[j] = " "
     return "".join(chars)
 records = []
 scan_root = root / "Solidity/Backend/PrimitivePackets"

@@ -40,7 +40,7 @@ class CensusTest(unittest.TestCase):
                 "def c : Char := '\"'\n"
                 "theorem exact_panic' : True := by trivial\n"
                 "theorem exact_panic.foo : True := by trivial\n"
-                "@[simp] private theorem\n  exact_panic_bytes : True := by trivial\n"
+                "@[simp, foo [bar], foo /- ] -/, bar \" ] \"] @[other] private theorem\n  exact_panic_bytes : True := by trivial\n"
                 "protected theorem panic_not_truncated : True := by trivial\n")
             cmd = ["python3", str(SCRIPT), "--root", str(root), "--ownership", str(registry)]
             result = json.loads(subprocess.check_output(cmd))
