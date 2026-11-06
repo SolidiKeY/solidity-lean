@@ -381,3 +381,14 @@ This only checks supplied claims and cannot authenticate actual concurrency,
 clocks or execution. It is not an independent review, an H56 measurement or
 production acceptance. The H28 goal pause is confirmed by the coordinator, but
 its exact original prompt and final bundle are still unavailable on this VM.
+
+## Combined selected-input snapshots
+
+`bound_snapshot.py` combines a clean source/tree/tool snapshot with a
+caller-selected cache fingerprint, checking source and tool again after cache
+traversal. Synthetic controls detect changed cache or tool bytes, dirty source
+and a corrupted equal manifest; the 37-method synthetic suite passes. This
+compares supplied snapshots and paths, not actual H56 measurements. It does
+not establish cache completeness, trusted VM/tool identity, race-free state
+between snapshots, or production runner integration. Independent reviews and
+all H56, production and full-scope acceptance gates remain pending.
