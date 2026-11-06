@@ -1,0 +1,21 @@
+{
+  "authority": "Coordinator H70 requester disposition @5fcec7dca5ab0d6d321eaf29ca176045b5c38e0c",
+  "work": "Continue source classification of all remaining 114 candidates and full signature/hypothesis inventory.",
+  "recipient_plan": [
+    "solidity-h62-6-20261106/migrate-bridge",
+    "solidity-h62-6-20261106/migrate-precompiles",
+    "solidity-h62-6-20261106/migrate-syntax",
+    "solidity-sol-20261103/precompile-agreement",
+    "solidity-v12-v17-20261031/v14-payments-bytecode"
+  ],
+  "transport": "relay.sh is host-only; no local invocation needed or attempted",
+  "wait_for": {
+    "G43-COMPILER-SUCCESS": "Separate theorem for the actual compiler from solidity-v12-v17-20261031/v14-payments-bytecode",
+    "DEP-RAW-435": "Raw compatibility receipt from migrate-syntax",
+    "DEP-BLS-435": "Bls12381 compatibility receipt from migrate-precompiles",
+    "DEP-BRIDGE-435": "Dependency receipt from migrate-bridge, coordinated with live precompile-agreement owner"
+  },
+  "receipt_status": "awaiting; recipient plan is not a producer reply",
+  "original_file_edit_permission": false,
+  "same_branch_and_goal": true
+}

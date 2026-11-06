@@ -1,7 +1,7 @@
 {
   "status": "proposal-only; coordinator registration decision required",
   "root_imports": [],
-  "reason": "All six Lean files are standalone audit tests under tests/, not production library modules. No generated root changes requested. CoreSignatures and StipendControl remain limited as documented.",
+  "reason": "All seven Lean files are standalone audit tests under tests/, not production library modules. No generated root changes requested. CoreSignatures and StipendControl remain limited as documented.",
   "area_rows": [
     {
       "path": "tests/h62/item2/audit-precompiles/BasicWitnesses.lean",
@@ -26,6 +26,10 @@
     {
       "path": "tests/h62/item2/audit-precompiles/TypeFidelity.lean",
       "description": "24 generated direct assignments at entire frozen statement types"
+    },
+    {
+      "path": "tests/h62/item2/audit-precompiles/JointPremiseFixture.lean",
+      "description": "Isolated joint numeric table/cap/k/l proof, imports Field only; not an original BLS statement witness"
     }
   ],
   "central_axiom_pins": "No central pin edit. Read actual axiom sets in basic-final.log and core-final.log; unchecked Stipend declarations must not be registered as verified. DataWitnesses uses standard sets recorded in data-final.log."
