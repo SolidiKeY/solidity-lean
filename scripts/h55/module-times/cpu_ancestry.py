@@ -12,12 +12,19 @@ CPUSET = re.compile(r"[0-9]+(?:-[0-9]+)?(?:,[0-9]+(?:-[0-9]+)?)*\Z")
 
 
 
+
+def ascii_uint(value):
+    return (isinstance(value, str) and len(value) <= 20 and re.fullmatch(r"[0-9]+", value) is not None
+            and int(value) <= (1 << 64) - 1)
+
 def valid_cpuset(value):
     if not isinstance(value, str) or not CPUSET.fullmatch(value):
         return False
     previous = -1
     for part in value.split(","):
         ends = part.split("-")
+        if any(not ascii_uint(end) for end in ends):
+            return False
         low, high = int(ends[0]), int(ends[-1])
         if low > high or low <= previous:
             return False
@@ -39,15 +46,20 @@ def read_chain(root, leaf):
     result = []
     for path in reversed(paths):
         quota = (path / "cpu.max").read_text().strip()
+        burst = (path / "cpu.max.burst").read_text().strip()
+        weight = (path / "cpu.weight").read_text().strip()
+        idle = (path / "cpu.idle").read_text().strip()
         cpus = (path / "cpuset.cpus.effective").read_text().strip()
         mems = (path / "cpuset.mems.effective").read_text().strip()
         fields = quota.split()
-        if (len(fields) != 2 or (fields[0] != "max" and (not fields[0].isdigit() or int(fields[0]) <= 0))
-                or not fields[1].isdigit() or int(fields[1]) <= 0
-                or not valid_cpuset(cpus) or not valid_cpuset(mems)):
+        if (len(fields) != 2 or (fields[0] != "max" and (not ascii_uint(fields[0]) or int(fields[0]) <= 0))
+                or not ascii_uint(fields[1]) or int(fields[1]) <= 0
+                or not ascii_uint(burst) or not ascii_uint(weight) or not 1 <= int(weight) <= 10000
+                or idle not in ("0", "1") or not valid_cpuset(cpus) or not valid_cpuset(mems)):
             raise ValueError("invalid or unavailable effective CPU policy")
         result.append({"path": "/" if path == root else "/" + path.relative_to(root).as_posix(),
-                       "cpu_max": quota, "cpus_effective": cpus, "mems_effective": mems})
+                       "cpu_max": quota, "cpu_burst": burst, "cpu_weight": weight, "cpu_idle": idle,
+                       "cpus_effective": cpus, "mems_effective": mems})
     return result
 
 
@@ -56,7 +68,7 @@ def process_identity(container_id, pid):
     if not stat_text.startswith(pid + " (") or ")" not in stat_text:
         raise ValueError("invalid process stat")
     fields = stat_text.rsplit(")", 1)[1].split()
-    if len(fields) <= 19 or not fields[19].isdigit():
+    if len(fields) <= 19 or not ascii_uint(fields[19]):
         raise ValueError("missing process start time")
     group = pathlib.Path("/proc", pid, "cgroup").read_text().strip()
     if group != "0::/../docker/" + container_id:
@@ -71,7 +83,7 @@ def local_mount_supported():
 
 
 def local_snapshot(container_id, pid):
-    if not isinstance(container_id, str) or not IDENT.fullmatch(container_id) or not isinstance(pid, str) or not pid.isdigit() or int(pid) <= 0:
+    if not isinstance(container_id, str) or not IDENT.fullmatch(container_id) or not isinstance(pid, str) or not ascii_uint(pid) or int(pid) <= 0:
         raise ValueError("invalid container identity")
     first_identity = process_identity(container_id, pid)
     if not local_mount_supported():
@@ -92,13 +104,13 @@ def valid_snapshot(value):
     if (not isinstance(value, dict) or set(value) != {"mount_root", "ancestor_complete", "container_id", "pid", "start_ticks", "visible_chain"}
             or value["mount_root"] != "/.." or value["ancestor_complete"] is not False
             or not isinstance(value["container_id"], str) or not IDENT.fullmatch(value["container_id"])
-            or not isinstance(value["pid"], str) or not value["pid"].isdigit() or int(value["pid"]) <= 0
-            or not isinstance(value["start_ticks"], str) or not value["start_ticks"].isdigit()
+            or not isinstance(value["pid"], str) or not ascii_uint(value["pid"]) or int(value["pid"]) <= 0
+            or not isinstance(value["start_ticks"], str) or not ascii_uint(value["start_ticks"])
             or not isinstance(value["visible_chain"], list) or len(value["visible_chain"]) != 3):
         return False
     previous = None
     for item in value["visible_chain"]:
-        if (not isinstance(item, dict) or set(item) != {"path", "cpu_max", "cpus_effective", "mems_effective"}
+        if (not isinstance(item, dict) or set(item) != {"path", "cpu_max", "cpu_burst", "cpu_weight", "cpu_idle", "cpus_effective", "mems_effective"}
                 or any(not isinstance(item[key], str) for key in item)):
             return False
         path = item["path"]
@@ -110,8 +122,10 @@ def valid_snapshot(value):
                     or str(pathlib.PurePosixPath(path).parent) != previous):
                 return False
         fields = item["cpu_max"].split()
-        if (len(fields) != 2 or (fields[0] != "max" and (not fields[0].isdigit() or int(fields[0]) <= 0))
-                or not fields[1].isdigit() or int(fields[1]) <= 0
+        if (len(fields) != 2 or (fields[0] != "max" and (not ascii_uint(fields[0]) or int(fields[0]) <= 0))
+                or not ascii_uint(fields[1]) or int(fields[1]) <= 0
+                or not ascii_uint(item["cpu_burst"]) or not ascii_uint(item["cpu_weight"])
+                or not 1 <= int(item["cpu_weight"]) <= 10000 or item["cpu_idle"] not in ("0", "1")
                 or not valid_cpuset(item["cpus_effective"]) or not valid_cpuset(item["mems_effective"])):
             return False
         previous = path

@@ -15,6 +15,9 @@ class CpuAncestry(unittest.TestCase):
     def write(self, path, quota, cpus="0-3", mems="0"):
         path.mkdir(exist_ok=True)
         (path / "cpu.max").write_text(quota)
+        (path / "cpu.max.burst").write_text("0")
+        (path / "cpu.weight").write_text("100")
+        (path / "cpu.idle").write_text("0")
         (path / "cpuset.cpus.effective").write_text(cpus)
         (path / "cpuset.mems.effective").write_text(mems)
 
@@ -35,6 +38,21 @@ class CpuAncestry(unittest.TestCase):
             other_run = {**item, "container_id": "b" * 64, "pid": "321", "start_ticks": "654", "visible_chain": other_chain}
             self.assertEqual("mismatch", module.compare(item, other_run))
             self.assertEqual("matching-visible-unattested", module.compare_visible_policies(item, other_run))
+            changed_burst = {**other_run, "visible_chain": [{**other_chain[0], "cpu_burst": "1"}, *other_chain[1:]]}
+            self.assertEqual("mismatch", module.compare_visible_policies(item, changed_burst))
+            for field, value in [("cpu_weight", "200"), ("cpu_idle", "1")]:
+                changed_field = {**other_run, "visible_chain": [{**other_chain[0], field: value}, *other_chain[1:]]}
+                self.assertEqual("mismatch", module.compare_visible_policies(item, changed_field))
+            for field, value in [("cpu_burst", "²"), ("cpu_burst", "٠"), ("cpu_burst", str(1 << 64)), ("cpu_max", "١ ١"),
+                                 ("cpu_max", "9" * 5000 + " 100000"), ("cpu_weight", "١٠٠"),
+                                 ("cpu_weight", "0"), ("cpu_idle", "2"), ("cpus_effective", "9" * 5000)]:
+                invalid = {**other_run, "visible_chain": [{**other_chain[0], field: value}, *other_chain[1:]]}
+                self.assertEqual("invalid", module.compare_visible_policies(item, invalid))
+            for field in ("cpu_burst", "cpu_weight", "cpu_idle"):
+                missing_row = dict(other_chain[0])
+                del missing_row[field]
+                invalid = {**other_run, "visible_chain": [missing_row, *other_chain[1:]]}
+                self.assertEqual("invalid", module.compare_visible_policies(item, invalid))
             changed_quota = {**other_run, "visible_chain": [{**other_chain[0], "cpu_max": "1 100000"}, *other_chain[1:]]}
             self.assertEqual("mismatch", module.compare_visible_policies(item, changed_quota))
             self.assertEqual("invalid", module.compare(item, {**item, "visible_chain": []}))
@@ -49,7 +67,7 @@ class CpuAncestry(unittest.TestCase):
 
     def test_pid_identity_or_membership_change_is_rejected(self):
         """Guard regression: a replaced process inherits stale cgroup evidence."""
-        chain = [{"path": "/", "cpu_max": "max 100000", "cpus_effective": "0-3", "mems_effective": "0"}]
+        chain = [{"path": "/", "cpu_max": "max 100000", "cpu_burst": "0", "cpu_weight": "100", "cpu_idle": "0", "cpus_effective": "0-3", "mems_effective": "0"}]
         with patch.object(module, "process_identity", side_effect=[("1", "old"), ("2", "new")]), \
              patch.object(module, "local_mount_supported", return_value=True), \
              patch.object(module, "read_chain", return_value=chain):

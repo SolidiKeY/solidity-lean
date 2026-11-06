@@ -601,3 +601,25 @@ CPU burst/weight/idle, daemon/VM identity and host scheduling remain
 unauthenticated. The helpers are not an accepted production runner, and no
 300-second hard-bound or actual H56 measurement is claimed. The exact H28
 rendered prompt is verified; its final Git artifact remains unavailable.
+
+## Visible CPU burst, weight and idle controls
+
+The visible cgroup chain now records `cpu.max.burst`, `cpu.weight` and
+`cpu.idle` alongside quota and effective CPU/memory sets. Missing or invalid
+fields fail closed. Independent read-only finder and skeptic reviews found
+that non-ASCII, oversized and over-u64 numeric strings could be mishandled;
+those cases were fixed with bounded ASCII parsing and regression controls. The
+finder rechecked the u64 boundary, and the skeptic rechecked oversized values
+and changed or missing weight/idle fields. Neither reviewer used Lean, a server,
+builds or writes. Reviewed source hashes are in
+`tests/h55/module-times/cpu-policy-review-inputs.sha256`.
+
+The final network-isolated synthetic fixture, control 07, passed using a
+1.5-second deadline and a 64 MiB no-swap container; it recorded the visible
+CPU chain as `ancestor_complete=false`. Controls 05 through 07 are retained off
+Git and hashed in `tests/h55/module-times/cpu-policy-evidence.sha256`. This is
+not H56 timing or a production pass. Hidden ancestors, transient changes,
+quota-period phase and burst credit, sibling load, CPU frequency, host
+scheduling and VM/daemon identity remain unattested. The pre-start race and
+possible delayed Docker cleanup also remain unresolved. H93 cold timing was
+not restarted, and the H28 final Git artifact remains unavailable.
