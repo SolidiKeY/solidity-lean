@@ -3887,8 +3887,10 @@ import Solidity.SolcValidation.IrCensusDeployed
 import Solidity.SolcValidation.IrCensusMaps
 import Solidity.SolcValidation.IrCensusTransfer
 import Solidity.SolcValidation.IrCensusTree
+import Solidity.SolcValidation.IrCensusUnique
 import Solidity.SolcValidation.IrEval
 import Solidity.SolcValidation.IrEvalFuel
+import Solidity.SolcValidation.IrExpEvm
 import Solidity.SolcValidation.IrExpHelpers
 import Solidity.SolcValidation.IrExpModel
 import Solidity.SolcValidation.IrExpSim
