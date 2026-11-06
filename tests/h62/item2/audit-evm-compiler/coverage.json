@@ -1,0 +1,95 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "links": [
+    {
+      "original": "Solidity.Evm.compile_correct",
+      "statement_id": "Solidity/Evm/Correct.lean:1089",
+      "source_signature_sha256": "30b321c12d1752eb49430b0489c0bdbbafa85e62634367cf90d683b06df2875b",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.compile_correct_joint",
+      "module": "tests/h62/item2/audit-evm-compiler/HeadlineAudit.lean",
+      "classification": "No globally quantified Producer structure; per-input fragment admission, representation, resource bounds and, as present, execution, pay flag or balance consistency."
+    },
+    {
+      "original": "Solidity.Evm.compile_exact",
+      "statement_id": "Solidity/Evm/Correct.lean:1115",
+      "source_signature_sha256": "ff0b996371588bc400787e292c2534adbcda027a0737bd348a076f54b13ce0f1",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.compile_exact_joint",
+      "module": "tests/h62/item2/audit-evm-compiler/HeadlineAudit.lean",
+      "classification": "No globally quantified Producer structure; per-input fragment admission, representation, resource bounds and, as present, execution, pay flag or balance consistency."
+    },
+    {
+      "original": "Solidity.Evm.compile_box",
+      "statement_id": "Solidity/Evm/Correct.lean:1137",
+      "source_signature_sha256": "70adf8dcefb8d15d8dc6ff4cbf3480c2f36b9d52d8b6b08e062b3e8770470326",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.compile_box_joint",
+      "module": "tests/h62/item2/audit-evm-compiler/HeadlineAudit.lean",
+      "classification": "No globally quantified Producer structure; per-input fragment admission, representation, resource bounds and, as present, execution, pay flag or balance consistency."
+    },
+    {
+      "original": "Solidity.Evm.compile_net",
+      "statement_id": "Solidity/Evm/Correct.lean:1157",
+      "source_signature_sha256": "7212f120eda4d57131a191e860d9cb780a90f87cf22ca12386843925259442e0",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.compile_net_joint",
+      "module": "tests/h62/item2/audit-evm-compiler/HeadlineAudit.lean",
+      "classification": "No globally quantified Producer structure; per-input fragment admission, representation, resource bounds and, as present, execution, pay flag or balance consistency."
+    },
+    {
+      "original": "Solidity.Evm.compile_storage",
+      "statement_id": "Solidity/Evm/Correct.lean:1197",
+      "source_signature_sha256": "0e9f26d2af7b1c86f86352b74910a5a79afde9803a9968f5948dbaea0507b7bd",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.compile_storage_joint",
+      "module": "tests/h62/item2/audit-evm-compiler/HeadlineAudit.lean",
+      "classification": "No globally quantified Producer structure; per-input fragment admission, representation, resource bounds and, as present, execution, pay flag or balance consistency."
+    },
+    {
+      "original": "Solidity.Evm.occ_members_disjoint",
+      "statement_id": "Solidity/Evm/Layout.lean:298",
+      "source_signature_sha256": "a25623cbfccae11621f481a8a5f23419c7980201eb3adbe4245cfbef3a8b04ad",
+      "status": "proved-no-joint-witness-scope-blocked",
+      "proof": "Solidity.H62.EvmCompilerAudit.occ_members_no_joint_witness",
+      "module": "tests/h62/item2/audit-evm-compiler/LayoutAudit.lean",
+      "classification": "Intentional separation eliminator: all data and proof hypotheses have no simultaneous instance; not a compiler correctness defect."
+    },
+    {
+      "original": "Solidity.Evm.occ_entries_disjoint",
+      "statement_id": "Solidity/Evm/Layout.lean:310",
+      "source_signature_sha256": "375f6cfec4f217ee5d07e20cce80fa429ecb5c6f06f7fbdedbe71fc7ee06145c",
+      "status": "proved-no-joint-witness-scope-blocked",
+      "proof": "Solidity.H62.EvmCompilerAudit.occ_entries_no_joint_witness",
+      "module": "tests/h62/item2/audit-evm-compiler/LayoutAudit.lean",
+      "classification": "Intentional separation eliminator: all data and proof hypotheses have no simultaneous instance; not a compiler correctness defect."
+    },
+    {
+      "original": "Solidity.Evm.occ_elems_disjoint",
+      "statement_id": "Solidity/Evm/Layout.lean:329",
+      "source_signature_sha256": "a123437db20da34e1d0d31df158df7a67a106747f8c486542ed4cd5e9efa5cf9",
+      "status": "proved-no-joint-witness-scope-blocked",
+      "proof": "Solidity.H62.EvmCompilerAudit.occ_elems_no_joint_witness",
+      "module": "tests/h62/item2/audit-evm-compiler/LayoutAudit.lean",
+      "classification": "Intentional separation eliminator: all data and proof hypotheses have no simultaneous instance; not a compiler correctness defect."
+    },
+    {
+      "original": "Solidity.Evm.occ_felems_disjoint",
+      "statement_id": "Solidity/Evm/Layout.lean:339",
+      "source_signature_sha256": "9be6cef4caa2f9406000f1b48f0381bc2462d9ef2a3d815113fe7b8afe62e74e",
+      "status": "proved-no-joint-witness-scope-blocked",
+      "proof": "Solidity.H62.EvmCompilerAudit.occ_felems_no_joint_witness",
+      "module": "tests/h62/item2/audit-evm-compiler/LayoutAudit.lean",
+      "classification": "Intentional separation eliminator: all data and proof hypotheses have no simultaneous instance; not a compiler correctness defect."
+    },
+    {
+      "original": "Solidity.Evm.occ_len_elem",
+      "statement_id": "Solidity/Evm/Layout.lean:349",
+      "source_signature_sha256": "02be4b0412f53012706e578dc72fc26098ef0cb9e6dee5a5670ff6c7b4bbbf6a",
+      "status": "proved-no-joint-witness-scope-blocked",
+      "proof": "Solidity.H62.EvmCompilerAudit.occ_len_elem_no_joint_witness",
+      "module": "tests/h62/item2/audit-evm-compiler/LayoutAudit.lean",
+      "classification": "Intentional separation eliminator: all data and proof hypotheses have no simultaneous instance; not a compiler correctness defect."
+    }
+  ]
+}
