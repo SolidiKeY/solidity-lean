@@ -141,7 +141,7 @@ theorem source_expr_statement_run {E : Source.Env} {Γ : Source.RCtx} {τ : Sour
   have hsub : (Source.EM.sub (Γ := []) y.1 (Source.evalE G F fuel e)).run (.nil,y.2)=
       (.ok (value,z.1),(.nil,z.2)) := by
     unfold Source.EM.sub
-    have he' : (Source.evalE G F fuel e) (y.1,y.2)=(.ok value,z) := he
+    have he' : (Source.evalE (plan := none) G F fuel e) (y.1,y.2)=(.ok value,z) := he
     cases z
     simp only [ExceptT.run,ExceptT.mk,he']
   rw [Source.execS,Source.Hoare.run_bind,hsub]

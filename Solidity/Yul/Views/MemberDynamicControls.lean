@@ -63,7 +63,7 @@ def mdRaw : SlotView := fun q => if q = 0 then ⟨2^240,by decide⟩ else
   if q = 3000 then ⟨2^248+2^24+2^16+1,by decide⟩ else 999
 
 def mdState : Source.EMState mdEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := mdEnv.layout) (mdEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := mdEnv.layout) (mdEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def mdResidual : ResidualJournal complementCarrierOwnership :=
   ⟨fun k => if k.transient then 0 else packedMask mdLayout.registrations mdRaw k.slot,[]⟩
 theorem md_initial_MemOK : Source.MemOK mdEnv mdState.2.heap.ty mdState :=

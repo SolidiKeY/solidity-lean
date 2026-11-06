@@ -1,0 +1,57 @@
+{
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.body_fuel_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.final_height": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.skipped_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.skipped_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.skipped_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.source_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.taken_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.taken_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.taken_underflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ConditionalCompilationControls.lean:Solidity.Yul.Compilation.ConditionalCompilation.Controls.untaken_incomplete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

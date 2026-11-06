@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeDescentHeap.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeDescentHeap.heap_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

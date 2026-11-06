@@ -195,7 +195,7 @@ theorem caller_run (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   rw [evalE,Hoare.run_bind,arguments_run]
   dsimp only
   rw [Hoare.run_bind]
-  have inner : callInternal (globals p fixed) frame 21 d parameters rs (L0 E,initial) =
+  have inner : callInternal (plan := none) (globals p fixed) frame 21 d parameters rs (L0 E,initial) =
       (.ok (.val (.memRef rfl 0)),(L0 E,reached)) := by
     have body : (globals p fixed).prog.body d = some flatBody := source_body
     rw [callInternal,show frame.contract = "C" from rfl,dispatch,body]
@@ -323,7 +323,7 @@ theorem caller_panic (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   rw [evalE,Hoare.run_bind,huge_arguments_run]
   dsimp only
   rw [Hoare.run_bind]
-  have inner : callInternal (globals p fixed) frame 21 d hugeParameters rs (L0 E,initial) =
+  have inner : callInternal (plan := none) (globals p fixed) frame 21 d hugeParameters rs (L0 E,initial) =
       (.error (.revert (panicData .alloc)),(L0 E,stopped)) := call_panic_at p fixed 7
   simp only [EM.sub,ExceptT.run,ExceptT.mk,inner]
 

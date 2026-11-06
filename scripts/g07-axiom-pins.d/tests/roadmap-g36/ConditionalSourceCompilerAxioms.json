@@ -1,0 +1,120 @@
+{
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.code_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.badCore": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.badEmitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.checked_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.core": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.machine": [],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.mapping": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.no_canary_store": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.observed_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.post": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.Rel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.sca": [],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.sci": [],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.SourceCtx": [],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.stale_condition_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.TargetCtx": [],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.tca": [],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.tci": [],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.typed_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.Controls.typed_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSourceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ]
+}
