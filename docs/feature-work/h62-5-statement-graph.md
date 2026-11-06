@@ -254,3 +254,30 @@ B-FINAL-GATE remain binding. The goal is not complete. The new handoff is at
 `/workspace/h62-statement-graph-handoff-pending/`; the previous exported handoff
 and archive remain intact. Resume this same original goal and branch when
 inputs or owner-approved migration repairs arrive.
+
+## H70 owner overlay relay
+
+The coordinator relayed the reviewed Hash owner patch from
+`solidity-h62-6-20261106/migrate-hash` at
+`2a18afcdba00a85645b0b3079704f78ffcd78860` for isolated migration validation.
+It explicitly grants no original-file edit permission. Only the CollisionBound
+portion is needed for the Roadmap census; Adaptive is not applied or edited.
+The exact relayed patch and provenance are stored as small reproduction inputs
+under the owned test directory's `overlays/` subdirectory.
+
+`census.py --hash-owner-overlay` verifies the checkout and pinned-base bytes
+against blob `b54c93a5b24340a19160c1fb378d057ccee60f84`, applies the patch
+only in an off-checkout source copy, verifies target blob
+`092971eda8c7d6997276a92ba19b25b7ce05844e` against the published prefix,
+and compiles that copy with an explicit package root. The original Hash source
+remains unchanged. The owner commit object is not local; its identity is relayed
+metadata, while file base/target hashes are independently verified.
+
+The census summary distinguishes original source hashes from validation source
+hashes and includes the overlay patch hash, owner provenance and a combined
+validation-input digest. It must not be represented as validation of the plain
+repository tree or a full migration gate. Exact-base, wrong-base, changed-patch,
+inside-checkout and unexpected-copy preservation controls are included.
+`relay.sh` is host-only; no local relay script or original-file permission is
+inferred from routing. G49 full production inventory remains pending coordinator
+relay. Metadata and census records remain separate from discharged proofs.

@@ -10,6 +10,9 @@ ROOT = Path(__file__).resolve().parents[4]
 SPEC = importlib.util.spec_from_file_location('h62graph', ROOT/'scripts/h62/item5/statement-graph/graph.py')
 g = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(g)
+OVERLAY_SPEC = importlib.util.spec_from_file_location('h70overlay', ROOT/'scripts/h62/item5/statement-graph/owner_overlay.py')
+overlay = importlib.util.module_from_spec(OVERLAY_SPEC)
+OVERLAY_SPEC.loader.exec_module(overlay)
 BASE = 'c6f550e281a7e5affa9a99bc2cdaed556dec00e4'
 TREE = '1'*40
 
@@ -274,6 +277,57 @@ class GraphTests(unittest.TestCase):
                 g.build(self.export,modified,BASE,TREE)
         self.catalog['pendingInputs'][0]['id']='L'
         self.reject('duplicate typed/pending')
+
+    def test_h70_exact_base_target_and_original_preservation(self):
+        source = ROOT/overlay.REL_PATH
+        before = source.read_bytes()
+        dest,meta = overlay.prepare(Path(self.tmp.name)/'source')
+        self.assertEqual(overlay.blob(before),meta['baseBlob'])
+        self.assertEqual(overlay.blob(dest.read_bytes()),meta['targetBlob'])
+        self.assertTrue(meta['targetBlob'].startswith('092971eda'))
+        self.assertEqual(source.read_bytes(),before)
+        self.assertEqual(overlay.prepare(Path(self.tmp.name)/'source'),(dest,meta))
+
+    def test_h70_wrong_base_and_checkout_destination(self):
+        meta = g.read(overlay.BUNDLE/'h70-collision-bound.json')
+        with self.assertRaisesRegex(ValueError,'base mismatch'):
+            overlay.check_base(b'wrong base',meta)
+        with self.assertRaisesRegex(ValueError,'outside every registered checkout'):
+            overlay.prepare(ROOT/'tests/h62/item5/statement-graph/not-created')
+        self.assertFalse((ROOT/'tests/h62/item5/statement-graph/not-created').exists())
+
+    def test_h70_rejects_preserved_original_checkout(self):
+        target = Path('/workspace/solidity-lean/.h62-h70-overlay-must-not-be-created')
+        before = target.exists()
+        with self.assertRaisesRegex(ValueError,'outside every registered checkout'):
+            overlay.prepare(target)
+        self.assertEqual(target.exists(),before)
+
+    def test_h70_preserves_unexpected_existing_copy(self):
+        copy_root = Path(self.tmp.name)/'source'
+        dest = copy_root/overlay.REL_PATH
+        dest.parent.mkdir(parents=True)
+        dest.write_bytes(b'preserve unexpected work')
+        with self.assertRaisesRegex(ValueError,'refusing to overwrite'):
+            overlay.prepare(copy_root)
+        self.assertEqual(dest.read_bytes(),b'preserve unexpected work')
+
+    def test_h70_rejects_changed_relay_patch(self):
+        original_bundle = overlay.BUNDLE
+        changed = Path(self.tmp.name)/'changed-relay'
+        changed.mkdir()
+        for name in ('h70-collision-bound.patch.json','h70-collision-bound.json'):
+            (changed/name).write_bytes((original_bundle/name).read_bytes())
+        changed_patch = g.read(changed/'h70-collision-bound.patch.json')
+        changed_patch['patch'] += 'changed'
+        (changed/'h70-collision-bound.patch.json').write_text(json.dumps(changed_patch))
+        overlay.BUNDLE = changed
+        try:
+            with self.assertRaisesRegex(ValueError,'patch identity mismatch'):
+                overlay.prepare(Path(self.tmp.name)/'not-created')
+        finally:
+            overlay.BUNDLE = original_bundle
+        self.assertFalse((Path(self.tmp.name)/'not-created').exists())
 
     def test_bad_lease_and_done_node(self):
         for ttl in (0,-1,float('nan'),float('inf'),86401):

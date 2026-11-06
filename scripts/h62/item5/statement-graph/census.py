@@ -11,6 +11,7 @@ import signal
 import subprocess
 import time
 from verify import available, sha, BASE, ROOT, SCOPE
+from owner_overlay import prepare, REL_PATH
 
 if not __debug__:
     raise RuntimeError('H62 verification cannot run with Python optimization enabled')
@@ -21,7 +22,10 @@ def main():
     for arg in ('lean-bin','pin','archive','evidence'):
         parser.add_argument('--'+arg,type=Path,required=True)
     parser.add_argument('--area',choices=('roadmap','evm'),default='roadmap')
+    parser.add_argument('--hash-owner-overlay',action='store_true',help='H70 exact-base relay in an off-checkout source copy; roadmap area only')
     args = parser.parse_args()
+    if args.hash_owner_overlay and args.area != 'roadmap':
+        parser.error('--hash-owner-overlay is only needed for roadmap')
     evidence = args.evidence.resolve()
     assert not evidence.is_relative_to(ROOT), 'evidence must be off git'
     pin = json.loads(args.pin.read_text())
@@ -44,10 +48,17 @@ def main():
             modules = [Path('Solidity/Keccak.lean'),Path('Solidity/Roadmap/Evm.lean'),SCOPE/'Exporter.lean']
         driver = SCOPE/('EvmCensus.lean' if args.area == 'evm' else 'Census.lean')
         snapshot_name = args.area+'-census'
+        overlay = None
+        overlay_source = None
+        if args.hash_owner_overlay:
+            overlay_source,overlay = prepare(evidence/'owner-overlay-source')
+            (evidence/'owner-overlay.json').write_text(json.dumps(overlay,indent=2)+'\n')
         logs = []
-        def run(src,output=None):
+        def run(src,output=None,package_root=None):
             assert available() >= 4*1024**3, '4GiB reserve missing'
             cmd = [lean,'-j1','--tstack=131072']
+            if package_root is not None:
+                cmd += ['-R',str(package_root)]
             if output is not None:
                 output.parent.mkdir(parents=True,exist_ok=True)
                 cmd += ['-o',str(output)]
@@ -71,7 +82,10 @@ def main():
             (evidence/'commands.json').write_text(json.dumps(logs,indent=2)+'\n')
             assert proc.returncode == 0, logs[-1]
         for src in modules:
-            run(src,build/src.with_suffix('.olean'))
+            if overlay_source is not None and src == REL_PATH:
+                run(overlay_source,build/src.with_suffix('.olean'),evidence/'owner-overlay-source')
+            else:
+                run(src,build/src.with_suffix('.olean'))
         run(driver)
         assert (evidence/(snapshot_name+'.json')).read_bytes() == (evidence/(snapshot_name+'-repeat.json')).read_bytes(), 'census nondeterminism'
         snapshot = json.loads((evidence/(snapshot_name+'.json')).read_text())
@@ -82,6 +96,16 @@ def main():
                        fieldCount=sum(len(r['fields']) for r in rows),snapshotSha256=sha(evidence/(snapshot_name+'.json')),
                        sourceSha256={str(p):sha(ROOT/p) for p in modules+[driver]},
                        limitation='Kernel namespace census includes generated declarations; no final G49/G50 statement selection, ownership or progress assertion.')
+        summary['ownerOverlay'] = overlay
+        summary['validationSourceSha256'] = dict(summary['sourceSha256'])
+        if overlay is not None:
+            summary['validationSourceSha256'][str(REL_PATH)] = overlay['targetSha256']
+            summary['limitation'] += ' Uses an H70 owner proof migration in an isolated source copy; not a full migration gate.'
+        import hashlib
+        material = dict(tree=summary['tree'],sources=summary['validationSourceSha256'],pinSha256=summary['pinSha256'],
+                        patchSha256=overlay['patchSha256'] if overlay else None)
+        summary['validationInputSha256'] = hashlib.sha256(json.dumps(material,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        assert all(sha(ROOT/p)==summary['sourceSha256'][str(p)] for p in modules+[driver]), 'original source changed'
         assert head == subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
         assert not subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],cwd=ROOT)
         (evidence/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
