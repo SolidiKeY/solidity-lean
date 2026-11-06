@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Checks/ScopedAssignments.lean:Solidity.Yul.ScopedAssignments.Checked.statement_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/ScopedAssignments.lean:Solidity.Yul.ScopedAssignments.Checked.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

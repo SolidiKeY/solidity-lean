@@ -1,0 +1,144 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-2-20261106/audit-precompiles",
+  "repository": "/workspace/solidity-h62-audit-precompiles",
+  "last_implementation_head": "91d40a243d03e2c5badcb95f7ef49789320f2933",
+  "owner": "solidity-h62-2-20261106/audit-precompiles",
+  "handoff_to": "solidity-sol-20261103/precompile-agreement",
+  "original_exclusive_additive_write_scope": [
+    "tests/h62/item2/audit-precompiles/**",
+    "scripts/h62/item2/audit-precompiles/**",
+    "docs/feature-work/h62-2-audit-precompiles.md"
+  ],
+  "original_read_only_originals": "Existing owned originals outside the original write scope; original task forbids generated roots, central module-map and axiom-pin edits; registration proposals supplied separately.",
+  "area": "docs/module-map/precompiles.md",
+  "frozen_module_map_sha256": "a469b5ddfaa9a2227aa5a1490bb3736571681ce8b67dc359704889f1afedbe1a",
+  "frozen_module_files": [
+    {
+      "path": "Solidity/Precompiles/Field.lean",
+      "sha256": "350c0828fc5f639a3c0124664e1b22e0eba5eb933ff32ddb29ca4599b4fe85fd",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 3
+    },
+    {
+      "path": "Solidity/Precompiles/Pairing.lean",
+      "sha256": "e3292ad348a04b8f1a0d16bcfcc0f1001e5953b080e611d4cd21b42cac049298",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 0
+    },
+    {
+      "path": "Solidity/Precompiles/Basic.lean",
+      "sha256": "ad735d22f74786399c0bc6ce2813fc782e4eeaf1bf80577382633111cfcb4b30",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 8
+    },
+    {
+      "path": "Solidity/Precompiles/Modexp.lean",
+      "sha256": "5c818e49fd4545f77a63d22e9956ea8c72f43ab82128da2750e11aae5f92ac82",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 3
+    },
+    {
+      "path": "Solidity/Precompiles/Bn254.lean",
+      "sha256": "322af5f8de4e8b4c345a3d9593e49a12329c96d57ac6dad11f9dfa056e42916e",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 5
+    },
+    {
+      "path": "Solidity/Precompiles/Blake2f.lean",
+      "sha256": "f33a4afceb229d9f13a47d15f01bbde264bbdd13d8d6c47ce43e6cbf776f949d",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 4
+    },
+    {
+      "path": "Solidity/Precompiles/P256.lean",
+      "sha256": "1425a9e50856fd26d75986f50ca6e7505750fcc50d6eac3f854cc7cd0f4ed295",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 1
+    },
+    {
+      "path": "Solidity/Precompiles/Bls12381Iso.lean",
+      "sha256": "8604c96abe3c64b69008f483906da938515669f532ad5e61ad39af720ded3bb3",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 0
+    },
+    {
+      "path": "Solidity/Precompiles/Bls12381.lean",
+      "sha256": "23d23e78cc25ae0330fb45fd05a14abd589204e8873b6f518d78beb1a09d7476",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 18
+    },
+    {
+      "path": "Solidity/Precompiles/PointEval.lean",
+      "sha256": "39af8a62ad5dfd1167a908df036dc617cc497698dd5b08eb6840e70a16007780",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 6
+    },
+    {
+      "path": "Solidity/Precompiles/Osaka.lean",
+      "sha256": "2bedba89b90b93fd65150e9ba8bcb9fd9b499df5eef06885839f2c8d11d3fa9f",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 5
+    },
+    {
+      "path": "Solidity/Stipend/Rule.lean",
+      "sha256": "2b150ea2b3fe2187a9b642eaa4109ef2e987bc9e1884cfbe5e854786d09fbc86",
+      "source_owner": "master (area producer lane-precompiles; Stipend adequacy G43: V14)",
+      "source_theorem_count": 12
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean",
+      "sha256": "fc0372bc130a9bb9139bee4572ea7a9dced16e908f8cb7a49cea3a325d5d7afe",
+      "source_owner": "solidity-sol-20261103/precompile-agreement",
+      "source_theorem_count": 10
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Controls.lean",
+      "sha256": "31684e1a1e3a57c0a6b194601960dc112d8cfe865b0da7d5bcc466f3705c09ac",
+      "source_owner": "solidity-sol-20261103/precompile-agreement",
+      "source_theorem_count": 25
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Gas.lean",
+      "sha256": "cd3a7fac1ff8700b4e1b51598e34f48e74276eb1f0c4c44409b377bb42cfd331",
+      "source_owner": "solidity-sol-20261103/precompile-agreement",
+      "source_theorem_count": 12
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Header.lean",
+      "sha256": "d8786856403c01c8da31897d1d264a317e161aed90b70c1045ad6a3ece551490",
+      "source_owner": "solidity-sol-20261103/precompile-agreement",
+      "source_theorem_count": 16
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Identity.lean",
+      "sha256": "bef3e3a3e8be5c7f61ea5e6f82dbe3832bbdd88a797ad4c7de8bd13cd7790d2e",
+      "source_owner": "solidity-sol-20261103/precompile-agreement",
+      "source_theorem_count": 10
+    }
+  ],
+  "original_constraints": [
+    "dependency-free intrinsic core; Gate G0",
+    "unchanged frozen statements/premises/exclusions/observations",
+    "no sorry/new axiom/native_decide/trust shortcut or raised maxHeartbeats",
+    "serial bounded Lean -j1 and LEAN_NUM_THREADS=1; no swap/systemd-run; 4GiB reserve",
+    "same-tree/cache/resources timing; stop >10% slowdown",
+    "finder/skeptic read-only no Lean server",
+    "H44 bulk off git, deterministic generator and SHA256 manifest",
+    "no duplicate H55-G49 work; no merge/pre-gate/master push/deployment"
+  ],
+  "H82_standing_authorization": "Statement-preserving proof-only edits/additive lemmas/definitions/module splits/import/doc fixes need no exact-file agreement. Statement or dependent-definition/interface/budget/axiom-set/exclusion changes need owner; frozen changes need H57 versioned pairs.",
+  "retirement_override": "No new proof implementation or automatic continuation. No Claude-owned source edits/messages. Preserve all files/VM/branch. Successor integrates final head after final stopped/head acknowledgement.",
+  "H71_push_authorization_available": false,
+  "push_policy": "Original no-push instruction remains; no H71 permission content supplied or found, so no push.",
+  "later_rules_to_preserve": [
+    "H44",
+    "H68 full PassCorrect bridges",
+    "H69 witness/intentional contradiction distinction",
+    "H78 generated public API shims",
+    "H80 editor requirements",
+    "H81 current resource policy"
+  ],
+  "policy_boundary": "Only supplied rule text is represented; successor must obtain authoritative missing H71/H68-H81 details before affected work. No content of missing policies is invented.",
+  "final_head_location": "External retirement delivery HANDOFF.md/CLOUDVM-RESULT.json and bundle advertised ref; commit self-reference is intentionally not embedded."
+}

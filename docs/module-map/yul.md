@@ -202,3 +202,6 @@
 | `Evm/MemoryLoopHorizonCostGrowthControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/NormalFramedTransport.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/NormalFramedTransportControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/RawFrameLogic.lean` | Intrinsic raw-local frame logic and transport used by P16; retained typed frame obligations remain explicit. |
+| `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
+| `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |

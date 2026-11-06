@@ -19,3 +19,11 @@ tests/cloud/runtime-checks.json
 # Generated compact verifier assets (packaged in the extension release)
 vscode/runtime/
 scripts/__pycache__/
+
+# H44: generated Dafny parity evidence is archived on the VM, not committed.
+/tests/editor-parity/recovery-*/
+/tests/editor-parity/lifecycle/
+/tests/editor-parity/parity-gate-report.json
+
+# H44: full parity inventory is restored from its checksum-bound VM bundle.
+/tests/editor-parity/inventory/

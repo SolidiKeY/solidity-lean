@@ -184,14 +184,39 @@ function protocol(tracePath) {
     framingFinalized:[...finalized],
     scope:'Native status notification intervals include transport and notification throttling; they do not isolate pure solver or VC time.'};
 }
+function terminalSdkIdentity(output,executable,version){
+ const lines=require('node:util').stripVTControlCharacters(output).split(/\r?\n/).map(line=>line.trim()).filter(Boolean),fs=require('node:fs');
+ if(!version||lines[0]!==executable||lines[1]!==version)throw Error('Terminal SDK path/version differs from selected executable');
+ const resolved=fs.realpathSync(lines[0]),selected=fs.realpathSync(executable),sha256=require('node:crypto').createHash('sha256').update(fs.readFileSync(resolved)).digest('hex');
+ if(resolved!==selected)throw Error('Terminal SDK canonical executable differs from selected SDK');
+ return{executable:resolved,sha256,version,lines};
+}
 function hostEvidenceErrors(result,config) {
   const errors=[];
   if(result?.runId!==config.runId||result?.target!==config.target||result?.schemaVersion!==1)errors.push('stale or foreign identity');
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(!result.scenarios.some(s=>s.id==='initial-verification'))errors.push('missing initial verification scenario');
-  if(['passed','passed-with-gaps'].includes(result.status)&&!result.scenarios.some(s=>s.id==='initial-verification'&&s.status==='passed'))errors.push('initial verification did not pass');
+  if(config.suite==='trace-light-show'){
+    if(config.target!=='dafny'||!ids.includes('native-trace-light-show-hide'))errors.push('missing native light trace observation');
+  }else if(config.suite==='trace-visibility'){
+    if(config.target!=='dafny'||!ids.includes('native-trace-tab-visibility-theme'))errors.push('missing native trace visibility observation');
+  }else if(config.suite==='custom-default-commands'){
+    if(!ids.includes('command-custom-default-build-keybinding'))errors.push('missing native default custom command scenario');
+    if(config.target==='dafny'){for(const id of ['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action','native-trace-lifecycle'])if(!ids.includes(id))errors.push('missing native observation '+id);}
+  } else if(config.suite==='custom-commands'){
+    if(!ids.includes('command-custom-build-keybinding'))errors.push('missing native custom command scenario');
+  } else if(config.suite==='commands'){
+    if(!ids.includes('command-build-keybinding'))errors.push('missing native command scenario');
+  } else if(config.suite==='visual') {
+    // Visual capture has its own five scenarios. Missing early phases remain
+    // missing, never passed checks; the aggregate below must retain those gaps.
+    for(const id of ['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'])
+      if(!ids.includes(id))errors.push('missing visual scenario '+id);
+  } else {
+    if(!result.scenarios.some(s=>s.id==='initial-verification'))errors.push('missing initial verification scenario');
+    if(['passed','passed-with-gaps'].includes(result.status)&&!result.scenarios.some(s=>s.id==='initial-verification'&&s.status==='passed'))errors.push('initial verification did not pass');
+  }
   const passed=result.scenarios.filter(s=>s.status==='passed').map(s=>s.id).sort();
   if(JSON.stringify([...result.checks].sort())!==JSON.stringify(passed))errors.push('checks do not match passed scenarios');
   if(result.scenarios.some(s=>!['passed','partial','missing','unexamined','broken','timeout'].includes(s.status)))errors.push('invalid scenario status');
@@ -201,4 +226,4 @@ function hostEvidenceErrors(result,config) {
   if(result.status!==status&&!(['broken','timeout'].includes(result.status)&&result.error))errors.push('aggregate status contradicts scenarios');
   return errors;
 }
-module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors};
+module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity};

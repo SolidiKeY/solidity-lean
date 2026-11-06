@@ -391,6 +391,44 @@
         "Solidity.Calculus.Rules",
         "Solidity.Calculus.PremiseSound"
       ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/RollbackBaseline.lean",
+      "namespace": "H28.RollbackBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/RollbackBookedKill.lean",
+      "namespace": "H28.RollbackBookedKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/FrameReturnBaseline.lean",
+      "namespace": "H28.FrameReturnBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound",
+        "Solidity.Calculus.CallbackHolds"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/FrameReturnKill.lean",
+      "namespace": "H28.FrameReturnKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.Rules",
+        "Solidity.Calculus.PremiseSound",
+        "Solidity.Calculus.CallbackHolds"
+      ]
     }
   ],
   "shared_roots_changed": false,
