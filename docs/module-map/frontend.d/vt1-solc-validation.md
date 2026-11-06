@@ -10,3 +10,4 @@
 | `SolcValidation/IrCensusMaps.lean`, `SolcValidation/IrCensusTransfer.lean` | Each extracted helper group located in the parsed objects' groups; the lookup lemmas, environment simulations and the helper theorems restated for the parsed programs. |
 | `SolcValidation/IrCensusUnique.lean` | One definition per function name in every scope of the parsed Census/LinkedMath trees; name lookup lands on the transferred helpers; duplicate-definition negative controls. |
 | `SolcValidation/IrExpEvm.lean` | `checked_exp`'s model and imported IR body against this compiler's checked `**` code (`Evm/Exp.lean`'s `exp_tail`) and the EVM `EXP` value. |
+| `SolcValidation/IrErase.lean`, `SolcValidation/IrCensusParse.lean` | An injective, decidable erasure of the intrinsic IR tree; the parser's own result for the LinkedMath fixture pinned by kernel evaluation. |

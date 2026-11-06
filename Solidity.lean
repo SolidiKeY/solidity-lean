@@ -3885,9 +3885,11 @@ import Solidity.SolcValidation.IrCensus
 import Solidity.SolcValidation.IrCensusCreation
 import Solidity.SolcValidation.IrCensusDeployed
 import Solidity.SolcValidation.IrCensusMaps
+import Solidity.SolcValidation.IrCensusParse
 import Solidity.SolcValidation.IrCensusTransfer
 import Solidity.SolcValidation.IrCensusTree
 import Solidity.SolcValidation.IrCensusUnique
+import Solidity.SolcValidation.IrErase
 import Solidity.SolcValidation.IrEval
 import Solidity.SolcValidation.IrEvalFuel
 import Solidity.SolcValidation.IrExpEvm

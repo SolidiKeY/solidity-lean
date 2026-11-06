@@ -859,3 +859,93 @@ replaced by `rw`; exact.
   "OK — annotations match" (377 taclets, 131 read-bearing, table covers 131), exit 0.
 - `VT1_SKIP_LEAN=1 check-ir.sh`: VT1_IR_CHECKS_PASS. `check-doc-paths.sh`: 1
   failure, in another lane's `tests/calldata-packets-1105/RawUintN/README.md`.
+
+## C10: Census-tree transfer, unique tables and the `Evm/Exp` link (follow-up 2, 2026-11-06)
+
+Scope approved by the user (H66). Base: branch head `a1ba2cf2` merged with
+origin/master (no conflicts). All proofs are kernel-checked; no `sorry`, no new
+axiom, no `maxHeartbeats` change. `#print axioms` of the headline theorems gives
+a subset of `propext`, `Classical.choice`, `Quot.sound`.
+
+### 1. Lookup transfer onto the parsed Census tree
+- **The parsed trees as terms.** `IrCensusGen.lean` (test, Lean server) prints the
+  parser's output for `fixtures/{Census,LinkedMath}.unoptimized.yul` as
+  `fixtures/census-tree.txt`; `gen-census-modules.py` (`--check` in `check-ir.sh`)
+  writes `IrCensusCreation.lean` (`Census_134`, 27 functions), `IrCensusDeployed.lean`
+  (`Census_134_deployed`, 103), `IrLinkedCode.lean` (`LinkedMath_14` and its deployed
+  object, 3 and 19) and `IrCensusTree.lean`, which quotes both fixture texts verbatim
+  and proves `census_certified`/`linked_certified` (`lex text = some (objectToks root) ∧
+  objectWf root = true`) by kernel evaluation (about a minute for Census).
+- **The parser's own result.** `IrCensusParse.lean`: `linked_is_the_parse : ∃ p,
+  parse linkedText = .ok p ∧ p.parts.root = linkedRoot`, by running the parser in the
+  kernel and comparing through `IrErase.lean`'s erasure, which keeps every name,
+  position, signature, operation and literal and is proved injective
+  (`objectErase_inj`). The Census version is not proved: deciding the erasure of
+  `parse censusText` exhausted the Lean worker (the kernel re-runs the unshared
+  parse for every projection; deciding only its success takes about two minutes),
+  so `censusRoot` rests on `census_certified`.
+- **Renaming simulation.** `IrRename.lean`: `Ren F G` maps call positions partially;
+  `Expr.ren … Bodies.ren` rename every call; `Sim k ρ E E'` relates environments up to
+  fuel `k`; `evalExpr_ren`/`evalBlock_ren`: renamed code evaluates in `E'` exactly as
+  the original in `E` (same effects, result and fault) at every fuel; `Sim.flat`
+  discharges `Sim` for one top-level group from one body equation per function.
+- **Lookup lemmas.** `IrCensusMaps.lean` (generated) maps each function of the four
+  extracted groups to the function with the same signature in `cdSigs`, `ccSigs` or
+  `ldSigs` (a wrong position does not elaborate). `IrCensusTransfer.lean`:
+  `<group>_lookup_<obj>`: for every function of the group that the object defines, the
+  object's body is exactly the extracted body with calls renamed — Helpers→`Census_134_deployed`
+  (all but `checked_mul_t_uint256`), Helpers→`LinkedMath_14_deployed` (`cleanup_t_uint256`,
+  `panic_error_0x11`, `checked_mul_t_uint256`), exp→Census deployed (all 6), ABI→Census
+  deployed and LinkedMath deployed (all 5), push→Census deployed and Census creation
+  (all 13). Unmapped functions are exactly those the object does not define.
+  `sim_<group>_<obj>` follow by `Sim.flat`.
+- **Headline theorems on the parsed programs** (`cdEnv` is what `runCode` installs,
+  `cdEnv_installed`): `census_checked_add_sim`, `census_checked_sub_sim`,
+  `linked_checked_mul_sim`, `census_checked_div_body`, the five `*_matches_source`
+  forms, `census_checked_exp_body`, `census_checked_exp_overflow_halts`,
+  `census_decodeTuple_body`, `linked_decodeTuple_body`, `census_decodeTuple_short_halts`,
+  `census_push_body` (`push(uint256)`), `census_constructor_push_body` (the
+  constructor's `values.push`). Call-site forms use `cdAddCall` etc., whose printed
+  tokens are checked (`cdAddCall_toks`: `checked_add_t_uint256(a, b)`); body forms use
+  the parsed bodies `cdF72`, `cdF67`, `cdF8`, `cdF87`, `ccF25`, `ldF7`, whose names
+  are checked by `cd_bodies_named`. The C09 provenance caveat (groups mixing creation
+  and runtime copies) no longer matters: each theorem is now about one object's own group.
+
+### 2. Unique function tables (the option the T02 references need)
+T02 and G01 refer to functions by name in an object's scope, so the stated
+property is one definition per name per scope. `IrCensusUnique.lean`:
+`TablesUnique o` (every function group at every depth of `o` has distinct names),
+`census_tables_unique`, `linked_tables_unique` (kernel); `Mem.name_unique` (in such a
+group the name fixes the signature and the position); `helpers_named_<obj>`: name
+lookup with the parser's resolver `findFn` lands exactly on the positions the
+transfer theorems use. Negative controls: `parse_rejects_duplicate` (a scope defining
+`f` twice is refused) and `duplicate_counterexample` (the two trees resolving `f()`
+to the first or the second definition print exactly the text's tokens yet differ,
+and both fail `TablesUnique` and `objectWf`). Not proved: printer injectivity under
+`objectWf` (that every certified tree for a text equals the parser's), so "the unique
+parse" of the Census text is not claimed; the parser's own result is pinned for
+LinkedMath only (`linked_is_the_parse`).
+
+### 3. `checked_exp` against `Evm/Exp.lean` and the EVM `EXP`
+`IrExpEvm.lean` (imports `Evm/Exp.lean`, which is not edited):
+`expUnsigned_evm`: the model returns `v` exactly when this compiler's checked `**`
+code (`uTail .pow`, `exp_tail`) returns `v`, and fails exactly when it reverts;
+`expUnsigned_opcode`: a model value is the `EXP` instruction's value
+(`Pure.eval .exp`, `powWord`), and the model fails exactly when `EXP` wraps;
+`checked_exp_vs_evm`, `census_checked_exp_vs_evm`: on equal operands the imported IR
+body (extracted, and the parsed Census body) returns the compiled code's value with no
+machine effect, and runs `Panic(0x11)` first when the compiled code reverts. The two
+machines are different models; what is related is the outcome on equal operands.
+This removes C09's "no lemma relates this to `Evm/Exp`".
+
+### 4. ABI and storage meaning: waits on X01/G01
+Master has no frozen G01 relation (D3 layout, ABI argument ↔ calldata words, revert ↔
+return data): `docs/feature-work/full-scope.md` still lists G01's contracts as
+"proposed"; `docs/coverage-plan.md` says G01 counts as frozen only after revisions;
+VX1's stub is on owner-review hold. What exists are partial, unfrozen pieces: the
+source semantics' decoder (`Source/Eval.lean`: `wordAt`, `decodeArg`, `decodeArgs`),
+layout slot terms (`Evm/Layout.lean` `Occ`, `Storage/HashedLayout.lean` `Loc.word`)
+and `Yul/Views/DynamicElements.lean`'s `uint256[]` element path. The handoff forbids
+substituting partial relations for D1–D6, so the ABI and storage helpers keep their
+exact machine-effect statements (C09) and their meaning waits on X01/G01, as do the
+`fun_<name>_<id>` simulations.
