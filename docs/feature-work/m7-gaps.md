@@ -93,7 +93,7 @@ exact answers and counterstates; `Covered`, `inTarget`, `Waivers` and
 | Two uint binders over a numeric body past the normalizer budget (`TwoUIntPrefixOverNormalizationBudget`: `exhausted`; `sibling` past the 511-node cap) | resource bound: deciding needs a larger normalization/node budget, a performance decision not taken here | `Examples/DecisionNormalizationResidue.lean`, `Examples/DecisionPrefixNormalizationResidue.lean` |
 | False literal-bounded blocks the region search misses (bound above 64, non-uint leaves that need a value other than default/one, conclusions needing two different past-bound values) | no candidate region certifies them; the search is sound, not complete | none beyond the controls in `Examples/DecisionGapArrayNegatives.lean` |
 | Partial guards in APF blocks outside the partial-OR floor family | the APF OR reconstruction needs left-operand definedness (`partialOrBlockReason`) | `Examples/DecisionHaltingOrReason.lean` |
-| KeY-`int` remainders past about `2^511` (`zMul n ≤ 2^256`) | the two-word encoding's multiplier exceeds a word | not pinned by this lane |
+| KeY-`int` remainders past about `2^511` in the two-word encoding (`zMul n ≤ 2^256`) | the encoding's multiplier exceeds a word | not pinned; a probe of `∀ int z; z > 2^600 → z > 2^600 - 1` (and its `+ 1` false variant) found both in target, covered and decided (proved/refuted), so large literals alone do not reach this residue |
 
 Outside the target (decisions c, c′, d, e3″), so not Residue: `twoAnchorNonlinear`,
 `gapHashNegForall`, `notApf`, `namesBound`, `&`/`|`/`^` with two symbolic
