@@ -436,3 +436,14 @@ hashed in `tests/h55/shared-fixtures/source-exec-evidence.sha256`. This lexical
 candidate set can include comments and miss indirect execution calls. It is
 not the entire original Source family, semantic case review, a comparison with
 future migrations, independent review or completion of any queue item.
+
+The second Source-execution inventory additionally records elaborated bodies
+of 1,020 non-theorem constants, so a later comparison can detect changed
+existing definitions as well as declaration types, universe parameters,
+axioms and safety flags. `compare_source_exec.py` checks the pinned 3,103-row
+baseline and 74-module coverage, rejects removed or modified original records
+and newly added unsafe/partial/axiom declarations, and reports safe additions.
+Its negative controls exercise changed types, definition bodies and axiom sets,
+removals and an unsafe addition; its self-comparison passed. This is an exact
+kernel-record comparison for this lexical candidate set, not semantic case
+acceptance for all assigned families or approval of owner-sensitive changes.

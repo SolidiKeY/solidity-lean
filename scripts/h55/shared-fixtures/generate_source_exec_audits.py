@@ -31,6 +31,7 @@ run_cmd do
       let axioms ← collectAxioms name
       let row := Json.mkObj [("module", toJson modName.toString), ("name", toJson name.toString),
         ("typeExpr", toJson (reprStr info.type)), ("levelParams", toJson (info.levelParams.map Name.toString)),
+        ("valueExpr", toJson (if info.isTheorem then none else (info.value? true).map reprStr)),
         ("axioms", toJson ((axioms.toList.mergeSort Name.quickLt).map Name.toString)),
         ("theorem", toJson info.isTheorem), ("unsafe", toJson info.isUnsafe),
         ("partial", toJson info.isPartial), ("axiom", toJson info.isAxiom)]
