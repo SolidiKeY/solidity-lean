@@ -12,6 +12,6 @@ if [ "${1:-}" = env ] && [ "${2:-}" = lean ]; then
   exec "$real" -f "$config" env lean -j1 "$@"
 fi
 if [ "${1:-}" = serve ]; then
-  exec "$real" -f "$config" "$@" -j1
+  exec "$real" -f "$config" "$@" --tstack=131072 -j1
 fi
 exec "$real" -f "$config" "$@"

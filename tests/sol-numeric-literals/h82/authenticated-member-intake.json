@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "manifest_sha256": "39fb14a45e1e34042b75922e8d60da77f4b6a3555bcae718a8f95e4c37d3055b",
+  "members": [
+    {
+      "lane": "solidity-h28-sol-20261104/type-grammar",
+      "head": "a6cb9553091e615aeea59bce3ecfdb333f9a17ea",
+      "verified_final_stop_head_pause": true,
+      "assignment_path": "assignments/frontend-language/solidity-h28-sol-20261104__type-grammar.json",
+      "assignment_sha256": "9a67e078b97bf170726722b531a9e8588f1683b2f2ba9e2ec3dbba8d139318ea"
+    },
+    {
+      "lane": "solidity-h62-1-20261106/infer-helpers",
+      "head": "9ced4aa2d8b7460e0a73ef897764d0ea8e619cb9",
+      "verified_final_stop_head_pause": true,
+      "assignment_path": "assignments/frontend-language/solidity-h62-1-20261106__infer-helpers.json",
+      "assignment_sha256": "25a23b385247889732a4e71484eb6c0934837a8592dce307445f0bc09eee3cb5"
+    },
+    {
+      "lane": "solidity-h62-2-20261106/audit-language",
+      "head": "a06d064670dc755496c520136d067b0aad429381",
+      "verified_final_stop_head_pause": true,
+      "assignment_path": "assignments/frontend-language/solidity-h62-2-20261106__audit-language.json",
+      "assignment_sha256": "25631ba149cd245667a7e5176b79da1bde1594a3509aad07664e34ebafe63f57"
+    },
+    {
+      "lane": "solidity-h62-2-20261106/audit-v07-lowering",
+      "head": "42e78a67e07fd786cb744036e7a4e53b0324ad65",
+      "verified_final_stop_head_pause": true,
+      "assignment_path": "assignments/frontend-language/solidity-h62-2-20261106__audit-v07-lowering.json",
+      "assignment_sha256": "692d5ecb7288bf049e629bc7c207961d8844d2c431c79419dc9e03ab71f52c44"
+    },
+    {
+      "lane": "solidity-h62-4-20261106/generic-source-frontend",
+      "head": "33b5001cc5cfa56445c7291a6492a2d7f16c5978",
+      "verified_final_stop_head_pause": true,
+      "assignment_path": "assignments/frontend-language/solidity-h62-4-20261106__generic-source-frontend.json",
+      "assignment_sha256": "5859ee0d2ac3cd08e5c447ae182b994422ca2ec92ec9ddaaafdb490a61524378"
+    }
+  ],
+  "boundary": "Authenticated metadata and available Git objects; integration and proof validation recorded separately."
+}
