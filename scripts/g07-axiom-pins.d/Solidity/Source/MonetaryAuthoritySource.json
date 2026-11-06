@@ -1,0 +1,14 @@
+{
+ "Solidity/Source/MonetaryAuthoritySource.lean:Solidity.Source.Monetary.Authority.request_postFee": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthoritySource.lean:Solidity.Source.Monetary.Authority.source_amount": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthoritySource.lean:Solidity.Source.Monetary.Authority.source_undo": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/SequenceCompilation.lean:Solidity.Yul.Compilation.SequenceCompilation.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilation.lean:Solidity.Yul.Compilation.SequenceCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompilation.lean:Solidity.Yul.Compilation.SequenceCompilation.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
