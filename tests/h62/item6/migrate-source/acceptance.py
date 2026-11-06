@@ -34,13 +34,16 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 import copy
 r={"status":"pass","clean":True,"base":c.BASE,"modules":[{"module":"fixture","exit":0}],"wall_seconds":100,"sampled_peak_group_rss_bytes":100}
 r.update({k:1 for k in m.PROFILE})
-assert m.compare(r,r,["fixture"])["status"]=="pass"
+pin={"toolchain":"leanprover/lean4:v4.35.0","sha256":"fixture-pin"}
+r["versions"]={"lean":"Lean (version 4.24.0, commit 797c613)","lake":"Lake version 5.0.0-src+797c613"}
+n=copy.deepcopy(r);n["versions"]={"lean":"Lean (version 4.35.0, commit eb6cafb)","lake":"Lake version 5.0.0-src+eb6cafb"};n["archive_sha256"]="fixture-pin"
+assert m.compare(r,n,["fixture"],c.BASE,pin)["status"]=="pass"
 for value,want in [(110,"escalate"),(110.01,"stop"),(99,"pass")]:
-    t=copy.deepcopy(r);t["wall_seconds"]=value
-    assert m.compare(r,t,["fixture"])["status"]==want
-for change in ({"status":"fail"},{"modules":[]},{"lean_threads":2},{"wall_seconds":float("nan")}):
-    t=copy.deepcopy(r);t.update(change)
-    try: m.compare(r,t,["fixture"])
+    t=copy.deepcopy(n);t["wall_seconds"]=value
+    assert m.compare(r,t,["fixture"],c.BASE,pin)["status"]==want
+for change in ({"status":"fail"},{"modules":[]},{"lean_threads":2},{"wall_seconds":float("nan")},{"base":"wrong"},{"versions":r["versions"]},{"archive_sha256":"wrong"}):
+    t=copy.deepcopy(n);t.update(change)
+    try: m.compare(r,t,["fixture"],c.BASE,pin)
     except ValueError: pass
     else: raise AssertionError("unsafe comparison accepted")
-print("PASS comparison negative controls: incomplete/order/profile/NaN rejection; 10% escalation and >10% STOP")
+print("PASS comparison negative controls: incomplete/order/profile/NaN/base/version/pin rejection; 10% escalation and >10% STOP")

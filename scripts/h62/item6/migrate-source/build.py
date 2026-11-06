@@ -69,7 +69,16 @@ def main():
         out.mkdir(parents=True); lib=out/"lib"; lib.mkdir(); logs=out/"logs"; logs.mkdir()
         env=os.environ.copy(); env.update(LEAN_NUM_THREADS="1",LEAN_PATH=str(lib),PATH=str(tc/"bin")+":"+env["PATH"])
         versions={n:subprocess.check_output([str(tc/"bin"/n),"--version"],text=True).strip() for n in ("lean","lake")}
-        report={"cgroup_memory_max":Path("/sys/fs/cgroup/memory.max").read_text().strip(),"cpu_quota":Path("/sys/fs/cgroup/cpu.max").read_text().strip(),"cpuset":Path("/sys/fs/cgroup/cpuset.cpus.effective").read_text().strip(),"census_revision":census.get("revision",census["base"]),"effective_lean_path":str(lib),"schema":1,"base":census["base"],"versions":versions,"clean":True,"cache":"fresh private LEAN_PATH; no master cache", "lean_threads":1,"lean_heap_mib":10000,"sampled_rss_stop_bytes":12*GIB,"parent_rlimit_as":resource.getrlimit(resource.RLIMIT_AS),"reserve_bytes":4*GIB,"stack_kib":131072,"modules":[],"status":"running"}
+        archive=tc.parent/(tc.name+".tar.zst")
+        digest=hashlib.sha256()
+        with archive.open("rb") as release:
+            for block in iter(lambda:release.read(1024*1024),b""): digest.update(block)
+            os.posix_fadvise(release.fileno(),0,0,os.POSIX_FADV_DONTNEED)
+        archive_sha256=digest.hexdigest()
+        if "version 4.35.0," in versions["lean"]:
+            pin=json.loads(Path("/workspace/h62-coordinator-inputs/toolchain-pin.json").read_text())
+            if archive_sha256!=pin["sha256"]: raise RuntimeError("target release archive differs from coordinator pin")
+        report={"archive_sha256":archive_sha256,"cgroup_memory_max":Path("/sys/fs/cgroup/memory.max").read_text().strip(),"cpu_quota":Path("/sys/fs/cgroup/cpu.max").read_text().strip(),"cpuset":Path("/sys/fs/cgroup/cpuset.cpus.effective").read_text().strip(),"census_revision":census.get("revision",census["base"]),"effective_lean_path":str(lib),"schema":1,"base":census["base"],"versions":versions,"clean":True,"cache":"fresh private LEAN_PATH; no master cache", "lean_threads":1,"lean_heap_mib":10000,"sampled_rss_stop_bytes":12*GIB,"parent_rlimit_as":resource.getrlimit(resource.RLIMIT_AS),"reserve_bytes":4*GIB,"stack_kib":131072,"modules":[],"status":"running"}
         print(json.dumps(versions),flush=True); start=time.monotonic(); peak=0
         order=["Solidity.KeySort"] if a.keysort_only else census["serial_build_order"]
         failed=set()

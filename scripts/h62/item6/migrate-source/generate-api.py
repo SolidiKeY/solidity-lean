@@ -33,7 +33,12 @@ run_cmd do
       some <| Json.mkObj [("module", toJson mod.toString), ("name", toJson n.toString),
         ("kind", toJson kind), ("universes", toJson (ci.levelParams.map Name.toString)),
         ("type_repr", toJson (reprStr ci.type))]
-  liftIO <| IO.FS.writeFile output (Json.arr rows).compress
+  let requested : List String := __SELECTED__
+  let ledger := Json.mkObj [("schema", toJson (1 : Nat)), ("complete", Json.bool __COMPLETE__),
+    ("assigned_module_count", toJson (__TOTAL__ : Nat)), ("requested_modules", toJson requested),
+    ("rows", Json.arr rows), ("boundary", Json.str "Compiler-format observation; not semantic API equivalence")]
+  liftIO <| IO.FS.writeFile output ledger.compress
   logInfo m!"H62 Source constant/type ledger: {rows.size} entries"
 """
+body=body.replace("__SELECTED__",json.dumps([f["module"] for f in files])).replace("__TOTAL__",str(c["assigned_count"])).replace("__COMPLETE__",str(len(files)==c["assigned_count"]).lower())
 Path(sys.argv[2]).write_text("import Lean\n"+"".join("import "+f["module"]+"\n" for f in files)+body)
