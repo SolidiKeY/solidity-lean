@@ -1,0 +1,3 @@
+| `Backend/MemoryCopies/StorageRoundTripInterface.lean` | Contract only for actual primitive-array storage/memory/deep-memory/storage composition with represented destination, cleanup, framing and ordered allocation refusals. |
+| `Backend/MemoryCopies/StorageRoundTrip.lean` | Proved actual primitive-array copy-back from the reached two-copy allocator, preserving typed destination overlay, cleanup, storage/memory framing and ordered refusals. |
+| `Backend/MemoryCopies/StorageRoundTripControls.lean` | Closed round-trip runs, executable length-first cleanup mutant, same-slot snapshot restoration after explicit changed contents, framing observations and ordered refusals. |
