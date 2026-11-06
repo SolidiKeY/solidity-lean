@@ -225,3 +225,9 @@ and corrected reports remain separately under the successor evidence directory.
 These checks do not close execution correspondence, semantic refusal acceptance,
 complete family census, proof validation or same-condition Lean timing. No Lean
 source, theorem, admission, toolchain, resource guard or frozen pin changed.
+
+### Checked execution consumers in the existing test module
+
+The original execution draft is preserved off Git. Its six additive declarations now live in `tests/h62/item4/generic-v08/IntrinsicWidths.lean`, avoiding an unregistered `tests` import prefix under the approved per-file Lake gate. Existing width declarations remain unchanged. `source_execution` consumes the actual published evaluator law; `joint_execution` consumes the complete actual-client result and reached local relation. Binary/maximal equalities are proof-term instance identities, with separate fixture field equations; they are not independent target-run proofs. Full generic-family correspondence, refusal coverage, migration-overlay acceptance and matched performance measurements remain open. Cache seeding was skipped; the environment toolchain was activated with one thread.
+
+Actual axiom reports retain the five original axiom-free width declarations. The new source/joint execution consumers and two instance identities depend on `propext`, `Classical.choice`, and `Quot.sound` through the existing producers; both input-field equations are axiom-free. No new axiom declaration is introduced. The preserved standalone draft has the same qualified names and must remain unregistered; do not import both copies. The final focused run took 2.245 seconds with one Lean process and 812314624 bytes sampled aggregate peak RSS. These are focused-check observations, not matched full-family performance acceptance or a full gate.
