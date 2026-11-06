@@ -501,3 +501,22 @@ resource policy, or produce a production timing receipt. It is not integrated
 with the actual Lean runner. H28 final Git artifact and exact rendered-prompt
 bytes remain unavailable; H56 measurements, full acceptance and independent
 reviews remain pending. No Lean job or production timing pass occurred.
+
+## Container-spec regression control
+
+`container_spec.py` checks a supplied Docker inspection object against a
+supplied plan for a fixed single-thread Lean command, image ID, non-root user,
+environment, working directory, read-only bind mounts, memory/no-swap limits,
+network isolation, namespace settings, devices and privilege settings. Its
+synthetic controls exercise matching and mismatching objects. The first suite
+attempt failed on a syntax error in the new test file; it was fixed, and the
+final 50-method synthetic suite passes. The new control docstrings name the
+container-masquerading regression they guard.
+
+This is a verifier of caller-supplied objects, not an authenticated Docker
+inspection or accepted runner. It does not prove the plan, image contents,
+mount contents, effective cgroup state, deadline enforcement, cache, H56
+identity or Lean execution. It is not wired into the experimental observation
+bridge. The H28 final artifact and exact rendered prompt, H56 measurements,
+full acceptance and independent reviews remain pending; no Lean timing or proof
+pass is claimed.
