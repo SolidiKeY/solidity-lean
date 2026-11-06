@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/AbiEntry/CoreJoinControls.lean:Solidity.Backend.AbiEntry.CoreJoinControls.divergent_body_join": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoinControls.lean:Solidity.Backend.AbiEntry.CoreJoinControls.escaping_raw_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoinControls.lean:Solidity.Backend.AbiEntry.CoreJoinControls.initial_representation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoinControls.lean:Solidity.Backend.AbiEntry.CoreJoinControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/CoreJoinControls.lean:Solidity.Backend.AbiEntry.CoreJoinControls.represented_branch_outcomes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoinControls.lean:Solidity.Backend.AbiEntry.CoreJoinControls.returning_body_join": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoinControls.lean:Solidity.Backend.AbiEntry.CoreJoinControls.reverting_body_join": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

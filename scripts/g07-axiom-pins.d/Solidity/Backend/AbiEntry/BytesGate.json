@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/AbiEntry/BytesGate.lean:Solidity.Backend.AbiEntry.BytesGate.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BytesGate.lean:Solidity.Backend.AbiEntry.BytesGate.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BytesGate.lean:Solidity.Backend.AbiEntry.BytesGate.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BytesGate.lean:Solidity.Backend.AbiEntry.BytesGate.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BytesGate.lean:Solidity.Backend.AbiEntry.BytesGate.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

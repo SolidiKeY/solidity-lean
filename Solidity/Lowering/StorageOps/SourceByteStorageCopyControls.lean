@@ -22,7 +22,7 @@ def storage : Source.Storage env.layout env.cellTy :=
  s.write (child 4) (byte 97)
 def state : Source.St env :=
  {ex:={world:=⟨fun a=>if a=address then
-   {balance:=⟨19,by decide⟩,nonce:=3,code:=some 0,storage:=storage}
+   {balance:=19,nonce:=3,code:=some 0,storage:=storage}
    else Source.Account.empty _⟩,transient:=Source.Transient.empty,journal:=[]}
   heap:=Source.Heap.empty,events:=[],logs:=[(address,[9,8])],fnLocals:=⟨[],.nil⟩}
 def initial : Source.Locals env.layout [] × Source.St env := (.nil,state)
@@ -40,7 +40,7 @@ def raw (s : Source.St env) (j : Nat) :=
  | _ => none
 def view (s : Source.St env) :=
  ([0,1,2,3,4].map (raw s),s.ex.journal.length,
-  (s.ex.world.accounts address).balance.val,(s.ex.world.accounts address).nonce,
+  (s.ex.world.accounts address).balance,(s.ex.world.accounts address).nonce,
   (s.ex.world.accounts address).code,s.heap.next,s.events.length,
   s.logs.map (fun (a,bs)=>(a.val,bs.map UInt8.toNat)))
 def ordered : Prop := [run 0,run 1,run 2,run 3].map (fun r=>view r.2.2)=
@@ -69,7 +69,7 @@ def journalRows (s : Source.St env) := s.ex.journal.map fun e=>
  | .account a old => (a.val,[0,1,2,3,4].map (fun j=>
     match old.storage.cell (child j) with
     | some (.fixedBytes bs _) => some (bs.map UInt8.toNat)
-    | _ => none),old.balance.val,old.nonce,old.code)
+    | _ => none),old.balance,old.nonce,old.code)
  | .transient a _ => (a.val,[],0,0,none)
 def journals : Prop := [run 0,run 1,run 2,run 3].map (fun r=>journalRows r.2.2)=
  [[],[(7,[some [41],some [53],some [59],none,some [97]],19,3,some 0)],

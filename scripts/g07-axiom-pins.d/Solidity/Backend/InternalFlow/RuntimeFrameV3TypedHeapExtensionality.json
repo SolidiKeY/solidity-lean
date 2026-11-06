@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.default_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.heap_ext": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.objects_ext": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.of_inventory": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.prefix_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.prepend_defaults": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.profiles_heq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean:Solidity.Backend.InternalFlow.RuntimeFrame.TypedHeapExtensionality.typing_shape": [
+  "Quot.sound",
+  "propext"
+ ]
+}
