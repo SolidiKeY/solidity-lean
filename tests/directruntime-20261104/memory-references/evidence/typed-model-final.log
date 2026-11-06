@@ -1,1 +1,0 @@
-PASS lean:tests/directruntime-20261104/memory-references/Admission.lean 3s /workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/typed-model-final/1.log
