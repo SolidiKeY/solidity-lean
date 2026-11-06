@@ -81,11 +81,63 @@
           "owner": "fixture-premise-owner"
         }
       }
+    },
+    {
+      "id": "fixture.contract-witness",
+      "declaration": "H62Fixture.contractWitness",
+      "kind": "helper",
+      "area": "fixture",
+      "owner": "fixture-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "parameter",
+          "reason": "arbitrary natural input, not a correctness certificate"
+        }
+      }
+    },
+    {
+      "id": "fixture.certificate",
+      "declaration": "H62Fixture.Certificate",
+      "kind": "premise",
+      "area": "fixture",
+      "owner": "fixture-owner",
+      "binderRoles": {
+        "field:0": {
+          "kind": "premise",
+          "owner": "fixture-resource-producer"
+        },
+        "field:1": {
+          "kind": "premise",
+          "owner": "fixture-validity-producer"
+        }
+      }
+    },
+    {
+      "id": "fixture.certificate-witness",
+      "declaration": "H62Fixture.certificateWitness",
+      "kind": "helper",
+      "area": "fixture",
+      "owner": "fixture-owner",
+      "binderRoles": {}
+    },
+    {
+      "id": "fixture.certificate-use",
+      "declaration": "H62Fixture.useCertificate",
+      "kind": "statement",
+      "area": "fixture",
+      "owner": "fixture-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "premise",
+          "owner": "fixture-certificate-producer"
+        }
+      }
     }
   ],
   "roots": {
     "fixture-G49-model": [
-      "fixture.root"
+      "fixture.root",
+      "fixture.certificate-use"
     ],
     "fixture-G50-model": [
       "fixture.base"

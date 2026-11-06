@@ -100,9 +100,19 @@ def main():
         run('exporter',[lean,*flags,'-o',str(build/SCOPE/'Exporter.olean'),str(SCOPE/'Exporter.lean')])
         run('fixture',[lean,*flags,str(SCOPE/'Fixture.lean')])
         original = (evidence/'fixture.json').read_bytes()
+        exported = {r['declaration']:r for r in json.loads(original)['declarations']}
+        assert [f['name'] for f in exported['H62Fixture.Certificate']['fields']] == ['resource','valid']
+        assert exported['H62Fixture.useCertificate']['binders'][0]['isProp'] is False
+        assert 'Lean.Expr.fvar' not in exported['H62Fixture.Certificate']['fields'][1]['typeExpr']
+        census = (evidence/'fixture-census.json').read_bytes()
+        assert census == (evidence/'fixture-census-repeat.json').read_bytes()
+        census_rows = json.loads(census)['declarations']
+        assert len(census_rows)>len(exported) and all(r['declaration'].startswith('H62Fixture.') for r in census_rows)
+        assert any(r['constantKind']=='constructor' for r in census_rows)
         assert original == (evidence/'fixture-repeat.json').read_bytes(), 'same-process nondeterminism'
         run('fixture-fresh',[lean,*flags,str(SCOPE/'Fixture.lean')])
         assert original == (evidence/'fixture.json').read_bytes(), 'fresh-process nondeterminism'
+        assert census == (evidence/'fixture-census.json').read_bytes(), 'fresh-process census nondeterminism'
         # Unknown/dead declaration and conflicting roles must fail elaboration.
         for label,body in {
             'dead-declaration':'#h62_export "negative-dead.json" [H62Missing.declaration]',
