@@ -2175,3 +2175,127 @@ remaining true parser coverage, full repository gates and whole-scope acceptance
 remain open. SOL-EU remains excluded and SG-CEX-01/02 remain OPEN/REFUTED.
 Existing shared inventory/full-build holds remain separate. No goal was created,
 reset, replaced or marked complete by this checkpoint.
+
+
+## Checkpoint Z — inline-Yul continuation boundaries
+
+Adopted published master `38d38d87e74376d6b95daf9b792fa884333f20b3`
+by verified fast-forward, preserving the owned branch and its original base.
+This checkpoint is additive: no existing implementation or proof was refactored,
+no protected Yul helper file was edited, and no budget or premise changed.
+
+[The source](../../Solidity/Frontend/StatementGrammarH28/YulControlFree.lean)
+proves `yul_yield_controlFree` for every existing `Syn c` whose category is
+Yul statement, expression or case, with arbitrary nested list/option closure.
+`yul_yield_no_continuations` extracts absence of the exact three Solidity
+keyword tokens selected by `boundaryToken` from every actual successful yield.
+`assembly_yield_controlFree` covers arbitrary EVM flags, flag strings and Yul
+bodies under the immutable printer. The result does not require parser success,
+expression uniqueness, lexical validity, valid assembly flags or execution
+adequacy. Identifier/string payload spellings remain data. SG-CEX-01 is retained:
+this token-absence property does not establish flag injectivity or round-trip.
+
+The exhaustive constructor inventory is 11 Yul statements (`yulBlock`, `yulLet`,
+`yulAssign`, `yulExprStmt`, `yulIf`, `yulFor`, `yulSwitch`, `yulLeave`, `yulBreak`,
+`yulContinue`, `yulFun`), three expressions (`yulPath`, `yulCall`, `yulLit`),
+and one `yulCase`, plus `nil`, `cons`, `none`, `some` closure. The scalar literal
+proof covers all five `YulLit` alternatives: decimal, hexadecimal, string,
+hex string and Boolean. No constructor is represented by an empty relation.
+
+[Kernel controls](../../tests/h28-sol/statement-grammar/YulControlFreeControls.lean)
+have 10 theorems: exact constructor inventory; all 15 inhabited successful
+nonempty yields; all five literal alternatives; absent initializer/default and
+empty call/function alternatives; actual four list/option yields; atomic keyword
+payload spellings; all four EVM/nonempty-flag combinations; rejection of real
+Solidity continuation keywords; rejection of the Solidity-statement category;
+and the arbitrary-Yul-tree three-keyword corollary. The public source has four
+theorems and one category definition. [Public audit](../../tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean)
+prints all five source signatures and axiom sets; controls print all 10 theorem
+axiom sets. Only standard `propext`/`Quot.sound` are permitted; no new trust.
+
+Reproduction in the prepared bounded VM, serially:
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.YulControlFree
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreeControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Initial per-file diagnostics and build passed. Separate read-only finder and
+skeptic source reviews found no proof defects. Finder caught a premature receipt
+claim in this paragraph; it was corrected before commit. Acceptance still requires
+exact committed-head gates, cache, final review and seal receipts in the checkpoint
+handoff. External solc
+results are unchanged historical fixture evidence, not evidence for this universal
+kernel theorem. Original G11 remains partial: general compound framing, remaining
+parser coverage and final whole-repository acceptance are still outstanding.
+
+
+## Checkpoint AA — universal list measures and iteration budgets
+
+Rebased onto published `c61eac233747385d1b76aff6c9af72eb7923f43b`.
+The coordinator cherry-picked Z as `bc417f403bd7c26b52c0a9dc924e49269302bd24`;
+owned files were verified byte-identical before Git skipped duplicate `dcbe2ebf`.
+The recovery ref `refs/backup/statement-grammar/pre-c61eac233` preserves that head.
+Z's root registration is now integrated. This checkpoint adds a module and local
+registration only; no old proof or implementation was refactored.
+
+[ListMeasures](../../Solidity/Frontend/StatementGrammarH28/ListMeasures.lean)
+contains exactly nine public theorems:
+
+| Theorem | Exact scope |
+| --- | --- |
+| `list_length_values` | Every intrinsic list has the same G0 length and typed-values length. |
+| `list_yield_length` | Every successful list yield has exactly one output chunk per element, for every category. |
+| `list_yield_chunks_nonempty` | Under the explicit universal nonempty-element-yield premise, each actual output chunk is nonempty. |
+| `nonempty_chunks_token_bound` | The number of nonempty token chunks is bounded by flattened token length. |
+| `list_yield_token_bound` | The generic premise yields the intrinsic list-count bound. |
+| `statement_list_yield_token_bound` | The premise is discharged for arbitrary statement syntax in every context. |
+| `item_list_yield_token_bound` | The premise is discharged for arbitrary item syntax, including unchecked blocks. |
+| `item_list_many_iteration_budget` | Token-count bound: item count plus one is at most located-input token length plus one (the `many` counter in Parser.lean); the link to `many` is not stated in Lean. |
+| `statement_list_many_iteration_budget` | The corresponding universal statement-list iteration bound. |
+
+These are universal structural measures, not parser-success assumptions.
+The final inequalities establish the loop counter's capacity only; they do not
+establish the per-element parser's success, nesting fuel or general completeness.
+The exact generic premise is necessary: a present optional expression containing
+`none` yields one empty chunk. The statement/item specializations use existing
+unconditional nonempty-yield theorems, covering all 13 statement constructors and
+both item forms without expression uniqueness or a framed-root restriction.
+Existing G0 list observers supply all computational measures; indexed cases are
+proof-only. Budgets and immutable producers are unchanged.
+
+[Controls](../../tests/h28-sol/statement-grammar/ListMeasuresControls.lean)
+contain exactly 10 theorems. They enumerate and inhabit all 13 statement roots
+in an actual successful list and all 14 corresponding statement/unchecked items;
+exercise attribute and fragment layouts; reject missing layout; prove actual
+yields/count/budget for arbitrary natural-number width; check both empty lists
+and one stopping iteration; and retain the inhabited generic empty-chunk
+counterexample and its failed nonempty check. All four list/option constructors
+occur in controls. The generic arity theorem still applies to that negative
+example; only the nonempty-derived bound is unavailable.
+
+[Public audit](../../tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean)
+prints all nine signatures and axiom sets. Controls print all 10 theorem axiom
+sets. Per-file diagnostics and the initial owned build passed. Separate finder
+and skeptic source reviews found no defects. Exact committed-head gate, final
+review, cache and seal receipts remain acceptance requirements in the handoff;
+this text does not claim they already exist.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ListMeasures
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+This is assigned block/list decomposition and fuel backfill. It does not close
+the remaining general compound framing, structural parser coverage or final
+whole-repository acceptance obligations. SG-CEX-01/02 stay explicit and SOL-EU
+remains excluded. External solc fixture results are separate historical evidence.
+
+Coordinator merge review (2026-11-06): finder and skeptic found no blocker.
+The `#print axioms` lines in ListMeasures* are unpinned (no `#guard_msgs`), and
+the `*_many_iteration_budget` theorems are token-count bounds that do not
+mention `many`.

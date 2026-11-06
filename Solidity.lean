@@ -2936,6 +2936,7 @@ import Solidity.Frontend.StatementGrammarH28.FramedStatementList
 import Solidity.Frontend.StatementGrammarH28.G0List
 import Solidity.Frontend.StatementGrammarH28.HeadPr
 import Solidity.Frontend.StatementGrammarH28.LeafCoverage
+import Solidity.Frontend.StatementGrammarH28.ListMeasures
 import Solidity.Frontend.StatementGrammarH28.LoopCoverage
 import Solidity.Frontend.StatementGrammarH28.MixedSplit
 import Solidity.Frontend.StatementGrammarH28.NearestElse
@@ -2959,6 +2960,7 @@ import Solidity.Frontend.StatementGrammarH28.SyntaxPair
 import Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance
 import Solidity.Frontend.StatementGrammarH28.TokenRoot
 import Solidity.Frontend.StatementGrammarH28.YieldSplit
+import Solidity.Frontend.StatementGrammarH28.YulControlFree
 import Solidity.Frontend.Static.C3
 import Solidity.Frontend.Static.Certificates
 import Solidity.Frontend.Static.Closure
@@ -3826,6 +3828,8 @@ import Solidity.Source.Agreement.BoolSlotReadControls
 import Solidity.Source.Agreement.BoolSlotReadWrite
 import Solidity.Source.Agreement.BoolSlotRepeated
 import Solidity.Source.Agreement.BoolSlotRepeatedControls
+import Solidity.Source.Agreement.BoolSlotSaved
+import Solidity.Source.Agreement.BoolSlotSavedControls
 import Solidity.Source.Agreement.BoolSlotToggle
 import Solidity.Source.Agreement.BoolSlotToggleControls
 import Solidity.Source.Agreement.Locals
@@ -3841,6 +3845,16 @@ import Solidity.Source.Agreement.NormalDefaults
 import Solidity.Source.Agreement.NormalStatement
 import Solidity.Source.Agreement.NormalStep
 import Solidity.Source.Agreement.Primitive
+import Solidity.Source.Agreement.PrimitiveCopySequence
+import Solidity.Source.Agreement.PrimitiveCopySequenceControls
+import Solidity.Source.Agreement.PrimitiveSavedAssign
+import Solidity.Source.Agreement.PrimitiveSavedAssignControls
+import Solidity.Source.Agreement.PrimitiveSlot
+import Solidity.Source.Agreement.PrimitiveSlotAssign
+import Solidity.Source.Agreement.PrimitiveSlotAssignControls
+import Solidity.Source.Agreement.PrimitiveSlotControls
+import Solidity.Source.Agreement.PrimitiveSlotReverse
+import Solidity.Source.Agreement.PrimitiveSlotReverseControls
 import Solidity.Source.Agreement.PrimitiveTypes
 import Solidity.Source.Calldata
 import Solidity.Source.CalldataExamples
