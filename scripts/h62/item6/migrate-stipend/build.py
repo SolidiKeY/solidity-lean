@@ -2,7 +2,8 @@
 """Serial, cache-independent Lean closure build with resource and time evidence.
 Fresh output required. Hold repository writer.lock around this process.
 """
-import argparse, json, os, pathlib, resource, subprocess, time
+import argparse, json, os, pathlib, resource, subprocess, sys, time
+sys.dont_write_bytecode = True
 from census import ROOT, census
 p=argparse.ArgumentParser(); p.add_argument('lean',type=pathlib.Path); p.add_argument('output',type=pathlib.Path)
 p.add_argument('--fixture',type=pathlib.Path,action='append'); a=p.parse_args()
