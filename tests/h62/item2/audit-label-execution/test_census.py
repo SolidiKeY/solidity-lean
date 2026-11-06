@@ -2,6 +2,7 @@
 import importlib.util
 import copy
 import json
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -139,5 +140,92 @@ class ReconciliationTests(unittest.TestCase):
         self.assertTrue(allocated['result_begins_forall'])
         capacity=reviewed['Solidity.Backend.LabelExec.BlockShape.control_capacity']['source_premise_bundle']
         self.assertIn('| _ => True',capacity['result_source'])
+
+class LeadingForallTests(unittest.TestCase):
+    def test_result_binder_order_and_separate_header(self):
+        b=census.source_bundle('theorem t (n : Nat) : ∀ (m : Nat) (h : n = m), Q m')
+        self.assertEqual([x['names'] for x in b['header_binders']],[['n']])
+        q=b['leading_result_quantifiers']
+        self.assertEqual([x['names'] for x in q['groups'][0]['source_binders']],[['m'],['h']])
+        self.assertEqual(q['remaining_source'].strip(),'Q m')
+        self.assertEqual(b['simultaneous_witness'],'pending')
+
+    def test_bounded_source_is_not_invented_as_an_assumption(self):
+        b=census.source_bundle('theorem t : ∀ n ∈ byteQuery bytes, n < 256')
+        q=b['leading_result_quantifiers']['groups'][0]
+        self.assertEqual(q['source'],'∀ n ∈ byteQuery bytes,')
+        self.assertEqual(q['source_binders'],[])
+        self.assertEqual(q['parse_status'],'bounded-notation-retained-for-elaboration')
+        self.assertEqual(b['header_binders'],[])
+
+    def test_arrow_stops_leading_quantifier_partition(self):
+        q=census.source_bundle('theorem t : ∀ x : Nat, P x → ∀ y, Q x y')['leading_result_quantifiers']
+        self.assertEqual(len(q['groups']),1)
+        self.assertIn('→ ∀ y',q['remaining_source'])
+        self.assertTrue(q['has_remaining_quantifier'])
+
+    def test_comments_do_not_shift_unbracketed_type_offsets(self):
+        q=census.source_bundle('theorem t : ∀ /- note -/ x : Nat, Q x')['leading_result_quantifiers']
+        b=q['groups'][0]['source_binders'][0]
+        self.assertEqual(b['names'],['x'])
+        self.assertEqual(b['type_source'],'Nat')
+
+    def test_result_lets_and_nested_quantifiers_stay_intact(self):
+        b=census.source_bundle('theorem t : let z := 0; P z ∧ (∀ n, Q n)')
+        self.assertEqual(b['leading_result_quantifiers']['groups'],[])
+        self.assertEqual(b['leading_result_quantifiers']['remaining_source'],b['result_source'])
+        self.assertTrue(b['leading_result_quantifiers']['has_remaining_quantifier'])
+
+    def test_all_modules_and_quantifiers_are_accounted_exactly_once(self):
+        ReconciliationTests.setUpClass()
+        result=ReconciliationTests.result
+        self.assertEqual(len(result['files']),147)
+        identities=[(f['path'],r['name']) for f in result['files'] for r in f['source_summary']['declared_statement_identities']]
+        self.assertEqual(len(identities),656)
+        self.assertEqual(len(set(identities)),656)
+        self.assertEqual(sum(f['source_summary']['header_binder_groups'] for f in result['files']),1914)
+        self.assertEqual(sum(f['source_summary']['result_binder_groups'] for f in result['files']),513)
+        self.assertEqual(sum(f['source_summary']['leading_result_quantifier_groups'] for f in result['files']),88)
+        zero=[f for f in result['files'] if f['source_summary']['zero_direct_declarations']]
+        self.assertEqual(len(zero),6)
+        self.assertTrue(any(f['path']=='Solidity/Frontend/Yul/Parsing.lean' for f in zero))
+        self.assertTrue(all(f['source_summary']['simultaneous_witnesses']==0 for f in result['files']))
+
+class OverlayInspectionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        p=ROOT/'scripts/h62/item2/audit-label-execution/inspect_overlay.py'
+        spec=importlib.util.spec_from_file_location('inspect_overlay',p)
+        cls.inspector=importlib.util.module_from_spec(spec)
+        with patch.dict(sys.modules,{'census':census}):spec.loader.exec_module(cls.inspector)
+
+    def header(self):
+        p=self.inspector.PATH
+        return f'diff --git a/{p} b/{p}\nindex 1234567..7654321 100644\n--- a/{p}\n+++ b/{p}\n'
+
+    def test_actual_routed_overlay_is_inspected_without_application(self):
+        r=self.inspector.inspect(ROOT,ROOT/'tests/h62/item2/audit-label-execution/owner-overlays/hash-partial-receipt.json')
+        self.assertEqual(r['source_signatures_unchanged'],64)
+        self.assertEqual(r['patch_sha256'],'3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff')
+        self.assertFalse(r['overlay_applied'])
+        self.assertFalse(r['lean_executed'])
+
+    def test_relocated_artifact_still_requires_the_exact_routed_checksum(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bad=Path(directory)/'wrong.patch';bad.write_text('not the routed artifact')
+            with self.assertRaisesRegex(ValueError,'checksum mismatch'):
+                self.inspector.inspect(ROOT,ROOT/'tests/h62/item2/audit-label-execution/owner-overlays/hash-partial-receipt.json',bad)
+
+    def test_out_of_range_and_zero_count_hunks_are_rejected(self):
+        for hunk in ['@@ -99,0 +2,1 @@\n+b\n','@@ -99,1 +1,1 @@\n-a\n+b\n']:
+            with self.assertRaises(ValueError):self.inspector.apply_in_memory('a\n',self.header()+hunk)
+
+    def test_contradictory_metadata_is_rejected(self):
+        malformed=self.header().replace('--- a/','deleted file mode 100644\n--- a/',1)+'@@ -1,1 +1,1 @@\n-a\n+b\n'
+        with self.assertRaisesRegex(ValueError,'metadata'):self.inspector.apply_in_memory('a\n',malformed)
+
+    def test_wrong_context_and_hunk_counts_are_rejected(self):
+        for hunk in ['@@ -1,1 +1,1 @@\n-x\n+b\n','@@ -1,1 +1,2 @@\n-a\n+b\n']:
+            with self.assertRaises(ValueError):self.inspector.apply_in_memory('a\n',self.header()+hunk)
 
 if __name__ == '__main__': unittest.main()

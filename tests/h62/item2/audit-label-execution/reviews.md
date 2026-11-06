@@ -99,3 +99,45 @@ finding in the fixes. Both reviews used no Lean, server, writes or fixes.
 Review boundaries remain unchanged: ten manual source inspections plus source
 routing for all rows do not establish any elaborated type, structure inhabitance,
 per-input feasibility or simultaneous witness. No proof checkpoint is complete.
+
+
+## H70 next routed receipt: overlay, quantifiers and modules
+
+Finder independently reproduced the exact Hash patch checksum, Git pre/post
+blob IDs and all 64 ordered raw source signatures, with original bytes unchanged.
+No reported owner head was authenticated and no Lean/migration result claimed.
+
+Skeptic reproduced two malformed-patch acceptances in memory: out-of-range
+zero-count insertion and contradictory deleted-file metadata. Both are fixed by
+strict exact metadata and positive in-range hunk checks, with negative regression
+cases. Actual routed bytes still pass the inspection. No overlay was applied.
+
+Final independent read-only Python `-B` checks from both reviewers confirmed:
+
+```text
+frozen_identity_and_signature_invariance 656
+module_summaries 147 statement_identities 656 unique 656
+zero_direct_named_theorem_modules 6
+leading_result_groups 88 statements 86 source_binder_groups 513
+bounded_prefix_retained_opaque 1 remaining_nested_quantifier_rows 1
+quantifier_source_slice_and_offset_checks PASS
+malformed_overlay_cases_rejected PASS
+actual_hash_overlay_ordered_signatures_unchanged 64
+```
+
+The six zero-direct-theorem modules include definition-bearing files; no
+imported-interface or inhabitance claim follows from that count. Headers,
+leading result quantifiers, implication chains, local lets and nested results
+remain separate. All source sort/inhabitance/witness/fidelity claims remain
+pending. The finder identified a stale intermediate generated census after a
+summary wording change; final generation/replay replaces that intermediate file.
+No remaining code finding. Both reviewers used no writes, Lean commands or server.
+
+The routed patch is an off-Git evidence asset because its exact context spaces
+are checksum-significant. The committed receipt pins those bytes; the inspector
+accepts an explicit relocated artifact path but always checks the routed SHA256.
+
+Final artifact-path rechecks confirmed default receipt lookup and explicit
+relocation produce identical inspections, bad checksums/non-basename receipts
+are rejected, and current regenerated source census matches the saved artifact.
+The full current suite has 26 passing tests; no remaining review finding.

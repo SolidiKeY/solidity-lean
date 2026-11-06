@@ -220,3 +220,82 @@ exports remain preserved. Runtime slowdown measurement is still inapplicable:
 there is no Lean implementation/refactor change or passing migration baseline.
 Resume proofs and final gates only after authorized compatible overlays arrive;
 the full four-checkpoint goal remains blocked, not complete.
+
+
+## H70 partial Hash receipt and complete module source partition
+
+The next routed message reports no current-owner delivery pending. Host relay
+journals determine delivery acceptance; this does not establish owner agreement,
+validation, or permission to modify original files. The supplied partial Hash
+patch is retained off Git under `h70r2/incoming/`; its receipt is committed under
+`tests/h62/item2/audit-label-execution/owner-overlays/`. Exact patch context spaces
+are preserved, rather than altered to satisfy source-file whitespace checks.
+Its SHA256 exactly matches
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`.
+The owner reported head `78c110f83dc1a30700acd1b5bd34b19f61da6ccd` and source head
+`2a18afcdba00a85645b0b3079704f78ffcd78860`; those heads are reported identifiers,
+not independently authenticated local commits.
+
+`inspect_overlay.py` reconstructs the Hash postimage in memory only. It checks
+exact frozen hunk contexts, the preimage/postimage Git blob indices and all 64
+ordered named raw source signatures. The original blob is
+`b54c93a5b24340a19160c1fb378d057ccee60f84`, and the reconstructed blob is
+`092971eda8c7d6997276a92ba19b25b7ce05844e`. No original file was written, no overlay
+was applied, and no Lean command or proof check was run. This inspects a dependency
+and adds no statements to the 656-candidate denominator. Hash full migration and
+Syntax.Raw remain pending, alongside the other exact dependency overlays.
+
+Source census schema 3 now separately partitions leading result quantifiers.
+There are 88 groups across 86 statements, containing 513 written binder groups,
+in addition to the original 1,914 header binder groups. Source slices and offsets
+are exact; dependent binder order is retained. Unbracketed inferred types remain
+unknown. `∀ n ∈ byteQuery bytes, ...` remains one opaque bounded source prefix;
+its implicit membership guard is not invented as a separate proved/assumed fact.
+Implication chains and local lets stay in the remaining result. The remaining
+nested quantifier in P6CalldataHash.source_target_clipped_hash is explicitly
+retained. Result records are never merged into the header assumptions, and no
+new inhabitance, feasibility or witness status is inferred.
+
+All 147 mapped files also have source summaries with exact statement identity
+lists, original hashes, header/result role hints, explicit unresolved obligations
+and zero verified witnesses. Their lists account for all 656 statements exactly
+once. Six files have no direct named theorem: HashBridge Frame/QueryCut,
+LabelExec Fragment/Step, UnsignedDiv Data, and Frontend/Yul Parsing. Those files
+may contain definitions or only imports; zero direct theorems says nothing about
+imported-interface feasibility or structure inhabitance. The uncovered report
+retains these 147 module records as well as all 656 statement records.
+
+Twenty-six scanner/overlay regressions pass. The skeptic found two malformed
+patches that the first inspector accepted: an out-of-range zero-count insertion
+and contradictory deleted-file metadata. The inspector now permits only the
+exact single-file header and positive in-range hunks, and rejects both cases.
+Ordered signature lists also prevent duplicate-name collapse. Finder/skeptic
+read-only rechecks confirmed the actual partial patch, all module/statement
+counts, quantifier slices and pending proof boundaries. The finder caught a
+stale intermediate census after a wording fix; final evidence is regenerated
+from current code before hashing. Reviews used no Lean/server or writes.
+
+Current exports are under
+`/workspace/h62-audit-label-execution-evidence/h70r2/`. Deterministic generation:
+
+```sh
+python3 -B scripts/h62/item2/audit-label-execution/census.py \
+  --ownership /workspace/h62-coordinator-inputs/ownership.json \
+  --owner-reconciliation tests/h62/item2/audit-label-execution/owner-reconciliation.json \
+  --source-reviews tests/h62/item2/audit-label-execution/source-bundle-reviews.json \
+  --output /workspace/h62-audit-label-execution-evidence/h70r2/source-census.json
+python3 -B scripts/h62/item2/audit-label-execution/inspect_overlay.py \
+  --receipt tests/h62/item2/audit-label-execution/owner-overlays/hash-partial-receipt.json \
+  --output /workspace/h62-audit-label-execution-evidence/h70r2/hash-overlay-inspection.json
+python3 -B tests/h62/item2/audit-label-execution/test_census.py
+```
+
+The source generation/inspection and 26 tests pass; enriched blocked-report
+checking still exits 1 against the retained failed pinned-toolchain import
+results. Every elaborated-signature, global premise inhabitance, per-input
+feasibility, simultaneous-witness, totality, negative-compiler, failure/gas/fork
+and final Lean gate remains pending or blocked. No original statements, budgets,
+roots, pins or intrinsic representations changed. No runtime slowdown claim is
+possible without a passing migration baseline. This is a fresh handoff after
+receipt inspection, result/module source partition and test/review work; the
+coordinator retains the same VM, branch and original unfinished goal.

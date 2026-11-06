@@ -1,5 +1,5 @@
 {
-  "delivery": "H70 coordinator router reports accepted relays by migrate-backend, migrate-bridge, migrate-frontend, migrate-hash, migrate-source, migrate-syntax and migrate-yul; wait for authorized overlays. relay.sh is host-only; no VM installation task. No original-file edit permission granted.",
+  "delivery": "Latest H70 router reports current-owner delivery pending: none. Host relay journals determine delivery acceptance only; no owner agreement, validation or edit permission inferred. Wait for the exact authorized migration overlays. relay.sh is host-only.",
   "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "blockers": [
     {
@@ -58,7 +58,9 @@
         "Migration owner repairs proof or API compatibility while preserving the full frozen statement and trust requirements.",
         "Coordinator supplies an already reviewed compatible migration overlay from the same assigned owner; audit replays all affected gates."
       ],
-      "audit_may_edit_original": false
+      "audit_may_edit_original": false,
+      "partial_overlay_receipt": "tests/h62/item2/audit-label-execution/owner-overlays/hash-partial-receipt.json",
+      "partial_overlay_disposition": "Advertised checksum and frozen contexts verified in memory; 64 ordered raw source signatures unchanged; not applied or Lean-validated. Full migration gate remains pending."
     },
     {
       "id": "B03",

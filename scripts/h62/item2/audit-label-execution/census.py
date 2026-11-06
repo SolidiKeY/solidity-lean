@@ -7,6 +7,7 @@ of elaborated premises requires a Lean environment; source routing hints below
 do not establish types, inhabitance or simultaneous feasibility.
 """
 import argparse
+from collections import Counter
 import fnmatch
 import hashlib
 import json
@@ -125,6 +126,54 @@ def source_role(type_source):
         return 'per-input-condition', 'source relation/equality/bound; exact proposition and dependence await elaboration'
     return 'argument-or-unresolved-bundle', 'data/index/type parameter or opaque premise bundle; no premise exclusion inferred'
 
+def leading_result_foralls(result):
+    """Partition written leading quantifiers; do not turn conclusions into premises."""
+    clean = mask(result)
+    records = []
+    offset = 0
+    while offset < len(clean):
+        while offset < len(clean) and clean[offset].isspace(): offset += 1
+        if offset == len(clean) or clean[offset] != '∀': break
+        start = offset
+        offset += 1
+        depth = 0
+        comma = None
+        for i in range(offset, len(clean)):
+            if clean[i] in '({[': depth += 1
+            elif clean[i] in ')}]': depth -= 1
+            elif clean[i] == ',' and depth == 0: comma = i; break
+        if comma is None: raise ValueError('leading forall has no source delimiter')
+        prefix = result[offset:comma].strip()
+        prefix_clean = mask(prefix)
+        plain = prefix_clean.strip()
+        binders = []
+        status = 'source-partitioned'
+        if any(op in plain for op in ['∈','∉']):
+            status = 'bounded-notation-retained-for-elaboration'
+        elif plain and plain[0] in '({[':
+            try:
+                # The wrapper is parser input only, never a saved/checked Lean declaration.
+                binders = source_bundle('theorem __source_quantifier ' + prefix + ' : True')['header_binders']
+            except ValueError: status = 'opaque-source-prefix-retained'
+        else:
+            colon = top_colon(prefix_clean)
+            names_source = prefix_clean[:colon].strip() if colon is not None else plain
+            names = names_source.split()
+            if not names or any(not re.fullmatch(r"[^\W\d][\w']*|_",n) for n in names):
+                status = 'opaque-source-prefix-retained'
+            else:
+                ty = prefix[colon+1:].strip() if colon is not None else None
+                role, reason = source_role(ty) if ty is not None else ('inferred-parameter-group','source has no written binder type')
+                binders = [dict(source=prefix,names=names,type_source=ty,binder_syntax='result-quantified-unbracketed',
+                                role_hint=role,role_evidence=reason,type_kind='pending-elaboration',inhabitance='not-checked')]
+        records.append(dict(start=start,end=comma+1,source=result[start:comma+1],binder_source=prefix,
+                            source_binders=binders,parse_status=status,
+                            interpretation='result-level quantifier; not promoted to a header assumption'))
+        offset = comma + 1
+    return dict(groups=records,remaining_source=result[offset:],remaining_offset=offset,
+                has_remaining_quantifier='∀' in clean[offset:],
+                status='source-only; bounded, inferred and nested obligations require elaboration')
+
 def source_bundle(signature):
     clean = mask(signature)
     match = DECL.match(clean)
@@ -157,6 +206,7 @@ def source_bundle(signature):
     else: raise ValueError('missing result colon')
     return dict(classification_level='source-routing-only',
                 header_binders=binders, result_source=result,
+                leading_result_quantifiers=leading_result_foralls(result),
                 result_contains_forall='∀' in mask(result),
                 result_begins_forall=mask(result).lstrip().startswith('∀'),
                 result_boundary='conclusion as written, not promoted to additional header premises',
@@ -281,6 +331,39 @@ def apply_source_reviews(root, rows, review):
         if row['signature_sha256'] != entry['signature_sha256']: raise ValueError('source review signature mismatch')
         row['source_review'] = entry
 
+def module_source_summaries(files, rows):
+    areas = ['Bridge/SolidityBridge/ExternalEvm/','Bridge/SolidityBridge/HashBridge/',
+             'Solidity/Backend/LabelExec/','Solidity/Backend/Transient/',
+             'Solidity/Backend/PrimitivePackets/UnsignedDiv/','Solidity/Backend/StructuredFlow/',
+             'Solidity/Frontend/Yul/','Solidity/Lowering/G19/','Solidity/Yul/Adapters/',
+             'Solidity/Yul/Checks/','Solidity/Yul/']
+    for f in files:
+        members = [r for r in rows if r['path'] == f['path']]
+        if len(members) != f['declarations']: raise ValueError('module declaration total mismatch')
+        headers = [b for r in members for b in r['source_premise_bundle']['header_binders']]
+        quantifiers = [g for r in members for g in r['source_premise_bundle']['leading_result_quantifiers']['groups']]
+        quantified_binders = [b for g in quantifiers for b in g['source_binders']]
+        area = next((a for a in areas if f['path'].startswith(a)),None)
+        if area is None: raise ValueError('unclassified mapped source area: ' + f['path'])
+        f['source_summary'] = dict(area=area,classification='source-only; not module proof validation',
+            declared_theorems=len(members),public_theorems=sum(r['visibility']=='public' for r in members),
+            private_helpers=sum(r['visibility']=='private' for r in members),
+            declared_statement_identities=[dict(name=r['name'],line=r['line'],signature_sha256=r['signature_sha256']) for r in members],
+            zero_direct_declarations=not members,
+            zero_declaration_boundary='no direct named theorem; may contain definitions or only imports; not an inhabitance or imported-interface claim' if not members else None,
+            header_binder_groups=len(headers),header_role_hints=dict(Counter(b['role_hint'] for b in headers)),
+            leading_result_quantifier_groups=len(quantifiers),result_binder_groups=len(quantified_binders),
+            result_role_hints=dict(Counter(b['role_hint'] for b in quantified_binders)),
+            retained_unparsed_or_bounded_prefixes=sum(g['parse_status']!='source-partitioned' for g in quantifiers),
+            retained_nested_quantifier_statements=[r['name'] for r in members if r['source_premise_bundle']['leading_result_quantifiers']['has_remaining_quantifier']],
+            manually_source_reviewed=sum('source_review' in r for r in members),
+            elaborated_signatures=0,simultaneous_witnesses=0,
+            pending=['exact implicit/inherited binder closure','bundled certificate fields and global laws',
+                     'joint per-input feasibility','success/totality and observable boundaries','Lean verification'])
+    identities=[(f['path'],r['name']) for f in files for r in f['source_summary']['declared_statement_identities']]
+    if len(identities)!=len(rows) or len(set(identities))!=len(rows):
+        raise ValueError('module source census does not account for every statement exactly once')
+
 def run(root, registry, reconciliation=None, source_reviews=None):
     files = []
     rows = []
@@ -299,9 +382,10 @@ def run(root, registry, reconciliation=None, source_reviews=None):
             write_authorization='none granted; task scope keeps original files read-only')
     if reconciliation is not None: reconcile_owners(root,registry,files,rows,reconciliation)
     if source_reviews is not None: apply_source_reviews(root,rows,source_reviews)
+    module_source_summaries(files,rows)
     keys = [(r['path'],r['name']) for r in rows]
     if len(keys) != len(set(keys)): raise ValueError('duplicate declaration identity')
-    return dict(schema=2, base=BASE, map=MAP, map_sha256=digest(frozen_bytes(root,MAP)),
+    return dict(schema=3, base=BASE, map=MAP, map_sha256=digest(frozen_bytes(root,MAP)),
                 source_fidelity='all mapped worktree bytes equal pinned git blobs',
                 limitations=['Source signatures retain defaults and full-prefix hashes; elaboration must recover section/implicit binders.',
                              'All named source theorems are candidates; no theorem is excluded by a textual hypothesis heuristic.',
@@ -310,7 +394,7 @@ def run(root, registry, reconciliation=None, source_reviews=None):
                 counts=dict(files=len(files), declarations=len(rows), witnessed=0,
                             uncovered=len(rows), owner_unresolved=sum(len(r['owner_evidence']) != 1 for r in rows),
                             producer_attribution_unresolved=sum(not r.get('producer_attribution', {}).get('owner') for r in rows),
-                            source_partitioned=len(rows), source_reviewed=sum('source_review' in r for r in rows), elaborated=0))
+                            source_partitioned=len(rows), source_reviewed=sum('source_review' in r for r in rows), source_modules_partitioned=len(files), elaborated=0))
 
 if __name__ == '__main__':
     p=argparse.ArgumentParser(description=__doc__)
