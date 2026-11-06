@@ -59,6 +59,26 @@ class ScannerControls(unittest.TestCase):
         self.assertIsNone(scanner.raw_literal('x?r#"s"#', 2))
         self.assertIsNone(scanner.char_literal("x?'a'", 2))
 
+    def test_lean_unicode_identifier_continuations(self):
+        for suffix in ("℘", "₀", "ₐ", "ᵢ", "𝒜"):
+            with self.subTest(suffix=suffix):
+                self.assertNotEqual(scanner.normalize("(x : Nat) : x" + suffix + " = x"),
+                                    scanner.normalize("(y : Nat) : y" + suffix + " = y"))
+                self.assertEqual(scanner.tokenize("x" + suffix), ["x" + suffix])
+                self.assertIsNone(scanner.raw_literal('x' + suffix + 'r#"a"#', 2))
+                self.assertIsNone(scanner.char_literal("x" + suffix + "'a'", 2))
+        self.assertEqual(scanner.normalize("(x℘ : Nat) : x℘ = x℘"),
+                         scanner.normalize("(y℘ : Nat) : y℘ = y℘"))
+
+    def test_lean_identifier_operator_boundaries(self):
+        for op in ("×", "÷", "λ", "Π", "Σ"):
+            with self.subTest(op=op):
+                self.assertEqual(scanner.tokenize("x" + op + "y"), ["x", op, "y"])
+        for op, literal in (("×", "'«'"), ("÷", "'»'")):
+            source = "def x := 2" + op + literal
+            self.assertEqual(scanner.mask(source), source)
+            self.assertEqual(len(scanner.hide_strings(source)), len(source))
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))

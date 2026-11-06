@@ -9,13 +9,18 @@ import re
 from pathlib import Path
 
 DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
-TOKEN = re.compile(r"""r(#+)"[\s\S]*?"\1|'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'|«[^»]*»|"(?:\\.|[^"\\])*"|(?:[^\W\d]|_)[\w\'!?]*(?:\.(?:[^\W\d]|_)[\w\'!?]*)*|[\w\']+(?:\.[\w\']+)*|[^\s]""")
+ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
+ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
+IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
+TOKEN = re.compile(r"""r(#+)"[\s\S]*?"\1|'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'|«[^»]*»|"(?:\\.|[^"\\])*"|""" + IDENT + r"(?:\." + IDENT + r")*|[0-9]+(?:\.[0-9]+)*|[^\s]")
 RAW_START = re.compile(r'r(#+)"')
 CHAR = re.compile(r"'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'")
-BINDER = re.compile(r"([({\[])\s*((?:[^\W\d]|_)[\w'!?]*(?:\s+(?:[^\W\d]|_)[\w'!?]*)*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
+BINDER = re.compile(r"([({\[])\s*(" + IDENT + r"(?:\s+" + IDENT + r")*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
+
+ID_REST_CHAR = re.compile("[" + ID_REST + "]")
 
 def raw_literal(text, i):
-    if text[i] != "r" or (i and (text[i-1].isalnum() or text[i-1] in "_'!?")): return None
+    if text[i] != "r" or (i and (ID_REST_CHAR.fullmatch(text[i-1]))): return None
     match = RAW_START.match(text, i)
     if not match: return None
     close = '"' + match.group(1)
@@ -24,7 +29,7 @@ def raw_literal(text, i):
     return end + len(close)
 
 def char_literal(text, i):
-    if text[i] != "'" or (i and (text[i-1].isalnum() or text[i-1] in "_'!?")): return None
+    if text[i] != "'" or (i and (ID_REST_CHAR.fullmatch(text[i-1]))): return None
     return CHAR.match(text, i)
 
 def mask(text):

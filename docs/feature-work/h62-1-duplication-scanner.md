@@ -424,3 +424,36 @@ are outside Git under
 ordered this worker retired before the after run. The successor must check the
 fix, complete negative controls and reviews, measure the matched after run
 and stop if slowdown exceeds 10%; no passing performance gate is claimed.
+
+## Post-merge identifier controls
+
+After the published master was merged, a skeptic found that the earlier
+continuation fix still split Lean letterlike and subscript characters, so
+`(x : Nat) : x℘ = x` and the corresponding `y℘` expression could normalize
+together. The scanner now uses character classes from the pinned Lean 4.24
+`isIdFirst` and `isIdRest` rules for identifiers, binders, and literal
+predecessors. Controls cover free-name differences, alpha-renamed binders,
+subscripts, astral letterlike characters, and operators adjacent to character
+literals. The 33-test Python suite passed. A first overbroad intermediate
+range incorrectly included operators; independent finder and skeptic reviews
+found it and the final controls cover their counterexamples. One reviewer
+compared the final continuation class with a transcription of Lean's predicate
+through U+1D59F. These controls do not prove full lexer or parser equivalence.
+
+On master `20e492ee99a3fa8679aa526de0b6e731d85e4134`, the matched full-tree
+pair for the earlier punctuation change took 96.098 seconds before and 96.333
+seconds after (+0.24%). Using that same-tree after run as the before of the
+Unicode correction, the corrected scanner took 97.220 seconds (+0.92%).
+All three runs selected 6,932 Lean files, recognized 118,563 declarations and
+reported no file errors or unmatched patterns. This is lexical discovery, not
+proof of complete declaration accounting or intrinsic-signature equivalence.
+The unfinished overbroad intermediate run was interrupted and is not a gate.
+Bulk outputs, commands and timings remain outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`. Selected
+symlink aliases and broken links remain a separately identified open defect.
+
+The post-merge repository documentation-path gate exited 1 on five missing
+references in `h62-6-migrate-theory.md`, the audit-abi-world census test,
+`packet-panic/H71-CANDIDATE.md` and generic-structuredflow registration. None
+is in this scanner document. Its log is `postmerge-timing/doc-paths.log` in
+the evidence directory; the repository-wide gate remains open.
