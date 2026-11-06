@@ -190,3 +190,28 @@ statement types, and every original observation remains an acceptance obligation
 This matrix covers named public statements in these two controls only. Private
 facts, other families, all replacement proofs and exact statement comparison
 remain open; the matrix is not a proof or scope-complete acceptance.
+
+## Literal-failure Source/static semantic review (partial)
+
+Manual review of three V08 controls identifies the following original public
+facts and distinct static-frame behavior. The list records preservation
+obligations, not proof of a proposed shared fixture.
+
+| Control and declarations | Original observations and premises to retain |
+|---|---|
+| BoolPrefix `member`, `typed`, `related`, `lookups`, `expression_lookups`, `fields` | Declaration membership and typing, argument/heap lookups and StringBytes/representation witnesses; `fields` retains its explicit heap lookup premise. |
+| BoolPrefix `actual_error`, `actual_expression` | The same heap premise yields the exact custom-error revert packet and unchanged state, versus successful ABI expression allocation at memory reference 4 with the specified `afterLiteral` state. |
+| BoolPrefix `retained`, `older`, `unused_third`, `fresh` | Preserve represented fields after allocation, the older bytes object, the unused third string, the new object at 4 and cursor 5. |
+| BoolPrefix `alias_error`, `timeout`, `dangling_error`, `dangling_expression`, `wrong_cursor` | Preserve the aliased first-string packet, timeout at fuel 1, distinct stuck dangling-reference outcomes for statement and expression, unchanged states, and cursor inequality. |
+| BoolPrefix `static_error` | With `static := true`, this pure custom-error statement still reverts with the exact packet and unchanged state; it is not a generic static-write refusal. |
+| BoolPrefix `packed_bool`, `packed_uint`, `packed_unequal` | Actual packed Bool and uint encodings remain distinct. |
+| MixedEncoding `represented`, `arguments_run`, `body_return`, `extracted` | Keep the four-field representation and exact argument/tuple-return states; `arguments_run` and `body_return` quantify over both values of `static`. |
+| MixedEncoding `encoding`, `transport`, `finite_fits`, `finite_transport` | Encoding applies at arbitrary frame/fuel; transport retains its explicit `Failure.Fits 8` premise, and the finite witness uses the 256-byte packet and physical world journal. |
+| MixedEncoding `old_alias`, `repeated_alias` | Preserve the old return-slot reference and the repeated dynamic reference with its duplicated bytes representation. |
+| MixedEncoding `wrong_order`, `first_offset`, `second_offset`, `empty_encoding`, `wrong_head` | Preserve the unequal order control, concrete offsets 128 and 192, empty encoding, and rejected head offset 64. The five `packets` and printed observations are separate original controls. |
+| ScalarOverflow `overflow_bound`, `populated` | Maximum plus one reaches the 256-bit bound; the actual checked Source `evalE` and guarded scalar execution both fail with arithmetic panic for either `static` value, retaining the stated Source state. |
+| ScalarOverflow `retained_operands`, `raw_zero`, `positive_baseline`, `no_success_on_overflow` | Retain the test stack operands, distinguish the unchecked raw zero body from the guarded failure, preserve the positive 1+1 result and the explicit no-success observation. |
+
+This is not a review of all Source/static families or of every original
+private declaration and emitted observation. It does not establish exact
+statement preservation or discharge any Lean gate.
