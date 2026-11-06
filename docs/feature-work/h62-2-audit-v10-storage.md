@@ -648,3 +648,26 @@ with 3232 unmapped. This establishes current compatibility of those selected
 witnesses, not general Source compiler admission, numeric/physical adequacy,
 world rollback or release of the separate v4.35 timing/trust STOP holds. No
 Source producer, frozen contract or witness statement was edited.
+
+## Dependency routing after published Source proof updates
+
+C217 compares the exact Git trees at the C213 kernel-receipt head and the
+adopted master head. Seven of the nine witness source/import closures have
+identical bytes. SourceReadWitnesses and SourceWriteWitnesses each reach one
+changed file, Source/Ctor.lean. This is a lexical one-line import routing aid,
+not an elaborated dependency certificate. It records external imports without
+comparing toolchain/package objects or generated artifacts. Equal source bytes
+do not transfer kernel, axiom, performance or resource acceptance. Historical
+kernel pins remain unchanged, and current-head Lean validation remains pending.
+
+The two additive tool files were initially created without the required writer
+flock. No concurrent modification was observed; unobserved activity cannot be
+ruled out. Subsequent edits, checks and commit preparation used the lock. The
+C216 resource-stop receipt is retained; no unchanged Lean retry was performed.
+
+Coordinator option 1 for V10-R217 authorized recovery of the same bounded
+runtime. It recovered with the original 12 GiB memory cap, zero swap and serial
+threads. The fresh unchanged preflight exited 1 before Lean started because
+other parent-cgroup usage exceeded the existing headroom allowance. Only the
+prospective shell stack limit was raised as authorized by H111. No proof budget,
+memory cap, guard or historical failed receipt was changed.
