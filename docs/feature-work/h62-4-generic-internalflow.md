@@ -1,7 +1,8 @@
 # H62 item 4: generic InternalFlow controls
 
 Status: **blocked; full assignment unfinished**. This is a reviewable additive
-census/backfill checkpoint, not completion of any semantic gate.
+census/backfill checkpoint. H70 classification of all 57 suffix Controls files is
+complete; no semantic Lean gate or full assignment completion is claimed.
 
 ## Checkout and boundaries
 
@@ -24,12 +25,14 @@ is needed yet: this checkpoint adds no Lean module.
 ## Queue status
 
 1. Partial: deterministic conservative lexical inventory and exact source/header
-   hashes are saved. Semantic case classification and per-case audit adjudication
-   are unfinished. Do not equate filename/control-name heuristics with all cases.
+   hashes are saved. H70 semantic classification and per-case audit9/11/16
+   adjudication are complete for all 57 suffix Controls files. Embedded Checks/Client
+   controls in other family files remain semantically unclassified. The full
+   checkpoint remains partial; no original declaration is dropped.
 2. Blocked: intrinsic parameterized semantic lemma and typed fixture table are not
    implemented/proved. No exact-instance migration is claimed.
 3. Blocked: semantic correspondence, all negative/refusal coverage and Lean
-   reproduction acceptance remain required. External census acceptance passes.
+   reproduction acceptance remain required. External census/classification acceptance passes.
 4. Blocked: before/after semantic checking measurements are unavailable without a
    migration implementation and working dependency closure. No timing delta or
    slowdown claim. Stop if an eventual comparable measurement exceeds 10%.
@@ -62,7 +65,10 @@ twins. The scanner marks their 14 matching files as candidates. Item 11 searches
 for shared sourceReverted/pushes_zero/allocationCostProg/HRef/HeapRepr/AllocatorRepr
 uses; 151 files have these broad search hits, not necessarily duplicated lemmas.
 Item 16 motivates data tables for the 57 Controls files; its Yul Raw and numeric
-examples remain out of scope. Manual semantic matching is still pending.
+examples remain out of scope. Those initial search hits were candidates only.
+H70 replaces candidate-only interpretation within the 57 suffix Controls files
+with manual per-declaration adjudication, described below. Embedded controls in
+other family files remain pending.
 
 ## Gates and resource evidence
 
@@ -80,8 +86,10 @@ preflights resources and cleans up its owned process group. No systemd-run.
 No Lean MCP diagnostic tools were exposed; direct bounded per-file checking used.
 
 - `bash scripts/h62/item4/generic-internalflow/acceptance.sh /workspace/h62-evidence/generic-internalflow`:
-  PASS, exit 0; seven tooling regression tests; BASE/current inventories identical;
-  deterministic byte reproduction and `git diff --check`. This is external
+  PASS, exit 0; 16 tooling regression tests (7 census + 9 classification);
+  BASE/current inventories identical; every Controls declaration/header/hash and
+  guard command conserved; semantic inventories reproduced byte-for-byte;
+  `git diff --check`. Evidence: `semantic-acceptance.log`. This is external
   acceptance, not semantic proof.
 - `python3 scripts/h62/item4/generic-internalflow/bounded.py -- /workspace/h62-toolchain/lean-4.35.0-linux/bin/lean -j1 --tstack=131072 Solidity/KeySort.lean`:
   PASS, Lean exit 0, 1.728617431 s, sampled peak group RSS 518,987,776 bytes;
@@ -103,12 +111,20 @@ No Lean MCP diagnostic tools were exposed; direct bounded per-file checking used
 `solidity-h62-6-20261106/migrate-syntax` (`H62-6-MIGRATE-SYNTAX`, reserved).
 This file is outside this worker's scope. Exact-file request saved at
 `tests/h62/item4/generic-internalflow/owner-request.json` for coordinator pickup.
-`relay.sh` is absent: no relay delivered and no owner agreement inferred.
+H70 confirms accepted ticket relays to `migrate-syntax` and
+`solidity-v12-v17-20261031/v12-flow-calls`. `relay.sh` is host-only, not a VM
+installation task. Accepted routing does not supply a dependency overlay or
+exact-file edit agreement. Neither has been inferred.
 The diagnostic is `/workspace/h62-build435/generic-internalflow/Solidity.Syntax.Raw.log`;
 summary `/workspace/h62-evidence/generic-internalflow/build-run.log`.
 
 Family originals also remain read-only until exact-file relay agreement. No
-family migration patch exists yet. Coordinator should obtain/apply the approved
+family migration patch exists yet. Candidate exact-file request
+`tests/h62/item4/generic-internalflow/family-owner-request.json` nominates
+`RuntimeFrameV3CallerStorageFrameControls.lean:no_ref` and
+`RuntimeFrameV3OrderedEffectfulStorageControls.lean:no_struct` for possible
+owner-applied instances of a future proved typed absence lemma. These are distinct
+candidates, not established duplicate bodies. Coordinator should obtain/apply the approved
 dependency overlay, preserve source ownership, and resume all four checkpoints.
 Do not fix Raw locally or silently use 4.24 as a substitute.
 
@@ -122,23 +138,101 @@ passes. All concrete findings were fixed with focused acceptance coverage.
 Finder re-reviewed all 2,190 theorem-like lexical headers and passed the current
 family census; semantic-completeness caveat remains. Skeptic final follow-up is
 recorded in off-git `reviews.json`. Reviews apply to this tooling milestone only;
-future semantic milestones still require their own finder/skeptic reviews.
+future semantic proof milestones still require their own finder/skeptic reviews.
+
+H70 classification received a separate independent read-only finder and skeptic
+review across all 57 files/912 declarations. Both pass classification accounting
+and multi-facet fidelity, not Lean elaboration or proof replay. The skeptic's
+liveness wording correction was applied: the storage variant transports fragile
+storage-alias liveness through storage equality **while retaining explicit
+heap-reference liveness**. Both reviewers require the full checkpoint to stay
+partial because embedded controls remain pending. Evidence:
+`/workspace/h62-evidence/generic-internalflow/semantic-reviews.json`.
 
 ## Resume and handoff
 
 Full original inventory below lists each Controls file; every other declaration
 and embedded client/control remains in the off-git JSON. Reproduce using the
 acceptance command above; resume the isolated builder only after approved owner
-dependency migration. Then classify all cases semantically, select generic
+dependency migration. Classify embedded controls outside the completed H70 subset;
+then select generic
 intrinsic lemmas, build typed fixture tables and exact-instance correspondence,
 preserve refusals, obtain owner-applied migration and registration, run affected
 and final gates, and measure before/after under identical toolchain/tree/cache/
 resource conditions. Persistent assignment remains unfinished and blocked.
 
-Export paths: `/workspace/h62-artifacts/generic-internalflow/original.patch`,
-`handoff.md`, `SHA256SUMS`; evidence directory above, exported without build bulk.
+H70 export paths: `/workspace/h62-artifacts/generic-internalflow/h70/original.patch`,
+`handoff.md`, `SHA256SUMS`; evidence snapshot:
+`/workspace/h62-evidence/generic-internalflow/h70/`. Previous checkpoint artifacts
+remain at the parent export path. Build bulk is not exported.
 Committed head is recorded in the external handoff/result after commit to avoid
 self-referential hashes. The coordinator can retrieve these from this same VM.
+
+## H70 semantic classification and audit adjudication
+
+Completed H70 subset: all 57 filename-suffix Controls files, 577 original theorem
+declarations and 335 fixture definitions/aliases (912 declarations). These counts
+include helper lemmas and do not claim 577 independent executions. No declaration
+was invented, removed, split, weakened or migrated. Embedded Checks/Client sections
+outside this subset remain pending; the complete 271-file lexical inventory stays
+available. `unclassified: 0` in the new output is scoped to these 57 files only.
+
+Source map: `tests/h62/item4/generic-internalflow/semantic-cases.txt`.
+Expander: `scripts/h62/item4/generic-internalflow/classify.py`. Each case has
+manually assigned nonexclusive conclusion facets; no semantic label is inferred
+from its name. Every record retains the full original header, header/slice hashes,
+line and kind; every file retains its source hash and guard commands. Original
+`negative_candidate` fields remain lexical hints only. Exact headers govern all
+quantifiers, hypotheses, observations and conjuncts; facets do not replace them.
+
+Generated off-git artifact:
+`/workspace/h62-evidence/generic-internalflow/semantic-inventory.json`, SHA256
+`2dff3601783cb66895fd3324a925c262575c9ecacc6890f30fb474cfe9c9f8c1`.
+It includes per-declaration audit9/11/16 dispositions and all facet definitions.
+Reproduction uses the acceptance command above or:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-internalflow/classify.py \
+  --inventory /workspace/h62-evidence/generic-internalflow/original-inventory.json \
+  --output /workspace/h62-evidence/generic-internalflow/semantic-inventory.json
+```
+
+Audit adjudication is deliberately narrower than a refactor approval:
+
+- **9:** The four named twin pairs are recorded with exact source filenames and
+  distinct semantic boundaries. Ordered scalar/storage and effectful runtime
+  variants differ in fragile-alias handling; explicit heap liveness remains.
+  RecursiveScopeCompiler/ScalarSourceCompiler differ in recognition of wrappers
+  at every recursive level versus exact canonical bodies. AllocatingArguments/
+  MutatingCaller differ in old-heap effects. Five Controls files are direct pair
+  controls; four support the same boundaries; the rest carry no direct named-twin
+  claim. Similar imports alone establish no substitution theorem.
+- **11:** No named sourceReverted/pushes_zero/allocationCostProg/Loc.data motif was
+  found in InternalFlow. Ordinary HRef/HeapRepr/AllocatorRepr use does not establish
+  copied proof bodies. Exactly two Controls helper candidates are adjudicated:
+  no_ref excludes every reference from an empty heap, while no_struct excludes
+  struct references from a singleton uint-array heap and needs constructor
+  disjointness. Preserve their separate exact instances. The audit's eight shared
+  MemoryCopies fixtures belong outside this lane.
+- **16:** A typed table may index existing fixtures and observations. Semantic
+  execution, reconstruction, correspondence and counterexample proofs must still
+  be parameterized kernel proofs. No decide-table replacement. Source-language
+  refusal, source bare revert/panic/payload/exhaustion, target outcomes, Entry
+  witnesses and claims are separate facets. No Yul Raw/vector generator work.
+
+Critical retained distinctions include positive admission/Entry for reverting
+inputs (`negative_member`, `negative_entry`), compiler acceptance of bad-evaluating
+arguments (`bad_selected`, `bad_root`), source exhaustion with target success,
+success without allocator ownership, two positive Heap.Keeps facts with unequal
+heaps and non-default new objects, and byte-exact payload/panic preservation.
+`wrong_active` is a conditional observation, not an existence witness.
+`AllocatingSourceViews.actual_exhaustion` asserts source exhaustion/non-revert only.
+
+Next generic proof candidates are typed halt-constructor separation after actual
+source-run witnesses, intrinsic view reconstruction/correspondence, and typed
+reference absence. Keep vector ordering, missing-export counterexamples, capacity
+boundaries, zero-owner success and fragility witnesses as full exact obligations.
+These are candidates, not proved generic lemmas or owner-approved migrations.
 
 ## Original Controls inventory (lexical counts)
 

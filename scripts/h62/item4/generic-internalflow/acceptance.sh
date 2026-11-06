@@ -12,6 +12,10 @@ python3 tests/h62/item4/generic-internalflow/test_census.py
 python3 scripts/h62/item4/generic-internalflow/census.py --revision c6f550e281a7e5affa9a99bc2cdaed556dec00e4 --output "$evidence/original-inventory.json"
 python3 scripts/h62/item4/generic-internalflow/census.py --output "$evidence/reproduced-inventory.json" --compare "$evidence/original-inventory.json"
 cmp "$evidence/original-inventory.json" "$evidence/reproduced-inventory.json"
-sha256sum "$evidence/original-inventory.json" "$evidence/reproduced-inventory.json"
+python3 tests/h62/item4/generic-internalflow/test_classification.py
+python3 scripts/h62/item4/generic-internalflow/classify.py --inventory "$evidence/original-inventory.json" --output "$evidence/semantic-inventory.json"
+python3 scripts/h62/item4/generic-internalflow/classify.py --inventory "$evidence/original-inventory.json" --output "$evidence/semantic-inventory-reproduced.json"
+cmp "$evidence/semantic-inventory.json" "$evidence/semantic-inventory-reproduced.json"
+sha256sum "$evidence/original-inventory.json" "$evidence/reproduced-inventory.json" "$evidence/semantic-inventory.json"
 git diff --check
-printf '%s\n' 'PASS external census acceptance; NOT semantic Lean proof or RUNTIME_GATE_PASS'
+printf '%s\n' 'PASS external census/classification acceptance; NOT semantic Lean proof or RUNTIME_GATE_PASS'

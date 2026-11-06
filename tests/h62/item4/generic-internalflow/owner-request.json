@@ -17,5 +17,5 @@
     "682 String.endsWith higher-order mismatch",
     "684 String.dropRight absent"
   ],
-  "delivery": "saved for coordinator pickup; scripts/coord-tools/relay.sh absent; no relay sent"
+  "delivery": "H70 coordinator routing: ticket relay accepted by solidity-h62-6-20261106/migrate-syntax and solidity-v12-v17-20261031/v12-flow-calls. relay.sh is host-only; no VM installation task. Dependency overlay and exact-file owner agreement remain pending; routing grants no original-file edit permission."
 }
