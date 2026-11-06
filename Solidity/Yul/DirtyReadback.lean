@@ -4,25 +4,36 @@ import Solidity.Yul.CleanFunctions
 /-! **Readback of dirty LOCAL words** (user decision H109, 2026-11-06).
 
 An assembly block may leave a dirty word (high bits set) in a narrow integer
-or `bool` Solidity local. Solidity code reading the local afterwards sees it
-cleaned, the same way in both pinned pipelines (solc 0.8.38, optimizer off;
-`tests/evm-reference/dirty-locals.json`, produced by
-`scripts/evm-reference/dirty-locals.mjs`):
+or `bool` Solidity local. Every Solidity-level read of the local afterwards
+sees it cleaned, the same way in both pinned pipelines (solc 0.8.38,
+optimizer off; `tests/evm-reference/dirty-locals.json`, produced by
+`scripts/evm-reference/dirty-locals.mjs`, 33 probes):
 
-- `uintN`: the low `N` bits (`uint8` `0x1ff` reads `255`, `uint16`
-  `0xabcd1234` reads `0x1234`);
-- `intN`: the low `N` bits sign-extended (`int8` `0x80` reads `-128`,
-  `0x17f` reads `127`, `0x1ff` reads `-1`);
-- `bool`: true exactly when the word is not zero (`2` reads true, `!x` is
-  false, `x == true` is true).
+- `uintN`: the low `N` bits (`u8_eq`, `u8_checked_add` (`0x1fe + 1` is
+  `255`), `u8_div`, `u8_lt`, `u8_shr`, `u8_store`, `u16_widen`, `u32_widen`);
+- `intN`: the low `N` bits sign-extended (`i8_widen_neg` (`0x80` is `-128`),
+  `i8_widen_pos` (`0x17f` is `127`), `i8_eq_neg1` (`0x1ff == -1`), `i8_lt`,
+  `i8_div`, `i16_widen` (`0x18000` is `-32768`));
+- `bool`: true exactly when the word is not zero (`b_eq_true`, `b_eq_b`,
+  `b_ne_false`, `b_and`, `b_if`, `b_store` stores `1`).
 
-The cleaning happens here, at the readback into Source locals: Source values
-stay intrinsic, the raw frame keeps every bit, and no assembly write cleans.
-Any other type a raw word can hold (addresses, `bytesN`, enums, external
-function values, …) is not read back: the refusal (`none`) stays, as
-`LocalValues.clean?` refuses. `RawCoherent.coherent` keeps reporting a dirty
-frame as incoherent: coherence is about reusing the clean backup without
-decoding, and this readback is the explicit cleaning boundary. -/
+**Limit.** solc cleans lazily, at each use; the stack slot keeps the dirty
+word. A later assembly read of the local, or of a Solidity copy of it
+(`uint8 y = x;`), sees the raw word (`u8_asm_direct`, `b_asm_direct`,
+`u8_asm_reread`). This readback drops the raw bits, so it agrees with solc
+exactly when no later assembly block reads the local (or a copy) before it
+is rewritten; the raw frame (`RawFrame.State`) keeps every bit for that
+case. The readback is the boundary declaration: no Source semantics calls it
+yet. (Unchecked narrow arithmetic results are a separate, recorded pipeline
+difference, H3: `u8_unchecked_add_widen`.)
+
+Source values stay intrinsic and no assembly write cleans. Any other type a
+raw word can hold (addresses, `bytesN`, enums, user-defined value types,
+contracts, fixed point, external function values) is not cleaned here: a
+dirty local of such a type is refused (`none`), as `LocalValues.clean?`
+refuses. `RawCoherent.coherent` keeps reporting a dirty frame as
+incoherent: coherence is about reusing the clean backup without decoding,
+and this readback is the explicit cleaning boundary. -/
 namespace Solidity.Yul.DirtyReadback
 
 open Solidity.Source (STy Locals)
@@ -97,6 +108,23 @@ def readbackFrom {env : Solidity.Source.Env} (pipeline : Pipeline) :
       let value ← readLocal pipeline values.1 backup
       let tail ← readbackFrom pipeline ctx values.2 rest
       pure (.cons value tail)
+
+/-- A clean local reads back as it is, against any backup. -/
+theorem readLocal_clean {env : Solidity.Source.Env} {ty : STy} (pipeline : Pipeline)
+    (v backup : Solidity.Source.Val env.layout ty) :
+    readLocal pipeline (LocalValue.clean (env := env) v) backup = some v := rfl
+
+/-- **Clean locals read back unchanged against any backup.** -/
+theorem readbackFrom_ofClean {env : Solidity.Source.Env} (pipeline : Pipeline) :
+    ∀ {ctx : Solidity.Source.RCtx} (locals backup : Locals env.layout ctx),
+      readbackFrom pipeline ctx (LocalValues.ofClean locals) backup = some locals
+  | [], .nil, .nil => rfl
+  | _ :: _, .cons v rest, .cons b brest => by
+    show (do let x ← readLocal pipeline (LocalValue.clean v) b
+             let t ← readbackFrom pipeline _ (LocalValues.ofClean rest) brest
+             pure (Locals.cons x t)) = _
+    rw [readLocal_clean, readbackFrom_ofClean pipeline rest brest]
+    rfl
 
 /-- **The readback of a raw LOCAL frame** after an assembly block: its
 authoritative words (`RawFrame.materialize`) read back into Source locals

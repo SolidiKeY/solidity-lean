@@ -3,7 +3,8 @@ import Solidity.Yul.Checks.LocalBlock
 
 /-! Controls of `Solidity.Yul.DirtyReadback` (user decision H109). Each
 word-level positive is a probe of `tests/evm-reference/dirty-locals.json`
-(pinned solc 0.8.38, optimizer off), in both pipelines; the frame-level
+(pinned solc 0.8.38, optimizer off), in both pipelines, cited by probe name;
+the frame-level
 ones reuse `Checks.LocalBlock`'s mixed frame (a `bool`, two external function
 values, a `uint8` and a `bytes1`) and its `dirtyFalse`/`dirtyTwo` frames.
 `LocalBlock`'s `RawCoherent.coherent` refusals of those frames stay as they
@@ -17,27 +18,34 @@ abbrev D := env.layout
 def u8 : Solidity.Source.STy := .int Solidity.Source.IntTy.u8
 def u16 : Solidity.Source.STy := .int ⟨false, 16, by decide⟩
 def i8 : Solidity.Source.STy := .int ⟨true, 8, by decide⟩
+def u32 : Solidity.Source.STy := .int ⟨false, 32, by decide⟩
+def i16 : Solidity.Source.STy := .int ⟨true, 16, by decide⟩
 
 def key? (ty : Solidity.Source.STy) (p : DirtyReadback.Pipeline) (w : Nat) : Option (Option Int) :=
   (cleanWord (D := D) p ty (word w)).map Solidity.Source.Val.key
 
 /-! ## Words, per type family and pipeline (`dirty-locals.json`) -/
 
-/-- `uintN`: the low bits (`u8_widen`, `u16_widen`). -/
+/-- `uintN`: the low bits (`u8_eq`, `u8_checked_add`, `u16_widen`, `u32_widen`). -/
 theorem uint_masked :
     key? u8 .legacy 0x1ff = some (some 255) ∧ key? u8 .viaIR 0x1ff = some (some 255) ∧
-    key? u16 .legacy 0xabcd1234 = some (some 0x1234) ∧ key? u16 .viaIR 0xabcd1234 = some (some 0x1234) := by
+    key? u8 .legacy 0x1fe = some (some 254) ∧ key? u8 .viaIR 0x1fe = some (some 254) ∧
+    key? u16 .legacy 0xabcd1234 = some (some 0x1234) ∧ key? u16 .viaIR 0xabcd1234 = some (some 0x1234) ∧
+    key? u32 .legacy 0x1234567890 = some (some 0x34567890) ∧
+    key? u32 .viaIR 0x1234567890 = some (some 0x34567890) := by
   decide
 
-/-- `intN`: the low bits sign-extended (`i8_widen_neg`, `i8_widen_pos`, `i8_ret`). -/
+/-- `intN`: the low bits sign-extended (`i8_widen_neg`, `i8_widen_pos`,
+`i8_eq_neg1`, `i16_widen`). -/
 theorem int_sign_extended :
     key? i8 .legacy 0x80 = some (some (-128)) ∧ key? i8 .viaIR 0x80 = some (some (-128)) ∧
     key? i8 .legacy 0x17f = some (some 127) ∧ key? i8 .viaIR 0x17f = some (some 127) ∧
-    key? i8 .legacy 0x1ff = some (some (-1)) ∧ key? i8 .viaIR 0x1ff = some (some (-1)) := by
+    key? i8 .legacy 0x1ff = some (some (-1)) ∧ key? i8 .viaIR 0x1ff = some (some (-1)) ∧
+    key? i16 .legacy 0x18000 = some (some (-32768)) ∧ key? i16 .viaIR 0x18000 = some (some (-32768)) := by
   decide
 
-/-- `bool`: true exactly when the word is not zero (`b_cond`, `b_eq_true`,
-`b_not`, `b_ret`). -/
+/-- `bool`: true exactly when the word is not zero (`b_eq_true`, `b_eq_b`,
+`b_ne_false`, `b_store`). -/
 theorem bool_nonzero :
     key? .bool .legacy 2 = some (some 1) ∧ key? .bool .viaIR 2 = some (some 1) ∧
     key? .bool .legacy 0 = some (some 0) ∧ key? .bool .viaIR 0 = some (some 0) := by
@@ -64,15 +72,19 @@ theorem dirtyTwo_read :
     keys (frame .viaIR dirtyTwo) = some (some 1, some 2, some 171) := by
   decide
 
-/-- **A dirty `bool` reads back cleaned**: `dirtyFalse` holds `0` in `flag`. -/
+/-- A `bool` rewritten to its clean `false` word (`dirtyFalse` writes `0`
+into `flag`, which held true) reads back false: a changed, not a dirty,
+word. -/
 theorem dirtyFalse_read :
     keys (frame .legacy dirtyFalse) = some (some 0, some 1, some 171) ∧
     keys (frame .viaIR dirtyFalse) = some (some 0, some 1, some 171) := by
   decide
 
-/-- A `bool` local holding `2` reads back true. -/
+/-- **A dirty `bool` reads back cleaned**: `flag` holding `2` reads back
+true, in both pipelines. -/
 theorem boolTwo_read :
-    keys (frame .legacy (RawFrame.write rawInitial flag (word 2))) = some (some 1, some 1, some 171) := by
+    keys (frame .legacy (RawFrame.write rawInitial flag (word 2))) = some (some 1, some 1, some 171) ∧
+    keys (frame .viaIR (RawFrame.write rawInitial flag (word 2))) = some (some 1, some 1, some 171) := by
   decide
 
 /-- An untouched frame reads back as its clean locals. -/

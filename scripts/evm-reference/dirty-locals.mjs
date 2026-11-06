@@ -34,13 +34,35 @@ export const PROBES = [
   {name: 'b_not', ty: 'bool', dirty: '2', ret: 'bool', read: 'r = !x;'},
   {name: 'b_ret', ty: 'bool', dirty: '2', ret: 'bool', read: 'r = x;'},
   {name: 'b_widen', ty: 'bool', dirty: '2', ret: 'uint256', read: 'r = x ? 7 : 9;'},
+  // Narrow arithmetic, ordering, shifts and storage (skeptic review gaps).
+  {name: 'u8_checked_add', ty: 'uint8', dirty: '0x1fe', ret: 'uint256', read: 'r = x + 1;'},
+  {name: 'u8_unchecked_add', ty: 'uint8', dirty: '0x1fe', ret: 'uint256', read: 'unchecked { r = uint256(x + 1); }'},
+  {name: 'u8_unchecked_add_widen', ty: 'uint8', dirty: '0x1ff', ret: 'uint256', read: 'uint8 y; unchecked { y = x + 1; } assembly { r := y }'},
+  {name: 'u8_div', ty: 'uint8', dirty: '0x1fe', ret: 'uint256', read: 'r = x / 2;'},
+  {name: 'u8_lt', ty: 'uint8', dirty: '0x101', ret: 'bool', read: 'r = (x < 2);'},
+  {name: 'u8_shr', ty: 'uint8', dirty: '0x1f0', ret: 'uint256', read: 'r = x >> 4;'},
+  {name: 'u8_store', ty: 'uint8', dirty: '0x1ff', ret: 'uint256', read: 's8 = x; r = s8;'},
+  {name: 'u8_asm_reread', ty: 'uint8', dirty: '0x1ff', ret: 'uint256', read: 'uint8 y = x; assembly { r := y }'},
+  {name: 'i8_div', ty: 'int8', dirty: '0x1fc', ret: 'int256', read: 'r = x / 2;'},
+  {name: 'b_if', ty: 'bool', dirty: '2', ret: 'uint256', read: 'if (x) { r = 5; } else { r = 6; }'},
+  {name: 'b_and', ty: 'bool', dirty: '2', ret: 'bool', read: 'r = x && true;'},
+  {name: 'b_ne_false', ty: 'bool', dirty: '2', ret: 'bool', read: 'r = (x != false);'},
+  {name: 'b_store', ty: 'bool', dirty: '2', ret: 'uint256', read: 'sb = x; assembly { r := sload(sb.slot) }'},
+  // Reads that separate cleanup at the read from cleanup at ABI encoding (finder review).
+  {name: 'i8_eq_neg1', ty: 'int8', dirty: '0x1ff', ret: 'bool', read: 'r = (x == -1);'},
+  {name: 'u32_widen', ty: 'uint32', dirty: '0x1234567890', ret: 'uint256', read: 'r = x;'},
+  {name: 'i16_widen', ty: 'int16', dirty: '0x18000', ret: 'int256', read: 'r = x;'},
+  {name: 'b_eq_b', ty: 'bool', dirty: '2', ret: 'bool', read: 'bool t = true; r = (x == t);'},
+  // A second assembly read of the same local: no cleanup (the raw word stays).
+  {name: 'u8_asm_direct', ty: 'uint8', dirty: '0x1ff', ret: 'uint256', read: 'assembly { r := x }'},
+  {name: 'b_asm_direct', ty: 'bool', dirty: '2', ret: 'uint256', read: 'assembly { r := x }'},
 ];
 
 export function source() {
   const fns = PROBES.map(p =>
-    `  function ${p.name}() external pure returns (${p.ret} r) { ${p.ty} x; ` +
+    `  function ${p.name}() external returns (${p.ret} r) { ${p.ty} x; ` +
     `assembly ("memory-safe") { x := ${p.dirty} } ${p.read} }`).join('\n');
-  return `// SPDX-License-Identifier: GPL-3.0\npragma solidity 0.8.38;\ncontract Dirty {\n${fns}\n}\n`;
+  return `// SPDX-License-Identifier: GPL-3.0\npragma solidity 0.8.38;\ncontract Dirty {\n  uint8 s8; bool sb;\n${fns}\n}\n`;
 }
 
 const selector = (keccak, sig) => keccak(sig).slice(0, 10);
