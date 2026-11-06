@@ -1,6 +1,12 @@
 # H62 item 6 — SolcValidation migration overlay
 
-Status: **BLOCKED**, not migration acceptance. No `RUNTIME_GATE_PASS`.
+Status: **RESUMED / PARTIAL**, not migration acceptance. No `RUNTIME_GATE_PASS`.
+
+The coordinator resolved Q-PERF-1: a per-module time or memory increase does
+not stop a migration lane. Record the module numbers and continue the matched
+clean full-build comparison; the coordinator reports growth with cut-over
+escalation. This supersedes the historical performance STOP below. The original
+STOP record and interrupted run are retained as history, not current blockers.
 
 ## Identity and ownership
 
@@ -28,11 +34,13 @@ for coordinator retrieval. No claim of a delivered relay or owner permission.
 2. **Partial:** official pinned v4.35.0 installed and all three modules build
    unchanged. `DataLayout` emits two deprecated-name warnings (`dif_pos`,
    `dif_neg`), retained pending any owner-approved cleanup. Full acceptance blocked.
-3. **Blocked:** directory build and affected fixtures pass, but performance STOP
-   and repository final-gate failures prevent acceptance.
+3. **Partial:** directory build and affected fixtures pass. A matched clean
+   repository-wide comparison is running old then new with identical settings.
+   Per-module growth is recorded; external owner failures still prevent final acceptance.
 4. **Partial:** reviewable patch, bundle, source/declaration hashes, dependency
-   report and checksummed evidence exported. Root acceptance and comparable
-   elaborated-interface hashing remain pending.
+   report and checksummed evidence exported. All 33 explicit original kernel
+   records now match, including structural types and axiom lists. Generated API
+   differences are reported separately; root acceptance remains pending.
 
 Census: `/workspace/solcvalidation-evidence/census.json`.
 Hashes named `source_sha256` and `block_sha256` are lexical hashes, including
@@ -90,10 +98,10 @@ use its sampled group peak rather than inferring a complete build maximum.
 | DataResolution alone (rounded Lake log) | 288 ms | 371 ms | +28.819% |
 
 The wall saving is largely the external Builtins module (3.9 s to 2.5 s).
-The directory cannot claim an unconditional improvement. **STOP** applies to the
-observed DataResolution >10% slowdown; RSS regression is separately escalated.
-No additional Lean checks were run after STOP. The owned full-gate group was
-terminated with SIGTERM; unrelated workers were not terminated.
+The directory cannot claim an unconditional improvement. The historical STOP
+for DataResolution was lifted by the coordinator clarification. The first
+full-gate group had been terminated with SIGTERM; unrelated workers were not
+terminated. Checks resumed only after the explicit clarification.
 
 ## Commands and decisive evidence
 
@@ -161,15 +169,15 @@ limits. Both confirmed exact frozen module bytes and matching twelve axiom sets.
 Finder caught post-commit census reproducibility (fixed to ancestry check) and
 manifest asymmetry (reconstructed and explicitly dated after builds). Skeptic
 caught per-module slowdown hidden by closure improvement; that finding triggered
-STOP. Both require a blocked handoff. Actual versions and observed archive digest
+STOP. Both required a blocked handoff at that checkpoint; the timing STOP recommendation is now superseded. Actual versions and observed archive digest
 were saved after the second review request. Review messages are summarized here;
 no claim is made of a separate reviewer attestation file authored by the agents.
 
 ## Typed blockers and coordinator requests
 
-- **PERFORMANCE_REGRESSION_STOP / H62.3:** DataResolution 288→371 ms and RSS
-  +89.367%. Preserve the STOP until root-gate assessment. No optimization or
-  owner-file edit is authorized by merely asking for explanation.
+- **PERFORMANCE_GROWTH_RECORDED / H62.3 (not a blocker):** DataResolution
+  288→371 ms and RSS +89.367%. Coordinator clarification supersedes STOP;
+  continue the matched clean full-build comparison and report growth at cut-over.
 - **EXTERNAL_OWNER_MIGRATION / H62.3:** full-gate failures at
   `Solidity/Hash/CollisionBound.lean` (407, 660, 680 and guard messages),
   `Solidity/Language/FixedPoint.lean` (152, 170 and later arithmetic goals),
@@ -183,12 +191,13 @@ no claim is made of a separate reviewer attestation file authored by the agents.
   SolKey sort checker and frontend consumer validation remain outstanding.
   KeySort is independently passing on both toolchains; this is not the complete
   SolKey executable conformance gate.
-- **INTERFACE_HASH_PENDING / H62.4:** normalized structural type comparison is
-  pending; lexical hashes and public type/axiom output are supplied for review.
+- **GENERATED_API_REVIEW / H62.4:** all 33 explicit original kernel records
+  match exactly. Generated API changes remain a downstream/root review item;
+  they are separately inventoried and not mistaken for explicit type changes.
 - **ROOT_GATE_ACCEPTANCE_PENDING / H62.4:** root lane must retrieve patch/bundle,
   assess regressions, combine external owner migrations and run its own gate.
 
-ESCALATE Q-PERF-1 [sources: H62.3, comparison.json]:
+Historical Q-PERF-1, now resolved [sources: H62.3, comparison.json]:
 For the pinned-base DataResolution single-run 288→371 ms slowdown and +89.367%
 maximum RSS, which root-gate follow-up should own resolution?
 
@@ -197,9 +206,10 @@ maximum RSS, which root-gate follow-up should own resolution?
 2. Coordinator obtains exact-file owner coordination for a bounded performance
    repair in the assigned modules; then this lane remeasures and reruns gates.
 
-No option authorizes a weakened statement, raised budget or trust-policy change.
-No recommendation: single short measurements do not establish which repair is
-needed. The frozen statement hashes are supplied as requested evidence only.
+Resolved by the coordinator: neither module timing growth nor memory growth
+stops a migration lane. No further decision is requested for Q-PERF-1. Record
+these numbers, continue matched clean full builds, and retain the external owner
+blockers. No statement, budget or trust-policy change was authorized.
 
 ## Handoff and remaining queue
 
@@ -207,12 +217,98 @@ Original persistent goal remains unfinished. No get_goal tool was exposed;
 coordinator explicitly confirmed this absence is not a blocker. Do not create,
 reset or schedule another goal. This turn completed census/toolchain/fixture
 work items and now hands the original VM/goal/branch to the coordinator for
-fresh-thread continuation, respecting the 3–5 item boundary. Continue only after
-the performance STOP is resolved; return to blocked gates before accepting the
-queue. Remaining work is exactly the typed blockers above, not a completed queue.
+fresh-thread continuation, respecting the 3–5 item boundary. The coordinator has now resolved the performance STOP; continue the matched
+full builds and return to external-owner-blocked gates before accepting the queue. Remaining work is exactly the typed blockers above, not a completed queue.
 
 Bulk evidence, toolchain archive and private snapshots stay off Git in
 `/workspace/solcvalidation-evidence/`; the committed tests manifest records hashes.
 Exported `original.patch`, `migration.bundle`, `handoff.json`, and `SHA256SUMS`
 are in that same absolute directory. The coordinator retrieves committed artifacts
 from this VM; nothing was pushed or deployed.
+
+
+## Resumed comparison and actual kernel-interface hashes
+
+The coordinator clarification is recorded verbatim in
+`/workspace/solcvalidation-evidence/coordinator-resolution.json`.
+Q-PERF-1 is resolved; current reports use `questions=[]`.
+The matched full build uses fresh `matched-full-old` and `matched-full-new`
+private snapshots exported with `git archive` from the exact pinned base.
+All Lean source hashes and private Lake configurations are identical between
+snapshots; only the private toolchain selector and actual binary toolchain differ.
+Both began without `.lake` or a private cache. Original selected inputs are
+recorded in matched-full-{old,new}-sources.json. The serial queue holds the task's
+writer lock, uses the existing bounded runner, and invokes the same command:
+
+`env SOLKEY_RULES=/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key bash ./run-lean.sh`
+
+The explicit SolKey input prevents a missing-checkout warning from counting as
+conformance. The old run is followed by the new run even if the old fails. A
+failed, interrupted or resource-stopped run cannot supply an accepted successful
+full-build ratio. Exact result JSON/log files use the matched-full-{old,new}-result
+prefix. These builds do not change the repository or frozen owner files.
+
+`tests/h62/item6/migrate-solcvalidation/KernelInventory.lean` is a test-only
+metaprogram, checked on both toolchains with the same bounded `lake env lean`
+flags. It enumerates imported constants by their actual originating module,
+including the private helper and generated declarations available at enumeration.
+It does not claim to force every possible lazy generated declaration.
+The initial helper's inferred counter type failed on v4.35.0; explicitly typing
+the test counter as Nat fixed it without changing any original declaration or
+raising a proof budget. The checked final runs both exit 0.
+
+The deterministic reducer validates the exact three-module scope and all
+33 explicit declarations, rejects duplicate module counts, and compares the
+union of record fields. The finder and skeptic independently verified all
+33 hashes against the raw logs. The deterministic reducer is
+`scripts/h62/item6/migrate-solcvalidation/reduce-inventory.py`:
+
+`python3 scripts/h62/item6/migrate-solcvalidation/reduce-inventory.py --evidence /workspace/solcvalidation-evidence`
+
+Bulk raw Expr inventories remain off Git in old-kernel-inventory.json and
+new-kernel-inventory.json. Actual type and full-record SHA256 hashes are in
+frozen-interface-hashes.json. All **33 explicit original declarations** match
+byte-for-byte as complete kernel records: raw type Expr, universe parameters,
+kind and exact axiom list. This includes private references_unique and every
+original public theorem. Unchanged complete source bytes separately attest the
+original definition bodies; matching types alone are not a body-semantics proof.
+
+Loaded owned constants total 247 old versus 253 new: Dialect 159→162,
+DataLayout 83→86, DataResolution 5→5. Among common names, 182 complete records
+match and 64 generated records differ. One generated name is removed
+(IrMode.toCtorIdx) and seven are added. Generated noConfusion signatures change
+structurally, including index binders and heterogeneous equality. Generated
+instReprObjectOp and instReprObjectOp.repr gain propext in their dependency lists;
+no new axiom declaration is introduced, but all-generated axiom parity is **not**
+claimed. These differences are supplied to the root gate for downstream review.
+The read-only skeptic found no explicit repository source references to the
+changed generated interfaces; complete downstream validation is still required.
+
+Independent finder and skeptic reviewed the resumed inventory without Lean,
+server access or edits. Both confirmed the origin-based enumeration boundary;
+the skeptic independently verified equality for all 33 explicit records and
+identified the generated API/axiom changes above. Their earlier STOP-related
+recommendations are superseded by the coordinator's explicit clarification.
+
+
+## Audit negative controls while full builds run
+
+The additive script
+`scripts/h62/item6/migrate-solcvalidation/check-inventory-controls.py` runs no
+Lean process. It keeps valid logs and all tampered copies off Git and checks:
+
+- The original complete inventory is accepted.
+- A failed runtime result is rejected despite complete logs.
+- Removing the same explicit declaration from both versions, while repairing
+  both module counts, is rejected rather than accepted as matching subsets.
+- Adding an otherwise allowlisted Classical.choice dependency to one explicit
+  theorem is rejected by exact baseline parity.
+- A duplicate module-count marker is rejected.
+
+Command:
+`python3 scripts/h62/item6/migrate-solcvalidation/check-inventory-controls.py --evidence /workspace/solcvalidation-evidence --output /workspace/solcvalidation-evidence/inventory-controls`
+
+All five controls pass their expected acceptance/rejection condition. Results
+and decisive reducer diagnostics are in inventory-controls/results.json and
+its case subdirectories. These are external tests of the audit tooling, not new
+kernel theorems or substitutions for downstream migration proofs.
