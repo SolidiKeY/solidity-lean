@@ -1,166 +1,167 @@
 # H62 item 2: frozen EVM compiler hypothesis audit
 
-Status: **stopped by human retirement instruction; full assignment partial**.
-Handoff to `solidity-v12-v17-20261031/v17-validation-release`.
-No implementation continuation is authorized. The exposed goal tool cannot
-set PAUSED (it accepts only complete or blocked); neither substitute state
-was requested. This capability failure does not authorize resuming work.
- Human H69
-accepts checked joint-impossibility proofs for intentional negative controls,
-separation lemmas and refutations. SCOPE1 and TC1 are resolved. Ordinary interface
-statements still require simultaneous witnesses. No original statement changes.
+Status: **active, partial**. The coordinator explicitly authorized resuming and
+merging origin/master after the retirement checkpoint. The original goal/VM and
+branch are preserved; no reset or replacement goal. The historical retirement
+instruction and preservation files remain under the assigned tests handoff
+folder. The latest resume instruction supersedes its stopped-state directions.
 
-## Frozen checkout and scope
+## Checkout, scope and frozen interfaces
 
-Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+Original base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-evm-compiler`.
-Repository: `/workspace/audit-evm-compiler`; older clean checkout
-`/workspace/solidity-lean` preserved. Published remote ancestry was verified.
-All 160 mapped originals and module map match their frozen Git blobs. Writes
-are confined to the assigned scripts/tests prefixes and this document. No push,
-merge, PR, generated root, central registration, axiom pin or interface edit.
+Repository: `/workspace/audit-evm-compiler`; old clean checkout
+`/workspace/solidity-lean` preserved.
+Authorized origin/master merge fast-forwarded to
+`d96f2406d352de7e0b72ba6ac4ab29dc457582c6`, containing retirement head
+`eaaaee17fe61e71ac3b5052839c0cf146eae3072` and coordinator checkpoint
+`20e492ee9`. All 160 original mapped files and their module map remain identical
+to the frozen base. All 321 files in the original core dependency closure are
+also unchanged. Other master changes arrived through the authorized merge;
+this lane's new writes remain in its tests/scripts/document scope.
 
-## Checkpoint ledger
+H82 permits statement-preserving edits without exact-file agreement; changing
+existing statements, dependent definitions, signatures, budgets, axiom sets or
+exclusions still needs owner authorization. No such change was made. No push,
+master mutation, generated-root/map/axiom-pin edit or new goal was performed.
 
-1. Inventory remains partial. All 1,830 authored theorem declarations in 160
-   mapped modules are counted once, including private and no-premise declarations.
-   Core: exact kernel Expr types, universe parameters and axiom sets extracted
-   for all 1,721 declarations in 156 modules. Four optional Bridge modules contain
-   109 declarations pending extraction; the exact-pinned dependency build was
-   interrupted for retirement.
-   Source scanner schema 2 corrects 48 truncated source signatures involving
-   root lets, root matches and tuple constructors; counts/identities and kernel
-   expressions are unchanged. The correction ledger retains old and new text.
-   Generated recursors/equations, standard instances and 224 anonymous examples
-   are separate from this authored-theorem census; the finder checked for custom
-   public theorem-generating macros and found none in this mapped corpus.
-   Only 18 Opcode records have confirmed producer owner master, from the supplied
-   G45.05 key and module header. Other producer owners remain unresolved. The
-   ownership snapshot supplies write candidates on 570 rows; migration overlays
-   on all rows never establish producer ownership.
-2. Witness audit remains partial. The ledger has 46 unique exact-signature links:
-   five original compiler headlines with joint witnesses, 23 intentional
-   impossibility cases, 16 Opcode declarations with joint input packages and two
-   closed Opcode equalities with no input binders. The other 1,784 declarations
-   remain pending classification or witnesses. Every intentional case has its
-   exact original name, reason, checked impossibility proof and classification
-   in coverage.json and the audit source. Layout accounts for five separation
-   lemmas; IntentionalAudit accounts for 18 empty-heap, shape-separation,
-   occurrence-kind and argument-alias refutations. No exclusion or premise added.
-3. Success/totality remains partial. A supported nonempty setAge program admits,
-   writes slot 13 from zero to ten and terminates with zero pending jumps.
-   Reject-all, constant REVERT, empty code and trailing-jump candidates fail that
-   observation. Overflow has exact reversion. The generic non-paying source
-   success transfer has all premises jointly witnessed on setAge. OpcodeAudit
-   proves encoder totality with decoding round trips for every intrinsic program,
-   rejects none/empty/constant-REVERT encoders, and checks PUSH1 0x2a; STOP bytes,
-   undefined-byte and truncated-PUSH failure. CLZ decoding documents the fixed
-   Osaka table only. General supported-source totality, public-contract coverage,
-   observable gas and historical-fork boundaries remain unfinished.
-4. Fidelity/validation remains partial. All 46 links have unique frozen source
-   IDs and hashes. Reconciliation checks bookkeeping; separate Lean checks and
-   independent reviews establish their proof meanings. Full affected-library
-   and run-lean.sh gates remain pending; no RUNTIME_GATE_PASS or full completion.
+## Four-checkpoint ledger
 
-## Premise meaning and proof boundary
+1. Inventory remains partial: 1,830 authored theorem declarations in 160 mapped
+   modules, including private and no-premise declarations. All 1,830 types
+   in 160 modules now have exact kernel Expr/universe/axiom captures, including
+   1,721 core declarations and 109 optional Bridge declarations. The four new
+   Bridge counts are 25, 7, 61 and 16; no source/kernel rows are unmatched. Generated
+   recursors/equations, standard instances and 224 anonymous examples are separate
+   from the authored census; the read-only custom theorem-macro sweep found none.
+   The scanner's 48 corrected let/match/tuple signatures preserve every identity
+   and kernel expression. Producer owner master is established for 37 Opcode/
+   Jumpdest records by G45.05 and their headers; 1,793 owners remain unresolved.
+   The 570 snapshot write-owner candidates and migration overlays are separate.
+2. Joint hypotheses remain partial: 65 unique exact-signature links comprise
+   40 joint witnesses, 23 H69 intentional impossibilities and two closed Opcode
+   statements. The remaining 1,765 rows await classification or witnesses.
+   JumpdestAudit adds exactly one full-telescope witness for each of its 19
+   authored declarations. Boundary, lookup and size proof hypotheses use coherent
+   actual inputs. No global producer structure is required by these statements.
+   Headline witnesses retain one shared nonempty setAge program/state/machine.
+3. Success/totality remains partial. setAge admits, writes slot 13 from zero to
+   ten and finishes with zero pending jumps. Reject-all, REVERT, empty-code and
+   trailing-jump controls fail that observation; overflow reverts exactly. The
+   conditional generic non-paying source-success transfer has all its premises
+   jointly inhabited. Opcode encoding is total with round trips and rejects
+   none/empty/constant-REVERT encoders. Jumpdest controls reject PUSH immediate
+   data and truncated PUSH32 data while accepting the following genuine boundary;
+   scanning every byte for 0x5b fails the public predicate. These are byte-level
+   boundaries, not execution-gas or historical-fork equivalence. Broader supported
+   source totality, all public contracts and gas/fork checks remain unfinished.
+4. Fidelity and final gates remain partial. The ledger checks frozen names,
+   source IDs and signature hashes exactly once. Reconciliation is bookkeeping;
+   separate Lean checks and read-only reviews establish proof meanings. Full
+   affected-library and run-lean.sh gates have not been claimed complete here.
 
-Headline fragment admission, actual-input Sim, capacity/push bounds, flags,
-execution and initial balance consistency are per-input conditions. Each joint
-witness uses one coherent program/state/machine tuple. Layout exhibits separately
-inhabited mapping regions and proves their forbidden overlap impossible.
-JointImpossible packages every original dependent forall binder into nested
-Exists ending True, applies the unchanged original theorem to the unpacked
-arguments, and installs a closed kernel-checked theorem. It only accepts a
-terminal False and rejects ordinary statements. Type-valued certificates are
-included. Syntactic is_prop_binder metadata alone never establishes feasibility.
+## Witness tools and H69
 
-There are 63 new checked theorem declarations across the audit modules: 23 from
-Layout/Success/Headline, 18 H69 generated impossibilities and 22 Opcode facts.
-The JointImpossible metaprogram generates proofs checked by Lean addDecl; it
-introduces no axiom. Printed proof axiom sets contain only propext,
-Classical.choice and Quot.sound. No authored sorry, new axiom, native_decide,
-trust shortcut or raised maxHeartbeats. External compiler/cache tests, parser
-controls and measurements are evidence outside these Lean proof statements.
+JointWitness elaborates a supplied witness against the entire original dependent
+forall telescope, packaged as nested Exists ending True. Data, typeclass
+certificates and proof hypotheses are all included. The original conclusion
+never manufactures a premise. Closed-expression, kernel addDecl and standard
+axiom guards are mandatory. A checked negative regression tries to use ambient
+contradictory arguments and is rejected by the free-variable guard.
 
-## Toolchain, builds and resources
+JointImpossible uses the same complete telescope to prove its joint package
+impossible only when the original terminal proposition is explicitly False.
+H69 accepts these proofs for intentional negative controls, separation lemmas
+and refutations. All 23 cases retain exact names, reasons and checked proofs in
+the ledger and audit sources. Ordinary statements still require joint witnesses.
+SCOPE1 and TC1 are resolved; no premise, exclusion or statement was weakened.
+Syntactic is_prop_binder never establishes feasibility by itself.
 
-Actual Lean 4.24.0, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
-Lake `5.0.0-src+797c613`. TC1 explicitly keeps this lane on v4.24.0; v4.35
-belongs solely to the separate migration batch. KeySort passed before proof
-work. Lean MCP is unavailable, so checks use bounded per-file Lake env lean,
-explicit -j1, LEAN_NUM_THREADS=1, the writer lock, no swap and four GiB reserve.
-No systemd-run, source proof-budget change or concurrent heavy Lean job.
+There are now 89 checked additive theorem declarations: the previous 63, 25
+Jumpdest declarations (19 generated witnesses, two scan helpers, four controls)
+and one intentional tool-regression fixture. Printed axiom sets use only
+propext, Classical.choice and Quot.sound as applicable. No authored sorry, new
+axiom, native_decide, trust shortcut or raised maxHeartbeats. Failed initial
+elaboration receipts are historical and distinct from passing replacements.
 
-Core dependency build completed 321 modules: 260 built, 61 existing artifacts,
-zero failures/blocked. A separate successful Lake --no-build freshness gate for
-all 156 mapped core targets validates their traces; presence alone is not a
-freshness claim. One default metadata budget per declaration avoids accumulation
-in a large module without raising any proof budget. Prior failed instrumentation
-and successful replacement receipts are retained.
+## Versions, resources and gates
 
-Optional Bridge uses the frozen manifest's exact Git revisions and root v4.24.0,
-private external serial package configs and ignored runtime package links. Public
-Mathlib cache requests returned CONNECT 403; serial source compilation had proceeded
-with bounded 300-second batches retaining completed artifacts. The fifth
-batch was terminated under the human retirement instruction (exit -15 after
-182.917 s), preserving completed dependencies through logged target 934/939.
-No further builds are running. Queued new witness-file creation was canceled
-before execution; the 63 checked theorems and 46 coverage links are unchanged. Dependency source
-and tracked Bridge/core configs remain unchanged. Runtime provisioning is not a
-proof result. Full optional Bridge extraction is still pending.
+Actual Lean 4.24.0, release commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake `5.0.0-src+797c613`.
+The merge keeps v4.24.0. No v4.35 overlay/install. KeySort passed again on the
+merged checkout before the new checks. No Lean MCP is exposed, so per-file
+checks use bounded Lake env lean, explicit -j1, LEAN_NUM_THREADS=1, writer lock,
+no swap and four GiB reserve. One heavy Lean job, no systemd-run or proof-budget
+change. No RUNTIME_GATE_PASS is claimed.
 
-Static milestone gates pass: scanner boundary acceptance, dependency layers
-(857 core modules, zero elaborator/parser-adapter reachability), generated
-fragments and global documentation paths. The previous missing optional Mathlib
-attribution now resolves through the exact-pinned runtime source checkout.
-The documentation gate reports 115 resolving ambiguous references as warnings.
+Core build evidence retains 321 dependencies: 260 built, 61 existing, zero
+failures; separate successful Lake --no-build trace validation establishes
+freshness for all 156 mapped core targets. Default metadata budgets reset per
+declaration rather than raising proof budgets. The new helper and full Jumpdest
+file pass, including the ambient-assumption rejection regression. Initial
+concrete decide failures were repaired by using existing well-founded scan
+equations, preserving all statements and budgets.
 
-Matched unchanged Layout checking, same tree/cache/resources: median 2.84262 s
-before and 2.82415 s after, delta -0.65%, within the 10% rule. This is not a
-whole-build performance claim. Exact commands, resource records, errors and
-passing replacement checks reside in the external evidence directory.
+Optional Bridge uses exact frozen manifest Git pins, private serial configs and
+v4.24. Public Mathlib cache CONNECT403 is preserved; source builds used
+bounded 300-second batches with completed artifacts retained. Two resumed
+batches timed out; the third passed in 93.20 seconds, completing all 1,240 jobs.
+All four mapped Bridge modules then passed separate bounded type captures.
+Reconciliation accounts for every one of the 1,830 declarations exactly once,
+with zero pending types and only the three standard axioms in their union. External cache/build diagnostics and
+static tests are evidence outside the Lean proof statements. Ten separately
+checked EthereumJS 10.1.3 fixtures cover exact/insufficient gas, PUSH0 and CLZ
+fork activation, empty reversion, valid jumps and runtime truncated-PUSH zero
+extension. The optional engine/common packages are copied from the frozen
+repository lock and installed outside Git with lifecycle scripts disabled.
+These observations do not prove source-compiler gas/fork equivalence.
 
-## Independent review and reproduction
+Historical matched unchanged Layout timing was -0.65% on the same tree/cache/
+resources; this is not a whole-build or post-merge performance claim. No original
+proof refactor or reversal of speed changes was performed in this milestone.
 
-Read-only finder and skeptic use neither Lean server nor writes. They checked
-full dependent witness tuples, the impossibility generator, every intentional
-reason, Opcode coverage and the scanner fixes. Confirmed signature truncations
-were fixed without changing kernel statements. Final receipts preserve findings
-and remaining limits. The reconciler does not certify proof links or resolve
-unknown owners. Full-task findings remain open as listed above.
+## Reviews, artifacts and continuation
 
-Scripts deterministically regenerate source census, exact-type inspection,
-reconciliation, bounded serial builds and private optional dependency setup.
-Bulk outputs stay outside Git at `/workspace/audit-evm-compiler-evidence` with a
-SHA256 manifest. coverage.json is the small reviewed link ledger. Registration
-suggestions are additive fragments under tests for the coordinator; no root or
-module-map registration is performed here.
+Independent read-only finder and skeptic use no Lean server, heavy calls or
+edits. They checked merge fidelity, all 19 exact Jumpdest input tuples, tool
+closure and controls, the Bridge capture/join tooling and all ten external
+reference fixtures. The suggested ambient-assumption regression was added.
+Final receipts and current census live under
+`/workspace/audit-evm-compiler-evidence/resume-merged`; older directories are
+historical. The current ledger is the small reviewed coverage.json in tests;
+bulk census, kernel expressions and logs stay off Git with SHA256 manifests.
+Registration suggestions remain additive fragments under tests, not root edits.
 
-The external handoff records full committed head, original goal/VM identity,
-commands, patch/bundle paths and pending obligations. The original VM/goal/branch are preserved. The successor integrates the final
-head; this worker stops. No new/reset/replacement goal or automatic continuation.
-No H71 push permission was supplied, so the original no-push rule remains.
-The retirement supersedes earlier instructions to continue.
+Preserved original prompt, complete work/backfill queue and exact 160-file scope
+remain authenticated in the committed tests handoff files. Continue this same
+original assignment: 1,765 witness/classification rows,
+1,793 producer owners, general success/totality and gas/fork boundaries, then
+full witness fidelity/reviews/final gates. Signature/type capture is complete;
+producer ownership, premise meaning and joint feasibility remain partial. Backfill remains within-scope census, negative
+controls, isolated fixtures and deterministic acceptance/reproduction/timing.
+A fresh-thread handoff after 3–5 completed items never completes the full goal.
 
-## Retirement preservation checkpoint
+## Checkpoint gates and outstanding validation
 
-The authenticated patch/bundle includes the original user-rendered assignment
-from this thread, its complete original work/backfill queues, exact scope
-manifest (all 160 mapped paths) and effective decisions under the assigned
-tests handoff directory. The local prompt copy's SHA256 is separately recorded;
-it is not asserted equal to the coordinator's older rendered-goal digest.
-Bulk census/kernel/build logs remain off Git with checksums.
+All eight audit modules pass on the merged tree; all 89 printed theorem axiom
+sets contain no sorryAx. Freshness checks for all 156 mapped core targets and
+four mapped Bridge targets pass with Lake --no-build, separately from extraction.
+Dependency layers pass (859 core modules, zero elaborator/parser reachability),
+generated fragments pass, and scanner acceptance passes.
 
-All four checkpoints remain partial. Pending: 109 Bridge captures/reconciliation,
-1,784 joint-witness/classification records, 1,812 producer-owner assignments,
-general supported-source success/totality, all-contract negative controls and
-observable gas/historical-fork boundaries, full affected-library/run-lean.sh
-gates and final fidelity/reviews. Backfill remains scanner/census, within-scope
-negative controls, isolated fixture proofs and deterministic acceptance/timing
-tooling; no new unclaimed candidate was taken. The interrupted Bridge build and
-cache CONNECT403 are the concrete dependency state, not a new scope question.
-The queued Jumpdest plan was not saved or checked and earns no coverage.
+The global documentation-path check fails on five references in four files:
+external artifact StringApiWitness.original-unproved in the migration-theory
+report; a synthetic Backend/A fixture in the ABI-world census test; proposed
+PanicBytes in the packet-panic candidate; and two proposed GenericMapped module
+paths in the structured-flow registration fragment. These files are byte-identical
+to the authorized integration base d96f2406d. No missing reference belongs to
+this lane's changed files. The global gate is reported FAIL, not waived or
+counted as a pass. Resolving it remains an outstanding repository validation
+item, alongside full-library/root checks and the incomplete proof/owner queue.
 
-The external retirement handoff enumerates waits, commands, exports, full final
-committed head and SHA256SUMS. No new proof implementation, owner message,
-Claude-owned edit, root/module-map/axiom pin change, push or merge was performed.
+This checkpoint's committed scope contains only additive audit tooling, proofs,
+fixtures, ledger and documentation. The external handoff records the complete
+committed head, original base and integration base, exact gate commands/output,
+independent reviews, incremental and cumulative owned patches, bundle and hashes.
+The original assignment remains active and unfinished; no goal completion or
+replacement continuation is authorized by a passing subset of these checks.
