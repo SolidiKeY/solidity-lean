@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "module": "Solidity/Yul/Composition/ModifierPostPhysical.lean",
+  "sourceCases": 48,
+  "nativeComparisons": 0,
+  "fullProofGate": "pending",
+  "original24": "pending",
+  "sixGeneralCombinations": "pending",
+  "boundary": "Actual selected resolved modifier/postlude, not frontend Derived/general raw/function/session/compiler/world/G01 adequacy; finite oldaccount/selectedc view not whole-world enumeration"
+}

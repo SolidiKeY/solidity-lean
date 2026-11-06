@@ -1,0 +1,93 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.allocated_live": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.allocated_repr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.allocator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.call_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.caller_words": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.child_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.code_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.extended": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.fragile_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.live": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.no_ref": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.path": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.public_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.storage": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.wrong_alias": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.Controls.wrong_liveness": [
+  "propext"
+ ]
+}

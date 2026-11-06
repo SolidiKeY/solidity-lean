@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.resolved_fixed_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.write_fixed_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
