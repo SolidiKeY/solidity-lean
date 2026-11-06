@@ -1,0 +1,15 @@
+{
+  "owner": "solidity-h62-6-20261106/migrate-hash",
+  "reported_head": "78c110f83dc1a30700acd1b5bd34b19f61da6ccd",
+  "reported_source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+  "reported_sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+  "observed_sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+  "checksum_match": true,
+  "artifact": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
+  "source_path": "Solidity/Hash/CollisionBound.lean",
+  "owner_report": "Reviewed Hash partial overlay; full migration gates and Syntax.Raw pending",
+  "disposition": "not applied; original frozen source remains read-only; no validation gate inferred",
+  "routing": "Host relay journals establish delivery acceptance only, not owner agreement or validation",
+  "artifact_path": "/workspace/h62-audit-label-execution-evidence/h70r2/incoming/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
+  "artifact_storage": "off-git exact routed bytes; patch context whitespace preserved"
+}
