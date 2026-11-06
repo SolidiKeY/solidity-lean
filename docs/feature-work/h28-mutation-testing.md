@@ -1,6 +1,6 @@
 # H28 semantic mutation testing
 
-Status: **scope-complete and sealed** (`runs/final-ae55acdb`). The final
+Status: **scope-complete and sealed** (`runs/final-8fad7b13`). The final
 manifest `manifests/h28-final.json` extends the frozen 30-operator census with
 a clause-level inventory of the 98 constructors the census missed. Every
 entry is decided: none is unrun and none is in error. Each of the nine
@@ -10,23 +10,23 @@ sound survivor. Each family has a passing negative control. Four of those
 controls fail inside the kill argument itself; the other five fail at the
 witness's link. `tools/accept.py` recomputes this from the per-check records
 and reports `scope_complete: true`. `tools/seal.py --verify` re-hashes the
-189 sealed files. The repository gates are under [Gates](#gates), and what is
+190 sealed files. The repository gates are under [Gates](#gates), and what is
 not proved is under [Limits](#limits).
 
-| Recorded run | `runs/final-ae55acdb` (sealed) |
+| Recorded run | `runs/final-8fad7b13` (sealed) |
 |---|---|
-| Head | `ae55acdb` (run); sealed at `8534c45c` |
+| Head | `8fad7b13` (run); sealed at `569c477a` |
 | Manifest | `manifests/h28-final.json`; extends `manifests/h28-full.json` (`bb3f1f97…`), unchanged |
-| Constructors | 215: 117 with census sites, 98 in the clause inventory (136 fixtures, 7 clauses with a reason) |
+| Constructors | 215: 117 with census sites, 98 in the clause inventory (136 fixtures, 8 clauses with a reason) |
 | Proof oracle (all 342 entries) | 273 detected, 7 equivalent-certified, 62 invalid-compilation, 0 error, 0 unrun |
 | Clause fixtures (136) | 121 detected, 1 equivalent-certified, 14 invalid-compilation |
 | Constructors with no compiled mutant | 15 (listed in `acceptance.json`): the 2 `Rule` wrappers and 13 whose every tried edit the DSL refuses |
 | Semantic cases (40) | 24 killed, 1 survivor-sound, 1 equivalent, 8 witness-failed, 2 link-mismatch, 4 semantic-witness-failed; 0 error, 0 unrun. Every non-kill outcome but the survivor is a control meeting its expectation |
 | Controls | 19, all as declared (`controls_pass: true`): the 5 earlier ones, 9 link-level negative controls, 4 semantic negative controls, and the survivor case |
 | Baselines | full `Calculus/Taclet.lean`, every row and link alone, `CallbackTaclet.toTaclet`: all pass |
-| Acceptance | `runs/final-ae55acdb/acceptance.json`: `scope_complete: true`, no failure |
-| Seal | `runs/final-ae55acdb/seal.json`, 189 files, including the Lean import closure, `lean-toolchain` and the reused runs' archives |
-| Earlier runs (kept) | `final-aa39f4cd` (2 classifier errors), `final-ff85b708` (scope-complete before the reviews' fixes) |
+| Acceptance | `runs/final-8fad7b13/acceptance.json`: `scope_complete: true`, no failure |
+| Seal | `runs/final-8fad7b13/seal.json`, 190 files, including the Lean import closure, `lean-toolchain` and the reused runs' archives |
+| Earlier runs (kept) | `final-aa39f4cd` (2 classifier errors), `final-ff85b708` (scope-complete before the reviews' fixes), `final-ae55acdb` (before the re-review's fixes; same decisions) |
 
 The lane moved from a Codex VM to a Claude VM on 2026-11-05. Its earlier
 history, which used a Docker backend and caches that exist only on the Codex
@@ -93,7 +93,10 @@ a census mutant.
   - `if (!cond)` in `whileUnwind`;
   - in `whileInvariantLexDiamond`, the negated condition and the emptied
     "preserved" body.
-- **Clauses listed with a reason, not a fixture (7):**
+- **Clauses listed with a reason, not a fixture (8):**
+  - `ifElseJoinSequence`'s capture `bool se = se; body;`: the local is read
+    only inside the spliced schema statement `body`, so no written use can
+    be made to re-read it;
   - the computed side conditions `hf`, `hq`, `hcap`, `hexp` and `hs`, each
     an equation to `some …`, `none` or `[]`. No one-change edit names
     another inhabited value, and the premise they fix is covered by the
@@ -110,8 +113,12 @@ a census mutant.
   scratch files with this code, without re-running Lean. Both fixtures are
   now `detected`. The reviews then found the clause extraction incomplete
   (see [Follow-up reviews](#follow-up-reviews)). The final run
-  `final-ae55acdb` adds the 17 missing fixtures and the semantic controls.
-  Its 22 fresh checks ran in 6.8 min; all other checks are reused.
+  `final-ae55acdb` added the 17 missing fixtures and the semantic controls;
+  its 22 fresh checks ran in 6.8 min, and all other checks were reused. A
+  re-review then tightened the semantic-control and `sound_all` checks. The
+  recorded run `final-8fad7b13` re-classified everything with the final
+  code. Only the four control witnesses, whose docstrings changed, ran
+  fresh (55 s). Every decision is the same as in `final-ae55acdb`.
 
 ### Per-family semantic verdicts
 
@@ -173,8 +180,14 @@ Four families also have a **semantic** negative control,
 `control.semantic.<family>`. Each one is a real kill witness with only its
 premise definition replaced by the production premise. The control
 requires the link to elaborate against the unchanged table and the kill
-argument to fail afterwards. The runner (`semantic_control`) refuses three
-cases: any error in the link span, a target error and a runtime limit. If
+argument to fail afterwards. The runner (`semantic_control`) refuses five
+cases:
+- any error at or before the link;
+- a target error;
+- a runtime limit;
+- a `source_link` that depends on `sorryAx`;
+- a `checked_kill` that does *not* depend on it, because the failure must
+  reach the kill. If
 the witness went through, the case would be `killed`, meaning the
 production rule is unsound.
 
@@ -290,7 +303,8 @@ server, audited head `7c822c8d`, which held the run `final-ff85b708`.
     (`constructors_without_compiled_mutant`).
 - **Weak `sound_all` check.** Any statement with parameters printed a `∀`.
   The check now requires the state that `Premise.Sound` is applied to to be
-  a bound variable of type `State`.
+  the last bound variable, of type `State`, with no hypothesis between it
+  and the conclusion.
 - **Seal coverage.** The seal now also hashes:
   - the Lean import closure of the targets and oracles, on which reuse
     depends;
@@ -306,6 +320,20 @@ server, audited head `7c822c8d`, which held the run `final-ff85b708`.
   - "Each compiled fixture differs from `Stmt.step`" overclaimed. A
     detection means the unchanged evidence fails, not that the premise
     provably differs.
+
+**Re-review of the fixes** (read-only, no Lean server, head `2cb825b01`,
+run `final-ae55acdb`). It confirmed every fix and every number. Its
+findings, all fixed in `final-8fad7b13`:
+
+- `semantic_control` would have passed a typo before the link or after
+  `checked_kill`. It now refuses errors at or before the link, and requires
+  a clean `source_link` and a `checked_kill` that depends on `sorryAx`.
+  The four recorded controls meet this.
+- `sound_all` accepted a state restricted by a hypothesis. That is now
+  refused, with a self-test.
+- `ifElseJoinSequence`'s capture was dropped silently. It is now listed
+  with its reason.
+- Stale docstrings and module counts.
 
 **Accepted as limits, not fixed:**
 
@@ -323,9 +351,9 @@ server, audited head `7c822c8d`, which held the run `final-ff85b708`.
 - `--reuse` now indexes earlier records by scratch sha256 across several
   runs, not by key. So a scratch file shared by two cases, such as a
   negative control's normal witness, is elaborated once.
-- Reuse is valid because the import closure has not changed. The 59 modules
-  imported by `Calculus/Taclet.lean` and `Calculus/CallbackRules.lean`, and
-  the 71 modules imported by the oracles, are unchanged from `91c9631d` and
+- Reuse is valid because the import closure has not changed. The 58
+  modules imported by `Calculus/Taclet.lean` and `Calculus/CallbackRules.lean`,
+  and the 76 imported by the oracles (71 before this session's oracles), are unchanged from `91c9631d` and
   `20d7b77c` (the sources of the reused records) to this head. Neither the
   master merge nor this session touched them. The seal pins that closure.
 - Fresh Lean checks in `final-aa39f4cd` (40.8 min wall-clock, 3 bridges):
@@ -334,7 +362,7 @@ server, audited head `7c822c8d`, which held the run `final-ff85b708`.
 
   The other checks reuse `full-91c9631d`/`full-20d7b77c` diagnostics.
   `final-ff85b708` re-classified all of them.
-- Runner self-tests: 34 (`test_mcprun`). They now cover:
+- Runner self-tests: 34 (`test_mcprun`), with more cases per test after the re-review. They now cover:
   - the survivor verdict;
   - `sound_all` universal in the state;
   - the semantic control;
@@ -785,7 +813,7 @@ those of the run head `20d7b77c`. The lane changes only
   does not change the semantics.
 - **Reuse.** The final run reuses earlier Lean diagnostics for byte-identical
   scratch files. This is valid only because the imported modules are
-  unchanged since `20d7b77c` (checked; see above). Reused records keep their
+  unchanged since `91c9631d` and `20d7b77c` (checked; the seal pins them). Reused records keep their
   original elapsed time and bridge.
 - **Runner outcome coverage.** Timeouts fold into `error`; there is no
   separate timeout class. No census mutant is a non-equivalent survivor; the
