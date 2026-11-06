@@ -8,24 +8,30 @@ Read-only audit of where Lean build/check time and memory go, at base
 
 A whole module is rarely the problem. The cost sits in a few constructs, and
 three of them dominate. **(a) In-file axiom pins**
-(`#guard_msgs in #print axioms X`, 22,928 of them in 2,420 modules) cost up to
-47 % of a module's wall time. Of their expected outputs, 12,795 could be
-parsed, and every one of those names only the three standard axioms, which
-`scripts/AxiomAudit.lean` already checks in CI for every declaration. **(b)
+(`#guard_msgs in #print axioms X`, 22,928 of them in 2,420 modules) cost
+0–47 % of a module's wall time in five A/B tests. Of the 12,795 whose expected
+output parses, 9,403 already list all three standard axioms
+(`propext, Classical.choice, Quot.sound`). Such a pin cannot grow without
+leaving the set that `scripts/AxiomAudit.lean` enforces in CI for every
+declaration, so it checks nothing that CI does not. The other pins (subsets,
+"no axioms", the 23 `requiredPins`) add real checks, because
+`scripts/check-axiom-pins.mjs` keeps sets exact and non-growing. Dropping the
+9,403 is a policy decision (Q1). **(b)
 Three worked examples** (`Examples/Tactics/OpenLoops`, `Examples/DecisionGaps`,
 `Examples/Tactics/RevertData`) take 600 s, 215 s and 163 s on one core. Commits
-outside these files rebuild them 16–61 times a week. In OpenLoops, 77 % of the
-time is kernel checking of `sol_prove (chunk := 128)` chunks, and each chunk
-costs more than the one before. In DecisionGaps, 81 % is two interpreted
-`#eval … verdict` lines. **(c) Peak memory**: OpenLoops reaches 9.2 GB,
-`Source/Horizon` 7.5 GB and RevertData 6.3 GB. None of the three imports
-another, so on a 15 GB VM any two of them running at once can exhaust memory.
-A chunk-512 variant of OpenLoops was killed by the OOM killer at 13.9 GB
-anonymous RSS. Some things look bad but measure cheap: the 211-deep import
+outside these files rebuild them 16–61 times a week. In OpenLoops, 75 % of the
+time is kernel checking of 16 `sol_prove (chunk := 128)` chunks, whose cost
+roughly grows chunk by chunk (3.6 s → 89 s). In DecisionGaps, 81 % is two interpreted
+`#eval … verdict` lines. **(c) Peak memory**: OpenLoops reaches 9.0 GiB
+VmHWM, `Source/Horizon` 7.3 GiB and RevertData 6.2 GiB. None of the three
+imports another, so Lake may run two at once on a 15 GB VM; VmHWM includes
+shared `.olean` mappings (about 1 GiB even for a trivial module), so whether
+two together exhaust memory is near the margin, not certain. Some things look bad but measure cheap: the 211-deep import
 chain (about 0.4 s per tiny module), the 6,038-import library root (6.3 s
 warm) and the most-touched modules. The base commit's cache seeding failed on
-this VM, so every module would have been built cold. Master fixed that today
-(`f160e517f`).
+this VM, so every module would have been built cold; master's `f160e517f`
+(today) no longer fails here, though re-seeding a fresh cache with it was not
+re-verified.
 
 ## 2. Method
 
@@ -59,16 +65,19 @@ this VM, so every module would have been built cold. Master fixed that today
   `SED=` it applies an edit (used for chunk sizes). Profiled modules: the top
   8, plus pin A/B runs on 5 modules, alternated, with 2 runs per variant.
 * **Static counts**: `build-speed-tools/scan.py` counts `decide`, `#eval`,
-  `#print axioms` and similar constructs per module and per area.
+  `#print axioms` and similar constructs per module and per area;
+  `build-speed-tools/pins.py` classifies the pins' expected axiom sets and
+  weighs them by churn.
 * **Cache**: `scripts/ci/fetch-lake-cache.sh`, then `run-lean.sh` (warm: 12.3 s
   wall, 6,461 jobs, all but 9 fetched). `gate.sh per-file` then failed with
   "object file … Decision.olean does not exist" until
   `scripts/ci/restore-lake-artifacts.py` had been run (it placed 12,892
   files).
-* **Noise**: two runs of the same file differ by up to 20 % (TargetNested:
-  41.9, 35.2 and 35.5 s). The first run after a container restart was 5–30×
-  slower because the page cache was cold (§5). Figures are wall seconds
-  unless marked CPU.
+* **Noise**: repeated profiler runs agree within about 10 % (TargetNested
+  35.2 and 35.5 s; SourceReferenceReadControls 43.9 and 40.5 s); the plain
+  `measure.sh` run of TargetNested gave 41.9 s. The first run after a
+  container restart was 3.5–32× slower because the page cache was cold (§5).
+  Figures are wall seconds unless marked CPU; memory is VmHWM in GiB.
 
 ### Inventory
 
@@ -88,9 +97,10 @@ this VM, so every module would have been built cold. Master fixed that today
 * Libraries: `Solidity` has 6,046 modules, `SolidityExamples` 355,
   `SolkeyTestSuite` 50 and `SolidityCorpus` 9. Modules whose name ends in
   `*Controls` number 1,408 (205,004 lines). Of those, 740 (122,488 lines) are
-  leaves: nothing but the root imports them.
+  leaves: nothing but the root imports them. (Name filters differ slightly;
+  a looser suffix match finds 1,412.)
 * **Depth** is 211 (`Yul.Views.RetainedLoopPayloadReadbackControls`), and 207
-  links of that chain are `Yul.Views` modules averaging about 85 lines.
+  links of that chain are `Yul.Views` modules averaging about 79 lines.
 * **Critical path by lines**: 52,771 lines over 82 modules, from `KeySort` →
   `Syntax.*` → `Semantics.*` → `Calculus.*` → `Examples.DecisionResidue`.
 * **Top transitive fan-in** (number of modules a change rebuilds):
@@ -125,7 +135,7 @@ this VM, so every module would have been built cold. Master fixed that today
 
 ### Measured modules (cold, one at a time)
 
-| Module | Wall s | CPU s | Peak RSS GB | Rebuilds/wk (lower–upper) |
+| Module | Wall s | CPU s | Peak RSS GiB | Rebuilds/wk (lower–upper) |
 |---|---:|---:|---:|---:|
 | `Examples.Tactics.OpenLoops` | 599.6 | 595.1 | **9.0** | 21–61 |
 | `Source.Horizon` | 222.8 | 700.5 | **7.3** | 1–14 |
@@ -174,28 +184,35 @@ A dash before a number means only the upper figure is shown.
 
 | Rank | Finding | Evidence | Estimated payoff | Effort | Risk |
 |---|---|---|---|---|---|
-| 1 | In-file axiom pins cost 0–47 % of a module's wall time, and every parsed pin checks only what CI's `AxiomAudit` already checks | Pins removed in 5 modules: −19.9 s (−47 %), −9.3 s (−26 %), −3.9 s, −1.9 s, 0 s; all 12,795 parsed pins ⊆ {propext, Classical.choice, Quot.sound} | ≈ 9 h/wk (lower churn × 0.10 s/pin; range 0–30 h) | M (mechanical, but G07 policy) | Low: CI keeps the audit; pins no longer fail locally |
-| 2 | `Examples/Tactics/OpenLoops` takes 600 s single-threaded; 77 % is kernel checking of chunks that each cost more than the last | profile: type checking 461 s over 17 checks growing 3.6 s → 89 s; interpretation 100 s | 3.5–10 h/wk if moved off the per-lane path | S | Low |
-| 3 | Peak memory: OpenLoops 9.2 GB, Horizon 7.5 GB, RevertData 6.3 GB, and none imports another | VmHWM samples; chunk-512 variant killed by the OOM killer at 13.9 GB anonymous RSS | prevents OOM-killed builds on 15 GB VMs | S | Removes risk |
-| 4 | `Examples/DecisionGaps`: two `#eval … verdict` lines take 179 s of 222 s, run serially | profile: `interpretation of _eval took 117s` (line 83) and `62.3s` (line 113); `Elab.async false` (line 19) | 1.0–2.8 h/wk | S | Low |
-| 5 | 740 leaf `*Controls` modules (122 k lines) sit in the `Solidity` library that every checkpoint builds | graph; line-based estimate (±50 %) | 7.7–17.3 h/wk taken off the checkpoint loop (still built at lane end) | M | Medium (later detection) |
-| 6 | `Source/Horizon`: 693 s of CPU in `below_go` (`repeat' first` over about 31 lemmas); 7.5 GB | profile: tactic execution 693 s, `refine` 183 s over 276 calls of ≥ 300 ms, `split` 65 s | 0.06–0.9 h/wk wall; memory risk | M | Low |
+| 1 | In-file axiom pins cost 0–47 % of a module's wall time; 9,403 of 12,795 parsed pins list all three standard axioms and so check nothing CI's `AxiomAudit` does not | Pins removed in 5 modules: −19.9 s (−47 %), −9.3 s (−26 %), −3.9 s, −1.9 s, 0 s | ≈ 9 h/wk (lower churn × median 0.10 s/pin; range 0–30 h; extrapolated from 5 pin-heavy modules) | M (mechanical, but G07 policy) | Low if limited to full-set pins and not `requiredPins`; payoff then scales by about 9.4/12.8 of the parsed pins |
+| 2 | `Examples/Tactics/OpenLoops` takes 600 s single-threaded; 75 % is kernel checking of 16 chunks whose cost roughly grows | profile: 16 chunk checks 3.6 s → 89 s (446 s); interpretation 100 s | lane-end time only: ≤ 61 × 600 s ≈ 10 h/wk (upper, per-commit); CI keeps building it | S | Low; needs Q2 |
+| 3 | Peak memory: OpenLoops 9.0 GiB, Horizon 7.3 GiB, RevertData 6.2 GiB, and none imports another | VmHWM samples (include ~1 GiB shared .olean maps) | margin against OOM on 15 GB VMs | S | Reduces risk |
+| 4 | `Examples/DecisionGaps`: two `#eval … verdict` lines take 179 s of 222 s, run serially | profile: `interpretation of _eval took 117s` (line 83) and `62.3s` (line 113); `Elab.async false` (line 19) | ≤ 2.8 h/wk of lane time (upper); CI keeps the check | S | Low; needs Q2 |
+| 5 | 740 leaf `*Controls` modules (122 k lines) sit in the `Solidity` library that every checkpoint builds | graph; line-based estimate fitted on large controls | ≤ 17 h/wk of checkpoint time (upper; still built at lane end and CI) | M | Medium: audits must import the new root |
+| 6 | `Source/Horizon`: 700 s CPU / 223 s wall, dominated by tactic execution (`below_go`'s `repeat' first` over 31 lemmas is the likely source); 7.3 GiB | profile: `refine` 183 s over 276 calls ≥ 300 ms, `split` 65 s | 0.06–0.9 h/wk wall; memory | M | Low–medium |
 | 7 | `Syntax/Elab/Arms`: 75 s of 87 s is LCNF code generation, and 779 modules wait on it | profile: `compilation (LCNF base) 75.3s`, single largest 38.2 s | 0.2–0.4 h/wk, plus about 75 s of critical-path latency per edit | M | Low |
-| 8 | `Examples/Tactics/RevertData`: 163 s with CPU ≈ wall; kernel checking 127 s, 6.3 GB | profile: type checking 46.7, 25.1, 15.4, 8.6 s; `blocked 122s` | 0.7–2.2 h/wk | S–M | Low |
-| 9 | Base cache seeding silently failed, and `gate.sh per-file` failed after a fetched build | `elan which lean` panicked (no default toolchain); "object file … does not exist" | cold vs 12.3 s warm `run-lean.sh`; first half fixed on master `f160e517f` | done / S | Removes risk |
-| 10 | 67 files set `Elab.async false`; measured ones run on one core | DecisionGaps CPU/wall = 0.99, Decision 0.99, vs Horizon 3.1 | not measured (needs a stack-overflow test) | M | Medium |
+| 8 | `Examples/Tactics/RevertData`: 163 s with CPU ≈ wall; kernel checking 127 s, 6.2 GiB | profile: type checking 46.7, 25.1, 15.4, 8.6 s; `blocked 122s` | 0.7–2.2 h/wk | S–M | Low |
+| 9 | Base cache seeding silently failed, and `gate.sh per-file` failed after a fetched build | `elan which lean` panicked (no default toolchain); "object file … does not exist" | cold vs 12.3 s warm `run-lean.sh`; master `f160e517f` no longer panics (seeding itself not re-verified) | done / S | Removes risk |
+| 10 | 67 files set `Elab.async false` (stack overflow, exit 135) | DecisionGaps and Decision run at CPU/wall 0.99 (but so do OpenLoops/RevertData without it) | not measured | M | Medium |
 
 ## 4. Findings
 
 ### F1. Axiom pins: a large, mostly redundant tax
 
 **Evidence.**
-* `scan.py`: 22,928 `#print axioms` in 2,420 modules. The 12,795 whose
-  `/-- info: … -/` text parses list only `[propext, Classical.choice,
-  Quot.sound]` or a subset; the other 10,133 use other layouts and were not
-  classified.
+* `pins.py`: 22,928 `#print axioms` in 2,420 modules. Of the 12,795 whose
+  `/-- info: … -/` text parses, 9,403 list exactly `[propext,
+  Classical.choice, Quot.sound]`, 2,500 a proper subset and 892 "does not
+  depend on any axioms";
+  the other 10,133 use other layouts and were not classified.
 * `scripts/AxiomAudit.lean`, run in CI since `f9791d442`, audits every
-  `Solidity` constant against exactly that set.
+  `Solidity` constant against that set. The pins check more:
+  `scripts/check-axiom-pins.mjs` requires a recorded pin to stay and its set
+  not to grow (`docs/feature-work/roadmap-g07-gates.md:244`), so an
+  axiom-free theorem gaining `propext` is caught only by a pin; and
+  `scripts/g07-baseline.json` lists 23 `requiredPins`. A pin that already
+  lists all three cannot grow without breaking `AxiomAudit`, so for those
+  9,403 the pin is redundant.
 * A/B runs with `STRIP_PINS=1 profile.sh`, wall s with → without pins:
 
 | Module | Pins | With pins | Without | Saved per pin |
@@ -206,19 +223,27 @@ A dash before a number means only the upper figure is shown.
 | `Lowering.V07.SignedEnumControls` | 25 | 5.6 | 3.6 | 0.08 s |
 | `Semantics.Nondeterminism.Fork` | 10 | 0.84 | 0.85 | 0 s |
 
-* Wall time drops more than CPU time (SourceReferenceReadControls: CPU
-  62.6 → 48.2 s, wall −20 s). Each `#print axioms` runs on the command thread
-  and must wait for the proof it audits. So the pins both repeat
-  axiom-collection work and serialize the end of a module.
+* Wall time drops more than user CPU in 3 of 4 modules
+  (SourceReferenceReadControls: CPU 62.6 → 48.2 s, wall −20 s). This is
+  consistent with each `#print axioms` waiting on the command thread for the
+  proof it audits, which serializes the end of a module; it was not shown
+  directly.
 * Weighted by churn, there are 316,784 pin rebuilds a week on master's
-  history (693,271 per-commit). At the median 0.10 s per pin that is about
-  8.8 h/wk; the measured range is 0–30 h/wk.
+  history (693,271 per-commit); 83,696 of them are in leaf controls, which
+  overlaps F5. At the median 0.10 s per pin that is about 8.8 h/wk; at
+  0.34 s, 30 h/wk. The five modules were chosen for having many pins, so the
+  figure is an extrapolation.
 
-**First step.** Decide whether per-theorem pins are still required (G07,
-`scripts/g07-axiom-pins.json`) now that `AxiomAudit` covers every
-declaration (Q1). If not, strip the pins whose set is the standard three,
-module by module, and regenerate the pin inventory. As a smaller step, keep
-one pin per module on its headline theorem.
+**First step.** Decide whether exact, non-growing per-theorem pins are
+still wanted (G07, `scripts/g07-axiom-pins.json`) now that `AxiomAudit`
+bounds every declaration (Q1). If not, strip the 9,403 pins whose set is the
+full standard three (they add nothing beyond `AxiomAudit`'s bound), never
+`requiredPins`, subset or "no axioms" pins, then regenerate the inventory
+with `check-axiom-pins.mjs --write`. A
+cheaper alternative keeping the guarantee: move the pins into one
+`*AxiomPins` module per area, off the checkpoint path, as
+`Frontend.ExpressionUniqueness.AxiomPins` already does (23 s for its whole
+area).
 
 ### F2. OpenLoops: chunk kernel checks grow with each chunk
 
@@ -226,40 +251,49 @@ one pin per module on its headline theorem.
 * `Examples/Tactics/OpenLoops.lean:36-37` (`binomialRowsNine`,
   `sol_prove (chunk := 128)`): 599.6 s wall, 595.1 s CPU, so one core.
 * Profile: type checking 461 s, interpretation 100 s, IR compilation 22 s.
-* The 17 kernel checks, in order: 15.2, 3.6, 5.4, 7.2, 10.6, 15.0, 18.7, 22.0,
-  23.3, 26.1, 31.5, 24.9, 38.1, 43.1, 45.2, 41.5 and 89 s. The interpreter
-  steps before them grow the same way (0.35 s → 3.7 s, last 79.2 s). Each
-  chunk restarts from a sequent whose state grows with the rows already
-  written.
+* Kernel checks in order: 15.2 s (follows an interpretation in a different
+  hygiene context, so almost certainly `binomialFaithfulRowsSmall`), then 16
+  chunks of `binomialRowsNine`: 3.6, 5.4, 7.2, 10.6, 15.0, 18.7, 22.0, 23.3,
+  26.1, 31.5, 24.9, 38.1, 43.1, 45.2, 41.5 and 89 s (446 s, 75 %). The
+  interpreter steps before them grow likewise (0.35 s → 3.7 s, last 79.2 s).
+  That the growth comes from the state carried between chunks is a
+  hypothesis.
 * The file has not changed since 2026-10-24, but edits in its imports rebuild
   it 21–61 times a week (`Frontend.Import` 13 times, `Syntax.Elab.Arms` 9,
   `SolcJson.Contract` 9).
 * Its docstring says "about four minutes"; this VM took ten.
-* Chunk 512 did not reduce the cost: it was OOM-killed after 360 s at 13.9 GB
-  anonymous RSS (dmesg). A chunk-64 run was cut off by a container restart at
-  ≥ 6.25 GB with no timing.
+* Chunk 512 was no escape: the variant was OOM-killed after 360 s at 13,865,132 kB
+  anonymous RSS (cgroup OOM message in dmesg). A chunk-64 run was cut off by a
+  container restart at ≥ 6.0 GiB with no timing.
+* Payoff caveat: lanes already skip examples at checkpoints unless they touch
+  Syntax/Semantics/Calculus (`gate.sh` checkpoint, `docs/parallelism.md` P5),
+  and CI would keep building it, so the saving is lane-end time only; 61 × 600 s
+  is an upper bound.
 
-**First step.** Move `binomialRowsNine` into its own module in a non-default
-"slow examples" library. Build that library in CI/nightly and in
-`run-lean.sh --slow`, not at each lane end. Then investigate why later chunks'
-kernel terms grow: the state is re-checked inside each chunk. Raising the
-chunk size does not help (OOM).
+**First step.** First instrument: find which term grows between chunks
+(profile with `trace.profiler` and print the chunk's sequent size). Moving
+`binomialRowsNine` to a non-default library would reverse the documented
+decision that examples stay default targets (`docs/parallelism.md` P5,
+`322212cf7`), so it waits on Q2. Raising the chunk size does not help.
 
-### F3. Memory: three modules can exhaust a 15 GB VM
+### F3. Memory: three modules near the limit of a 15 GB VM
 
 **Evidence.**
-* Peak VmHWM: OpenLoops 9,198 MB, Horizon 7,475 MB, RevertData 6,316 MB, the
-  root 3,459 MB; every other measured module is under 2.5 GB.
-* None of the three imports another: their closures are 277, 279 and 22
-  modules, and none contains another of the three. Lake can therefore start
-  any two together on a 4-worker VM, and 9.2 + 6.3 > 15 GB.
-* OOM kills are already recorded in `docs/parallelism.md` (P5 table: "3
-  killed by the host's OOM killer").
-* This audit's chunk-512 run was killed by the cgroup OOM killer.
+* Peak VmHWM: OpenLoops 9,198 MiB, Horizon 7,475 MiB, RevertData 6,316 MiB,
+  the root 3,459 MiB; every other measured module is under 2.5 GiB. VmHWM
+  includes shared `.olean` mappings: a trivial module already peaks near
+  1 GiB (`Yul.Interfaces.P16`, `Calculus.Close`), so two of these together
+  are near, not clearly over, a 15 GB VM.
+* None of the three imports another (closures: OpenLoops 277, RevertData
+  279, Horizon 22 modules), so Lake can schedule them together.
+* The OOM kills in `docs/parallelism.md` P5 happened while another session
+  built, not from these modules together; this audit saw no OOM in normal
+  builds (only the chunk-512 variant).
 
-**First step.** Give these modules a Lake job weight, or build the slow
-examples library (F2) with `-j1` after the rest. Record peak RSS next to the
-times in docs/parallelism.md so that growth is noticed.
+**First step.** Record peak RSS next to module times (as `measure.sh` does)
+so growth is noticed, and check whether Lake can limit concurrency for
+selected modules; the fallback is building the heavy examples last with
+`-j1`. Lake per-module job weights were not verified to exist.
 
 ### F4. DecisionGaps: two interpreted `#eval`s are 81 % of the module
 
@@ -288,15 +322,19 @@ measured.
 * There are 1,408 `*Controls` modules: 205 k lines, 20 % of the library.
   Of them, 740 (122 k lines) are imported by nothing but the root.
 * `gate.sh checkpoint` builds `lake build Solidity`, which includes them.
-* Estimate from the 8 measured controls (0.0137 s/line + 0.4 s; individual
-  errors ±50 %): leaf controls are 17 % of the library's rebuild time,
-  7.7–17.3 h/wk.
+* Estimate from the 8 measured controls (0.0137 s/line + 0.4 s, fitted on
+  files of 1,448–3,977 lines and applied to smaller leaves; individual errors
+  ±50 %): leaf controls are 17 % of the library's rebuild time, up to
+  17.3 h/wk on the per-commit figure. The 7.7 h first-parent figure is CI's,
+  which would keep building them, so it is not a checkpoint saving.
 * The same move for the examples cut the checkpoint gate from 1,476 s to
   188 s (`docs/parallelism.md`, P5).
 
 **First step.** Have `register.sh` emit a `SolidityControls` root for leaf
 `*Controls`, kept as a default target, and have `gate.sh checkpoint` skip it
-unless `GATE_CONTROLS=1`.
+unless `GATE_CONTROLS=1`. `scripts/AxiomAudit.lean` and `TrustAudit.lean`
+must then import the new root, or 740 modules drop out of the audit; the
+orphan check, `register.sh` and the root list in AGENTS.md change too.
 
 ### F6. Horizon: `below_go` search
 
@@ -305,14 +343,17 @@ unless `GATE_CONTROLS=1`.
   $[| with_reducible apply $ls]*) | (refine Below.bind ?_ ?_) | … | split |
   dsimp only)`.
 * `:491-512` and onward pass it the same list of 31 lemmas at every step.
-* Profile: tactic execution 693 s of CPU (wall 223 s on 4 cores);
-  `refine` ≥ 300 ms 276 times (183 s); `split` 65 s; one declaration's
-  elaboration 92.4 s; attribute application 90 s.
-* Peak RSS 7.5 GB (F3). It is rebuilt rarely (1–14 times a week).
+* Measured 700 s CPU, 223 s wall. Profile categories (which overlap and sum
+  past total CPU): tactic execution 693 s, `refine` ≥ 300 ms 276 times
+  (183 s, `refine Below.bind` is in `below_go`), `split` 65 s, one
+  declaration's elaboration 92.4 s, attribute application 90 s, simp 62 s.
+  Attributing the bulk to `below_go` is likely, not proven.
+* Peak RSS 7.3 GiB (F3). It is rebuilt rarely (1–14 times a week).
 
 **First step.** For each `*_step` theorem, pass only the lemmas for the
-callees of that function, and try `Below.bind` before the `apply` list. Check
-that the profiler's `refine` total drops.
+callees of that function, and re-profile. Reordering `first` (e.g.
+`Below.bind` before the `apply` list) can change which branch succeeds, so
+check every proof still closes.
 
 ### F7. `Syntax/Elab/Arms`: code generation on the critical path
 
@@ -333,10 +374,12 @@ helper definitions, and re-profile LCNF base time.
 **Evidence.**
 * 163 s wall, 162.8 s CPU. Profile: type checking 127 s, mostly four
   declarations (46.7, 25.1, 15.4 and 8.6 s); simp 24 s; `blocked 122s`.
-* Candidates by size are `symbolicCustom` (`:191-193`, `sol_prove (steps :=
-  2048)`) and `externalReason` (`:207-209`). The profiler prints no positions,
-  so this mapping is not confirmed.
-* 6.3 GB peak; rebuilt 16–48 times a week.
+* `symbolicCustom` (`:191-193`, `sol_prove (steps := 2048)`) is a likely
+  source of the 46.7 s check; the 25.1 s and 8.6 s checks are printed after
+  the `#eval` region near `:241`, so they are later theorems. The profiler
+  prints no positions, so the mapping is not confirmed.
+* CPU ≈ wall here although the file does not set `Elab.async false`.
+* 6.2 GiB peak; rebuilt 16–48 times a week.
 
 **First step.** Profile with `trace.profiler` to attach declaration names,
 then split the top two theorems into their own module (as P2 did for
@@ -352,8 +395,9 @@ then split the top two theorems into their own module (as P2 did for
   "no active toolchain").
 * Installing with the path that `install.sh` would have computed gave
   `+6446 module entries`, and `run-lean.sh` then took 12.3 s.
-* Master's `f160e517f` fetch script ran successfully on this VM
-  (`+0 module entries; pack master f160e517fd`).
+* Master's `f160e517f` fetch script no longer panics on this VM
+  (`+0 module entries; pack master f160e517fd`). Nothing new was installed,
+  so seeding a fresh cache with it was not re-verified.
 * Separately, after a fetched build, `gate.sh per-file` failed (`object file
   '…/Solidity/Calculus/Decision.olean' … does not exist`) until
   `scripts/ci/restore-lake-artifacts.py` had run. CI runs that script; the
@@ -368,15 +412,17 @@ and have the fetch fail loudly for lanes instead of warning.
 
 **Evidence.**
 * `grep -l 'Elab.async false'`: 67 files, mostly `Examples/Decision*`.
-* Measured ones use one core: DecisionGaps CPU/wall 0.99, Decision 0.99,
-  against Horizon 3.1 and SourceReferenceReadControls 1.5.
+* Measured ones use one core: DecisionGaps CPU/wall 0.99, Decision 0.99.
+  This does not isolate the option: OpenLoops and RevertData do not set it and
+  also run near 1.
 * The stated reason (`DecisionGaps.lean:17-18`) is that parallel evaluations
-  overflow the stack (exit 135).
+  overflow the stack (exit 135), with `--tstack=131072` already in effect.
+* Full builds already run 4 Lake jobs, and `gate.sh touched` sets
+  `LEAN_NUM_THREADS=1`, so the in-file parallelism would mainly shorten the
+  tail of a build.
 
-**First step.** On one file, try `--tstack` (or a per-task stack size)
-together with `Elab.async true`. If it is stable, the payoff is up to
-(cores − 1)/cores of these files' wall time. Not measured: listed as an open
-question.
+**First step.** On DecisionGaps alone, try a larger `--tstack` with
+`Elab.async true` and check for exit 135. Not measured; low priority.
 
 ## 5. Things that look bad but are fine
 
@@ -384,38 +430,65 @@ question.
   about 0.4 s: `Yul.Views.PrimitiveOwnershipPreservation` (33 lines, 217
   imports) 0.55 and 0.36 s; `RetainedLoopSourceWrite` 0.37 s; `Keccak` 0.43 s;
   the chain's end, `RetainedLoopPayloadReadbackControls`, 3.1 s. That is about
-  1.5–2 min of serial latency at most.
+  1.5–2 min of serial latency at most (Lake's own per-job overhead not
+  measured).
 * **Root `Solidity.lean` (6,038 imports, touched by 1,211 of 1,974
   commits).** It takes 6.3 s warm (25.8 s on the first run, when the page
-  cache was cold) and 3.4 GB. Lower figure: 482 rebuilds × 6.3 s ≈ 0.8 h/wk.
-  The docs say 1.5–4.3 s at 3,487 modules, so the cost grows roughly with the
-  import count. Nothing imports the root except `scripts/AxiomAudit.lean`.
+  cache was cold) and 3.4 GiB. Lower figure: 482 rebuilds × 6.3 s ≈ 0.8 h/wk.
+  `docs/parallelism.md` P5 records 1.5–4.3 s for rebuilding the root, at a
+  time it reached 3,487 modules, so the cost grows roughly with the import
+  count. Nothing imports the root except `scripts/AxiomAudit.lean`.
 * **Most-touched modules are cheap.** `Yul.Interfaces.P16` (43 touches, 120
   rebuilds) 1.0 s; `Frontend.Testing` 7.1 s; `Frontend.Import` 7.7 s.
 * **Huge fan-in at the bottom.** `Keccak` (6,043 dependents) and `KeySort`
   (4,506) are rarely edited (0 and 0 touches in 7 days).
 * **The largest files are not the slowest.**
   `Frontend.ExpressionUniqueness.AxiomPins` (3,905 lines) takes 23 s and is
-  rebuilt 6 times; `Examples.DecisionHashes` (formerly 417 s) now takes 1.2 s
-  after the P5 split.
-* **First-run timings after a container restart** were 5–30× higher (Fork:
-  27.1 s, then 0.84 s; SourceMemoryKeccak: 85.0 s, then 16.9 s). This comes
+  rebuilt 6 times. (`Examples.DecisionHashes` takes 1.2 s, but its checks
+  moved to `DecisionHashesChecks`, which was not measured.)
+* **First-run timings after a container restart** were 3.5–32× higher (Fork:
+  27.1 s, then 0.84 s; SignedEnumControls: 19.5 s, then 5.6 s;
+  SourceMemoryKeccak: 85.0 s, then 16.9 s). This comes
   from the page cache, not Lean, so those runs were discarded.
 
 ## 6. Skeptic pass
 
-A read-only pass, without the Lean server, tried to refute each finding;
-outcomes are in [§6a](#6a-skeptic-results).
+A separate read-only reviewer (no builds, no Lean server) tried to refute
+each finding against the raw logs, the cited lines and the project docs.
+Outcomes, all applied above:
+
+| Finding | Verdict | Change |
+|---|---|---|
+| F1 pins | Downgraded | Pins also enforce exact, non-growing sets and 23 `requiredPins`, so they are not redundant with `AxiomAudit`; the serialization explanation is now "consistent with"; the extrapolation from 5 chosen modules is flagged; overlap with F5 noted; counts now come from `pins.py` |
+| F2 OpenLoops | Downgraded | 16 chunk checks, not 17 (the first is the other theorem); growth not monotone; payoff counts only lane-end time; moving it reverses a documented decision (Q2) |
+| F3 memory | Downgraded | VmHWM counts shared `.olean` maps, so overlap is near the limit, not over it; the P5 OOMs had another cause; "Lake job weights" not known to exist; risk "reduced", not "removed" |
+| F4 DecisionGaps | Stands | Same churn caveat as F2 |
+| F5 leaf controls | Downgraded | Fit is from large files; the 7.7 h CI figure is not a checkpoint saving; audits must import the new root |
+| F6 Horizon | Downgraded | Profiler categories overlap; attribution to `below_go` is likely, not proven; reordering `first` can break proofs |
+| F7 Arms | Stands | — |
+| F8 RevertData | Downgraded (small) | Candidate theorems corrected |
+| F9 cache | Stands | "+0 entries" shows only that the panic is gone |
+| F10 Elab.async | Downgraded | CPU ≈ wall does not isolate the option; `--tstack` already set; payoff unmeasured, low priority |
+
+Also corrected: closure sizes, GB vs GiB, "5–30×" → 3.5–32×, average
+`Yul.Views` size 79 lines, the TargetNested noise comparison, and the source
+of the root's 1.5–4.3 s. One scratchpad log
+(`SourceReferenceReadControls.nopins` in `prof/`) was produced before the pin
+regex was fixed and still contains the pins; only the `ab/` A/B runs are
+used for F1.
 
 ## 7. Open questions for the user
 
-* **Q1 [Axiom pins]** Are per-theorem `#guard_msgs in #print axioms` pins
-  still required now that `scripts/AxiomAudit.lean` audits every declaration
-  in CI? Options:
-  * Drop the pins with the standard set (largest saving; the pins stop
-    failing locally).
-  * Keep one headline pin per module.
-  * Keep all of them (no saving).
+* **Q1 [Axiom pins]** Are exact, per-theorem `#guard_msgs in #print
+  axioms` pins still required now that `scripts/AxiomAudit.lean` bounds
+  every declaration in CI? Options:
+  * Drop the 9,403 pins whose set is already all three standard axioms,
+    keeping `requiredPins`, subset and "no axioms" pins (largest saving; no
+    check is lost, since CI's `AxiomAudit` bounds every declaration by the
+    same three).
+  * Move the pins to one `*AxiomPins` module per area, off the checkpoint
+    path (keeps every check; saving smaller and later).
+  * Keep everything as is (no saving).
 * **Q2 [Slow examples]** May the three slowest examples (OpenLoops,
   DecisionGaps' two `#eval`s, RevertData's large theorems) move to a
   non-default library built only by CI or nightly? Options:
