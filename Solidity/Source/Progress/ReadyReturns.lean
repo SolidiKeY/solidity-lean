@@ -12,14 +12,14 @@ variable {E : Env}
 abbrev returnContext (ps : List STy) (τ : STy) : RCtx := [τ].reverseAux (ps.reverseAux [])
 
 def singleReturningBody (ps : List STy) (τ : STy)
-    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase τ = true) : RBody E :=
+    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase E.mapFree τ = true) : RBody E :=
   {ps := ps,rs := [τ],inModifier := false,locals := returnContext ps τ,out := returnContext ps τ,
    items := .stmt (.retVal rfl e same) .nil}
 
 theorem return_ready_nsp {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (n nps : Nat)
     (ph : Option (Ph E)) {Γ : RCtx} {τ : STy}
-    (e : RExpr E Γ τ) (same : τ.implicit E.isBase τ = true)
+    (e : RExpr E Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ReadyExpr A e) (l : Locals E.layout Γ)
     (frame : BodyFrame nps [τ] Γ) :
     NSP (execS G F (n+1) nps ph (.retVal (M := false) (k := .body) rfl e same) l)
@@ -41,7 +41,7 @@ theorem return_ready_nsp {A : Decl → Prop} {G : Glob E} {c : String}
 
 theorem single_return_items_nsp {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (ps : List STy) (τ : STy)
-    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase τ = true)
+    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ReadyExpr A e) (l : Locals E.layout (returnContext ps τ)) :
     ∀ n, NSP (execItems G F n ps.length none (singleReturningBody ps τ e same).items l)
       (fun out => ∃ last, out = .ret last)
@@ -62,7 +62,7 @@ theorem single_return_items_nsp {A : Decl → Prop} {G : Glob E} {c : String}
 
 theorem run_single_return_ns {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (ps : List STy) (τ : STy)
-    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase τ = true)
+    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ReadyExpr A e) (l : Locals E.layout (returnContext ps τ)) :
     ∀ n, NS (runMods G F n (singleReturningBody ps τ e same) [] l)
   | 0 => by rw [runMods.eq_1]; exact NS.halt' (fun _ h => by cases h)
@@ -76,7 +76,7 @@ theorem run_single_return_ns {A : Decl → Prop} {G : Glob E} {c : String}
 theorem call_single_return_ns {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (d : Decl)
     (ps : List STy) (τ : STy) (e : RExpr E (returnContext ps τ) τ)
-    (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ)
     (ready : ReadyExpr A e) (defaults : ZeroReady E τ)
     (body : G.prog.body (G.dispatchFn F.contract d) = some (singleReturningBody ps τ e same))
     (vs : Vals E.layout ps) : ∀ n, NS (callInternal G F n d vs [τ])
@@ -97,7 +97,7 @@ theorem call_single_return_ns {A : Decl → Prop} {G : Glob E} {c : String}
 theorem single_return_progress_and_memory {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (d : Decl)
     (ps : List STy) (τ : STy) (e : RExpr E (returnContext ps τ) τ)
-    (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ)
     (ready : ReadyExpr A e) (defaults : ZeroReady E τ)
     (body : G.prog.body (G.dispatchFn F.contract d) = some (singleReturningBody ps τ e same))
     (vs : Vals E.layout ps) (H : HeapTy) (n : Nat) :
@@ -114,7 +114,7 @@ theorem single_return_progress_and_memory {A : Decl → Prop} {G : Glob E} {c : 
 theorem single_return_expr_progress_and_memory {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (d : Decl)
     (ps : List STy) (τ : STy) (signature : d.fnSig E = some (ps,[τ]))
-    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase τ = true)
+    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ReadyExpr A e) (defaults : ZeroReady E τ)
     (body : G.prog.body (G.dispatchFn F.contract d) = some (singleReturningBody ps τ e same))
     {Γ : RCtx} (args : RConvArgs E Γ ps) (argsOK : ReadyArgs A args) (H : HeapTy) (n : Nat) :
@@ -141,7 +141,7 @@ theorem single_return_from_elaborate (res : Resolution) (elaborated : (Source.el
     (F : Fr) (contract : F.contract = c) (ps : List STy) (τ : STy)
     (d : {d : Decl // d ∈ Solidity.Lowering.P9.WholeProgram.functions res ∧
       d.fnSig res.env = some (ps,[τ])})
-    (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase τ = true)
+    (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase res.env.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ReadyExpr (fun d => d ∈ values) e) (defaults : ZeroReady res.env τ)
     (body : G.prog.body (G.dispatchFn F.contract d.val) = some (singleReturningBody ps τ e same))
     (vs : Vals res.env.layout ps) (H : HeapTy) (n : Nat) :
@@ -157,7 +157,7 @@ theorem single_return_expr_from_elaborate (res : Resolution) (elaborated : (Sour
     (checked : Solidity.Lowering.P9.WholeProgram.check res G c values = true)
     (F : Fr) (contract : F.contract = c) (ps : List STy) (τ : STy)
     (d : {d : Decl // d ∈ Solidity.Lowering.P9.WholeProgram.functions res ∧ d.fnSig res.env = some (ps,[τ])})
-    (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase τ = true)
+    (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase res.env.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ReadyExpr (fun d => d ∈ values) e) (defaults : ZeroReady res.env τ)
     (body : G.prog.body (G.dispatchFn F.contract d.val) = some (singleReturningBody ps τ e same))
     {Γ : RCtx} (args : RConvArgs res.env Γ ps) (argsOK : ReadyArgs (fun d => d ∈ values) args)

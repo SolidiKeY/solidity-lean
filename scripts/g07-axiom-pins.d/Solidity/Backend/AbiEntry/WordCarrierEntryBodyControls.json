@@ -1,0 +1,68 @@
+{
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.all_kinds_early_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.body_failure_not_decoder_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.dirty_padding_prevents_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.dirty_still_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.nonpayable_before_any_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.payable_bytes_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.payable_enum_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.raw_bytes_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.raw_enum_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.short_before_word_and_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.wide_bytes_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.zero_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

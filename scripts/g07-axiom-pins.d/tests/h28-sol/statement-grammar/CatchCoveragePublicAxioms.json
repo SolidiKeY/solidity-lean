@@ -1,0 +1,46 @@
+{
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_actual_yield_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_clauses_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_coverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_derives": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_token_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_yield": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_list_plain_catch_coverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_list_plain_catch_yield": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_list_signature_catch_coverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_list_signature_catch_yield": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanCatch.plain": [],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanCatch.signature": [],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_plain_prefix": [],
+ "tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_signature_prefix": []
+}

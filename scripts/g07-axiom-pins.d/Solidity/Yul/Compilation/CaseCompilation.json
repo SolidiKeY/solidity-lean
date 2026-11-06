@@ -1,0 +1,20 @@
+{
+ "Solidity/Yul/Compilation/CaseCompilation.lean:Solidity.Yul.Compilation.CaseCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/CaseCompilation.lean:Solidity.Yul.Compilation.CaseCompilation.source_hit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/CaseCompilation.lean:Solidity.Yul.Compilation.CaseCompilation.source_miss": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/CaseCompilation.lean:Solidity.Yul.Compilation.CaseCompilation.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

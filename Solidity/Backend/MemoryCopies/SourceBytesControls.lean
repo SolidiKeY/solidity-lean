@@ -38,7 +38,7 @@ private def stored (count : Nat)
 private def before (count : Nat)
     (range : Source.IntTy.u256.lo ≤ (count : Int) ∧ (count : Int) ≤ Source.IntTy.u256.hi) : Source.EMState E [.bool] :=
   (.cons (.bool true) .nil,
-    {ex := ⟨⟨fun _ => ⟨⟨17,by decide⟩,3,some 9,stored count range⟩⟩,
+    {ex := ⟨⟨fun _ => ⟨17,3,some 9,stored count range⟩⟩,
       Source.Transient.empty,[]⟩,
      heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,
      events := [],logs := [(⟨13,by decide⟩,[1,2])],fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩})

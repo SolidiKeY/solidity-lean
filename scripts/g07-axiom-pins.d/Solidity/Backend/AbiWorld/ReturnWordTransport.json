@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/AbiWorld/ReturnWordTransport.lean:Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ReturnWordTransport.lean:Solidity.Backend.AbiWorld.ReturnWordTransport.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ReturnWordTransport.lean:Solidity.Backend.AbiWorld.ReturnWordTransport.encoded_values": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ReturnWordTransport.lean:Solidity.Backend.AbiWorld.ReturnWordTransport.truncated": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ReturnWordTransport.lean:Solidity.Backend.AbiWorld.ReturnWordTransport.wordAt_index": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ReturnWordTransport.lean:Solidity.Backend.AbiWorld.ReturnWordTransport.words_readback": [
+  "Quot.sound",
+  "propext"
+ ]
+}
