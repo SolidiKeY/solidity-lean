@@ -446,3 +446,24 @@ source, cache or toolchain state. It is not an actual H56 run, production
 acceptance, a split or a Lean proof. Independent reviews and the full gate
 remain pending. The H28 paused-member final bundle and exact original prompt
 remain unavailable on this VM.
+
+## H82b member-intake verification
+
+The delivered H82b archive, manifest and SHA256SUMS matched their advertised
+hashes; `sha256sum -c SHA256SUMS` passed. The timing-tools member record has
+`verified_final_stop_head_pause=true`, paused status and the exact requested
+head `28900209b0e221f9e20e07e06921a79527ca4d18`. The metadata archive contains
+no Git bundle. The named remote branch was absent, and an exact-SHA fetch from
+origin failed with `upload-pack: not our ref`. No H28 merge or source edit was
+performed.
+
+The metadata assignment field includes substantial original-assignment text
+and an authenticated scope manifest. Its decoded UTF-8 bytes have SHA-256
+`b1146de0b55d7ac23777b109a56342270f9b15bf86e875857844668776218589`; the
+member objective names rendered-prompt SHA-256
+`1693a6c1af58fbbe4fa6d829f8b464f608e725d0351415a9f2faf78d5780dfac`.
+The relationship between those byte representations is unresolved; the
+metadata is not claimed as a verified exact rendered prompt. The final Git
+bundle/patch and the exact prompt bytes or a verified byte-reconstruction
+procedure remain required before member integration or task work. No contact to
+the retired worker was made.
