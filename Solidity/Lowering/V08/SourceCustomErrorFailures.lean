@@ -39,7 +39,7 @@ theorem encoding_failure {E : Source.Env} {Γ : RCtx} {types : List STy}
 argument, encoding or custom selector is reached. -/
 theorem converted_tail_failure {E : Source.Env} {Γ : RCtx} {σ τ : STy} {types : List STy}
     (global : Glob E) (frame : Fr) (horizon : Nat) (expr : RExpr E Γ σ)
-    (conversion : σ.implicit E.isBase τ = true) (tail : RConvArgs E Γ types)
+    (conversion : σ.implicit E.isBase E.mapFree τ = true) (tail : RConvArgs E Γ types)
     (locals middle reached : Source.Locals E.layout Γ) (state interim final : Source.St E)
     (value : Source.Val E.layout τ) (halt : Source.Halt)
     (head : (do Source.getV (← Source.convRV frame horizon τ (← Source.evalE global frame horizon expr)) :

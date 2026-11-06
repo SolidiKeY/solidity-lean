@@ -43,8 +43,11 @@ elaborator.
 `Tools.SolCases` is an external-source printer and is explicitly included in
 the forbidden frontend set checked from the core.
 
-The list is closed under imports: no core module imports a module outside
-it.  The elaborator is `Syntax/{Elab,Quote,Splice}` and
+The list is meant to be closed under imports, but it is not today: the
+architecture audit (`cloud/audit-20261106/architecture`, fa5acebd4) found 95
+direct imports from core modules to modules outside the list.
+`scripts/check-layers.mjs` checks only that no core module reaches the
+elaborator, the printers or the tactic front ends, not closure.  The elaborator is `Syntax/{Elab,Quote,Splice}` and
 `Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`.  Source
 extraction for the core's composed models stays above it
 (`Frontend/WorldImport`, `Examples/Tactics/TransientStorage.lean`).
@@ -141,7 +144,7 @@ file per new arm (`Calculus/Sound/README.md`; the template is in
    (`Calculus/RuleShapes.lean`) and `PrintedRules.printedOrigins`
    (`Calculus/PrintedRules.lean`); `#check_constructor_table` fails on a
    missing row.  A taclet that reads storage or memory also gets its row in
-   `SortCheck/Annotations.lean`, checked by `lake exe solkeycheck`.
+   `SortCheck/Annotations.lean` (`solidity-lean rules check` compares it with SolKey's rules on demand; no gate runs it since H89).
    `taclets_partitioned`/`printed_rules_partitioned` and the claimed and
    unclaimed counts move with the rows.
 

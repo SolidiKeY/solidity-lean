@@ -1,0 +1,3851 @@
+{
+  "schema": 1,
+  "scope": "External reference bytes/failure/ordered logs and stateful call sequences; no complete memory/world or source correspondence theorem.",
+  "previousCheckpoint": "2f8682af36deb36b1a39c0c1cc85a482e71e360a",
+  "counts": {
+    "blocked": 21,
+    "working": 227
+  },
+  "compilerProbeCounts": {
+    "match": 72,
+    "mismatch": 8,
+    "pending": 304,
+    "reference-rejection-match": 4,
+    "blocked": 28
+  },
+  "validationFailures": [],
+  "fixtures": [
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/basefee_berlin_function.sol",
+      "sourceSha256": "5da36a2854225dc1d33bf0265d700e3b511cb17311c987f21475207e9269bdab",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <=berlin",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <=berlin",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <=berlin",
+          "calls": 0,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/blobbasefee_shanghai_function.sol",
+      "sourceSha256": "0de854a965bbb253d515c6466b01b20cb1a1d840401853495989f58f7bfff746",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <=shanghai",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <=shanghai",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <=shanghai",
+          "calls": 0,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/blobhash.sol",
+      "sourceSha256": "970cff5c232b406e16922cb19a8c20159c1533a6c842a78f007bd60a20f5dfaa",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/blobhash_index_exceeding_blob_count.sol",
+      "sourceSha256": "e5a23185e29a8d7f3f2936b5168d3b1b6e8abb2fead1d1dd390764579bd323cd",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/blobhash_pre_cancun.sol",
+      "sourceSha256": "3f6dfa0adac5090cb84cc7576bbec37443d7c7174e3809a258a83993996d495f",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_assign_dynamic.sol",
+      "sourceSha256": "26e6caa1b45fde3903c364ec55b72da79210ae9ef1138fc60c77e77cd1a5f49c",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_assign_static.sol",
+      "sourceSha256": "67d885c621a9fcc73680e813294d8a9dafd5de7fc0c43516d727dc065f6382eb",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_array_read.sol",
+      "sourceSha256": "754df716a7f347556639a19a7677674497feb8335342fd69e26974b31c12236e",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_assign.sol",
+      "sourceSha256": "1c44f9797862e8d2a1087f52092fe78274d7637f5dae2aca2124955fe4457b3b",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_assign_from_nowhere.sol",
+      "sourceSha256": "fac9f207ac25c90e8cd8e2fb2ae6aff6b84eccc5387eb6c7f231b4143ea3d8de",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_length_read.sol",
+      "sourceSha256": "6f6d8edf0cdad127ef9f7170e6955d0679597bf795c4fac56d0bbd0f254fbb12",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 6,
+          "expectedCalls": 6
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 6,
+          "expectedCalls": 6
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 6,
+          "expectedCalls": 6
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_offset_read.sol",
+      "sourceSha256": "2253032e84ec7788de7b04341692862e01db6c96a7abd24f35035c042647559a",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_offset_read_write.sol",
+      "sourceSha256": "29e24ef936072300cfac8fcd8de04ebd6cf430b68a36580e9ee28c6512665604",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_struct_assign.sol",
+      "sourceSha256": "d60bf3ec922aca1088147ea2d16a4f12c63cc42e16aba2ddceee853e36205052",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/calldata_struct_assign_and_return.sol",
+      "sourceSha256": "23d86634f9fd6222d22df2741921be359dd6a577dd41837a80875f437ae5df7e",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/chainid.sol",
+      "sourceSha256": "f561fb1d00e038cd4935d63b39d275e1c2e04c4170a07a71e43da8e2aa36f015",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/clz.sol",
+      "sourceSha256": "2aecd37d0ec4e00dae42149f41bf1464bdf86f6dc162fe784e7d7358d3c879f9",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/clz_pre_osaka.sol",
+      "sourceSha256": "509eb6b77ec1b1bb4f9645cd66fb9d3854fb04b19683e67af6521c2052afb6e9",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <osaka",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <osaka",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <osaka",
+          "calls": 0,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/constant_access.sol",
+      "sourceSha256": "033440f6fefceaf50a124bb4c37f425a0ef87e4d265209dcfd98c6d30da3a6bc",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/constant_access_referencing.sol",
+      "sourceSha256": "e077fb6ba3664e3f55dcf5ddaca0b2dc4f71c8dcde7c9cec29d271d979b119ca",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/difficulty.sol",
+      "sourceSha256": "29951773918a18c138fdf30e62551362b163dd47baa1ebe19f01e47f6b07099d",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <paris",
+          "calls": 0,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <paris",
+          "calls": 0,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <paris",
+          "calls": 0,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_address.sol",
+      "sourceSha256": "308dd2bde94eb04f6e9610e62c27d169d8571c71fe817eeef0f121b8d7a16659",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_address_assignment.sol",
+      "sourceSha256": "0774edfbb5e4a91310082c17dd2d60bf1677c7fbaf4efaca1b7e46b4b0324de4",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_selector.sol",
+      "sourceSha256": "a216fac809084a9384d6d3216d0bf3383c00469dfc251d44b35c5f2e822ee4f3",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_selector_assignment.sol",
+      "sourceSha256": "973bb542e366d938cfab28754375359409a713def4dd1c0f820a78600e0ac678",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/external_identifier_access_shadowing.sol",
+      "sourceSha256": "f8ebcda73178d336918875ee9f3f56ac34c6b9c7784166d3f00fceafeae6b9bc",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/for_loop_break.sol",
+      "sourceSha256": "10ccac0851079f5fe4a304354866ccb16f267f2a60356e8e488b19119547af87",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/for_loop_continue.sol",
+      "sourceSha256": "0b107fdc8b90c0784ff481186a874bf00b5883d0d9ebf49dd8c234e5439ccdba",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/for_loop_nested.sol",
+      "sourceSha256": "22c81ce86fa3ec45f40eeff5c0ee2bbae550f65b0cead65cebb72452de2e6afa",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/function_name_clash.sol",
+      "sourceSha256": "00782384bd34aa1db11ad55bf30a8c84fb9ca532bc6f97141d08940919c8d8d4",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_embedded_function_call.sol",
+      "sourceSha256": "d506d3beb3fd71deb18b0ddf55c3ee94f5088b0638dd651caac347ad51d0f37c",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_for.sol",
+      "sourceSha256": "76b71a3ffc74baacc3b7703f9fe9a2aed90df1aca2996b35e09ed0e05e66e635",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_for2.sol",
+      "sourceSha256": "11514b27570ee4585236986fd256e6f82351cc79b11fa20f020dbc0c692f1c59",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call.sol",
+      "sourceSha256": "5fe63f40eb1637c29af197f24d89a914c495501e165fa821086231e4c5c2e89e",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call2.sol",
+      "sourceSha256": "cd053332f4e6ed75efb8b5c6c7a137c35fdb810899d99a7f74efb83dbc2af329",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_function_call_assignment.sol",
+      "sourceSha256": "6c914d67a4e4698a2217f99821b54ce51c0e3da20295fc5b83683379fb73d126",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_if.sol",
+      "sourceSha256": "5503ec8734a5807250e45a175f38b8a75ec88a4738212007b0104512df980d8b",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_in_modifiers.sol",
+      "sourceSha256": "80ef45281adee35dbd09209316b2b9347217bff553c7e524fd8972b5fe392aaa",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_memory_access.sol",
+      "sourceSha256": "99060126b0b6186cbe2937222b52387f21e2fce62454b7616ce8db5ea4c4fc46",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_read_and_write_stack.sol",
+      "sourceSha256": "07e9f353c95aaf4cae602cc99f85086bb7c9cb70fd5b2f1494b0873e65ea1a40",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_recursion.sol",
+      "sourceSha256": "7a9eae19476bb40fb1c06bc075e18bb21c346f8cc63e4acbdd29698055eba9c8",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access.sol",
+      "sourceSha256": "72b34ef92677d0c27abadf3dba27b5fe04f9cc3e6d43b06cccccec21fa55aa8c",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_inside_function.sol",
+      "sourceSha256": "365755dc50a1c1a3414c6dff1d194e1abb36eb162a5b05407bcae3971cb91faa",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_local_var.sol",
+      "sourceSha256": "3f8bf32d52813bd0af2fce8885399995395b22794f5c1b46d08af97ab0cd5096",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_via_pointer.sol",
+      "sourceSha256": "5bcf8c9730a68586a21fe6d17a28007098b30c493b5a70634688cee073de33b4",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_switch.sol",
+      "sourceSha256": "7355708dd71a4240ed8eca1a20c61e83af809399372de97a4015c760498b6dfa",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+      "sourceSha256": "b0b3e80b80c3340af421165b0e0b91843fb54b20f0e1af7d4b9c8047eb94e21e",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_write_to_stack.sol",
+      "sourceSha256": "f407169e44d0d2d53ac2fe44c4aacd2483b899d6f1209aca3fc0c45eaaec6dfb",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inlineasm_empty_let.sol",
+      "sourceSha256": "f9b481e95fd2a72751fd79bf1f4dcf5675b64ba51b52627745c3c4baf8921557",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_assembly.sol",
+      "sourceSha256": "4ccbc461df2811def7772195f1668e2c98eb5345f93e95c8618e7cca572e7ee2",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_optimization.sol",
+      "sourceSha256": "c8cb4711634ff9ab2dc29acd1c45a610e9e0cb48dff60c718305e2dc0579b904",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_optimizer_bug_different_memory_location.sol",
+      "sourceSha256": "e3b6b2da66258102d156fc92cf61c9fb3ba8503c8f68a48bc32617105c26c6b9",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/keccak256_optimizer_cache_bug.sol",
+      "sourceSha256": "2fef0220d5523ccb492634145978c96e3976ece0447c68eff06aa720b7493dea",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/keccak_optimization_bug_string.sol",
+      "sourceSha256": "99ecc391f261f51d8434717bf17084791b06cf5e8b382cd3d533322be3a8d330",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/keccak_yul_optimization.sol",
+      "sourceSha256": "64b568d66ff257a96de3d661e9aedbd4c7bd8a1e9c0fe83e8f16533b5f337301",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "unsupported runtime expectation: gas irOptimized: 22209"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "unsupported runtime expectation: gas irOptimized: 22209"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "irOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "legacyOptimized",
+          "pipeline": "legacy",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/leave.sol",
+      "sourceSha256": "a45400765e92e994d7409982bf89431cbffeac4f608000c42a1b74790e48a3f8",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy.sol",
+      "sourceSha256": "d2c6a31a65f068e42c01de3644c07aef0e6cd9e039e75f47a7a10b1ca87b78f8",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+      "sourceSha256": "df0a0e30bda413116504dd3ffba0cdde94df38757d75e8377f67f4bdeaf41735",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy_empty.sol",
+      "sourceSha256": "41b2efade8cfa99cdf640956aca15f36cc973c1a29cc77eca5f8581b7f73679b",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/mcopy_overlap.sol",
+      "sourceSha256": "a2a8dd19fe362e75375986e0b2744047b48cd4a5b016f25a551085a707bfdf97",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "Cannot read properties of undefined (reading 'map')"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/optimize_memory_store_multi_block.sol",
+      "sourceSha256": "6d1c699dfd6b2e006e253b660652e5bf091a7fa92948b443df720409c24b7b09",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/optimize_memory_store_multi_block_bugreport.sol",
+      "sourceSha256": "9309b80d5fd62e8074efdf83b90acb7ad6bfce579422b1d984b6ba8297241595",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "unsupported runtime expectation: ~ emit <anonymous>: 0x0123456789abcd, 0xef00000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "unsupported runtime expectation: ~ emit <anonymous>: 0x0123456789abcd, 0xef00000000000000000000000000000000000000000000000000000000000000"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/prevrandao.sol",
+      "sourceSha256": "35f9bdf4a70f6eac789b4e52feeefa1546d67fdf267aec3b6a3f9af42242ea8c",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/returndatacopy_using_stale_returndatasize.sol",
+      "sourceSha256": "46b9288bf3f2ef0bcc204d389bbc3fce05d6b96dadc69e822e9cdf352046bb5d",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/selfbalance.sol",
+      "sourceSha256": "92b5a2412917427603c947b7e898a29a4108a1ad5123fc7be9fe7f833b594b94",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/shadowing_local_function_opcode.sol",
+      "sourceSha256": "db47b638f53f49b953fd64bb1ee60f4691dd94a76b6541993bea7f3542ac2a71",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/slot_access.sol",
+      "sourceSha256": "7dbfe31b5976ee94c194baa2264a1ffa3c497c7cfab7132bd15a56ff665191a5",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "unsupported runtime expectation: set(uint256): 4"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "unsupported runtime expectation: set(uint256): 4"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/slot_access_via_mapping_pointer.sol",
+      "sourceSha256": "ae1e78ecb262cea9cba58ceba8c4f785fad95a9ab00a4bc413a15a752f99d903",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/slotnum_pre_amsterdam_function.sol",
+      "sourceSha256": "b56b87b65e6ad920f67e8e512bb4e86493d956f3438bc25f7ac7cc12cb526b7a",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+      "sourceSha256": "295d26a8fec073b4e5dcf7bc520c76d7ae90c424e5ee1350bdaf095274eddf95",
+      "previous": [],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "blocked",
+          "reason": "fixture EVM constraint excludes Osaka: <cancun",
+          "calls": 0,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_creation.sol",
+      "sourceSha256": "607ae272b9c6b463d375646d73a95187d2dcc42365d924bdd14a40831d436ae5",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_low_level_calls.sol",
+      "sourceSha256": "274011f18f2e9fe9b7da7e09bf7d87c62a102b4b5c3e0d6040c55042b2a552e4",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "irOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        },
+        {
+          "name": "legacyOptimized",
+          "pipeline": "legacy",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 4,
+          "expectedCalls": 4
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_multiple_calls_different_transactions.sol",
+      "sourceSha256": "ee1873557e47d7abe579f825fdef441d6d4dde4a953b99ed51b39bf9ad844ddd",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_multiple_transactions.sol",
+      "sourceSha256": "0585c51dfcab5a902c1e2fe67a22b5edf4565f710f4441282c97ac3840238cdc",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 5,
+          "expectedCalls": 5
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_reset_between_creation_runtime.sol",
+      "sourceSha256": "242350734bab6f58b068f7945e548f9b269d56b7de2015ae139b190da3b2c353",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_sanity_checks.sol",
+      "sourceSha256": "529081b175c954819391ccd1ab31571de2b8cfee0bd0d1743b448045ebf7eaba",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_selfdestruct.sol",
+      "sourceSha256": "7cc27bb86089e1b36d35a55c827bda0cfb219d419c760d938d6dc872036aabc4",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "irOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        },
+        {
+          "name": "legacyOptimized",
+          "pipeline": "legacy",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 3,
+          "expectedCalls": 3
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/transient_storage_simple_reentrancy_lock.sol",
+      "sourceSha256": "a684d20ae9f802d40b0170920457f76a3c2545f7580456c54921f2bbd7d00121",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 2,
+          "expectedCalls": 2
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/truefalse.sol",
+      "sourceSha256": "87312e292f0fdd6d5093441922de571d51dce8f4c2d79499c58fd0074d49f553",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        },
+        {
+          "name": "viaIR",
+          "status": "working",
+          "reason": "all scalar vectors match on pinned reference EVM"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/tstore_hidden_staticcall.sol",
+      "sourceSha256": "2df5c6f1848335a731deecfaecdab01fcf3b43ff37e81f8aa915683e46832a73",
+      "previous": [
+        {
+          "name": "legacy",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        },
+        {
+          "name": "viaIR",
+          "status": "blocked",
+          "reason": "host-dependent behavior not adapted"
+        }
+      ],
+      "current": [
+        {
+          "name": "legacy",
+          "pipeline": "legacy",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ir",
+          "pipeline": "viaIR",
+          "optimized": false,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "ssaCFGOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": true,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "irOptimized",
+          "pipeline": "viaIR",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        },
+        {
+          "name": "legacyOptimized",
+          "pipeline": "legacy",
+          "optimized": true,
+          "required": false,
+          "status": "working",
+          "reason": null,
+          "calls": 1,
+          "expectedCalls": 1
+        }
+      ]
+    }
+  ]
+}

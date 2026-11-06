@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.equal_content_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.prefix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.repeated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.self_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.source_extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.source_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.target_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffectControls.lean:Solidity.Lowering.V07.SignedNegationEffectControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -13,7 +13,7 @@ inductive AllocatingExpr {E : Env} (A : Decl → Prop) {Γ : RCtx} :
     {τ : STy} → RExpr E Γ τ → Prop
   | value {τ} {e : RExpr E Γ τ} : e.ValFragC A → e.OpsOK → AllocatingExpr A e
   | «local» {τ} (i : Idx Γ τ) : AllocatingExpr A (.local i)
-  | same {τ} {e : RExpr E Γ τ} (h : Conv E.isBase τ τ) :
+  | same {τ} {e : RExpr E Γ τ} (h : Conv E.isBase E.mapFree τ τ) :
       AllocatingExpr A e → AllocatingExpr A (.conv e h)
   | branch {τ} {c : RExpr E Γ .bool} {a b : RExpr E Γ τ} :
       AllocatingExpr A c → AllocatingExpr A a → AllocatingExpr A b →

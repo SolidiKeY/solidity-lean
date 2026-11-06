@@ -45,7 +45,7 @@ theorem ag_stop : agComputed.2=32 := rfl
 theorem ag_separated : packedSeparationCheck agComputed.1=true := by decide
 
 def agState : Source.EMState agEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := agEnv.layout) (agEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := agEnv.layout) (agEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 theorem ag_initial_MemOK : Source.MemOK agEnv agState.2.heap.ty agState :=
   ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩
 theorem ag_apply_ready : (aggregateApplySnapshot? packedStepFrame agDeclaration agFixed agPath 0 agRaw agState).isSome := by decide
