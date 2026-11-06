@@ -339,3 +339,31 @@ New patch, bundle, evidence and handoff are saved under
 The full original goal remains unfinished; continue the same VM/branch/goal
 when reviewed inputs arrive, without creating a replacement goal. No merge,
 push, PR, pre-gate, publication or original producer-file edit occurred.
+
+## H70 routing disposition at requester 372e4628
+
+The next coordinator relay reports Hash owner ticket head
+`78c110f83dc1a30700acd1b5bd34b19f61da6ccd` with overlay source head
+`2a18afcdba00a85645b0b3079704f78ffcd78860`. Its decoded CollisionBound
+patch SHA256 exactly matches the already validated partial overlay:
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`.
+No identical Lean gate is repeated. This is still a partial Hash overlay;
+full migration gates and Syntax.Raw remain pending on that lane.
+
+`h70-routing.json` records the machine-readable production metadata disposition.
+The owner routes are now H55 G49-final-theorem for production declaration inventory
+and H62 migrate-roadmap for Contracts:1104. The coordinator reports no pending
+current-owner delivery, but host relay journals determine acceptance; neither
+owner agreement nor validation follows from this relay. Q-H70-CONTRACTS is
+resolved as **wait for the routed owner fix**. H64 excludes guard relaxation.
+No further permission question is open and no original-file permission is granted.
+
+All five G49/G50 entries remain explicit pending inputs. No type, statement,
+dependency, compatibility match or discharged premise is inferred. The failed
+Contracts guard and the absent actual G49 production declaration inventory remain
+the two input boundaries. Current metadata can be regenerated against the verified
+ownership snapshot, with unknown total open premises represented as null. The
+existing 37-test and isolated-overlay evidence remains bounded to its recorded
+implementation/source hashes; this routing-only update is not a new proof gate.
+New exports are saved under `/workspace/h62-statement-graph-handoff-h70-routing/`.
+Continue the same original VM/goal/branch when owner-reviewed inputs arrive.
