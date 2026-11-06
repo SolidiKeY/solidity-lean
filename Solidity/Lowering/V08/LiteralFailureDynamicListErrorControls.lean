@@ -27,12 +27,12 @@ def refs : List (Source.Idx context (.bytes .memory)) := [.here,.there .here,.he
 def repeated (n : Nat) : List (Source.Idx context (.bytes .memory)) := List.replicate n .here
 
 def empty (n : Nat) : St (environment n) :=
- ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩⟩
+ ⟨⟨⟨fun _ => Account.empty _⟩,Transient.empty,[]⟩,Source.Heap.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩
 def frame := SourceCustomErrorControls.frame
 def state (n : Nat) (first second : Roadmap.Bytes) : St (environment n) :=
  {empty n with
   heap := ((((Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [9,7]⟩).1).alloc ⟨.bytes .memory,.bytes first⟩).1.alloc ⟨.string .memory,.string second⟩).1
-  ex := (empty n).ex.run [.account frame.this (fun account => {account with balance:=⟨73,by decide +kernel⟩,nonce:=4})]}
+  ex := (empty n).ex.run [.account frame.this (fun account => {account with balance := 73,nonce:=4})]}
 def program (n : Nat) : Program (environment n) :=
  {body:=fun _=>none,consts:=fun _=>none,inits:=fun _=>[],ctor:=fun _=>none,
   ctorLocals:=fun _=>[],baseArgs:=fun _=>[],contracts:=["C"]}

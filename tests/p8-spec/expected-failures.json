@@ -1,0 +1,14 @@
+{
+  "horizon": 3,
+  "requestIndex": 7,
+  "requestBalance": 257,
+  "requestCut": 0,
+  "untouchedRequestIndex": 6,
+  "untouchedBalance": 7,
+  "frameAt0": null,
+  "allUncutDiagonalFrameAt42": 0,
+  "allCutDiagonalFrameAt42": null,
+  "allDiagonalRequestBalance": 0,
+  "nativeComparisons": 0,
+  "sourceExecutions": 0
+}
