@@ -73,9 +73,9 @@ private def isIdentChar (c : Char) : Bool :=
 Block openers like `\rules {` start with a backslash and are not
 matched. -/
 private def headerName? (l : String) : Option String :=
-  let t := l.trim
+  let t := l.trimAscii.copy
   if t.endsWith "{" then
-    let n := (t.dropRight 1).trim
+    let n := (t.dropEnd 1).trimAscii.copy
     match n.toList with
     | [] => none
     | c :: cs =>

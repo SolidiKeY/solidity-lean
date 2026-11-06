@@ -12,10 +12,17 @@ p.add_argument("--out",required=True,type=pathlib.Path); p.add_argument("--targe
 p.add_argument("--dependency-lib",action="append",type=pathlib.Path,default=[])
 p.add_argument("--source-root",type=pathlib.Path,default=ROOT)
 p.add_argument("--run",action="store_true")
+p.add_argument("--lake-exe",choices=["solkeycheck"],help="native conformance after dependency-ordered object builds")
 p.add_argument("--lake-build",action="store_true",help="serial dependency-ordered Lake leanArts in a private cache-disabled project")
 p.add_argument("--run-args",nargs=argparse.REMAINDER,default=[])
 a=p.parse_args()
 if a.lake_build and (a.run or a.dependency_lib): p.error("Lake clean builds cannot use run mode or prerequisite libraries")
+if a.lake_exe and (not a.lake_build or a.targets!=["SolkeyCheck"]):
+    p.error("native conformance requires --lake-build --targets SolkeyCheck")
+frozen_rules=ROOT/"tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+if a.lake_exe:
+    if a.run_args!=["--key",str(frozen_rules)] or hashlib.sha256(frozen_rules.read_bytes()).hexdigest()!="02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb":
+        p.error("native conformance requires the exact explicit frozen rules input")
 source_root=a.source_root.resolve()
 def source(m): return source_root/(m.replace(".","/")+".lean")
 out=a.out.resolve(); out.mkdir(parents=True,exist_ok=True)
@@ -82,6 +89,7 @@ def snapshot():
     return {"runner_sha256":hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
       "census_runner_sha256":hashlib.sha256(pathlib.Path(__file__).with_name("census.py").read_bytes()).hexdigest(),
       "lake_profile_sha256":hashlib.sha256(lake_profile_template.encode()).hexdigest() if lake_profile_template else None,
+      "external_input_sha256":{str(frozen_rules):hashlib.sha256(frozen_rules.read_bytes()).hexdigest()} if a.lake_exe else {},
       "prerequisite_artifact_sha256":artifacts,"head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),
       "imports":{m:imports(m,source_root) for m in modules},
       "source_sha256":{m:hashlib.sha256(source(m).read_bytes()).hexdigest() for m in modules}}
@@ -89,15 +97,21 @@ archive=pathlib.Path(str(a.toolchain.resolve())+".tar.zst")
 archive_sha256=hashlib.sha256(archive.read_bytes()).hexdigest() if archive.is_file() else None
 before=snapshot()
 rows=[]; start=time.monotonic(); failure=None
-for m in modules:
-    dest=build/(m.replace(".","/")+".olean"); dest.parent.mkdir(parents=True,exist_ok=True)
-    # New module-system compilation can emit .olean.private/.server/.ir
-    # siblings too. Unlink target-family prerequisites before any output.
-    for sibling in dest.parent.glob(dest.stem+".*"):
-        if sibling.is_symlink(): sibling.unlink()
-    cmd=[str(lean),"-j1","--tstack=131072","-o",str(dest),str(source(m).relative_to(source_root))]
-    if a.run: cmd=[str(lean),"-j1","--tstack=131072","--run",str(source(m).relative_to(source_root)),*a.run_args]
-    if a.lake_build: cmd=[str(lake),"--dir",str(project),"--no-cache","--verbose","build","+"+m]
+jobs=[(m,False) for m in modules]
+if a.lake_exe: jobs.append(("executable:"+a.lake_exe,True))
+for m,exe_phase in jobs:
+    if exe_phase:
+        cmd=[str(lake),"--dir",str(project),"--no-cache","--verbose","exe",a.lake_exe,*a.run_args]
+    else:
+        dest=build/(m.replace(".","/")+".olean"); dest.parent.mkdir(parents=True,exist_ok=True)
+        # Never write module-system output siblings through prerequisite links.
+        for sibling in dest.parent.glob(dest.stem+".*"):
+            if sibling.is_symlink(): sibling.unlink()
+        cmd=[str(lean),"-j1","--tstack=131072","-o",str(dest),str(source(m).relative_to(source_root))]
+        if a.run: cmd=[str(lean),"-j1","--tstack=131072","--run",str(source(m).relative_to(source_root)),*a.run_args]
+        if a.lake_build:
+            facet=":o" if a.lake_exe else ""
+            cmd=[str(lake),"--dir",str(project),"--no-cache","--verbose","build","+"+m+facet]
     rss,avail,workers=stats(-1)
     if avail<reserve: failure="preflight available memory below 4 GiB"; break
     tick=time.monotonic(); peak=0; max_workers=0; stop=None
@@ -126,11 +140,11 @@ for m in modules:
 elapsed=time.monotonic()-start
 after=snapshot()
 if before!=after: failure="source/head changed during run"
-report={"comparison_scope":"directory" if a.targets==TARGETS and not a.dependency_lib and not a.run else "module",
- "build_kind":"lake-leanArts" if a.lake_build else "execution" if a.run else "per-file-elaboration",
+report={"comparison_scope":"directory" if a.targets==TARGETS and not a.dependency_lib and not a.run and not a.lake_exe else "module",
+ "build_kind":"lake-native-executable" if a.lake_exe else "lake-leanArts" if a.lake_build else "execution" if a.run else "per-file-elaboration",
  "artifact_root":str(build),"toolchain_archive_sha256":archive_sha256,"source_before":before,"source_after":after,"versions":versions,"targets":a.targets,"source_root":str(source_root),"dependency_libs":[str(x.resolve()) for x in a.dependency_lib],"clean":not bool(a.dependency_lib),"cache":"explicit prerequisite libraries for focused checks; fresh private output; OS page cache not flushed" if a.dependency_lib else "none: fresh private olean directory; OS page cache not flushed",
  "resources":{"threads":1,"lean_j":1,"rss_limit_bytes":limit,"reserve_bytes":reserve,"swap":0,"per_module_timeout_s":300},
  "rows":rows,"wall_s":elapsed,"sampled_peak_aggregate_rss_bytes":max((r["sampled_peak_aggregate_rss_bytes"] for r in rows),default=0),"kernel_children_cumulative_max_rss_kib":resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,"failure":failure,
- "status":"fail" if failure else "pass","boundary":"Lake leanArts closure with generated C; full repository run-lean.sh and native executable conformance separate" if a.lake_build else "per-file elaboration/kernel closure; final run-lean.sh and executable conformance separate"}
+ "status":"fail" if failure else "pass","boundary":"native Lake solkeycheck against explicit frozen file; not full directory/Faithfulness/run-lean.sh acceptance" if a.lake_exe else "Lake leanArts closure with generated C; full repository run-lean.sh and native executable conformance separate" if a.lake_build else "per-file elaboration/kernel closure; final run-lean.sh and executable conformance separate"}
 (out/"result.json").write_text(json.dumps(report,indent=2)+"\n")
 raise SystemExit(bool(failure))

@@ -3,5 +3,19 @@
     "source": "Coordinator reply in this task thread, after commit 174fa34328e46da9666a9fbeca713c5befd22e06",
     "verbatim": "Answer (coordinator, from H62 item 6): a per-module time or memory increase does not stop a migration lane. Record the before/after numbers for that module and continue to the matched clean full-build comparison the task requires; the coordinator reports memory/time growth to the human with the cut-over escalation.",
     "effect": "Per-module Parser growth is recorded, not a lane STOP. Continue serial bounded validation. Full matched build slowdown rule remains binding; source ownership and other gates unchanged."
+  },
+  "H76": {
+    "source": "Coordinator answer in this task thread, after head695674e8e3bc0a314fcbb72c17a99f12c0e0c83a",
+    "authorization": "Per supplied H69 owner decision, migrate-sortcheck is registered writer of Solidity/SortCheck on this isolated migration branch and may apply tested Parser/Annotations migration preserving statements and budgets. Migration-only ownership; no live master producer transfer.",
+    "dependency": "migrate-syntax latest published reviewed overlay only, exact base/head/artifact hashes. No head in coordinator pipeline, no staged bundle, no origin branch at coordinator lookup. Do not substitute uncommitted overlay.",
+    "resolved": [
+      "OWNER-PARSER-01",
+      "OWNER-ANNOTATIONS-01"
+    ],
+    "remaining": "DEP-SYNTAX-01 remains queued by coordinator in deps.json; interface and full validation requirements remain",
+    "dependency_receipt": {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "DEP-SYNTAX-01: latest published reviewed migration overlay for Solidity/Syntax/Raw.lean, exact base/head and artifact hashes"
+    }
   }
 }

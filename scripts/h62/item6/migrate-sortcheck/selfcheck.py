@@ -5,9 +5,11 @@ import sys
 sys.dont_write_bytecode = True
 from census import ROOT, TARGETS, census, closure, imports, uncomment
 from compare import compare
+from migration import expected_sources
 x=census()
 assert len(x["files"])==3 and len(x["closure_order"])==64
-assert all(f["unchanged"] and not any(f["trust_tokens"].values()) for f in x["files"].values())
+assert all(not any(f["trust_tokens"].values()) for f in x["files"].values())
+for rel,text in expected_sources().items(): assert (ROOT/rel).read_text()==text,rel
 assert len(x["files"]["Solidity.SortCheck.Faithfulness"]["generated_theorems"])==46
 assert len(x["files"]["Solidity.SortCheck.Parser"]["where_declarations"])==1
 try: closure(["Solidity.SortCheck.DoesNotExist"])
@@ -53,6 +55,32 @@ with tempfile.TemporaryDirectory() as td:
     try: closure(["Solidity.First"],overlay)
     except ValueError: pass
     else: raise AssertionError("missing overlay import accepted")
+    # Structural audit must not silently accept call-syntax or logical changes.
+    audit=ROOT/"scripts/h62/item6/migrate-sortcheck/parser-interfaces.py"
+    old_log=pathlib.Path(td)/"canonical-old.log"; new_log=pathlib.Path(td)/"canonical-new.log"
+    def record(ty,axioms,names=None): return "CANONICAL_COUNT 1\nCANONICAL "+json.dumps(["Audit.public",0,ty,axioms,names or []])+"\n"
+    old_type=["forall",0,["sort",["zero"]],["bvar",0]]
+    old_log.write_text(record(old_type,[]))
+    new_log.write_text(record(["forall",1,["sort",["zero"]],["bvar",0]],[]))
+    run=subprocess.run(["python3",str(audit),"canonical-compare",str(old_log),str(new_log)],capture_output=True,text=True)
+    result=json.loads(run.stdout)
+    assert run.returncode==1 and result["status"]=="review-required"
+    assert result["logical_structure_status"]=="pass" and result["binder_info_only_changes"]
+    new_log.write_text(record(["forall",0,["sort",["succ",["zero"]]],["bvar",0]],[]))
+    run=subprocess.run(["python3",str(audit),"canonical-compare",str(old_log),str(new_log)],capture_output=True,text=True)
+    assert run.returncode==1 and json.loads(run.stdout)["other_type_changes"]
+    new_log.write_text(record(["sort",["param",0]],[]))
+    run=subprocess.run(["python3",str(audit),"canonical-compare",str(old_log),str(new_log)],capture_output=True,text=True)
+    assert run.returncode!=0 # undeclared universe cannot collapse to a valid type
+    old_log.write_text(record(old_type,[]))
+    for bad in [record(old_type,[]).split("\n",1)[1], "CANONICAL_COUNT 2\n"+record(old_type,[]).split("\n",1)[1], "CANONICAL_COUNT 1\n"]:
+        new_log.write_text(bad)
+        run=subprocess.run(["python3",str(audit),"canonical-compare",str(old_log),str(new_log)],capture_output=True,text=True)
+        assert run.returncode!=0 # missing or truncated inventories cannot shrink a baseline
+    new_log.write_text(record(old_type,[],[[[],["str",["anonymous"],"renamed"]]]))
+    run=subprocess.run(["python3",str(audit),"canonical-compare",str(old_log),str(new_log)],capture_output=True,text=True)
+    result=json.loads(run.stdout)
+    assert run.returncode==1 and result["changed_binder_name_maps"] and result["logical_structure_status"]=="pass"
     for name in ["one","two"]:
         subprocess.run(["python3",str(ROOT/"scripts/h62/item6/migrate-sortcheck/fixture.py"),"--out",str(pathlib.Path(td)/name)],check=True,stdout=subprocess.DEVNULL)
     a=pathlib.Path(td)/"one"; b=pathlib.Path(td)/"two"

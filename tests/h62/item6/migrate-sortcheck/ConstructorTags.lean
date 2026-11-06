@@ -1,8 +1,8 @@
 import Solidity.SortCheck.Annotations
 
 /-! Frozen numeric constructor-tag expectations, independent of either
-compiler's generated implementation. The 4.35 compatibility proposal is
-injected only into the generated test fixture, never production sources. -/
+compiler's generated implementation. The H76 migration restores the same
+legacy aliases in production; these expectations apply on both toolchains. -/
 namespace SortCheckMigrationTags
 open Solidity.TacletAnnotations
 
