@@ -85,3 +85,17 @@ across both vector and fixture helpers. This preparation does not edit owned fil
 provide a production migration patch, compile these fixture controls, or prove
 anything beyond the stated byte and inventory comparisons. WordTable migration,
 actual owner handoff and full acceptance remain pending.
+
+## WordTable proof extraction preparation
+
+`word_table.py` extracts 30 pinned parts into external structured proof text and
+renders all 439 complete theorem declarations and module bytes. A second extraction
+was byte-identical. The bulk JSON and emitted files are under
+`/workspace/scratch/h55-vectors-tables/`; the committed `word-table-bulk.sha256`
+pins the JSON. All 30 source hashes match the published base Git blobs. Negative
+controls cover missing, extra, reordered and malformed entries and changed proof
+text. The first schema matched only 438 headings because it omitted
+`table_prefix_root`; the full-count test failed and the corrected schema rejects
+unrecognized theorem headings. Attempt-one data and manifest are preserved in
+that scratch directory. This transcribes proof bodies, does not synthesize them,
+compile them, or provide an owner-approved production migration patch.
