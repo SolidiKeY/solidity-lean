@@ -3446,3 +3446,59 @@ killed for memory (exit 137, parallel jobs:
 the unpinned `../solkey` (b8d5f88: 167 mismatches, unannotated reads).
 With the pinned rules (`SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key`)
 `check-solkey.sh` reports `OK — annotations match` (exit 0).
+
+### Mapping-holding structs refused in `STy.implicit` (2026-11-06, follow-up 2)
+
+User decisions (2026-11-06, relayed by the coordinator as answers to this
+lane's Q1/Q2): Q1 "Env parameter on `STy.implicit`"; Q2 "Separate task"
+(`BalancesFit` is proved elsewhere, not here).
+
+`STy.implicit isBase mapFree` (`Solidity/Source/Types.lean`) refuses a copy
+to another location of a struct holding a mapping (`l == l' || mapFree d`)
+and of an array whose elements hold one (`l == l' || τ.noMapping
+mapFree`); a pointer at the same location keeps its type. This closes the
+previous entry's finder item (storage arrays of mapping structs reaching
+`loadMem`'s mapping arm) and the older one-level struct case. `STy.explicit`
+takes the same argument. `Env.mapFree` (`Typing.lean`) reads the members'
+type names (`Syn.mappingRefs`, `Env.structHoldsMapping`, fuel
+`structCount`) rather than their elaborated types: `Syn.tys` depends on
+`Classical.choice`, and every elaborated conversion proof mentions
+`E.mapFree`, so the elaborated-type reading grew pinned axiom sets
+(`IntegerConstants.not_allowed`). `Env.mapFree` and `Env.hasMapping`
+(`assignRefused`) agree on declarations whose member types elaborate; on a
+member that does not elaborate, `mapFree` may report a mapping where
+`hasMapping` reports none (it only refuses more, for ill-formed
+declarations). Every `X.isBase` passed as a conversion argument became
+`X.isBase X.mapFree` (about 315 sites in 97 files); definitions and lemmas
+taking `isBase`/`B` take `mapFree`/`M` (a generalization; no premise added).
+Proof repairs: `Unique.implicit_of_copiesTo`, the two `change` patterns of
+`CalldataPackets/Raw{Int,UintN}/Execution`, call sites of `zero_u256` and
+`lit_ok`, and `Lowering/Readonly/PrimitiveFields` (a relation use of
+`isBase` the rewrite had touched).
+
+Controls (`CalldataNestedCopyControls.lean`): `keyed_holds_mapping`,
+`struct_mapping_refused`, `array_mapping_refused`, `nested_mapping_refused`
+(a mapping through a nested struct or an array member), and
+`mapping_pointer_kept`. Docs: the stuck census of `source-soundness.md` and
+`solc-alignment.md` now name the remaining type-checks-but-stuck
+conversions: `calldata` arrays of dynamically encoded elements and
+`calldata` structs copied to memory.
+
+Reviews (read-only, without the Lean server):
+
+- **Finder.** No high or medium findings. Rewrite clean (no constant
+  `mapFree`, no comment or string touched beyond the reverted `contract B`
+  and `FU2-B` hits, relation uses kept); every converting typing rule
+  carries `Γ.mapFree`; no weakened theorem. Low: the `mapFree`/`hasMapping`
+  divergence on ill-formed members (recorded above); this entry was
+  missing (added); a run-on docstring bullet (fixed).
+- **Skeptic.** No claim refuted. Confirmed: the census sentence "the only
+  type-checks-but-stuck conversion left" was too narrow (other `calldata`
+  arrays of dynamic elements and `calldata` structs are stuck too; fixed in
+  both docs); no control covered a nested struct (added
+  `nested_mapping_refused`). Accepted: `STy.noMapping` repeats
+  `STy.mapsWith` negated, because `Types.lean` precedes `Typing.lean`.
+  `loadMem`'s mapping arm is unreachable from a typed conversion now.
+
+Check speed: no proof heavier; editing `Types.lean`/`Typing.lean` rebuilds
+about 6000 modules (about 2.2 h on this VM).

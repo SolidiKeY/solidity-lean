@@ -566,11 +566,14 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   at the target's location, `bytes[] calldata`, `string[] calldata` and
   `uint256[][] calldata` convert to memory as in solc, but `cdToMem` copies
   only one-word and statically encoded elements, so these copies are
-  `stuck` (`CalldataNestedCopyControls.dynamic_elements_stuck`). This is
-  the only type-checks-but-stuck conversion left: copies out of storage of
-  a struct holding a mapping, or of an array of such structs, are refused
-  by `STy.implicit` (`Env.mapFree`; `struct_mapping_refused`,
-  `array_mapping_refused`), as solc refuses them.
+  `stuck` (`CalldataNestedCopyControls.dynamic_elements_stuck`); so are
+  copies to memory of any `calldata` array whose elements are dynamically
+  encoded (`uint8[][]`, `bytes[2]`) and of `calldata` structs (not
+  modelled, below). These `calldata` copies are the type-checks-but-stuck
+  conversions left: copies out of storage of a struct holding a mapping,
+  or of an array of such structs, are refused by `STy.implicit`
+  (`Env.mapFree`; `struct_mapping_refused`, `array_mapping_refused`,
+  `nested_mapping_refused`), as solc refuses them.
 
 **Typing gaps** (S01 types them, solc refuses them, the semantics is
 `stuck`), fixed in S01's rules and G13's checker:

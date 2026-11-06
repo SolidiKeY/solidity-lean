@@ -12,9 +12,13 @@ from a typed declaration. The element type, the static length and the
 target location are still compared exactly.
 
 - `nested_implicit` … `to_storage_refused`: the conversion and its
-  refusals; `struct_mapping_refused`, `array_mapping_refused`: copies out of
-  `storage` of structs holding a mapping are refused (pointers kept). `dynamic_elements_stuck`: `bytes[] calldata` also converts,
-  but its copy is `stuck` (no dynamic element copy; a recorded gap).
+  refusals.
+- `struct_mapping_refused`, `array_mapping_refused`,
+  `nested_mapping_refused`: copies out of `storage` of structs holding a
+  mapping (directly or through a nested struct) are refused; pointers keep
+  their type (`mapping_pointer_kept`).
+- `dynamic_elements_stuck`: `bytes[] calldata` also converts, but its copy
+  is `stuck` (no dynamic element copy; a recorded gap).
 - `w_copy`: the typing derivation of `uint256[2][] memory c = xs;` for a
   `uint256[2][] calldata` parameter; its elaborated form converts with
   `convRV`, which runs `cdToMem`'s nested arm (`convRV_nested`) and keeps
@@ -89,6 +93,23 @@ def mapEnv : Env := ⟨[
     (.cons (.structMember (.mapping mK none mU none) "m") .nil)⟩,
   ⟨.struct, "Plain", none, true, .struct "Plain" (.structMember mU "a")
     (.cons (.structMember (.array mU .none) "xs") .nil)⟩]⟩
+
+/-- `mapEnv` with `struct Outer { Keyed k; }`, `struct Holder { Keyed[] ks; }`
+and `struct Wrap { Plain p; }`: a mapping held through a nested struct. -/
+def nestedEnv : Env := ⟨mapEnv.decls ++ [
+  ⟨.struct, "Outer", none, true, .struct "Outer" (.structMember (.userType ⟨"Keyed", []⟩) "k") .nil⟩,
+  ⟨.struct, "Holder", none, true, .struct "Holder" (.structMember (.array (.userType ⟨"Keyed", []⟩) .none) "ks") .nil⟩,
+  ⟨.struct, "Wrap", none, true, .struct "Wrap" (.structMember (.userType ⟨"Plain", []⟩) "p") .nil⟩]⟩
+
+/-- **Nested structs**: `Outer` and `Holder` hold `Keyed`'s mapping, `Wrap`
+holds none; `Outer storage` does not copy to memory, `Wrap storage` does. -/
+theorem nested_mapping_refused :
+    nestedEnv.mapFree ⟨none, "Outer"⟩ = false ∧ nestedEnv.mapFree ⟨none, "Holder"⟩ = false ∧
+    nestedEnv.mapFree ⟨none, "Wrap"⟩ = true ∧
+    STy.implicit nestedEnv.isBase nestedEnv.mapFree (.struct .storage ⟨none, "Outer"⟩)
+      (.struct .memory ⟨none, "Outer"⟩) = false ∧
+    STy.implicit nestedEnv.isBase nestedEnv.mapFree (.struct .storage ⟨none, "Wrap"⟩)
+      (.struct .memory ⟨none, "Wrap"⟩) = true := ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 def keyed : DeclName := ⟨none, "Keyed"⟩
 def plain : DeclName := ⟨none, "Plain"⟩

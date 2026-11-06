@@ -194,10 +194,10 @@ programs, and the check is a statement the rules already run.
   elements at the target's location, so a nested `calldata` or `storage`
   array converts to `memory` as in solc, and refuse a copy out of `storage`
   of a struct holding a mapping, or of an array of such structs (solc's
-  "only valid in storage"); a storage pointer keeps its type. One
-  deviation remains: `bytes[]`, `string[]` and `uint256[][]` `calldata`
-  convert to `memory` as in solc, but the Source copy of dynamically
-  encoded elements is not modelled and is `stuck`
+  "only valid in storage"); a storage pointer keeps its type. The
+  remaining deviation is in `calldata`: arrays of dynamically encoded
+  elements (`bytes[]`, `string[]`, `uint256[][]`, `bytes[2]`) and structs
+  convert to `memory` as in solc, but the Source copy of them is not modelled and is `stuck`
   (`docs/feature-work/source-soundness.md`, stuck census).
 - **Casts.**  A cast keeps the low bits of its operand's 256-bit word, as
   solc's conversions do: `uintN(e)` of a `uint` is `e % 2^N`, of an `int`
