@@ -3,8 +3,9 @@ from pathlib import Path
 from collections import Counter
 import hashlib,json
 owned=Path(__file__).resolve().parent;root=owned.parents[2]
+bulk=owned/'artifacts/h68-bulk'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
-receipt=json.loads((owned/'evidence/adoption-8bf/modality-compilation.json').read_text())
+receipt=json.loads((bulk/'evidence/h68/modality-compilation.json').read_text())
 assert sha(root/receipt['source'])==receipt['sourceSha256']
 assert sha(root/receipt['fixture'])==receipt['fixtureSha256']
 assert sha(root/receipt['rawAst'])==receipt['rawAstSha256']
@@ -39,5 +40,5 @@ for stem in ['normal','revert','panic']:
  box=functions[stem+'Box'];diamond=functions[stem+'Diamond'];assert span(box['body']['src'])==span(diamond['body']['src'])
  pairs.append({'box':box['name'],'diamond':diamond['name'],'bodyBytesIdentical':True})
 result={'source':receipt['source'],'sourceSha256':receipt['sourceSha256'],'rawAst':receipt['rawAst'],'rawAstSha256':receipt['rawAstSha256'],'fixture':receipt['fixture'],'fixtureSha256':receipt['fixtureSha256'],'compiler':receipt['compiler'],'observationsSha256':sha(owned/'modality-observations.json'),'cases':rows,'pairs':pairs,'checkerCounts':dict(Counter(r['trustedCheckerStatus'] for r in rows)),'boundary':'Six source-identified paired body-byte controls,finite initial-state runs and trusted public checker observations. This validates provenance and regression intent,not compiler/source preservation,Lean proof terms or native/WASM closure.'}
-(owned/'modality-ledger.json').write_text(json.dumps(result,indent=2)+'\n')
+(bulk/'modality-ledger.json').write_text(json.dumps(result,indent=2)+'\n')
 print('PASS six source/AST identities, three byte-identical body pairs, exact compiler binary and observed modal tags; no source/native proof claim.')
