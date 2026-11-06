@@ -91,6 +91,7 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - V10 Source operation clients and remaining integration: [storage operations](feature-work/roadmap-v10-storage-operations.md#source-operation-clients-c145).
 - Registered V10 Source operation clients: [storage operation views and Source clients](feature-work/roadmap-v10-storage-operations.md#operation-views-and-source-clients).
 - [V16 correctness consumers](feature-work/roadmap-v16-correctness.md): scoped actual allocation-memory preservation, bounded Source transaction pairs and exact rollback/specification observations; full composition remains open.
+- [V17 validation/evidence preparation](feature-work/roadmap-v17-validation.md).
 - [P7 transient target](feature-work/p7-transient-target.md): typed transient target, Source correspondence and remaining G39/G42 obligations.
 - [Executable bytecode selection](feature-work/executable-bytecode-selection.md) and [memory defaults and copies](feature-work/memory-copies.md): G45 and G33/G35 statement-only interfaces and premises.
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
