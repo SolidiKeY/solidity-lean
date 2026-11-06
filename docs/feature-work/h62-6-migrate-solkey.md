@@ -1,6 +1,6 @@
 # H62 item 6: migrate-solkey handoff
 
-Status: **H82 retired; authorized PAUSED intent; not complete**. Owner: `solidity-h62-6-20261106/migrate-solkey`.
+Status: **resumed by explicit coordinator instruction; blocked on retained holds; not complete**. Owner: `solidity-h62-6-20261106/migrate-solkey`.
 Branch: `codex/solidity-h62-6-20261106/migrate-solkey`.
 Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Repository: `/workspace/migrate-solkey`. Original clean checkout at
@@ -216,3 +216,54 @@ The local continuation state records authorized PAUSED intent and no active
 work. Coordinator must apply the backend pause using its trusted goal context.
 All outstanding migration/backfill obligations and waits transfer as recorded;
 none are silently complete or waived. Prior sealed handoff is retained.
+
+## Explicit coordinator resumption after integration
+
+The later coordinator instruction explicitly authorizes merging origin/master
+and continuing this same branch/goal. It supersedes the preceding retirement
+for this worker; historical retirement artifacts remain intact. Published
+20e492ee99a3fa8679aa526de0b6e731d85e4134 contains our0dd1adc3f3 head and is
+an ancestor of fetched master d96f2406d352de7e0b72ba6ac4ab29dc457582c6. The
+assigned branch fast-forwarded cleanly to that integration base. No master
+branch mutation or push occurred. Reported gate-touched/Bridge PASS belongs to
+the coordinator's integration; it is not a local4.35 acceptance run.
+
+Independent static backfill completed: refreshed census equals the pinned
+census byte-for-byte semantically, including all assigned module entries,
+fixture hashes and complete dependency closure. Thus Raw's recorded errors
+have not been repaired in this source tree. No unchanged timing STOP rerun.
+
+consolidate-existing-api.py retains all759 existing old declarations, exact
+universes/kinds/kernel signature expressions and source/capture provenance.
+Six names are _proof_ family candidates; no other selected family prefix is
+present in this module-owned list. These are name candidates, not authoritative
+generation/visibility metadata. No declarations are excluded. Visibility is
+explicitly not_recorded, new/shim signatures null, public_inventory_complete
+false and implemented_shims empty. H78 remains pending, not waived.
+
+std-import-footprint.py scans SDK import headers only (body character literals
+are irrelevant): Basic26->181 and Lemmas137->361 source modules across official
+4.24/4.35, no missing source records. This is a static source-import footprint,
+not memory attribution/profiling. A narrower version-specific proof/import
+strategy is a candidate for root/gate review, not an implemented optimization
+or permission to lift the retained+124.6% diagnostic RSS STOP.
+
+Both read-only reviewers caught assert-based validation that Python optimization
+could skip. Explicit errors now enforce coverage, uniqueness, signature, kind
+and module checks under -O; a deliberately altered signature is rejected.
+Both final reviews pass by inspection. No Lean/server run, statement/proof edit,
+new premise, axiom, budget change or source shim occurred in this resumed item.
+
+Current schema-v1 waits and remaining full queue are in
+tests/h62/item6/migrate-solkey/resume-d96f2406/status.json. No independent static
+item remains identified: Raw prerequisite, RSS disposition, authoritative H78
+visibility/new exports, and actual VM-readable H81 policy remain necessary.
+The inspected durable decision document reaches H64; H81 references alone
+are not policy delivery. Original timing/proof gates stay incomplete.
+
+New bulk remains off Git at /workspace/migrate-solkey-resume-d96f2406 with a
+committed checksum manifest and deterministic generators. The new delta is
+against integration base d96f2406d, not a claim that unrelated imported master
+changes are this lane's edits. Earlier complete original assignment, queue,
+scope, original evidence and cumulative lane patch/bundle remain authenticated
+in /workspace/migrate-solkey-h82-final. No new goal/reset or lane push.
