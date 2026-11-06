@@ -68,7 +68,7 @@ def mask(src):
         raise ValueError("unterminated comment/string")
     return "".join(out)
 
-EVENT = re.compile(r"^[ \t]*(?:(?:private|protected|noncomputable|unsafe|partial|nonrec)\s+)*(namespace|section|mutual|end|variable|theorem|lemma|def|abbrev|structure|class|inductive|instance|axiom|opaque)\b([^\n]*)", re.M)
+EVENT = re.compile(r"^[ \t]*(?:@\[[^\n]*\][ \t]*)*(?:deriving[ \t]+)?(?:(?:private|protected|noncomputable|unsafe|partial|nonrec)\s+)*(namespace|section|mutual|end|variable|theorem|lemma|def|abbrev|structure|class|inductive|instance|axiom|opaque)\b([^\n]*)", re.M)
 
 def signature_end(clean, start):
     depth = 0
@@ -122,9 +122,11 @@ def scan(src, path, area, owner):
             ns = ".".join(n for t,n,_ in stack if t == "namespace")
             fq = name[len("_root_."):] if name.startswith("_root_.") else ".".join(filter(None,[ns,name]))
             if kind not in ("theorem", "lemma"):
-                candidates.append(dict(source_qualified_name=None if kind == "instance" and name[0] in ":({[" else fq,
+                candidates.append(dict(source_qualified_name=None if kind == "instance" and (name[0] in ":({[" or "deriving" in clean[m.start():m.start(1)].split()) else fq,
                     source_id=f"{path}:{src[:m.start()].count(chr(10))+1}", module=path,
                     line=src[:m.start()].count("\n")+1, kind=kind,
+                    section_variable_context=variables.copy(),
+                    source_form="deriving-instance-command" if "deriving" in clean[m.start():m.start(1)].split() else "declaration",
                     classification="pending-proof-bearing-interface-review"))
                 continue
             end = signature_end(clean, m.end(1))

@@ -50,6 +50,14 @@ end A
         rows, _ = scan(src, "fixture.lean", "tools", "fixture")
         self.assertEqual(rows[0]["signature"], "theorem t : let x := 1; let y := x + 1; y = 2")
 
+    def test_inline_attributes_and_deriving_commands(self):
+        src = "namespace N\n@[inline] def f (n : Nat) : Nat := n\nderiving instance Repr for Nat\nend N\n"
+        rows, extra = scan(src, "fixture.lean", "tools", "fixture")
+        self.assertEqual(rows, [])
+        self.assertEqual(extra[0]["source_qualified_name"], "N.f")
+        self.assertIsNone(extra[1]["source_qualified_name"])
+        self.assertEqual(extra[1]["source_form"], "deriving-instance-command")
+
     def test_unterminated_comment_fails_closed(self):
         with self.assertRaises(ValueError):
             mask("/- theorem t : False := x")

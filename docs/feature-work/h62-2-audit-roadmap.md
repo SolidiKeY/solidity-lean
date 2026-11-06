@@ -1,4 +1,4 @@
-# H62 item 2 audit-roadmap — H69 continuation handoff
+# H62 item 2 audit-roadmap — H70 source-census handoff
 
 Batch `solidity-h62-2-20261106`, worker `audit-roadmap`.
 Repository `/workspace/audit-roadmap`, branch
@@ -14,13 +14,13 @@ No push, merge, PR, pre-gate, publication or deployment.
 
 **17 checked theorem audits; 334 uncovered. Full assignment incomplete.**
 All 351 source theorem declarations in all 46 frozen mapped files occur exactly
-once in the generated census. Another 642 declaration candidates require
+once in the generated census. Another 649 declaration candidates require
 semantic classification, including proof-bearing definitions such as `Cert.comp`.
 No complete elaborated telescope/structure-field census is claimed.
 
 | Checkpoint | Saved evidence | Remaining |
 |---|---|---|
-| 1 frozen signatures and owners |46 mapped files,351 theorem source signatures,642 other candidates; source hashes; snapshot scope matches for every module |Elaborated telescopes, inherited-premise classification and exact live-owner confirmation |
+| 1 frozen signatures and owners |46 mapped files,351 theorem source signatures,649 other candidates; source hashes; snapshot scope matches for every module |Elaborated telescopes, inherited-premise classification and exact live-owner confirmation |
 | 2 simultaneous hypotheses |15 Evm mappings and2 Context mappings checked jointly;3 H69 controls explicitly classified |334 uncovered; all3 H69 impossibility checks blocked by unchanged Hash dependency |
 | 3 totality/success and controls |3 checked Evm gas/observation/fork-depth boundaries; supported-constructor and generic compiler-control drafts |Production supported-program success/totality and complete compiler/failure/gas/fork coverage; drafts blocked |
 | 4 fidelity census and validation |Hash-bound per-row report; deterministic reproduction; stale-evidence controls; independent finder/skeptic |All uncovered witnesses, semantic census, full affected gates and comparable timing |
@@ -28,9 +28,76 @@ No complete elaborated telescope/structure-field census is claimed.
 Canonical off-git source inventory:
 `/workspace/audit-roadmap-evidence/census/census.json`.
 Canonical checked audit:
-`/workspace/audit-roadmap-evidence/h69-audit/audit-census.json`.
+`/workspace/audit-roadmap-evidence/h70-audit/audit-census.json`.
 Every row has its criterion, checked/uncovered status, original source signature,
 proof reference where applicable, and source-import dependency blockers.
+
+## H70 source-only continuation
+
+Requester disposition H70 is saved verbatim in
+`tests/h62/item2/audit-roadmap/h70-disposition.txt`. It directs source-only
+backfill while migrate-syntax Raw, migrate-hash CollisionBound, migrate-backend
+Creation/Linking and migrate-source Source/Ctor proceed. Those are routed
+migration contacts, not live ownership transfers or edit permissions.
+`relay.sh` is host-only; routing is performed by the coordinator. No missing
+VM relay tool is treated as a blocker and no VM relay was attempted.
+
+The source-only ledger now accounts for **all 334 uncovered statements** and
+**649 additional source candidates**. The previous 642 were retained; five
+inline-attributed definitions and two deriving-instance commands were recovered
+from the same frozen mapped files. No new theorem was discovered or invented:
+the count remains 351, with 17 previously checked and 334 uncovered.
+Generated instance names, equation lemmas and inherited record projections
+remain elaboration-unknown; this is not a claim to enumerate generated kernel
+constants.
+
+Canonical new artifacts:
+
+- `/workspace/audit-roadmap-evidence/h70-source/source-premises.json`;
+- `/workspace/audit-roadmap-evidence/h70-source/source-summary.md`;
+- `/workspace/audit-roadmap-evidence/h70-source-reproduction/source-premises.json`.
+
+The JSON records source identities and offsets, exact raw headers/type/default
+slices and hashes, declaration binders, leading forall/arrow inputs, potential
+lexical section context, remaining result scope, direct structure fields,
+source-type categories and their limits. It contains 982 declaration-parameter
+groups, 133 leading result-input groups, 107 potential inherited-context groups,
+and 312 direct structure fields. The inherited groups are not claimed to be
+actual parameters; for example LazyStorage's C context is retained separately
+from whether any particular declaration uses it. Quantified premise contents,
+conjunctions, existential/iff/conditional scopes and local lets are not silently
+promoted to outer hypotheses.
+
+Authored `source-classification-rules.json` distinguishes global proof-bearing
+record types, predicate definitions, certificate-valued constructors, opaque
+stage-certificate data and operational/metaprogram results. `Cert.comp`,
+`Certificate.refl`, `Chain.frontend` and published toy interface constructors
+remain proof-carrying despite Type-valued results. `Chain.Cert` alone does not
+prove checker acceptance. `Refutation.certified : Bool`, `Trace.proof : Expr`
+and theorem text returned as String are not kernel semantic proofs.
+Global versus per-input roles derived from source-type patterns are explicitly
+provisional. All input worlds still need simultaneous checked evidence.
+
+The ledger deliberately retains 226 dependent/inferred-result classifications
+and 20 aliases requiring semantic expansion. Those are unresolved obligations,
+not proof-free exclusions. All other source categories likewise add zero proof
+coverage. H69's three intentional contradiction controls and 44 outer-world
+refutation obligations remain as previously recorded.
+
+Source parser tests now total 16 and pass. Independent finder/skeptic identified
+and verified fixes for omitted attributed/deriving commands, type-level-let
+assignments mistaken for binder defaults, erased string literals, quantified
+premises mistaken for parameter names, opaque certificate projections, and
+existential/iff/conditional arrow scope. Exact g()/library/refusal strings are
+preserved. Both reviewers used no Lean/server or edits. The source ledger and
+canonical source census reproduce byte-for-byte. Hash-bound report acceptance
+still validates only the existing 17 witnesses; no new Lean job, proof-budget
+change or elaborated-witness claim occurs in this continuation.
+
+H70 source-level work is reviewable; all four original checkpoints and full
+validation remain unfinished. Waits and owner tickets remain typed. No source
+classification is a substitute for the frozen statement's checked joint witness
+or an H69 checked impossibility proof.
 
 ## H69 criterion resolution
 
@@ -109,7 +176,7 @@ through those lets; no original declaration was changed. Repair name/hash list:
 The superseded truncated census is retained only under
 `/workspace/audit-roadmap-evidence/superseded/pre-h69-census`.
 The canonical census and reproduction were regenerated and are byte-identical.
-Six scanner acceptance tests pass, including nested comments/mutual scopes,
+The H69 baseline had six scanner acceptance tests; H70 now has 16 combined parser tests, including nested comments/mutual scopes,
 private/root/anonymous names, binder defaults, result-type lets, equation proofs
 and fail-closed unterminated comments.
 
@@ -198,10 +265,10 @@ The original full frozen objective remains binding, rendered prompt SHA256
 `1f2f43a9089ad3fc56319ade15f7e99c83c1466170941c9c81c12defc4eadbf1`.
 Environment ID:
 `ccarenv_b64_Y2NhcmVudl9lNmE5OTQwMjI2ZDg4MTkxYmZhZGE0ZGM1MTYwNmYyZQ`.
-get_goal is unavailable; coordinator explicitly permits that optional absence.
+get_goal remains unavailable; coordinator explicitly permits that optional absence.
 
 Next: obtain owner-compatible migration overlays, check the3 H69 impossibility
-proofs, complete334 uncovered rows and642candidate classifications, confirm
+proofs, complete334 uncovered rows and649candidate classifications, confirm
 live owners, finish supported-program totality/success and all required
 failure/gas/fork controls, elaborated fidelity/axiom census, full affected gates
 and timing/acceptance requirements. H55 implementation remains untouched.
