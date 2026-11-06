@@ -1,13 +1,28 @@
 {
   "schema": "sol-numeric-literals-h44-v2",
-  "source_head": "ae42c9e708d70d8a5ba84fed85170675b51e5b4d",
-  "base": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "source_head": "9442e5b6d29b41a3b4bf8907705574b79fec79b4",
+  "base": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
   "archive": {
     "name": "payload.tar.gz",
-    "bytes": 89838,
-    "sha256": "e2c2b6c0586a5cd16f68dfd727ec9b62a1673b3413fb53ee8f7627169b2d5721"
+    "bytes": 93122,
+    "sha256": "519aff9c630d878d922401c1e30e5b40a1714554976d720f44c131755dc7f500"
   },
   "files": [
+    {
+      "logical_path": "tests/primitive-packets-1105/Constants/adoption-e2c/audit.log",
+      "bytes": 5489,
+      "sha256": "eb45b37e2a369b27ec0ec4cefec7dba6497b489e920b001a1d2f5a96489d3bc9"
+    },
+    {
+      "logical_path": "tests/primitive-packets-1105/Constants/adoption-e2c/build.json",
+      "bytes": 7045,
+      "sha256": "11d26b45d3cc7ca9afb5f0f18d3b3b7b27a22bec270dfbd2ceb9c7a14a612f8c"
+    },
+    {
+      "logical_path": "tests/primitive-packets-1105/Constants/adoption-e2c/gate.json",
+      "bytes": 7174,
+      "sha256": "78cd16a92135c269e849749359330ffb6af3b2b8a6c1bbe6db1b333b59227dea"
+    },
     {
       "logical_path": "tests/primitive-packets-1105/Constants/evidence/h55-cache-verification.json",
       "bytes": 704,
@@ -200,13 +215,13 @@
     },
     {
       "logical_path": "tests/primitive-packets-1105/Constants/registration-current.json",
-      "bytes": 115459,
-      "sha256": "6f6f2aca81799219dfbecf0bda6a1ba7443c9fd838e860c3847700acc15add2b"
+      "bytes": 115814,
+      "sha256": "6ea59cb5f6c8fedac185b0493f73939d2fa5f60d89288e0a83521124a5a1fe85"
     },
     {
       "logical_path": "tests/primitive-packets-1105/Constants/registration-current.patch",
-      "bytes": 5523,
-      "sha256": "8dc34396f080a22f9ba66aca7cdd4ecf17a7f43385afa43e4f83ae56e77c9c92"
+      "bytes": 5719,
+      "sha256": "29d8ba4183d16e90b7b779cfdaa72c32ea08ed5874ba9405838f84446796e641"
     },
     {
       "logical_path": "tests/primitive-packets-1105/Constants/reviews.json",

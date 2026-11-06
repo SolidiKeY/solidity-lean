@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "authorization": "H44",
+  "archive": "/workspace/h28-repository-gate-export-60a068dd/validation.tar.gz",
+  "archive_bytes": 90180,
+  "archive_sha256": "ee9db32fa3169d78b7e69ba91414c41aa8d6bda2c8bf62a581f7e214f3f40d81",
+  "members": {
+    "doc-correction/doc-paths.log": {
+      "bytes": 11754,
+      "sha256": "e8674cd9d8eb295063df9e56db2cf48f3ed56dff3432958a0fe2badd3dccf443"
+    },
+    "doc-correction/result.json": {
+      "bytes": 1923,
+      "sha256": "0713ece33cd1a7456aacf7865c3bff359820419fee37268232d79f32646842fc"
+    },
+    "first-launch/console.log": {
+      "bytes": 142,
+      "sha256": "a02303bd6c121570069189e6b76e224701cade6cbcb11add7042b8d2a0c8f4cf"
+    },
+    "first-launch/keysort.json": {
+      "bytes": 2760,
+      "sha256": "705a381068e52209f188010e1180dd85a77d80cefb42042e749a1e6f1866ac2b"
+    },
+    "first-launch/keysort.log": {
+      "bytes": 110,
+      "sha256": "b584393a618de86a28bf01e276404c42f3dbcf4f9b548cab185d43cf7639e588"
+    },
+    "first-launch/result.json": {
+      "bytes": 3559,
+      "sha256": "141413f7a5261903f210eb1dc8d8760bf128e46ec0d2ba095efdb0574a0923f1"
+    },
+    "first-launch/run-full.py": {
+      "bytes": 4699,
+      "sha256": "3950c870f2a713e37667fdba5bef2777c58d691fa2af39e4f392273e1b4b8c79"
+    },
+    "first-launch/runtime/bin/lean": {
+      "bytes": 86,
+      "sha256": "806667c1e7bf4daf3ebc53b823e76649f3c9c8273bc397f74f899d3317c2124a"
+    },
+    "first-launch/setup.json": {
+      "bytes": 634,
+      "sha256": "d5607201b9af7ffb0f38b1397fe47fc2535689f8b00e427942ca98f037203a14"
+    },
+    "first-launch/source-preflight.json": {
+      "bytes": 171,
+      "sha256": "3c8002ca5ca51fb697cccf8fd1323dfe24996bf4a24c5fe3d1ceabad98feb7fd"
+    },
+    "first-launch/versions.json": {
+      "bytes": 1601,
+      "sha256": "fb6629a968d0902b51c5660bf3a7a1e255dc37222f0dd15bc94d033d28534bcc"
+    },
+    "first-launch/versions.log": {
+      "bytes": 159,
+      "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4"
+    },
+    "first-launch/wrappers/lake": {
+      "bytes": 136,
+      "sha256": "4a7bbb47a26371081f8b9ff2ae0c2d91bcd8f0a72c2f7d119568490147be1216"
+    },
+    "full-gate/RETRY.md": {
+      "bytes": 263,
+      "sha256": "8b51118a1bb0c212100108bcc7237496056abba10717749b904d2a614883e85a"
+    },
+    "full-gate/console.log": {
+      "bytes": 553,
+      "sha256": "167969a7fa5722caf0ddc4722f08cc28e50e3420d3aebbed5b1c07c4d3501c29"
+    },
+    "full-gate/gates/1.log": {
+      "bytes": 14,
+      "sha256": "611127708f35de8aba889e7c9d152d2dcc31c138ce3919c10c21c66d10d5324a"
+    },
+    "full-gate/gates/10.log": {
+      "bytes": 385,
+      "sha256": "32481e0de6928326e00e1c4595d5021d1e8b5cbd4e9dde6ca364eb195a0a8b95"
+    },
+    "full-gate/gates/11.log": {
+      "bytes": 163,
+      "sha256": "b09d39b1f1d1ecf1e2ea9ea7d7df3f33f514dd48b8f4b2a06fd5aee2cf9968cc"
+    },
+    "full-gate/gates/12.log": {
+      "bytes": 155,
+      "sha256": "b2b841479106ada50111d792351a6dde92b28c5529fbbde0ab768d3bbd67d83f"
+    },
+    "full-gate/gates/2.log": {
+      "bytes": 322,
+      "sha256": "493deffcad522d95ba89c0971dc9f97449ec43aef813695467f662bb7d67a7a5"
+    },
+    "full-gate/gates/3.log": {
+      "bytes": 79,
+      "sha256": "215358f8056a96224bb38dadfc19b764f6f1c82b49e40982ac466f1d5da4ae9a"
+    },
+    "full-gate/gates/4.log": {
+      "bytes": 168,
+      "sha256": "ab109fb7ff3e0c011b9504207893721d69b87f8c842e537583c03aa69bb7f177"
+    },
+    "full-gate/gates/5.log": {
+      "bytes": 95,
+      "sha256": "8cf3b28ff9ff623f43c5ea8563222a4d671b8abfbc57dd1b4395942fc8ec1e85"
+    },
+    "full-gate/gates/6.log": {
+      "bytes": 227,
+      "sha256": "3175bcd30fe02efadc879a14c7c93a18077218e8ae7a7fc2633e001ac8d7a9a7"
+    },
+    "full-gate/gates/7.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "full-gate/gates/8.log": {
+      "bytes": 11706,
+      "sha256": "59bb85b911990a5764f85c07ac98a0400dbcee5d5837ef11d0e3cbbb7d19d105"
+    },
+    "full-gate/gates/9.log": {
+      "bytes": 486983,
+      "sha256": "532ef0bf4c7f79534455cd087bc98c04b2ac6cd19b2bb2f9858ad47997480e7b"
+    },
+    "full-gate/gates/HEAD": {
+      "bytes": 41,
+      "sha256": "9df20c256b4430e0b5bf93e51b8f6df353f75347b17e3e40100ff7cd56771318"
+    },
+    "full-gate/gates/core": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "full-gate/gates/gates.tsv": {
+      "bytes": 816,
+      "sha256": "e40951aa5a931de042a6e8d90e41115a35c87d0de3f15f6e63a6cd3dce2f99ee"
+    },
+    "full-gate/keysort.json": {
+      "bytes": 2758,
+      "sha256": "5e2a1f3a46b190303bb122d95b18657e6235b4159af38b03b567067a4419e953"
+    },
+    "full-gate/keysort.log": {
+      "bytes": 109,
+      "sha256": "45c86019dfd8551a891ef0403a56df7e58a0c8ac10b34e7d4687eeca54aaf4f7"
+    },
+    "full-gate/result.json": {
+      "bytes": 3565,
+      "sha256": "df8d14363f0206e99791485c493f6dda675b04d09b3e5fe8897103cdff7b8b77"
+    },
+    "full-gate/run-full.py": {
+      "bytes": 4707,
+      "sha256": "d7c9e9f4b50e0aef522a2e545857d10b71cceb4ba970c353ac46dbdf184b868b"
+    },
+    "full-gate/runtime/bin/lean": {
+      "bytes": 86,
+      "sha256": "806667c1e7bf4daf3ebc53b823e76649f3c9c8273bc397f74f899d3317c2124a"
+    },
+    "full-gate/setup.json": {
+      "bytes": 634,
+      "sha256": "d5607201b9af7ffb0f38b1397fe47fc2535689f8b00e427942ca98f037203a14"
+    },
+    "full-gate/source-preflight.json": {
+      "bytes": 171,
+      "sha256": "3c8002ca5ca51fb697cccf8fd1323dfe24996bf4a24c5fe3d1ceabad98feb7fd"
+    },
+    "full-gate/versions.json": {
+      "bytes": 1602,
+      "sha256": "5d5c994cbaf785a4674b2263d5eae1b45777197ff362b76637469bb837fd2c3c"
+    },
+    "full-gate/versions.log": {
+      "bytes": 159,
+      "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4"
+    },
+    "full-gate/wrappers/lake": {
+      "bytes": 136,
+      "sha256": "4a7bbb47a26371081f8b9ff2ae0c2d91bcd8f0a72c2f7d119568490147be1216"
+    },
+    "resource-only.lakefile.toml": {
+      "bytes": 2109,
+      "sha256": "6e7a5cd7e4dc38d5731542a7d231e7553583849e947cbffe03ef01ec6c54caf2"
+    },
+    "reviews.json": {
+      "bytes": 666,
+      "sha256": "5435f0f6b783673ebd4d851d8658af445bdfb35274fbbc7a6a02ab33b2c83dfa"
+    },
+    "runtime-identities.json": {
+      "bytes": 285,
+      "sha256": "089223273d9753ad803551adbc7ba1c72f680c6d3e8d3f52140424551645f228"
+    },
+    "updated-master/0.log": {
+      "bytes": 107,
+      "sha256": "abe5e38d3f75ea295d2589f00aeffd457ae70a1e654660f3040850dec3901545"
+    },
+    "updated-master/1.log": {
+      "bytes": 151,
+      "sha256": "0c8e0f3d7d40e286a4a4cf2493b7e7a2312b39399de47c2fbce3bee22fcfcf77"
+    },
+    "updated-master/2.log": {
+      "bytes": 153417,
+      "sha256": "9783cca0ab06295f46848987ac1aa6c1f8eafe5a30acae3c452428ea9acc80cf"
+    },
+    "updated-master/axiom-complete-result.json": {
+      "bytes": 1959,
+      "sha256": "c7dc65aa9e742442522b572512e9c308d91fad3c1d6716b0d9950acafe0395b2"
+    },
+    "updated-master/axiom-complete.log": {
+      "bytes": 492655,
+      "sha256": "62eea494464f9c0c3b366709ab38fdec63b8dac2f74322bdf85d02790e2c869d"
+    },
+    "updated-master/result.json": {
+      "bytes": 5603,
+      "sha256": "5bc0bfbea7a0e1bce4cea11600b23dad8b2b97f870b9a3e1f34b172c67d4dace"
+    },
+    "SHA256SUMS": {
+      "bytes": 4432,
+      "sha256": "cc75315ea5588033f3539a6bcae5caa549230edb467c4001578302e3792809e2"
+    }
+  }
+}
