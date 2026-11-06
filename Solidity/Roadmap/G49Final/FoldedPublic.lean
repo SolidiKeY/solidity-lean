@@ -158,9 +158,11 @@ theorem g49_g50_of_fold {S : SourceSpec} {I : IntrinsicSpec}
       exact ⟨passes.fold.envSound e allowed, passes.fold.refines e allowed⟩
     decode_reach := obligations.decode_reach
     decode_commutes := obligations.decode_commutes }
-  have folded : FoldStatement lowering backend execution compiler obligations.artifact := by
-    intro i r admitted w p art receipt passes e allowed rs source
-    exact passes.fold.need_ok e rs allowed source
+  have folded : FoldStatement lowering backend execution compiler obligations.artifact :=
+    fun i r admitted w p art receipt =>
+      let passes := pipeline lowering backend execution (source_from_admitted i r admitted) art
+        (obligations.artifact i r admitted w p art receipt)
+      fun e allowed rs source => passes.fold.need_ok e rs allowed source
   exact ⟨folded, obligations.sourceApproved, obligations.sourceNonVacuous,
     obligations.targetApproved, obligations.keccak, publicProof, publicProof.transfer⟩
 
