@@ -1,4 +1,5 @@
 import Solidity.Source.State
+import Solidity.Source.Monetary
 
 /-!
 # World, transactions and frames (S04.03)
@@ -45,7 +46,7 @@ variable {D : Layout}
 
 /-- An instance's account. -/
 structure Account (D : Layout) (L : SPath → STy) where
-  balance : Word
+  balance : Monetary.Balance
   nonce : Nat
   /-- The contract the instance runs, by its position in the compilation
   input. -/
@@ -53,7 +54,7 @@ structure Account (D : Layout) (L : SPath → STy) where
   storage : Storage D L
 
 /-- An account with nothing. -/
-def Account.empty (L : SPath → STy) : Account D L := ⟨⟨0, by decide⟩, 0, none, Storage.empty⟩
+def Account.empty (L : SPath → STy) : Account D L := ⟨0, 0, none, Storage.empty⟩
 
 /-- The instances, each over its storage layout. -/
 structure World (D : Layout) (L : Address → SPath → STy) where
@@ -263,43 +264,55 @@ theorem commit_keeps (f : CallFrame) (s : ExecState D L T) : f.commit s = s := r
 /-! ## Transfers and the end of a transaction -/
 
 /-- A balance replaced. -/
-def Account.withBalance {L : SPath → STy} (x : Account D L) (b : Word) : Account D L :=
+def Account.withBalance {L : SPath → STy} (x : Account D L) (b : Monetary.Balance) : Account D L :=
   { x with balance := b }
 
 /-- **A value transfer between instances**: `none` when the sender cannot
 afford it or the recipient would overflow; otherwise two journaled balance
 updates. -/
-def ExecState.transfer (s : ExecState D L T) (src dst : Address) (v : Word) : Option (ExecState D L T) :=
-  let bs := (s.world.accounts src).balance.val
-  let bd := (s.world.accounts dst).balance.val
-  if src = dst then (if v.val ≤ bs then some s else none)
-  else if h : v.val ≤ bs ∧ bd + v.val < 2 ^ 256 then
-    some ((s.apply (.account src fun x => x.withBalance ⟨bs - v.val, by omega⟩)).apply
-      (.account dst fun x => x.withBalance ⟨bd + v.val, h.2⟩))
+def ExecState.transferNat (s : ExecState D L T) (src dst : Address)
+    (amount : Monetary.Balance) : Option (ExecState D L T) :=
+  let bs := (s.world.accounts src).balance
+  let bd := (s.world.accounts dst).balance
+  if src = dst then (if amount ≤ bs then some s else none)
+  else if _h : amount ≤ bs ∧ bd + amount < 2 ^ 256 then
+    some ((s.apply (.account src fun x => x.withBalance (bs - amount))).apply
+      (.account dst fun x => x.withBalance (bd + amount)))
   else none
+
+/-- Call value remains an intrinsic256-bit Word; money is exact Nat. -/
+def ExecState.transfer (s : ExecState D L T) (src dst : Address) (v : Word) : Option (ExecState D L T) :=
+  s.transferNat src dst v.val
 
 /-- A transfer between two instances fails exactly when it is unaffordable
 or would overflow. -/
 theorem transfer_none_iff (s : ExecState D L T) {src dst : Address} (hne : src ≠ dst) (v : Word) :
     s.transfer src dst v = none ↔
-      ¬ (v.val ≤ (s.world.accounts src).balance.val ∧
-        (s.world.accounts dst).balance.val + v.val < 2 ^ 256) := by
-  simp only [ExecState.transfer, hne, if_false]
+      ¬ (v.val ≤ (s.world.accounts src).balance ∧
+        (s.world.accounts dst).balance + v.val < 2 ^ 256) := by
+  simp only [ExecState.transfer, ExecState.transferNat, hne, if_false]
   constructor
   · intro h hc
     simp only [hc, and_self, dif_pos, reduceCtorEq] at h
   · intro h
     simp only [h, dif_neg, not_false_eq_true]
 
+/-- Natural-amount transfers use the same actual journal and rollback. -/
+theorem rollback_transferNat (s s' : ExecState D L T) {src dst : Address} (hne : src ≠ dst)
+    (amount : Monetary.Balance) (h : s.transferNat src dst amount = some s')
+    (a c : Address) (value : Word) (input : Bytes) (static : Bool) :
+    (s.enter a c value input static).rollback s' = s := by
+  simp only [ExecState.transferNat, hne, if_false] at h
+  split at h
+  · cases h
+    exact rollback_run s [_, _] a c value input static
+  · cases h
+
 /-- **A reverted call undoes its transfers.** -/
 theorem rollback_transfer (s s' : ExecState D L T) {src dst : Address} (hne : src ≠ dst) (v : Word)
     (h : s.transfer src dst v = some s') (a c : Address) (i : Bytes) (st : Bool) :
-    (s.enter a c v i st).rollback s' = s := by
-  simp only [ExecState.transfer, hne, if_false] at h
-  split at h
-  · cases h
-    exact rollback_run s [_, _] a c v i st
-  · cases h
+    (s.enter a c v i st).rollback s' = s :=
+  rollback_transferNat s s' hne v.val h a c v i st
 
 /-- **The end of a transaction** clears transient storage and the journal,
 and keeps the world. -/
@@ -309,5 +322,30 @@ theorem endTx_world (s : ExecState D L T) : s.endTx.world = s.world := rfl
 
 theorem endTx_transient (s : ExecState D L T) (a : Address) (p : SPath) :
     (s.endTx.transient.cells a).read p = Val.default D (T a p) := rfl
+
+/-! ## Request-boundary sender funds (S04.04)
+
+External sender balances are the fixed ledger over opening balances and the
+actual boundary history, not the system instance balance map. Invalid requests
+are dropped by session entry before evaluating the transaction body. -/
+
+def RequestFunded (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) : Prop :=
+  q.value.val ≤ (F.ledger opening history q.sender).val
+
+def requestFunded (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) : Bool :=
+  decide (q.value.val ≤ (F.ledger opening history q.sender).val)
+
+theorem requestFunded_true_iff (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) :
+    requestFunded F opening history q = true ↔ RequestFunded F opening history q := by
+  simp only [requestFunded, RequestFunded, decide_eq_true_eq]
+
+theorem requestFunded_false_iff (F : Roadmap.Fixed) (opening : Address → Word)
+    (history : List Roadmap.Event) (q : Request) :
+    requestFunded F opening history q = false ↔
+      (F.ledger opening history q.sender).val < q.value.val := by
+  simp only [requestFunded, decide_eq_false_iff_not, Nat.not_le]
 
 end Solidity.Source

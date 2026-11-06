@@ -1,0 +1,39 @@
+{
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.body_changes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.mutation_not_noop": [],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.nonzero_blocks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.payable_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.raw_fault_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.raw_skip_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean:Solidity.Backend.AbiEntry.ValueGateBodyControls.zero_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

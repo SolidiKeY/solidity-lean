@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherenceControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeAllocationCoherence.Controls.exact_heap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

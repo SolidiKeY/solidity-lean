@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/StructuredLoopExecution.lean:Solidity.Yul.Compilation.StructuredLoopExecution.finite": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredLoopExecution.lean:Solidity.Yul.Compilation.StructuredLoopExecution.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredLoopExecution.lean:Solidity.Yul.Compilation.StructuredLoopExecution.selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,552 @@
+{
+  "schema": 1,
+  "producerHead": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
+  "fullObligationsClosed": 0,
+  "fullCombinationsClosed": 0,
+  "facts": [
+    {
+      "name": "Solidity.Yul.Composition.prepared_frame_action",
+      "module": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_success_projection",
+      "module": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.prepared_persistent_source",
+      "module": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_success_copy",
+      "module": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_child_outer_rollback",
+      "module": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_two_success_projection",
+      "module": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_child_state_rollback",
+      "module": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_window_byte",
+      "module": "Solidity/Yul/Composition/PhysicalBytes.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_window_memory",
+      "module": "Solidity/Yul/Composition/PhysicalBytes.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.physical_window_target",
+      "module": "Solidity/Yul/Composition/PhysicalBytes.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.child_prepared",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.first_checked_MemOK_and_raw",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.child_logical_truth",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.child_full_raw",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.child_MemOK",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.all_journals_outer_restore",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.complete_source_outer_restore",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.actual_physical_payload",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.actual_target_bytes",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.physical_target_window",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.child_inner_all_restore",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.outer_full_raw",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalControls.nested_world_projection",
+      "module": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.allocated_bytes_window_target",
+      "module": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalMemoryControls.actual_reserved",
+      "module": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.PhysicalMemoryControls.all_placements_same_copy",
+      "module": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "fullCoverage": false
+    }
+  ],
+  "sourceHashes": {
+    "Solidity/Yul/Composition/PhysicalFrames.lean": "1c4387e7cf69c8475fe60cad52fdac618173e8147017c4bcd3592ab41ba086f8",
+    "Solidity/Yul/Composition/PhysicalBytes.lean": "e9ad1835b2dafc295407f1912f5286064b72d40a15737da3be8f220b742de84c",
+    "Solidity/Yul/Composition/PhysicalControls.lean": "1cea48b2286f82e8fb478c4f345c59e329908e29e7f99b2923c4db1854505ee7",
+    "Solidity/Yul/Composition/PhysicalMemory.lean": "492c975cfb33c7683bd5e134c62aa07cad14cdcf28da59c063bf9b8fb3361e28",
+    "tests/yul-composition/PhysicalDriver.lean": "ff6da99541e7470cccce4b3c8e0f981861245e3414d0d89654b9c8395fad2bc5"
+  },
+  "obligations": [
+    {
+      "id": "Y01",
+      "owner": "VY1",
+      "dependencies": [
+        "S00"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y01.02",
+      "owner": "VY1",
+      "dependencies": [
+        "Y01",
+        "G08",
+        "G09",
+        "G10",
+        "G11"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y02",
+      "owner": "VY1",
+      "dependencies": [
+        "Y01",
+        "S01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y03",
+      "owner": "VY1",
+      "dependencies": [
+        "Y02",
+        "S02",
+        "S03",
+        "V04"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y04",
+      "owner": "VY2",
+      "dependencies": [
+        "Y03",
+        "S04",
+        "G27.01",
+        "G27.02",
+        "G27.03",
+        "G27.04",
+        "G27.05"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4"
+    },
+    {
+      "id": "Y05",
+      "owner": "VY2",
+      "dependencies": [
+        "Y03",
+        "S04",
+        "V04b",
+        "G32"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4"
+    },
+    {
+      "id": "Y06",
+      "owner": "VY2",
+      "dependencies": [
+        "Y05",
+        "S04.04"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4"
+    },
+    {
+      "id": "Y07.01",
+      "owner": "VY4",
+      "dependencies": [
+        "Y06",
+        "G22",
+        "G42",
+        "V13"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y07.02",
+      "owner": "VY4",
+      "dependencies": [
+        "Y07.01",
+        "G42",
+        "V13"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y08.01",
+      "owner": "VY3",
+      "dependencies": [
+        "Y04",
+        "Y05",
+        "Y06",
+        "G24",
+        "G27",
+        "G32",
+        "V12"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y08.02",
+      "owner": "VY3",
+      "dependencies": [
+        "Y08.01",
+        "G45",
+        "G46",
+        "V15"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y09.01",
+      "owner": "VY1",
+      "dependencies": [
+        "Y03",
+        "G51.interface"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y09.02",
+      "owner": "VY2",
+      "dependencies": [
+        "Y04",
+        "Y05",
+        "Y06",
+        "G51.interface"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4"
+    },
+    {
+      "id": "Y09.03",
+      "owner": "VY4",
+      "dependencies": [
+        "Y07.01",
+        "Y07.02",
+        "G51.interface"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G48",
+      "owner": "V16",
+      "dependencies": [
+        "Y01",
+        "Y02",
+        "Y03",
+        "Y04",
+        "Y05",
+        "Y06",
+        "Y07.01",
+        "Y07.02",
+        "Y08.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G49.01",
+      "owner": "V16",
+      "dependencies": [
+        "G48",
+        "Y08.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G49.02",
+      "owner": "V16",
+      "dependencies": [
+        "G49.01",
+        "Y08.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G49.03",
+      "owner": "V16",
+      "dependencies": [
+        "G49.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G50.01",
+      "owner": "V16",
+      "dependencies": [
+        "G49.02",
+        "Y07.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G50.02",
+      "owner": "V16",
+      "dependencies": [
+        "G50.01",
+        "Y07.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G51.01",
+      "owner": "V16",
+      "dependencies": [
+        "Y09.01",
+        "Y09.02",
+        "Y09.03"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G51.02",
+      "owner": "V16",
+      "dependencies": [
+        "G49.03",
+        "G50.02",
+        "G51.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "G51.interface",
+      "owner": "V16",
+      "dependencies": [
+        "V16"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": null
+    },
+    {
+      "id": "Y10",
+      "owner": "VY5",
+      "dependencies": [
+        "G48",
+        "G49.01",
+        "G49.02",
+        "G49.03",
+        "G50.01",
+        "G50.02",
+        "G51.01",
+        "G51.02",
+        "Y08.02",
+        "Y07.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "readyPhysicalInputs": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4"
+    }
+  ],
+  "combinations": [
+    {
+      "id": "loops",
+      "constructors": [
+        "assembly",
+        "forStmt",
+        "whileStmt",
+        "doWhile",
+        "breakStmt",
+        "continueStmt"
+      ],
+      "dependencies": [
+        "Y03",
+        "Y09.01",
+        "G49.03",
+        "G51.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "loops"
+    },
+    {
+      "id": "modifiers",
+      "constructors": [
+        "assembly",
+        "modifier",
+        "modInv"
+      ],
+      "dependencies": [
+        "Y03",
+        "G48",
+        "G49.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "modifiers"
+    },
+    {
+      "id": "try-catch",
+      "constructors": [
+        "assembly",
+        "tryStmt",
+        "catchPlain",
+        "catchSig"
+      ],
+      "dependencies": [
+        "Y07.01",
+        "Y07.02",
+        "G49.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "try-catch"
+    },
+    {
+      "id": "unchecked",
+      "constructors": [
+        "assembly",
+        "uncheckedItem"
+      ],
+      "dependencies": [
+        "Y03",
+        "Y09.01",
+        "G48"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "unchecked"
+    },
+    {
+      "id": "constructors",
+      "constructors": [
+        "assembly",
+        "constructor",
+        "new"
+      ],
+      "dependencies": [
+        "Y07.01",
+        "G50.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "constructors"
+    },
+    {
+      "id": "libraries",
+      "constructors": [
+        "assembly",
+        "library",
+        "call"
+      ],
+      "dependencies": [
+        "Y08.01",
+        "Y07.02",
+        "G48"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "libraries"
+    }
+  ],
+  "gap": "VY4 Effects carries execution/logs/returndata only; complement and owned-byte journals remain separate actual VY2 carriers. No full Source.St.log/topic encoding, callee execution, allocation or compiler adequacy inferred."
+}

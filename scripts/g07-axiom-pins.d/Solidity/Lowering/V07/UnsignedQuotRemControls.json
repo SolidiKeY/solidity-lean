@@ -1,0 +1,76 @@
+{
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.binder_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.equal_content_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.live_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.locals_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.locals_zero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.pair_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.pair_zero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.range_client": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.repeated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.source_frame_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.source_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.source_zero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemControls.lean:Solidity.Lowering.V07.UnsignedQuotRemControls.zero_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
