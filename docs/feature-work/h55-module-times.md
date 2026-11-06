@@ -623,3 +623,13 @@ quota-period phase and burst credit, sibling load, CPU frequency, host
 scheduling and VM/daemon identity remain unattested. The pre-start race and
 possible delayed Docker cleanup also remain unresolved. H93 cold timing was
 not restarted, and the H28 final Git artifact remains unavailable.
+
+The first final manifest verification after this CPU-policy change failed for
+two entries in the earlier pre-start review manifest because that manifest
+records the old CPU files at `57308b9ddc7c1c997dbcbead7ea3f4aa88be4474`.
+Those reviewed bytes were extracted from that exact commit to
+`/workspace/h55-module-times-evidence/prestart-review-57308b9dd`; the unchanged
+historical manifest verifies against that snapshot. The other current evidence
+and CPU-policy review manifests verify against their respective paths. The
+failed check and corrected historical check are retained separately; this does
+not retroactively claim the old review covered the changed CPU files.
