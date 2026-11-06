@@ -19,9 +19,14 @@ half is needed because rollback restores saved accounts
 
 ## 1. Writer inventory
 
-Every Source-level writer of `Account.balance` (`rg` over `withBalance`,
-`balance :=`, `.account _ fun`, `Op.account`; Bridge/vendor EVM accounts are
-`UInt256` and out of scope):
+Every Source-level writer that *changes* `Account.balance` (`rg` over
+`withBalance`, `balance :=`, `.account _ fun`, `Op.account`; EVM `Account .EVM`
+balances in `Bridge/` — vendor and `SolidityBridge/HashBridge` — are `UInt256`
+and out of scope). Account updates that keep the balance
+— nonce bumps (`Yul/World/CreationFrames.lean` `creationNonceOp`) and the Yul
+view storage writes (`Yul/Views/FiniteWorld.lean`, `ScalarWorld.lean`,
+`PackedCellUpdate.lean`, `ActualScalarWrite.lean`, …) — are covered generically
+by `ExecState.apply_sameBalance_balancesFit` and not listed one by one:
 
 | Writer | Location | Guard | Preservation theorem |
 |---|---|---|---|
@@ -37,13 +42,16 @@ Every Source-level writer of `Account.balance` (`rg` over `withBalance`,
 | EIP-6780 self-beneficiary burn (`balance := 0`) | `Yul/World/Lifecycle.lean` | — | `selfBeneficiary_balancesFit` (new) |
 | EIP-6780 destruct transfer | `Yul/World/Lifecycle.lean` | `transferNat`'s guard | `destructTransfer_balancesFit` (new) |
 | lifecycle finalization (erase to `Account.empty`, clear journal) | `Yul/World/Lifecycle.lean` | — | `finish_balancesFit` (new) |
-| read-only history writes `withBalance amount.val` (`amount : Word`) | `Lowering/Readonly/StaticJournal.lean` | Word type | `ExecState.apply_wordBalance_balancesFit` (new) |
+| read-only `History.balance` step (`withBalance b`, `b : Monetary.Balance`) | `Lowering/Readonly/StaticJournal.lean` | **none** (a structural history relation, not an executed writer) | only its Word form `History.balance_word` is covered, by `ExecState.apply_wordBalance_balancesFit` (new); the unbounded Nat step is not |
 
 Generic: `ExecState.apply_account_balancesFit` (any account update whose new
 balance fits) and `ExecState.apply_sameBalance_balancesFit` (any update keeping
-the balance). Remaining `withBalance`/`balance :=` hits are fixtures in
-`*Controls*`/`*Checks*` files and `Backend/Transient/SourceCallback.lean`
-(a fixed literal 93), not semantics.
+the balance). Remaining `withBalance`/`balance :=` hits are not semantic writers:
+fixtures in `*Controls*`/`*Checks*` files, `Backend/Transient/SourceCallback.lean`
+(a fixed literal 93), the `savedWide` witness in `Source/MonetaryWorld.lean`, this
+lane's own controls in `Source/MonetaryFit.lean`, the held test
+`tests/yul-composition/held/FailureDriver.lean`, and `GlobT.withBalance` in
+`Calculus/` (a different type, not a Source account).
 
 `Authority.writeSource`: the assignment asked to guard it or add the premise at
 its single caller. It has **no caller** anywhere in the repository, so the
@@ -63,7 +71,12 @@ fitting one: `writeSourceChecked?_of_fits`) is provided for a future caller.
   `uintValueOfWord ⟨balance, fit⟩`, and leaves the state unchanged;
 - `sourceBalanceLocal_exact_int`: the same as `intWrap u256 balance`.
 
-External (`code = none`) addresses read G01's Word ledger and are unaffected.
+External (`code = none`) addresses read G01's Word ledger. **Gap:** `deploy`
+opens the new account with `code := none` and installs code only after the
+constructor returns, so `address(this).balance` *during a constructor* takes
+the ledger branch, not the Nat balance just credited; `sourceBalanceLocal_exact`
+(which needs `code = some _`) says nothing about that case. This is pre-existing
+semantics, recorded here, not changed.
 
 ## 4. Witness and negative controls (`Source/MonetaryFit.lean`)
 
@@ -79,6 +92,26 @@ External (`code = none`) addresses read G01's Word ledger and are unaffected.
 - `sourceBalanceLocal_wide`: an instance holding exactly `2^256` is observed by
   `BALANCE` as `0`, and its state is not `BalancesFit`.
 
+## Reviews
+
+Read-only finder and skeptic reviews (no Lean server), after the modules
+elaborated. Neither found a semantic writer missing, a vacuous or circular
+statement, a `deploy_*` lemma that differs from `deploy`, or a changed existing
+declaration. Confirmed findings, all fixed in this document:
+
+- the StaticJournal row claimed a Word guard; `History.balance` takes an
+  unbounded Nat (row corrected, recorded as a limitation);
+- balance-keeping account updates (nonce bump, Yul view storage writes) were
+  not mentioned (scope sentence added; generic theorem cited);
+- the list of non-semantic `withBalance` hits and the Bridge scope were
+  incomplete (completed);
+- `BALANCE` during a constructor reads the ledger branch (gap recorded).
+
+Not acted on: `sourceBalanceLocal_wide` is conditional (a negative control by
+design; the guards make such a state unreachable from `St.init`); the
+generated `docs/module-map/source-definitions.md` places the row at the end of
+the preceding table, as `fragments.sh` generates it.
+
 ## Gates
 
 See the CLOUD-RESULT block in the final marker commit for the recorded runs.
@@ -91,5 +124,9 @@ See the CLOUD-RESULT block in the final marker commit for the recorded runs.
   and would compose the per-writer laws above.
 - `BALANCE` exactness is proved for a local-address operand (the profile of
   `sourceBalanceLocal_run`); an operand with effects needs its own run lemma.
+- `BALANCE` of an account under construction (code not yet installed) reads
+  the Word ledger, not the account's Nat balance; see section 2–3.
+- The unbounded `History.balance` step of `Lowering/Readonly/StaticJournal.lean`
+  is a proof-side relation and is not shown to preserve the invariant.
 - `deploy`'s writes are covered by lemmas stated on the exact operations it
   applies, not by a run lemma of `deploy` itself.
