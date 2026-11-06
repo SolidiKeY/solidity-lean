@@ -330,7 +330,7 @@ merge, cut-over, freeze announcement or live-producer ownership transfer occurre
 
 The final global documentation-path check exits 1 on the unchanged baseline
 `docs/feature-work/after-roadmap-va1.md` reference to
-`Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean`. The citing document's
+Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean. The citing document's
 bytes match the pinned base; this lane's document has no finding. The failure
 is recorded in `static-gates/doc-paths-baseline.json` and routed to the root
 gate without changing that outside-scope document or adding a core dependency.
