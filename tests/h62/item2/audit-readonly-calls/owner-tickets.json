@@ -48,34 +48,6 @@
       "required_deliverable": "A separate theorem proving owner compiler success on supported stated inputs, excluding reject-all and always-revert behavior; no frozen-interface amendment."
     },
     {
-      "id": "CALLBACK-HISTORY-INTENT",
-      "type": "JOINT_PREMISES_IMPOSSIBLE_PENDING_INTENT",
-      "owner": "solidity-v12-v17-20261031/v13-abi-world",
-      "dependencies": [
-        "solidity-compiler10-20261028/readonly-external"
-      ],
-      "declarations": [
-        "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks",
-        "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
-        "Solidity.Backend.WorldCalls.UnknownRevertControls.children"
-      ],
-      "status": "waiting RO owner decision",
-      "evidence": "tests/h62/item2/audit-readonly-calls/HiddenClients.lean; continuation-semantic/evidence/hidden-clients.log",
-      "question_id": "Q-CALLBACK-INTENT",
-      "question_resolved": false,
-      "question": "The three fixed-strategy CallbackHistories declarations have checked callback-choice impossibility proofs. Are they intentional no-callback separation controls under H69, or ordinary producer obligations requiring reachable versions?",
-      "options": [
-        "Intentional no-callback separation controls: accept checked joint impossibility under H69, never as positive witnesses.",
-        "Ordinary producer obligations: retain pending status until owners publish reachable versions or fixtures."
-      ],
-      "delivery_status": "Coordinator confirms routed to RO owner; owner decision pending. V13 declaration ownership remains unchanged.",
-      "wait": {
-        "lane": "solidity-compiler10-20261028/readonly-external",
-        "item": "Q-CALLBACK-INTENT"
-      },
-      "decision_owner": "solidity-compiler10-20261028/readonly-external"
-    },
-    {
       "id": "SEMANTIC-CHECKING-PERFORMANCE-STOP",
       "type": "PERFORMANCE_STOP",
       "owner": "coordinator/runtime",
@@ -109,5 +81,50 @@
     "solidity-compiler10-20261028/readonly-external",
     "solidity-v12-v17-20261031/v13-abi-world",
     "solidity-v12-v17-20261031/v15-evm-agreement"
+  ],
+  "resolved_items": [
+    {
+      "id": "CALLBACK-HISTORY-INTENT",
+      "type": "JOINT_PREMISES_IMPOSSIBLE_PENDING_INTENT",
+      "owner": "solidity-v12-v17-20261031/v13-abi-world",
+      "dependencies": [
+        "solidity-compiler10-20261028/readonly-external"
+      ],
+      "declarations": [
+        "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks",
+        "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
+        "Solidity.Backend.WorldCalls.UnknownRevertControls.children"
+      ],
+      "status": "resolved: intentional no-callback specialization controls",
+      "evidence": "tests/h62/item2/audit-readonly-calls/HiddenClients.lean; continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "question_resolved": true,
+      "question": "The three fixed-strategy CallbackHistories declarations have checked callback-choice impossibility proofs. Are they intentional no-callback separation controls under H69, or ordinary producer obligations requiring reachable versions?",
+      "options": [
+        "Intentional no-callback separation controls: accept checked joint impossibility under H69, never as positive witnesses.",
+        "Ordinary producer obligations: retain pending status until owners publish reachable versions or fixtures."
+      ],
+      "delivery_status": "Coordinator relayed RO owner decision; no worker-to-Claude message.",
+      "decision_owner": "solidity-compiler10-20261028/readonly-external",
+      "resolution": "RO reports these are intentional no-callback specialization controls; accept checked callback-choice impossibility as the audit result under H69; never count them as positive callback witnesses. Statements remain unchanged.",
+      "resolved_wait": {
+        "lane": "solidity-compiler10-20261028/readonly-external",
+        "item": "Q-CALLBACK-INTENT"
+      }
+    }
+  ],
+  "current_waits": [
+    {
+      "lane": "claudecloud/move6-20261106/ro-v2",
+      "item": "Versioned reachable dispatch split, explicit migration and consumer re-proofs"
+    },
+    {
+      "lane": "claudecloud/move6-20261106/v13-abi",
+      "item": "Separate actual compiler-success theorem with V15/P10 fixed outcomes"
+    },
+    {
+      "lane": "coordinator/runtime",
+      "item": "Mandatory performance hold: +80.25496653564336%; retain failed evidence; no unchanged rerun"
+    }
   ]
 }

@@ -296,35 +296,38 @@
     {
       "source_name": "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks",
       "signature_sha256": "ad533aeb84204dbd9a83c845c87897dd4ab518495ac70580bc29a1a323f46f8f",
-      "status": "pending-owner-intent",
+      "status": "checked-joint-impossibility",
       "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.closed_children_joint_impossible",
       "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
       "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
       "evidence": "continuation-semantic/evidence/hidden-clients.log",
       "question_id": "Q-CALLBACK-INTENT",
-      "witness_rule": "Pending owner intent: do not silently reclassify ordinary producer obligation as H69 intentional negative"
+      "witness_rule": "H69: RO confirms intentional no-callback specialization; checked callback-choice impossibility is the audit result, never a positive callback witness",
+      "owner_resolution": "Q-CALLBACK-INTENT resolved by coordinator relaying RO decision"
     },
     {
       "source_name": "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
       "signature_sha256": "348dfdc87a989adccee3e85cab8a764781a59034fbf98ec210688f45bdcc3740",
-      "status": "pending-owner-intent",
+      "status": "checked-joint-impossibility",
       "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.unknown_children_joint_impossible",
       "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
       "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
       "evidence": "continuation-semantic/evidence/hidden-clients.log",
       "question_id": "Q-CALLBACK-INTENT",
-      "witness_rule": "Pending owner intent: do not silently reclassify ordinary producer obligation as H69 intentional negative"
+      "witness_rule": "H69: RO confirms intentional no-callback specialization; checked callback-choice impossibility is the audit result, never a positive callback witness",
+      "owner_resolution": "Q-CALLBACK-INTENT resolved by coordinator relaying RO decision"
     },
     {
       "source_name": "Solidity.Backend.WorldCalls.UnknownRevertControls.children",
       "signature_sha256": "9eea72ce66994da99e2c4127baba726f4b88ea7d04b9c26868f713da3605f7d2",
-      "status": "pending-owner-intent",
+      "status": "checked-joint-impossibility",
       "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.revert_children_joint_impossible",
       "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
       "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
       "evidence": "continuation-semantic/evidence/hidden-clients.log",
       "question_id": "Q-CALLBACK-INTENT",
-      "witness_rule": "Pending owner intent: do not silently reclassify ordinary producer obligation as H69 intentional negative"
+      "witness_rule": "H69: RO confirms intentional no-callback specialization; checked callback-choice impossibility is the audit result, never a positive callback witness",
+      "owner_resolution": "Q-CALLBACK-INTENT resolved by coordinator relaying RO decision"
     }
   ]
 }
