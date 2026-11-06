@@ -221,3 +221,30 @@ Implementation stopped for accepted successor `solidity-inline-assembly5-2026103
 Handoff files are in `scripts/h62/item4/generic-yul-views/handoff/`: original assignment transcription, scope manifest, full work/backfill queue and retirement limitations. The transcription is incomplete in its long owner-key paragraph; the exact original frozen rendered prompt has NOT been reproduced or hash-verified. Full ownership snapshot is exported off git. Successor needs exact original-thread export before new work.
 
 The exposed goal API cannot set PAUSED: its only outcomes are complete/blocked. No substitute completion or new goal was requested. No push was performed because H71 permission is not present in available inputs. Final cumulative patch, bundle, head and SHA256 manifest are recorded in the export handoff.
+
+## Explicit coordinator resume after integration
+
+The later coordinator instruction explicitly resumed this lane and authorized
+merging origin/master. The clean original branch fast-forwarded from
+67e0398f217da988605a7323efeabbfd44b1a84b to
+d96f2406d352de7e0b72ba6ac4ab29dc457582c6, which contains the reported
+20e492ee99a3fa8679aa526de0b6e731d85e4134 integration. The earlier stopped
+package is preserved as historical evidence; its pause text no longer describes
+the current authorized work. No push or new goal was requested.
+
+Independent backfill repaired the correspondence checker defect recorded by
+both retirement reviewers: comparison now retains literal and quoted-identifier
+contents and normalizes whitespace only outside them. Six external tests pass,
+including changed string values, internal string whitespace and quoted type
+identifiers. The current two selected type comparisons and all 3026 control
+theorem dispositions reproduce. This still supports only selected unquoted
+theorem names and is not a Lean parser or a semantic proof. Original-preservation
+claims continue to require the separate base-blob acceptance evidence.
+
+The integrated tree has no changes to the four previously failing dependency
+files relative to the stopped head; those known failures were not rerun.
+Roadmap axiom drift, Storage dependent elimination and Language migration remain
+waits. Independent queue work remains available; status is partial, not blocked.
+No original Lean source, axiom set, proof budget, interface or observation changed
+in this resumed checkpoint. Kernel fixture/refusal validation and matched timing
+remain open.
