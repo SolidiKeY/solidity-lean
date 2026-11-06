@@ -1235,3 +1235,20 @@ coverage wording (only blocks, `if` branches and loop bodies; `revertData` not t
 halting at first (now fixed: `revert` with data halts, `alwaysHalts_runC` covers it); `Val.indep` also rejects storage/memory reads in `e₂`); `o02_pipeline_preserves`
 now includes `Prog.dce` and `Prog.dse`. Added controls `guarded_kept` (non-literal
 `require` not cut), `branch_cut` (cut inside an `if` branch), `different_targets_kept`.
+
+## Checkpoint gate at e272602b — 2026-11-06
+
+`gate.sh checkpoint`, warm-cache resumption across three 2 h task windows (the first was
+lost to a container restart; Lake kept the built modules). Final run (02:48–03:49 UTC):
+
+- `build-touched` and `library` (`lake build Solidity`): PASS, `✔ [5414/5415] Built
+  Solidity`, no build errors in any of the three logs.
+- `check-trust.sh`, `check-orphans.mjs`, `check-layers.mjs`, `register.sh --check`,
+  `fragments.sh --check`: PASS.
+- `check-doc-paths.sh`: FAIL, not this lane. The only missing reference is in
+  `docs/feature-work/after-roadmap-va1.md` (cites a Mathlib test under `Bridge/.lake`),
+  a file this lane does not own or change; the other lines are `ambiguous` warnings.
+- `check-axiom-pins.mjs`: FAIL on its "unrecorded changes" rule only: 0 errors,
+  3735 unrecorded new pins from other lanes' merged modules, none from
+  `Solidity/Optimizer/**` (no optimizer theorem appears in the output). Recording pins
+  edits the shared trust pins, which this lane may not edit; left to the coordinator.
