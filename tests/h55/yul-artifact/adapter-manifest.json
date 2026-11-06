@@ -10,6 +10,14 @@
       "boundary": "Context-indexed by arbitrary literal selector and real original scoped fallback artifact; exact Artifact.Image recovers the original case producer. Source is actual switch; code prepends selector push to the exact original dispatch. No family migration or inverse on arbitrary common artifacts claimed."
     },
     {
+      "producer_file": "Solidity/Yul/Compilation/ConditionalCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ConditionalAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55Conditional",
+      "boundary": "Exact original if statement, code, separate guard/arm fuels and selection evidence; inverse only on the exact image. No production family migration claimed."
+    },
+    {
       "producer_file": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
       "declaration_kind": "structure",
       "declaration_name": "Artifact",
