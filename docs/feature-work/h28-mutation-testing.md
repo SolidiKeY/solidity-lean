@@ -741,22 +741,24 @@ corrected above:
 
 ## Gates
 
-Run on head 2ae5b586, whose Lean and production files are identical to
-those of the run head `20d7b77c`. The lane changes only
-`tests/h28-sol/mutation-testing/**` and `docs/**`.
+Run at head `b32ea932a`. Its `Solidity/` tree is master's (merged at
+`516ca265e`); the lane changes only `tests/h28-sol/mutation-testing/**`
+and its docs. The SolKey checker is no longer part of `run-lean.sh` (master
+`a897dac76`, H89).
 
 | Gate | Result | Decisive output |
 |---|---|---|
-| `./run-lean.sh` (layers, register, fragments, `lake build` of the default targets and `SolkeyTestSuite`) | build pass | `Build completed successfully (5824 jobs).`, 0 error lines |
-| `./run-lean.sh` final step `check-solkey.sh` against the default `../solkey` checkout | fail, environmental | the checkout is at `b8d5f88` ("added polymorphic save"), not the pin `473da89` in `tests/migration/solkey.pin.json`: `parsed 392 taclets … table covers 131`, with READ DRIFT / UNKNOWN SORT lines for the new polymorphic `save` |
-| `solkeycheck --key` on `solidityProgramRules.key` at the pinned `473da89` | pass | `OK — annotations match`, `parsed 377 taclets, 131 read-bearing, table covers 131` |
+| `./run-lean.sh` (layers, register, fragments, `lake build` of the default targets and `SolkeyTestSuite`) | pass | `Build completed successfully (6461 jobs).`, 0 error lines. The cold first pass (134 min, no Lake cache: the `lake-cache` release could not be fetched, HTTP 404) lost one module, `Solidity.Source.Horizon`, to an out-of-memory kill (exit 137) while three Lean bridges ran beside it. The rerun with no bridge built it, in 5 min. |
 | `bash scripts/coord-tools/register.sh --check` | pass | exit 0 |
 | `bash scripts/coord-tools/fragments.sh --check` | pass | exit 0 |
-| `node scripts/check-orphans.mjs` | pass | `5808 reachable, 0 orphaned, 0 not allowed` |
-| doc-path check | fail, existing only | `1 reference(s) name a file that does not exist` (in `after-roadmap-va1.md`); no finding in this lane's files |
-| `python3 -m unittest test_mcprun` | pass | 29 tests OK |
-| legacy unit tests | 65 of 71 pass | the 6 failures need the Codex VM `/workspace` data |
-| Lean MCP diagnostics on the new oracle files | pass | 0 errors (recorded per check in `runs/full-20d7b77c`) |
+| `node scripts/check-orphans.mjs` | pass | `6452 reachable, 0 orphaned, 0 not allowed` |
+| `scripts/check-doc-paths.sh` | fail, master's only | `5 reference(s) name a file that does not exist`, all in h62 files; none in this lane |
+| `python3 -m unittest test_mcprun test_verify_bulk_local` | pass | 34 + 3 tests OK |
+| legacy unit tests | 126 of 133 pass | the 7 failures (`test_callback_cache` 3, `test_candidate_inventory` 1, `test_cleanup` 3) need the Codex VM's pinned runtime or `/workspace` data |
+| `tools/accept.py manifests/h28-final.json runs/final-8fad7b13` | pass | `scope_complete: true`, no failure |
+| `tools/seal.py runs/final-8fad7b13 --verify` | pass | `verified: true`, 190 files |
+| `tools/verify_bulk.py` | local-only (exit 3) | committed pins verified; the H44 `/workspace` index, archive and bundle are not on this VM |
+| Lean MCP diagnostics on every new oracle | pass | 0 errors on the cases' own tables (recorded per check in `runs/final-8fad7b13`) |
 
 ## Limits
 
