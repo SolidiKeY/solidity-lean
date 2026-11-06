@@ -1,4 +1,6 @@
-# Continuations after mapped conditional assignments and bare return
+# Continuations after context-related conditional assignments and bare return
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 This one-shape component extends the existing [mapped conditional-return producer](roadmap-g19-conditional-return.md). It imports V07 context relations read-only and defines no parallel lowering relation. `ConditionalReturnContinuation.correct` retains alignment, Boolean reflection and six exact slot-map propositions. It proves actual Source return execution, actual intrinsic typed execution, the entire weakened context relation, a true return capture and unchanged target globals.
 
