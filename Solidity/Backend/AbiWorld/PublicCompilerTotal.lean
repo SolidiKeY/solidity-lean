@@ -12,20 +12,23 @@ with a data-free machine `revert`; payment refusal; divergence with a fault).
 The domain is stated here as inductive predicates over the intrinsic syntax.
 They mention no acceptance function, no fragment (`Frag`) and no compile
 result; the word-fit side conditions read the backend's storage layout
-(`Evm.offset`, `W`):
-alias-free scalar programs over locals and storage locations, with branches,
-blocks, loops and single-value internal calls. Each side condition records an
-actual refusal in the compiler's code (`simpleIn`, `binInFrag`, `locIn`), not a
-success filter:
+(`Evm.offset`, `W`). It is the core branch's fragment without the parts that
+depend on alias bookkeeping (H87 widened it by signed `&`/`|`/`^`, plain
+storage aliases and storage compound assignment): scalar programs over
+locals, storage locations and storage aliases bound to index-free paths, with
+branches, blocks, loops and single-value internal calls. The remaining side
+conditions are refusals in the compiler's code (`simpleIn`, `locIn`):
 
 * `env` excludes `address(this).balance` (`simpleIn`);
-* `binop` excludes `&`, `|`, `^` at `int` (typed, but not in `binInFrag`);
-* mapping keys are `uint` and a fixed array or struct offset fits a word.
+* mapping keys are `uint` and a fixed array or struct offset fits a word;
+* an alias is declared with an initializer and bound only to index-free
+  paths (an alias through an array index is forgotten at a `pop`, and an unset
+  one is not readable).
 
 `compile_core` proves every program of the domain is compiled, from every
-fragment and base, by the core branch; `compile_agrees` composes it with the
-existing `Compilation.correct`. No statement, premise or observation of the
-compiler is changed. -/
+fragment whose locals are all readable (`Readable`, e.g. `Frag.init`) and
+every base, by the core branch; `compile_agrees` composes it with the
+existing `Compilation.correct`. -/
 namespace Solidity.Backend.AbiWorld.PublicCompilerTotal
 open Solidity.Evm
 
@@ -34,11 +37,12 @@ variable {C : Contract}
 /-! ## The domain -/
 
 mutual
-/-- An alias-free storage path. -/
+/-- A storage path: a storage alias, or a location. -/
 inductive PathOk {Γ : Ctx} : {T : Ty} → Solidity.SPath C Γ T → Prop
+  | alias {R : RefTy} (i : Idx Γ (.alias R)) : PathOk (.alias i)
   | loc {T : Ty} {l : Solidity.Loc C Γ T} : LocOk l → PathOk (.loc l)
 
-/-- An alias-free storage location. -/
+/-- A storage location. -/
 inductive LocOk {Γ : Ctx} : {T : Ty} → Solidity.Loc C Γ T → Prop
   | root {T : Ty} (r : Name) (h : C.rootType r = some T) : LocOk (.root r h)
   | field {s : Name} {T : Ty} {b : Solidity.SPath C Γ (.ref (.struct s))} (f : Name)
@@ -60,9 +64,7 @@ inductive ValOk {Γ : Ctx} : {p : PrimTy} → Solidity.Val C Γ p → Prop
       ValOk (.simple (.env k hp))
   | read {p : PrimTy} {l : Solidity.Loc C Γ (.prim p)} : LocOk l → ValOk (.read l)
   | binop {p q : PrimTy} (op : BinOp) (h : op.accepts p = true) (hq : op.ret p = q)
-      {a b : Solidity.Val C Γ p}
-      (signedBitwise : ¬ (p = .int ∧ (op = .band ∨ op = .bor ∨ op = .bxor))) :
-      ValOk a → ValOk b → ValOk (.binop op h hq a b)
+      {a b : Solidity.Val C Γ p} : ValOk a → ValOk b → ValOk (.binop op h hq a b)
   | unop {p q : PrimTy} (op : UnOp) (h : op.accepts p = true) (hq : op.ret p = q)
       {a : Solidity.Val C Γ p} : ValOk a → ValOk (.unop op h hq a)
   | ternary {p : PrimTy} {c : Solidity.Val C Γ .bool} {a b : Solidity.Val C Γ p} :
@@ -70,6 +72,27 @@ inductive ValOk {Γ : Ctx} : {p : PrimTy} → Solidity.Val C Γ p → Prop
   | len {p : PrimTy} {E : Ty} {b : Solidity.SPath C Γ (.array E)} (hp : p = .uint) :
       PathOk b → ValOk (.len b hp)
 end
+
+/-- A path that indexes no array: what an alias of the domain is bound to. -/
+inductive FreePath {Γ : Ctx} : {T : Ty} → Solidity.SPath C Γ T → Prop
+  | alias {R : RefTy} (i : Idx Γ (.alias R)) : FreePath (.alias i)
+  | root {T : Ty} (r : Name) (h : C.rootType r = some T) : FreePath (.loc (.root r h))
+  | field {s : Name} {T : Ty} {b : Solidity.SPath C Γ (.ref (.struct s))} (f : Name)
+      (h : C.fieldType s f = some T) (fits : offset s f < W) :
+      FreePath b → FreePath (.loc (.field b f h))
+  | map {V : Ty} {b : Solidity.SPath C Γ (.ref (.mapping .uint V))}
+      {i : Solidity.Val C Γ .uint} : FreePath b → ValOk i → FreePath (.loc (.index .map b i))
+
+/-- A compound-assignment target: a local or a storage location. -/
+inductive OpLocOk {Γ : Ctx} : {p : PrimTy} → Solidity.OpLoc C Γ p → Prop
+  | local {p : PrimTy} (i : Idx Γ (.val p)) : OpLocOk (.local i)
+  | root {p : PrimTy} (r : Name) (h : C.rootType r = some (.prim p)) : OpLocOk (.root r h)
+  | field {s : Name} {p : PrimTy} {b : Solidity.SPath C Γ (.ref (.struct s))} (f : Name)
+      (h : C.fieldType s f = some (.prim p)) (fits : offset s f < W) :
+      PathOk b → OpLocOk (.field b f h)
+  | index {R : RefTy} {k p : PrimTy} {it : IndexTy R k (.prim p)}
+      {b : Solidity.SPath C Γ (.ref R)} {i : Solidity.Simple C Γ k} :
+      LocOk (.index it b (.simple i)) → OpLocOk (.index it b i)
 
 /-- Value arguments of the domain. -/
 inductive ArgsOk {Γ : Ctx} : {ps : Ctx} → Solidity.Args C Γ ps → Prop
@@ -87,11 +110,15 @@ inductive StmtOk : {Γ Γ' : Ctx} → Solidity.Stmt C Γ Γ' → Prop
   | declNone {Γ : Ctx} (p : PrimTy) (x : Var) : StmtOk (Γ := Γ) (.declLocal p x none)
   | declSome {Γ : Ctx} (p : PrimTy) (x : Var) {v : Solidity.Val C Γ p} :
       ValOk v → StmtOk (.declLocal p x (some v))
+  | declStorage {Γ : Ctx} (R : RefTy) (x : Var) {q : Solidity.SPath C Γ (.ref R)} :
+      FreePath q → StmtOk (.declStorage R x (some (.path q)))
+  | rebind {Γ : Ctx} {R : RefTy} (i : Idx Γ (.alias R)) {q : Solidity.SPath C Γ (.ref R)} :
+      FreePath q → StmtOk (.rebind i (.path q))
   | opAssign {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
-      (hp : p.isNumeric = true) (i : Idx Γ (.val p)) {v : Solidity.Val C Γ p} :
-      ValOk v → StmtOk (.opAssign op hop hp (.local i) v)
-  | incDec {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (i : Idx Γ (.val p)) :
-      StmtOk (.incDec op hp (.local i))
+      (hp : p.isNumeric = true) {l : Solidity.OpLoc C Γ p} {v : Solidity.Val C Γ p} :
+      OpLocOk l → ValOk v → StmtOk (.opAssign op hop hp l v)
+  | incDec {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      {l : Solidity.OpLoc C Γ p} : OpLocOk l → StmtOk (.incDec op hp l)
   | require {Γ : Ctx} {c : Solidity.Val C Γ .bool} : ValOk c → StmtOk (.require c)
   | assert {Γ : Ctx} {c : Solidity.Val C Γ .bool} : ValOk c → StmtOk (.assert c)
   | revert {Γ : Ctx} : StmtOk (Γ := Γ) .revert
@@ -114,14 +141,40 @@ inductive ProgOk : {Γ Γ' : Ctx} → Solidity.Prog C Γ Γ' → Prop
       StmtOk s → ProgOk P → ProgOk (.cons s P)
 end
 
+/-! ## Readable fragments -/
 
-/-! ## Values are accepted from every fragment -/
+/-- Every local of `Γ` is known readable: the fragment of a fresh frame. -/
+def Readable {Γ : Ctx} (F : Frag Γ) : Prop :=
+  Γ.length ≤ F.fl.length ∧ ∀ f ∈ F.fl, f = .ok
 
-/-- The typed binary operators the domain admits are the compiled ones. -/
-theorem binInFrag_of {op : BinOp} {p : PrimTy} (h : op.accepts p = true)
-    (signedBitwise : ¬ (p = .int ∧ (op = .band ∨ op = .bor ∨ op = .bxor))) :
+theorem Readable.init (Γ : Ctx) : Readable (Frag.init Γ) := by
+  refine ⟨by simp only [Frag.init, List.length_map, Nat.le_refl], fun f hf => ?_⟩
+  obtain ⟨_, _, rfl⟩ := List.mem_map.mp hf
+  rfl
+
+theorem Readable.get {Γ : Ctx} {F : Frag Γ} (hF : Readable F) {t : LTy} (i : Idx Γ t) :
+    F.get i = .ok := by
+  have hi : i.toNat < F.fl.length := Nat.lt_of_lt_of_le (Idx.toNat_lt i) hF.1
+  simp only [Frag.get, List.getD_eq_getElem?_getD, List.getElem?_eq_getElem hi,
+    Option.getD_some]
+  exact hF.2 _ (List.getElem_mem hi)
+
+theorem Readable.set {Γ : Ctx} {F : Frag Γ} (hF : Readable F) {t : LTy} (i : Idx Γ t) :
+    F.set i .ok = F := by
+  cases F with
+  | mk fl =>
+    simp only [Frag.set, Frag.mk.injEq]
+    have hi : i.toNat < fl.length := Nat.lt_of_lt_of_le (Idx.toNat_lt i) hF.1
+    have same : fl[i.toNat] = Fl.ok := hF.2 _ (List.getElem_mem hi)
+    rw [← same]
+    exact List.set_getElem_self hi
+
+/-! ## Values are accepted from every readable fragment -/
+
+/-- Every typed binary operator is compiled. -/
+theorem binInFrag_of {op : BinOp} {p : PrimTy} (h : op.accepts p = true) :
     binInFrag op p = true := by
-  revert h signedBitwise
+  revert h
   cases op <;> cases p <;> decide
 
 /-- Every typed unary operator is compiled. -/
@@ -131,42 +184,67 @@ theorem unInFrag_of {op : UnOp} {p : PrimTy} (h : op.accepts p = true) :
   cases op <;> cases p <;> decide
 
 mutual
-theorem PathOk.spathIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → {q : Solidity.SPath C Γ T} →
-    PathOk q → spathIn F false q = true
-  | _, _, .loc h => by simp only [Evm.spathIn, h.locIn F]
+theorem PathOk.spathIn {Γ : Ctx} {F : Frag Γ} (hF : Readable F) : {T : Ty} →
+    {q : Solidity.SPath C Γ T} → PathOk q → spathIn F false q = true
+  | _, _, .alias i => by simp only [Evm.spathIn, hF.get i, beq_self_eq_true, Bool.true_or]
+  | _, _, .loc h => by simp only [Evm.spathIn, h.locIn hF]
 
-theorem LocOk.locIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → {l : Solidity.Loc C Γ T} →
-    LocOk l → locIn F false l = true
+theorem LocOk.locIn {Γ : Ctx} {F : Frag Γ} (hF : Readable F) : {T : Ty} →
+    {l : Solidity.Loc C Γ T} → LocOk l → locIn F false l = true
   | _, _, .root _ _ => by simp only [Evm.locIn]
   | _, _, .field _ _ fits hb => by
-    simp only [Evm.locIn, decide_eq_true fits, hb.spathIn F, Bool.and_self]
+    simp only [Evm.locIn, decide_eq_true fits, hb.spathIn hF, Bool.and_self]
   | _, _, .map hb hi => by
-    simp only [Evm.locIn, hb.spathIn F, hi.valIn F, Bool.and_self, beq_self_eq_true]
+    simp only [Evm.locIn, hb.spathIn hF, hi.valIn hF, Bool.and_self, beq_self_eq_true]
   | _, _, .dyn hb hi => by
-    simp only [Evm.locIn, hb.spathIn F, hi.valIn F, Bool.and_self, Bool.not_false]
+    simp only [Evm.locIn, hb.spathIn hF, hi.valIn hF, Bool.and_self, Bool.not_false]
   | _, _, .fixed fits hb hi => by
-    simp only [Evm.locIn, decide_eq_true fits, hb.spathIn F, hi.valIn F, Bool.and_self,
+    simp only [Evm.locIn, decide_eq_true fits, hb.spathIn hF, hi.valIn hF, Bool.and_self,
       Bool.not_false]
 
-theorem ValOk.valIn {Γ : Ctx} (F : Frag Γ) : {p : PrimTy} → {v : Solidity.Val C Γ p} →
-    ValOk v → valIn F v = true
+theorem ValOk.valIn {Γ : Ctx} {F : Frag Γ} (hF : Readable F) : {p : PrimTy} →
+    {v : Solidity.Val C Γ p} → ValOk v → valIn F v = true
   | _, _, .lit _ _ => by simp only [Evm.valIn, simpleIn]
   | _, _, .bool _ => by simp only [Evm.valIn, simpleIn]
   | _, _, .local _ => by simp only [Evm.valIn, simpleIn]
-  | _, _, .env _ _ hk => by simp only [Evm.valIn, simpleIn, bne_iff_ne, ne_eq, hk, not_false_eq_true]
-  | _, _, .read hl => by simp only [Evm.valIn, hl.locIn F]
-  | _, _, .binop _ h _ sb ha hb => by
-    simp only [Evm.valIn, binInFrag_of h sb, ha.valIn F, hb.valIn F, Bool.and_self]
-  | _, _, .unop _ h _ ha => by simp only [Evm.valIn, unInFrag_of h, ha.valIn F, Bool.and_self]
+  | _, _, .env _ _ hk => by
+    simp only [Evm.valIn, simpleIn, bne_iff_ne, ne_eq, hk, not_false_eq_true]
+  | _, _, .read hl => by simp only [Evm.valIn, hl.locIn hF]
+  | _, _, .binop _ h _ ha hb => by
+    simp only [Evm.valIn, binInFrag_of h, ha.valIn hF, hb.valIn hF, Bool.and_self]
+  | _, _, .unop _ h _ ha => by simp only [Evm.valIn, unInFrag_of h, ha.valIn hF, Bool.and_self]
   | _, _, .ternary hc ha hb => by
-    simp only [Evm.valIn, hc.valIn F, ha.valIn F, hb.valIn F, Bool.and_self]
-  | _, _, .len _ hb => by simp only [Evm.valIn, hb.spathIn F]
+    simp only [Evm.valIn, hc.valIn hF, ha.valIn hF, hb.valIn hF, Bool.and_self]
+  | _, _, .len _ hb => by simp only [Evm.valIn, hb.spathIn hF]
 end
 
-theorem ArgsOk.argsIn {Γ : Ctx} (F : Frag Γ) : {ps : Ctx} → {as : Solidity.Args C Γ ps} →
-    ArgsOk as → argsIn F as = true
+theorem FreePath.spathIn {Γ : Ctx} {F : Frag Γ} (hF : Readable F) : {T : Ty} →
+    {q : Solidity.SPath C Γ T} → FreePath q → spathIn F true q = true
+  | _, _, .alias i => by simp only [Evm.spathIn, hF.get i, beq_self_eq_true, Bool.true_or]
+  | _, _, .root _ _ => by simp only [Evm.spathIn, Evm.locIn]
+  | _, _, .field _ _ fits hb => by
+    simp only [Evm.spathIn, Evm.locIn, decide_eq_true fits, hb.spathIn hF, Bool.and_self]
+  | _, _, .map hb hi => by
+    simp only [Evm.spathIn, Evm.locIn, hb.spathIn hF, hi.valIn hF, Bool.and_self,
+      beq_self_eq_true]
+
+theorem FreePath.bindFl {Γ : Ctx} {F : Frag Γ} (hF : Readable F) {R : RefTy}
+    {q : Solidity.SPath C Γ (.ref R)} (hq : FreePath q) : bindFl F q = some .ok := by
+  simp only [Evm.bindFl, hq.spathIn hF, ite_true]
+
+theorem OpLocOk.opLocIn {Γ : Ctx} {F : Frag Γ} (hF : Readable F) {p : PrimTy}
+    {l : Solidity.OpLoc C Γ p} : OpLocOk l → opLocIn F l = true
+  | .local _ => by simp only [Evm.opLocIn]
+  | .root _ _ => by simp only [Evm.opLocIn, opLocToLoc, Evm.locIn]
+  | .field _ _ fits hb => by
+    simp only [Evm.opLocIn, opLocToLoc, Evm.locIn, decide_eq_true fits, hb.spathIn hF,
+      Bool.and_self]
+  | .index hl => by simp only [Evm.opLocIn, opLocToLoc, hl.locIn hF]
+
+theorem ArgsOk.argsIn {Γ : Ctx} {F : Frag Γ} (hF : Readable F) : {ps : Ctx} →
+    {as : Solidity.Args C Γ ps} → ArgsOk as → argsIn F as = true
   | _, _, .nil => by simp only [Evm.argsIn]
-  | _, _, .snoc _ _ ha he => by simp only [Evm.argsIn, ha.argsIn F, he.valIn F, Bool.and_self]
+  | _, _, .snoc _ _ ha he => by simp only [Evm.argsIn, ha.argsIn hF, he.valIn hF, Bool.and_self]
 
 /-! ## Programs push, pay and shrink nothing -/
 
@@ -174,7 +252,8 @@ mutual
 theorem StmtOk.quiet : {Γ Γ' : Ctx} → {s : Solidity.Stmt C Γ Γ'} → StmtOk s →
     Stmt.pushes s = 0 ∧ Stmt.pays s = false ∧ Stmt.shrinks s = false
   | _, _, _, .assign _ _ | _, _, _, .assignLocal _ _ | _, _, _, .declNone _ _
-  | _, _, _, .declSome _ _ _ | _, _, _, .opAssign _ _ _ _ _ | _, _, _, .incDec _ _ _
+  | _, _, _, .declSome _ _ _ | _, _, _, .declStorage _ _ _ | _, _, _, .rebind _ _
+  | _, _, _, .opAssign _ _ _ _ _ | _, _, _, .incDec _ _ _
   | _, _, _, .require _ | _, _, _, .assert _ | _, _, _, .revert =>
     by simp only [Stmt.pushes, Stmt.pays, Stmt.shrinks, and_self]
   | _, _, _, .ite _ ht he => by
@@ -199,12 +278,16 @@ end
 
 /-! ## Fragment growth -/
 
-/-- `G` is `F` with only readable value locals pushed. -/
+/-- `G` is `F` with only readable locals pushed. -/
 def Grows {Γ Γ' : Ctx} (F : Frag Γ) (G : Frag Γ') : Prop :=
   G.fl = List.replicate (Γ'.length - Γ.length) Fl.ok ++ F.fl ∧ Γ.length ≤ Γ'.length
 
 theorem Grows.refl {Γ : Ctx} (F : Frag Γ) : Grows F F :=
   ⟨by simp only [Nat.sub_self, List.replicate_zero, List.nil_append], Nat.le_refl _⟩
+
+theorem Grows.push {Γ : Ctx} (F : Frag Γ) (t : LTy) : Grows F (F.push t .ok) :=
+  ⟨by simp only [Frag.push, List.length_cons, Nat.add_sub_cancel_left, List.replicate_one,
+    List.singleton_append], Nat.le_succ _⟩
 
 theorem Grows.trans {Γ Γ₁ Γ₂ : Ctx} {F : Frag Γ} {G : Frag Γ₁} {H : Frag Γ₂}
     (fg : Grows F G) (gh : Grows G H) : Grows F H := by
@@ -228,6 +311,17 @@ theorem Grows.restrict {Γ Γ' : Ctx} {F : Frag Γ} {G : Frag Γ'} (fg : Grows F
     simp only [Frag.restrict, fg.1]
     rw [List.drop_left' (List.length_replicate ..)]
 
+theorem Grows.readable {Γ Γ' : Ctx} {F : Frag Γ} {G : Frag Γ'} (fg : Grows F G)
+    (hF : Readable F) : Readable G := by
+  refine ⟨?_, fun f hf => ?_⟩
+  · rw [fg.1, List.length_append, List.length_replicate]
+    have := hF.1
+    omega
+  · rw [fg.1, List.mem_append] at hf
+    rcases hf with hf | hf
+    · exact List.eq_of_mem_replicate hf
+    · exact hF.2 f hf
+
 theorem Frag.meet_self {Γ : Ctx} (F : Frag Γ) : F.meet F = F := by
   cases F with
   | mk fl =>
@@ -240,70 +334,74 @@ theorem Frag.meet_self {Γ : Ctx} (F : Frag Γ) : F.meet F = F := by
 
 mutual
 theorem StmtOk.frag : {Γ Γ' : Ctx} → {s : Solidity.Stmt C Γ Γ'} → StmtOk s →
-    ∀ F : Frag Γ, ∃ G, inFrag F s = some G ∧ Grows F G
-  | _, _, _, .assign hl hv, F => ⟨F, by
-      simp only [Evm.inFrag, assignIn, hl.locIn F, hv.valIn F, Bool.and_self, Frag.guard,
+    ∀ F : Frag Γ, Readable F → ∃ G, inFrag F s = some G ∧ Grows F G
+  | _, _, _, .assign hl hv, F, hF => ⟨F, by
+      simp only [Evm.inFrag, assignIn, hl.locIn hF, hv.valIn hF, Bool.and_self, Frag.guard,
         ite_true], Grows.refl F⟩
-  | _, _, _, .assignLocal _ hv, F => ⟨F, by
-      simp only [Evm.inFrag, hv.valIn F, Frag.guard, ite_true], Grows.refl F⟩
-  | _, _, _, .declNone p _, F => ⟨F.push (.val p) .ok, by
-      simp only [Evm.inFrag, Option.all, Frag.guard, ite_true],
-      ⟨by simp only [Frag.push, List.length_cons, Nat.add_sub_cancel_left, List.replicate_one,
-        List.singleton_append], Nat.le_succ _⟩⟩
-  | _, _, _, .declSome p _ hv, F => ⟨F.push (.val p) .ok, by
-      simp only [Evm.inFrag, Option.all, hv.valIn F, Frag.guard, ite_true],
-      ⟨by simp only [Frag.push, List.length_cons, Nat.add_sub_cancel_left, List.replicate_one,
-        List.singleton_append], Nat.le_succ _⟩⟩
-  | _, _, _, .opAssign _ _ _ _ hv, F => ⟨F, by
-      simp only [Evm.inFrag, opLocIn, hv.valIn F, Bool.and_self, Frag.guard, ite_true],
+  | _, _, _, .assignLocal _ hv, F, hF => ⟨F, by
+      simp only [Evm.inFrag, hv.valIn hF, Frag.guard, ite_true], Grows.refl F⟩
+  | _, _, _, .declNone p _, F, _ => ⟨F.push (.val p) .ok, by
+      simp only [Evm.inFrag, Option.all, Frag.guard, ite_true], Grows.push F _⟩
+  | _, _, _, .declSome p _ hv, F, hF => ⟨F.push (.val p) .ok, by
+      simp only [Evm.inFrag, Option.all, hv.valIn hF, Frag.guard, ite_true], Grows.push F _⟩
+  | _, _, _, .declStorage R _ hq, F, hF => ⟨F.push (.alias R) .ok, by
+      simp only [Evm.inFrag, declStorageIn, hq.bindFl hF, Option.map_some], Grows.push F _⟩
+  | _, _, _, .rebind i hq, F, hF => ⟨F, by
+      simp only [Evm.inFrag, hq.bindFl hF, Option.map_some, hF.set i], Grows.refl F⟩
+  | _, _, _, .opAssign _ _ _ hl hv, F, hF => ⟨F, by
+      simp only [Evm.inFrag, hl.opLocIn hF, hv.valIn hF, Bool.and_self, Frag.guard, ite_true],
       Grows.refl F⟩
-  | _, _, _, .incDec _ _ _, F => ⟨F, by
-      simp only [Evm.inFrag, opLocIn, Frag.guard, ite_true], Grows.refl F⟩
-  | _, _, _, .require hc, F => ⟨F, by
-      simp only [Evm.inFrag, hc.valIn F, Frag.guard, ite_true], Grows.refl F⟩
-  | _, _, _, .assert hc, F => ⟨F, by
-      simp only [Evm.inFrag, hc.valIn F, Frag.guard, ite_true], Grows.refl F⟩
-  | _, _, _, .revert, F => ⟨F, by simp only [Evm.inFrag], Grows.refl F⟩
-  | _, _, _, .ite hc ht he, F => by
-    obtain ⟨F₁, h₁, g₁⟩ := ht.frag F
-    obtain ⟨F₂, h₂, g₂⟩ := he.frag F
+  | _, _, _, .incDec _ _ hl, F, hF => ⟨F, by
+      simp only [Evm.inFrag, hl.opLocIn hF, Frag.guard, ite_true], Grows.refl F⟩
+  | _, _, _, .require hc, F, hF => ⟨F, by
+      simp only [Evm.inFrag, hc.valIn hF, Frag.guard, ite_true], Grows.refl F⟩
+  | _, _, _, .assert hc, F, hF => ⟨F, by
+      simp only [Evm.inFrag, hc.valIn hF, Frag.guard, ite_true], Grows.refl F⟩
+  | _, _, _, .revert, F, _ => ⟨F, by simp only [Evm.inFrag], Grows.refl F⟩
+  | _, _, _, .ite hc ht he, F, hF => by
+    obtain ⟨F₁, h₁, g₁⟩ := ht.frag F hF
+    obtain ⟨F₂, h₂, g₂⟩ := he.frag F hF
     refine ⟨F, ?_, Grows.refl F⟩
-    simp only [Evm.inFrag, hc.valIn F, ite_true, h₁, h₂, g₁.restrict, g₂.restrict,
+    simp only [Evm.inFrag, hc.valIn hF, ite_true, h₁, h₂, g₁.restrict, g₂.restrict,
       Frag.meet_self]
-  | _, _, _, .block hb, F => by
-    obtain ⟨G, h, g⟩ := hb.frag F
+  | _, _, _, .block hb, F, hF => by
+    obtain ⟨G, h, g⟩ := hb.frag F hF
     exact ⟨F, by simp only [Evm.inFrag, h, Option.map_some, g.restrict], Grows.refl F⟩
-  | _, _, _, .loop _ hc hb, F => by
-    obtain ⟨G, h, g⟩ := hb.frag F
+  | _, _, _, .loop _ hc hb, F, hF => by
+    obtain ⟨G, h, g⟩ := hb.frag F hF
     have q := hb.quiet
     refine ⟨F, ?_, Grows.refl F⟩
-    simp only [Evm.inFrag, hc.valIn F, q.1, q.2.1, q.2.2, h, g.restrict, beq_self_eq_true,
+    simp only [Evm.inFrag, hc.valIn hF, q.1, q.2.1, q.2.2, h, g.restrict, beq_self_eq_true,
       Bool.not_false, Bool.and_self, ite_true]
-  | _, _, _, .callNone _ ha hb, F => by
-    obtain ⟨G, h, _⟩ := hb.frag (Frag.init _)
+  | _, _, _, .callNone _ ha hb, F, hF => by
+    obtain ⟨G, h, _⟩ := hb.frag (Frag.init _) (Readable.init _)
     refine ⟨F, ?_, Grows.refl F⟩
-    simp only [Evm.inFrag, ha.argsIn F, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn, Bool.false_eq_true, ite_false]
-  | _, _, _, .callVal _ _ _ _ ha hb, F => by
-    obtain ⟨G, h, _⟩ := hb.frag (Frag.init _)
+    simp only [Evm.inFrag, ha.argsIn hF, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn,
+      Bool.false_eq_true, ite_false]
+  | _, _, _, .callVal _ _ _ _ ha hb, F, hF => by
+    obtain ⟨G, h, _⟩ := hb.frag (Frag.init _) (Readable.init _)
     refine ⟨F, ?_, Grows.refl F⟩
-    simp only [Evm.inFrag, ha.argsIn F, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn, Bool.false_eq_true, ite_false]
+    simp only [Evm.inFrag, ha.argsIn hF, ite_true, h, hb.quiet.2.2, Frag.after, CallRetIn,
+      Bool.false_eq_true, ite_false]
 
 theorem ProgOk.frag : {Γ Γ' : Ctx} → {P : Solidity.Prog C Γ Γ'} → ProgOk P →
-    ∀ F : Frag Γ, ∃ G, inFragP F P = some G ∧ Grows F G
-  | _, _, _, .nil, F => ⟨F, by simp only [Evm.inFragP], Grows.refl F⟩
-  | _, _, _, .cons hs hP, F => by
-    obtain ⟨F₁, h₁, g₁⟩ := hs.frag F
-    obtain ⟨G, h, g⟩ := hP.frag F₁
+    ∀ F : Frag Γ, Readable F → ∃ G, inFragP F P = some G ∧ Grows F G
+  | _, _, _, .nil, F, _ => ⟨F, by simp only [Evm.inFragP], Grows.refl F⟩
+  | _, _, _, .cons hs hP, F, hF => by
+    obtain ⟨F₁, h₁, g₁⟩ := hs.frag F hF
+    obtain ⟨G, h, g⟩ := hP.frag F₁ (g₁.readable hF)
     exact ⟨G, by simp only [Evm.inFragP, h₁, h], g₁.trans g⟩
 end
 
 /-! ## Totality and the fixed observation -/
 
 /-- **Compiler success.** Every program of the domain is compiled by the
-public entry, from every fragment and frame base, through its core branch. -/
-theorem compile_core {Γ Δ : Ctx} (b : Nat) (F : Frag Γ) {P : Solidity.Prog C Γ Δ}
-    (hP : ProgOk P) : ∃ G h, Compiler.compile b F P = some (.core G h) := by
-  obtain ⟨G, h, _⟩ := hP.frag F
+public entry, from every readable fragment and frame base, through its core
+branch. -/
+theorem compile_core {Γ Δ : Ctx} (b : Nat) {F : Frag Γ} (hF : Readable F)
+    {P : Solidity.Prog C Γ Δ} (hP : ProgOk P) :
+    ∃ G h, Compiler.compile b F P = some (.core G h) := by
+  obtain ⟨G, h, _⟩ := hP.frag F hF
   refine ⟨G, h, ?_⟩
   unfold Compiler.compile
   split
@@ -313,19 +411,24 @@ theorem compile_core {Γ Δ : Ctx} (b : Nat) (F : Frag Γ) {P : Solidity.Prog C 
     rfl
   · next h' => exact absurd (h'.symm.trans h) (by simp only [reduceCtorEq, not_false_eq_true])
 
-theorem compile_isSome {Γ Δ : Ctx} (b : Nat) (F : Frag Γ) {P : Solidity.Prog C Γ Δ}
-    (hP : ProgOk P) : (Compiler.compile b F P).isSome = true := by
-  obtain ⟨G, h, eq⟩ := compile_core b F hP
+theorem compile_isSome {Γ Δ : Ctx} (b : Nat) {F : Frag Γ} (hF : Readable F)
+    {P : Solidity.Prog C Γ Δ} (hP : ProgOk P) : (Compiler.compile b F P).isSome = true := by
+  obtain ⟨G, h, eq⟩ := compile_core b hF hP
   rw [eq]
   rfl
 
+/-- The entry form: a whole program or call body from its fresh frame. -/
+theorem compile_init {Γ Δ : Ctx} (b : Nat) {P : Solidity.Prog C Γ Δ} (hP : ProgOk P) :
+    (Compiler.compile b (Frag.init Γ) P).isSome = true :=
+  compile_isSome b (Readable.init Γ) hP
+
 /-- The compiled result satisfies the public compiler's fixed observation
 `Compilation.Agrees` from every simulated machine below the word horizon. -/
-theorem compile_agrees {Γ Δ : Ctx} (b : Nat) (F : Frag Γ) {P : Solidity.Prog C Γ Δ}
-    (hP : ProgOk P) : ∃ result, Compiler.compile b F P = some result ∧
+theorem compile_agrees {Γ Δ : Ctx} (b : Nat) {F : Frag Γ} (hF : Readable F)
+    {P : Solidity.Prog C Γ Δ} (hP : ProgOk P) : ∃ result, Compiler.compile b F P = some result ∧
       ∀ (L frame : Nat) (base : Nat → Fin W) (σ : State C Γ) (m : Machine),
         Sim C L b F σ m → L ≤ Lmax → result.Agrees L frame base σ m := by
-  obtain ⟨G, h, eq⟩ := compile_core b F hP
+  obtain ⟨G, h, eq⟩ := compile_core b hF hP
   refine ⟨.core G h, eq, fun L frame base σ m hs hL => ?_⟩
   apply Compiler.Compilation.correct
   show Sim C L b F σ m ∧ L + Prog.pushes P ≤ Lmax

@@ -360,6 +360,55 @@ private theorem utail_simT {op : BinOp} (hop : binInFrag op .uint = true) (hand 
     show (a : Int) ^ b % (W : Int) = _
     rw [Int.natCast_emod, Int.natCast_pow]
 
+/-- `wordOf` reads a word's signed reading back as the word. -/
+private theorem wordOf_sgn {a : Nat} (ha : a < W) : Semantics.wordOf (sgn a) = a := by
+  have hW := W_eq
+  have e : ((2 ^ 256 : Nat) : Int) = (W : Int) := rfl
+  unfold Semantics.wordOf sgn
+  rw [e]
+  split
+  · rw [Int.emod_eq_of_lt (Int.natCast_nonneg a) (by omega), Int.toNat_natCast]
+  · rw [show (a : Int) - W = a + (-1) * W by omega, Int.add_mul_emod_self_right,
+      Int.emod_eq_of_lt (Int.natCast_nonneg a) (by omega), Int.toNat_natCast]
+
+/-- `signedOf` is `sgn`. -/
+private theorem signedOf_eq_sgn (r : Nat) : Semantics.signedOf r = sgn r := rfl
+
+/-- A bitwise operator on two `int`s, read in two's complement as the source
+does (`uintBitwise`), is the signed reading of the operator on their words,
+when the operator keeps the nonnegative half. -/
+private theorem bitwise_sgn (f : Nat → Nat → Nat) (hH : ∀ x y, x < H → y < H → f x y < H)
+    {a b : Nat} (ha : a < W) (hb : b < W) :
+    Semantics.uintBitwise f (sgn a) (sgn b) = sgn (f a b) := by
+  have hW := W_eq
+  by_cases hA : a < H
+  · by_cases hB : b < H
+    · have sa : sgn a = (a : Int) := if_pos hA
+      have sb : sgn b = (b : Int) := if_pos hB
+      rw [sa, sb, Semantics.uintBitwise_natCast]
+      exact (if_pos (hH a b hA hB)).symm
+    · have sb : sgn b < 0 := by unfold sgn; rw [if_neg hB]; omega
+      have : ∀ x : Int, Semantics.uintBitwise f x (sgn b) =
+          Semantics.signedOf (f (Semantics.wordOf x) (Semantics.wordOf (sgn b))) := by
+        intro x
+        revert sb
+        cases x <;> cases sgn b <;> intro sb <;>
+          first | rfl | (exfalso; exact absurd sb (Int.not_lt.mpr (Int.ofNat_zero_le _)))
+      rw [this, wordOf_sgn ha, wordOf_sgn hb, signedOf_eq_sgn]
+  · have sa : sgn a < 0 := by unfold sgn; rw [if_neg hA]; omega
+    have : ∀ y : Int, Semantics.uintBitwise f (sgn a) y =
+        Semantics.signedOf (f (Semantics.wordOf (sgn a)) (Semantics.wordOf y)) := by
+      intro y
+      revert sa
+      cases sgn a <;> cases y <;> intro sa <;>
+        first | rfl | (exfalso; exact absurd sa (Int.not_lt.mpr (Int.ofNat_zero_le _)))
+    rw [this, wordOf_sgn ha, wordOf_sgn hb, signedOf_eq_sgn]
+
+/-- The signed word of a word's signed reading is the word. -/
+private theorem sword_sgn {r : Nat} (hr : r < W) : sword (sgn r) = ⟨r, hr⟩ := by
+  apply Fin.ext
+  simp only [sword, toWord_sgn hr, wmod, Nat.mod_eq_of_lt hr]
+
 /-- **The operators agree at `int`**: `utail_simT`'s signed half, on the
 integers two words read as (`sgn`). -/
 private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand : op ≠ .and)
@@ -375,6 +424,18 @@ private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand :
   case shr =>
     rw [sar_tail m m.stack ha hb]
     exact out_int_ok (sarShr_range (sgn b) (sgn_range ha)) rfl
+  case band =>
+    rw [bitwise_sgn _ (fun x y _ hy => Nat.and_lt_two_pow x hy) ha hb, Nat.and_comm]
+    exact out_int_ok (sgn_range (Nat.and_lt_two_pow b ha))
+      (by rw [sword_sgn (Nat.and_lt_two_pow b ha)]; rfl)
+  case bor =>
+    rw [bitwise_sgn _ (fun _ _ hx hy => Nat.or_lt_two_pow hx hy) ha hb, Nat.or_comm]
+    exact out_int_ok (sgn_range (Nat.or_lt_two_pow hb ha))
+      (by rw [sword_sgn (Nat.or_lt_two_pow hb ha)]; rfl)
+  case bxor =>
+    rw [bitwise_sgn _ (fun _ _ hx hy => Nat.xor_lt_two_pow hx hy) ha hb, Nat.xor_comm]
+    exact out_int_ok (sgn_range (Nat.xor_lt_two_pow hb ha))
+      (by rw [sword_sgn (Nat.xor_lt_two_pow hb ha)]; rfl)
   · rw [sadd_tail m m.stack ha hb]; exact out_int_if m
   · rw [ssub_tail m m.stack ha hb]; exact out_int_if m
   · rw [smul_tail m m.stack ha hb]; exact out_int_if m
