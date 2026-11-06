@@ -88,6 +88,10 @@ jobs:
           use-mathlib-cache: "false"
           test: "false"
           lint: "false"
+      # Fetched modules stay in Lake's cache; tools that run Lean themselves
+      # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
+      - name: Restore fetched artifacts
+        run: python3 scripts/ci/restore-lake-artifacts.py
       # Every declaration under `Solidity` may use only propext,
       # Classical.choice and Quot.sound; the `unsafe` twins behind
       # `@[implemented_by]` memo helpers, which reach `lcProof` through
@@ -124,8 +128,14 @@ jobs:
         run: |
           set -o pipefail
           lake build SolkeyTestSuite 2>&1 | tee testsuite-build.log
+      # Fetched modules stay in Lake's cache; tools that run Lean themselves
+      # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
+      - name: Restore fetched artifacts
+        run: python3 scripts/ci/restore-lake-artifacts.py
       - name: Check fresh replay timing
-        run: timeout 300s python3 scripts/check-memory-loop-timing.py --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json
+        run: |
+          timeout 300s python3 scripts/check-memory-loop-timing.py --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json \
+            || { for f in .lake/memory-loop-ci-replay/*.log; do echo "== $f"; tail -20 "$f"; done; exit 1; }
       - name: Automation gate
         run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log --replay-group-results memory-loop-ci-replay.json
 
@@ -145,6 +155,10 @@ jobs:
           use-mathlib-cache: "false"
           test: "false"
           lint: "false"
+      # Fetched modules stay in Lake's cache; tools that run Lean themselves
+      # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
+      - name: Restore fetched artifacts
+        run: python3 scripts/ci/restore-lake-artifacts.py
       - name: Test source verification and regression suites
         env:
           SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
