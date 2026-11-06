@@ -10,7 +10,9 @@ operation (checked overflow, zero divisor, negative exponent, out-of-range
 conversion) is **kept** as written: its halt is an observation, so folding
 never turns a failure into a value. A conditional on a literal is replaced by
 the branch it takes, and a short-circuit decided by a literal left operand
-drops the right operand, exactly as the run skips it.
+drops the right operand, exactly as the run skips it. Index expressions inside
+storage and memory paths are folded too (`Loc.cfold`, `MLoc.cfold`, …, with
+`Loc.cfold_resolveT` and `MLoc.cfold_addrT`).
 
 Preservation is the strongest per-expression relation: for every typed state
 the folded expression's result (value or halt) is the original's
@@ -187,19 +189,66 @@ theorem foldMod_evalT (σ : State C Γ) (op : ModOp) (a b k : Val C Γ .uint) :
 
 /-! ## The pass -/
 
-/-- Bottom-up constant folding. Storage, memory, length and hash reads are
-left as written (their index expressions are not rewritten). -/
+mutual
+/-- Fold the index expressions of a storage path. -/
+def _root_.Solidity.SPath.cfold : {T : Ty} → SPath C Γ T → SPath C Γ T
+  | _, .alias i => .alias i
+  | _, .loc l => .loc l.cfold
+
+/-- Fold the index expressions of a storage location. -/
+def _root_.Solidity.Loc.cfold : {T : Ty} → Loc C Γ T → Loc C Γ T
+  | _, .root r h => .root r h
+  | _, .field b f h => .field b.cfold f h
+  | _, .index it b i => .index it b.cfold i.cfold
+
+/-- Fold the index expressions of a memory path. -/
+def _root_.Solidity.MPath.cfold : {T : Ty} → MPath C Γ T → MPath C Γ T
+  | _, .var i hm => .var i hm
+  | _, .loc l => .loc l.cfold
+
+/-- Fold the index expressions of a memory location. -/
+def _root_.Solidity.MLoc.cfold : {T : Ty} → MLoc C Γ T → MLoc C Γ T
+  | _, .field b f h => .field b.cfold f h
+  | _, .index a b i => .index a b.cfold i.cfold
+
+/-- Bottom-up constant folding, including the index expressions of storage and
+memory paths. -/
 def _root_.Solidity.Val.cfold : {p : PrimTy} → Val C Γ p → Val C Γ p
   | _, .binop op h hq a b => foldBin op h hq a.cfold b.cfold
   | _, .unop op h hq a => foldUn op h hq a.cfold
   | _, .ternary c a b => foldTern c.cfold a.cfold b.cfold
   | _, .modular op a b k => foldMod op a.cfold b.cfold k.cfold
   | _, .simple s => .simple s
-  | _, .read l => .read l
-  | _, .readMem l => .readMem l
-  | _, .len b hp => .len b hp
-  | _, .mlen b hp => .mlen b hp
-  | _, .hash k b hp => .hash k b hp
+  | _, .read l => .read l.cfold
+  | _, .readMem l => .readMem l.cfold
+  | _, .len b hp => .len b.cfold hp
+  | _, .mlen b hp => .mlen b.cfold hp
+  | _, .hash k b hp => .hash k b.cfold hp
+end
+
+mutual
+theorem _root_.Solidity.SPath.cfold_resolveT (σ : State C Γ) : {T : Ty} → (b : SPath C Γ T) →
+    b.cfold.resolveT σ = b.resolveT σ
+  | _, .alias _ => rfl
+  | _, .loc l => by simp only [SPath.cfold, SPath.resolveT, Loc.cfold_resolveT σ l]
+
+theorem _root_.Solidity.Loc.cfold_resolveT (σ : State C Γ) : {T : Ty} → (l : Loc C Γ T) →
+    l.cfold.resolveT σ = l.resolveT σ
+  | _, .root .. => rfl
+  | _, .field b f h => by simp only [Loc.cfold, Loc.resolveT, SPath.cfold_resolveT σ b]
+  | _, .index it b i => by
+    simp only [Loc.cfold, Loc.resolveT, SPath.cfold_resolveT σ b, Val.cfold_evalT σ i]
+
+theorem _root_.Solidity.MPath.cfold_mvalT (σ : State C Γ) : {T : Ty} → (b : MPath C Γ T) →
+    b.cfold.mvalT σ = b.mvalT σ
+  | _, .var .. => rfl
+  | _, .loc l => by simp only [MPath.cfold, MPath.mvalT, MLoc.cfold_addrT σ l]
+
+theorem _root_.Solidity.MLoc.cfold_addrT (σ : State C Γ) : {T : Ty} → (l : MLoc C Γ T) →
+    l.cfold.addrT σ = l.addrT σ
+  | _, .field b f h => by simp only [MLoc.cfold, MLoc.addrT, MPath.cfold_mvalT σ b]
+  | _, .index a b i => by
+    simp only [MLoc.cfold, MLoc.addrT, MPath.cfold_mvalT σ b, Val.cfold_evalT σ i]
 
 /-- **Constant folding preserves every result**, value or halt, in every
 typed state. -/
@@ -218,10 +267,11 @@ theorem _root_.Solidity.Val.cfold_evalT (σ : State C Γ) : {p : PrimTy} → (v 
     rw [Val.cfold, foldMod_evalT]
     simp only [Val.evalT, Val.cfold_evalT σ a, Val.cfold_evalT σ b, Val.cfold_evalT σ k]
   | _, .simple _ => rfl
-  | _, .read _ => rfl
-  | _, .readMem _ => rfl
-  | _, .len _ _ => rfl
-  | _, .mlen _ _ => rfl
-  | _, .hash _ _ _ => rfl
+  | _, .read l => by simp only [Val.cfold, Val.evalT, Loc.cfold_resolveT σ l]
+  | _, .readMem l => by simp only [Val.cfold, Val.evalT, MLoc.cfold_addrT σ l]
+  | _, .len b hp => by simp only [Val.cfold, Val.evalT, SPath.cfold_resolveT σ b]
+  | _, .mlen b hp => by simp only [Val.cfold, Val.evalT, MPath.cfold_mvalT σ b]
+  | _, .hash k b hp => by simp only [Val.cfold, Val.evalT, MPath.cfold_mvalT σ b]
+end
 
 end Solidity.Optimizer.ConstFold

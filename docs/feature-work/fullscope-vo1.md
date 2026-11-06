@@ -1156,3 +1156,12 @@ Prog.simplify, Prog.cfold, Prog.cse [], Prog.uve]`, `Prog.optimize n` (n rounds)
 `x = 5`, fold `require(5 > 3)` to `true` and drop it, remove the unused `x`).
 For consumers (VO2/VT): `Prog.optimize`/`Prog.optimize_runC` are the stable entry points;
 no published `Pass.lean` signature changed.
+
+Constant folding now also folds index expressions inside storage and memory paths
+(mutual `SPath/Loc/MPath/MLoc/Val.cfold` with `SPath.cfold_resolveT`,
+`Loc.cfold_resolveT`, `MPath.cfold_mvalT`, `MLoc.cfold_addrT`, `Val.cfold_evalT`); the
+statement of `Val.cfold_evalT` is unchanged. Control `index_folded`
+(`balances[2 + 3]` → `balances[5]`). This supersedes the "storage/memory path index
+expressions left as written" item for folding; propagation, simplification and CSE still
+leave path indices as written, and statement-level locations (`assign l`, `delete l`) are
+not yet rewritten.

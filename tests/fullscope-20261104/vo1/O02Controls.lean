@@ -40,6 +40,12 @@ theorem overflow_reverts (σ : State C []) :
 /-- `x + (2 + 3)` folds its constant operand only. -/
 theorem fold_inner : (add x (add (lit 2) (lit 3))).cfold = add x (lit 5) := rfl
 
+/-- `balances[2 + 3]`: the index inside a storage read is folded. -/
+def balRead (i : Val C [] .uint) : Val C [] .uint :=
+  .read (.index .map (.loc (.root (T := .ref (.mapping .uint (.prim .uint))) "balances" rfl)) i)
+
+theorem index_folded : (balRead (add (lit 2) (lit 3))).cfold = balRead (lit 5) := rfl
+
 /-- `assert(3 > 2 + 4)`: the condition folds to `false`, the `assert` stays,
 and the program still halts with Panic. -/
 def assertProg : Prog C [] [] := .cons (.assert (gt (lit 3) (add (lit 2) (lit 4)))) .nil
