@@ -453,3 +453,37 @@ goal mutation accepts only complete|blocked, with no pause/get/update endpoint.
 No invalid completion/block transition, reset or new goal is used as a substitute.
 The human's explicit retirement governs: this worker stops after the final saved
 head acknowledgement and will not automatically resume this assignment.
+
+
+## H82 successor frozen-source recovery
+
+The final member head `7a9f8aa5b391696c70e3cb23b76135869f79bacb` is merged
+into the successor branch. Its stopped receipt and complete visible frozen
+assignment/scope were authenticated through H82b. The original launcher-payload
+byte identity remains unclaimed. All original unfinished obligations remain.
+
+The current module map has changed, so the unchanged frozen census is run
+against an owned detached source snapshot at the original base, not against a
+relaxed current-map check. Snapshot:
+`/workspace/scratch/executable-bytecode-frozen-c6f550`, exact head
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`, clean with no build outputs.
+The source-only recovery reproduces all 227 mapped files (190 core, 37 Bridge)
+and 1,660 named theorem candidates. Every file hash and the module-map hash
+match the authenticated scope manifest. Two census outputs are byte-identical.
+
+Evidence is under
+`/workspace/parallel-20261103/executable-bytecode/h82-bytecode-source/evidence/`.
+The source-recovery verification records the actual successor head, snapshot,
+scope fingerprint, census fingerprint and boundaries. The unchanged expanded
+inspection generator also emitted the full 190-core-module program and its
+source pins. That program has **not** been executed; its old three-module smoke
+validation cannot establish full generated-program acceptance.
+
+This recovers lexical evidence, not elaborated hypothesis classification,
+inherited obligations, exact owner mapping, source-to-kernel linkage or witness
+feasibility. No new mechanically linked witness or kernel check is claimed;
+all 1,660 source candidates remain uncovered at this source-only layer.
+The 37 Bridge files remain uninspected by the elaborated census. Existing
+producer waits, meaningful-success/gas/fork work, full affected gates and final
+performance obligations remain open. No current H81 policy or historical bulk
+Lean evidence is inferred from these source hashes.
