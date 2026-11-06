@@ -21,7 +21,7 @@ def builtinW (F : Fr) (n : Nat) {s : STy} (t : STy) (x : RVal E.layout s) : EM E
 
 theorem builtinW_ns (F : Fr) (n : Nat) {s : STy} (t : STy)
     (hs : WordSource s) (ht : t.keyable = true)
-    (hc : s.implicit E.isBase t = true) (x : RVal E.layout s) :
+    (hc : s.implicit E.isBase E.mapFree t = true) (x : RVal E.layout s) :
     NS (Γ := Γ) (builtinW F n t x) := by
   have conv : NS (convRV (Γ := Γ) F n t x) := by
     rcases hs with hs | ⟨bs, rfl⟩
@@ -42,10 +42,10 @@ theorem builtinW_ns (F : Fr) (n : Nat) {s : STy} (t : STy)
 theorem evalBuiltin_ecrecover_ns (G : Glob E) (F : Fr) (n : Nat)
     {h v r s : STy} (args : RArgs E Γ [h,v,r,s])
     (hh : WordSource h) (hv : WordSource v) (hr : WordSource r) (hs : WordSource s)
-    (ch : h.implicit E.isBase .bytes32 = true)
-    (cv : v.implicit E.isBase (.int IntTy.u8) = true)
-    (cr : r.implicit E.isBase .bytes32 = true)
-    (cs : s.implicit E.isBase .bytes32 = true)
+    (ch : h.implicit E.isBase E.mapFree .bytes32 = true)
+    (cv : v.implicit E.isBase E.mapFree (.int IntTy.u8) = true)
+    (cr : r.implicit E.isBase E.mapFree .bytes32 = true)
+    (cs : s.implicit E.isBase E.mapFree .bytes32 = true)
     (ha : NS (evalArgs G F n args)) :
     NS (evalBuiltin G F (n + 1) .ecrecover args (.address false)) := by
   simp only [evalBuiltin]

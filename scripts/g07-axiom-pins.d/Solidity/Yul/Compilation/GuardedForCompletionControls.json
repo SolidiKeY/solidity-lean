@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/GuardedForCompletionControls.lean:Solidity.Yul.Compilation.GuardedForCompletion.Controls.recovered_skipped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompletionControls.lean:Solidity.Yul.Compilation.GuardedForCompletion.Controls.recovered_taken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompletionControls.lean:Solidity.Yul.Compilation.GuardedForCompletion.Controls.reflected_skipped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

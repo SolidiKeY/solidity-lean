@@ -1,0 +1,53 @@
+{
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.deploy_code_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.deploy_open_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.edgeState_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_account_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_sameBalance_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.apply_wordBalance_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.ExecState.empty_balancesFit": [],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.set_fit": [],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSource_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSource_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSourceChecked?_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.Monetary.Authority.writeSourceChecked?_of_fits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.St.init_balancesFit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.transferNat_hypotheses_satisfiable": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.unguarded_write_breaks": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryFit.lean:Solidity.Source.wideAuthority_writeSource_breaks": [
+  "propext"
+ ]
+}

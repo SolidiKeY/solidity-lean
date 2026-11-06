@@ -1,0 +1,57 @@
+{
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.key_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.other_underlying": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.read_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.related_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.self_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean:Solidity.Lowering.V07.UdvtAddressAssignmentControls.underlying": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

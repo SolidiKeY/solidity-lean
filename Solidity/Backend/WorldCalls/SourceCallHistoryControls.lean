@@ -46,11 +46,11 @@ theorem known_zero_success : changedKnown.1 = .ok (.success []) := by rfl
 theorem known_zero_caller_kept : readX changedKnown.2.2 = some 3 := by decide
 theorem known_zero_callee_written : otherX changedKnown.2.2 = some 4 := by decide
 theorem funding_success : funded.1 = .ok true := by rfl
-theorem funding_balances : (funded.2.2.ex.world.accounts thisC).balance.val = 7 ∧
-    (funded.2.2.ex.world.accounts other).balance.val = 3 := by decide
+theorem funding_balances : (funded.2.2.ex.world.accounts thisC).balance = 7 ∧
+    (funded.2.2.ex.world.accounts other).balance = 3 := by decide
 theorem nonpayable_reverts : nonpayable.1 = .ok (.revert []) := by rfl
-theorem nonpayable_balance_rollback : (nonpayable.2.2.ex.world.accounts thisC).balance.val = 10 ∧
-    (nonpayable.2.2.ex.world.accounts other).balance.val = 0 := by decide
+theorem nonpayable_balance_rollback : (nonpayable.2.2.ex.world.accounts thisC).balance = 10 ∧
+    (nonpayable.2.2.ex.world.accounts other).balance = 0 := by decide
 theorem nonpayable_storage_kept : otherX nonpayable.2.2 = some 3 := by decide
 theorem known_static_revert : refusedKnown.1 = .ok (.revert []) := by rfl
 theorem known_static_storage : otherX refusedKnown.2.2 = some 3 := by decide
