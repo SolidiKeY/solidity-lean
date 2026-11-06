@@ -1,9 +1,9 @@
 """Shared read-only inventory logic for the numeric-literal acceptance gate."""
-import hashlib,json,pathlib,re,subprocess
+import hashlib,json,os,pathlib,re,subprocess
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 FOLDER=ROOT/'tests/sol-numeric-literals'
 BASE='6f3eedf0788ee1f8a3bcf230558c712ecdca04d5'
-ADOPTED_MASTER='b86ae4568cef6d6226f4d170360bbb089debe3fb'
+ADOPTED_MASTER='4095d848297d87e374b4f069692511cfe4a36cf7'
 PREFIX='Solidity.Frontend.NumericLiteralProofs.'
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -72,4 +72,6 @@ def case_families():
  families += [dict(family='checksum length/case/nibble boundaries',theorems=['checksum_controls','checksum_length_controls','eip55_other_length']),dict(family='all fixed compiler spellings and lexical/compiler stage differences',fixtures=[r['id'] for r in json.loads((FOLDER/'spellings.json').read_text())],theorems=['fixture_observations_pass']),dict(family='all word-table prefix cases',prefix_proofs=439,theorems=['solWordTable_no_num'])]
  return families
 
-def permitted(path):return path.startswith(('Solidity/Frontend/NumericLiteralProofs/','tests/sol-numeric-literals/')) or path in ('scripts/check-sol-numeric-literals.py','docs/feature-work/numeric-literal-proofs.md')
+# H26 assigns SOL-NL; coordinator H10/H12 idle-lane rebalance assigns G25-CONST-1105.
+# permitted() is the exact union of those two authorized exclusive scopes.
+def permitted(path):return path.startswith(('Solidity/Frontend/NumericLiteralProofs/','tests/sol-numeric-literals/','Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/')) or path in ('scripts/check-sol-numeric-literals.py','docs/feature-work/numeric-literal-proofs.md','docs/feature-work/primitive-packets-1105-Constants.md')

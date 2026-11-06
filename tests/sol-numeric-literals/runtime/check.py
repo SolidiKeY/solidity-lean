@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Run one owned-container command, with aggregate cap and H1 reserve checks."""
 import fcntl,hashlib,json,os,pathlib,subprocess,sys,time
-root=pathlib.Path('/workspace/solidity-lean'); evidence=root/'tests/sol-numeric-literals/evidence'
+root=pathlib.Path('/workspace/solidity-lean'); evidence=pathlib.Path('/workspace/sol-numeric-literals-gate-output')
+evidence.mkdir(exist_ok=True)
 name='sol-nl-proof-worker'
 label=sys.argv[1]; command=sys.argv[2:]
 if not command: raise SystemExit('usage: check.py LABEL COMMAND...')
