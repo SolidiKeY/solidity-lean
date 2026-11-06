@@ -4,7 +4,7 @@ import Solidity.Examples.Tactics.SliceCopies
 
 /-! The modern, pinned Solidity 0.8.38 fixture follows the same slice-copy
 path as native syntax, while preserving calldata local locations. -/
-solc_import "../../../tests/solc/SliceCopies.ast.json" hash 0xec803d395de97787
+solc_import "../../../tests/solc/SliceCopies.ast.json" hash 0x16da906acfe7b107
   as Solkey.Migration.SliceCopies testing
 
 namespace Solidity.Examples.Tactics.SliceCopiesImport

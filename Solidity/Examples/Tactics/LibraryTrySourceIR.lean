@@ -5,7 +5,7 @@ settings and observations. Compiled EVM correspondence is separately replayed. -
 namespace Solidity.Examples.Tactics.LibraryTrySourceIR
 open ContractWorld Semantics
 open Solidity.Examples.Tactics.LibraryTrySource
-solc_library_try "../../../tests/solc/LibraryTryIR.ast.json" hash 0xce73e5f0cfa5a668
+solc_library_try "../../../tests/solc/LibraryTryIR.ast.json" hash 0x2d00ad7ae68f2bcc
   from_contract "C" as OriginalIR
 
 def initialIR := World.empty OriginalIR.contracts initial.funds OriginalIR.roles

@@ -2253,7 +2253,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SourceAdmission.ast.json",
-            "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+            "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
             "pointer": "/ast/nodes/2/nodes/11/body/statements/0",
             "nodeId": null,
             "src": "1004:20:0",
@@ -2305,7 +2305,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SourceAdmission.ast.json",
-            "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+            "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
             "pointer": "/ast/nodes/2/nodes/11/body/statements/0",
             "nodeId": null,
             "src": "1004:20:0",
@@ -2899,7 +2899,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SourceAdmission.ast.json",
-            "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+            "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
             "pointer": "/ast/nodes/2/nodes/1",
             "nodeId": 10,
             "src": "135:20:0",
@@ -2943,7 +2943,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SourceAdmission.ast.json",
-            "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+            "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
             "pointer": "/ast/nodes/2/nodes/1",
             "nodeId": 10,
             "src": "135:20:0",
@@ -5740,7 +5740,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SourceAdmission.ast.json",
-            "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+            "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
             "pointer": "/ast/nodes/2/nodes/16/body/statements/0",
             "nodeId": null,
             "src": "1545:47:0",
@@ -5792,7 +5792,7 @@
           "producerExpression": null,
           "sourceIdentity": {
             "fixture": "tests/solc/SourceAdmission.ast.json",
-            "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+            "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
             "pointer": "/ast/nodes/2/nodes/16/body/statements/0",
             "nodeId": null,
             "src": "1545:47:0",
@@ -7194,7 +7194,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/ContractWorld.ast.json",
-            "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+            "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
             "pointer": "/ast/nodes/8/nodes/0/body/statements/0/expression/expression/expression",
             "nodeId": null,
             "src": "1165:16:0",
@@ -7254,7 +7254,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/ContractWorld.ast.json",
-            "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+            "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
             "pointer": "/ast/nodes/8/nodes/0/body/statements/0/expression/expression/expression",
             "nodeId": null,
             "src": "1165:16:0",

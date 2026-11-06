@@ -1971,7 +1971,7 @@
         },
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -2445,7 +2445,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -4786,7 +4786,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -5118,7 +5118,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -6679,7 +6679,7 @@
         },
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -7449,7 +7449,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7465,7 +7465,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7494,7 +7494,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7510,7 +7510,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7538,7 +7538,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7554,7 +7554,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7582,7 +7582,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7598,7 +7598,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7627,7 +7627,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7674,7 +7674,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7721,7 +7721,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7752,7 +7752,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7768,7 +7768,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7799,7 +7799,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7815,7 +7815,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7846,7 +7846,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7862,7 +7862,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7893,7 +7893,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7909,7 +7909,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7940,7 +7940,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -7971,7 +7971,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -8002,7 +8002,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -8033,7 +8033,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -8064,7 +8064,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -8092,7 +8092,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -8108,7 +8108,7 @@
         },
         {
           "fixture": "tests/solc/ContractWorld.ast.json",
-          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "fixtureSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
@@ -8182,7 +8182,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8198,7 +8198,7 @@
         },
         {
           "fixture": "tests/solc/CreationTryIR.ast.json",
-          "fixtureSha256": "40593c50257ce6c4e8968677d95afc0e54e4c14f938960c34cf84856874790bb",
+          "fixtureSha256": "641caa63d3d8d606145f92f14c60bf7d416afa603045cbb3406c12cbe2d1599b",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8229,7 +8229,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8245,7 +8245,7 @@
         },
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8274,7 +8274,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8290,7 +8290,7 @@
         },
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8319,7 +8319,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8335,7 +8335,7 @@
         },
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8366,7 +8366,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8382,7 +8382,7 @@
         },
         {
           "fixture": "tests/solc/CreationTryIR.ast.json",
-          "fixtureSha256": "40593c50257ce6c4e8968677d95afc0e54e4c14f938960c34cf84856874790bb",
+          "fixtureSha256": "641caa63d3d8d606145f92f14c60bf7d416afa603045cbb3406c12cbe2d1599b",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8413,7 +8413,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/CreationTry.ast.json",
-          "fixtureSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+          "fixtureSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -8429,7 +8429,7 @@
         },
         {
           "fixture": "tests/solc/CreationTryIR.ast.json",
-          "fixtureSha256": "40593c50257ce6c4e8968677d95afc0e54e4c14f938960c34cf84856874790bb",
+          "fixtureSha256": "641caa63d3d8d606145f92f14c60bf7d416afa603045cbb3406c12cbe2d1599b",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
@@ -15316,7 +15316,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/LibraryTry.ast.json",
-          "fixtureSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+          "fixtureSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15332,7 +15332,7 @@
         },
         {
           "fixture": "tests/solc/LibraryTry.ast.json",
-          "fixtureSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+          "fixtureSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15363,7 +15363,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/LibraryTry.ast.json",
-          "fixtureSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+          "fixtureSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15379,7 +15379,7 @@
         },
         {
           "fixture": "tests/solc/LibraryTryIR.ast.json",
-          "fixtureSha256": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1",
+          "fixtureSha256": "8292a7633217026d686ee24bd3ca2a020d22457e2d67a7b35fdac324a12d2834",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15410,7 +15410,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/LibraryTry.ast.json",
-          "fixtureSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+          "fixtureSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15423,7 +15423,7 @@
         },
         {
           "fixture": "tests/solc/LibraryTryIR.ast.json",
-          "fixtureSha256": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1",
+          "fixtureSha256": "8292a7633217026d686ee24bd3ca2a020d22457e2d67a7b35fdac324a12d2834",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15451,7 +15451,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/LibraryTry.ast.json",
-          "fixtureSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+          "fixtureSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15467,7 +15467,7 @@
         },
         {
           "fixture": "tests/solc/LibraryTryIR.ast.json",
-          "fixtureSha256": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1",
+          "fixtureSha256": "8292a7633217026d686ee24bd3ca2a020d22457e2d67a7b35fdac324a12d2834",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15498,7 +15498,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/LibraryTry.ast.json",
-          "fixtureSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+          "fixtureSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -15514,7 +15514,7 @@
         },
         {
           "fixture": "tests/solc/LibraryTryIR.ast.json",
-          "fixtureSha256": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1",
+          "fixtureSha256": "8292a7633217026d686ee24bd3ca2a020d22457e2d67a7b35fdac324a12d2834",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
@@ -16313,7 +16313,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -16567,7 +16567,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -18040,7 +18040,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -22376,7 +22376,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22392,7 +22392,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22423,7 +22423,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22468,7 +22468,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22497,7 +22497,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22542,7 +22542,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22558,7 +22558,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22587,7 +22587,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22603,7 +22603,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22634,7 +22634,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22650,7 +22650,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22679,7 +22679,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22710,7 +22710,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22726,7 +22726,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22757,7 +22757,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22788,7 +22788,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22817,7 +22817,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22864,7 +22864,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22895,7 +22895,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22926,7 +22926,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22957,7 +22957,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -22973,7 +22973,7 @@
         },
         {
           "fixture": "tests/solc/SliceCopies.ast.json",
-          "fixtureSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+          "fixtureSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "8b5230b4fa4fc0a0feb9f9580221a3656453ead7f19035f3e595f533220f985c",
@@ -23797,7 +23797,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -23813,7 +23813,7 @@
         },
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -23844,7 +23844,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -23860,7 +23860,7 @@
         },
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -23891,7 +23891,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -23922,7 +23922,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -23947,7 +23947,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -23975,7 +23975,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -24003,7 +24003,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -24031,7 +24031,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -24059,7 +24059,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -24090,7 +24090,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -24118,7 +24118,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -24149,7 +24149,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceAdmission.ast.json",
-          "fixtureSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+          "fixtureSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b",
@@ -24180,7 +24180,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24193,7 +24193,7 @@
         },
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24221,7 +24221,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24249,7 +24249,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24265,7 +24265,7 @@
         },
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24296,7 +24296,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24327,7 +24327,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24343,7 +24343,7 @@
         },
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24374,7 +24374,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24390,7 +24390,7 @@
         },
         {
           "fixture": "tests/solc/SourceIdentifiers.ast.json",
-          "fixtureSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+          "fixtureSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "1d33c45cd18890af13c9f54f4e9736d8728d0b8526b53d289c5efac7e1ddb102",
@@ -24419,7 +24419,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24447,7 +24447,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24488,7 +24488,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24514,7 +24514,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24530,7 +24530,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24559,7 +24559,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24575,7 +24575,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24604,7 +24604,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24620,7 +24620,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24649,7 +24649,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24678,7 +24678,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24707,7 +24707,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24736,7 +24736,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24765,7 +24765,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24794,7 +24794,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24823,7 +24823,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24852,7 +24852,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24868,7 +24868,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24897,7 +24897,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24926,7 +24926,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24955,7 +24955,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -24984,7 +24984,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25000,7 +25000,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25029,7 +25029,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25058,7 +25058,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25087,7 +25087,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25116,7 +25116,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25145,7 +25145,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25174,7 +25174,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25190,7 +25190,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25219,7 +25219,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25248,7 +25248,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25277,7 +25277,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25293,7 +25293,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25322,7 +25322,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25338,7 +25338,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25367,7 +25367,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25383,7 +25383,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25412,7 +25412,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25441,7 +25441,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25470,7 +25470,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25499,7 +25499,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25528,7 +25528,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25544,7 +25544,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25573,7 +25573,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25589,7 +25589,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25620,7 +25620,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25649,7 +25649,7 @@
       "witnesses": [
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",
@@ -25665,7 +25665,7 @@
         },
         {
           "fixture": "tests/solc/SourceLiterals.ast.json",
-          "fixtureSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+          "fixtureSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
           "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "sourceSha256": "866b96fd1333d06e6b35fb54b408e1fb63168a27a41a7da7006b7834bde8d00a",

@@ -1,0 +1,110 @@
+{
+ "authority": "H102 (drift functionSelector + upstream no-source) under H90/H82: hash-only re-pin; owner verifies",
+ "pins": [
+  {
+   "file": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+   "fixture": "tests/solc/ContractWorld.ast.json",
+   "oldSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+   "newSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
+   "occurrences": 1
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+   "fixture": "tests/solc/SourceAdmission.ast.json",
+   "oldSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+   "newSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
+   "occurrences": 3
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+   "fixture": "tests/solc/ContractWorld.ast.json",
+   "oldSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+   "newSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
+   "occurrences": 2
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+   "fixture": "tests/solc/SourceAdmission.ast.json",
+   "oldSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+   "newSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
+   "occurrences": 6
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+   "fixture": "tests/solc/ContractWorld.ast.json",
+   "oldSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+   "newSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
+   "occurrences": 3
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-census.json",
+   "fixture": "tests/solc/SourceAdmission.ast.json",
+   "oldSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+   "newSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
+   "occurrences": 13
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/ContractWorld.ast.json",
+   "oldSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+   "newSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
+   "occurrences": 27
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/CreationTry.ast.json",
+   "oldSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+   "newSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
+   "occurrences": 9
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/CreationTryIR.ast.json",
+   "oldSha256": "40593c50257ce6c4e8968677d95afc0e54e4c14f938960c34cf84856874790bb",
+   "newSha256": "641caa63d3d8d606145f92f14c60bf7d416afa603045cbb3406c12cbe2d1599b",
+   "occurrences": 3
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/LibraryTry.ast.json",
+   "oldSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+   "newSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
+   "occurrences": 6
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/LibraryTryIR.ast.json",
+   "oldSha256": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1",
+   "newSha256": "8292a7633217026d686ee24bd3ca2a020d22457e2d67a7b35fdac324a12d2834",
+   "occurrences": 4
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SliceCopies.ast.json",
+   "oldSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+   "newSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
+   "occurrences": 25
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SourceAdmission.ast.json",
+   "oldSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+   "newSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
+   "occurrences": 16
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SourceIdentifiers.ast.json",
+   "oldSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+   "newSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
+   "occurrences": 10
+  },
+  {
+   "file": "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+   "fixture": "tests/solc/SourceLiterals.ast.json",
+   "oldSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+   "newSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
+   "occurrences": 51
+  }
+ ]
+}
