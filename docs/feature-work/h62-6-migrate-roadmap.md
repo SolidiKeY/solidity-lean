@@ -396,3 +396,11 @@ performance escalation, dependency integration gates and frozen API obligations
 before the remaining migration validation can proceed. No push, merge, PR,
 producer ownership transfer, original-file permission or freeze announcement
 is implied by this checkpoint.
+
+
+The same H70 supplemental inspection also records sampled aggregate peak RSS:
+old **689307648 bytes**, new **1767239680 bytes**. The exact percentage is in
+`h70/classification/timing-escalation.json`. This is another instrumentation-
+workload regression signal, not a full-directory memory comparison; it reinforces
+the retained worker STOP and root investigation. Both wall and sampled RSS are
+reported; neither is substituted for the still-missing full after-build gate.

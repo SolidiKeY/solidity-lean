@@ -90,10 +90,12 @@ def main():
                    structural="Difference remains after those normalizations, or declaration universe arity changes; requires a preserving root strategy."),
         boundary="Syntactic inspection of elaborated closed Expr trees. No defeq normalization, constant unfolding, reordering, API exemption, kernel equivalence proof or semantic acceptance."))
     percent=100*(new["wall_seconds"]/old["wall_seconds"]-1)
+    rss_percent=100*(new["sampled_peak_aggregate_rss_bytes"]/old["sampled_peak_aggregate_rss_bytes"]-1)
     write(out/"timing-escalation.json",dict(id="B-PERF-INSPECTION",old_wall_seconds=old["wall_seconds"],new_wall_seconds=new["wall_seconds"],delta_percent=percent,
-        stopped_further_lean=percent>10,kind="Supplemental inspection workload, not a full assigned-directory build benchmark",
+        old_sampled_peak_aggregate_rss_bytes=old["sampled_peak_aggregate_rss_bytes"],new_sampled_peak_aggregate_rss_bytes=new["sampled_peak_aggregate_rss_bytes"],rss_delta_percent=rss_percent,
+        stopped_further_lean=percent>10 or rss_percent>10,kind="Supplemental inspection workload, not a full assigned-directory build benchmark",
         model_compile_log_observations=dict(old=logged_compile_times(old_path),new=logged_compile_times(new_path)),
         limitation="Logged module times have limited precision. Inspection includes helper compilation and metadata serialization; it does not establish directory-wide checking slowdown.",
         request="Root gate investigates this >10% supplemental-probe increase before further worker Lean runs. Full matched migration timing acceptance remains pending."))
-    print(json.dumps(dict(classified=len(rows),counts=counts,probe_delta_percent=percent,stop_further_lean=percent>10)))
+    print(json.dumps(dict(classified=len(rows),counts=counts,probe_delta_percent=percent,probe_rss_delta_percent=rss_percent,stop_further_lean=percent>10 or rss_percent>10)))
 if __name__=="__main__":main()
