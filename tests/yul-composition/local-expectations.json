@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "derivation": "Saved before native execution. Source: exact four assignments over initialized seven word cells; VY2 bool slot43 gets raw0xab000002, child0xcd000003; heap bytes AABB. Physical first then raw locals; no raw\u2192clean resumption. Fuel minimum6 from seq/assign/builtin depth; transfer wrapper minimum7.",
+  "cells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "257",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "physical": {
+    "first": "2868903938",
+    "child": "3439329283",
+    "outer": "0"
+  },
+  "heapBytes": [
+    170,
+    187
+  ],
+  "sourceLogs": [
+    [
+      "1",
+      [
+        85
+      ]
+    ]
+  ],
+  "nonwordId": 0,
+  "targetBytes": [
+    238,
+    187,
+    238
+  ],
+  "horizons": [
+    0,
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "completedFrom": 6,
+  "transferCompletedFrom": 7,
+  "nativePlan": [
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "post": "0",
+      "exception": null,
+      "frames": 1
+    },
+    {
+      "signature": "joint()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "257",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "2868903938",
+        "43707"
+      ],
+      "post": "2868903938",
+      "exception": null,
+      "frames": 1
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "1",
+        "2868903938"
+      ],
+      "post": "2868903938",
+      "exception": null,
+      "frames": 1
+    },
+    {
+      "signature": "outer()",
+      "words": [
+        "3439329283"
+      ],
+      "post": "2868903938",
+      "exception": "revert",
+      "frames": 2
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "1",
+        "2868903938"
+      ],
+      "post": "2868903938",
+      "exception": null,
+      "frames": 1
+    }
+  ]
+}

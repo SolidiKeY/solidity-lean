@@ -1,0 +1,36 @@
+{
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.body_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.run_route": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.target_hit": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatch.lean:Solidity.Backend.AbiEntry.CoreDispatch.target_miss": [
+  "propext"
+ ]
+}

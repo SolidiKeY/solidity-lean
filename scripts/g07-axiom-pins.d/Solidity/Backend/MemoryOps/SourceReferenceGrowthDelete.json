@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceGrowthDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.alloc_redirect_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceGrowthDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.fresh_redirect_separated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

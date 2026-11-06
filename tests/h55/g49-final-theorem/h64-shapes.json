@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "scope": "Representative frozen pipeline boundary families, not an exhaustive classification of every repository theorem.",
+  "exhaustiveLaneCoverage": false,
+  "semanticImplementation": "Solidity.Roadmap.G49Final.cert_adapter",
+  "carrierAdapters": [
+    "Solidity.Roadmap.G49Final.cert_adapter",
+    "Solidity.Roadmap.G49Final.lowering_adapter",
+    "Solidity.Roadmap.G49Final.compilation_adapter",
+    "Solidity.Roadmap.G49Final.execution_adapter",
+    "Solidity.Roadmap.G49Final.p8b_adapter"
+  ],
+  "families": [
+    {
+      "id": "full-cert",
+      "supported": true,
+      "shape": "Constructive environment/resource-indexed certificate with forward A/F/G and reverse A/G",
+      "representatives": [
+        "Solidity.Roadmap.Cert",
+        "Solidity.Roadmap.Lowering",
+        "Solidity.Roadmap.Compilation",
+        "Solidity.Roadmap.Execution",
+        "Solidity.Lowering.P8b.Frozen.Producer"
+      ],
+      "sources": [
+        "Solidity/Roadmap/Contracts.lean",
+        "Solidity/Lowering/P8b/Frozen.lean"
+      ]
+    },
+    {
+      "id": "bare-refinement",
+      "supported": false,
+      "shape": "Standalone RefinesUnder conclusion, without the original full certificate",
+      "representatives": [
+        "Solidity.Roadmap.RefinesUnder"
+      ],
+      "sources": [
+        "Solidity/Roadmap/Contracts.lean"
+      ],
+      "missing": "Constructive need, intermediate Forward/Guard transport and environment map. Generic transitivity is formally refuted by the controls."
+    },
+    {
+      "id": "compiler-agreement",
+      "supported": false,
+      "shape": "Checked physical Input plus success/representation, panic/payment/divergence alternatives",
+      "representatives": [
+        "Solidity.Evm.Compiler.Compilation.correct",
+        "Solidity.Backend.Passes.compilation_exact"
+      ],
+      "sources": [
+        "Solidity/Evm/Compiler.lean",
+        "Solidity/Backend/Passes/Boundary.lean"
+      ],
+      "missing": "Complete session-prefix observation bridge, constructive resource adequacy and backward guard/environment transport."
+    },
+    {
+      "id": "frame-claim",
+      "supported": false,
+      "shape": "Outcome-specific runtime-frame return/bare-revert transport",
+      "representatives": [
+        "Solidity.Backend.InternalFlow.RuntimeFrame.InterfaceV1.ReturnClaim",
+        "Solidity.Backend.InternalFlow.RuntimeFrame.InterfaceV1.BareRevertClaim"
+      ],
+      "sources": [
+        "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV1.lean",
+        "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean"
+      ],
+      "missing": "All-outcome session correspondence, arbitrary-horizon adequacy/backward simulation, environment and panic/data/divergence closure."
+    },
+    {
+      "id": "world-phase",
+      "supported": false,
+      "shape": "State-image invariant or reached creation/library/reset phase consumer",
+      "representatives": [
+        "Solidity.Lowering.V08.WorldImage.Image",
+        "Solidity.Lowering.V08.WorldImage.image_reset"
+      ],
+      "sources": [
+        "Solidity/Lowering/V08/WorldImage.lean",
+        "Solidity/Lowering/V08/WorldReset.lean",
+        "Solidity/Lowering/V08/CreationPremises.lean"
+      ],
+      "missing": "Canonical whole-source/body/frame/session certificate; published V08 migration still required before composition."
+    },
+    {
+      "id": "opcode-local",
+      "supported": false,
+      "shape": "Fetched opcode decoding, charged-step and continuation equations",
+      "representatives": [
+        "SolidityBridge.RoadmapV15.P10.FrozenV1.API"
+      ],
+      "sources": [
+        "Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean",
+        "Bridge/SolidityBridge/RoadmapV15/P10/FrozenWitness.lean"
+      ],
+      "missing": "Whole-program assembler/domain/load agreement, complete observations and two-sided resource/environment transport."
+    }
+  ],
+  "notPassShapes": [
+    "P8a admission/source-realization is source-boundary evidence, not itself a lowering or execution pass."
+  ],
+  "legacyComposition": "G49Final.pass_chain retains its frozen statement. Its three full-certificate inputs use the same three carrier adapters in pipeline; its erased conclusion is not used as a new composable pass.",
+  "question": "Q-H64-ADAPTER",
+  "owners": {
+    "S": "P8a-SPEC",
+    "I": "G18.02",
+    "Asm": "G49.01",
+    "V": "G47",
+    "lowering": "P8b",
+    "backend": "G49.01",
+    "execution": "G49.02",
+    "compiler": "G49.03",
+    "decode": "G50.02",
+    "sourceApproved": "P8a-SPEC",
+    "sourceNonVacuous": "P8a-SPEC",
+    "targetApproved": "G47",
+    "keccak": "G47",
+    "coverage": "G49.03",
+    "bothPipelines": "G49.03",
+    "artifact": "G49.02",
+    "fixed": "G49.02",
+    "session": "G49.02",
+    "ifixed": "G49.02",
+    "isession": "G49.02",
+    "creates_table": "G50.01",
+    "hashes_source": "G49.02",
+    "decode_reach": "G50.02",
+    "decode_commutes": "G50.02"
+  },
+  "sourceHashes": {
+    "Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean": "9560a674e2be7f4efeb9601cc25a36f5e93387335c3f023c0c5866b7d7cb3ee6",
+    "Bridge/SolidityBridge/RoadmapV15/P10/FrozenWitness.lean": "ce7d6750d9677644d93e5f6f09ce8809473fc6768411670346e53e43fe3eec9c",
+    "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV1.lean": "2383047dc6035b3f54bccac10b86f087df0eae7271edc84ae960e07b567f536f",
+    "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean": "e879b09bb74bfa7231b3e949dec1bbda0676b551150e5df63d00d112cf8041cd",
+    "Solidity/Backend/Passes/Boundary.lean": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+    "Solidity/Evm/Compiler.lean": "38565297a2909c6213dbec3aad878f4f04823efdeee7a91c19d2cfee64ef1810",
+    "Solidity/Lowering/P8b/Frozen.lean": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64",
+    "Solidity/Lowering/V08/CreationPremises.lean": "9ce078e744ff61d51b114c2987a6f989cf94988d2e33041f689498574a710dbe",
+    "Solidity/Lowering/V08/WorldImage.lean": "e9c70c8b42c2b5d2d8ba7c682c2f0ddf0232b94011aeb5077265d5497b2a17e6",
+    "Solidity/Lowering/V08/WorldReset.lean": "7ecaecacbe081d185d2c14e0d1a33afa0a708b27d2a87adcb76bea4f00e1b75b",
+    "Solidity/Roadmap/Contracts.lean": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+  },
+  "checkedDeclarations": [
+    "Solidity.Roadmap.G49Final.PassCorrect.trans",
+    "Solidity.Roadmap.G49Final.PassList.fold",
+    "Solidity.Roadmap.G49Final.public_end_to_end",
+    "Solidity.Roadmap.G49Final.cert_adapter",
+    "Solidity.Roadmap.G49Final.lowering_adapter",
+    "Solidity.Roadmap.G49Final.compilation_adapter",
+    "Solidity.Roadmap.G49Final.execution_adapter",
+    "Solidity.Roadmap.G49Final.p8b_adapter",
+    "Solidity.Roadmap.G49Final.source_from_admitted",
+    "Solidity.Roadmap.G49Final.source_ready",
+    "Solidity.Roadmap.G49Final.pipeline",
+    "Solidity.Roadmap.G49Final.pipeline_env",
+    "Solidity.Roadmap.G49Final.PublicObligations.mk",
+    "Solidity.Roadmap.G49Final.g49_g50_of_fold"
+  ],
+  "binderOrder": [
+    "S",
+    "I",
+    "Asm",
+    "V",
+    "lowering",
+    "backend",
+    "execution",
+    "compiler",
+    "decode",
+    "sourceApproved",
+    "sourceNonVacuous",
+    "targetApproved",
+    "keccak",
+    "coverage",
+    "bothPipelines",
+    "artifact",
+    "fixed",
+    "session",
+    "ifixed",
+    "isession",
+    "creates_table",
+    "hashes_source",
+    "decode_reach",
+    "decode_commutes"
+  ]
+}

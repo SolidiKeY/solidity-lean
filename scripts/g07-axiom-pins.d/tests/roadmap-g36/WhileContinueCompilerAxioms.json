@@ -1,0 +1,70 @@
+{
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.guard_change_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.scalar_dead_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.wrong_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.wrong_entry_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.wrong_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.wrong_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.wrongCore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.Controls.wrongEmit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.emit_split": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.false_guard_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileContinueCompiler.loop_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

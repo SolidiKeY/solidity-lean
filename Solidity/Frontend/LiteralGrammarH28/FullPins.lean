@@ -10,12 +10,14 @@ import Solidity.Frontend.LiteralGrammarH28.Global
 import Solidity.Frontend.LiteralGrammarH28.Hex
 import Solidity.Frontend.LiteralGrammarH28.HexControls
 import Solidity.Frontend.LiteralGrammarH28.HexEncoding
+import Solidity.Frontend.LiteralGrammarH28.Lengths
 import Solidity.Frontend.LiteralGrammarH28.ModeGrammar
 import Solidity.Frontend.LiteralGrammarH28.Quoted
 import Solidity.Frontend.LiteralGrammarH28.Roundtrips
 import Solidity.Frontend.LiteralGrammarH28.Scanner
 import Solidity.Frontend.LiteralGrammarH28.Split
 import Solidity.Frontend.LiteralGrammarH28.TaggedEncoding
+import Solidity.Frontend.LiteralGrammarH28.Utf8Shape
 import Solidity.Frontend.LiteralGrammarH28.WordTable
 
 namespace Solidity.Frontend.LiteralGrammarH28
@@ -419,4 +421,43 @@ namespace Solidity.Frontend.LiteralGrammarH28
 #print axioms word_transport
 #check @solWordTable_nonliteral
 #print axioms solWordTable_nonliteral
+#check @Scan.deterministic
+#print axioms Scan.deterministic
+#check @Scan.isSuffix
+#print axioms Scan.isSuffix
+#check @Scan.length_lt
+#print axioms Scan.length_lt
+#check @Scan.length_eq
+#print axioms Scan.length_eq
+#check @Plain.length_le
+#print axioms Plain.length_le
+#check @HexLiteral.length_bounds
+#print axioms HexLiteral.length_bounds
+#check @HexBody.length_tight
+#print axioms HexBody.length_tight
+#check @HexLiteral.length_le_tight
+#print axioms HexLiteral.length_le_tight
+#check @UnicodeLiteral.length_le
+#print axioms UnicodeLiteral.length_le
+#check @Fragments.length_eq
+#print axioms Fragments.length_eq
+#check @Fragments.flatten_length_le
+#print axioms Fragments.flatten_length_le
+#check @FragmentValue.plain_length_le
+#print axioms FragmentValue.plain_length_le
+#check @FragmentValue.hex_length_le
+#print axioms FragmentValue.hex_length_le
+#check @FragmentValue.unicode_length_le
+#print axioms FragmentValue.unicode_length_le
+#check @CodepointBytes.shape
+#print axioms CodepointBytes.shape
+#check @CodepointBytes.value
+#print axioms CodepointBytes.value
+#check @utf8_injective
+#print axioms utf8_injective
+#check @uniEscape_shape
+#print axioms uniEscape_shape
+#check @uniEscape_value
+#print axioms uniEscape_value
+
 end Solidity.Frontend.LiteralGrammarH28

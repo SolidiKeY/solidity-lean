@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/LetScopeCompletionControls.lean:Solidity.Yul.Compilation.LetScopeCompletion.Controls.boundary_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompletionControls.lean:Solidity.Yul.Compilation.LetScopeCompletion.Controls.boundary_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompletionControls.lean:Solidity.Yul.Compilation.LetScopeCompletion.Controls.boundary_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompletionControls.lean:Solidity.Yul.Compilation.LetScopeCompletion.Controls.oversized_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompletionControls.lean:Solidity.Yul.Compilation.LetScopeCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompletionControls.lean:Solidity.Yul.Compilation.LetScopeCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompletionControls.lean:Solidity.Yul.Compilation.LetScopeCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
