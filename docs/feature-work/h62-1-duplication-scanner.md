@@ -289,3 +289,25 @@ A staged whitespace check initially rejected a trailing blank line in the
 axiom fixture. The line was removed and the guarded fixture was rerun against
 the final bytes. The subsequent staged whitespace and proof-shortcut checks
 passed. The repository doc-path check exited 0 with 115 ambiguous references.
+
+### Incremental report including the signature fixtures
+
+After adding the four isolated Lean fixtures, two bounded incremental scans
+against the matched-pair report took 95 and 94 seconds and were byte-identical,
+SHA256
+`01e696eee1f088dc3e1482b6a4362a76f9e320cf1a0d8f1a83455b7a8a35ad63`.
+They read 6,661 Lean files, recognized 114,507 declarations and returned no
+file errors or unmatched globs. The input delta is exactly the four new
+fixture files; no Lean inputs were changed or removed, and the scanner hash
+was unchanged. The report adds one statement group and changes one body group;
+these are lexical group changes, not resolved intrinsic-signature matches or
+unowned opportunities. These two runs used four more input files than the
+matched performance pair and are not a same-input slowdown comparison.
+Bulk outputs and status logs remain off Git in
+`/workspace/h62-duplication-scanner-evidence/signature-fixture/`.
+
+The scanner still does not consume the isolated signature records. A future
+integration needs a verified binding among the record, exact source,
+compiled module and dependency environment before using elaborated signatures.
+The live ownership dependency, unsupported declarations, remaining backfill
+and final repository gates remain open.
