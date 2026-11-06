@@ -175,3 +175,4 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
 V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
