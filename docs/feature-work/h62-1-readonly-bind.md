@@ -53,3 +53,29 @@ The latter passed six controls on 2026-11-06. Independent finder and skeptic
 reviews and Lean checks remain pending; this preparation is not a milestone
 acceptance. Exact-file RO agreement is requested for all three original files
 listed above before edits.
+
+## Isolated proof-sharing candidate
+
+H71 grants owner agreement for the three exact files with the hashes pinned in
+`scripts/h62/item1/readonly-bind/overlay.py`. The ticket JSON was not present at
+its stated VM path; the coordinator message supplied the agreement and hashes,
+which matched the checkout. Originals remain untouched. The generator creates
+an additive overlay that imports the existing `Solidity.Source.Hoare.run_bind`,
+removes each private copy and replaces proof references. `overlay.py --check`
+verifies exact generated text against the pinned originals. It does not prove
+semantic equivalence by itself.
+
+With Lean 4.24.0 and Lake 5.0.0, serial `-j1` and bounded memory, the three
+original modules built, then all three overlay modules elaborated. Existing
+FullCaptureControls, CaptureFailureControls and EnvironmentCreditControls
+also elaborated with overlay objects. Ten `#print axioms` outputs matched the
+originals byte for byte: propext, Classical.choice and Quot.sound. Five paired
+warm-cache measurements per file yielded median deltas of -9.18%, -6.69% and
+-6.20%, respectively; these do not include building the extra Hoare dependency.
+The initial sparse overlay failed to locate Hoare; a symlinked isolated library
+with the overlay objects resolved the namespace lookup. Raw evidence is in
+`/workspace/scratch/h62-readonly-bind/evidence/`.
+
+This is a candidate, not an accepted migration: independent finder and skeptic
+reviews, added inhabited fixture proofs, scope-complete affected validation,
+full final gate and registration/owner integration decisions remain pending.
