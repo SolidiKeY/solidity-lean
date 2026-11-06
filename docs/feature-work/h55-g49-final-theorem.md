@@ -1,4 +1,4 @@
-# H55–H70 G49/G50 work record and handoff
+# H55–H71 G49/G50 work record and handoff
 
 Batch: `solidity-h55-sol-20261106`; task: `g49-final-theorem`.
 Repository: `/workspace/solidity-lean`.
@@ -18,6 +18,52 @@ open. The timing gate exceeded its threshold and further proof expansion stopped
 The current section below supersedes older H55 statements about missing public
 theorem syntax or unavailable typed counts; the older checkpoint remains history.
 No partial checkpoint or prerequisite pass is full completion.
+
+## H71 MIC reply: canonical binding dependency remains open
+
+MIC reply at `a48125fe5435c9d2b27036554c2e0007323b59ab` requests the concrete
+canonical session endpoints, native context/domain, fixed public environment
+map, executable resource calculation and exact disjoint G38 branch obligation.
+The reported reply SHA256 is
+`7b5729ee7ef795a5668b70ff3ee134444c0fc876c22005eae726b21d9173b4ee`;
+original file bytes are not on this VM and were not independently verified.
+MIC retains G38/P9 as reported; no V12/MRS/V17/V13 P1 variant is transferred.
+
+H55's generic fold does not publish those concrete bindings. H68 explicitly
+listed the family-suffixed names as required deliverables, not existing APIs.
+[The response manifest](../../tests/h55/g49-final-theorem/h71-mic-binding.json)
+records `/workspace/h71-g49-mic/mic-response.md` and
+`/workspace/h71-g49-mic/mic-binding-disposition.json` with hashes. It keeps the
+request pending canonical publication, without substituting a local agreement
+or assuming a full certificate. Coordinator relay is not owner acceptance.
+
+The frozen compiler interface is `Compilation I Asm`: its endpoints are the
+supplied `I.lang` at `I.ofWorld w`, and supplied `Asm` at `backend.compile w`.
+`S.lang` and `S.meaning` belong to the earlier Lowering boundary. These are
+interface projections, not concrete intrinsic/structured-IR session instances.
+They supply neither a MIC program-to-world origin equation nor emitted-code
+observation equality. `backend.pass.envAbs` names the conditional package map;
+`backend.cert.need (I.ofWorld w) (backend.dom w)` names its conditional bound.
+Neither is supplied as an independently prescribed canonical beta/nu: obtaining
+nu from the full certificate being requested would be circular.
+
+The existing `Solidity.Evm.Compiler.Compilation.correct` signature is copied
+verbatim as source text with its source hash in the disposition. It preserves
+all original `result.Input` to `result.Agrees` indices and antecedents, including
+Rep/protected stack, guarded panic/revert, payment and divergence alternatives.
+It is the collector law, not a new MIC-only branch assignment. Exact MIC G38
+embedding and branch scope remain pending alongside canonical endpoint bindings.
+No fresh typed export, lexical-absence completeness claim, replacement language,
+observation projection or success/no-failure restriction is introduced.
+
+The response records V11 runtime encoder, P7 rollback, V12 failure-frame
+transport and VY5/H16 failure points as reported dependencies, without assigning
+new scope or asserting producer proofs. No proof/guard/pin change, Hash overlay
+or Lean run occurs. Timing HOLD remains +14.46%; full assignment is unfinished.
+Current evidence and handoff: `/workspace/h71-g49-mic`. Source-signature and
+artifact-hash checks pass; documentation paths resolve with the same 115
+existing ambiguities. Independent read-only finder and skeptic found no
+confirmed defects; neither used Lean, servers, builds or tests.
 
 ## H70 Contracts ticket and dependency-inventory continuation
 
