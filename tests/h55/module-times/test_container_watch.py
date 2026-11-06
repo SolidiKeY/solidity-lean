@@ -14,21 +14,29 @@ class WatchControls(unittest.TestCase):
     nonce = "b" * 32
 
     def test_ownership_mismatch_never_kills(self):
-        with patch.object(watch, "docker", return_value="other|true|0|67108864|67108864|none|16") as docker:
+        with patch.object(watch, "docker", return_value="other|true|0|67108864|67108864|none|16|123") as docker:
             with self.assertRaises(ValueError):
                 watch.stop_owned(self.container, self.nonce)
             self.assertEqual(1, docker.call_count)
             self.assertEqual("inspect", docker.call_args.args[0])
 
     def test_resource_policy_mismatch_rejected(self):
-        for payload in ["b" * 32 + "|true|0|0|0|none|16",
-                        "b" * 32 + "|true|0|67108864|134217728|none|16",
-                        "b" * 32 + "|true|0|67108864|67108864|bridge|16",
-                        "b" * 32 + "|true|0|67108864|67108864|none|0"]:
+        for payload in ["b" * 32 + "|true|0|0|0|none|16|123",
+                        "b" * 32 + "|true|0|67108864|134217728|none|16|123",
+                        "b" * 32 + "|true|0|67108864|67108864|bridge|16|123",
+                        "b" * 32 + "|true|0|67108864|67108864|none|0|123"]:
             with self.subTest(payload=payload), patch.object(watch, "docker", return_value=payload):
                 with self.assertRaises(ValueError):
                     watch.state(self.container, self.nonce)
                 self.assertEqual((True, 0), watch.state(self.container, self.nonce, check_limits=False))
+
+    def test_effective_limit_failure_cannot_pass(self):
+        payload = self.nonce + "|true|0|67108864|67108864|none|16|123"
+        with patch.object(watch, "docker", return_value=payload), \
+             patch.object(watch, "kernel_limits", side_effect=ValueError("kernel mismatch")):
+            with self.assertRaises(ValueError):
+                watch.state(self.container, self.nonce)
+            self.assertEqual((True, 0), watch.state(self.container, self.nonce, check_limits=False))
 
     def test_bad_inputs_refused_without_docker(self):
         with patch.object(watch, "docker") as docker:

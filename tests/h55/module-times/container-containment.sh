@@ -53,6 +53,16 @@ done
 [ "$(wc -l < "$out/processes.txt")" -eq 3 ]
 read -r parent child < <(awk 'NR==2 {p=$1} NR==3 {print p,$1}' "$out/processes.txt")
 [ "$(awk 'NR==2 {print $4}' "$out/processes.txt")" != "$(awk 'NR==3 {print $4}' "$out/processes.txt")" ]
+cat "/proc/$parent/cgroup" > "$out/process-cgroup.txt"
+cgroup_path=$(sed -n "s/^0:://p" "$out/process-cgroup.txt")
+# This executor exposes the daemon container as a sibling in the cgroup
+# namespace. Accept only its exact owned ID and the observed mount root.
+test "$cgroup_path" = "/../docker/$container_id"
+awk '$4 == "/.." && $5 == "/sys/fs/cgroup" && $0 ~ / - cgroup2 / { found=1 } END { exit !found }' /proc/self/mountinfo
+cgroup_dir=$(readlink -e "/sys/fs/cgroup/docker/$container_id")
+test "$cgroup_dir" = "/sys/fs/cgroup/docker/$container_id"
+printf "memory.max=%s memory.swap.max=%s\n" "$(cat "$cgroup_dir/memory.max")" "$(cat "$cgroup_dir/memory.swap.max")" > "$out/effective-cgroup.txt"
+test "$(cat "$out/effective-cgroup.txt")" = "memory.max=67108864 memory.swap.max=0"
 parent_start=$(awk '{print $22}' "/proc/$parent/stat")
 child_start=$(awk '{print $22}' "/proc/$child/stat")
 printf "parent=%s start=%s child=%s start=%s\n" "$parent" "$parent_start" "$child" "$child_start" > "$out/identities.txt"

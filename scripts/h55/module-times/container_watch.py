@@ -24,17 +24,39 @@ def docker(*args, timeout=1):
                           stderr=subprocess.PIPE, timeout=timeout, check=True).stdout.strip()
 
 
+def kernel_limits(container_id, pid, memory, pids):
+    """Inspect the observed local cgroup-v2 layout, rejecting all others."""
+    if not IDENT.fullmatch(container_id) or not pid.isdigit() or int(pid) <= 0:
+        raise ValueError("invalid kernel process identity")
+    group = pathlib.Path("/proc", pid, "cgroup").read_text().strip()
+    if group != "0::/../docker/" + container_id:
+        raise ValueError("unexpected process cgroup")
+    mounts = pathlib.Path("/proc/self/mountinfo").read_text().splitlines()
+    if not any(len(line.split()) >= 6 and line.split()[3:5] == ["/..", "/sys/fs/cgroup"]
+               and " - cgroup2 " in line for line in mounts):
+        raise ValueError("unsupported cgroup mount")
+    base = pathlib.Path("/sys/fs/cgroup/docker") / container_id
+    if base.resolve(strict=True) != base:
+        raise ValueError("unexpected cgroup path")
+    values = [(base / name).read_text().strip() for name in
+              ("memory.max", "memory.swap.max", "memory.swap.current", "pids.max")]
+    if values != [str(memory), "0", "0", str(pids)]:
+        raise ValueError("effective cgroup limits mismatch")
+
+
 def state(container_id, nonce, timeout=1, check_limits=True):
     fmt = ("{{index .Config.Labels \"" + LABEL + "\"}}|{{.State.Running}}|{{.State.ExitCode}}"
-           "|{{.HostConfig.Memory}}|{{.HostConfig.MemorySwap}}|{{.HostConfig.NetworkMode}}|{{.HostConfig.PidsLimit}}")
+           "|{{.HostConfig.Memory}}|{{.HostConfig.MemorySwap}}|{{.HostConfig.NetworkMode}}|{{.HostConfig.PidsLimit}}|{{.State.Pid}}")
     parts = docker("inspect", "--format", fmt, container_id, timeout=timeout).split("|")
-    if len(parts) != 7 or parts[0] != nonce or parts[1] not in ("true", "false") or not parts[2].isdigit():
+    if len(parts) != 8 or parts[0] != nonce or parts[1] not in ("true", "false") or not parts[2].isdigit():
         raise ValueError("container identity or state mismatch")
     if check_limits:
         if (not parts[3].isdigit() or not parts[4].isdigit() or not parts[6].isdigit()
                 or not 0 < int(parts[3]) <= 12 * 1024 ** 3 or int(parts[4]) != int(parts[3])
                 or parts[5] != "none" or int(parts[6]) <= 0):
             raise ValueError("container resource policy mismatch")
+        if parts[1] == "true":
+            kernel_limits(container_id, parts[7], int(parts[3]), int(parts[6]))
     return parts[1] == "true", int(parts[2])
 
 

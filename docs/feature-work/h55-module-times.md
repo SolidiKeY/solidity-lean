@@ -298,3 +298,28 @@ image, daemon, source/toolchain/cache or H56 identity, and it is not wired to
 an actual Lean production gate. No 300-second measurement or Lean proof is
 claimed. Independent finder/skeptic reviews, full acceptance and the assigned
 H56 and owner dependencies remain outstanding.
+
+## H82 synthetic effective-cgroup checks
+
+After fetching master at `7ae5607c9ecfff4078162115eaaaa48a1ff46eb0`, the
+synthetic watcher compares the owned container process and exact container ID
+to the observed local cgroup-v2 mount and verifies effective `memory.max`,
+`memory.swap.max`, `memory.swap.current` and `pids.max` against its configured
+limits. Unsupported cgroup layouts and mismatches fail closed. The 29-method
+synthetic unit suite passes. The final local escaped-child deadline control
+09 passed with effective memory.max 67,108,864 bytes and memory.swap.max 0;
+control 08 also passed. The first attempt, control 07, failed safely because
+its initial path guard rejected the sibling cgroup namespace path. All three
+runs are retained off Git and bound by
+`tests/h55/module-times/kernel-resource-evidence.sha256`.
+
+This is a local synthetic control, not a 300-second Lean timing or production
+acceptance. It supports only the observed local namespace layout, samples
+rather than continuously checks resources, and does not authenticate the
+Docker daemon, image, VM, tree, toolchain or cache. The command, timeout,
+provenance and inventory helpers are not integrated as an accepted runner.
+H56 identity and actual full-inventory measurements remain a wait before
+qualifying splits. H82 supplies standing permission for statement-preserving
+edits; owner permission remains required for the statement, dependency,
+interface, proof-budget, axiom-set and exclusion changes specified by H82.
+Independent finder and skeptic reviews and all full-scope gates remain pending.
