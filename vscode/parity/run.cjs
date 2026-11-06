@@ -9,6 +9,7 @@ const {randomUUID,createHash} = require('node:crypto');
 const {ProcessSampler,summarize,differences,normalize,scaling,protocol,hostEvidenceErrors} = require('./core.cjs');
 const {terminateTree} = require('../src/backend.cjs');
 const renderer=require('./renderer.cjs');
+const {servePhases}=require('./phase-capture.cjs');
 const repo=resolve(__dirname,'../..');
 
 function parse(args) {
@@ -32,7 +33,7 @@ function parse(args) {
   for(const key of ['workers','targets','cache'])if(new Set(options[key]).size!==options[key].length)throw new Error('Duplicate '+key);
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
-  if(!['full','benchmark'].includes(options.suite))throw new Error('Invalid suite');
+  if(!['full','benchmark','visual'].includes(options.suite))throw new Error('Invalid suite');
   for(const key of ['memoryReserveMiB','memoryMaxMiB'])if(options[key]!==undefined&&(!Number.isSafeInteger(options[key])||options[key]<1))throw new Error('Invalid '+key);
   return options;
 }
@@ -56,7 +57,7 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,runId:randomUUID()};
+  config={...config,suite:options.suite||'full',runId:randomUUID()};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
@@ -65,7 +66,7 @@ async function launch(config,options) {
     'solidityLean.backendPath':repo,'solidityLean.nodePath':process.execPath,'solidityLean.timeoutMs':options.operationTimeoutMs};
   settings['files.autoSave']='off';settings['telemetry.telemetryLevel']='off';settings['update.mode']='none';
   settings['git.enabled']=false;settings['workbench.secondarySideBar.defaultVisibility']='hidden';
-  if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']='never';}
+  if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']=options.suite==='visual'?'onchange':'never';}
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
   writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
@@ -95,7 +96,14 @@ async function launch(config,options) {
   },500);
   // Capture before VS Code's test runner closes the window. The host writes a
   // completion marker then waits briefly for this observer's acknowledgement.
+  const seenPhases=new Set();let phaseTask,phaseBusy=false;
   const renderTimer=setInterval(()=>{
+    if(options.suite==='visual'&&!phaseBusy){
+      phaseBusy=true;
+      phaseTask=servePhases(config.dir,config.runId,async directory=>{
+        const client=await renderer.connect(debugPort);try{return await renderer.capture(client,directory,true);}finally{client.close();}
+      },seenPhases).catch(error=>{rendererCapture={captured:false,error:error.message};}).finally(()=>{phaseBusy=false;});
+    }
     if(!probing&&existsSync(join(config.dir,'renderer-probe.json'))) {
       probing=true;
       probeTask=(async()=>{
@@ -129,6 +137,7 @@ async function launch(config,options) {
   let exitCode,error;
   await new Promise(resolvePromise=>{child.on('error',e=>{error=e.message;resolvePromise();});child.on('close',code=>{exitCode=code;resolvePromise();});});
   clearTimeout(timer);clearInterval(renderTimer);clearInterval(resourceTimer);
+  if(phaseTask)await phaseTask;
   if(probeTask)await probeTask;
   if(deadlineTask)await deadlineTask;
   if(captureTask)await captureTask;
@@ -195,7 +204,7 @@ async function main(args=process.argv.slice(2)) {
       'Frontend, VC generation and solver phases remain unmeasured unless supplied by native notifications.',
       'Dafny protocol recording adds synchronous disk writes in the extension host; use --trace off for an observer-overhead control.',
       'Missing editor capabilities and incomplete scenarios prevent a claim of full parity.']};
-  const inventory=JSON.parse(readFileSync(join(repo,'docs/dafny-editor-features.json'),'utf8'));
+  const inventory=require('./inventory.cjs').loadInventory();
   const save=()=>{
     report.summary=summarize(runs);report.parallelScaling=scaling(report.summary);
     report.featureParity=inventory.features.map(feature=>{

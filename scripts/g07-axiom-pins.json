@@ -3714,6 +3714,241 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_value": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_negative": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_positive": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.empty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_frame_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_large_length_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_short_head_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_truncated_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.eof_padding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int16_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int16_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int248_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int256_all": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int8_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.large_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.late_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.misaligned_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.near_width_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_min": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_suffix_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.one_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_int256_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_zero_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.positive_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.positive_max": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.selector_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.sign_matters": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.uint256_all": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.uint8_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.unshifted_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.unsigned_rejects_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.copy_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.copy_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_dirty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.eval_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.guarded_frame_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.guarded_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.range_iff_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.signed_decode_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_dirty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_succ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/CalldataPackets/RawUint/Controls.lean:Solidity.Backend.CalldataPackets.RawUint.Controls.empty_standalone_copy": [
   "Classical.choice",
   "Quot.sound",
@@ -29302,6 +29537,384 @@
  "Solidity/Frontend/Checked/UnitExamples.lean:Solidity.Frontend.Checked.profileCtors_covered": [
   "propext"
  ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.arrayLen_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.arrayLen_static_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.arrayLen_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.arrayLenB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.arrayLenB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.arrayLenB_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.arrayLenB_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.constant_clash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.constant_not_overload": [],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.constBin_paths": [],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.constDeps_declared_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.constNodes_length_le": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.chain_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.chain_decls": [],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.chain_rank": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.chain_rank_tight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.chain_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.chain_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.cyclic_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.cyclic_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_rank": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.duplicate_clashes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.duplicate_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.near_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.near_rank": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.near_rank_tight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.near_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.noClashB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_length_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_no_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_member_hidden": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_no_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.unused_cycle_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.Controls.unused_cycle_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.declared_constant_singleton": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.declared_identity": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.depPath_rank_no_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.evalConst_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.evalConst_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.evalConst_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.evalConst_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.filter_length_mono": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.filter_length_strict": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.initializer_dependency": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.linearize_starts": [],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.lookup_constant_canonical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.lookup_declared_constant": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.lookup_identity": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.lookup_own_singleton": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.mem_constDeps_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.mem_constNodes_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.nconst_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.nconst_levels_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.nconst_rank_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.nconst_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.nconst_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.no_self_path": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.rank_declared_dependency_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.rank_le_decls": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.rank_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.rank_lt_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.rank_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.rank_pos": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.rank_resolved_dependency_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.reaches_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.singleton_of_pairwise": [
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.teval_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.teval_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.teval_with_oracle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.walk_length_lt_decls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/ConstantDepth/Controls.lean:Solidity.Frontend.ConstantDepth.walk_rank": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/SolcJson/CallMetadata.lean:Solidity.Frontend.CallMetadata.inspect_declaration_member": [
   "propext"
  ],
@@ -40998,6 +41611,241 @@
   "Quot.sound",
   "propext"
  ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_value": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_negative": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_positive": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.empty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_frame_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_large_length_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_short_head_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_truncated_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.eof_padding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int16_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int16_near_width": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int248_near_width": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int256_all": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int8_near_width": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.large_entry": [
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.late_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.misaligned_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.near_width_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_min": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_suffix_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.one_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_int256_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_zero_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.positive_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.positive_max": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.selector_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.sign_matters": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.uint256_all": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.uint8_near_width": [],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.unshifted_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.unsigned_rejects_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.copy_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.copy_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.decode_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.decode_dirty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.decode_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.decode_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.eval_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.guarded_frame_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.guarded_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.range_iff_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.signed_decode_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.values_dirty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.values_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.values_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.values_succ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.values_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.alias_field": [
   "Classical.choice",
   "Quot.sound",
@@ -42763,6 +43611,384 @@
   "propext"
  ],
  "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ValidTail.holds_of_clean": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLen_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLen_static_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLen_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constant_clash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constant_not_overload": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constBin_paths": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constDeps_declared_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constNodes_length_le": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_decls": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_rank": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_rank_tight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.cyclic_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.cyclic_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_rank": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.duplicate_clashes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.duplicate_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_rank": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_rank_tight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.noClashB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_length_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_no_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_member_hidden": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_no_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.unused_cycle_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.unused_cycle_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.declared_constant_singleton": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.declared_identity": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.depPath_rank_no_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.filter_length_mono": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.filter_length_strict": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.initializer_dependency": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.linearize_starts": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_constant_canonical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_declared_constant": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_identity": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_own_singleton": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.mem_constDeps_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.mem_constNodes_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_levels_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_rank_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.no_self_path": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_declared_dependency_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_le_decls": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_lt_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_pos": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_resolved_dependency_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.reaches_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.singleton_of_pairwise": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.teval_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.teval_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.teval_with_oracle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.walk_length_lt_decls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.walk_rank": [
   "Classical.choice",
   "Quot.sound",
   "propext"

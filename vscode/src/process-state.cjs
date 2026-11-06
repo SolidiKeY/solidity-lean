@@ -1,0 +1,8 @@
+// Linux readback of a known-owned process/session. No process-name/global cleanup authority.
+'use strict';
+const fs=require('node:fs');
+function processState(pid){if(process.platform!=='linux')return null;try{const text=fs.readFileSync('/proc/'+pid+'/stat','utf8'),parts=text.slice(text.lastIndexOf(')')+2).split(' ');return{pid,state:parts[0],ppid:Number(parts[1]),group:Number(parts[2]),session:Number(parts[3]),threads:Number(parts[17]),birth:parts[19],rssPages:Number(parts[21])};}catch(error){if(['ENOENT','ESRCH'].includes(error.code))return null;throw error;}}
+const running=record=>!!record&&!['Z','X'].includes(record.state);
+function groupMembers(child){if(process.platform!=='linux'||!child.ownedGroup)return[];const root=processState(child.pid);if(root&&child.processBirth&&root.birth!==child.processBirth)throw new Error('Owned process identity changed; refusing group cleanup');return fs.readdirSync('/proc').filter(name=>/^\d+$/.test(name)).map(Number).map(processState).filter(record=>record?.group===child.pid&&record.session===child.pid);}
+function ownedProcess(params,parent){if(!Number.isSafeInteger(params?.pid)||params.pid<=0||params.pid===parent.pid||!/^\d+$/.test(params.birth)||!['analysis','proof','build'].includes(params.kind))throw new Error('Invalid owned process registration');const current=processState(params.pid);if(!running(current)||current.birth!==params.birth||current.ppid!==parent.pid||current.group!==params.pid||current.session!==params.pid)throw new Error('Process is not owned by this server');return{pid:params.pid,processBirth:params.birth,ownedGroup:true,kind:params.kind};}
+module.exports={processState,running,groupMembers,ownedProcess};

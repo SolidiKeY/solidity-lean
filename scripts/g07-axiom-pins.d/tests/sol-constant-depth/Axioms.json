@@ -1,0 +1,380 @@
+{
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLen_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLen_static_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLen_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.arrayLenB_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constant_clash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constant_not_overload": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constBin_paths": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constDeps_declared_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.constNodes_length_le": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_decls": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_rank": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_rank_tight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.chain_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.cyclic_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.cyclic_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_rank": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.diamond_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.duplicate_clashes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.duplicate_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_rank": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_rank_tight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.near_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.noClashB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_length_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_no_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.overflow_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.qualified_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_member_hidden": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_no_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.scoped_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.unused_cycle_teval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.Controls.unused_cycle_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.declared_constant_singleton": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.declared_identity": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.depPath_rank_no_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.evalConst_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.filter_length_mono": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.filter_length_strict": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.initializer_dependency": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.linearize_starts": [],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_constant_canonical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_declared_constant": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_identity": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.lookup_own_singleton": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.mem_constDeps_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.mem_constNodes_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_levels_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_rank_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_resolved_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.nconst_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.no_self_path": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_declared_dependency_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_le_decls": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_lt_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_pos": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.rank_resolved_dependency_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.reaches_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.singleton_of_pairwise": [
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.teval_det": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.teval_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.teval_with_oracle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.walk_length_lt_decls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-constant-depth/Axioms.lean:Solidity.Frontend.ConstantDepth.walk_rank": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
