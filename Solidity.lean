@@ -3828,6 +3828,8 @@ import Solidity.Source.Agreement.PrimitiveSlot
 import Solidity.Source.Agreement.PrimitiveSlotAssign
 import Solidity.Source.Agreement.PrimitiveSlotAssignControls
 import Solidity.Source.Agreement.PrimitiveSlotControls
+import Solidity.Source.Agreement.PrimitiveSlotReverse
+import Solidity.Source.Agreement.PrimitiveSlotReverseControls
 import Solidity.Source.Agreement.PrimitiveTypes
 import Solidity.Source.Calldata
 import Solidity.Source.CalldataExamples

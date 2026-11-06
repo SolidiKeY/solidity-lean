@@ -37,3 +37,5 @@
 | `Source/Agreement/PrimitiveSlotAssignControls.lean` | Mixed-type neighbor preservation, actual signed/unsigned writes and reversed-copy controls. |
 | `Source/Agreement/PrimitiveSavedAssign.lean` | Actual primitive save-and-shifted-copy sequence, composed normal agreement/client and exact horizon-four timeout. |
 | `Source/Agreement/PrimitiveSavedAssignControls.lean` | Saved/original head liveness, mixed neighbors and overwritten-target refusal controls. |
+| `Source/Agreement/PrimitiveSlotReverse.lean` | Actual deeper-slot-to-head primitive assignment with internally derived operand, normal client and timeout. |
+| `Source/Agreement/PrimitiveSlotReverseControls.lean` | Retained source/tail/neighbors and real opposite-direction controls. |
