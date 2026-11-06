@@ -1,0 +1,9 @@
+/-! RawTypedScope.scalarRead/liftScalar and their capture/drop laws preserve
+existing scalar occurrence words without coherence or cleaning premises.
+RawContinueLoop.initialized_scalar_read concretely preserves every old scalar
+through the read-local uint8 initializer/continue loop at every fuel and raw
+input. The proof uses actual grown-loop view equality and typed binder close.
+Controls retain uint8 word257 and Boolean word2, refuse normalization to word1,
+and preserve a changed outer word513 through drop. Function address/selector
+projection, full WordCells equality and ordinary Solidity readback remain
+separate; no raw-frame metadata identity or general admission is inferred. -/

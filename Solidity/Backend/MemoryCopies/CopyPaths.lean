@@ -182,13 +182,49 @@ theorem copy_paths_separated {H : HTy} {T U : Ty} {R Q : RefTy} (heap : Heap H)
     have later : first.H'.length ≤ right.id := (copy_path_bounds first.heap secondValue secondMemory secondPath right observedRight).1
     omega
 
+/--
+info: 'Solidity.Backend.MemoryCopies.mirror_path' depends on axioms: [propext]
+-/
+#guard_msgs in
 #print axioms mirror_path
+/--
+info: 'Solidity.Backend.MemoryCopies.CopyPathMirrors.contents' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
 #print axioms CopyPathMirrors.contents
+/--
+info: 'Solidity.Backend.MemoryCopies.copy_path_contents' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
 #print axioms copy_path_contents
+/--
+info: 'Solidity.Backend.MemoryCopies.copy_path_bounds' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
 #print axioms copy_path_bounds
+/--
+info: 'Solidity.Backend.MemoryCopies.copiedPaths' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
 #print axioms copiedPaths
+/--
+info: 'Solidity.Backend.MemoryCopies.copy_path_absent_iff' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
 #print axioms copy_path_absent_iff
+/--
+info: 'Solidity.Backend.MemoryCopies.copyPathObserver_keeps' depends on axioms: [propext]
+-/
+#guard_msgs in
 #print axioms copyPathObserver_keeps
+/--
+info: 'Solidity.Backend.MemoryCopies.copy_path_contents_keeps' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
 #print axioms copy_path_contents_keeps
+/--
+info: 'Solidity.Backend.MemoryCopies.copy_paths_separated' depends on axioms: [propext, Quot.sound]
+-/
+#guard_msgs in
 #print axioms copy_paths_separated
 end Solidity.Backend.MemoryCopies
