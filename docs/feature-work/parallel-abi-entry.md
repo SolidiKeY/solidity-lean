@@ -128,3 +128,25 @@ The first timing wrapper failed because /usr/bin/time is absent; Bash timing
 was used for the actual successful run. No known timing STOP was retried.
 Retiring-member work is queued only after authenticated intake; original
 G40 controls/replay/composition and G46 branch obligations remain open.
+
+
+## Independent backfill while audit intake waits: exact truncation failures
+
+Extended the existing cf1 generator with eight one-byte truncations, confined
+to the saved single-dimensional uint256-array cases. All 34 unchanged saved
+acceptance/length observations still pass; all eight derived inputs produce
+exactly AbiEntry.entry `.error .revert`, excluding panic, fuel and acceptance.
+The zero-length case truncates its length word; nonempty cases truncate the
+last required element. Selector bytes remain present. No reference observation
+is modified or relabelled and no body/failure bytes beyond decoder empty-revert
+classification are inferred. This remains a runtime regression, not a kernel
+proof or whole-entry/native correspondence.
+
+A negative test passed an original unmodified accepted vector to the failure
+check and correctly failed. Independent finder and skeptic reviews passed
+with no findings; neither built, used a Lean server or wrote files. Fresh
+current decoder checking took 1.613s and the 34+8 replay took 18.189s (Bash
+wall time, serial Lean-j1 under 12GiB virtual-memory limit). Full checkpoint
+gates remain pending; no RUNTIME_GATE_PASS is claimed. Retiring audit member
+head/stopped acknowledgement and authenticated frozen prompt/scope remain
+absent, and its scope remains untouched.

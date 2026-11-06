@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Generate decoder-only length checks from the immutable first cf1 fixture.
+Includes exact empty-revert controls for one-byte-truncated uint256 arrays.
 No body execution, return-byte equality, or full-fixture replay is claimed.
 """
 import hashlib, json, pathlib, sys
@@ -40,13 +41,24 @@ def replay (shape : Shape) (bytes : List UInt8) : Except String Nat := do
     | .fixed _ count => pure count
     | _ => pure length
   | .cons (.val _) .nil => throw "unexpected value entry for a calldata parameter"
+def uintArrayEmptyRevert (bytes : List UInt8) : Bool :=
+  match entry ⟨bytes, 128⟩ 1000 [⟨.array (.word (.uint 256)), .calldata, true⟩] with
+  | .error .revert => true
+  | _ => false
 #eval do
 """
 body = []
+truncated = 0
 for index, (pipeline, shape, raw, expected) in enumerate(rows):
     body.append(f"  let result{index} := replay ({shape}) {raw}")
     body.append(f'  unless result{index}.toOption == some {expected} do throw (IO.userError "vector {index} {pipeline} mismatch")')
-body.append(f'  IO.println "PASS: {len(rows)} saved pipeline observations; entry accepted and dynamic outer / declared fixed lengths match"')
+    if shape == shapes["f(uint256[])"]:
+        require(len(raw) > 4, "cannot truncate an absent argument")
+        body.append(f'  unless uintArrayEmptyRevert {raw[:-1]} do throw (IO.userError "truncated vector {index} {pipeline}: expected exact empty revert")')
+        truncated += 1
+require(truncated == 8, "unexpected single-dimensional vector inventory")
+body.append(f'  IO.println "PASS: {len(rows)} saved pipeline observations; entry accepted and dynamic outer / declared fixed lengths match; {truncated} one-byte truncations empty-revert"')
 pathlib.Path(sys.argv[1]).write_text(header + "\n".join(body) + "\n")
 print("fixture_sha256=" + hashlib.sha256(source.read_bytes()).hexdigest())
 print("vectors=" + str(len(rows)))
+print("truncated_controls=" + str(truncated))
