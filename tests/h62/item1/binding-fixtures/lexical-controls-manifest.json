@@ -1,0 +1,32 @@
+{
+  "headBeforeCheckpoint": "334e008e7b22b8f3589654517fc5fb309363d064",
+  "gates": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item1/binding-fixtures/test_lexical.py",
+      "exit": 0,
+      "wallSeconds": 0.12141599999995378,
+      "path": "/workspace/solidity-lean/tests/h62/item1/binding-fixtures/artifacts/lexical-controls/test_lexical.py.log",
+      "sha256": "240f530659684cc57d031e02a606e0eb155622712358e229d428dce27f067d88"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item1/binding-fixtures/test_reconciliation.py",
+      "exit": 0,
+      "wallSeconds": 20.164871981999568,
+      "path": "/workspace/solidity-lean/tests/h62/item1/binding-fixtures/artifacts/lexical-controls/test_reconciliation.py.log",
+      "sha256": "be4855da3acb180d57bb2b420099bcbe905738a679798b978a7207fb4c39ca77"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item1/binding-fixtures/test_source_intervals.py",
+      "exit": 0,
+      "wallSeconds": 2.5604321299997537,
+      "path": "/workspace/solidity-lean/tests/h62/item1/binding-fixtures/artifacts/lexical-controls/test_source_intervals.py.log",
+      "sha256": "f0e2b54fd1f051d5d9b864d21894c75d61d5cd2ce1de6233f55e4d24a3ad318e"
+    }
+  ],
+  "boundary": "External Python lexical accounting only. No Lean source/proofs changed in this checkpoint; no Lean timing or axiom gate claimed.",
+  "priorFailures": [
+    "Read-only sandbox test attempt failed to create temporary directories; rerun with temporary-file access passed.",
+    "Initial uncached all-file filter took51.360s; subsequent all-file scan123.679s. It was replaced with substring-prefiltered bounded memoization; no unchanged timing STOP retried."
+  ],
+  "reviews": "Independent read-only finder and skeptic; no Lean/server. Fixed zero-hash raw strings, trailing escape EOF, and explicit quoted-name unknown reporting."
+}

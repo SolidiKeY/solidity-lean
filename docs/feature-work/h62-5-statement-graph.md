@@ -402,3 +402,130 @@ budget, axiom-set or exclusion change. The specific Contracts:1104 wait still
 stands, with its exact empty guard preserved: H30 standard-axiom re-pinning does
 not authorize changing it. Full PassCorrect, witness/vacuity, public-shim/editor
 requirements and all member frozen acceptance/STOP constraints remain binding.
+
+### H82b authenticated intake and typed witness checkpoint
+
+The H82b package at `/workspace/h82-handoffs/h82b-20261106T180909Z`
+passed its archive, manifest and all 557 per-file hashes. Its authoritative
+assignment envelopes, live scope and stopped/head receipts resolve the metadata
+waits. Legacy rendered-wrapper hashes remain provenance; no byte equivalence
+with the extracted assignment text is asserted. Three exact final heads are
+integrated: result-size-cache `6c93ebcd`, pin-fragments `7587ff4e`, and
+trust-fragments `8dc693e4`. Drift, artifact and runtime final Git objects remain
+unavailable. Metadata receipt does not establish their merge or any gate pass.
+The coordinator-requested origin/master merge is `fe5140232485efba2d47ff55f0ac90e497c1e22f`.
+All own uncommitted work was preserved through that merge.
+
+Optional `#h62_witness` registrations now compute the universal closure of an
+actual elaborated binder or constructor-field type. A safe kernel-checked helper
+must match that closure with rigid consumer universes and no unresolved
+metavariables or transitive axioms. Exported witness evidence is separate from
+statement and proof-helper dependencies. The graph verifies location, exact type,
+producer ownership and preceding named premise prerequisites. Witness availability
+alone cannot discharge an earlier open premise or complete a Type-valued interface.
+The fixture separates inhabited positive witnesses from intentional contradiction.
+No production statement, definition, axiom guard, exclusion or proof budget changed;
+no new source axiom, sorry or native_decide was added.
+
+At this checkpoint 44 external Python controls pass; exporter per-file MCP
+and direct serial exporter/WitnessFixture compilation pass with official Lean
+4.35.0. Evidence is under `/workspace/h62-statement-graph-evidence/h82-witness-*`.
+The authenticated H78/H81 policy is applied conservatively: one Lean job, explicit
+-j1, 8 GiB address-space cap, no swap and 4 GiB available reserve. Full fixture
+acceptance, new negative controls and fresh timing remain pending at commit time.
+Production G49/G50 declarations and Contracts' exact empty guard fix remain waits;
+no production discharge or RUNTIME_GATE_PASS is claimed. Pin writer STOP remains
+unchanged and its explicitly paused proposal was not resumed.
+
+Final witness checkpoint gates supersede the pending note above. At committed
+source head recorded in `h82-witness-evidence.json`, full clean-tree fixture
+acceptance passed, including 44 Python controls, deterministic same/fresh-process
+exports, unsafe/axiom/type/index/duplicate/universe/import rejection checks and
+all graph count assertions. Certificate and Pair now explicitly inhabit Type;
+MCP exposed the earlier inferred-Prop fixture gap. The corrected acceptance
+checks actual elaborated sort expressions and the certificate binder's isProp
+flag. Two harness-only assertion failures (nonexistent field and repr layout)
+were fixed without weakening those checks; failed evidence is retained off git.
+Both read-only reviews found no remaining static blocker. Exporter and corrected
+WitnessFixture per-file MCP diagnostics pass without warnings. MCP library
+shutdown prints an event-loop warning after results; diagnostic calls succeed
+and exit zero. No Lean server was used by either reviewer.
+
+Official versions: Lean 4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+Lake 5.0.0-src+eb6cafb. All bounded KeySort controls pass. Seven-run medians on
+the corrected fixture tree are 1.209114830s before and 1.162983514s after,
+-3.8153%; this is an unchanged-core control, not a project speedup claim.
+The evidence manifest binds actual outputs and the tested committed head.
+Full production DAG/counts, actual G49/G50 inventory, Contracts empty-guard fix,
+project final gate, and all inherited open member obligations remain unfinished.
+No known timing STOP was rerun, no frozen production statement/guard changed,
+and no original goal was created, reset, completed or claimed paused.
+
+### Fresh-thread handoff after three implementation milestones
+
+The typed witness fixture, local H55 v1 compatibility and trust-fragment snapshot/
+resource hardening milestones are committed and independently reviewed. Follow
+user-required fresh-thread handoff now; do not self-launch a replacement goal or
+VM. Original VM environment:
+ccarenv_b64_Y2NhcmVudl9mNWI2NjA5Mjg2NDA4MTkxYjNlNzQ5ZGM2YWM0NTI5OQ.
+Repository /workspace/solidity-h62-statement-graph, same assigned branch,
+original goal objective rendered-prompt provenance SHA256
+9b5f127834cb2597a16f03dd05cba17c2467359fefcd5b5ba42db8e88933075a.
+No exposed get_goal/pause operation; do not invent a goal ID or create another.
+Implementation head before this documentation checkpoint:
+6f3e173b0fd103d0b4d59e88e3248a8399ea3c24. Entire original/H82 queue unfinished.
+
+Exact origin SHA fetches for drift faca44dc415dfbdab9b9ea6b0664f1e755abaa57,
+artifact 9cc85b14fa3f611e183379c257b10b19e1aa5325 and runtime
+f8975f25b12a5e9723b00ec794b261708280092c each exited 128 with upload-pack:
+not our ref. Preserve those typed artifact waits and recover original bundles
+through coordinator; do not assume authenticated metadata contains Git objects.
+Next independent queue work remains integrated H55 local controls and trust
+registration acceptance after required inputs, plus original graph production
+inventory when relayed. Explicitly paused pin proposal remains stopped. No
+full-project gate, production proof discharge or whole-goal completion claimed.
+
+### H70/H90 continuation: independent refusal coverage
+
+Coordinator routed compatibility waits to migrate-root-gate (Contracts:1104 exact
+empty guard and Syntax.Raw); G49 inventory forwarding is staged for Claude and
+no stale/retired owner was contacted. Routing is not validation or owner agreement.
+No fresh-thread creation, goal reset or replacement is inferred from the router.
+H86 unavailable raw evidence remains an explicit regeneration limitation.
+
+Independent graph backfill now generates named regression docstrings for witness
+refusals, including disabled kernel checking and unresolved witness universes.
+A direct syntactic unused-universe fixture was rejected by Lean before reaching
+the exporter; a first low-level driver lacked the Command/Core monad lift. Those
+failed harness attempts are retained and not counted as intended refusals. The
+corrected control uses a safe kernel-checked True definition with an unused
+universe parameter, then confirms registerWitness refuses its unresolved level.
+The kernel-skip control confirms the command refuses before adding any helper.
+No theorem is accepted with kernel checking disabled; no axiom/sorry/native_decide
+or production declaration/budget/guard change was introduced.
+
+All witness negatives require exact JSON error bodies, never filename text,
+warnings or setup failures. Forty-five Python controls pass. The corrected direct
+probes pass; full clean-tree optional fixture acceptance remains pending at this
+commit. Existing production inventory/full gate waits remain. The separate H55
+size proposal hit +21.4335% timing STOP and is stopped/unaccepted; it was not
+rerun unchanged while these independent controls were developed.
+
+Final committed-tree refusal acceptance passes at the source head recorded in
+h70-controls-evidence.json: 45 Python controls, intended JSON diagnostic bodies
+for all witness refusals, deterministic exports, original graph controls and
+bounded KeySort. Seven-run KeySort medians 1.315427167s before and 1.368037786s
+after (+3.9995%, within 10%); unchanged-core control only. Both independent
+read-only reviews found no blocking delta and used no Lean/server. Source and
+output hashes bind this actual acceptance; no production statement/guard edit,
+axiom/sorry/native_decide, budget change or RUNTIME_GATE_PASS.
+
+The queued trust coverage backfill accounts for all frozen source occurrences:
+44 blocks, 1380 headline occurrences/1373 distinct names, 77 imports and 17 print
+commands. Two regenerations are byte-identical, and all current fragments match
+the pinned central source SHA256 ece2e6cebbee95d82fec246892993662e81dcfd895831981583d2b0867a37482.
+This is current committed-source coverage, not declaration-existence proof or
+authentication of unavailable original worker runtime evidence. The held audit
+was not started. H55 size controls are functionally improved but their +21.4335%
+performance STOP remains binding. No master publication, retired-lane revival,
+fresh-thread creation, goal recreation/reset or claim of whole-goal completion.

@@ -13,8 +13,9 @@ mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings now also pass. Full normal
-repository validation remains unfinished. H82 retirement explicitly stops this worker;
-the successor receives the preserved queue and evidence. This is not completion.
+repository validation remains unfinished. The later coordinator instruction explicitly
+reactivated this same worker and authorized merging origin/master and continuing.
+The retirement section below is historical; no goal was created or reset.
 
 | Checkpoint | Result |
 |---|---|
@@ -337,3 +338,82 @@ pass. Independent read-only finder and skeptic reviews found no issues.
 The unchanged global documentation checker still fails on four references
 outside this successor scope; this correction does not establish full audit
 validation, timing acceptance or completion.
+
+## Reactivated post-merge validation (2026-11-06)
+
+The coordinator reported audit head e55d46407e merged into master20e492ee9 with
+touched gate/Bridge build/reviews passing, and explicitly instructed this worker
+to merge origin/master and continue. Fetch verified originalbase, e55d46407 and
+20e492ee9 ancestors of d96f2406d352de7e0b72ba6ac4ab29dc457582c6. The clean assigned
+branch fast-forwarded to d96; no local work was discarded, and no push was made.
+Existing goal get/resume operations are not exposed; no replacement/reset goal
+was created. User reactivation authorizes the remaining original work.
+
+All24 mapped source files and the frozen module map remain byte-identical to
+c6f550e. Other upstream files/config changed. Frozen proof/runtime receipts and
+retirement exports remain preserved. New resume tooling produces separately
+labelled integration-tree receipts, never relabels old records or weakens their
+checks. A separate deterministic TOML preserves current root target metadata and
+defaults while adding explicit stack131072/-j1 on every target and the auditlib.
+The current upstream policy removed solkeycheck from default targets/gates; this
+worker retains the explicitly required KeySort diagnostic prerequisite and uses
+the current unchanged ./run-lean.sh for full confirmation.
+
+Resume sources are pinned to all7592 canonical integration Lean paths (including
+generated roots/vendor), exact current path set and SHA256 bytes before/after.
+Unexpected sources, changed upstream inputs or changed frozen map/files fail
+closed. Support binds driver/helper/config/scanner bytes and all9 local Lean
+files before/after. The original evidence manifest is read from integration Git
+bytes before reusing archived external fixture hashes. It stays untouched; new
+evidence uses a separate resume-evidence.sha256 manifest.
+
+All9 audit modules and KeySort passed fresh complete MCP diagnostics, bound
+output/resource/source checks, exit0 and verified cleanup. Acceptance confirms
+177 unique fidelity rows,439 binders, seven success theorems and exactly10
+encoded fixtures identical to the authenticated archived external-test inputs.
+This reuses those external observations for identical code, and claims neither
+a new EVM run nor a Lean gas/fork/general compiler bridge proof. No Lean source,
+frozen statement, axiom, exclusion or proof budget changed.
+
+Actual tools remain Lean4.24.0 Release797c613eb9b6d4ec95db23e3e00af9ac6657f24b
+and Lake5.0.0-src+797c613. Existing16GiBhardVM/12GiBtaskRSS/4GiBreserve/noSwap/
+oneheavyjob/-j1 resource policy is unchanged. Under identical documented cache
+conditioning, the seven-sample warm before/after medians are1.527788517s and
+1.541366676s (+0.888746%, within10%). This comparison uses the new integration
+identity and is not compared to the earlier frozen-tree baseline.
+
+Both independent reviewers found and had fixed before-only imported-source
+checking/untracked omission and unpinned archive-manifest authority. They then
+accepted fresh9+KeySort receipts, complete177/439/7/10 accounting, resource limits
+and timing. Three post-merge receipt controls pass (validchain, replaced archive
+authority rejected, forged upstream digest with rebound outer hash rejected);
+all four scanner tests pass. Neither reviewer used Lean/server/builds or edited.
+
+Remaining: complete current normal full ./run-lean.sh under these bounds, record
+its actual outcome, obtain final read-only review and export the exact committed
+head/evidence. The coordinator's reported touched/Bridge passes are reported
+evidence, not a substitute for an unrun local full gate. No RUNTIME_GATE_PASS or
+full assignment completion is claimed at this checkpoint.
+
+### Full-gate resource recovery on the integration tree
+
+First current full attempt stopped at375/6053 after335.149s when its strict
+4GiB reserve was crossed (minimum4273532928bytes); noLeanerrors,cleanuptrue,
+noSwap,oneheavyjob. PowerBounds passed170s. Generated-build advice reclaimed
+only90MB; retry stopped at the same dependency after21.358s, not a passing gate.
+
+The installed Lake uses /home/agent/.cache/lake/artifacts, a separate local
+cache (not a downloaded per-master cache). It held16010 regular artifacts,
+5.308GB. A new additive cache_artifact_advice.py uses the same writer lock,
+rejects liveLean/Lake and symlinked roots, anchors traversal with directoryFDs,
+opens nofollow/nonblocking/read-only, and advises current-UID regular files only.
+It writes/removes no artifacts, changes no budget or reserve accounting, and
+uses no network/globalcache drop. Both independent reviewers accepted it after
+requiring the nonblocking-open safeguard. No source/proof edits were made.
+
+Its first run advised5.308GB with zero errors/skips and observed cgroup current
+fall from5991899136 to500625408bytes. Advice is not guaranteed eviction. The
+previous timing pair remains valid only for its documented generated-build-cache
+conditioning; this artifact advice is separate full-gate memory housekeeping.
+The unchanged full gate will resume using retained completed artifacts and the
+same16hard/12RSS/4reserve/noSwap/onejob policy. Both failed attempts are retained.
