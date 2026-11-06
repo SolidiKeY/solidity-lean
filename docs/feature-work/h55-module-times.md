@@ -73,3 +73,20 @@ passed six test methods. Independent finder and skeptic reviews remain pending.
 Timeout enforcement and fake-clock detection are not implemented; synthetic
 status and malformed-time tests do not establish either property. No source or
 proof migration occurred, and the full gate remains incomplete.
+
+## Experimental process and clock controls
+
+`measurement_control.py` runs isolated subprocess controls, with timeout
+termination of the spawned process group and comparisons of monotonic and
+boot-time clocks. Its tests exercise successful execution, nonzero exit,
+spawn failure, real timeout, invalid configuration and injected clock
+inconsistency. `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s
+tests/h55/module-times -p 'test_*.py' -v` passed 11 methods after this
+work. These are synthetic controls, not H56 measurements or a Lean proof.
+The runner is deliberately not a production gate: it discards process output,
+does not authenticate clocks or execution environment, cannot detect clocks
+falsified consistently, and does not impose the required memory/no-swap/serial
+or source/cache binding conditions. Its process timeout begins after process
+creation; the later clock check includes creation time. In particular no gate
+may accept its output as authenticated measurement evidence. Independent
+finder and skeptic reviews remain outstanding.
