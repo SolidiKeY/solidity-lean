@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/V07/AddressComparisons.lean:Solidity.Lowering.V07.AddressComparisons.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisons.lean:Solidity.Lowering.V07.AddressComparisons.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisons.lean:Solidity.Lowering.V07.AddressComparisons.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisons.lean:Solidity.Lowering.V07.AddressComparisons.source_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisons.lean:Solidity.Lowering.V07.AddressComparisons.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisons.lean:Solidity.Lowering.V07.AddressComparisons.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

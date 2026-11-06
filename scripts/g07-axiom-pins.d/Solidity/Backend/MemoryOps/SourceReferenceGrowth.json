@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceGrowth.lean:Solidity.Backend.MemoryOps.sourceBoolRefMemory_wk": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.alloc_bool": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

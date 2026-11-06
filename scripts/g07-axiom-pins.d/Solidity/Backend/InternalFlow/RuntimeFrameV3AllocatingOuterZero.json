@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZero.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.all_counts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZero.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZero.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.return_from_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,42 @@
+{
+  "scope": "Selected actual Source unchecked/while constructors around canonical alias/rethrow; not general assembly/arithmetic/frontend/Source adequacy",
+  "facts": [
+    "existing_items",
+    "declare",
+    "rethrow",
+    "items_run",
+    "unchecked_run",
+    "while_false",
+    "while_true",
+    "restore_cons",
+    "unchecked_decl_rest",
+    "unchecked_low",
+    "while_low",
+    "execute_run",
+    "carry_run",
+    "sample_run",
+    "sample_dead",
+    "sample_empty",
+    "sample_panic",
+    "sample_wrong_alias",
+    "sample_raw",
+    "sample_nonword",
+    "while_sample",
+    "while_break",
+    "while_continue_step",
+    "while_continue_timeout"
+  ],
+  "fullCoverage": false,
+  "fullProofGate": "pending",
+  "originalObligations": 24,
+  "originalCombinations": 6,
+  "nativeComparisons": 0,
+  "originalStrictJournalFailures": 5,
+  "missing": [
+    "ordinary nonempty-revert producer",
+    "general Source try selector/raw sessions",
+    "frontend admission/general unchecked and loop coverage",
+    "allocation/refinement/G01/compiler/world/V16 adequacy"
+  ],
+  "boundary": "Raw LocalValues/journals explicit unchanged companions; no runClean or new world rollback. Literal-true continue timeout is all-horizon actual Source proof."
+}

@@ -1,0 +1,335 @@
+{
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.address_complete": [
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.address_table": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.big_reader": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_insufficient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_invalid_flag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_invalid_size": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_padding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_price": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_valid_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_zero_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.blake_zero_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.bnadd_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.bnmul_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.byte_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.byte_list": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.array": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.bad_point": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_bad_flag": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_byte_order": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_core_lengths": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_final_one": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_final_one_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_high_header": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_one": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.blake_short_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.bnadd_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.bnmul_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.ecrecover_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.filled": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.identity_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.identity_lengths": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.identity_nonzero_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.invalid_recovery": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.lengths": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.modexp_base_truncation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.modexp_bound_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.modexp_empty_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.oversized_modexp": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.pairing_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.point_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.ripemd_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.ripemd_lengths": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.sha_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.sha_lengths": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.unsupported": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.unsupported_core": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.wide_base": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.Controls.zeros": [],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.ecrecover_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.first_four": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_gas": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_one_short": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_output": [
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.identity_unaffordable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.ofNat_nat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.pairing_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.pairing_price": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.point_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.ripemd_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.ripemd_price": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.sha_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.sha_price": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.subtract_nat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.words_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.words_last": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.words_multiple": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.words_next": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.words_rounding": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/tests/precompile-agreement/Axioms.lean:SolidityBridge.PrecompileAgreement.zero_padding": [
+  "Quot.sound",
+  "propext"
+ ]
+}

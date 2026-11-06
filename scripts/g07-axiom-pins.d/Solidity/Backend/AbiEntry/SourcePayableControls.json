@@ -1,0 +1,40 @@
+{
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.no_collision_fallthrough": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.no_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.payable_all_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.protected_and_saved": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.rejected_collision": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.source_revert_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.source_table": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayableControls.lean:Solidity.Backend.AbiEntry.SourcePayableControls.zero_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
