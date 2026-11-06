@@ -20,7 +20,7 @@ import sys
 import time
 sys.dont_write_bytecode = True
 from census import mask
-from receipts import find_direct_compile
+from receipts import find_direct_compile, parse_export_log, probe_total_or_tombstone, CHUNK_HELPER
 
 GIB = 1024**3
 BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
@@ -141,10 +141,14 @@ def main():
     parser.add_argument("--export-census", action="store_true")
     parser.add_argument("--reuse-private", action="store_true")
     parser.add_argument("--export-only", action="store_true")
+    parser.add_argument("--chunked-export", action="store_true")
+    parser.add_argument("--chunk-size", type=int, default=16)
     parser.add_argument("files", nargs="+")
     args = parser.parse_args()
     root, evidence, lean = args.root.resolve(), args.evidence.resolve(), args.lean.resolve()
     if evidence.is_relative_to(root): parser.error("H44: outputs must be outside git")
+    if args.chunked_export and not args.export_census: parser.error("--chunked-export requires --export-census")
+    if not 1 <= args.chunk_size <= 64: parser.error("chunk size must be in 1..64")
     if args.export_only and not args.export_census: parser.error("--export-only requires --export-census")
     evidence.mkdir(parents=True, exist_ok=True)
     build = evidence/"private-olean"; build.mkdir(exist_ok=True)
@@ -213,30 +217,53 @@ def main():
                     raise SystemExit(receipt["exit"])
             seen.add(relative);pending.remove(relative)
 
-        if args.export_census:check(HELPER,force=True)
+        helper=CHUNK_HELPER if args.chunked_export else HELPER
+        if args.export_census:check(helper,force=True)
         for relative in args.files:
             check(relative)
             if not args.export_census:continue
             module=module_for(relative)
             scratch=run/"scratch"/Path(relative);scratch.parent.mkdir(parents=True,exist_ok=True)
-            scratch.write_text("import "+quoted_module(module)+"\nimport tests.h62.item2.«audit-calculus».KernelCensus\n#audit_module \""+module+"\"\n")
-            log=run/"kernel"/Path(relative).with_suffix(".log");log.parent.mkdir(parents=True,exist_ok=True)
+            preamble="import "+quoted_module(module)+"\nimport "+quoted_module(module_for(helper))+"\n"
             index=(evidence/"kernel"/relative).with_suffix(".json");index.parent.mkdir(parents=True,exist_ok=True)
             index.unlink(missing_ok=True)
+            export_format="chunks-v1" if args.chunked_export else "module-v1"
+            helper_binding=dict(helper_file=helper,helper_source_sha256=sha(root/helper),
+                helper_artifact=str(artifact(helper)),helper_artifact_sha256=sha(artifact(helper)))
+            if args.chunked_export:
+                probe=scratch.with_suffix(".probe.lean")
+                probe.write_text(preamble+f'#audit_module_chunk "{module}" from 0 count {args.chunk_size}\n')
+                probe_log=run/"probe"/Path(relative).with_suffix(".log");probe_log.parent.mkdir(parents=True,exist_ok=True)
+                execution=execute([str(lean),"-j1","--tstack=131072","--memory=12288","--root=/workspace",str(probe)],root,env,probe_log)
+                probe_record=dict(execution,kind="kernel-census-probe",file=relative,module=module,
+                    source_sha256=sha(root/relative),scratch=str(probe),scratch_sha256=sha(probe),**helper_binding)
+                if execution["exit"]:
+                    save(dict(probe_record,kind="kernel-census"))
+                    raise SystemExit(execution["exit"])
+                save(probe_record)
+                try:
+                    total=probe_total_or_tombstone(probe_record,args.chunk_size,save)
+                except RuntimeError:
+                    raise SystemExit(89)
+                offsets=list(range(0,total,args.chunk_size)) or [0]
+                scratch.write_text(preamble+"".join(f'#audit_module_chunk "{module}" from {offset} count {args.chunk_size}\n' for offset in offsets))
+            else:
+                scratch.write_text(preamble+'#audit_module "'+module+'"\n')
+            log=run/"kernel"/Path(relative).with_suffix(".log");log.parent.mkdir(parents=True,exist_ok=True)
             command=[str(lean),"-j1","--tstack=131072","--memory=12288","--root=/workspace",str(scratch)]
             receipt=dict(execute(command,root,env,log),kind="kernel-census",file=relative,module=module,
+                         export_format=export_format,
                          source_sha256=sha(root/relative),artifact=str(artifact(relative)),artifact_sha256=sha(artifact(relative)),
-                         helper_source_sha256=sha(root/HELPER),helper_artifact=str(artifact(HELPER)),helper_artifact_sha256=sha(artifact(HELPER)),
-                         scratch=str(scratch),scratch_sha256=sha(scratch))
-            result=[line.split("H62_KERNEL_CENSUS ",1)[1] for line in log.read_text().splitlines() if "H62_KERNEL_CENSUS " in line]
-            if receipt["exit"]==0 and len(result)==1:
-                data=json.loads(result[0])
-                if data["module"]!=module:raise RuntimeError("wrong exported module")
+                         scratch=str(scratch),scratch_sha256=sha(scratch),**helper_binding)
+            if receipt["exit"]==0:
+                try:
+                    data=parse_export_log(log.read_text(),module,export_format)
+                except (RuntimeError,ValueError,KeyError,TypeError) as failure:
+                    save(dict(receipt,exit=89,assembly_error=str(failure)))
+                    raise SystemExit(89)
                 output=log.with_suffix(".json");output.write_text(json.dumps(data,indent=2)+"\n")
                 receipt.update(json=str(output),json_sha256=sha(output),index=str(index))
                 index.write_bytes(output.read_bytes())
-            else:
-                if receipt["exit"]==0:receipt["exit"]=89
             receipt=save(receipt)
             if receipt["exit"]:raise SystemExit(receipt["exit"])
 

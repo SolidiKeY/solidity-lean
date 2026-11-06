@@ -78,4 +78,69 @@ class FreshnessControls(unittest.TestCase):
         with self.assertRaises(RuntimeError):receipts.validate_dependency_edge(parent,child,"same-object")
 
 
+class ChunkControls(unittest.TestCase):
+    def parts(self):
+        return [{"module":"M","offset":0,"limit":2,"total":3,"theorems":[{"name":"a"},{"name":"b"}]},
+                {"module":"M","offset":2,"limit":2,"total":3,"theorems":[{"name":"c"}]}]
+
+    def parse(self,parts):
+        log="\n".join("H62_KERNEL_CENSUS_CHUNK "+json.dumps(part) for part in parts)
+        return receipts.parse_export_log(log,"M","chunks-v1")
+
+    def test_all_chunks_reassemble(self):
+        self.assertEqual([r["name"] for r in self.parse(self.parts())["theorems"]],["a","b","c"])
+
+    def test_missing_chunk_rejected(self):
+        with self.assertRaises(RuntimeError):self.parse(self.parts()[:1])
+
+    def test_duplicate_chunk_rejected(self):
+        parts=self.parts()
+        with self.assertRaises(RuntimeError):self.parse(parts+parts[1:])
+
+    def test_inconsistent_total_rejected(self):
+        parts=self.parts();parts[1]["total"]=4
+        with self.assertRaises(RuntimeError):self.parse(parts)
+
+    def test_repeated_theorem_rejected(self):
+        parts=self.parts();parts[1]["theorems"]=[{"name":"b"}]
+        with self.assertRaises(RuntimeError):self.parse(parts)
+
+    def test_truncated_chunk_rejected(self):
+        parts=self.parts();parts[0]["theorems"].pop()
+        with self.assertRaises(RuntimeError):self.parse(parts)
+
+    def test_empty_module_has_one_checked_empty_chunk(self):
+        parts=[{"module":"M","offset":0,"limit":16,"total":0,"theorems":[]}]
+        self.assertEqual(self.parse(parts),{"module":"M","theorems":[]})
+
+
+class ProbeFreshnessControls(unittest.TestCase):
+    def test_malformed_zero_exit_probe_supersedes_prior_success(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            log=Path(temporary)/"probe.log"
+            for text in [
+                "H62_KERNEL_CENSUS_CHUNK {bad json",
+                "H62_KERNEL_CENSUS_CHUNK "+json.dumps({"module":"M"}),
+                "H62_KERNEL_CENSUS_CHUNK "+json.dumps({"module":"M","offset":0,"limit":16,"total":-1,"theorems":[]}),
+            ]:
+                with self.subTest(text=text):
+                    log.write_text(text)
+                    history=[{"kind":"kernel-census","file":"M.lean","exit":0}]
+                    record={"kind":"kernel-census-probe","file":"M.lean","module":"M","log":str(log),"exit":0}
+                    with self.assertRaises(RuntimeError):
+                        receipts.probe_total_or_tombstone(record,16,history.append)
+                    latest=[r for r in history if r["kind"]=="kernel-census"][-1]
+                    self.assertEqual(latest["exit"],89)
+                    with self.assertRaises(RuntimeError):
+                        receipts.validate_export(latest,Path(temporary),{},{})
+
+    def test_well_formed_probe_total(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            log=Path(temporary)/"probe.log"
+            log.write_text("H62_KERNEL_CENSUS_CHUNK "+json.dumps({"module":"M","offset":0,"limit":16,"total":1,"theorems":[{"name":"t"}]}))
+            history=[]
+            self.assertEqual(receipts.probe_total_or_tombstone({"module":"M","log":str(log)},16,history.append),1)
+            self.assertEqual(history,[])
+
+
 if __name__=="__main__":unittest.main()

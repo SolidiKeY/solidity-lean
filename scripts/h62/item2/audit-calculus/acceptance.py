@@ -11,6 +11,7 @@ sys.dont_write_bytecode=True
 from owners import inventory
 from receipts import HELPER, sha, validate_export, find_direct_compile, validate_dependency_edge
 from bounded_lean import imports
+from reconcile import reconcile_sources
 
 BASE="c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 
@@ -52,7 +53,7 @@ def main():
         if record.get("schema")!=2:
             if file in files:unrefreshed.append(file)
             continue
-        item=validate_export(record,root,certified(file),certified(HELPER))
+        item=validate_export(record,root,certified(file),certified(record.get("helper_file",HELPER)))
         if file in files:exported.append(file)
         for theorem in item["theorems"]:
             key=(item["module"],theorem["name"])
@@ -84,25 +85,30 @@ def main():
             if record["original_type_expression"]!=kernel[key]["type_expression"]:
                 raise RuntimeError("exact joint/kernel statement expression differs: "+str(key))
             witnesses[key]=dict(record,file=relative)
-    accounted=[];matched_keys=set();source_keys=set()
+    identities=reconcile_sources(source["declarations"],kernel)
+    accounted=[];matched_keys=set()
     for row in source["declarations"]:
-        module=row["file"].removesuffix(".lean").replace("/",".")
-        key=(module,row["source_name"]);source_keys.add(key)
+        key=identities.get(row["id"])
         record=dict(row,ownership=ownership[row["file"]])
         record["owner"]="See separate writer contact and producer routing; exact semantic producer pending"
+        if key is not None:
+            statement=kernel[key]
+            record["kernel_statement"]=statement
+            record["signature_status"]="source identity uniquely matched to exact kernel type, independently of witness"
+            record["hypotheses"]="exact dependent telescope exported; semantic role classification pending"
         if key in witnesses:
             record["joint_witness"]=witnesses[key];matched_keys.add(key)
             record["hypotheses"]="joint telescope verified; semantic role reviewed for this bounded fixture"
-            record["signature_status"]="source candidate matched to exact kernel type and joint receipt"
         accounted.append(record)
     supporting={key:value for key,value in witnesses.items() if key not in matched_keys}
     for key in supporting:
         if kernel[key]["file"] in files:raise RuntimeError("mapped joint receipt lacks source match")
-    # Supporting transitive-interface witnesses are retained, never counted as
-    # progress against the frozen module-map declaration census.
+    # Supporting transitive-interface witnesses never inflate mapped coverage.
+    source_keys=set(identities.values())
     additional=[dict(row,status="pending generated/private/projection classification") for key,row in sorted(kernel.items()) if key in scoped_kernel and key not in source_keys]
     unresolved=[file for file in files if not ownership[file]["writer_contacts"]]
-    counts={"source_candidates":len(accounted),"verified_source_joint_witnesses":len(matched_keys),"supporting_dependency_joint_witnesses":len(supporting),
+    counts={"source_candidates":len(accounted),"exact_kernel_matched_source_candidates":len(identities),
+            "source_signatures_pending":len(accounted)-len(identities),"verified_source_joint_witnesses":len(matched_keys),"supporting_dependency_joint_witnesses":len(supporting),
             "source_candidates_uncovered":len(accounted)-len(matched_keys),"fresh_kernel_modules":len(exported),
             "kernel_theorems_in_fresh_modules":len(scoped_kernel),"additional_kernel_candidates_uncovered":len(additional),
             "writer_contacts_resolved_files":len(files)-len(unresolved),"writer_contacts_unresolved_files":len(unresolved)}
