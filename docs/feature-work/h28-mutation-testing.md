@@ -1,25 +1,27 @@
 # H28 semantic mutation testing
 
-Status: the declared 30-operator manifest is fully run: no entry is unrun and
-none is in error. The remaining queue obligations are not claimed:
+Status: **scope-complete and sealed** (`runs/final-ff85b708`). The final
+manifest `manifests/h28-final.json` extends the frozen 30-operator census with
+a clause-level inventory of the 98 constructors the census missed. Every
+entry is decided: none is unrun and none is in error. Each of the nine
+families has a semantic verdict on a census site or clause fixture, and each
+has a negative control that passed. `tools/accept.py` recomputes all of this
+from the per-check records and reports `scope_complete: true`.
+`tools/seal.py --verify` re-hashes the 108 sealed files. The repository gates
+are under [Gates](#gates), and what is not proved is under [Limits](#limits).
 
-- the clause-level inventory (dispositions are per constructor and per
-  declared operator site);
-- `scope_complete` acceptance;
-- an immutable seal.
-
-The repository gates are reported under [Gates](#gates). See also
-[Limits](#limits).
-
-| Recorded run | `runs/full-20d7b77c` |
+| Recorded run | `runs/final-ff85b708` (sealed) |
 |---|---|
-| Head | `20d7b77c2e0c9e97559e8f3e8332ad9f4487edc4` |
-| Manifest | `manifests/h28-full.json`, schema 3, sha256 `bb3f1f97…` (full value in `summary.json`) |
-| Census | 215 constructors; 194 site mutants on 117 constructors plus 4 `Tms` helper edits (198) |
-| Proof oracle (census) | 146 detected, 5 equivalent-certified, 47 invalid-compilation, 0 error, 0 unrun |
-| Semantic witnesses | 20 of 20 scored cases killed, 0 witness-failed, 0 error, 0 unrun. The cases were chosen because a witness exists, so this is witness validation, not a census score |
-| Controls | 4 manifest controls plus 1 pilot control (label renamed), all as declared (`controls_pass: true`) |
+| Head | `ff85b708f584812e793f3057841626e4b994376f` |
+| Manifest | `manifests/h28-final.json`, sha256 `7dc4a1c9…`; extends `manifests/h28-full.json` (`bb3f1f97…`), unchanged |
+| Constructors | 215: 117 with census sites, 98 in the clause inventory (96 with fixtures, the 2 `Rule` wrappers with a reason) |
+| Proof oracle (all 325 entries) | 261 detected, 6 equivalent-certified, 58 invalid-compilation, 0 error, 0 unrun |
+| Clause fixtures (119) | 109 detected, 10 invalid-compilation, 0 equivalent-certified |
+| Semantic cases (36) | 24 killed, 1 survivor-sound, 1 equivalent, 8 witness-failed and 2 link-mismatch (all negative controls, as expected), 0 error, 0 unrun |
+| Controls | 15, all as declared (`controls_pass: true`): the 5 earlier ones and 10 new negative controls (one per family; the guard family's is new beside its earlier ones) |
 | Baselines | full `Calculus/Taclet.lean`, every row and link alone, `CallbackTaclet.toTaclet`: all pass |
+| Acceptance | `runs/final-ff85b708/acceptance.json`: `scope_complete: true`, no failure |
+| Seal | `runs/final-ff85b708/seal.json`, 108 files |
 
 The lane moved from a Codex VM to a Claude VM on 2026-11-05. Its earlier
 history, which used a Docker backend and caches that exist only on the Codex
@@ -37,6 +39,174 @@ sections up to there describe the work redone on the Claude VM.
   module registration changed. The lane writes only
   `tests/h28-sol/mutation-testing/**`, this file and its docs/README row
   fragment.
+
+## Follow-up: clause inventory, family witnesses and acceptance (2026-11-06)
+
+A second Claude VM session finished the four open items of the previous
+one. Sections from [Method (Claude VM)](#method-claude-vm) to
+[Final reviews](#final-reviews) describe the census run `full-20d7b77c`,
+which the final run reuses unchanged.
+
+### Clause inventory
+
+[tools/clauses.py](../../tests/h28-sol/mutation-testing/tools/clauses.py)
+takes the 98 constructors with no census site and lists every clause of
+their premises. Each clause gets a family and a one-change fixture: a
+mutant whose `old` is the whole constructor span, so it is attributed to
+that constructor alone. The fixture then runs through the proof oracle like
+a census mutant.
+
+| Clause kind | Fixture operator | Family | Fixtures | detected / invalid |
+|---|---|---|---|---|
+| capture `T x = E; … x …` | the later uses read `E` again | alias-capture-once | 28 | 26 / 2 |
+| update binding `lhs := rhs` | the identity `lhs := lhs` | other:access; pop-delete for `delete mv` | 46 | 43 / 3 |
+| `if (c) {A} else {B}`, `if (se) thenStm else elseStm` | branches swapped | guard-polarity | 4 | 4 / 0 |
+| `a ⊕ b` | operands swapped | division-minimum | 8 | 8 / 0 |
+| `⊖se` | operator dropped | overflow | 2 | 0 / 2 |
+| short-circuit `&& true`, `‖ false`, `v = false`, `v = true` | flipped | guard-polarity | 4 | 4 / 0 |
+| term-built premise, `try` branches, loop clauses, declaration continuations, `addmod`/`mulmod` modulus | hand fixture (closing flipped, modality swapped, flag negated, premise closed `true`, branch body replaced, modulus swapped) | per constructor | 27 | 24 / 3 |
+
+- Every fixture is decided: 109 detected and 10 invalid-compilation. No
+  fixture is equivalent-certified, so each compiled one differs from
+  `Stmt.step`.
+- The invalid fixtures are shapes the DSL refuses:
+  - the identity binding of a fresh declaration (`valueDeclSkip`,
+    `storageLocalDeclSkip`, `memoryReferenceDeclFreshAlloc`);
+  - `⊖se` dropped (it changes the type);
+  - re-reading a primitive push argument or `new T(se)`;
+  - an empty `call succeeded` branch;
+  - `if (!cond)` in `whileUnwind`.
+- `Rule.key` and `Rule.lean` have no premise of their own: `Rule.key d`
+  has `d`'s premise. Each has one clause with that reason and no fixture.
+- The classifier missed one case. A mutated `LeanTaclet.ifElseJoin*` side
+  condition fails that constructor's own `#h28_toStep_link` command, and
+  an error on such a command line was not attributed to its constructor. So
+  the first run `final-aa39f4cd` reported the two fixtures as `error`.
+  `hand_spans` now attributes a `#h28_toStep_row`/`#h28_toStep_link` line
+  to the constructor it names, and a self-test covers it. The recorded run
+  `final-ff85b708` re-classified all 472 records of the byte-identical
+  scratch files with this code, without re-running Lean. Both fixtures are
+  now `detected`.
+
+### Per-family semantic verdicts
+
+Four families had only a pilot or helper edit as a semantic verdict. Each
+now has a verdict on a census site or clause fixture:
+
+| Family | Mutant | Witness | Verdict |
+|---|---|---|---|
+| index-bounds | `storageIndexReadArrayFind.index-constant-zero.1` (`find(storage, arr[0])`) | `BoundsZeroKill`: `d = [7]`; `v = d[1];` reverts, but the mutant reads `d[0]` and lands, so its diamond premise admits a returning run | killed |
+| push-tail-length | `storagePushAddAssign.last-slot-is-length.1` (writes at `sp[sp.length]`, lowered to `PTerm.next`) | `PushLastSlotKill`: from `[]` the run leaves `[1]`; the mutant's write past the pushed slot fails, so its box premise admits `false` | killed |
+| division-minimum | `clause.binopAssignment.operands-swapped.1` (`{ v := se₂ ⊕ se₁ }`) | `DivisionOperandsKill`: `v = 1 / 0;` reverts, but the mutant computes `0 / 1` and lands | killed |
+| alias-capture-once | `storageLengthRead_unfold_rightFst.receiver-reevaluated.1` | `LengthReevalSound`: a **universal** proof that the mutated premise is sound in every state and instance (`sound_all`, via `Premise.Runs`), linked by `source_link_all` and rejected on the normal table | survivor-sound |
+
+- **Division.** The only compiled census site of the division family is
+  the `Tms.Term.binop` operand swap. The rule language uses `Term.binop`
+  only for the literal length arithmetic (`sp.length - 1`, …), while
+  divisions go through `Term.binopS`/`binopC`. So that site is index
+  arithmetic, not division, and the clause fixture carries the family's
+  verdict instead.
+- **Alias.** Re-reading a receiver differs only when reading it has an
+  effect. A `Val` or a storage or memory path has none (`Syntax/Scoped.lean`):
+  it can fail, but then the capture fails first. So the 36 detected census
+  re-evaluations on pure paths are expected survivors. One is certified by
+  the universal proof. The other 35 are not individually proved; see
+  [Limits](#limits). The killable call-receiver re-evaluations are refused
+  by the DSL, and their term form is the pilot `AliasTwiceKill`.
+- **New verdict kind.** `sound-survivor` is decided `survivor-sound` only
+  if all of these pass:
+  - the normal oracle passes;
+  - the witness is rejected at `source_link_all` on the normal table,
+    naming the case's constructor;
+  - on the mutant, `sound_all` states `∀ …, Premise.Sound …` with only the
+    three permitted axioms.
+
+  It is never counted as a kill.
+
+### Negative controls
+
+Each family now has a negative control. Each one runs a real kill witness
+against a *different* mutant, and must not kill it:
+
+| Family | Witness | Mutant | Result |
+|---|---|---|---|
+| pop-delete | `PopSkippedKill` | `storagePopSave.last-slot-is-length.1` (equivalent-certified) | witness-failed |
+| index-bounds | `BoundsSkippedKill` | `storageIndexReadArrayFind.index-constant-zero.1` | witness-failed |
+| push-tail-length | `PushOrderSwappedKill` | `storagePushAddAssign.last-slot-is-length.1` | witness-failed |
+| overflow | `OverflowSubtractKill` | `binopC.helper-compound-operands-swapped.1` | witness-failed |
+| division-minimum | `DivisionSubtractKill` | `binop.helper-binop-args-swapped.1` | witness-failed |
+| alias-capture-once | `AliasTwiceKill` | `storagePush_unfold_leftFstReceiver.receiver-reevaluated.1` | link-mismatch |
+| callback-frames | `CallbackTacletFailureKill` | `sendWithCallbackBox.send-flag-true-to-false.1` | witness-failed |
+| rollback-payment | `PaymentFalseKill` | `sendNoCallbackBox.send-flag-false-to-true.1` | witness-failed |
+| guard-polarity | `GuardTruePolarityKill` | `requireSimple.guard-false-to-true.1` | witness-failed |
+
+These are the first real `witness-failed` outcomes. Before, only the unit
+tests exercised that outcome.
+
+### Acceptance and seal
+
+[tools/accept.py](../../tests/h28-sol/mutation-testing/tools/accept.py)
+recomputes the summary from the per-check records and requires all of the
+following:
+
+- the stored summary equals the recomputed one;
+- the run is not a development run;
+- every baseline passes;
+- no proof entry is unrun or in error;
+- the census constructors and the clause inventory partition the 215
+  constructors, and every clause has a decided fixture or a reason;
+- each of the nine families has a `killed` or `survivor-sound` verdict on a
+  manifest mutant;
+- no semantic case is unrun or in error;
+- every control meets its expectation;
+- each family has a passing negative control.
+
+On the previous census run it reports exactly the gaps this session
+closed: the 98 unaccounted constructors, three families without a verdict,
+and eight without a negative control.
+[tools/seal.py](../../tests/h28-sol/mutation-testing/tools/seal.py) seals
+only an accepted run. It hashes the manifest and its base, every lane tool
+and oracle, the production inputs, the proof oracle, the summary, the
+acceptance record, the compact records and the full-record archive.
+
+### Reuse and runner changes
+
+- `--reuse` now indexes earlier records by scratch sha256 across several
+  runs, not by key. So a scratch file shared by two cases, such as a
+  negative control's normal witness, is elaborated once.
+- Reuse is valid because the import closure has not changed. The 59 modules
+  imported by `Calculus/Taclet.lean` and `Calculus/CallbackRules.lean`, and
+  the 71 modules imported by the oracles, are unchanged from `20d7b77c` to
+  this head. Neither the master merge nor this session touched them.
+- Fresh Lean checks in `final-aa39f4cd` (40.8 min wall-clock, 3 bridges):
+  - the 119 clause fixtures, at about 35–65 s each;
+  - the new and changed semantic checks.
+
+  The other checks reuse `full-91c9631d`/`full-20d7b77c` diagnostics.
+  `final-ff85b708` re-classified all of them.
+- Runner self-tests: 33 (`test_mcprun`). They now cover:
+  - the survivor verdict;
+  - `sound_all`'s statement;
+  - the negative-control expectation;
+  - link-command attribution.
+
+### verify_bulk off the Codex VM
+
+`verify_bulk.py` read the H44 index at `/workspace/...` and crashed on any
+other VM. When that data is absent, it now runs `verify_local` and reports
+`status: local-only`, never `pass`. `verify_local` checks the committed
+side only:
+
+- the committed manifest;
+- each explicit off-Git input pin against the bytes in the checkout (fresh
+  sha256 over repository-relative paths);
+- that the retained support files are tracked and unchanged.
+
+It lists the Codex-only files it cannot verify. The old digests are neither
+re-derived nor faked. Here `inventory.extended.draft.json` matches its pin
+`e7f8f223…`. The callback cache manifest is absent, being Codex VM only.
+`test_verify_bulk_local.py` has three controls: local-only is never a pass,
+and a changed input and an uncommitted manifest are both refused.
 
 ## Method (Claude VM)
 
@@ -412,34 +582,44 @@ those of the run head `20d7b77c`. The lane changes only
 
 ## Limits
 
-- **Proof-oracle verdicts.** These are about premise identity with
-  `Stmt.step`, not soundness. Only the 20 scored cases have semantic
-  verdicts.
-- **Census scope.** The census covers the 30 declared operators. It does not
-  reach the term semantics of checked arithmetic, division by zero, the
-  minimum ÷ −1 case or array bounds, which live in `Tm.denote` and
-  `Stmt.runR`, not in the read-only rule table. Those behaviours are
-  exercised only by the semantic witnesses (overflow, division and bounds
-  pilots).
-- **Clauses with no operator:**
+- **Proof-oracle verdicts** are about premise identity with `Stmt.step`, not
+  soundness. Semantic verdicts exist only for the 36 semantic cases (24 kills,
+  1 certified survivor). The other detected census sites and clause fixtures
+  have no semantic verdict. Some are probably sound, such as the 35 uncertified
+  pure-path receiver re-evaluations, the capture fixtures, and the operand
+  swaps of commutative operators.
+- **Census and clause scope.** The census covers the 30 declared operators.
+  The clause inventory covers one fixture per listed clause of the 98
+  constructors without a site, not every conceivable edit. Clauses of
+  constructors that do have census sites still have no operator unless the
+  census reaches them:
   - the pushed value of `storagePushValueSave`;
   - the variant clause of `whileInvariantDiamond`;
-  - `tryCall*` branches and binders;
-  - the term-built premises of the 13 no-premise-text constructors;
-- **Not re-certified here:** the Codex VM's evidence, caches, seals and H35
-  transport. The pilots were re-run fresh instead.
-- **Runner outcome coverage.** Timeouts fold into `error`; the runner keeps
-  no separate timeout class. No real survivor (`witness-failed`) occurs in
-  the run: that outcome is exercised only by the unit tests. The
-  cross-witness control ends in `link-mismatch`, which the runner checks
-  before running the witness.
-- **Backfill.** The negative controls cover only the guard and
-  rollback/payment families. The other seven families have none of their
-  own.
-- **Census, helpers.** 51 of the 55 `Tms` helpers have no operator.
-- **Resource measurement.** No per-process RSS is available through the
-  language-server bridge, and VM memory was observed by hand, not recorded.
+  - the `tryCall*` binders.
 
+  The term semantics of checked arithmetic, division by zero, minimum ÷ −1
+  and array bounds live in `Tm.denote` and `Stmt.runR`, outside the
+  read-only inputs. They are exercised only through witnesses.
+- **Helpers.** 51 of the 55 `Tms` helpers have no operator.
+- **Model observation.** In this model, division by zero reverts
+  (`THalt.revert`); solc panics with code 0x12. `DivisionOperandsKill`
+  relies only on the run not returning, so it holds either way. This lane
+  does not change the semantics.
+- **Reuse.** The final run reuses earlier Lean diagnostics for byte-identical
+  scratch files. This is valid only because the imported modules are
+  unchanged since `20d7b77c` (checked; see above). Reused records keep their
+  original elapsed time and bridge.
+- **Runner outcome coverage.** Timeouts fold into `error`; there is no
+  separate timeout class. No census mutant is a non-equivalent survivor; the
+  only `witness-failed` outcomes are the negative controls.
+- **Not re-certified here:** the Codex VM's evidence, caches, seals, H35
+  transport and the H44 bulk digests (`verify_bulk.py` reports
+  `local-only`). 7 legacy unit tests in `test_callback_cache` (3),
+  `test_candidate_inventory` (1) and `test_cleanup` (3) need that VM's
+  pinned runtime or `/workspace` data.
+- **Resource measurement.** The language-server bridge reports no
+  per-process RSS. VM memory stayed under 4 GiB used of 15 GiB during the
+  final run (`free -g`, by hand).
 
 ## History (Codex VM)
 
