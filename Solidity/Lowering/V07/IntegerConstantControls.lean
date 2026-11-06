@@ -67,7 +67,7 @@ def check (p : Roadmap.Pipeline) (checked : Bool) (t : Source.IntTy) (z : Int) :
   match Source.constVal (Source.Q.ofInt 256) (.int .u8) (D := E.layout),
       (UnsignedCasts.castValue 8 (value .u256 256 (by decide))).evalT target with
   | .error (.stuck why),.ok wrong => why == "integer out of range" && wrong.val == 0 &&
-      !(Source.STy.rational (Source.Q.ofInt 256)).implicit E.isBase (.int .u8)
+      !(Source.STy.rational (Source.Q.ofInt 256)).implicit E.isBase E.mapFree (.int .u8)
   | _,_ => false))
 
 -- Fractional Source constants do not become integer one by silently truncating.
@@ -77,7 +77,7 @@ def check (p : Roadmap.Pipeline) (checked : Bool) (t : Source.IntTy) (z : Int) :
   let q : Source.Q := ⟨3,2,by decide⟩
   match Source.constVal q (.int .u8) (D := E.layout),(operand .u8 1 (by decide)).run target with
   | .error (.stuck why),.ok (_,.prim wrong) => why == "fractional constant at an integer type" && wrong.val == 1 &&
-      !(Source.STy.rational q).implicit E.isBase (.int .u8)
+      !(Source.STy.rational q).implicit E.isBase E.mapFree (.int .u8)
   | _,_ => false))
 
 -- Signed literal minus one is not the unsigned bit-pattern literal 255.

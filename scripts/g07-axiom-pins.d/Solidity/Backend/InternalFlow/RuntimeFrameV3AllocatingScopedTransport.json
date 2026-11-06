@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedTransport.claims": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
