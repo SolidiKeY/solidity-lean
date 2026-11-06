@@ -265,6 +265,8 @@
 'Solidity.Frontend.QualifiedUnits.MergeSpecification.empty_rows_accepted' does not depend on any axioms
 'Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList_eq' depends on axioms: [propext]
 'Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.elementary_erase' does not depend on any axioms
+'Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.root_refs' depends on axioms: [propext, Quot.sound]
+'Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.child_refs' depends on axioms: [propext, Quot.sound]
 'Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_sound' depends on axioms: [propext]
 'Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_complete' depends on axioms: [propext, Quot.sound]
 'Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound' depends on axioms: [propext,
@@ -639,10 +641,17 @@
 'Solidity.Frontend.QualifiedUnits.TargetControls.struct_member_refused' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_references' does not depend on any axioms
+'Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_nominal' depends on axioms: [propext]
+'Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_sound' depends on axioms: [propext]
+'Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_complete' depends on axioms: [propext]
+'Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_instance' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
 'Solidity.Frontend.QualifiedUnits.TypePaths.tail_iff' depends on axioms: [propext, Quot.sound]
 'Solidity.Frontend.QualifiedUnits.TypePaths.lookup_iff' depends on axioms: [propext, Quot.sound]
 'Solidity.Frontend.QualifiedUnits.uniqueSymbol_iff' depends on axioms: [propext, Quot.sound]
 'Solidity.Frontend.QualifiedUnits.unitTail_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Solidity.Frontend.QualifiedUnits.unitBase_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Solidity.Frontend.QualifiedUnits.UnitRoute.decl_exists' does not depend on any axioms
-AXIOM_PINS_PASS 407
+AXIOM_PINS_PASS 414

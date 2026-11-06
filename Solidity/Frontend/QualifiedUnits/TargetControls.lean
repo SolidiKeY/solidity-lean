@@ -1,6 +1,7 @@
 import Solidity.Frontend.QualifiedUnits.Target
 import Solidity.Frontend.QualifiedUnits.NormalizationAdequacy
 import Solidity.Frontend.QualifiedUnits.SignatureResolutionControls
+import Solidity.Frontend.QualifiedUnits.ReferenceCoverage
 
 /-! Kernel controls for the independent C3 judgment, the final target relation
 and normalization adequacy. Positive controls derive the declarative judgment
@@ -15,7 +16,7 @@ theorem diamond_linear : Linear SignatureMemberControls.overrideDiamond [] ⟨"A
     [⟨"A",5⟩,⟨"A",3⟩,⟨"A",2⟩,⟨"A",0⟩] :=
   order_iff.mp SignatureMemberControls.diamond_owner_order
 
-/-- The shared base B occurs once and after both of its derived contracts. -/
+/-- The shared base B occurs once (duplicate-free linearization). -/
 theorem diamond_shared_base_once : ([⟨"A",5⟩,⟨"A",3⟩,⟨"A",2⟩,⟨"A",0⟩] : List DeclId).Nodup :=
   diamond_linear.bounded.1
 
@@ -78,7 +79,7 @@ theorem visible_barrier_no_target :
     ∀ s, ¬ Target.Target SignatureResolutionControls.visibleBarrier [] "A" (some ⟨"A",4⟩) [] ⟨"f",[]⟩ s :=
   Target.refused_no_target SignatureResolutionControls.visible_intermediate_barrier_refused
 
-/-- A nested function type normalizes; its erasure is the Source elaboration. -/
+/-- A leaf-free function type normalizes and erases to the expected STy. -/
 theorem callable_erases :
     (SignatureNormalization.types DifferentialControls.hopsInput [] "A.sol" none .memory
       (.fnType (.cons (.param (.elem .bool) none none) .nil) (some .external) none .nil)).map
@@ -90,5 +91,44 @@ theorem struct_member_refused :
     SignatureNormalization.types DifferentialControls.hopsInput [] "A.sol" none .memory
       (.structMember (.elem .bool) "x") = none :=
   (NormalizationAdequacy.fields_refused .memory (.elem .bool) "x" none).1
+
+/-- Cross-unit adequacy instance: A imports B; B and C both declare enum T.
+The written path T names B's identity; the Source environment of A's import
+sees one T. The localized leaf premises are discharged, not assumed. -/
+def adequacyInput : UnitSet := ⟨[("A", unitOf [.importPath "B" none]),
+  ("B", unitOf [.topPart (.enum "T" "a" [])]), ("C", unitOf [.topPart (.enum "T" "b" [])])]⟩
+
+def adequacyEnv : Env := (unitOf [.topPart (.enum "T" "a" [])]).env
+
+def adequacySig : Syn (.list .param) := .cons (.param (.userType ⟨"T", []⟩) none none) .nil
+
+theorem adequacy_references : references adequacySig = [⟨"T", []⟩] := rfl
+
+theorem adequacy_nominal (loc : DataLoc) :
+    SignatureNormalization.nominal adequacyInput [] "A" none loc ⟨"T", []⟩ =
+      some (.enumeration ⟨⟨"B", 0⟩, _, rfl, rfl⟩) := by
+  cases loc <;> rfl
+
+theorem adequacy_leaf_sound : NormalizationAdequacy.LeafSound adequacyInput [] "A" none adequacyEnv none
+    (references adequacySig) := by
+  intro loc p k hp hn
+  rw [adequacy_references, List.mem_singleton] at hp
+  subst hp
+  rw [adequacy_nominal] at hn
+  cases hn
+  cases loc <;> rfl
+
+theorem adequacy_leaf_complete : NormalizationAdequacy.LeafComplete adequacyInput [] "A" none adequacyEnv none
+    (references adequacySig) := by
+  intro loc p τ hp _
+  rw [adequacy_references, List.mem_singleton] at hp
+  subst hp
+  exact ⟨_, adequacy_nominal loc⟩
+
+/-- Normalization of the parameter list erases exactly to Source elaboration. -/
+theorem adequacy_instance :
+    (SignatureNormalization.types adequacyInput [] "A" none .memory adequacySig).map
+      (·.map NormalizationAdequacy.erase) = adequacySig.tys adequacyEnv none .memory :=
+  NormalizationAdequacy.types_adequate adequacySig adequacy_leaf_sound adequacy_leaf_complete rfl .memory
 
 end Solidity.Frontend.QualifiedUnits.TargetControls

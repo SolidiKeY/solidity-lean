@@ -7,14 +7,17 @@ base path of a container resolves through the qualified unit-route relation,
 every base has its own linearization and `out` is the owner followed by the
 independent `MergeSpecification.Merge` of those linearizations and the local
 base list. It never mentions `SignatureMembers.linearize`, `mergeOwners`,
-`bases` or a numeric bound.
+`bases` or a numeric bound. It shares only the syntactic base-path
+extractor `basePaths` with the executable `bases`.
 
 `order_iff` proves that the executable `SignatureMembers.order` (its
 `idUniverse` depth and `bound * bound + 2` merge budgets) is sound and complete
 for this judgment, with no premise: a hierarchy exists exactly when `order`
 succeeds, and the bound never refuses one. Precedence is the C3 monotonicity
 property: every base linearization and the reversed local base list are
-sublists of the result. Cyclic hierarchies have no derivation. This is not
+sublists of the result. Cyclic hierarchies have no derivation. Agreement with
+solc's exact order rests on the deterministic first-head rule and pinned
+fixtures, not on a compiler differential of `Linear` itself. This is not
 inheritance/override legality (G14) and makes no claim about solc beyond the
 pinned fixtures. -/
 namespace Solidity.Frontend.QualifiedUnits.Linearization

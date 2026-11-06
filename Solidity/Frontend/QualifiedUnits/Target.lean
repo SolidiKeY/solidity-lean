@@ -3,16 +3,25 @@ import Solidity.Frontend.QualifiedUnits.SignatureResolution
 
 /-! The final SOL-QN target relation, including inherited overloads.
 
-Every ingredient is declarative: the hierarchy is the independent C3
-`Linearization.Linear` judgment (no `order`, fuel or `idUniverse` bound),
+The hierarchy used for overload collection is the independent C3
+`Linearization.Linear` judgment (no `order`, fuel or `idUniverse` bound);
 inherited overload families are `SignatureMembers.WalkMember` derivations
-over that hierarchy with every candidate's signature normalized, nearest
-non-overloadable declarations keep their lexical priority, and qualified
-paths use unique proper prefixes and coherent terminal symbols.
+over that hierarchy; nearest non-overloadable declarations keep their
+lexical priority; qualified paths use unique proper prefixes and coherent
+terminal symbols.
+
+Trusted executable leaves remain, stated as propositions: `group` (the
+Bool `overload` filter over `visibleMembers`), `Unhidden` (`hides … = some
+false`, which compares `normalize` keys), `Normalized` (`normalize … = some
+_`) and `overload` in `SafeOwners`/`Eligible`. The plain branch and the
+global barrier use `InheritedMember`, reachability along the syntactic base
+graph, which does not require a valid linearization; only the overload
+branch requires `Linear`.
 
 `target_iff` proves the public consumer `SignatureResolution.resolve` sound
-and complete for `Target` with no premise. This is completeness against the
-stated relation; it is not external Solidity correctness, parser
+and complete for `Target` with no premise. This is completeness against an
+implementation-shaped relation whose hierarchy part is independent; it is
+not independent Solidity semantics, external Solidity correctness, parser
 correspondence or cross-unit expression typing (G13), and does not validate
 inheritance or override legality (G14). -/
 namespace Solidity.Frontend.QualifiedUnits.Target
@@ -139,7 +148,8 @@ theorem target_iff {P : UnitSet} {R : List Remapping} {u : String} {scope : Opti
       Target P R u scope locals p s := by
   rw [SignatureResolution.resolve_iff, resolved_iff]
 
-/-- Target answers name original declarations and never clash. -/
+/-- Every answer of a successful `resolve` is a target answer, and the
+answer list (not the relation) passes the existing no-clash check. -/
 theorem Target.noClash {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
     {locals : List String} {p : IdPath} {out : List Sym}
     (h : SignatureResolution.resolve P R u scope locals p = .ok out) :

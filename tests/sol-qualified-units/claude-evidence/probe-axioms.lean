@@ -265,6 +265,8 @@ import Solidity.Frontend.QualifiedUnits.UnitPaths
 #print axioms Solidity.Frontend.QualifiedUnits.MergeSpecification.empty_rows_accepted
 #print axioms Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList_eq
 #print axioms Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.elementary_erase
+#print axioms Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.root_refs
+#print axioms Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.child_refs
 #print axioms Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_sound
 #print axioms Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_complete
 #print axioms Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound
@@ -427,6 +429,11 @@ import Solidity.Frontend.QualifiedUnits.UnitPaths
 #print axioms Solidity.Frontend.QualifiedUnits.TargetControls.visible_barrier_no_target
 #print axioms Solidity.Frontend.QualifiedUnits.TargetControls.callable_erases
 #print axioms Solidity.Frontend.QualifiedUnits.TargetControls.struct_member_refused
+#print axioms Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_references
+#print axioms Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_nominal
+#print axioms Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_sound
+#print axioms Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_complete
+#print axioms Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_instance
 #print axioms Solidity.Frontend.QualifiedUnits.TypePaths.tail_iff
 #print axioms Solidity.Frontend.QualifiedUnits.TypePaths.lookup_iff
 #print axioms Solidity.Frontend.QualifiedUnits.uniqueSymbol_iff

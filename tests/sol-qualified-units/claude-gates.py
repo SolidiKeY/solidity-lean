@@ -11,10 +11,14 @@ under `tests/sol-qualified-units/claude-evidence/`:
   probe M    write the Lean input for M in {axioms, declarations, queries}
              to claude-evidence/probe-M.lean, to be elaborated by the Lean
              language server (lean_diagnostic_messages on that file)
-  record M [F] record probe M: axioms parses the language server's saved
-             diagnostics JSON F; declarations/queries read the file the probe
-             itself wrote (probe-M.out); writes the log, report and receipt
-  runlean L  record a ./run-lean.sh log L as the build/keysort/repository gates
+  record M F record probe M from the language server's diagnostics JSON F
+             (saved as probe-M.diagnostics.json; must have no errors);
+             declarations/queries also read the file the probe itself wrote
+             (probe-M.out, deleted by `probe`); sources must be unchanged
+             since `probe`
+  gatelog L  record `scripts/coord-tools/gate.sh full` output L (its own
+             PASS/FAIL lines and per-gate logs) as the build/repository gates
+  keysort    run the built solkeycheck against the vendored solkey taclets
 
 Every receipt binds the owned sources, inputs, this driver and lakefile.
 Nothing here is evidence that the old Codex seals hold.
@@ -59,14 +63,19 @@ def available():
     return 0
 
 
-def receipt(mode, passed, log, command, exit_code):
-    (OUT / f"gate-{mode}.json").write_text(json.dumps({
+def receipt(mode, passed, log, command, exit_code, extra=None):
+    # No monitored run exists on the language-server path: minimum_available_bytes
+    # is null, and the point-in-time reading is recorded under its own name.
+    data = {
         "mode": mode, "passed": passed, "repository_base": REPOSITORY_BASE,
         "lakefile_sha256": sha(ROOT / "lakefile.toml"), "process_exit": exit_code,
         "sources": sources(), "runner_sha256": sha(__file__), "command": command,
-        "minimum_available_bytes": available(),
+        "minimum_available_bytes": None, "available_bytes_at_record": available(),
+        "compiler_artifacts_sha256": sha(ROOT / "tests/sol-qualified-units/compiler-artifacts.json"),
         "head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
-        "log_sha256": sha(log)}, indent=2) + "\n")
+        "log_sha256": sha(log)}
+    data.update(extra or {})
+    (OUT / f"gate-{mode}.json").write_text(json.dumps(data, indent=2) + "\n")
 
 
 def theorem_names():
@@ -118,7 +127,7 @@ def messages(diagnostics):
 
 
 def compiler():
-    os.environ.setdefault("SOL_QN_EVIDENCE", str(OUT.relative_to(ROOT)))
+    os.environ["SOL_QN_EVIDENCE"] = str(OUT.relative_to(ROOT))
     assert "SOL_QN_SOLJSON" in os.environ, "SOL_QN_SOLJSON must name a pinned soljson artifact"
     ok = True
     for mode, script in [("solc", "solc-fixtures.mjs"), ("signature-probes", "h27-location-probe.mjs"),
@@ -144,7 +153,16 @@ def compiler():
 def record(mode, diagnostics):
     probe = OUT / f"probe-{mode}.lean"
     assert probe.read_text() == probe_text(mode), "stale probe input"
-    lines = messages(diagnostics) if mode == "axioms" else [output_file(mode).read_text().rstrip("\n")]
+    probed = json.loads((OUT / f"probe-{mode}.sources.json").read_text())
+    assert probed == sources(), "sources changed between probe and record"
+    saved = OUT / f"probe-{mode}.diagnostics.json"
+    if Path(diagnostics).resolve() != saved.resolve():
+        saved.write_bytes(Path(diagnostics).read_bytes())
+    lines = messages(saved)
+    if mode != "axioms":
+        out = output_file(mode)
+        assert out.stat().st_mtime >= probe.stat().st_mtime, "probe output older than probe input"
+        lines = [out.read_text().rstrip("\n")]
     log = OUT / f"candidate-{mode}.log"
     log.write_text("\n".join(lines) + "\n")
     passed = False
@@ -189,28 +207,46 @@ def record(mode, diagnostics):
         passed = result["compiler_agreement"]
         with log.open("a") as out:
             out.write("DIRECT_DIFFERENTIAL " + ("PASS" if passed else "FAIL") + " " + json.dumps(result["mismatches"]) + "\n")
-    receipt(mode, passed, log, ["lean_diagnostic_messages", str(probe.relative_to(ROOT))], 0)
+    receipt(mode, passed, log, ["lean_diagnostic_messages", str(probe.relative_to(ROOT))], None,
+            {"diagnostics_sha256": sha(saved), "probe_sources_sha256": sha(OUT / f"probe-{mode}.sources.json")})
     print(f"GATE {mode} {'pass' if passed else 'fail'}")
     return passed
 
 
-def runlean(path):
+def gatelog(path):
+    """Record `scripts/coord-tools/gate.sh full` output: its own PASS/FAIL lines."""
     text = Path(path).read_text()
-    log = OUT / "candidate-run-lean.log"
-    keep = [line for line in text.splitlines() if not line.startswith(("✔", "info:", "⚠", "warning:"))]
-    log.write_text("\n".join(keep) + "\n")
-    exit_match = re.search(r"^EXIT (\d+)$", text, re.M)
-    exit_code = int(exit_match[1]) if exit_match else None
-    built = all(f"Built {m}" in text or f"Replayed {m}" in text for m in
-                [str(p.relative_to(ROOT).with_suffix("")).replace("/", ".") for p in sorted(LANE.rglob("*.lean"))])
-    errors = [line for line in text.splitlines() if re.search(r"\berror\b", line) and not line.startswith(("✔", "info:"))]
-    passed = exit_code == 0 and not errors
-    for mode in ["build", "keysort", "repository"]:
-        ok = passed and (built if mode == "build" else True)
-        if mode == "keysort":
-            ok = ok and bool(re.search(r"^parsed \d+ taclets", text, re.M) or "solkeycheck" in text)
-        receipt(mode, ok, log, ["./run-lean.sh"], exit_code)
-        print(f"GATE {mode} {'pass' if ok else 'fail'}")
+    rows = re.findall(r"^(PASS|FAIL) (\S+) (\d+)s (\S+)$", text, re.M)
+    status = {name: result for result, name, _, _ in rows}
+    for required in ["build-touched", "run-lean", "trust", "orphans", "layers", "roots", "fragments", "doc-paths", "axiom-pins"]:
+        assert required in status, "gate.sh did not run " + required
+    summary = OUT / "gate-sh-summary.log"
+    summary.write_text("".join(f"{r} {n} {t}s\n" for r, n, t, _ in rows))
+    logs = {name: Path(log) for _, name, _, log in rows}
+    build_log = OUT / "candidate-build.log"
+    lines = [l for l in logs["run-lean"].read_text().splitlines() if not l.startswith(("info:", "⚠", "warning:"))]
+    build_log.write_text("\n".join(lines) + "\n")
+    built = set(re.findall(r"(?:Built|Replayed) (Solidity\.Frontend\.QualifiedUnits\.\w+)\b", logs["run-lean"].read_text()))
+    receipt("build", status["run-lean"] == "PASS", build_log, ["scripts/coord-tools/gate.sh", "full"], None,
+            {"gate_sh": status, "lane_modules_built_or_replayed": sorted(built)})
+    repo_log = OUT / "candidate-repository.log"
+    repo_log.write_text(summary.read_text())
+    # doc-paths fails on master before this lane (a Bridge Mathlib path); recorded, not waived.
+    receipt("repository", all(v == "PASS" for v in status.values()), repo_log, ["scripts/coord-tools/gate.sh", "full"], None,
+            {"gate_sh": status})
+    print("gate.sh:", status)
+    return status
+
+
+def keysort():
+    key = "tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+    command = ["./.lake/build/bin/solkeycheck", "--key", key]
+    result = subprocess.run(command, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    log = OUT / "candidate-keysort.log"
+    log.write_text(result.stdout)
+    passed = result.returncode == 0 and bool(re.search(r"parsed \d+ taclets", result.stdout))
+    receipt("keysort", passed, log, command, result.returncode)
+    print(result.stdout.strip().splitlines()[-1] if result.stdout.strip() else "no output")
     return passed
 
 
@@ -220,13 +256,16 @@ if __name__ == "__main__":
     if command == ["compiler"]:
         sys.exit(0 if compiler() else 1)
     if len(command) == 2 and command[0] == "probe":
+        output_file(command[1]).unlink(missing_ok=True)
+        (OUT / f"probe-{command[1]}.sources.json").write_text(json.dumps(sources(), indent=2) + "\n")
         (OUT / f"probe-{command[1]}.lean").write_text(probe_text(command[1]))
         print(OUT / f"probe-{command[1]}.lean")
         sys.exit(0)
-    if len(command) == 3 and command[0] == "record" and command[1] == "axioms":
+    if len(command) == 3 and command[0] == "record":
         sys.exit(0 if record(command[1], command[2]) else 1)
-    if len(command) == 2 and command[0] == "record":
-        sys.exit(0 if record(command[1], None) else 1)
-    if len(command) == 2 and command[0] == "runlean":
-        sys.exit(0 if runlean(command[1]) else 1)
+    if len(command) == 2 and command[0] == "gatelog":
+        status = gatelog(command[1])
+        sys.exit(0 if status.get("run-lean") == "PASS" else 1)
+    if command == ["keysort"]:
+        sys.exit(0 if keysort() else 1)
     raise SystemExit(__doc__)

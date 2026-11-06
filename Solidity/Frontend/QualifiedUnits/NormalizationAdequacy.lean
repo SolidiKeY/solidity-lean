@@ -1,4 +1,5 @@
 import Solidity.Frontend.QualifiedUnits.SignatureNormalization
+import Solidity.Frontend.QualifiedUnits.ReferenceCoverage
 
 /-! Structural adequacy of signature normalization against Source elaboration.
 
@@ -9,8 +10,14 @@ shows every normalized key list erases to the Source elaboration, and
 `types_complete` shows every type the Source elaborator accepts in a
 supported signature category (type names, parameters, event and error
 parameters, and their lists) normalizes. Their premises speak only about
-nominal leaves (`userTy` versus qualified `nominal` lookup), which is
-exactly where the two are meant to differ: identities versus spellings.
+the nominal leaves written in the syntax itself (`references s`): `userTy`
+versus qualified `nominal` lookup, exactly where the two are meant to
+differ, identities versus spellings. Where Source `userTy` cannot follow
+(unit aliases, deeper paths, homonyms visible to its flat environment) the
+premises fail for that syntax and the theorems say nothing about it.
+`TargetControls.adequacy_instance` discharges them for a cross-unit program
+with a same-spelled enum in an unimported unit. The statement concerns
+`types`, the parameter elaboration that `normalize` uses.
 
 Array lengths reuse `Source.arrayLen` in both; no constant evaluator is
 added. Struct members and variable declarations are outside signature
@@ -61,18 +68,30 @@ theorem elementary_erase {P : UnitSet} (loc : DataLoc) (e : Elem) :
   | fixed s dims => cases dims <;> rfl
   | _ => rfl
 
-/-- Normalized nominal leaves erase to the Source user type. -/
+/-- On the paths `S`, normalized nominal leaves erase to the Source user type.
+The theorems below take `S := references s`: only the paths written in the
+signature syntax itself, not every path of the program. -/
 abbrev LeafSound (P : UnitSet) (R : List Remapping) (u : String) (scope : Option DeclId)
-    (E : Env) (sc : Option String) : Prop :=
-  ∀ loc p k, nominal P R u scope loc p = some k → E.userTy sc loc p = some (erase k)
+    (E : Env) (sc : Option String) (S : List IdPath) : Prop :=
+  ∀ loc p k, p ∈ S → nominal P R u scope loc p = some k → E.userTy sc loc p = some (erase k)
 
-/-- Every Source user type also has a qualified nominal leaf. -/
+/-- On the paths `S`, every Source user type also has a qualified nominal leaf. -/
 abbrev LeafComplete (P : UnitSet) (R : List Remapping) (u : String) (scope : Option DeclId)
-    (E : Env) (sc : Option String) : Prop :=
-  ∀ loc p τ, E.userTy sc loc p = some τ → ∃ k, nominal P R u scope loc p = some k
+    (E : Env) (sc : Option String) (S : List IdPath) : Prop :=
+  ∀ loc p τ, p ∈ S → E.userTy sc loc p = some τ → ∃ k, nominal P R u scope loc p = some k
+
+theorem root_refs {c : Cat} {s : Syn c} {S : List IdPath} (hS : ∀ p, p ∈ references s → p ∈ S) :
+    ∀ p, p ∈ rootReferences s → p ∈ S := fun p hp =>
+  hS p (by rw [references_eq]; exact List.mem_append_left _ hp)
+
+theorem child_refs {c c' : Cat} {s : Syn c} {t : Syn c'} {S : List IdPath}
+    (hS : ∀ p, p ∈ references s → p ∈ S) (h : (⟨c', t⟩ : Σ c, Syn c) ∈ s.children) :
+    ∀ p, p ∈ references t → p ∈ S := fun p hp =>
+  hS p (by rw [references_eq s]; exact List.mem_append_right _ (List.mem_flatMap.mpr ⟨_, h, hp⟩))
 
 theorem keyType_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
-    {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) {k : MapKey} {key : TypeKey P}
+    {E : Env} {sc : Option String} {S : List IdPath} (hl : LeafSound P R u scope E sc S) {k : MapKey}
+    (hk : ∀ p, p ∈ k.paths → p ∈ S) {key : TypeKey P}
     (h : keyType P R u scope k = some key) : E.keyTy sc k = some (erase key) := by
   cases k with
   | elem e _ =>
@@ -85,13 +104,14 @@ theorem keyType_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : O
     | none => rw [hn] at h; cases h
     | some r =>
       rw [hn] at h
-      have hu := hl _ _ _ hn
+      have hu := hl _ _ _ (hk p (List.mem_singleton_self p)) hn
       cases r <;> simp only [Option.some.injEq, reduceCtorEq] at h <;> subst key <;>
         simp only [Env.keyTy, hu, erase]
 
 theorem keyType_complete {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
-    {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) (hc : LeafComplete P R u scope E sc)
-    {k : MapKey} {τ : STy} (h : E.keyTy sc k = some τ) : ∃ key, keyType P R u scope k = some key := by
+    {E : Env} {sc : Option String} {S : List IdPath} (hl : LeafSound P R u scope E sc S)
+    (hc : LeafComplete P R u scope E sc S) {k : MapKey} (hk : ∀ p, p ∈ k.paths → p ∈ S)
+    {τ : STy} (h : E.keyTy sc k = some τ) : ∃ key, keyType P R u scope k = some key := by
   cases k with
   | elem e _ => exact ⟨_, rfl⟩
   | path p =>
@@ -99,8 +119,9 @@ theorem keyType_complete {P : UnitSet} {R : List Remapping} {u : String} {scope 
     cases hu : E.userTy sc .memory p with
     | none => rw [hu] at h; cases h
     | some σ =>
-      obtain ⟨r, hr⟩ := hc _ _ _ hu
-      have he := hl _ _ _ hr
+      have hp := hk p (List.mem_singleton_self p)
+      obtain ⟨r, hr⟩ := hc _ _ _ hp hu
+      have he := hl _ _ _ hp hr
       rw [hu, Option.some.injEq] at he
       simp only [keyType, hr]
       cases r with
@@ -111,12 +132,12 @@ theorem keyType_complete {P : UnitSet} {R : List Remapping} {u : String} {scope 
 
 /-- Soundness: every normalized key list erases to the Source elaboration. -/
 theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
-    {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) :
-    ∀ {c : Cat} (s : Syn c) {loc : DataLoc} {ks : List (TypeKey P)},
+    {E : Env} {sc : Option String} {S : List IdPath} (hl : LeafSound P R u scope E sc S) :
+    ∀ {c : Cat} (s : Syn c), (∀ p, p ∈ references s → p ∈ S) → ∀ {loc : DataLoc} {ks : List (TypeKey P)},
       types P R u scope loc s = some ks → s.tys E sc loc = some (ks.map erase) := by
   intro c s
   induction s
-  all_goals intro loc ks h
+  all_goals intro hS loc ks h
   all_goals first | exact Option.noConfusion h | skip
   case nil =>
     change some [] = some ks at h
@@ -128,17 +149,17 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
     split at h
     · rename_i first tail ha hr
       cases h
-      simp only [Syn.tys, iha ha, ihr hr, List.map_append]
+      simp only [Syn.tys, iha (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) ha, ihr (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) hr, List.map_append]
     · cases h
   case eventParam t _ _ ih =>
     change types P R u scope .memory t = some ks at h
-    simp only [Syn.tys]; exact ih h
+    simp only [Syn.tys]; exact ih (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) h
   case errorParam t _ ih =>
     change types P R u scope .memory t = some ks at h
-    simp only [Syn.tys]; exact ih h
+    simp only [Syn.tys]; exact ih (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) h
   case param t l _ ih =>
     change types P R u scope (l.getD loc) t = some ks at h
-    simp only [Syn.tys]; exact ih h
+    simp only [Syn.tys]; exact ih (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) h
   case elem e =>
     change some [elementary P loc e] = some ks at h
     cases h
@@ -150,9 +171,9 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
     split at h
     · rename_i a b ha hb
       cases h
-      simp only [Syn.tys, ihp ha, ihr hb, List.map_cons, List.map_nil, erase, eraseList_eq]
+      simp only [Syn.tys, ihp (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) ha, ihr (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) hb, List.map_cons, List.map_nil, erase, eraseList_eq]
     · cases h
-  case mapping k _ v _ ih =>
+  case mapping k kn v vn ih =>
     change (if loc = .storage then
       (match keyType P R u scope k, types P R u scope .storage v with
         | some k, some [v] => some [TypeKey.mapping k v]
@@ -162,9 +183,10 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
       split at h
       · rename_i key val hk hv
         cases h
-        have := ih hv
+        have := ih (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) hv
         simp only [List.map_cons, List.map_nil] at this
-        simp only [Syn.tys, hs, if_true, keyType_sound hl hk, this, List.map_cons, List.map_nil, erase]
+        have hkey := keyType_sound hl (root_refs (s := .mapping k kn v vn) hS) hk
+        simp only [Syn.tys, hs, if_true, hkey, this, List.map_cons, List.map_nil, erase]
       · cases h
     · cases h
   case userType p =>
@@ -173,7 +195,8 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
     | none => rw [hn] at h; cases h
     | some k =>
       rw [hn] at h; cases h
-      simp only [Syn.tys, hl _ _ _ hn, Option.map_some, List.map_cons, List.map_nil]
+      simp only [Syn.tys, hl _ _ _ (root_refs (s := .userType p) hS p (List.mem_singleton_self p)) hn,
+        Option.map_some, List.map_cons, List.map_nil]
   case array t len iht _ =>
     change (match types P R u scope loc t, arrayLen len with
       | some [element], some length => some [TypeKey.array loc element length]
@@ -181,7 +204,7 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
     split at h
     · rename_i el n ht hn
       cases h
-      have := iht ht
+      have := iht (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) ht
       simp only [List.map_cons, List.map_nil] at this
       simp only [Syn.tys, this, hn, List.map_cons, List.map_nil, erase]
     · cases h
@@ -195,20 +218,21 @@ def Supported : Cat → Bool
 /-- Supported-type completeness: every type the Source elaborator accepts in a
 signature category has a normalized key list. -/
 theorem types_complete {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
-    {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) (hc : LeafComplete P R u scope E sc) :
-    ∀ {c : Cat} (s : Syn c), Supported c = true → ∀ {loc : DataLoc} {τs : List STy},
-      s.tys E sc loc = some τs → ∃ ks, types P R u scope loc s = some ks := by
+    {E : Env} {sc : Option String} {S : List IdPath} (hl : LeafSound P R u scope E sc S)
+    (hc : LeafComplete P R u scope E sc S) :
+    ∀ {c : Cat} (s : Syn c), Supported c = true → (∀ p, p ∈ references s → p ∈ S) →
+      ∀ {loc : DataLoc} {τs : List STy}, s.tys E sc loc = some τs → ∃ ks, types P R u scope loc s = some ks := by
   intro c s
   induction s
-  all_goals intro hs loc τs h
+  all_goals intro hs hS loc τs h
   all_goals first | (simp only [Supported, Bool.false_eq_true] at hs; done) | skip
   case nil => exact ⟨[], rfl⟩
   case cons a rest iha ihr =>
     simp only [Syn.tys] at h
     split at h
     · rename_i x y ha hb
-      obtain ⟨first, hf⟩ := iha hs ha
-      obtain ⟨tail, ht⟩ := ihr hs hb
+      obtain ⟨first, hf⟩ := iha hs (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) ha
+      obtain ⟨tail, ht⟩ := ihr hs (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) hb
       refine ⟨first ++ tail, ?_⟩
       show (match types P R u scope loc a, types P R u scope loc rest with
         | some first, some rest => some (first ++ rest)
@@ -217,35 +241,36 @@ theorem types_complete {P : UnitSet} {R : List Remapping} {u : String} {scope : 
     · cases h
   case eventParam t _ _ ih =>
     simp only [Syn.tys] at h
-    exact ih rfl h
+    exact ih rfl (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) h
   case errorParam t _ ih =>
     simp only [Syn.tys] at h
-    exact ih rfl h
+    exact ih rfl (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) h
   case param t l _ ih =>
     simp only [Syn.tys] at h
-    exact ih rfl h
+    exact ih rfl (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) h
   case elem e => exact ⟨_, rfl⟩
   case fnType ps vis m rs ihp ihr =>
     simp only [Syn.tys] at h
     split at h
     · rename_i x y ha hb
-      obtain ⟨a, hpa⟩ := ihp rfl ha
-      obtain ⟨b, hrb⟩ := ihr rfl hb
+      obtain ⟨a, hpa⟩ := ihp rfl (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) ha
+      obtain ⟨b, hrb⟩ := ihr rfl (child_refs hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)) hb
       refine ⟨[TypeKey.callable (vis == some Visibility.external) a b m], ?_⟩
       show (match types P R u scope .memory ps, types P R u scope .memory rs with
         | some ps, some rs => some [TypeKey.callable (vis == some Visibility.external) ps rs m]
         | _, _ => none) = _
       rw [hpa, hrb]
     · cases h
-  case mapping k _ v _ ih =>
+  case mapping k kn v vn ih =>
     simp only [Syn.tys] at h
     split at h
     · rename_i hst
       split at h
       · rename_i τk τv hk hv
-        obtain ⟨key, hkey⟩ := keyType_complete hl hc hk
-        obtain ⟨vals, hvals⟩ := ih rfl hv
-        have hsv := types_sound hl v hvals
+        obtain ⟨key, hkey⟩ := keyType_complete hl hc (root_refs (s := .mapping k kn v vn) hS) hk
+        have hv' := child_refs (t := v) hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)
+        obtain ⟨vals, hvals⟩ := ih rfl hv' hv
+        have hsv := types_sound hl v hv' hvals
         rw [hv, Option.some.injEq] at hsv
         cases vals with
         | nil => cases hsv
@@ -266,7 +291,7 @@ theorem types_complete {P : UnitSet} {R : List Remapping} {u : String} {scope : 
     cases hu : E.userTy sc loc p with
     | none => rw [hu] at h; cases h
     | some τ =>
-      obtain ⟨k, hk⟩ := hc _ _ _ hu
+      obtain ⟨k, hk⟩ := hc _ _ _ (root_refs (s := .userType p) hS p (List.mem_singleton_self p)) hu
       refine ⟨[k], ?_⟩
       show (nominal P R u scope loc p).map ([·]) = _
       rw [hk]; rfl
@@ -274,8 +299,9 @@ theorem types_complete {P : UnitSet} {R : List Remapping} {u : String} {scope : 
     simp only [Syn.tys] at h
     split at h
     · rename_i τ n ht hn
-      obtain ⟨els, hels⟩ := iht rfl ht
-      have hse := types_sound hl t hels
+      have ht' := child_refs (t := t) hS (by first | exact List.mem_cons_self | exact List.mem_cons_of_mem _ List.mem_cons_self)
+      obtain ⟨els, hels⟩ := iht rfl ht' ht
+      have hse := types_sound hl t ht' hels
       rw [ht, Option.some.injEq] at hse
       cases els with
       | nil => cases hse
@@ -293,16 +319,17 @@ theorem types_complete {P : UnitSet} {R : List Remapping} {u : String} {scope : 
 /-- Adequacy: on signature categories normalization erases exactly to the
 existing Source elaboration, success and failure alike. -/
 theorem types_adequate {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
-    {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) (hc : LeafComplete P R u scope E sc)
-    {c : Cat} (s : Syn c) (hs : Supported c = true) (loc : DataLoc) :
+    {E : Env} {sc : Option String} {c : Cat} (s : Syn c)
+    (hl : LeafSound P R u scope E sc (references s)) (hc : LeafComplete P R u scope E sc (references s))
+    (hs : Supported c = true) (loc : DataLoc) :
     (types P R u scope loc s).map (·.map erase) = s.tys E sc loc := by
   cases ht : types P R u scope loc s with
-  | some ks => rw [types_sound hl s ht]; rfl
+  | some ks => rw [types_sound hl s (fun _ hp => hp) ht]; rfl
   | none =>
     cases hty : s.tys E sc loc with
     | none => rfl
     | some τs =>
-      obtain ⟨ks, hks⟩ := types_complete hl hc s hs hty
+      obtain ⟨ks, hks⟩ := types_complete hl hc s hs (fun _ hp => hp) hty
       rw [ht] at hks; cases hks
 
 /-- Struct members and variable declarations are not signature syntax. -/

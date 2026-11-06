@@ -36,6 +36,10 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
     runner_file = ROOT / ("tests/sol-qualified-units/claude-gates.py" if claude else "tests/sol-qualified-units/run-candidate-gates.py")
     artifacts = json.loads((ROOT / "tests/sol-qualified-units/compiler-artifacts.json").read_text())
     artifact_shas = {a["sha256"] for a in artifacts["artifacts"]}
+    # The accepted artifact set is pinned here, not only in the editable JSON.
+    assert artifacts["version"] == "0.8.38+commit.1835d247.Emscripten.clang" and artifact_shas == {
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "0b15fcb24fe784ed60f3853afc7f7e133a427bf1ac0d682e3f808d44b8e2fa6c"}, "compiler artifact pin set changed"
     scope = json.loads((ROOT / "tests/sol-qualified-units/scope.json").read_text())
     matrix = json.loads((ROOT / "tests/sol-qualified-units/constructors.json").read_text())
     syntax = ROOT / "Solidity/Source/Syntax.lean"
@@ -104,6 +108,12 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
         assert "@[implemented_by " + twin["implementation"] + "]" in text, "missing executable twin"
         assert twin["theorem"] in all_declarations, "missing twin equivalence theorem"
     pins = json.loads((ROOT / "tests/sol-qualified-units/axiom-pins.json").read_text())
+    if claude:
+        gates_module = runpy.run_path(str(runner_file))
+        diagnostics = ev / "probe-axioms.diagnostics.json"
+        rederived = "\n".join(gates_module["messages"](diagnostics)) + "\n"
+        assert (ev / "candidate-axioms.log").read_text().startswith(rederived), "axiom log not derived from saved diagnostics"
+        assert json.loads((ev / "gate-axioms.json").read_text())["diagnostics_sha256"] == sha(diagnostics), "axiom diagnostics drift"
     observed = {}
     for match in re.finditer(r"^'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])", (ev / "candidate-axioms.log").read_text(), re.M):
         observed[match[1]] = [] if match[2] is None else [name.strip() for name in match[2].split(",")]
@@ -195,7 +205,7 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
             saved = json.loads((ev / f"gate-{mode}.json").read_text())
             assert saved["passed"] and saved["mode"] == mode and saved["process_exit"] == 0, "foundation gate failure " + mode
             assert saved["sources"] == sources and saved["runner_sha256"] == runner_sha, "stale foundation gate " + mode
-            assert saved["minimum_available_bytes"] >= 4 * 1024**3, "foundation reserve " + mode
+            assert (saved["minimum_available_bytes"] is None) if claude else saved["minimum_available_bytes"] >= 4 * 1024**3, "foundation reserve " + mode
             assert saved["lakefile_sha256"] == sha(ROOT / "lakefile.toml"), "foundation Lake drift"
             assert saved["log_sha256"] == sha(ev / f"candidate-{mode}.log"), "foundation log drift"
             subprocess.run(["git", "merge-base", "--is-ancestor", saved["repository_base"], "HEAD"], cwd=ROOT, check=True)
@@ -208,7 +218,11 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
         assert saved["lakefile_sha256"] == sha(ROOT / "lakefile.toml"), "stale Lake configuration " + mode
         subprocess.run(["git", "merge-base", "--is-ancestor", saved["repository_base"], "HEAD"], cwd=ROOT, check=True)
         assert saved["log_sha256"] == sha(ev / f"candidate-{mode}.log"), "changed gate log " + mode
-        assert saved["minimum_available_bytes"] >= 4 * 1024**3, "reserve gate " + mode
+        # Claude VM: no monitored run; the field is null by construction (see claude-gates.py).
+        assert (saved["minimum_available_bytes"] is None) if claude else saved["minimum_available_bytes"] >= 4 * 1024**3, "reserve gate " + mode
+        if claude and mode in ("axioms", "declarations", "queries"):
+            assert saved["diagnostics_sha256"] == sha(ev / f"probe-{mode}.diagnostics.json"), "diagnostics drift " + mode
+            assert json.loads((ev / f"probe-{mode}.sources.json").read_text()) == sources, "probe source drift " + mode
         gate_results[mode] = saved["passed"]
     print("DIRECT_DIFFERENTIAL: " + ("pass" if recomputed["compiler_agreement"] else "fail " + ", ".join(recomputed["mismatches"])))
     for path in scope["inputs"]:
@@ -233,6 +247,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     try:
         failures = []
+        ev = ROOT / "tests/sol-qualified-units/evidence"
         if not args.inventory_only and not args.audit_only and not args.signature_foundation_only and not args.claude_vm:
             gates = []
             for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "keysort", "repository"]:

@@ -5021,6 +5021,18 @@
     },
     {
       "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.child_refs",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
       "axioms": [],
       "kind": "definition",
       "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
@@ -5315,6 +5327,18 @@
       "kind": "theorem",
       "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
       "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_sound",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy",
+      "name": "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.root_refs",
       "partial": false,
       "unsafe": false
     },
@@ -12139,6 +12163,88 @@
       "kind": "theorem",
       "module": "Solidity.Frontend.QualifiedUnits.Target",
       "name": "Solidity.Frontend.QualifiedUnits.Target.target_iff",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacyEnv",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacyInput",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "definition",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacySig",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_instance",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_complete",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_sound",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [
+        "propext"
+      ],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_nominal",
+      "partial": false,
+      "unsafe": false
+    },
+    {
+      "axiom": false,
+      "axioms": [],
+      "kind": "theorem",
+      "module": "Solidity.Frontend.QualifiedUnits.TargetControls",
+      "name": "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_references",
       "partial": false,
       "unsafe": false
     },

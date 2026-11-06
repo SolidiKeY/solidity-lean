@@ -453,6 +453,8 @@
       "elementary_erase",
       "LeafSound",
       "LeafComplete",
+      "root_refs",
+      "child_refs",
       "keyType_sound",
       "keyType_complete",
       "types_sound",
@@ -746,7 +748,15 @@
       "failed_signature_no_target",
       "visible_barrier_no_target",
       "callable_erases",
-      "struct_member_refused"
+      "struct_member_refused",
+      "adequacyInput",
+      "adequacyEnv",
+      "adequacySig",
+      "adequacy_references",
+      "adequacy_nominal",
+      "adequacy_leaf_sound",
+      "adequacy_leaf_complete",
+      "adequacy_instance"
     ],
     "Solidity/Frontend/QualifiedUnits/TypePaths.lean": [
       "step",

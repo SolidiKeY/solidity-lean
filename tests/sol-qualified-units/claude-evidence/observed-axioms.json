@@ -554,6 +554,14 @@
     "propext"
   ],
   "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.elementary_erase": [],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.root_refs": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.child_refs": [
+    "propext",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_sound": [
     "propext"
   ],
@@ -1246,6 +1254,21 @@
     "Quot.sound"
   ],
   "Solidity.Frontend.QualifiedUnits.TargetControls.struct_member_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_references": [],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_nominal": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_sound": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_complete": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_instance": [
     "propext",
     "Classical.choice",
     "Quot.sound"
