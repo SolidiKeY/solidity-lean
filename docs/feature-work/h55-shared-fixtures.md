@@ -378,3 +378,27 @@ adequacy or injectivity of the mixed byte observation.
 The selected file's named public statements are reviewed here; other ABI and
 Source/static families, private/generated declarations, exact migrated
 statements, independent reviews and all broader acceptance gates remain open.
+
+## Source ABI expression semantic review (partial)
+
+The public statements in `SourceAbiControls.lean` cover several related
+families; any future shared frame fixture must retain their original quantified
+pipeline/static/packing inputs and exact reached states.
+
+| Declarations | Original observations to preserve |
+|---|---|
+| `literal_complete`, `literal_vector`, `empty_binary_unaligned_lengths`, `literal_cases` | Actual Source evaluation for arbitrary bytes and both static/packed flags; complete world, transient, journal and heap vector; empty, binary and 33-byte cases with standard lengths 64, 96 and 128. |
+| `arguments_execute`, `digest_word`, `digestWord_eq`, `encoding_execute`, `mixed_complete`, `mixed_vector` | Reached local assignment and hash/allocation effects, exact digest word, packed/standard encoding, result reference 2 and complete final vector. |
+| `reversed_execution`, `complete_offset_words`, `mixed_standard_offsets`, `reversed_standard_offsets`, `different_ordered_bytes` | Actual reversed execution and distinct ordered bytes, including offset words 160, 224 and 256. |
+| `insufficient_after_effects`, `wrong_stale_pointer`, `wrong_skipped_hash`, `wrong_returned_locals`, `actual_different_order`, `actual_different_packing`, `mixed_lengths` | Timeout after the local effect, distinct wrong pointers/effects/locals, actual order and packing inequalities, and standard/packed lengths 320 and 70. |
+| `selector_value_bytes`, `selector_drop`, `selector_byte_at`, selector/signature argument and completion facts | Exact selector bytes and indexed prefix behavior; actual selector/signature Source executions preserve reached argument effects and output reference 2 for either static value. |
+| `empty_signature_prefix`, `prefixed_complete_vector`, `prefixed_offsets_and_length`, `prefixed_values_encoding` | Preserve the checked empty-hash prefix, complete prefixed vector, total length 324 and specified offsets, and the encoding equation at arbitrary horizon. |
+| `prefixed_timeout_after_effects`, `prefixed_zero_horizon`, `wrong_selector_bytes`, `wrong_signature_prefix`, `prefixed_wrong_pointer`, `prefixed_skipped_effects` | Distinguish the reached-effect timeout from zero-horizon timeout and retain each negative selector, signature, pointer and skipped-effect control. |
+| `memory_signature_arguments`, `memory_signature_complete`, `memory_signature_vector`, `selector_reversed_complete`, `actual_prefixed_different_order`, `memory_signature_wrong_pointer` | Preserve the additional signature-memory allocation and reference 3, its complete vector, reordered selector behavior and wrong-pointer/order inequalities. |
+| `selector_argsOK`, `signature_argsOK`, `memory_signature_argsOK`, `overlong_selector_not_argsOK` | Preserve the three accepted typing observations and the explicit overlong-selector rejection. |
+| `source_transient_write`, `source_transient_read`, `source_transient_read_end`, `source_transient_rollback`, `source_transient_static_after_effect`, `source_transient_zero_horizon`, `source_transient_complete_vector` | Preserve actual Source write/read/reset and explicit undo, static refusal after the RHS local effect, timeout, and complete account/journal/heap/event/log vector. |
+| `intrinsic_transient_write`, `intrinsic_transient_reset`, `intrinsic_selected_reset`, `wrong_source_stale_transient`, `wrong_intrinsic_stale_transient`, `wrong_transient_payload` | Retain intrinsic write/reset observations, the generic typed-path reset instantiation and the three negative controls; no canonical Source-to-contract layout relation is inferred. |
+
+This matrix records named public statements in this one file. It does not
+establish the complete cross-family census, private/generated case acceptance,
+or any post-migration proof or independent review.
