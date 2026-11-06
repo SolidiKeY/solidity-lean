@@ -77,9 +77,13 @@ Actual versions (`versions.json`):
   Lake `5.0.0-src+eb6cafb`.
 
 VM: 16 GiB cgroup memory cap, four CPU quota, no host swap in use.
-All heavy jobs ran serially with `LEAN_NUM_THREADS=1`, library/executable
-`weakLeanArgs` containing explicit `-j1`, a 12 GiB per-process virtual-address
-limit and sampled aggregate RSS/headroom guard with 4 GiB reserve.
+Heavy jobs run serially with `LEAN_NUM_THREADS=1` and explicit `-j1`.
+Historical runs also used an extra 12 GiB per-process virtual-address limit;
+that limit was removed during calibration after thread-creation failures.
+Current runs retain the unchanged 16 GiB hard VM cap, sampled 12 GiB aggregate
+RSS watchdog and estimated 4 GiB available-memory headroom guard. The estimate
+uses host MemAvailable and cgroup free capacity plus reclaimable inactive_file;
+it is not a guarantee of instantaneous free allocation.
 No systemd-run, no old per-master cache, no external package dependency.
 Private `enableArtifactCache=false`; new empty build destinations; logs show
 all four closure modules built, no fetched artifacts. OS page caches were not
@@ -312,3 +316,52 @@ All five controls pass their expected acceptance/rejection condition. Results
 and decisive reducer diagnostics are in inventory-controls/results.json and
 its case subdirectories. These are external tests of the audit tooling, not new
 kernel theorems or substitutions for downstream migration proofs.
+
+
+## Full-build resource calibration
+
+The first resumed old full attempt at matched-full-old was interrupted after
+943.975 s, with generated Yul checks aborting on thread creation. That attempt
+is **invalid for a successful full-build comparison**, not a module-growth STOP.
+The queued new run was prevented from starting, and only task-owned processes
+were stopped. Its observed aggregate sampled RSS peak was 4,523,896,832 bytes;
+its child maxRSS after interruption does not account for all killed descendants.
+
+The extra RLIMIT_AS=12 GiB in the original runner constrained reserved virtual
+stacks. A live Lean process had approximately 11.3 GiB virtual size versus 2.7 GiB
+RSS and 37 internal threads despite the explicit -j1 command. Cgroup OOM/max and
+PID-limit event counts remained zero. Removing that extra virtual cap allowed
+unchanged Solidity.Yul.Checks.Powers, which previously aborted, to build in a
+bounded diagnostic (exit 0, 2.084 s wrapper wall, 538,247,168-byte group RSS peak).
+This supports the calibration fix; it is not a completed repository gate.
+
+The actual VM memory cap is unchanged at 16 GiB, host swap remains unused, and
+the watchdog still stops above 12 GiB sampled RSS or below estimated 4 GiB
+available headroom. The guard now recognizes inactive_file as reclaimable cache,
+consistent with reserving available memory rather than total virtual mappings.
+No statement, proof budget, heartbeat setting or original source was changed.
+
+`migration.py prepare-full --dest FRESH_DIR --toolchain TOOLCHAIN` now reproduces
+fresh exports from the exact pinned BASE, including Git metadata required by the
+read-only root checks, private toolchain selectors, identical cache-disabled Lake
+configs and explicit --tstack=131072/-j1 for all five libraries and three executables.
+The corrected pair is matched-rss-old and matched-rss-new. Both source manifests
+attest identical 7,311 Lean files and identical private config SHA256
+4f3ec665aa7d14932b59a0605d220866ce505e4bf10888f036de7e243c26012a.
+These private snapshots replace the invalid matched-full pair for comparison.
+The independent finder and skeptic reviewed this correction read-only and found
+no blocking setup defect; both required the historical/current distinction above.
+
+
+## Calibrated SolKey conformance prerequisite
+
+Actual old-toolchain `lake exe solkeycheck --key` passes with the explicit frozen
+rule file: 377 parsed taclets, 131 read-bearing, table covers 131, annotations OK.
+The new-toolchain invocation fails in Solidity.SortCheck.Parser at line 76:
+String.trim is absent in v4.35.0, producing dependent field-notation errors and
+failed executable evaluation. This is an **EXTERNAL_OWNER_MIGRATION** blocker,
+not a failure to install the toolchain. KeySort itself already passed on both.
+The exact-file request DEP-SORTCHECK-1 is saved in owner-requests.json for the
+coordinator/root migration relay. No SortCheck source or pin is edited here.
+The matched full comparison continues independently; a new full gate cannot be
+accepted until its owning lane supplies a compatible parser overlay.

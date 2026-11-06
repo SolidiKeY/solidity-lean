@@ -107,6 +107,50 @@ weakLeanArgs = ["--tstack=131072", "-j1"]
     return sorted(seen)
 
 
+
+def prepare_full(root, dest, toolchain):
+    """Fresh pinned-base repository export; only private test config differs."""
+    if toolchain is None:
+        raise RuntimeError('prepare-full requires --toolchain')
+    lean_version = subprocess.check_output([str(toolchain / 'bin/lean'), '--version'], text=True).strip()
+    match = re.search(r'version (4\.(?:24|35)\.0)', lean_version)
+    if match is None:
+        raise RuntimeError(f'unexpected migration toolchain: {lean_version}')
+    dest.mkdir(parents=True, exist_ok=False)
+    archive = subprocess.Popen(['git', 'archive', BASE], cwd=root, stdout=subprocess.PIPE)
+    try:
+        subprocess.run(['tar', '-x', '-C', str(dest)], stdin=archive.stdout, check=True)
+    finally:
+        archive.stdout.close()
+    if archive.wait() != 0:
+        raise RuntimeError('pinned-base archive failed')
+    subprocess.run(['git', 'init', '-q', str(dest)], check=True)
+    original = (dest / 'lakefile.toml').read_text()
+    config = original.replace('enableArtifactCache = true', 'enableArtifactCache = false')
+    # Every library and executable, including LeanTeX, gets explicit -j1.
+    parts = re.split(r'(\[\[lean_(?:lib|exe)\]\])', config)
+    for index in range(1, len(parts), 2):
+        body = parts[index + 1]
+        if 'weakLeanArgs =' in body:
+            body = body.replace('weakLeanArgs = ["--tstack=131072"]',
+                                'weakLeanArgs = ["--tstack=131072", "-j1"]')
+        else:
+            body = '\nweakLeanArgs = ["--tstack=131072", "-j1"]' + body
+        parts[index + 1] = body
+    config = ''.join(parts)
+    (dest / 'lakefile.toml').write_text(config)
+    (dest / 'lean-toolchain').write_text('leanprover/lean4:v' + match[1] + '\n')
+    sources = {str(path.relative_to(dest)): sha(path.read_bytes())
+               for path in sorted(dest.rglob('*.lean'))}
+    metadata = {'base': BASE, 'lean_version': lean_version,
+                'lake_version': subprocess.check_output([str(toolchain / 'bin/lake'), '--version'], text=True).strip(),
+                'original_lakefile_sha256': sha(original.encode()),
+                'private_lakefile_sha256': sha(config.encode()), 'lean_sources': sources,
+                'clean_build_dir_absent': not (dest / '.lake').exists()}
+    dest.with_name(dest.name + '-sources.json').write_text(json.dumps(metadata, indent=2) + '\n')
+    return metadata['private_lakefile_sha256']
+
+
 def bounded(command, cwd, toolchain, evidence):
     evidence.parent.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
@@ -118,15 +162,19 @@ def bounded(command, cwd, toolchain, evidence):
         mem = dict((k, int(v.split()[0]) * 1024) for k, v in
                    (line.split(':', 1) for line in Path('/proc/meminfo').read_text().splitlines()))
         cgroup = Path('/sys/fs/cgroup')
-        return min(mem['MemAvailable'], int((cgroup / 'memory.max').read_text()) -
-                   int((cgroup / 'memory.current').read_text()))
+        stats = dict(line.split() for line in (cgroup / 'memory.stat').read_text().splitlines())
+        # Inactive file cache is reclaimable; reserve available memory, not
+        # virtual address space or unreclaimed cache pages. The hard VM cap stays.
+        available = (int((cgroup / 'memory.max').read_text()) -
+                     int((cgroup / 'memory.current').read_text()) +
+                     int(stats.get('inactive_file', 0)))
+        return min(mem['MemAvailable'], available)
     if headroom() < reserve:
         raise RuntimeError('4 GiB headroom prerequisite failed')
     if int(Path('/sys/fs/cgroup/memory.swap.current').read_text()) != 0:
         raise RuntimeError('swap is in use')
     def limits():
         os.setsid()
-        resource.setrlimit(resource.RLIMIT_AS, (cap, cap))
     start = time.monotonic()
     peak = 0
     stopped = None
@@ -162,7 +210,10 @@ def bounded(command, cwd, toolchain, evidence):
               'exit': code, 'wall_seconds': time.monotonic()-start,
               'kernel_children_maxrss_kib': resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,
               'aggregate_sampled_peak_rss_bytes': peak, 'resource_stop': stopped,
-              'limits': {'address_space_bytes': cap, 'reserve_bytes': reserve,
+              'limits': {'virtual_address_limit_bytes': None,
+                         'rss_watchdog_cap_bytes': cap,
+                         'vm_hard_memory_cap_bytes': int(Path('/sys/fs/cgroup/memory.max').read_text()),
+                         'reserve_bytes': reserve,
                          'threads': 1, 'swap_current_bytes': 0},
               'log': str(evidence.with_suffix('.log'))}
     evidence.with_suffix('.json').write_text(json.dumps(result, indent=2) + '\n')
@@ -172,7 +223,7 @@ def bounded(command, cwd, toolchain, evidence):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('action', choices=['census', 'audit', 'prepare', 'run'])
+    p.add_argument('action', choices=['census', 'audit', 'prepare', 'prepare-full', 'run'])
     p.add_argument('--root', type=Path, default=Path.cwd())
     p.add_argument('--dest', type=Path, required=True)
     p.add_argument('--toolchain', type=Path)
@@ -195,6 +246,8 @@ def main():
                 if declaration['kind'] == 'theorem':
                     lines.append('#print axioms ' + name)
         a.dest.write_text('\n'.join(lines) + '\n')
+    elif a.action == 'prepare-full':
+        print(prepare_full(a.root, a.dest, a.toolchain))
     elif a.action == 'prepare':
         print(json.dumps(prepare(a.root, a.dest)))
     else:
