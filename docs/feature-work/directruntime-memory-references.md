@@ -762,3 +762,59 @@ all seven Reader/Compose/Intrinsic/DirectRuntime/three-controls mappings.
 Delivery remains coordinator-pending, not full-tree freshness. Existing-owner
 counterexample request is recorded in counterexample-owner-ticket.json; no
 producer file was edited. Python syntax and whitespace checks pass.
+
+## H70 complete finite runtime/source census
+
+The runtime-boundary-census.py backfill guards the regression where the
+previous14-candidate audit is mistaken for a complete inventory. It reuses the
+unchanged producer extractor and checks the exact producer build-input path
+set before every input hash. It accounts for all343 Lean source fingerprints
+against committed HEAD and generated C,1631 traversed C-source fingerprints,
+206 selected module/object pairs,9953 selected functions and206 initializers.
+All bodies have fingerprints and retained C snapshots. All4987 closed values
+also have explicit initializer and initializer-body fingerprint rows. This is exhaustive
+enumeration under the existing extractor, not proof of its C-parser completeness.
+
+All14789 defined and298 undefined ELF symbol rows are retained. Of8405 text
+rows,3783 lack an exact selected-generated name; these represent3255 distinct
+names. All3255 are inventoried:3249 have name-based input-object/archive
+candidates and six do not(_start,_init,_fini,__do_init,__do_fini,compact_initialize).
+Matches are candidate origins, not a recovered linker map. Six current dynamic
+libraries and16 pinned static archives are fingerprinted. The bridge object,
+bridge C and generated initializer source receive explicit retained-input
+fingerprints. No row is filtered out by an approval/safety classification.
+
+The final census passes35.998s,1230236KiB aggregate RSS in the exact12GiB/
+zero-swap serial scope with existing headroom guard. Five isolated refusal
+controls pass0.602s,30264KiB: truncated source list,wrong binary hash,wrong
+build-input hash,truncated build-input set,and Python optimization disabling
+assertions. Neither gate invokes Lean or executes a verifier request. Both
+new scripts name their guarded regression in their docstrings(H90).
+
+Finder found the initial input-key completeness gap; skeptic found missing
+bridge/initializer fingerprint rows. Both were fixed before the final gates.
+Both independent read-only reviewers then verified all223 inventory file hashes
+and reconciled every count, with no remaining concrete finding. No Lean/server
+was used. Bulk C snapshots/JSONL/symbol dumps stay outside Git; the archive
+has complete per-member readback. runtime-census-receipt.json records exact
+commands,exits,timings,RSS,source/script fingerprints and absolute archive path.
+
+Zero forbidden lexical hits and14 origin-name candidates are observations,
+not semantic absence certification. Indirect calls,native runtime functions,
+dynamic code and exact link attribution remain unclassified at that level.
+No ordinary runtime trust-boundary/source-adequacy theorem or RUNTIME_GATE_PASS
+is inferred. H89 removes the solkey checker from new gates; earlier KeySort
+outputs remain historical. Browser ticket was accepted by native-browser and
+is not relayed again; live counterexample certification remains coordinator-
+owned for the four pending storageAlias/storageCopy diamond cases.
+
+The repository-wide documentation gate exits1 on four unchanged references in
+three files outside this lane; exact files,hashes and references are recorded
+in doc-reference-owner-ticket.json. Owned-document references and whitespace
+checks pass. The global failure is preserved and no overall checkpoint/final
+gate pass is claimed. No Lean source,theorem,axiom,budget or producer changed.
+
+Final closed-value addition was independently checked by finder and skeptic:
+all4987 unique rows bind matching initializer body fingerprints and all223
+output hashes verify. Both report no defect; the global documentation failure
+remains explicitly unresolved.
