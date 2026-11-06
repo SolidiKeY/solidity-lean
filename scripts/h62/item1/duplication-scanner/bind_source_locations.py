@@ -47,13 +47,13 @@ def source_slice(source, location):
     return "\n".join([lines[first][start[1]:], *lines[first+1:last], lines[last][:end[1]]])
 
 
-def join_locations(source, lexical, census, locations):
+def join_locations(source, lexical, census, locations, expected_module=kernel.MODULE):
     """Structural join, not independent authentication of a saved census."""
     if (not isinstance(locations, dict) or set(locations) != {"format", "module", "rows"}
         or type(locations["format"]) is not int or locations["format"] != 1
-        or locations["module"] != kernel.MODULE or not isinstance(locations["rows"], list)):
+        or locations["module"] != expected_module or not isinstance(locations["rows"], list)):
         raise ValueError("location census header")
-    known = {kernel.name_key(row["declaration"]): row for row in kernel.validate(census)["rows"]}
+    known = {kernel.name_key(row["declaration"]): row for row in kernel.validate(census, expected_module)["rows"]}
     reported = {}
     for row in locations["rows"]:
         if not isinstance(row, dict) or set(row) != {"declaration", "selection"}:

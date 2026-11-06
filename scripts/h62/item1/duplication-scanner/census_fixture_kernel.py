@@ -35,10 +35,10 @@ def name_key(value):
     return parent + ((value[0], value[2]),)
 
 
-def validate(value):
+def validate(value, expected_module=MODULE):
     """Structural refusal controls only; a saved packet cannot authorize a run."""
     if (not isinstance(value, dict) or set(value) != {"format", "module", "total", "rows"}
-        or type(value["format"]) is not int or value["format"] != 1 or value["module"] != MODULE
+        or type(value["format"]) is not int or value["format"] != 1 or value["module"] != expected_module
         or type(value["total"]) is not int or value["total"] <= 0
         or not isinstance(value["rows"], list) or len(value["rows"]) != value["total"]):
         raise ValueError("census header/count mismatch")
