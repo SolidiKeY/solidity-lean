@@ -901,3 +901,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherenceControls.lean` | Exact populated two-allocation output at two sufficient indices and genuine insufficient-index exhaustion. |
 | `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContents.lean` | Exact fresh private array source contents and physical words after arbitrary allocating descent tails. |
 | `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContentsControls.lean` | Populated one/two-turn fresh object observations and header/payload ordering negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean` | Typed complete new-object inventory, every-reference coverage, distinct addresses and same-state physical observations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object alias negatives. |
