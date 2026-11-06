@@ -1,0 +1,10 @@
+# Verify from /workspace/migrate-solkey-evidence; bulk data remains off Git.
+f8ef7af114cf2cb4f4f1c8057321266036d88b02cf5ec2221f67e3667ac39d67  bulk-evidence.tar.gz
+7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d  lean-4.35.0-linux.tar.zst
+57340289664e7879dd2643a46ed005f548501c514eb3ce8e4c7ec8e28aa8bd6e  census-base.json
+9b4d0d065a1d4c659b5d21e3ffd9a13ae425dd27459ce268a71c3119c5fdad9c  old-clean-final/measurement.json
+6df9e0740f1ecb00025b44a27fce70437939c0674e446d03c40689c0866692a2  old-interfaces.json
+d1434ba896790926fe65d1783c72c28366cb0dbf23241526fe746916dbb4f2cf  dependency-blockers.json
+bb7e0d46062f1a79ff76eb4de808b3831d16685c24f32a9f1f3198a7e07874c3  escalations.json
+9dcb660b513bc1a17eb9d3f669eeb3918e3278ad8276f73f868940592c41ecaf  old-api-final/gate.json
+30c1a9ba0157f72ab9cf5ae19d429fe95f753bf38a88ee8fdc763e8ccd68ade4  new-api-final/gate.json

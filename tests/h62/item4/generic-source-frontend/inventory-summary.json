@@ -1,0 +1,33 @@
+{
+  "frontend_files": 490,
+  "source_declarations": 7576,
+  "control_candidate_files": 136,
+  "control_candidate_declarations": 1645,
+  "statement_fixture_files": 45,
+  "word_table_files": 30,
+  "word_table_theorems": 439,
+  "source_inventory_sha256": "06c25d329befbce1872769a3eafaa46fe69b439a1fab27b9b37a2f12a78cc64f",
+  "source_hash_boundary": "lexical source headers; not elaborated statement hashes",
+  "negative_cases": [
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41
+  ],
+  "out_of_profile_cases": [
+    22,
+    23,
+    27
+  ],
+  "pending": "elaborated statement/type inventory and migration checks blocked by owned Token dependency"
+}

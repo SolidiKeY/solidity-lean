@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-4-20261106",
+  "slug": "generic-yul-views",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-4-20261106/generic-yul-views",
+  "original_exclusive_scope": [
+    "tests/h62/item4/generic-yul-views/**",
+    "scripts/h62/item4/generic-yul-views/**",
+    "docs/feature-work/h62-4-generic-yul-views.md"
+  ],
+  "h82": "Standing statement-preserving edits supersede exact-file agreement; pending VY2 request withdrawn. Retirement now forbids further implementation.",
+  "handoff_to": "solidity-inline-assembly5-20261031/vy2-physical",
+  "frozen_rendered_prompt_sha256": "e4ad68a8d063aef349df25eb7b65d8345d75de02fa0271bda1375c7500f871ef",
+  "exact_prompt_status": "transcription incomplete owner-key paragraph; original rendered prompt export unavailable; must not claim hash verification"
+}

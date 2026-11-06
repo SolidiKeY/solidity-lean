@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-4-20261106",
+  "slug": "generic-v08",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-4-20261106/generic-v08",
+  "original_write_scope": [
+    "tests/h62/item4/generic-v08/**",
+    "scripts/h62/item4/generic-v08/**",
+    "docs/feature-work/h62-4-generic-v08.md"
+  ],
+  "original_target": "Solidity/Lowering/V08/**",
+  "excluded": [
+    "H55 Yul Raw/vector generator",
+    "frozen interface changes",
+    "statement weakening",
+    "generated roots/central maps/axiom pins under original assignment"
+  ],
+  "policy_update": "H82 supersedes exact-file agreement for statement-preserving proof-only/additive/import/doc/split changes. Owner approval still required for statement/dependent-definition/interface/budget/axiom/exclusion changes. Retirement overrides further implementation; no permission pending for proof-only edits.",
+  "handoff_to": "solidity-v07-v11-20261030/v08-world-lowering",
+  "rendered_prompt_sha256_provenance": "cad513750b4e8042834e4a5785ff407be7974c3c71d3dc7633f23ba98f9b16bf",
+  "original_prompt_capture": "original-assignment.txt transcribes the complete visible original assignment from the thread. Raw launcher rendering is not available for independent verification of its advertised rendered-prompt digest."
+}
