@@ -323,3 +323,26 @@ qualifying splits. H82 supplies standing permission for statement-preserving
 edits; owner permission remains required for the statement, dependency,
 interface, proof-budget, axiom-set and exclusion changes specified by H82.
 Independent finder and skeptic reviews and all full-scope gates remain pending.
+
+## H82 consolidation and cache-state backfill
+
+This branch already contains the listed module-times member head
+`9869c12e3f689be6056bfa7c59ada2f5c91c3e58` as an ancestor. The H28 timing
+member remains behind the retirement and frozen-assignment barriers: its
+reported `/workspace/h28-timing-handoff` is absent on this VM, the named
+remote lane ref was not found, and no final stopped or goal-paused
+acknowledgement was supplied. The full original rendered assignment and exact
+scope manifest must be verified from its authenticated final handoff before
+that lane can be merged or edited. Published master contains a timing-parser
+commit, but that does not establish the requested final member head.
+
+The additive `cache_fingerprint.py` fingerprints every regular file and
+directory in a caller-selected tree, including content hashes, modes, mtimes,
+link counts and empty directories. It rejects symlinks and nonregular files and
+checks for changes during traversal and reading. Synthetic controls cover
+content and directory changes, symlinks, FIFO inputs and mutation during a read;
+the 32-method synthetic suite passes. This is a cache-state comparison helper,
+not proof that the selected tree comprises all actual Lean caches, that a cache
+is authentic, or that a before/after measurement occurred. It is not wired into
+an accepted runner. Race-free snapshots, H56 identity and measurements, the
+full gate, independent reviews and cache pack remain outstanding.
