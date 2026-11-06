@@ -17,7 +17,7 @@ bundle=e/("overlay-"+head+".bundle")
 if not bundle.exists():subprocess.run(["git","bundle","create",str(bundle),branch,"^"+base],check=True)
 census=json.loads((e/"census-base.json").read_text())
 (e/"source-base.sha256").write_text("".join(row["source_sha256"]+"  "+row["path"]+"\n" for row in census["modules"]))
-files=sorted(x for x in e.iterdir() if x.is_file() and x.name not in ("SHA256SUMS","evidence.tar.gz") and x.suffix in (".json",".log",".md",".txt",".sha256",".patch",".bundle"))
+files=sorted(x for x in e.iterdir() if x.is_file() and x.name not in ("SHA256SUMS","evidence.tar.gz") and x.suffix in (".json",".jsonl",".lean",".log",".md",".txt",".sha256",".patch",".bundle"))
 # Normalized tar metadata makes a snapshot reproducible given its input bytes.
 with (e/"evidence.tar.gz").open("wb") as raw_archive, gzip.GzipFile(filename="",mode="wb",fileobj=raw_archive,mtime=0) as gz, tarfile.open(fileobj=gz,mode="w") as tar:
     for f in files:
