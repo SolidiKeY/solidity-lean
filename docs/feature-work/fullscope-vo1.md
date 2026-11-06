@@ -1445,3 +1445,28 @@ root). Controls `rle_keyed`, `rle_keyed_forwarded`, `rle_keyed_kill`,
 (forwarding past the key's assignment reads `5` where the program reads `0`). Still not
 covered: struct members of storage (`s.f`), nested paths, key-sensitive apartness of two
 entries of one mapping (different literal keys).
+
+### X06 gates at c0cc5e178 — 2026-11-06
+
+- MCP diagnostics on every touched file: no errors. `#print axioms` on the headline
+  theorems (`Prog.rle_empty_runC`, `rle_preserves`, `Prog.dstore_runC`,
+  `dstore_preserves`, `licm_runC`, `Prog.licm_runC`, `licm_preserves`,
+  `Prog.optimize_runC`, the witnesses) in `tests/fullscope-20261104/vo1/X06Controls.lean`:
+  `[propext, Classical.choice, Quot.sound]` (`licm_witness`: `[propext, Quot.sound]`);
+  no `sorryAx`, no new axiom.
+- `gate.sh checkpoint` (warm-cache resumption over three task windows): `build-touched`
+  and `library` PASS with no build errors; `trust`, `orphans`, `layers`, `roots` PASS.
+  Module times: `Loads` 12 s, `DeadStore` 9.5 s, `LICM` 6.9 s, `Pipeline` 0.7 s.
+  FAIL, none from this lane: `fragments` (master's `docs/README.md` carries a
+  decisions-20261106 row no fragment produces; identical on `origin/master`),
+  `doc-paths` (the only missing reference is in `after-roadmap-va1.md`), `axiom-pins`
+  (0 errors; 4379 unrecorded pins, none under `Solidity/Optimizer/`).
+- `./run-lean.sh`: stops at `fragments.sh --check` for the same master README row.
+  With that file regenerated locally (`fragments.sh --force`, restored afterwards and
+  not committed): `Build completed successfully (6413 jobs)` (a first attempt lost
+  `Examples/Tactics/{RevertData,OpenLoops}` to the OOM killer, exit 137; the rerun built
+  them). `check-solkey.sh` against the unpinned sibling `../solkey` (`b8d5f88`, not the
+  pin `473da8944c`): 167 mismatches (storage-taclet annotation rows,
+  `save<[Struct<[..]>`), as recorded above. Rerun against the pinned snapshot
+  (`SOLKEY_RULES=tests/migration/solkey/.../solidityProgramRules.key`): OK,
+  "annotations match", 377 taclets, 131 read-bearing, table covers 131.
