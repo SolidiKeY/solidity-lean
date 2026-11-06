@@ -1,140 +1,203 @@
 # H62/H63 Source migration overlay
 
-Owner: `solidity-h62-6-20261106/migrate-source`. Branch:
-`codex/solidity-h62-6-20261106/migrate-source`. Pinned base:
+**Overall blocked; original goal incomplete.** Sole migration lane owner:
+`solidity-h62-6-20261106/migrate-source`. Branch:
+`codex/solidity-h62-6-20261106/migrate-source`. Published base:
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
-Repository: `/workspace/solidity-h62-6-migrate-source`.
-The original clean `/workspace/solidity-lean` work checkout was preserved.
-Base was fetched from origin and verified an ancestor of origin/master before
-creating this worktree. No push, merge, registration, producer ownership transfer,
-central pin edit, or toolchain cut-over has occurred.
+Checkout: `/workspace/solidity-h62-6-migrate-source`.
+The older clean `/workspace/solidity-lean` work checkout is preserved.
+Base ancestry against HEAD and fetched origin/master passes. No push, merge,
+PR, publication, pre-gate, ownership transfer or cut-over has occurred.
+All original Source files and tracked lean-toolchain remain byte-identical to base.
 
-## Checkpoint state
+## Checkpoints
 
-1. **Partial:** census covers exactly the 199 explicitly owned Source files and
-   246 local prerequisite modules. It records 4,428 lexical declaration
-   candidates, 47 external local modules, 11 external direct imports and 489
-   external consumer edges. Header reconciliation and negative controls pass.
-   Byte hashes freeze all original Source statements, definitions and budgets;
-   they do not establish elaborated cross-version API equivalence. Full imported
-   constant/constructor/recursor inventory fixture is prepared, not yet validated.
-   Accepted complete clean old baseline remains pending.
-2. **Blocked:** exact official target archive is installed privately and matches
-   coordinator SHA256 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
-   Target Lean is 4.35.0, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
-   Lake is 5.0.0-src+eb6cafb. Bounded target KeySort passes. Diagnostic closure
-   run: 15 passed (5 Source), 3 failed, 228 import-blocked. See owner requests.
-3. **Blocked:** all-module new build, accepted complete old/new wall/RSS comparison,
-   affected acceptance and final repository gate remain pending. Timing delta is
-   undefined; incomplete runs cannot establish the <=10% regression gate.
-4. **Partial:** deterministic tooling and an isolated proof candidate are prepared
-   for root/gate review. Final patch/bundle and checksum handoff follow validation.
+| Checkpoint | State | Decisive evidence |
+|---|---|---|
+| 1 Census and clean old baseline | Done, with bounded evidence below | All 199 assigned Source modules / 246 local prerequisites pass; complete old type ledger and hashes |
+| 2 Official release adaptation | Blocked | Exact official pin installed; isolated Ctor repair passes; unchanged original and external dependencies fail; generated API contract unresolved |
+| 3 New full build and matched timing | Blocked | 15 target modules pass, 3 fail, 228 import-blocked; no complete target run or valid timing delta |
+| 4 Reviewed migration handoff | Partial | Reviewable unapplied proof patch, tooling and diagnostic artifacts ready; integration/whole migration gate unfinished |
 
-## Reproduction and resource policy
-
-All bulk evidence is outside git at `/workspace/h62-migrate-source-evidence`.
-Coordinator inputs at `/workspace/h62-coordinator-inputs` all match sha256.json.
-The tracked lean-toolchain stays at v4.24.0. Private absolute compiler paths
-select the official target. Baseline Lean: 4.24.0, commit
-`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-The downloaded old release archive SHA256 is
+Evidence directory: `/workspace/h62-migrate-source-evidence`.
+All coordinator inputs passed their supplied sha256.json. Official target archive:
+lean-4.35.0-linux.tar.zst, SHA256
+`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
+Lean 4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc;
+Lake 5.0.0-src+eb6cafb. Actual bounded KeySort passes in new-keysort-final.
+Baseline: official Lean 4.24.0 commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake 5.0.0-src+797c613. Old archive SHA256
 `b14f5e5159219dd1a1956c3b806813319f5e94ccd5bdfd56f54520609a5bb5ec`.
+Absolute private compiler paths select releases; no tracked toolchain edit.
 
-Tooling lives in `scripts/h62/item6/migrate-source/` and acceptance fixtures in
-`tests/h62/item6/migrate-source/`. Commands are documented in each script's CLI
-or header. `census.py --out PATH` reads the pinned git objects;
-`acceptance.py CENSUS` independently reconciles all import headers and checks
-comments, strings, complete owned-file/order coverage and local dependency order.
-`generate-api.py CENSUS OUTPUT` emits the Inventory fixture reproducibly.
-It records every imported Source constant, including constructors and recursors,
-with its defining module, universe parameters, kind and internal type representation.
-The representation is compiler-dependent observation, not semantic equality proof.
+## Complete old census, proof build and boundaries
 
-`build.py --root ROOT --toolchain TC --census CENSUS --out FRESH_DIRECTORY`
-runs one compiler at a time, explicit `-j1`, LEAN_NUM_THREADS=1, 10,000 MiB Lean
-heap bound, sampled 12 GiB group-RSS stop and a 4 GiB available-memory guard.
-The kernel-enforced hard bound is the VM cgroup; no virtual-address cap is used.
-The VM has a 16 GiB cgroup cap, four CPU quota and no system swap. No systemd-run.
-The repository writer lock spans every build. Fresh private import paths are
-forced *after* lake env. Both Lake and Lean executables are absolute.
-The measurement builds oleans for the closure; it is not the final run-lean.sh
-repository gate or native executable/test compilation.
-Reports record each command/exit/wall time and sampled process-group RSS at 50 ms.
-Resource stops preserve the failing module and are never passing checks.
+The pinned census has exactly the 199 explicitly assigned files: 4,428 lexical
+candidates, 47 external local prerequisite modules, 11 external direct imports,
+and 489 external consumer edges. Independent import-header reconciliation and
+comment/string/order negative controls pass. Lexical candidates are navigation,
+not elaborated proof or witness coverage.
 
-Initial old-clean-01 was interrupted to fix finder/skeptic tooling findings.
-Old-clean-02 stopped safely in Horizon at a per-module 389.706 s and 4,834,746,368 sampled RSS
-bytes because provisioning left 7.3 GB clean file cache. It is failed evidence.
-Task-private clean-page eviction via cold-cache.py reduced cgroup usage from
-7.7 GB to 0.55 GB without changing files, limits or global cache settings.
-Before each accepted measurement, run the same roots:
+Clean old run old-clean-04 passes all 246 modules, including all 199 Source modules:
+wall **2275.218421954 s**, sampled peak group RSS **8263950336 bytes** (7.70 GiB).
+Horizon alone: 705.884 s, same peak RSS. The complete imported-constant ledger has
+**17,542 entries** across all 199 requested Source modules. It includes constructors,
+recursors, equations, instances and declarations in other namespaces defined here.
+API capture passes. Raw ledger api-full-old.json is 666 MB, intentionally off git.
+frozen-interfaces-old.json records per-declaration SHA256; frozen-source-files.sha256
+freezes every original file, including statements, definitions and budgets.
+
+This is a clean olean/proof-elaboration build of the assigned closure. It is not
+native executable compilation, the repository-wide run-lean.sh final gate, a new
+H70 simultaneous-hypothesis witness audit, or a source-to-EVM correctness theorem.
+No new-toolchain all-directory success or RUNTIME_GATE_PASS is asserted.
+No Lean MCP tools are exposed; bounded CLI per-file diagnostics are used.
+
+## Resource and timing reproducibility
+
+Use scripts/h62/item6/migrate-source and tests/h62/item6/migrate-source.
+The VM hard cgroup cap is 16 GiB; CPU quota is four; no system swap. One heavy job
+at a time, LEAN_NUM_THREADS=1, explicit -j1, tstack 131072, Lean heap 10000 MiB,
+4 GiB available-memory reserve, and a sampled 12 GiB group-RSS stop. The latter is
+a watchdog, not a kernel cap. No systemd-run. Writer lock spans every heavy check.
+Both executables and import paths are forced after lake env; no master cache.
+Reports retain exact commands/exits, RSS peaks sampled at 50 ms, diagnostic VMS, actual
+versions and release archive hashes. Fixture reports bind SHA256 before launch
+and check input stability afterward.
+
+Before either accepted full measurement, use identical clean-page preparation:
 
 ```sh
 python3 scripts/h62/item6/migrate-source/cold-cache.py \
   /workspace/h62-migrate-source-evidence /workspace/.setup/tools/lean-4.24.0-linux
 ```
 
-## Exact-file owner coordination and backfill
+Only task-private clean pages are advised for eviction; no files or global cache
+settings change. build.py --out must name a fresh directory; its private LEAN_PATH
+excludes workspace/shared artifacts. The comparison script requires both complete
+passing runs, exact module order, matching resource profile and census base,
+correct old/new versions, and the coordinator target archive SHA. Every regression
+escalates; >10% stops. Invalid/incomplete runs cannot produce a timing pass.
+Actual before/after comparison and delta remain **pending/undefined**.
 
-The saved `owner-requests.json` is the self-contained coordinator relay request.
-No relay.sh exists on this VM. Existing originals remain read-only pending reply.
-MS-DEP-HASH requests migrate-hash's CollisionBound proof compatibility patch.
-MS-DEP-SYNTAX requests migrate-syntax's Raw String/Slice API compatibility patch.
-MS-OWNER-CTOR requests coordination with the live Source producer before touching
-only the nodes_eq/excl_ctor proof bodies. No absent reply is treated as consent.
+Failed preparation runs remain explicit failure evidence: old-clean-01 was stopped
+for tooling fixes. Old-clean-02 hit the reserve in Horizon at per-module 389.706 s
+(whole failed run 972.143 s), with 7.3 GB provisioning clean cache present.
+Old-clean-03 failed std::bad_alloc at per-module 461.294 s / 5606068224 RSS bytes
+(whole run 1013.790 s); cgroup OOM/max counters were zero. Its self-imposed 12 GiB
+virtual-address limit incorrectly stood in for RAM. The corrected single-file
+probe passed 715.030 s, 8110936064 RSS bytes, 16827170816 virtual bytes, inherited
+RLIMIT_AS unlimited. It reused imports and is not an accepted clean baseline.
+The complete old-clean-04 independently validates the corrected resource setup.
+Neither resident nor proof budgets were raised; AS reservation is not RSS.
 
-The generated Ctor fixture contains the exact pinned definitions and theorem
-headers. Its proof-only candidate uses constructor-head congruence to avoid
-recursive simplifier expansion, and explicitly cases Boolean tests before
-conditional elimination. The full 112-constructor completeness proof is retained.
-No statement, premise, exclusion, observation, axiom policy or proof budget changes.
-First candidate failed and its sorryAx printouts are rejected failure evidence.
-The revised candidate passed on old (63.549 s, 1,561,919,488 sampled RSS bytes)
-and new (21.636 s, 710,295,552 bytes); both changed theorem axiom sets are [propext].
-These fixture observations are not a clean all-directory performance comparison.
-Final unused simp-argument cleanup must be rechecked before accepting the patch.
-No original Source declaration was edited. Lexical Source sorry/axiom/native_decide
-counts are all zero. Failed elaboration's synthetic sorryAx is never accepted.
+## Concrete proof-only candidate and owner delivery
 
-## Independent reviews
+Committed proposal: tests/h62/item6/migrate-source/ctor-candidate.patch.
+Patch SHA256:
+`4eae67d556a0f322499c3695b0db0582cf259c08d1e55b2ea9d41dce96f55881`.
+It changes only Syn.nodes_eq and Syn.excl_ctor proof bodies, including two unused
+simp arguments. All definitions, theorem headers, premises, exclusions and
+observations stay unchanged. The full 112-constructor completeness proof remains.
+Constructor-head congruence avoids recursive simplifier expansion; explicit Bool
+cases handle the changed conditional elimination. No maxHeartbeats increase.
+History inspection found S00 construction/review commits, no speed fix undone.
 
-Independent read-only finder and skeptic used neither Lean server nor Lean jobs.
-Both found and confirmed fixes for Lake prepending workspace artifacts and missing
-resource-stop rows. Finder prompted absolute compiler paths; skeptic prompted
-complete assigned-module/order coverage. Both accepted the preparatory scanner
-scope, while retaining elaborated inventory and full validation as outstanding.
-Both rejected the first Ctor candidate. Finder and skeptic found a cold-cache path
-prefix acceptance bug; it now uses resolved path containment. Further candidate
-and handoff reviews remain pending.
+Final isolated fixture SHA256:
+`92a08a3c6879c88df6b1a6720fa0dc284e453c286fe384ee8b3471cb29657247`.
+Old check: exit0, 56.030609418 s, 1502949376 sampled RSS bytes.
+New check: exit0, 22.954620345 s, 680759296 bytes. Both headline theorem axiom sets
+are exactly [propext]. These are isolated fixture observations, not all-directory
+before/after timing. The first rejected candidate's errors/sorryAx printouts remain
+failed evidence and are never treated as accepted proofs.
 
-## Proof versus external checks and unfinished obligations
+MS-OWNER-CTOR requests coordinator/live Source producer agreement before editing
+only this original file. Original Source/Ctor is still unchanged and still fails
+new-toolchain compilation. The candidate is reproducible from the exact base with
+ctor-fixture.py. No direct owner delivery or original-file permission is claimed.
+relay.sh is host-only, not a worker installation task. owner-requests.json records
+exact files, patch paths and hashes for coordinator retrieval.
 
-Per-file diagnostics use the bounded CLI because no Lean MCP tools are exposed.
-The isolated fixture checks kernel-elaborated proofs, while the census, resource
-sampling and scanner controls are external tooling observations. No fixture pass
-certifies the unchanged failing Source original or blocked imports. No
-RUNTIME_GATE_PASS is asserted. Required work still includes owner coordination,
-external dependency overlays, applying/rechecking the owned proof repair, full
-old/new clean comparison, elaborated interface reconciliation, final affected
-validation/reviews, and the root/gate migration handoff. No goal completion claimed.
+H70 audit-v10-storage, audit-roadmap, migrate-roadmap and migrate-root-gate pings
+were acknowledged with the committed patch/head/hash. Only their supplied excerpts
+were received; the full staged Roadmap payloads have not been obtained or reviewed.
+Their witness/totality/gas/fork queues remain their owners' work.
 
-## Resource instrumentation correction (checkpoint 2)
+## Cross-directory failures and unresolved generated API
 
-Old-clean-03 failed at Horizon after 461.294 s (whole failed run 1013.790 s),
-5,606,068,224 sampled RSS bytes, std::bad_alloc and zero cgroup OOM/max events.
-Its self-imposed 12 GiB RLIMIT_AS was an incorrect proxy for resident RAM.
-Finder and skeptic supported removing that virtual restriction while retaining
-all resident/proof budgets. The corrected Horizon single-file feasibility probe
-passed at 715.030 s, 8,110,936,064 sampled RSS bytes and 16,827,170,816 diagnostic
-virtual bytes; inherited RLIMIT_AS is unlimited. The original source SHA256 is
-f579466b9b961c899a4cb2bbe3948a8143284b186e8035c30395c6b89a7d9cd4.
-This probe reused exact private imports and cannot establish a clean full build.
-Only a new complete clean run under the corrected harness can establish baseline.
-The earlier address-limited results are failed diagnostic evidence.
+new-diagnostic-01: **15 pass (5 Source), 3 fail, 228 import-blocked**.
+MS-DEP-HASH: migrate-hash owns CollisionBound, with contains equality failure at407,
+omega failures at660/680 and failed-elaboration guard-message mismatches.
+MS-DEP-SYNTAX: migrate-syntax owns Raw, with String/Slice changes at597/650/665/682/684.
+No outside-scope original was edited or silently repaired. Source/Ctor fails at641
+(timeout at the original200000 budget) and715 (dependent conditional elimination).
+Await owner-reviewed external overlays and Source original-file coordination.
 
-Final fixture reports now bind input SHA256 and actual compiler version before
-launch, check the input remains unchanged, and retain RSS/VMS/failure data.
-compare.py rejects failed/incomplete builds, changed module order/resource
-profiles and invalid metrics. Any regression returns escalation; >10% returns
-STOP. Synthetic negative controls are acceptance of that refusal logic, not
-measured source performance. The actual comparison remains blocked.
+Partial old/new inventories explicitly say complete=false and request 5/199 modules:
+2365 old entries,2422 new;18 missing names,75 additions,555 changed raw type/universe
+records,1792 identical. Independent reviews matched139 explicitly named authored
+declarations with identical raw types. This is bounded evidence, not full-directory
+compatibility. Missing16 enum toCtorIdx helpers and2 hygienic names are not waived.
+All555 changed rows are generated, but not all changes are alpha/formatting:
+Syn.noConfusion and FrameBudget.noConfusionType change argument structure; Q.isInt's
+generated equation uses a changed BEq Int instance. No textual consumers found is
+not authority to drop an API.
+
+Official4.35 unconditionally generates the new noConfusion signature; no supported
+genNoConfusion legacy-signature control was found. genInjectivity/genCtorIdx do not
+restore it; redeclaring an existing constant is rejected. Custom elaborator work
+would be a major unvalidated change, not an approved workaround. **Q-MS-API-01**
+remains pending: include generated exports in the exact freeze, or obtain the
+root/gate's authoritative authored-export manifest and adjudication of every
+remaining generated difference. Neither option has been selected or approved.
+Scope question and detailed evidence are saved in scope-questions.json.
+
+A bounded semantic bridge in IntegerInstanceSemantics checks Q.isInt=true iff its
+numerator modulo denominator is zero, plus an inhabited zero positive control,
+on both releases. It certifies only that contract. Standard axiom closures differ:
+old spec [propext,Quot.sound], old zero []; new spec/zero
+[propext,Classical.choice,Quot.sound]. No new axiom declaration, sorry,
+native_decide, trust-policy change or axiom-pin edit was introduced. The standard
+closure change is retained for root classification rather than hidden.
+
+## Reviews, checks and resumption
+
+Independent finder and skeptic used no Lean server/jobs and made no edits. They
+found and confirmed fixes for workspace cache precedence, missing resource-stop
+rows, compiler path/fixture hash binding, path-containment checks, incomplete timing
+acceptance, release/base identity and partial-ledger labelling. They accepted the
+proof-only Ctor approach and identified the generated API/axiom-closure limits.
+Final finder/skeptic review accepted the stated proof/evidence boundaries. Both
+requested a deterministic fingerprint generator and precise peak-sampling wording;
+those findings are fixed before export.
+
+Layer check passes:857 core modules reach neither elaborators nor checked-parser
+adapters. Generated-root and fragment checks pass. Repository doc-path check fails
+one **pre-existing, unchanged, out-of-scope** optional Mathlib citation in
+feature-work/after-roadmap-va1.md; see MS-DOC-EXTERNAL. No such fix is authorized here.
+New scoped document paths and git diff whitespace checks must pass before export.
+
+Resume the original persistent goal on this same VM/branch. Do not reset/create a
+goal or self-launch a replacement thread. Root/coordinator must resolve owner
+coordination, external migration overlays and Q-MS-API-01. Then apply approved
+proof repair, recheck every assigned module under the exact official release,
+reconcile frozen interfaces and standard axioms, run matched clean old/new metrics
+and required full affected/repository gates, fix reviews, and complete the root-gate
+handoff. Fresh-thread handoff goes to the coordinator. No partial checkpoint or
+failed required gate constitutes full assignment completion.
+
+## Fingerprint reproduction
+
+```sh
+python3 scripts/h62/item6/migrate-source/fingerprints.py \
+  /workspace/h62-migrate-source-evidence/census-base.json \
+  /workspace/h62-migrate-source-evidence/api-full-old.json \
+  /workspace/h62-migrate-source-evidence
+```
+
+Each row hash is SHA256 of its complete raw ledger record encoded UTF-8 after
+json.dumps(sort_keys=True, ensure_ascii=False, separators=(",", ":")). The outer
+manifest uses sorted keys/indent2. Partial ledgers are rejected; requested modules
+must equal the assigned census and current source bytes must match every frozen
+file SHA. This algorithm hashes compiler representations without asserting
+cross-version semantic equality. Bulk outputs stay off git; the generator is tracked.
