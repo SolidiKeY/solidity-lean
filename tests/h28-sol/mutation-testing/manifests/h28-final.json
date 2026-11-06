@@ -6993,7 +6993,7 @@
    "oracle": "tests/h28-sol/mutation-testing/oracles/BoundsBaseline.lean",
    "oracle_sha256": "059db341369f65869183ce8c422d2852b4fd9c2cf102678ee7641a1252e91cdc",
    "witness": "tests/h28-sol/mutation-testing/oracles/BoundsZeroOnProduction.lean",
-   "witness_sha256": "34bd7528ffc9aebde0440e57e05acc45145271be67e99caa3aff46e3d40888c5",
+   "witness_sha256": "085c25f3542306b182dd388c0c33ff69b72fd4bf19ab154dffa13c48c86d340f",
    "from_pilot": null,
    "expect": "semantic-witness-failed",
    "note": "the family's kill argument, aimed at the production premise, must fail after the link"
@@ -7007,7 +7007,7 @@
    "oracle": "tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.lean",
    "oracle_sha256": "a80cda87cbfbe10b940740335d890c62c893e7f1725acc5cf63937e363016510",
    "witness": "tests/h28-sol/mutation-testing/oracles/PushLastSlotOnProduction.lean",
-   "witness_sha256": "9206a0f440fbe6a25e2bcc30a30b38919973c89af8186893c42b87b1f7476230",
+   "witness_sha256": "93e1a1340d9a5af872ad19237dda572db364440fa5a6eefcf0c9622ca8c997c7",
    "from_pilot": null,
    "expect": "semantic-witness-failed",
    "note": "the family's kill argument, aimed at the production premise, must fail after the link"
@@ -7021,7 +7021,7 @@
    "oracle": "tests/h28-sol/mutation-testing/oracles/DivAssignBaseline.lean",
    "oracle_sha256": "3e0c2c00043a2bb8cd85fcf06230c0e9c772baa4d0283b7a90382c22cc769c51",
    "witness": "tests/h28-sol/mutation-testing/oracles/DivisionOperandsOnProduction.lean",
-   "witness_sha256": "04a121747033341077ef6e4a67a3ddccb92f9610a139e4c654fac266235fcc67",
+   "witness_sha256": "80310261cd7e2ff8eb67fcb3e5e72f53c70b52292d538d555a6b694b6f509621",
    "from_pilot": null,
    "expect": "semantic-witness-failed",
    "note": "the family's kill argument, aimed at the production premise, must fail after the link"
@@ -7035,7 +7035,7 @@
    "oracle": "tests/h28-sol/mutation-testing/oracles/RootDeleteBaseline.lean",
    "oracle_sha256": "a44fa5baf23e6ec7e37246eaab964635ff955494c2709b42203446590d06e0a8",
    "witness": "tests/h28-sol/mutation-testing/oracles/RootDeleteSkippedOnProduction.lean",
-   "witness_sha256": "779fca9eb7e691195d41b448e2c4361d2a0e55e55a98dc5eb0c9c2686463488d",
+   "witness_sha256": "511ba9ae02835a1fb982e896c8b457c4ec0d54255c271e56034f3bf90e7eabe2",
    "from_pilot": null,
    "expect": "semantic-witness-failed",
    "note": "the family's kill argument, aimed at the production premise, must fail after the link"
@@ -8320,6 +8320,13 @@
    "line": 975,
    "census": "no-family-site",
    "clauses": [
+    {
+     "clause": "capture: se = se",
+     "family": "alias-capture-once",
+     "operator": null,
+     "fixture": null,
+     "reason": "the captured local is read only inside a spliced schema statement (`body`), so no written use can be made to re-read the expression"
+    },
     {
      "clause": "side condition: join of then/else",
      "family": "guard-polarity",

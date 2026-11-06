@@ -6,7 +6,8 @@ premise definition replaced by the production premise (the production `1 / 0`, w
 `source_link` must elaborate against the unchanged table, and the kill
 argument, unchanged otherwise, must then fail: a witness that went through
 here would show the production rule unsound.  The runner decides it
-`semantic-witness-failed` only if every error lies after the link. -/
+`semantic-witness-failed` only if every error lies after the link and
+the failure reaches `checked_kill`. -/
 namespace H28.DivisionOperandsOnProduction
 open Solidity
 

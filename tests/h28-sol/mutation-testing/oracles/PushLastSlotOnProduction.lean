@@ -6,7 +6,8 @@ premise definition replaced by the production premise (the production write at t
 `source_link` must elaborate against the unchanged table, and the kill
 argument, unchanged otherwise, must then fail: a witness that went through
 here would show the production rule unsound.  The runner decides it
-`semantic-witness-failed` only if every error lies after the link. -/
+`semantic-witness-failed` only if every error lies after the link and
+the failure reaches `checked_kill`. -/
 namespace H28.PushLastSlotOnProduction
 open Solidity
 
@@ -19,7 +20,7 @@ def extendUpdate : Upd C [] [] := .snoc .nil (.storage (.app2 .pushSlot (.app0 .
 def lastIndex : Tm C [] (.val .uint) := Tms.Term.binop .sub .uint
   (Tms.Term.lenH rfl Tms.STerm.storage path.lower) (Tms.Term.nat 1 rfl) rfl
 def lastPath : Tm C [] (.path (.prim .uint)) := Tms.PTerm.at (.arr .dyn) path.lower lastIndex
-/-- `sp[sp.length]`, as the rule language lowers it: the slot past the end. -/
+/-- The production write's slot `sp[sp.length - 1]` (the kill witness wrote past the end). -/
 def pastPath : Tm C [] (.path (.prim .uint)) := lastPath
 def added : Tm C [] (.val .uint) := Tms.Term.binopC .add rfl rfl
   (Tms.Term.find Tms.STerm.storage lastPath) (.app0 (.lit (p := .uint) ⟨1, rfl⟩))

@@ -171,6 +171,10 @@ def mechanical(cid, span):
         if new != rest:
             fam = "alias-capture-once"
             out.append((f"capture: {name} = {expr}", fam, "capture-use-reevaluated", m.start(3), m.end(3), new))
+        else:
+            # the captured local is used only inside a spliced schema
+            # statement: listed, with no textual use to re-read
+            out.append((f"capture: {name} = {expr}", "alias-capture-once", None, 0, 0, None))
     for m in UPDATE.finditer(span, arrow):
         body, off = m[1], m.start(1)
         # bindings are separated by `‖`, with any whitespace (also a newline)
@@ -219,7 +223,13 @@ def inventory(root):
         target, line, span = spans[cid]
         short = cid.split(".")[1]
         clauses, made, n = [], {}, {}
-        found = [(c, f, op, span[:a] + new + span[b:]) for c, f, op, a, b, new in mechanical(cid, span)]
+        mech = mechanical(cid, span)
+        for c, f, op, a, b, new in mech:
+            if op is None:
+                clauses.append({"clause": c, "family": f, "operator": None, "fixture": None,
+                                "reason": "the captured local is read only inside a spliced schema statement "
+                                          "(`body`), so no written use can be made to re-read the expression"})
+        found = [(c, f, op, span[:a] + new + span[b:]) for c, f, op, a, b, new in mech if op is not None]
         for c, f, old, new in HAND.get(cid, []):
             if span.count(old) != 1:
                 raise SystemExit(f"hand fixture not unique in {cid}: {old!r}")

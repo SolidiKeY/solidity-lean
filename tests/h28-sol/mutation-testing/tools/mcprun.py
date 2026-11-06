@@ -352,8 +352,10 @@ def semantic_success(items, regions, oracle_text, require):
         # universal in the state: the state `Premise.Sound` is applied to
         # (its last argument) must be a bound variable of type `State`
         m = re.search(r"Solidity\.Premise\.Sound.*?(\w+)\)*$", flat) if flat else None
+        # the state is the last binder, directly before the conclusion: no
+        # hypothesis restricts it
         if not flat or "¬" in flat or not m or \
-                not re.search(r"\(" + re.escape(m[1]) + r":Solidity\.State", flat):
+                not re.search(r"\(" + re.escape(m[1]) + r":Solidity\.State[^()]*\),Solidity\.Premise\.Sound", flat):
             return {"ok": False, "reason": "sound_all does not state Premise.Sound in every state"}
     if "checked_kill" in require:
         kill = [v for k, v in sigs.items() if k.lstrip("@") == ns + ".checked_kill"]
@@ -402,11 +404,22 @@ def semantic_control(items, regions, oracle_text):
             "sorryAx" in x["message"] for x in items), "reason": "the kill argument went through"}
     if any(regions["target"][0] <= x["line"] <= regions["target"][1] for x in errors):
         return {"ok": False, "reason": "normal target failed"}
-    if any(x["line"] in span for x in errors):
-        return {"ok": False, "reason": "the link itself failed: not a semantic control"}
+    if any(x["line"] < span.stop for x in errors):
+        return {"ok": False, "reason": "an error at or before the link: not a semantic control"}
     if any(not (regions["oracle"][0] <= x["line"] <= regions["oracle"][1]) or RUNTIME.search(x["message"])
            for x in errors):
         return {"ok": False, "reason": "error outside the witness or a runtime limit"}
+    # the link is trusted, the kill is not: the failure reached checked_kill
+    ns, _ = owned(oracle_text)
+    def deps(n):
+        hits = [re.sub(r"\s+", " ", x["message"]) for x in region(items, regions, "oracle")
+                if x["message"].startswith(f"'{ns}.{n}' ")]
+        return hits[0] if len(hits) == 1 else None
+    link_ax, kill_ax = deps("source_link"), deps("checked_kill")
+    if link_ax is None or "sorryAx" in link_ax:
+        return {"ok": False, "reason": "source_link does not elaborate cleanly"}
+    if kill_ax is None or "sorryAx" not in kill_ax:
+        return {"ok": False, "reason": "the failure does not reach checked_kill"}
     return {"ok": True, "first_error": {"line": errors[0]["line"], "message": errors[0]["message"][:400]},
             "errors": len(errors), "link_line": link}
 

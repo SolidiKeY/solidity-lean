@@ -268,13 +268,24 @@ class Summary(unittest.TestCase):
         self.assertFalse(run("Solidity.Premise.Sound m s p H28.T.start"))
         # parameters bound, but the state fixed: not universal
         self.assertFalse(run("∀ (k : Nat), Solidity.Premise.Sound m s p H28.T.start"))
+        # a hypothesis restricting the state
+        self.assertFalse(run("∀ (σ : Solidity.State C Γ), σ = σ → Solidity.Premise.Sound m s p σ"))
         self.assertFalse(run("True"))
 
     def test_semantic_control(self):
         link = REG["oracle"][0] + 1  # source_link line of the stripped body
         sc = mcprun.semantic_control
         # failure in the kill argument, after the link: the control passes
-        self.assertTrue(sc([item(link + 2, "rfl failed")], REG, ORACLE)["ok"])
+        ax = [item(105, "'H28.T.source_link' depends on axioms: [propext]", "info"),
+              item(106, "'H28.T.checked_kill' depends on axioms: [propext, sorryAx]", "info")]
+        self.assertTrue(sc([item(link + 2, "rfl failed")] + ax, REG, ORACLE)["ok"])
+        # the failure must reach checked_kill, and the link must be clean
+        self.assertFalse(sc([item(link + 2, "rfl failed")] + ax[:1] + [
+            item(106, "'H28.T.checked_kill' depends on axioms: [propext]", "info")], REG, ORACLE)["ok"])
+        self.assertFalse(sc([item(link + 2, "rfl failed")] + [
+            item(105, "'H28.T.source_link' depends on axioms: [sorryAx]", "info")] + ax[1:], REG, ORACLE)["ok"])
+        # an error before the link (a typo in a definition) is refused
+        self.assertFalse(sc([item(link - 1, "unknown identifier")] + ax, REG, ORACLE)["ok"])
         # the link itself failing is not a semantic control
         self.assertFalse(sc([item(link, "Type mismatch Taclet.x")], REG, ORACLE)["ok"])
         # the target failing, a runtime limit: never ok
