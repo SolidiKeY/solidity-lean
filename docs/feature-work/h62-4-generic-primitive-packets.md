@@ -90,7 +90,7 @@ as insufficient evidence of a cgroup reserve; final checks use the conservative
 minimum of host availability and cgroup remaining memory, minus 4 GiB. The
 final fixed child cap was 8 GiB. Writer lock held; no systemd-run.
 
-**B-MIGRATION-HASH**: The 231-module CheckedSub.Controls import closure fails
+**B-MIGRATION-HASH (historical; cleared for isolated H70 consumption below)**: The 231-module CheckedSub.Controls import closure fails
 under pinned v4.35 at `Solidity/Hash/CollisionBound.lean`:407 (List.contains
 function equality), :660 and :680 (omega), followed by axiom-message guard
 failures caused by unsolved proofs. That source was not modified. This is not
@@ -187,11 +187,13 @@ The persistent goal remains unfinished and dependency-blocked. `get_goal` is
 not exposed; coordinator explicitly authorized continuing from the supplied
 verified goal. No second goal or competing continuation was created.
 Checkpoint 1 and bounded backfill are committed on the assigned branch.
-This is two completed work items, below the 3–5-item fresh-thread threshold.
+The later H70 overlay consumption makes three completed bounded work items;
+a coordinator-managed fresh-thread handoff is now requested below.
 
-Read `tests/h62/item4/generic-primitive-packets/blockers.json`. Resolve the
-Hash migration with its existing owner and relay exact application authority;
-then re-run the bounded import closure. Complete the actual PrimitivePackets
+Read `tests/h62/item4/generic-primitive-packets/blockers.json`. Hash was resolved
+for isolated staged consumption by the H70 relay below. Resolve the next
+Roadmap.Contracts axiom-guard failure with its migration owner, then re-run the
+bounded import closure using only explicitly reviewed staged overlays. Complete the actual PrimitivePackets
 parameterized semantic lemma, typed execution table and frozen-statement
 correspondence. Retain and validate every original negative/observation case.
 Coordinate MRS/V09 before the exact CheckedSub Controls migration; continue
@@ -220,3 +222,87 @@ as retrieved or forwarded, and no unspecified error is invented here.
 `relay.sh` is host-only and is not a worker installation task. Requests remain
 in the result and typed blocker file. Proved arithmetic fixtures remain separate
 from pending compiler correspondence. No goal, scope, budget or gate changed.
+
+## H70 exact Hash overlay consumption: complete; next dependency blocked
+
+Owner relay: `solidity-h62-6-20261106/migrate-hash` at
+`2a18afcdba00a85645b0b3079704f78ffcd78860`. Provenance is the supplied exact
+owner diff, not a claimed retrieval of that Git commit. The two checkout files
+remain byte-identical to c6f550e281a7e5affa9a99bc2cdaed556dec00e4. Only external
+staged copies were compiled; routing granted no checkout-original permission.
+
+| File | Exact base Git blob | Exact owner postimage Git blob |
+|---|---|---|
+| Solidity/Hash/CollisionBound.lean | b54c93a5b24340a19160c1fb378d057ccee60f84 | 092971eda8c7d6997276a92ba19b25b7ce05844e |
+| Solidity/Hash/Adaptive.lean | cb5d5a1c61f7350aa01d9d0c81c8f4403b19fab3 | 20087c3f9525d6773c008708678eb67876ab9e14 |
+
+`stage_hash_overlay.py` verifies the published base bytes and full owner blob
+hashes, requires a fresh destination outside the checkout and refuses path
+escapes. The relayed patch and SHA256-bearing manifest are committed under
+`tests/h62/item4/generic-primitive-packets/hash-owner-relay.json` and
+`hash-owner-relay.patch.json` (exact patch text serialized without whitespace
+changes to its contents).
+No duplicated source module or large build artifact is committed.
+
+`check.py --source-overlay` restricts staged sources to those exact two files
+and validates full postimages, manifest fields and original base blobs.
+Compiler commands record the actual source path/root and source/output hashes.
+The staged modules use an explicit external `--root`; other modules use the
+checkout root. Timing fingerprints include external dependency source bytes;
+external timing inputs require their validated source root. This does not
+supply the still-missing full affected-scope timing or semantic correspondence.
+
+Deterministic reproduction, with a fresh staging destination and writer lock:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/stage_hash_overlay.py /workspace/h62-generic-primitive-packets-evidence/hash-overlay/fresh-source
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/accept_hash_overlay.py /workspace/h62-generic-primitive-packets-evidence/hash-overlay/fresh-source /workspace/h62-generic-primitive-packets-evidence/hash-overlay
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/check.py --evidence /workspace/h62-generic-primitive-packets-evidence/hash-overlay/run --source-overlay /workspace/h62-generic-primitive-packets-evidence/hash-overlay/fresh-source Solidity.Hash.Adaptive Solidity.Backend.PrimitivePackets.CheckedSub.Controls
+```
+
+The actual first run staged `hash-overlay/source`, and its manifest matches the
+committed fixture. A fresh `hash-overlay/run/build` was used; its `toolchain`
+symlink selects the already SHA256-verified official v4.35 distribution, never
+v4.24 cache. Versions and passing KeySort prerequisite are in
+`hash-overlay/run/{versions.log,keysort.json}`. Bounded serial compilation then
+passed CollisionBound (4.188 s) and Adaptive (1.675 s), plus Source.Syntax,
+Source.Const, Source.Types, Keccak and Roadmap.Evm. The next module failed:
+
+**B-MIGRATION-ROADMAP-CONTRACTS**: `Solidity/Roadmap/Contracts.lean:1104`
+`#guard_msgs` for `Solidity.Roadmap.PublicCorrectness.transfer` expects no
+axioms, while pinned v4.35 reports `[propext, Classical.choice, Quot.sound]`.
+Exit 1 is preserved. No guard, theorem, premise, allowlist or pin was changed.
+The reserved migration owner is `solidity-h62-6-20261106/migrate-roadmap` per
+the supplied ownership snapshot. Exact-path ticket is saved in blockers.json
+for coordinator routing. This is an axiom-guard failure, not a new source sorry.
+The full import closure, compiler correspondence and final gates remain blocked.
+MRS exact-file agreement on CheckedSub/Controls also remains pending.
+
+The complete eight-module command/exits/source roots/caps/hashes/times are in
+`/workspace/h62-generic-primitive-packets-evidence/hash-overlay/run/dependency-results.json`.
+The decisive failing log is
+`hash-overlay/run/dependency-logs/Solidity.Roadmap.Contracts.log`.
+Hash check times are isolated observations, not before/after migration deltas.
+
+Overlay acceptance exited 0:
+`EXACT_OWNER_OVERLAY_ACCEPTANCE_PASS: full blobs, deterministic reproduction,
+unchanged originals, optimized symlink refusal, tampered-manifest refusal`.
+Independent finder and skeptic passed after full-postimage and fresh-staging
+hardening. Neither used Lean, a Lean server, edits or builds. Both confirmed the
+next Roadmap guard failure and that no statement/trust change is authorized.
+Evidence: `hash-overlay/acceptance.log` and `hash-overlay/reviews.txt`.
+
+## Fresh-thread handoff request after three bounded work items
+
+Coordinator should resume this same VM/branch and existing goal in a fresh
+thread after census, arithmetic/tooling backfill, and exact-owner overlay
+consumption. No replacement goal or thread was created by this worker.
+The original VM is
+`ccarenv_b64_Y2NhcmVudl8wNTVjODQyNGExN2M4MTkxODFjMjUyNzJhMGFiOTdkYQ`;
+repository `/workspace/solidity-lean`; assigned branch unchanged. The original
+launcher-created goal is identified by the frozen rendered-prompt SHA256
+`6f981f1156a761c51ec5daff85fc7683198027eaf4dd88c64057cb9de9fdf8a9`.
+A numeric goal ID is not exposed; do not create/reset a goal to obtain one.
+State is dependency-blocked, not complete. Exact committed head and fresh export
+paths are in the external `hash-overlay/result.json` after this checkpoint.
+Retain all original queue obligations, owner scopes, v4.35 pin and proof budgets.

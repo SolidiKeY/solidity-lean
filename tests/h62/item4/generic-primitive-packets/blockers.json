@@ -2,22 +2,25 @@
   "schema": 1,
   "blockers": [
     {
-      "id": "B-MIGRATION-HASH",
-      "kind": "failed-owned-migration-prerequisite",
+      "id": "B-MIGRATION-ROADMAP-CONTRACTS",
+      "kind": "owned-migration-axiom-guard-failure",
       "status": "blocked",
       "exact_files": [
-        "Solidity/Hash/CollisionBound.lean"
+        "Solidity/Roadmap/Contracts.lean"
       ],
-      "owner": "solidity-h62-6-20261106/migrate-hash",
-      "authority": "H62-6-MIGRATE-HASH ownership snapshot; isolated migration overlay only",
-      "evidence": "/workspace/h62-generic-primitive-packets-evidence/dependency-logs/Solidity.Hash.CollisionBound.log",
-      "errors": [
-        407,
-        660,
-        680
+      "owner": "solidity-h62-6-20261106/migrate-roadmap",
+      "source_tag": "H62-6-MIGRATE-ROADMAP ownership snapshot",
+      "theorem": "Solidity.Roadmap.PublicCorrectness.transfer",
+      "line": 1104,
+      "expected_axioms": [],
+      "observed_axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
       ],
-      "required_resolution": "Coordinator relays the migration owner\u2019s reviewed compatible prerequisite with explicit exact-file application authority; keep theorem statements and trust policy unchanged.",
-      "routing_receipt": "H70: owner ticket relay accepted; dependency and exact-file agreement remain pending; no write authorization implied."
+      "evidence": "/workspace/h62-generic-primitive-packets-evidence/hash-overlay/run/dependency-logs/Solidity.Roadmap.Contracts.log",
+      "required_resolution": "Coordinator relays an owner-reviewed exact-base migration resolution preserving frozen statements and trust policy; do not silently change the axiom guard or pins.",
+      "relay_status": "New exact-path ticket recorded here for coordinator routing; no external owner message sent by worker."
     },
     {
       "id": "B-OWNER-RELAY",
@@ -34,5 +37,35 @@
     }
   ],
   "questions": [],
-  "registration": "No registered area module yet. SubFixtures is standalone additive arithmetic backfill. Area registration fragments and exact-instance migration patch remain pending semantic bridge and exact owner agreement."
+  "registration": "No registered area module yet. SubFixtures is standalone additive arithmetic backfill. Area registration fragments and exact-instance migration patch remain pending semantic bridge and exact owner agreement.",
+  "resolved_dependencies": [
+    {
+      "id": "B-MIGRATION-HASH",
+      "kind": "failed-owned-migration-prerequisite",
+      "status": "cleared-for-isolated-consumer-check",
+      "exact_files": [
+        "Solidity/Hash/CollisionBound.lean",
+        "Solidity/Hash/Adaptive.lean"
+      ],
+      "owner": "solidity-h62-6-20261106/migrate-hash",
+      "authority": "H62-6-MIGRATE-HASH ownership snapshot; isolated migration overlay only",
+      "evidence": "/workspace/h62-generic-primitive-packets-evidence/hash-overlay/run/dependency-results.json",
+      "errors": [
+        407,
+        660,
+        680
+      ],
+      "required_resolution": "Coordinator relays the migration owner\u2019s reviewed compatible prerequisite with explicit exact-file application authority; keep theorem statements and trust policy unchanged.",
+      "routing_receipt": "H70: owner ticket relay accepted; dependency and exact-file agreement remain pending; no write authorization implied.",
+      "resolution": "Exact H70 owner overlay staged outside checkout; both Hash modules checked under pinned v4.35. Full migration gates remain pending.",
+      "owner_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+      "checkout_originals_unchanged": true
+    }
+  ],
+  "owner_overlay": {
+    "source": "/workspace/h62-generic-primitive-packets-evidence/hash-overlay/source",
+    "manifest": "tests/h62/item4/generic-primitive-packets/hash-owner-relay.json",
+    "patch": "tests/h62/item4/generic-primitive-packets/hash-owner-relay.patch.json",
+    "authorization": "Isolated staged-source consumption only; no checkout-original edit permission"
+  }
 }

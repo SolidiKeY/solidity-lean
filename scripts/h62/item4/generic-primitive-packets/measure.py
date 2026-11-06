@@ -23,15 +23,17 @@ def measure(args, report, save):
     if dependency['status'] != 'pass':
         raise ValueError('affected dependency build has not passed')
     for row in json.loads((evidence/'dependency-results.json').read_text()):
-        if row['exit'] != 0 or sha(ROOT/(row['module'].replace('.','/')+'.lean')) != row['source_sha256'] or sha(evidence/'build'/(row['module'].replace('.','/')+'.olean')) != row['output_sha256']:
+        if row['exit'] != 0 or sha(Path(row.get('source_path',str(ROOT/(row['module'].replace('.','/')+'.lean'))))) != row['source_sha256'] or sha(evidence/'build'/(row['module'].replace('.','/')+'.olean')) != row['output_sha256']:
             raise ValueError('dependency evidence is failed or stale')
+    dependency_sources={row.get('source_path',str(ROOT/(row['module'].replace('.','/')+'.lean'))):row['source_sha256'] for row in json.loads((evidence/'dependency-results.json').read_text())}
+    dependency_roots={row.get('source_path',str(ROOT/(row['module'].replace('.','/')+'.lean'))):row.get('source_root',str(ROOT)) for row in json.loads((evidence/'dependency-results.json').read_text())}
     binary,pin=compiler(evidence)
     build=evidence/'build'
     env=dict(os.environ,LEAN_NUM_THREADS='1',LEAN_PATH=str(build))
     groups={key:[p.resolve() for p in getattr(args,key)] for key in ('before','after')}
     if groups['before'] == groups['after']:
         raise ValueError('identical file groups are not a migration comparison')
-    hashes={str(p):sha(p) for paths in groups.values() for p in paths}
+    hashes={**dependency_sources,**{str(p):sha(p) for paths in groups.values() for p in paths}}
     snapshot=fingerprint(build)
     cap=memory_cap()
     report.update(snapshot=snapshot,toolchain=pin,source_sha256=hashes,memory_cap_bytes=cap,
@@ -48,7 +50,10 @@ def measure(args, report, save):
             for index,source in enumerate(groups[key]):
                 guard(cap)
                 log=evidence/f'timing-{pair}-{key}-{index}.log'
-                cmd=[str(binary),'-j1','--tstack=131072',str(source)]
+                if not source.is_relative_to(ROOT) and str(source) not in dependency_roots:
+                    raise ValueError('external timing input needs a validated source root')
+                source_root=dependency_roots.get(str(source),str(ROOT))
+                cmd=[str(binary),'-j1','--tstack=131072','--root='+source_root,str(source)]
                 start=time.monotonic()
                 with log.open('w') as stream:
                     try:
