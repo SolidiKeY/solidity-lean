@@ -28,3 +28,6 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object alias negatives. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean` | Frozen recursive-return source-coherence duty for the allocating family, all compatible callers/arguments/return binders and quotation indices. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherenceControls.lean` | Actual outer calls at indices two/four with private allocation and preserved caller scalar; zero-index exhaustion distinguished from bare revert. |
+
+| `Solidity.Backend.InternalFlow.RuntimeFrameV3OuterScalarRestore` | Same-reference outer scalar restore preserving the live result and reached heap. |
+| `Solidity.Backend.InternalFlow.RuntimeFrameV3OuterAllocatingCall` | Executed allocating scalar call with actual exported caller representation and ordered result/control observations. |
