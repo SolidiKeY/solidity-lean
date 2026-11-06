@@ -1,0 +1,32 @@
+# Explicit Checks namespace tranche; no other embedded region is claimed.
+@V3AllocatingSource
+obs: read_bound ordered_bindings old_objects allocation_count
+ss,obs,pres,heap_keeps: specification
+neq: wrong_alias wrong_scalar omitted_allocation wrong_old_content
+boundneg: wrong_reference_bound
+sx: shallow
+sn: shallow_not_revert shallow_not_success
+ss: prefix_then_call
+@V3MutatingSource
+ss: inner root actual all_sufficient
+obs: read_bound ordered_bindings objects allocation_count private_objects
+sx: shallow
+sn: shallow_not_revert wrong_scalar wrong_alias
+pneg: not_keeps
+eq: root_state
+@V3AllocatingResume
+loop,repr,obs,pres,alloc,continuation,heap_keeps: available specification
+eq: same_machine caller_identity
+obs: observations
+ss: source_result source_all caller_result
+sx: shallow
+sn: shallow_not_revert
+rneg: still_needs_unwind
+@V3MutatingResume
+loop,repr,obs,pres,alloc,continuation,lengths: available specification
+eq: same_first same_second zero_horizon source_identity entered_state caller_identity
+ss: source_result caller_result source_all
+obs: caller_bindings objects first_observations second_observations
+sx: shallow
+neq: unrestored_view wrong_horizon wrong_old_content
+sn: shallow_not_revert

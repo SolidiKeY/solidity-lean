@@ -1,0 +1,50 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_child_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_old_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_result_counter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.source_advance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.source_bindings": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.specification": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.Controls.words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

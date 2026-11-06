@@ -11,7 +11,7 @@ inductive Plan {E : Env} {Γ : RCtx} (F : Fr) (state : St E) (locals : Locals E.
  {types : RCtx} → RConvArgs E Γ types → {shapes : List AbiEntry.Shape} → AbiEntry.Vals shapes → Nat → Prop
  | nil : Plan F state locals .nil .nil 0
  | read {type types arguments shape shapes encoded encodeds copies}
-   (index : Source.Idx Γ type) (typed : type.implicit E.isBase type=true)
+   (index : Source.Idx Γ type) (typed : type.implicit E.isBase E.mapFree type=true)
    (head : @Head E F state type (locals.get index) shape encoded)
    (tail : @Plan E Γ F state locals types arguments shapes encodeds copies) :
    Plan F state locals (.cons (.local index) typed arguments) (.cons encoded encodeds) copies

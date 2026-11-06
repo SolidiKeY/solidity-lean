@@ -1,0 +1,28 @@
+{
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_actual_derivation_controls": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_all_optional_name_variants": [],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_arbitrary_depth_relation": [],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_arbitrary_plain_parse": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_arbitrary_signature_parse": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_arbitrary_width_depth_bound": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_both_constructor_controls": [],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_empty_parameter_list_rejected": [],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_following_keywords_preserved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_fragment_both_constructors_inhabited": [],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_wrong_header_and_missing_brace_rejected": [],
+ "tests/h28-sol/statement-grammar/CatchCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_zero_and_insufficient_fuel_rejected": []
+}

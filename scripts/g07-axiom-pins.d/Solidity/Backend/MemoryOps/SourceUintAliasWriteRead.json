@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintAliasWriteRead.lean:Solidity.Backend.MemoryOps.source_uint_alias_write_read_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAliasWriteRead.lean:Solidity.Backend.MemoryOps.source_uint_read_into_objects_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

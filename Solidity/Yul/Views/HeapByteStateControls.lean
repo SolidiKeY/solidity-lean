@@ -6,7 +6,7 @@ namespace Solidity.Yul.Views.Controls
 
 def byteState : Source.EMState heapByteEnv [.bytes .memory, .string .memory] :=
   ⟨.cons bytesAlias (.cons stringAlias .nil),
-    ⟨⟨⟨fun _ => Source.Account.empty _⟩, .empty, []⟩, byteHeap, [], [], ⟨[], .nil⟩⟩⟩
+    ⟨⟨⟨fun _ => Source.Account.empty _⟩, .empty, []⟩, byteHeap, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def byteStateAfter := withSourceHeap byteState heapByteAfter
 def byteStringStateAfter := withSourceHeap byteState bothHeapAfter
 

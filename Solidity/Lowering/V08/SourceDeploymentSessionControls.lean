@@ -42,7 +42,7 @@ theorem failed_session_actual (p : Roadmap.Pipeline) :
       some (.revert (Source.errorData [0,255,128])) := by cases p <;> decide +kernel
 
 theorem event_is_not_installation : (rolled.ex.world.accounts self).code = none ∧
-    (rolled.ex.world.accounts self).balance.val = 5 ∧ rolled.ex.journal.length = 2 :=
+    (rolled.ex.world.accounts self).balance = 5 ∧ rolled.ex.journal.length = 2 :=
   ⟨rfl,rfl,rfl⟩
 
 theorem wrong_final_success (p : Roadmap.Pipeline) :
