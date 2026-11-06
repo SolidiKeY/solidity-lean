@@ -890,7 +890,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 | Module | Purpose |
 |---|---|
 | `Backend/InternalFlow/RuntimeFrameV3ScalarDescentInterfaceV1.lean` | Frozen typed public-guard and allocating three-cell prefix obligations, parameterized by an existing compiler certificate. |
-| `Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean` | Actual scalar allocating descent horizons with reached representation, exact ownership growth and derived three-cell parent history. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean` | Actual scalar allocating descent horizons with reached representation, exact ownership growth, three-cell parent history and complete exact new-object inventory. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean` | Populated zero/one/two descent horizons, old-array observations, capture-order negatives and the actual terminal guard. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean` | Actual allocating descent history feeds the same-state scalar return loop. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransport.lean` | All-count descent and return execution against the frozen producer, with derived history and allocator transport. |
@@ -902,4 +902,15 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContents.lean` | Exact fresh private array source contents and physical words after arbitrary allocating descent tails. |
 | `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContentsControls.lean` | Populated one/two-turn fresh object observations and header/payload ordering negatives. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean` | Typed complete new-object inventory, every-reference coverage, distinct addresses and same-state physical observations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object address distinctness. |
+| `Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean` | Intrinsic object/heap extensionality, derived output typings and uniqueness from exact old/new contents. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeHeapProfile.lean` | Actual native recursive allocation supplies exact new-object contents and State-field preservation for every sufficient quotation index. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeDescentHeap.lean` | Actual native output and reached target descent have identical complete dependent heaps; local return transport remains separate. |
+| `Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionalityControls.lean` | Two actual allocations preserve old objects yet differ in fresh contents; the altered heap fails the exact profile. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeDescentHeapControls.lean` | Populated source/target heap identity with the native-result versus descent-slot mismatch retained. |
+| `Backend/InternalFlow/RuntimeFrameV3StateShell.lean` | Equality of existing non-memory State fields for allocation-only internal execution; no external/world-call adequacy. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean` | Actual native recursive output represented after actual target parent returns, with derived heaps, locals and remaining State fields. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentationControls.lean` | Populated actual-output representation, complete ordered 20-word observation vector and cursor/alias/halt negatives. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object alias negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
