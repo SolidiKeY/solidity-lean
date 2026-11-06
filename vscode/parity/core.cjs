@@ -190,7 +190,9 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='visual') {
+  if(config.suite==='commands'){
+    if(!ids.includes('command-build-keybinding'))errors.push('missing native command scenario');
+  } else if(config.suite==='visual') {
     // Visual capture has its own five scenarios. Missing early phases remain
     // missing, never passed checks; the aggregate below must retain those gaps.
     for(const id of ['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'])

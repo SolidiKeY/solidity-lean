@@ -103,7 +103,23 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(visual){
+    if(config.suite==='commands'){
+      assert.equal(target,'local','compiler command evidence only');
+      await scenario('command-build-keybinding',async()=>{
+        const doc=await open('commands',1);const lineEnding=new vscode.WorkspaceEdit();lineEnding.set(doc.uri,[vscode.TextEdit.setEndOfLine(vscode.EndOfLine.CRLF)]);assert.equal(await vscode.workspace.applyEdit(lineEnding),true);assert.equal(doc.eol,vscode.EndOfLine.CRLF);await replace(doc,doc.getText()+'\r\n// unsaved UTF16 edit 🦀\r\n');assert.equal(doc.isDirty,true,'keyboard build begins with unsaved source');const source=doc.getText(),version=doc.version;
+        await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+        const requestId=require('node:crypto').randomUUID();
+        writeFileSync(join(config.dir,'keybinding-request.json'),JSON.stringify({runId:config.runId,requestId,uri:doc.uri.toString(),version,sourceHash:createHash('sha256').update(source).digest('hex')}));
+        await until(()=>existsSync(join(config.dir,'keybinding-reply.json')),'renderer keybinding dispatch');
+        const reply=JSON.parse(readFileSync(join(config.dir,'keybinding-reply.json'),'utf8'));assert.equal(reply.runId,config.runId);assert.equal(reply.requestId,requestId,reply.error);assert.equal(reply.observation.focusedEditor,true);
+        let report;
+        await until(()=>{for(const event of events.filter(e=>e.kind==='output')){try{const value=JSON.parse(event.data.text);if(value.operation==='build'&&value.source===doc.uri.fsPath){report=value;return true;}}catch{}}return false;},'native compiler Build output after key dispatch');
+        assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.equal(doc.isDirty,false,'Build saved the current buffer');assert.equal(readFileSync(doc.uri.fsPath,'utf8'),source);assert.equal(report.sourceHash,createHash('sha256').update(source).digest('hex'));assert.equal(report.kind,'compiler-ast');assert.equal(report.verification,'not-run');
+        const artifact=JSON.parse(readFileSync(report.artifact,'utf8'));assert.ok(artifact.ast||artifact.sourceUnits,'actual compiler artifact has source AST');assert.equal(artifact.header?.sourceSha256,report.sourceHash,'artifact header binds exact current source');writeFileSync(join(config.dir,'compiler.ast.json'),readFileSync(report.artifact));
+        result.observations.commandScope='Actual Linux keyboard -> registered Build -> native solc AST, with no proof execution. Run/Test/macOS bindings remain unevidenced.';
+        return {request:reply,report,version,source,scope:result.observations.commandScope};
+      });
+    }else if(visual){
       const {requestPhase,phaseObserved}=require('./phase-capture.cjs');
       const localStates=new Map();
       if(target==='local'){
