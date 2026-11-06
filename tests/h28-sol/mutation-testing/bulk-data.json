@@ -184,5 +184,90 @@
     "unit_tests_per_mode": 74,
     "finder": "PASS",
     "skeptic": "PASS"
+  },
+  "candidate_inventory_audit": {
+    "authorization": "H41/H44",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-candidate-export-b85da7eb/inventory-proof-world.tar.gz",
+    "sha256": "1d1f4da80c217f78eae36154c4ac283d765712b4c2bac8e7a0bc8f028e38dcfb",
+    "bytes": 200344,
+    "archive_seconds": 0.12219038599869236,
+    "process_maxrss_kib": 104192,
+    "regular_members": 13,
+    "input_head": "b85da7eb8f5cd1dc9cebeb19fd0a90f3613a2da9",
+    "positive_source_sha256": "50a662458218d17e1fcc92e3798a2c6c64f85b42a008ad34a0323e6576866ed2",
+    "artifact_sha256": "c0b0267507d47cba7e3b5b40175c64e51b80adc774b9bb6f0000385d7dca9e3e",
+    "catalog_sha256": "9977a50a4d659d02283ecc6587611413cd3ea298cc134bd01da5c36a052d2f73",
+    "dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "coordinator_pull_observed": false,
+    "validation": {
+      "archive": "/workspace/h28-candidate-export-b85da7eb/validation.tar.gz",
+      "sha256": "1c8b50d29e5ad8925bec4ecb7488e6b7e34734ec2d8057b86cbd255f2491a54e",
+      "bytes": 2932,
+      "files": 10,
+      "gate_head": "c78b96cac48b23c75cfd75782f56c7f8e2021ff0",
+      "finder": "PASS",
+      "skeptic": "PASS"
+    }
+  },
+  "combined_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-combined-export-fb7ce29b/proof-worlds.tar.gz",
+    "sha256": "d79ae154926399af25b2c0a598f0924c26da493bcb917efb2fb562bd2656b83a",
+    "bytes": 49560922,
+    "catalog": "/workspace/h28-combined-export-fb7ce29b/catalog.json",
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "coordinator_pull_observed": false,
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "input_head": "fb7ce29bc5305ca58bc4dd6264f4b30fc0fcbe56",
+    "members": 241,
+    "check_count": 101,
+    "compiled_artifact_count": 70,
+    "axiom_export_count": 267
+  },
+  "combined_validation": {
+    "archive": "/workspace/h28-combined-export-fb7ce29b/validation.tar.gz",
+    "sha256": "fd41cafd29edc296c5496e855e52463f7c0a7b20098a7ff3c5907879c05c48ee",
+    "bytes": 3212,
+    "gate_head": "3407707a3c8817ef72e5bd88211f41c712b2ef5c",
+    "effective_gate_count": 8,
+    "scope_complete": false
+  },
+  "frozen_manifest_inputs": {
+    "tests/h28-sol/mutation-testing/manifests/combined-pilot.json": [
+      {
+        "role": "inventory",
+        "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+        "sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+        "bytes": 106323
+      },
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528
+      }
+    ]
+  },
+  "held_fix_validation": {
+    "archive": "/workspace/h28-held-fix-6f2390ee/validation.tar.gz",
+    "sha256": "b232314cde37bb1f8a0c2b10ae7ff14975c5fe28c1309d16c923eb5f1430b676",
+    "bytes": 3957,
+    "gate_head": "6f2390eecd3d62655f8a0042134e1e1307f78233",
+    "commands": 8,
+    "scope_complete": false
   }
 }
