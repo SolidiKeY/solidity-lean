@@ -4839,6 +4839,7 @@ import Solidity.Yul.RawDefaultScope
 import Solidity.Yul.RawDoWhileHorizon
 import Solidity.Yul.RawForPostHorizon
 import Solidity.Yul.RawFrame
+import Solidity.Yul.RawFrameLogic
 import Solidity.Yul.RawGrowingBlock
 import Solidity.Yul.RawGrowingForPost
 import Solidity.Yul.RawGrowingSequence
