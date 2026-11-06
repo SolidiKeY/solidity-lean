@@ -35,3 +35,8 @@ open Solidity.Frontend.ExecutableAst.Shared
 #check Solidity.Frontend.ExecutableAst.Shared.Scope.bodySeed
 #check Solidity.Frontend.ExecutableAst.Shared.Scope.reserved_lt_bodySeed
 #check Solidity.Frontend.ExecutableAst.Shared.Scope.validateScopes
+
+-- H90 canonical narrow-local decoding; no source adequacy theorem.
+#check Solidity.Frontend.ExecutableAst.Shared.localPrim
+#check Solidity.Frontend.ExecutableAst.Shared.localTypeName
+#check Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_narrow

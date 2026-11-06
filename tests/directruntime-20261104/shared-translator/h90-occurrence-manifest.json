@@ -1,0 +1,72 @@
+{
+  "regression": "Every frozen AST occurrence accounted; H90 reader profile",
+  "summary": {
+    "cases": 55218,
+    "documents": 95,
+    "kinds": 73,
+    "forms": 1926,
+    "routes": {
+      "none": 9507,
+      "contract": 378,
+      "typeName": 4698,
+      "expression": 30209,
+      "function": 1894,
+      "statements": 8532
+    },
+    "boundary": "Every frozen AST occurrence/pointer/hash,not every semantic context or source state. Decoder/printing success is not intrinsic proof or source/backend preservation.",
+    "default": {
+      "not-standalone": 9507,
+      "decoded": 28648,
+      "refused": 17063
+    },
+    "composed": {
+      "not-standalone": 9507,
+      "decoded": 28862,
+      "refused": 16849
+    },
+    "unknownRootRefusalsEachReader": 45711,
+    "changes": {
+      "refused->decoded": 214,
+      "refused->refused": 1122
+    },
+    "inputs": {
+      "cases.json": "9404d8aaf991a9e5615778d15559a43f6f8cdbb3b084ea0acde29d8d14ed6659",
+      "default.json": "52c74feb25906094e5aa5ba227f3e86dcd0a616ecb00d973d8b7267ab430349c",
+      "composed.json": "12ab14f12127b9e403f13370b9bbaf019fb52e71e6e5ab7299a324d8cce566c9"
+    }
+  },
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/occurrences-bc8ade9cc95867bd.tar.zst",
+    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/occurrences-bc8ade9cc95867bd.tar.zst",
+    "bytes": 9402066,
+    "sha256": "bc8ade9cc95867bd597568f4a8a6e3712e4796114cc9242843e28602f1f2be28"
+  },
+  "files": [
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/cases.json",
+      "relative": "tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/cases.json",
+      "bytes": 31209422,
+      "sha256": "9404d8aaf991a9e5615778d15559a43f6f8cdbb3b084ea0acde29d8d14ed6659"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/default.json",
+      "relative": "tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/default.json",
+      "bytes": 18002117,
+      "sha256": "52c74feb25906094e5aa5ba227f3e86dcd0a616ecb00d973d8b7267ab430349c"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/composed.json",
+      "relative": "tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/composed.json",
+      "bytes": 17983491,
+      "sha256": "12ab14f12127b9e403f13370b9bbaf019fb52e71e6e5ab7299a324d8cce566c9"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/summary.json",
+      "relative": "tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/summary.json",
+      "bytes": 24590,
+      "sha256": "d57b418a8d88040a7ad3778ddac50011e5559b42f8568cc08917202d849ef06b"
+    }
+  ],
+  "priorTimingStop": "Original quadratic uniqueness check stopped137after467.071s without matrices; retained in occurrence-timing-stop. Optimized capture32s and frozen replay25s both passed; not a successful before-run ratio.",
+  "boundary": "55218occurrences/95documents is a finite fixture denominator, distinct from H90 matched78-file function census. Standalone decoder/printing and unknown-root refusal controls only; no source/kernel-proof/backend adequacy."
+}

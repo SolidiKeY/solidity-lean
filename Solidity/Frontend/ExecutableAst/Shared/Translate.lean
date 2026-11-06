@@ -5,7 +5,8 @@ import Solidity.Frontend.SolcJson.Contract
 
 Extracted from Tools.DirectRuntime at the frozen dispatch base. Recursive
 one-step functions accept explicit readers for owned extension modules.
-The default retains the supported fragment and all original error strings.
+H90 adds primitive narrow locals with their source spelling; parameter/state
+readers and unrelated refusal paths retain the original fragment/errors.
 This module depends on neither Frontend.Import nor Frontend.Testing.
 Producer migration and parity are separate required gates.
 -/
@@ -27,6 +28,14 @@ def prim (j : Json) : Except String Ty := do
   | "int256" => return .prim .int
   | "bool" => return .prim .bool
   | _ => throw s!"compact verifier: unsupported type {t}"
+
+/-- Shape gate for primitive expression leaves in local tuples. Width semantics
+remain with each declaration's retained RawTy spelling and existing elaboration.
+Parameter decoding deliberately keeps `prim`, since Ty alone erases width. -/
+def localPrim (j : Json) : Except String Ty := do
+  let spelling ← str (← field j "typeDescriptions") "typeString"
+  if let some (p, _) := narrowTy? spelling then return .prim p
+  prim j
 
 def typeNameStep (read : Json → Except String (Ty × RawTy)) (j : Json) : Except String (Ty × RawTy) := do
   match ← node j with
@@ -53,6 +62,30 @@ def typeNameStep (read : Json → Except String (Ty × RawTy)) (j : Json) : Exce
 
 partial def typeName (j : Json) : Except String (Ty × RawTy) :=
   typeNameStep typeName j
+
+/-- A primitive local retains its source narrow spelling for the existing
+width-aware declaration elaborator. Parameters and state roots still use their
+original readers: returning only `Ty` there would discard width metadata. -/
+def localTypeName (j : Json) : Except String (Ty × RawTy) :=
+  match node j with
+  | .error e => .error e
+  | .ok kind =>
+    if kind == "ElementaryTypeName" then
+      match str j "name" with
+      | .error e => .error e
+      | .ok name =>
+        match narrowTy? name with
+        | some (p, _) => .ok (.prim p, .named name)
+        | none => typeName j
+    else typeName j
+
+/-- Every canonical narrow local keeps its exact spelling; this is a decoder
+fact, not an adequacy theorem for compiler expressions or intrinsic programs. -/
+theorem localTypeName_of_narrow (j : Json) (name : String) (p : PrimTy) (width : Nat)
+    (hkind : node j = .ok "ElementaryTypeName") (hname : str j "name" = .ok name)
+    (hwidth : narrowTy? name = some (p, width)) :
+    localTypeName j = .ok (.prim p, .named name) := by
+  simp only [localTypeName, hkind, beq_self_eq_true, ↓reduceIte, hname, hwidth]
 
 def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except String RawExpr := do
   let kind ← node j
@@ -282,7 +315,7 @@ def statementsStep
 
 
 partial def statements (j : Json) : Except String (List RawStmt) :=
-  statementsStep expression statements typeName j
+  statementsStep expression statements localTypeName j
 
 def params (j : Json) (returns : Bool) (fresh : String) : Except String (List (String × Ty)) := do
   (← arr j "parameters").toList.zipIdx.mapM fun (p, i) => do

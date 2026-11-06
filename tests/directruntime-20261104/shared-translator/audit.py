@@ -11,6 +11,22 @@ published=subprocess.check_output(['git','show','fcdddfcc446b5004860875f772ff603
 assert literals(removed)==literals(published), 'published extraction strings/order changed'
 # Remove only the separately reviewed metadata/admission phase. Every existing
 # decoding algorithm (including recursive calls and failure order) is unchanged.
+# H90 is an explicit reviewed extension. Pin all three implementation bodies
+# by source hash, then normalize exactly its two helpers/proof/callback before
+# retaining the original byte-for-byte extraction audit below.
+h90='def localPrim (j : Json)' in shared
+if h90:
+    approved=json.loads((root/'tests/directruntime-20261104/shared-translator/h90-census-manifest.json').read_text())
+    for row in approved['sourceFiles']:
+        assert hashlib.sha256((root/row['path']).read_bytes()).hexdigest()==row['headSourceSha256'], 'H90 implementation changed after review'
+    begin=shared.index('/-- Shape gate for primitive expression leaves in local tuples.')
+    end=shared.index('def typeNameStep',begin)
+    shared=shared[:begin]+shared[end:]
+    begin=shared.index('/-- A primitive local retains its source narrow spelling')
+    end=shared.index('def expressionStep',begin)
+    shared=shared[:begin]+shared[end:]
+    shared=shared.replace('statementsStep expression statements localTypeName j','statementsStep expression statements typeName j')
+    shared=shared.replace('H90 adds primitive narrow locals with their source spelling; parameter/state\nreaders and unrelated refusal paths retain the original fragment/errors.','The default retains the supported fragment and all original error strings.')
 a=shared.index('/-- Metadata-only validation')
 withoutGuards=(shared[:a]+'end Solidity.Frontend.ExecutableAst.Shared\n')
 withoutGuards=withoutGuards.replace('private def decodeFunction (read : Reader)', 'def function (read : Reader)',1).replace('private def decodeContract (read : Reader)', 'def contract (read : Reader)',1)
@@ -46,6 +62,8 @@ assert re.fullmatch(r'[0-9a-f]{40}', ownershipBase), 'invalid ownership baseline
 subprocess.run(['git','merge-base','--is-ancestor',base,ownershipBase],cwd=root,check=True)
 subprocess.run(['git','merge-base','--is-ancestor',ownershipBase,'HEAD'],cwd=root,check=True)
 files=subprocess.check_output(['git','diff','--name-only',ownershipBase],cwd=root,text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=root,text=True).splitlines()
-allowed=lambda p:p=='Solidity/Tools/DirectRuntime.lean' or p.startswith(('Solidity/Frontend/ExecutableAst/Shared/','tests/directruntime-20261104/shared-translator/')) or p=='docs/feature-work/directruntime-shared-translator.md'
+exclusive=set(pin['exclusiveFiles'])
+newScopes=pin['newFileScopes']
+allowed=lambda p:p in exclusive or any(p.startswith(s[:-2]) if s.endswith('/**') else p==s for s in newScopes)
 assert all(allowed(p) for p in files), 'unowned path modified'
-print(json.dumps({'publishedReaderStringLiteralCount':len(literals(removed)),'currentReaderChange':'whole-root metadata admission after unchanged legacy decoding','proofSearchBlock':'byte-identical','assertionBuilder':'callback extraction, reference gate and existing lexical renamer with scope/freshness checks','exportedWrapper':'byte-identical','ownedPathsOnly':True,'ownershipComparisonBase':ownershipBase,'ownershipBaselineRecord':'ownership-baseline.json','newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))
+print(json.dumps({'publishedReaderStringLiteralCount':len(literals(removed)),'currentReaderChange':('H90 hash-pinned narrow locals/tuple leaves; original extraction normalized exactly' if h90 else 'whole-root metadata admission after unchanged legacy decoding'),'proofSearchBlock':'byte-identical','assertionBuilder':'callback extraction, reference gate and existing lexical renamer with scope/freshness checks','exportedWrapper':'byte-identical','ownedPathsOnly':True,'ownershipComparisonBase':ownershipBase,'ownershipBaselineRecord':'ownership-baseline.json','newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))
