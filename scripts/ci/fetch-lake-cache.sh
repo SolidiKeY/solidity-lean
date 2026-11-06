@@ -13,7 +13,8 @@ if curl -fsSL --retry 3 -o "$tmp/master-cache.tar.gz" "$base/master-cache.tar.gz
    && curl -fsSL --retry 3 -o "$tmp/master-cache.sha256" "$base/master-cache.sha256" \
    && (cd "$tmp" && sha256sum -c master-cache.sha256 >/dev/null) \
    && tar -C "$tmp" -xzf "$tmp/master-cache.tar.gz"; then
-  PATH="$HOME/.elan/bin:$PATH" bash "$tmp/pack/install.sh" || echo "::warning::lake-cache install failed; building cold"
+  root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+  (cd "$root" && PATH="$HOME/.elan/bin:$PATH" bash "$tmp/pack/install.sh") || echo "::warning::lake-cache install failed; building cold"
 else
   echo "::warning::lake-cache release unavailable; building cold"
 fi
