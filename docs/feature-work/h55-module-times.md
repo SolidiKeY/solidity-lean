@@ -1212,3 +1212,24 @@ Independent read-only reviews corrected the JoinWalk role, clarified that
 typing output effects belong to the driver, and refined ABI success-control
 labeling. They used no Lean, server or build. No candidate is excluded or
 accepted solely from this static index.
+
+### H109 default executable closure review
+
+An independent read-only review found that the original partition test
+inspected only `Solidity/` sources and could miss a future slow import from
+the default executable root `SolidityLean.lean`. The CI test now reads
+`defaultTargets`, resolves declared library/executable roots, requires the
+root files to exist and traverses their lexical imports; a synthetic negative
+fixture checks an indirect slow dependency. Review also identified indented
+and meta imports and explicit Lake roots/globs as possible false negatives;
+the test now handles those import forms and roots and rejects unsupported
+default globs/srcDir and nonempty `needs`/`extraDepTargets`. Local
+`Solidity` and vendored `LeanTeX` imports must resolve to files. The first
+revised test over-rejected a non-default
+vendor library; the corrected run passed. Its text-based traversal can
+still miss nonstandard syntax, unavailable
+imports and Lake-specific resolution, so it is not an actual Lake build or
+complete import proof. The existing checkpoint's Lake invocations do not
+themselves provide this assignment's authenticated single-process/no-swap
+resource envelope; the fake-Lake test cannot establish that envelope. Full
+H109 Lean gates, matched measurements and Sol runner remediation stay open.
