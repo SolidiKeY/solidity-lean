@@ -12,9 +12,9 @@ Never overwrites an existing file. Usage: restore-lake-artifacts.py [ROOT]
 import json, os, pathlib, shutil, sys
 root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '.').resolve()
 build = root/'.lake/build'
-cache = os.environ.get('LAKE_CACHE_DIR')
-if not cache:
-    sys.exit('restore-lake-artifacts: LAKE_CACHE_DIR is not set')
+import subprocess
+cache = os.environ.get('LAKE_CACHE_DIR') or str(pathlib.Path(subprocess.check_output(
+    ['elan', 'which', 'lean'], text=True).strip()).parent.parent/'lake/cache')
 art = pathlib.Path(cache)/'artifacts'
 names = {}
 for n in os.listdir(art):
