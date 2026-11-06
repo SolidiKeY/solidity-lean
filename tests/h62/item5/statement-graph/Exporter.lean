@@ -25,7 +25,89 @@ def role (env : Environment) (n : Name) : String :=
   else if helperTag.hasTag env n then "helper"
   else "unclassified"
 
-def exportBinders (ty : Expr) (skip : Nat := 0) : MetaM (Array Json × Array Name) :=
+structure CheckedWitness where
+  consumer : Name
+  scope : String
+  index : Nat
+  witness : Name
+  helper : Name
+  expectedType : Expr
+  binderType : Expr
+  priorBinders : Array String
+  deriving Inhabited
+
+initialize checkedWitnesses : SimplePersistentEnvExtension CheckedWitness (Array CheckedWitness) ←
+  registerSimplePersistentEnvExtension {
+    addEntryFn := fun rows row => rows.push row
+    addImportedFn := fun arrays => arrays.foldl (· ++ ·) #[] }
+
+def registerWitness (consumer : Name) (scope : String) (index : Nat) (witness : Name) : MetaM Unit := do
+  unless scope == "binder" || scope == "field" do throwError "unknown H62 witness scope"
+  if (← getOptions).getBool `debug.skipKernelTC false then
+    throwError "H62 witness requires kernel checking"
+  if (checkedWitnesses.getState (← getEnv)).any (fun w => w.consumer == consumer && w.scope == scope && w.index == index) then
+    throwError "duplicate H62 witness registration"
+  let ci ← getConstInfo consumer
+  let wi ← getConstInfo witness
+  if wi.isUnsafe then throwError "unsafe H62 witness is forbidden"
+  unless (← collectAxioms witness).isEmpty do throwError "H62 witness must be axiom-free"
+  let mut targetType := ci.type
+  let mut skip := 0
+  if scope == "field" then
+    let some _ := getStructureInfo? (← getEnv) consumer | throwError "H62 field target is not a structure"
+    let .inductInfo info := ci | throwError "H62 field target is not inductive"
+    let some ctor := info.ctors.head? | throwError "H62 field target has no constructor"
+    targetType := (← getConstInfo ctor).type
+    skip := info.numParams
+  let absolute := skip + index
+  let (expected, binderType, prior) ← forallTelescope targetType fun xs _ => do
+    unless absolute < xs.size do throwError "H62 witness binder index is out of range"
+    let ty ← inferType xs[absolute]!
+    let preceding := xs[:absolute].toArray
+    let expected ← mkForallFVars preceding ty
+    let prior := (Array.range absolute).map fun i =>
+      if scope == "binder" || i < skip then toString i else "field:" ++ toString (i - skip)
+    return (expected, ty.abstract preceding, prior)
+  -- Consumer universe parameters remain rigid; only witness universes are inferred.
+  let value ← mkConstWithFreshMVarLevels witness
+  unless ← isDefEq (← inferType value) expected do
+    throwError "H62 witness type does not match the exact universal premise closure"
+  let value ← instantiateMVars value
+  let expected ← instantiateMVars expected
+  if value.hasMVar || expected.hasMVar || value.hasFVar || expected.hasFVar then
+    throwError "H62 witness is not closed or has unresolved metavariables"
+  let helper := Name.str (`H62.CheckedWitness ++ consumer) (scope ++ "_" ++ toString index)
+  if (← getEnv).contains helper then throwError "H62 witness helper name conflict"
+  -- A safe declaration with the exact computed type is checked by Lean's kernel.
+  addAndCompile <| .defnDecl {
+    name := helper
+    levelParams := ci.levelParams
+    type := expected
+    value := value
+    hints := .opaque
+    safety := .safe }
+  unless (← collectAxioms helper).isEmpty do throwError "H62 checked helper is not axiom-free"
+  modifyEnv fun env => checkedWitnesses.addEntry env {
+    consumer := consumer, scope := scope, index := index, witness := witness, helper := helper,
+    expectedType := expected, binderType := binderType, priorBinders := prior }
+
+def witnessJson (consumer : Name) (scope : String) (index : Nat) : MetaM (Option Json) := do
+  let entries := (checkedWitnesses.getState (← getEnv)).filter fun w =>
+    w.consumer == consumer && w.scope == scope && w.index == index
+  if entries.isEmpty then return none
+  if entries.size != 1 then throwError "conflicting imported H62 witnesses"
+  let w := entries[0]!
+  let helper ← getConstInfo w.helper
+  if helper.type != w.expectedType || helper.isUnsafe then
+    throwError "H62 checked witness helper identity/type mismatch"
+  return some <| Json.mkObj [
+    ("consumer", toJson consumer.toString), ("scope", toJson scope), ("index", toJson index),
+    ("declaration", toJson w.witness.toString), ("checkedDeclaration", toJson w.helper.toString),
+    ("kernelChecked", toJson true), ("binderTypeExpr", toJson (reprStr w.binderType)),
+    ("expectedTypeExpr", toJson (reprStr w.expectedType)), ("helperTypeExpr", toJson (reprStr helper.type)),
+    ("priorBinders", toJson w.priorBinders), ("axioms", namesJson (← collectAxioms w.helper))]
+
+def exportBinders (consumer : Name) (scope : String) (ty : Expr) (skip : Nat := 0) : MetaM (Array Json × Array Name) :=
   forallTelescope ty fun xs _ => do
     let mut rows : Array Json := #[]
     let mut refs : Array Name := #[]
@@ -34,13 +116,15 @@ def exportBinders (ty : Expr) (skip : Nat := 0) : MetaM (Array Json × Array Nam
       let d ← x.fvarId!.getDecl
       let ty ← instantiateMVars d.type
       refs := refs ++ ty.getUsedConstants
-      rows := rows.push <| Json.mkObj [
+      let checked ← witnessJson consumer scope (i - skip)
+      rows := rows.push <| Json.mkObj ([
         ("name", toJson d.userName.toString), ("contextSize", toJson i),
         ("type", toJson (← ppExpr ty).pretty),
         -- Close telescope locals using de Bruijn indices, never fresh FVarIds.
         ("typeExpr", toJson (reprStr (ty.abstract xs[:i].toArray))),
         ("isProp", toJson (← isProp ty)),
-        ("references", namesJson ty.getUsedConstants)]
+        ("references", namesJson ty.getUsedConstants)] ++
+        (match checked with | some evidence => [("witness", evidence)] | none => []))
     return (rows, refs)
 
 def exportDecl (n : Name) : MetaM Json := withOptions (fun o =>
@@ -56,7 +140,7 @@ def exportDecl (n : Name) : MetaM Json := withOptions (fun o =>
   if helperTag.hasTag env n then kinds := kinds.push "helper"
   if (kinds.toList.eraseDups).length > 1 then throwError "conflicting H62 tags on {n}"
   let mut typeRefs := ci.type.getUsedConstants
-  let (binders, _) ← exportBinders ci.type
+  let (binders, _) ← exportBinders n "binder" ci.type
   let mut fields : Array Json := #[]
   let mut fieldDecls : Array Name := #[]
   -- Structure contracts live in constructor/field types, not just `S : ... → Prop`.
@@ -64,7 +148,7 @@ def exportDecl (n : Name) : MetaM Json := withOptions (fun o =>
     let .inductInfo induct := ci | throwError "structure {n} is not inductive"
     let some ctor := induct.ctors.head? | throwError "structure {n} has no constructor"
     let ctorInfo ← getConstInfo ctor
-    let (fs, refs) ← exportBinders ctorInfo.type induct.numParams
+    let (fs, refs) ← exportBinders n "field" ctorInfo.type induct.numParams
     fields := fs
     typeRefs := typeRefs ++ refs
     fieldDecls := info.fieldInfo.map (·.projFn)
@@ -90,6 +174,13 @@ def exportDecl (n : Name) : MetaM Json := withOptions (fun o =>
     ("exists", toJson true),
     ("isTheorem", toJson (match ci with | .thmInfo _ => true | _ => false)),
     ("axioms", namesJson (← collectAxioms n))]
+
+syntax (name := checkWitness) "#h62_witness " str ident num ident : command
+elab_rules : command
+  | `(#h62_witness $scope:str $consumer:ident $index:num $witness:ident) => do
+    let target ← resolveGlobalConstNoOverload consumer
+    let proof ← resolveGlobalConstNoOverload witness
+    liftTermElabM <| registerWitness target scope.getString index.getNat proof
 
 syntax (name := overlayTag) "#h62_tag " str ident : command
 elab_rules : command
