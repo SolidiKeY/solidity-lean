@@ -7,7 +7,8 @@
       "declaration_name": "Compiled",
       "adapter_module": "tests/h55/yul-artifact/CaseAdapter.lean",
       "namespace": "Solidity.Yul.Compilation.H55Cases",
-      "boundary": "Context-indexed by arbitrary literal selector and real original scoped fallback artifact; exact Artifact.Image recovers the original case producer. Source is actual switch; code prepends selector push to the exact original dispatch. No family migration or inverse on arbitrary common artifacts claimed."
+      "boundary": "Context-indexed by arbitrary literal selector and real original scoped fallback artifact; exact Artifact.Image recovers the original case producer. Source is actual switch; code prepends selector push to the exact original dispatch. No family migration or inverse on arbitrary common artifacts claimed.",
+      "adapter_kind": "contextual_artifact"
     },
     {
       "producer_file": "Solidity/Yul/Compilation/ConditionalCompilation.lean",
@@ -15,7 +16,26 @@
       "declaration_name": "Artifact",
       "adapter_module": "tests/h55/yul-artifact/ConditionalAdapter.lean",
       "namespace": "Solidity.Yul.Compilation.H55Conditional",
-      "boundary": "Exact original if statement, code, separate guard/arm fuels and selection evidence; inverse only on the exact image. No production family migration claimed."
+      "boundary": "Exact original if statement, code, separate guard/arm fuels and selection evidence; inverse only on the exact image. No production family migration claimed.",
+      "adapter_kind": "selected_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ForCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Exact preparation image of original raw For producer and its optional common Artifact. Original emission/selection None is retained as preparation refusal, not runtime failure; selected payload uses unchanged For execution laws."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ForCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Exact original for statement/code and arbitrary newer prefix. Both old execution laws and all original selected producer data are retained in the exact image."
     },
     {
       "producer_file": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
@@ -23,7 +43,8 @@
       "declaration_name": "Artifact",
       "adapter_module": "tests/h55/yul-artifact/ScopedControlAdapter.lean",
       "namespace": "Solidity.Yul.Compilation.H55ScopedControl",
-      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
     },
     {
       "producer_file": "Solidity/Yul/Compilation/LetControlCompilation.lean",
@@ -31,7 +52,8 @@
       "declaration_name": "Artifact",
       "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetControl",
-      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
     },
     {
       "producer_file": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
@@ -39,7 +61,8 @@
       "declaration_name": "Artifact",
       "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetScope",
-      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
     },
     {
       "producer_file": "Solidity/Yul/Compilation/LoopControlCompilation.lean",
@@ -47,7 +70,8 @@
       "declaration_name": "Artifact",
       "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LoopControl",
-      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
     }
   ]
 }
