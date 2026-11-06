@@ -170,3 +170,17 @@ clocks or the VM/tree/cache/toolchain, cannot guarantee process-tree containment
 against process-group escape, and does not enforce Lean thread or job flags.
 Production acceptance, actual H56 evidence and both independent reviews remain
 pending; the attached executor preflight still cannot be counted as a pass.
+
+## Inventory coverage consumer
+
+A fresh origin/master fetch resolved to `5f7bb1441566aaad64a34436904afc61de762fd2`;
+the assigned base remains its ancestor. No H55 module-times helper was found
+in the assigned master paths. The frozen-base worktree remains unchanged.
+`inventory_gate.py` compares every tracked Lean path and its current SHA-256
+against a supplied inventory, rejects absent, duplicate, extra and undecided
+rows, and refuses tracked source changes and untracked Lean files. Its tests
+cover these structural cases. Eighteen synthetic test methods passed before
+subsequent command-constructor work. The checker does not validate whether the
+chosen execution context or method is correct, prove exhaustive coverage of
+ignored/generated Lean sources, authenticate toolchain or cache, or measure a
+module. A manually supplied disposition is not owner acceptance.
