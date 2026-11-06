@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/confirmed-owners-v6/semantic-roles-reviewed.json",
-    "bytes": 149199,
-    "sha256": "f9fbf7e6a91da90a6d856eab28007c5d503a6ace225fde98cb094ea7c0b9f986"
+    "path": "/workspace/h62-successor-bulk/correct-classification-v7/semantic-roles-reviewed.json",
+    "bytes": 165125,
+    "sha256": "1a68b4d08ac2311ce5a19f738798c07601a75683b07274be486c669cbeaed751"
   }
 }

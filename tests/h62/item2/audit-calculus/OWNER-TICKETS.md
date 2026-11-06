@@ -42,3 +42,8 @@ The classifier requires explicit coordinator-answer provenance and the frozen fi
 Finder and skeptic independently passed the exact answer map, producing paths, source hashes and unchanged role content; neither used Lean/server or writes. Historical ownership snapshots remain UNVERIFIABLE; this is a new authoritative answer, not recovered old evidence. H28 Raw/Context dependencies and pause remain unchanged.
 
 The machine checks metadata shape and frozen-source binding; authority authenticity comes from the recorded coordinator answer and independent review, not from an authority-kind string alone. No blanket statement-change approval is inferred.
+
+
+## Q-SEM-OWNER-02 answered (#63)
+
+Explicit coordinator answer confirms `Solidity/Calculus/Correct.lean` and `Solidity/Calculus/CorrectCallback.lean` as master (coordinator), no live producer. The eight new source candidates are owner-confirmed, independently of their static roles; prior78 records are unchanged. Totals now86 owner-confirmed,5197 unresolved. Question-ref delivery: coord-q/codex/solidity-h28-sol-20261104/automation-benchmark/20261106T231250Z. Exact answer and standing-rule text are preserved in the external correct-classification-v7 evidence. No question remains pending here, and no blanket statement-change authorization follows. The broader standing rule is applied only after checking that no live lane scope contains the file; no such check or inference is made for other files in this increment.
