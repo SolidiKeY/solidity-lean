@@ -14,10 +14,10 @@ compiler) is read twice:
   public `Shared.function` root, whose per-function outcomes and exact
   diagnostics are pinned below.
 
-The controls are observations, not a migration. They record the contract a
-migration of the existing route must meet: every row the existing route
-elaborates is either admitted by the canonical reader or appears here as a
-named support reduction. No fallback from one reader to the other exists or
+The controls are observations, not a migration. For this fixture, every row
+the existing route elaborates is either admitted by the canonical reader or
+pinned here as a named support reduction; the corpus-wide gap is measured in
+the contract document, not checked here. No fallback from one reader to the other exists or
 is introduced, and neither reader is changed. See
 `docs/feature-work/cr-canonical-reader-contract.md`. -/
 namespace Solidity.Frontend.Admission.CanonicalReaderContract

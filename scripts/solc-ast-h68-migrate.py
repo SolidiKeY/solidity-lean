@@ -15,8 +15,10 @@ fixture's own recorded compiler (by sha256) and solkey commit, and classifies:
   failed     the producer refused (message kept)
 
 Default is a dry run into --work; the committed tree is not touched.  --apply
-rewrites only `exact` fixtures in place and every `hash 0x...` literal that
-pins the old bytes in a tracked .lean file naming that fixture.  Sha256
+rewrites only `exact` fixtures in place and every `hash 0x...` literal
+(`solc_import`, `solc_world_factory`) that pins the old bytes in a tracked .lean
+file naming that fixture; modules that read a fixture by path are listed as
+`pathReaders` (their pinned outputs need their own check).  Sha256
 manifests owned by other lanes are reported, never rewritten.
 
 Usage:
@@ -82,6 +84,10 @@ def main():
     ap.add_argument("--receipt")
     ap.add_argument("--apply", action="store_true")
     a = ap.parse_args()
+    a.compiler, a.solkey_root, a.work = map(os.path.abspath, (a.compiler, a.solkey_root, a.work))
+    if a.receipt:
+        a.receipt = os.path.abspath(a.receipt)
+    os.chdir(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
     compilers = {sha256(p): p for p in glob.glob(os.path.join(a.compiler, "*.js"))}
     os.makedirs(a.work, exist_ok=True)
     rows = []
@@ -93,7 +99,7 @@ def main():
         row = {"fixture": f, "source": h.get("source"), "compilerSha256": h.get("compilerSha256"),
                "solkeyCommit": h.get("solkeyCommit"), "oldSha256": sha256(f)}
         rows.append(row)
-        if not os.path.exists(h.get("source", "")):
+        if not os.path.exists(h.get("source") or ""):
             row["status"] = "no-source"
             continue
         comp = compilers.get(h.get("compilerSha256"))
@@ -129,12 +135,20 @@ def main():
             row["status"] = "exact"
         else:
             row["status"] = "drift"
-            row["driftKeys"] = dict(extra) | ({} if same_header else {"<header>": 1})
-    tracked = subprocess.check_output(["git", "ls-files"], text=True).split()
+            row["driftKeys"] = {**dict(extra), **({} if same_header else {"<header>": 1})}
+    tracked = subprocess.check_output(["git", "ls-files", "-z"], text=True).split("\0")
+    texts = {}
+    for p in tracked:
+        if p and not p.endswith(".ast.json") and os.path.isfile(p) and \
+                not p.startswith("tests/cr-canonical-reader/"):  # this tool's own evidence
+            data = open(p, "rb").read()
+            if b"\0" not in data:  # text files only
+                texts[p] = data.decode("utf-8", "replace")
     for row in rows:
-        base = os.path.basename(row["fixture"])
-        mentions = [p for p in tracked if not p.endswith(".ast.json") and
-                    base in open(p, errors="replace").read()] if os.path.exists(row["fixture"]) else []
+        # The basename must follow a path separator or quote: Loops.ast.json
+        # is not a reference to OpenLoops.ast.json.
+        pat = re.compile(r'(?:^|[/"\'`(\s])' + re.escape(os.path.basename(row["fixture"])))
+        mentions = sorted(p for p, t in texts.items() if pat.search(t))
         row["leanPins"] = [p for p in mentions if p.endswith(".lean")]
         row["otherReferences"] = [p for p in mentions if not p.endswith(".lean")]
     if a.apply:
@@ -144,13 +158,16 @@ def main():
             old = fnv1a64(open(row["fixture"], "rb").read())
             new_path = os.path.join(a.work, os.path.basename(row["fixture"]))
             new = fnv1a64(open(new_path, "rb").read())
+            pat = re.compile(r"hash(\s+)0x0*%x\b" % old, re.IGNORECASE)
+            rewrites = {p: pat.sub(lambda m: "hash%s0x%016x" % (m.group(1), new), texts[p])
+                        for p in row["leanPins"]}
+            # A module naming the fixture without its old hash reads it by
+            # path (no pin to rewrite); it is reported, not edited.
+            row["pinnedModules"] = [p for p in row["leanPins"] if rewrites[p] != texts[p]]
+            row["pathReaders"] = [p for p in row["leanPins"] if rewrites[p] == texts[p]]
+            for p in row["pinnedModules"]:
+                open(p, "w").write(rewrites[p])
             os.replace(new_path, row["fixture"])
-            for p in row["leanPins"]:
-                text = open(p).read()
-                pat = re.compile(r"0x0*%x\b" % old)
-                text2 = pat.sub("0x%016x" % new, text)
-                if text2 != text:
-                    open(p, "w").write(text2)
             row["applied"] = True
     counts = collections.Counter(r["status"] for r in rows)
     result = {"authority": "H68 option 1", "producer": "scripts/solc-ast.mjs",

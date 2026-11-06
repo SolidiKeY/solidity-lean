@@ -63,7 +63,8 @@ and are not touched here.
 For each `exact` fixture with a `solc_import` pin, import the committed bytes
 and the `--apply` output side by side under fresh namespaces with the same
 options and the same contract name (the last component of the import name),
-and compare `toString (repr ….report)`. Run the scripts with
+and compare `toString (repr ….report)`. Identical (contract, options) imports
+repeated across modules are compared once: 118 pairs for 120 pin lines. Run the scripts with
 `--compiler DIR` holding the soljson files whose sha256 the headers record
 (0.8.34 `c8649f8d…`, 0.8.38 `6c74ffba…`, the GitHub release assets), and
 `--solkey-root DIR` holding `solkey-<commit>` checkouts for `473da894…`,
@@ -87,7 +88,12 @@ for the four fixtures that record `unknown`.
   and `solc_world_factory` in `TransientWorldSource.lean`) in 20 modules:
   `Solidity/Examples/Tactics/*` (7, one of them the factory pin), `Solidity/Solkey/QuantifiedDiamond.lean`,
   `tests/upstream/*.lean` (11), `web/test/CalldataImport.lean`. Only the hash
-  literal changes. No `.lean` file pins either `SliceReferenceCopies` reason string; only
+  literal changes. Three modules read migrated fixtures by path at elaboration and
+  need their own before/after check, which is not done here:
+  `Examples/Tactics/DeclarationMetadata.lean`, `tests/upstream/EntryPointsAdmission.lean`,
+  `tests/upstream/EntryPointsReceiverProfile.lean`. The comparison above
+  covers `solc_import` pins only, not the eight `solc_world_factory` pins of the
+  two `TransientFactory` fixtures. No `.lean` file pins either `SliceReferenceCopies` reason string; only
   `Body.lean` emits them, so the refinement changes no pinned check.
 - **OT-CR-4 (V11 MemoryOps, H55 G49/G50 Sol lane): three reserved path
   controls.** The ownership registry (`registry/ownership.json`) is not
