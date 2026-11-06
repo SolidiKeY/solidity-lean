@@ -1,4 +1,4 @@
-# H62 item 2: audit-language — blocked continuation handoff
+# H62 item 2: audit-language — stopped retirement handoff
 
 Batch `solidity-h62-2-20261106`, owner `audit-language`.
 Repository `/workspace/solidity-lean`; branch
@@ -8,6 +8,38 @@ VM environment: `ccarenv_b64_Y2NhcmVudl9hNTQ3YjYwNzYwNjA4MTkxOGJhYmM3MGZiMTJjYzk
 The exported `handoff.json` records the full committed head without a self-hash
 inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
+
+
+## H82 retirement — authoritative current disposition
+
+The human explicitly stopped this worker and assigned the handoff to
+`solidity-sol2-20261104/numeric-literals`. No further proof implementation,
+continuation, replacement goal or VM is authorized. The final retirement commit
+adds handoff documentation and export tooling only. All original Lean sources,
+the four audit Lean modules and their prior 12 joint certificates are unchanged.
+
+The pending command to apply two proof-only migration overlays and extend the
+checker was rejected by automatic approval review after the stop instruction.
+It did not execute. Zero patches were applied and no new Lean checks were run.
+Earlier source receipts remain authenticated, unapplied partial prerequisites.
+H82 withdraws earlier exact-file agreement waits for statement-preserving edits;
+validation and authoritative producer-routing obligations remain for the successor.
+
+The tool inventory exposes no pause-goal operation. Its only goal mutation is
+`codex_goals_stop_goal(outcome: complete | blocked)`, which cannot express PAUSED;
+no false transition was requested. The existing goal remains incomplete, and the
+worker is stopped. Coordinator must apply the requested PAUSED state using its
+available control. No accessible H71 push authorization is established, so no
+branch was pushed; the original no-push rule remains effective here.
+
+Mandatory authenticated handoff inputs are tracked under
+`tests/h62/item2/audit-language/retirement/`: complete original rendered prompt,
+full original work/backfill queue, exact 389-file frozen scope manifest,
+retirement state/open obligations/waits and their SHA256SUMS. Portable evidence
+contains actual coordinator inputs and current/historical proof/scan logs,
+without compiled caches or extracted toolchain. Export records final base/head,
+branch, clean status, cumulative patch and bundle, archive hashes and exact gates.
+Earlier sections below are historical and retain their original limitations.
 
 ## Subsequent H70 partial deliveries and remaining-domain refinements
 
