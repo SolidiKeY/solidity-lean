@@ -1,4 +1,5 @@
 import Solidity.Optimizer.Loads
+import Solidity.Optimizer.DeadStore
 
 /-!
 # X06 memory-optimization controls
@@ -166,5 +167,70 @@ theorem entry0_holds : LEnt.Holds entry0 start := by
 
 theorem rle_entry0 (P : Prog C [] G2) : Prog.runC (Prog.rle entry0 P) start = Prog.runC P start :=
   Prog.rle_runC entry0 P start entry0_holds
+
+/-! ## Dead store elimination -/
+
+def add {Γ : Ctx} (a b : Val C Γ .uint) : Val C Γ .uint := .binop .add rfl rfl a b
+
+/-- `total = 1; total = 2 + 3;` becomes `total = 2 + 3;`. -/
+def deadS : Prog C [] [] := .cons (setTotal (lit 1)) (.cons (setTotal (add (lit 2) (lit 3))) .nil)
+
+theorem dstore_removed : Prog.dstore deadS = .cons (setTotal (add (lit 2) (lit 3))) .nil := rfl
+
+theorem dstore_same (P : Prog C [] []) : Prog.runC (Prog.dstore P) = Prog.runC P :=
+  Prog.dstore_runC P
+
+/-- `total = 1; total = total + 1;`: the second value reads `total`, so the first
+store is live and kept. -/
+def liveS : Prog C [] [] := .cons (setTotal (lit 1)) (.cons (setTotal (add total (lit 1))) .nil)
+
+theorem dstore_live_kept : Prog.dstore liveS = liveS := rfl
+
+/-- Negative control: dropping the live store changes the final storage. -/
+def totalOf (r : TRes (Out C start.H [])) : TRes Int :=
+  r.map fun o => match o.st.storage.find (SRef.ofRoot (C := C) "total" (T := .prim .uint) rfl) with
+    | some v => (v.view : PrimTy.uint.Denote).1
+    | none => -1
+
+theorem live_runs_two : totalOf (Prog.runC liveS start) = .ok 2 := rfl
+theorem live_dropped_runs_one :
+    totalOf (Prog.runC (.cons (setTotal (add total (lit 1))) .nil) start) = .ok 1 := rfl
+
+/-- A first store that can fail is kept: `total = a + 1; total = 2;` with `a` the
+largest `uint` reverts, while `total = 2;` alone returns. -/
+abbrev maxU : Nat := 2 ^ 256 - 1
+
+def failingFirst : Prog C [.val .uint] [.val .uint] :=
+  .cons (setTotal (add here (lit 1))) (.cons (setTotal (lit 2)) .nil)
+
+theorem dstore_failing_kept : Prog.dstore failingFirst = failingFirst := rfl
+
+def startMax : State C [.val .uint] :=
+  start.push (t := .val .uint) (⟨maxU, by decide⟩ : PrimTy.uint.Denote)
+
+theorem failing_first_reverts : (Prog.runC failingFirst startMax).toOption.isNone = true := rfl
+theorem failing_dropped_returns :
+    (Prog.runC (.cons (setTotal (lit 2)) .nil : Prog C [.val .uint] [.val .uint])
+      startMax).toOption.isSome = true := rfl
+
+/-- `xs[0] = 1; xs[0] = 2;` becomes `xs[0] = 2;`; `xs[0] = 1; xs[1] = 2;` is kept. -/
+def deadM : Prog C [] [.mem uarr] :=
+  .cons (newXs "xs") (.cons (.assignMem (at_ .here 0) (.val (lit 1)))
+    (.cons (.assignMem (at_ .here 0) (.val (lit 2))) .nil))
+
+theorem dstore_mem_removed : Prog.dstore deadM =
+    .cons (newXs "xs") (.cons (.assignMem (at_ .here 0) (.val (lit 2))) .nil) := rfl
+
+def liveM : Prog C [] [.mem uarr] :=
+  .cons (newXs "xs") (.cons (.assignMem (at_ .here 0) (.val (lit 1)))
+    (.cons (.assignMem (at_ .here 1) (.val (lit 2))) .nil))
+
+theorem dstore_mem_other_kept : Prog.dstore liveM = liveM := rfl
+
+/-- The side conditions of `sstore_dead_runC` are satisfiable (a literal is pure). -/
+theorem sstore_witness :
+    Prog.runC (.cons (setTotal (lit 1)) (.cons (setTotal (lit 2)) .nil) : Prog C [] []) =
+      Prog.runC (.cons (setTotal (lit 2)) .nil) :=
+  sstore_dead_runC "total" rfl (.lit 1 (by decide)) (lit 2) rfl .nil
 
 end Solidity.Optimizer.X06Controls
