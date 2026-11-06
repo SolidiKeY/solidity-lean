@@ -732,6 +732,9 @@ import Solidity.Backend.MemoryCopies.PublishedStorageInterface
 import Solidity.Backend.MemoryCopies.RangeOverlap
 import Solidity.Backend.MemoryCopies.RangeOverlapControls
 import Solidity.Backend.MemoryCopies.RangeOverlapInterface
+import Solidity.Backend.MemoryCopies.ReferenceDefaultDemand
+import Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls
+import Solidity.Backend.MemoryCopies.ReferenceDefaultDemandInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrayControls
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrays
@@ -3793,6 +3796,9 @@ import Solidity.Source.Agreement.BoolSlotOr
 import Solidity.Source.Agreement.BoolSlotOrControls
 import Solidity.Source.Agreement.BoolSlotRead
 import Solidity.Source.Agreement.BoolSlotReadControls
+import Solidity.Source.Agreement.BoolSlotReadWrite
+import Solidity.Source.Agreement.BoolSlotRepeated
+import Solidity.Source.Agreement.BoolSlotRepeatedControls
 import Solidity.Source.Agreement.BoolSlotToggle
 import Solidity.Source.Agreement.BoolSlotToggleControls
 import Solidity.Source.Agreement.Locals
@@ -4839,6 +4845,7 @@ import Solidity.Yul.RawDefaultScope
 import Solidity.Yul.RawDoWhileHorizon
 import Solidity.Yul.RawForPostHorizon
 import Solidity.Yul.RawFrame
+import Solidity.Yul.RawFrameLogic
 import Solidity.Yul.RawGrowingBlock
 import Solidity.Yul.RawGrowingForPost
 import Solidity.Yul.RawGrowingSequence
