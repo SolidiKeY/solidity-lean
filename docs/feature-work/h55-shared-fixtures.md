@@ -488,3 +488,19 @@ execution and static-frame observations.
 This matrix covers the named public statements of these two files only;
 private/generated declarations, the rest of the Source families and exact
 post-migration acceptance remain open.
+
+### G19 execution candidate declaration baseline
+
+The exact G19 original assignment list remains unestablished. As a read-only
+superset lead, `g19_exec_inventory.py` selected 18 original G19 controls with
+lexical `execS`/`evalE` references and verified their source bytes against the
+original base. All 18 modules built serially. One-module audit batches recorded
+240 owned kernel constants, 128 theorems and 112 non-theorem values, including
+elaborated types, definition bodies, universes, axiom dependencies and
+safety flags; none were flagged unsafe, partial or axiom declarations.
+`compare_g19_exec.py` self-comparison and negative controls for changed type,
+body and axiom sets, removal and unsafe addition passed. The build, generated
+batches, records and module inputs are hashed off Git in
+`tests/h55/shared-fixtures/g19-exec-evidence.sha256`. This is not an exact G19
+scope determination, semantic case review, migrated-code acceptance or
+independent review. All original G19 scope and final gates remain open.
