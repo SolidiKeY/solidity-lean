@@ -136,5 +136,11 @@ not edited.
   not touch (`after-roadmap-va1.md` Mathlib path; 0 errors, 4385 unrecorded
   pins, the same on `master`).
 - `gate.sh checkpoint` library build: stopped by the 2 h session limit at
-  2641/5999 modules with no errors. The cold build continues incrementally
-  under `./run-lean.sh`.
+  2641/5999 modules with no errors. The build then finished under `./run-lean.sh`.
+- `./run-lean.sh`: layers, roots, fragments and the Lake build of the default
+  targets plus `SolkeyTestSuite` all pass ("Build completed successfully (6417
+  jobs)", which includes `MergedControls`). Exit is 1 only because the last
+  step, `check-solkey.sh`, finds 167 sort-annotation mismatches against the
+  unpinned sibling `../solkey` checkout. This lane touches no rule or
+  annotation table (its commits touch only `Lowering/P8*` and docs), so the
+  drift is inherited.
