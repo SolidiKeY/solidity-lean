@@ -56,6 +56,23 @@ def checked_receipt(path):
     assert set(audit["support_before"]) == support_paths
     for support, digest in audit["support_before"].items():
         assert hashlib.sha256((root/support).read_bytes()).hexdigest() == digest, f"stale dependency: {support}"
+    resource = json.loads((args.evidence/(path.stem+"-resource.json")).read_text())
+    assert resource["guard_sha256"] == hashlib.sha256((root/"scripts/h62/item2/audit-abi-world/bounded.py").read_bytes()).hexdigest(), "stale resource guard"
+    assert resource["stdout_file"] == str((args.evidence/(path.stem+".json")).resolve())
+    assert resource["stdout_sha256"] == hashlib.sha256((args.evidence/(path.stem+".json")).read_bytes()).hexdigest(), "proof output digest mismatch"
+    assert resource["reason"] is None and resource["exit_code"] == 0
+    assert resource["cleanup_complete"] is True and resource["subreaper"] is True
+    assert resource["swap_active_seen"] is False and resource["lean_num_threads"] == 1
+    assert resource["reserve_bytes"] == 4*1024**3 and resource["task_cap_bytes"] == 12*1024**3
+    assert resource["minimum_available_bytes"] >= resource["reserve_bytes"]
+    assert resource["peak_task_rss_bytes"] <= resource["task_cap_bytes"]
+    assert resource["max_heavy_lean_jobs"] <= 1
+    if path.stem == "Fidelity":
+        assert resource["command"] == [".venv/bin/python","-B","scripts/h62/item2/audit-abi-world/fidelity_call.py"]
+    else:
+        assert len(resource["command"]) == 5
+        assert resource["command"][:4] == [".venv/bin/python","-B","scripts/h62/item2/audit-abi-world/mcp_call.py","lean_diagnostic_messages"]
+        assert json.loads(resource["command"][4]) == audit["arguments"]
     data = receipt["structuredContent"]["result"]
     assert data.get("success") is True and data.get("partial") is False and data.get("timed_out") is False
     assert not data.get("failed_dependencies")
@@ -83,16 +100,43 @@ for path in sorted(schema.parent.glob("*Witnesses.lean")):
         assert len(reports) == 1 and "axioms" in reports[0], (original, reports)
         assert "sorryAx" not in reports[0], reports[0]
         checked[original] = dict(label=label, module=str(path.relative_to(root)), source_sha256=actual_hash,
-                                 receipt=path.stem+".json", axiom_report=reports[0])
+                                 receipt=path.stem+".json", qualified_name=re.match(r"'([^']+)'",reports[0])[1], axiom_report=reports[0])
+fidelity_path = schema.parent/"Fidelity.lean"
+fidelity_data,_ = checked_receipt(fidelity_path)
+fidelity_receipt = json.loads((args.evidence/"Fidelity.json").read_text())
+local_dependencies = {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
+                      for p in sorted(schema.parent.glob("*.lean"))}
+assert fidelity_receipt["_fidelity_dependencies"]["before"] == local_dependencies
+assert fidelity_receipt["_fidelity_dependencies"]["after"] == local_dependencies
+fidelity = {}
+for item in fidelity_data["items"]:
+    if not item.get("message", "").startswith("FIDELITY "): continue
+    record = json.loads(item["message"][len("FIDELITY "):])
+    name=record["original"]
+    assert name in rows and name not in fidelity, "duplicate or unknown fidelity statement"
+    assert record["matched"] is True, "fidelity mismatch"
+    assert name in checked and record["witness"] == checked[name]["qualified_name"]
+    assert record["binder_count"] == len(record["binders"])
+    assert record["original_type"] and record["witness_type"]
+    assert all(type(b["proposition"]) is bool for b in record["binders"])
+    fidelity[name]=record
+assert set(fidelity) == set(rows), "missing fidelity statements"
 for name, row in rows.items():
     row["simultaneous_witness"] = checked.get(name, "uncovered")
+    row["elaborated_fidelity"] = fidelity[name]
 uncovered = [dict(name=name, owner=row["owner"]) for name,row in rows.items() if name not in checked]
 report = dict(base=census["base"], mapped_modules=len(census["mapped_modules"]), total=len(rows),
               witnessed=len(checked), uncovered_count=len(uncovered), uncovered=uncovered,
+              fidelity_statements=len(fidelity), binder_count=sum(r["binder_count"] for r in fidelity.values()),
+              proposition_binders=sum(b["proposition"] for r in fidelity.values() for b in r["binders"]),
+              proposition_premise_statements=sum(any(b["proposition"] for b in r["binders"]) for r in fidelity.values()),
+              data_only_statements=sum(r["binder_count"] > 0 and not any(b["proposition"] for b in r["binders"]) for r in fidelity.values()),
+              binder_free_statements=sum(r["binder_count"] == 0 for r in fidelity.values()),
               declarations=list(rows.values()), all_frozen_sources_unchanged=True,
-              final_gate_complete=not uncovered,
-              boundary="Binder-package feasibility only; supported-program success and gas/fork gates are separate.")
+              witness_gate_complete=not uncovered and len(fidelity)==len(rows),
+              assignment_complete=False,
+              boundary="Binder-package feasibility and type fidelity only; success/gas/fork and final validation are separate gates.")
 output = args.evidence/"coverage.json"
 output.write_text(json.dumps(report, indent=2, ensure_ascii=False)+"\n")
 print(json.dumps({k:v for k,v in report.items() if k not in ("declarations","uncovered")}))
-if args.require_complete and uncovered: raise SystemExit(2)
+if args.require_complete and not report["witness_gate_complete"]: raise SystemExit(2)
