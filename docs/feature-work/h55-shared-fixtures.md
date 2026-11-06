@@ -165,3 +165,28 @@ unless a later, checked migration preserves each one exactly.
 This covers the named public statements in these two files only. It does not
 review every private fact, all related files, or an actual replacement proof;
 it is not scope-complete acceptance.
+
+## Fixed Bool storage-copy semantic review (partial)
+
+The following records the named public statements in the Bool fixed-copy
+Source and target control files. Their shared names are not evidence of equal
+statement types, and every original observation remains an acceptance obligation.
+
+| File and declaration | Original observations to preserve |
+|---|---|
+| Source `certificate`, `ordered`, `source_context` | Actual Source copy log, complete before/after views with journal length 3, and exact Source context equality. |
+| Source `no_dynamic_header` | Both fixed roots have absent cells and no words; dynamic length reads and the wrong dynamic interpretation fail with the stated stuck result. |
+| Source `live_fixed_alias` | The same live fixed alias reads true before and false after copy; index 3 reverts with exact panic data, while direct read of retained position 3 remains true. |
+| Source `fuel_static` | Timeout preserves the specified partial view with journal length 2; static copy reverts with initial state. |
+| Source `malformed_source` | Missing-value and wrong-cell-type failures retain their distinct stuck messages and initial state. |
+| Source `snapshot_order` | Actual memory load followed by captured versus fresh copies yields the two specified complete views, each with journal length 4. |
+| Source `same_path`, `explicit_restore` | Self-copy succeeds unchanged even under static mode; explicit rollback of the ordinary copy restores the initial state. |
+| Source `false_presence` | Preserve absent versus present false cells and the alias's before/after true-to-false reads. |
+| Target `certificate`, `source_ordered` | Actual Source log and target execution, selected word agreements, complete Source before/after views and Source context equality. |
+| Target `target_ordered`, `selected_ordered`, `root_presence` | Complete target vectors and non-store context, selected-order readbacks including repeats and outside positions, and fixed roots with no Source words. |
+| Target `required_old_agreements`, `wrong_execution`, `wrong_ordered` | Independently refute wrong old source and retained-position agreements; execute both target cases and preserve their complete old/result target vectors and Source mismatches. |
+| Target `false_presence` | Source absence and present false remain distinct while both selected target words are zero. |
+
+This matrix covers named public statements in these two controls only. Private
+facts, other families, all replacement proofs and exact statement comparison
+remain open; the matrix is not a proof or scope-complete acceptance.
