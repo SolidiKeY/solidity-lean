@@ -118,5 +118,15 @@
   ],
   "kernelValidated": false,
   "semanticPremisesDischarged": false,
-  "releaseClosed": false
+  "releaseClosed": false,
+  "exactArtifactVerification": {
+    "status": "UNVERIFIABLE",
+    "policy": "H30/H86",
+    "missingPaths": [
+      "/workspace/h62-audit-retirement/evidence.tar.gz",
+      "/workspace/h62-audit-retirement/SHA256SUMS",
+      "/workspace/h62-audit-h70-evidence/gates.json"
+    ],
+    "boundary": "Owned 27-path bytes verified live or in local H44 archive; no historical proof/gate acceptance."
+  }
 }
