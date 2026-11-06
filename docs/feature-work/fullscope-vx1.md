@@ -940,3 +940,80 @@ ScopeScan admission/diagnostic and compiler-artifact boundaries to ADAPTERS.md.
 Independent skeptic found no blocking scope/provenance defect and recommended
 explicit unchanged category/syntax assertions; added them to check.py. Neither
 review used Lean/server/builds; skeptic ran the lightweight Python checker.
+
+## VX1 G01 (cloud move5-20261106): OOM fix, frozen D1–D6, generator adapter
+
+Lane moved from the Codex VM lane `solidity-fullscope-20261104/vx1-contracts-environment`
+(H75); branch `cloud/move5-20261106/vx1-g01` from `cloud/move5-20261106/vx1-base`
+(`d2a9a040`), which already contained `origin/master` (`5f7bb144`).
+
+### 1. OOM hold: the module over the bound
+
+Measured on a cold full build (`LEAN_NUM_THREADS=1 ./run-lean.sh`, 4 cores,
+15 GiB, no swap) with a `/proc/<pid>/status` VmHWM sampler (0.2 s) over every
+`lean` process. `Solidity/Backend/Scalar/PowerBounds.lean` (from master's
+v13-abi-world increment, `0bf90a41`) peaked at **7877 MiB, 203 s**: 32
+`decide +kernel` row checks in one module, at the 8 GiB pre-gate bound once
+Lake's own memory is counted. Every lane touching the library root rebuilds it.
+The next heaviest modules sampled so far stay under 2.7 GiB (full table below
+when the build finishes).
+
+Fix (`[oom-fix]` commit `cb07a2c3`): `scripts/backend-scalar-thresholds.py`
+now emits `PowerBounds/Part01`–`Part08` (four widths each: rows
+`naturalThresholdRow<w>` and `rowBounds<w>`, no longer `private`) and
+`PowerBounds.lean` assembling `naturalThresholds`, `threshold_bounds`,
+`thresholdWord(_nat)`, `exponentWord(_nat)` with unchanged statements and
+proofs. Constants and row proofs are byte-identical (multiset and order
+checked). Parts measured: Part04 2099 MiB / 26 s, Part08 2337 MiB / 26 s;
+`--check` of the generator and `check-backend-scalar.mjs` pass.
+
+### 3. Frozen G01 relation contracts D1–D6 (`FullScope.V1`)
+
+`Solidity/Language/EnvironmentFields/Frozen.lean`, namespace
+`Solidity.Roadmap.FullScope.V1`, over the unchanged definitions of
+`Solidity.Language.EnvironmentFields.Contracts`. A later change is a `V2`
+namespace with an adapter (H57); V1 is never edited in place.
+
+Consumer declaration names (vt1, vo1 and every X/O/T lane):
+
+| Name | Kind | Meaning |
+|---|---|---|
+| `V1.Alignment source target` | `abbrev` (Type) | the producer's operational resource alignment |
+| `V1.D1 source target domain machine compiler environment aligned` | `abbrev` (Type) | `RunIndexed.Certificate … .exact` |
+| `V1.targetRunOf` | `def` | the target run a certificate assigns to an eligible source run |
+| `V1.D1.forward_oracle`, `V1.D1.backward_oracle` | theorems | executed queries read the actual target reader |
+| `V1.D2 attempt` | `abbrev` (Prop) | `CreationSizeFailures attempt` (EIP-170/3860) |
+| `FullScope.PackedField.read`, `FullScope.PackedField.Disjoint` | defs | low-order-first packed field content; byte disjointness |
+| `V1.Layout`, `V1.Layout.Agrees`, `V1.MemoryAgrees`, `V1.Physical`, `V1.Physical.Representable` | defs/structures | D3 data |
+| `V1.D3 physical` | structure (Prop) | `agrees` on related states, `total` on representable ones |
+| `V1.Assembly`, `V1.D4 assembly` | structure, structure (Prop) | `writeback : UnsafeWriteback …`, `opaqueBlocks : Opaque …` |
+| `V1.D5 source target environment`, `V1.d5_of_certificate` | def, theorem | environment correspondence; every certificate proves it |
+| `V1.D6 …` | `abbrev` (Type) | `RunIndexed.Certificate … .optimizer` |
+| `V1.Mode.observe_le`, `V1.Mode.observe_optimizer`, `V1.D1.toD6` | theorems/def | quotient monotone, idempotent; exact ⇒ optimizer |
+| `V1.Contract source target domain machine compiler environment aligned mode attempt physical assembly` | structure | `run`, `creation`, `layout`, `assemblyBoundary` |
+| `V1.Contract.compiles`, `V1.rejecting_refused`, `V1.forward_completes` | theorems | totality, rejecting compiler refused, adequacy on completion |
+
+`Solidity/Language/EnvironmentFields/FrozenControls.lean`
+(`V1.Controls`): `witness` and `optimizerWitness` inhabit the whole bundle
+(joint satisfiability, H62/H69) with an admitted input, an executed gas query,
+a successful completion matched by the target (`witness_live`,
+`oracle_live`), creation success at the limits (`creation_at_limits`) and a
+representable nonzero layout (`d3_live`). Negative controls:
+`rejecting_refused`, `reverting_refused` (both modes), `empty_relation_refused`,
+`shifted_relation_refused`, `overlap_refused`, `rewriting_optimizer_refused`.
+`tests/fullscope-20261104/vx1/FrozenAxioms.lean` inventories 21 declarations:
+only `propext`/`Quot.sound`. MCP diagnostics: no errors or warnings on all three.
+
+Binding for consumers: vt1's `fun_<name>_<id>` simulations state their
+correspondence as a `V1.Alignment` plus `RunIndexed.SourceRuns`/`TargetRuns`
+and conclude `V1.D1` (or `V1.Contract`); vo1 binds X01/D6 by `V1.D6` (from
+`V1.D1.toD6` for passes that are exact) and D4's `opaqueBlocks`.
+
+### Generator adapter
+
+See `tests/fullscope-20261104/vx1/manifest-rescope/ADAPTERS.md`, "Generator
+adapter": a patch for the generator owner, identity on the active catalog,
+staged and kernel-checked 30-row transition, seven mutation controls.
+Activation waits for VY5's `ScopeScan.certify` to test `unmodelled?` first; the
+active catalog (`docs/solidity-features.json`, `FeatureInfo.lean`,
+`Features.lean`) is unchanged.
