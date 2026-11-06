@@ -22,12 +22,43 @@ each proof iteration. Documentation-only edits need path and link checks.
 | `lake build SolidityExamples SolkeyTestSuite` | The examples and the TestSuite: a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
 | `node scripts/check-layers.mjs` | No core module reaches an elaborator, printer or tactic front end; no Lean |
-| `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose |
+| `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose; five exact historical/fixture pairs carry explicit reasons, with no basename-wide exemption |
+| `node scripts/check-axiom-pins.mjs` | Original axiom-policy errors plus new unrecorded pin changes; exact existing H112 drift uses a SHA256-pinned, shrink-only baseline |
 | `solidity-lean rules check --key FILE` | Sort annotations against a SolKey rules file; manual, not part of any gate (H89) |
 | `./scripts/check-corpus.sh` | `SolidityCorpus` against `tests/solkey/expected.tsv` |
 | `./scripts/check-testsuite.sh` | TestSuite rows against `TestSuite/Report.lean`'s pin and SolKey functions; no Lean |
 | `node scripts/check-automatic.mjs --strict` | Every TestSuite obligation has an automatic proof/replay or refutation, none pending; no Lean |
 | `node scripts/solidity-upstream.mjs` | Pinned solc tests on the typed interpreter, per pipeline; [runner documentation](solidity-upstream-tests.md) |
+
+H112 records the existing unrecorded pin drift separately from the actual axiom
+inventory. The refreshed source snapshot has **99 changes**, not the older
+approximate 4,500: zero policy errors were present when it was captured.
+`scripts/g07-unrecorded-baseline.json` is immutable, SHA256
+`4d98b1810853c54992feb064f1a7b028e23d8212fd2aad8b8b65e81895d7c701`
+(also in `scripts/g07-unrecorded-baseline.sha256`). Reproduce its exact bytes from
+its pinned Git source with
+`python3 -B scripts/h62/item5/statement-graph/reproduce_pin_drift.py`.
+The active subset, `scripts/g07-unrecorded-allowlist.json`, may only shrink.
+Entries bind the file, printed declaration, change kind, recorded axiom set and
+observed axiom set; another file or changed axiom set is new drift. History checks
+reject re-additions, deletion/recreation, and merge resurrection. Full ordinary
+Git history is required; shallow/grafted or custom history is refused.
+
+This baseline never permits a non-standard axiom, axiom-set growth, a missing
+recorded pin, a malformed print or a target/name mismatch. Those remain errors
+even when a pin otherwise matches a baseline identity. It does not prove that
+source print annotations match the kernel; Lean's unchanged guarded prints do
+that during builds. The baseline does not update actual pin fragments or their
+combined inventory. Use the existing reviewed `--write`/fragment workflow when
+recording drift and remove resolved exceptions from the active subset; never
+regenerate the immutable snapshot from today's new failures.
+
+The documentation check's five historical exceptions are exact source/reference
+pairs in `scripts/check-doc-paths.sh`, each with its reason. They cover unadopted
+proposed module destinations, an off-git failed experiment and a synthetic
+negative fixture, not claims that these files exist. A different source citing
+the same nonexistent file, or a new missing reference in an exempt source, still
+fails. Ambiguous existing references retain the separate `--strict` behavior.
 
 The examples are their own library, `SolidityExamples`, still a default
 target: `lake build` and `./run-lean.sh` build them.  A lane checkpoint builds
