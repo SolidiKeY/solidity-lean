@@ -7,7 +7,7 @@ import json
 import re
 from pathlib import Path
 
-DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
+DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
 TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[\w\']+(?:\.[\w\']+)*|[^\s]')
 BINDER = re.compile(r"([({\[])\s*((?:[^\W\d]|_)[\w']*(?:\s+(?:[^\W\d]|_)[\w']*)*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
 
@@ -86,7 +86,7 @@ def normalize(header):
         ns = match.group(2).split()
         if "_" in ns or len(set(ns)) != len(ns) or any(n in env for n in ns): return None
         type_text = match.group(3)
-        if any(c in type_text for c in "λ∀") or re.search(r"\b(fun|let|forall|match)\b", type_text): return None
+        if any(c in type_text for c in "λ∀∃") or re.search(r"\b(fun|let|forall|match)\b", type_text): return None
         typ = tokenize(type_text)
         if any("." in t and any(n in t.split(".") for n in env) for t in typ): return None
         if any(typ[i] == "." and i + 1 < len(typ) and typ[i+1] in env for i in range(len(typ))): return None
@@ -96,7 +96,7 @@ def normalize(header):
         for n in ns: env[n] = "$binder" + str(len(env))
         pos = match.end()
     rest = header[pos:]
-    if any(c in rest for c in "{}[]λ∀") or re.search(r"\b(fun|let|forall)\b", header): return None
+    if any(c in rest for c in "{}[]λ∀∃") or re.search(r"\b(fun|let|forall|match|by|do|have)\b", header): return None
     if re.search(r"\([^()]*:", rest): return None
     ts = tokenize(rest)
     if any("." in t and any(n in t.split(".") for n in env) for t in ts): return None
@@ -124,8 +124,9 @@ def split_definition(content):
         i += 1
     return None
 
-def scan(path, root):
-    text = mask(path.read_text(encoding="utf-8"))
+def scan(path, root, source=None):
+    if source is None: source = path.read_bytes()
+    text = mask(source.decode("utf-8"))
     skeleton = hide_strings(text)
     matches = list(DECL.finditer(skeleton))
     context_commands = list(re.finditer(r"(?m)^[ \t]*(?:import|namespace|section|end|open|variable|universe)\b[^\n]*", skeleton))
@@ -133,15 +134,25 @@ def scan(path, root):
     for i, match in enumerate(matches):
         end = matches[i+1].start() if i+1 < len(matches) else len(text)
         content = text[match.end():end]
+        command = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", hide_strings(content))
+        if command: content = content[:command.start()]
+        qualifiers = sorted(re.findall(r"\b(?:partial|unsafe|noncomputable)\b", skeleton[match.start():match.start(1)]))
         context = digest([m.group().strip() for m in context_commands if m.start() < match.start()])
         unsupported = match.group(1) in {"structure", "inductive", "class", "axiom", "constant"}
         parts = None if unsupported else split_definition(content)
+        reason = "unsupported-declaration-form" if unsupported else "missing-top-level-definition"
+        if parts is not None:
+            head_skeleton = hide_strings(parts[0])
+            if re.search(r"\bwhere\b", head_skeleton):
+                parts, reason = None, "unsupported-where-declaration"
+            elif re.search(r"(?m)^[ \t]*\|", head_skeleton):
+                parts, reason = None, "unsupported-equation-declaration"
         if parts is None:
             rows.append(dict(path=path.relative_to(root).as_posix(),
                              line=text.count("\n", 0, match.start())+1,
                              kind=match.group(1), name=match.group(2) or "<anonymous>",
-                             statement=None, body=[], owner="unknown", context_hash=context,
-                             reject_reason="unsupported-declaration-form" if unsupported else "missing-top-level-definition"))
+                             statement=None, body=[], owner="unknown", context_hash=context, qualifiers=qualifiers,
+                             reject_reason=reason))
             continue
         header, body = parts
         boundary = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", hide_strings(body))
@@ -150,7 +161,7 @@ def scan(path, root):
                          line=text.count("\n", 0, match.start())+1,
                          kind=match.group(1), name=match.group(2) or "<anonymous>",
                          statement=normalize(header.strip()), body=tokenize(body),
-                         owner="unknown", context_hash=context,
+                         owner="unknown", context_hash=context, qualifiers=qualifiers,
                          reject_reason="unsupported-binder-syntax" if normalize(header.strip()) is None else None))
     return rows
 
@@ -191,20 +202,21 @@ def main():
     for path in files:
         try:
             rel = path.relative_to(root).as_posix()
-            inputs.append(dict(path=rel, sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
-            found = scan(path, root)
+            source = path.read_bytes()
+            inputs.append(dict(path=rel, sha256=hashlib.sha256(source).hexdigest()))
+            found = scan(path, root, source)
             references = [dict(pattern=p, id=i, owner=o, status=st) for p, i, o, st in sorted(refs)
                 if (rel.startswith(p) if p.endswith("/") else fnmatch.fnmatchcase(rel, p))]
             for row in found:
                 row["owner"] = owners.get(rel, "unknown")
                 row["registry_references"] = references
             rows.extend(found)
-        except (ValueError, UnicodeError) as exc:
+        except (OSError, ValueError, UnicodeError) as exc:
             errors.append(dict(path=str(path), reason=str(exc)))
     groups = {}
     for row in rows:
         if row["statement"] is not None:
-            groups.setdefault(digest([row["kind"], row["statement"], row["context_hash"]]), []).append(row)
+            groups.setdefault(digest([row["kind"], row["qualifiers"], row["statement"], row["context_hash"]]), []).append(row)
     candidates = []
     for key, group in sorted(groups.items()):
         if len(group) > 1:
@@ -223,26 +235,63 @@ def main():
                 members=[{k:v for k,v in row.items() if k not in ("statement", "body")} for row in group],
                 reject_reasons=sorted({"intrinsic-signature-unresolved", "ownership-requires-live-verification"} |
                     ({"different-or-unsupported-statements"}
-                    if len({digest([row["statement"], row["context_hash"]]) for row in group}) > 1 or
+                    if len({digest([row["kind"], row["qualifiers"], row["statement"], row["context_hash"]]) for row in group}) > 1 or
                        any(row["statement"] is None for row in group) else set())),
                 action="weak-lexical-lead-review-signatures-and-ownership"))
+    selection = dict(root=str(root), patterns=sorted(set(args.paths)))
     previous = json.loads(args.previous.read_text()) if args.previous else None
-    if previous is not None and (not isinstance(previous, dict) or previous.get("version") != 1 or not isinstance(previous.get("inputs"), list)):
-        parser.error("unsupported or malformed previous report")
-    old = {x["path"]: x["sha256"] for x in previous["inputs"]} if previous else {}
+    if previous is not None and (not isinstance(previous, dict) or previous.get("version") != 2 or
+                                 previous.get("selection") != selection or not isinstance(previous.get("inputs"), list)):
+        parser.error("previous report has incompatible version or selection")
+    if previous is not None and (previous.get("errors") != [] or previous.get("unmatched_patterns") != []):
+        parser.error("previous report is incomplete")
+    def prior_map(records, key, label):
+        if not isinstance(records, list): parser.error("malformed previous " + label)
+        result = {}
+        for row in records:
+            if not isinstance(row, dict) or not isinstance(row.get(key), str) or row[key] in result:
+                parser.error("malformed or duplicate previous " + label)
+            result[row[key]] = row
+        return result
+    old_inputs = prior_map(previous["inputs"], "path", "inputs") if previous else {}
+    if any(not isinstance(row.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", row["sha256"])
+           for row in old_inputs.values()): parser.error("malformed previous input hash")
+    old = {path: row["sha256"] for path, row in old_inputs.items()}
     new = {x["path"]: x["sha256"] for x in inputs}
+    def candidate_delta(old_rows, new_rows, key, label):
+        old_groups = prior_map(old_rows, key, label)
+        new_groups = {row[key]: row for row in new_rows}
+        def stable(row):
+            return hashlib.sha256(json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        return dict(added=sorted(new_groups.keys()-old_groups.keys()),
+                    removed=sorted(old_groups.keys()-new_groups.keys()),
+                    changed=sorted(k for k in old_groups.keys() & new_groups.keys()
+                                   if stable(old_groups[k]) != stable(new_groups[k])))
+    changes = None
+    if previous is not None and not errors and not unmatched:
+        changes = dict(statements=candidate_delta(previous.get("candidates"), candidates, "lexical_key", "statement candidates"),
+                       bodies=candidate_delta(previous.get("body_candidates"), body_candidates, "body_hash", "body candidates"))
     scanner_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-    incremental = dict(added=sorted(new.keys()-old.keys()), removed=sorted(old.keys()-new.keys()),
-        changed=sorted(k for k in old.keys() & new.keys() if old[k] != new[k]),
+    incomplete = bool(errors or unmatched)
+    incremental = dict(added=None if incomplete else sorted(new.keys()-old.keys()),
+        removed=None if incomplete else sorted(old.keys()-new.keys()),
+        changed=None if incomplete else sorted(k for k in old.keys() & new.keys() if old[k] != new[k]),
         owner_config_changed=previous is not None and previous.get("owner_config_sha256") != digest(owners),
         registry_changed=previous is not None and previous.get("registry_sha256") != hashlib.sha256(registry_bytes).hexdigest(),
-        scanner_changed=previous is not None and previous.get("scanner_sha256") != scanner_sha256)
+        scanner_changed=previous is not None and previous.get("scanner_sha256") != scanner_sha256,
+        comparison_status=("current-incomplete" if incomplete else
+                           "no-baseline" if previous is None else "scanner-output-comparable"),
+        candidate_groups=changes)
     rejected = [{k:r[k] for k in ("path", "line", "name", "reject_reason")} for r in rows if r["reject_reason"]]
     inventory = [{k:v for k,v in row.items() if k not in ("statement", "body")} for row in rows]
-    print(json.dumps(dict(version=1, inputs=inputs, declarations=len(rows), inventory=inventory, candidates=candidates, rejected_declarations=rejected,
+    rejection_counts = {}
+    for row in rejected:
+        reason = row["reject_reason"]
+        rejection_counts[reason] = rejection_counts.get(reason, 0) + 1
+    print(json.dumps(dict(version=2, selection=selection, inputs=inputs, declarations=len(rows), inventory=inventory, candidates=candidates, rejected_declarations=rejected,
         body_candidates=body_candidates, incremental=incremental, unmatched_patterns=unmatched,
         owner_config_sha256=digest(owners), registry_sha256=hashlib.sha256(registry_bytes).hexdigest(), scanner_sha256=scanner_sha256,
-        rejections=dict(unsupported_binder_syntax=sum(r["statement"] is None for r in rows),
+        rejections=dict(by_reason=rejection_counts,
                         unknown_ownership=sum(r["owner"] == "unknown" for r in rows)), errors=errors),
         sort_keys=True, ensure_ascii=False, indent=2))
     return bool(errors or unmatched)

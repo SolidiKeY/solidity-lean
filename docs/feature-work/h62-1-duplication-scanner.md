@@ -122,3 +122,51 @@ ran the old code and is not evidence for the attempted edit.
 The scanner remains incomplete. Full current-head census and incremental
 reports, live owner verification, remaining backfill, and final validation are
 still required.
+
+## Selection-pinned incremental reports and discovery controls
+
+Version 2 records the absolute scan root and selected glob patterns and rejects
+a previous report with a different selection, an incompatible version, duplicate
+input paths, or prior scan errors. It reports changes to statement and body
+candidate groups as well as files. A current scan with an input read error or
+unmatched pattern exits nonzero and suppresses file and candidate deltas;
+`scanner-output-comparable` only means the two scanner outputs are comparable,
+not that the Lean census is complete. Source bytes are read once for both hash
+and parsing. Historical version 1 reports are deliberately not accepted as
+version 2 baselines.
+
+The finder identified omitted `partial` and `unsafe` declarations, field
+assignments in `where` declarations mistaken for declaration bodies,
+existential shadowing in binder types, qualifier differences missing from body
+rejection reasons, and rejection counts that mixed categories. The skeptic
+identified selection changes mislabeled as file removal and deltas produced
+from incomplete scans. The changes and controls address those concrete cases;
+both reviewers rechecked them independently without Lean. Unsupported syntax
+still exists, and an unchanged lexical group is not an elaborated-signature
+proof. A first v2 whole-tree attempt was interrupted by the owner before
+completion to fix read-error handling and was not used as evidence.
+
+At the scanner bytes in this checkpoint, two deterministic V07 sample scans
+took 3.061 and 3.101 seconds, compared with 3.225 and 3.145 seconds before
+the changes; means 3.081 and 3.185 seconds, about 3.3% faster. Whole-tree
+baseline and incremental runs took 99, 102 and 102 seconds; the previous
+baseline took 101 seconds and the previous incremental runs 97 and 100
+seconds. The two incremental files are byte-identical with SHA-256
+`64445dc4f4e9d6461c0e5a9631506dc61f8bb5273323113be11c907918094bdd`.
+They scanned 6,657 files, recognized 114,487 declarations, and reported
+67,825 explicit rejections; the remaining unrecognized forms are not counted.
+No file or candidate group changed against the v2 baseline. These are
+off-Git lexical reports, not kernel proofs or unowned-opportunity claims.
+
+Acceptance on this checkpoint: `PYTHONDONTWRITEBYTECODE=1 python3
+tests/h62/item1/duplication-scanner/test_scan.py` passed 11 tests and
+`PYTHONDONTWRITEBYTECODE=1 python3
+tests/h62/item1/duplication-scanner/test_index.py` passed 2. They are external
+scanner tests. The previously recorded bounded KeySort run remains a
+prerequisite result for unchanged Lean sources, not a full gate. Full
+declaration accounting, resolved intrinsic-signature safety, live ownership,
+remaining backfill and final repository gates remain unfinished.
+
+The repository `./scripts/check-doc-paths.sh` exited 0: every checked
+backticked Lean path resolved; it reported 115 ambiguous references under its
+non-strict mode. Its complete output is retained off Git.
