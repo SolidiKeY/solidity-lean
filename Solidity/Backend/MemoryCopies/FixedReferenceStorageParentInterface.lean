@@ -3,10 +3,11 @@ import Solidity.Backend.MemoryCopies.NestedStorageParent
 import Solidity.Backend.MemoryCopies.TraversalWords
 import Solidity.Evm.MemoryDefaultFixedBuilder
 
-/-! Complete checked fixed parents with dynamic primitive children. Existing
-reservation, typed traversal and late adoption are composed; source inputs are
-actual ReprAt values. Source/physical/gas and general compiler coverage remain
-separate. Static counts are natural numbers, not an excluded word-size domain. -/
+/-! Signature-only contract for checked fixed parents with dynamic primitive
+children. This module supplies no inhabitant. FixedReferenceStorageParent and
+its Controls companion prove/check the reservation, traversal and typed-adoption
+composition. Source inputs are actual ReprAt values; physical/gas and general
+compiler coverage remain separate. Static counts are natural numbers. -/
 namespace Solidity.Backend.MemoryCopies
 open Evm Evm.Memory
 
