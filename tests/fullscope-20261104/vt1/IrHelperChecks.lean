@@ -3,8 +3,8 @@ open Solidity Solidity.SolcValidation Solidity.SolcValidation.IrSyntax
 
 /-! Executable cross-check of all four imported helpers against the source
 operators `BinOp.evalNum` on edge-case words. `checked_add` and `checked_mul`
-are also proved (`IrHelperSource.lean`); `checked_sub` and `checked_div_t_int256`
-are only tested here (their kernel proofs are open: see the feature doc). The
+are also proved (`IrHelperSource.lean`), as are `checked_sub` and the body of
+`checked_div_t_int256`; this test runs all four end to end on concrete words. The
 machine logs every effect and halts on `revert`. -/
 
 abbrev Log := List (String × List Nat)

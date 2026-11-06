@@ -9,8 +9,9 @@ and running the body of `checked_mul_t_uint256` from its entry values
 (`checked_mul_body`), on any two words, any machine and any state, either
 returns the mathematical result or runs solc's panic sequence
 (`mstore(0, Panic selector)`, `mstore(4, code)`, `revert(0, 0x24)`).
-`checked_sub_t_uint256` and `checked_div_t_int256` have no kernel proof yet
-(see `docs/feature-work/fullscope-vt1.md`, C08).
+`checked_sub_t_uint256`, `checked_div_t_int256` and the call-site form of
+`checked_mul_t_uint256` are proved in `SolcValidation/IrHelperSteps.lean` by
+composing statement-level lemmas.
 -/
 namespace Solidity.SolcValidation.IrSyntax
 open Solidity.SolcValidation
