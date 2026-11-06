@@ -395,3 +395,11 @@ goal API cannot set PAUSED; coordinator will pause the existing goal after the
 final report and idle turn. No complete, new, reset or competing goal is sent.
 The successor integrates the exact reported final head. All VM/branch/evidence
 is retained. No H71 lane-push permission was supplied, so no push is performed.
+
+## H86 live CheckedSub fixture correspondence
+
+`tests/h62/item4/generic-primitive-packets/SubCorrespondence.lean` connects the typed fixture classification to actual Source evaluation and public-selected EVM IR execution for every pair of `Fin W` operands in the populated CheckedSub fixture world. Source evaluation quantifies over both pipelines and `fuel+3`; target execution preserves any saved stack tail. The physical input representation is constructed, and public compiler selection is proved rather than supplied as a desired compiled value. Success preserves the machine apart from pushing the result; Source underflow retains the exact arithmetic panic data and unchanged Source state, while the target retains only its existing coarse revert.
+
+All seven existing rows specialize the same target theorem. Concrete success/underflow and reject-all/accept-underflow controls are included. This covers that fixture family, not arbitrary Source worlds, every packet family, whole-language adequacy, gas/fork semantics or the pinned 4.35 migration. Original production controls remain untouched. The bridge reports only the existing standard axioms `propext`, `Classical.choice`, `Quot.sound`; public selection reports `propext`, `Quot.sound`. Two proof-only fixture edits replace unavailable live-toolchain tactic lemmas with `dif_pos`/`dif_neg`, preserving all statements.
+
+`live_inventory.py` regenerates lexical accounting from the authenticated Git base and current source. It checks byte identity for all 82 original files/826 declarations and explicitly records the canonical helper addition: 83 live files/829 declarations. The 18 original control files and 476 control declarations remain unchanged. Four tests reject missing/changed/duplicate originals and check addition separation. This is source-byte/lexical evidence, not semantic coverage; the original frozen checker is unchanged. Complete semantic case accounting, other family migrations, full validation and comparable pinned-toolchain timing remain open.
