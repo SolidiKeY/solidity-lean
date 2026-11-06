@@ -463,3 +463,13 @@ OrderedArgumentFailure: `checked_failure` retains failing argument evaluation, e
 EffectfulScalarFailure: `arguments` actually succeeds; `actual_write_failure` is a concrete heap-write refusal. `source` and `target` therefore locate failure in the callee write, not argument decoding. `write_code` pins the selected writer; whole-program lemmas retain the preparation prefix. `arguments_not_failure`, `source_not_exhausted`, `target_not_ok`, `target_not_fault` and `zero_control` preserve all contrasts. Neither region supplies Source panic bytes, G42 callback execution, monetary rollback or a target reverted machine.
 
 Generalization must keep the stage-specific actual argument/write evidence and original depth/suffix quantifiers. It must not collapse both failures into an unqualified supplied revert result. Full semantic correspondence, axiom audit and comparable timings remain open.
+
+## Successor ArrayProbe embedded region
+
+Explicit region: `RuntimeFrameV3ArrayProbe.lean`, `Checks` namespace (lines64–104 at inspected input). Source hash: `6a5c206775042a7ca8577b63685a79c3f569327bed78deb86d1479d7f311f3f2`. This is one bounded region, not completion of the embedded census; previous aggregate counts remain unchanged.
+
+Fixtures: `F` and `input` alias the existing Countdown/AllocatorReturn fixture; `bad` writes local count3 and `badMachine` writes word3 at cell3. `bad_repr` proves the actual full StateRepr after that local change; `bad_ownership` separately preserves the struct allocator relation. These are initial representation facts, not successful bounds/admission assumptions.
+
+`good_evaluated` reads the actual indexed value9; `bad_evaluated` is actual coarse source revert. `good_read` executes the public selected code with word9 pushed. `wrong_read` rejects word7 by observing the pushed stack head, rather than an execution-only projection. `bad_not_exhausted` distinguishes the failed read from exhaustion. `good_target` proves the read-and-pop code restores the entire input machine. `bad_target` retains arbitrary target suffix and proves revert using `failure_suffix`. No reverted machine or panic payload is invented.
+
+All nine theorem declarations and four fixture declarations are retained in this accounting. A generic migration must preserve both representation relations, the different good/bad inputs, full success machine and arbitrary-suffix failure. No producer implementation, theorem, fixture or proof budget changed; kernel acceptance and comparative timing of any future helper remain separate obligations.
