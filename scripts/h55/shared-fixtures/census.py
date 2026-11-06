@@ -4,7 +4,7 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-AREAS = ("Solidity/Lowering/V08", "Solidity/Backend/StorageOps", "Solidity/Lowering/G19")
+AREAS = ("Solidity/Lowering/V08", "Solidity/Backend/StorageOps", "Solidity/Lowering/StorageOps", "Solidity/Lowering/G19")
 DECL = re.compile(r"^\s*(?:(?:private|protected|noncomputable)\s+)*(?:def|abbrev|theorem|lemma)\s+(\w+)")
 NAMES = re.compile(r"^(?:extract_failure|fitting|uintSyntax|initial\w*|frame\w*)$")
 

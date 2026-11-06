@@ -1,0 +1,252 @@
+--- a/Solidity/Lowering/V08/CreationSuccessControls.lean
++++ b/Solidity/Lowering/V08/CreationSuccessControls.lean
+@@ -1,3 +1,4 @@
++import Solidity.Lowering.V08.SharedFailureFixture
+ import Solidity.Lowering.V08.LibraryHandlerControls
+ 
+ /-! Successful nonempty creation, then actual caller-typed library work in the
+@@ -23,21 +24,13 @@
+       have same : result = value := Option.some.inj checked
+       cases same
+       rfl
+-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
+-    (checked : run.halt? = some halt) : run = .error halt := by
+-  cases run with
+-  | ok value => cases checked
+-  | error actual =>
+-    have same : actual = halt := Option.some.inj checked
+-    cases same
+-    rfl
+ 
+ theorem creation_reached : outer.create false candidate goodCtor ctorCtx = .ok (created, ⟨candidate⟩) :=
+   extract_success _ _ (by decide +kernel)
+ theorem library_reached : delegated created = .ok (linked, expected) :=
+   extract_success _ _ (by decide +kernel)
+ theorem later_reached : later linked expected = .error laterHalt :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ def successWork (w : World Catalog) (_ : Handle false) : TRes (World Catalog × Unit) := do
+   let (next, output) ← delegated w
+@@ -113,7 +106,7 @@
+       ([0xb1, 0xb2], [1, 7, 2, 14, 12345])) := by decide +kernel
+ 
+ theorem wrong_role : created.libraryCall (⟨self⟩ : Handle false) wrongRole paidCtx = .error .revert :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ -- Successful counterpart: actual library result, not a constant world stand-in.
+ def keep (w : World Catalog) : TRes (World Catalog × Result) :=
+@@ -224,7 +217,7 @@
+     laterHalt rfl creation_reached linkedObserved failed
+ 
+ theorem wrong_runtime_identity : created.libraryCall (⟨self⟩ : Handle false) wrongIdentity paidCtx = .error .revert :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ theorem wrong_payload : (attempt outer).halt? ≠ some (.revertWith (Semantics.encodeError [0x6c, 0, 0xfe, 0x48])) := by
+   rw [combined_application]; decide +kernel
+@@ -238,7 +231,7 @@
+       later after output) caught
+ 
+ theorem wrong_continuation_run : wrongContinuation outer = .error .panic :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ /-- Full listed observations after actual repeated reads, with both statuses. -/
+ theorem repeat_vector_statuses :
+@@ -257,7 +250,7 @@
+ /-- The same actual read procedure fails at the rolled-back missing candidate. -/
+ theorem rollback_candidate_read_fails : readCandidate (base.transact frame).1 = .error .revert := by
+   rw [transaction_application]
+-  exact extract_failure _ _ (by decide +kernel)
++  exact Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ #print axioms creation_reached
+ #print axioms library_reached
+--- a/Solidity/Lowering/V08/HandlerControls.lean
++++ b/Solidity/Lowering/V08/HandlerControls.lean
+@@ -1,3 +1,4 @@
++import Solidity.Lowering.V08.SharedFailureFixture
+ import Solidity.Lowering.V08.NestedControls
+ import Solidity.Lowering.V08.AbiObservations
+ 
+@@ -63,14 +64,6 @@
+       cases same
+       rfl
+ 
+-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
+-    (checked : run.halt? = some halt) : run = .error halt := by
+-  cases run with
+-  | ok value => cases checked
+-  | error actual =>
+-    have same : actual = halt := Option.some.inj checked
+-    cases same
+-    rfl
+ 
+ private theorem extract_value {α : Type} (run : TRes α) (fallback : α)
+     (checked : run.toOption.isSome = true) : run = .ok (run.toOption.getD fallback) := by
+@@ -83,12 +76,12 @@
+ theorem outer_reached : NestedControls.enterOuter base.resetTransient = .ok (outer, [0xab, 0xcd]) :=
+   extract_success _ _ (by decide +kernel)
+ theorem constructor_failed : outer.create true third failingConstructor NestedControls.createCtx = .error constructorHalt :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ theorem constructor_catchable : catchable constructorHalt = true := rfl
+ theorem work_reached : work outer constructorHalt = .ok (handled, [0xb1, 0xb2]) :=
+   extract_success _ _ (by decide +kernel)
+ theorem later_failed : later handled [0xb1, 0xb2] = .error handlerHalt :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ /-- Handler failure is derived from the paid prefix and the real failing call. -/
+ theorem handler_failed : handler outer constructorHalt = .error handlerHalt := by
+@@ -235,7 +228,7 @@
+   if halt = .panic then w.call (⟨self⟩ : Handle false) workEntry workCtx else .error .revert
+ 
+ theorem panic_constructor_failed : outer.create true third panicConstructor NestedControls.createCtx = .error .panic :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ theorem panic_work_reached : panicWork outer .panic = .ok (handled, [0xb1, 0xb2]) := by
+   simpa only [panicWork, work, ↓reduceIte] using work_reached
+ 
+@@ -257,7 +250,7 @@
+   w.call (⟨self⟩ : Handle false) panicEntry failureCtx
+ 
+ theorem later_panic_failed : laterPanic handled [0xb1, 0xb2] = .error .panic :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ def panicHandlerAttempt (w : World NestedControls.catalog) : TRes (World NestedControls.catalog × Unit) :=
+   w.tryCreate (.ok [0xab, 0xcd]) true (fun _ => third) (fun _ => failingConstructor)
+@@ -283,7 +276,7 @@
+   simpa only [guardWork, work, ↓reduceIte] using work_reached
+ 
+ theorem collision_failed : outer.create true self failingConstructor NestedControls.createCtx = .error .revert :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ def collisionAttempt : TRes (World NestedControls.catalog × Unit) :=
+   outer.tryCreate (.ok [0xab, 0xcd]) true (fun _ => self) (fun _ => failingConstructor)
+--- a/Solidity/Lowering/V08/LibraryHandlerControls.lean
++++ b/Solidity/Lowering/V08/LibraryHandlerControls.lean
+@@ -1,3 +1,4 @@
++import Solidity.Lowering.V08.SharedFailureFixture
+ import Solidity.Lowering.V08.HandlerControls
+ import Solidity.Lowering.V08.LibraryControls
+ 
+@@ -74,14 +75,6 @@
+       have same : result = value := Option.some.inj checked
+       cases same
+       rfl
+-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
+-    (checked : run.halt? = some halt) : run = .error halt := by
+-  cases run with
+-  | ok value => cases checked
+-  | error actual =>
+-    have same : actual = halt := Option.some.inj checked
+-    cases same
+-    rfl
+ private theorem extract_value {α : Type} (run : TRes α) (fallback : α)
+     (checked : run.toOption.isSome = true) : run = .ok (run.toOption.getD fallback) := by
+   cases run with
+@@ -92,11 +85,11 @@
+ theorem ancestor_reached : enter base.resetTransient = .ok (outer, [0xab, 0xcd]) :=
+   extract_success _ _ (by decide +kernel)
+ theorem constructor_failed : outer.create false candidate constructor ctorCtx = .error ctorHalt :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ theorem delegated_reached : delegated outer = .ok (handled, expected) :=
+   extract_success _ _ (by decide +kernel)
+ theorem later_failed : later handled expected = .error laterHalt :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ theorem handler_failed : handler outer ctorHalt = .error laterHalt := by
+   simp only [handler, delegated_reached, bind, Except.bind, later_failed]
+ 
+@@ -203,7 +196,7 @@
+ 
+ def wrongIdentity : Library Catalog false Result := { library with address := third }
+ theorem wrong_runtime_identity : outer.libraryCall (⟨self⟩ : Handle false) wrongIdentity paidCtx = .error .revert :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ theorem wrong_rollback_snapshot : vector (base.transact frame).1 ≠ vector (atomic outer (attempt outer)).1 := by
+   rw [transaction_application, atomic_application]
+@@ -315,9 +308,9 @@
+ 
+ def wrongRole : Library Catalog false Result := { library with kind := false }
+ theorem wrong_role_guard : outer.libraryCall (⟨self⟩ : Handle false) wrongRole paidCtx = .error .revert :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ theorem static_library_guard : outer.libraryCall (⟨self⟩ : Handle false) library
+-    { sender, mode := .readOnly } = .error .revert := extract_failure _ _ (by decide +kernel)
++    { sender, mode := .readOnly } = .error .revert := Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ theorem wrong_failure_payload : (attempt outer).halt? ≠
+     some (.revertWith (Semantics.encodeError [0x6c, 0x00, 0xff, 0x49])) := by
+--- a/Solidity/Lowering/V08/PrefixControls.lean
++++ b/Solidity/Lowering/V08/PrefixControls.lean
+@@ -1,3 +1,4 @@
++import Solidity.Lowering.V08.SharedFailureFixture
+ import Solidity.Lowering.V08.TransactionPrefixes
+ import Solidity.Lowering.V08.CreationSuccessControls
+ import Solidity.Lowering.V08.Audit
+@@ -48,14 +49,6 @@
+ def h4 : List (TRes Output) := h3 ++ [.ok readValue]
+ def frames : List (TransactionFrame Catalog Output) := [commit, failing, occupied, reading]
+ 
+-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
+-    (checked : run.halt? = some halt) : run = .error halt := by
+-  cases run with
+-  | ok value => cases checked
+-  | error actual =>
+-    have same : actual = halt := Option.some.inj checked
+-    cases same
+-    rfl
+ 
+ theorem commit_reached : commit base.resetTransient = .ok (linked, commitValue) := by
+   rw [commit, commit_frame_reached]
+@@ -65,12 +58,12 @@
+ from the base-world failure equation. Real paid call/body/binary revert. -/
+ theorem paid_failure_reached :
+     linked.resetTransient.call (⟨self⟩ : Handle false) failureEntry HandlerControls.failureCtx =
+-      .error laterHalt := extract_failure _ _ (by decide +kernel)
++      .error laterHalt := Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ theorem failing_reached : failing linked.resetTransient = .error laterHalt := by
+   rw [failing, paid_failure_reached]; rfl
+ 
+ theorem collision_reached : linked.resetTransient.create false candidate goodCtor ctorCtx =
+-    .error .revert := extract_failure _ _ (by decide +kernel)
++    .error .revert := Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ theorem occupied_reached : occupied linked.resetTransient = .error .revert := by
+   rw [occupied, collision_reached]; rfl
+ 
+@@ -1276,7 +1269,7 @@
+ /-- Actual read before construction fails at the absent candidate, furnishing
+ a nonempty reached prefix for the subsequent successful constructor segment. -/
+ theorem prelude_read_failed : reading base.resetTransient = .error .revert :=
+-  extract_failure _ _ (by decide +kernel)
++  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
+ 
+ theorem prelude_complete_run : transactPrefix base (reading :: frames) =
+     (readWorld.resetTransient, .error .revert :: h4) := by
+--- /dev/null
++++ b/Solidity/Lowering/V08/SharedFailureFixture.lean
+@@ -0,0 +1,16 @@
++import Solidity.Semantics.Run
++
++/-! Shared failure extraction for V08 control fixtures. -/
++namespace Solidity.Lowering.V08.SharedFailureFixture
++open Solidity
++
++theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
++    (checked : run.halt? = some halt) : run = .error halt := by
++  cases run with
++  | ok value => cases checked
++  | error actual =>
++    have same : actual = halt := Option.some.inj checked
++    cases same
++    rfl
++
++end Solidity.Lowering.V08.SharedFailureFixture
