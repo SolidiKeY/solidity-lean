@@ -74,3 +74,102 @@ source in the local optional-package checkout. That file is outside this
 lane; the raw output is retained. All five relative links in this new note
 resolve. This external path-check failure remains recorded, without a full
 gate or runtime pass claim.
+
+
+## H82 independent cf1 decoder replay
+
+Added `tests/abi-entry/replay-cf1-length.py`, which extracts all 34 saved
+legacy/viaIR observations from the first immutable cf1 fixture,
+`calldata_array_length_v2.sol`. The generated Lean runtime check invokes
+actual `Solidity.AbiEntry.entry` on the saved argument bytes with four inert
+selector bytes prepended. It checks acceptance and the dynamic outer length
+(or the declared fixed-array length) against the first saved return word.
+Nested arrays retain their exact noncanonical input bytes. The first fixture
+passed all 34 observations against a freshly compiled current AbiEntry module.
+This is a bounded runtime regression, not a new kernel theorem, body execution,
+full return-byte comparison or replay of the remaining 41 fixtures.
+
+Initial harness attempts are retained in evidence: Except has no BEq instance,
+and fixed-array reference lengths are zero rather than the declared array
+length. The latter was a harness projection error, not a decoder/reference
+mismatch. The corrected projection preserves all recorded observations.
+Finder and skeptic independently caught the fixed-length and malformed-word
+issues. Return parsing now validates complete hex word sequences; unexpected
+value entries produce test errors, never fabricated semantic fuel failures.
+Validation uses explicit exceptions even under Python optimization.
+
+Remaining waits: V11/P6 concrete physical byte-world production; V09/G24.03
+statement production; memory-reference-structs whole-decoder execution
+integration; V15 canonical H68 P10 execution endpoints. These do not prevent
+continuing independent G40 controls or G46 branch work. G40 full composition,
+remaining fixture replay, G46.02 and G46.03 stay open. No pending exact-file
+request for these statement-preserving test additions is retained under H82.
+
+
+## H82 consolidation intake
+
+The surviving ABI-entry VM retains the existing goal and branch. The listed
+predecessor `af9915007218b3213ee500d54bd0b6b0103264d4` is already an ancestor;
+newer replay commit `3c20ce40590a18717ab802b516e8f06de9f9b24d` is preserved.
+Published master `41f8b61be` was adopted without discarding committed work.
+No audit-abi-world final relay exists under the local peer-input directory.
+Its final head, authenticated cumulative bundle/checksums, frozen rendered
+prompt, exact scope-manifest bytes and explicit stopped/goal-paused
+acknowledgement remain an intake wait. No member scope is edited or merged,
+no stop requested and no retirement acceptance asserted before that barrier.
+The coordinator was asked for the relay; host receipt paths are not treated
+as VM-readable files. No original audit scope is inferred from the summary.
+
+Independent checks continue on this lane. Actual Lean/Lake versions and a
+fresh successful `lake build Solidity.KeySort` are recorded in the intake
+evidence (two jobs, 0.141 seconds shell wall time). This prerequisite alone
+is not RUNTIME_GATE_PASS, full checkpoint validation or whole-lane completion.
+The first timing wrapper failed because /usr/bin/time is absent; Bash timing
+was used for the actual successful run. No known timing STOP was retried.
+Retiring-member work is queued only after authenticated intake; original
+G40 controls/replay/composition and G46 branch obligations remain open.
+
+
+## Independent backfill while audit intake waits: exact truncation failures
+
+Extended the existing cf1 generator with eight one-byte truncations, confined
+to the saved single-dimensional uint256-array cases. All 34 unchanged saved
+acceptance/length observations still pass; all eight derived inputs produce
+exactly AbiEntry.entry `.error .revert`, excluding panic, fuel and acceptance.
+The zero-length case truncates its length word; nonempty cases truncate the
+last required element. Selector bytes remain present. No reference observation
+is modified or relabelled and no body/failure bytes beyond decoder empty-revert
+classification are inferred. This remains a runtime regression, not a kernel
+proof or whole-entry/native correspondence.
+
+A negative test passed an original unmodified accepted vector to the failure
+check and correctly failed. Independent finder and skeptic reviews passed
+with no findings; neither built, used a Lean server or wrote files. Fresh
+current decoder checking took 1.613s and the 34+8 replay took 18.189s (Bash
+wall time, serial Lean-j1 under 12GiB virtual-memory limit). Full checkpoint
+gates remain pending; no RUNTIME_GATE_PASS is claimed. Retiring audit member
+head/stopped acknowledgement and authenticated frozen prompt/scope remain
+absent, and its scope remains untouched.
+
+
+## Second cf1 decoder replay: saved bounds outcomes
+
+The generator now also replays the six saved observations for
+`array_exceeds_calldatasize_no_revert_string.sol`: two accepted empty arrays
+and four exact empty reverts for lengths one/two with absent element bytes.
+These are retained cf1 model observations, not a new solc/EVM run. Each failure
+is checked against actual entry `.error .revert`; arbitrary body failures are
+not reclassified as decoder failures. Exact fixture path, signature, Boolean
+failure field, empty recorded outcome bytes and six/four inventory are checked.
+The original 34 acceptance/length observations and eight derived truncations
+still pass. All saved JSON bytes remain unchanged.
+
+Fresh current decoder checking took 1.874s and the expanded runtime replay
+23.410s. The earlier 18.189s replay had six fewer checks, so these are different
+workloads, not a same-workload proof-checking slowdown measurement. No production
+Lean proof, interface, definition, axiom or budget changed. Finder passed with
+no findings; skeptic requested that the docstring name both fixtures, now fixed.
+Both reviews were read-only, with no Lean server/build/write. The remaining
+40 fixture files are unreplayed; this is not full body/native correspondence
+or a new kernel theorem. Full checkpoint gates and all original proof queues
+remain open, and the audit-member retirement barrier remains in force.
