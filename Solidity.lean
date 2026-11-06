@@ -394,6 +394,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificate
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificateControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViews
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViewsControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViews
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViewsControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingZero
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventoryControls
@@ -2884,6 +2886,8 @@ import Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage
 import Solidity.Frontend.StatementGrammarH28.BoolCompound
 import Solidity.Frontend.StatementGrammarH28.BoundaryHead
 import Solidity.Frontend.StatementGrammarH28.BoundaryHeadPr
+import Solidity.Frontend.StatementGrammarH28.CatchCoverage
+import Solidity.Frontend.StatementGrammarH28.CatchListCoverage
 import Solidity.Frontend.StatementGrammarH28.ConditionalCoverage
 import Solidity.Frontend.StatementGrammarH28.ConditionalFuel
 import Solidity.Frontend.StatementGrammarH28.ConditionalList
