@@ -92,3 +92,4 @@ Solidity.Frontend.StatementGrammarH28.ConditionalFuel	Constructive Boolean item-
 Solidity.Frontend.StatementGrammarH28.ControlFreePr	Actual continuation-token-free printer combinators over existing token syntax
 Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms	Universal scalar type/operator/literal/attribute continuation-token absence
 Solidity.Frontend.StatementGrammarH28.SyntaxControlFree	All 42 atom constructors: global else/catch/unchecked absence with list/option closure
+Solidity.Frontend.StatementGrammarH28.YulControlFree	All 15 inline-Yul constructors and assembly: universal else/catch/unchecked token absence
