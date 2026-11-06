@@ -13,7 +13,8 @@ def digest(data):return hashlib.sha256(data).hexdigest()
 def verify(repo, profile='combined'):
  profiles={'combined':('combined_proof_pack','combined-pilot.json',17,13),
            'rollback':('rollback_proof_pack','rollback-pilot.json',2,1),
-           'frame':('frame_proof_pack','frame-pilot.json',2,1)}
+           'frame':('frame_proof_pack','frame-pilot.json',2,1),
+           'selected':('selected_proof_pack','selected-suite.json',19,15)}
  require(profile in profiles,'unsupported proof profile')
  pin_key,manifest_name,case_count,scored_count=profiles[profile]
  pin=read_json(repo/'tests/h28-sol/mutation-testing/bulk-data.json',repo)[pin_key]
@@ -98,6 +99,9 @@ def verify(repo, profile='combined'):
     require(digest(original.replace(c['old'].encode(),c['new'].encode(),1))==c['mutant_sha256']==rec['mutation']['after_sha256'],'mutation attribution mismatch')
     require(digest(read(prefix+'mutant.patch'))==rec['mutation']['diff_sha256'],'mutation diff mismatch')
   require(checks==pin['check_count']==catalog['check_count'] and exports==pin['axiom_export_count']==catalog['axiom_export_count'] and artifacts==pin['compiled_artifact_count'],'evidence counts mismatch')
+  if profile == 'selected':
+   from selected_accounting import verify as verify_accounting
+   verify_accounting(repo, read, r, m, set(members))
  for key in ('dependency_pack','prior_dependency_pack'):
   dep=pin[key];h=hashlib.sha256()
   with open(dep['archive'],'rb') as stream:
@@ -108,5 +112,5 @@ def verify(repo, profile='combined'):
 
 if __name__=='__main__':
  repo=Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())
- parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=('combined','rollback','frame'),default='combined');args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=('combined','rollback','frame','selected'),default='combined');args=parser.parse_args()
  print(json.dumps(verify(repo,args.profile),indent=2))
