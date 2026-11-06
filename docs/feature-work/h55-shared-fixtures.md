@@ -561,3 +561,22 @@ log are off Git and hashed in
 `tests/h55/shared-fixtures/backend-remaining-evidence.sha256`. This is not a
 complete backend semantic census, full declaration audit, performance pass or
 acceptance of any migration.
+
+## Source emit semantic review (partial)
+
+The named public statements in `SourceEmitControls` retain the following
+Source behavior for their stated pipeline, static and horizon parameters:
+
+| Declarations | Original observations to preserve |
+|---|---|
+| `populated_snapshot`, `event_member`, `assign_false`, `read_false` | Complete initial world/transient/journal/heap/event/log snapshot, event membership and actual local assignment/read for arbitrary state and static mode. |
+| `arguments_execute`, `encoding_execute`, `emit_execute` | Ordered converted arguments, local and hash-allocation effects, exact encoded bytes and actual successful emit with its reached logged state. |
+| `static_after_effects`, `retained_after_static`, `erased_success_retains_effects`, `wrong_static_snapshot` | Direct static emit refuses only after the actual argument/encoding effects; preserve the reached heap and other state fields, the log-erasure observation and the inequality from the original populated snapshot. |
+| `zero_horizon`, `argument_timeout` | Distinct zero-horizon and positive-horizon argument timeouts at the stated initial state. |
+| `reordered_arguments_execute`, `reordered_encoding_execute`, `exact_ordered_bytes`, `wrong_argument_order`, `reordered_emit_execute`, `wrong_ordered_execution` | Preserve changed argument order and the exact zero/one word ordering, plus inequality of the actual logged executions. |
+| `panic_arguments`, `panic_before_static`, `intrinsic_panic_observation`, `nonempty_panic` | Division-by-zero argument failure is reached before static refusal for either static value, carries intrinsic panic code 0x12 bytes and is not an empty revert. |
+| `digest_word`, `encoded_intrinsic` | Preserve the digest-word equality and exact intrinsic hash/zero-word payload observation. |
+| `dangling_arguments_execute`, `dangling_encoding_execute`, `encoding_failure_before_static`, `wrong_encoding_halt` | Preserve the explicitly malformed pointer-99 fixture, its successful argument evaluation followed by stuck dangling-reference encoding failure, and its distinction from a plain static revert. It is not an admitted SourceSpec machine. |
+
+This is a partial semantic census of one control file, not a complete
+cross-family acceptance, proof of a replacement or independent review.
