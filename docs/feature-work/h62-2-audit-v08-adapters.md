@@ -288,3 +288,28 @@ API supports complete|blocked only; no false substitute transition attempted.
 See retirement-handoff.md and preserved goal-pause-unavailable.json. No automatic
 implementation continuation is authorized. Final stopped/head acknowledgement
 accompanies cumulative authenticated exports; successor owns integration.
+
+## Successor acceptance guard hardening (2026-11-06)
+
+The exact acknowledged final source `b2bd56aa33352d2a0ab3049259e6aeeae0ddbdca`
+was integrated after frozen assignment/queue/scope SHA256 verification and the
+coordinator's final-stop receipt. External historical gates were not revalidated.
+
+`accept_witnesses.py`, `accept_local_guard.py` and `h70_inventory.py` used Python
+assertions for acceptance predicates. Optimized Python removes assertions. All
+44 predicate expressions are now explicit `require` checks with identical AST
+conditions; rejection raises `ValueError`, and CLI rejection remains nonzero.
+Only literals and already-bound paths are message arguments, so eager message
+evaluation adds no I/O. Three tests pass in normal and optimized Python: exact
+44-predicate conservation, synthetic captured-run corruption rejection, and
+false-condition rejection. Version, exit, STOP, swap, cap, reserve and source-hash
+corruptions are rejected. These fixtures are fake metadata, never proof evidence.
+
+Independent finder and skeptic reviewed read-only without Lean/server/builds;
+no confirmed findings remain in this limited change. Their review stresses that
+other scripts, including `reconcile.py`, still use assertions. This is not a
+claim that the entire audit pipeline is optimization-safe. No real historical
+acceptance run, kernel type, witness, H69 classification, axiom footprint,
+resource enforcement or full-family timing is established by these tests.
+All ordinary joint witnesses, intentional-refutation distinctions, semantic
+census, supported compiler/failure/gas/fork coverage and final gates remain open.
