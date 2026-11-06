@@ -1,0 +1,26 @@
+{
+  "id": "V15-GENERIC-P10-BYTE-01",
+  "owner": "V15 (v12-v17/v15-evm-agreement)",
+  "state": "pending-coordinator-relay; no owner permission received",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "exact_files": [
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/ByteObservationControls.lean",
+      "source_sha256": "6972a0fa4ea0814ba40cb5de182b7a15b44240e050c678a36ca33470efb2c02a"
+    }
+  ],
+  "proposed_original_instances": [
+    "first_byte",
+    "second_byte",
+    "middle_zero",
+    "penultimate_byte",
+    "last_byte",
+    "outside_word",
+    "maximum_index",
+    "zero_word",
+    "maximum_word"
+  ],
+  "requested_action": "Owner reviews an additive typed fixture and intrinsic execution-lemma proposal, then explicitly agrees to/apply migration of exact original declarations, retaining their exact statements. No implementation or proof acceptance is claimed by this request.",
+  "excluded": "All other original files, generated roots/module maps/axiom pins, frozen-interface changes, H55 Yul Raw/vector generation.",
+  "implementation_state": "not started; toolchain applicability awaiting clarification"
+}
