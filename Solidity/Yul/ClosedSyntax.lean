@@ -62,6 +62,18 @@ theorem Checked.complete {outside body} (p : Checked outside body) :
           | some dt => .ok ⟨shape, finalNames, declarations, dp, dt⟩ : Except Error (Checked outside body)) = _
       rw [placement.complete, typing.complete]
 
+/-- At fixed original syntax and supplied outside names, completeness
+determines the whole certificate. This does not prove namespace provenance. -/
+theorem Checked.unique {outside body} (first second : Checked outside body) :
+    first = second := by
+  exact Except.ok.inj (first.complete.symm.trans second.complete)
+
+/-- Final declaration names are fixed by the original syntax and outside names,
+rather than being an independent choice made by the certificate supplier. -/
+theorem Checked.finalNames_unique {outside body} (first second : Checked outside body) :
+    first.finalNames = second.finalNames := by
+  exact congrArg Checked.finalNames (Except.ok.inj (first.complete.symm.trans second.complete))
+
 theorem check_iff (outside : List String) (body : Syn (.list .yulStmt)) :
     (check outside body).toOption.isSome = true ↔ Nonempty (Checked outside body) := by
   constructor
