@@ -15,7 +15,7 @@ def image : List Instr := OuterAllocatingCall.image
 def source (depth : Nat) : Stmt C (Frame A) (Frame A) :=
  InterfaceV1.recursiveSource "outerAllocating" (next A (by rfl)) (result A) (AllocatingScalarSource.step A (by rfl)) depth
 
-theorem endpoint {L frame : Nat} (depth n : Nat) (σ : State C (Frame A))
+theorem framed_endpoint {L frame : Nat} (depth n : Nat) (σ : State C (Frame A))
  (fit : n+1<W) (ref : HRef σ.H A)
  (counter : TEnv.get (.there .here : Idx (Frame A) (.val .uint)) σ.env=countValue (n+1) fit)
  (alias : TEnv.get (.there (.there .here) : Idx (Frame A) (.mem A)) σ.env=some ref)
@@ -28,7 +28,10 @@ theorem endpoint {L frame : Nat} (depth n : Nat) (σ : State C (Frame A))
  StateRepr L 2 frame F out.st addresses last ∧
  last.stack=before.stack ∧ last.mem 8=w[10] ∧ last.mem 2=.val (base ref.id) ∧
  last.mem 3=.val (wmod (n+1)) ∧ last.mem 4=.val (wmod n) ∧
- StructAllocatorRepr out.st.heap addresses frame (⟨cursor.val+4*n,space⟩ : Fin W) last := by
+ StructAllocatorRepr out.st.heap addresses frame (⟨cursor.val+4*n,space⟩ : Fin W) last ∧
+ BaseExtends σ.H base addresses ∧
+ GrowsAllocator 2 frame (4*n) σ base before out.st addresses last ∧
+ Footprint.Words 8 10 before last := by
  obtain ⟨saved,savedRun,captured,savedRepr,captureGrowth⟩ :=
    Context.capture_context (σ:=σ) (F:=F) (base:=base) before 8 8 10 repr
      (by decide) (by decide) (by omega) (by decide) (by change 13≤frame;omega) (.inl (by decide)) (by decide) current
@@ -107,11 +110,51 @@ theorem endpoint {L frame : Nat} (depth n : Nat) (σ : State C (Frame A))
    rw [locals] at represented
    exact (Restore.uint_unique represented (ReprV.uint_of rfl)).trans
      (congrArg Word.val (Fin.ext (Nat.mod_eq_of_lt (by omega : n<W)).symm))
+ have entryGrowth : GrowsAllocator 2 frame 0 σ base saved child base prepared := by
+   intro point positive owner capacity
+   simpa only [Nat.add_zero] using
+     (((owner.localWrite 3 (by decide) (by omega) (.val ⟨n,by omega⟩)).localWrite 4
+       (by decide) (by omega) w[0]).localWrite 7 (by decide) (by omega) w[13])
+ have total : GrowsAllocator 2 frame (4*n) σ base before out.st addresses last := by
+   simpa only [Nat.zero_add,Nat.add_zero] using (captureGrowth.comp entryGrowth).comp (bodyGrowth.comp restoreGrowth)
+ have olderWords : Footprint.Words 8 10 before last := by
+   intro x lower upper
+   have possibilities : x=8 ∨ x=9 := by omega
+   rcases possibilities with rfl | rfl
+   · exact lastPointer.trans current.symm
+   · exact (outside 9 (by decide) (by decide) (by decide)).trans
+       ((bodyWords 9 (by decide) (by omega) (by decide) (.inl (by decide))).trans
+         ((show prepared.mem 9=saved.mem 9 from rfl).trans
+           (captured.exterior 9 (by decide) (.inl (by decide)))))
  exact ⟨out,last,addresses,native,actual,restored,lastStack.trans (bodyStack.trans captured.stack),lastPointer,
-   lastRef.trans bodyRef,lastCount,lastResult.trans scalar,finalOwner⟩
+   lastRef.trans bodyRef,lastCount,lastResult.trans scalar,finalOwner,extended,total,olderWords⟩
+
+
+/-- Compatibility projection: the previously published endpoint is unchanged. -/
+theorem endpoint {L frame : Nat} (depth n : Nat) (σ : State C (Frame A))
+ (fit : n+1<W) (ref : HRef σ.H A)
+ (counter : TEnv.get (.there .here : Idx (Frame A) (.val .uint)) σ.env=countValue (n+1) fit)
+ (alias : TEnv.get (.there (.there .here) : Idx (Frame A) (.mem A)) σ.env=some ref)
+ (base : Nat → Fin W) (before : Machine) (repr : StateRepr L 2 frame F σ base before)
+ (cursor : Fin W) (owned : StructAllocatorRepr σ.heap base frame cursor before)
+ (room : 13+3*n≤frame) (space : cursor.val+4*n<W)
+ (payloadFit : 13+3*n<W) (current : before.mem 8=w[10]) (enough : n<depth) :
+ ∃ (out : Solidity.Out C σ.H (Frame A)) (last : Machine) (addresses : Nat → Fin W),
+ (source depth).run σ=.ok out ∧ run image before=.ok last 0 ∧
+ StateRepr L 2 frame F out.st addresses last ∧
+ last.stack=before.stack ∧ last.mem 8=w[10] ∧ last.mem 2=.val (base ref.id) ∧
+ last.mem 3=.val (wmod (n+1)) ∧ last.mem 4=.val (wmod n) ∧
+ StructAllocatorRepr out.st.heap addresses frame (⟨cursor.val+4*n,space⟩ : Fin W) last := by
+ obtain ⟨out,last,addresses,native,actual,represented,stack,position,reference,countWord,resultWord,owner,extended,growth,olderWords⟩ :=
+   framed_endpoint depth n σ fit ref counter alias base before repr cursor owned room space payloadFit current enough
+ exact ⟨out,last,addresses,native,actual,represented,stack,position,reference,countWord,resultWord,owner⟩
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily
 
 /-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.endpoint
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.framed_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.framed_endpoint
