@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/FixedReferenceStorageParentInterface.lean` | Complete fixed-parent storage copy with dynamic children, actual source representation, typed adoption and exact demand/growth/refusal. |
