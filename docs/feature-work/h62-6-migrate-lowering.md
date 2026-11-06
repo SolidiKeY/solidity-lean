@@ -245,3 +245,36 @@ owner-ticket payload or recipients recovered; relay.sh is host-only; routing
 grants no original-file edit permission. The running supervisor is preserved.
 No original production file has been edited. Census/API follow-up waits for the
 serial supervisor to finish, as requested; no full comparison is inferred.
+
+## H70 continuation: proof-budget classification and owner waits
+
+The latest routing names three pending inputs for elaborated API/axiom
+comparison: `Solidity.Syntax.Raw` from migrate-syntax,
+`Solidity.Hash.CollisionBound` from migrate-hash, and `Solidity.Source.Ctor`
+from migrate-source. All three are in the pinned dependency closure and remain
+read-only here. Current-owner delivery pending was reported as none; host relay
+journals, owner agreement and actual validation are distinct, and none is
+inferred locally from routing. No original-file edit permission was granted.
+
+No saved 224-file classification manifest was recovered in this checkout or its
+artifacts. The deterministic proof_budgets.py report covers all 661 assigned
+source files, preserving their pinned hashes and marking the requested 224-file
+subset unreconciled. It does not invent a membership list or declare that subset
+finished. The generated report remains off Git as
+`/workspace/migrate-lowering-artifacts/evidence/proof-budget-classification.json`.
+
+Every file has no recognized explicit local budget option. Both installed
+source trees declare maxHeartbeats 200000 and defaultMaxRecDepth 512. Source
+hashes are recorded, and equality is labelled source_defaults_equal: this does
+not establish effective elaborated command options. Lexical decide candidates
+occur in 248 files, +kernel candidates in 138, with 28 overlapping; term uses
+are included and labelled as candidates. No lexical +native/native_decide uses
+were found. Comments, strings and quoted identifiers are excluded. These are
+source classifications, not tactic elaboration, proof, API or axiom acceptance.
+
+Controls passed masking, qualified-reference exclusion, modifier chains,
+explicit-option detection and source-only wording. Independent read-only finder
+and skeptic confirmed the counts/hashes and boundaries; skeptic's stronger
+inherited-default wording was corrected to no-explicit-source-option. Neither
+reviewer used Lean or changed files. The active supervisor/heartbeat is preserved;
+no extra Lean job, restart or original production-file edit was performed.
