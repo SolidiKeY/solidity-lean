@@ -330,6 +330,54 @@ whose `revert` halts the sequence never returns; on others execution goes on. -/
 def panicIf {σ : Type} (M : Machine σ) (b : Bool) (code : Word) (s : σ) : Run σ σ :=
   if b then panicRun M code s else .ok s
 
+/-- The machine's `revert` never returns (as on the EVM): it halts with `HaltKind.revert`.
+A property a consumer's machine proves; no theorem here assumes it unless it says so. -/
+def RevertHalts {σ : Type} (M : Machine σ) : Prop :=
+  ∀ (xs : Fin 2 → Word) (s : σ), ∃ s', M.run .«revert» xs s = .error (.halt s' .revert)
+
+/-- On such a machine anything after `revert` is irrelevant. -/
+theorem revert_bind_halts {σ α : Type} (M : Machine σ) (h : RevertHalts M) (xs : Fin 2 → Word) (s : σ)
+    (cont cont' : σ × (Fin 0 → Word) → Run σ α) :
+    M.run .«revert» xs s >>= cont = M.run .«revert» xs s >>= cont' := by
+  obtain ⟨s', hs⟩ := h xs s
+  rw [hs]
+  rfl
+
+/-- … and the panic sequence ends in a halt, so what follows it is irrelevant too. -/
+theorem panicRun_bind_halts {σ α : Type} (M : Machine σ) (h : RevertHalts M) (code : Word) (s : σ)
+    (cont cont' : σ → Run σ α) :
+    panicRun M code s >>= cont = panicRun M code s >>= cont' := by
+  simp only [panicRun]
+  rcases M.run .«mstore» (word2 0 panicSelector) s with e | ⟨s1, r1⟩
+  · rfl
+  simp only [run_ok_bind]
+  rcases M.run .«mstore» (word2 4 code) s1 with e | ⟨s2, r2⟩
+  · rfl
+  obtain ⟨s', hs⟩ := h (word2 0 36) s2
+  simp only [run_ok_bind, hs]
+  rfl
+
+/-- On such a machine the panic sequence ends in a fault (the halt, or an earlier machine fault). -/
+theorem panicRun_error_of_halts {σ : Type} (M : Machine σ) (h : RevertHalts M) (code : Word) (s : σ) :
+    ∃ e, panicRun M code s = .error e := by
+  simp only [panicRun]
+  rcases M.run .«mstore» (word2 0 panicSelector) s with e | ⟨s1, r1⟩
+  · exact ⟨e, rfl⟩
+  simp only [run_ok_bind]
+  rcases M.run .«mstore» (word2 4 code) s1 with e | ⟨s2, r2⟩
+  · exact ⟨e, rfl⟩
+  obtain ⟨s', hs⟩ := h (word2 0 36) s2
+  simp only [run_ok_bind, hs]
+  exact ⟨_, rfl⟩
+
+/-- So a result that factors through the panic sequence is exactly its fault. -/
+theorem panic_factor_halts {σ α : Type} (M : Machine σ) (h : RevertHalts M) (code : Word) (s : σ)
+    (r : Run σ α) (hr : ∃ cont, r = panicRun M code s >>= cont) :
+    ∃ e, panicRun M code s = .error e ∧ r = .error e := by
+  obtain ⟨cont, hc⟩ := hr
+  obtain ⟨e, he⟩ := panicRun_error_of_halts M h code s
+  exact ⟨e, he, by rw [hc, he]; rfl⟩
+
 /-- `if cond { panic() }` as a `panicIf`. -/
 theorem if_panic_as (v : Word) (code : Word) {L : List String} (vs : Vals L) (s : σ) :
     (if v = 0 then (.ok (s, vs, .normal) : Run σ (σ × Vals L × Flow))

@@ -147,6 +147,16 @@ theorem decodeTuple_body (k : Nat) (h d : Word) (s : σ) :
     · simp only [run_ok_map, run_ok_bind, Vals.drop_cons, Vals.drop_nil, toFn_single, assignAll,
         Vals.set_here, Vals.set_there]
 
+/-- On a machine whose `revert` halts, short calldata ends exactly with the fault of
+`revert(0, 0)` run from the entry state. -/
+theorem decodeTuple_short_halts (k : Nat) (h d : Word) (s : σ) (hr : RevertHalts M)
+    (short : decide (Solidity.Yul.signed (Solidity.Yul.Pure.eval .«sub» (word2 d h)) < 32) = true) :
+    ∃ e, M.run .«revert» (word2 0 0) s = .error e ∧
+      evalBlock M ctx (k + 80) abiEnv abiDecodeTuple (.cons h (.cons d (.cons 0 .nil))) s = .error e := by
+  obtain ⟨cont, hc⟩ := (decodeTuple_body M ctx k h d s).1 short
+  obtain ⟨s', hs⟩ := hr (word2 0 0) s
+  exact ⟨_, hs, by rw [hc, hs]; rfl⟩
+
 end
 
 end Solidity.SolcValidation.IrSyntax

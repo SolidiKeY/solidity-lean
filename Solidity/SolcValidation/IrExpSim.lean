@@ -776,6 +776,14 @@ theorem checked_exp_body (j : Nat) (x y : Word) (s : σ) :
     simp only [bind_assoc]
     exact ⟨_, rfl⟩
 
+/-- On a machine whose `revert` halts, an overflowing `checked_exp_t_uint256_t_uint256`
+ends exactly with the fault of solc's `Panic(0x11)` sequence run from the entry state. -/
+theorem checked_exp_overflow_halts (j : Nat) (x y : Word) (s : σ) (h : RevertHalts M)
+    (over : ¬ x.val ^ y.val < 2 ^ 256) :
+    ∃ e, panicRun M 0x11 s = .error e ∧
+      evalBlock M ctx (j + 420) expEnv expExpU256 (.cons x (.cons y (.cons 0 .nil))) s = .error e :=
+  panic_factor_halts M h 0x11 s _ ((checked_exp_body M ctx j x y s).2 over)
+
 end
 
 end Solidity.SolcValidation.IrSyntax
