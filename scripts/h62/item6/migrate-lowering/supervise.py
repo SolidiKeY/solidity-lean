@@ -19,7 +19,7 @@ def cleanup_owned(livefile,runner_pid=None):
 if (evidence/"old-clean-full.json").exists() or (evidence/"new-clean-full.json").exists():
     raise SystemExit("refusing to overwrite an existing gate result")
 if (root/".lake/build").exists(): raise SystemExit("old baseline must start with absent .lake/build")
-env=dict(os.environ,PATH=str(artifacts/"old-config/bin")+":/workspace/.setup/tools/lean-4.24.0-linux/bin:"+os.environ["PATH"],XDG_CACHE_HOME=str(artifacts/"old-cache"),LEAN_NUM_THREADS="1",SOLKEY_RULES="/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key")
+env=dict(os.environ,PATH=str(artifacts/"old-config/bin")+":/workspace/.setup/tools/lean-4.24.0-linux/bin:"+os.environ["PATH"],XDG_CACHE_HOME=str(artifacts/"old-cache"),LEAN_NUM_THREADS="1",MIGRATION_LAKE_CONFIG=str(artifacts/"old-config/lakefile.toml"),SOLKEY_RULES="/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key")
 save("old-gate-starting")
 old=subprocess.Popen(["python3",str(script/"bounded.py"),"--output",str(evidence/"old-clean-full.json"),"--","./run-lean.sh"],env=env)
 save("old-gate-running",runner_pid=old.pid)

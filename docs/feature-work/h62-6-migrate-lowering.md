@@ -193,3 +193,37 @@ handoff goes to the coordinator with this same VM, branch and original goal;
 no replacement goal or competing continuation was created. Full migration work
 continues through the saved supervisor, followed by the still-pending owner/API
 work, affected validation, performance comparison and migration reviews.
+
+## Second continuation: reserve accounting and master inspection
+
+Fetched origin/master before new work; it is now `96788a953` and still selects
+Lean 4.24.0. Its post-base Lowering diff is empty: no landed Lowering migration
+to reuse or rebase onto. The pinned migration branch/source tree is retained.
+The pipeline repeats fetch/log/owned-code/toolchain inspection before starting
+the new-toolchain item. Relevant master changes stop for rebase review so a
+pinned old baseline cannot be silently compared against a different source tree.
+
+The first supervised restart stopped safely with exit 125 after
+1,123.051359 seconds: raw cgroup charge reached the guard threshold while the
+sampled process-group peak was 6,240,215,040 bytes. No new gate started, and no
+baseline or slowdown result is accepted. This failed run is preserved under
+`evidence/attempts/old-reserve-stop`; its generated build is retained separately.
+The machine reported no OOM and roughly 6 GB of charged file cache after stop.
+
+The repaired guard keeps the same 16 GiB VM cap, 4 GiB available-memory reserve,
+no swap, -j1 and -M11000. It credits only clean unmapped file-LRU cache when
+estimating cgroup availability; mapped, dirty/writeback, shared and unevictable
+pages are excluded. Host MemAvailable is checked independently. This is a
+sampled availability estimate, not a guarantee of 4 GiB of uncharged memory.
+Both matched measurements restart clean under the identical repaired policy.
+Snapshots, minimum sampled availability, and guard/configuration SHA256s are
+recorded; mismatched policies/configurations cannot yield an accepted comparison.
+Kernel page cache is not forcibly dropped; Lean/Lake artifact caches are empty
+and disabled for each clean measurement.
+
+Finder and skeptic independently reviewed the availability definition. Skeptic's
+transient-over-cap arithmetic and inconsistent-stat cache-credit findings were
+fixed and added to controls. Memory controls cover cache-heavy usage, protected
+pages, true low availability, swap, cap overshoot, and inconsistent statistics;
+runner lifecycle controls pass under the repaired policy. No proof budget,
+production source, frozen statement, root registration or toolchain pin changed.

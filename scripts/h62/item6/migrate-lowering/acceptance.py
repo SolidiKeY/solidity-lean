@@ -31,7 +31,10 @@ if any(m is not None and (m.get("exit")!=0 or m.get("stop_reason")) for m in met
     comparison="failed-gate"
 elif all(metrics.values()):
     x,y=metrics["old"],metrics["new"]
-    if any(m["exit"] or m["stop_reason"] for m in metrics.values()): comparison="failed-gate"
+    settings=("cgroup_cap_bytes","reserve_bytes","LEAN_NUM_THREADS","sample_interval_seconds","memory_policy","guard_sha256","config_sha256","cpu_max","cpuset_cpus_effective","affinity_cpus")
+    if any(k not in m for m in (x,y) for k in settings): comparison="missing-resource-provenance"
+    elif any(x[k]!=y[k] for k in settings): comparison="resource-settings-mismatch"
+    elif not all(isinstance(m.get(k),str) and len(m[k])==64 for m in (x,y) for k in ("guard_sha256","config_sha256")): comparison="missing-resource-provenance"
     elif not all(isinstance(m.get(k),(int,float)) and math.isfinite(m[k]) and m[k]>0 for m in (x,y) for k in ("wall_seconds","sampled_peak_group_rss_bytes")): comparison="missing-metric"
     else:
         wall=100*(y["wall_seconds"]/x["wall_seconds"]-1)
