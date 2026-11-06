@@ -52,10 +52,14 @@ for original in source['statements']:
         row['witness_status'] = 'verified-joint-witness' if verified else 'prepared-joint-witness'
         row['audit_theorem'] = 'H62.CompilerTransport.boundary_joint_witness'
         row['joint_witness'] = row['audit_theorem'] if verified else None
+        row['input_feasibility'] = ('verified simultaneously by ' if verified else 'prepared in ') + row['audit_theorem']
+        row['global_premises'] = 'Per-program Compilation certificate inhabited in the same tuple; no global P12 producer is required or instantiated.'
     elif row['source_name'] in negative:
         row['witness_status'] = 'verified-joint-impossibility' if verified else 'prepared-joint-impossibility'
         row['audit_theorem'] = 'H62.CompilerTransport.'+negative[row['source_name']]
         row['impossibility_certificate'] = row['audit_theorem'] if verified else None
+        row['input_feasibility'] = 'jointly infeasible under the exact frozen hypotheses' if verified else 'joint impossibility certificate prepared'
+        row['global_premises'] = 'Joint incompatibility does not establish any individual global producer structure uninhabited.'
     elif original['false_conclusion']:
         row['witness_status'] = 'intentional-private-negative; universal-witness-criterion-conflict'
     row['global_input_classification'] = ('Per-program Compilation certificate plus joint physical Input/source/target execution tuple; no global P12 producer is instantiated.' if row['source_name'] in positive else 'pending semantic review; binder Prop/data alone is insufficient')
