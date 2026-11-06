@@ -1,22 +1,284 @@
-# H55–H65 G49/G50 work record and handoff
+# H55–H68 G49/G50 work record and handoff
 
 Batch: `solidity-h55-sol-20261106`; task: `g49-final-theorem`.
 Repository: `/workspace/solidity-lean`.
 Branch: `codex/solidity-h55-sol-20261106/g49-final-theorem`.
 Frozen base: `4d3790eadb8a5212233bc7d5e345817476b2f590`.
 Historical H55 identity: `/workspace/h55-g49-evidence/identity.json`.
-Current H64/H65 identity: `/workspace/h64-g49-evidence/identity.json`.
+Historical H64/H65 identity: `/workspace/h64-g49-evidence/identity.json`.
+Current H68 identity: `/workspace/h68-g49-evidence/identity.json`.
 
-The full assignment is unfinished. H64/H65 now supplies the common template,
-a folded conditional theorem with the full frozen public/specification result,
-and typed owner accounting. Concrete producer/residual proofs, adapters for
+The full assignment is unfinished. H68 resolves both prior questions: owning
+lanes supply additive full-certificate bridges, and one proof-only optimization
+was authorized and checked. The retry still exceeds 10%, so further proof work
+is stopped again. H64/H65 supplies the common template, folded conditional
+public/specification theorem and typed owner accounting. Concrete producer/residual proofs, adapters for
 incompatible lane shapes, exhaustive lane coverage and full acceptance remain
 open. The timing gate exceeded its threshold and further proof expansion stopped.
 The current section below supersedes older H55 statements about missing public
 theorem syntax or unavailable typed counts; the older checkpoint remains history.
 No partial checkpoint or prerequisite pass is full completion.
 
-## H64/H65 current work: one pass template and explicit folded statement
+## H68 current work: exact owner bridge requests and timing retry
+
+The coordinator supplied the human's H68 decisions: the owning lanes prove
+additive full-certificate PassCorrect bridges for the five unresolved families;
+our adapters stay pending until those land. H68 also authorizes a proof-only
+optimization of the added fold statement under identical limits, without a
+statement or heartbeat change, followed by the recorded timing protocol and
+another stop/report if the result is still above 10%. These decisions answer
+Q-H64-ADAPTER and Q-H64-SPEED; the old questions below are historical, not new
+permission requests. No bridge proof is inferred from the decision itself.
+
+### Proof-only optimization and unchanged statements
+
+Only the final `have folded` proof in
+[FoldedPublic](../../Solidity/Roadmap/G49Final/FoldedPublic.lean) changed: the
+intro/exact tactic block became a direct lambda with the same local `passes`
+let and the same existing `passes.fold.need_ok` application. It does not build
+and discard the larger backward conjunction, change an executable pass, or
+change any premise, observation, field, resource condition or interface.
+The theorem signature and entire FoldStatement definition are byte-identical.
+Their SHA256 values are respectively
+`2050045a8b46de2095eda1fe65e757006b466555ca2b70789955a4f77f1dc782` and `ab9c6ad5ef88ec68400baa51a25ae053487f18ca4a368e98f66cf55cbe8c1584`.
+
+The actual Lean inventories also have identical complete types, raw binder
+rows and axiom sets for all fourteen selected declarations. Final selected
+axioms remain propext/Quot.sound only; no new choice, sorry/axiom, trust shortcut,
+heartbeat increase or resource change was introduced. Before/after source,
+proof-only diff identity and actual-type checks are retained outside Git in
+`/workspace/h68-g49-evidence`.
+
+Exactly one H68 retry of the unchanged nine-module protocol was run:
+
+```sh
+python3 -B scripts/h55/g49-final-theorem/check-pass-correct.py --lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --evidence /workspace/h68-g49-evidence/timing-retry
+```
+
+Source/semantic controls, bounded KeySort, typed inventory and axiom checks pass.
+**Timing remains FAIL/HOLD:** 15.200 seconds against the recorded 13.280-second
+baseline, +14.46%; the 10% ceiling is 14.608 seconds. The previous unoptimized
+sample was 15.390 seconds. The result is not a timing pass or evidence of a
+causal speedup. Further proof changes/composition stopped after this one retry;
+no repeated sampling, reduced scope, changed runner or increased limit was used
+to obtain a pass. Controls are excluded from the comparison exactly as in the
+recorded protocol. Compiler path, module order, fresh-cache policy, explicit
+-j1, LEAN_NUM_THREADS=1, 8 GiB cap, swap0, 4 GiB reserve and 300-second bounds
+are unchanged. Lean/Lake remain 4.24.0/5.0.0-src+797c613.
+
+Accounting against the new successful proof run passes, with the unchanged
+24 = 4 interface + 3 certificate-package + 2 implementation + 15 public-field
+census. Four metadata-test methods pass. This does not discharge any concrete
+producer/public obligation or turn either timing/integration failure into a pass.
+No gate-VM wait was used. Remaining H68 work below is relay documentation only.
+
+### Exact common result type for all five owner deliveries
+
+The required result is the following subtype of the EXISTING PassCorrect, not
+a second refinement relation or an assumed certificate:
+
+```lean
+open Solidity.Roadmap Solidity.Roadmap.G49Final
+
+abbrev BridgeGoal (A B : Lang Event Outcome)
+    (ps : A.Prog) (pt : B.Prog)
+    (beta : B.Env → A.Env)
+    (nu : B.Env → A.Res → B.Res)
+    (Local : Prop) :=
+  { pc : PassCorrect (Behaviour.ofLang A ps) (Behaviour.ofLang B pt) //
+      pc.envAbs = beta ∧ pc.need = nu ∧ Local }
+```
+
+For each family i the owner must first publish the concrete canonical endpoint
+API, then prove the corresponding factory type below:
+
+- `NativeContext_i`: the family's actual typed program/producer indices.
+- `Approved_i`: its UNCHANGED independently approved/admitted producer domain,
+  with a proof of that domain's agreement/coverage. It must not be a success-only
+  or implemented-fragment filter or an extra per-pass no-failure condition.
+- `A_i, B_i : NativeContext_i → Lang Event Outcome` with the original resource
+  orders, Allowed/Admissible/Forward/Guard predicates and consistent prefixes.
+- `ps_i : (x : NativeContext_i) → (A_i x).Prog` and the analogous `pt_i`.
+- `beta_i : (x : NativeContext_i) → (B_i x).Env → (A_i x).Env`, prescribed
+  independently of pc and proved uniform with the single public map across
+  programs/artifacts in the fixed interface context.
+- `nu_i : (x : NativeContext_i) → (B_i x).Env → (A_i x).Res → (B_i x).Res`,
+  an independently prescribed executable bound, not a choice witness or a
+  post-hoc name for pc.need.
+- `Local_i`: the ENTIRE exact original conditional lane conclusion, keeping
+  its old quantifiers/antecedents and all physical/frame/state/step facts.
+
+The names with family suffixes are REQUIRED OWNER DELIVERABLES, not asserted
+existing APIs. The inspected local statements do not already publish all their
+canonical Lang/program/map/bound definitions. Owners must include operational
+and source-origin/encoding/observation binding equations to the actual executions.
+Arbitrary Behaviours, empty/trivial traces, success-only prefix families and
+narrowed resource/environment domains are not acceptable instantiations.
+`typedRunPrefixes` is not already a G01 Event/Outcome language: its actual
+Unit/raw typed-state observations and missing transaction/general-call semantics
+still require proof.
+
+A factory quantifies the full approved native context. Original local
+preconditions such as Entry, Input or a selected successful phase remain in
+Local_i's original implications; they cannot silently become new restrictions
+on the full bridge. Owners must establish their actual reached applicability
+and independently prove the other outcomes/prefixes. Returning an assumed full
+certificate or BridgeGoal as a premise merely moves the obligation and does
+not fulfill this request. Reuse the original local theorems; do not restate,
+weaken or edit them.
+
+The pc component must supply ALL existing PassCorrect fields: the fixed beta
+is sound and onto for the full Allowed environments; nu transports each source
+A/F/G bound to target A/F/G with Prefix.Le; and every target A/G prefix maps back
+to source A/G with reverse Prefix.Le, without adding backward Forward. No
+monotonicity of nu is requested. Complete events/outcomes and hash guards remain
+those of the actual canonical languages.
+
+### Per-family factory signatures and owner relay
+
+#### 1. Bare prefix refinement
+
+**Relay:** Actual producer owner; H55/G49.02 integrates. No owner can be inferred from RefinesUnder alone.
+
+Required factory type (proof-relevant definition, not an axiom):
+
+```lean
+bare_prefix_bridge : (x : NativeContext_bare) → Approved_bare x → BridgeGoal (A_bare x) (B_bare x) (ps_bare x) (pt_bare x) (beta_bare x) (nu_bare x) (Local_bare x)
+```
+
+**Exact context/local statement:** The actual canonical producer, its unchanged approved domain, source/target programs, resource families and observed prefixes. Local_bare is its entire original RefinesUnder claim with original antecedents.
+
+**Endpoint binding required:** A_bare/B_bare must be the actual canonical languages; ps_bare/pt_bare must be exactly the programs of that producer. beta_bare is the predetermined public environment abstraction and nu_bare the independently specified executable resource calculation.
+
+**Facts that must survive:** All original A/F/G and prefix observations; full forward A/F/G, reverse A/G, envSound/envOnto and explicit need are additional proved transports.
+
+No generic h : RefinesUnder → PassCorrect request is made: it is refuted by the existing control. Our pass_chain already has its full-package route through pipeline.fold; any other missing producer must be identified/routed individually.
+
+Status: **pending owner proof/publication and verification**. No new adapter
+is constructed by this request.
+
+#### 2. Compiler Input/Agrees
+
+**Relay:** H55/G49.01 collector and G49.02 runtime integration; concrete branch proofs remain with V07/V09/V11/V12 and recorded memory/copy/internal-call producers.
+
+Required factory type (proof-relevant definition, not an axiom):
+
+```lean
+compiler_agreement_bridge : (x : NativeContext_compiler) → Approved_compiler x → BridgeGoal (A_compiler x) (B_compiler x) (ps_compiler x) (pt_compiler x) (beta_compiler x) (nu_compiler x) (Local_compiler x)
+```
+
+**Exact context/local statement:** Same C,b,Gamma,Delta,F,P and result : Solidity.Evm.Compiler.Compilation b F P, with actual source-origin and emitted-code identities. Local_compiler universally retains the SAME L,frame,base,sigma,m and result.Input → result.Agrees law.
+
+**Endpoint binding required:** Canonical intrinsic source sessions for this P/world and canonical structured-IR sessions for exactly result.code; their observation/origin equations and all original environment/resource predicates must be published.
+
+**Facts that must survive:** Complete branch-specific Rep, protected stack, guarded panic, payment refusal and divergence/fault alternatives. No source-success, desired-target, notExhausted or new pays=false premise.
+
+The payment-free compilation_exact variant is not a replacement for the general correct theorem. Original physical preconditions remain inside Local_compiler and must be established at the actual reached boundary, not assumed as a new full-pass domain restriction.
+
+Status: **pending owner proof/publication and verification**. No new adapter
+is constructed by this request.
+
+#### 3. P1 frame claims
+
+**Relay:** V12 for P1/P1-REC/P1-PROFILE; MRS for P1-CALL/P4/G37.03; V17 for P1-THUNK; V13 for P1-REVERT.
+
+Required factory type (proof-relevant definition, not an axiom):
+
+```lean
+p1_frame_bridge : (x : NativeContext_frame) → Approved_frame x → BridgeGoal (A_frame x) (B_frame x) (ps_frame x) (pt_frame x) (beta_frame x) (nu_frame x) (Local_frame x)
+```
+
+**Exact context/local statement:** Actual canonical call/callRec, args, return binding, body and plan; SAME L,frame,caller,base,machine,start in Entry. Local_frame contains the original ReturnClaim and separate BareRevertClaim with their original quantifiers/antecedents, plus applicable frozen V3 admission agreement, universal entry coverage and genuine outcome witnesses.
+
+Local_frame is variant-specific: failure-only PendingBareRevertProducer retains exactly its original failure-only fields and is not represented as already supplying successful-entry witnesses.
+
+**Endpoint binding required:** Actual source call/session and the SAME emitted plan.code/cursor/frame target sessions, under the independently approved/admitted P1 domain and one code image for recursive depths.
+
+**Facts that must survive:** Typed StateRepr, full protected stack, BaseExtends, allocator growth, cursor and protected older frame words. Prove panic/data/exhaustion/divergence and arbitrary-prefix transports separately.
+
+Success and bare-revert evidence, or existential successful fixtures, must not become all-outcome adequacy. Do not narrow the recursive/profile domain or add per-pass no-failure/desired-run premises.
+
+Status: **pending owner proof/publication and verification**. No new adapter
+is constructed by this request.
+
+#### 4. V08 image/reached phase
+
+**Relay:** V08 for G22.03 creation/G22.04 libraries/G22.05 world/G23 source-unit-transient composition; original P8a/CR, P8a-SPEC/VY5, P4/MRS, P7/VY4, G42.04/V13 and SS-NEW/V17 dependencies remain.
+
+Required factory type (proof-relevant definition, not an axiom):
+
+```lean
+v08_world_phase_bridge : (x : NativeContext_world) → Approved_world x → BridgeGoal (A_world x) (B_world x) (ps_world x) (pt_world x) (beta_world x) (nu_world x) (Local_world x)
+```
+
+**Exact context/local statement:** Same Source global/environment, contract catalogue, StoreRelation, environment/history, source St and intrinsic World; original ResetInputs/Image implication and creation/library Inputs, selected invocation/horizon, P8a origin/admission, reached frame/layout and body-producer conditions remain inside Local_world.
+
+**Endpoint binding required:** Canonical complete Source and intrinsic unit/session semantics for those exact programs and phases, with actual published V08 agreement migration and admitted input identities.
+
+**Facts that must survive:** Accounts/code/store/funds/roles, relative transient reset, clock obligations, creation settlement, delegated-caller storage and exact outcomes; no raw/reset-world equality substitution.
+
+Do not use successful reached-phase/body premises to filter the full pass to successful runs. Preserve local conditional laws while proving the complete failing/resumed-session behavior and resource/environment transports additively.
+
+Status: **pending owner proof/publication and verification**. No new adapter
+is constructed by this request.
+
+#### 5. P10 opcode-local laws
+
+**Relay:** V15 for P10/G46.06/G47; V14 G45.03/G45.06, V11 P6 and PAR G46.02/.03 dependencies retain their owners.
+
+Required factory type (proof-relevant definition, not an axiom):
+
+```lean
+p10_execution_bridge : (x : NativeContext_opcode) → Approved_opcode x → BridgeGoal (A_opcode x) (B_opcode x) (ps_opcode x) (pt_opcode x) (beta_opcode x) (nu_opcode x) (Local_opcode x)
+```
+
+**Exact context/local statement:** SAME Backend-emitted Site op, encoded code, nonwrapping PC, arbitrary supplied valid array, fuel/cost indices and frozen CALL/RETURNDATA/JUMP decode/charged-step/continuation laws. Local_opcode retains every field of the existing FrozenV1.API for its original domain.
+
+**Endpoint binding required:** Canonical assembly/encoding sessions and the pinned Osaka EVM on the SAME assembled/loaded Artifact. Publish complete assembler/domain/load agreement and operational observation equations, not just a decoder roundtrip.
+
+**Facts that must survive:** All charged-gate errors, stack underflow, call result/state, memory/returndata actions, control flow and continuation equations; arbitrary target resource/failure prefixes retain their own hash guards.
+
+No new gate-success, favourable-call or source-success premise. If canonical execution computes a jump scanner, prove the actual binding and coverage separately; do not silently replace arbitrary valid with an assumed scanner certificate.
+
+Status: **pending owner proof/publication and verification**. No new adapter
+is constructed by this request.
+
+### H68 handoff and unchanged outstanding scope
+
+The one supported semantic shape and five carrier adapters are unchanged. The
+five representative pending families remain pending until the owning lanes'
+actual canonical definitions, proof sources and binding equations land. The
+registry remains non-exhaustive. Fifteen public fields and supplied packages
+are still unproved concretely; all old staging/integration prerequisites remain.
+No frozen source/compiler/lane theorem, Source/Core ExtCall file, shared root,
+map/pin or H58 HOLD item changed. The only Lean source edit is the authorized
+proof block. Further proof expansion is stopped on the measured timing failure.
+
+H68 evidence and exact relay JSON: `/workspace/h68-g49-evidence` and
+`/workspace/h68-g49-evidence/bridge-requests.json`.
+Whole-branch original patch: `/workspace/h68-g49-evidence/original.patch`.
+Focused H68 patch: `/workspace/h68-g49-evidence/h68.patch`.
+Handoff: `/workspace/h68-g49-evidence/handoff.md`.
+Identity/full committed head/base/push result:
+`/workspace/h68-g49-evidence/identity.json`.
+Checksums: `/workspace/h68-g49-evidence/SHA256SUMS`.
+Scoped cache pack: `/workspace/h68-g49-evidence/pass-correct-cache.tar.gz`.
+SHA256: `5c1428271a46b8bf12de92a236783cb59d276f6a05d62095001fc7e3d094e3c9`.
+It includes the passing nine-module source cache and the FAILED timing result;
+it is not timing approval or full-project acceptance. It remains on this VM.
+
+The H68 documentation path and whitespace checks pass (115 existing ambiguous
+references retained). Finder/skeptic read-only reviews found no confirmed proof
+or specification defect; the P1 failure-only variant clarification was applied
+to both this document and relay JSON. No reviewer ran Lean/server/build/tests or
+wrote files. The old full-repository entry still awaits central shared-root
+registration; no full-project Lean build was retried after the instructed timing
+stop. No acceptance failure, pending bridge or original prerequisite is waived.
+H65's assigned-branch push authorization persists; no master merge or PR is made.
+The original whole goal remains unfinished; neither the answered questions nor
+this failed timing retry authorizes partial-goal completion.
+
+## Historical H64/H65: one pass template and explicit folded statement
 
 The human's H64 instruction, supplied verbatim by the coordinator, requires:
 
