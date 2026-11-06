@@ -1,0 +1,73 @@
+{
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.alias_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.binding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.drop_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.exact_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.initial_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.live_refs_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.memory_index": [],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.repeated_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.source_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.wrong_contents_equal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.wrong_fresh_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.wrong_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

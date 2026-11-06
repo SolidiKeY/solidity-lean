@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintAliasDelete.lean:Solidity.Backend.MemoryOps.source_uint_alias_delete_bounds_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAliasDelete.lean:Solidity.Backend.MemoryOps.source_uint_alias_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

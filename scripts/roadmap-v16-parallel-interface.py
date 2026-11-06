@@ -90,7 +90,13 @@ class CorruptionControls(unittest.TestCase):
 
 if __name__ == "__main__":
  meta = core.snapshot(pathlib.Path(sys.argv[1])); NODES = h.merged([meta])
- POLICY = json.loads((ROOT / "tests/roadmap-v16/parallel-premises.json").read_text())
+ # H44: payload is regenerated outside Git; its exact historical bytes are pinned.
+ policy_path = pathlib.Path(sys.argv[4]).resolve()
+ import hashlib
+ manifest = json.loads((ROOT / "tests/h55/g49-final-theorem/staging-manifest.json").read_text())
+ policy_bytes = policy_path.read_bytes()
+ core.require(hashlib.sha256(policy_bytes).hexdigest() == manifest["files"]["tests/roadmap-v16/parallel-premises.json"], "changed off-Git premise payload")
+ POLICY = json.loads(policy_bytes)
  data = json.loads(pathlib.Path(sys.argv[2]).read_text()); core.validate_inventory(data["inventory"])
  REPORT = data["report"]; core.validate_report(REPORT,data["inventory"],core.validate_inventory(data["inventory"]))
  reached = validate(NODES,POLICY,REPORT)

@@ -1,0 +1,42 @@
+{
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.mixed_high_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.mixed_high_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.mixed_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.mixed_zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.mixed_zero_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetControlCompletionControls.lean:Solidity.Yul.Compilation.LetControlCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

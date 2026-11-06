@@ -1,0 +1,47 @@
+{
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.literal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.literal_native_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.literal_source_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.literal_source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.literal_source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.local_native_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.local_source_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.local_source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditions.lean:Solidity.Lowering.V07.P12AtomicConditions.readLocal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

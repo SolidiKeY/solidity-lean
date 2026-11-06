@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/AbiEntry/WordGate.lean:Solidity.Backend.AbiEntry.WordGate.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGate.lean:Solidity.Backend.AbiEntry.WordGate.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGate.lean:Solidity.Backend.AbiEntry.WordGate.correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGate.lean:Solidity.Backend.AbiEntry.WordGate.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGate.lean:Solidity.Backend.AbiEntry.WordGate.rejected_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGate.lean:Solidity.Backend.AbiEntry.WordGate.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGate.lean:Solidity.Backend.AbiEntry.WordGate.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
