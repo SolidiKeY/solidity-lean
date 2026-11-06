@@ -394,3 +394,18 @@ Receipt and handoff: `evidence/H70-bridge-receipt.json` and
 `evidence/H70-bridge-probe.log`; checksums: `evidence/SHA256SUMS-H70-bridge`.
 Original whole-lane and validation obligations remain open; no goal reset or
 completion, cache shipment or host relay is claimed.
+
+## H44 reviewable evidence split, 2026-11-06
+
+The five new raw log captures relative to held integration base
+`b7c3cc5110b1ebee1eab45e8b1b9894ecada7237` are no longer tracked. Their original
+absolute VM paths and all bytes remain intact. The logs total495449bytes; the
+archive is30700bytes. Exact paths, individual sizes/hashes and archive location
+are recorded in [H44-bulk-manifest.json](../../Bridge/tests/precompile-agreement/evidence/H44-bulk-manifest.json).
+Only that small manifest is committed for the bulk. Existing Lean declarations,
+proofs, deterministic generators, gates, budgets and small reviewable handoffs
+are unchanged. Restore the archive at repository root when a fresh checkout
+needs saved evidence; no gate is weakened to accommodate missing captures.
+Historical evidence already present at the held base is unchanged. No full
+build, cache shipment, scope expansion or goal transition occurs in this split.
+The41ready core audit cases remain queued under the same original goal.
