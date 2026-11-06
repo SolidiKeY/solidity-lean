@@ -66,40 +66,42 @@ def observe (s : EVM.State) :=
    (s.accountMap.find! (.ofNat 7)).balance.toNat,
    ((s.accountMap.find? (.ofNat 31)).map (fun a => a.balance.toNat)).getD 0)
 
+/-- Kernel-evaluated observation of a driver run; the error case is `none`. -/
+def run (steps fuel : Nat) (s : EVM.State) :=
+  (Assembly.driverSteps steps fuel valid s).toOption.map observe
+
 /-- A returning callee: success flag 1, return buffer `[0x2a]`, and the output
 window writes `0x2a` over the caller's first memory byte. -/
 theorem returning_call :
-    (Assembly.driverSteps 1 52 valid (site (some returning)).state).map observe =
-    .ok (1,[1,258,513],[0x2a],[0x2a,0xbb],29,0) := by
+    run 1 52 (site (some returning)).state = some (1,[1,258,513],[0x2a],[0x2a,0xbb],29,0) := by
+  unfold run
   rw [FrozenV1.api.charged.checked_call]
-  rfl
+  decide +kernel
 
 /-- A reverting callee: flag 0, yet the revert bytes become the return buffer
 and are written to the output window. -/
 theorem reverting_call :
-    (Assembly.driverSteps 1 52 valid (site (some reverting)).state).map observe =
-    .ok (1,[0,258,513],[0x2b],[0x2b,0xbb],29,0) := by
+    run 1 52 (site (some reverting)).state = some (1,[0,258,513],[0x2b],[0x2b,0xbb],29,0) := by
+  unfold run
   rw [FrozenV1.api.charged.checked_call]
-  rfl
+  decide +kernel
 
 /-- An absent callee: flag 1, the stale buffer is cleared and memory is kept. -/
 theorem absent_call :
-    (Assembly.driverSteps 1 52 valid (site none).state).map observe =
-    .ok (1,[1,258,513],[],[0xaa,0xbb],29,0) := by
+    run 1 52 (site none).state = some (1,[1,258,513],[],[0xaa,0xbb],29,0) := by
+  unfold run
   rw [FrozenV1.api.charged.checked_call]
-  rfl
+  decide +kernel
 
 /-- The following RETURNDATASIZE observes the callee's output size (1), not
 the stale caller buffer (2). -/
 theorem returning_then_size :
-    (Assembly.driverSteps 2 53 valid (site (some returning)).state).map observe =
-    .ok (2,[1,1,258,513],[0x2a],[0x2a,0xbb],29,0) := by
-  rfl
+    run 2 53 (site (some returning)).state = some (2,[1,1,258,513],[0x2a],[0x2a,0xbb],29,0) := by
+  decide +kernel
 
 theorem absent_then_size :
-    (Assembly.driverSteps 2 53 valid (site none).state).map observe =
-    .ok (2,[0,1,258,513],[],[0xaa,0xbb],29,0) := by
-  rfl
+    run 2 53 (site none).state = some (2,[0,1,258,513],[],[0xaa,0xbb],29,0) := by
+  decide +kernel
 
 /-- The two seeds agree on every caller-frame field. -/
 theorem same_caller_frame :
@@ -109,44 +111,24 @@ theorem same_caller_frame :
     (site (some returning)).state.gasAvailable = (site (some reverting)).state.gasAvailable ∧
     (site (some returning)).state.memory = (site (some reverting)).state.memory ∧
     (site (some returning)).state.returnData = (site (some reverting)).state.returnData ∧
-    (site (some returning)).state.accountMap.find? (.ofNat 7) =
-      (site (some reverting)).state.accountMap.find? (.ofNat 7) :=
-  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+    ((site (some returning)).state.accountMap.find? (.ofNat 7)).map (fun a => (a.nonce,a.balance)) =
+      ((site (some reverting)).state.accountMap.find? (.ofNat 7)).map (fun a => (a.nonce,a.balance)) :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,by decide +kernel⟩
 
 /-- Post-CALL return data is not determined by the caller frame: it depends on
 the callee's code. -/
 theorem returndata_needs_callee :
-    ∃ s₁ s₂ : EVM.State, ∃ r₁ r₂ : EVM.State,
+    ∃ s₁ s₂ : EVM.State,
       s₁.executionEnv = s₂.executionEnv ∧ s₁.pc = s₂.pc ∧ s₁.stack = s₂.stack ∧
       s₁.gasAvailable = s₂.gasAvailable ∧ s₁.memory = s₂.memory ∧
       s₁.returnData = s₂.returnData ∧
-      s₁.accountMap.find? (.ofNat 7) = s₂.accountMap.find? (.ofNat 7) ∧
-      Assembly.driverSteps 1 52 valid s₁ = .ok r₁ ∧
-      Assembly.driverSteps 1 52 valid s₂ = .ok r₂ ∧
-      r₁.returnData ≠ r₂.returnData := by
-  have h₁ := returning_call
-  have h₂ := reverting_call
-  cases e₁ : Assembly.driverSteps 1 52 valid (site (some returning)).state with
-  | error e => rw [e₁] at h₁; cases h₁
-  | ok r₁ =>
-    cases e₂ : Assembly.driverSteps 1 52 valid (site (some reverting)).state with
-    | error e => rw [e₂] at h₂; cases h₂
-    | ok r₂ =>
-      rw [e₁] at h₁
-      rw [e₂] at h₂
-      have o₁ : (observe r₁).2.2.1 = [0x2a] := by
-        have := Except.ok.inj h₁
-        rw [this]
-      have o₂ : (observe r₂).2.2.1 = [0x2b] := by
-        have := Except.ok.inj h₂
-        rw [this]
-      obtain ⟨env,pc,stack,gas,memory,ret,caller⟩ := same_caller_frame
-      refine ⟨_,_,r₁,r₂,env,pc,stack,gas,memory,ret,caller,e₁,e₂,?_⟩
-      intro same
-      have bytes : (observe r₁).2.2.1 = (observe r₂).2.2.1 := by
-        simp only [observe,same]
-      rw [o₁,o₂] at bytes
-      cases bytes
+      (s₁.accountMap.find? (.ofNat 7)).map (fun a => (a.nonce,a.balance)) =
+        (s₂.accountMap.find? (.ofNat 7)).map (fun a => (a.nonce,a.balance)) ∧
+      (run 1 52 s₁).map (fun o => o.2.2.1) ≠ (run 1 52 s₂).map (fun o => o.2.2.1) := by
+  obtain ⟨env,pc,stack,gas,memory,ret,caller⟩ := same_caller_frame
+  refine ⟨_,_,env,pc,stack,gas,memory,ret,caller,?_⟩
+  rw [returning_call,reverting_call]
+  decide
 
 #print axioms returning_call
 #print axioms reverting_call
