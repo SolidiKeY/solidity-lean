@@ -43,7 +43,7 @@ theorem schedule_world (s t : Lifecycle D L T) (static : Bool) (a : Address)
 /-- EIP-6780's self-beneficiary exception: pre-existing accounts keep their
 balance; same-transaction creations burn it. Deletion is still deferred. -/
 def selfBeneficiary (s : ExecState D L T) (created : Bool) (a : Address) : ExecState D L T :=
-  if created then s.apply (.account a (fun old => { old with balance := ⟨0, by decide⟩ })) else s
+  if created then s.apply (.account a (fun old => { old with balance := 0 })) else s
 
 theorem selfBeneficiary_old (s : ExecState D L T) (a : Address) :
     selfBeneficiary s false a = s := rfl
@@ -53,7 +53,7 @@ funding/overflow conditions. This is not a foreign-account credit adapter. -/
 def destructTransfer (s : ExecState D L T) (created : Bool) (a beneficiary : Address) :
     Option (ExecState D L T) :=
   if a = beneficiary then some (selfBeneficiary s created a)
-  else s.transfer a beneficiary (s.world.accounts a).balance
+  else s.transferNat a beneficiary (s.world.accounts a).balance
 
 /-- Finalization erases only the accounts both created and scheduled in this
 transaction, then clears transient storage, journal and lifecycle flags. -/
@@ -153,12 +153,12 @@ theorem schedule_after_finish (s t : Lifecycle D L T) (a : Address)
 /-- The actual burn is one ordinary account operation (old accounts do none). -/
 theorem selfBeneficiary_run (s : ExecState D L T) (created : Bool) (a : Address) :
     selfBeneficiary s created a = s.run
-      (if created then [.account a (fun old => { old with balance := ⟨0, by decide⟩ })] else []) := by
+      (if created then [.account a (fun old => { old with balance := 0 })] else []) := by
   cases created <;> rfl
 
 theorem selfBeneficiary_fresh_account (s : ExecState D L T) (a : Address) :
     (selfBeneficiary s true a).world.accounts a =
-      { s.world.accounts a with balance := ⟨0, by decide⟩ } := by
+      { s.world.accounts a with balance := 0 } := by
   exact World.set_get _ _ _
 
 theorem selfBeneficiary_other (s : ExecState D L T) (created : Bool) (a b : Address)
@@ -187,7 +187,7 @@ theorem rollback_destructTransfer (s out : ExecState D L T) (created : Bool)
     subst out
     exact rollback_selfBeneficiary _ _ _ _ _ _ _ _
   · simp only [destructTransfer, heq, ↓reduceIte] at h
-    exact rollback_transfer s out heq _ h a c input static
+    exact rollback_transferNat s out heq _ h a c v input static
 
 /-- Successful outputs are concretely journaled by the existing owner
 implementation. This existential is proved, never an adequacy premise. -/
@@ -198,14 +198,14 @@ theorem destructTransfer_run (s out : ExecState D L T) (created : Bool) (src dst
   · simp only [destructTransfer, heq, ↓reduceIte, Option.some.injEq] at h
     subst out
     exact ⟨_, selfBeneficiary_run s created dst⟩
-  · simp only [destructTransfer, ExecState.transfer, heq, ↓reduceIte] at h
+  · simp only [destructTransfer, ExecState.transferNat, heq, ↓reduceIte] at h
     split at h
-    · next hc =>
+    · next _hc =>
         cases h
         exact ⟨[.account src (fun x => x.withBalance
-          ⟨(s.world.accounts src).balance.val - (s.world.accounts src).balance.val, by omega⟩),
+          ((s.world.accounts src).balance - (s.world.accounts src).balance)),
           .account dst (fun x => x.withBalance
-            ⟨(s.world.accounts dst).balance.val + (s.world.accounts src).balance.val, hc.2⟩)], rfl⟩
+            ((s.world.accounts dst).balance + (s.world.accounts src).balance))], rfl⟩
     · cases h
 
 theorem destructTransfer_other (s out : ExecState D L T) (created : Bool)
@@ -216,7 +216,7 @@ theorem destructTransfer_other (s out : ExecState D L T) (created : Bool)
   · simp only [destructTransfer, heq, ↓reduceIte, Option.some.injEq] at h
     subst out
     exact selfBeneficiary_other s created dst b hd
-  · simp only [destructTransfer, ExecState.transfer, heq, ↓reduceIte] at h
+  · simp only [destructTransfer, ExecState.transferNat, heq, ↓reduceIte] at h
     split at h
     · cases h
       simp only [ExecState.apply, World.set_other _ hd, World.set_other _ hs]

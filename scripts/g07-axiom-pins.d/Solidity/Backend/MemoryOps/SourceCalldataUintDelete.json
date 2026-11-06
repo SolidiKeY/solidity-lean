@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataUintDelete.lean:Solidity.Backend.MemoryOps.source_cd_uint_bind_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintDelete.lean:Solidity.Backend.MemoryOps.source_cd_uint_bind_delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

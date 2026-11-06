@@ -31,10 +31,10 @@ class SourceIntervalControls(unittest.TestCase):
 
     def test_no_markers_and_comment_marker(self):
         self.assertEqual(subject.split_source("no declaration\n"), ("no declaration\n", []))
-        # A marker inside a block comment is still a marker: this is not a parser.
+        # Comment markers are ignored while original source remains intact.
         text = "/-\ndef phantom : Nat := 0\n-/\n"
         prefix, intervals = subject.split_source(text)
-        self.assertEqual(intervals[0]["name"], "phantom")
+        self.assertEqual(intervals, [])
         self.assertEqual(prefix + "".join(i["text"] for i in intervals), text)
 
 

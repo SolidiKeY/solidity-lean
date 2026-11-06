@@ -1,0 +1,37 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean:SolidityBridge.AccessBridge.ByteWorldLoadControls.bad_active_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean:SolidityBridge.AccessBridge.ByteWorldLoadControls.byte_overflow_domain": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean:SolidityBridge.AccessBridge.ByteWorldLoadControls.literal_mload_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean:SolidityBridge.AccessBridge.ByteWorldLoadControls.native_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean:SolidityBridge.AccessBridge.ByteWorldLoadControls.numeric_case": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean:SolidityBridge.AccessBridge.ByteWorldLoadControls.paired_case": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean:SolidityBridge.AccessBridge.ByteWorldLoadControls.word_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

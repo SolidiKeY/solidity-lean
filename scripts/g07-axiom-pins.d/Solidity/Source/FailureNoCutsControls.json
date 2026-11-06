@@ -1,0 +1,48 @@
+{
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.after_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.emitted_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.mismatched_not_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.mismatched_stop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.nested_clear": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.noFail_not_enough": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.one_event_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.points_noFail": [],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.requested_clear": [],
+ "Solidity/Source/FailureNoCutsControls.lean:Solidity.Source.FailureExecution.NoCutsControls.retained_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

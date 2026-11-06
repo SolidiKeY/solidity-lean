@@ -11,7 +11,7 @@ variable {E : Env}
 theorem initialized_composed_nsp {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     {n : Nat} (context : CompositionAt A G c ds n) (F : Fr) (contract : F.contract = c)
     (nps : Nat) {R : List STy} {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
-    (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ)
     (ready : ComposedExpr A (fun d => d ∈ ds) e) (l : Locals E.layout Γ) :
     NSP (execS G F (n+1) nps none (.declInit (R := R) (M := false) (k := .body) e same) l)
       (fun out => ∃ v last, out = .normal (.cons v last)) := by
@@ -27,7 +27,7 @@ theorem initialized_composed_nsp {A : Decl → Prop} {G : Glob E} {c : String} {
 theorem initialized_composed_mem {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     {n : Nat} (context : CompositionAt A G c ds n) (F : Fr) (contract : F.contract = c)
     (nps : Nat) {R : List STy} {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
-    (same : τ.implicit E.isBase τ = true) (ready : ComposedExpr A (fun d => d ∈ ds) e)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (ready : ComposedExpr A (fun d => d ∈ ds) e)
     (l : Locals E.layout Γ) (H : HeapTy) :
     Hoare (fun y => MemOK E H y ∧ LocalsOK E y.2.heap.ty l)
       (execS G F (n+1) nps none (.declInit (R := R) (M := false) (k := .body) e same) l)

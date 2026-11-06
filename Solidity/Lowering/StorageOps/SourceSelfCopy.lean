@@ -99,7 +99,7 @@ private def storage : Source.Storage env.layout env.cellTy :=
 private def state : Source.St env :=
   { ex :=
       { world := ⟨fun a => if a = address then
-          { balance := ⟨19,by decide⟩, nonce := 3, code := some 0, storage := storage }
+          { balance := 19, nonce := 3, code := some 0, storage := storage }
           else Source.Account.empty _⟩
         transient := Source.Transient.empty
         journal := [] }

@@ -47,29 +47,11 @@ def is_slow(baseline, candidate):
 
 
 def run_one(lake, lean, source):
-    check_fixture.headroom()
     env = dict(os.environ, LEAN_NUM_THREADS='1')
     command = [str(lake), 'env', str(lean), '-j1', '--tstack=131072', str(source)]
-    started = time.monotonic()
-    process = subprocess.Popen(command, cwd=collect.ROOT, env=env,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                               text=True, preexec_fn=check_fixture.limit_memory)
-    try:
-        while True:
-            try:
-                output, _ = process.communicate(timeout=0.25)
-                break
-            except subprocess.TimeoutExpired:
-                check_fixture.headroom()
-                if time.monotonic() - started > 1800:
-                    raise TimeoutError('Lean audit exceeded 1800 seconds')
-    except BaseException:
-        process.kill()
-        process.communicate()
-        raise
-    elapsed = time.monotonic() - started
-    if process.returncode:
-        raise RuntimeError(f'Lean audit failed ({process.returncode}):\n{output}')
+    code, output, elapsed = check_fixture.run_bounded(command, collect.ROOT, env, 1800)
+    if code:
+        raise RuntimeError(f'Lean audit failed ({code}):\n{output}')
     return elapsed, output
 
 
@@ -90,6 +72,7 @@ def main():
     parser.add_argument('--output-dir', type=pathlib.Path, required=True)
     parser.add_argument('--archive', type=pathlib.Path, required=True)
     args = parser.parse_args()
+    check_fixture.pinned_tools(args.lean, args.archive, args.lake)
     archive = args.archive.resolve()
     digest = hashlib.sha256()
     with archive.open('rb') as stream:

@@ -31,8 +31,14 @@ class ProposalTest(unittest.TestCase):
         text = patch.decode()
         self.assertIn("PanicBytes.exact_panic_bytes", text)
         self.assertIn("PanicBytes.panic_not_truncated", text)
-        self.assertNotIn("PanicBytes.panic_not_empty", text)
-        self.assertNotIn("#print axioms", text)
+        self.assertIn("PanicBytes.panic_not_empty", text)
+        lines = text.splitlines()
+        removed = [line for line in lines if line.startswith("-") and not line.startswith("---")]
+        added = [line for line in lines if line.startswith("+") and not line.startswith("+++")]
+        self.assertEqual(removed, ["-  first | decide | rfl | omega"] * 3)
+        self.assertEqual(added, ["+import Solidity.Backend.PrimitivePackets.PanicBytes"] +
+                         ["+  exact Solidity.Backend.PrimitivePackets.PanicBytes." + name
+                          for name in ("exact_panic_bytes", "panic_not_truncated", "panic_not_empty")])
 
 
 if __name__ == "__main__":
