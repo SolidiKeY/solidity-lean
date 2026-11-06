@@ -1,6 +1,17 @@
 # H28 semantic mutation testing
 
-Status: RESULT-PENDING (filled in from the recorded run below).
+Status: done for the declared manifest (queue items 1–5 and the backfill),
+with the limits listed under [Limits](#limits).
+
+| Recorded run | `runs/full-20d7b77c` |
+|---|---|
+| Head | `20d7b77c2e0c9e97559e8f3e8332ad9f4487edc4` |
+| Manifest | `manifests/h28-full.json`, schema 3, sha256 `bb3f1f97…` (full value in `summary.json`) |
+| Census | 215 constructors, 198 mutants on 117 constructors |
+| Proof oracle (census) | 146 detected, 5 equivalent-certified, 47 invalid-compilation, 0 error, 0 unrun |
+| Semantic witnesses | 20 of 20 scored cases killed, 0 witness-failed, 0 error, 0 unrun |
+| Controls | 5 of 5 as declared (`controls_pass: true`) |
+| Baselines | full `Calculus/Taclet.lean`, every row and link alone, `CallbackTaclet.toTaclet`: all pass |
 
 The lane moved from a Codex VM to a Claude VM on 2026-11-05. Its earlier
 history, which used a Docker backend and caches that exist only on the Codex
@@ -19,7 +30,299 @@ sections up to there describe the work redone on the Claude VM.
   `tests/h28-sol/mutation-testing/**`, this file and its docs/README row
   fragment.
 
-RESULT-SECTIONS
+## Method (Claude VM)
+
+### Runtime
+
+The Codex VM's runner needed a Docker daemon, `/workspace` caches and an
+off-Git bulk archive. None of these exist here, and this VM's settings deny
+direct `lean`/`lake` calls. The new runner
+([tools/mcprun.py](../../tests/h28-sol/mutation-testing/tools/mcprun.py), see
+its [README](../../tests/h28-sol/mutation-testing/tools/README.md)) runs Lean
+only through the repository's language-server bridge,
+`scripts/coord-tools/lean-mcp` (three daemons, one open file each). It reads
+only committed inputs, so queue item 1 (self-contained tooling) is met
+without the H44 bulk digests. The old Docker tools and `bulk-data.json` stay
+as a record and are marked legacy. 85 of their 91 unit tests still pass here.
+The other six need the Codex VM's off-Git evidence or its runtime.
+
+A check is one scratch file in the ignored `.scratch/`:
+
+1. the imports;
+2. the target module's text, production or one-change mutant, inlined in
+   place of its import;
+3. an oracle's text.
+
+Production files are only read. Each record keeps:
+
+- the bridge command and its exit;
+- the elapsed time;
+- the scratch file's sha256;
+- the one-change diff;
+- every diagnostic, including the `#print axioms` output;
+- the decision.
+
+The bridge reports no per-process RSS. VM memory stayed under 10 GiB with
+three workers.
+
+### Census
+
+[tools/sites.py](../../tests/h28-sol/mutation-testing/tools/sites.py) reads
+every constructor of `Taclet`, `LeanTaclet`, `CallbackTaclet` and `Rule`
+(215). It applies each declared family operator at every match in a
+constructor's premise text (after `⇝`). Each match is one mutant, whose edit
+replaces the whole constructor span, so it is attributed to exactly one
+constructor. Four `Tms` helper edits come on top.
+
+"Exhaustive" means every match of these 30 declared operators, not every
+conceivable fault. The operators are:
+
+| Family | Operators (sites) |
+|---|---|
+| guard-polarity | branch guard `true`↔`false` (5), loop guard `b = TRUE`↔`FALSE` (7), assert check (1) |
+| overflow | push-arithmetic operator swaps (7), `± 1` step dropped (12), compound/inc-dec operand swaps (2 helpers) |
+| division-minimum | `/`→`*`, `%`→`/`, zero guard negated (4), fixed binop operand swap (helper) |
+| index-bounds | index `[ie]`→`[0]` on arrays (32) |
+| push-tail-length | length `+ 1`→`+ 2` (19), new slot / last slot shifted (6+19), recycled tail cleared (helper) |
+| pop-delete | storage and memory deletion dropped (9), pop length `- 1`→`- 2` (2), popped slot shifted |
+| alias-capture-once | each receiver capture's later uses re-evaluate the receiver (39) |
+| rollback-payment | revert/transfer/try/send closings flipped (5), send flags flipped (4), amount zeroed (6), `0 <= se`→`0 < se` (2) |
+| callback-frames | the same payment and flag edits on the `CallbackTaclet` table (8) |
+| other (kept, outside the nine) | loop-invariant `inv = TRUE` and `¬broke` edits (9), other closings (3) |
+
+Per-constructor dispositions are in `runs/full-20d7b77c/dispositions.json`:
+
+- **sites-run (117):** every site was run.
+- **no-family-site (85):** the premise text matches no operator. The
+  heuristic tags of `inventory.draft.json` (kept unchanged) came from names
+  or captures, not family clauses.
+- **no-premise-text (13):** the premise is a named function (`blockEmpty`,
+  `tryCallSelfBox`, `catchDataBox`, …) or the constructor is a `Rule`
+  wrapper. Those functions are outside the read-only inputs.
+
+### Proof oracle
+
+The production evidence that each premise is `Stmt.step`'s
+(`Calculus/Taclet.lean`) is re-checked against the mutated table. For each
+affected constructor:
+
+- its `#replay_toStep` row is re-run alone. Rows are independent
+  declarations, and `#h28_toStep_row` makes the same `addToStep` call as the
+  table;
+- a hand-proved lemma states its premise itself, so its link to the
+  constructor is checked as the closing `cases h <;> apply_toStep` does it:
+  `#h28_toStep_link` proves the constructor's own `toStepType` by
+  `intros; apply X.c.toStep <;> assumption`;
+- `CallbackRules.lean` mutants are checked by its own `CallbackTaclet.toTaclet`.
+
+The baseline `rules-taclet-rows` runs every row and link this way on the
+normal table and passes, beside the full production file.
+
+How a mutant is classified:
+
+- **detected:** an error is attributed to an affected constructor. Errors
+  that cascade from it (unknown lemma, closing theorems, error-recovery
+  `sorry`) are allowed.
+- **error, never detected:** heartbeat, recursion or timeout messages, and
+  any lemma that depends on `sorryAx`. The `H28 TRUST` guard reports the
+  latter.
+- **equivalent-certified:** the unchanged evidence still passes. The
+  mutant's premise is then provably `Stmt.step`'s for every admitted
+  instance, hence the original's.
+
+Detection means "differs from `Stmt.step`". It is not a soundness claim, and
+over compiled mutants it is total by construction, so no detection rate is
+reported as a score. Some detected mutants are semantically harmless; the
+operand swaps of commutative operators, for example, are detected.
+
+### Semantic oracle
+
+An owned witness proves `¬ Premise.Sound m s p σ` at a concrete inhabited σ.
+Its `source_link` is `Taclet …` (or `LeanTaclet`, `CallbackTaclet`) proved by
+the mutated constructor. A case is **killed** only if:
+
+1. its normal baseline passes;
+2. on the normal table, the witness is rejected inside the `source_link`
+   span, with a mismatch naming the linked constructor, and that constructor
+   is the case's;
+3. on the mutant, the witness passes with no error, no oracle warning, only
+   `propext`, `Classical.choice` and `Quot.sound`, an export for every
+   theorem, and a `checked_kill` whose printed type is `¬ Premise.Sound …`.
+
+The owned-file scanner refuses all of these: `sorry`, `admit`, `axiom`,
+`native_decide`, `maxHeartbeats`, `unsafe`, `opaque`, `implemented_by`,
+`extern`, `debug` and non-`pp` options. A completed witness failure is
+`witness-failed`. A bridge, target or trust failure is `error`, never a
+survivor.
+
+## Results
+
+### Census by family (`runs/full-20d7b77c/summary.json`)
+
+| Family | detected | equivalent-certified | invalid-compilation |
+|---|---|---|---|
+| alias-capture-once | 37 | 0 | 3 |
+| callback-frames | 8 | 0 | 0 |
+| division-minimum | 2 | 0 | 4 |
+| guard-polarity | 9 | 1 | 5 |
+| index-bounds | 33 | 0 | 0 |
+| overflow | 15 | 0 | 7 |
+| pop-delete | 10 | 1 | 2 |
+| push-tail-length | 22 | 4 | 19 |
+| rollback-payment | 12 | 0 | 0 |
+| other:closing | 3 | 0 | 0 |
+| other:loop-invariant | 1 | 0 | 8 |
+
+Totals include the four helper edits. The 8 extra proof entries (6 pilot
+cases that are not census mutants, the label-equivalence control and the
+invalid-syntax control) are listed apart.
+
+What the run found:
+
+- **Equivalent-certified (5): the rule DSL lowers by shape.** It lowers
+  `save(delAt(storage, darr[…]), darr.length, darr.length - 1)` to
+  `STerm.pop` and `save(save(storage, sp[…], v), sp.length, sp.length + 1)`
+  to `STerm.push`, whatever index text is written. So shifting that index
+  (`storagePopSave`, `storagePushValueSave`, `storagePushValueCopySource`,
+  `storagePushMemoryCopySource`, `pushFixedCopySave`) yields the identical
+  premise. Only the printed-rule round trip (`scripts/check-rule-text.sh`)
+  can see such a text change; that check is outside this lane.
+- **Invalid-compilation (47): the DSL refuses the shape.**
+  - Length arithmetic other than `len ± 1` is refused ("a length is not a
+    storage path").
+  - So are push-arithmetic operator swaps (typed fixed shapes), loop
+    invariant and guard edits that leave the accepted `inv = TRUE` /
+    `b = TRUE` forms, some division edits, and three receiver re-evaluations
+    whose receiver is not a path.
+  - None is scored.
+- **No error and no unrun entry.**
+
+### Semantic kills (20 scored, all killed)
+
+These are the 16 earlier hand-selected cases, rechecked fresh, plus new
+ones:
+
+- `ifElseSplit` then-guard and else-guard flips: `IfThenPolarityKill`,
+  `IfElsePolarityKill`;
+- `transferNoCallbackBox` with amount `0`: `TransferZeroKill`. The balance
+  stays 10 while the run pays 5, and `mutant_update_applies` shows the box is
+  not vacuous;
+- `LeanTaclet.transferDiamond` closing to `true`: `TransferDiamondTrueKill`,
+  an unfunded transfer that reverts;
+- `storageRootDelete` with the update dropped: `RootDeleteSkippedKill`;
+- `storageRootIncrement` with the step dropped: `RootIncSkipKill`. It uses
+  the uint256 maximum, though dropping the step is killable at any state;
+- the separate callback table, `CallbackTaclet.sendWithCallbackBox` with the
+  failed flag `true` (`CallbackTacletFailureKill`, queue item 4). Its kill
+  uses `holds`, as `toTaclet` makes that premise the no-callback one. The
+  holdsC theorem `checked_callback_frames` is required too.
+
+14 census mutants carry one of these witnesses. The 6 helper and hand-typed
+pilot edits carry the rest.
+
+This is a witness-validation rate over cases chosen because a witness
+exists. It is not a semantic mutation score of the census: the other 132
+detected census mutants have no semantic verdict. Some of them are probably
+sound; the receiver re-evaluations, for example, only differ when the
+receiver has an effect.
+
+Every new witness has a normal baseline (`IfElseBaseline`,
+`TransferBaseline`, `TransferDiamondBaseline`, `RootDeleteBaseline`,
+`RootIncBaseline`, `CallbackTacletBaseline`). Each is registered in the
+lane's local `registration.json`.
+
+### Controls and backfill
+
+| Control | Expected | Actual |
+|---|---|---|
+| `control.proof-invalid-syntax` (malformed guard) | invalid-compilation | invalid-compilation |
+| `pilot.control.guard-label-equivalent` (branch label renamed) | equivalent-certified | equivalent-certified |
+| `control.guard-label-equivalent` (universal equivalence witness) | equivalent | equivalent |
+| `control.revert-diamond-true` (independent known kill) | killed | killed |
+| `control.cross-witness-survivor` (guard mutant, pop witness) | link-mismatch | link-mismatch |
+
+The 29 runner self-tests in
+[tools/test_mcprun.py](../../tests/h28-sol/mutation-testing/tools/test_mcprun.py)
+cover false kills and false passes:
+
+- unattributed, runtime and trust errors;
+- region boundaries;
+- rejection outside the link span;
+- a kill that does not state unsoundness;
+- refused options;
+- unrun, bridge-error and witness-failed accounting.
+
+### Run provenance
+
+`full-20d7b77c` re-classified every check with the final code:
+
+- 297 checks reuse the diagnostics of byte-identical scratch files from
+  `full-91c9631d` (`--reuse`, matched by scratch sha256);
+- 4 checks were fresh: the edited `ifElseSplit` witnesses on both tables.
+
+`full-91c9631d` ran all 301 checks at its own head. Its first 108 records
+predate a container restart; the remaining 193 resumed from the same head
+(`--resume` accepts only records of the same head and manifest).
+
+Both runs' compact records (`checks.jsonl`), summaries and full-record
+archives (`runs/*-checks-full.tar.gz`, with sha256 in each `summary.json`)
+are committed. 3.42 hours of check time ran on three bridges; the longest
+single check took 229 s.
+
+## Reviews
+
+Separate read-only finder and skeptic reviews, neither using the Lean
+server, audited the tools, census and new witnesses at `4c900cfb`. All
+confirmed findings were fixed in `91c9631d` and `20d7b77c`:
+
+- **Survivor accounting.** Any failed witness check, bridge errors included,
+  counted as a survivor. Now only a completed, attributed failure counts as
+  `witness-failed`; anything else is `error`.
+- **Proof score.** The proof "score" was 100% by construction; it was
+  replaced by counts. Pilot entries that duplicated census mutants were
+  dropped.
+- **Census patterns.** The `± 1` pattern missed the local increments. The
+  receiver operator saw only a capture that comes first, and its stutter
+  form was not a double evaluation; it is replaced by re-evaluating the
+  receiver. Memory deletes had no operator. Several families were mislabelled
+  (slots, closings, invariants).
+- **Runtime limits.** Heartbeat and recursion failures could count as
+  detections.
+- **Hand lemmas.** A hand lemma's `sorry` passed silently; the `H28 TRUST`
+  guard now reports it.
+- **Regions.** The target and oracle regions overlapped by one line.
+- **What witnesses state.** Kill signatures and source-link constructors were
+  not checked, and target-region warnings could fail a witness.
+- **Resume.** `--resume` could merge stale records.
+
+Two further defects surfaced in the first recorded run and were fixed before
+the final one: the rejection checker read only the `source_link` header line,
+and a failing hand lemma's cascade was reported through the trust guard.
+
+The final evidence and doc review is recorded below.
+
+## Limits
+
+- **Proof-oracle verdicts.** These are about premise identity with
+  `Stmt.step`, not soundness. Only the 20 scored cases have semantic
+  verdicts.
+- **Census scope.** The census covers the 30 declared operators. It does not
+  reach the term semantics of checked arithmetic, division by zero, the
+  minimum ÷ −1 case or array bounds, which live in `Tm.denote` and
+  `Stmt.runR`, not in the read-only rule table. Those behaviours are
+  exercised only by the semantic witnesses (overflow, division and bounds
+  pilots).
+- **Clauses with no operator:**
+  - the pushed value of `storagePushValueSave`;
+  - the variant clause of `whileInvariantDiamond`;
+  - `tryCall*` branches and binders;
+  - the term-built premises of the 13 no-premise-text constructors;
+  - 26 of the 30 `Tms` helpers.
+- **Not re-certified here:** the Codex VM's evidence, caches, seals and H35
+  transport. The pilots were re-run fresh instead.
+- **Resource measurement.** No per-process RSS is available through the
+  language-server bridge.
+
 
 ## History (Codex VM)
 
