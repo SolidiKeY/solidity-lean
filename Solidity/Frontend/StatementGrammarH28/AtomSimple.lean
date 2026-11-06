@@ -14,8 +14,9 @@ open Solidity.Source Solidity.Frontend.Checked
 
 /-- A conservative subset of the tokens that `stmt`, `item` and the block
 loop send to `simpleStmt`: no statement keyword, `unchecked`, brace or the
-contextual identifier `revert`; `else` and `;` are excluded too, for the
-no-else frame and the `for` header's `eat ;`. -/
+contextual identifier `revert` (its expression statements are `revertExpr`
+in `AtomNested`); `else`, `catch` and `;` are excluded too, for the no-else
+and no-catch frames and the `for` header's `eat ;`. -/
 def simpleHead : Tok → Bool
   | .kw k => !(k == .if_ || k == .for_ || k == .while_ || k == .do_ || k == .continue_ ||
       k == .break_ || k == .try_ || k == .return_ || k == .emit || k == .assembly ||

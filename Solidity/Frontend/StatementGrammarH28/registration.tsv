@@ -105,3 +105,6 @@ Solidity.Frontend.StatementGrammarH28.CatchCoverage	Constructive plain and singl
 Solidity.Frontend.StatementGrammarH28.CatchListCoverage	Actual many catch-list parsing from structural maximum fuel and token count, with explicit greedy terminal frame
 Solidity.Frontend.StatementGrammarH28.TryCoverage	Constructive try statement coverage for empty identifier calls and success blocks with recursive Boolean catch lists
 Solidity.Frontend.StatementGrammarH28.BlockHeaderBoundary	Universal precedence-valid block versus named call-options boundary and actual postfix parser stopping
+Solidity.Frontend.StatementGrammarH28.AtomTry	try/catch sub-parser premises, catch-open frame and the actual try and catch-signature steps
+Solidity.Frontend.StatementGrammarH28.AtomAsm	assembly Yul-body and flag premises and the actual assembly step
+Solidity.Frontend.StatementGrammarH28.AtomDerives	Printer premises, mutual print relations and Derives/yield uniqueness for the mutual atom fragment

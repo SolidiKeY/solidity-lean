@@ -2,17 +2,25 @@ import Solidity.Frontend.StatementGrammarH28.AtomAsm
 
 /-! Arbitrarily nested statements and item lists over expression atoms.
 
-`AtomStmt` and `AtomItems` are mutual relations over the existing indexed
-syntax (no alternate AST): blocks of arbitrary width and depth, empty return,
-break and continue in their intrinsic contexts, `return e;`, `unchecked`
-items in their permitted context, `if`/`while`/`do` with atom conditions,
-and `for` with an empty initialiser and optional atom condition and update
-(`OptAtom`; initialiser statements are not covered). Expression atoms enter only through the exposed
-premises `ExprAtomRparen` and `ExprAtomSemi`; expression parser completeness
-and expression uniqueness (SOL-EU) are not claimed. The else-bearing
-constructor keeps exactly the existing closed-then contract. All parser
-success is derived by mutual structural recursion on the witness, with a
-budget computed from the syntax; no successful parse is assumed. -/
+`AtomStmt`, `AtomItems`, `AtomCatch` and `AtomCatches` are mutual relations
+over the existing indexed syntax (no alternate AST): blocks of arbitrary
+width and depth, empty return, break and continue in their intrinsic
+contexts, `return e;`, `unchecked` items in their permitted context,
+`if`/`while`/`do` with atom conditions, `for` with an optional simple
+initialiser and optional atom condition and update (`OptAtom`), simple
+statements, `emit`/`revert`, contextual `revert` expression statements
+(`revertExpr`), `try` with or without `returns` and any number of plain or
+signature catch clauses, and `assembly`. Sub-trees outside the statement
+grammar enter only through exposed premises on their own sub-parsers
+(`ExprAtomRparen`, `ExprAtomSemi`, `SimpleAtom`, `PathAtom`, `ArgsAtom`,
+`ExprAtomBrace`, `ExprAtomReturns`, `RetsAtom`, `ParamsAtom`, `YulBodyAtom`,
+`FlagsAtom`); expression parser completeness and expression uniqueness
+(SOL-EU) are not claimed. The else-bearing constructor keeps exactly the
+existing closed-then contract. Coverage takes the existing else frame and
+the catch frame `CatchFrame` (only a catch-open statement, whose last
+sub-statement is a `try`, needs a following token other than `catch`). All
+parser success is derived by mutual structural recursion on the witness,
+with a budget computed from the syntax; no successful parse is assumed. -/
 namespace Solidity.Frontend.StatementGrammarH28
 open Solidity.Source Solidity.Frontend.Checked
 

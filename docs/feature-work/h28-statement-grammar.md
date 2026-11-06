@@ -2084,6 +2084,13 @@ and its caches are not reachable from this VM; nothing below cites them.
 Validation is re-run fresh with the Lean MCP server (per-file diagnostics)
 and `./run-lean.sh`.
 
+The Codex lane kept publishing to master in parallel (its checkpoints Y–AE
+below, from `ControlFreePr` to `BlockHeaderBoundary`). Its letters collide
+with this lane's, so this lane's sections are headed "Moved-lane
+checkpoint …". The moved lane builds on the Codex modules where they apply
+(`CatchCoverage`, `CatchListCoverage`, `BlockHeaderBoundary`) and changes
+none of them.
+
 ## Moved-lane checkpoint Y: Gate G0 node twin for the fixture observers
 
 The held review finding: the fixture observers evaluated by `decide +kernel`
@@ -2965,3 +2972,127 @@ composition, arbitrary catch headers, remaining general compound framing and
 parser coverage, and final whole-repository acceptance remain open. Existing
 SG-CEX-01/02, SOL-EU exclusion, premises and budgets are unchanged. Kernel
 lookahead proofs are separate from historical external solc fixture evidence.
+
+
+## Moved-lane checkpoint AD: `try` and catch clauses in the mutual fragment
+
+Follow-up item 1 (2026-11-06). Merged master `5af89dce` first. `AtomTry.lean`
+states four sub-parser premises, each stopping at the next block's `{`:
+
+- `ExprAtomBrace e es a`: `expr` reads `es` as `e` before a success block
+  whose body is not headed by `ident :` (`NoNamedFrame`, the call-options
+  lookahead of `postLoop`; Codex `BlockHeaderBoundary`). Proved for
+  identifiers (`ident_expr_brace`, budget 5) with `postLoop_no_named_lookahead`.
+- `ExprAtomReturns e es a`: `expr` stops at `returns` (identifiers, by `rfl`).
+- `RetsAtom rets rs r` on `returnsOpt` (empty, `returns (bool)`).
+- `ParamsAtom ps pts a` on `paramsParen` (`(bool)` and `(bool x)`).
+
+`try_step` and `catch_sig_step` are the actual parser equations from those
+results; `catches_many` turns the catch loop's token-length counter into the
+recursive count. The catch loop is greedy, so a `try` must not be followed by
+`catch`. Requiring that of every statement would weaken the earlier coverage
+theorems, so the frame is conditional, like the else frame: `catchOpen`
+marks the statements whose last sub-statement is a `try` (`try`, and `if`,
+`while`, `for` through their last body), and `CatchFrame x s :=
+catchOpen x = false ∨ NoFollowingCatch s`.
+
+`AtomStmt` gains `tryS` (no return parameters; side condition
+`BlockBodyParts parts` on the success block) and `tryRets`. The mutual block
+gains `AtomCatch` (`plain`, `sig`) and `AtomCatches` (lists), with coverage
+by mutual structural recursion (`atom_catch_step`, `atom_catches_many_aux`).
+Budgets: `a + b + f + g + 2` (expression, success block, first clause, tail
+list), `+ r` with return parameters; a clause has `b + 2` or `a + b + 2`.
+
+Changed statements, all in this lane's own moved-lane modules:
+`atom_stmt_coverage` takes the extra `CatchFrame x s`, and
+`atom_stmt_prefix_unique` takes catch frames for both suffixes;
+`atom_stmt_token_unique` is unchanged. Every earlier control closes with
+`Or.inl rfl` for the new frame (no catch-open statement), so no earlier
+result is weakened. `simpleHead` now also excludes `catch`, which is needed
+for the no-catch lemma; the dispatch lemma is unchanged.
+
+Controls (`tests/…/AtomTryControls.lean`): a try with a plain and a signature
+catch at derived budget 37 (coverage at every catch-free suffix, token
+uniqueness), a try with `returns (bool)`, a try inside a block followed by a
+statement (any suffix), `if (c) try …` (catch-open through the then-branch),
+and kernel `rfl` parses of `try f {} catch {}`. Negative: with a second
+`catch` as suffix the actual parser reads both clauses (`try_greedy_catch_kernel`),
+a `catch` suffix fails the frame, and a success body starting with `x :` fails
+`BlockBodyParts` and is read by the actual expression parser as call options
+(`named_body_call_options`, kernel).
+
+## Moved-lane checkpoint AE: assembly, and the `isRethrow` link
+
+Follow-up item 2.
+
+**Gate G0 link.** `G0Rejections` now defines `g0IsRethrow`, a twin of
+Source's `isRethrow` reading the Yul body through six `Syn.casesOn` views
+(`listViewAt` with its result family, `yulExprStmtAt`, `yulCallAt`,
+`yulPathAt`, `yulLitAt`). Lean 4.24 still generates no equation lemmas for
+`isRethrow.match_1`, but the link does not need them. The twin inspects the
+tree in the matcher's own preorder (head statement, call name, arguments,
+`add` arguments, path, literal, `mload`, the remaining tails, the outer
+tail), so `g0IsRethrow_eq : g0IsRethrow b = isRethrow b` is proved by case
+analysis in that order: each mismatched constructor reduces both sides
+(`rfl`), and each failed string or number test (`revert`, `add`, `32`,
+`mload`) is discharged by `delta isRethrow isRethrow.match_1` and
+`dif_neg`. Axioms: `propext`, `Quot.sound`. The node twin's assembly
+exclusion calls `g0IsRethrow` (link `excl_assembly`), so the fixture
+observers no longer reach `isRethrow`. The four accepted assembly fixtures
+(Cases 22, 23, 24, 27) and `FixtureData` re-check by `decide +kernel`. The
+elaboration audit lists the six new views (26 targets).
+`G0ObserverControls.g0_rethrow_twin_actual` evaluates the twin by the kernel
+on the canonical body, on a different path, name and offset, on a trailing
+statement and on the empty body, and through `g0Rejections` on assembly.
+This closes the residual recorded in moved-lane checkpoint Y: no lane
+observer reaches an indexed-family `match`. The producer's own `parse` is
+the system under test and is out of scope, as before.
+
+**Assembly statements.** `AtomAsm.lean` states `YulBodyAtom` on `yulBody`
+and `FlagsAtom` on the flag list `sepBy1 (strArg "assembly flag")` before
+`)`; the `"evmasm"` dialect is data (`evmToks`). `AsmFlags` is the optional
+parenthesised list. `asm_step` is the actual `assembly` branch. Instances:
+the empty body, the single flag `"memory-safe"`. An elaborator `rfl` for the
+rethrow body exceeded the heartbeat budget (not raised), so that body is
+covered by a kernel parse of the whole statement in the controls
+(`rethrow_asm_kernel`, which also checks through the linked twin that it is
+not rejected). `AtomStmt.asm` has budget `a + 1`. A refusal control covers an
+unknown dialect string.
+
+## Moved-lane checkpoint AF: revert-headed statements
+
+Follow-up item 3. The dispatcher reads `revert` as a revert statement only
+when the next token is an identifier; otherwise it falls back to
+`simpleStmt`. `revertExprNext` names that side, and `revert_expr_dispatch`
+proves the fallback for every non-identifier next token. `AtomStmt.revertExpr`
+covers `revert …;` expression statements through `SimpleAtom` (budget
+`a + 1`), next to the existing `revertS`. Controls: the block
+`{ revert; revert Err(); revert(); }` (two `revertExpr` and one `revertS`),
+and `revertExprNext` refusing every identifier, so the two forms never share
+tokens.
+
+## Moved-lane checkpoint AG: `Derives` uniqueness for the mutual fragment
+
+Follow-up item 4 (G11 completion within the fragment). `AtomDerives.lean`
+states the printer side of each atom as `Prints t parts` (the existing printer
+yields `parts` and consumes no layout choice) or `PrintsTo t ts` (its yield
+flattens to `ts`). The print relations `AtomStmtP`, `AtomItemsP`,
+`AtomCatchP` and `AtomCatchesP` mirror the four parse relations with the same
+token indices. Their printer premises sit on expressions, simple statements,
+arguments, parameters, return parameters, Yul bodies and flags (as a token
+equation), never on statements, items, blocks or clauses. Proved by mutual
+structural recursion: `atom_stmt_prints` (and for items, clauses, clause
+lists); then `atom_stmt_derives_iff : x.Derives w ↔ w = ts` and
+`atom_stmt_yield_unique`: two trees with parse and print witnesses that derive
+the same words are equal. Instances: identifiers, identifier expression
+statements, empty arguments, `bool` parameters, empty lists.
+
+Controls (`tests/…/AtomDerivesControls.lean`): a block holding a try with a
+signature catch, `revert;`, `assembly {}` and an `unchecked` block, with both
+witnesses, its `Derives` set, uniqueness against every fragment tree, and the
+printer's tokens computed by the kernel; print witnesses for `try … returns`,
+flagged assembly, `revert Err();` and `emit E();`; negative controls for
+other words and a wrong print premise.
+
+Not claimed: printer premises beyond the stated instances, and any
+expression-level printing or parsing fact.
