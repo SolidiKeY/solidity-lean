@@ -61,6 +61,32 @@ is an assignment, `STy.copiesTo`). -/
 theorem to_storage_refused (B : DeclName → DeclName → Bool) :
     cdNested.implicit B (.array .storage (.array .storage u (some 2)) none) = false := rfl
 
+/-! ## The conversion arm -/
+
+/-- **An implicit conversion of a `calldata` reference to a statically
+encoded memory array** runs `cdToMem` (`convRV`'s reference arm), keeps the
+memory invariant and is never `stuck`: the targets `cdToMem_static_ok`
+covers, which `STy.implicit` admits from `calldata` once elements are
+compared at the target's location. -/
+theorem convRV_cd_static_ok {E : Env} {Γ' : RCtx} {H : HeapTy} (F : Fr) (n : Nat) {σ τ : STy}
+    (hσ : σ.loc? = some .calldata)
+    (hτ : (∃ e m, τ = .array .memory (.array .memory e (some m)) none ∧
+        (STy.array .memory e (some m)).cdCopyElem E = true) ∨
+      (∃ σ m, τ = .array .memory σ (some m) ∧ σ.cdCopyElem E = true))
+    (v : Val E.layout σ) :
+    Hoare (MemOK E H) (convRV (Γ := Γ') F n τ (.val v))
+      (fun v y => MemOK E H y ∧ RValOK E y.2.heap.ty v) (fun e y => MemOK E H y ∧ NotStuck e) := by
+  obtain ⟨h, off, len, rfl⟩ := Val.cd_shape hσ v
+  have hne : σ ≠ τ := by
+    rintro rfl
+    rcases hτ with ⟨_, _, rfl, _⟩ | ⟨_, _, rfl, _⟩ <;> simp only [STy.loc?, reduceCtorEq, Option.some.injEq] at hσ
+  have hc : convRV (E := E) (Γ := Γ') F n τ (.val (.cdRef h off len)) = cdToMem F τ off len := by
+    unfold convRV
+    rw [dif_neg hne]
+    cases σ <;> first | (simp only [STy.loc?, reduceCtorEq] at hσ; done) | rfl
+  rw [hc]
+  exact cdToMem_static_ok F off len hτ
+
 /-! ## The typed declaration -/
 
 /-- The body of `function n(uint256[2][] calldata xs)`. -/
@@ -139,5 +165,9 @@ def elabN : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 -- **Refusal**: a `uint256[3][] memory` target does not type.
 #guard (elaborate (resolveUnit { pipeline := .legacy }
   (unitN (.array u256 (.some (num 3)))))).isNone
+
+#print axioms convRV_cd_static_ok
+#print axioms w_copy_ok
+#print axioms convRV_nested
 
 end Solidity.Source.CalldataNestedCopyControls

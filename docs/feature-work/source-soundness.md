@@ -1023,13 +1023,12 @@ Horizon's step proofs take them without new lemmas, except
   (G18.05): inner arrays are allocated before the outer one, as `zeroData`
   allocates (solc allocates the outer first; heap addresses are abstract
   indices, so no observation here depends on the order). An element that is
-  not statically encoded is not inline and stays `stuck`. Only the
-  one-level static copy is reachable from typed source today:
-  `STy.implicit` compares element types with `STy.same`, which compares
-  locations, so `uint256[2][] calldata` does not convert to
-  `uint256[2][] memory` and the nested arm runs only when `cdToMem` is
-  called directly (open: compare elements up to `withLoc`, as `copiesTo`
-  does);
+  not statically encoded is not inline and stays `stuck`. The nested copy
+  is reachable from typed source: `STy.implicit` compares array elements
+  at the target's location (`STy.withLoc`, as `copiesTo` does; user
+  decision 2026-11-06), so `uint256[2][] calldata` converts to
+  `uint256[2][] memory` and `convRV` runs the nested arm
+  (`convRV_cd_static_ok`, controls in `CalldataNestedCopyControls.lean`);
 - `abi.decode(b, …)` on `bytes calldata` (`STy.decodeSrc` now admits it;
   `bytesOfRV` reads the reference).
 

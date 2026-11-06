@@ -131,7 +131,8 @@
 | `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, same-input model noncommutation and swap refusal controls. |
 | `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
 | `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
-| `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly (not yet reachable from typed source). |
+| `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly; its typed-source reachability is in `CalldataNestedCopyControls`. |
+| `Source/CalldataNestedCopyControls.lean` | G18.05 nested copy from typed source: `STy.implicit` compares array elements at the target's location, so `uint256[2][] calldata` converts to `uint256[2][] memory`; refusals, the typed declaration, `convRV_cd_static_ok` (the conversion runs `cdToMem` and keeps `MemOK`) and an elaborated, deployed control. |
 | `Source/FailureMachine.lean` | Explicit-plan Source frame operations (H16 execution leaf) These operations run in the actual Source EM and use its existing event emitter. |
 | `Source/FailureMachineControls.lean` | Independent expected actual-EM controls. |
 | `Source/FailurePrimitives.lean` | Shared actual-EM failure primitives below Eval. |

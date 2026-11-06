@@ -11,9 +11,8 @@ element is validated (a dirty `bool` reverts with no data); an element that
 is not statically encoded is not inline, so its copy is `stuck`. The one-word
 copy of a `uint256[] calldata` is unchanged.
 
-Only the `uint256[2]` copy is reachable from typed source: `STy.implicit`
-compares element locations, so the nested conversion does not type and the
-nested arm is exercised here by calling `cdToMem` directly.
+The copies are exercised here by calling `cdToMem` directly; the nested
+conversion from typed source is in `CalldataNestedCopyControls.lean`.
 -/
 
 namespace Solidity.Source.CalldataStaticCopyControls
