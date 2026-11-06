@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "toolchain": "Live Lean4.24.0 / Lake5.0.0-src+797c613; unchanged",
+  "sources": {
+    "tests/h62/item4/generic-source-frontend/Core.lean": "2a0c34205ba416a84eaab13108887ece87550eab7e2e74d618027c12b93df36f",
+    "tests/h62/item4/generic-source-frontend/CoreControls.lean": "88c3dd9dc131c0a6c11640e643190ef81bc7b3b34eb822604830cfc5aa6f1eee",
+    "tests/h62/item4/generic-source-frontend/FixtureTable.lean": "d365af8ea4544cf92d48cd1ca2828757ac88cea9f497bfd2504c98f337f027ad",
+    "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json": "09f48059a0c2a492e7e2761abd6c461c0fda89e3518c5af3966ae97e90dae556",
+    "scripts/h62/item4/generic-source-frontend/generate.py": "5facbd74e5fa103aa731bea187087dc08a6f191a21b6a1b98731c8a530ec014f"
+  },
+  "original_case_files_unchanged": 45,
+  "case_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+  ],
+  "gates": [
+    {
+      "label": "h82-generic-core",
+      "exit": 0,
+      "seconds": 1.069,
+      "command": [
+        "bash",
+        "-eu",
+        "-c",
+        "mkdir -p .lake/build/lib/lean/tests/h62/item4/generic-source-frontend\nlake env lean --tstack=131072 -o .lake/build/lib/lean/tests/h62/item4/generic-source-frontend/Core.olean tests/h62/item4/generic-source-frontend/Core.lean\nlake env lean --tstack=131072 tests/h62/item4/generic-source-frontend/CoreControls.lean"
+      ],
+      "resource_stop": false,
+      "minimum_parent_headroom_bytes": 16062574592,
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-generic-core.json",
+      "record_sha256": "d57848c35e8ab8a1a594a941a38393a526fd0bb4b5a6ebf4614336e4a8dba3f9"
+    },
+    {
+      "label": "h82-generic-fixture-table",
+      "exit": 1,
+      "seconds": 69.656,
+      "command": [
+        "env",
+        "GATE_LOGS=/workspace/sol-numeric-literals-gate-output/h82-generic-fixture-table-files",
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item4/generic-source-frontend/FixtureTable.lean"
+      ],
+      "resource_stop": false,
+      "minimum_parent_headroom_bytes": 11028025344,
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-generic-fixture-table.json",
+      "record_sha256": "df9416b3b0397e07d0ddfa7c2eb4b30b0de7ee26e1a4c317ef7736d940cfea47"
+    },
+    {
+      "label": "h82-generic-equality-probe",
+      "exit": 1,
+      "seconds": 0.575,
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--root=/workspace",
+        "--tstack=131072",
+        "/workspace/sol-numeric-literals-h82/GenericEqualityProbe.lean"
+      ],
+      "resource_stop": false,
+      "minimum_parent_headroom_bytes": 16063139840,
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-generic-equality-probe.json",
+      "record_sha256": "5e8f8f9bccc342ae18b1a23439ba95a92e8b58a505d8a274c38b693eb48ac435"
+    },
+    {
+      "label": "h82-generic-equality-probe2",
+      "exit": 0,
+      "seconds": 0.563,
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--root=/workspace",
+        "--tstack=131072",
+        "/workspace/sol-numeric-literals-h82/GenericEqualityProbe.lean"
+      ],
+      "resource_stop": false,
+      "minimum_parent_headroom_bytes": 16063176704,
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-generic-equality-probe2.json",
+      "record_sha256": "e21fdcc374e49e995caa65c83d3715fe6cf9bb2b392d602c2eaf09fd8317a629"
+    },
+    {
+      "label": "h82-generic-original-baseline",
+      "exit": 0,
+      "seconds": 72.628,
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--root=/workspace",
+        "--tstack=131072",
+        "/workspace/sol-numeric-literals-h82/OriginalFixtureBaseline.lean"
+      ],
+      "resource_stop": false,
+      "minimum_parent_headroom_bytes": 14964756480,
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-generic-original-baseline.json",
+      "record_sha256": "e23000a1d845ef0acd7dbb3f5f74fb49330e9d0d5a109ae07323864ee8c320cc"
+    },
+    {
+      "label": "h82-generic-fixture-table-repaired",
+      "exit": 0,
+      "seconds": 69.662,
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--root=/workspace",
+        "--tstack=131072",
+        "/workspace/solidity-lean/tests/h62/item4/generic-source-frontend/FixtureTable.lean"
+      ],
+      "resource_stop": false,
+      "minimum_parent_headroom_bytes": 10545131520,
+      "record": "/workspace/sol-numeric-literals-gate-output/h82-generic-fixture-table-repaired.json",
+      "record_sha256": "387597c28e62536655e5e396cd3780e0c89dcb15a3c2fa5b7132aeba1e2151d8"
+    }
+  ],
+  "timing": {
+    "baseline_seconds": 72.628,
+    "proposed_seconds": 69.662,
+    "delta_percent": -4.084,
+    "slowdown_stop": false,
+    "boundary": "Standalone batched45 original proofs versus45-row table; single Lean process each, cached imports, same container/resources. Not production affected-module/end-to-end timing."
+  },
+  "failed_attempts": "Initial table equality rfl failed; dependent sorryAx diagnostics retained only as failed-run evidence. Tiny split-only probe also failed; case-and-rewrite probe and repaired table passed.",
+  "limitations": "No production FixtureControls file changed. No4.35 overlay, full affected/runtime pass, full generated-helper axiom inventory or production migration claimed. Original false/open claims retained.",
+  "reviews": {
+    "finder": "PASS source pins, all six receipts, exact45-source preservation and limited timing arithmetic",
+    "skeptic": "PASS source fidelity, successful logs exclude sorryAx, failed attempts separate"
+  }
+}

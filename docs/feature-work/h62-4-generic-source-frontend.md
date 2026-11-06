@@ -199,3 +199,20 @@ Owner alone applies approved migrations. Full assignment remains unfinished.
 The useful unblocked backfill increments (census, intrinsic lemma/witnesses,
 reproduction acceptance, bounded measurement tooling) are ready for a fresh
 coordinator thread handoff; this worker must not self-launch another thread.
+
+## H82 live45-case validation
+
+The unchanged live Lean4.24 toolchain checks Core and CoreControls, all45
+FixtureTable certificates/instances, exact row inventory, universal checker
+correspondence and negative refusal. Initial checker_exact rfl failed; its
+statement is preserved and its proof now cases on the actual parser result
+and rewrites both matches. Failed-run sorryAx diagnostics remain failed evidence;
+the repaired run exits0 and prints only standard axiom sets.
+
+The standalone batched original45 proofs took72.628s; the repaired45-row table
+took69.662s under the same serial12GiB/no-swap envelope and cached imports
+(−4.084%). This is not an end-to-end production speed claim. All45 owner source
+files retain their exact pinned bytes. Exact commands, hashes, failed attempts
+and limits are in tests/h62/item4/generic-source-frontend/live-validation.json.
+Production integration, full affected gates, generated-helper trust inventory
+and the separate4.35 overlay remain unfinished.
