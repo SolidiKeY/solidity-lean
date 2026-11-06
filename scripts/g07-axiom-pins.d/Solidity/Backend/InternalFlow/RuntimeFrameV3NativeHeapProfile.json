@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeHeapProfile.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeHeapProfile.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeHeapProfile.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeHeapProfile.success_with_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

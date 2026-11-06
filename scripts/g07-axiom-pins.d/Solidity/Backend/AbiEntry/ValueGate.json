@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/AbiEntry/ValueGate.lean:Solidity.Backend.AbiEntry.ValueGate.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGate.lean:Solidity.Backend.AbiEntry.ValueGate.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGate.lean:Solidity.Backend.AbiEntry.ValueGate.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

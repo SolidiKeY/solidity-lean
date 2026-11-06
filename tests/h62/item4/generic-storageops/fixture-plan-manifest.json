@@ -1,0 +1,11 @@
+{
+  "format": 1,
+  "classification_sha256": "ea9995ef1ff96bcea13c16b5154127a6c8cfc16fa0cbdabddbdf9d5d9873e945",
+  "plan_sha256": "7c00d2fd368a5d8d2b04c9d55d9b5a8c73b9e7f80a1987f7e445bddc4804eda9",
+  "totals": {
+    "claims": 1623,
+    "packets": 84,
+    "private": 616,
+    "public": 1007
+  }
+}

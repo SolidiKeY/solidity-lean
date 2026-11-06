@@ -108,7 +108,7 @@ theorem StmtD.declTuple_frag {C : Source.Ctx} {X : StmtExt C.env} {A : Decl → 
     {h : Nat} {d : Syn .varDecl} {ds : Syn (.list (.opt .varDecl))} {e : Syn .expr}
     {slots : List (Option (String × STy))} {σs : List STy}
     (hs : C.tupleSlots h d ds = some slots) (de : Typed (C.at L) e (.tuple σs))
-    (hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true)
+    (hf : slotsFit C.isBase C.mapFree (slots.map (Option.map Prod.snd)) σs = true)
     (hi : TupleInit A de.toR) (ho : SlotsOK (slots.map (Option.map Prod.snd)) σs) :
     SFrag X A (StmtD.declTuple (k := k) hs de hf).toR :=
   SFrag.cast_out (pushSlots_tys slots L).symm _ (.declTuple _ _ _ hi ho)

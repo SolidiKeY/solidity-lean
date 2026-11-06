@@ -1,0 +1,22 @@
+{
+  "schema": "h70-g49-dependency-inventory-manifest-v1",
+  "validatedSourceHead": "9f1d4fba424fdb1592e2e90c17b54c2bbd8bc73c",
+  "selectedDeclarationCount": 14,
+  "directEdgeCount": 450,
+  "unexportedDependencyCount": 215,
+  "publicProofFields": 15,
+  "fullCertificatePackages": 3,
+  "expandedAtomicOpenPremises": null,
+  "exhaustiveProductionInventory": false,
+  "frontier": {
+    "path": "/workspace/h70-g49-contracts/dependency-frontier.json",
+    "sha256": "6438fc8c31debd231c144f65805258e4ad830d736eb0928c325c1a464594ceba"
+  },
+  "contractsDisposition": {
+    "path": "/workspace/h70-g49-contracts/contracts-disposition.json",
+    "sha256": "8d2f3a4210e0ab5c7960f090d13194efcc49482963338b91c444b42e41aad08b"
+  },
+  "newLeanRun": false,
+  "timingHoldPercent": 14.46,
+  "ownerBridges": "pending"
+}
