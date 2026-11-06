@@ -91,9 +91,37 @@ inline pin block exactly, and covers RawInt (pins, mirror, forbidden tokens).
 
 RawInt reviews: see the RawInt document.
 
-## Gates
+## Gates (Claude VM, head before this commit `ffab0c15`)
 
-Recorded in the RawInt document's increment section (one build covers both).
+- Lean MCP diagnostics, `severity=error`, clean on every touched file:
+  RawInt `Execution`/`Controls`, ConstantDepth `Determinism`/`Correspondence`/`Controls`,
+  and both pin files `tests/calldata-packets-1105/RawInt/Axioms.lean` and
+  `tests/sol-constant-depth/Axioms.lean` (their `#guard_msgs` pass).
+- `./run-lean.sh`: `lake build` of the default targets and `SolkeyTestSuite`
+  passed ("Build completed successfully (5827 jobs)", 36m44s wall after a
+  container restart resumed the cache). The script then exits 1 in its final
+  `scripts/check-solkey.sh` step: the environment's `../solkey` checkout is at
+  `b8d5f88`, newer than the repository's pin `473da8944c`
+  (`tests/migration/solkey.pin.json`), giving 167 drift reports. Against the
+  pinned commit's rule file the same check passes:
+  `scripts/check-solkey.sh --key <pinned solidityProgramRules.key>` →
+  "solkeycheck: OK — annotations match". This lane touches no Calculus,
+  annotation or SolKey file.
+- `register.sh --check`, `fragments.sh --check`: pass. `node scripts/check-orphans.mjs`:
+  "5811 reachable, 0 orphaned, 0 not allowed". `node scripts/check-layers.mjs`: pass.
+  `bash scripts/check-trust.sh`: "0 findings". `python3 scripts/check-sol-constant-depth.py`:
+  ACCEPT (ConstantDepth 6 modules, 83 theorems, 83 pins; RawInt 2 modules, 55 theorems,
+  55 pins; 8 control families; 7 input pins).
+- `#print axioms`: every headline theorem uses at most `propext`,
+  `Classical.choice` and `Quot.sound`.
+- Module times (4-way parallel build): `ConstantDepth.Controls` 116 s and
+  `RawInt.Controls` 163 s, both above 60 s; they are new control modules that only
+  evaluate concrete units/byte strings in the kernel and nothing imports them,
+  so no existing module slows. The other touched modules were elaborated by the
+  Lean server in seconds and were already up to date for the build.
+- `check-doc-paths.sh` fails with one pre-existing missing reference (also on the
+  base `aec9adf1`); `check-axiom-pins.mjs` reports thousands of pre-existing
+  unrecorded pins on master; registering this lane's pins is coordinator-owned.
 
 ## Limitations
 

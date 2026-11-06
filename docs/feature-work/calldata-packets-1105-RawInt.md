@@ -80,3 +80,5 @@ had no copy (added `int16_copy`). Its pin-exactness doubts (`values_zero`,
 
 Still open: none of the listed RawInt obligations. The H44 bulk is unverifiable
 from this checkout and is not relied on.
+
+Gates for this increment: see `constant-depth.md`, section "Gates" (one build covers both areas).
