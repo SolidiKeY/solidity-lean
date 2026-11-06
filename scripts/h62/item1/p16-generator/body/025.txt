@@ -1,0 +1,4 @@
+/-! RawContinueLoop.all_fuel_clean additionally preserves the existing typed
+LOCAL values and coherence at every horizon under its genuine coherent-input
+premise. The dirty-one-horizon refusal control prevents treating refresh as a
+cleaning operation. The arbitrary dirty initialized raw word-view projection remains open. -/
