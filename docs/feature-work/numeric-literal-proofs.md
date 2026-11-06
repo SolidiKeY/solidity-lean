@@ -5,7 +5,8 @@ full `run-lean.sh` gate stops at generated-root registration. The assignment
 reserves roots and module maps for coordinator integration, so this lane has not
 edited them. All 42 modules and their proposed rows/imports are listed in
 [registration.json](../../tests/sol-numeric-literals/registration.json); the exact
-root-only proposal is [registration.patch](../../tests/sol-numeric-literals/registration.patch).
+module-map proposal is [registration.module-map.patch](../../tests/sol-numeric-literals/registration.module-map.patch).
+All owned root imports are already published; the old root-only patch is empty.
 No push, merge, PR, producer edit or source representation change occurred.
 
 Batch `solidity-sol2-20261104`, task `numeric-literals`.
@@ -367,3 +368,6 @@ Publication9584f9e7 adopted by merged9e1e7e preserving b225656c and every owned 
 
 
 Publishedb86ae456 adopted by merge3c9defec preservingd7cdfb47 and all42proof files/seven source pins. Parts07/08 identically integrated; proposals now33 root imports/34 map rows. Fresh bounded owned matching-cache build and controls PASS; register --check exit1 records missing roots. Finder/skeptic PASS. Prior complete axiom/KeySort evidence retained; no theorem changed. No fresh full-runtime pass/cache freshness claimed. H41 preserved pack/path/SHA unchanged, coordinator-pending; no VM shipping. Original goal unchanged and blocked on registration/final runtime.
+
+
+The H55-H58 unaffected validation checkpoint is recorded in tests/primitive-packets-1105/Constants/H55-H58-HANDOFF.md. It prepares 34 coordinator-only map rows and validates archived VM-reported Numeric/KeySort/kernel/axiom evidence (raw outcomes are not tracked), and reconciles the two authorized implementation scopes without changing any of 47 proof files or reserved Yul sources. Final registration/runtime obligations remain open.
