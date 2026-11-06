@@ -40,3 +40,5 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaimsControls.lean` | Inhabited universal success/revert consumers and complete failure entries at every index, rejecting panic/exhaustion/wrong-success outcomes. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean` | Closed syntax certificates for canonical/scoped allocating recursion; full source-run equality and frozen claim transport are derived, with no arbitrary-input parser or public-selector claim. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean` | Inhabited scoped recursion success/failure at all supplied indices and uncertifiability of malformed base/quotation inputs. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViews.lean` | Context-generalized intrinsic sequence/statement views and executable exact recBase certification; recursive-head recognition remains open. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean` | Actual base acceptance and nil/revert/extra-statement refusal receipts, with extracted-certificate revert/exhaustion consumers. |
