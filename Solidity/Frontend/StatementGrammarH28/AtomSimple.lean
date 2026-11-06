@@ -12,9 +12,10 @@ completeness or expression uniqueness (SOL-EU) is claimed. -/
 namespace Solidity.Frontend.StatementGrammarH28
 open Solidity.Source Solidity.Frontend.Checked
 
-/-- Tokens that no statement, item or block-loop dispatcher reads as their
-own: not a statement keyword, `else`, `unchecked`, a brace or `;`, and not
-the contextual identifier `revert`. -/
+/-- A conservative subset of the tokens that `stmt`, `item` and the block
+loop send to `simpleStmt`: no statement keyword, `unchecked`, brace or the
+contextual identifier `revert`; `else` and `;` are excluded too, for the
+no-else frame and the `for` header's `eat ;`. -/
 def simpleHead : Tok → Bool
   | .kw k => !(k == .if_ || k == .for_ || k == .while_ || k == .do_ || k == .continue_ ||
       k == .break_ || k == .try_ || k == .return_ || k == .emit || k == .assembly ||

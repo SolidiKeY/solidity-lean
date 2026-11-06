@@ -1,4 +1,5 @@
 import Solidity.Frontend.StatementGrammarH28.AtomNested
+import Solidity.Frontend.StatementGrammarH28.G0Nodes
 
 /-! Inhabited controls for every AtomStmt and AtomItems constructor, nested
 blocks, unchecked items, `return e;`, arbitrary width and depth, the
@@ -282,9 +283,12 @@ statement; the dispatcher sends it to `simpleStmt`, which reads `revert;` and
 `revert();` as expression statements (all tokens consumed). -/
 theorem revert_needs_identifier :
     (stmt 8 .body (locatedInput [.ident "revert", .punct .semi] ⟨[], [], 0⟩)).toOption.map
-      (fun p => p.2.ts.length) = some 0 ∧
+      (fun p => ((g0NodeCtors p.1).take 3, p.2.ts.length)) =
+      some ([.simpleStmt, .exprStmt, .ident], 0) ∧
     (stmt 20 .body (locatedInput [.ident "revert", .punct .lparen, .punct .rparen,
-      .punct .semi] ⟨[], [], 0⟩)).toOption.map (fun p => p.2.ts.length) = some 0 := by
+      .punct .semi] ⟨[], [], 0⟩)).toOption.map
+      (fun p => ((g0NodeCtors p.1).take 3, p.2.ts.length)) =
+      some ([.simpleStmt, .exprStmt, .call], 0) := by
   decide +kernel
 
 /-- Negative: the precedence contract refuses a non-path event. -/

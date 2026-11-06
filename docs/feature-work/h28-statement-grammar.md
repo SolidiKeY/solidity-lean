@@ -2409,3 +2409,12 @@ Fixes:
 - The `simpleHead` set is described as conservative, not exact.
 - The `try` reason is softened, with the catch frame named as the blocker.
 - The module-map row for `AtomNested` was stale and has been updated.
+
+The finder found no soundness or coverage bugs. It confirmed the same
+`simpleHead` wording issue, fixed in the Lean docstring as well. It also
+found that `revert_needs_identifier` checked only token consumption; the
+control now checks the root constructors through the G0 twin
+(`simpleStmt`, `exprStmt`, `ident` or `call`). Two premises are noted as
+redundant but harmless, and are kept as stated: the `(` head of
+`emitS`/`revertS` follows from `ArgsAtom`, and `isPathExpr` follows from
+`PathAtom`.
