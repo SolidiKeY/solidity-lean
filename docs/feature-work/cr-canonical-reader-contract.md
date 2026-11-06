@@ -17,10 +17,10 @@ and are not touched here.
 
 | Item | Where | Result |
 |---|---|---|
-| uint8 and support control | `Solidity/Frontend/Admission/CanonicalReaderContract.lean`, fixture `tests/solc/CanonicalReaderContract.{sol,ast.json}` | One H68 fixture (pinned 0.8.34, sha256 `c8649f8d…`, 50 type identifiers, 1 `tryCall`). Existing route: all six probe functions `elaborated`. Canonical reader on the same JSON: `wide`, `signedWide`, `flag`, `memoryArray` admitted; `narrowParam` and `narrowLocal` refused with `compact verifier: unsupported type uint8`. Both pinned (`decide` on the rows; `#guard_msgs` on the outcomes). |
+| uint8 and support control | `Solidity/Frontend/Admission/CanonicalReaderContract.lean`, fixture `tests/solc/CanonicalReaderContract.{sol,ast.json}` | One H68 fixture (`solc_import` pin `0x86bd4cd2be87c02a`; compiler 0.8.34 with compiler sha256 `c8649f8d…`; 50 type identifiers, 1 `tryCall`). Existing route: all six probe functions `elaborated`. Canonical reader on the same JSON: `wide`, `signedWide`, `flag`, `memoryArray` admitted; `narrowParam` and `narrowLocal` refused with `compact verifier: unsupported type uint8`. Both pinned (`decide` on the rows; `#guard_msgs` on the outcomes). |
 | H68 fixture migration dry run | `scripts/solc-ast-h68-migrate.py`, receipt `tests/cr-canonical-reader/h68-migration-dryrun.json` | Of 46 modern fixtures: 34 `exact` (regenerated with each fixture's own recorded compiler and solkey commit; equal to the committed AST after removing only the H68 fields, header equal), 1 `current` (the new probe), 7 `drift`, 4 `no-source`. |
-| Existing-route rows before/after | Scratch elaboration (not committed; reproduce with the comparison recipe below) | 118 `solc_import` pairs over the 29 `exact` fixtures that `solc_import` pins (same options, old versus migrated bytes): 116 report lists (531 rows, none empty) equal; the two `SliceReferenceCopies` pairs (legacy and via-IR pipelines) differ in one row only. The `nominal` row stays `unsupported`, and its reason narrows from `a calldata slice of nominal enum/UDVT elements …` to `a calldata slice of nominal UDVT elements …`. The importer's UDVT-identifier check (`Frontend/SolcJson/Body.lean`, `IndexRangeAccess`) now fires before its name-based fallback for trimmed fixtures. |
-| Support census | Scratch census over all 68 `tests/solc` fixtures (`readContract` printed-body stage versus `Shared.function executableReader`) | 1,599 functions: existing printed bodies 1,446; canonical admitted 226; both 222. Among the 1,224 that only the existing route admits, the most frequent canonical diagnostics are `binary expression lacks its common type` (293, legacy fixtures without `commonType`), `unsupported expression` (180), `unsupported type declaration` (158), `String expected` (86, missing pre-H68 metadata), `unsupported statement` (78), narrow integers `uint8`/`int8`/`uint16`/`uint32`/`uint8[]`/`uint8[2][]`/… (≈86), `address`/`bytes*`/`string`/enum/struct/contract types (≈110). The printed-body stage is an upper bound on existing admission, not elaboration. |
+| Existing-route rows before/after | Scratch elaboration; one of the four generated files is kept as `tests/cr-canonical-reader/H68Pairs0.lean.txt`, and every observed line is in `h68-pairs-observed.txt` | 118 `solc_import` pairs over the 29 `exact` fixtures that `solc_import` pins (same options, old versus migrated bytes): 116 report lists (531 rows, none empty) equal; the two `SliceReferenceCopies` pairs (legacy and via-IR pipelines) differ in one row only. The `nominal` row stays `unsupported`, and its reason narrows from `a calldata slice of nominal enum/UDVT elements …` to `a calldata slice of nominal UDVT elements …`. The importer's UDVT-identifier check (`Frontend/SolcJson/Body.lean`, `IndexRangeAccess`) now fires before its name-based fallback for trimmed fixtures. |
+| Support census | Scratch census (`tests/cr-canonical-reader/CrCensus.lean.txt`, run as a module under `Solidity/Scratch/`) over all 68 `tests/solc` fixtures (`readContract` printed-body stage versus `Shared.function executableReader`) | 1,599 functions: existing printed bodies 1,446; canonical admitted 226; both 222. Among the 1,224 that only the existing route admits, the most frequent canonical diagnostics are `binary expression lacks its common type` (293, legacy fixtures without `commonType`), `unsupported expression` (180), `unsupported type declaration` (158), `String expected` (86, missing pre-H68 metadata), `unsupported statement` (78), narrow integers `uint8`/`int8`/`uint16`/`uint32`/`uint8[]`/`uint8[2][]`/… (≈86), `address`/`bytes*`/`string`/enum/struct/contract types (≈110). The printed-body stage is an upper bound on existing admission, not elaboration. |
 
 ## Contract clauses
 
@@ -76,18 +76,19 @@ for the four fixtures that record `unknown`.
   byte strings that A's frozen packet pins
   (`tests/directruntime-20261104/shared-translator/fixture-variants.json`, 31;
   `fixture-census.json`, `coverage-inventory.json`, `construct-reader-cases.json`,
-  4 each). A's preflight scripts would fail. Needed from A: either A re-pins its
+  4 each). A's `preflight-construct-cases.py` asserts those sha256 values against the live fixtures and would fail. `preflight-variants.py` also checks hashes, but it reads `artifacts/h68-bulk/`, which is external (H44). Needed from A: either A re-pins its
   packet after CR applies, or A keeps frozen copies and CR applies. Also needed:
   A's plan for clause 4 (narrow integers first; the `uint8` witness is pinned).
 - **OT-CR-2 (h28-terra manifests).** `tests/h28-terra/proof-cleanup/manifest.json`
   and `tests/h28-terra/drift-reports/evidence/item1-manifest.json` record all 34
   fixtures. They are historical receipts and will not be rewritten. Owner to
   confirm.
-- **OT-CR-3 (pin holders).** `--apply` rewrites `solc_import` hash literals in
-  20 modules: `Solidity/Examples/Tactics/*` (7), `Solidity/Solkey/QuantifiedDiamond.lean`,
+- **OT-CR-3 (pin holders).** `--apply` rewrites `hash 0x…` pins (`solc_import`,
+  and `solc_world_factory` in `TransientWorldSource.lean`) in 20 modules:
+  `Solidity/Examples/Tactics/*` (7, one of them the factory pin), `Solidity/Solkey/QuantifiedDiamond.lean`,
   `tests/upstream/*.lean` (11), `web/test/CalldataImport.lean`. Only the hash
-  literal changes. The `SliceReferenceCopies` reason refinement affects
-  `Solidity/Examples/Tactics/SliceReferenceCopies.lean` if it pins that reason.
+  literal changes. No `.lean` file pins either `SliceReferenceCopies` reason string; only
+  `Body.lean` emits them, so the refinement changes no pinned check.
 - **OT-CR-4 (V11 MemoryOps, H55 G49/G50 Sol lane): three reserved path
   controls.** The ownership registry (`registry/ownership.json`) is not
   available on this VM, and no repository document names the three reserved
