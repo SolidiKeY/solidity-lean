@@ -188,3 +188,34 @@ files were not found in the available coordinator-input or shared folders,
 so their byte hashes were not independently verified and neither patch was
 applied. Their full migration gates and the H55 source-relations agreement
 remain pending.
+
+## H70 completeness-consumer compatibility candidates
+
+After the required fetch, `origin/master` was
+`0b2a648b32335f35ff323ff468f75907e926fc13`. The relevant Source and Static
+inferencer, typing and completeness files have no diff from the frozen base;
+the lane artifacts are absent on master. No rebase was performed.
+
+The new additive `tests/h62/item1/infer-helpers/CompletenessCompatibility.lean`
+records three candidate applications of the existing static completeness
+consumers using source-helper premises:
+
+* `source_delete_res` retains both `τ.isMapping = false` and
+  `Γ.deleteRefused τ a = false`, and targets membership in `prefixOne`, not
+  full `infer` membership.
+* `source_convElem_mem` retains both the existing inferred-operand membership
+  and the explicit-conversion test at `el.ty σ.convLoc`.
+* `source_payable_mem` retains both the existing inferred-operand membership
+  and `σ.isPayableArg = true`.
+
+These are candidate statements and proof terms only: neither their
+elaboration nor their definitional-equality assumptions have been checked.
+They do not prove equivalence between the Option-returning source inferencer
+and the list-returning static inferencer, and they do not alter the H55-owned
+relations or completeness theorem. No premises or exclusions were weakened.
+
+The reported Hash CollisionBound overlay is still partial and its full gates
+remain pending. The host-only path in the owner ticket is not a VM artifact;
+the prior base-blob match does not verify the patch bytes. Language FixedPoint
+migration and exact source-relations agreement are still outstanding. The
+independent finder/skeptic reviews must include this new candidate file.
