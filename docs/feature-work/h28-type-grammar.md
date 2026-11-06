@@ -1,17 +1,14 @@
 # H28 G09 type-name grammar exactness
 
-Status: **conditional proof/fixture scope complete and reviewed; full assignment
-blocked on final integration/gates**. All original constructors, both array
-branches and parameter/list clauses have finite-dependency completeness,
-arbitrary-depth boundary/AST/layout exactness, frozen-fuel and source corollaries.
-The 18 modules contain 444 source-bound checked statements. Read-only length
-atom contracts remain explicit external dependencies; no universal expression
-support, resolution, evaluation or whole-compiler correctness is claimed.
-All18 modules are now centrally registered after rebase onto e6849d3b. Fresh
-full VM validation passes run-lean, roots, orphans and every other stage except
-shared axiom pins:0errors,479unrecorded changes,0owned TypeGrammarH28 entries.
-This shared inventory is outside the lane's write scope; whole acceptance remains
-blocked without a trust waiver.
+Status: **STOPPED by human H82 retirement; successor handoff pending integration**.
+The original owned conditional proof/fixture scope is preserved. The additive pin
+metadata repair is complete and statically clean, but fresh full integrated
+validation was canceled by the explicit stop; it is not a passing gate.
+Successor: `solidity-sol2-20261104/numeric-literals`. No new proof work or automatic
+continuation is authorized. See `tests/h28-sol/type-grammar/handoff/` for the
+complete original rendered assignment, exact scope and full work/backfill queue.
+The tool cannot set PAUSED: only complete/blocked goal outcomes are exposed.
+The existing goal was not completed/reset; coordinator PAUSED transition remains.
 
 ## Frozen scope and source identities
 
@@ -1581,3 +1578,28 @@ or freshness claim. No scope waiver or shared-inventory edit is requested.
 Separate read-only finder/skeptic accepted rebase fidelity, original-queue
 accounting, complete fresh VM evidence and this thin handoff with no findings,
 without Lean server use. Their verdicts are in the committed summary.
+
+## Final human-authorized stop-and-handoff, 2026-11-06
+
+H82 permits statement-preserving edits across files. The current patch adds3554
+missing records to `scripts/g07-axiom-pins.json`, preserving all8154old records
+and all6492tracked Lean source hashes/checker bytes. No theorem, definition,
+interface, actual axiom set, proof budget, exclusion or trust policy changed.
+Independent read-only finder/skeptic accepted the additive diff with no findings.
+Checker regressions and static inventory pass:11708pins,0errors,0notes.
+Fresh runtime/solc/ownedaxiom/parser controls passed. Human retirement canceled
+the active full gate,exit137;no passing full acceptance or later default/SolKey
+result is claimed. This supersedes old shared-pin-blocker counts without
+rewriting their historical evidence.
+
+Mandatory original scope is committed in `tests/h28-sol/type-grammar/handoff/`.
+`OPEN-QUEUE-AND-WAITS.json` enumerates open validation/backfill boundaries. Bulk
+raw evidence remains `/workspace/scratch/h28-type-grammar/h82-additive-pins/`;
+final authenticated patch/bundles/manifests identify all exact paths and hashes.
+No H71 push authorization text was available,so no push. Successor is responsible
+for integrating the final head. No ownership takeover precedes final stopped/head
+acknowledgment. No Claude-owned source edit or message;no new proof implementation.
+
+PAUSED was explicitly requested;the exposed goal tool cannot express it. No
+complete/blocked substitution was attempted. Coordinator must apply PAUSED;the
+worker stops after this handoff with no automatic implementation continuation.
