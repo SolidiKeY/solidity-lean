@@ -559,3 +559,49 @@ comparison tests). Still open: `immutableReferences`/`linkReferences` from a
 fresh compiler run (needs the pinned binary), executing `linkersymbol` through
 a call-capable machine, and a relation between this interpreter and the owner's
 `Yul/ClosedRun.lean` semantics.
+
+## C08: helper-level simulation (T02 first slice)
+
+T02's relations to the source program wait for X01's frozen G01 relations, so
+this checkpoint takes the part that does not: solc's checked-arithmetic
+helpers matched to the source's runtime operators.
+
+`SolcValidation/IrHelpers.lean` holds eight helper functions cut verbatim from
+the saved IR (`extract-helpers.py`, `--check`; `fixtures/helpers.yul`):
+`cleanup_t_uint256`, `cleanup_t_int256`, `panic_error_0x11`,
+`panic_error_0x12`, `checked_add_t_uint256`, `checked_sub_t_uint256`,
+`checked_div_t_int256` (Census) and `checked_mul_t_uint256` (LinkedMath). Their
+tree was generated from the parser's output by `IrLeanGen.lean`, and
+`helpers_certified : lex helpersText = some (objectToks helpersRoot) ∧
+objectWf helpersRoot = true` is checked by kernel evaluation (`decide +kernel`;
+axioms [propext]) — the same certificate a parse of that text carries.
+
+`SolcValidation/IrHelperSim.lean` (any `Machine σ`, any state, any words):
+- `checked_add_sim (k) (x y : Word) (s : σ) : evalExpr M ctx (k + 20) helperEnv addCall (argVals x y) s = if x.val + y.val < 2 ^ 256 then .ok (s, fun _ => word (x.val + y.val)) else (fun s => (s, fun _ => word (x.val + y.val))) <$> panicRun M 0x11 s` — through the call site, closure lookup and both cleanups.
+- `checked_mul_body (k) (x y) (s) : evalBlock M ctx (k + 30) helperEnv bodyMul (.cons x (.cons y (.cons 0 .nil))) s = if x.val * y.val < 2 ^ 256 then .ok (s, …word (x.val * y.val)…, .normal) else … <$> panicRun M 0x11 s`.
+- Arithmetic facts: `add_wraps`, `sub_wraps`, `mul_fits` (solc's `x = 0 ∨ y = (x·y mod 2^256)/x` check is exactly "fits"), `pure_sub_of_le`.
+`panicRun` is solc's sequence `mstore(0, 0x4e487b71…)`, `mstore(4, code)`,
+`revert(0, 0x24)` on the machine.
+
+`SolcValidation/IrHelperSource.lean` (imports `Semantics/Ops.lean`):
+`sourceAdd_eq`, `sourceMul_eq` compute `BinOp.evalNum .uint … .add/.mul`, and
+- `checked_add_matches_source (k) (x y) (s) : match sourceAdd x y with | some v => evalExpr … = .ok (s, fun _ => word v.toNat) | none => evalExpr … = … <$> panicRun M 0x11 s`
+- `checked_mul_matches_source` (same shape for the body of `checked_mul_t_uint256`).
+Axioms [propext, Classical.choice, Quot.sound]. The relation between the
+source's revert and the panic's return data is G01's and is not asserted.
+
+Tests (`IrHelperChecks.lean`): 576 helper/source agreements on 12×12 edge
+words for add, sub, mul and signed div (division by zero `Panic(0x12)`,
+`min / -1` and every unsigned overflow `Panic(0x11)`, exact effect log);
+`helpersText` equals the fixture and its blocks are verbatim substrings.
+
+Open (kernel): `checked_sub_t_uint256` and `checked_div_t_int256`. Their proofs
+elaborate, but the kernel reports deep recursion: the owner's `Pure.sub`
+(`word (x + 2^256 - y)`) and `sdiv` (`signed`, `x - 2^256`) put a symbolic sum
+with the literal `2^256` where a defeq check unfolds it in unary — the same
+family as Gate G0's `ofInt?` pitfall, which `IrHelperSource.lean` avoids with
+`rw`-stated lemmas. Fix: carry the `Pure` values folded through a `rw`-proved
+characterization (as `pure_sub_of_le`), or ask VY1 for `rw`-friendly `Pure.eval`
+lemmas. Also open: `checked_exp_*` (the loop; would generalize `Evm/Exp.lean`),
+ABI and storage helpers, `fun_<name>_<id>` bodies and dispatcher/constructor
+composition (need G01), and the remaining helpers of the census.

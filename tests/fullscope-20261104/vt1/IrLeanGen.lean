@@ -89,3 +89,9 @@ def genCode (text : String) : String :=
   match parse text with
   | .ok p => blockL p.parts.code
   | .error e => s!"PARSE ERROR {e}"
+
+-- Regenerates the term; `IrHelpers.lean` must contain exactly this output.
+#eval show IO Unit from do
+  let term := genCode (← IO.FS.readFile "tests/fullscope-20261104/vt1/fixtures/helpers.yul")
+  IO.FS.writeFile "tests/fullscope-20261104/vt1/fixtures/helpers.term" (term ++ "\n")
+  IO.println s!"HELPERS_TERM {term.length} chars"
