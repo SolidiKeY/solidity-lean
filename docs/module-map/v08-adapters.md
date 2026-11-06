@@ -820,6 +820,11 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Source.lean` | Checked int256 `*` Source evaluation on arbitrary locals: exact value or `Panic(0x11)`. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Selected.lean` | The public compiler selects `binaryCode .int .mul`, with the literal `sTail .mul` guard. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Target.lean` | Selected checked int256 `*` execution on any represented machine and saved stack: product or coarse revert. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Agreement.lean` | Source and selected target of checked int256 `*` from one local family. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Controls.lean` | Populated-frame, arbitrary-stack controls: both orders of `-2^255 * -1`, lower/upper overflow, regular products. |
 <!-- Retained V17 lane modules not yet present in the published map. -->
 | `Backend/StructuredFlow/ConditionalSourceCompiler.lean` | Compile the existing V07-related conditional statement, preserving its actual Source run and reached map as well as the intrinsic compiler contract. |
 | `Backend/StructuredFlow/ConditionalSourceCompilerControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
@@ -919,8 +924,3 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Solidity.Backend.InternalFlow.RuntimeFrameV3OuterAllocatingCall` | Executed allocating scalar call with actual exported caller representation and ordered result/control observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
-| `Backend/PrimitivePackets/SignedCheckedMul/Source.lean` | Checked int256 `*` Source evaluation on arbitrary locals: exact value or `Panic(0x11)`. |
-| `Backend/PrimitivePackets/SignedCheckedMul/Selected.lean` | The public compiler selects `binaryCode .int .mul`, with the literal `sTail .mul` guard. |
-| `Backend/PrimitivePackets/SignedCheckedMul/Target.lean` | Selected checked int256 `*` execution on any represented machine and saved stack: product or coarse revert. |
-| `Backend/PrimitivePackets/SignedCheckedMul/Agreement.lean` | Source and selected target of checked int256 `*` from one local family. |
-| `Backend/PrimitivePackets/SignedCheckedMul/Controls.lean` | Populated-frame, arbitrary-stack controls: both orders of `-2^255 * -1`, lower/upper overflow, regular products. |
