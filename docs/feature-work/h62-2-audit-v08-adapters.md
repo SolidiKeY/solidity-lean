@@ -275,3 +275,16 @@ inference; final review evidence is h70-reviews.json. Export under
 /workspace/h62-audit-v08-adapters-export/h70 includes the original base-to-head
 patch, handoff, bundle, inventory archive and SHA256 manifest. Continue the
 remaining all-kind census while the ordinary global producer witnesses wait.
+
+## H82 authorized stop and successor handoff
+
+Implementation STOPPED by explicit retirement; concurrent H70 continue wording
+is superseded. Successor: solidity-v07-v11-20261030/v08-world-lowering.
+All original obligations remain unfinished. Committed retirement/ files preserve
+the complete original assignment content (normalized owner JSON), original queues,
+881-file scope manifest and every open item/wait. No proof implementation added.
+No H71 push permission is available; no push. PAUSED cannot be set: exposed goal
+API supports complete|blocked only; no false substitute transition attempted.
+See retirement-handoff.md and preserved goal-pause-unavailable.json. No automatic
+implementation continuation is authorized. Final stopped/head acknowledgement
+accompanies cumulative authenticated exports; successor owns integration.
