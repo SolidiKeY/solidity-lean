@@ -141,3 +141,25 @@ semantic cases, and exact semantic case coverage and meaningful Lean validation
 are still pending. Current master includes an additional RawFrameLogic module
 and changes RawFrame and RawBoundary, so this 102-file frozen census is not a
 claim about the updated master inventory. Sixteen Python tests pass.
+
+## H70 Lean parser node inventory
+
+`run_raw_parser.py` runs `ParseProbe.lean` against all 102 frozen Raw files
+with Lean 4.24.0, `LEAN_NUM_THREADS=1`, `-j1`, one process, and a 4 GiB
+host/cgroup available-memory guard. Two runs exited 0 and their logs matched.
+The selected node inventory contains 20 constructor declarations, 440 term
+match alternatives, 1,347 tactic induction alternatives, 20 tactic case nodes,
+833 cases tactics and 79 induction tactics: 2,739 nodes in total. Their byte
+spans and source-slice hashes are in the external
+`/workspace/scratch/h55-vectors-tables/raw-syntax.json`, pinned by the committed
+manifest and bulk checksum. `raw_syntax.py` checks the complete file order,
+node schema and spans. Missing, extra, file-order, malformed-schema and invalid
+span controls pass. Seventeen Python tests pass overall.
+
+The probe uses `Lean.Parser.testParseFile` with the built-in Lean environment;
+it does not elaborate the project imports or execute proofs. These counts cover
+the six selected parser node kinds only; they do not establish semantic case
+coverage, constructor inhabitation or preservation by a parametrisation. The
+102 frozen files also predate the extra RawFrameLogic file on current master.
+The production migration, meaningful Lean validation, independent finder and
+skeptic reviews and owner handoffs remain open.
