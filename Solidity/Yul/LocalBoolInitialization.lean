@@ -69,7 +69,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (types : Solidity.Source
               (.error halt,(nextLocals,nextWorld)) := by
             rw [Solidity.Source.Hoare.run_bind,actual]
           have actualRun : (do Solidity.Source.getV (← Solidity.Source.convRV frame fuel .bool
-              (← Solidity.Source.evalE glob frame fuel expr))) (locals,world) =
+              (← Solidity.Source.evalE (plan := none) glob frame fuel expr))) (locals,world) =
               (.error halt,(nextLocals,nextWorld)) := converted
           simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
         rw [Solidity.Source.execS,Solidity.Source.Hoare.run_bind,sub]
@@ -93,7 +93,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (types : Solidity.Source
                 rw [Solidity.Source.Hoare.run_bind,actual]
                 rfl
               have actualRun : (do Solidity.Source.getV (← Solidity.Source.convRV frame fuel .bool
-                  (← Solidity.Source.evalE glob frame fuel expr))) (locals,world) =
+                  (← Solidity.Source.evalE (plan := none) glob frame fuel expr))) (locals,world) =
                   (.ok (.bool value),(nextLocals,nextWorld)) := converted
               simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
             rw [Solidity.Source.execS,Solidity.Source.Hoare.run_bind,sub]

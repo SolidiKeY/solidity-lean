@@ -84,8 +84,8 @@ theorem signature_preserved (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   rw [EncodingVariantControls.signature_run] at actual ⊢
   exact actual
 
-theorem missing_selector_boundary : AbiKind.encodeWithSelector.argsOK E.isBase [] = false := rfl
-theorem missing_signature_boundary : AbiKind.encodeWithSignature.argsOK E.isBase [] = false := rfl
+theorem missing_selector_boundary : AbiKind.encodeWithSelector.argsOK E.isBase E.mapFree [] = false := rfl
+theorem missing_signature_boundary : AbiKind.encodeWithSignature.argsOK E.isBase E.mapFree [] = false := rfl
 
 theorem missing_selector_run (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     (evalE (glob p fixed) frame 3 (.abiEncode .encodeWithSelector
