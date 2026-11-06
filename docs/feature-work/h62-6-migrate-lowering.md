@@ -160,3 +160,36 @@ No whole-goal completion, push, merge, PR, cut-over, or freeze announcement.
 Saved tooling patch/bundle and immutable evidence manifest live under
 `/workspace/migrate-lowering-artifacts`; live build logs are not checksum-bound
 until closed. See the external handoff for exact committed head and current state.
+
+## Continuation checkpoint: repaired monitoring and explicit acceptance
+
+QPERF1 is resolved; questions are empty. The original goal is still unfinished.
+The repaired supervisor is PID 34201, runner 34202, build group 34224. Repeated
+independent finder/skeptic snapshots confirmed adopted supervisor, live runner,
+advancing heartbeats and one bounded Lean worker across tool returns. Current
+state is in `supervisor.json` and `old-clean-full.live.json` under the external
+evidence directory. The earlier unguarded run cannot establish a baseline.
+
+`acceptance.py` writes off-Git `evidence/acceptance.json`: explicit all-661-module
+accounting from build logs, per-module reported durations, current-byte hashes
+for the 402 external project dependency modules, and the 146 direct external
+edges. These dependency hashes are not elaborated interface hashes. Module
+growth is recorded for escalation under QPERF1. Missing modules never count as
+built, failed gates dominate pending results, and both full reports require
+positive finite wall/RSS values. The matched full comparison alone governs
+the performance stop. Pipeline writes this report after its new full gate;
+rerun the report manually after an old-gate failure or to refresh progress.
+
+`acceptance_controls.py` passed module-growth-with-improved-full-metrics,
+missing module, missing result, old failure without new result, failed/resource
+stopped run and zero/nonfinite/missing metric cases. Finder and skeptic reviewed
+these rules independently; their confirmed classification findings were fixed.
+No full migration gate is accepted by these tooling reviews.
+
+Three useful backfill/tooling items are saved: complete lexical/directive census
+and controls; repaired detached serial supervision and lifecycle controls; and
+deterministic acceptance/dependency reporting with negative controls. Fresh-thread
+handoff goes to the coordinator with this same VM, branch and original goal;
+no replacement goal or competing continuation was created. Full migration work
+continues through the saved supervisor, followed by the still-pending owner/API
+work, affected validation, performance comparison and migration reviews.

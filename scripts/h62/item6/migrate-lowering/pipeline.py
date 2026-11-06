@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Continue an already-running clean old gate, then one clean pinned new gate."""
-import fcntl, hashlib, json, os, subprocess, time
+import fcntl, hashlib, json, math, os, subprocess, time
 from pathlib import Path
 root=Path.cwd(); artifacts=Path("/workspace/migrate-lowering-artifacts"); evidence=artifacts/"evidence"
 old=evidence/"old-clean-full.json"; result=evidence/"pipeline.json"
@@ -28,11 +28,15 @@ new=evidence/"new-clean-full.json"
 rc=subprocess.run(["python3",str(script/"bounded.py"),"--output",str(new),"--lock-fd",str(lock.fileno()),"--","./run-lean.sh"],env=env,pass_fds=(lock.fileno(),)).returncode
 lock.close()
 if not new.exists(): raise SystemExit("new gate setup failed; inspect pipeline driver log")
-b=json.loads(new.read_text()); delta=(b["wall_seconds"]/a["wall_seconds"]-1)*100 if not rc else None
-rss_delta=(b["sampled_peak_group_rss_bytes"]/a["sampled_peak_group_rss_bytes"]-1)*100 if not rc and a["sampled_peak_group_rss_bytes"] else None
+b=json.loads(new.read_text())
+gate_failed=bool(rc or b.get("exit")!=0 or b.get("stop_reason"))
+valid=all(isinstance(m.get(k),(int,float)) and math.isfinite(m[k]) and m[k]>0 for m in (a,b) for k in ("wall_seconds","sampled_peak_group_rss_bytes"))
+delta=(b["wall_seconds"]/a["wall_seconds"]-1)*100 if not gate_failed and valid else None
+rss_delta=(b["sampled_peak_group_rss_bytes"]/a["sampled_peak_group_rss_bytes"]-1)*100 if not gate_failed and valid else None
 regression=max(delta,rss_delta) if delta is not None and rss_delta is not None else None
-status="blocked" if rc or regression is None or regression>0 else "validation-pending"
-blocker="NEW_GATE_FAILED" if rc else "MISSING_COMPARISON_METRIC" if regression is None else "SLOWDOWN_GT_10_PERCENT_STOP" if regression is not None and regression>10 else "REGRESSION_ESCALATION" if regression is not None and regression>0 else None
+status="blocked" if gate_failed or regression is None or regression>0 else "validation-pending"
+blocker="NEW_GATE_FAILED" if gate_failed else "MISSING_COMPARISON_METRIC" if regression is None else "SLOWDOWN_GT_10_PERCENT_STOP" if regression>10 else "REGRESSION_ESCALATION" if regression>0 else None
 result.write_text(json.dumps({"status":status,"blocker":blocker,"old":a,"new":b,"wall_delta_percent":delta,"sampled_rss_delta_percent":rss_delta,"note":"No migration completion: assigned module acceptance, type/axiom checks, owner coordination and milestone reviews still required."},indent=2)+"\n")
+subprocess.run(["python3",str(script/"acceptance.py")],check=True)
 print(result.read_text(),flush=True)
 raise SystemExit(1 if blocker else 0)
