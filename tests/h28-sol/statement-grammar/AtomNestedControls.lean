@@ -252,6 +252,49 @@ theorem simple_premise_names_parsed :
   injection bad with bad
   exact absurd bad (by decide)
 
+/-- `{ emit E(); revert Err(); }` through the path and argument premises. -/
+def callItems : Syn (.list (.item .body)) :=
+  .cons (.stmtItem (.emit (.ident "E") (.positional .nil)))
+    (.cons (.stmtItem (.revert (.ident "Err") (.positional .nil))) .nil)
+
+def callParts : List (List Tok) :=
+  [[.kw .emit] ++ [.ident "E"] ++ [.punct .lparen, .punct .rparen] ++ [.punct .semi],
+   [.ident "revert"] ++ [.ident "Err"] ++ [.punct .lparen, .punct .rparen] ++ [.punct .semi]]
+
+theorem call_items_relation : AtomItems callItems callParts 8 :=
+  .stmtCons (.emitS (ident_path_atom "E") empty_args_atom rfl rfl)
+    (.stmtCons (.revertS (ps := []) (ident_path_atom "Err") empty_args_atom rfl rfl) .nil)
+
+theorem call_block_coverage (n : Nat) (s : St) :
+    stmt (n + 8 + 6) .body (locatedInput (braces callParts.flatten) s) =
+      .ok (.blockStmt (.block callItems), s) :=
+  atom_stmt_coverage (.block call_items_relation) n s (Or.inl rfl)
+
+/-- The kernel evaluates the actual parser on `revert Err();`. -/
+theorem revert_kernel :
+    stmt 8 .body (locatedInput ([.ident "revert"] ++ [.ident "Err"] ++
+      [.punct .lparen, .punct .rparen] ++ [.punct .semi]) ⟨[], [], 0⟩) =
+      .ok (.revert (.ident "Err") (.positional .nil), ⟨[], [], 0⟩) := by
+  rfl
+
+/-- Contextual `revert`: followed by a non-identifier it is not a revert
+statement; the dispatcher sends it to `simpleStmt`, which reads `revert;` and
+`revert();` as expression statements (all tokens consumed). -/
+theorem revert_needs_identifier :
+    (stmt 8 .body (locatedInput [.ident "revert", .punct .semi] ⟨[], [], 0⟩)).toOption.map
+      (fun p => p.2.ts.length) = some 0 ∧
+    (stmt 20 .body (locatedInput [.ident "revert", .punct .lparen, .punct .rparen,
+      .punct .semi] ⟨[], [], 0⟩)).toOption.map (fun p => p.2.ts.length) = some 0 := by
+  decide +kernel
+
+/-- Negative: the precedence contract refuses a non-path event. -/
+theorem emit_needs_path : (Syn.emit (k := .body) (.lit (.bool true)) (.positional .nil)).precNode = false := by
+  rfl
+
+#print axioms call_block_coverage
+#print axioms revert_kernel
+#print axioms revert_needs_identifier
+#print axioms emit_needs_path
 #print axioms simple_block_coverage
 #print axioms simple_stmt_kernel
 #print axioms simple_block_unique

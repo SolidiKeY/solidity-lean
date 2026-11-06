@@ -2327,3 +2327,40 @@ It was dropped, not given more heartbeats.
 Not claimed: any `simple` parse beyond the premise (declarations, tuple
 declarations and compound expressions are covered only through it), and
 the contextual `revert`-headed simple statements.
+
+## Checkpoint AB: `emit` and `revert`; `try` not covered
+
+This is coordinator item 2. `AtomCall.lean` exposes two premises:
+
+- `PathAtom e ps`: `pathExpr` reads `ps` as `e` and stops at the
+  argument list's `(`.
+- `ArgsAtom args as b`: `callArgs` reads `as` as `args` before `;`.
+
+They are proved for identifiers (`ident_path_atom`) and for the empty
+positional list (`empty_args_atom`, budget 1). The steps are `emit_step`
+and `revert_step`. For `revert`, the dispatcher's string test on the
+literal reduces, and the path must start with an identifier, which is
+exactly the dispatcher's own condition.
+
+`AtomStmt` gains `emitS` and `revertS`, both at budget `b`. Each takes the
+precedence contract `e.isPathExpr = true` as a premise, because
+`Syn.precNode` of `emit` and `revert` is exactly that.
+
+Controls cover:
+
+- `{ emit E(); revert Err(); }` at budget 8, with coverage;
+- a kernel `rfl` parse of `revert Err();`;
+- contextual `revert;` and `revert();`, which reach `simpleStmt` and are
+  read as expression statements;
+- the precedence refusal of a non-path event.
+
+`try` is not covered. Its expression is followed by `{`, and the expression
+parser's call-options check looks past that brace. Probes show that `f {}`
+and `f() {}` both parse, leaving `{ }`. A premise for an arbitrary
+following block therefore cannot be inhabited by computation: neither the
+identifier nor the call instance closes by `rfl` with a variable suffix.
+Covering `try` would need a proof about the expression parser's postfix
+loop, which is expression-parser completeness and belongs to the
+expression lanes. The catch-clause loop also needs a "no following `catch`"
+frame, which the statement-level frame does not carry. The partial code was
+removed. `try` stays in limitations.

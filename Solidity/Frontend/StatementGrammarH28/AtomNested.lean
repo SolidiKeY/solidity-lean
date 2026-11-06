@@ -1,4 +1,4 @@
-import Solidity.Frontend.StatementGrammarH28.AtomSimple
+import Solidity.Frontend.StatementGrammarH28.AtomCall
 
 /-! Arbitrarily nested statements and item lists over expression atoms.
 
@@ -145,6 +145,17 @@ inductive AtomStmt : {k : SCtx} → Syn (.stmt k) → List Tok → Nat → Prop 
       AtomStmt (Syn.forStmt (l := l) (.some x) c v b)
         ([.kw .for_, .punct .lparen] ++ ss ++ [.punct .semi] ++ cs ++ [.punct .semi] ++ vs ++
           [.punct .rparen] ++ ts) (d + a + ca + va + 1)
+  | emitS {k : SCtx} {e : Syn .expr} {ps : List Tok} {args : Syn .callArgs} {as : List Tok}
+      {b : Nat} :
+      PathAtom e ps → ArgsAtom args as b → as.head? = some (.punct .lparen) →
+      e.isPathExpr = true →
+      AtomStmt (k := k) (.emit e args) ([.kw .emit] ++ ps ++ as ++ [.punct .semi]) b
+  | revertS {k : SCtx} {e : Syn .expr} {y : String} {ps : List Tok} {args : Syn .callArgs}
+      {as : List Tok} {b : Nat} :
+      PathAtom e (.ident y :: ps) → ArgsAtom args as b → as.head? = some (.punct .lparen) →
+      e.isPathExpr = true →
+      AtomStmt (k := k) (.revert e args)
+        ([.ident "revert"] ++ (.ident y :: ps) ++ as ++ [.punct .semi]) b
 
 inductive AtomItems : {k : SCtx} → Syn (.list (.item k)) → List (List Tok) → Nat → Prop where
   | nil {k : SCtx} : AtomItems (Syn.nil (c := .item k)) [] 0
@@ -438,6 +449,12 @@ theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List T
     rw [fuel]
     exact for_atom_step hc hv (n + d + 1) l s hb
   | _, _, _, _, .simpleS hx hh, n, s, _ => simple_stmt_coverage hx hh n s
+  | _, _, _, b, .emitS hp ha hl _, n, s, _ => by
+    rw [show n + b + 6 = (n + 5) + b + 1 by omega]
+    exact emit_step hp ha hl (n + 5) s
+  | _, _, _, b, .revertS hp ha hl _, n, s, _ => by
+    rw [show n + b + 6 = (n + 5) + b + 1 by omega]
+    exact revert_step hp ha hl (n + 5) s
   | _, _, _, _, .forInit (l := l) (u := u) (ts := ts) (d := d) (a := a) (ca := ca) (va := va)
       hx hh hc hv h, n, s, hf => by
     have hb := atom_stmt_coverage h (n + a + ca + va) s hf
@@ -533,6 +550,8 @@ theorem atom_stmt_node {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
     (h : AtomStmt x ts d) : x.precNode = true := by
   cases h with
   | ifSome _ _ _ hc => exact (if_some_contract_iff _ _ _).mpr hc
+  | emitS _ _ _ hpath => exact hpath
+  | revertS _ _ _ hpath => exact hpath
   | _ => rfl
 
 theorem atom_stmt_nearest_else {k : SCtx} {c : Syn .expr} {t e : Syn (.stmt k)}

@@ -94,3 +94,4 @@ Solidity.Frontend.StatementGrammarH28.AtomConditional	Conditional/loop coverage 
 Solidity.Frontend.StatementGrammarH28.AtomNested	Mutual nested atom statement/item fragment: coverage, budgets, nearest else, token/prefix uniqueness
 Solidity.Frontend.StatementGrammarH28.G0Rejections	Gate G0 twins of Syn.rejections for the fixture profile observation, with link theorems
 Solidity.Frontend.StatementGrammarH28.AtomSimple	Simple statements and for initialisers under the stated SimpleAtom premise
+Solidity.Frontend.StatementGrammarH28.AtomCall	emit/revert statement steps under stated path and argument premises
