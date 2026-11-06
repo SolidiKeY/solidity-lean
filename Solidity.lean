@@ -2441,6 +2441,7 @@ import Solidity.Frontend.StatementGrammarH28.AtomCall
 import Solidity.Frontend.StatementGrammarH28.AtomConditional
 import Solidity.Frontend.StatementGrammarH28.AtomNested
 import Solidity.Frontend.StatementGrammarH28.AtomSimple
+import Solidity.Frontend.StatementGrammarH28.AtomYield
 import Solidity.Frontend.StatementGrammarH28.Balance
 import Solidity.Frontend.StatementGrammarH28.BalanceAtoms
 import Solidity.Frontend.StatementGrammarH28.BalancePr

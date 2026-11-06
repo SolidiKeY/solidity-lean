@@ -2292,10 +2292,10 @@ It is proved for identifier expression statements (`ident_simple_atom`,
 budget 6, by `rfl`; the parser's `declHead` attempt fails and backtracks).
 Otherwise it is a premise, as with the expression atoms. The first token
 must satisfy `simpleHead`: it is not a statement keyword, `else`,
-`unchecked`, `{`, `}`, `;` or the identifier `revert`. These are exactly
-the tokens that the statement, item and block-loop dispatchers read as
-their own. The side condition is conservative, because `revert` followed by
-a non-identifier also reaches `simpleStmt`.
+`unchecked`, `{`, `}`, `;` or the identifier `revert`. This is a
+conservative set, not an exact one. `else` reaches `simpleStmt` but fails
+there, and `;` is excluded for the `for` header's `eat ;`. `revert` followed
+by a non-identifier also reaches `simpleStmt`.
 
 The following are proved:
 
@@ -2356,11 +2356,56 @@ Controls cover:
 
 `try` is not covered. Its expression is followed by `{`, and the expression
 parser's call-options check looks past that brace. Probes show that `f {}`
-and `f() {}` both parse, leaving `{ }`. A premise for an arbitrary
-following block therefore cannot be inhabited by computation: neither the
-identifier nor the call instance closes by `rfl` with a variable suffix.
-Covering `try` would need a proof about the expression parser's postfix
-loop, which is expression-parser completeness and belongs to the
-expression lanes. The catch-clause loop also needs a "no following `catch`"
-frame, which the statement-level frame does not carry. The partial code was
-removed. `try` stays in limitations.
+and `f() {}` both parse, leaving `{ }`. With a variable suffix, neither the identifier
+instance nor the call instance closes by `rfl`, because `postLoop` looks
+two tokens past `{` for `ident :`. A premise with that lookahead frame
+would probably work, since no statement starts with `ident :`. The real
+blocker is the catch-clause loop, which needs a "no following `catch`"
+frame that the statement-level frame does not carry. `try` was therefore
+not completed. The partial code was removed, and `try` stays in
+limitations.
+
+## Checkpoint AC: yield and `Derives` uniqueness for the atom-condition fragment
+
+This is coordinator item 3. The printer premise can be stated without a scope
+decision:
+
+    AtomYield c cs := ∀ L, c.yield L = some ([cs], L)
+
+It says the existing printer yields exactly `cs` for `c`, for every layout
+state. It is proved for identifiers and Boolean literals.
+`AtomYields` (`AtomYield.lean`) mirrors `AtomStatements` with these
+premises; Boolean witnesses embed. The following are proved:
+
+- `atom_yields_yield`: the tree yields exactly its tokens.
+- `atom_yields_derives_iff`: `x.Derives w ↔ w = ts`.
+- `atom_statements_yield_unique`: two trees that have parse and print
+  witnesses and derive the same words are equal.
+
+Controls (`AtomConditionalControls`) cover:
+
+- the dangling-else tree `if (x) if (y) {} else {}`: its print witness, its
+  derivation, and that it is the only fragment tree deriving those words;
+- the wrong association printing the same tokens (`rfl`), which is excluded
+  by the precedence contract and not by the printer;
+- the printer premise naming the printed tokens.
+
+Not done: the same for the mutual `AtomStmt`/`AtomItems` fragment. It would
+need printer premises for `simple`, path and argument atoms, a yield
+relation parallel to the mutual pair, and a yield proof for blocks and
+lists. No scope decision is needed; this is left as further work.
+
+### Reviews of checkpoints AA–AB
+
+The skeptic gave PASS-with-fixes and confirmed:
+
+- the premises are confined to the sub-parsers `simple`, `pathExpr` and
+  `callArgs`, never `stmt`, `item` or `block`;
+- no earlier theorem statement changed;
+- imports are acyclic.
+
+Fixes:
+
+- The `simpleHead` set is described as conservative, not exact.
+- The `try` reason is softened, with the catch frame named as the blocker.
+- The module-map row for `AtomNested` was stale and has been updated.

@@ -95,3 +95,4 @@ Solidity.Frontend.StatementGrammarH28.AtomNested	Mutual nested atom statement/it
 Solidity.Frontend.StatementGrammarH28.G0Rejections	Gate G0 twins of Syn.rejections for the fixture profile observation, with link theorems
 Solidity.Frontend.StatementGrammarH28.AtomSimple	Simple statements and for initialisers under the stated SimpleAtom premise
 Solidity.Frontend.StatementGrammarH28.AtomCall	emit/revert statement steps under stated path and argument premises
+Solidity.Frontend.StatementGrammarH28.AtomYield	Printer premise, yield relation and yield uniqueness for the atom-condition fragment

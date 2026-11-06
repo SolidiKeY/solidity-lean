@@ -1,4 +1,4 @@
-import Solidity.Frontend.StatementGrammarH28.AtomConditional
+import Solidity.Frontend.StatementGrammarH28.AtomYield
 
 /-! Inhabited controls for every AtomStatements constructor, identifier atoms
 in every condition position, the dangling-else association with identifier
@@ -112,6 +112,42 @@ theorem atom_premise_needs_budget : ¬ ExprAtomRparen (.ident "x") [.ident "x"] 
   revert bad
   decide +kernel
 
+/-- Printed tokens of the dangling-else tree, and yield uniqueness: any
+fragment tree deriving the same words is the nearest-else tree. -/
+theorem ident_nearest_yields : AtomYields identNearest identTokens :=
+  .ifNone (ident_atom_yield "x")
+    (.ifSome (ident_atom_yield "y") (.boolean (.loops (.block .nil)))
+      (.boolean (.loops (.block .nil))))
+
+theorem ident_nearest_derives : identNearest.Derives identTokens :=
+  (atom_yields_derives_iff ident_nearest_yields identTokens).mpr rfl
+
+theorem ident_nearest_yield_unique {x : Syn (.stmt .body)} {ts : List Tok} {d : Nat}
+    (hx : AtomStatements x ts d) (px : AtomYields x ts) (dx : x.Derives identTokens) :
+    x = identNearest :=
+  atom_statements_yield_unique hx px ident_nearest_relation ident_nearest_yields dx
+    ident_nearest_derives
+
+/-- The wrong association prints the same tokens; it is excluded by the
+precedence contract, not by the printer. -/
+theorem ident_wrong_same_print : identWrong.toks [] = identNearest.toks [] := by rfl
+
+/-- Negative: the printer premise names the printed tokens. -/
+theorem atom_yield_names_tokens : ¬ AtomYield (.ident "x") [.ident "y"] := by
+  intro h
+  have bad := h []
+  injection bad with bad
+  injection bad with bad
+  injection bad with bad
+  injection bad with bad
+  injection bad with bad
+  exact absurd bad (by decide)
+
+#print axioms ident_nearest_yields
+#print axioms ident_nearest_derives
+#print axioms ident_nearest_yield_unique
+#print axioms ident_wrong_same_print
+#print axioms atom_yield_names_tokens
 #print axioms ident_nearest_coverage
 #print axioms ident_nearest_actual_parse
 #print axioms ident_wrong_not_in_fragment
