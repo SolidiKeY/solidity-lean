@@ -48,6 +48,12 @@ Frozen whole-source hashes (not elaborated type hashes):
 
 The generated complete census is off Git at
 `/workspace/migrate-lowering-artifacts/evidence/census-base.json`.
+The repository-wide `bash scripts/check-doc-paths.sh` failed (exit 1) on one
+pre-existing reference in docs/feature-work/after-roadmap-va1.md:198 to the
+uninstalled Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean. The same
+reference is present at the pinned base. It is outside this lane; no fix was
+attempted. No missing reference from this new handoff was reported.
+
 Regression controls:
 `PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item6/migrate-lowering/census_controls.py`
 passed for local/private instances, examples, comment-hidden imports, dependency
