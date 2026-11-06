@@ -1,5 +1,32 @@
 # SOL-EU: certified expression yield uniqueness
 
+## Current status (Claude VM continuation, 2026-11-05)
+
+This section supersedes the Codex-VM status text below wherever they differ.
+
+- **Evidence moved out (H44).** Commit e48d82a2 removed 1137 generated files
+  from `tests/sol-expression-uniqueness/`: everything under `evidence/` and the
+  `kernel-{declarations,emissions,module-declarations}.json(.gz)` dumps. It
+  removed no `.lean` file. Only `bulk-manifest.json` indexes them, and the copies
+  stay on the Codex VM. Every later reference below to `evidence/…`, a
+  `*.inside.json` or `*.outer.json`, or a review-verdict JSON names a file that
+  is **not in git**; it is history, not something the repository can check now.
+- **Codex tooling removed.** `bounded.py`, `inside.py`, `serial-build.py`,
+  `runtime-bin/lake`, `runtime-lakefile.toml` and `runtime-mcp.sh` are deleted.
+  The runtime-enforcement paragraphs below describe the Codex VM only.
+- **Checker.** `scripts/check-sol-expression-uniqueness.py` reads the kernel axiom
+  report from the `#guard_msgs` docstrings of `AxiomPins.lean`, which the
+  library build re-checks. `--checkpoint --build-log LOG` requires a completed
+  `./run-lean.sh` log from this checkout. The Codex evidence checks (kernel
+  environment dumps, 130 solc parsing observations) run only with
+  `--external-evidence`. They were not re-run here: the pinned soljson 0.8.38
+  (sha256 `6c74ffba…`) cannot be downloaded from this VM, and the npm `solc@0.8.38`
+  build hashes differently (`0b15fcb2…`).
+- **Registration.** `register.sh` already lists all 100 modules in the library
+  roots. The module-map rows are in `docs/module-map/frontend.d/expression-uniqueness.md`,
+  and the axiom pins go through `scripts/g07-axiom-pins.d/` (`check-axiom-pins.mjs --write`).
+- **Post-split reviews (read-only, no Lean server).** See "Claude-VM reviews" at the end.
+
 Status: the original certified uniqueness theorem and accepted-tree corollaries
 are kernel-checked by exhaustive intrinsic induction. All1241declaration axiom pins and
 all2323unique logical declaration type/axiom audits pass. H26 runtime setup remains resolved without changing
@@ -863,3 +890,93 @@ This is a complete original SOURCE PROOF checkpoint with an integration-blocked
 assignment status, not full RUNTIME/task acceptance. Required global registrations,
 central pins and library/TestSuite/corpus/strict integration validation remainOPEN.
 The goal is retained and not marked complete. No scope question is pending.
+
+## Claude-VM reviews
+
+**Post-split finder and skeptic (2026-11-05).** Both were read-only and neither
+used the Lean server.
+
+- **Skeptic: no refutation.**
+  - `CertifiedYieldUnique` is unchanged, and `Syn`, `Derives`, `prec` and `Tok`
+    are the existing definitions.
+  - There are no smuggled premises: no sorry, axiom, opaque, native_decide,
+    set_option, variable or class anywhere in the area.
+  - `AxiomPins.lean` imports all 99 other modules and holds 1241 pins. Their
+    axiom union is {propext, Classical.choice, Quot.sound}.
+  - e48d82a2 deleted no `.lean` file, and the layer check is clean.
+- **Finder: no `.lean` file deleted.** e48d82a2 deleted 671 json, 376 log,
+  43 tsv, 43 HEAD and 4 gz files. Every root import resolves, the EU-01 count is
+  29 = 29, and no file uses forbidden constructs.
+- **Confirmed findings, all fixed:**
+  1. This document still claimed the externalized evidence and the removed
+     tooling as present. Fixed by the current status section above.
+  2. `checker-controls.py` read deleted evidence and failed its positive
+     baseline. It is rewritten: synthetic gate logs exercise the build-log
+     checks (stale digest, failed exit, partial gate, error lines, missing log),
+     the axiom-report controls corrupt `AxiomPins.lean`, and the kernel
+     environment controls run only when the evidence is restored.
+  3. `refresh-audit.py pins` read a deleted log. It now takes `--report`.
+  4. `--checkpoint` accepted any log that said "Build completed successfully".
+     It now requires a `gate.sh` log whose `SOL_EU_SOURCES` digest equals the
+     current sources, `SOL_EU_FULL_GATE ./run-lean.sh`, `SOL_EU_EXIT 0` and no
+     error or failed job.
+  5. The `--proof` docstring overstated what it checks. It now says that mode is
+     static only.
+  6. `obligations.json` (EU-12, EU-13) and `registration-manifest.json` (rows
+     file, note, central pins, kernel inventory) were stale. They are updated.
+
+## Sealed handoff (Claude VM)
+
+- **Branch:** `cloud/moved4-20261105/expression-uniqueness`.
+- **Start:** `cloud/expression-uniqueness-move` (c2e862c1) merged, plus master
+  aec9adf1, which was already contained.
+- **Toolchain:** Lean 4.24.0, Lake 5.0.0-src+797c613. The VM had 4 cores and
+  15 GB of RAM; Lake ran in its default parallel mode.
+
+**Headline theorems, kernel-checked by the library build.** Each pins
+`[propext, Classical.choice, Quot.sound]` in `AxiomPins.lean`:
+
+```lean
+theorem certified_expression_yield_unique (a b : Syn .expr) (ts : List Tok)
+    (da : a.Derives ts) (ha : a.prec = true) (db : b.Derives ts) (hb : b.prec = true) : a = b
+theorem certifiedYieldUnique : CertifiedYieldUnique
+theorem parseCat_expression_accepted_unique {p : Nat → P (Syn .expr)} {src : Bytes}
+    {tree : Syn .expr} {layout : List Choice} (accepted : parseCat p src = .ok (tree, layout)) :
+    ∃ ps, lex src = .ok ps ∧ tree.toks layout = some (tokensOf ps) ∧ tree.prec = true ∧
+      ∀ other : Syn .expr, other.Derives (tokensOf ps) → other.prec = true → tree = other
+```
+
+All 1241 declarations of the area are pinned with standard axioms only, and
+recorded centrally in
+`scripts/g07-axiom-pins.d/Solidity/Frontend/ExpressionUniqueness/AxiomPins.json`.
+
+**Gates, all passing:**
+
+| Gate | Result |
+|---|---|
+| `tests/sol-expression-uniqueness/gate.sh LOG`, which runs `./run-lean.sh` with `SOLKEY_RULES` set to the pinned snapshot | exit 0; build completed (5922 jobs); KeySort 377 taclets, 131 read-bearing, OK |
+| `python3 scripts/check-sol-expression-uniqueness.py --build-log LOG` | CHECKPOINT_PASS (1241 guards, 100 modules); ACCEPTANCE_PASS |
+| `python3 tests/sol-expression-uniqueness/checker-controls.py` | all controls pass; the kernel-environment controls are skipped because their evidence is externalized |
+| `node scripts/check-orphans.mjs` | 5906 reachable, 0 orphaned |
+| `register.sh --check`, `fragments.sh --check` | pass |
+| `sha256sum -c tests/sol-expression-uniqueness/SOURCE-SHA256SUMS` | pass |
+| EU-01: constructor list against current `Syntax.lean` | 29 = 29 |
+
+`gate-logs.sha256` lists the hashes of the gate logs; the logs themselves are
+not in git.
+
+**KeySort and the sibling checkout.** Without `SOLKEY_RULES`, `check-solkey.sh`
+reads `../solkey`, which on this VM is upstream `main` (b8d5f88), not the pin
+`473da8944c`. Against that checkout it reports 167 mismatches. The check is
+defined against the pinned snapshot (`docs/solkey-migration.md`), and at the pin
+it passes. The mismatches come from the unpinned checkout, not from this lane.
+
+**Slow modules.** These took over 60 s as dependency builds while four jobs ran
+in parallel: `ExpressionUniqueness.Families` 118 s (the Codex VM recorded about
+188 s) and `ExpressionUniqueness.ExpressionLowFree` 99 s. Nothing in this lane
+changed them.
+
+**Not re-run.** The 130 external solc parsing observations and the
+kernel-environment dump audit depend on the H44 evidence and on the pinned
+soljson (sha256 `6c74ffba…`), and neither can be reached from this VM. They are
+external tests, not part of the kernel proof.

@@ -114,3 +114,6 @@
 | `Source/Agreement/BoolSlotOrControls.lean` | Internally instantiated disjunction client, reversed selected/skipped right-hand effects/fuel and operator-distinction controls. |
 | `Source/Agreement/BoolSlotToggle.lean` | Actual computed-RHS boolean read-modify-write expression/statement producer, returning the new value and retaining exact local/state history. |
 | `Source/Agreement/BoolSlotToggleControls.lean` | Internally instantiated computed-assignment client, low fuel/new-result controls and actual Source/model two-head-update restoration. |
+| `Source/Agreement/BoolSlotReadWrite.lean` | Actual paired-index get/set, last-write and read-after-write restoration laws over existing locals/environments. |
+| `Source/Agreement/BoolSlotRepeated.lean` | Both actual two-computed-update executions at arbitrary slots, with internally derived intermediate reads and normal composition. |
+| `Source/Agreement/BoolSlotRepeatedControls.lean` | Both-run importing client, insufficient-horizon refusal and different-slot countercontrol. |

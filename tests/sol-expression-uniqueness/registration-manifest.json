@@ -1347,507 +1347,507 @@
   ],
   "module_map_rows": [
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/Accepted.lean",
       "description": "Accepted expression trees equal every certified tree of their actual tokens"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AddControls.lean",
       "description": "Inhabited arbitrary prefix and additive-root controls"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AddFreeAlgebra.lean",
       "description": "Operand-sensitive additive algebra"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AddRoot.lean",
       "description": "Certified additive roots use operand-sensitive last markers"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AddScan.lean",
       "description": "Operand-sensitive additive scans"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AllRootLevels.lean",
       "description": "Reconstruct every certified expression precedence level"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ArgumentIdentity.lean",
       "description": "Intrinsic argument identity induction steps"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ArgumentSpans.lean",
       "description": "Positional and named argument constructors reconstruct their word vectors"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ArgumentWords.lean",
       "description": "Actual argument vectors preserve nonempty words and comma boundaries"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AttributeBalance.lean",
       "description": "Function-type attribute layout preserves delimiter balance"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AttributeFieldIdentity.lean",
       "description": "Actual attribute words determine existing function-type fields"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AttributeOrderIdentity.lean",
       "description": "Successful two-field attribute orders are exhaustive"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AttributeTokens.lean",
       "description": "Actual function-type attribute tokens belong to their keyword run"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/AxiomPins.lean",
       "description": "AxiomPins"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/BinaryControls.lean",
       "description": "Rank-ten raw-marker limitation is an inhabited arbitrary-family control"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/BinaryFreeAlgebra.lean",
       "description": "Parameterized binary marker algebra"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/BinaryIdentity.lean",
       "description": "Binary expression identity structural steps"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/BinaryRank.lean",
       "description": "Certified binary marker classes distinguish lower roots from higher roots"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/BinaryRoot.lean",
       "description": "Certified binary root markers follow their associativity"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/BinarySpans.lean",
       "description": "Recover binary child words from actual certified printer executions"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/BoundaryIdentity.lean",
       "description": "Unary and conditional expression identity steps"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/Certified.lean",
       "description": "Certified expression yield uniqueness over the original intrinsic syntax"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/CertifiedControls.lean",
       "description": "Inhabited arbitrary-family controls for the complete theorem"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/CommaFreeAlgebra.lean",
       "description": "Comma-free token algebra for expression spans"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ConditionalAlgebra.lean",
       "description": "Conditional balance algebra for successful intrinsic yields"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ConditionalBalance.lean",
       "description": "Top-level conditional punctuation balance"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ConditionalControls.lean",
       "description": "Arbitrarily nested conditional middle controls"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ConditionalSpans.lean",
       "description": "Recover all three conditional child words from original certificates"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ContainerControls.lean",
       "description": "Arbitrary optional-hole vector identity and flattened collision control"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ContainerIdentity.lean",
       "description": "Intrinsic list and optional-expression identity steps"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/DelimiterReconstruction.lean",
       "description": "Reconstruct enclosing delimiter boundaries from certified expression tokens"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ElementaryPathPrefix.lean",
       "description": "Elementary type and path words have maximal prefix cuts"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionAddFree.lean",
       "description": "Certified roots above addition are additively free from an unfinished state"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionBalance.lean",
       "description": "Intrinsic expression yields are delimiter-balanced"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionBinaryFree.lean",
       "description": "Certified higher roots avoid each lower binary marker family"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionCommaFree.lean",
       "description": "Intrinsic expression certificates exclude top-level commas"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionConditional.lean",
       "description": "Existing expression yields pair top-level questions and colons"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionLowFree.lean",
       "description": "Certified high-precedence expressions avoid loose-root markers"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionMode.lean",
       "description": "Every successful intrinsic expression yield finishes an operand"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionStart.lean",
       "description": "Actual expression-category yields never begin with an opening brace"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ExpressionUnaryFree.lean",
       "description": "Original certified roots above unary operators exclude their outer markers"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/v08-adapters.d/00-base.md",
       "module": "Frontend/ExpressionUniqueness/Families.lean",
       "description": "Arbitrary-size inhabited expression controls"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/00-base.md",
       "module": "Frontend/ExpressionUniqueness/Fixtures.lean",
       "description": "Frozen disagreement refusals, rerun without changing verdicts"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/FnTypePrefix.lean",
       "description": "Function-type words have maximal parameter, attribute and returns cuts"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/v08-adapters.d/00-base.md",
       "module": "Frontend/ExpressionUniqueness/Fragments.lean",
       "description": "Reconstruction of concatenated literal payloads"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/FunctionTypeIdentity.lean",
       "description": "Actual function-type vectors and field identity"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/Grouping.lean",
       "description": "Grouping yield inversion and arbitrary-depth certified controls"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/LastEnclosure.lean",
       "description": "Trailing balanced enclosures reconstruct their prefix and payload"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/LayoutBoundary.lean",
       "description": "Successful expression layouts extend and trim"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/LiteralPrefix.lean",
       "description": "Literal primary words reconstruct their maximal prefix"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/LowControls.lean",
       "description": "Inhabited loose-root controls with arbitrary conditional middle assignments"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/LowFreeAlgebra.lean",
       "description": "Joint assignment and conditional marker algebra"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/LowRoot.lean",
       "description": "Recover assignment and conditional root marker classes from certificates"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/MappingIdentity.lean",
       "description": "Actual intrinsic mapping identity induction step"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/MappingKeyIdentity.lean",
       "description": "Existing intrinsic mapping key word reconstruction"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/MemberSpans.lean",
       "description": "Member and named-argument names and child words reconstruct"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/OperandMode.lean",
       "description": "Delimiter-aware operand completion state"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/OperandModeAlgebra.lean",
       "description": "Operand-mode algebra for literal fragments, types and attribute layouts"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ParameterIdentity.lean",
       "description": "Actual parameter fields and recursive identity step"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ParameterWords.lean",
       "description": "Actual parameter words are nonempty at arbitrary list lengths"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PostfixControls.lean",
       "description": "Inhabited arbitrary-depth mixed postfix controls"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PostfixFollowers.lean",
       "description": "Concrete followers of an existing primary expression"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PostfixIdentity.lean",
       "description": "Postfix expression identity structural steps"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PostfixRootKind.lean",
       "description": "The five postfix constructor families reconstruct from actual words"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PostfixSpans.lean",
       "description": "Actual bracketed postfix children have unique token spans"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PostfixYieldSplit.lean",
       "description": "Actual postfix and call-argument printer inversion"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/Primary.lean",
       "description": "Reconstruction of deterministic primary token yields"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PrimaryChildIdentity.lean",
       "description": "Recursive primary expression identity steps"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PrimaryLeafIdentity.lean",
       "description": "Primary expression leaf identity against every certified competitor"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PrimaryPrefix.lean",
       "description": "Reconstruct the complete primary token prefix"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PrimaryPrefixParts.lean",
       "description": "Primary word-prefix cuts from actual intrinsic executions"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PrimarySpine.lean",
       "description": "Certified high expressions expose an existing primary and actual postfix word"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PrimaryStart.lean",
       "description": "Actual primary first-token classes"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/PrimaryYieldSplit.lean",
       "description": "Actual primary printer components and balanced enclosures"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/RecursiveProperty.lean",
       "description": "Structural induction predicates over existing intrinsic syntax"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/v08-adapters.d/00-base.md",
       "module": "Frontend/ExpressionUniqueness/Refusals.lean",
       "description": "Whole-certificate refusal and precedence boundary families"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/ReverseSplit.lean",
       "description": "Reverse delimiter scanning and last-marker reconstruction"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/RootLevelControls.lean",
       "description": "Arbitrary primary/postfix boundary controls"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/RootLevels.lean",
       "description": "Original certified root levels agree through unary precedence"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/00-base.md",
       "module": "Frontend/ExpressionUniqueness/SeparatorSplit.lean",
       "description": "Comma-separated token span reconstruction"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/SpanControls.lean",
       "description": "Arbitrary-family controls for recovered operand spans"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/StartAlgebra.lean",
       "description": "Balanced words which do not begin with an opening brace"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/00-base.md",
       "module": "Frontend/ExpressionUniqueness/Statement.lean",
       "description": "The original certified expression uniqueness target"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/00-base.md",
       "module": "Frontend/ExpressionUniqueness/TokenSplit.lean",
       "description": "Delimiter execution and token splitting for expression uniqueness"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypeArrayIdentity.lean",
       "description": "Reconstruct intrinsic array type roots and recursive identity"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypeAtomPrefix.lean",
       "description": "Existing non-array type words reconstruct their maximal prefix"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypeAtomStart.lean",
       "description": "Non-array type roots distinguish their first token classes"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypeIdentityControls.lean",
       "description": "Unconditional identity controls for arbitrary intrinsic type families"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypeLeafIdentity.lean",
       "description": "Actual type atom classification and intrinsic leaf identity"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypePrefix.lean",
       "description": "Arbitrary intrinsic type words reconstruct their maximal prefix"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypePrefixAlgebra.lean",
       "description": "Maximal token runs and array-bracket spines"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypePrefixControls.lean",
       "description": "Type-prefix inhabited families and necessary-boundary countercontrols"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypeSpine.lean",
       "description": "Actual type yields decompose into an existing atom and square payload words"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/TypeYieldSplit.lean",
       "description": "Invert actual type printer executions"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/UnaryControls.lean",
       "description": "Inhabited arbitrary unary-chain controls"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/UnaryFreeAlgebra.lean",
       "description": "Unary-marker freedom above unary expression roots"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/UnaryRoot.lean",
       "description": "Unary root reconstruction and actual child spans"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/YieldBalance.lean",
       "description": "Balance algebra for the intrinsic expression printer"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/YieldShape.lean",
       "description": "Structural facts about successful intrinsic expression yields"
     },
     {
-      "file": "docs/module-map/source-definitions.md",
+      "file": "docs/module-map/frontend.d/expression-uniqueness.md",
       "module": "Frontend/ExpressionUniqueness/YieldSplit.lean",
       "description": "Invert actual printer executions into successful child executions"
     }
   ],
-  "note": "Coordinator registration requested through this manifest only. Shared roots and module map remain frozen. Source declarations are enumerated; Bracket also has kernel-generated recursors, deriving instances and its three constructors.",
+  "note": "Registered through the current convention: register.sh lists all modules in Solidity.lean; module-map rows are in the per-lane fragment docs/module-map/frontend.d/expression-uniqueness.md (7 earlier rows in 00-base.md fragments); axiom pins in scripts/g07-axiom-pins.d/. Source declarations are enumerated; Bracket also has kernel-generated recursors, deriving instances and its three constructors.",
   "generated_constructors": [
     "Solidity.Frontend.ExpressionUniqueness.Bracket.round",
     "Solidity.Frontend.ExpressionUniqueness.Bracket.square",
@@ -1855,9 +1855,10 @@
   ],
   "central_axiom_registration": {
     "file": "scripts/g07-axiom-pins.json",
+    "fragment": "scripts/g07-axiom-pins.d/Solidity/Frontend/ExpressionUniqueness/AxiomPins.json",
     "source": "tests/sol-expression-uniqueness/axioms.json",
     "count": 1241,
-    "status": "pending coordinator integration; shared trust inventory frozen"
+    "status": "recorded by node scripts/check-axiom-pins.mjs --write"
   },
   "published_integration": {
     "master": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
@@ -1878,6 +1879,7 @@
     "compiler_only_names": 353,
     "tooling": "Lean imports are isolated to owned verification tests; compiler-only names have no additional kernel declaration/type/axiom claim.",
     "audited_emissions": 2447,
-    "repeated_emissions": 124
+    "repeated_emissions": 124,
+    "externalized": "H44 (e48d82a2): the kernel-*.json dumps and evidence/ are off git; bulk-manifest.json indexes them and they stay on the Codex VM."
   }
 }
