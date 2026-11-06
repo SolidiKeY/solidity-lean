@@ -115,7 +115,7 @@ def main():
         for label,kind in (('OverlayA','statement'),('OverlayB','premise')):
             driver = evidence/(label+'.lean')
             driver.write_text('import tests.h62.item5.«statement-graph».Exporter\n#h62_tag "'+kind+'" Nat.add_comm\n')
-            run(label,[lean,*flags,'-o',str(build/(label+'.olean')),str(driver)])
+            run(label,[lean,*flags,'-R',str(evidence),'-o',str(build/(label+'.olean')),str(driver)])
         conflict = evidence/'overlay-conflict.lean'
         conflict.write_text('import OverlayA\nimport OverlayB\n#h62_export "negative-overlay.json" [Nat.add_comm]\n')
         run('overlay-conflict',[lean,*flags,str(conflict)],expected=1)

@@ -76,6 +76,10 @@ def exportDecl (n : Name) : MetaM Json := withOptions (fun o =>
     | none => #[]
   return Json.mkObj [
     ("declaration", toJson n.toString), ("role", toJson (role env n)),
+    ("constantKind", toJson (match ci with
+      | .axiomInfo _ => "axiom" | .defnInfo _ => "definition" | .thmInfo _ => "theorem"
+      | .opaqueInfo _ => "opaque" | .quotInfo _ => "quotient" | .inductInfo _ => "inductive"
+      | .ctorInfo _ => "constructor" | .recInfo _ => "recursor")),
     ("type", toJson (← ppExpr ci.type).pretty),
     ("typeExpr", toJson (reprStr ci.type)),
     ("typeReferences", namesJson typeRefs),
@@ -99,20 +103,31 @@ elab_rules : command
       throwError "conflicting H62 overlay tag on {n}"
     modifyEnv fun env => overlayTags.addEntry env (n, k)
 
+def writeExport (path : String) (names : Array Name) (scope : String) : CommandElabM Unit := do
+  if names.size != (names.toList.eraseDups).length then
+    throwError "duplicate declaration in H62 export"
+  let rows : Array Json ← liftTermElabM <| (names.qsort Name.quickLt).mapM fun n => exportDecl n
+  let some directory ← liftIO <| IO.getEnv "H62_GRAPH_OUTPUT_DIR"
+    | throwError "H62_GRAPH_OUTPUT_DIR must name an off-git evidence directory"
+  let target := System.FilePath.mk directory / path
+  liftIO <| IO.FS.writeFile target ((Json.mkObj [
+    ("schema", toJson 1), ("source", toJson "Lean.ConstantInfo.type"),
+    ("scope", toJson scope), ("declarations", toJson rows)]).compress ++ "\n")
+
 syntax (name := exportGraph) "#h62_export " str " [" ident,* "]" : command
 elab_rules : command
   | `(#h62_export $path:str [$ns:ident,*]) => do
     let mut names : Array Name := #[]
     for n in ns.getElems do
       names := names.push (← resolveGlobalConstNoOverload n)
-    if names.size != (names.toList.eraseDups).length then
-      throwError "duplicate declaration in H62 export"
-    let rows : Array Json ← liftTermElabM <| (names.qsort Name.quickLt).mapM fun n => exportDecl n
-    let some directory ← liftIO <| IO.getEnv "H62_GRAPH_OUTPUT_DIR"
-      | throwError "H62_GRAPH_OUTPUT_DIR must name an off-git evidence directory"
-    let target := System.FilePath.mk directory / path.getString
-    liftIO <| IO.FS.writeFile target ((Json.mkObj [
-      ("schema", toJson 1), ("source", toJson "Lean.ConstantInfo.type"),
-      ("scope", toJson "explicit selected declarations; not a repository-wide census"),
-      ("declarations", toJson rows)]).compress ++ "\n")
+    writeExport path.getString names "explicit selected declarations; not a repository-wide census"
+
+syntax (name := censusGraph) "#h62_census " str ident : command
+elab_rules : command
+  | `(#h62_census $path:str $prefix:ident) => do
+    let env ← getEnv
+    let names := env.constants.toList.toArray.filterMap fun (name, _) =>
+      if prefix.getId.isPrefixOf name then some name else none
+    if names.isEmpty then throwError "empty H62 namespace census: {prefix.getId}"
+    writeExport path.getString names s!"all elaborated declarations in namespace {prefix.getId}; includes generated declarations"
 end H62
