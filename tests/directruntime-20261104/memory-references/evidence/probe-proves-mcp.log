@@ -1,5 +1,0 @@
-ERROR 10:3 sol_prove: the sequent mentions a local hypothesis or a metavariable
-ERROR 8:87 unsolved goals
-case R
-⊢ RuleSet
-diag: 2 errors
