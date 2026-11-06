@@ -24,7 +24,7 @@ The existing goal was not replaced or reset.
 
 | Checkpoint | State | Evidence / remaining work |
 |---|---|---|
-| 1: exact inventory and owner, global/per-input distinction | partial | Frozen source census: 179 files, 1,259 theorem/lemma declarations, each once. Elaborated signatures, implicit variables and complete global/per-input premise classification remain pending. |
+| 1: exact inventory and owner, global/per-input distinction | partial | Frozen source census: 179 files, 1,259 theorem/lemma declarations, each once. Source premise roles are now recorded for all rows; elaborated signatures, actual implicit inclusion and semantic global/per-input classification remain pending. |
 | 2: simultaneous witness for every statement | blocked | Zero verified. All 1,259 source rows explicitly uncovered until semantic classification; no independently inhabited assumptions are counted as a simultaneous witness. |
 | 3: supported-program totality, negative controls and observation boundary | blocked | No new totality/success or reject-all/always-revert exclusion theorem checked. Public failure, gas and fork boundaries remain pending. |
 | 4: Lean witness verification and statement-fidelity census | blocked | Only source-span fidelity checked. No elaborated fidelity, axiom audit or full final validation claimed. |
@@ -55,10 +55,11 @@ needed yet because no Lean module has been added.
 
 ## Dependency ticket B-MIGRATION-SYNTAX-RAW
 
-Owner/relay destination: coordinator's Syntax migration producer; V09 area
-producer is an affected consumer. This ticket is saved for coordinator retrieval;
-no relay.sh is available in this checkout and no delivery acknowledgement is
-claimed. No out-of-scope repair was attempted.
+Owner/relay destination: `solidity-h62-6-20261106/migrate-syntax`; V09 area
+producer is an affected consumer. Coordinator H70 confirms the owner accepted
+the ticket relay. relay.sh is host-only and is not a VM installation task.
+No out-of-scope repair was attempted. Wait for the owner before elaborated
+witnesses, supported-success controls and affected gates.
 
 Official pinned archive: `lean-4.35.0-linux.tar.zst`, SHA256
 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
@@ -144,3 +145,74 @@ The deterministic census generator is committed; its 1.4MB bulk output is not.
 The coordinator can retrieve this committed partial checkpoint from this VM.
 No fresh goal or replacement thread was launched. Resume the existing goal and
 branch after the owner dependency is resolved; do not mark the queue complete.
+
+## H70 continuation: source premises and owners
+
+The coordinator authorized continued source classification on the same frozen
+1,259-row inventory while the Syntax migration owner repairs the dependency.
+No migration branch was merged or fetched into this lane, and no new Lean check
+was attempted during this source-only continuation.
+
+`premises.py` creates one additive row for every existing census row, joined by
+path, fully qualified name and both frozen hashes. It extracts all 1,327
+source-written telescope groups, plus 427 available section-variable groups
+counted across rows. Each group records its exact source text, type annotation,
+source-role candidate and absolute frozen-file span. Names/implicit inclusion
+still require Lean. All 1,259 witness statuses remain uncovered and every
+binder's inhabitation remains unproved.
+
+| Source classification | Count / meaning |
+|---|---|
+| Global program certificates | 115 source telescope groups; selected supported expressions/programs, not certified feasible runs |
+| Global operator certificates, fragment laws, return-form laws | 2 / 3 / 2 groups; none shown inhabited here |
+| Per-input admission, representation, reached-transport | 16 / 31 / 15 groups |
+| Per-input representation/allocation and stack-capacity packages | 10 / 3 groups; a structure in Type may still encode per-input capacity |
+| Quantified conditional laws | 3 groups; allocation/execution occurrences retained separately |
+| Execution/evaluation/verdict constraints | 68 groups; source-versus-target layer left unresolved |
+| Other logical/resource constraints | 91 groups; semantic scope unresolved |
+| Macro return types | 27 rows contain type_of%; expansion can reveal further inputs |
+| No source-written telescope groups | 820 rows; this does not mean hypothesis-free after elaboration |
+
+Seventy rows have source global-certificate/law roles; 124 have a per-input role
+including data such as states/maps; 52 have both. These are source triage counts,
+not a denominator of inhabited public interfaces. The remaining source-role
+categories describe data, scalar parameters, range/support and observation
+constraints. All counts and the 27 definition-family references are in
+`source-premises/premises.json`. Family references do not resolve every
+unqualified identifier to its elaborated declaration.
+
+Concrete distinctions retained:
+
+- value_success_tail requires its selected CompiledVal, the same StateRepr
+  and successful source evaluation together, with shared parameters.
+- compilation_mapped_reflect_success requires selected Compilation artifacts,
+  actual Input, a reached link and actual target success together. A certificate
+  or conditional link alone does not supply that successful execution.
+- RuntimeReturnCapture.capture keeps selected producer, global alias law,
+  physical admission, actual call success, reached evaluation and room together.
+- BinaryInvocation and ClosedInvocation package stackBound for the selected
+  tail. They are per-input capacity certificates even though defined as structures.
+
+The source classifier preserves the whole return type. In particular it flags
+27 type_of% cases and the leading-forall result of ShortCircuitBoundary.execution;
+it does not mistake result quantification or conditional laws for absent premises.
+No source classification is accepted as a simultaneous witness or as evidence
+that a premise is inhabited.
+
+New commands (source-only, no Lean):
+
+- `python3 scripts/h62/item2/audit-v09-passes/premises.py --output /workspace/h62-audit-v09-passes-evidence/source-premises`
+- `PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item2/audit-v09-passes/test_premises.py`
+
+The seven new acceptance tests verify nested/implicit binders, scoped-variable
+lifetimes, assignment-token decoys, quantified budgets, source/target ambiguity,
+all frozen telescopes and the generated 1,259-row hash join with absolute spans
+and unproved statuses. Bulk classification remains off git. Original census
+bytes and frozen signatures remain unchanged.
+
+Independent finder/skeptic reviews found and corrected three issues: target
+runs mislabeled as source; ambiguous span-coordinate bases; and :=/=> mistaken
+for logical equality. Quantified allocation laws now keep their law role and
+occurrence tags. Final outcomes are saved in reviews-h70.json. Required Lean
+witness, totality, negative-control, fidelity and full gates remain pending on
+B-MIGRATION-SYNTAX-RAW; there is no new runtime or proof-performance pass.
