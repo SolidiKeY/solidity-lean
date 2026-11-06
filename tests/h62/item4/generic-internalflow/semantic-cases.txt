@@ -1,0 +1,411 @@
+# Manually adjudicated conclusion facets. Names are exact within each file.
+# Every theorem-like declaration must occur exactly once; facets may combine.
+# Full headers, hashes, source line and audit dispositions are generated off git.
+@CodeAuthentication
+eq: construction emitted_equality
+auth: selected_image nested_positive
+ts: target
+obs: complete_observations
+repr: caller_frame
+aref: inner_body_negative inner_condition_negative loop_order_negative wrong_destination wrong_cursor missing_instruction
+@V3AllocatingCallCoherence
+ss,eq,obs,sx,sn: actual
+@V3AllocatingHeadViews
+view: conditional_root recursive_root allocation_root
+vref: unsupported_refused wrong_length wrong_name wrong_reference missing_initializer extra_statement
+view,compile: compiler_link
+@V3AllocatingOuterClaims
+ss,return: success
+entry: entry
+sr,tr,sn,tn: failure
+@V3AllocatingOuterFamily
+ss,ts,repr,obs,neq,tn: one
+ss,ts,repr,obs: zero
+ss,ts,repr,alloc,pres,obs,neq: older_frame
+ss,ts,repr,pres,obs,neq: dynamic_zero dynamic_one
+@V3AllocatingOuterPlan
+entry: entry
+ss,return: actual
+ss,ts,repr,obs,tn: observations
+@V3AllocatingOuterZero
+repr: represented
+aneg: no_allocator
+entry: entry
+ss,return,aneg: actual
+ss,ts,repr,obs,neq,tn: observations
+@V3AllocatingRecursiveCheck
+view: next_checked result_checked actual_head canonical_checked guarded_continuation
+vref: wrong_alias_name wrong_count_name wrong_argument_slot wrong_argument_operator wrong_argument_literal wrong_result_name missing_destination wrong_destination wrong_index wrong_child malformed_base wrong_signature wrong_function_name
+@V3AllocatingScalar
+ev: args_run
+obs: default_entry observations heap_observations
+ss: callee native
+ss,obs,pres: generic_witness
+sx: shallow
+sn: shallow_not_revert
+sr: bad_reference
+neq: wrong_result wrong_growth
+@V3AllocatingScalarLeaves
+view: guard_checked zero_checked increment_checked actual_root actual_tail
+vref: wrong_guard_operator wrong_guard_slot wrong_guard_literal wrong_zero_value wrong_destination wrong_increment_operator wrong_increment_value extra_tail wrong_alternative
+@V3AllocatingScopedCheck
+view: decorated canonical_checked
+vref: initialized_refused reordered_refused extra_root_refused unscoped_turn_refused wrong_index wrong_child decorated_base_refused open_inner_refused
+@V3AllocatingScopedEndpoint
+ss,return: two_bool three_uint
+ss,ts,repr,obs,pres,neq: result_and_frame
+eneg: too_small_frame
+ss,return,aneg: zero_without_owner
+@V3AllocatingScopedTransport
+sr,tr,sn,tn: failure
+sr,tr: at_two
+@V3AllocatingSourceCertificate
+cert: certified
+ss,return: success
+sr,tr,sn: failure
+certneg: nil_uncertifiable wrong_index_uncertifiable
+@V3AllocatingSourceViews
+view: base_root certificate_root
+vref: nil_refused revert_refused extra_refused
+sr,tr: actual_failure
+sx,sn: actual_exhaustion
+@V3AllocatingTurnViews
+view: actual_turn continuation_preserved
+vref: nil_refused nonconditional_refused extra_root_refused missing_allocation_refused empty_positive_refused extended_branch_refused
+@V3AllocationInventory
+loop,repr,pres,obs,neq: prefixes
+@V3CallProducer
+ss: source_success
+sr: source_revert
+cost: zero_cost
+capacity: room
+repr: initial_repr failing_repr capacity_repr
+member: positive_member negative_member
+entry: positive_entry negative_entry
+switness: successful
+fwitness: reverting
+form: flags
+return: target_return
+tr: target_reverts
+ts,obs: target_value
+cref: refused_literal_revert
+obs: capacity_cursor
+capneg: refuses_arena_capacity
+@V3CallProducerRefArray
+repr,alloc: initial
+cost: cost
+ss: source_success
+sr: source_revert
+form: form flags
+capacity: capacity
+member: member
+entry: entered
+switness: successful
+fwitness: reverting
+ss,return: simulated_success
+tr: simulated_revert
+cref: refused_literal_revert old_tuple_selector_refused old_struct_default_selector_refused
+capneg: capacity_refusal
+@V3CallProducerRefStructDefault
+cost: cost
+ss: source_success
+sr: source_revert
+form: form flags
+capacity: capacity
+member: member
+entry: entered
+switness: successful
+fwitness: reverting
+ss,return: simulated_success
+tr: simulated_revert
+capneg: capacity_refused
+cref: literal_revert_refused zero_base_refused reference_array_refused
+obs: source_observation target_observation
+neq: missing_export_refused
+@V3CallProducerRefStructRebind
+cost: seed_cost cost
+repr,alloc: initial_exists initial
+ts: seed_executed
+obs: machine_runtime source_observation target_observation
+ss: source_success
+sr: source_revert
+form: form flags
+capacity: capacity
+member: member
+entry: entered
+switness: successful
+fwitness: reverting
+ss,return: simulated_success
+tr: simulated_revert
+capneg: capacity_refused
+neq: missing_export_refused default_root_refused
+@V3CallProducerRefTuple
+ss: source_success
+sr: source_revert
+cost: cost
+form: form flags
+capacity: capacity
+member: member
+entry: entered
+switness: successful
+fwitness: reverting
+ss,return: simulated_success
+tr: simulated_revert
+capneg: capacity_refused
+cref: literal_revert_refused
+obs: source_observation target_observation
+neq: missing_export_refused
+@V3CallProducerRefTupleFrame
+ts: executed
+repr: input_represented retained
+alloc: input_owned owned
+obs: observed
+neq: missing_copy_refused
+@V3CallerStorageFrame
+repr: path initial child_initial allocated_repr reached restored
+obs: live allocated_live fragile_observed observations
+impossible: no_ref
+alloc: allocator
+compile: public_root
+eq: code_eq
+ts: target
+ss: source call_source
+pres: storage extended caller_words
+livenessneg: wrong_liveness
+neq: wrong_alias
+@V3DisjointScalar
+compile: selected bad_selected
+repr: initial
+eq: source_identity
+ss,sx,ts,repr,alloc,pres,obs: available specification
+alloc: initial_owner owner
+ts,obs: entry_contrast
+obs: old_caller_words snapshot source_bindings source_heap
+ss,ts,repr: native_and_target
+obs,neq: changed_destination
+neq: distinct_slots wrong_typed_slot wrong_alias wrong_heap_cursor
+sx: shallow
+tn: not_revert
+er: bad_eval bad_arguments
+tr: bad_prefix bad_target
+sr: bad_call
+sn: argument_failure_not_exhausted
+@V3DistinctParent
+repr: parent_repr captured_repr after_repr
+ts,repr,alloc,pres: capture_exists capture_spec
+ts: capture_run entry_run
+obs: payload
+neq: actual_different wrong_result wrong_counter wrong_cursor
+ts,repr,obs,pres: endpoint completed
+conditional,neq: wrong_active
+tn: not_revert
+@V3DistinctScalar
+ss: source_advance
+ts,repr,obs,alloc,pres: specification
+ts: completed
+repr: endpoint
+obs: words source_bindings
+neq: not_child_reference not_old_result not_result_counter
+tn: not_revert
+@V3EffectfulRuntime
+form: nonfragile
+capacity: good_arena callee_arena argument_arena
+entry: good_entry callee_entry argument_entry
+return: returned
+switness: successful_entry
+repr,pres,alloc: named_target
+fwitness: callee_reverting_entry argument_reverting_entry
+tr: callee_revert argument_revert
+neq: wrong_captured_count
+tn: wrong_halt
+@V3EffectfulSourceCheck
+vref: wrong_index wrong_value deep_child_rejected missing_effect wrong_depth wrong_effect
+view: outer_tail_matches zero_recognized
+view,ss,ts: actual_success
+view,ev,tr: actual_failure
+@V3EffectfulSourceSelection
+compile: root good_root bad_callee_root
+ss,ts: success
+eq: same_image
+sr,tr: callee_failure argument_failure
+cref: wrong_effect_rejected deep_child_rejected ordinary_call_refused
+sx,ts: exhausted_boundary
+@V3EffectfulStorageRuntime
+compile: root bad_root
+capacity: arena bad_arena
+entry: entry bad_entry
+ss: source
+return: returned
+switness: successful_entry
+repr,pres,alloc: named_target
+formneg: violates_old_condition
+er: bad_eval
+sr: bad_source
+fwitness: reverting_entry
+tr: bad_target
+@V3FreshAllocationContents
+loop,repr,obs,neq: prefixes
+@V3FullScalarLoop
+eq: native_state
+loop,loopneg,ts,repr,alloc,obs: endpoint
+@V3FullScalarPrefix
+loop,loopneg,ts,repr,alloc,obs,neq: endpoint
+@V3NativeAllocationCoherence
+ss,sx,obs,sn: exact_heap
+@V3NativeDescentHeap
+ss,loop,repr,eq,obs,rneg: actual
+@V3NativeReturnRepresentation
+ss,ts,repr,obs,neq,tn: complete
+@V3NativeScalarAgreement
+ss,ts,obs,sx,tn: coupled
+@V3OrderedEffectfulStorage
+impossible: no_struct
+repr: initial
+compile: public_root
+ev: evaluated changed_count
+obs: binding live ref_base current fragile_observed before_observations complete_observations
+ss,sx,ts,repr,alloc,pres,obs: available specification
+formneg: outside_old_condition
+pneg: not_keeps
+sx,ts: shallow_boundary
+@V3PrimitiveCaller
+ss: native native_discarded
+pres: retained_scalar retained_reference discarded_frame
+obs: observations discarded_result heap_observations
+neq: wrong_scalar private_not_escaped
+pneg: not_keeps
+sn: not_revert wrong_destination
+sr: bad_arguments
+@V3RecursiveScope
+view: mixed_checked
+cref: old_exact_refuses old_outer_only_refuses deep_root_refused
+vref: deep_child_refused wrong_index_refused double_wrapper_refused initialized_refused protected_write_refused extra_context_refused
+sr,sx: source_difference
+sx,ts: exhausted_boundary
+@V3SameCall
+obs: source_locals source_objects snapshot
+neq: different_callers wrong_frontier wrong_alias
+cneg: wrong_cost
+tn: not_fault
+@V3ScalarCaller
+ts,repr,obs,alloc,pres: specification
+obs: snapshot
+ss,ts,repr: native_and_target
+neq: wrong_result wrong_alias wrong_order wrong_cursor wrong_stack
+tn: not_revert
+sx: shallow
+sn: shallow_not_revert
+alloc: growth
+@V3ScalarClaims
+sclaim: good_claim
+fclaim: failing_claim
+return: returned_via_claim
+ts: chosen_execution
+eq: same_endpoint
+repr: chosen_frame
+obs: complete_observations
+neq: wrong_alias wrong_cursor
+tr: actual_revert
+tn: failure_not_success
+sn: exhaustion_not_revert
+@V3ScalarContinuation
+obs: complete_observations source_bindings source_objects writes_returned_value allocation_uses_returned_length
+neq: wrong_old_scalar wrong_old_frontier
+obs,neq: distinct_private_identity
+sr,tr: failure_absorbs_suffix
+sx: shallow_source
+tn: target_not_revert
+@V3ScalarDescent
+ts,loop,repr,obs,pres,alloc: available
+ts,loop,repr,pres,alloc,obs,neq: complete
+@V3ScalarDual
+eq: one_image
+ev: good_guard bad_guard
+obs: rejected_reference complete_observations protected_failure_input
+er: bad_branch_reached
+er,ev: skipped_bad_branch
+neq: source_input_difference changed_result wrong_alias wrong_cursor
+repr: target_frame
+alloc: rejected_allocator
+tn: failure_not_success failure_not_fault
+sn: wrong_success_caller
+ss: index_five_source
+ts: index_five_target
+eneg: index_five_not_entry
+@V3ScalarEmitter
+compile: selected_root bad_selected
+eq: selected_argument selected_code bad_code
+ss,sx,ts,repr,alloc,pres,obs: available
+ts: target
+obs: complete_observations
+repr: restored_caller
+neq: wrong_protected_destination wrong_alias wrong_cursor
+cref: refuse_overlap refuse_control_overlap refuse_frame
+tr: bad_target
+tn: bad_not_success
+@V3ScalarPairedTransport
+ts,obs,neq: inhabited
+@V3ScalarPlan
+entry: entry bad_entry
+return: returned
+switness: successful_entry
+eq: same_actual_endpoint
+obs: complete_observations
+fwitness: reverting_entry
+tr: bare_target
+eneg: insufficient_frame omitted_control_space wrong_cursor
+@V3ScalarPrefix
+loop,repr,obs,alloc,pres: specification
+obs: scalar_words snapshot completed_snapshot
+ts,loop,repr,obs,alloc,pres: completed completion
+ts: whole_target
+ss,ts,repr: native_and_target
+loopneg: wrong_stopped
+neq: wrong_horizon wrong_alias wrong_scalar wrong_cursor
+tn: not_revert not_fault
+eq: returned_is_last
+alloc: ownership_at
+@V3ScalarRecursive
+ev: arguments
+ss: source_all alternate_all private_result
+obs: private_default ordered_bindings ordered_heap
+pres: other_fields
+sn: swapped_destination not_default wrong_alias shallow_not_revert
+sx: shallow
+sr: missing_argument
+@V3ScalarReentry
+obs: complete_observations source_objects
+eq: source_state
+neq: wrong_old_count wrong_frontier
+obs,neq: retained_new_identity
+sx: shallow_source
+tn: not_fault not_revert
+@V3ScalarReturn
+repr: encoded initial
+alloc: initial_owner
+ss,sx,ts,repr,alloc,pres,obs: available specification
+obs: payload_words snapshot
+ss,ts: native_and_target
+neq: wrong_alias wrong_private wrong_runtime_cursor wrong_heap_cursor
+sx: shallow
+sn: shallow_not_revert
+tn: not_revert not_fault
+@V3ScalarSourceCompiler
+view: outer_layer_matches
+vref: deeper_child_rejected index_rejected wrong_base_rejected wrong_guard_rejected wrong_increment_rejected wrong_result_rejected
+cref: altered_root_rejected ordinary_call_refused
+sr,sx: source_difference
+sx,ts: exhausted_boundary
+compile: bad_root
+er: bad_eval
+sr: bad_source
+entry: bad_entry
+tr: bad_target
+tn: bad_not_fault
+@V3ScopedScalar
+cref: initialized_refused protected_write_refused extra_inner_context_refused noncanonical_body_refused
+sp: panic_preserved
+sd: payload_preserved
+neq: wrong_frontier
+@V3TypedHeapExtensionality
+pres,neq,defaultsneg: old_keeps_insufficient
