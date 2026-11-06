@@ -5,6 +5,7 @@ Not a Lean timing gate: callers must create, pin and inspect the container and
 prove VM, source, toolchain, cache, resource and process ownership separately.
 """
 import os
+import pathlib
 import re
 import subprocess
 import time
@@ -23,23 +24,56 @@ def docker(*args, timeout=1):
                           stderr=subprocess.PIPE, timeout=timeout, check=True).stdout.strip()
 
 
-def state(container_id, nonce, timeout=1):
-    fmt = "{{index .Config.Labels \"" + LABEL + "\"}}|{{.State.Running}}|{{.State.ExitCode}}"
+def state(container_id, nonce, timeout=1, check_limits=True):
+    fmt = ("{{index .Config.Labels \"" + LABEL + "\"}}|{{.State.Running}}|{{.State.ExitCode}}"
+           "|{{.HostConfig.Memory}}|{{.HostConfig.MemorySwap}}|{{.HostConfig.NetworkMode}}|{{.HostConfig.PidsLimit}}")
     parts = docker("inspect", "--format", fmt, container_id, timeout=timeout).split("|")
-    if len(parts) != 3 or parts[0] != nonce or parts[1] not in ("true", "false") or not parts[2].isdigit():
+    if len(parts) != 7 or parts[0] != nonce or parts[1] not in ("true", "false") or not parts[2].isdigit():
         raise ValueError("container identity or state mismatch")
+    if check_limits:
+        if (not parts[3].isdigit() or not parts[4].isdigit() or not parts[6].isdigit()
+                or not 0 < int(parts[3]) <= 12 * 1024 ** 3 or int(parts[4]) != int(parts[3])
+                or parts[5] != "none" or int(parts[6]) <= 0):
+            raise ValueError("container resource policy mismatch")
     return parts[1] == "true", int(parts[2])
 
 
 def stop_owned(container_id, nonce):
-    running, _ = state(container_id, nonce)
+    running, _ = state(container_id, nonce, check_limits=False)
     if running:
         docker("kill", container_id)
-    running, code = state(container_id, nonce)
+    running, code = state(container_id, nonce, check_limits=False)
     if running:
         raise RuntimeError("container remained running")
     return code
 
+
+
+def host_headroom():
+    """Conservative host/parent check; container limits are separate."""
+    reserve = 4 * 1024 ** 3
+    if pathlib.Path("/proc/self/cgroup").read_text().strip() != "0::/":
+        raise ValueError("unsupported cgroup layout")
+    fields = {}
+    for line in pathlib.Path("/proc/meminfo").read_text().splitlines():
+        key, sep, value = line.partition(":")
+        if sep and key in ("MemAvailable", "SwapTotal"):
+            parts = value.split()
+            if len(parts) != 2 or not parts[0].isdigit() or parts[1] != "kB":
+                raise ValueError("invalid memory information")
+            fields[key] = int(parts[0]) * 1024
+    if set(fields) != {"MemAvailable", "SwapTotal"}:
+        raise ValueError("missing memory information")
+    base = pathlib.Path("/sys/fs/cgroup")
+    def number(name):
+        value = (base / name).read_text().strip()
+        if not value.isdecimal():
+            raise ValueError("unbounded or invalid cgroup value")
+        return int(value)
+    cap, current = number("memory.max"), number("memory.current")
+    swap = number("memory.swap.current")
+    return (fields["SwapTotal"] == 0 and swap == 0 and 0 <= current <= cap
+            and fields["MemAvailable"] >= reserve and cap - current >= reserve)
 
 def watch(container_id, nonce, seconds):
     """Synthetic deadline; timeout is adjustable for tests and never a receipt."""
@@ -51,6 +85,8 @@ def watch(container_id, nonce, seconds):
     boot = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
     try:
         while True:
+            if not host_headroom():
+                return {"status": "resource-stop", "exit_code": stop_owned(container_id, nonce)}
             elapsed = (time.monotonic_ns() - start) / 1e9
             boot_elapsed = (time.clock_gettime_ns(time.CLOCK_BOOTTIME) - boot) / 1e9
             if elapsed < 0 or boot_elapsed < 0 or abs(elapsed - boot_elapsed) > max(.05, boot_elapsed * .01):

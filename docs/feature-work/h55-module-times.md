@@ -276,3 +276,25 @@ headroom, authenticate image or daemon, bind source/tool/cache, prove the
 300-second production bound or orchestrate actual Lean. Both clocks can be
 falsified together. The full runner, independent finder/skeptic reviews and
 all assigned runtime and migration gates remain pending. No Lean was run.
+
+## Synthetic container resource monitoring
+
+The experimental deadline watcher now checks host `MemAvailable`, zero host
+swap, and finite parent-cgroup headroom on each polling pass, retaining a 4 GiB
+reserve. It inspects the owned container for a finite memory limit no greater
+than 12 GiB, memory-swap equal to memory, network none and a positive pids
+limit. On a policy or resource failure it attempts cleanup only after verifying
+the owned label, and cannot report a passing result. Two local synthetic runs
+(05 and 06) used the 64 MiB no-swap escaped-child fixture and reached the
+0.3-second timeout with both process identities absent. Their off-Git evidence
+is bound by `tests/h55/module-times/resource-evidence.sha256`. The expanded
+28-method synthetic suite covers resource loss, unreadable state and mismatched
+container limits.
+
+These checks sample rather than continuously enforce host reserve. Docker
+inspection reports configuration rather than authenticated effective kernel
+state, and cleanup may be delayed or fail. The watcher does not bind a trusted
+image, daemon, source/toolchain/cache or H56 identity, and it is not wired to
+an actual Lean production gate. No 300-second measurement or Lean proof is
+claimed. Independent finder/skeptic reviews, full acceptance and the assigned
+H56 and owner dependencies remain outstanding.
