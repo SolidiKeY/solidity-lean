@@ -1661,3 +1661,89 @@ This is specialized scoped source selection, not arbitrary recursive compilation
 `RuntimeFrameV3RecursiveScopeCompiler` retains actual source fields, the complete semantic-check receipt and public argument-emitter receipt. Source execution equality transports the existing conditional success and bare-revert claims. The populated client discharges Entry and source success at the existing post-allocation caller, preserving the complete 26-word endpoint. A selected bad argument has real source and target bare revert. Controls accept mixed wrapped/plain levels, reject a deeper changed base with an observably different source halt, retain older-selector refusals and distinguish exhausted source from the common successful image.
 
 These modules extend specialized intrinsic source selection inside recursion. They do not establish arbitrary recursive-body compilation, original frontend/profile provenance, full failure/termination correspondence, or physical/world adequacy. The frozen interfaces, original observations and mandatory gates are unchanged.
+
+## General closure inventory and boundary (V12-P1 cloud lane, 2026-11-06)
+
+This lane took over the V12 runtime-frame write scope from the Codex
+`v12-flow-calls` lane (H75). It merged `origin/master` (already up to date).
+
+### Inventory: what P1 provides on master
+
+- Frozen interfaces V1–V3 (`RuntimeFrameInterfaceV{1,2,3}`), unchanged.
+- Ordinary calls: V3 `PendingCallProducer` instances from
+  `RuntimeFrameV3CallProducer`/`…Ref` for selected checked call-free bodies
+  (P1-CALL); `PendingBareRevertProducer` instances (P1-REVERT).
+- Fixed thunks: `V3FixedThunkProducer.of_call` already transports any V3
+  ordinary-call producer of `thunk ()` to `PendingFixedCallRecProducer` at
+  every quotation index (general; P1-THUNK).
+- Recursive families: V3 `PendingRecursiveReturns` for the scalar countdown
+  (`ScalarDual`, `ScalarDemandDual`), its scoped variant
+  (`FrozenScopeCoverage.with_profile`) and the allocating countdown, each
+  taking only the external approved-domain agreement. No general recursive
+  compiler: `Mutation.compileRecursive` still refuses every unrolling.
+- `RuntimeFrameRestoredRepresentation.restorationProducer` inhabits V1
+  `PendingRestoration`.
+
+### What G49 requests (H68, family 3 "P1 frame claims")
+
+The H68 request (relayed to the Codex lane only as an off-git payload) is
+also recorded in Git on the unmerged branch
+`codex/solidity-h55-sol-20261106/g49-final-theorem` at `62377f31`, file
+`docs/feature-work/h55-g49-final-theorem.md`, section "3. P1 frame claims":
+
+```lean
+p1_frame_bridge : (x : NativeContext_frame) → Approved_frame x →
+  BridgeGoal (A_frame x) (B_frame x) (ps_frame x) (pt_frame x)
+    (beta_frame x) (nu_frame x) (Local_frame x)
+```
+
+where `BridgeGoal A B ps pt beta nu Local` is a `PassCorrect
+(Behaviour.ofLang A ps) (Behaviour.ofLang B pt)` with fixed `envAbs = beta`,
+`need = nu` and `Local` the original `ReturnClaim`/`BareRevertClaim` plus V3
+admission agreement, coverage and witnesses. `PassCorrect.back` requires every
+target prefix of the canonical target language to map back to a source prefix,
+and the request forbids turning success and bare-revert evidence into
+all-outcome adequacy.
+
+This bridge is not proved here, for three reasons that a proof cannot remove:
+
+1. `PassCorrect`, `Behaviour` and `BridgeGoal` exist only on the unmerged G49
+   branch (`Solidity/Roadmap/G49Final/PassCorrect.lean`); master has none.
+   Importing them would merge another lane's scope.
+2. No canonical `Lang Event Outcome` for P1 endpoints (`A_frame`, `B_frame`)
+   exists; the request names them as owner deliverables, and their
+   definition is an interface design decision.
+3. `PassCorrect.back` over a canonical EVM-side language needs panic, payload,
+   exhaustion and divergence transport (G37.02, G38), which P1 does not have.
+
+### General closure: boundary and the generic part
+
+`RuntimeFrameV3GeneralBoundary` makes the scope of a "general P1 closure"
+precise without changing any interface:
+
+- `callRec_run`: a `callRec` runs as the ordinary call of its body.
+  `return_of_call`, `bare_revert_of_call`, `successful_of_call`,
+  `reverting_of_call` transport every V3 field along it.
+- `of_unrolled` is generic recursive `callRec` transport: a V3
+  `PendingRecursiveReturns` for any `step` from the ordinary-call obligations
+  of each actual unrolled body `recUnroll Prog.recBase step n` with one code
+  image. `unrolled_returns` is its converse, so these hypotheses are exactly
+  as strong as the frozen structure.
+- `no_call_producer`, `no_fixed_producer`, `no_recursive_producer`: each
+  dual-outcome V3 structure is empty for a source that never bare-reverts.
+  `trivial_never_reverts` and `no_unrestricted_closure`: for every contract,
+  fragment and domain, the uniform empty-body family has no V3 recursive
+  producer, so "every family has a V3 producer" is false. A general closure
+  must be stated over a source class, or with a success-only companion
+  interface (a versioned V4, H57).
+
+Controls (`RuntimeFrameV3GeneralBoundaryControls`): `rebuilt` round-trips the
+scoped scalar-family producer through `unrolled_returns`/`of_unrolled` with
+the same plan (`rebuilt_plan`); the trivial family exhausts at index 0,
+succeeds at index 1 (`trivial_exhausts`, `trivial_succeeds`) and is empty
+(`trivial_empty`). All theorems use only `propext`, `Classical.choice` and
+`Quot.sound` (pinned with `#guard_msgs`).
+
+Still open: a general recursive compiler with per-body `ReturnClaim`
+(the inputs to `of_unrolled` for arbitrary `step`), approved-profile
+provenance, G37.02 divergence and G38 failure classes, and the G49 bridge.
