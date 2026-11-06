@@ -23,16 +23,17 @@ the compiler's code:
 * mapping keys are `uint` and a fixed array or struct offset fits a word
   (`locIn`).
 
-Aliases carry a kind (`Kinds`): plain (bound to an index-free path) or
-indexed (bound through an array index, `S storage s = arr[i];`). The
-judgement fixes each alias's kind at its declaration and requires every
-rebind to keep it: the compiler meets the two branches of an `if` and checks
-a loop's fixed point on the alias flags, and both refuse mixing a plain and
-an indexed binding of one alias. The other exclusions are this domain's
-choices, not refusals: an alias is declared with an initializer (solc rejects
-reading an unset storage pointer), and the core branch also compiles
-transfers, `push`/`pop`/`delete`, `assignIncDec` and static storage copies,
-which are outside this domain.
+Aliases carry a kind (`Kinds`): plain (bound to a path through no array index
+and no indexed alias) or indexed (`S storage s = arr[i];`, or a path through
+an indexed alias). The judgement fixes each alias's kind at its declaration
+and requires every rebind to keep it: where the two branches of an `if`
+disagree on an alias's flag the compiler's meet marks it unreadable (`dead`),
+so a later read is refused, and a loop whose body changes a flag fails the
+fixed-point check. The other exclusions are this domain's choices, not
+refusals: an alias is declared with an initializer (an unset one is not
+readable until rebound, which this domain does not track), and the core
+branch also compiles transfers, `push`/`pop`/`delete`, `assignIncDec` and
+static storage copies, which are outside this domain.
 
 `compile_core` proves every program of the domain is compiled, from every
 fragment whose alias flags match the kinds (`Matches`, e.g. `Frag.init` with
@@ -228,8 +229,6 @@ theorem Frag.set_of_get {Γ : Ctx} {F : Frag Γ} {t : LTy} {i : Idx Γ t} {f : F
       obtain ⟨hi, hv⟩ := List.getElem?_eq_some_iff.mp e
       rw [← h, ← hv]
       exact List.set_getElem_self hi
-
-
 
 /-! ## Values are accepted from every matching fragment -/
 

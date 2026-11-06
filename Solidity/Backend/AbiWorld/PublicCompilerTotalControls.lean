@@ -18,7 +18,9 @@ open Solidity.Evm Solidity.Backend.AbiWorld.PublicCompilerTotal
 def C : Contract :=
   { vars := [("total", .prim .uint), ("balances", .ref (.mapping .uint (.prim .uint))),
     ("signed", .ref (.mapping .int (.prim .uint))),
-    ("rows", .ref (.array (.ref (.array (.prim .uint))))), ("list", .ref (.array (.prim .uint)))] }
+    ("rows", .ref (.array (.ref (.array (.prim .uint))))), ("list", .ref (.array (.prim .uint))),
+    ("mrows", .ref (.array (.ref (.mapping .uint (.ref (.array (.prim .uint))))))),
+    ("frows", .ref (.fixed (.ref (.array (.prim .uint))) 3))] }
 
 abbrev Γ₀ : Ctx := []
 abbrev Γ₁ : Ctx := [.val .uint]
@@ -166,6 +168,42 @@ theorem indexed_agrees_fresh : ∃ result, Compiler.compile 0 (Frag.init Γ₀) 
   obtain ⟨result, accepted, agrees⟩ := compile_agrees 0 (Matches.init Γ₀) indexed_ok
   exact ⟨result, accepted, fun frame base =>
     agrees 1 frame base _ _ (Sim.init C 0 W_pos (fun _ => 0) ⟨0, W_pos⟩ rfl) (by unfold Lmax; decide)⟩
+
+/-- `uint x = 1; uint[] storage row = rows[x]; uint[] storage r2 = row;
+uint[] storage m = mrows[x][x]; uint[] storage f = frows[x];
+require(r2[0] == m[0]); f[0] = x;`: an alias of an indexed alias, a mapping
+inside an array element, and a fixed array element. -/
+def nested : Solidity.Prog C Γ₀ [.alias A, .alias A, .alias A, .alias A, .val .uint] :=
+  .cons (.declLocal .uint (.user "x") (some (.simple (.lit 1 (by decide))))) <|
+  .cons (.declStorage A (.user "row") (some (.path (rowsAt (.simple (.local .here)))))) <|
+  .cons (.declStorage A (.user "r2") (some (.path (.alias .here)))) <|
+  .cons (.declStorage A (.user "m") (some (.path (.loc (.index .map
+    (.loc (.index (.arr .dyn) (.loc (.root "mrows" rfl)) (.simple (.local (.there (.there .here))))))
+    (.simple (.local (.there (.there .here))))))))) <|
+  .cons (.declStorage A (.user "f") (some (.path (.loc (.index (.arr .fixed)
+    (.loc (.root "frows" rfl)) (.simple (.local (.there (.there (.there .here)))))))))) <|
+  .cons (.require (.binop .eqB rfl rfl
+    (.read (.index (.arr .dyn) (.alias (.there (.there .here))) (.simple (.lit 0 (by decide)))))
+    (.read (.index (.arr .dyn) (.alias (.there .here)) (.simple (.lit 0 (by decide))))))) <|
+  .cons (.assign (.index (.arr .dyn) (.alias .here) (.simple (.lit 0 (by decide))))
+    (.val (.simple (.local (.there (.there (.there (.there .here)))))))) .nil
+
+theorem nested_ok : ProgOk [] nested :=
+  .cons (.declSome _ _ (.lit _ _)) <|
+  .cons (.declIndexed _ _ (.loc (.dyn (.loc (.root _ _)) (.local _))) .dyn) <|
+  .cons (.declIndexed _ _ (.alias _) (.alias _ rfl)) <|
+  .cons (.declIndexed _ _ (.loc (.map (.loc (.dyn (.loc (.root _ _)) (.local _))) (.local _)))
+    (.map .dyn)) <|
+  .cons (.declIndexed _ _ (.loc (.fixed (by decide) (.loc (.root _ _)) (.local _))) .fixed) <|
+  .cons (.require (.binop _ _ _ (.read (.dyn (.alias _) (.lit _ _)))
+    (.read (.dyn (.alias _) (.lit _ _))))) <|
+  .cons (.assign (.dyn (.alias _) (.lit _ _)) (.local _)) .nil
+
+theorem nested_accepted : (Compiler.compile 0 (Frag.init Γ₀) nested).isSome = true :=
+  compile_init 0 nested_ok
+
+theorem nested_kernel : (Compiler.compile 0 (Frag.init Γ₀) nested).isSome = true := by
+  decide +kernel
 
 /-- Rebinding an indexed alias to a plain path inside a loop changes its kind:
 the loop fixed-point check refuses it, and the judgement excludes it. -/

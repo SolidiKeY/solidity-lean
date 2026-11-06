@@ -14,7 +14,7 @@ and the G49 base (`origin/cloud/move6-20261106/g49-base`):
 |---|---|
 | Public compiler declaration | `Solidity.Evm.Compiler.compile (b : Nat) (F : Frag Γ) (P : Prog C Γ Δ) : Option (Compilation b F P)` — the single checked entry every G38/G40/G42 consumer selects ("public compiler" in `abi-entry.md`, `g38-failure-paths.md`). No separate G42 world-call compiler exists: `g42-world-call-consumers.md` records that no world CALL is implemented. RO's V2 interface is Source-only (dispatch partition, histories) and declares no compiler. |
 | Fixed outcome/returndata observation | `Compiler.Compilation.Agrees`, obtained from `Compilation.Input` by `Compilation.correct`: success with typed state, stack and the branch's `Rep`; a disjunction pairing each source outcome with a machine outcome (one direction, no converse): source revert or asserting panic with machine `.revert`; source success with a payment revert; divergence with fault (or payment revert). The machine `revert` carries **no returndata**. The core branch refuses `revertData`/`catchData`/`tryCall` (`inFrag` returns `none`); refusal by the seven memory backends is observed in examples, not proved generally. |
-| Supported input domain (this lane's statement) | `PublicCompilerTotal.ProgOk`: inductive predicates over the intrinsic syntax that mention no acceptance function, fragment or compile result (the word-fit conditions read the backend storage layout `Evm.offset`). Storage paths (aliases; roots; struct fields whose offset fits a word; `uint`-keyed mappings; dynamic and word-sized fixed arrays); values: literals, booleans, locals, environment reads other than `address(this).balance`, storage reads, every typed unary and binary operator, ternaries and storage-array lengths; statements: storage value assignment, local assignment, value declarations, storage-alias declarations with an initializer and rebinds, plain (index-free path, `FreePath`) or indexed (through an array index or an indexed alias, `IndexedPath`; H96), each alias keeping the kind of its declaration (`Kinds`), `op=`/`++`/`--` on locals and storage locations, `require`, `assert`, `revert`, `if`, blocks, `while`, internal calls with value arguments and no or one value return. Widened by H87 and H96 (2026-11-06). |
+| Supported input domain (this lane's statement) | `PublicCompilerTotal.ProgOk`: inductive predicates over the intrinsic syntax that mention no acceptance function, fragment or compile result (the word-fit conditions read the backend storage layout `Evm.offset`). Storage paths (aliases; roots; struct fields whose offset fits a word; `uint`-keyed mappings; dynamic and word-sized fixed arrays); values: literals, booleans, locals, environment reads other than `address(this).balance`, storage reads, every typed unary and binary operator, ternaries and storage-array lengths; statements: storage value assignment, local assignment, value declarations, storage-alias declarations with an initializer and rebinds, plain (a path through no array index and no indexed alias, `FreePath`) or indexed (through an array index or an indexed alias, `IndexedPath`; H96), each alias keeping the kind of its declaration (`Kinds`), `op=`/`++`/`--` on locals and storage locations, `require`, `assert`, `revert`, `if`, blocks, `while`, internal calls with value arguments and no or one value return. Widened by H87 and H96 (2026-11-06). |
 
 **Framing and H87.** The domain is a subset of the core branch's fragment.
 The user's decision H87 (relayed 2026-11-06, answering Q1) required widening
@@ -27,19 +27,23 @@ two kinds:
   mapping keys and word-overflowing offsets (`locIn`), `send`, memory
   statements outside the core branch, multiple returns, recursion and
   external/self/library calls;
-- compiled by the core branch but outside this domain: aliases left unset
-  (solc rejects reading an unset storage pointer), rebinds that change an
-  alias's kind (accepted outside loops and branches, but the `if` meet and
-  the loop fixed-point check refuse the mix, so acceptance depends on context;
-  the Controls show the loop refusal), transfers, `push`/`pop`/`delete`,
+- compiled by the core branch but outside this domain: aliases declared
+  unset (unreadable until rebound; a later rebind is accepted by the compiler
+  but this domain does not track it), rebinds that change an alias's kind
+  (accepted, but where `if` branches disagree the meet marks the alias `dead`
+  so a later read is refused, and a loop whose body changes a flag fails the
+  fixed-point check; the Controls show the loop refusal; a kind change at top
+  level, or the same change in both branches, is compiled and could be
+  covered by letting a rebind update `K`), transfers, `push`/`pop`/`delete`,
   `assignIncDec` (`x = l++`) and static storage copies.
 
 **H96 (2026-11-06): aliases through an array index.** The judgement now
 carries the kind of each alias in scope (`Kinds`, a list read by position:
-`true` = indexed). A declaration or rebind to an `IndexedPath` (an array index
-anywhere, or an indexed alias) records or requires `true`; to a `FreePath`,
+`true` = indexed). A declaration or rebind to an `IndexedPath` (an array index or
+an indexed alias in the path's own chain of bases; an index inside a mapping
+key does not count) records or requires `true`; to a `FreePath`,
 `false`. `Matches K F` says the fragment flags each alias as its kind
-(`fragile`/`ok`); `IndexedPath.not_free` and `bindFl` show the compiler binds
+(`fragile`/`ok`); `IndexedPath.not_free`, `FreePath.bindFl` and `IndexedPath.bindFl` show the compiler binds
 exactly that flag, and `Frag.set_of_get` that a kind-preserving rebind leaves
 the fragment unchanged, so meets and loop fixed points still hold. Call bodies
 start from no kinds (`Frag.init`).
@@ -96,8 +100,9 @@ that `inFragP` only pushes locals (`Grows`) flagged as their kinds and
 kind-preserving rebinds leave the fragment unchanged (`Frag.set_of_get`), so branch meets, scope
 restriction and the loop fixed-point check hold. Axioms: `propext`, `Classical.choice`, `Quot.sound` (the library standard)
 (guarded in the Controls). H87 changed the compiler (signed bitwise, above),
-two other lanes' controls (below) and this lane's own theorems (the
-`Readable F` premise, which the alias cases need). No frozen statement
+two other lanes' controls (below) and this lane's own theorems (a
+`Readable F` premise); H96 replaced it by `Matches K F`, changed `ProgOk P`
+to `ProgOk K P` and `compile_init` to `ProgOk [] P`. No frozen statement
 changed; no `maxHeartbeats` option is used.
 
 Controls: an inhabited program using a storage read, a storage alias with a
@@ -112,7 +117,10 @@ kind-preserving rebind inside a loop, a rebind in a branch, indexed writes and
 reads) is accepted by the theorem and by kernel evaluation, with the
 fresh-machine witness `indexed_agrees_fresh`; `kindChange_refused` (an indexed
 alias rebound to a plain path in a loop) and `unsetRead_refused` are
-kernel-observed refusals, `kindChange_outside` its contrapositive. `intKey_outside` is the contrapositive of totality on a refused program.
+kernel-observed refusals, `kindChange_outside` its contrapositive. `nested`
+covers an alias of an indexed alias, a mapping inside an array element and a
+fixed-array element (theorem and kernel). No control has a struct field
+through an indexed path (`IndexedPath.field`; proved generally). `intKey_outside` is the contrapositive of totality on a refused program.
 
 Limits: this is totality of the entry on this domain. It does not extend the
 domain to unset aliases, kind-changing rebinds, memory, transfers/sends,
@@ -196,3 +204,18 @@ Owners should verify: `Solidity/Backend/PrimitivePackets/Bitwise/Selected.lean`
 `Solidity/Backend/Passes/BitwiseValueContextControls.lean` `signed_refusal` →
 `signed_acceptance` (v09-compiler-passes; pin renamed in
 `scripts/g07-axiom-pins.json` and its fragment).
+
+### H96 reviews
+
+Finder: Lean definitions behave as documented (`FreePath`/`IndexedPath`
+disjoint and exhaustive over `PathOk` paths; `Matches.read`, both `bindFl`
+lemmas and `Frag.set_of_get` agree with `Compile.lean`; unset-read refusal
+accurate). Fixed: the `if` meet was described as refusing kind mixing (it
+marks the alias `dead`, refusing a later read); "array index anywhere" and
+"index-free" overstated or misdescribed the kinds; the unset-alias exclusion
+was attributed to solc (it is a domain choice); stale `Readable` wording.
+Skeptic: no vacuity (nontrivial `K` is matched; kinds cannot be chosen
+inconsistently), `indexed_agrees_fresh` meets every premise jointly, no
+axiom/`sorry`/`maxHeartbeats`. Fixed: added `nested` controls; documented
+kind changes at top level as compiled-but-outside and the H96 signature
+changes.
