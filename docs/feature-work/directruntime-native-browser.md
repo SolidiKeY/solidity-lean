@@ -518,3 +518,15 @@ has no dispatch action; host-owned branch publication/dispatch is pending.
 The non-default-branch workflow does not deploy Pages. H100 remains open until
 the actual IDE result is retrieved. Exact evidence is retained outside Git at
 `/workspace/solidity-lean/.lake/native-browser-pages-sdk-config/receipt.json`.
+
+H100 IDE verification completed on the exact reviewed fix head
+`39d914b72eb31f116fe628282026437346a70deb`: [Pages run42300556762](https://github.com/SolidiKeY/solidity-lean/actions/runs/42300556762),
+IDE job128176919315, succeeded. All16 reported steps passed, including the
+native build/audit guards, generated-C/leanrt/GMP WASM build, offline HTML and
+fresh offline launch/proof/reopening tests. Independent finder and skeptic
+confirmed the head and result through live GitHub reads. The
+[CI manifest](../../tests/directruntime-20261104/native-browser/pages-sdk-config-ci-manifest.json)
+pins externally retained logs and metadata. This clears the IDE-fix validation
+wait; the overall workflow was still running its Solidity job at inspection.
+No default-branch deployment, original timing STOP resolution or whole-goal
+completion is inferred. This documentation increment changes no tested code.
