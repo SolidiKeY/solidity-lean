@@ -17,7 +17,7 @@ def bounded_control(command, *, env, **kwargs):
     except subprocess.TimeoutExpired:
         return subprocess.CompletedProcess(command,124,stdout="" if kwargs.get("text") else None,stderr="Docker control timeout")
 def main():
-    if len(sys.argv) not in (3,4) or sys.argv[1] not in ("old","new") or sys.argv[2] not in ("prerequisite","baseline","after","fixtures","api","matrix"):
+    if len(sys.argv) not in (3,4) or sys.argv[1] not in ("old","new") or sys.argv[2] not in ("prerequisite","baseline","after","fixtures","api","matrix","classify"):
         raise SystemExit("usage: build.py old|new prerequisite|baseline|after")
     version,phase=sys.argv[1:3]
     if (phase=="api") != (len(sys.argv)==4):raise SystemExit("api requires a successful full-closure result.json; other modes take no extra argument")
@@ -31,7 +31,7 @@ def main():
     g=mod.graph(ROOT)
     inputs=[g.source(m) for m in c["closure"]]+[ROOT/"lakefile.toml",ROOT/"lean-toolchain",ROOT/"run-lean.sh",ROOT/"scripts/v08-build-graph.py",ROOT/"scripts/roadmap-v15-bounded-pidfd.py",ROOT/"scripts/roadmap-v15-bounded-observe.py"]
     inputs += [p for p in (ROOT/"lake-manifest.json",) if p.exists()]
-    helpers=("HashContainsFixture.lean","ExportEvm.lean") if phase=="fixtures" else (("ExportAll.lean",) if phase=="api" else ())
+    helpers=("HashContainsFixture.lean","ExportEvm.lean") if phase=="fixtures" else (("ExportAll.lean",) if phase=="api" else (("CanonicalEvm.lean",) if phase=="classify" else ()))
     inputs += [ROOT/"tests/h62/item6/migrate-roadmap"/name for name in helpers]
     def fingerprint():
         return {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
@@ -41,7 +41,7 @@ def main():
             if "tests/h62/item6/migrate-roadmap" in str(p):continue
             original=subprocess.check_output(["git","show",mod.BASE+":"+str(p.relative_to(ROOT))],cwd=ROOT)
             assert hashlib.sha256(original).hexdigest()==before[str(p.relative_to(ROOT))], "old baseline input differs from pinned base: "+str(p)
-    targets=mod.graph(ROOT).closure(["Solidity.KeySort"]) if phase=="prerequisite" else (mod.graph(ROOT).closure(["Solidity.Roadmap.Evm"]) if phase=="fixtures" else c["closure"])
+    targets=mod.graph(ROOT).closure(["Solidity.KeySort"]) if phase=="prerequisite" else (mod.graph(ROOT).closure(["Solidity.Roadmap.Evm"]) if phase in ("fixtures","classify") else c["closure"])
     toolchain=Path("/workspace/.setup/tools/lean-4.24.0-linux") if version=="old" else Path("/workspace/migrate-roadmap-toolchains/lean-4.35.0-linux")
     if version=="new":
         pin=json.loads(Path("/workspace/h62-coordinator-inputs/toolchain-pin.json").read_text())
@@ -60,7 +60,7 @@ def main():
         assert reused_build.is_dir()
         targets=[]
     name="h62-roadmap-"+version+"-"+phase+"-"+str(time.time_ns())
-    dest=EVIDENCE/name;dest.mkdir(parents=True)
+    dest=(EVIDENCE/"h70"/name) if phase=="classify" else EVIDENCE/name;dest.mkdir(parents=True)
     config=dest/"runtime.toml"
     text=(ROOT/"lakefile.toml").read_text().replace("enableArtifactCache = true","enableArtifactCache = false")
     text=text.replace('version = "0.1.0"','version = "0.1.0"\nbuildDir = "'+str(reused_build or dest/"build")+'"',1)
@@ -90,8 +90,8 @@ def main():
             shell+='echo MODULE '+shlex.quote(module)+'; timeout --kill-after=5s 300s lake -f '+shlex.quote(str(config))+' --no-cache build '+shlex.quote(module)+'; '
     if phase=="api":
         shell+='timeout --kill-after=5s 300s lake -f '+shlex.quote(str(config))+' env lean --tstack=131072 -j1 '+shlex.quote(str(ROOT/"tests/h62/item6/migrate-roadmap/ExportAll.lean"))+'; '
-    if phase=="fixtures":
-        for helper in ("HashContainsFixture.lean","ExportEvm.lean"):
+    if phase in ("fixtures","classify"):
+        for helper in helpers:
             shell+='timeout --kill-after=5s 300s lake -f '+shlex.quote(str(config))+' env lean --tstack=131072 -j1 '+shlex.quote(str(ROOT/"tests/h62/item6/migrate-roadmap"/helper))+'; '
     script=dest/"run.sh"
     script.write_text(shell+"\n")

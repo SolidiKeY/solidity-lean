@@ -283,3 +283,116 @@ Full committed head/base, result paths, proof boundaries, remaining gates and
 original VM/goal context are in the handoff. No push, merge, PR, generated-root,
 central-map, axiom-pin or tracked toolchain edit has occurred. The original goal
 must remain unfinished and blocked pending the listed owner/API obligations.
+
+## H70 continuation: classified API deltas and private Hash relay
+
+Continued from `1498f324e0def23f2eb727c6638179df6743c050` on the same VM,
+branch, pinned base and existing goal. `relay.sh` is host-only. H70 routing
+confers no original-file edit permission. The Evm proposal remains unapplied
+pending the exact live-owner response. Raw, Creation/Linking and Ctor gates
+remain pending. The Hash relay is staged privately; its full migration and
+integration gates remain pending.
+
+`CanonicalEvm.lean` is an unregistered inspection helper. It serializes closed
+Lean `Expr` types, retaining constants, level structure/indices, de Bruijn
+indices, binder structure, declaration universe arity and binder visibility.
+The first comparison normalizes binder names and ordered universe-parameter
+labels. The second additionally erases binder visibility, solely to identify
+API-visible explicit/implicit/strict/instance changes. There is no reduction,
+unfolding or binder reordering. Unsupported metadata/free/metavariable nodes
+reject classification. This is syntactic inspection, not a cross-version kernel
+or semantic equivalence proof, and grants no API exception.
+
+Commands: `python3 scripts/h62/item6/migrate-roadmap/build.py old classify`
+and then `... new classify`, with the original official pins, 11 GiB cap,
+zero swap, one CPU, explicit `-j1`, 4 GiB reserve, cache-disabled fresh outputs
+and original 300 s module wall limit. Both passed with guard=null and four
+normalization/negative controls each. Old/new inventories have 392/391 Evm
+constants and match the original debug inventories exactly. Evidence:
+
+- `/workspace/migrate-roadmap-evidence/h70/h62-roadmap-old-classify-1793978165171900399/`
+- `/workspace/migrate-roadmap-evidence/h70/h62-roadmap-new-classify-1793978204527825213/`
+
+All 64 prior deltas are classified; none omitted:
+
+| Category | Count | Interpretation |
+|---|---:|---|
+| alpha-only | 45 | Structural types match after name/ordered universe-label normalization; visibility retained. |
+| binder visibility only | 9 | Match only after erasing binder info; API compatibility remains an obligation. |
+| structural | 10 | Difference persists, or declaration universe arity changes; requires a preserving root strategy. |
+
+Each row, both original types, compiler family and first structural differences
+are in `h70/classification/classification.json`. Three removed and two added
+names remain accounted for. All 64 remain visible for root review; the 19
+visibility/structural rows require particular compatibility attention. Generated
+and private names receive no blanket exemption. Additional direct Lean controls
+for universe-label normalization remain future work: no Lean was run after the
+timing stop. Python controls cover universe arity/index and constant identity.
+
+### ESCALATE B-PERF-INSPECTION
+
+Supplemental whole inspection wall: old **13.569120222 s**, new
+**20.159489847 s**, **+48.568879317%**. Further Lean in this worker stopped under
+the original >10% rule. Emitted compilation timings were Evm **1.9 s old /
+1.2 s new**, Keccak **624 ms old / 447 ms new**, parsed from the logs. The whole
+probe also compiles the metadata helper and serializes types. It is a single
+supplemental probe, not a full assigned-directory after-build benchmark, and
+does not establish a directory-wide regression or performance acceptance. No
+rerun averaged away the signal. Full before/after delta remains unavailable.
+
+`h70/classification/timing-escalation.json` requests root-gate investigation
+before further worker Lean. Preserving next-step options: investigate metadata
+inspection cost first, or have root-gate plan matched pure-module/full-build
+measurement first. Both retain this worker's stop and all original budgets;
+neither authorizes an exclusion, lowered proof obligation or performance waiver.
+
+### Exact owner overlay, staged only
+
+H70 owner commit as relayed: `2a18afcdba00a85645b0b3079704f78ffcd78860`.
+The Git object is not local; the received payload is reproducibly replayed and
+hashed. `stage_h70_hash.py` checks the original against published pinned base and
+full blob `b54c93a5b24340a19160c1fb378d057ccee60f84`, then requires full result
+blob `092971eda8c7d6997276a92ba19b25b7ce05844e`, matching the relayed target
+prefix. Overlay SHA256:
+`cfddc9e45edee7ac2f5a83c3212c741034d39a4e700a5384689b4ee6035565a0`.
+Duplicate CollisionBound relays are staged once, not applied twice.
+
+Private provenance and read-only mount plan:
+`/workspace/migrate-roadmap-evidence/h70/hash-owner-overlay/overlay.json`.
+The copy is under that directory at `Solidity/Hash/CollisionBound.lean`; it was
+not mounted or compiled after STOP and has not changed the original. Adaptive's
+advertised base `cb5d5a1c61f7350aa01d9d0c81c8f4403b19fab3` also matches; it is
+not a Roadmap import dependency and was not staged or edited. Original producer
+files and tracked toolchain remain byte-identical to pinned base.
+
+Independent read-only finder/skeptic reviews recomputed all 64 classifications,
+checked input/driver/resource provenance and the scoped timing escalation. Both
+requested full target-blob equality instead of a prefix; this is fixed with a
+same-prefix/wrong-full-hash control. Neither used Lean, a server, builds or edits.
+H70 bulk outputs stay off git with deterministic generators and a separate
+checksum manifest. The previous sealed handoff and 6570-entry manifest remain
+intact. The brief failed shell documentation append was replaced; subsequent
+scope checks confirm no producer file changed.
+
+
+H70 final non-Lean validation: 9 structural-classifier controls, 5 exact-relay
+controls, 10 existing census/runner controls and 43 terminal-identity controls
+pass (67 total), together with layers, generated roots/fragments and whitespace.
+Classification and private-overlay regeneration are byte-identical. Both
+inspection runs used the current recorded driver bytes. All tracked production
+and toolchain diffs against the pinned base are empty; the original sealed
+6570-entry manifest verifies. An initial check command used the evidence working
+directory rather than the repository and was rejected; its logs are retained
+under `h70/checks-cwd-invalid`, separate from passing checks under `h70/checks`.
+No Lean ran during these checks or after B-PERF-INSPECTION.
+
+H70 retrieval uses separate artifacts, preserving the prior sealed checkpoint:
+`/workspace/migrate-roadmap-evidence/h70/original.patch`,
+`/workspace/migrate-roadmap-evidence/h70/migrate-roadmap-h70.bundle`,
+`/workspace/migrate-roadmap-evidence/h70/HANDOFF.json`, and
+`/workspace/migrate-roadmap-evidence/h70/SHA256SUMS`.
+The existing goal remains blocked, not complete. Root must resolve the inspection
+performance escalation, dependency integration gates and frozen API obligations
+before the remaining migration validation can proceed. No push, merge, PR,
+producer ownership transfer, original-file permission or freeze announcement
+is implied by this checkpoint.
