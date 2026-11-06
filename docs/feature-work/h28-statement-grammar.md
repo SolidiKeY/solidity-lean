@@ -3143,3 +3143,39 @@ constructor is inhabited. Fixes:
   matcher name. All three are recorded.
 - Skeptic 8, a possible "no goals" after `prints_simp`, was refuted: the file
   checks clean.
+
+### Gates for moved-lane checkpoints AD–AG
+
+Lean MCP per-file diagnostics, severity error, all clean:
+
+- `AtomTry`, `AtomAsm`, `AtomCall`, `AtomSimple`, `AtomNested`, `AtomDerives`,
+  `G0Rejections`;
+- `FixtureControls/Case22`, `Case23`, `Case24`, `Case27`;
+- `tests/…/AtomNestedControls`, `AtomTryControls`, `AtomDerivesControls`,
+  `G0ObserverControls`, `G0ElaborationAudit`.
+
+`#print axioms` for every new theorem is within `propext` and `Quot.sound`.
+
+`./run-lean.sh` ran twice; neither run completed.
+
+- First run (cold cache, 6003+ jobs, started at `a1003dd0`). Three modules
+  outside the lane were killed with exit 137 (out of memory):
+  `Checked/UnitExamples`, `Examples/Tactics/OpenLoops` and
+  `TestSuite/Derived7`. No module failed with a Lean error.
+- Second run (warm, at `1311182e`). Only `Checked/UnitExamples` was killed
+  (exit 137). Every lane module built: `AtomNested`, `AtomDerives` and the
+  four assembly fixture cases appear as built.
+
+`Checked/UnitExamples` is unchanged by this lane and by the merged master.
+While it built, the Lean language server held about 3 GB. Stopping the
+server was refused by the session's permission policy. `check-solkey.sh`,
+the script's last step, was therefore not reached in either run.
+
+| Check | Result |
+| --- | --- |
+| `register.sh --check` | pass |
+| `fragments.sh --check` | pass |
+| `check-layers` | pass |
+| `check-orphans` | 6384 reachable, 0 orphaned |
+| `check-trust` | 0 findings |
+| `check-doc-paths` | one missing reference, the same one that predates this lane (`after-roadmap-va1.md`) |
