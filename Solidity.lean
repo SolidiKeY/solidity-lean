@@ -361,6 +361,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingActivation
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingArguments
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallCoherence
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallCoherenceControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallLeaves
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallViews
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCoherence
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingDeclarationCheck
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingEmission
@@ -380,6 +382,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZero
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZeroControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingQuotations
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingRecursiveCheck
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingRecursiveCheckControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingResume
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarControls
@@ -610,6 +614,9 @@ import Solidity.Backend.MemoryCopies.AllocationPanicInterface
 import Solidity.Backend.MemoryCopies.BudgetedDefault
 import Solidity.Backend.MemoryCopies.BudgetedDefaultControls
 import Solidity.Backend.MemoryCopies.BudgetedDefaultInterface
+import Solidity.Backend.MemoryCopies.BudgetedFinite
+import Solidity.Backend.MemoryCopies.BudgetedFiniteControls
+import Solidity.Backend.MemoryCopies.BudgetedFiniteInterface
 import Solidity.Backend.MemoryCopies.BudgetedReference
 import Solidity.Backend.MemoryCopies.BudgetedReferenceControls
 import Solidity.Backend.MemoryCopies.BudgetedReferenceInterface
@@ -2978,6 +2985,7 @@ import Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi
 import Solidity.Frontend.StatementGrammarH28.SyntaxPair
 import Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance
 import Solidity.Frontend.StatementGrammarH28.TokenRoot
+import Solidity.Frontend.StatementGrammarH28.TryCoverage
 import Solidity.Frontend.StatementGrammarH28.YieldSplit
 import Solidity.Frontend.StatementGrammarH28.YulControlFree
 import Solidity.Frontend.Static.C3
