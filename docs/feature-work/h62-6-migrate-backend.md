@@ -191,3 +191,53 @@ can be accepted. Final export status records whether this work remains running.
 The live v3 baseline log/progress can change while running and is outside the
 frozen checkpoint checksum snapshot until the run finishes. Its evidence must
 be finalized and checksummed in the next checkpoint.
+
+## Python-only import reconciliation checkpoint
+
+The next backfill increment adds `reconcile_imports.py`, which validates the
+1,919 actual assigned source identities, bytes and source imports against the
+census; verifies the reachable, topologically ordered 2,497-module local closure
+without padding; and compares compiler `.ilean` module identities and direct
+import names/order. Missing or unreadable artifacts remain pending (exit 2).
+Unresolved non-toolchain imports are rejected. The census now distinguishes
+exact `Init`, `Lean` and `Std` namespaces from vendored names such as LeanTeX.
+
+The sealed checkpoint2 report checks all 1,919 source files and matches the
+124 available compiler records, with 2,373 artifacts unavailable and no
+mismatches. This is **pending**, not a complete census gate. These checks do
+not establish artifact freshness, toolchain provenance, import visibility/meta
+flags, elaborated type compatibility or semantic equivalence. Fresh build
+provenance and final compiler gates remain necessary. Eight Python controls
+cover the committed scanner/reconciler; four additional API controls belong
+to uncommitted draft work. Both independent read-only reviews passed after
+the missing-dependency finding was fixed. No reviewer used Lean or its server.
+
+Reproduction from the assigned checkout:
+
+```sh
+python3 scripts/h62/item6/migrate-backend/reconcile_imports.py \
+  --census /workspace/migrate-backend-evidence/census-base.json \
+  --artifacts /workspace/migrate-backend-baseline/.lake/build/lib/lean \
+  --output /workspace/migrate-backend-evidence/import-reconciliation-progress.json
+```
+
+Sealed evidence: `/workspace/migrate-backend-evidence/checkpoint2/`. The
+committed `EVIDENCE-IMPORTS.sha256` is relative to that directory. The live
+baseline and later reconciliation reports can advance independently.
+
+Additional owned drafts are preserved separately for continuation: a complete
+83-constructor actual-opcode recursor fixture; a generated full Slice proposal
+copy/diff that changes only the ternary body while retaining its exact written
+primary signature, remaining source and every frozen guard; and a structural
+API exporter with DAG sharing, strict binder names/annotations, per-declaration
+streaming, and a derived runtime cache control. The proposal is not applied.
+Their Lean verification, full API compatibility, proof/resource checks and
+timings remain pending; none is included as an accepted proof in this commit.
+The API count check validates consistency with its exporter header, not
+independent declaration completeness. The draft archive/state records exact
+paths and hashes. Preserve these owned drafts rather than discarding them.
+
+The old clean gate continues unchanged under the existing goal-owned writer
+lock (supervisor PID 20926, session 7208). All preparation above changed only
+this lane's scripts, tests and handoff in the assigned worktree; no input in
+the immutable baseline worktree changed, and no second Lean job was launched.

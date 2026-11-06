@@ -46,6 +46,9 @@ def imports(text):
     return [name for line in re.findall(r"(?m)^\s*(?:public\s+|meta\s+)?import\s+([^\n]+)", clean)
             for name in line.split()]
 
+def is_toolchain_module(name):
+    return name in ("Init", "Lean", "Std") or name.startswith(("Init.", "Lean.", "Std."))
+
 def census(root):
     sources = {str(p.relative_to(root).with_suffix("")).replace("/", "."): p
                for p in sorted((root/"Solidity").rglob("*.lean"))}
@@ -56,7 +59,7 @@ def census(root):
         if m in seen: return
         if m in active: raise ValueError("import cycle: " + m)
         if m not in sources:
-            if not m.startswith(("Init", "Lean", "Std")):
+            if not is_toolchain_module(m):
                 raise ValueError("unresolved non-toolchain import: " + m)
             return
         active.add(m)

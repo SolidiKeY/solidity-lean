@@ -19,6 +19,12 @@ class LexicalControls(unittest.TestCase):
         text = '#eval "-- /- \\" fake"\nimport Solidity.KeySort -- trailing\n'
         self.assertEqual(module.imports(text), ["Solidity.KeySort"])
 
+    def test_toolchain_prefix_does_not_hide_vendor_dependencies(self):
+        for name in ("Init","Init.Data.Nat","Lean","Lean.Elab","Std","Std.Data.HashMap"):
+            self.assertTrue(module.is_toolchain_module(name),name)
+        for name in ("LeanTeX","StandardFake","Initializer"):
+            self.assertFalse(module.is_toolchain_module(name),name)
+
     def test_multiple_and_qualified_imports(self):
         self.assertEqual(module.imports("public import Lean Std\nmeta import Init\n"), ["Lean", "Std", "Init"])
 
