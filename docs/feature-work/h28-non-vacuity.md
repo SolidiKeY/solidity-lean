@@ -641,9 +641,18 @@ and check.py are unchanged. Finder and skeptic accepted the wiring read-only.
 V2 headlines are not present in the inspected tree; include their witness
 applications when V14 publishes them, without dropping existing coverage.
 
-Local validation remains FAILED: absent library oleans and root-owned build
-outputs prevented prerequisite restoration/build. No witness rejection or green
-run is inferred. GitHub authentication is invalid, so workflow_dispatch is
-pending coordinator execution. Q-H107-LOCAL and Q-H107-DISPATCH were submitted
-through coord-ask. Raw failures stay off git; the H107 evidence manifest records
-their paths, sizes and hashes. This is CI wiring, not non-vacuity completion.
+Local validation subsequently passed at reviewed CI commit
+`e04e0b8e6cc8b15a28d51922a697112e6d19ee6c`: all 26 modules freshly elaborated
+in the coordinator-authorized owned worktree `/workspace/v17-witness`, using
+serial Lean and the unchanged 12 GiB address-space cap. All witness source
+hashes match the original checkout. Earlier prerequisite/permission failures
+remain preserved. The master-cache seed fell back after temporary staging
+reached its reserve; the successful build used existing artifacts through an
+owned cache view at `/tmp/v17-witness-owned/cache`, with new outputs in owned
+temporary storage. The original root-owned build tree was not repaired.
+
+The coordinator-published lane branch was verified at that same reviewed CI
+commit. Workflow dispatch no longer waits on a VM token: the coordinator will
+dispatch the published branch and return its run URL. That reference remains
+pending. The H107 evidence manifest pins successful and failed raw logs off git.
+This suite pass does not close the whole non-vacuity or V17 release assignment.
