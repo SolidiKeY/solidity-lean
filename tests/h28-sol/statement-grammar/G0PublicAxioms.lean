@@ -8,6 +8,20 @@ proof statements and new constructor equations. -/
 open Solidity.Frontend.StatementGrammarH28
 open Solidity.Source Solidity.Frontend.Checked
 
+#check g0IsLiteralBase_eq
+#print axioms g0IsLiteralBase_eq
+#check g0Placeholders_eq
+#print axioms g0Placeholders_eq
+#check g0Nodes_eq
+#print axioms g0Nodes_eq
+#check g0Rejections_eq
+#print axioms g0Rejections_eq
+#check g0IsRethrow_eq
+#print axioms g0IsRethrow_eq
+#check statementFixtureCheck_profile
+#print axioms statementFixtureCheck_profile
+#check g0NodeCtors_eq_nodes
+#print axioms g0NodeCtors_eq_nodes
 #check g0ListCell_nil
 #print axioms g0ListCell_nil
 #check g0ListCell_cons
