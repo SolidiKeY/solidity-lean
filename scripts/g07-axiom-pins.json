@@ -6004,6 +6004,41 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipeline.lean:Solidity.Backend.MemoryCopies.nested_live_pipeline_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipeline.lean:Solidity.Backend.MemoryCopies.nestedLivePipeline": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.final_cursor_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.first_capacity_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.mixed_shadows_reach_two_fresh_copies": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.second_refusal_retains_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.shallow_cursor_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryCopies/NestedMemoryPath.lean:Solidity.Backend.MemoryCopies.nestedMemoryPath": [
   "Classical.choice",
   "Quot.sound",

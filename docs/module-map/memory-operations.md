@@ -578,6 +578,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/GuardedDefaultDeclaration.lean` | Guard the actual selected declaration with complete success state/allocator contract and explicit capacity refusal. |
 | `Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean` | Actual body selection, local bindings, stack/payload, full new contents, represented saturation refusal and unsupported-domain controls. |
 | `Backend/MemoryCopies/NestedLivePipelineInterface.lean` | Contract only for original shadow-retaining nested values through the existing two-copy pipeline, with full reached states and two refusal phases. |
+| `Backend/MemoryCopies/NestedLivePipeline.lean` | Proved original-value nested storage/memory pipeline by exact whole-copy and strip transport, retaining both reached refusal phases. |
+| `Backend/MemoryCopies/NestedLivePipelineControls.lean` | Original outer/child shadows, mixed live lengths, two fresh copies, actual final cursor, shallow-copy negative and first/later represented capacity-refusal controls. |
 | `Backend/MemoryCopies/NestedMemoryPathFrameInterface.lean` | Additive contract only for gap-preserving selected nested deep binding; frozen binding contract unchanged. |
 | `Backend/MemoryCopies/NestedMemoryPathFrame.lean` | Proved additive nested deep binding gap transport at the same full post-state and allocator witnesses. |
 | `Backend/MemoryCopies/NestedMemoryPathInterface.lean` | Contract only for selected nested memory paths, checked deep snapshot copying/binding, preserved old contents and distinct path/capacity refusals. |
