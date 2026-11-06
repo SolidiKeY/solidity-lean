@@ -79,3 +79,10 @@ with the overlay objects resolved the namespace lookup. Raw evidence is in
 This is a candidate, not an accepted migration: independent finder and skeptic
 reviews, added inhabited fixture proofs, scope-complete affected validation,
 full final gate and registration/owner integration decisions remain pending.
+
+`tests/h62/item1/readonly-bind/BindControls.lean` checks synthetic success and
+failure computations over the existing concrete `before`/`after` source states.
+It proves those states differ, success applies the continuation to the returned
+state, and timeout retains that state and bypasses the continuation. It does
+not instantiate the remaining actual capture-phase failure premises. The file
+elaborated under the bounded overlay setup; new phase fixtures remain pending.
