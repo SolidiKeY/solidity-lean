@@ -702,6 +702,7 @@ import Solidity.Backend.MemoryCopies.FixedReferenceDeclareInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceLive
 import Solidity.Backend.MemoryCopies.FixedReferenceLiveControls
 import Solidity.Backend.MemoryCopies.FixedReferenceLiveInterface
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurnInterface
 import Solidity.Backend.MemoryCopies.FixedReferencePath
 import Solidity.Backend.MemoryCopies.FixedReferencePathControls
 import Solidity.Backend.MemoryCopies.FixedReferencePathCopy

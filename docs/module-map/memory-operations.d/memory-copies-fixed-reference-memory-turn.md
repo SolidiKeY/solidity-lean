@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/FixedReferenceMemoryTurnInterface.lean` | Contract only for a headerless fixed-memory parent child read, checked deep copy and header0 reservation store, with distinct access/capacity refusals. |
