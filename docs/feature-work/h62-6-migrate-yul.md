@@ -561,3 +561,31 @@ Final partition reviews: finder and skeptic independently verified exact261+1513
 coverage, full frozen source map, parent/probe/summary/raw/gzip hashes, detached
 base and helper identities, negative controls and no false acceptance. Neither
 ran Lean or wrote. No findings. Remaining export/consolidation still required.
+
+## Complete old-inventory checker prepared
+
+`consolidate-old-inventory.py` requires a passing complete suffix and exact
+ordered disjoint coverage of all original1774 modules before writing a candidate
+result. It rechecks frozen baseline source hashes, parent/census hashes, each
+summary/probe/gzip/raw checksum, raw declaration/footer/schema reconstruction,
+exact exporter/module/output bindings, old release identity, unchanged resource
+helper/driver and helper source identity. Public/private/generated declarations
+are retained. Partial validation is running/fail, never a complete inventory pass.
+The final result is old persisted-kernel inventory integrity only, explicitly
+not cross-version API equivalence, attributes/priority, new build/performance or
+runtime acceptance. It must be run through the same bounded driver after the
+suffix job completes; no second heavy job is started during export.
+
+Negative controls using the actual running suffix reject incomplete status and
+also reject a forged pass label on incomplete coverage, before output creation.
+Evidence: resume-d96f2406d/consolidation-negative-control.json and
+consolidation-forged-pass-control.json. Full positive consolidation remains
+pending until all1513 suffix snapshots are sealed. This tool checkpoint alone
+does not finish the original queue or old full-inventory gate.
+
+Consolidation-tool finder and skeptic independently reviewed coverage,source/
+artifact/exporter bindings,version checks,negative controls and limited claims;
+no findings. Neither ran Lean or wrote. Tool checkpoint reviewed; full positive
+consolidation and final inventory gate still pending suffix completion.
+The export supervisor was briefly suspended at a probe boundary for this commit;
+its active bounded probe was allowed to finish and the same export then resumed.
