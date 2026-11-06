@@ -8,7 +8,7 @@ import Solidity.SolcValidation.IrEval
 0.8.38 `--ir` output of `Census` (`tests/fullscope-20261104/vt1/extract-helpers.py`):
 `checked_exp_t_uint256_t_uint256` and everything it calls. The tree was printed
 from the parser's output (`IrLeanGen.lean`) and split into named bodies
-(`gen-exp-module.py`); `expHelpers_certified` re-checks it against the text by
+(`gen-helper-modules.py`); `expHelpers_certified` re-checks it against the text by
 kernel evaluation (`Parsed.sound`'s statement).
 -/
 namespace Solidity.SolcValidation.IrSyntax

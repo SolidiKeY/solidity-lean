@@ -3666,6 +3666,7 @@ import Solidity.Signature
 import Solidity.SolcValidation.DataLayout
 import Solidity.SolcValidation.DataResolution
 import Solidity.SolcValidation.Dialect
+import Solidity.SolcValidation.IrAbiHelpers
 import Solidity.SolcValidation.IrCensus
 import Solidity.SolcValidation.IrEval
 import Solidity.SolcValidation.IrEvalFuel
@@ -3677,6 +3678,7 @@ import Solidity.SolcValidation.IrHelperSource
 import Solidity.SolcValidation.IrHelperSteps
 import Solidity.SolcValidation.IrHelpers
 import Solidity.SolcValidation.IrParse
+import Solidity.SolcValidation.IrPushHelpers
 import Solidity.SolcValidation.IrSyntax
 import Solidity.Solkey.ComputedRevert
 import Solidity.Solkey.Constructors

@@ -103,3 +103,10 @@ def genCode (text : String) : String :=
   let term := genCode (← IO.FS.readFile "tests/fullscope-20261104/vt1/fixtures/exp-helpers.yul")
   IO.FS.writeFile "tests/fullscope-20261104/vt1/fixtures/exp-helpers.term" (term ++ "\n")
   IO.println s!"EXP_HELPERS_TERM {term.length} chars"
+
+-- The calldata-decoding and storage-push groups (`IrAbiHelpers.lean`, `IrPushHelpers.lean`).
+#eval show IO Unit from do
+  for name in ["abi-helpers", "push-helpers"] do
+    let term := genCode (← IO.FS.readFile s!"tests/fullscope-20261104/vt1/fixtures/{name}.yul")
+    IO.FS.writeFile s!"tests/fullscope-20261104/vt1/fixtures/{name}.term" (term ++ "\n")
+    IO.println s!"{name} TERM {term.length} chars"
