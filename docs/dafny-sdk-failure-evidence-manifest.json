@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "1340720d807de43bbdf9715e2cd552cb74e9d4c0",
+  "obligation": "submenus:dafny.context",
+  "status": "partial",
+  "archive": {
+    "path": "/workspace/dafny-parity-sdk-failure-20261106/evidence.tar.gz",
+    "bytes": 9084816,
+    "sha256": "5ad36e8c465207d74a2d7927ffb05556c0d03cba199cbafecb02f9f02709847f"
+  },
+  "files": 605,
+  "members": [
+    "PROVENANCE.json",
+    "REVIEWS.md",
+    "COMPARISON.md"
+  ],
+  "boundary": "Matching existing SDK provision, actual native F6/Run/Test observations; prompt/compiler failures preserved; no completed row/kernel or EVM proof"
+}
