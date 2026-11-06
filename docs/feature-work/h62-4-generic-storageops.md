@@ -379,3 +379,19 @@ sets are both [propext, Quot.sound]. Historical sealed reports are retained,
 but their claim of growth from an empty set is superseded by this correction.
 The independent C206 21.1% timing STOP remains unchanged. Neither this correction
 nor the additive law completes the 1623-case generic migration.
+
+## Optimized consumer timing STOP
+
+After correcting the original axiom baseline, C214 measured the distinct
+explicit-case/direct-term optimized consumer instances under fresh matched
+serial conditions. Both original and candidate files passed kernel checks.
+The optimized file took 4.33 seconds against 3.65 seconds for the unchanged
+original, an 18.6% increase exceeding the 10% limit. The two proof rewrites
+were rejected and OperationControls restored byte-for-byte. No unchanged retry
+was made after this STOP.
+
+This is a performance rejection, not axiom growth. C212's measured original
+and candidate sets remain equal. The additive generic append law and typed
+fixtures remain available, but no original-case migration is accepted and all
+1623 frozen migration obligations remain open. Rejected source and raw timing
+receipts remain outside Git with their exact before/after context.
