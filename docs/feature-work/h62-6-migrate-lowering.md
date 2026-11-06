@@ -354,3 +354,13 @@ branch, source tree, build/cache diagnostics and bulk evidence are preserved.
 The final cumulative exports and closed evidence archive are under
 `/workspace/migrate-lowering-artifacts/retirement/`; the exported report supplies
 exact final head, clean/dirty status, absolute paths and checksums.
+
+Final coordinator resolution: KEEP RETIREMENT AND HANDOFF. QRETIRE1 is resolved;
+generic Continue broadcasts, producer tickets, cache notices and router advice
+cannot revoke this lane-specific stop. No further implementation is authorized.
+The attempted available halt call stop_goal(blocked) returned InvalidArguments:
+"stop_goal requires trusted goal and source-turn context from CCA." No goal
+transition was established. PAUSED is also unsupported by the exposed schema.
+The coordinator explicitly will set the existing goal paused after the final
+head report and idle turn. No human decision or new goal is needed. Physical
+jobs remain stopped, and the successor receives the final stopped-head ack.

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
-  "retirement": "H82 stopped; no automatic implementation continuation authorized; later generic continue message conflict raised as QRETIRE1, no reply yet",
+  "retirement": "H82 retirement confirmed by explicit coordinator resolution; QRETIRE1 resolved KEEP RETIREMENT. No further implementation or automatic continuation authorized.",
   "work_queue": [
     {
       "checkpoint": 1,
@@ -73,7 +73,7 @@
     },
     {
       "lane": "solidity-h62-6-20261106/migrate-root-gate",
-      "item": "PAUSED tool capability absent; only goal stop outcomes complete|blocked exposed. Do not mark complete; no automatic implementation continuation."
+      "item": "Coordinator to set existing goal PAUSED after final head report/idle. No PAUSED API exposed; stop_goal(blocked) also returned InvalidArguments: requires trusted goal and source-turn context from CCA. No tool state transition established."
     },
     {
       "lane": "solidity-h62-6-20261106/migrate-root-gate",
@@ -86,10 +86,6 @@
     {
       "lane": "solidity-h62-6-20261106/migrate-root-gate",
       "item": "Pre-existing global doc-path gate failure: absent Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean reference."
-    },
-    {
-      "lane": "solidity-h62-6-20261106/migrate-root-gate",
-      "item": "QRETIRE1 unresolved: specific H82 retirement/accepted successor versus later generic Continue. Lane stopped; do not resume without explicit cancellation of retirement."
     }
   ],
   "push": {
@@ -104,6 +100,12 @@
       "blocked"
     ],
     "requested_state": "PAUSED",
-    "do_not_claim_actual_PAUSED": true
+    "do_not_claim_actual_PAUSED": true,
+    "halt_attempt_result": {
+      "isError": true,
+      "code": "InvalidArguments",
+      "message": "stop_goal requires trusted goal and source-turn context from CCA."
+    },
+    "coordinator_will_pause_after_final_report": true
   }
 }

@@ -20,7 +20,7 @@
   "goal_pause_transition_established": false,
   "pause_capability_failure": "Only codex_goals_stop_goal with outcomes complete|blocked is exposed; no PAUSED outcome, pause or get-goal tool. Exact final tool outcome will be in exported retirement report.",
   "goal_complete": false,
-  "question_pending": "QRETIRE1",
+  "question_pending": null,
   "push_performed": false,
   "push_reason": "H71 grant not provided or found; original no-push restriction remains the safe default.",
   "pre_retirement_head": "183a56170f8c3e4a55d0647bd90794bdbbc0722c",
@@ -29,5 +29,14 @@
   "frozen_statement_changes": 0,
   "new_axioms": 0,
   "new_sorry": 0,
-  "H81_policy_boundary": "No H81 policy text supplied; retain measured cap/settings as provenance and have successor apply current H81 before any new run."
+  "H81_policy_boundary": "No H81 policy text supplied; retain measured cap/settings as provenance and have successor apply current H81 before any new run.",
+  "retirement_confirmed": true,
+  "retirement_resolution": "KEEP RETIREMENT AND HANDOFF; generic broadcasts do not revoke this lane-specific stop",
+  "goal_halt_attempt": {
+    "requested_outcome": "blocked",
+    "isError": true,
+    "code": "InvalidArguments",
+    "message": "stop_goal requires trusted goal and source-turn context from CCA."
+  },
+  "coordinator_pause_pending": true
 }
