@@ -3649,6 +3649,8 @@ import Solidity.SortCheck.Parser
 import Solidity.Source.Agreement.BoolSlot
 import Solidity.Source.Agreement.BoolSlotAssign
 import Solidity.Source.Agreement.BoolSlotControls
+import Solidity.Source.Agreement.BoolSlotNot
+import Solidity.Source.Agreement.BoolSlotNotControls
 import Solidity.Source.Agreement.BoolSlotRead
 import Solidity.Source.Agreement.BoolSlotReadControls
 import Solidity.Source.Agreement.Locals

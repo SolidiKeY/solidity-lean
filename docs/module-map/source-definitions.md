@@ -104,3 +104,5 @@
 | `Source/Agreement/BoolSlotControls.lean` | Actual middle-slot Source/model preservation and a wrong-slot countercontrol. |
 | `Source/Agreement/BoolSlotRead.lean` | Actual arbitrary-slot get correspondence, local-read initialization and later original-slot write producers. |
 | `Source/Agreement/BoolSlotReadControls.lean` | Concrete read-copy/write histories and importing client; horizon and primitive-copy-versus-alias controls. |
+| `Source/Agreement/BoolSlotNot.lean` | Actual local-read boolean negation initializer producer with internally derived operand and factored checked monad runs. |
+| `Source/Agreement/BoolSlotNotControls.lean` | Total-initial-locals client, Source horizon and both negation polarity controls. |
