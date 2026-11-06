@@ -227,7 +227,8 @@ theorem after_halt_reverts (σ : State C []) :
 
 /-- The `require` itself is never cut: dropping it would turn the revert into success. -/
 theorem halt_kept_wrong (σ : State C []) :
-    Prog.runC (.cons afterHalt .nil) σ ≠ Prog.runC (.cons (.block .nil) .nil : Prog C [] []) σ := by
+    Prog.runC (.cons afterHalt .nil) σ ≠
+      Prog.runC (.cons (.block .nil) .nil : Prog C [] []) σ := by
   intro h
   cases h
 
@@ -240,8 +241,8 @@ def deadStore (e₁ e₂ : Val C G2 .uint) : Prog C G2 G2 :=
   .cons (.assignLocal .here e₁) (.cons (.assignLocal .here e₂) .nil)
 
 theorem dead_store_removed :
-    Prog.dse (deadStore (lit 1) (add y (lit 2))) = .cons (.assignLocal .here (add y (lit 2))) .nil :=
-  rfl
+    Prog.dse (deadStore (lit 1) (add y (lit 2))) =
+      .cons (.assignLocal .here (add y (lit 2))) .nil := rfl
 
 /-- `a = 1; a = a + 2;` is kept: the second right side reads `a`. -/
 theorem self_read_kept :
