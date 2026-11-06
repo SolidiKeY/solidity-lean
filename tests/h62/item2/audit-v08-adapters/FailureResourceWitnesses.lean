@@ -48,6 +48,19 @@ theorem exact_refusals : ¬ NoFail failed ∧ ¬ before ≤ (4, failed) := by
   change TxFate.runs 37 none = .dropped at observed
   cases observed
 
+/-- H69: the deliberate diagonal refutation is audited by impossibility,
+not by fabricating a joint witness for its contradictory premises. -/
+theorem no_retraction_joint_impossible :
+    ¬ ∃ (extract : Nat → FailurePoints) (replace : Nat → FailurePoints → Nat),
+      ∀ n p, extract (replace n p) = p := by
+  rintro ⟨extract, replace, rightInverse⟩
+  exact no_horizon_retraction extract replace rightInverse
+
+/-- The resource premise predicate itself has an inhabited model. This is
+not an inhabitant of the separate frozen SourceSpec producer structure. -/
+theorem nofail_predicate_witness : ∃ p : FailurePoints, NoFail p :=
+  ⟨clear, noFailures_noFail (fun _ => 37)⟩
+
 /-- info: 'H62.AuditV08Adapters.FailureResourceWitnesses.trans_joint' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms trans_joint
 /-- info: 'H62.AuditV08Adapters.FailureResourceWitnesses.replacement_joint' does not depend on any axioms -/
@@ -58,4 +71,8 @@ theorem exact_refusals : ¬ NoFail failed ∧ ¬ before ≤ (4, failed) := by
 #guard_msgs (whitespace := lax) in #print axioms schedule_change_joint
 /-- info: 'H62.AuditV08Adapters.FailureResourceWitnesses.exact_refusals' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms exact_refusals
+/-- info: 'H62.AuditV08Adapters.FailureResourceWitnesses.no_retraction_joint_impossible' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms no_retraction_joint_impossible
+/-- info: 'H62.AuditV08Adapters.FailureResourceWitnesses.nofail_predicate_witness' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms nofail_predicate_witness
 end H62.AuditV08Adapters.FailureResourceWitnesses

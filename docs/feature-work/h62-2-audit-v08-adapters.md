@@ -1,169 +1,224 @@
-# H62 item 2 — v08-adapters audit (unfinished)
+# H62 item 2 — v08-adapters audit, ongoing
 
 Owner: `solidity-h62-2-20261106/audit-v08-adapters`.
 Repository: `/workspace/solidity-lean`.
 Branch: `codex/solidity-h62-2-20261106/audit-v08-adapters`.
 Frozen base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Original rendered prompt SHA256: `5cacd891e4eb0f7c11882c5370c149cf789d69a846d5ca83b10b7c6fd650a2b6`.
-Persistent goal retained; get_goal is not exposed. No replacement goal created.
+Previous checkpoint: `1b7eb0c5f8251efbaaf3b7e692d0f50d1ba53fb5`.
+The original persistent goal is retained unfinished; get_goal is unavailable.
+No second goal, reset, push, merge, PR, pre-gate, deployment or systemd-run.
 
-## Checkpoint status
+## Coordinator answers applied
 
-| Checkpoint | Status | Evidence / remaining obligation |
+The latest coordinator answer says v4.35.0 applies ONLY to the toolchain-migration
+batch. This lane uses the frozen master's installed v4.24.0. The previous
+MIG-STRING-001 question is resolved by that scope correction, without editing
+Solidity/SortCheck/Parser.lean. Earlier v4.35 logs/install artifacts remain historical off-git data;
+they are not used or accepted by current validation. No further install/overlay.
+The tracked lean-toolchain and all frozen sources remain unchanged.
+
+H69 (human, 2026-11-06): "for theorems whose hypotheses are contradictory on
+purpose (negative controls, separation lemmas, refutations), a checked Lean proof
+that the hypotheses cannot hold together IS the audit result for that theorem.
+Ordinary interface theorems still need a joint-satisfiability witness. Change no
+statement. Classify each such theorem explicitly in your audit report (name, why
+intentional, the impossibility proof) and continue."
+AUD-REFUTATION-001 is resolved by the checked classification below. Questions: none.
+
+## Original checkpoint status
+
+| Checkpoint | Status | Remaining work |
 |---|---|---|
-| 1. Frozen signatures and owners | partial | Conservative 881-file, 7,949-candidate source inventory; exact blobs checked against base; all owners await confirmation; inherited variables and 26 ambiguous signatures await elaboration. |
-| 2. Simultaneous hypotheses | partial | Five original resource-law targets have reviewed kernel-checked joint witnesses; 7,944 candidates remain uncovered in acceptance output. Candidate count includes controls and premise-free declarations; exact public-interface classification is pending. |
-| 3. Compiler success and negative controls | pending | No supported-program compiler totality, reject-all/always-revert compiler controls, or executable gas/fork boundary suite added. Resource schedules are not execution evidence. |
-| 4. Witness/fidelity verification | partial | Five witness targets verified and linked to frozen source signatures; exact full elaborated census and all owners remain pending. No full-audit acceptance or runtime gate pass. |
+| 1. Every frozen interface signature and owner | partial | 881 mapped files, 7,949 lexical theorem candidates; 26 source-signature ambiguities. All-kind kernel census now covers two modules, including proof fields, predicate definitions, universes and definition values. Remaining modules and producer ownership still need reconciliation. |
+| 2. Every ordinary joint witness / H69 impossibility | partial | Six ordinary source-theorem targets jointly witnessed; one intentional refutation audited; four additional proof fields witnessed through two coherent per-input carriers. Global SourceSpec producers remain unwitnessed. |
+| 3. Supported compiler success and negative controls | partial | Actual dynamic local-require compiler succeeds for true input, reverts for false input; both reject-all and always-revert candidates fail its scoped public contract. Global success, charged gas and fork boundaries remain pending. |
+| 4. Witness and statement-fidelity census | partial | Thirteen source theorems accounted exactly once in two limited acceptances. 7,936 lexical theorem candidates remain, plus further non-keyword interfaces and generated declarations awaiting classification. Full-root gates remain pending. |
 
-This is a reviewed backfill checkpoint and scope-blocker handoff, not completion
-of the four-checkpoint queue or its 8–10h useful-work budget.
+This checkpoint is not completion of the four-checkpoint / 8–10h queue. The
+fresh-thread handoff follows four useful work items: correct lane prerequisite;
+H69 resource witnesses and census; scoped success/carrier proofs; reviewed
+acceptance/cache hardening. Resume the same VM, goal and branch, not a replacement.
 
-## Frozen inputs and scope
+## Scope and setup provenance
 
-Initial clean checkout was `work` at `6cf853aea0417155aca29ddb91f1767d3f3a3cc4`.
-Fetched origin/master and exact base; base is an ancestor of fetched master
-`821e3e8f4` (full observed SHA is saved in provenance evidence). Created the
-assigned branch at the exact base without resetting or discarding work.
-No existing original, generated root, module-map fragment, pin, toolchain file
-or central registration was edited. New Lean helpers remain under the exclusive
-tests directory. No integration registration is requested until the audit is complete.
-No push, merge, PR, pre-gate, deployment or systemd-run occurred.
+Initial clean checkout was work at `6cf853aea0417155aca29ddb91f1767d3f3a3cc4`.
+Fetched the intended remote/base, verified ancestry, and created this branch at
+the exact base without reset/discard. The earlier export records full ancestry.
+All current changes are in the sole assigned tests/scripts paths and this doc.
+No Solidity, Bridge, generated root, central map, pin, lakefile or original
+interface was edited. Writer lock protects writes/checks; no owner edit request
+is needed for these exclusively owned additive files. Existing originals remain
+read only, and no H55-G49 proof work is duplicated.
 
-The coordinator-input SHA256 manifest was independently checked: all five inputs
-match. Official Lean archive SHA256 is
-`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
-Lean: `4.35.0`, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, Release.
-Lake: `5.0.0-src+eb6cafb`, Lean `4.35.0`.
-No v4.24 artifact cache is used. Original tracked toolchain remains untouched.
+Actual versions: Lean `4.24.0`, Release commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake `5.0.0-src+797c613`.
+Installed archive observed SHA256:
+`b14f5e5159219dd1a1956c3b806813319f5e94ccd5bdfd56f54520609a5bb5ec`.
+Fresh KeySort/AST/annotations/parser/checker compiled, and the actual checker
+reported `parsed 377 taclets, 131 read-bearing, table covers 131` and `OK`.
 
-## Inventory and joint witnesses
+Heavy work remains serial, LEAN_NUM_THREADS=1 and explicit -j1, one CPU,
+600s per-file wall cap, no host swap, hard 12 GiB per-child ADDRESS-SPACE cap,
+and monitored 4 GiB available OS reserve. This is not an aggregate RSS-cgroup
+claim. Lean MCP is unavailable. No proof/heartbeat/resource budget was raised.
 
-`census.py` expands explicit braces, same-row directory shorthand and contextual
-control globs, retains every lexical theorem candidate, deduplicates by file,
-line and local name, and verifies every scanned source blob against the frozen
-commit. The output includes original signature text and its SHA256, module hash,
-private/public visibility candidate, unresolved status and owner confirmation
-status. Names are candidates, not verified Lean fully qualified names. Type-level
-match branches remain explicitly unsupported rather than truncated. The full
-module hash retains the surrounding variable/include/omit source context; that
-context still requires elaboration. No lexical flag establishes inhabitation.
+## Resource theorem family and H69
 
-`witness-ledger.json` carries exact frozen source signatures and links:
+`witness-ledger.json` stores original signatures, signature hashes, exact imported
+kernel type hashes, classifications and proof links. The all-kind census retains
+20 kernel declarations: 12 theorem constants, one predicate, seven other
+implementations. Eleven theorem declarations occur in the original source;
+`noFailures.eq_1` is separately recorded as a generated equation.
 
-| Original target (prefix `Solidity.Source.FailureResources`) | Joint witness |
+All original names below have prefix `Solidity.Source.FailureResources`.
+
+| Statement | Audit result |
 |---|---|
-| `Bound.le_trans` | `trans_joint`: one a/b/c triple with BOTH inequalities |
-| `Bound.withFailures_mono` | `replacement_joint`: same r/s, replacement p, and inequality |
-| `dropped_not_noFail` | `refusal_joint`: p/i with the exact dropped request |
-| `frame_not_noFail` | `refusal_joint`: SAME p/k/cut with the exact frame failure |
-| `Bound.not_le_of_points_ne` | `schedule_change_joint`: r/s with distinct schedules |
+| Bound.le_trans | trans_joint supplies BOTH inequalities on one a/b/c triple |
+| Bound.withFailures_mono | replacement_joint supplies one shared r/s, p and extension |
+| dropped_not_noFail | refusal_joint supplies exact p/i dropped equality |
+| frame_not_noFail | SAME refusal_joint schedule supplies exact p/k/cut equality |
+| Bound.not_le_of_points_ne | schedule_change_joint supplies unequal schedules |
+| no_horizon_retraction | Intentional diagonal refutation; no_retraction_joint_impossible proves the exact extract/replace/rightInverse hypotheses cannot coexist (H69). The original docstring explicitly explains why a bare horizon cannot retract all failure plans. Statement unchanged. |
+| Bound.le_refl, Bound.failures_with, Bound.horizon_with, noFailures_noFail, noFail_iff | Exact elaborated telescopes have no propositional premise binder. Resource/schedule data types are inhabited by the fixture; no hidden global Producer structure is present. |
 
-These targets have per-input feasibility hypotheses and no inhabited global
-producer premise. Witnesses use nonzero horizon, balance, request/frame indices
-and failure cut; `exact_refusals` consumes unchanged refusal laws on that witness.
-All five new helper theorems have guarded empty axiom reports. No new sorry,
-axiom, native_decide, trust shortcut or raised heartbeat budget is present.
-The remaining resource declarations include premise-free laws and an intentional
-diagonal refutation; none is silently counted as a witnessed interface.
+`nofail_predicate_witness` separately proves the actual NoFail predicate inhabited
+by a schedule with balance 37. This does not inhabit a SourceSpec producer.
+All seven new resource helper theorems have guarded empty axiom reports.
+The original noFail_iff retains its existing standard classical axiom set; no
+original pin was changed. Seven other data/implementation declarations remain
+explicitly retained in metadata rather than silently disappearing.
 
-## Typed blockers and owner tickets (prepared, dispatch pending)
+## Supported compiler and coherent carrier proofs
 
-No `relay.sh` exists in this checkout or available workspace, so no exact-file
-owner request was transmitted. Coordinator retrieval of this committed handoff
-must dispatch these tickets; absent replies grant no write permission.
+`LocalGuardSuccess.lean` imports the unchanged LocalGuardSelectionControls.
+Its Contract requires compilation AND exact whole-machine execution for every
+Boolean input: true succeeds preserving the populated machine, false reverts.
+`actual_contract` proves it for the real checked local-require compiler.
+`rejectAll_not_contract` and `alwaysRevert_not_contract` refute the named trivial
+candidates by the mandatory true-success case. No selected-code or successful-run
+premise is assumed by the contract. Both actual Source pipelines execute the
+same populated fixture; saved stack word 77 and full machine are preserved.
+The original zero-horizon, literal/assert/message refusal controls also compiled.
 
-**MIG-STRING-001 — external-owner migration dependency.** The unchanged private
-`_private.Solidity.SortCheck.Parser.0.Solidity.KeyTacletParser.headerName?`
-fails at `Solidity/SortCheck/Parser.lean:76:13` because String.trim was removed.
-Owner: area producer / coordinator migration lane (not this exclusive audit scope).
-KeySort itself compiles, but checker compilation/conformance and final gates do not.
+`selected_correct_joint` supplies the original selection equality, complete
+local relation and StateRepr simultaneously on one shared value and machine.
+`views_joint` inhabits BOTH whole dependent carrier records, including their
+indices, context/type equalities and transported expression equalities:
 
-ESCALATE: _private.Solidity.SortCheck.Parser.0.Solidity.KeyTacletParser.headerName? migration — official pinned v4.35.0 rejects String.trim at Parser.lean:76:13; options: owner supplies a semantics-preserving reviewed migration overlay, or human authorizes a precise isolated edit exception for this dependency. No out-of-scope repair made.
+- LocalGuardSelection.View: contexts, same, index.
+- LocalGuardSelection.BoolLocalView: type, same, index.
 
-**PREMISE-P8-001 — missing producer, not an arbitrary-S impossibility proof.**
-`CreationPremises.Inputs.admission` and `LibraryPremises.Inputs.admission` require
-`DeclarationGraphAdmission.Producer.base.failures : P8a.FailureProjection S`.
-`ResourceContractLaw1.nat_encodable_resource_impossible` rules out that projection
-ONLY when explicit encode/decode/roundtrip data for `S.lang.Res` are available.
-The arbitrary-S frozen Inputs do not supply them. Their docstrings' assertion of
-uninhabitedness is therefore not a generic proof. No intended concrete producer
-or full joint witness has been supplied. Owners: CR/P8a, VY5 resource (H16), V08,
-and V17/V07 constructor or G42.04/P4 library producers; H55-G49 coordination
-retained, no duplicate H55 work.
+These are PER-INPUT indexed carriers. They are not globally quantified P8a,
+SourceSpec, dispatch, body-lowering or world-correctness producers.
+The six local helpers pin only the inherited standard axioms
+`[propext, Classical.choice, Quot.sound]`; no new axiom/sorry/native shortcut.
+
+The exact local kernel census retains 56 declarations. Thirteen primary source
+items are reviewed: two source theorems, four proof fields, two carriers, two
+data projections and three implementation definitions. Forty-three generated
+support declarations remain explicitly pending interface classification.
+Here the four proof getters are kernel theorem constants despite their source
+field syntax; predicate definitions still require all-kind enumeration. The
+exporter uses original declaration-kind metadata, not deprecated isTheorem.
+Human producer ownership is separate from defining-module provenance.
+
+Proof boundary: this is the existing instruction interpreter and actual Source
+execS at horizon 7. The `0` in `.ok machine 0` is pending jump count, not gas.
+No paid-call transition, charged gas, fork adequacy, deployment or whole-program
+frontend admission is established by these fixtures. Those obligations remain.
+
+## Census, acceptance, negative controls and timings
+
+The lexical scanner verifies every scanned source blob against the base,
+expands map shorthand and retains all keyword-theorem candidates. It explicitly
+reports complete_interface_inventory=false. Source theorem counts alone do NOT
+cover proof fields or predicate contracts (e.g. P8 FrozenInterface fields and
+RuntimeFrameInterfaceV1.ReturnClaim). The all-kind exporters retain exact kernel
+names/types, universe parameters, original kinds, field/projection metadata,
+axioms and definition values. Ordinary proof correspondence is reviewed; scripts
+reconcile evidence and cannot independently prove statement equivalence.
+
+Current evidence root: `/workspace/h62-audit-v08-adapters-evidence`.
+
+| Gate / actual command family | Outcome / decisive evidence |
+|---|---|
+| bounded_prerequisite.py, default fresh v4.24 mode | PASS; prerequisite-424/results.json contains exact commands, exits, versions and timings; CHECKER_RUN.log has 377/131/131 and OK. |
+| bounded_prerequisite.py --audit-module .../LocalGuardSuccess.lean, fresh closure | PASS; local-guard-final-424 records all 158 exits0, source stability and production artifact hashes. |
+| Same fixture after coherent carrier addition | PASS; local-guard-carriers-424 records 157 verified reused imports and one fresh leaf, 1.805s. Reused times are explicitly zero and not new checking evidence. |
+| Resource and two all-kind metadata fixtures | PASS; resource-predicate-424, resource-declarations-final-424, local-declarations-final-424. Exact commands/source hashes are saved in each results/source manifest. |
+| accept_witnesses.py and accept_local_guard.py | PASS, LIMITED; resource-acceptance-final.json and local-acceptance-final.json. Neither passes the overall audit. |
+| census.py + check_census.py + independent regeneration | PASS, lexical tooling only; census-v424-h69 and census-repeat-v424 are byte-identical; equation/type-match/comment/character/name/path regressions pass. |
+| node scripts/check-layers.mjs | PASS; layers-v424.log |
+| bash scripts/coord-tools/register.sh --check | PASS; register-check-v424.log; no registration applied |
+| bash scripts/coord-tools/fragments.sh --check | PASS; fragments-check-v424.log; no map/root edit |
+| Failed proof record, failed-run cache, corrupted cache | Expected REJECTION; reject-failed-proof-v424.log, reject-failed-cache-v424.log, reject-corrupt-cache-v424.log; no false accepted output |
+| Full affected-root run-lean.sh, all 881 module witnesses, charged gas/fork acceptance | PENDING; no full-audit acceptance or RUNTIME_GATE_PASS |
+
+The runner now requires a completed source-stable successful prior run, exact
+versions/source hashes, and artifact SHA256 checked before/after copy. It rejects
+partial or undigested legacy runs. The initial optional-reuse review finding is
+fixed; final artifacts use only hardened certificates or fresh compilation.
+
+Paired original-import timings: 157 identical frozen source inputs, same v4.24.0,
+-j1/CPU/resource bounds, isolated empty Lean outputs in each run. Before 748.370s;
+after 705.174s; delta -5.772%, below the >10% slowdown stop threshold. Scope is
+original import checking only. The baseline leaf had an audit namespace error,
+so it is not a passing fixture gate. OS page cache was not flushed. 155 output
+olean files were byte-identical; Evm.Signed and Evm.Exp differed in serialization
+while their sources and successful checking remained unchanged. No full-root
+performance conclusion is claimed. Details: paired-frozen-timing.json.
+
+Retained failed diagnostics are separate from accepted runs: the first local
+audit omitted an open namespace; one metadata revision lacked an explicit field
+type. Both were corrected within owned files and rechecked. Error-generated
+sorryAx placeholders were never accepted. Source has zero new sorry/axiom,
+no native_decide and no raised heartbeat budget.
+
+## Remaining owner ticket and work
+
+PREMISE-P8-001 remains an ordinary-interface witness dependency. CreationPremises
+and LibraryPremises require DeclarationGraphAdmission.Producer.base.failures.
+The Nat-encoding impossibility theorem requires explicit encode/decode/roundtrip;
+it does NOT establish arbitrary-S Inputs empty. H69 does not reclassify these
+ordinary consumers as negative controls. No intended full producer is supplied.
+Owners: CR/P8a and VY5 resource (H16), V08; V17/V07 constructor and G42.04/P4 library
+producers; H55-G49 coordination retained. Resource owner evidence includes H16's
+single-writer decision; the older snapshot also records CR history and isolated
+migration overlays, which do not transfer live ownership. Local guard producer
+ownership still needs coordinator confirmation.
+
 Affected CreationPremises statements: meaning_origin, actual_source, reached_body,
 creation, installed, try_success, runtime_success, settlement_failure, try_failure.
 Affected LibraryPremises statements: source_caller, source_library,
 no_second_payment, delegated, library_account_preserved, source_roles_separate.
-Options: producer owners supply the full intended concrete joint witness, or
-owners submit a frozen-contract repair proposal while retaining the blocker.
-No consumer theorem is marked mathematically vacuous solely from the docstring.
+Each remains individually uncovered. Options remain producer delivery of the
+intended coherent model or an owner-authored frozen repair proposal with blocker
+retained; no statement or new premise has been substituted.
 
-**AUD-REFUTATION-001 — audit classification of intentional refutations.**
-The conservative map census includes a theorem whose hypotheses prove False.
-A simultaneous witness for its extract/replace/rightInverse hypotheses would
-contradict the unchanged theorem itself. Its status remains uncovered pending
-explicit treatment in the interface census; this is not silently excluded.
+No relay.sh exists in this checkout/workspace. The exact owner ticket is prepared
+here for coordinator retrieval; no relay transmission or owner approval claimed.
+Continue full all-declaration census and ownership reconciliation, original joint
+witnesses, success/negative controls for remaining supported families, observable
+charged gas/fork boundaries, full validation and reviews. Use only assigned
+backfill; never take another producer's files or duplicate H55 work.
 
-ESCALATE: Solidity.Source.FailureResources.no_horizon_retraction — frozen extract/replace/rightInverse hypotheses imply False by its diagonal proof; no simultaneous witness can exist. Options: retain the statement and this audit blocker while the owner explains its intended interface boundary, or obtain an explicit human census-classification decision for intentional refutation lemmas without changing the theorem. No exclusion or premise change assumed.
+## Reviews, registration and export handoff
 
-## Commands, gates and measurements
+Finder and skeptic independently reviewed read-only, without Lean/server use.
+Confirmed fixes include source equation-boundary capture, match-type ambiguity,
+frozen provenance, carrier versus field satisfiability, theorem-only inventory
+limits, metadata field typing, wrong census-run substitution, and cache stability
+plus artifact verification. Final review text is saved in reviews-v424-h69.json.
+Full goal completion remains unclaimed.
 
-All heavy Lean work is serial under the writer lock, LEAN_NUM_THREADS=1,
-explicit -j1, one CPU, a hard per-child 12 GiB ADDRESS-SPACE limit, host swap zero,
-and a monitored 4 GiB available-memory reserve. This is not an aggregate RSS
-cgroup claim. Per-file wall budget is 600s. No Lean MCP is available.
+Registration proposals are in the owned tests registration-fragment.md; no
+central registration or import promotion is applied. Metaprograms importing Lean
+must remain outside the dependency-free core.
 
-Evidence root: `/workspace/h62-audit-v08-adapters-evidence`.
-
-| Command / operation | Outcome | Decisive evidence |
-|---|---|---|
-| `git fetch origin master c6f550e281a7e5affa9a99bc2cdaed556dec00e4`; merge-base; branch creation | pass | `provenance.json` |
-| Coordinator manifest hashes; official archive SHA256; actual Lean/Lake versions | pass | `provenance.json`, `prerequisite-435/versions.txt` |
-| `bounded_prerequisite.py --repo /workspace/solidity-lean --evidence .../prerequisite-435 --toolchain .../toolchain/lean-4.35.0-linux --key /workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key` | fail | KeySort exit0 1.204s; AST exit0 5.613s; annotations exit0 1.204s; Parser exit1 3.809s. Checker never executed. Full commands in results.json. |
-| Same runner with `--audit-module tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean --evidence .../failure-resource-final` | pass, limited | Four-module fresh closure, all exits0; five guarded empty axiom reports; source-sha256.json stable. |
-| `census.py --repo /workspace/solidity-lean --out .../census`; repeat | pass, lexical only | 881 files, 7,949 candidates, 26 unsupported signatures; byte-identical regeneration, determinism.log |
-| `check_census.py .../census/census.json` | pass | CENSUS_REGRESSION_PASS; equation/type-match/comment/character/name/path regressions |
-| `accept_witnesses.py --repo ... --census .../census/census.json --run .../failure-resource-final --out .../witness-acceptance.json` | pass, backfill only | five witnessed targets; 7,944 uncovered candidates; owners/fidelity/totality explicitly pending |
-| Acceptance with a failed Lean record substituted | expected rejection | acceptance-negative/negative-control.log; no accepted output emitted |
-| Full affected run-lean.sh, checker acceptance, final runtime gate | pending/blocked | Parser migration outside scope; no RUNTIME_GATE_PASS |
-| Valid paired before/after checking benchmark | pending | No speed refactor made; isolated timings are observations, not a controlled comparison or >10% performance gate pass. Stop rule retained. |
-
-The initial fixture compile failed due to a mistaken constructor name
-RequestFailure.runs; it was corrected to frozen TxFate.runs. Failed evidence is
-retained separately and never accepted. Successful fixed and final runs are
-separate. The final proof outputs do not rely on the failed run's generated
-sorryAx placeholders.
-
-## Independent milestone reviews
-
-Finder and skeptic independently reviewed read-only without Lean/server use.
-Fixed confirmed findings: equation proofs swallowed following definitions;
-missing frozen-source verification; private-name collisions not labelled;
-quoted-name/character handling; type match branches misidentified as equation
-proofs; overbroad interpretation of Nat-encoding obstruction. Finder confirmed
-all five exact premise mappings. Skeptic confirmed no blocking issue for this
-partial resource backfill, with full-audit limitations retained. Reviews are
-saved in `reviews.json`, including final acceptance-tool review. Proof-to-target
-correspondence is independently reviewed; the acceptance script reconciles
-source/signature provenance and saved kernel-run evidence, and does not itself
-elaborate statement equivalence.
-
-## Continuation and handoff
-
-This is the fresh-thread handoff after setup, census/review repair, bounded
-prerequisite diagnosis, and resource-witness backfill. The original persistent
-goal remains unfinished; any blocked transition is not completion. Coordinator
-must resume this same VM/goal/branch, never create a replacement goal.
-
-Next: dispatch owner tickets and resolve migration/classification; elaborate all
-candidate names/types/variables and confirm owners; build every required full
-joint witness; implement supported-program compiler success/totality plus
-reject-all/always-revert controls and real gas/fork/failure observations; finish
-full affected gates and controlled timings; rerun independent reviews per
-milestone. Never register helper modules centrally without owner approval.
-
-Original patch, bundle, absolute handoff copy and SHA256 manifest are exported
-off Git. Their full paths and hashes, full committed head and base are in
-`export.json`. Bulk census, logs, toolchain archive and proof artifacts remain
-off Git, regenerated by committed scripts. No empty marker commit is required.
+Export after commit to `/workspace/h62-audit-v08-adapters-export/continuation-v424-h69`:
+original.patch, checkpoint.bundle, handoff.md, evidence.tar.gz, evidence-files.sha256,
+checksums.sha256 and export.json with full committed head/base and hashes. Previous
+checkpoint exports are preserved. The current full head is recorded in export.json
+rather than introducing a self-referential commit hash into this document.

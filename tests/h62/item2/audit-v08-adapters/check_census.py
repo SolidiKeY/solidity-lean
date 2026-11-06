@@ -43,6 +43,7 @@ assert census.expand("A/{B,C}D.lean")==["A/BD.lean","A/CD.lean"]
 if len(sys.argv)>1:
     data=json.loads(Path(sys.argv[1]).read_text()); summary=data["summary"];rows=data["declarations"]
     assert summary["frozen_source_verified"] and summary["unresolved_references"]==[]
+    assert summary["complete_interface_inventory"] is False
     assert summary["uncovered"]==len(rows) and summary["simultaneous_witnesses_verified"]==0
     assert len({r["id"] for r in rows})==len(rows)
     for r in rows:

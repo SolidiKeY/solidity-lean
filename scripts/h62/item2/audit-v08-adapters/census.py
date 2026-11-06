@@ -175,9 +175,10 @@ def main():
         unresolved_references=[r for r in references if not r["resolved"]],
         unterminated_signatures=[r["id"] for r in declarations if r["signature_source"] is None],
         uncovered=len(declarations), simultaneous_witnesses_verified=0,
-        statement_fidelity="PENDING LEAN ELABORATION", owner_confirmation="PENDING", frozen_source_verified=True,
+        statement_fidelity="PENDING LEAN ELABORATION", owner_confirmation="PENDING", frozen_source_verified=True, complete_interface_inventory=False,
         limitations=["Lexical census; inherited variables are not elaborated.",
           "All theorem candidates retained; interface/hypothesis classification pending.",
+          "Theorem-only source inventory omits structure proof projections and predicate definitions; these require the all-kind kernel census.",
           "Map shorthand (+Controls) requires manual reconciliation.",
           "Namespace reconstruction is a candidate, not kernel name validation."])
     out.mkdir(parents=True, exist_ok=True)
