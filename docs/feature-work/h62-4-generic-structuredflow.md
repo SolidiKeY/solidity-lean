@@ -87,3 +87,58 @@ The serial fresh-output MappedCondition import closure exits 1 at read-only `Sol
 `PERFORMANCE_UNMEASURED`: the failed dependency check is not a before/after performance result. No speedup or slowdown is asserted. Stop adoption if a valid same-condition measurement exceeds 10% slowdown. A full affected gate, actual new axiom sets, final run-lean.sh gate and owner-approved patch validation remain required.
 
 All coordinator input hashes were verified against `/workspace/h62-coordinator-inputs/sha256.json`. The optional get_goal tool is unavailable; the existing persistent goal was neither reset nor replaced. No pushes, merges, PRs, pre-gates, publishing or generated-root edits occurred.
+
+## Blocked backfill handoff
+
+`GenericMapped.lean` is additive unvalidated source: typed `Fixture`, intrinsic
+`program`, proposed `compiled_execution`, distinct-donor `copyFixture` and
+same-slot `selfFixture`, typed `fixtures` data table, proposed `fixtures_execute`.
+It imports the existing mapped compiler/semantics and introduces no external
+dependency, untyped intermediate or semantic outcome reclassification. Source
+contains zero sorry/axiom/native_decide/ofReduceBool/maxHeartbeats tokens; actual
+new theorem axiom sets remain UNMEASURED because imports do not compile.
+
+`propose.py` exports an UNVALIDATED_UNAPPLIED patch with ten positive proof
+replacements in six exact owner files. SHA256:
+`2d6f682dc9da8d0991de9e20c0267bf25c60656296cd42a1605f18a8806ad3dd`.
+All34 original declarations/statements in those files remain; other24 bodies,
+including every refusal, are unchanged. `registration.md` supplies the exact-file
+relay request and owner-only relocation/module-map fragment. Its temporary test
+module import is unregistered: the proposal is NOT APPLY-READY. No owner agreement
+has been received and no original file was edited or overlay applied.
+
+`accept.py --output /workspace/h62-generic-evidence/acceptance-final` exits0:
+eight census regressions, three synthetic timing threshold/refusal tests,
+deterministic proposal regeneration, textual `git apply --check`, zero forbidden
+helper proof tokens and a fresh byte-identical original-family census. This is
+source/tooling acceptance only. It explicitly emits semantic/performance PENDING.
+`measure.py` requires successful distinct runs of all six affected targets,
+identical conditions/tree/pin, unchanged unrelated dependencies, complete module
+records and fresh outputs; it stops strictly above10% using integer nanoseconds.
+No real paired timing result exists; KeySort-only timings are not family evidence.
+
+The final bounded affected-closure command is recorded verbatim in
+`/workspace/h62-generic-evidence/affected-closure/receipt.json`: helper plus all six
+Controls targets requested, fresh private objects, LEAN_NUM_THREADS=1, explicit
+-j1, one CPU, 12GiB/no-swap, effective4GiB headroom guard, 300s module timeout.
+Exit1 in20.456950836s, no resource guard stop, peak774029312bytes. KeySort exits0
+in1.894318423s, AST exits0, SpecSyntax exits0; Syntax.Raw exits1 with the same five
+v4.35 String API errors. Both source hashes and Git status before/after match.
+The helper and affected controls are not reached. No RUNTIME_GATE_PASS follows.
+
+Final independent finder and skeptic re-reviews report all source/tooling
+findings fixed; detailed findings, corrections and explicit limits are saved in
+`/workspace/h62-generic-evidence/REVIEWS.md`. Neither used Lean. Frozen originals,
+all179 Controls theorems and all241 family theorems remain accounted for.
+
+Next coordinator action: relay the Syntax.Raw migration repair from its owner;
+obtain V17 exact-file agreement and finalize helper registration; validate helper
+axioms, all exact instances and refusals; run matched baseline/candidate timings
+and stop above10%; complete full affected and repository run-lean.sh final gates
+serially. No full build/correspondence/axiom/timing gate has passed. Persistent
+goal must remain blocked, not complete. No replacement goal/thread was launched.
+
+Artifacts for retrieval: `/workspace/h62-generic-export/original.patch`,
+`/workspace/h62-generic-export/HANDOFF.md`, `/workspace/h62-generic-evidence/`,
+`/workspace/h62-generic-export/SHA256SUMS`. Full committed head is recorded in the
+exported handoff and result, avoiding self-referential commit metadata here.
