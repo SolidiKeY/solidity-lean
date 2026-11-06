@@ -4,3 +4,5 @@
 !/registration.json
 /.scratch/
 __pycache__/
+/runs/*-checks-full.tar.gz
+/runs/*/checks/

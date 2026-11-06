@@ -15,7 +15,7 @@
    "line": 425,
    "span_sha256": "71a30e9df40d8cc504cff0313e871ddd0c2dbe801753cbd5b28c2756a3c88a41",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexRead_unfold_rightFst",
@@ -23,7 +23,7 @@
    "line": 427,
    "span_sha256": "7429cc3293abd138894e023eb7d72d06bbe3b1f0d763896a99a6705da516b0e4",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexRead_unfold_rightSndIndex",
@@ -55,7 +55,7 @@
    "line": 436,
    "span_sha256": "03111216d96c5119394b9a25b5c19e4fd6d9073223e74d6218ab140845c1aaac",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageFieldWriteStorageRef_unfold_leftFst",
@@ -63,7 +63,7 @@
    "line": 438,
    "span_sha256": "de14a688b00a45ccbb2e4cd86cef94cb17ab3aee49fafacdea31a31603b1f448",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexWriteCaptureAllComplexRecv",
@@ -71,7 +71,7 @@
    "line": 440,
    "span_sha256": "9df103a646f5b2cd1beed31e9859ccdf736d302e6df7edc9dc7e4eb491617944",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv",
@@ -79,7 +79,7 @@
    "line": 442,
    "span_sha256": "b397ab89e9d3e81946411d5d5123a998a8e9dbc056fe706c8dbd54ce41df4e6b",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexWriteCaptureAllNonSimpleIndex",
@@ -127,7 +127,7 @@
    "line": 454,
    "span_sha256": "6945801723dd3afa3bb125450e54480d5b0eaf4f829bafd172d608b477d6b03c",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexDelete_unfold_leftFst",
@@ -135,7 +135,7 @@
    "line": 456,
    "span_sha256": "96b7907355fd7b7243836a12843f8a955ab531d8227b391e4141a84ed56ff46a",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexDeleteNonSimpleIndexCapture",
@@ -231,7 +231,7 @@
    "line": 483,
    "span_sha256": "c24fa6e47b31c91076ffeeba79a94d76eabdc12837bcd795c456939fe5c736fa",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageRootWriteStore",
@@ -271,7 +271,7 @@
    "line": 493,
    "span_sha256": "7a0bf0ae5a830c6a85607a2340941275f573eb6c606c51c6297d3ffb5c115a8f",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageFieldWriteSave",
@@ -303,7 +303,7 @@
    "line": 501,
    "span_sha256": "3b538dd6dd2625c2a3dde42252132a94689b4a62733c663a03f4ff56745dcdef",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexWriteMappingCopySource",
@@ -319,7 +319,7 @@
    "line": 505,
    "span_sha256": "c7c8b7d1403dbc2031043f579fd50e241ce0d89b02d1a9c337653a85ec947a3a",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageLocalRootRebind",
@@ -351,7 +351,7 @@
    "line": 513,
    "span_sha256": "15db7940d59cccf20942806fc171584abeed3acd156dfe021fcb38888bb1caed",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexReadArrayBindLocalRootMappingElement",
@@ -359,7 +359,7 @@
    "line": 515,
    "span_sha256": "f7fb7e99d247cc402b23cd6430d66818a7788a9049fb6d62793d590962365e1a",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageRootDelete",
@@ -391,7 +391,7 @@
    "line": 523,
    "span_sha256": "b74ee9abfd433e83e527e4a41f5b130619d6806b7e6371555b45887a7bca000d",
    "premise_written": true,
-   "sites": 1
+   "sites": 2
   },
   {
    "id": "Taclet.storageLengthRead",
@@ -407,7 +407,7 @@
    "line": 528,
    "span_sha256": "81d3edfe58fc5faee1884fa1edd645df78cf2c3db6bef1ae9a3481e45e6e3f98",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryLengthRead",
@@ -423,7 +423,7 @@
    "line": 532,
    "span_sha256": "679f7f2c03b864473dc1a138161cada9aaa6417edd07007c9b27115ec5d545d9",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.binopAssignment",
@@ -535,7 +535,7 @@
    "line": 567,
    "span_sha256": "0a96503c5423d13c3c05b3e5bd2ca5f5a577c8ab28b1aee18e2fe9df82f1212b",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.memoryFieldOpAssign",
@@ -551,7 +551,7 @@
    "line": 571,
    "span_sha256": "1e754620aed4e38d82f6a66ab7dc3987ebcdf7e79fd6d3f45286b83203ae7e69",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.storageFieldOpAssignUnfoldLeftFst",
@@ -559,7 +559,7 @@
    "line": 573,
    "span_sha256": "05f4d7bbbe95880adf98f7b7562f5a910ea739db0a82c3538baa7cf0d4216a0b",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexOpAssignUnfoldLeftFst",
@@ -567,7 +567,7 @@
    "line": 575,
    "span_sha256": "535eff099be1d659e1b80a57b8b257f733b07e67e789697a12f0d368f46d7c99",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldOpAssignUnfoldLeftFst",
@@ -575,7 +575,7 @@
    "line": 577,
    "span_sha256": "d64211be1f786779d224c9932dcf976c8f6fbfd6829f8987572d7f2813334c90",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexOpAssignUnfoldLeftFst",
@@ -583,7 +583,7 @@
    "line": 579,
    "span_sha256": "28b629f041fd42eba9b26a6af47627ad36127e704a88e3acefec0f9c999f94a3",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.compoundAssignValueRhsCapture",
@@ -599,7 +599,7 @@
    "line": 583,
    "span_sha256": "df81cc7e16872a6ab8c5dadd5f7b27a87b4eef7d53a6c1da034f51aad4510196",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageRootIncrement",
@@ -639,7 +639,7 @@
    "line": 593,
    "span_sha256": "dfcb55cc75b5cb117420e1446d1abb558a1c662877d06147dc03ace33dabcec2",
    "premise_written": true,
-   "sites": 1
+   "sites": 3
   },
   {
    "id": "Taclet.storageFieldIncrementUnfoldLeftFst",
@@ -647,7 +647,7 @@
    "line": 595,
    "span_sha256": "107404b14e25dc564f0ef3ef5be8bf072fd722bf7dd8141253152f654a98b692",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageIndexIncrementUnfoldLeftFst",
@@ -655,7 +655,7 @@
    "line": 597,
    "span_sha256": "1d7a902469a211a02f5fd4dbbf526d2b10c06e47bda8b0fbca24bdc4e699d9b2",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldIncrementUnfoldLeftFst",
@@ -663,7 +663,7 @@
    "line": 599,
    "span_sha256": "63643df8c15f64e6731d2ebe5202cd14f53389b8d956bd874d98285f502eba31",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexIncrementUnfoldLeftFst",
@@ -671,7 +671,7 @@
    "line": 601,
    "span_sha256": "900045739e6028b05985fd6048e4a6c1816eaa50758c1925434ddb05d1c773e4",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.localAssignIncrement",
@@ -679,7 +679,7 @@
    "line": 603,
    "span_sha256": "8297a20e4b7c30ddcb0804f29374328cee5c13c5c1f49302f30cee7eb64d5939",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageRootIncrementAssignment",
@@ -719,7 +719,7 @@
    "line": 616,
    "span_sha256": "e7e3f20833d0aa13d2e6e65102351d9ddb4ab93fbe536d81aa5629b2f727009c",
    "premise_written": true,
-   "sites": 1
+   "sites": 4
   },
   {
    "id": "Taclet.storagePushAddAssign",
@@ -879,7 +879,7 @@
    "line": 689,
    "span_sha256": "6ee25f67fa2d0f56c6caa64b728b28114581a296bdfc38f56c7464d7d6efbade",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storagePush_unfold_leftFstReceiver",
@@ -887,7 +887,7 @@
    "line": 691,
    "span_sha256": "4b8517f65f337790a56293b7714118780d9c7874f57926124ada9b432cf1c492",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storagePop_unfold_leftFstReceiver",
@@ -895,7 +895,7 @@
    "line": 693,
    "span_sha256": "8cf40003f91875fa71e02e1edabad9ac6e2382f40ed9320740c5da3aa61d8681",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storagePushValue_unfold_leftCallReceiver",
@@ -903,7 +903,7 @@
    "line": 696,
    "span_sha256": "20326bbef3bfa8481b817bd07d328823a5e1627efe061a56d908320f33c284ad",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storagePush_unfold_leftCallReceiver",
@@ -911,7 +911,7 @@
    "line": 699,
    "span_sha256": "1755390ab735a995d9e6b3def41ee7730e2f0592ef708173aa09cbcd55a95fbd",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storagePop_unfold_leftCallReceiver",
@@ -919,7 +919,7 @@
    "line": 702,
    "span_sha256": "71dfc325617052d709fd08e041f1f0914814c4e596d68abc83175318a0d653e4",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storagePopSave",
@@ -943,7 +943,7 @@
    "line": 710,
    "span_sha256": "387b104918cb21d3cfdf3da11011894ec7d573870fe2b75bac32f08227d12e9f",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageLocalRootPushBind",
@@ -967,7 +967,7 @@
    "line": 721,
    "span_sha256": "d7a74e0b07fe96600c3c6c08400f2204f214451ba709b25cb498480397e8e685",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.storageLocalRootPushBindMappingElement",
@@ -1039,7 +1039,7 @@
    "line": 762,
    "span_sha256": "c4205351da4fb7a69abcf9fd5a887968f30d75125e2f53d0a51fd179e2ef31fd",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexRead_unfold_rightFst",
@@ -1047,7 +1047,7 @@
    "line": 764,
    "span_sha256": "b19ab11963cf3928d9edeec97a5d778ca210740012465dae10e693e0dc114703",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexRead_unfold_rightSndIndex",
@@ -1055,7 +1055,7 @@
    "line": 766,
    "span_sha256": "f83a69b64672604da783a87bb6b8e4a6822c8f93a90b2bb1c84e6e1521ac5387",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldRead",
@@ -1071,7 +1071,7 @@
    "line": 770,
    "span_sha256": "78fc98c9bbc0bd692588c1267cec61d96aaa1079aef40f1b7505313b4a0023eb",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryRootRebind",
@@ -1095,7 +1095,7 @@
    "line": 776,
    "span_sha256": "4f1bade87e9e2d437a74415a6f21863b978c365419f67e8022a5fd5582e0bb14",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldWrite",
@@ -1111,7 +1111,7 @@
    "line": 780,
    "span_sha256": "77e676d98b67963154b985bc0483c6ab44c73b3a5959aab3aaedebacd09b869a",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldWriteCopy",
@@ -1127,7 +1127,7 @@
    "line": 784,
    "span_sha256": "61c031e42ce5b71b0dbc41e6112153d89221df56c50018364635eac17496f147",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldWrite_unfold_leftFst",
@@ -1135,7 +1135,7 @@
    "line": 786,
    "span_sha256": "40eaef91ce31bf1b12bc72e9b8d1f8686aa8f3aaeb01b9ae333f0c3727111df0",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexWriteCaptureAllComplexRecv",
@@ -1143,7 +1143,7 @@
    "line": 788,
    "span_sha256": "c584b7f5dab2cc59f7b673c131bd2ebb557cb24ee74153da229855a0b884d874",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv",
@@ -1151,7 +1151,7 @@
    "line": 790,
    "span_sha256": "2119cf7210e8f7477ff2a3c6597171697eb4667e1ea75a3ec8b17e9f722e5ea0",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.memoryIndexWriteCaptureAllNonSimpleIndex",
@@ -1159,7 +1159,7 @@
    "line": 796,
    "span_sha256": "f8a576bdf14a329e83bce12d823f59f718b5af4d5caac11442fb2f000eab8d2c",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex",
@@ -1167,7 +1167,7 @@
    "line": 798,
    "span_sha256": "3e412828085765f03cdf47662786cc399f2b90f54bc0287d3d96a8b7d464bb31",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldWriteUnfoldSource",
@@ -1183,7 +1183,7 @@
    "line": 802,
    "span_sha256": "f284a8394848c00a1f9f14fc789669be7b94a2bc87aaf8822e77c84638da7159",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryRootDeleteFreshRebind",
@@ -1199,7 +1199,7 @@
    "line": 807,
    "span_sha256": "e5515e1b3aabed8cce5d5837a7727a7e0114d01a98219659febf32456b8da96a",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryFieldDeleteReference",
@@ -1207,7 +1207,7 @@
    "line": 810,
    "span_sha256": "a6c900e750bc7b1383174cd35cdd4196eaa37261562d82e96e858f4253c5da6f",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexDeletePrimitive",
@@ -1215,7 +1215,7 @@
    "line": 813,
    "span_sha256": "cea66ced920fad903c32ff8b7c5aea0cec0c49069a110f961b244c75bdac322e",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.memoryIndexDeleteReference",
@@ -1223,7 +1223,7 @@
    "line": 815,
    "span_sha256": "2d76f4b8a9e02774a0abacb38426c2b000258caad4a7ed6ad3125acb5ad92fa3",
    "premise_written": true,
-   "sites": 0
+   "sites": 2
   },
   {
    "id": "Taclet.memoryFieldDelete_unfold_leftFst",
@@ -1231,7 +1231,7 @@
    "line": 818,
    "span_sha256": "fad910e389acc402c50e6ea4b049a90758b318aabd96845566b084af3a406f2f",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexDelete_unfold_leftFst",
@@ -1239,7 +1239,7 @@
    "line": 820,
    "span_sha256": "78f0c20bfed7e3e0262d7d2034c4916c8cd01c63007cbf0c036d2bfd42d6a911",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryIndexDeleteNonSimpleIndexCapture",
@@ -1247,7 +1247,7 @@
    "line": 822,
    "span_sha256": "284d46c0793344297009fb345d55fe8d44f189605900ccdfa008f515ccf0292c",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryArrayFreshAlloc",
@@ -1279,7 +1279,7 @@
    "line": 837,
    "span_sha256": "7919214d9333b9a697392bcbcd85647b896bed1c0b64fdeb9d5121947b3c41b4",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryToStorageStoreRoot",
@@ -1311,7 +1311,7 @@
    "line": 845,
    "span_sha256": "5b8bbdb9895d94a799a53a986b5152a619826c48824b172544e120edce6ae478",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryToStorageField_unfold_leftFst",
@@ -1319,7 +1319,7 @@
    "line": 847,
    "span_sha256": "706054430fa8007942282c2a3e5e8bfd1ff44c4cd950ab2bb7109651dafcf2f6",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryToStorageIndexCaptureAllComplexRecv",
@@ -1327,7 +1327,7 @@
    "line": 849,
    "span_sha256": "bd911bc0203bc4e93e4f9a01a30b8fca5daca8041e22cd1b24f62e2d56612cf9",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex",
@@ -1527,7 +1527,7 @@
    "line": 1016,
    "span_sha256": "c2ef8bfdecf064a2d933f7ca03cc9faec599f9cb5989f093ffe24010001e765a",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "LeanTaclet.pushCompoundUnfoldReceiver",
@@ -1535,7 +1535,7 @@
    "line": 1022,
    "span_sha256": "4f1b325961023c61341e88c07bd79783e3d1f7a7b3b98df7340813cc72fab43c",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "LeanTaclet.pushIncrementUnfoldReceiver",
@@ -1543,7 +1543,7 @@
    "line": 1027,
    "span_sha256": "c9b945a819429d13a63fd8702353a34f7850002c408e781a968a091744304292",
    "premise_written": true,
-   "sites": 0
+   "sites": 1
   },
   {
    "id": "LeanTaclet.tryCallDiamond",
@@ -1744,38 +1744,44 @@
    "replacement": "= true ⟹"
   },
   {
-   "id": "guard-TRUE-to-FALSE",
+   "id": "loop-guard-TRUE-to-FALSE",
    "family": "guard-polarity",
-   "pattern": "= TRUE",
-   "replacement": "= FALSE"
+   "pattern": "b = TRUE",
+   "replacement": "b = FALSE"
   },
   {
-   "id": "guard-FALSE-to-TRUE",
+   "id": "loop-guard-FALSE-to-TRUE",
    "family": "guard-polarity",
-   "pattern": "= FALSE",
-   "replacement": "= TRUE"
+   "pattern": "b = FALSE",
+   "replacement": "b = TRUE"
   },
   {
-   "id": "guard-check-true-to-false",
+   "id": "invariant-TRUE-to-FALSE",
+   "family": "other:loop-invariant",
+   "pattern": "inv = TRUE",
+   "replacement": "inv = FALSE"
+  },
+  {
+   "id": "assert-check-true-to-false",
    "family": "guard-polarity",
    "pattern": "re:se = true \\}$",
    "replacement": "se = false }"
   },
   {
-   "id": "guard-broke-negation-dropped",
-   "family": "guard-polarity",
+   "id": "break-negation-dropped",
+   "family": "other:loop-invariant",
    "pattern": "¬broke",
    "replacement": "broke"
   },
   {
    "id": "close-true-to-false",
-   "family": "rollback-payment",
+   "family": "close*",
    "pattern": "re:⇝ true \\}$",
    "replacement": "⇝ false }"
   },
   {
    "id": "close-false-to-true",
-   "family": "rollback-payment",
+   "family": "close*",
    "pattern": "re:⇝ false \\}$",
    "replacement": "⇝ true }"
   },
@@ -1804,40 +1810,40 @@
    "replacement": "0 < se"
   },
   {
-   "id": "overflow-plus-one-to-minus",
+   "id": "push-arith-plus-one-to-minus",
    "family": "overflow",
    "pattern": ") + 1)",
    "replacement": ") - 1)"
   },
   {
-   "id": "overflow-minus-one-to-plus",
+   "id": "push-arith-minus-one-to-plus",
    "family": "overflow",
    "pattern": ") - 1)",
    "replacement": ") + 1)"
   },
   {
-   "id": "overflow-add-to-sub",
+   "id": "push-arith-add-to-sub",
    "family": "overflow",
    "pattern": ") + se)",
    "replacement": ") - se)"
   },
   {
-   "id": "overflow-sub-to-add",
+   "id": "push-arith-sub-to-add",
    "family": "overflow",
    "pattern": ") - se)",
    "replacement": ") + se)"
   },
   {
-   "id": "overflow-mul-to-add",
+   "id": "push-arith-mul-to-add",
    "family": "overflow",
    "pattern": ") * se)",
    "replacement": ") + se)"
   },
   {
-   "id": "overflow-step-dropped",
+   "id": "increment-step-dropped",
    "family": "overflow",
-   "pattern": "re: ± 1\\)",
-   "replacement": ")"
+   "pattern": " ± 1",
+   "replacement": ""
   },
   {
    "id": "division-div-to-mul",
@@ -1865,13 +1871,13 @@
   },
   {
    "id": "push-slot-is-last-old",
-   "family": "index-bounds",
+   "family": "push-tail-length",
    "pattern": "re:(\\w+)\\[\\1\\.length\\]",
    "replacement": "\\1[\\1.length - 1]"
   },
   {
-   "id": "index-last-is-length",
-   "family": "index-bounds",
+   "id": "last-slot-is-length",
+   "family": "slot*",
    "pattern": "re:(\\w+)\\[\\1\\.length - 1\\]",
    "replacement": "\\1[\\1.length]"
   },
@@ -1886,6 +1892,18 @@
    "family": "pop-delete",
    "pattern": "re:delAt\\(storage, [^()]*(?:\\([^()]*\\))?[^()]*\\)",
    "replacement": "storage"
+  },
+  {
+   "id": "memory-delete-dropped",
+   "family": "pop-delete",
+   "pattern": "re:\\{ memory := write\\((?:addM\\(memory\\)|memory), \\w+(?:\\.\\w+|\\[ie\\]), (?:defVal\\(T\\)|freshId\\(addM\\(memory\\)\\))\\) \\}",
+   "replacement": "{ memory := memory }"
+  },
+  {
+   "id": "index-constant-zero",
+   "family": "index-bounds",
+   "pattern": "re:\\b(arr|darr|marr|mv|pmv|rmv|mv₂)\\[ie\\]",
+   "replacement": "\\1[0]"
   }
  ],
  "helper_operators": [
@@ -1913,81 +1931,185 @@
  "duplicates_not_run": [],
  "mutants": [
   {
-   "id": "storageFieldRead_unfold_rightFst.receiver-capture-bypassed.1",
+   "id": "storageFieldRead_unfold_rightFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageFieldRead_unfold_rightFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 70,
+   "offset_in_span": 95,
    "old": "  | storageFieldRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; lhs = sp.fld; ]⟩ }\n",
-   "new": "  | storageFieldRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nsp.fld; ]⟩ ⇝ ⟨[ lhs = nsp.fld; ]⟩ }\n",
+   "new": "  | storageFieldRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; lhs = nsp.fld; ]⟩ }\n",
    "affected": [
     "Taclet.storageFieldRead_unfold_rightFst"
    ]
   },
   {
-   "id": "storageIndexRead_unfold_rightFst.receiver-capture-bypassed.1",
+   "id": "storageIndexRead_unfold_rightFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageIndexRead_unfold_rightFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 69,
+   "offset_in_span": 94,
    "old": "  | storageIndexRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nsp[e]; ]⟩ ⇝ ⟨[ T storage sp = nsp; lhs = sp[e]; ]⟩ }\n",
-   "new": "  | storageIndexRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nsp[e]; ]⟩ ⇝ ⟨[ lhs = nsp[e]; ]⟩ }\n",
+   "new": "  | storageIndexRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nsp[e]; ]⟩ ⇝ ⟨[ T storage sp = nsp; lhs = nsp[e]; ]⟩ }\n",
    "affected": [
     "Taclet.storageIndexRead_unfold_rightFst"
    ]
   },
   {
-   "id": "storageFieldWriteStorageRef_unfold_leftFst.receiver-capture-bypassed.1",
-   "constructor": "Taclet.storageFieldWriteStorageRef_unfold_leftFst",
-   "operator": "receiver-capture-bypassed",
+   "id": "storageFieldWrite_unfold_leftFst.receiver-reevaluated.1",
+   "constructor": "Taclet.storageFieldWrite_unfold_leftFst",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 81,
+   "offset_in_span": 103,
+   "old": "  | storageFieldWrite_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp = nsp; sp.fld = se; ]⟩ }\n",
+   "new": "  | storageFieldWrite_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp = nsp; nsp.fld = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.storageFieldWrite_unfold_leftFst"
+   ]
+  },
+  {
+   "id": "storageFieldWriteStorageRef_unfold_leftFst.receiver-reevaluated.1",
+   "constructor": "Taclet.storageFieldWriteStorageRef_unfold_leftFst",
+   "operator": "receiver-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 106,
    "old": "  | storageFieldWriteStorageRef_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld = path; ]⟩ }\n",
-   "new": "  | storageFieldWriteStorageRef_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = path; ]⟩ ⇝ ⟨[ nsp.fld = path; ]⟩ }\n",
+   "new": "  | storageFieldWriteStorageRef_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp.fld = path; ]⟩ }\n",
    "affected": [
     "Taclet.storageFieldWriteStorageRef_unfold_leftFst"
    ]
   },
   {
-   "id": "storageIndexWriteStorageRefCaptureAllComplexRecv.receiver-capture-bypassed.1",
-   "constructor": "Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv",
-   "operator": "receiver-capture-bypassed",
+   "id": "storageIndexWriteCaptureAllComplexRecv.receiver-reevaluated.1",
+   "constructor": "Taclet.storageIndexWriteCaptureAllComplexRecv",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 86,
+   "offset_in_span": 111,
+   "old": "  | storageIndexWriteCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se; ]⟩ }\n",
+   "new": "  | storageIndexWriteCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; nsp[ie] = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexWriteCaptureAllComplexRecv"
+   ]
+  },
+  {
+   "id": "storageIndexWriteStorageRefCaptureAllComplexRecv.receiver-reevaluated.1",
+   "constructor": "Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv",
+   "operator": "receiver-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 111,
    "old": "  | storageIndexWriteStorageRefCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e] = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; sp[ie] = path; ]⟩ }\n",
-   "new": "  | storageIndexWriteStorageRefCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e] = path; ]⟩ ⇝ ⟨[ nsp[e] = path; ]⟩ }\n",
+   "new": "  | storageIndexWriteStorageRefCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e] = path; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; nsp[ie] = path; ]⟩ }\n",
    "affected": [
     "Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv"
    ]
   },
   {
-   "id": "storageFieldDelete_unfold_leftFst.receiver-capture-bypassed.1",
+   "id": "storageFieldDelete_unfold_leftFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageFieldDelete_unfold_leftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 72,
+   "offset_in_span": 97,
    "old": "  | storageFieldDelete_unfold_leftFst :\n      dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp.fld; ]⟩ }\n",
-   "new": "  | storageFieldDelete_unfold_leftFst :\n      dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ delete nsp.fld; ]⟩ }\n",
+   "new": "  | storageFieldDelete_unfold_leftFst :\n      dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete nsp.fld; ]⟩ }\n",
    "affected": [
     "Taclet.storageFieldDelete_unfold_leftFst"
    ]
   },
   {
-   "id": "storageIndexDelete_unfold_leftFst.receiver-capture-bypassed.1",
+   "id": "storageIndexDelete_unfold_leftFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageIndexDelete_unfold_leftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 71,
+   "offset_in_span": 96,
    "old": "  | storageIndexDelete_unfold_leftFst :\n      dl{ ⟨[ delete nsp[e]; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp[e]; ]⟩ }\n",
-   "new": "  | storageIndexDelete_unfold_leftFst :\n      dl{ ⟨[ delete nsp[e]; ]⟩ ⇝ ⟨[ delete nsp[e]; ]⟩ }\n",
+   "new": "  | storageIndexDelete_unfold_leftFst :\n      dl{ ⟨[ delete nsp[e]; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete nsp[e]; ]⟩ }\n",
    "affected": [
     "Taclet.storageIndexDelete_unfold_leftFst"
+   ]
+  },
+  {
+   "id": "storageIndexReadArrayFind.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexReadArrayFind",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 84,
+   "old": "  | storageIndexReadArrayFind :\n      dl{ ⟨[ v = arr[ie]; ]⟩ ⇝ { v := find(storage, arr[ie]) } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexReadArrayFind :\n      dl{ ⟨[ v = arr[ie]; ]⟩ ⇝ { v := find(storage, arr[0]) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexReadArrayFind"
+   ]
+  },
+  {
+   "id": "storageIndexReadArrayStoreRoot.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexReadArrayStoreRoot",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 116,
+   "old": "  | storageIndexReadArrayStoreRoot :\n      dl{ ⟨[ gsp = arr[ie]; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, arr[ie])) } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexReadArrayStoreRoot :\n      dl{ ⟨[ gsp = arr[ie]; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, arr[0])) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexReadArrayStoreRoot"
+   ]
+  },
+  {
+   "id": "storageIndexWriteArraySave.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexWriteArraySave",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 92,
+   "old": "  | storageIndexWriteArraySave :\n      dl{ ⟨[ arr[ie] = se; ]⟩ ⇝ { storage := save(storage, arr[ie], se) } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexWriteArraySave :\n      dl{ ⟨[ arr[ie] = se; ]⟩ ⇝ { storage := save(storage, arr[0], se) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexWriteArraySave"
+   ]
+  },
+  {
+   "id": "storageIndexWriteArrayCopySource.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexWriteArrayCopySource",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 99,
+   "old": "  | storageIndexWriteArrayCopySource :\n      dl{ ⟨[ arr[ie] = sp2; ]⟩ ⇝ { storage := save(storage, arr[ie], find(storage, sp2)) } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexWriteArrayCopySource :\n      dl{ ⟨[ arr[ie] = sp2; ]⟩ ⇝ { storage := save(storage, arr[0], find(storage, sp2)) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexWriteArrayCopySource"
+   ]
+  },
+  {
+   "id": "storageIndexReadArrayBindLocalRoot.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexReadArrayBindLocalRoot",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 84,
+   "old": "  | storageIndexReadArrayBindLocalRoot :\n      dl{ ⟨[ lsv = darr[ie]; ]⟩ ⇝ { lsv := darr[ie] } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexReadArrayBindLocalRoot :\n      dl{ ⟨[ lsv = darr[ie]; ]⟩ ⇝ { lsv := darr[0] } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexReadArrayBindLocalRoot"
+   ]
+  },
+  {
+   "id": "storageIndexReadArrayBindLocalRootMappingElement.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexReadArrayBindLocalRootMappingElement",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 98,
+   "old": "  | storageIndexReadArrayBindLocalRootMappingElement :\n      dl{ ⟨[ lsv = marr[ie]; ]⟩ ⇝ { lsv := marr[ie] } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexReadArrayBindLocalRootMappingElement :\n      dl{ ⟨[ lsv = marr[ie]; ]⟩ ⇝ { lsv := marr[0] } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexReadArrayBindLocalRootMappingElement"
    ]
   },
   {
@@ -2043,87 +2165,178 @@
    ]
   },
   {
-   "id": "storageLengthRead_unfold_rightFst.receiver-capture-bypassed.1",
+   "id": "storageIndexArrayDelete.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexArrayDelete",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 92,
+   "old": "  | storageIndexArrayDelete :\n      dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := delAt(storage, arr[ie]) } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexArrayDelete :\n      dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := delAt(storage, arr[0]) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexArrayDelete"
+   ]
+  },
+  {
+   "id": "storageLengthRead_unfold_rightFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageLengthRead_unfold_rightFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 72,
+   "offset_in_span": 97,
    "old": "  | storageLengthRead_unfold_rightFst :\n      dl{ ⟨[ v = nsp.length; ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.length; ]⟩ }\n",
-   "new": "  | storageLengthRead_unfold_rightFst :\n      dl{ ⟨[ v = nsp.length; ]⟩ ⇝ ⟨[ v = nsp.length; ]⟩ }\n",
+   "new": "  | storageLengthRead_unfold_rightFst :\n      dl{ ⟨[ v = nsp.length; ]⟩ ⇝ ⟨[ T storage sp = nsp; v = nsp.length; ]⟩ }\n",
    "affected": [
     "Taclet.storageLengthRead_unfold_rightFst"
    ]
   },
   {
-   "id": "memoryLengthRead_unfold_rightFst.receiver-capture-bypassed.1",
+   "id": "memoryLengthRead_unfold_rightFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryLengthRead_unfold_rightFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 71,
+   "offset_in_span": 95,
    "old": "  | memoryLengthRead_unfold_rightFst :\n      dl{ ⟨[ v = nmp.length; ]⟩ ⇝ ⟨[ T memory mv = nmp; v = mv.length; ]⟩ }\n",
-   "new": "  | memoryLengthRead_unfold_rightFst :\n      dl{ ⟨[ v = nmp.length; ]⟩ ⇝ ⟨[ v = nmp.length; ]⟩ }\n",
+   "new": "  | memoryLengthRead_unfold_rightFst :\n      dl{ ⟨[ v = nmp.length; ]⟩ ⇝ ⟨[ T memory mv = nmp; v = nmp.length; ]⟩ }\n",
    "affected": [
     "Taclet.memoryLengthRead_unfold_rightFst"
    ]
   },
   {
-   "id": "storageFieldOpAssignUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "storageIndexArrayOpAssign.index-constant-zero.1",
+   "constructor": "Taclet.storageIndexArrayOpAssign",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 92,
+   "old": "  | storageIndexArrayOpAssign :\n      dl{ ⟨[ arr[ie] ⊕= se; ]⟩ ⇝ { storage := save(storage, arr[ie], arr[ie] ⊕ se) } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexArrayOpAssign :\n      dl{ ⟨[ arr[ie] ⊕= se; ]⟩ ⇝ { storage := save(storage, arr[0], arr[ie] ⊕ se) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexArrayOpAssign"
+   ]
+  },
+  {
+   "id": "storageIndexArrayOpAssign.index-constant-zero.2",
+   "constructor": "Taclet.storageIndexArrayOpAssign",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 101,
+   "old": "  | storageIndexArrayOpAssign :\n      dl{ ⟨[ arr[ie] ⊕= se; ]⟩ ⇝ { storage := save(storage, arr[ie], arr[ie] ⊕ se) } ⟨[ ]⟩ }\n",
+   "new": "  | storageIndexArrayOpAssign :\n      dl{ ⟨[ arr[ie] ⊕= se; ]⟩ ⇝ { storage := save(storage, arr[ie], arr[0] ⊕ se) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexArrayOpAssign"
+   ]
+  },
+  {
+   "id": "memoryIndexArrayOpAssign.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexArrayOpAssign",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 89,
+   "old": "  | memoryIndexArrayOpAssign :\n      dl{ ⟨[ mv[ie] ⊕= se; ]⟩ ⇝ { memory := write(memory, mv[ie], mv[ie] ⊕ se) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexArrayOpAssign :\n      dl{ ⟨[ mv[ie] ⊕= se; ]⟩ ⇝ { memory := write(memory, mv[0], mv[ie] ⊕ se) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexArrayOpAssign"
+   ]
+  },
+  {
+   "id": "memoryIndexArrayOpAssign.index-constant-zero.2",
+   "constructor": "Taclet.memoryIndexArrayOpAssign",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 97,
+   "old": "  | memoryIndexArrayOpAssign :\n      dl{ ⟨[ mv[ie] ⊕= se; ]⟩ ⇝ { memory := write(memory, mv[ie], mv[ie] ⊕ se) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexArrayOpAssign :\n      dl{ ⟨[ mv[ie] ⊕= se; ]⟩ ⇝ { memory := write(memory, mv[ie], mv[0] ⊕ se) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexArrayOpAssign"
+   ]
+  },
+  {
+   "id": "storageFieldOpAssignUnfoldLeftFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageFieldOpAssignUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 71,
+   "offset_in_span": 96,
    "old": "  | storageFieldOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nsp.fld ⊕= se; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld ⊕= se; ]⟩ }\n",
-   "new": "  | storageFieldOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nsp.fld ⊕= se; ]⟩ ⇝ ⟨[ nsp.fld ⊕= se; ]⟩ }\n",
+   "new": "  | storageFieldOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nsp.fld ⊕= se; ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp.fld ⊕= se; ]⟩ }\n",
    "affected": [
     "Taclet.storageFieldOpAssignUnfoldLeftFst"
    ]
   },
   {
-   "id": "storageIndexOpAssignUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "storageIndexOpAssignUnfoldLeftFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageIndexOpAssignUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 71,
+   "offset_in_span": 96,
    "old": "  | storageIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nsp[ie] ⊕= se; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp[ie] ⊕= se; ]⟩ }\n",
-   "new": "  | storageIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nsp[ie] ⊕= se; ]⟩ ⇝ ⟨[ nsp[ie] ⊕= se; ]⟩ }\n",
+   "new": "  | storageIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nsp[ie] ⊕= se; ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp[ie] ⊕= se; ]⟩ }\n",
    "affected": [
     "Taclet.storageIndexOpAssignUnfoldLeftFst"
    ]
   },
   {
-   "id": "memoryFieldOpAssignUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "memoryFieldOpAssignUnfoldLeftFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryFieldOpAssignUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 70,
+   "offset_in_span": 94,
    "old": "  | memoryFieldOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp.fld ⊕= se; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv.fld ⊕= se; ]⟩ }\n",
-   "new": "  | memoryFieldOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp.fld ⊕= se; ]⟩ ⇝ ⟨[ nmp.fld ⊕= se; ]⟩ }\n",
+   "new": "  | memoryFieldOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp.fld ⊕= se; ]⟩ ⇝ ⟨[ T memory mv = nmp; nmp.fld ⊕= se; ]⟩ }\n",
    "affected": [
     "Taclet.memoryFieldOpAssignUnfoldLeftFst"
    ]
   },
   {
-   "id": "memoryIndexOpAssignUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "memoryIndexOpAssignUnfoldLeftFst.index-constant-zero.1",
    "constructor": "Taclet.memoryIndexOpAssignUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
-   "family": "alias-capture-once",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 70,
+   "offset_in_span": 94,
    "old": "  | memoryIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie] ⊕= se; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv[ie] ⊕= se; ]⟩ }\n",
-   "new": "  | memoryIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie] ⊕= se; ]⟩ ⇝ ⟨[ nmp[ie] ⊕= se; ]⟩ }\n",
+   "new": "  | memoryIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie] ⊕= se; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv[0] ⊕= se; ]⟩ }\n",
    "affected": [
     "Taclet.memoryIndexOpAssignUnfoldLeftFst"
    ]
   },
   {
-   "id": "storageRootIncrement.overflow-step-dropped.1",
+   "id": "memoryIndexOpAssignUnfoldLeftFst.receiver-reevaluated.1",
+   "constructor": "Taclet.memoryIndexOpAssignUnfoldLeftFst",
+   "operator": "receiver-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 94,
+   "old": "  | memoryIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie] ⊕= se; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv[ie] ⊕= se; ]⟩ }\n",
+   "new": "  | memoryIndexOpAssignUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie] ⊕= se; ]⟩ ⇝ ⟨[ T memory mv = nmp; nmp[ie] ⊕= se; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexOpAssignUnfoldLeftFst"
+   ]
+  },
+  {
+   "id": "localIncrement.increment-step-dropped.1",
+   "constructor": "Taclet.localIncrement",
+   "operator": "increment-step-dropped",
+   "family": "overflow",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 52,
+   "old": "  | localIncrement :\n      dl{ ⟨[ v⊕⊕; ]⟩ ⇝ { v := v ± 1 } ⟨[ ]⟩ }\n",
+   "new": "  | localIncrement :\n      dl{ ⟨[ v⊕⊕; ]⟩ ⇝ { v := v } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.localIncrement"
+   ]
+  },
+  {
+   "id": "storageRootIncrement.increment-step-dropped.1",
    "constructor": "Taclet.storageRootIncrement",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 87,
@@ -2134,9 +2347,9 @@
    ]
   },
   {
-   "id": "storageFieldIncrement.overflow-step-dropped.1",
+   "id": "storageFieldIncrement.increment-step-dropped.1",
    "constructor": "Taclet.storageFieldIncrement",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 97,
@@ -2147,9 +2360,9 @@
    ]
   },
   {
-   "id": "storageIndexIncrement.overflow-step-dropped.1",
+   "id": "storageIndexIncrement.increment-step-dropped.1",
    "constructor": "Taclet.storageIndexIncrement",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 97,
@@ -2160,9 +2373,9 @@
    ]
   },
   {
-   "id": "memoryFieldIncrement.overflow-step-dropped.1",
+   "id": "memoryFieldIncrement.increment-step-dropped.1",
    "constructor": "Taclet.memoryFieldIncrement",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 95,
@@ -2173,9 +2386,9 @@
    ]
   },
   {
-   "id": "memoryIndexArrayIncrement.overflow-step-dropped.1",
+   "id": "memoryIndexArrayIncrement.increment-step-dropped.1",
    "constructor": "Taclet.memoryIndexArrayIncrement",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 100,
@@ -2186,61 +2399,113 @@
    ]
   },
   {
-   "id": "storageFieldIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "memoryIndexArrayIncrement.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexArrayIncrement",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 86,
+   "old": "  | memoryIndexArrayIncrement :\n      dl{ ⟨[ mv[ie]⊕⊕; ]⟩ ⇝ { memory := write(memory, mv[ie], mv[ie] ± 1) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexArrayIncrement :\n      dl{ ⟨[ mv[ie]⊕⊕; ]⟩ ⇝ { memory := write(memory, mv[0], mv[ie] ± 1) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexArrayIncrement"
+   ]
+  },
+  {
+   "id": "memoryIndexArrayIncrement.index-constant-zero.2",
+   "constructor": "Taclet.memoryIndexArrayIncrement",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 94,
+   "old": "  | memoryIndexArrayIncrement :\n      dl{ ⟨[ mv[ie]⊕⊕; ]⟩ ⇝ { memory := write(memory, mv[ie], mv[ie] ± 1) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexArrayIncrement :\n      dl{ ⟨[ mv[ie]⊕⊕; ]⟩ ⇝ { memory := write(memory, mv[ie], mv[0] ± 1) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexArrayIncrement"
+   ]
+  },
+  {
+   "id": "storageFieldIncrementUnfoldLeftFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageFieldIncrementUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 68,
+   "offset_in_span": 93,
    "old": "  | storageFieldIncrementUnfoldLeftFst :\n      dl{ ⟨[ nsp.fld⊕⊕; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld⊕⊕; ]⟩ }\n",
-   "new": "  | storageFieldIncrementUnfoldLeftFst :\n      dl{ ⟨[ nsp.fld⊕⊕; ]⟩ ⇝ ⟨[ nsp.fld⊕⊕; ]⟩ }\n",
+   "new": "  | storageFieldIncrementUnfoldLeftFst :\n      dl{ ⟨[ nsp.fld⊕⊕; ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp.fld⊕⊕; ]⟩ }\n",
    "affected": [
     "Taclet.storageFieldIncrementUnfoldLeftFst"
    ]
   },
   {
-   "id": "storageIndexIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "storageIndexIncrementUnfoldLeftFst.receiver-reevaluated.1",
    "constructor": "Taclet.storageIndexIncrementUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 68,
+   "offset_in_span": 93,
    "old": "  | storageIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nsp[ie]⊕⊕; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp[ie]⊕⊕; ]⟩ }\n",
-   "new": "  | storageIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nsp[ie]⊕⊕; ]⟩ ⇝ ⟨[ nsp[ie]⊕⊕; ]⟩ }\n",
+   "new": "  | storageIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nsp[ie]⊕⊕; ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp[ie]⊕⊕; ]⟩ }\n",
    "affected": [
     "Taclet.storageIndexIncrementUnfoldLeftFst"
    ]
   },
   {
-   "id": "memoryFieldIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "memoryFieldIncrementUnfoldLeftFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryFieldIncrementUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 67,
+   "offset_in_span": 91,
    "old": "  | memoryFieldIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp.fld⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv.fld⊕⊕; ]⟩ }\n",
-   "new": "  | memoryFieldIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp.fld⊕⊕; ]⟩ ⇝ ⟨[ nmp.fld⊕⊕; ]⟩ }\n",
+   "new": "  | memoryFieldIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp.fld⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; nmp.fld⊕⊕; ]⟩ }\n",
    "affected": [
     "Taclet.memoryFieldIncrementUnfoldLeftFst"
    ]
   },
   {
-   "id": "memoryIndexIncrementUnfoldLeftFst.receiver-capture-bypassed.1",
+   "id": "memoryIndexIncrementUnfoldLeftFst.index-constant-zero.1",
    "constructor": "Taclet.memoryIndexIncrementUnfoldLeftFst",
-   "operator": "receiver-capture-bypassed",
-   "family": "alias-capture-once",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 67,
+   "offset_in_span": 91,
    "old": "  | memoryIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie]⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv[ie]⊕⊕; ]⟩ }\n",
-   "new": "  | memoryIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie]⊕⊕; ]⟩ ⇝ ⟨[ nmp[ie]⊕⊕; ]⟩ }\n",
+   "new": "  | memoryIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie]⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv[0]⊕⊕; ]⟩ }\n",
    "affected": [
     "Taclet.memoryIndexIncrementUnfoldLeftFst"
    ]
   },
   {
-   "id": "storageRootIncrementAssignment.overflow-step-dropped.1",
+   "id": "memoryIndexIncrementUnfoldLeftFst.receiver-reevaluated.1",
+   "constructor": "Taclet.memoryIndexIncrementUnfoldLeftFst",
+   "operator": "receiver-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 91,
+   "old": "  | memoryIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie]⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv[ie]⊕⊕; ]⟩ }\n",
+   "new": "  | memoryIndexIncrementUnfoldLeftFst :\n      dl{ ⟨[ nmp[ie]⊕⊕; ]⟩ ⇝ ⟨[ T memory mv = nmp; nmp[ie]⊕⊕; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexIncrementUnfoldLeftFst"
+   ]
+  },
+  {
+   "id": "localAssignIncrement.increment-step-dropped.1",
+   "constructor": "Taclet.localAssignIncrement",
+   "operator": "increment-step-dropped",
+   "family": "overflow",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 65,
+   "old": "  | localAssignIncrement :\n      dl{ ⟨[ v = lv⊕⊕; ]⟩ ⇝ { lv := lv ± 1 ‖ v := lv⊕⊕ } ⟨[ ]⟩ }\n",
+   "new": "  | localAssignIncrement :\n      dl{ ⟨[ v = lv⊕⊕; ]⟩ ⇝ { lv := lv ‖ v := lv⊕⊕ } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.localAssignIncrement"
+   ]
+  },
+  {
+   "id": "storageRootIncrementAssignment.increment-step-dropped.1",
    "constructor": "Taclet.storageRootIncrementAssignment",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 101,
@@ -2251,9 +2516,9 @@
    ]
   },
   {
-   "id": "storageFieldIncrementAssignment.overflow-step-dropped.1",
+   "id": "storageFieldIncrementAssignment.increment-step-dropped.1",
    "constructor": "Taclet.storageFieldIncrementAssignment",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 121,
@@ -2264,9 +2529,9 @@
    ]
   },
   {
-   "id": "storageIndexIncrementAssignment.overflow-step-dropped.1",
+   "id": "storageIndexIncrementAssignment.increment-step-dropped.1",
    "constructor": "Taclet.storageIndexIncrementAssignment",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 121,
@@ -2277,9 +2542,9 @@
    ]
   },
   {
-   "id": "memoryFieldIncrementAssignment.overflow-step-dropped.1",
+   "id": "memoryFieldIncrementAssignment.increment-step-dropped.1",
    "constructor": "Taclet.memoryFieldIncrementAssignment",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 119,
@@ -2290,9 +2555,9 @@
    ]
   },
   {
-   "id": "memoryIndexArrayIncrementAssignment.overflow-step-dropped.1",
+   "id": "memoryIndexArrayIncrementAssignment.increment-step-dropped.1",
    "constructor": "Taclet.memoryIndexArrayIncrementAssignment",
-   "operator": "overflow-step-dropped",
+   "operator": "increment-step-dropped",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 124,
@@ -2303,10 +2568,49 @@
    ]
   },
   {
-   "id": "storagePushAddAssign.index-last-is-length.1",
-   "constructor": "Taclet.storagePushAddAssign",
-   "operator": "index-last-is-length",
+   "id": "memoryIndexArrayIncrementAssignment.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexArrayIncrementAssignment",
+   "operator": "index-constant-zero",
    "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 110,
+   "old": "  | memoryIndexArrayIncrementAssignment :\n      dl{ ⟨[ v = mv[ie]⊕⊕; ]⟩ ⇝\n          { memory := write(memory, mv[ie], mv[ie] ± 1) ‖ v := mv[ie]⊕⊕ } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexArrayIncrementAssignment :\n      dl{ ⟨[ v = mv[ie]⊕⊕; ]⟩ ⇝\n          { memory := write(memory, mv[0], mv[ie] ± 1) ‖ v := mv[ie]⊕⊕ } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexArrayIncrementAssignment"
+   ]
+  },
+  {
+   "id": "memoryIndexArrayIncrementAssignment.index-constant-zero.2",
+   "constructor": "Taclet.memoryIndexArrayIncrementAssignment",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 118,
+   "old": "  | memoryIndexArrayIncrementAssignment :\n      dl{ ⟨[ v = mv[ie]⊕⊕; ]⟩ ⇝\n          { memory := write(memory, mv[ie], mv[ie] ± 1) ‖ v := mv[ie]⊕⊕ } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexArrayIncrementAssignment :\n      dl{ ⟨[ v = mv[ie]⊕⊕; ]⟩ ⇝\n          { memory := write(memory, mv[ie], mv[0] ± 1) ‖ v := mv[ie]⊕⊕ } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexArrayIncrementAssignment"
+   ]
+  },
+  {
+   "id": "memoryIndexArrayIncrementAssignment.index-constant-zero.3",
+   "constructor": "Taclet.memoryIndexArrayIncrementAssignment",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 137,
+   "old": "  | memoryIndexArrayIncrementAssignment :\n      dl{ ⟨[ v = mv[ie]⊕⊕; ]⟩ ⇝\n          { memory := write(memory, mv[ie], mv[ie] ± 1) ‖ v := mv[ie]⊕⊕ } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexArrayIncrementAssignment :\n      dl{ ⟨[ v = mv[ie]⊕⊕; ]⟩ ⇝\n          { memory := write(memory, mv[ie], mv[ie] ± 1) ‖ v := mv[0]⊕⊕ } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexArrayIncrementAssignment"
+   ]
+  },
+  {
+   "id": "storagePushAddAssign.last-slot-is-length.1",
+   "constructor": "Taclet.storagePushAddAssign",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 160,
    "old": "  | storagePushAddAssign :\n      dl{ ⟨[ sp.push() += se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }\n",
@@ -2316,10 +2620,10 @@
    ]
   },
   {
-   "id": "storagePushAddAssign.index-last-is-length.2",
+   "id": "storagePushAddAssign.last-slot-is-length.2",
    "constructor": "Taclet.storagePushAddAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 193,
    "old": "  | storagePushAddAssign :\n      dl{ ⟨[ sp.push() += se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }\n",
@@ -2329,9 +2633,9 @@
    ]
   },
   {
-   "id": "storagePushAddAssign.overflow-add-to-sub.1",
+   "id": "storagePushAddAssign.push-arith-add-to-sub.1",
    "constructor": "Taclet.storagePushAddAssign",
-   "operator": "overflow-add-to-sub",
+   "operator": "push-arith-add-to-sub",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 210,
@@ -2355,10 +2659,10 @@
    ]
   },
   {
-   "id": "storagePushSubAssign.index-last-is-length.1",
+   "id": "storagePushSubAssign.last-slot-is-length.1",
    "constructor": "Taclet.storagePushSubAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 160,
    "old": "  | storagePushSubAssign :\n      dl{ ⟨[ sp.push() -= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - se) } ⟨[ ]⟩ }\n",
@@ -2368,10 +2672,10 @@
    ]
   },
   {
-   "id": "storagePushSubAssign.index-last-is-length.2",
+   "id": "storagePushSubAssign.last-slot-is-length.2",
    "constructor": "Taclet.storagePushSubAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 193,
    "old": "  | storagePushSubAssign :\n      dl{ ⟨[ sp.push() -= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - se) } ⟨[ ]⟩ }\n",
@@ -2381,9 +2685,9 @@
    ]
   },
   {
-   "id": "storagePushSubAssign.overflow-sub-to-add.1",
+   "id": "storagePushSubAssign.push-arith-sub-to-add.1",
    "constructor": "Taclet.storagePushSubAssign",
-   "operator": "overflow-sub-to-add",
+   "operator": "push-arith-sub-to-add",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 210,
@@ -2407,10 +2711,10 @@
    ]
   },
   {
-   "id": "storagePushMulAssign.index-last-is-length.1",
+   "id": "storagePushMulAssign.last-slot-is-length.1",
    "constructor": "Taclet.storagePushMulAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 160,
    "old": "  | storagePushMulAssign :\n      dl{ ⟨[ sp.push() *= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n",
@@ -2420,10 +2724,10 @@
    ]
   },
   {
-   "id": "storagePushMulAssign.index-last-is-length.2",
+   "id": "storagePushMulAssign.last-slot-is-length.2",
    "constructor": "Taclet.storagePushMulAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 193,
    "old": "  | storagePushMulAssign :\n      dl{ ⟨[ sp.push() *= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n",
@@ -2433,9 +2737,9 @@
    ]
   },
   {
-   "id": "storagePushMulAssign.overflow-mul-to-add.1",
+   "id": "storagePushMulAssign.push-arith-mul-to-add.1",
    "constructor": "Taclet.storagePushMulAssign",
-   "operator": "overflow-mul-to-add",
+   "operator": "push-arith-mul-to-add",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 210,
@@ -2485,10 +2789,10 @@
    ]
   },
   {
-   "id": "storagePushDivAssign.index-last-is-length.1",
+   "id": "storagePushDivAssign.last-slot-is-length.1",
    "constructor": "Taclet.storagePushDivAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 179,
    "old": "  | storagePushDivAssign :\n      dl{ ⟨[ sp.push() /= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
@@ -2498,10 +2802,10 @@
    ]
   },
   {
-   "id": "storagePushDivAssign.index-last-is-length.2",
+   "id": "storagePushDivAssign.last-slot-is-length.2",
    "constructor": "Taclet.storagePushDivAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 212,
    "old": "  | storagePushDivAssign :\n      dl{ ⟨[ sp.push() /= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
@@ -2550,10 +2854,10 @@
    ]
   },
   {
-   "id": "storagePushModAssign.index-last-is-length.1",
+   "id": "storagePushModAssign.last-slot-is-length.1",
    "constructor": "Taclet.storagePushModAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 179,
    "old": "  | storagePushModAssign :\n      dl{ ⟨[ sp.push() %= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) % se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
@@ -2563,10 +2867,10 @@
    ]
   },
   {
-   "id": "storagePushModAssign.index-last-is-length.2",
+   "id": "storagePushModAssign.last-slot-is-length.2",
    "constructor": "Taclet.storagePushModAssign",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 212,
    "old": "  | storagePushModAssign :\n      dl{ ⟨[ sp.push() %= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) % se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
@@ -2589,10 +2893,10 @@
    ]
   },
   {
-   "id": "storagePushPreincrement.index-last-is-length.1",
+   "id": "storagePushPreincrement.last-slot-is-length.1",
    "constructor": "Taclet.storagePushPreincrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 159,
    "old": "  | storagePushPreincrement :\n      dl{ ⟨[ ++sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
@@ -2602,10 +2906,10 @@
    ]
   },
   {
-   "id": "storagePushPreincrement.index-last-is-length.2",
+   "id": "storagePushPreincrement.last-slot-is-length.2",
    "constructor": "Taclet.storagePushPreincrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 192,
    "old": "  | storagePushPreincrement :\n      dl{ ⟨[ ++sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
@@ -2615,9 +2919,9 @@
    ]
   },
   {
-   "id": "storagePushPreincrement.overflow-plus-one-to-minus.1",
+   "id": "storagePushPreincrement.push-arith-plus-one-to-minus.1",
    "constructor": "Taclet.storagePushPreincrement",
-   "operator": "overflow-plus-one-to-minus",
+   "operator": "push-arith-plus-one-to-minus",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 209,
@@ -2641,10 +2945,10 @@
    ]
   },
   {
-   "id": "storagePushPostincrement.index-last-is-length.1",
+   "id": "storagePushPostincrement.last-slot-is-length.1",
    "constructor": "Taclet.storagePushPostincrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 162,
    "old": "  | storagePushPostincrement :\n      dl{ ⟨[ (sp.push())++; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
@@ -2654,10 +2958,10 @@
    ]
   },
   {
-   "id": "storagePushPostincrement.index-last-is-length.2",
+   "id": "storagePushPostincrement.last-slot-is-length.2",
    "constructor": "Taclet.storagePushPostincrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 195,
    "old": "  | storagePushPostincrement :\n      dl{ ⟨[ (sp.push())++; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
@@ -2667,9 +2971,9 @@
    ]
   },
   {
-   "id": "storagePushPostincrement.overflow-plus-one-to-minus.1",
+   "id": "storagePushPostincrement.push-arith-plus-one-to-minus.1",
    "constructor": "Taclet.storagePushPostincrement",
-   "operator": "overflow-plus-one-to-minus",
+   "operator": "push-arith-plus-one-to-minus",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 212,
@@ -2693,10 +2997,10 @@
    ]
   },
   {
-   "id": "storagePushPredecrement.index-last-is-length.1",
+   "id": "storagePushPredecrement.last-slot-is-length.1",
    "constructor": "Taclet.storagePushPredecrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 159,
    "old": "  | storagePushPredecrement :\n      dl{ ⟨[ −−sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
@@ -2706,10 +3010,10 @@
    ]
   },
   {
-   "id": "storagePushPredecrement.index-last-is-length.2",
+   "id": "storagePushPredecrement.last-slot-is-length.2",
    "constructor": "Taclet.storagePushPredecrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 192,
    "old": "  | storagePushPredecrement :\n      dl{ ⟨[ −−sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
@@ -2719,9 +3023,9 @@
    ]
   },
   {
-   "id": "storagePushPredecrement.overflow-minus-one-to-plus.1",
+   "id": "storagePushPredecrement.push-arith-minus-one-to-plus.1",
    "constructor": "Taclet.storagePushPredecrement",
-   "operator": "overflow-minus-one-to-plus",
+   "operator": "push-arith-minus-one-to-plus",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 209,
@@ -2745,10 +3049,10 @@
    ]
   },
   {
-   "id": "storagePushPostdecrement.index-last-is-length.1",
+   "id": "storagePushPostdecrement.last-slot-is-length.1",
    "constructor": "Taclet.storagePushPostdecrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 162,
    "old": "  | storagePushPostdecrement :\n      dl{ ⟨[ (sp.push())−−; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
@@ -2758,10 +3062,10 @@
    ]
   },
   {
-   "id": "storagePushPostdecrement.index-last-is-length.2",
+   "id": "storagePushPostdecrement.last-slot-is-length.2",
    "constructor": "Taclet.storagePushPostdecrement",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 195,
    "old": "  | storagePushPostdecrement :\n      dl{ ⟨[ (sp.push())−−; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
@@ -2771,9 +3075,9 @@
    ]
   },
   {
-   "id": "storagePushPostdecrement.overflow-minus-one-to-plus.1",
+   "id": "storagePushPostdecrement.push-arith-minus-one-to-plus.1",
    "constructor": "Taclet.storagePushPostdecrement",
-   "operator": "overflow-minus-one-to-plus",
+   "operator": "push-arith-minus-one-to-plus",
    "family": "overflow",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 212,
@@ -2813,7 +3117,7 @@
    "id": "storagePushValueSave.push-slot-is-last-old.1",
    "constructor": "Taclet.storagePushValueSave",
    "operator": "push-slot-is-last-old",
-   "family": "index-bounds",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 100,
    "old": "  | storagePushValueSave :\n      dl{ ⟨[ sp.push(se); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length + 1) } ⟨[ ]⟩ }\n",
@@ -2839,7 +3143,7 @@
    "id": "storagePushValueCopySource.push-slot-is-last-old.1",
    "constructor": "Taclet.storagePushValueCopySource",
    "operator": "push-slot-is-last-old",
-   "family": "index-bounds",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 108,
    "old": "  | storagePushValueCopySource :\n      dl{ ⟨[ sp1.push(sp2); ]⟩ ⇝\n          { storage := save(save(storage, sp1[sp1.length], find(storage, sp2)), sp1.length,\n              sp1.length + 1) } ⟨[ ]⟩ }\n",
@@ -2865,7 +3169,7 @@
    "id": "storagePushMemoryCopySource.push-slot-is-last-old.1",
    "constructor": "Taclet.storagePushMemoryCopySource",
    "operator": "push-slot-is-last-old",
-   "family": "index-bounds",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 107,
    "old": "  | storagePushMemoryCopySource :\n      dl{ ⟨[ sp.push(mv); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], copyMem(mtSt, memory, mv)), sp.length,\n              sp.length + 1) } ⟨[ ]⟩ }\n",
@@ -2914,79 +3218,79 @@
    ]
   },
   {
-   "id": "storagePushValue_unfold_leftFstReceiver.receiver-capture-bypassed.1",
+   "id": "storagePushValue_unfold_leftFstReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.storagePushValue_unfold_leftFstReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 77,
+   "offset_in_span": 102,
    "old": "  | storagePushValue_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.push(src); ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.push(src); ]⟩ }\n",
-   "new": "  | storagePushValue_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.push(src); ]⟩ ⇝ ⟨[ nsp.push(src); ]⟩ }\n",
+   "new": "  | storagePushValue_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.push(src); ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp.push(src); ]⟩ }\n",
    "affected": [
     "Taclet.storagePushValue_unfold_leftFstReceiver"
    ]
   },
   {
-   "id": "storagePush_unfold_leftFstReceiver.receiver-capture-bypassed.1",
+   "id": "storagePush_unfold_leftFstReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.storagePush_unfold_leftFstReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 69,
+   "offset_in_span": 94,
    "old": "  | storagePush_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.push(); ]⟩ }\n",
-   "new": "  | storagePush_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.push(); ]⟩ ⇝ ⟨[ nsp.push(); ]⟩ }\n",
+   "new": "  | storagePush_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp.push(); ]⟩ }\n",
    "affected": [
     "Taclet.storagePush_unfold_leftFstReceiver"
    ]
   },
   {
-   "id": "storagePop_unfold_leftFstReceiver.receiver-capture-bypassed.1",
+   "id": "storagePop_unfold_leftFstReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.storagePop_unfold_leftFstReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 67,
+   "offset_in_span": 92,
    "old": "  | storagePop_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.pop(); ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.pop(); ]⟩ }\n",
-   "new": "  | storagePop_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.pop(); ]⟩ ⇝ ⟨[ nsp.pop(); ]⟩ }\n",
+   "new": "  | storagePop_unfold_leftFstReceiver :\n      dl{ ⟨[ nsp.pop(); ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp.pop(); ]⟩ }\n",
    "affected": [
     "Taclet.storagePop_unfold_leftFstReceiver"
    ]
   },
   {
-   "id": "storagePushValue_unfold_leftCallReceiver.receiver-capture-bypassed.1",
+   "id": "storagePushValue_unfold_leftCallReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.storagePushValue_unfold_leftCallReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 75,
+   "offset_in_span": 107,
    "old": "  | storagePushValue_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.push(e); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; sp.push(e); ]⟩ }\n",
-   "new": "  | storagePushValue_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.push(e); ]⟩ ⇝ ⟨[ fc.push(e); ]⟩ }\n",
+   "new": "  | storagePushValue_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.push(e); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; fc.push(e); ]⟩ }\n",
    "affected": [
     "Taclet.storagePushValue_unfold_leftCallReceiver"
    ]
   },
   {
-   "id": "storagePush_unfold_leftCallReceiver.receiver-capture-bypassed.1",
+   "id": "storagePush_unfold_leftCallReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.storagePush_unfold_leftCallReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 69,
+   "offset_in_span": 101,
    "old": "  | storagePush_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.push(); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; sp.push(); ]⟩ }\n",
-   "new": "  | storagePush_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.push(); ]⟩ ⇝ ⟨[ fc.push(); ]⟩ }\n",
+   "new": "  | storagePush_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.push(); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; fc.push(); ]⟩ }\n",
    "affected": [
     "Taclet.storagePush_unfold_leftCallReceiver"
    ]
   },
   {
-   "id": "storagePop_unfold_leftCallReceiver.receiver-capture-bypassed.1",
+   "id": "storagePop_unfold_leftCallReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.storagePop_unfold_leftCallReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 67,
+   "offset_in_span": 99,
    "old": "  | storagePop_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.pop(); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; sp.pop(); ]⟩ }\n",
-   "new": "  | storagePop_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.pop(); ]⟩ ⇝ ⟨[ fc.pop(); ]⟩ }\n",
+   "new": "  | storagePop_unfold_leftCallReceiver :\n      dl{ ⟨[ fc.pop(); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; fc.pop(); ]⟩ }\n",
    "affected": [
     "Taclet.storagePop_unfold_leftCallReceiver"
    ]
@@ -3005,10 +3309,10 @@
    ]
   },
   {
-   "id": "storagePopSave.index-last-is-length.1",
+   "id": "storagePopSave.last-slot-is-length.1",
    "constructor": "Taclet.storagePopSave",
-   "operator": "index-last-is-length",
-   "family": "index-bounds",
+   "operator": "last-slot-is-length",
+   "family": "pop-delete",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 94,
    "old": "  | storagePopSave :\n      dl{ ⟨[ darr.pop(); ]⟩ ⇝\n          { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length - 1) }\n          ⟨[ ]⟩ }\n",
@@ -3044,14 +3348,14 @@
    ]
   },
   {
-   "id": "storageLocalRootPush_unfold_leftFstReceiver.receiver-capture-bypassed.1",
+   "id": "storageLocalRootPush_unfold_leftFstReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.storageLocalRootPush_unfold_leftFstReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 84,
+   "offset_in_span": 109,
    "old": "  | storageLocalRootPush_unfold_leftFstReceiver :\n      dl{ ⟨[ lsv = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; lsv = sp.push(); ]⟩ }\n",
-   "new": "  | storageLocalRootPush_unfold_leftFstReceiver :\n      dl{ ⟨[ lsv = nsp.push(); ]⟩ ⇝ ⟨[ lsv = nsp.push(); ]⟩ }\n",
+   "new": "  | storageLocalRootPush_unfold_leftFstReceiver :\n      dl{ ⟨[ lsv = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; lsv = nsp.push(); ]⟩ }\n",
    "affected": [
     "Taclet.storageLocalRootPush_unfold_leftFstReceiver"
    ]
@@ -3073,7 +3377,7 @@
    "id": "storageLocalRootPushBind.push-slot-is-last-old.1",
    "constructor": "Taclet.storageLocalRootPushBind",
    "operator": "push-slot-is-last-old",
-   "family": "index-bounds",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 156,
    "old": "  | storageLocalRootPushBind :\n      dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝\n          { storage := save(storage, darr.length, darr.length + 1)\n            ‖ lsv := darr[darr.length] }\n          ⟨[ ]⟩ }\n",
@@ -3096,14 +3400,14 @@
    ]
   },
   {
-   "id": "localValuePush_unfold_leftFstReceiver.receiver-capture-bypassed.1",
+   "id": "localValuePush_unfold_leftFstReceiver.receiver-reevaluated.1",
    "constructor": "Taclet.localValuePush_unfold_leftFstReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 76,
+   "offset_in_span": 101,
    "old": "  | localValuePush_unfold_leftFstReceiver :\n      dl{ ⟨[ v = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.push(); ]⟩ }\n",
-   "new": "  | localValuePush_unfold_leftFstReceiver :\n      dl{ ⟨[ v = nsp.push(); ]⟩ ⇝ ⟨[ v = nsp.push(); ]⟩ }\n",
+   "new": "  | localValuePush_unfold_leftFstReceiver :\n      dl{ ⟨[ v = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; v = nsp.push(); ]⟩ }\n",
    "affected": [
     "Taclet.localValuePush_unfold_leftFstReceiver"
    ]
@@ -3125,7 +3429,7 @@
    "id": "storageLocalRootPushBindMappingElement.push-slot-is-last-old.1",
    "constructor": "Taclet.storageLocalRootPushBindMappingElement",
    "operator": "push-slot-is-last-old",
-   "family": "index-bounds",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 158,
    "old": "  | storageLocalRootPushBindMappingElement :\n      dl{ ⟨[ lsv = marr.push(); ]⟩ ⇝\n          { storage := save(storage, marr.length, marr.length + 1) ‖ lsv := marr[marr.length] }\n          ⟨[ ]⟩ }\n",
@@ -3239,118 +3543,365 @@
    ]
   },
   {
-   "id": "memoryFieldRead_unfold_rightFst.receiver-capture-bypassed.1",
+   "id": "memoryFieldRead_unfold_rightFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryFieldRead_unfold_rightFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 69,
+   "offset_in_span": 93,
    "old": "  | memoryFieldRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = mv.fld; ]⟩ }\n",
-   "new": "  | memoryFieldRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nmp.fld; ]⟩ ⇝ ⟨[ lhs = nmp.fld; ]⟩ }\n",
+   "new": "  | memoryFieldRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = nmp.fld; ]⟩ }\n",
    "affected": [
     "Taclet.memoryFieldRead_unfold_rightFst"
    ]
   },
   {
-   "id": "memoryIndexRead_unfold_rightFst.receiver-capture-bypassed.1",
+   "id": "memoryIndexRead_unfold_rightFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryIndexRead_unfold_rightFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 68,
+   "offset_in_span": 92,
    "old": "  | memoryIndexRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nmp[e]; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = mv[e]; ]⟩ }\n",
-   "new": "  | memoryIndexRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nmp[e]; ]⟩ ⇝ ⟨[ lhs = nmp[e]; ]⟩ }\n",
+   "new": "  | memoryIndexRead_unfold_rightFst :\n      dl{ ⟨[ lhs = nmp[e]; ]⟩ ⇝ ⟨[ T memory mv = nmp; lhs = nmp[e]; ]⟩ }\n",
    "affected": [
     "Taclet.memoryIndexRead_unfold_rightFst"
    ]
   },
   {
-   "id": "memoryFieldWrite_unfold_leftFst.receiver-capture-bypassed.1",
+   "id": "memoryIndexRead_unfold_rightSndIndex.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexRead_unfold_rightSndIndex",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 97,
+   "old": "  | memoryIndexRead_unfold_rightSndIndex :\n      dl{ ⟨[ lhs = mv[nse]; ]⟩ ⇝ ⟨[ T ie = nse; lhs = mv[ie]; ]⟩ }\n",
+   "new": "  | memoryIndexRead_unfold_rightSndIndex :\n      dl{ ⟨[ lhs = mv[nse]; ]⟩ ⇝ ⟨[ T ie = nse; lhs = mv[0]; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexRead_unfold_rightSndIndex"
+   ]
+  },
+  {
+   "id": "memoryIndexReadArrayValue.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexReadArrayValue",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 82,
+   "old": "  | memoryIndexReadArrayValue :\n      dl{ ⟨[ v = mv[ie]; ]⟩ ⇝ { v := read(memory, mv[ie]) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexReadArrayValue :\n      dl{ ⟨[ v = mv[ie]; ]⟩ ⇝ { v := read(memory, mv[0]) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexReadArrayValue"
+   ]
+  },
+  {
+   "id": "memoryIndexReadArrayMemory.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexReadArrayMemory",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 88,
+   "old": "  | memoryIndexReadArrayMemory :\n      dl{ ⟨[ mv₁ = mv₂[ie]; ]⟩ ⇝ { mv₁ := read(memory, mv₂[ie]) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexReadArrayMemory :\n      dl{ ⟨[ mv₁ = mv₂[ie]; ]⟩ ⇝ { mv₁ := read(memory, mv₂[0]) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexReadArrayMemory"
+   ]
+  },
+  {
+   "id": "memoryIndexWriteArray.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexWriteArray",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 85,
+   "old": "  | memoryIndexWriteArray :\n      dl{ ⟨[ mv[ie] = se; ]⟩ ⇝ { memory := write(memory, mv[ie], se) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexWriteArray :\n      dl{ ⟨[ mv[ie] = se; ]⟩ ⇝ { memory := write(memory, mv[0], se) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteArray"
+   ]
+  },
+  {
+   "id": "memoryIndexWriteCopy.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexWriteCopy",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 87,
+   "old": "  | memoryIndexWriteCopy :\n      dl{ ⟨[ mv[ie] = mpath; ]⟩ ⇝ { memory := write(memory, mv[ie], mpath) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexWriteCopy :\n      dl{ ⟨[ mv[ie] = mpath; ]⟩ ⇝ { memory := write(memory, mv[0], mpath) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteCopy"
+   ]
+  },
+  {
+   "id": "memoryFieldWrite_unfold_leftFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryFieldWrite_unfold_leftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 70,
+   "offset_in_span": 94,
    "old": "  | memoryFieldWrite_unfold_leftFst :\n      dl{ ⟨[ nmp.fld = msrc; ]⟩ ⇝ ⟨[ T memory mv = nmp; mv.fld = msrc; ]⟩ }\n",
-   "new": "  | memoryFieldWrite_unfold_leftFst :\n      dl{ ⟨[ nmp.fld = msrc; ]⟩ ⇝ ⟨[ nmp.fld = msrc; ]⟩ }\n",
+   "new": "  | memoryFieldWrite_unfold_leftFst :\n      dl{ ⟨[ nmp.fld = msrc; ]⟩ ⇝ ⟨[ T memory mv = nmp; nmp.fld = msrc; ]⟩ }\n",
    "affected": [
     "Taclet.memoryFieldWrite_unfold_leftFst"
    ]
   },
   {
-   "id": "memoryIndexWriteMemRefCaptureAllComplexRecv.receiver-capture-bypassed.1",
-   "constructor": "Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv",
-   "operator": "receiver-capture-bypassed",
+   "id": "memoryIndexWriteCaptureAllComplexRecv.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexWriteCaptureAllComplexRecv",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 120,
+   "old": "  | memoryIndexWriteCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T memory mv = nmp; T ie = e₁; mv[ie] = se; ]⟩ }\n",
+   "new": "  | memoryIndexWriteCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T memory mv = nmp; T ie = e₁; mv[0] = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteCaptureAllComplexRecv"
+   ]
+  },
+  {
+   "id": "memoryIndexWriteCaptureAllComplexRecv.receiver-reevaluated.1",
+   "constructor": "Taclet.memoryIndexWriteCaptureAllComplexRecv",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 82,
+   "offset_in_span": 109,
+   "old": "  | memoryIndexWriteCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T memory mv = nmp; T ie = e₁; mv[ie] = se; ]⟩ }\n",
+   "new": "  | memoryIndexWriteCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T memory mv = nmp; T ie = e₁; nmp[ie] = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteCaptureAllComplexRecv"
+   ]
+  },
+  {
+   "id": "memoryIndexWriteMemRefCaptureAllComplexRecv.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 116,
    "old": "  | memoryIndexWriteMemRefCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e] = mpath; ]⟩ ⇝ ⟨[ T memory mv = nmp; T ie = e; mv[ie] = mpath; ]⟩ }\n",
-   "new": "  | memoryIndexWriteMemRefCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e] = mpath; ]⟩ ⇝ ⟨[ nmp[e] = mpath; ]⟩ }\n",
+   "new": "  | memoryIndexWriteMemRefCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e] = mpath; ]⟩ ⇝ ⟨[ T memory mv = nmp; T ie = e; mv[0] = mpath; ]⟩ }\n",
    "affected": [
     "Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv"
    ]
   },
   {
-   "id": "memoryFieldDelete_unfold_leftFst.receiver-capture-bypassed.1",
-   "constructor": "Taclet.memoryFieldDelete_unfold_leftFst",
-   "operator": "receiver-capture-bypassed",
+   "id": "memoryIndexWriteMemRefCaptureAllComplexRecv.receiver-reevaluated.1",
+   "constructor": "Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 71,
+   "offset_in_span": 106,
+   "old": "  | memoryIndexWriteMemRefCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e] = mpath; ]⟩ ⇝ ⟨[ T memory mv = nmp; T ie = e; mv[ie] = mpath; ]⟩ }\n",
+   "new": "  | memoryIndexWriteMemRefCaptureAllComplexRecv :\n      dl{ ⟨[ nmp[e] = mpath; ]⟩ ⇝ ⟨[ T memory mv = nmp; T ie = e; nmp[ie] = mpath; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv"
+   ]
+  },
+  {
+   "id": "memoryIndexWriteCaptureAllNonSimpleIndex.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexWriteCaptureAllNonSimpleIndex",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 105,
+   "old": "  | memoryIndexWriteCaptureAllNonSimpleIndex :\n      dl{ ⟨[ mv[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T ie = nse₁; mv[ie] = se; ]⟩ }\n",
+   "new": "  | memoryIndexWriteCaptureAllNonSimpleIndex :\n      dl{ ⟨[ mv[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T ie = nse₁; mv[0] = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteCaptureAllNonSimpleIndex"
+   ]
+  },
+  {
+   "id": "memoryIndexWriteMemRefCaptureAllNonSimpleIndex.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 103,
+   "old": "  | memoryIndexWriteMemRefCaptureAllNonSimpleIndex :\n      dl{ ⟨[ mv[nse] = mpath; ]⟩ ⇝ ⟨[ T ie = nse; mv[ie] = mpath; ]⟩ }\n",
+   "new": "  | memoryIndexWriteMemRefCaptureAllNonSimpleIndex :\n      dl{ ⟨[ mv[nse] = mpath; ]⟩ ⇝ ⟨[ T ie = nse; mv[0] = mpath; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex"
+   ]
+  },
+  {
+   "id": "memoryIndexWriteUnfoldSource.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexWriteUnfoldSource",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 82,
+   "old": "  | memoryIndexWriteUnfoldSource :\n      dl{ ⟨[ mv[ie] = nse; ]⟩ ⇝ ⟨[ T se = nse; mv[ie] = se; ]⟩ }\n",
+   "new": "  | memoryIndexWriteUnfoldSource :\n      dl{ ⟨[ mv[ie] = nse; ]⟩ ⇝ ⟨[ T se = nse; mv[0] = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexWriteUnfoldSource"
+   ]
+  },
+  {
+   "id": "memoryFieldDeletePrimitive.memory-delete-dropped.1",
+   "constructor": "Taclet.memoryFieldDeletePrimitive",
+   "operator": "memory-delete-dropped",
+   "family": "pop-delete",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 67,
+   "old": "  | memoryFieldDeletePrimitive :\n      dl{ ⟨[ delete mv.pfld; ]⟩ ⇝ { memory := write(memory, mv.pfld, defVal(T)) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryFieldDeletePrimitive :\n      dl{ ⟨[ delete mv.pfld; ]⟩ ⇝ { memory := memory } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryFieldDeletePrimitive"
+   ]
+  },
+  {
+   "id": "memoryFieldDeleteReference.memory-delete-dropped.1",
+   "constructor": "Taclet.memoryFieldDeleteReference",
+   "operator": "memory-delete-dropped",
+   "family": "pop-delete",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 77,
+   "old": "  | memoryFieldDeleteReference :\n      dl{ ⟨[ delete mv.rfld; ]⟩ ⇝\n          { memory := write(addM(memory), mv.rfld, freshId(addM(memory))) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryFieldDeleteReference :\n      dl{ ⟨[ delete mv.rfld; ]⟩ ⇝\n          { memory := memory } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryFieldDeleteReference"
+   ]
+  },
+  {
+   "id": "memoryIndexDeletePrimitive.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexDeletePrimitive",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 93,
+   "old": "  | memoryIndexDeletePrimitive :\n      dl{ ⟨[ delete pmv[ie]; ]⟩ ⇝ { memory := write(memory, pmv[ie], defVal(T)) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexDeletePrimitive :\n      dl{ ⟨[ delete pmv[ie]; ]⟩ ⇝ { memory := write(memory, pmv[0], defVal(T)) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexDeletePrimitive"
+   ]
+  },
+  {
+   "id": "memoryIndexDeletePrimitive.memory-delete-dropped.1",
+   "constructor": "Taclet.memoryIndexDeletePrimitive",
+   "operator": "memory-delete-dropped",
+   "family": "pop-delete",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 67,
+   "old": "  | memoryIndexDeletePrimitive :\n      dl{ ⟨[ delete pmv[ie]; ]⟩ ⇝ { memory := write(memory, pmv[ie], defVal(T)) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexDeletePrimitive :\n      dl{ ⟨[ delete pmv[ie]; ]⟩ ⇝ { memory := memory } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexDeletePrimitive"
+   ]
+  },
+  {
+   "id": "memoryIndexDeleteReference.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexDeleteReference",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 109,
+   "old": "  | memoryIndexDeleteReference :\n      dl{ ⟨[ delete rmv[ie]; ]⟩ ⇝\n          { memory := write(addM(memory), rmv[ie], freshId(addM(memory))) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexDeleteReference :\n      dl{ ⟨[ delete rmv[ie]; ]⟩ ⇝\n          { memory := write(addM(memory), rmv[0], freshId(addM(memory))) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexDeleteReference"
+   ]
+  },
+  {
+   "id": "memoryIndexDeleteReference.memory-delete-dropped.1",
+   "constructor": "Taclet.memoryIndexDeleteReference",
+   "operator": "memory-delete-dropped",
+   "family": "pop-delete",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 77,
+   "old": "  | memoryIndexDeleteReference :\n      dl{ ⟨[ delete rmv[ie]; ]⟩ ⇝\n          { memory := write(addM(memory), rmv[ie], freshId(addM(memory))) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryIndexDeleteReference :\n      dl{ ⟨[ delete rmv[ie]; ]⟩ ⇝\n          { memory := memory } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexDeleteReference"
+   ]
+  },
+  {
+   "id": "memoryFieldDelete_unfold_leftFst.receiver-reevaluated.1",
+   "constructor": "Taclet.memoryFieldDelete_unfold_leftFst",
+   "operator": "receiver-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 95,
    "old": "  | memoryFieldDelete_unfold_leftFst :\n      dl{ ⟨[ delete nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; delete mv.fld; ]⟩ }\n",
-   "new": "  | memoryFieldDelete_unfold_leftFst :\n      dl{ ⟨[ delete nmp.fld; ]⟩ ⇝ ⟨[ delete nmp.fld; ]⟩ }\n",
+   "new": "  | memoryFieldDelete_unfold_leftFst :\n      dl{ ⟨[ delete nmp.fld; ]⟩ ⇝ ⟨[ T memory mv = nmp; delete nmp.fld; ]⟩ }\n",
    "affected": [
     "Taclet.memoryFieldDelete_unfold_leftFst"
    ]
   },
   {
-   "id": "memoryIndexDelete_unfold_leftFst.receiver-capture-bypassed.1",
+   "id": "memoryIndexDelete_unfold_leftFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryIndexDelete_unfold_leftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 70,
+   "offset_in_span": 94,
    "old": "  | memoryIndexDelete_unfold_leftFst :\n      dl{ ⟨[ delete nmp[e]; ]⟩ ⇝ ⟨[ T memory mv = nmp; delete mv[e]; ]⟩ }\n",
-   "new": "  | memoryIndexDelete_unfold_leftFst :\n      dl{ ⟨[ delete nmp[e]; ]⟩ ⇝ ⟨[ delete nmp[e]; ]⟩ }\n",
+   "new": "  | memoryIndexDelete_unfold_leftFst :\n      dl{ ⟨[ delete nmp[e]; ]⟩ ⇝ ⟨[ T memory mv = nmp; delete nmp[e]; ]⟩ }\n",
    "affected": [
     "Taclet.memoryIndexDelete_unfold_leftFst"
    ]
   },
   {
-   "id": "memoryStorageCopyUnfold.receiver-capture-bypassed.1",
+   "id": "memoryIndexDeleteNonSimpleIndexCapture.index-constant-zero.1",
+   "constructor": "Taclet.memoryIndexDeleteNonSimpleIndexCapture",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 101,
+   "old": "  | memoryIndexDeleteNonSimpleIndexCapture :\n      dl{ ⟨[ delete mv[nse]; ]⟩ ⇝ ⟨[ T ie = nse; delete mv[ie]; ]⟩ }\n",
+   "new": "  | memoryIndexDeleteNonSimpleIndexCapture :\n      dl{ ⟨[ delete mv[nse]; ]⟩ ⇝ ⟨[ T ie = nse; delete mv[0]; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryIndexDeleteNonSimpleIndexCapture"
+   ]
+  },
+  {
+   "id": "memoryStorageCopyUnfold.receiver-reevaluated.1",
    "constructor": "Taclet.memoryStorageCopyUnfold",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 56,
+   "offset_in_span": 81,
    "old": "  | memoryStorageCopyUnfold :\n      dl{ ⟨[ mv = nsp; ]⟩ ⇝ ⟨[ T storage sp = nsp; mv = sp; ]⟩ }\n",
-   "new": "  | memoryStorageCopyUnfold :\n      dl{ ⟨[ mv = nsp; ]⟩ ⇝ ⟨[ mv = nsp; ]⟩ }\n",
+   "new": "  | memoryStorageCopyUnfold :\n      dl{ ⟨[ mv = nsp; ]⟩ ⇝ ⟨[ T storage sp = nsp; mv = nsp; ]⟩ }\n",
    "affected": [
     "Taclet.memoryStorageCopyUnfold"
    ]
   },
   {
-   "id": "memoryToStorageField_unfold_leftFst.receiver-capture-bypassed.1",
+   "id": "memoryToStorageIndexArrayCopyRoot.index-constant-zero.1",
+   "constructor": "Taclet.memoryToStorageIndexArrayCopyRoot",
+   "operator": "index-constant-zero",
+   "family": "index-bounds",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 102,
+   "old": "  | memoryToStorageIndexArrayCopyRoot :\n      dl{ ⟨[ arr[ie] = mpath; ]⟩ ⇝ { storage := save(storage, arr[ie], copyMem(mtSt, memory, mpath)) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryToStorageIndexArrayCopyRoot :\n      dl{ ⟨[ arr[ie] = mpath; ]⟩ ⇝ { storage := save(storage, arr[0], copyMem(mtSt, memory, mpath)) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryToStorageIndexArrayCopyRoot"
+   ]
+  },
+  {
+   "id": "memoryToStorageField_unfold_leftFst.receiver-reevaluated.1",
    "constructor": "Taclet.memoryToStorageField_unfold_leftFst",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 75,
+   "offset_in_span": 100,
    "old": "  | memoryToStorageField_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = mpath; ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.fld = mpath; ]⟩ }\n",
-   "new": "  | memoryToStorageField_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = mpath; ]⟩ ⇝ ⟨[ nsp.fld = mpath; ]⟩ }\n",
+   "new": "  | memoryToStorageField_unfold_leftFst :\n      dl{ ⟨[ nsp.fld = mpath; ]⟩ ⇝ ⟨[ T storage sp = nsp; nsp.fld = mpath; ]⟩ }\n",
    "affected": [
     "Taclet.memoryToStorageField_unfold_leftFst"
    ]
   },
   {
-   "id": "memoryToStorageIndexCaptureAllComplexRecv.receiver-capture-bypassed.1",
+   "id": "memoryToStorageIndexCaptureAllComplexRecv.receiver-reevaluated.1",
    "constructor": "Taclet.memoryToStorageIndexCaptureAllComplexRecv",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 80,
+   "offset_in_span": 105,
    "old": "  | memoryToStorageIndexCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e] = mpath; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; sp[ie] = mpath; ]⟩ }\n",
-   "new": "  | memoryToStorageIndexCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e] = mpath; ]⟩ ⇝ ⟨[ nsp[e] = mpath; ]⟩ }\n",
+   "new": "  | memoryToStorageIndexCaptureAllComplexRecv :\n      dl{ ⟨[ nsp[e] = mpath; ]⟩ ⇝ ⟨[ T storage sp = nsp; T ie = e; nsp[ie] = mpath; ]⟩ }\n",
    "affected": [
     "Taclet.memoryToStorageIndexCaptureAllComplexRecv"
    ]
@@ -3408,9 +3959,9 @@
    ]
   },
   {
-   "id": "assertSimple.guard-check-true-to-false.1",
+   "id": "assertSimple.assert-check-true-to-false.1",
    "constructor": "Taclet.assertSimple",
-   "operator": "guard-check-true-to-false",
+   "operator": "assert-check-true-to-false",
    "family": "guard-polarity",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 90,
@@ -3460,75 +4011,10 @@
    ]
   },
   {
-   "id": "whileInvariantBox.guard-FALSE-to-TRUE.1",
+   "id": "whileInvariantBox.break-negation-dropped.1",
    "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-FALSE-to-TRUE",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 425,
-   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = TRUE ⟹ ⟨[ ]⟩)) }\n",
-   "affected": [
-    "Taclet.whileInvariantBox"
-   ]
-  },
-  {
-   "id": "whileInvariantBox.guard-TRUE-to-FALSE.1",
-   "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-TRUE-to-FALSE",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 228,
-   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = FALSE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "affected": [
-    "Taclet.whileInvariantBox"
-   ]
-  },
-  {
-   "id": "whileInvariantBox.guard-TRUE-to-FALSE.2",
-   "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-TRUE-to-FALSE",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 304,
-   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = FALSE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "affected": [
-    "Taclet.whileInvariantBox"
-   ]
-  },
-  {
-   "id": "whileInvariantBox.guard-TRUE-to-FALSE.3",
-   "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-TRUE-to-FALSE",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 349,
-   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = FALSE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "affected": [
-    "Taclet.whileInvariantBox"
-   ]
-  },
-  {
-   "id": "whileInvariantBox.guard-TRUE-to-FALSE.4",
-   "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-TRUE-to-FALSE",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 383,
-   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = FALSE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "affected": [
-    "Taclet.whileInvariantBox"
-   ]
-  },
-  {
-   "id": "whileInvariantBox.guard-broke-negation-dropped.1",
-   "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-broke-negation-dropped",
-   "family": "guard-polarity",
+   "operator": "break-negation-dropped",
+   "family": "other:loop-invariant",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 237,
    "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
@@ -3538,10 +4024,10 @@
    ]
   },
   {
-   "id": "whileInvariantBox.guard-broke-negation-dropped.2",
+   "id": "whileInvariantBox.break-negation-dropped.2",
    "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-broke-negation-dropped",
-   "family": "guard-polarity",
+   "operator": "break-negation-dropped",
+   "family": "other:loop-invariant",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 313,
    "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
@@ -3551,10 +4037,10 @@
    ]
   },
   {
-   "id": "whileInvariantBox.guard-broke-negation-dropped.3",
+   "id": "whileInvariantBox.break-negation-dropped.3",
    "constructor": "Taclet.whileInvariantBox",
-   "operator": "guard-broke-negation-dropped",
-   "family": "guard-polarity",
+   "operator": "break-negation-dropped",
+   "family": "other:loop-invariant",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 370,
    "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
@@ -3564,25 +4050,77 @@
    ]
   },
   {
-   "id": "whileInvariantDiamond.guard-FALSE-to-TRUE.1",
-   "constructor": "Taclet.whileInvariantDiamond",
-   "operator": "guard-FALSE-to-TRUE",
-   "family": "guard-polarity",
+   "id": "whileInvariantBox.invariant-TRUE-to-FALSE.1",
+   "constructor": "Taclet.whileInvariantBox",
+   "operator": "invariant-TRUE-to-FALSE",
+   "family": "other:loop-invariant",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 517,
-   "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = TRUE ⟹ ⟨[ ]⟩)) }\n",
+   "offset_in_span": 224,
+   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = FALSE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "affected": [
-    "Taclet.whileInvariantDiamond"
+    "Taclet.whileInvariantBox"
    ]
   },
   {
-   "id": "whileInvariantDiamond.guard-TRUE-to-FALSE.1",
-   "constructor": "Taclet.whileInvariantDiamond",
-   "operator": "guard-TRUE-to-FALSE",
+   "id": "whileInvariantBox.invariant-TRUE-to-FALSE.2",
+   "constructor": "Taclet.whileInvariantBox",
+   "operator": "invariant-TRUE-to-FALSE",
+   "family": "other:loop-invariant",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 300,
+   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = FALSE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "affected": [
+    "Taclet.whileInvariantBox"
+   ]
+  },
+  {
+   "id": "whileInvariantBox.invariant-TRUE-to-FALSE.3",
+   "constructor": "Taclet.whileInvariantBox",
+   "operator": "invariant-TRUE-to-FALSE",
+   "family": "other:loop-invariant",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 379,
+   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = FALSE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "affected": [
+    "Taclet.whileInvariantBox"
+   ]
+  },
+  {
+   "id": "whileInvariantBox.loop-guard-FALSE-to-TRUE.1",
+   "constructor": "Taclet.whileInvariantBox",
+   "operator": "loop-guard-FALSE-to-TRUE",
    "family": "guard-polarity",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 294,
+   "offset_in_span": 423,
+   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = TRUE ⟹ ⟨[ ]⟩)) }\n",
+   "affected": [
+    "Taclet.whileInvariantBox"
+   ]
+  },
+  {
+   "id": "whileInvariantBox.loop-guard-TRUE-to-FALSE.1",
+   "constructor": "Taclet.whileInvariantBox",
+   "operator": "loop-guard-TRUE-to-FALSE",
+   "family": "guard-polarity",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 347,
+   "old": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "new": "  | whileInvariantBox {cond inv : Val C Γ .bool}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ [ /// @custom:key invariant inv\n          while (cond) body; ] ⇝\n        \"invariant initially valid\": inv = TRUE ∧ ¬broke ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }\n          (b = FALSE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "affected": [
+    "Taclet.whileInvariantBox"
+   ]
+  },
+  {
+   "id": "whileInvariantDiamond.invariant-TRUE-to-FALSE.1",
+   "constructor": "Taclet.whileInvariantDiamond",
+   "operator": "invariant-TRUE-to-FALSE",
+   "family": "other:loop-invariant",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 290,
    "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = FALSE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "affected": [
@@ -3590,12 +4128,12 @@
    ]
   },
   {
-   "id": "whileInvariantDiamond.guard-TRUE-to-FALSE.2",
+   "id": "whileInvariantDiamond.invariant-TRUE-to-FALSE.2",
    "constructor": "Taclet.whileInvariantDiamond",
-   "operator": "guard-TRUE-to-FALSE",
-   "family": "guard-polarity",
+   "operator": "invariant-TRUE-to-FALSE",
+   "family": "other:loop-invariant",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 361,
+   "offset_in_span": 357,
    "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = FALSE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "affected": [
@@ -3603,25 +4141,12 @@
    ]
   },
   {
-   "id": "whileInvariantDiamond.guard-TRUE-to-FALSE.3",
+   "id": "whileInvariantDiamond.invariant-TRUE-to-FALSE.3",
    "constructor": "Taclet.whileInvariantDiamond",
-   "operator": "guard-TRUE-to-FALSE",
-   "family": "guard-polarity",
+   "operator": "invariant-TRUE-to-FALSE",
+   "family": "other:loop-invariant",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 414,
-   "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = FALSE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
-   "affected": [
-    "Taclet.whileInvariantDiamond"
-   ]
-  },
-  {
-   "id": "whileInvariantDiamond.guard-TRUE-to-FALSE.4",
-   "constructor": "Taclet.whileInvariantDiamond",
-   "operator": "guard-TRUE-to-FALSE",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 439,
+   "offset_in_span": 435,
    "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = FALSE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "affected": [
@@ -3629,12 +4154,38 @@
    ]
   },
   {
-   "id": "whileInvariantDiamond.guard-TRUE-to-FALSE.5",
+   "id": "whileInvariantDiamond.loop-guard-FALSE-to-TRUE.1",
    "constructor": "Taclet.whileInvariantDiamond",
-   "operator": "guard-TRUE-to-FALSE",
+   "operator": "loop-guard-FALSE-to-TRUE",
    "family": "guard-polarity",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 465,
+   "offset_in_span": 515,
+   "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = TRUE ⟹ ⟨[ ]⟩)) }\n",
+   "affected": [
+    "Taclet.whileInvariantDiamond"
+   ]
+  },
+  {
+   "id": "whileInvariantDiamond.loop-guard-TRUE-to-FALSE.1",
+   "constructor": "Taclet.whileInvariantDiamond",
+   "operator": "loop-guard-TRUE-to-FALSE",
+   "family": "guard-polarity",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 412,
+   "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = FALSE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
+   "affected": [
+    "Taclet.whileInvariantDiamond"
+   ]
+  },
+  {
+   "id": "whileInvariantDiamond.loop-guard-TRUE-to-FALSE.2",
+   "constructor": "Taclet.whileInvariantDiamond",
+   "operator": "loop-guard-TRUE-to-FALSE",
+   "family": "guard-polarity",
+   "target": "Solidity/Calculus/Rules.lean",
+   "offset_in_span": 463,
    "old": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "new": "  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}\n      (hf : Prog.frame body = some (xs, hv) := by side_cond) :\n      dl{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases dec\n          while (cond) body; ⟩ ⇝\n        \"invariant initially valid\": inv = TRUE ;\n        \"invariant preserved and used\": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }\n          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = FALSE → 0 <= dec ∧ dec < variant)) ;\n            b = FALSE ⟹ ⟨[ ]⟩)) }\n",
    "affected": [
@@ -3658,7 +4209,7 @@
    "id": "pushFixedCopySave.push-slot-is-last-old.1",
    "constructor": "LeanTaclet.pushFixedCopySave",
    "operator": "push-slot-is-last-old",
-   "family": "index-bounds",
+   "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 217,
    "old": "  | pushFixedCopySave {Γ : Ctx} {E : Ty} {sp : SPath C Γ (.array E)} {src : Src C Γ E}\n      (hshape : src.isFixedCopy = true) :\n      dl[LeanTaclet C k]{ ⟨[ sp.push(src); ]⟩ ⇝\n        { storage := save(save(storage, sp[sp.length], src), sp.length,\n            sp.length + 1) } ⟨[ ]⟩ }\n",
@@ -3668,40 +4219,40 @@
    ]
   },
   {
-   "id": "pushMemorySourceCapture.receiver-capture-bypassed.1",
+   "id": "pushMemorySourceCapture.receiver-reevaluated.1",
    "constructor": "LeanTaclet.pushMemorySourceCapture",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 76,
+   "offset_in_span": 108,
    "old": "  | pushMemorySourceCapture :\n      dl[LeanTaclet C k]{ ⟨[ sp.push(nmp); ]⟩ ⇝\n        ⟨[ T memory mv = nmp; sp.push(mv); ]⟩ }\n",
-   "new": "  | pushMemorySourceCapture :\n      dl[LeanTaclet C k]{ ⟨[ sp.push(nmp); ]⟩ ⇝ ⟨[ sp.push(nmp); ]⟩ }\n",
+   "new": "  | pushMemorySourceCapture :\n      dl[LeanTaclet C k]{ ⟨[ sp.push(nmp); ]⟩ ⇝\n        ⟨[ T memory mv = nmp; sp.push(nmp); ]⟩ }\n",
    "affected": [
     "LeanTaclet.pushMemorySourceCapture"
    ]
   },
   {
-   "id": "pushCompoundUnfoldReceiver.receiver-capture-bypassed.1",
+   "id": "pushCompoundUnfoldReceiver.receiver-reevaluated.1",
    "constructor": "LeanTaclet.pushCompoundUnfoldReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 83,
+   "offset_in_span": 116,
    "old": "  | pushCompoundUnfoldReceiver :\n      dl[LeanTaclet C k]{ ⟨[ nsp.push() ⊕= se; ]⟩ ⇝\n        ⟨[ T storage sp = nsp; sp.push() ⊕= se; ]⟩ }\n",
-   "new": "  | pushCompoundUnfoldReceiver :\n      dl[LeanTaclet C k]{ ⟨[ nsp.push() ⊕= se; ]⟩ ⇝ ⟨[ nsp.push() ⊕= se; ]⟩ }\n",
+   "new": "  | pushCompoundUnfoldReceiver :\n      dl[LeanTaclet C k]{ ⟨[ nsp.push() ⊕= se; ]⟩ ⇝\n        ⟨[ T storage sp = nsp; nsp.push() ⊕= se; ]⟩ }\n",
    "affected": [
     "LeanTaclet.pushCompoundUnfoldReceiver"
    ]
   },
   {
-   "id": "pushIncrementUnfoldReceiver.receiver-capture-bypassed.1",
+   "id": "pushIncrementUnfoldReceiver.receiver-reevaluated.1",
    "constructor": "LeanTaclet.pushIncrementUnfoldReceiver",
-   "operator": "receiver-capture-bypassed",
+   "operator": "receiver-reevaluated",
    "family": "alias-capture-once",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 82,
+   "offset_in_span": 115,
    "old": "  | pushIncrementUnfoldReceiver :\n      dl[LeanTaclet C k]{ ⟨[ (nsp.push())⊕⊕; ]⟩ ⇝\n        ⟨[ T storage sp = nsp; (sp.push())⊕⊕; ]⟩ }\n",
-   "new": "  | pushIncrementUnfoldReceiver :\n      dl[LeanTaclet C k]{ ⟨[ (nsp.push())⊕⊕; ]⟩ ⇝ ⟨[ (nsp.push())⊕⊕; ]⟩ }\n",
+   "new": "  | pushIncrementUnfoldReceiver :\n      dl[LeanTaclet C k]{ ⟨[ (nsp.push())⊕⊕; ]⟩ ⇝\n        ⟨[ T storage sp = nsp; (nsp.push())⊕⊕; ]⟩ }\n",
    "affected": [
     "LeanTaclet.pushIncrementUnfoldReceiver"
    ]
@@ -3736,7 +4287,7 @@
    "id": "assumeFalse.close-true-to-false.1",
    "constructor": "LeanTaclet.assumeFalse",
    "operator": "close-true-to-false",
-   "family": "rollback-payment",
+   "family": "other:closing",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 65,
    "old": "  | assumeFalse :\n      dl[LeanTaclet C k]{ ⟨[ assume(false); ]⟩ ⇝ true }\n",
@@ -3746,12 +4297,12 @@
    ]
   },
   {
-   "id": "loopExit.guard-FALSE-to-TRUE.1",
+   "id": "loopExit.loop-guard-FALSE-to-TRUE.1",
    "constructor": "LeanTaclet.loopExit",
-   "operator": "guard-FALSE-to-TRUE",
+   "operator": "loop-guard-FALSE-to-TRUE",
    "family": "guard-polarity",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 166,
+   "offset_in_span": 164,
    "old": "  | loopExit {cond : Val C Γ .bool} :\n      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0\n          while (cond) body; ]⟩ ⇝\n        \"loop exited\": { b := cond } (b = FALSE) ⟹ ⟨[ ]⟩ ;\n        \"unwound to the end\": { b := cond } (b = FALSE) }\n",
    "new": "  | loopExit {cond : Val C Γ .bool} :\n      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0\n          while (cond) body; ]⟩ ⇝\n        \"loop exited\": { b := cond } (b = TRUE) ⟹ ⟨[ ]⟩ ;\n        \"unwound to the end\": { b := cond } (b = FALSE) }\n",
    "affected": [
@@ -3759,12 +4310,12 @@
    ]
   },
   {
-   "id": "loopExit.guard-FALSE-to-TRUE.2",
+   "id": "loopExit.loop-guard-FALSE-to-TRUE.2",
    "constructor": "LeanTaclet.loopExit",
-   "operator": "guard-FALSE-to-TRUE",
+   "operator": "loop-guard-FALSE-to-TRUE",
    "family": "guard-polarity",
    "target": "Solidity/Calculus/Rules.lean",
-   "offset_in_span": 232,
+   "offset_in_span": 230,
    "old": "  | loopExit {cond : Val C Γ .bool} :\n      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0\n          while (cond) body; ]⟩ ⇝\n        \"loop exited\": { b := cond } (b = FALSE) ⟹ ⟨[ ]⟩ ;\n        \"unwound to the end\": { b := cond } (b = FALSE) }\n",
    "new": "  | loopExit {cond : Val C Γ .bool} :\n      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0\n          while (cond) body; ]⟩ ⇝\n        \"loop exited\": { b := cond } (b = FALSE) ⟹ ⟨[ ]⟩ ;\n        \"unwound to the end\": { b := cond } (b = TRUE) }\n",
    "affected": [
@@ -3775,7 +4326,7 @@
    "id": "whileClose.close-false-to-true.1",
    "constructor": "LeanTaclet.whileClose",
    "operator": "close-false-to-true",
-   "family": "rollback-payment",
+   "family": "other:closing",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 183,
    "old": "  | whileClose {cond : Val C Γ .bool}\n      (hf : Prog.frame body = none := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv\n          while (cond) body; ]⟩ ⇝ false }\n",
@@ -3788,7 +4339,7 @@
    "id": "whileNoVariantDiamond.close-false-to-true.1",
    "constructor": "LeanTaclet.whileNoVariantDiamond",
    "operator": "close-false-to-true",
-   "family": "rollback-payment",
+   "family": "other:closing",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 279,
    "old": "  | whileNoVariantDiamond {cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)}\n      (hf : (Prog.frame body).isSome = true := by side_cond)\n      (hd : dec.isNone = true := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv\n          while (cond) body; ⟩ ⇝ false }\n",
@@ -3962,18 +4513,6 @@
    ]
   },
   {
-   "id": "pilot.control.revert-diamond-true",
-   "constructor": "Taclet.revertDiamond",
-   "operator": "pilot-hand-selected",
-   "family": "rollback-payment",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | revertDiamond :\n      dl{ ⟨ revert(); ⟩ ⇝ false }",
-   "new": "  | revertDiamond :\n      dl{ ⟨ revert(); ⟩ ⇝ true }",
-   "affected": [
-    "Taclet.revertDiamond"
-   ]
-  },
-  {
    "id": "pilot.bounds.array-read-skipped",
    "constructor": "Taclet.storageIndexReadArrayFind",
    "operator": "pilot-hand-selected",
@@ -3983,18 +4522,6 @@
    "new": "  | storageIndexReadArrayFind :\n      dl{ ⟨[ v = arr[ie]; ]⟩ ⇝ { v := v } ⟨[ ]⟩ }",
    "affected": [
     "Taclet.storageIndexReadArrayFind"
-   ]
-  },
-  {
-   "id": "pilot.callback.failed-send-flag-true",
-   "constructor": "Taclet.sendNoCallbackBox",
-   "operator": "pilot-hand-selected",
-   "family": "callback-frames",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] ⇝\n          \"send succeeded\":\n            { pay(sadr, se) ‖ pv := true }\n            ⟨[ ]⟩\n        ; \"send failed\": { pv := false } ⟨[ ]⟩ }\n",
-   "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] ⇝\n          \"send succeeded\":\n            { pay(sadr, se) ‖ pv := true }\n            ⟨[ ]⟩\n        ; \"send failed\": { pv := true } ⟨[ ]⟩ }\n",
-   "affected": [
-    "Taclet.sendNoCallbackBox"
    ]
   },
   {
@@ -4022,30 +4549,6 @@
    ]
   },
   {
-   "id": "pilot.overflow.increment-erased-max",
-   "constructor": "Taclet.localIncrement",
-   "operator": "pilot-hand-selected",
-   "family": "overflow",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | localIncrement :\n      dl{ ⟨[ v⊕⊕; ]⟩ ⇝ { v := v ± 1 } ⟨[ ]⟩ }",
-   "new": "  | localIncrement :\n      dl{ ⟨[ v⊕⊕; ]⟩ ⇝ { v := v } ⟨[ ]⟩ }",
-   "affected": [
-    "Taclet.localIncrement"
-   ]
-  },
-  {
-   "id": "pilot.payment.success-flag-false",
-   "constructor": "Taclet.sendNoCallbackBox",
-   "operator": "pilot-hand-selected",
-   "family": "rollback-payment",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] ⇝\n          \"send succeeded\":\n            { pay(sadr, se) ‖ pv := true }\n            ⟨[ ]⟩\n        ; \"send failed\": { pv := false } ⟨[ ]⟩ }\n",
-   "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] ⇝\n          \"send succeeded\":\n            { pay(sadr, se) ‖ pv := false }\n            ⟨[ ]⟩\n        ; \"send failed\": { pv := false } ⟨[ ]⟩ }\n",
-   "affected": [
-    "Taclet.sendNoCallbackBox"
-   ]
-  },
-  {
    "id": "pilot.pop.empty-skipped",
    "constructor": "Taclet.storagePopSave",
    "operator": "pilot-hand-selected",
@@ -4055,30 +4558,6 @@
    "new": "  | storagePopSave :\n      dl{ ⟨[ darr.pop(); ]⟩ ⇝ { storage := storage } ⟨[ ]⟩ }",
    "affected": [
     "Taclet.storagePopSave"
-   ]
-  },
-  {
-   "id": "pilot.delete.array-index-skipped",
-   "constructor": "Taclet.storageIndexArrayDelete",
-   "operator": "pilot-hand-selected",
-   "family": "pop-delete",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | storageIndexArrayDelete :\n      dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := delAt(storage, arr[ie]) } ⟨[ ]⟩ }",
-   "new": "  | storageIndexArrayDelete :\n      dl{ ⟨[ delete arr[ie]; ]⟩ ⇝ { storage := storage } ⟨[ ]⟩ }",
-   "affected": [
-    "Taclet.storageIndexArrayDelete"
-   ]
-  },
-  {
-   "id": "pilot.push.reference-tail-cleared",
-   "constructor": "Tms.STerm.pushSlot",
-   "operator": "pilot-hand-selected",
-   "family": "push-tail-length",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": ".app2 .pushSlot s q",
-   "new": ".app2 .delAt (.app2 .pushSlot s q) (.app1 .next q)",
-   "affected": [
-    "*"
    ]
   },
   {
@@ -4094,30 +4573,6 @@
    ]
   },
   {
-   "id": "pilot.guard.require-success-false",
-   "constructor": "Taclet.requireSimple",
-   "operator": "pilot-hand-selected",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | requireSimple :\n      dl{ ⟨[ require(se); ]⟩ ⇝ \"Holds\": se = true",
-   "new": "  | requireSimple :\n      dl{ ⟨[ require(se); ]⟩ ⇝ \"Holds\": se = false",
-   "affected": [
-    "Taclet.requireSimple"
-   ]
-  },
-  {
-   "id": "pilot.guard.require-revert-true",
-   "constructor": "Taclet.requireSimple",
-   "operator": "pilot-hand-selected",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | requireSimple :\n      dl{ ⟨[ require(se); ]⟩ ⇝ \"Holds\": se = true ⟹ ⟨[ ]⟩ ; \"Reverts\": se = false",
-   "new": "  | requireSimple :\n      dl{ ⟨[ require(se); ]⟩ ⇝ \"Holds\": se = true ⟹ ⟨[ ]⟩ ; \"Reverts\": se = true",
-   "affected": [
-    "Taclet.requireSimple"
-   ]
-  },
-  {
    "id": "pilot.control.guard-label-equivalent",
    "constructor": "Taclet.requireSimple",
    "operator": "pilot-hand-selected",
@@ -4127,19 +4582,8 @@
    "new": "  | requireSimple :\n      dl{ ⟨[ require(se); ]⟩ ⇝ \"holds\"",
    "affected": [
     "Taclet.requireSimple"
-   ]
-  },
-  {
-   "id": "pilot.callback-table.failed-send-flag-true",
-   "constructor": "CallbackTaclet.sendWithCallbackBox",
-   "operator": "pilot-hand-selected",
-   "family": "callback-frames",
-   "target": "Solidity/Calculus/CallbackRules.lean",
-   "old": "        ; \"send failed\": { pv := false } ⟨[ ]⟩ }\n  | sendWithCallbackDiamond",
-   "new": "        ; \"send failed\": { pv := true } ⟨[ ]⟩ }\n  | sendWithCallbackDiamond",
-   "affected": [
-    "CallbackTaclet.sendWithCallbackBox"
-   ]
+   ],
+   "expect": "equivalent-certified"
   },
   {
    "id": "control.proof-invalid-syntax",
@@ -4153,20 +4597,6 @@
     "Taclet.requireSimple"
    ],
    "expect": "invalid-compilation"
-  },
-  {
-   "id": "control.proof-label-renamed",
-   "constructor": "Taclet.requireSimple",
-   "operator": "control",
-   "family": "guard-polarity",
-   "target": "Solidity/Calculus/Rules.lean",
-   "old": "  | requireSimple :\n      dl{ ⟨[ require(se); ]⟩ ⇝ \"Holds\": se = true ⟹ ⟨[ ]⟩ ; \"Reverts\": se = false ⟹ ⟨[ revert(); ]⟩ }\n",
-   "new": "  | requireSimple :\n      dl{ ⟨[ require(se); ]⟩ ⇝ \"holds\": se = true ⟹ ⟨[ ]⟩ ; \"Reverts\": se = false ⟹ ⟨[ revert(); ]⟩ }\n",
-   "affected": [
-    "Taclet.requireSimple"
-   ],
-   "expect": "recorded",
-   "note": "branch labels: detected if toStep compares them, equivalent-certified otherwise"
   }
  ],
  "state": "frozen",
@@ -4196,13 +4626,15 @@
  },
  "controls": [
   "control.proof-invalid-syntax",
-  "control.proof-label-renamed",
-  "control.cross-witness-survivor"
+  "control.cross-witness-survivor",
+  "control.guard-label-equivalent",
+  "control.revert-diamond-true"
  ],
  "semantic_cases": [
   {
    "id": "alias.receiver-getter-twice",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "alias-capture-once",
    "constructor": "Taclet.storagePush_unfold_leftCallReceiver",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4217,6 +4649,7 @@
   {
    "id": "control.revert-diamond-true",
    "kind": "known-kill",
+   "pilot_kind": "known-kill",
    "family": "rollback-payment",
    "constructor": "Taclet.revertDiamond",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4226,11 +4659,13 @@
    "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
    "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
    "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
-   "from_pilot": "alias-pilot.json"
+   "from_pilot": "alias-pilot.json",
+   "census_id": "revertDiamond.close-false-to-true.1"
   },
   {
    "id": "bounds.array-read-skipped",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "index-bounds",
    "constructor": "Taclet.storageIndexReadArrayFind",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4245,6 +4680,7 @@
   {
    "id": "callback.failed-send-flag-true",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "callback-frames",
    "constructor": "Taclet.sendNoCallbackBox",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4254,11 +4690,13 @@
    "oracle_sha256": "de340249b80f01eeb91d0b53e0c2177004207c1f9ab9bef546754f3b79f86591",
    "witness": "tests/h28-sol/mutation-testing/oracles/CallbackFailureKill.lean",
    "witness_sha256": "c0154e2afaffd7d8b78a5dd5e0e8042e6d256844a9e47239d8cb4a92dea5e756",
-   "from_pilot": "callback-pilot.json"
+   "from_pilot": "callback-pilot.json",
+   "census_id": "sendNoCallbackBox.send-flag-false-to-true.1"
   },
   {
    "id": "division.div-sub-helper-min-and-zero",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "division-minimum",
    "constructor": "Tms.Term.binopC",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4273,6 +4711,7 @@
   {
    "id": "overflow.compound-sub-helper-max",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "overflow",
    "constructor": "Tms.Term.binopC",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4286,7 +4725,8 @@
   },
   {
    "id": "overflow.increment-erased-max",
-   "kind": "negative-control",
+   "kind": "mutant",
+   "pilot_kind": "negative-control",
    "family": "overflow",
    "constructor": "Taclet.localIncrement",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4296,11 +4736,13 @@
    "oracle_sha256": "4a309b8fd210e39138400b05d38da2d9f1723eb9682dbf5f8237fc47f05990aa",
    "witness": "tests/h28-sol/mutation-testing/oracles/OverflowIncSkipKill.lean",
    "witness_sha256": "1c0e362275bdf2c2e48eed44fc9f2ad9f06c1b1657743b9e656937fec39fd730",
-   "from_pilot": "overflow-pilot.json"
+   "from_pilot": "overflow-pilot.json",
+   "census_id": "localIncrement.increment-step-dropped.1"
   },
   {
    "id": "payment.success-flag-false",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "rollback-payment",
    "constructor": "Taclet.sendNoCallbackBox",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4310,11 +4752,13 @@
    "oracle_sha256": "171c3b08a4286826f67e1eefada3b0800d1e560efc5cd9c7701c0a96c235cbc4",
    "witness": "tests/h28-sol/mutation-testing/oracles/PaymentFalseKill.lean",
    "witness_sha256": "fbb4ebd568b499a5fe08314307700c3229380915c0a661c0e64939276e9b797f",
-   "from_pilot": "payment-pilot.json"
+   "from_pilot": "payment-pilot.json",
+   "census_id": "sendNoCallbackBox.send-flag-true-to-false.1"
   },
   {
    "id": "pop.empty-skipped",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "pop-delete",
    "constructor": "Taclet.storagePopSave",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4328,7 +4772,8 @@
   },
   {
    "id": "delete.array-index-skipped",
-   "kind": "negative-control",
+   "kind": "mutant",
+   "pilot_kind": "negative-control",
    "family": "pop-delete",
    "constructor": "Taclet.storageIndexArrayDelete",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4338,11 +4783,13 @@
    "oracle_sha256": "5bedd7f6795f26c1f6537ad7b1e61b42191bbd1e7e16531dfe20d08c45735b55",
    "witness": "tests/h28-sol/mutation-testing/oracles/DeleteSkippedKill.lean",
    "witness_sha256": "ccca00f0e1b59bf171ef78beb5f481f912a2dc67b3314afde971256adac0ca7a",
-   "from_pilot": "pop-delete-pilot.json"
+   "from_pilot": "pop-delete-pilot.json",
+   "census_id": "storageIndexArrayDelete.delete-dropped.1"
   },
   {
    "id": "push.reference-tail-cleared",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "push-tail-length",
    "constructor": "Tms.STerm.pushSlot",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4352,11 +4799,13 @@
    "oracle_sha256": "f8884d84ac056c19f493d1cc5f90dc345aa12bd1c2fb1534c35a5bb47be5349c",
    "witness": "tests/h28-sol/mutation-testing/oracles/PushTailClearKill.lean",
    "witness_sha256": "b813788f044c3e7b7fb86b51d14884e44ca5ac12df8bd1ba7905fc3421f59395",
-   "from_pilot": "push-pilot.json"
+   "from_pilot": "push-pilot.json",
+   "census_id": "pushSlot.helper-push-slot-cleared.1"
   },
   {
    "id": "push.compound-updates-swapped",
-   "kind": "negative-control",
+   "kind": "mutant",
+   "pilot_kind": "negative-control",
    "family": "push-tail-length",
    "constructor": "Taclet.storagePushAddAssign",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4371,6 +4820,7 @@
   {
    "id": "guard.require-success-false",
    "kind": "mutant",
+   "pilot_kind": "mutant",
    "family": "guard-polarity",
    "constructor": "Taclet.requireSimple",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4380,11 +4830,13 @@
    "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
    "witness": "tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.lean",
    "witness_sha256": "521891721ea8598866a1932044ec7e7ff41809197aa0585f30bd80cb9f840d40",
-   "from_pilot": "runner-pilot.json"
+   "from_pilot": "runner-pilot.json",
+   "census_id": "requireSimple.guard-true-to-false.1"
   },
   {
    "id": "guard.require-revert-true",
-   "kind": "negative-control",
+   "kind": "mutant",
+   "pilot_kind": "negative-control",
    "family": "guard-polarity",
    "constructor": "Taclet.requireSimple",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4394,11 +4846,13 @@
    "oracle_sha256": "7bb5e129a4f46e189a1f0dfc4daf984a356cdb5caff0adafd9b0cec4cd5c593e",
    "witness": "tests/h28-sol/mutation-testing/oracles/GuardFalsePolarityKill.lean",
    "witness_sha256": "b16424fb02d3fc64319689a214a535fed821729d1194b185d5e6c996f0760f69",
-   "from_pilot": "runner-pilot.json"
+   "from_pilot": "runner-pilot.json",
+   "census_id": "requireSimple.guard-false-to-true.1"
   },
   {
    "id": "control.guard-label-equivalent",
    "kind": "equivalent-control",
+   "pilot_kind": "equivalent-control",
    "family": "guard-polarity",
    "constructor": "Taclet.requireSimple",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4423,7 +4877,12 @@
    "witness": "tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean",
    "witness_sha256": "7f060e567140215088e5f4a52d2cdab0b2848ea1236f6df9c722b8927ca5c2ac",
    "from_pilot": null,
-   "note": "separate callback table (H28 queue item 4)"
+   "note": "separate callback table (H28 queue item 4)",
+   "require": [
+    "checked_kill",
+    "checked_callback_frames"
+   ],
+   "census_id": "sendWithCallbackBox.send-flag-false-to-true.1"
   },
   {
    "id": "census.ifElseSplit.guard-true-to-false.1",
@@ -4501,7 +4960,7 @@
    "census_id": "storageRootDelete.delete-dropped.1"
   },
   {
-   "id": "census.storageRootIncrement.overflow-step-dropped.1",
+   "id": "census.storageRootIncrement.increment-step-dropped.1",
    "kind": "mutant",
    "family": "overflow",
    "constructor": "Taclet.storageRootIncrement",
@@ -4513,11 +4972,12 @@
    "witness": "tests/h28-sol/mutation-testing/oracles/RootIncSkipKill.lean",
    "witness_sha256": "fb547a2cc7b53ea310dcea33ca3d368eca1771c034413df31d3d480eacff2281",
    "from_pilot": null,
-   "census_id": "storageRootIncrement.overflow-step-dropped.1"
+   "census_id": "storageRootIncrement.increment-step-dropped.1"
   },
   {
    "id": "control.cross-witness-survivor",
    "kind": "runner-survivor-control",
+   "pilot_kind": "mutant",
    "family": "guard-polarity",
    "constructor": "Taclet.requireSimple",
    "target": "Solidity/Calculus/Rules.lean",
@@ -4528,7 +4988,7 @@
    "witness": "tests/h28-sol/mutation-testing/oracles/PopSkippedKill.lean",
    "witness_sha256": "cac41e9773a515b9d58a98948a9176f5da7c6fbc0381e0538824a3164806e31d",
    "from_pilot": "runner-pilot.json",
-   "expect": "surviving",
+   "expect": "link-mismatch",
    "note": "guard mutant checked with the pop witness: its source link names popSave, so no kill"
   }
  ]

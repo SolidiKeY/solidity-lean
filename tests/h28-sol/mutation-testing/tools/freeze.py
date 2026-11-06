@@ -28,7 +28,10 @@ def main():
                 continue
             seen.add(c["id"])
             witness = c.get("witness") or c.get("equivalence")
-            semantic.append({"id": c["id"], "kind": c["kind"], "family": c["family"],
+            # The pilots' "negative-control" label meant a second mutant of the
+            # family (e.g. the erased increment), scored like any other.
+            semantic.append({"id": c["id"], "kind": "mutant" if c["kind"] == "negative-control" else c["kind"],
+                             "pilot_kind": c["kind"], "family": c["family"],
                              "constructor": c.get("constructor_id"), "target": c["target"],
                              "old": c["old"], "new": c["new"], "oracle": c["oracle"],
                              "oracle_sha256": sha(c["oracle"]), "witness": witness,
@@ -43,7 +46,8 @@ def main():
                      "oracle_sha256": sha("tests/h28-sol/mutation-testing/oracles/CallbackTacletBaseline.lean"),
                      "witness": "tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean",
                      "witness_sha256": sha("tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean"),
-                     "from_pilot": None, "note": "separate callback table (H28 queue item 4)"})
+                     "from_pilot": None, "note": "separate callback table (H28 queue item 4)",
+                     "require": ["checked_kill", "checked_callback_frames"]})
     # Census mutants with their own witnesses (Claude VM, 2026-11-05).
     census = {m["id"]: m for m in data["mutants"]}
     for cid, fam, base, kill in [
@@ -52,7 +56,7 @@ def main():
             ("transferNoCallbackBox.payment-amount-zeroed.1", "rollback-payment", "TransferBaseline", "TransferZeroKill"),
             ("transferDiamond.close-false-to-true.1", "rollback-payment", "TransferDiamondBaseline", "TransferDiamondTrueKill"),
             ("storageRootDelete.delete-dropped.1", "pop-delete", "RootDeleteBaseline", "RootDeleteSkippedKill"),
-            ("storageRootIncrement.overflow-step-dropped.1", "overflow", "RootIncBaseline", "RootIncSkipKill")]:
+            ("storageRootIncrement.increment-step-dropped.1", "overflow", "RootIncBaseline", "RootIncSkipKill")]:
         m = census[cid]
         assert m["family"] == fam
         o, w = (f"tests/h28-sol/mutation-testing/oracles/{n}.lean" for n in (base, kill))
@@ -65,7 +69,7 @@ def main():
     # Runner self-test: a real witness of another constructor must never kill.
     semantic.append(dict(guard, id="control.cross-witness-survivor", kind="runner-survivor-control",
                          witness=pop["witness"], witness_sha256=pop["witness_sha256"],
-                         expect="surviving",
+                         expect="link-mismatch",
                          note="guard mutant checked with the pop witness: its source link names popSave, so no kill"))
     rules = (ROOT / sites.RULES if hasattr(sites, "RULES") else ROOT / "Solidity/Calculus/Rules.lean").read_text()
     req = next(r for r in data["mutants"] if r["constructor"] == "Taclet.requireSimple")
@@ -74,11 +78,6 @@ def main():
          "family": "guard-polarity", "target": req["target"], "old": req["old"],
          "new": req["old"].replace('"Holds": se = true', '"Holds": se = )'), "affected": ["Taclet.requireSimple"],
          "expect": "invalid-compilation"},
-        {"id": "control.proof-label-renamed", "constructor": "Taclet.requireSimple", "operator": "control",
-         "family": "guard-polarity", "target": req["target"], "old": req["old"],
-         "new": req["old"].replace('"Holds"', '"holds"'), "affected": ["Taclet.requireSimple"],
-         "expect": "recorded",
-         "note": "branch labels: detected if toStep compares them, equivalent-certified otherwise"},
     ]
     for c in controls:
         assert c["old"] != c["new"]
@@ -91,13 +90,27 @@ def main():
                                   "target": "Solidity/Calculus/CallbackRules.lean",
                                   "oracle": "CallbackTaclet.toTaclet (in the target)"}],
                 oracle_sha256={"Solidity/Calculus/Taclet.lean": sha("Solidity/Calculus/Taclet.lean")},
-                controls=[c["id"] for c in controls] + ["control.cross-witness-survivor"],
+                controls=[c["id"] for c in controls] + ["control.cross-witness-survivor",
+                                                         "control.guard-label-equivalent", "control.revert-diamond-true"],
                 semantic_cases=semantic)
-    pilots = [{"id": "pilot." + c["id"], "constructor": c["constructor"], "operator": "pilot-hand-selected",
-               "family": c["family"], "target": c["target"], "old": c["old"], "new": c["new"],
-               "affected": [c["constructor"]] if c["constructor"].split(".")[0] in ("Taclet", "LeanTaclet", "CallbackTaclet") else ["*"]}
-              for c in semantic if c["kind"] in ("mutant", "negative-control", "known-kill", "equivalent-control")
-              and not c.get("census_id")]
+    # A hand-selected case whose mutated file equals a census mutant's is that
+    # census mutant (one proof entry); the others get their own proof entry.
+    texts = {t: (ROOT / t).read_text() for t in ("Solidity/Calculus/Rules.lean", "Solidity/Calculus/CallbackRules.lean")}
+    by_text = {(m["target"], texts[m["target"]].replace(m["old"], m["new"], 1)): m["id"] for m in data["mutants"]}
+    pilots = []
+    for c in semantic:
+        if c["kind"] == "runner-survivor-control":
+            continue
+        same = by_text.get((c["target"], texts[c["target"]].replace(c["old"], c["new"], 1)))
+        if same:
+            c["census_id"] = same
+            continue
+        pilots.append({"id": "pilot." + c["id"], "constructor": c["constructor"], "operator": "pilot-hand-selected",
+                       "family": c["family"], "target": c["target"], "old": c["old"], "new": c["new"],
+                       "affected": [c["constructor"]] if c["constructor"].split(".")[0] in
+                       ("Taclet", "LeanTaclet", "CallbackTaclet") else ["*"]})
+        if c["kind"] == "equivalent-control":
+            pilots[-1]["expect"] = "equivalent-certified"
     data["mutants"] = data["mutants"] + pilots + controls
     out = LANE / "manifests/h28-full.json"
     out.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")

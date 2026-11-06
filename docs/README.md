@@ -71,6 +71,7 @@ history is in git.
 | [feature-work/primitive-return-projection.md](feature-work/primitive-return-projection.md) | Primitive return-byte validation before binding/discard, checked controls and the remaining O1 operational boundary. |
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
+| [feature-work/h28-mutation-testing.md](feature-work/h28-mutation-testing.md) | H28 semantic rule mutation testing: whole-family census, toStep proof oracle, checked kill witnesses and score. |
 
 **The calculus and its proofs**
 

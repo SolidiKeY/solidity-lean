@@ -11,7 +11,7 @@ diagnostics (errors, warnings and `#print axioms` output) retained.
 Two oracles, never conflated:
 
 * proof oracle: the production `Calculus/Taclet.lean` (`Taclet.toStep`,
-  `LeanTaclet.toStep`) after a `Rules.lean` mutant, or `CallbackTaclet.toTaclet`
+  `LeanTaclet.toStep`) after a `Calculus/Rules.lean` mutant, or `CallbackTaclet.toTaclet`
   in a mutated `CallbackRules.lean`.  A mutant is `detected` only if its
   errors are attributed to the toStep/toTaclet proof of an affected
   constructor (other errors may only be the strict replay's declared
@@ -83,9 +83,9 @@ def assemble(target_path, target_text, oracle_text):
     head = "".join("import " + i + "\n" for i in imps)
     tbody, obody = body(target_text), body(oracle_text)
     t0 = head.count("\n") + 1
-    t1 = t0 + tbody.count("\n")
     text = head + tbody + ("" if tbody.endswith("\n") else "\n") + obody
     o0 = (head + tbody + ("" if tbody.endswith("\n") else "\n")).count("\n") + 1
+    t1 = o0 - 1  # the target's last line; the oracle starts on the next one
     return text, {"target": [t0, t1], "oracle": [o0, text.count("\n") + 1], "imports": imps}
 
 
@@ -136,11 +136,20 @@ def region(items, regions, name):
 
 ROW_COMMAND = """
 open Lean Elab Command in
+/-- H28 runner: a checked lemma that exists must not rest on `sorryAx` (a hand
+lemma's own `sorry` would otherwise pass silently through its link). -/
+def h28Trust (n : Lean.Name) : CommandElabM Unit := do
+  if (← getEnv).contains n then
+    let ax ← Lean.collectAxioms n
+    if ax.contains ``sorryAx then logError m!"H28 TRUST: {n} depends on sorryAx"
+
+open Lean Elab Command in
 /-- H28 runner: one row of a `#replay_toStep` table checked alone (rows are
 independent declarations, `Calculus/Taclet.lean`); no completeness check. -/
 elab "#h28_toStep_row " j:ident c:ident p:str : command => do
   let J ← liftCoreM <| realizeGlobalConstNoOverload j
   discard <| addToStep (J ++ c.getId) (toStepReplay p.getString)
+  h28Trust (J ++ c.getId ++ `toStep)
 
 open Lean Elab Command Tactic in
 /-- H28 runner: a hand-proved lemma `J.c.toStep` states its premise itself, so
@@ -154,6 +163,7 @@ elab "#h28_toStep_link " j:ident c:ident : command => do
   discard <| addCtorLemma n `h28link (toStepType n)
     (do evalTactic (← `(tactic| (intros; apply $lemma <;> assumption))))
     m!"no proof that `{n}` is `Stmt.step`'s rule"
+  h28Trust (n ++ `h28link)
 """
 
 
@@ -198,6 +208,7 @@ def row_oracle(taclet_text, affected):
 def all_rows_oracle(taclet_text):
     return row_oracle(taclet_text, ["*"])
 
+RUNTIME = re.compile(r"heartbeats|maximum recursion|deep recursion|stack overflow|timeout|H28 TRUST", re.I)
 CASCADE = [r"Unknown constant `Solidity\.(?:Taclet|LeanTaclet)\.\w+\.toStep`",
            r"fail to show termination for\s+Solidity\.(?:Taclet|LeanTaclet)\.toStep\b"]
 
@@ -253,7 +264,9 @@ def proof_classify(items, regions, affected, oracle_body, kind):
         spans = hand_spans(oracle_body, regions)
         for x in errors:
             name = attribute(x, spans)
-            if name and ("*" in affected or name in affected):
+            if RUNTIME.search(x["message"]):
+                other.append(dict(x, constructor=name, reason="runtime limit, not a proof failure"))
+            elif name and ("*" in affected or name in affected):
                 primary.append(dict(x, constructor=name))
             elif any(re.search(p, x["message"]) for p in CASCADE) or (tail is not None and x["line"] >= tail):
                 cascade.append(x)
@@ -275,14 +288,27 @@ def owned(oracle_text):
     printed = re.findall(r"^#print axioms (\w+)\s*$", oracle_text, re.M)
     if len(ns) != 1 or not names or sorted(printed) != sorted(names) or len(set(names)) != len(names):
         raise ValueError("owned oracle must have one namespace and one #print axioms per theorem")
-    if re.search(r"\b(sorry|admit|axiom|native_decide|maxHeartbeats|unsafe)\b", oracle_text):
+    if re.search(r"\b(sorry|admit|axiom|native_decide|maxHeartbeats|unsafe|opaque|implemented_by|extern|debug)\b",
+                 oracle_text):
         raise ValueError("owned oracle uses a forbidden trust shortcut")
+    if any(not o.startswith("pp.") for o in re.findall(r"set_option\s+(\S+)", oracle_text)):
+        raise ValueError("owned oracle sets a non-printing option")
     return ns[0], names
+
+
+def link_constructor(oracle_text):
+    """The table and constructor that `source_link` is proved by."""
+    m = re.search(r"^theorem source_link\b(.*?):=\s*(?:fun [^=]*=>\s*)?\.(\w+)", oracle_text, re.S | re.M)
+    if not m:
+        return None
+    owner = re.search(r"\b(CallbackTaclet|LeanTaclet|Taclet)\b", m[1])
+    return owner and f"{owner[1]}.{m[2]}"
 
 
 def semantic_success(items, regions, oracle_text, require):
     ns, names = owned(oracle_text)
-    bad = [x for x in items if x["severity"] in ("error", "warning")]
+    bad = [x for x in items if x["severity"] == "error" or
+           (x["severity"] == "warning" and regions["oracle"][0] <= x["line"] <= regions["oracle"][1])]
     if bad:
         return {"ok": False, "reason": "errors/warnings", "diagnostics": [
             {"line": x["line"], "severity": x["severity"], "message": x["message"][:300]} for x in bad[:8]]}
@@ -305,10 +331,14 @@ def semantic_success(items, regions, oracle_text, require):
         return {"ok": False, "reason": "missing required theorem(s) " + ", ".join(missing)}
     sigs = {x["message"].split(" :", 1)[0]: x["message"] for x in region(items, regions, "oracle")
             if x["severity"] == "info" and re.match(r"@?" + re.escape(ns) + r"\.\w+ :", x["message"])}
+    if "checked_kill" in require:
+        kill = [v for k, v in sigs.items() if k.lstrip("@") == ns + ".checked_kill"]
+        if len(kill) != 1 or "¬Solidity.Premise.Sound" not in re.sub(r"\s+", "", kill[0]):
+            return {"ok": False, "reason": "checked_kill does not state ¬ Premise.Sound"}
     return {"ok": True, "axioms": axioms, "signatures": sigs}
 
 
-def source_link_rejection(items, regions, oracle_text):
+def source_link_rejection(items, regions, oracle_text, constructor=None):
     lines = body(oracle_text).splitlines()
     idx = [i for i, l in enumerate(lines) if re.match(r"theorem source_link\b", l)]
     if len(idx) != 1:
@@ -322,6 +352,8 @@ def source_link_rejection(items, regions, oracle_text):
                 "errors": [{"line": x["line"], "message": x["message"][:300]} for x in errors[:5]], "link_line": link}
     if any(regions["target"][0] <= x["line"] <= regions["target"][1] for x in errors):
         return {"ok": False, "reason": "normal target failed"}
+    if constructor and constructor not in first["message"]:
+        return {"ok": False, "reason": "rejection does not name the linked constructor " + constructor}
     return {"ok": True, "line": link, "first_error": first["message"][:600], "errors": len(errors)}
 
 
@@ -361,6 +393,7 @@ def run(args):
     scratch.mkdir(exist_ok=True)
 
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
+    manifest_sha = sha(manifest_path.read_bytes())
     jobs = []  # (key, target, target_text, oracle_text, finisher)
     taclet_body = texts[TACLET]
     for b in manifest["proof_baselines"]:
@@ -392,7 +425,12 @@ def run(args):
                 jobs.append((f"semantic.{c['id']}.{phase}", c["target"], ttext, otext, (phase, c)))
     if args.only:
         jobs = [j for j in jobs if any(re.fullmatch(p, j[0]) for p in args.only)]
-    done = {p.stem for p in (out / "checks").glob("*.json")} if args.resume else set()
+    done = set()
+    if args.resume:
+        for p in (out / "checks").glob("*.json"):
+            r = json.loads(p.read_text())
+            if r.get("manifest_sha256") == manifest_sha and r.get("head") == head:
+                done.add(p.stem)  # a record of another manifest or head is rerun
     jobs = [j for j in jobs if j[0] not in done]
     print(f"{len(jobs)} checks to run", flush=True)
 
@@ -410,6 +448,7 @@ def run(args):
             with lock:
                 free.append(bridge)
         record["phase"], record["entry"] = phase, entry["id"]
+        record["manifest_sha256"], record["head"] = manifest_sha, head
         if "old" in entry:
             original = texts[target]
             record["diff"] = "".join(difflib.unified_diff(
@@ -439,10 +478,19 @@ def run(args):
             elif phase in ("normal-witness", "mutant-witness") and entry["kind"] == "equivalent-control":
                 record["result"] = semantic_success(items, regs, otext, ["source_link_all", "equivalence_all"])
             elif phase in ("normal-oracle", "mutant-witness"):
-                record["result"] = semantic_success(items, regs, otext,
-                                                    ["checked_kill"] if phase == "mutant-witness" and entry["kind"] not in ("equivalent-control",) else ["source_link"])
+                need = entry.get("require", ["checked_kill"]) if phase == "mutant-witness" else ["source_link"]
+                record["result"] = semantic_success(items, regs, otext, need)
+                if phase == "mutant-witness" and not record["result"]["ok"]:
+                    # a completed check whose only errors are the witness's own:
+                    # the witness failed against this mutant (not a bridge,
+                    # target or trust failure)
+                    errs = [x for x in items if x["severity"] == "error"]
+                    record["result"]["witness_failed"] = bool(errs) and all(
+                        regs["oracle"][0] <= x["line"] <= regs["oracle"][1] and
+                        not RUNTIME.search(x["message"]) for x in errs)
             elif phase == "normal-witness":
-                record["result"] = source_link_rejection(items, regs, otext)
+                record["result"] = source_link_rejection(items, regs, otext, link_constructor(otext))
+                record["result"]["link"] = link_constructor(otext)
             else:  # mutant-oracle: recorded, not decisive
                 errs = [x for x in items if x["severity"] == "error"]
                 record["result"] = {"outcome": "recorded", "errors": len(errs)}
@@ -457,7 +505,7 @@ def run(args):
         for b in bridges:
             b.stop()
     summary = summarize(manifest, out)
-    summary.update(manifest=str(rel), manifest_sha256=sha(manifest_path.read_bytes()),
+    summary.update(manifest=str(rel), manifest_sha256=manifest_sha,
                    head=head, dirty_development_run=bool(dirty))
     (out / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     print(json.dumps({k: v for k, v in summary.items() if k not in ("mutants", "semantic")}, indent=1))
@@ -466,6 +514,17 @@ def run(args):
 def load(out, key):
     p = out / "checks" / (key + ".json")
     return json.loads(p.read_text()) if p.exists() else None
+
+
+def link_matches(case, rs):
+    """The witness's source link names the case's constructor.  A helper edit
+    (`Tms.*`) is linked to the constructor its witness instantiates, which the
+    record shows but this check cannot compare."""
+    r = rs.get("normal-witness")
+    ctor = case.get("constructor") or ""
+    if r is None or case["kind"] == "equivalent-control" or ctor.startswith("Tms."):
+        return True
+    return r["result"].get("link") == ctor
 
 
 def summarize(manifest, out):
@@ -494,18 +553,22 @@ def summarize(manifest, out):
             o = "equivalent" if ok("normal-oracle") and ok("mutant-witness") else "unrun-or-error"
         elif any(rs[p] is None for p in ("normal-oracle", "normal-witness", "mutant-witness")):
             o = "unrun"
+        elif not link_matches(c, rs):
+            o = "link-mismatch"  # the witness is linked to another constructor: never a kill
         elif ok("normal-oracle") and ok("normal-witness") and ok("mutant-witness"):
             o = "killed"
-        elif ok("normal-oracle") and ok("normal-witness"):
-            o = "surviving"
+        elif ok("normal-oracle") and ok("normal-witness") and rs["mutant-witness"]["result"].get("witness_failed"):
+            o = "witness-failed"
         else:
             o = "error"
         semantic[c["id"]] = {"family": c["family"], "kind": c["kind"], "outcome": o}
         scounts[o] = scounts.get(o, 0) + 1
-    scored = [v for v in mutants.values() if v["outcome"] in ("detected", "equivalent-certified")]
-    det = sum(v["outcome"] == "detected" for v in scored)
-    sem_scored = [v for v in semantic.values() if v["kind"] in ("mutant", "negative-control")
-                  and v["outcome"] in ("killed", "surviving")]
+    census = {k: v for k, v in mutants.items() if not k.startswith(("control.", "pilot."))}
+    ccounts = {}
+    for v in census.values():
+        ccounts[v["outcome"]] = ccounts.get(v["outcome"], 0) + 1
+    sem_scored = [v for v in semantic.values() if v["kind"] == "mutant"
+                  and v["outcome"] in ("killed", "witness-failed")]
     controls = {}
     for m in manifest["mutants"]:
         if m.get("expect") and m["expect"] != "recorded":
@@ -521,13 +584,17 @@ def summarize(manifest, out):
         "controls": controls,
         "controls_pass": all(v["expect"] == v["actual"] for v in controls.values()),
         "proof_baselines": baselines,
-        "proof_oracle": {"counts": counts, "by_family": fam,
-                         "score": {"detected": det, "denominator_non_equivalent_run": det,
-                                   "equivalent_certified_excluded": len(scored) - det,
-                                   "unscored_invalid_error_unrun": len(mutants) - len(scored)}},
+        # Counts, not a ratio: a compiled mutant is either detected (its toStep
+        # evidence fails: it differs from Stmt.step) or equivalent-certified,
+        # so a detection rate over compiled mutants is 100% by construction.
+        "proof_oracle": {"census_counts": ccounts, "all_entry_counts": counts, "by_family": fam,
+                         "census_mutants": len(census)},
         "semantic": semantic,
-        "semantic_score": {"killed": sum(v["outcome"] == "killed" for v in sem_scored),
-                           "denominator": len(sem_scored), "counts": scounts},
+        # Witness validation over the hand-chosen semantic cases (each has a
+        # kill witness), not a mutation score of the census.
+        "semantic_witness_validation": {"killed": sum(v["outcome"] == "killed" for v in sem_scored),
+                                        "denominator_killed_or_witness_failed": len(sem_scored),
+                                        "counts": scounts},
         "runner_cases_complete": all(v["outcome"] != "unrun" for v in mutants.values()) and
                                  all(v["outcome"] != "unrun" for v in semantic.values()),
         "mutants": mutants,

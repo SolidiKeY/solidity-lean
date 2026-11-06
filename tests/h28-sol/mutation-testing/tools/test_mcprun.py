@@ -23,8 +23,8 @@ def item(line, message, severity="error"):
     return {"line": line, "message": message, "severity": severity}
 
 
-def axioms(*deps):
-    out = []
+def axioms(*deps, kill_sig="¬Solidity.Premise.Sound Solidity.Modality.box H28.T.s H28.T.p H28.T.σ"):
+    out = [item(107, "H28.T.checked_kill : " + kill_sig, "info")]
     for n in ("source_link", "checked_kill"):
         msg = f"'H28.T.{n}' depends on axioms: [{', '.join(deps)}]" if deps else f"'H28.T.{n}' does not depend on any axioms"
         out.append(item(105, msg, "info"))
@@ -32,6 +32,12 @@ def axioms(*deps):
 
 
 class Assemble(unittest.TestCase):
+    def test_regions_disjoint(self):
+        for target in ("import A\nX\nY\n", "import A\nX\nY"):
+            text, regions = mcprun.assemble("Solidity/Calculus/Rules.lean", target, ORACLE)
+            self.assertEqual(regions["target"][1] + 1, regions["oracle"][0])
+            self.assertEqual(text.splitlines()[regions["target"][1] - 1], "Y")
+
     def test_target_inlined_and_import_dropped(self):
         text, regions = mcprun.assemble("Solidity/Calculus/Rules.lean",
                                         "import A\nimport B\nX\nY\n", ORACLE)
@@ -87,6 +93,15 @@ class Proof(unittest.TestCase):
         self.assertEqual(self.classify([item(102, "unsolved goals")], ["Taclet.ifElseSplit"]), "detected")
         self.assertEqual(self.classify([item(102, "unsolved goals")]), "error")
 
+    def test_runtime_limit_is_not_a_kill(self):
+        self.assertEqual(self.classify([
+            item(104, "Solidity.Taclet.requireSimple: (deterministic) timeout at `whnf`, maximum number of heartbeats")]),
+            "error")
+
+    def test_trust_guard_is_not_a_kill(self):
+        self.assertEqual(self.classify([item(104, "H28 TRUST: Solidity.Taclet.requireSimple.toStep depends on sorryAx")]),
+                         "error")
+
     def test_helper_wildcard(self):
         self.assertEqual(self.classify([
             item(104, "no proof that `Solidity.Taclet.localOpAssign` is `Stmt.step`'s rule")], ["*"]), "detected")
@@ -109,6 +124,27 @@ class Semantic(unittest.TestCase):
         for sev in ("error", "warning"):
             self.assertFalse(mcprun.semantic_success(axioms() + [item(104, "x", sev)], REG, ORACLE, [])["ok"])
 
+    def test_kill_must_state_unsoundness(self):
+        self.assertFalse(mcprun.semantic_success(axioms(kill_sig="True"), REG, ORACLE, ["checked_kill"])["ok"])
+
+    def test_target_warning_ignored_oracle_warning_fails(self):
+        self.assertTrue(mcprun.semantic_success(axioms() + [item(50, "linter", "warning")], REG, ORACLE,
+                                                ["checked_kill"])["ok"])
+        self.assertFalse(mcprun.semantic_success(axioms() + [item(104, "linter", "warning")], REG, ORACLE,
+                                                 ["checked_kill"])["ok"])
+
+    def test_options_refused(self):
+        with self.assertRaises(ValueError):
+            mcprun.owned(ORACLE.replace("namespace H28.T", "set_option debug.skipKernelTC true\nnamespace H28.T"))
+        mcprun.owned(ORACLE.replace("end H28.T", "set_option pp.fullNames true\nend H28.T"))
+
+    def test_link_constructor(self):
+        self.assertEqual(mcprun.link_constructor("theorem source_link : Taclet C 0 .box s p := .requireSimple"),
+                         "Taclet.requireSimple")
+        self.assertEqual(mcprun.link_constructor(
+            "theorem source_link : ∀ b : Bool, LeanTaclet C 0 m (s b) (p b) := fun b => .transferDiamond"),
+            "LeanTaclet.transferDiamond")
+
     def test_required_theorem(self):
         self.assertFalse(mcprun.semantic_success(axioms(), REG, ORACLE, ["missing"])["ok"])
 
@@ -122,6 +158,8 @@ class Semantic(unittest.TestCase):
         link = REG["oracle"][0] + 1  # the source_link line of the stripped body
         ok = mcprun.source_link_rejection([item(link, "Type mismatch\n  Taclet.requireSimple")], REG, ORACLE)
         self.assertTrue(ok["ok"])
+        self.assertFalse(mcprun.source_link_rejection([item(link, "Type mismatch\n  Taclet.revertBox")], REG, ORACLE,
+                                                      "Taclet.requireSimple")["ok"])
         for bad in ([item(link + 1, "Type mismatch Taclet.x")], [item(link, "unknown identifier")], [],
                     [item(50, "error in target"), item(link, "Type mismatch Taclet.x")]):
             self.assertFalse(mcprun.source_link_rejection(bad, REG, ORACLE)["ok"])
@@ -138,10 +176,28 @@ class Summary(unittest.TestCase):
             (out / "checks/baseline.b.json").write_text(json.dumps({"result": {"outcome": "pass"}}))
             (out / "checks/proof.x.json").write_text(json.dumps({"result": {"outcome": "detected"}, "elapsed_s": 1}))
             s = mcprun.summarize(m, out)
-            self.assertEqual(s["proof_oracle"]["score"]["detected"], 1)
+            self.assertEqual(s["proof_oracle"]["census_counts"], {"detected": 1, "unrun": 1})
             self.assertEqual(s["mutants"]["y"]["outcome"], "unrun")
-            self.assertEqual(s["semantic_score"]["denominator"], 0)
+            self.assertEqual(s["semantic_witness_validation"]["denominator_killed_or_witness_failed"], 0)
             self.assertFalse(s["runner_cases_complete"])
+
+    def semantic(self, mutant_result):
+        import json, tempfile, pathlib
+        with tempfile.TemporaryDirectory() as d:
+            out = pathlib.Path(d)
+            (out / "checks").mkdir()
+            m = {"proof_baselines": [], "mutants": [],
+                 "semantic_cases": [{"id": "s", "kind": "mutant", "family": "f", "constructor": "Taclet.c"}]}
+            for ph, res in (("normal-oracle", {"ok": True}), ("normal-witness", {"ok": True, "link": "Taclet.c"}),
+                            ("mutant-witness", mutant_result), ("mutant-oracle", {"outcome": "recorded"})):
+                (out / f"checks/semantic.s.{ph}.json").write_text(json.dumps({"result": res}))
+            return mcprun.summarize(m, out)["semantic"]["s"]["outcome"]
+
+    def test_bridge_error_is_not_a_survivor(self):
+        self.assertEqual(self.semantic({"outcome": "error", "reason": "bridge"}), "error")
+        self.assertEqual(self.semantic({"ok": False, "witness_failed": False}), "error")
+        self.assertEqual(self.semantic({"ok": False, "witness_failed": True}), "witness-failed")
+        self.assertEqual(self.semantic({"ok": True}), "killed")
 
     def test_failed_baseline_voids_detection(self):
         import json, tempfile, pathlib
