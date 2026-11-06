@@ -63,8 +63,17 @@ def declarations(source):
         while start < len(clean) and clean[start].isspace(): start += 1
         cursor = event.end()
         depth = 0
+        let_assignments = 0
         while cursor < len(clean):
-            if depth == 0 and (clean.startswith(':=', cursor) or clean.startswith('where', cursor)):
+            if depth == 0 and re.match(r'let\b', clean[cursor:]) and (cursor == 0 or not (clean[cursor-1].isalnum() or clean[cursor-1] == '_')):
+                let_assignments += 1
+            if depth == 0 and clean.startswith(':=', cursor):
+                if let_assignments:
+                    let_assignments -= 1
+                    cursor += 2
+                    continue
+                break
+            if depth == 0 and re.match(r'where\b', clean[cursor:]) and (cursor == 0 or not (clean[cursor-1].isalnum() or clean[cursor-1] == '_')):
                 break
             if clean[cursor] in '([{': depth += 1
             if clean[cursor] in ')]}': depth -= 1

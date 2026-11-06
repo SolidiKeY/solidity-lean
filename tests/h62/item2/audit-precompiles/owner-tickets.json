@@ -1,8 +1,8 @@
 [
   {
     "id": "OBL-SUCCESS",
-    "status": "owner-decision-required",
-    "owner": "master source owner; G43/V14 adequacy owner",
+    "status": "pending-owner-compiler-success-theorem",
+    "owner": "G43/V14 (v12-v17/v14-payments-bytecode)",
     "declaration": "Solidity.Stipend.Obligation",
     "evidence": [
       "Solidity/Stipend/Rule.lean:171",
@@ -10,11 +10,10 @@
       "tests/h62/item2/audit-precompiles/StipendControl.lean"
     ],
     "finding": "Gas-only Fitted and one-way Enforced admit abstract zero-gas/always-failure functions. Proposed control remains unchecked because frozen import closure fails under pinned toolchain. Does not establish failure of an actual compiler correctness theorem.",
-    "options": [
-      "Owner links actual compiled execution and successful source inputs to the public obligation.",
-      "Owner publishes a separate public totality/success theorem tied to actual compilation, required alongside the gas obligation."
-    ],
-    "delivery": "Saved for local coordinator retrieval; relay.sh is absent. No original-file edits."
+    "delivery": "Saved for local coordinator retrieval; relay.sh is absent. No original-file edits.",
+    "decision": "Coordinator H62 item 2: totality obligation is met by a separate compiler-success theorem proved for the owner compiler; do not change any frozen interface statement.",
+    "required_artifact": "Owner supplies committed theorem name/path and proof for its actual compiler: supported feasible source-success inputs compile and execute successfully; reject-all/always-revert cannot meet it. Audit verifies theorem and original contract together.",
+    "interface_policy": "All frozen statements unchanged. No interface repair requested or authorized."
   },
   {
     "id": "DEP-RAW-435",

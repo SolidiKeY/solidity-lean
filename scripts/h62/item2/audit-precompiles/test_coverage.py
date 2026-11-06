@@ -2,12 +2,12 @@
 """Mutation checks for stale/failed partial proof receipts, without source writes."""
 import json, os, pathlib, shutil, subprocess, sys, tempfile, unittest
 HERE=pathlib.Path(__file__).resolve().parent
-EVIDENCE=pathlib.Path('/workspace/h62-audit-precompiles-evidence')
+EVIDENCE=pathlib.Path(os.environ.get('H62_AUDIT_EVIDENCE','/workspace/h62-audit-precompiles-evidence-2'))
 class CoverageTests(unittest.TestCase):
  def setUp(self):
-  self.temp=tempfile.TemporaryDirectory(prefix='h62-coverage-',dir='/workspace/h62-audit-precompiles-evidence')
+  self.temp=tempfile.TemporaryDirectory(prefix='h62-coverage-',dir=str(EVIDENCE))
   self.dir=pathlib.Path(self.temp.name)
-  for stem in ['basic-final','core-final']:
+  for stem in ['basic-final','core-final','data-final']:
    for suffix in ['.json','.log']: shutil.copyfile(EVIDENCE/(stem+suffix),self.dir/(stem+suffix))
  def tearDown(self): self.temp.cleanup()
  def run_check(self):
@@ -26,4 +26,6 @@ class CoverageTests(unittest.TestCase):
   self.edit(change);self.assertNotEqual(self.run_check(),0)
  def test_failed_axiom_log_rejected(self):
   p=self.dir/'basic-final.log';p.write_text(p.read_text()+'\nsorryAx\n');self.assertNotEqual(self.run_check(),0)
+ def test_missing_data_witness_receipt_rejected(self):
+  (self.dir/'data-final.json').unlink();self.assertNotEqual(self.run_check(),0)
 if __name__=='__main__': unittest.main()

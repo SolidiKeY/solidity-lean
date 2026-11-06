@@ -12,10 +12,10 @@ No push, merge, deployment, central registration, axiom-pin edit, or frozen-inte
 
 | Checkpoint | Saved result | Remaining obligations |
 |---|---|---|
-| 1. Frozen inventory and owners | 17 module-map files, 138 source theorem declarations (134 public, four private), exact source headers, hashes, owner records; 24 public types elaborated | Full elaborated signatures, private constant mapping, complete hypothesis and input-feasibility classification |
-| 2. Simultaneous witnesses | Seven original implication statements have checked joint witnesses | 131 candidates remain pending; data-only declarations are retained, not silently excluded |
+| 1. Frozen inventory and owners | 17 module-map files, 138 source theorem declarations (134 public, four private), corrected exact source headers, hashes, owner records; 24 public types elaborated and directly assigned at full frozen types | Full elaborated signatures, private constant mapping, complete hypothesis and input-feasibility classification |
+| 2. Simultaneous witnesses | Seven implication statements have joint proof-premise witnesses; 17 unconditional statements have concrete data-domain samples | 114 candidates remain pending; the two witness kinds are counted separately |
 | 3. Success and trivial implementations | IDENTITY exact output/total success, reject-all and constant-empty negative controls; basic/P256 totality; MODEXP success/gas and BLAKE2F valid-size success/failure | Actual compiler success contract, executable stipend control, full gas/fork and Bridge boundaries |
-| 4. Fidelity and verification | Exactly-once partial ledger, frozen source/scope guards, seven scanner regression tests, independent reviews | Full statement-fidelity acceptance, all remaining witnesses, full affected validation, complete queue handoff |
+| 4. Fidelity and verification | Exactly-once partial ledger, frozen source/scope guards, eight scanner regression tests, independent reviews | Full statement-fidelity acceptance, all remaining witnesses, full affected validation, complete queue handoff |
 
 The deterministic source census rejects any module-map or source-byte change from BASE.
 Its `preceding_variable_commands` field is lexical history, **not** a list of actual premises:
@@ -32,9 +32,11 @@ Each witness binds all relevant inputs together with every proof hypothesis and 
 that exact unchanged theorem. A successful call's input and output are the same pair throughout.
 No independently inhabited premises are substituted for a joint witness.
 
-`BasicWitnesses` and `CoreWitnesses` contain 17 checked declarations total: seven premise
-witnesses plus success/control helpers. `StipendControl` contains two additional **unchecked**
-proposed declarations. No source `sorry`, new axiom, native_decide, or increased proof limit.
+`BasicWitnesses` and `CoreWitnesses` contain 17 checked named declarations: seven premise
+witnesses plus success/control helpers. `DataWitnesses` adds 17 checked named declarations for
+unconditional data domains, not extra proof-premise cases. `TypeFidelity` checks 24 anonymous
+full-type assignments directly against the frozen constants. `StipendControl` retains two
+additional **unchecked** proposed declarations. No source `sorry`, new axiom, native_decide, or increased proof limit.
 Failed elaboration logs can print `sorryAx`; those failures are retained and never accepted.
 Accepted new declarations use only the recorded standard propext/Classical.choice/Quot.sound sets.
 
@@ -57,10 +59,15 @@ LengthPriced p and one related input pair. Its witness remains pending behind BL
 Concrete tickets, evidence, repair choices and delivery state are in
 [owner-tickets.json](../../tests/h62/item2/audit-precompiles/owner-tickets.json).
 
-* OBL-SUCCESS: master source owner and G43/V14 must resolve the missing execution-success link
-  in Solidity.Stipend.Obligation. Either link the actual compiled run to successful source inputs
-  in the obligation, or publish a separate public compiled-success theorem required alongside
-  this gas-only obligation. Do not demand success for source programs that intentionally revert.
+* OBL-SUCCESS: **decision resolved; theorem pending**. The coordinator answered H62 item 2:
+  “the totality obligation is met by a SEPARATE compiler-success theorem proved for the owner's
+  compiler (it does not reject everything / always revert on the stated inputs); do not change
+  any frozen interface statement.” G43/V14 (`v12-v17/v14-payments-bytecode`) must supply that
+  theorem for its actual compiler and stated supported success inputs. Its qualified name,
+  source path, compiler identity and commit remain pending in
+  [compiler-success-pending.json](../../tests/h62/item2/audit-precompiles/compiler-success-pending.json).
+  The audit will check it alongside the original obligation. Existing precompile totality and
+  data-domain samples do not discharge this owner-compiler obligation. No frozen repair is requested.
 * DEP-RAW-435: pinned Lean rejects frozen Syntax/Raw String APIs, preventing Stipend imports.
   The migration Syntax/Source owner must supply a compatible overlay; this lane cannot edit it.
 * DEP-BLS-435: frozen Bls12381 discount length proofs at 171/172 hit the existing recursion budget.
@@ -69,7 +76,8 @@ Concrete tickets, evidence, repair choices and delivery state are in
   are installed in this worktree. Migration/Bridge and live SOL-PC producer coordination remains required.
 
 relay.sh is absent in this checkout. Tickets are saved for the local coordinator's authorized
-retrieval; no relay delivery or owner reply is claimed. No frozen repair is authorized by silence.
+retrieval; no relay delivery is claimed. The coordinator answer above resolves the choice of approach;
+the owner theorem has not been delivered. Frozen statements remain unchanged.
 H55-G49 work is untouched. None of these blockers is an exclusion or a weakened statement.
 
 ## Toolchain, gates, timings and evidence
@@ -81,21 +89,25 @@ Lake: 5.0.0-src+eb6cafb, Lean 4.35.0. No v4.24 per-master cache was reused.
 The owned alternate config disables artifact caches and passes explicit -j1.
 The original core and Bridge toolchain files were preserved.
 
-Absolute evidence directory: `/workspace/h62-audit-precompiles-evidence`.
+Current evidence directory: `/workspace/h62-audit-precompiles-evidence-2`.
+The original evidence archive and SHA256 manifest at `/workspace/h62-audit-precompiles-delivery`
+are preserved and still verify. Its old census record remains historical, not the current corrected census.
 Every bounded receipt contains its full actual command, cwd, exit, wall time and resource fields.
 Final proof receipts also bind the exact source import closure and config hashes and reject edits
-through the run. The ledger verifies every recorded proof/config/import-source binding before marking seven witnesses.
+through the run. The ledger verifies every recorded proof/config/import-source binding before marking seven proof-premise witnesses and 17 data-input samples.
 
 | Evidence stem / command purpose | Outcome |
 |---|---|
-| census-tests-final / python3 scripts/h62/item2/audit-precompiles/test_census.py | Seven tests pass, including frozen scope/source mutation rejection |
+| census-tests-continuation / python3 scripts/h62/item2/audit-precompiles/test_census.py | Eight tests pass, including frozen scope/source mutation rejection |
 | frozen-census / census.py --check | 17 files, 138 declarations, exact frozen bytes |
 | basic-final / bounded lake env lean BasicWitnesses | Exit 0; seven declarations, four simultaneous witnesses |
 | core-final / bounded lake env lean CoreWitnesses | Exit 0; ten declarations, three simultaneous witnesses |
+| data-final / bounded lake env lean DataWitnesses | Exit 0; 17 unconditional concrete-domain samples |
+| type-fidelity-final / bounded lake env lean TypeFidelity | Exit 0; 24 direct full-frozen-type assignments, retaining every binder |
 | core-signatures / bounded lake env lean CoreSignatures | Exit 0; 24 public type checks with pp.all |
-| coverage-mutations / test_coverage.py | Five receipt mutation tests pass: valid partial input, failed exit, wrong cwd, stale import, and failed axiom log |
+| coverage-mutations-continuation / test_coverage.py | Six tests pass: valid partial input, failed exit, wrong cwd, stale import, failed axiom log, missing data receipt |
 | doc-paths / bash scripts/check-doc-paths.sh | Exit 1: existing archived after-roadmap-va1.md reference to absent optional MathlibTest/SplitIfs.lean; owned handoff link resolves |
-| coverage-check / coverage.py | Partial ledger: 138 statements, seven witnesses, 131 pending; never full acceptance |
+| coverage-check-continuation / coverage.py | Partial ledger: 138 statements, 7 proof-premise + 17 data-input witnesses, 114 pending; never full acceptance |
 | keysort-control-a, keysort-control-b / bounded lean -j1 Solidity/KeySort.lean | Both exit 0, 1.505269 s and 1.509260 s |
 | import-prerequisite / bounded lake build Basic and Stipend imports | Exit 1; Raw String API errors at 597/650/665/682/684 |
 | osaka-imports / bounded lake build Osaka import | Exit 1; frozen BLS discount proofs hit max recursion depth |
@@ -116,16 +128,31 @@ Older receipts before monitoring was added retain only their original resource f
 
 KeySort's same-source/same-runner control delta is +0.265%; no slowdown above 10% was measured.
 This is a stability control, not a compiler speedup or a completed migration before/after comparison.
-No production refactor or original-source change occurred. New audit file checks take about 0.50 s each.
+No production refactor or original-source change occurred. Basic/Core/TypeFidelity checks take about 0.50 s each; DataWitnesses took 2.34 s.
 No RUNTIME_GATE_PASS, full sort-check pass, external EVM test, or cryptographic agreement is claimed.
+
+## Corrected signature census and resolved owner approach
+
+The continuation's full-type checks exposed one audit-parser defect: top-level `let x :=`
+inside a theorem conclusion was mistaken for the proof delimiter. The old recorded signature
+for Solidity.Precompiles.Bn254.decodeG1_eq_none_iff stopped before its full conclusion.
+The scanner now tracks pending top-level let assignments; the regression includes two
+successive lets. The regenerated census contains both lets and the polynomial condition.
+Only that signature record changed (`census-correction.json`); no frozen source byte changed.
+The initial generated full-type file failed before correction; its failure receipt is retained.
+The corrected generated file passes all 24 assignments without removed binders or raised budgets.
+Local unused-variable lint is disabled solely for these exact-type examples so original unused
+proof-binder names can be retained. This does not alter any theorem or proof limit.
 
 ## Reviews and continuation handoff
 
 Independent finder and skeptic reviews were read-only, used no Lean server/build, and confirmed
-seven statement-faithful witnesses and the narrow negative-control interpretation. Their findings
+seven statement-faithful proof-premise witnesses, 17 unconditional data-domain samples,
+24 direct full-type checks, and the narrow negative-control interpretation. Their findings
 were fixed: mutual block namespace handling; comment offsets; section-variable overclaim; frozen
 module-map/source guards; resource evidence wording and sampled monitoring. The scanner regression
-line-number typo was corrected. Their final review text is saved off git in reviews.md.
+line-number typo was corrected. Continuation reviews independently confirmed the let-signature
+fix, separate witness counts, and the coordinator-resolved separate owner theorem requirement. Their final review text is saved off git in reviews.md.
 
 Continue the existing goal only; never create/reset a replacement. Original prompt digest:
 39585f8ffb6629c51fc8d1e0fca1808807d9cb06983d0c558dcdc019112450f3.
@@ -133,7 +160,7 @@ Original VM/environment:
 ccarenv_b64_Y2NhcmVudl83YjM2Yzc3YzA3Njg4MTkxODg3Yjc3MTBhZWVkNzdhMg.
 get_goal is not exposed; the goal objective in this thread is authoritative.
 Ask the coordinator for a fresh thread on this same VM/branch/goal after this saved handoff.
-Do not self-launch another goal. Resume with the migration overlays and owner decision, then
-finish all 131 pending candidate applicability witnesses, complete exact elaborated types,
+Do not self-launch another goal. Resume with the migration overlays and the pending G43/V14 compiler-success theorem, then
+finish all 114 pending candidate applicability witnesses, complete exact elaborated types,
 Bridge/gas/fork/compiler boundaries, independent milestone reviews and all final passing gates.
 The assignment remains blocked, not complete; the 8-10 hour useful queue has not been exhausted.

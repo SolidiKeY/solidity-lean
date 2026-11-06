@@ -28,6 +28,13 @@ class CensusTests(unittest.TestCase):
   with patch('census.subprocess.run') as run:
    run.side_effect=[type('R',(),{'stdout':census.MAP.read_bytes()})(),type('R',(),{'stdout':b'changed source'})()]
    with self.assertRaisesRegex(ValueError,'frozen source changed'): census.census()
+ def test_let_assignments_are_part_of_signature(self):
+  source='theorem t (n : Nat) : (let x := n; x = n) ∧ (let y := n; y = n) := by simp\n'
+  d=list(census.declarations(source))[0]
+  self.assertEqual(d['signature'],source.split(' := by')[0])
+  source='theorem t (n : Nat) :\n  let x := n\n  let y := x\n  y = n := by rfl\n'
+  d=list(census.declarations(source))[0]
+  self.assertEqual(d['signature'],source.split(' := by')[0])
  def test_real_frozen_census(self):
   c=census.census()
   ds=[d for f in c['files'] for d in f['declarations']]
