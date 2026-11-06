@@ -10,7 +10,13 @@ import census
 PAIRS = {"byte_component": "original_byte_component", "byte_component_decode": "original_byte_component_decode"}
 
 def theorem_types(text):
+    # Raw-string parsing is outside this lexical check; fail closed.
+    if re.search(r'\br#*"', text):
+        raise ValueError("unsupported Lean raw string literal")
+    if re.search(r"'(?:\\.|[^'\\])'", text):
+        raise ValueError("unsupported Lean character literal")
     code = census.mask(text)
+    literal_code = census.mask(text, strings=False)
     declarations = list(census.DECL.finditer(code))
     result = {}
     for i, match in enumerate(declarations):
@@ -21,7 +27,13 @@ def theorem_types(text):
         if not name: raise ValueError("unsupported theorem identifier")
         prefix = tail[name.end():]
         prefix = prefix[:census.statement_end(prefix)]
-        result[name[1]] = " ".join(prefix.split())
+        # Mask strings only to locate syntax boundaries, never for equality.
+        start = match.end() + name.end()
+        raw_type = literal_code[start:start + len(prefix)]
+        chunks = re.split(r'("(?:\\.|[^"\\])*"|«[^»]*»)', raw_type)
+        result[name[1]] = "".join(
+            chunk if index % 2 else " ".join(chunk.split())
+            for index, chunk in enumerate(chunks))
     return result
 
 def compare(original, candidate):
