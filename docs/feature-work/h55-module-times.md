@@ -1233,3 +1233,35 @@ complete import proof. The existing checkpoint's Lake invocations do not
 themselves provide this assignment's authenticated single-process/no-swap
 resource envelope; the fake-Lake test cannot establish that envelope. Full
 H109 Lean gates, matched measurements and Sol runner remediation stay open.
+
+## Upstream, G49 and Yul runtime fixture rows
+
+`standalone_runtime_classify.py` records 71 supplied tracked candidates:
+41 upstream fixtures, six G49 files and 24 Yul-composition files. The v2
+artifact and superseded first output are checksum-bound in
+`tests/h55/module-times/upstream-g49-yul-evidence.sha256`. Source hashes
+and lexical hints are retained, but subsets are accepted and actual current
+commands, inputs and outcomes remain unresolved. Lexical hints can occur in
+comments or omit syntax.
+
+Three upstream fixtures (`EnumAbiRanges`, `AbiEntryReplay`, `Replay`) have
+explicit source references in `scripts/test-solidity.test.mjs`; their
+prerequisites and serial/resource policy still need verification. Other
+upstream fixtures include relative AST inputs, `#eval`, guarded diagnostics
+and I/O hints; these do not by themselves establish process outcomes.
+
+G49 includes pass and axiom controls, a premise inventory and two staged
+snapshots. `check-pass-correct.py` and `check-pass-chain.py` are candidate
+drivers with private evidence; alternate controls need explicit options and
+prerequisites. The staged calculus controls reference a missing live producer
+and are not silently treated as checked. G49 premise inventories and finite
+controls do not establish source/compiler correspondence.
+
+The Yul group has 18 reviewed root runtime drivers, two control/signature
+files and four held source files. Driver `main` output and external replay
+are distinct from Lean theorem checks; the held files retain unresolved VY4
+producer dependencies and are not excluded from the requested census. A
+review found the first classifier would label any newly added `*Driver` as
+reviewed; it now accepts only the explicit reviewed set and rejects unknown
+ones. Independent read-only reviews checked these roles without Lean, server
+or builds. No H56 run or production acceptance is inferred.
