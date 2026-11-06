@@ -38,16 +38,14 @@ assert len(inventory['rawConstructors']['RawStmt'])==42
 assert all(not re.search(r'\b(?:sorry|axiom|admit)\b', q.read_text())
            for q in (root/'Solidity/Frontend/ExecutableAst/Shared').glob('*.lean'))
 
-# The caller must perform the authorized fetch/rebase first. The common ancestor
-# excludes unpublished local work, even when HEAD is ahead of the publication.
-# A published adoption therefore needs no audit-code edit for each new SHA.
-publishedRef='refs/remotes/origin/master'
-subprocess.run(['git','show-ref','--verify','--quiet',publishedRef],cwd=root,check=True)
-common=subprocess.check_output(['git','merge-base','--all','HEAD',publishedRef],cwd=root,text=True).splitlines()
-assert len(common)==1, 'ambiguous published ownership baseline'
-ownershipBase=common[0]
+# H68: this recorded publication is immutable. Moving remote refs must never
+# hide committed out-of-scope changes. Updating the pin is an explicit review.
+pin=json.loads((root/'tests/directruntime-20261104/shared-translator/ownership-baseline.json').read_text())
+ownershipBase=pin['commit']
+assert re.fullmatch(r'[0-9a-f]{40}', ownershipBase), 'invalid ownership baseline'
 subprocess.run(['git','merge-base','--is-ancestor',base,ownershipBase],cwd=root,check=True)
+subprocess.run(['git','merge-base','--is-ancestor',ownershipBase,'HEAD'],cwd=root,check=True)
 files=subprocess.check_output(['git','diff','--name-only',ownershipBase],cwd=root,text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=root,text=True).splitlines()
 allowed=lambda p:p=='Solidity/Tools/DirectRuntime.lean' or p.startswith(('Solidity/Frontend/ExecutableAst/Shared/','tests/directruntime-20261104/shared-translator/')) or p=='docs/feature-work/directruntime-shared-translator.md'
 assert all(allowed(p) for p in files), 'unowned path modified'
-print(json.dumps({'publishedReaderStringLiteralCount':len(literals(removed)),'currentReaderChange':'whole-root metadata admission after unchanged legacy decoding','proofSearchBlock':'byte-identical','assertionBuilder':'callback extraction, reference gate and existing lexical renamer with scope/freshness checks','exportedWrapper':'byte-identical','ownedPathsOnly':True,'ownershipComparisonBase':ownershipBase,'publicationRef':publishedRef,'newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))
+print(json.dumps({'publishedReaderStringLiteralCount':len(literals(removed)),'currentReaderChange':'whole-root metadata admission after unchanged legacy decoding','proofSearchBlock':'byte-identical','assertionBuilder':'callback extraction, reference gate and existing lexical renamer with scope/freshness checks','exportedWrapper':'byte-identical','ownedPathsOnly':True,'ownershipComparisonBase':ownershipBase,'ownershipBaselineRecord':'ownership-baseline.json','newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))
