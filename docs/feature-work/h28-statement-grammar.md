@@ -3218,3 +3218,22 @@ The coordinator asked for four more steps on 2026-11-06.
    so it is outside this lane. The two relations stay separate, and
    uniqueness needs both witnesses.
 4. **Full gate:** below.
+
+### Gates for moved-lane checkpoint AH
+
+- Lean MCP per-file diagnostics, severity error, all clean: `AtomNested`,
+  `AtomAsm`, `tests/…/AtomTryControls`, `AtomDerivesControls`.
+- `#print axioms`: every new theorem is within `propext` and `Quot.sound`.
+- `LEAN_NUM_THREADS=2 ./run-lean.sh` at `65f452c8`: "Build completed
+  successfully (6400 jobs)". With two threads, no module was killed for lack
+  of memory. The script still exits 1, in its last step: `check-solkey.sh`
+  against the unpinned `../solkey` reports "167 mismatch(es)", as in earlier
+  runs. That step reads nothing this lane changes.
+- `SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key
+  scripts/check-solkey.sh`, the pinned rules: "OK — annotations match",
+  377 taclets.
+- `register.sh --check`, `fragments.sh --check` and `check-layers`: pass.
+- `check-orphans`: 6384 reachable, 0 orphaned.
+- `check-trust`: 0 findings.
+- `check-doc-paths`: one missing reference, the same one that predates this
+  lane.
