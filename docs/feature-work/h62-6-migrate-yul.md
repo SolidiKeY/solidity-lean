@@ -148,3 +148,142 @@ Evidence: `/workspace/migrate-yul-artifacts/evidence` plus each private run dire
 Static checksum manifest: `/workspace/migrate-yul-artifacts/SHA256SUMS`.
 No final timing comparison, elaborated frozen-interface hash, all-module new
 build, owner approval, or final root gate acceptance exists yet.
+
+## Continuation checkpoint: resource calibration and scoped backfill
+
+The original goal remains active and unfinished. Original VM:
+`ccarenv_b64_Y2NhcmVudl8yODkwNjBkZWY4ZjA4MTkxODQxNGQ4ODBiMjNlNzAwNw`.
+Goal reference: launcher-owned original objective, rendered prompt SHA256
+`97ec48be960b9ab7efbf4fb5c674d50e2306820a8ab6c082e8f9e1b6a8139e53`.
+No goal was created/reset; `get_goal` is not exposed, which the coordinator
+confirmed is not a blocker. Resume this same VM/branch, not a replacement goal.
+
+The first CLEAN attempt **failed**, not passed:
+`/workspace/migrate-yul-artifacts/old-yul-clean/yul-result.json` records 425
+successful modules followed by `Solidity.Source.Horizon` resource stop, exit
+`-15`, target wall 547.6047 seconds, sampled target/group peak 6,750,199,808 bytes.
+Its v1 guard measured raw cgroup headroom, including reclaimable cache as used.
+A targeted, explicitly non-clean v2 probe also **failed**:
+`/workspace/migrate-yul-artifacts/old-horizon-guard-v2/probe-result.json`, target
+wall 653.2827 seconds, RSS 8,292,679,680 bytes. Its recorded stop has cgroup
+cap 17,179,869,184, current 14,655,553,536, host available 8,469,323,776, and an
+inactive-only estimate of 4,272,156,672 bytes. This is below the fixed 4 GiB
+threshold but omits clean active file cache. Neither attempt is a baseline
+success; neither establishes a new-versus-old slowdown or a Lean proof error.
+
+The reviewed v3 policy estimates availability after reclaim using:
+
+```text
+clean = max(0, file - shmem - dirty - writeback - unevictable)
+allowance = min(clean / 2, measured host low-watermark reserve)
+available = min(host MemAvailable, cgroup cap,
+                max(0, cap - current + clean - allowance))
+```
+
+It counts no slab reclaim and retains the raw and inactive-only metrics.
+The measured host low-watermark reserve is 88,186,880 bytes. This remains a
+sampled estimate, not an allocation guarantee or exact kernel MemAvailable
+replica. All numeric bounds remain unchanged: 12 GiB sampled process-group RSS,
+`-M12288`, 4 GiB estimated available reserve, hard 16 GiB VM cap, no swap,
+`-j1` and `LEAN_NUM_THREADS=1`. No proof budget or VM budget was increased.
+Seven resource controls pass; independent finder and skeptic reviewed the
+calculation, exclusions and allowance. Prior failures are retained.
+
+Next: run `old-horizon-guard-v3` as a non-clean targeted resource probe. If it
+passes, start a fresh `old-yul-clean-v3 --kind yul --clean`; the final new run
+must use the identical hashed driver/resource policy and fresh cache. The
+original KeySort owner dependency remains unresolved. Do not reuse targeted
+probe timing as the full clean baseline. No full timing delta exists.
+
+### String dependency controls
+
+`generate-string-fixtures.py --check` reproduces two small fixtures under the
+assigned tests directory. Legacy reproduces the pinned `headerName?` helper;
+New changes only String trim/drop API spelling and copies. Each checks 23
+finite runtime cases: six accepted inputs and seventeen rejected boundaries,
+including ASCII whitespace, digit-leading/punctuated identifiers, brace errors,
+backslash rules, Unicode letters, NBSP and vertical tab.
+
+The finite String cases are **external execution checks**, not a universal
+parser equivalence proof. An initial uncommitted attempt to reduce the entire
+String packet with `decide` did not reduce; its failed diagnostics remain in
+`old-string-fixture`, `old-string-fixture-v2`, and `old-string-diagnostic`.
+Final fixtures instead clearly separate runtime checks from the two proved
+logical guards: `whitespace_exact` has no axioms; `digit_rejected` uses existing
+`propext`. No new axiom declaration, sorry, native_decide or budget increase was
+introduced. No original/frozen statement or owner parser source was changed.
+
+Passing, source-bound final controls:
+`/workspace/migrate-yul-artifacts/old-string-bound/probe-result.json` and
+`/workspace/migrate-yul-artifacts/new-string-bound/probe-result.json`.
+Both bind fixture and generator hashes before/after. These do not satisfy
+KeySort or authorize editing `Solidity/SortCheck/Parser.lean`.
+
+### Private interface inspection controls
+
+`ExportInterfaces.lean` is an external inspection helper under tests; it is
+not registered in core. It imports private/all module data, retains every
+persisted kernel declaration including shared entries with separate authoritative
+provenance, and records IR-only names separately. Explicit Name/Level/Expr
+encoding preserves binder information, literals, projections and universe order;
+only expression metadata is erased. Type, implementation and proof encodings
+remain separate. It records complete ConstantInfo metadata and a private-kernel
+transitive axiom union, failing on missing dependencies. Anonymous source checks
+still require the prescribed builds; snapshots cover persisted declarations.
+
+`interfaces.py` requires a successful source-bound probe, a fresh output
+path/size/SHA256 recorded by that probe, exact exporter/module/output arguments,
+and matching private-mode header/footer/count. It retains verified deterministic
+gzip snapshots off Git, with separate type/signature/implementation/proof hashes.
+Incomplete, unrelated or modified outputs are rejected. All source and generated
+payload differences, provenance changes and header/IR differences are retained
+for review. Structural agreement is not semantic equivalence, proof replay,
+attribute/instance-priority compatibility or proof-budget acceptance.
+
+The isolated `InterfaceFixture.lean` compiles on both official toolchains; only
+the v4.24 private-module **control** needs `-Dexperimental.module=true`. That
+flag is not added to migration/baseline builds. Both inspectors retain 27
+control declarations, three private declarations and the expected transitive
+`propext` union. Source-public control signatures match. Seven raw generated
+type differences and IR name/count differences remain explicit findings; they
+are not accepted production exclusions or migration passage.
+
+Actual bound output/control evidence:
+
+- `/workspace/migrate-yul-artifacts/interface-fixture-old-bound/probe-result.json`
+- `/workspace/migrate-yul-artifacts/interface-fixture-new-bound/probe-result.json`
+- `/workspace/migrate-yul-artifacts/old-interface-bound/probe-result.json`
+- `/workspace/migrate-yul-artifacts/new-interface-bound/probe-result.json`
+- `/workspace/migrate-yul-artifacts/evidence/old-interface-bound.json`
+- `/workspace/migrate-yul-artifacts/evidence/new-interface-bound.json`
+- `/workspace/migrate-yul-artifacts/evidence/interface-controls.log`
+- `/workspace/migrate-yul-artifacts/evidence/interface-control-differences.json`
+
+Twelve snapshot acceptance controls pass. The control comparison intentionally
+returns exit 2, `differences_require_review`; it is not a passing frozen-interface
+migration gate. Full Yul interface exports and comparison remain outstanding.
+Finder and skeptic approved the final helper, wrapper and bounded control
+checkpoint; neither ran Lean or wrote files. Full affected checks, fresh clean
+builds, regression disposition and migrate-root-gate acceptance remain required.
+
+### Routing receipt and owner coordination
+
+The coordinator confirmed `relay.sh` is host-only. Its absence is not a VM
+installation task. Keep exact-path requests in CLOUDVM-RESULT for retrieval.
+B-KEYSORT-API still requests the root/live owner migration of
+`Solidity/SortCheck/Parser.lean` (absolute lane path
+`/workspace/migrate-yul/Solidity/SortCheck/Parser.lean`). No owner fix or exact-file
+permission has been received. Existing Yul originals remain unchanged.
+
+Incoming H70 routing is context only, not additional source ownership:
+requester `solidity-h62-2-20261106/audit-label-execution`, head
+`a107fd353aba492a3144da90cabcbde20032ca0c`, requester source
+`/workspace/solidity-lean/tests/h62/item2/audit-label-execution/owner-tickets.json`.
+Coordinator host receipt:
+`/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json`,
+11,017 bytes, supplied SHA256
+`4d515bbb0b5de8540c660ccf8c5f0aa5efa3a2f9d502eba8dab5142391ed51f1`.
+The full ticket is not staged in this VM and was not inspected here. The
+routing reports unfinished audit gates/51 ownership questions; this lane has
+not taken over witness/producer work. No permission, budget change, merge,
+publication or passing-gate claim is inferred from that routing.

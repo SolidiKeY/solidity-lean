@@ -10,7 +10,7 @@ def compare(old,new):
         if not r['modules'] or any(m['exit']!=0 or m.get('stop') for m in r['modules']): raise ValueError('incomplete modules')
         for k in ['source_check_before','source_check_after']:
             if r[k]['status']!='pass': raise ValueError('source verification missing/failing')
-    for k in ['target_order_sha256','config_policy_sha256','resources','swap_total_kib','reserve_bytes','sampled_rss_budget_bytes','guard_interval_seconds','driver_sha256']:
+    for k in ['target_order_sha256','config_policy_sha256','resources','swap_total_kib','reserve_bytes','sampled_rss_budget_bytes','guard_interval_seconds','driver_sha256','resource_helper_sha256','resource_policy']:
         if old[k]!=new[k]: raise ValueError('incomparable '+k)
     if [r['module'] for r in old['modules']] != [r['module'] for r in new['modules']]: raise ValueError('module coverage mismatch')
     wall=(new['wall_seconds']/old['wall_seconds']-1)*100
