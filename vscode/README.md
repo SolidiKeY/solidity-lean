@@ -212,3 +212,49 @@ runs the real servers without Electron. It defaults to language-service checks;
 `parity:check` also checks the independent upstream test-discovery ledger. The
 manual editor-parity workflow offers both transports. Stdio results do not
 establish VS Code UI behavior.
+
+Startup checks the configured Node executable against the existing Node18+ requirement and verifies that the backend directory contains readable `scripts/test-solidity.mjs` and `lean-toolchain` files. Failures offer settings or an explicit Node download-page link; the extension does not install or replace executables. The version item shows actual server initialize identity (or unknown), Node runtime and extension metadata. Initialization is not proof/backend readiness: compiler/runtime/toolchain checks still occur when their operations run. Resource configuration changes restart affected owners while retaining healthy clients.
+
+After LSP initialization, the version item waits separately up to five seconds for the running server's `solidityLean/serverVersion` metadata notification. Missing/malformed data yields unknown; a late notification cannot replace that settled result. The separate initialization deadline remains30seconds. Timers and subscriptions are released on decision, failure or disposal. Early metadata retains normalized name/version only; more than128 candidates or64KiB fails explicitly as startup metadata overflow. These transport bounds do not change version-support or proof budgets.
+
+The status summary distinguishes document compilation/queue/running phases from reported function outcomes. Completion counts include reported proved/direct-correct/failed outcomes, not a count of kernel proofs; unknown, unsupported, stale, cancelled, skipped and audit-qualified results stay explicit. Direct checks are labeled separately. Status packets carry source hashes and reopen synchronization identities. The menu offers local output inspection and a repository-derived issue draft with current version metadata and no automatically attached source; it never submits the issue. External proof-help routing is awaiting an explicit destination.
+
+## Testing hierarchy and editor context
+
+Accepted function results appear under their current compiler symbol ancestors when matching symbols are available. A row verified in a derived contract can refer to a base declaration; its label retains the verification contract and its description identifies that distinction. Missing or historical symbols use a labeled result grouping without inventing parent locations. Parent selection and exclusion apply to their descendants.
+
+The trusted Solidity-file editor context menu exposes the existing verification, discovery, cancellation, output, status and restart actions. These do not compile target programs, execute Solidity programs/tests or supply verification traces. Build/run/test/trace parity and their keybindings remain incomplete pending authentic backend contracts/data.
+
+Owned worker retirement now waits for closure before reusing capacity. The matching local server/client negotiate process ownership for compiler workers and builds; an existing build command starts only after ownership acknowledgement. Cleanup failures remain visible and can block replacement admission. Legacy servers/platforms without these ownership observations do not establish the same crash-cleanup guarantees. This lifecycle infrastructure does not certify proofs, solver retention or rendered Dafny parity.
+
+
+### Concrete execution contract (human decision Q-CLI-01)
+
+Build Compiler Artifact saves the current file and runs the pinned compiler,
+writing an AST plus source-hash manifest under the backend's ignored
+`.lake/editor-source-artifacts/`. It does not prove obligations or claim an EVM
+binary. Concrete Run uses the existing `scripts/solidity-lean.mjs run` typed-model
+executor (`Solidity.Frontend.Cli`), with an explicit `Contract::function(signature)`
+selection and JSON arguments (booleans or exact integer strings). Initial state
+defaults to that CLI's empty state; concrete JSON test cases can specify its
+primitive storage/transaction state. Constructor calls and unsupported model
+inputs remain unsupported; execution is not kernel proof or EVM equivalence.
+
+Concrete Test reads a user-selected JSON file:
+
+```json
+{"schemaVersion":1,"cases":[{"name":"increment","target":"Counter::inc(uint256)","args":["1"],"state":{"storage":{"count":"41"}},"expect":{"status":"ok","text":"ok\nreturns 42\ncount = 42"}}]}
+```
+
+The example's exact text must match that contract's actual CLI result. Each case
+executes independently in the typed model and compares exact status/text;
+`unsupported`, `error` and `diverge` never pass. Expected `revert`/`panic` may be
+asserted explicitly. No test success is published as verification evidence.
+Cases share the existing overall command timeout; jobs are canceled on edit,
+close, relevant resource configuration changes or extension disposal. Save/prompt
+ownership and stale results are checked. Custom include-path/remapping settings
+are explicitly refused for concrete CLI execution until that public CLI exposes
+them; compiler Build supports the existing compiler configuration.
+
+Human H49 excludes the proof-help action. Ordinary output and issue reporting
+remain separate actions; no proof-help destination is selected.

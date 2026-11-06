@@ -47,8 +47,9 @@ class RpcPeer extends EventEmitter {
         clearTimeout(timer);signal?.removeEventListener('abort',abort);
         if(error)reject(error);else resolve(result);
       };
-      const abort=()=>{if(!this.closed)this.notify('$/cancelRequest',{id});finish(failure('Request cancelled',-32800));};
-      const timer=setTimeout(()=>{if(!this.closed)this.notify('$/cancelRequest',{id});finish(failure('Request timed out',-32800));},timeoutMs);
+      const cancel=message=>{let writeError;try{if(!this.closed)this.notify('$/cancelRequest',{id});}catch(error){writeError=error;}finish(failure(message,-32800));if(writeError)this.close(writeError);};
+      const abort=()=>cancel('Request cancelled');
+      const timer=setTimeout(()=>cancel('Request timed out'),timeoutMs);
       this.pending.set(id,{finish});signal?.addEventListener('abort',abort,{once:true});
       try{this.write({jsonrpc:'2.0',id,method,params});}catch(error){finish(error);}
     });
@@ -75,11 +76,22 @@ class RpcPeer extends EventEmitter {
       });
   }
   onRequest(method,handler){this.requests.set(method,handler);}
-  onNotification(method,handler){this.notifications.set(method,handler);}
+  onNotification(method,handler){this.notifications.set(method,handler);return{dispose:()=>{if(this.notifications.get(method)===handler)this.notifications.delete(method);}};}
   close(error=failure('Connection closed')){
     if(this.closed)return;this.closed=true;
     for(const pending of [...this.pending.values()])pending.finish(error);
+    this.notifications.clear();this.requests.clear();
     this.emit('close',error);
   }
 }
-module.exports={LspFrames,RpcPeer,failure};
+function cancellable(promise,signal){
+  if(!signal)return promise;
+  return new Promise((resolve,reject)=>{
+    const finish=(error,value)=>{signal.removeEventListener('abort',abort);if(error)reject(error);else resolve(value);};
+    const abort=()=>finish(failure('Request cancelled',-32800));
+    signal.addEventListener('abort',abort,{once:true});
+    Promise.resolve(promise).then(value=>finish(null,value),error=>finish(error));
+    if(signal.aborted)abort();
+  });
+}
+module.exports={LspFrames,RpcPeer,failure,cancellable};
