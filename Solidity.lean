@@ -624,6 +624,9 @@ import Solidity.Backend.MemoryCopies.AliasBindingControls
 import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.AllocationPanic
 import Solidity.Backend.MemoryCopies.AllocationPanicInterface
+import Solidity.Backend.MemoryCopies.BudgetedDefault
+import Solidity.Backend.MemoryCopies.BudgetedDefaultControls
+import Solidity.Backend.MemoryCopies.BudgetedDefaultInterface
 import Solidity.Backend.MemoryCopies.CanonicalArray
 import Solidity.Backend.MemoryCopies.CanonicalArrayControls
 import Solidity.Backend.MemoryCopies.CanonicalArrayInterface
