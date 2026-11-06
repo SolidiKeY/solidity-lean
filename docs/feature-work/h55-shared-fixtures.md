@@ -465,3 +465,26 @@ performance pass, source migration or scope-complete acceptance. No unchanged
 failing configuration should be rerun. The off-Git logs, generated audit
 sources and successful outputs are hashed in
 `tests/h55/shared-fixtures/fitting-census-evidence.sha256`.
+
+## Transient dynamic-bytes and mixed-rethrow review (partial)
+
+The named public statements in `SourceTransientBytesEmitControls` and
+`SourceTransientMixedRethrowControls` retain the following distinct Source
+execution and static-frame observations.
+
+| Control and declarations | Original observations to preserve |
+|---|---|
+| Bytes emit `bytes_event_member`, `arguments_reached`, `memory_reached`, `encoding_reached`, `emit_reached`, `sequence_complete` | Actual event membership, argument allocation at reference 1, exact old/new heap objects, ABI encoding, direct emit and prefixed sequence for arbitrary bytes. Argument/encoding facts quantify over static mode. |
+| Bytes emit `direct_static`, `prefix_static_refusal`, `static_boundary_contrast` | Direct static emit allocates its argument then reverts at `afterArgument`; the static prefix refuses at `opening`; their heap cursors are 2 and 1. |
+| Bytes emit `zero_timeout`, `prefix_argument_timeout` | Preserve zero-horizon timeout at opening and argument timeout after the prefix at written. |
+| Bytes emit `payload_transport`, `complete_vector`, `boundary_cases`, `boundary_lengths`, `actual_payload` | Preserve selector plus ABI head/length/padding, complete account/transient/journal/heap/log vector, actual empty/binary/33-byte executions and lengths 64/96/128. |
+| Bytes emit `wrong_length`, `wrong_padding`, `wrong_byte_order`, `stale_reached`, `fresh_not_stale`, `wrong_reference`, `dangling_error` | Preserve each wrong-payload inequality, valid stale reference 0 versus fresh reference 1, wrong-reference inequality and the explicit malformed dangling-reference failure for either static flag. |
+| Bytes emit `erased_execution`, `rollback_logged`, `wrong_automatic_rollback`, `end_fields`, `end_reads` | Preserve log erasure, explicit journal rollback, negative automatic-rollback observation and end-execution field/read behavior; no automatic heap/log rollback is inferred. |
+| Mixed rethrow `arguments_reached`, `encoding_reached`, `expression_reached`, `declaration_reached`, `sequence_complete` | Preserve argument effects at the reached transient state, packed/standard encoding, allocated reference 2, declaration state and exact rethrown bytes. |
+| Mixed rethrow `static_before_arguments`, `argument_timeout`, `sequence_timeout` | Static prefix refuses at opening; the argument and sequence timeout cases retain their distinct written/local states. |
+| Mixed rethrow `complete_vector`, `rollback_complete_state`, `end_fields`, `transient_reads` | Preserve complete account/transient/journal/heap/log vector, explicit journal rollback and actual pre/post end-execution reads for both owners. |
+| Mixed rethrow `wrong_original_base`, `wrong_reversed_payload` | Preserve the negative controls distinguishing the reached journal base and reversed standard-encoding payload. |
+
+This matrix covers the named public statements of these two files only;
+private/generated declarations, the rest of the Source families and exact
+post-migration acceptance remain open.
