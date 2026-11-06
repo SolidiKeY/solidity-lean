@@ -11,3 +11,6 @@ and register there; no original producer ownership is transferred.
 | `tests/h62/item2/audit-bytecode-selection/LiteralSuccess.lean` | Same-selected-code numeric literal totality, success and trivial-selector controls. |
 | `tests/h62/item2/audit-bytecode-selection/RuntimePremiseWitness.lean` | Closed nonidentity compiler/decoder/consumer/input witness, with local-adapter boundary. |
 | `tests/h62/item2/audit-bytecode-selection/ValueGateSuccess.lean` | Existing public compiler family selection, nonempty success, refusal and mutant controls. |
+
+The HypothesisDomains audit imports the Lean frontend. Keep it audit-only under
+tests; it is not proposed for intrinsic library registration.

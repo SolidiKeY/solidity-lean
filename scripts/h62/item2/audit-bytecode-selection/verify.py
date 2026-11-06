@@ -13,10 +13,26 @@ import re
 import resource
 import subprocess
 import time
-from census import mask
+from census import BASE, mask
+import hashlib
 
 DEFAULT_ROOTS = ["tests/h62/item2/audit-bytecode-selection/" + name + ".lean"
-                 for name in ["Witnesses", "LiteralSuccess", "RuntimePremiseWitness", "ValueGateSuccess"]]
+                 for name in ["Witnesses", "LiteralSuccess", "RuntimePremiseWitness", "ValueGateSuccess", "HypothesisDomains"]]
+
+
+def import_path(module):
+    part = r"(?:[A-Za-z_]\w*|«[^»/.\s]+»)"
+    if not re.fullmatch(part + r"(?:\." + part + r")*", module):
+        raise ValueError("unsupported import: " + module)
+    return "/".join(segment[1:-1] if segment.startswith("«") else segment for segment in module.split(".")) + ".lean"
+
+
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def memory_available():
@@ -52,9 +68,7 @@ def main():
         clean = mask((repo / path).read_text())
         for imports in re.findall(r"(?m)^import[ \t]+([^\n]+)", clean):
             for module in imports.split():
-                if not re.fullmatch(r"[A-Za-z_][\w.]*", module):
-                    raise ValueError("unsupported import: " + module)
-                dependency = module.replace(".", "/") + ".lean"
+                dependency = import_path(module)
                 if (repo / dependency).is_file():
                     visit(dependency)
                 elif not module.startswith(("Lean", "Init", "Std")):
@@ -84,6 +98,10 @@ def main():
     for index, path in enumerate(order):
         if memory_available() < 4 * 1024**3:
             raise SystemExit("STOP: less than 4 GiB reserve")
+        source_bytes = (repo / path).read_bytes()
+        source_sha256 = hashlib.sha256(source_bytes).hexdigest()
+        if path.startswith("Solidity/") and source_bytes != subprocess.check_output(["git", "show", BASE + ":" + path], cwd=repo):
+            raise SystemExit("STOP: original source differs from frozen base: " + path)
         output = build / Path(path).with_suffix(".olean")
         output.parent.mkdir(parents=True, exist_ok=True)
         command = [str(args.lean), "-j1", "-M8192", "--tstack=131072", "-o", str(output), path]
@@ -118,11 +136,14 @@ def main():
                 time.sleep(0.2)
         record = {"path": path, "command": command, "exit": process.returncode,
                   "seconds": round(time.monotonic() - start, 3), "stop": reason, "log": str(logfile),
-                  "peak_rss_kib": peak_rss_kib, "peak_virtual_kib": peak_virtual_kib}
+                  "peak_rss_kib": peak_rss_kib, "peak_virtual_kib": peak_virtual_kib,
+                  "source_sha256": source_sha256,
+                  "source_unchanged_during_check": file_sha256(repo / path) == source_sha256,
+                  "output_sha256": file_sha256(output) if process.returncode == 0 and output.exists() else None}
         records.append(record)
         (evidence / "verification.json").write_text(json.dumps(records, indent=2) + "\n")
         print(json.dumps(record), flush=True)
-        if process.returncode != 0 or reason:
+        if process.returncode != 0 or reason or not record["source_unchanged_during_check"] or record["output_sha256"] is None:
             raise SystemExit(1)
     print("AUDIT_FILES_SOURCE_CHECK_PASS (not RUNTIME_GATE_PASS)", flush=True)
 

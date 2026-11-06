@@ -269,12 +269,103 @@ explicit. A kernel-type-derived explicit-hypothesis witness domain may help avoi
 manual binder omissions; it must be independently reviewed and must not unfold
 negative conclusions into false extra preconditions or omit hidden premises.
 
+## Third milestone: derived domains and full core census
+
+Four further additive work items are checkpointed: the exact-domain audit
+elaborator and five applications; coherent source validation of all mapped core
+roots; the complete core elaborated census; and its reviewed evidence linker.
+The full assignment and all four checkpoints remain partial.
+
+`HypothesisDomains.lean` derives a new feasibility proposition directly from the
+frozen theorem's raw forall binders. It retains implicit, data, self and proof
+binders with their dependencies, substitutes lets, and replaces only the terminal
+conclusion by True. Not/Ne conclusions are not turned into extra false premises.
+It rejects non-theorems, universe-polymorphic targets and hidden binders under
+reducible results. It imports Lean only in this standalone test module and must
+never enter the intrinsic core or generated roots. Toy cases check these
+boundaries. No frozen declaration or representation was changed.
+
+Four positive domains cover V2 RuntimeConsumer.consume (including consumer self,
+compiler, composition, decoder and actual related input), FrameCertificate.capacity,
+FrameCertificate.prefixes with a populated tail and nonempty executed prefix,
+and no_overfull_output. A fifth theorem refutes the intentional reject_push_program
+domain; it is not a positive witness or a repaired interface. There are now 25
+named audit theorems and two closed proof definitions across the five audit files,
+plus private elaborator regression fixtures. The newer exact-domain ledger does
+not automatically infer coverage from the other 20 audit theorems.
+
+The serial fresh-output check covers 190 mapped core roots, their 703 original
+local source dependencies, and all five audit files: 708 successful checks in
+2,559.278 s. Each journal row records the exact command, unchanged source hash,
+output hash, log, elapsed time and sampled RSS/virtual peaks. All original
+Solidity source bytes match the frozen base. Peak RSS was 3,759,408 KiB; no
+resource stop occurred. The existing 16 GiB cgroup cap, no swap, four GiB reserve,
+Lean eight GiB heap, one thread/-j1 and 300 s per-file limit were retained.
+PowerBounds took 283.104 s versus the earlier same-source 264.308 s (+7.11%);
+this is reproduction evidence, not the final whole-package performance gate.
+
+Actual binaries remain Lean 4.24.0 Release commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b and Lake 5.0.0-src+797c613.
+The bounded KeySort prerequisite already passed (exit zero, 1.768 s;
+`keysort.log` and metadata.json record the command). This audit branch performs
+no toolchain migration or cut-over; the official v4.35.0 pin is preserved in
+coordinator inputs, and no migration/runtime gate is claimed on these results.
+
+The latest inspector uses Lean's original-theorem metadata query. The 190-core
+inventory contains 3,111 records: 2,499 theorem records, 154 direct fields
+(130 proof fields), and 458 other interface/premise constants. It records kernel
+type expressions, binders, direct parents and frozen source hashes. Of the theorem
+records, 1,213 match source names directly and 1,286 retain generated/private
+origin follow-up. Exact-file writer matches are unresolved for 1,145 records.
+Two inspections in the SAME coherent checked-import context took 86.813 s and
+85.810 s and produced byte-identical normalized inventory data. The 37 mapped
+Bridge files remain explicitly uninspected; inherited obligations are not flattened
+and predicate definitions still need body/role classification.
+
+`witness_ledger.py` links the four positive domains and one refuted control to
+unique frozen records, exact helper result signatures, checked source/output
+hashes and allowlisted axiom output. It leaves 3,106 records uncovered. It is an
+evidence linker that trusts genuine upstream inventory/journal inputs, not an
+independent proof checker or authenticator. It does not establish original
+conclusions or silently waive any source candidate. The output records every
+core declaration once and preserves all 37 uninspected paths.
+
+Independent read-only finder and skeptic reviews used no Lean server/jobs.
+Skeptic found that exit-zero without an output could pass the verifier; this now
+fails closed, with a fake-runner regression. Both reviewers found that an initial
+linker regex accepted weakened helper-type suffixes; it now matches the complete
+expected signature through the proof delimiter. All-five-helper implication and
+disjunction mutations are rejected. Both reviewers confirmed the fixes and no
+remaining blocking finding for this limited milestone. All 16 scanner/inventory/
+evidence regressions pass. The five checked audit files' printed axiom sets use
+only propext, Classical.choice and Quot.sound; no new axiom, sorry, native_decide,
+kernel shortcut or raised maxHeartbeats was introduced.
+
+New evidence lives under the existing off-Git evidence root: full-core-check/,
+full-core-inspection-gates.json, full-core-repeat-gates.json,
+full-core-inventory.json, witness-ledger.json, milestone-3-python-tests.log,
+reviews-milestone-3.md and milestone-3-axioms.json. The source verifier still
+compares only Solidity originals to base: extend that check and resolve vendored
+package roots before claiming Bridge validation.
+
+Pending typed dependencies: Q-O01 requests exact-file owners for the 64 mapped
+Selection/FailurePaths files lacking a snapshot match (coordinator routing is
+not permission to edit them). Q-P6 requests the existing checked ByteWorld.Producer
+and matching emission provenance through PAR/P6-V11 for paired-load domains.
+The current MLOAD slice refusal alone does not refute every possible producer;
+paired loads remain conditional, without weakening their universal memory law.
+Neither missing response grants permission. Q-N01's intentional-control
+classification remains open but does not block positive interface work. The
+previous closed runtime self witness resolved Q-H55-SELF; a general H55 artifact
+is not needed for that closed fixture. The existing single legacy-vacuity owner
+ticket above remains pending, without duplicated escalation or interface edits.
+
 ## Remaining four-checkpoint queue and handoff
 
 | Checkpoint | State | Remaining |
 |---|---|---|
-| 1. Exact frozen inventory and owners | partial | Elaborated complete census including public structure fields; exact-file ownership and global/per-input premise classification for every statement. |
-| 2. Simultaneous witnesses | partial | Almost all statement witnesses; whole runtime composition/compiler/decoder/input conjunctions; deliberate-negative classification. |
+| 1. Exact frozen inventory and owners | partial | Core inventory complete; 37 Bridge files, generated/private origins, inherited obligations, predicate roles, owner gaps and global/per-input classification remain. |
+| 2. Simultaneous witnesses | partial | Four exact-domain links and one negative control; 3,106 core records unlinked, remaining source/Bridge statements and producer dependencies remain. |
 | 3. Public supported-program totality/success | partial | Beyond numeric literal and ValueGate families; remaining public compilers, observable failure, gas, fork and resource boundaries; owner-approved repairs if needed. |
 | 4. Witness/fidelity verification | partial | Complete proof-to-statement census and uncovered-owner report; all final affected/full gates and acceptance/performance checks. |
 
@@ -287,8 +378,10 @@ fresh thread on THIS VM, THIS branch and the SAME persistent goal. Do not
 create a replacement goal, reset the branch, merge, pre-gate, push, publish or
 register modules without the appropriate owner action. Read this handoff,
 `census.json`, the ticket and the two verification logs before continuing.
-The next useful work is an elaborated inventory of structure fields and an
-owner-linked witness ledger, starting with positive Selection interfaces.
+The next useful work is extending the existing exact-domain ledger to the
+remaining positive interfaces, classifying predicate definitions and inherited
+obligations, and resolving coherent Bridge imports plus the paired-load producer
+dependency. Keep all unsupported targets and owner gaps explicit.
 
 Registration proposal for coordinator (not applied): keep the standalone audit
 fixtures directly checked under `tests/h62/item2/audit-bytecode-selection/`.

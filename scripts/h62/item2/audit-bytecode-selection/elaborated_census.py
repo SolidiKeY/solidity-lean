@@ -40,9 +40,7 @@ run_cmd do
     if inScope name then
       let moduleName := (moduleOf name).get!
       let moduleString := moduleName.toString
-      let isTheorem := match info with
-        | .thmInfo _ => true
-        | _ => false
+      let isTheorem := wasOriginallyTheorem env name
       let isProjection := fields.contains name
       let isInterface := decide ((moduleString.splitOn "Interface").length > 1 ∨ (moduleString.splitOn "Premises").length > 1)
       if isTheorem || isProjection || isInterface then
