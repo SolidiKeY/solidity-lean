@@ -219,5 +219,51 @@ class Summary(unittest.TestCase):
             self.assertEqual(mcprun.summarize(m, out)["mutants"]["x"]["outcome"], "error")
 
 
+    def survivor(self, results, kind="sound-survivor", link="Taclet.c"):
+        import json, tempfile, pathlib
+        with tempfile.TemporaryDirectory() as d:
+            out = pathlib.Path(d)
+            (out / "checks").mkdir()
+            m = {"proof_baselines": [], "mutants": [],
+                 "semantic_cases": [{"id": "s", "kind": kind, "family": "f", "constructor": "Taclet.c"}]}
+            base = {"normal-oracle": {"ok": True}, "normal-witness": {"ok": True, "link": link},
+                    "mutant-witness": {"ok": True}, "mutant-oracle": {"outcome": "recorded"}}
+            base.update(results)
+            for ph, res in base.items():
+                if res is not None:
+                    (out / f"checks/semantic.s.{ph}.json").write_text(json.dumps({"result": res}))
+            return mcprun.summarize(m, out)
+
+    def test_sound_survivor_needs_every_phase(self):
+        s = self.survivor({})
+        self.assertEqual(s["semantic"]["s"]["outcome"], "survivor-sound")
+        self.assertTrue(s["controls_pass"])
+        # a survivor proof is never scored as a kill or a witness failure
+        self.assertEqual(s["semantic_witness_validation"]["denominator_killed_or_witness_failed"], 0)
+        self.assertEqual(self.survivor({"normal-witness": {"ok": False}})["semantic"]["s"]["outcome"], "error")
+        self.assertEqual(self.survivor({"mutant-witness": {"ok": False, "witness_failed": True}})
+                         ["semantic"]["s"]["outcome"], "error")
+        self.assertEqual(self.survivor({"mutant-witness": None})["semantic"]["s"]["outcome"], "unrun")
+        self.assertEqual(self.survivor({}, link="Taclet.other")["semantic"]["s"]["outcome"], "error")
+
+    def test_sound_all_must_be_universal_soundness(self):
+        oracle = ORACLE.replace("theorem source_link :", "theorem source_link_all :").replace(
+            "#print axioms source_link\n", "#print axioms source_link_all\n").replace(
+            "checked_kill", "sound_all")
+        def run(sig):
+            items = [item(107, "H28.T.sound_all : " + sig, "info")]
+            for n in ("source_link_all", "sound_all"):
+                items.append(item(105, f"'H28.T.{n}' does not depend on any axioms", "info"))
+            return mcprun.semantic_success(items, REG, oracle, ["source_link_all", "sound_all"])["ok"]
+        self.assertTrue(run("∀ σ, Solidity.Premise.Sound m s p σ"))
+        self.assertFalse(run("¬Solidity.Premise.Sound m s p σ"))
+        self.assertFalse(run("Solidity.Premise.Sound m s p σ"))
+        self.assertFalse(run("True"))
+
+    def test_negative_control_expectation(self):
+        s = self.survivor({"mutant-witness": {"ok": False, "witness_failed": True}}, kind="negative-control")
+        self.assertEqual(s["semantic"]["s"]["outcome"], "witness-failed")
+
+
 if __name__ == "__main__":
     unittest.main()

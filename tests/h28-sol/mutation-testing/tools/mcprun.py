@@ -306,7 +306,7 @@ def owned(oracle_text):
 
 def link_constructor(oracle_text):
     """The table and constructor that `source_link` is proved by."""
-    m = re.search(r"^theorem source_link\b(.*?):=\s*(?:fun [^=]*=>\s*)?\.(\w+)", oracle_text, re.S | re.M)
+    m = re.search(r"^theorem source_link(?:_all)?\b(.*?):=\s*(?:fun [^=]*=>\s*)?\.(\w+)", oracle_text, re.S | re.M)
     if not m:
         return None
     owner = re.search(r"\b(CallbackTaclet|LeanTaclet|Taclet)\b", m[1])
@@ -339,6 +339,11 @@ def semantic_success(items, regions, oracle_text, require):
         return {"ok": False, "reason": "missing required theorem(s) " + ", ".join(missing)}
     sigs = {x["message"].split(" :", 1)[0]: x["message"] for x in region(items, regions, "oracle")
             if x["severity"] == "info" and re.match(r"@?" + re.escape(ns) + r"\.\w+ :", x["message"])}
+    if "sound_all" in require:
+        sound = [v for k, v in sigs.items() if k.lstrip("@") == ns + ".sound_all"]
+        flat = re.sub(r"\s+", "", sound[0]) if len(sound) == 1 else ""
+        if not flat or "Solidity.Premise.Sound" not in flat or "¬" in flat or "∀" not in flat:
+            return {"ok": False, "reason": "sound_all does not state Premise.Sound universally"}
     if "checked_kill" in require:
         kill = [v for k, v in sigs.items() if k.lstrip("@") == ns + ".checked_kill"]
         if len(kill) != 1 or "¬Solidity.Premise.Sound" not in re.sub(r"\s+", "", kill[0]):
@@ -348,7 +353,7 @@ def semantic_success(items, regions, oracle_text, require):
 
 def source_link_rejection(items, regions, oracle_text, constructor=None):
     lines = body(oracle_text).splitlines()
-    idx = [i for i, l in enumerate(lines) if re.match(r"theorem source_link\b", l)]
+    idx = [i for i, l in enumerate(lines) if re.match(r"theorem source_link(?:_all)?\b", l)]
     if len(idx) != 1:
         return {"ok": False, "reason": "no unique source_link"}
     link = regions["oracle"][0] + idx[0]
@@ -449,21 +454,28 @@ def run(args):
     free = list(bridges)
     lock = threading.Lock()
 
+    # Earlier records indexed by the sha256 of their scratch file (the whole
+    # Lean input but the imported modules, which the caller must show
+    # unchanged): an identical file is never elaborated twice.
+    prior_index = {}
+    for d in (args.reuse or []):
+        for p in sorted((Path(d) / "checks").glob("*.json")):
+            old = json.loads(p.read_text())
+            if old.get("status") == "complete" and "diagnostics" in old and "reused_from" not in old:
+                prior_index.setdefault(old.get("scratch_sha256"), p)
+
     def reused(key, ttext, otext, target):
         """A prior record of the identical scratch file: its Lean diagnostics
         are reused and re-classified by this code."""
-        if not args.reuse:
-            return None
-        p = Path(args.reuse) / "checks" / (key + ".json")
-        if not p.exists():
+        text, regions = assemble(target, ttext, otext)
+        p = prior_index.get(sha(text))
+        if p is None:
             return None
         old = json.loads(p.read_text())
-        text, regions = assemble(target, ttext, otext)
-        if old.get("scratch_sha256") != sha(text) or old.get("status") != "complete" or "diagnostics" not in old:
-            return None
         record = {k: old[k] for k in ("command", "bridge", "exit", "elapsed_s", "stderr", "status")}
         record.update(name=key, scratch_sha256=old["scratch_sha256"], regions=regions,
-                      reused_from={"head": old.get("head"), "manifest_sha256": old.get("manifest_sha256"),
+                      reused_from={"run": p.parent.parent.name, "record": p.name,
+                                   "head": old.get("head"), "manifest_sha256": old.get("manifest_sha256"),
                                    "record_sha256": sha(p.read_bytes())})
         return record, old["diagnostics"]
 
@@ -508,6 +520,8 @@ def run(args):
             elif phase == "proof":
                 record["result"] = proof_classify(items, regs, entry["affected"], obody,
                                                   "callback" if target == CALLBACK else "rules")
+            elif phase == "mutant-witness" and entry["kind"] == "sound-survivor":
+                record["result"] = semantic_success(items, regs, otext, ["source_link_all", "sound_all"])
             elif phase in ("normal-witness", "mutant-witness") and entry["kind"] == "equivalent-control":
                 record["result"] = semantic_success(items, regs, otext, ["source_link_all", "equivalence_all"])
             elif phase in ("normal-oracle", "mutant-witness"):
@@ -538,7 +552,7 @@ def run(args):
         for b in bridges:
             b.stop()
     summary = summarize(manifest, out)
-    summary.update(reuse=args.reuse and str(Path(args.reuse).name),
+    summary.update(reuse=[str(Path(r).name) for r in (args.reuse or [])],
                    reused_checks=len([p for p in (out / "checks").glob("*.json")
                                       if "reused_from" in json.loads(p.read_text())]),
                    manifest=str(rel), manifest_sha256=manifest_sha,
@@ -557,7 +571,9 @@ def link_matches(case, rs):
     (`Tms.*`) is linked to the constructor its witness instantiates, which the
     record shows but this check cannot compare."""
     r = rs.get("normal-witness")
-    ctor = case.get("constructor") or ""
+    # a helper edit whose witness names the constructor it instantiates
+    # declares it (`linked_constructor`), and that one is compared
+    ctor = case.get("linked_constructor") or case.get("constructor") or ""
     if r is None or case["kind"] == "equivalent-control" or ctor.startswith("Tms."):
         return True
     return r["result"].get("link") == ctor
@@ -589,6 +605,12 @@ def summarize(manifest, out):
             o = "equivalent" if ok("normal-oracle") and ok("mutant-witness") else "unrun-or-error"
         elif any(rs[p] is None for p in ("normal-oracle", "normal-witness", "mutant-witness")):
             o = "unrun"
+        elif c["kind"] == "sound-survivor":
+            # a universal proof that the mutant's premise is sound, linked to
+            # the mutant (and rejected on the normal table): a certified
+            # survivor, never a kill and never an unexplained one
+            o = ("survivor-sound" if link_matches(c, rs) and ok("normal-oracle") and ok("normal-witness")
+                 and ok("mutant-witness") else "error")
         elif not link_matches(c, rs):
             o = "link-mismatch"  # the witness is linked to another constructor: never a kill
         elif ok("normal-oracle") and ok("normal-witness") and ok("mutant-witness"):
@@ -616,6 +638,8 @@ def summarize(manifest, out):
             controls[c["id"]] = {"expect": "killed", "actual": semantic[c["id"]]["outcome"]}
         elif c["kind"] == "equivalent-control":
             controls[c["id"]] = {"expect": "equivalent", "actual": semantic[c["id"]]["outcome"]}
+        elif c["kind"] == "sound-survivor":
+            controls[c["id"]] = {"expect": "survivor-sound", "actual": semantic[c["id"]]["outcome"]}
     return {
         "controls": controls,
         "controls_pass": all(v["expect"] == v["actual"] for v in controls.values()),
@@ -646,7 +670,8 @@ if __name__ == "__main__":
     r.add_argument("--jobs", type=int, default=2)
     r.add_argument("--only", nargs="*")
     r.add_argument("--resume", action="store_true")
-    r.add_argument("--reuse", help="earlier run directory: reuse diagnostics of byte-identical scratch files")
+    r.add_argument("--reuse", action="append",
+                   help="earlier run directory (repeatable): reuse diagnostics of byte-identical scratch files")
     r.add_argument("--bridge-base", type=int, default=0, help="first daemon index (concurrent runs)")
     r.add_argument("--allow-dirty", action="store_true", help="development only; never for recorded runs")
     s = sub.add_parser("summarize")
