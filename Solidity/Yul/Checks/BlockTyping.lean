@@ -160,4 +160,27 @@ example : expressionPolicy .A (call "add" [lit 257, lit 1]) = some (.ok ()) := r
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.ScopedBlockTyping.WalkD.result_unique
 
+/- Literal spelling differences do not bypass normalized switch-label uniqueness. -/
+def normalizedDuplicateCases : Syn (.list .yulCase) :=
+  list [.yulCase (.dec 1) .nil,.yulCase (.hex 1) .nil]
+def normalizedDistinctCases : Syn (.list .yulCase) :=
+  list [.yulCase (.dec 1) .nil,.yulCase (.hex 2) .nil]
+#guard (ScopedBlockTyping.checkNode .closed normalizedDuplicateCases
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).map
+  (fun result => result.1.map (fun value => value.val)) = some [1,1]
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl
+  (.yulSwitch (lit 0) normalizedDuplicateCases .none)).isNone
+#guard (ScopedBlockTyping.checkNode .closed normalizedDistinctCases
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).map
+  (fun result => result.1.map (fun value => value.val)) = some [1,2]
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl
+  (.yulSwitch (lit 0) normalizedDistinctCases .none)).isSome
+
+/-- info: 'Solidity.Yul.ScopedBlockTyping.CaseD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.CaseD.result_unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.CasesD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.CasesD.result_unique
+
 end Solidity.Yul.Checks.BlockTyping
