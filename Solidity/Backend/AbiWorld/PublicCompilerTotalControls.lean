@@ -7,8 +7,8 @@ single-value internal call is accepted through the theorem and,
 independently, by kernel evaluation of the public entry. A signed `&`
 formerly refused is now accepted. Negative controls kernel-observe refusals
 for two remaining side conditions (self balance, a non-`uint` mapping key);
-the word-fit and alias conditions are refusals of `locIn`/`bindFl` by their
-code and have no kernel control here. -/
+the word-fit conditions are refusals of `locIn` by its code without a kernel
+control; the alias conditions are domain choices, not refusals. -/
 namespace Solidity.Backend.AbiWorld.PublicCompilerTotalControls
 open Solidity.Evm Solidity.Backend.AbiWorld.PublicCompilerTotal
 

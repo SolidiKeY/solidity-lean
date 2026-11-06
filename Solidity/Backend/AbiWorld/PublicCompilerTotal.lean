@@ -12,18 +12,23 @@ with a data-free machine `revert`; payment refusal; divergence with a fault).
 The domain is stated here as inductive predicates over the intrinsic syntax.
 They mention no acceptance function, no fragment (`Frag`) and no compile
 result; the word-fit side conditions read the backend's storage layout
-(`Evm.offset`, `W`). It is the core branch's fragment without the parts that
-depend on alias bookkeeping (H87 widened it by signed `&`/`|`/`^`, plain
-storage aliases and storage compound assignment): scalar programs over
-locals, storage locations and storage aliases bound to index-free paths, with
-branches, blocks, loops and single-value internal calls. The remaining side
-conditions are refusals in the compiler's code (`simpleIn`, `locIn`):
+(`Evm.offset`, `W`). It is a subset of the core branch's fragment (H87
+widened it by signed `&`/`|`/`^`, plain storage aliases and storage compound
+assignment): scalar programs over locals, storage locations and storage
+aliases bound to index-free paths, with branches, blocks, loops and
+single-value internal calls. Two side conditions are refusals in the
+compiler's code:
 
 * `env` excludes `address(this).balance` (`simpleIn`);
-* mapping keys are `uint` and a fixed array or struct offset fits a word;
-* an alias is declared with an initializer and bound only to index-free
-  paths (an alias through an array index is forgotten at a `pop`, and an unset
-  one is not readable).
+* mapping keys are `uint` and a fixed array or struct offset fits a word
+  (`locIn`).
+
+The others are this domain's choices, not refusals: an alias is declared
+with an initializer and bound only to index-free paths (the compiler accepts
+an unset alias or one through an array index, but then a later read depends
+on fragment state: dead, or forgotten at a `pop`), and the core branch also
+compiles transfers, `push`/`pop`/`delete`, `assignIncDec` and static storage
+copies, which are outside this domain.
 
 `compile_core` proves every program of the domain is compiled, from every
 fragment whose locals are all readable (`Readable`, e.g. `Frag.init`) and

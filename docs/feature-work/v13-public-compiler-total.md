@@ -16,21 +16,27 @@ and the G49 base (`origin/cloud/move6-20261106/g49-base`):
 | Fixed outcome/returndata observation | `Compiler.Compilation.Agrees`, obtained from `Compilation.Input` by `Compilation.correct`: success with typed state, stack and the branch's `Rep`; a disjunction pairing each source outcome with a machine outcome (one direction, no converse): source revert or asserting panic with machine `.revert`; source success with a payment revert; divergence with fault (or payment revert). The machine `revert` carries **no returndata**. The core branch refuses `revertData`/`catchData`/`tryCall` (`inFrag` returns `none`); refusal by the seven memory backends is observed in examples, not proved generally. |
 | Supported input domain (this lane's statement) | `PublicCompilerTotal.ProgOk`: inductive predicates over the intrinsic syntax that mention no acceptance function, fragment or compile result (the word-fit conditions read the backend storage layout `Evm.offset`). Storage paths (aliases; roots; struct fields whose offset fits a word; `uint`-keyed mappings; dynamic and word-sized fixed arrays); values: literals, booleans, locals, environment reads other than `address(this).balance`, storage reads, every typed unary and binary operator, ternaries and storage-array lengths; statements: storage value assignment, local assignment, value declarations, storage-alias declarations with an initializer and rebinds, both to index-free paths (`FreePath`), `op=`/`++`/`--` on locals and storage locations, `require`, `assert`, `revert`, `if`, blocks, `while`, internal calls with value arguments and no or one value return. Widened by H87 (2026-11-06). |
 
-**Framing and H87.** The domain is the part of the core branch's fragment
-that does not depend on alias bookkeeping: each side condition mirrors a check
-of `simpleIn`, `locIn` or `bindFl`. The user's decision H87 (relayed
-2026-11-06, answering Q1) required widening before acceptance: signed
-`&`/`|`/`^`, aliases and storage compound assignment. All three are now in the
-domain; signed bitwise needed a compiler extension (below). The remaining
-documented gaps (H87: stay gaps): `address(this).balance`, non-`uint` mapping
-keys, aliases bound through an array index or left unset, memory,
-transfers/sends, pushes/pops/deletes, multiple returns, recursion and external
-calls. The domain is not widened to G01 `S.Admitted`.
+**Framing and H87.** The domain is a subset of the core branch's fragment.
+The user's decision H87 (relayed 2026-11-06, answering Q1) required widening
+before acceptance: signed `&`/`|`/`^`, aliases and storage compound
+assignment. All three are now in the domain; signed bitwise needed a compiler
+extension (below). Remaining exclusions (H87: they stay documented gaps), in
+two kinds:
+
+- refused by the compiler: `address(this).balance` (`simpleIn`), non-`uint`
+  mapping keys and word-overflowing offsets (`locIn`), `send`, memory
+  statements outside the core branch, multiple returns, recursion and
+  external/self/library calls;
+- compiled by the core branch but outside this domain: aliases left unset or
+  bound through an array index (later reads depend on fragment state),
+  transfers, `push`/`pop`/`delete`, `assignIncDec` and static storage copies.
+
+The domain is not widened to G01 `S.Admitted`.
 
 The Controls kernel-evaluate the public entry on `address(this).balance` and
 on an `int`-keyed mapping read and observe refusal (`isNone`), and on a signed
-`&` and observe the former refusal is gone; the word-fit and alias conditions
-are refusals by `locIn`/`bindFl`'s code without a kernel control.
+`&` and observe the former refusal is gone; the word-fit conditions are
+refusals by `locIn`'s code without a kernel control.
 
 ## H87 compiler extension: signed `&`, `|`, `^`
 
@@ -47,6 +53,13 @@ already compiled through `sarCode`). The Bitwise packet control that asserted
 the old refusal is now the acceptance fact
 (`PrimitivePackets/Bitwise/Selected.signed_accepted`,
 `Passes/BitwiseValueContextControls.signed_acceptance`; pin renamed).
+Stale records, proposed for their owners and not edited here: R12 in
+[G04 restrictions](roadmap-g04-restrictions.md) (both halves now compiled;
+`Layout.lean:410` moved), the note in
+[V09 passes](roadmap-v09-compiler-passes.md) that signed `&`, `|`, `^` stay
+uint-only, and the generated [G03 ledger](roadmap-g03-ledger.md) (and its
+JSON) via `scripts/roadmap-g03-ledger.py`, which still calls signed `&`, `|`,
+`^` refused.
 Checking note: `Layout.lean` is imported early, so this rebuilds most of the
 library once; no proof became slower by design.
 
@@ -66,8 +79,10 @@ from every readable fragment, that programs push, pay and shrink nothing, and
 that `inFragP` only pushes readable locals (`Grows`) and rebinds leave a
 readable fragment unchanged (`Readable.set`), so branch meets, scope
 restriction and the loop fixed-point check hold. Axioms: `propext`, `Classical.choice`, `Quot.sound` (the library standard)
-(guarded in the Controls). No compiler, statement, premise or observation is
-changed; no `maxHeartbeats` option is used.
+(guarded in the Controls). H87 changed the compiler (signed bitwise, above)
+and this lane's own theorems (the `Readable F` premise, which the alias cases
+need; alias-free programs from an arbitrary fragment are no longer stated
+separately). No frozen statement changed; no `maxHeartbeats` option is used.
 
 Controls: an inhabited program using a storage read, a storage alias with a
 rebind, a mapping write through it, storage `+=` and `++`, a signed `&`, a
