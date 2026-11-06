@@ -75,7 +75,8 @@ run_cmd do
     let valueRefs := (((ci.value? true).map Expr.getUsedConstants).getD #[] |>.map Name.toString).qsort (· < ·)
     let row := Json.mkObj [
       ("module", toJson m), ("name", toJson n.toString), ("name_key", nameJson n), ("kind", toJson (kind ci)),
-      ("unsafe", toJson ci.isUnsafe), ("level_parameters", Json.arr (ci.levelParams.toArray.map nameJson)),
+      ("unsafe", toJson ci.isUnsafe), ("private_name", toJson (isPrivateName n)),
+      ("protected_name", toJson (isProtected env n)), ("level_parameters", Json.arr (ci.levelParams.toArray.map nameJson)),
       ("type", typeJson ci.type), ("type_constants", toJson typeRefs), ("value_constants", toJson valueRefs)]
     liftIO <| handle.putStrLn row.compress
   liftIO <| handle.putStrLn <| (Json.mkObj [("complete", toJson true), ("declarations", toJson roots.size)]).compress

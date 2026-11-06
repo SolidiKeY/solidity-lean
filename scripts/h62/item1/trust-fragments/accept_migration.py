@@ -19,17 +19,15 @@ import lane_history
 PATCH = collect.ROOT / 'scripts/h62/item1/trust-fragments/migration.patch'
 
 
-def coverage(original, candidate, lane_root):
+def coverage(original, candidate, files):
     if hashlib.sha256(original).hexdigest() != accept_baseline.SHA256:
         raise ValueError('frozen baseline checksum mismatch')
     old_imports = set(re.findall(rb'(?m)^import (\S+)', original))
     imports, additions = set(), []
-    if lane_root.exists():
-        for lane in sorted(lane_root.iterdir(), key=lambda p: p.name):
-            for path in sorted(lane.iterdir(), key=lambda p: p.name):
-                item = json.loads(path.read_text(encoding='utf-8'))
-                imports.update(x.encode() for x in item['imports'] if x.encode() not in old_imports)
-                additions.extend(x.encode() for x in item['headlines'])
+    for path, data in sorted(files.items(), key=lambda row: tuple(row[0].split('/', 1))):
+        item = json.loads(data.decode('utf-8'))
+        imports.update(x.encode() for x in item['imports'] if x.encode() not in old_imports)
+        additions.extend(x.encode() for x in item['headlines'])
     prefix = b''.join(b'import ' + name + b'\n' for name in sorted(imports))
     start = original.index(b'  let headlines : List Name := [')
     end = original.index(b']', start)
@@ -48,6 +46,10 @@ def coverage(original, candidate, lane_root):
             'generated_sha256': hashlib.sha256(candidate).hexdigest()}
 
 
+def read_commit_audit(head):
+    return subprocess.check_output(['git', 'show', f'{head}:TrustAudit.lean'], cwd=collect.ROOT)
+
+
 def accept(lane_root, candidate=None, require_installed=False, prior_commit=None):
     original = subprocess.check_output(['git', 'show', f'{accept_baseline.BASE}:TrustAudit.lean'], cwd=collect.ROOT)
     fragments = collect.collect(collect.FRAGMENTS)
@@ -61,7 +63,8 @@ def accept(lane_root, candidate=None, require_installed=False, prior_commit=None
                                  str(source), str(PATCH)], capture_output=True, text=True)
         if result.returncode or applied.read_bytes() != collect.MARKER + original:
             raise ValueError(f'migration patch does not reproduce the marked baseline: {result.stderr}')
-    generated = collect.MARKER + collect.collect_lanes(fragments, lane_root)
+    snapshot = lane_history.read_current_files(lane_root)
+    generated = collect.MARKER + collect.collect_lane_snapshot(fragments, snapshot)
     if checked_in not in (original, generated):
         raise ValueError('checkout audit is neither the original nor the generated migration')
     if require_installed and checked_in != generated:
@@ -75,19 +78,25 @@ def accept(lane_root, candidate=None, require_installed=False, prior_commit=None
             raise ValueError('installed gate requires the canonical lane directory')
         head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=collect.ROOT).decode().strip()
         committed = lane_history.read_commit_files(head)
-        if committed != lane_history.read_current_files(lane_root):
+        if committed != snapshot:
             raise ValueError('lane inputs do not match committed HEAD')
+        if read_commit_audit(head) != generated:
+            raise ValueError('installed audit does not match committed HEAD')
     if prior_commit is not None:
         prior = lane_history.read_commit(prior_commit)
-        lane_history.preserve(prior, lane_history.read_current(lane_root))
+        lane_history.preserve(prior, lane_history.inventory_from_files(snapshot))
     if candidate is not None and candidate != generated:
         raise ValueError('candidate does not match generated migration')
-    result = coverage(original, generated if candidate is None else candidate, lane_root)
+    result = coverage(original, generated if candidate is None else candidate, snapshot)
+    if collect.collect(collect.FRAGMENTS) != fragments:
+        raise ValueError('raw fragments changed during acceptance')
+    if lane_history.read_current_files(lane_root) != snapshot:
+        raise ValueError('lane inputs changed during acceptance')
     if collect.AUDIT.read_bytes() != checked_in:
         raise ValueError('checkout audit changed during acceptance')
     if require_installed:
         final_head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=collect.ROOT).decode().strip()
-        if final_head != head or lane_history.read_current_files(lane_root) != committed:
+        if final_head != head:
             raise ValueError('HEAD or lane inputs changed during acceptance')
     result['checkout_state'] = 'original' if checked_in == original else 'migrated'
     result['prior_commit'] = prior_commit

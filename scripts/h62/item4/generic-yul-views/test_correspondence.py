@@ -32,6 +32,18 @@ class CorrespondenceControls(unittest.TestCase):
         original = self.original.replace(': True', ": (' ' : Char) = ' '")
         candidate = self.candidate.replace(': True', ": ('\t' : Char) = ' '")
         with self.assertRaises(ValueError): compare(original, candidate)
+    def test_string_mutation_refused(self):
+        a = self.original.replace('True', '"A" = "A"')
+        b = self.candidate.replace('True', '"A" = "B"')
+        with self.assertRaises(ValueError): compare(a,b)
+    def test_string_whitespace_mutation_refused(self):
+        a = self.original.replace('True', '"A B" = "A B"')
+        b = self.candidate.replace('True', '"A  B" = "A B"')
+        with self.assertRaises(ValueError): compare(a,b)
+    def test_quoted_identifier_mutation_refused(self):
+        a = self.original.replace('True', '«has where A» = «has where A»')
+        b = self.candidate.replace('True', '«has where A» = «has where B»')
+        with self.assertRaises(ValueError): compare(a,b)
     def test_dropped_instance_refused(self):
         with self.assertRaises(ValueError): compare(self.original,self.candidate.splitlines()[0])
 

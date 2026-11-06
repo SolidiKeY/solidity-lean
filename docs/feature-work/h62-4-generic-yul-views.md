@@ -229,3 +229,29 @@ The successor verified all 557 H82b checksum entries and the exact final Git hea
 The external correspondence checker now uses masked text only for declaration/proof boundaries and retains ordinary string and quoted-identifier contents for equality. Whitespace inside literals is significant. Unsupported Lean character literals and raw strings fail closed (including conservative false refusals when their spelling occurs in comments). Nine regression controls pass, including changed literals, escaped whitespace and raw-string refusal. The two real ReadControls/Fixtures type pairs still match. Seven scanner tests and the process-cleanup control also pass. The initial sandbox-only scanner/cleanup attempts failed to create temporary directories; reruns with authorized filesystem access passed. No Lean statements, definitions, axioms or budgets changed; kernel correspondence, complete census/refusal coverage and matched production timings remain pending.
 
 Read-only finder review caught an escaped-character regex defect in the first draft; it was corrected and the finder confirmed the repair. Skeptic review caught raw-string false acceptance; explicit refusal and a mutation regression address it. A further character-literal whitespace finding is likewise handled by explicit refusal and a regression. Neither reviewer ran tests, Lean or a server. Evidence: `/workspace/vy2-evidence/h82b-intake/correspondence-tests.log`.
+## Explicit coordinator resume after integration
+
+The later coordinator instruction explicitly resumed this lane and authorized
+merging origin/master. The clean original branch fast-forwarded from
+67e0398f217da988605a7323efeabbfd44b1a84b to
+d96f2406d352de7e0b72ba6ac4ab29dc457582c6, which contains the reported
+20e492ee99a3fa8679aa526de0b6e731d85e4134 integration. The earlier stopped
+package is preserved as historical evidence; its pause text no longer describes
+the current authorized work. No push or new goal was requested.
+
+Independent backfill repaired the correspondence checker defect recorded by
+both retirement reviewers: comparison now retains literal and quoted-identifier
+contents and normalizes whitespace only outside them. Six external tests pass,
+including changed string values, internal string whitespace and quoted type
+identifiers. The current two selected type comparisons and all 3026 control
+theorem dispositions reproduce. This still supports only selected unquoted
+theorem names and is not a Lean parser or a semantic proof. Original-preservation
+claims continue to require the separate base-blob acceptance evidence.
+
+The integrated tree has no changes to the four previously failing dependency
+files relative to the stopped head; those known failures were not rerun.
+Roadmap axiom drift, Storage dependent elimination and Language migration remain
+waits. Independent queue work remains available; status is partial, not blocked.
+No original Lean source, axiom set, proof budget, interface or observation changed
+in this resumed checkpoint. Kernel fixture/refusal validation and matched timing
+remain open.
