@@ -3,8 +3,9 @@ No decoder/semantic support is inferred from a structural reference match.
 """
 from pathlib import Path
 from collections import Counter,defaultdict
-import hashlib,json,subprocess
+import argparse,hashlib,json,subprocess
 ROOT=Path(__file__).resolve().parents[3];OWNED=Path(__file__).resolve().parent;OUT=OWNED/'artifacts/corpus-inventory'
+parser=argparse.ArgumentParser();parser.add_argument('--read-only',action='store_true');args=parser.parse_args()
 def digest(value):return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()).hexdigest()
 def conform(desc,value):
  if 'node' in desc:assert isinstance(value,dict) and value.get('nodeType')==desc['node']
@@ -163,4 +164,5 @@ assert dict(kindCounts)==summary['nodesByKind'] and dict(edgeCounts)==summary['e
 computedCounts={'documents':len(documents),'nodes':len(seen),'forms':len(forms),'kinds':len(kindCounts),'edges':len(seenEdges),'formsWithSelectedObservations':sum(count>0 for count in observedCounts.values())}
 assert computedCounts==manifest['counts'], 'computed census manifest count mismatch'
 result={'status':'pass','documents':len(documents),'nodes':len(seen),'forms':len(forms),'identityFields':summary['identityFields'],'edges':len(seenEdges),'boundary':'All enumerated occurrences/field schemas/explicit reference slots checked;not source authenticity,lexical/overload adequacy or semantic preservation.'}
-(OUT/'verification.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
+if not args.read_only:(OUT/'verification.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result))

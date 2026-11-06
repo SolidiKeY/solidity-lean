@@ -1,0 +1,432 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "scope": "18 previously unmatched mapped files; producer attribution does not create H30 reservation or edit permission",
+  "files": [
+    {
+      "path": "Solidity/Frontend/Yul/Checks/ClosedSyntax.lean",
+      "declarations": 1,
+      "frozen_sha256": "eff8368d355a5459dc3249e46742b5b8a7fff79cfed76e707734056061fb154b",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/Checks/DeclarationParsing.lean",
+      "declarations": 1,
+      "frozen_sha256": "ea3fe0f410200a33aba3ca8ef8789e4d458b3baeb6649c97469d9971e9988298",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/Checks/Occurrences.lean",
+      "declarations": 1,
+      "frozen_sha256": "cb83df3ec6ff52f1db27eb106bdec86a855ab81f481a74289ff9ec1b7cad44d2",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/Checks/Parsing.lean",
+      "declarations": 6,
+      "frozen_sha256": "e7555ea8ab77e73c88fc1083fb708fe40d32e1b9fbc760154a0207251472d882",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/Checks/ScopedSyntax.lean",
+      "declarations": 2,
+      "frozen_sha256": "930cbe79848af722dabca77c6d07f133abe513793c5025f80542c0bbc02e69b6",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/Checks/WordSyntax.lean",
+      "declarations": 1,
+      "frozen_sha256": "4fbf11882986fa648c5c1c8c1287b2112f5b8f7ab679f462857fe7798139423a",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/ClosedParse.lean",
+      "declarations": 2,
+      "frozen_sha256": "7687e75be61fc9c978719c9fe15e9d16ca8536ce59972ee30e1e671234327b36",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/DeclarationParse.lean",
+      "declarations": 3,
+      "frozen_sha256": "f82dab6b23c3313d564339d7e354a6eb56b5837bf967aa4d20ff426c748d5207",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/Grammar.lean",
+      "declarations": 1,
+      "frozen_sha256": "9322785893b7389e8fb2981d74ee4f58bb0b13d8fc707b829b01ddbb4ddc789c",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/OccurrenceParse.lean",
+      "declarations": 2,
+      "frozen_sha256": "0b3c15af0234ba5dfd1654b7ef7e07853c656baf60b2d1be6b04b5cacb0b31a9",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/Parsing.lean",
+      "declarations": 0,
+      "frozen_sha256": "db1597da25dcfd08697ac57be2506fbcb6fc240a9e6d3a4b6eb4d194feef2270",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/ScopedParse.lean",
+      "declarations": 2,
+      "frozen_sha256": "1719552d16e176916bf61495565786f68c3fafa6cd73f90489da7ae982ae67c8",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/WordParse.lean",
+      "declarations": 2,
+      "frozen_sha256": "0b74dc22e39ab89a67703edc2c43523f1dc091c3ecbac7bf7ae70d835190259f",
+      "live_producer": "VY1 (inline-assembly5/vy1-words)",
+      "owner_mapping_source": "VY1 integration commit, parser-boundary document and registry P16",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-frontend",
+      "migration_reservation": "H62-6-MIGRATE-FRONTEND",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/inline-assembly-vy1.md",
+          "sha256": "22fb9961e4694292f3de55097333a5e15011dec6149f77a29a44e351fb729357"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "89bad2b29005bcc99f720369c3bc1bfdd114f1fd"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "P16"
+    },
+    {
+      "path": "Solidity/Lowering/G19/AssignmentReturnFlagControls.lean",
+      "declarations": 7,
+      "frozen_sha256": "ed5263943b4bc04762ff12de2869cc43c4ba55a44ab4e789c1dcf26c45e3745d",
+      "live_producer": "V17 (v12-v17/v17-validation-release)",
+      "owner_mapping_source": "original user G19->V17 mapping and registry G19",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-lowering",
+      "migration_reservation": "H62-6-MIGRATE-LOWERING",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/integration-20261105T1608Z-v17-validation-release.md",
+          "sha256": "c83f97c9cbf8f21e6699cf53583e2cb829cdb370d324ebdc049dbadc8b672809"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "d412a3c47ddc397026e853f62943abc28834656f"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "b00165c791973181a1da8b38b6e051eee647bd45"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "G19"
+    },
+    {
+      "path": "Solidity/Lowering/G19/AssignmentWhileBreak.lean",
+      "declarations": 4,
+      "frozen_sha256": "bf13b75a25a0cb2a6b416633d145014ecf9e90caed84b2c3587380aaf1c22bf4",
+      "live_producer": "V17 (v12-v17/v17-validation-release)",
+      "owner_mapping_source": "original user G19->V17 mapping and registry G19",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-lowering",
+      "migration_reservation": "H62-6-MIGRATE-LOWERING",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/integration-20261105T1608Z-v17-validation-release.md",
+          "sha256": "c83f97c9cbf8f21e6699cf53583e2cb829cdb370d324ebdc049dbadc8b672809"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "d412a3c47ddc397026e853f62943abc28834656f"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "b00165c791973181a1da8b38b6e051eee647bd45"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "G19"
+    },
+    {
+      "path": "Solidity/Lowering/G19/AssignmentWhileBreakControls.lean",
+      "declarations": 6,
+      "frozen_sha256": "3a1e92798d50535fb9b40f268d3fee97e19114948d1a679a148156555310ba2e",
+      "live_producer": "V17 (v12-v17/v17-validation-release)",
+      "owner_mapping_source": "original user G19->V17 mapping and registry G19",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-lowering",
+      "migration_reservation": "H62-6-MIGRATE-LOWERING",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/integration-20261105T1608Z-v17-validation-release.md",
+          "sha256": "c83f97c9cbf8f21e6699cf53583e2cb829cdb370d324ebdc049dbadc8b672809"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "d412a3c47ddc397026e853f62943abc28834656f"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "b00165c791973181a1da8b38b6e051eee647bd45"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "G19"
+    },
+    {
+      "path": "Solidity/Lowering/G19/ConditionalSequence.lean",
+      "declarations": 4,
+      "frozen_sha256": "a32d3ffaab56c49242cdc1168b1726b657e91202dffd38695f9017cf064d7405",
+      "live_producer": "V17 (v12-v17/v17-validation-release)",
+      "owner_mapping_source": "original user G19->V17 mapping and registry G19",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-lowering",
+      "migration_reservation": "H62-6-MIGRATE-LOWERING",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/integration-20261105T1200Z-v17-validation-release.md",
+          "sha256": "551b5fe704ac134c5d60e3da1b7921c33a9d2939997a9f70569ac74aad6044ed"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "17f34ad5c384e71722eb2933179275f1fe4d94c7"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "G19"
+    },
+    {
+      "path": "Solidity/Lowering/G19/ConditionalSequenceControls.lean",
+      "declarations": 6,
+      "frozen_sha256": "1860a4bc50580ebecd170d88e042323b423dd9b7eecdfc901194727014a03240",
+      "live_producer": "V17 (v12-v17/v17-validation-release)",
+      "owner_mapping_source": "original user G19->V17 mapping and registry G19",
+      "migration_overlay_owner": "solidity-h62-6-20261106/migrate-lowering",
+      "migration_reservation": "H62-6-MIGRATE-LOWERING",
+      "source_evidence": [
+        {
+          "kind": "frozen-document",
+          "path": "docs/feature-work/integration-20261105T1200Z-v17-validation-release.md",
+          "sha256": "551b5fe704ac134c5d60e3da1b7921c33a9d2939997a9f70569ac74aad6044ed"
+        },
+        {
+          "kind": "integration-commit",
+          "commit": "17f34ad5c384e71722eb2933179275f1fe4d94c7"
+        }
+      ],
+      "exact_file_h30_reservation_present": false,
+      "write_authorization": "none granted",
+      "producer_mapping_id": "G19"
+    }
+  ]
+}
