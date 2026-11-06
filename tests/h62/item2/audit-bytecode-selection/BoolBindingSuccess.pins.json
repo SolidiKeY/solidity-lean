@@ -1,0 +1,36 @@
+{
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.always_revert_fails_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.certificate_and_execution_jointWitness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.dirty_word_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.full_valid_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.reject_all_fails_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.short_head_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.validated_local": [
+  "Quot.sound",
+  "propext"
+ ]
+}

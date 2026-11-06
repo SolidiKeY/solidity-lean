@@ -711,3 +711,10 @@ proved rather than assumed. The final strengthened file was rechecked; earlier
 passing versions remain separately hash-bound in the evidence. H112 is respected:
 this is an instantiation of the existing generic BoolBindingCertificate, with
 parameterized success, rather than a new per-shape compiler/Artifact family.
+
+Checkpoint static gates: trust, reachability, layers, generated roots/fragments
+and whitespace pass. Documentation paths fail on five missing references outside
+this lane; the global axiom inventory has zero nonstandard-axiom errors but 106
+unrecorded changes, including this module's seven. A scoped pin proposal is
+provided in the owned audit tests for coordinator registration. Neither failure
+is waived or counted as a whole-checkpoint/full gate pass.
