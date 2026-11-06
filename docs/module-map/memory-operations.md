@@ -543,6 +543,9 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/BudgetedDefaultInterface.lean` | Configurable target word budgets, full selected-default success/refusal and 32-byte live-cell address bounds. |
 | `Backend/MemoryCopies/BudgetedDefault.lean` | Existing-guard bias, total checked selected defaults, complete allocator contract and live-cell address-fit proof. |
 | `Backend/MemoryCopies/BudgetedDefaultControls.lean` | Inhabited certificate, represented empty/nested successes, strict and zero-budget refusals, actual child contents and address-bound controls. |
+| `Backend/MemoryCopies/BudgetedFiniteInterface.lean` | Configurable finite-plan guards with complete existing success and actual declaration growth contracts. |
+| `Backend/MemoryCopies/BudgetedFinite.lean` | Total configurable finite-plan success/refusal and actual declaration growth, retaining the original full contract. |
+| `Backend/MemoryCopies/BudgetedFiniteControls.lean` | Nonzero parent offsets, actual child layout/declaration bindings, retained earlier children and strict/zero budget refusals. |
 | `Backend/MemoryCopies/BudgetedReferenceInterface.lean` | Configurable runtime reference-array budget guard and complete actual success/refusal certificate. |
 | `Backend/MemoryCopies/BudgetedReference.lean` | Division-based runtime budget checking and total complete allocator success/refusal for the unchanged reference constructor. |
 | `Backend/MemoryCopies/BudgetedReferenceControls.lean` | Populated empty/long/reference defaults, oversized unused-child success, overflow/strict-budget refusals and same-heap child contents. |
