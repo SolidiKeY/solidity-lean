@@ -1,4 +1,4 @@
-"""Acceptance predicate tests with synthetic metadata; never proof evidence."""
+"""Acceptance and frozen-baseline regression tests; never proof evidence."""
 import ast,hashlib,importlib.util,json,pathlib,subprocess,sys,tempfile,unittest
 ROOT=pathlib.Path(__file__).resolve().parents[4]
 SCRIPTS=ROOT/'scripts/h62/item2/audit-v08-adapters'
@@ -43,4 +43,25 @@ class Guards(unittest.TestCase):
    with self.assertRaises(ValueError):m.checked_run(root,run)
  def test_require_rejects_false(self):
   with self.assertRaises(ValueError):m.require(False,'metadata rejection')
+
+class FrozenBaseline(unittest.TestCase):
+ def test_exact_one_reviewed_override(self):
+  spec=importlib.util.spec_from_file_location('audit_census',SCRIPTS/'census.py')
+  c=importlib.util.module_from_spec(spec);spec.loader.exec_module(c)
+  frozen=c.frozen_blobs(ROOT)
+  baseline={}
+  for record in subprocess.check_output(['git','-C',str(ROOT),'ls-tree','-rz',c.BASE]).split(b'\0'):
+   if record:
+    metadata,path=record.split(b'\t',1);baseline[path.decode()]=metadata.split()[2].decode()
+  path='Solidity/Backend/CalldataPackets/RawAddress/Controls.lean'
+  self.assertEqual(set(c.BASELINE_OVERRIDES),{path})
+  self.assertEqual({p for p in set(frozen)|set(baseline) if frozen.get(p)!=baseline.get(p)},{path})
+  c.verify_frozen(ROOT,frozen,path)
+  with tempfile.TemporaryDirectory() as tmp:
+   root=pathlib.Path(tmp);target=root/path;target.parent.mkdir(parents=True)
+   target.write_bytes((ROOT/path).read_bytes()+b'\n-- unreviewed drift\n')
+   with self.assertRaises(SystemExit):c.verify_frozen(root,frozen,path)
+   other='unapproved.lean';(root/other).write_text('unapproved')
+   with self.assertRaises(SystemExit):c.verify_frozen(root,frozen,other)
+
 unittest.main()

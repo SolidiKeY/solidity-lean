@@ -14,6 +14,32 @@ from pathlib import Path
 BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 MAP = "docs/module-map/v08-adapters.md"
 
+# Q-WORLD-AUDIT-DRIFT-CURSOR: exact one-file reviewed VY5 baseline.
+# d83228dae5e6d141cd1ff454c75d544fc7f7cb60 adds the empty execution cursor;
+# e8247d9277190b71488387dac594e82b2b191942 is the approved integration snapshot.
+BASELINE_OVERRIDES = {
+    "Solidity/Backend/CalldataPackets/RawAddress/Controls.lean":
+        "e8247d9277190b71488387dac594e82b2b191942",
+}
+
+def frozen_blobs(repo):
+    tracked = subprocess.check_output(["git", "ls-tree", "-rz", BASE], cwd=repo)
+    frozen = {}
+    for record in tracked.split(b"\0"):
+        if not record: continue
+        metadata, path = record.split(b"\t", 1)
+        frozen[path.decode()] = metadata.split()[2].decode()
+    for path, revision in BASELINE_OVERRIDES.items():
+        frozen[path] = subprocess.check_output(
+            ["git", "rev-parse", revision + ":" + path], cwd=repo, text=True).strip()
+    return frozen
+
+def verify_frozen(repo, frozen, path):
+    data = (repo/path).read_bytes()
+    blob = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+    if frozen.get(path) != blob: raise SystemExit("Frozen-source mismatch: " + path)
+
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -133,17 +159,10 @@ def main():
     args = ap.parse_args()
     repo = args.repo.resolve(); out = args.out.resolve()
     if out == repo or repo in out.parents: raise SystemExit("Bulk output must be outside repository")
-    tracked = subprocess.check_output(["git", "ls-tree", "-rz", BASE], cwd=repo)
-    frozen = {}
-    for record in tracked.split(b"\0"):
-        if not record: continue
-        metadata, path = record.split(b"\t",1)
-        frozen[path.decode()] = metadata.split()[2].decode()
-    def verify_frozen(path):
-        data = (repo/path).read_bytes()
-        blob = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
-        if frozen.get(path) != blob: raise SystemExit("Frozen-source mismatch: " + path)
-    verify_frozen(MAP)
+    frozen = frozen_blobs(repo)
+    def verify(path):
+        verify_frozen(repo, frozen, path)
+    verify(MAP)
     text = (repo/MAP).read_text()
     references = []
     for line_number, line in enumerate(text.splitlines(), 1):
@@ -164,13 +183,13 @@ def main():
     declarations = []
     modules = []
     for path in files:
-        verify_frozen(path)
+        verify(path)
         data = (repo/path).read_bytes(); source = data.decode()
         rows = scan(source, path); declarations.extend(rows)
         modules.append(dict(file=path, sha256=sha(data), theorem_candidates=len(rows)))
     ids = [r["id"] for r in declarations]
     if len(ids) != len(set(ids)): raise SystemExit("Duplicate declaration identifiers")
-    summary = dict(base=BASE, map=MAP, map_sha256=sha((repo/MAP).read_bytes()),
+    summary = dict(base=BASE, baseline_overrides=BASELINE_OVERRIDES, map=MAP, map_sha256=sha((repo/MAP).read_bytes()),
         references=len(references), unique_files=len(files), theorem_candidates=len(declarations),
         unresolved_references=[r for r in references if not r["resolved"]],
         unterminated_signatures=[r["id"] for r in declarations if r["signature_source"] is None],
