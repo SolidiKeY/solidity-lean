@@ -96,10 +96,35 @@ def fetchInstr (I : EvmYul.ExecutionEnv .EVM) (pc : UInt256) :
                Except EVM.ExecutionException (Operation .EVM × Option (UInt256 × Nat)) :=
   decode I.code pc |>.option (.error .StackUnderflow) Except.ok
 
-partial def D_J_aux (c : ByteArray) (i : UInt256) (result : Array UInt256) : Array UInt256 :=
+/-- Exact old scanner retained for code outside the proved no-wrap domain. -/
+partial def D_J_aux_unbounded (c : ByteArray) (i : UInt256) (result : Array UInt256) : Array UInt256 :=
   match c.get? i.toNat >>= EvmYul.EVM.parseInstr with
     | none => result
-    | some cᵢ => D_J_aux c (N i cᵢ) (if cᵢ = .JUMPDEST then result.push i else result)
+    | some cᵢ => D_J_aux_unbounded c (N i cᵢ) (if cᵢ = .JUMPDEST then result.push i else result)
+
+
+/-- Natural-PC traversal uses the existing parser/width and accumulator order.
+The structural measure is bytes remaining, not EVM execution fuel. -/
+def D_J_scan (c : ByteArray) (pc : Nat) (result : Array UInt256) : Array UInt256 :=
+  if _h : pc < c.size then
+    match c.get? pc >>= EvmYul.EVM.parseInstr with
+    | none => result
+    | some op => D_J_scan c (pc + 1 + argOnNBytesOfInstr op)
+        (if op = .JUMPDEST then result.push (.ofNat pc) else result)
+  else result
+termination_by c.size - pc
+decreasing_by omega
+
+/-- H7 bounded logical interface. Outside its no-wrap domain the original
+partial computation is retained; no arbitrary-code totalization is adopted. -/
+def D_J_aux (c : ByteArray) (i : UInt256) (result : Array UInt256) : Array UInt256 :=
+  if c.size + 33 < UInt256.size then D_J_scan c i.toNat result
+  else D_J_aux_unbounded c i result
+
+theorem D_J_aux_bounded (c : ByteArray) (i : UInt256) (result : Array UInt256)
+    (bound : c.size + 33 < UInt256.size) :
+    D_J_aux c i result = D_J_scan c i.toNat result := by
+  simp only [D_J_aux, if_pos bound]
 
 def D_J (c : ByteArray) (i : UInt256) : Array UInt256 :=
   D_J_aux c i #[]

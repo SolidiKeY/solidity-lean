@@ -1,0 +1,112 @@
+{
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_not_diverge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_not_panic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.argument_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_not_diverge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_not_panic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.body_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.reached_costs_differ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerScopedFailurePins.lean:Solidity.Backend.Passes.CompilerScopedFailure.target_not_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

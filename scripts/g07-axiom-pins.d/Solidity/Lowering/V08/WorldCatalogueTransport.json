@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/V08/WorldCatalogueTransport.lean:Solidity.Lowering.V08.WorldCatalogue.assembled_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueTransport.lean:Solidity.Lowering.V08.WorldCatalogue.assembled_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -196,10 +196,10 @@ theorem ExecS.frame : {Γ Γ' : Ctx} → {σ : State C Γ} → {s : Stmt C Γ Γ
     have hw' : ((μ == .nonpayable) && sargs.readsIn μ && Prog.within μ sbody && Prog.within μ ok &&
         _ && _ && _) = true := hw
     simp only [Bool.and_eq_true] at hw'
-    have hwc : (sargs.readsIn μ && (CallRet.rets (Γ := Γ) rets).noMem &&
+    have hwc : (sargs.readsIn μ && (CallRet.rets (Γ := Γ) rets.toRet).noMem &&
         Prog.within μ sbody) = true := by
       simp only [Bool.and_eq_true]
-      exact ⟨⟨hw'.1.1.1.1.1.2, rfl⟩, hw'.1.1.1.1.2⟩
+      exact ⟨⟨hw'.1.1.1.1.1.2, rets.toRet_noMem⟩, hw'.1.1.1.1.2⟩
     obtain ⟨hg₁, ha₁⟩ := ExecS.frame hc hwc d o₁ rfl
     have ih := ExecP.frame hp hw'.1.1.1.2 (d + (Ext.append Γ ρ).depth)
     cases o₂ with

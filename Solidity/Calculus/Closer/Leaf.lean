@@ -1055,11 +1055,35 @@ theorem Facts.direct_sound {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimT
   rw [F.nf_eval hF] at hx hb
   exact (LFml.holds_eq_iff g ν a b).2 ⟨x, hx, hb⟩
 
+/-- Contradictory retained disequalities, after their existing normalization.
+No new term evaluation or return assumption is introduced. -/
+def Facts.clashRaw (F : Facts C) : Bool := F.nes.any fun e => e.l.beqR e.r
+
+/-- A raw clash contradicts the certified returning, unequal values. -/
+theorem Facts.clashRaw_false {F : Facts C} {ν : AEnv} (hF : F.Ok g ν)
+    (h : F.clashRaw = true) : False := by
+  obtain ⟨e, he, heq⟩ := List.any_eq_true.1 h
+  obtain ⟨x, y, hx, hy, hne⟩ := hF.nes e he
+  have eq : e.l = e.r := LTm.eq_of_beqR heq
+  rw [eq, hy] at hx
+  exact hne (Option.some.inj hx).symm
+
+/-- The ordinary equality fast path first; only its failure scans retained facts. -/
+def Facts.directOrClash (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Bool :=
+  F.direct a b || F.clashRaw
+
+/-- Equality follows from the old direct certificate or impossible certified facts. -/
+theorem Facts.directOrClash_sound {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
+    {a b : LTm C (.val p)} (h : F.directOrClash a b = true) :
+    (LFml.eq a b).holds g ν :=
+  (Eq.mp (Bool.or_eq_true (F.direct a b) F.clashRaw) h).elim (Facts.direct_sound hF)
+    (fun hc => (Facts.clashRaw_false hF hc).elim)
+
 /-- `a = b` by the normal forms, splitting on a key comparison at most
 `n` deep (KeY's `cut` on `k = j`).  By the recursor. -/
 def Facts.proveEqN {p : PrimTy} (a b : LTm C (.val p)) (n : Nat) : Facts C → Bool :=
-  Nat.rec (motive := fun _ => Facts C → Bool) (fun F => F.direct a b)
-    (fun _ ih F => F.direct a b ||
+  Nat.rec (motive := fun _ => Facts C → Bool) (fun F => F.directOrClash a b)
+    (fun _ ih F => F.directOrClash a b ||
       match (F.nf a).pick F <|> (F.nf b).pick F with
       | some e => F.returns e.l && F.returns e.r && ih (F.addEqn e.l e.r) && ih (F.addNeq e.l e.r)
       | none => false) n
@@ -1068,12 +1092,12 @@ theorem Facts.proveEqN_sound {p : PrimTy} (a b : LTm C (.val p)) (n : Nat) :
     ∀ {ν : AEnv} {F : Facts C}, F.Ok g ν → Facts.proveEqN a b n F = true →
       (LFml.eq a b).holds g ν := by
   induction n with
-  | zero => intro ν F hF h; exact F.direct_sound hF h
+  | zero => intro ν F hF h; exact F.directOrClash_sound hF h
   | succ n ih =>
     intro ν F hF h
     simp only [Facts.proveEqN, Bool.or_eq_true] at h
     rcases h with h | h
-    · exact F.direct_sound hF h
+    · exact F.directOrClash_sound hF h
     · split at h
       · rename_i e _
         simp only [Bool.and_eq_true] at h

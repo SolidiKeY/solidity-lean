@@ -32,9 +32,12 @@ def unitC : Syn .unit :=
     (.cons (.stateVar (.elem (.int false 8 (by decide))) none none none false "small" .none)
       .nil)))))) .nil)
 
-/-- The body context of `function f(uint256 a, bool b, address o) returns (uint256)`. -/
+/-- The body context of `function f(uint256 a, bool b, address o, bytes calldata cd) returns (uint256)`
+(`cd` for the slice witness, lane FU2-B; appended outermost, so the other
+locals keep their positions). -/
 def Γ : Ctx :=
-  { env := unitC.env, scope := some "C", locals := [("o", .address false), ("b", .bool), ("a", .int IntTy.u256)],
+  { env := unitC.env, scope := some "C",
+    locals := [("o", .address false), ("b", .bool), ("a", .int IntTy.u256), ("cd", .bytes .calldata)],
     rets := [.int IntTy.u256] }
 
 def a : Syn .expr := .ident "a"
@@ -68,6 +71,19 @@ def w_index_mapping : Typed Γ (.index (.ident "m") (.some (.ident "o"))) (.int 
 def w_member : Typed Γ (.member (.ident "arr") "length") (.int IntTy.u256) := .length ty_arr rfl
 def w_call : Typed Γ (.call (.elemType (.int false 8 (by decide)) (by decide))
     (.positional (.cons a .nil))) (.int IntTy.u8) := .convElem ty_a rfl rfl
+/-- `abi.decode(hex"…", (uint8, bool))` (FU2-B): the type names are read
+as the decoder's types, not typed as values. -/
+def w_abiDecode : Typed Γ (.call (.member (.ident "abi") "decode") (.positional (.cons (.lit (.hexStr [0, 1]))
+    (.cons (.tuple (.some (.elemType (.int false 8 (by decide)) (by decide)))
+      (.cons (.some (.elemType .bool (by decide))) .nil)) .nil))))
+    (.tuple [.int IntTy.u8, .bool]) :=
+  .abiDecode (τs := [.int IntTy.u8, .bool]) rfl (.hexStr _) rfl rfl rfl
+/-- `cd[1:]` on a `bytes calldata` parameter (FU2-B). -/
+def w_slice : Typed Γ (.slice (.ident "cd") (.some one) .none) (.bytes .calldata) :=
+  .sliceFrom (.loc rfl rfl) rfl ty_one rfl
+/-- `[a, 1]` (FU2-B): a `uint256[2] memory`, `1` converting to `a`'s type. -/
+def w_inlineArray : Typed Γ (.inlineArray a (.cons one .nil)) (.array .memory (.int IntTy.u256) (some 2)) :=
+  .inlineArray ty_a (.cons ty_one .nil) rfl rfl rfl
 def w_payableConv : Typed Γ (.payableConv (.positional (.cons (.ident "o") .nil))) (.address true) :=
   .payable ty_o rfl
 def w_unaryPrefix : Typed Γ (.unaryPrefix .not (.ident "flag")) .bool := .not ty_flag
@@ -200,6 +216,9 @@ def r_emit : RStmt CE.env CE.rets CE.inModifier .body (tysOf LE) (tysOf LE) := w
 /-- How S01 covers a constructor. -/
 inductive Coverage where
   | typed
+  /-- Typed only as an operand that another constructor's rule reads (not
+  types): never an expression of its own, typed inside `parent`. -/
+  | operand (parent : Ctor) (role : String)
   /-- Deferred to a stage, with the reason. -/
   | deferred (stage reason : String)
   deriving DecidableEq, Repr
@@ -209,13 +228,11 @@ for constructors of other categories (`exprCoverage_total`). -/
 def exprCoverage : Ctor → Option Coverage
   | .index | .member | .call | .payableConv | .unaryPrefix | .unarySuffix | .exp | .mulDivMod
   | .addSub | .shift | .bitAnd | .bitXor | .bitOr | .order | .equality | .and | .or | .cond
-  | .assign | .tuple | .ident | .lit | .litUnit => some .typed
-  | .slice => some (.deferred "S02" "calldata slices are typed with the calldata references of S02")
+  | .assign | .tuple | .ident | .lit | .litUnit | .slice | .inlineArray => some .typed
   | .callOptions => some (.deferred "S02" "call options belong to external calls and creation (S02/S03)")
   | .metaType => some (.deferred "S04.02" "type(T) members read the artifact table and ABI identities")
-  | .new => some (.deferred "S03" "creation and memory allocation are typed with their semantics")
-  | .inlineArray => some (.deferred "S02" "inline arrays take the mobile type of their elements (S02)")
-  | .elemType => some (.deferred "S02" "a type name as a value (abi.decode, type(T)) is S02's; S01 types it only as a conversion callee (convElem)")
+  | .new => some (.deferred "S03" "contract creation is typed with its semantics; new T[](n), new bytes(n) and new string(n) are typed as the callee of a call (newArray, FU2-B)")
+  | .elemType => some (.operand .call "a type name: the callee of an elementary conversion (convElem) and a type expression of abi.decode (abiDecode, FU2-B); type(T) is metaType's")
   | _ => none
 
 /-- **Every expression constructor is classified.** -/
@@ -251,15 +268,44 @@ theorem exprCoverage_typed (k : Ctor) (ht : exprCoverage k = some .typed) :
     | exact ⟨_, _, rfl, ⟨w_ident⟩⟩
     | exact ⟨_, _, rfl, ⟨w_lit⟩⟩
     | exact ⟨_, _, rfl, ⟨w_litUnit⟩⟩
+    | exact ⟨_, _, rfl, ⟨w_slice⟩⟩
+    | exact ⟨_, _, rfl, ⟨w_inlineArray⟩⟩
+
+/-- **Coverage of operands**: every constructor classified as an operand
+occurs in a typed expression whose root is its parent. -/
+theorem exprCoverage_operand (k p : Ctor) (r : String) (ho : exprCoverage k = some (.operand p r)) :
+    ∃ (e : Syn .expr) (τ : STy), e.ctor = p ∧ k ∈ e.nodes.map Node.ctor ∧ HasType Γ e τ := by
+  cases k <;> simp only [exprCoverage, reduceCtorEq, Option.some.injEq, Coverage.operand.injEq] at ho
+  obtain ⟨rfl, -⟩ := ho
+  exact ⟨_, _, rfl, by decide, ⟨w_call⟩⟩
+
+/-- `abi.decode`'s type expressions are operands of a typed call. -/
+theorem elemType_decode_operand :
+    ∃ (e : Syn .expr) (τ : STy), e.ctor = .call ∧ Ctor.elemType ∈ e.nodes.map Node.ctor ∧
+      (∃ g x ts, e = .call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) ∧
+      HasType Γ e τ :=
+  ⟨_, _, rfl, by decide, ⟨_, _, _, rfl⟩, ⟨w_abiDecode⟩⟩
 
 /-- **The coverage of every statement constructor**, explicitly. -/
 def stmtCoverage : Ctor → Option Coverage
   | .blockStmt | .simpleStmt | .declVar | .exprStmt | .ifStmt | .forStmt | .whileStmt | .doWhile
-  | .continueStmt | .breakStmt | .returnStmt | .emit | .revert => some .typed
-  | .declTuple => some (.deferred "S02" "tuple declarations destructure tuple values, typed with S02's calls")
-  | .tryStmt => some (.deferred "S03" "try/catch is an external call's")
+  | .continueStmt | .breakStmt | .returnStmt | .emit | .revert | .declTuple => some .typed
+  | .tryStmt => some (.deferred "S03" "try/catch is an external call's; typed and evaluated for a call without value and one plain or bytes memory catch clause (tryCall, FU2-B), other clauses not")
   | .assembly => some (.deferred "S00" "inline assembly is excluded; only the canonical rethrow is typed (rethrow)")
   | _ => none
+
+/-- `(uint256 p, ) = (a, b);` (lane FU2-B): a tuple declaration with a hole. -/
+def w_declTuple : StmtD (k := .body) Γ Γ.locals
+    (.simpleStmt (.declTuple 0 (.varDecl u256 none "p") (.cons .none .nil)
+      (.tuple (.some a) (.cons (.some (.ident "b")) .nil))))
+    (("p", .int IntTy.u256) :: Γ.locals) :=
+  .declTuple (slots := [some ("p", .int IntTy.u256), none]) (by
+    simp only [Ctx.tupleSlots, Ctx.declSlot, Ctx.declSlots]; rfl) w_tuple rfl
+
+/-- **A hole refuses an empty component** (review fix, lane FU2-B):
+`(, uint a) = (g(), 1)` with `g` returning nothing fits no slots. -/
+theorem slotsFit_hole_empty (B : DeclName → DeclName → Bool) :
+    slotsFit B [Option.none, Option.some (.int IntTy.u256)] [.tuple [], .int IntTy.u256] = false := rfl
 
 /-- **Every statement constructor is classified.** -/
 theorem stmtCoverage_total {k : SCtx} (s : Syn (.stmt k)) : (stmtCoverage s.ctor).isSome = true := by
@@ -570,3 +616,8 @@ end Solidity.Source.TypingExamples
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.bareReturn_refused
 /-- info: 'Solidity.Source.TypingExamples.twoCtors_illFormed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.twoCtors_illFormed
+
+/-- info: 'Solidity.Source.TypingExamples.exprCoverage_operand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.TypingExamples.exprCoverage_operand
+/-- info: 'Solidity.Source.TypingExamples.elemType_decode_operand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.TypingExamples.elemType_decode_operand

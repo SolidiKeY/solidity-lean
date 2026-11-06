@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacy.lean:SolidityBridge.Yul.ScopedForAdequacy.no_source_iff_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForAdequacy.lean:SolidityBridge.Yul.ScopedForAdequacy.output_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

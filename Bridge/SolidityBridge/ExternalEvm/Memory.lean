@@ -24,7 +24,8 @@ theorem aligned_disjoint (i j : Nat) (h : i ≠ j) :
     32 * i + 32 ≤ 32 * j ∨ 32 * j + 32 ≤ 32 * i := by omega
 
 /-- The external primitive's missing specification, kept as a predicate rather
-than installed as an axiom. There is no claimed inhabitant of this predicate. -/
+than installed as an axiom. `PaddingInterface` proves it from the H7 logical body of `ByteArray.zeroes`
+(native allocation correctness stays separate). -/
 def PaddingCorrect (bound : Nat) : Prop :=
   bound < 2 ^ 64 ∧
   ∀ n : Nat, n ≤ bound → ffi.ByteArray.zeroes (USize.ofNat n) =

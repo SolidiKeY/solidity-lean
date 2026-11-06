@@ -29,10 +29,10 @@ private def pairPayload (n a : Nat) (bs : List Nat) :=
 #eval (do
   for report in [Group10.AggregateLegacy.AggregateErrorControls.report,Group10.AggregateIR.AggregateErrorControls.report] do
     for row in report do
-      if ["arrayCalldata(uint[])","pairCalldata(struct AggregateErrorControls.ErrorPair)"].contains row.sourceSignature then
-        unless row.status == .unsupported && (row.reason.splitOn "a calldata slice ordinary alias without a known calldata origin").length > 1 do
-          throw (IO.userError s!"calldata provenance refusal changed: {row.sourceSignature}: {row.reason}")
-      else unless row.status == .elaborated do
+      -- The calldata named-argument reverts are admitted since the import
+      -- passes calldata parameters as slice origins (lane FU2-C, `974dd1de`
+      -- reapplied); their replayed error encodings are pinned below.
+      unless row.status == .elaborated do
         throw (IO.userError s!"control import failed: {row.sourceSignature}: {row.reason}")
   for C in [Group10.AggregateLegacy.AggregateErrorControls,Group10.AggregateIR.AggregateErrorControls] do
     let init := success "initialize()" [] []
@@ -63,8 +63,29 @@ private def pairPayload (n a : Nat) (bs : List Nat) :=
     for wrong in [selector "PairError(uint256,(uint16,string),int8)" ++ words [3,64,2^256-1,9,64,0],
         selector "PairError(uint256,(uint16,string),int8)" ++ words [3,96,255,9,64,0]] do
       check C [failure "pairEmpty()" [] wrong] "broken"
-    -- Calldata captures retain their location and remain explicitly refused
-    -- by the existing slice-origin gate, rather than being copied to memory.
+    -- Calldata arguments of a named-argument revert (lane FU2-C): replayed on
+    -- raw calldata, canonical, with a noncanonical offset and with trailing
+    -- data. The error data is pinned solc 0.8.38's, legacy and via-IR,
+    -- optimizer off and on (`ArrayError(v, 3)`, `PairError(3, v, -1)`):
+    -- `tests/abi-0.8.38/AggregateCalldataErrors.vectors.json`, checked by
+    -- `scripts/abi-entry-probe.mjs --aggregate`.
+    let raw (sig : String) (inputs : List String) (data bs : List Nat) := Json.mkObj [
+      ("signature",toJson sig),("inputTypes",toJson inputs),("outputTypes",toJson ([] : List String)),
+      ("calldata",toJson data),("expectedBytes",toJson bs),("failure",toJson true)]
+    let abc := [97,98,99] ++ List.replicate 29 0
+    let arr := "arrayCalldata(uint256[])"
+    let pair := "pairCalldata((uint16,string))"
+    check C [init, raw arr ["uint256[]"] (words [32,2,7,8]) (arrayPayload [7,8] 3),
+      raw arr ["uint256[]"] (words [32,0]) (arrayPayload [] 3),
+      raw arr ["uint256[]"] (words [64,0,1,9]) (arrayPayload [9] 3),
+      raw arr ["uint256[]"] (words [32,1,9,0xdead]) (arrayPayload [9] 3),
+      raw pair ["(uint16,string)"] (words [32,5,64,3] ++ abc) (pairPayload 3 5 [97,98,99]),
+      raw pair ["(uint16,string)"] (words [32,5,64,0]) (pairPayload 3 5 [])] "working"
+    for wrong in [arrayPayload [8,7] 3, arrayPayload [7,8] 5, arrayPayload [7] 3, []] do
+      check C [raw arr ["uint256[]"] (words [32,2,7,8]) wrong] "broken"
+    for wrong in [pairPayload 3 5 [97,98], pairPayload 5 3 [97,98,99]] do
+      check C [raw pair ["(uint16,string)"] (words [32,5,64,3] ++ abc) wrong] "broken"
+    -- Context reads are unchanged.
     let ss := [← IO.ofExcept (runStmt C "context" [])]
     let ⟨_,Q⟩ ← IO.ofExcept (entryProg C ss)
     for (sender,value,want) in [(37,5,42),(38,5,43),(37,6,43)] do

@@ -567,7 +567,10 @@ theorem Stmt.ite.ruleExists {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : P
   cases c with
   | simple se =>
     cases hj : Upd.ifJoin? se.lower thn els with
-    | some u => exact ⟨_, LeanTaclet.ifElseJoin.toStep hj, .lean (.ifElseJoin hj)⟩
+    | some plan =>
+      cases plan with
+      | inl u => exact ⟨_, LeanTaclet.ifElseJoin.toStep hj, .lean (.ifElseJoin hj)⟩
+      | inr body => exact ⟨_, LeanTaclet.ifElseJoinSequence.toStep hj, .lean (.ifElseJoinSequence hj)⟩
     | none => exact ⟨_, Taclet.ifElseSplit.toStep hj, .key (.ifElseSplit hj)⟩
   | _ => exact ⟨_, rfl, .key .ifElseUnfold⟩
 

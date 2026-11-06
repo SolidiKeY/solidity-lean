@@ -123,4 +123,36 @@ def elabProofTreeJsonCore : CommandElab := fun stx => liftTermElabM do
   let some tree ← coreProofTree? ⟨stx[1]⟩ | notScoped "#proof_tree_json"
   logInfo (← tree.toJson).pretty
 
+/-! ## The size of a proof tree -/
+
+open Lean Elab Command Meta Tactic in
+/-- A leaf's size: its sequent as `sol_leaf` reads it, `⊨ᶠ ψ`, and the
+term nodes of `ψ` (`Fml.tmSize`, M5). -/
+def leafSize (seq : Expr) : TermElabM Nat := do
+  let g ← mkFreshExprSyntheticOpaqueMVar seq
+  let gs ← Tactic.run g.mvarId! (evalTactic (← `(tactic| sol_leaf)))
+  let [g'] := gs | throwError "#proof_size: `sol_leaf` left {gs.length} goals"
+  let ty ← instantiateMVars (← g'.getType)
+  unless ty.isAppOf ``Fml.Valid do throwError "#proof_size: `sol_leaf` left {ty}"
+  unsafe evalExpr Nat (mkConst ``Nat) (← mkAppM ``Fml.tmSize #[ty.appArg!])
+
+/-- The leaves of a proof tree, leftmost first. -/
+partial def treeLeaves (t : ProofTree.Tree) : Array ProofTree.Tree :=
+  if t.children.isEmpty then #[t] else t.children.foldl (· ++ treeLeaves ·) #[]
+
+/-- `#proof_size φ`: `⊢ φ`'s proof tree (`#proof_tree`) measured, its nodes,
+its branches, its open goals, and its largest leaf in term nodes. -/
+syntax "#proof_size " term : command
+
+open Lean Elab Command Meta in
+@[command_elab Solidity.Tools.«command#proof_size_»]
+def elabProofSize : CommandElab := fun stx => liftTermElabM do
+  let some tree ← Tools.coreProofTree? ⟨stx[1]⟩ | Tools.notScoped "#proof_size"
+  let mut big := 0
+  for l in treeLeaves tree do
+    big := max big (← leafSize (← instantiateMVars l.sequent))
+  logInfo m!"{tree.rows.size} node(s), {tree.leaves} branch(es), \
+    {tree.openGoals.size} open, largest leaf {big} term node(s)"
+
+
 end Solidity.Tools

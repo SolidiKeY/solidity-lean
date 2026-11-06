@@ -1,0 +1,21 @@
+import Solidity.Backend.Passes.LoopReframedFailureControls
+
+/-! DRAFT validation requests only; no claimed or guessed axiom pins. -/
+#print axioms Solidity.Backend.Passes.compilation_reframed_revert_witness_iff
+#print axioms Solidity.Backend.Passes.compilation_reframed_reached_revert_shared
+#print axioms Solidity.Backend.Passes.compilation_reframed_reached_fault_shared
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.before_source
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.after_source
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.after_link
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.reached_prefix_failure
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.joined_source_failure
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.before_target
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.before_target_tail
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_target
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_source
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_distinct
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.complete_wrong_order_vector
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.corrupt_saved_tail
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.insufficient_guard_frame
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.stale_guard_input_refused
+#print axioms Solidity.Backend.Passes.LoopReframedFailureControls.ordinary_revert_separate

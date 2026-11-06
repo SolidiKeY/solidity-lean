@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/RepresentedControls.lean:Solidity.Backend.StorageOps.RepresentedControls.copy_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedControls.lean:Solidity.Backend.StorageOps.RepresentedControls.numeric_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedControls.lean:Solidity.Backend.StorageOps.RepresentedControls.stale_word_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "Solidity/Backend/StorageOps/RecursivePop.lean:Solidity.Backend.StorageOps.recursivePop_eq_pop": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePop.lean:Solidity.Backend.StorageOps.recursivePop_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePop.lean:Solidity.Backend.StorageOps.recursivePop_header": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursivePop.lean:Solidity.Backend.StorageOps.recursivePop_other": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,16 +1,20 @@
 import Solidity.Evm.Correct
 import Solidity.Evm.MemoryCompile
+import Solidity.Evm.MemoryStorageCopyCompile
+import Solidity.Evm.MemoryFixedCompile
+import Solidity.Evm.MemoryStorageConstructionCompile
 import Solidity.Evm.MemoryCalls
 import Solidity.Evm.MemoryRefArrayCompile
 import Solidity.Evm.MemoryObjectCompile
 import Solidity.Evm.MemoryObjectConstructionCompile
+import Solidity.Evm.MemoryLoopScopeCompile
 
 /-!
 # The checked compiler entry
 
 One entry selects the existing core compiler when its fragment applies,
-otherwise the published memory backends, then the checked internal-call path. Its result retains the corresponding fragment
-certificate. The common agreement theorem preserves the stronger heap and
+otherwise the published memory backends, then the checked internal-call path.
+Its result retains the corresponding fragment certificate. The common agreement theorem preserves the stronger heap and
 pointer relation on the memory path; its input states that relation and the
 reserved frame bound explicitly.
 -/
@@ -24,7 +28,20 @@ inductive Compilation (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) w
   | referenceArrays (result : Memory.ReferenceArrays.CompiledProg b F P)
   | objects (result : Memory.Objects.CompiledProg b F P)
   | construction (result : Memory.Construction.CompiledProg b F P)
+  | memoryLoops (result : Memory.Loops.CompiledProg b F P)
+  | memoryLoopScopes (result : Memory.LoopScopes.CompiledProg b F P)
   | memoryCalls (result : Memory.Calls.Program b F P) (pushFree : Evm.Prog.pushes P = 0)
+  | memoryCopy (result : Memory.StorageCopy.CompiledProg b F P)
+  | fixedMemory (result : Memory.Fixed.CompiledProg b F P)
+  | copyConstruction (result : Memory.CopyConstruction.CompiledProg b F P)
+
+private def compileCopies (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
+    Option (Compilation b F P) :=
+  match Memory.StorageCopy.compileProg b F P with
+  | some result => some (.memoryCopy result)
+  | none => match Memory.Fixed.compileProg b F P with
+    | some result => some (.fixedMemory result)
+    | none => (Memory.CopyConstruction.compileProg b F P).map .copyConstruction
 
 def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
     Option (Compilation b F P) :=
@@ -38,9 +55,15 @@ def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
         | some result => some (.objects result)
         | none => match Memory.Construction.compileProg b F P with
           | some result => some (.construction result)
-          | none => if hz : Evm.Prog.pushes P = 0 then
-              (Memory.Calls.compile b F P).map (fun result => .memoryCalls result hz)
-            else none
+          | none => match Memory.Loops.compileProg b F P with
+            | some result => some (.memoryLoops result)
+            | none => match Memory.LoopScopes.compileProg b P F with
+              | some result => some (.memoryLoopScopes result)
+              | none => if hz : Evm.Prog.pushes P = 0 then
+                  match Memory.Calls.compile b F P with
+                  | some result => some (.memoryCalls result hz)
+                  | none => compileCopies b F P
+                else compileCopies b F P
 
 namespace Compilation
 
@@ -51,7 +74,12 @@ def code {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
   | .referenceArrays result => result.code
   | .objects result => result.code
   | .construction result => result.code
+  | .memoryLoops result => result.code
+  | .memoryLoopScopes result => result.code
   | .memoryCalls result _ => result.code
+  | .memoryCopy result => result.code
+  | .fixedMemory result => result.code
+  | .copyConstruction result => result.code
 
 def frag {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Frag Δ
@@ -60,31 +88,52 @@ def frag {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
   | .referenceArrays result => result.frag
   | .objects result => result.frag
   | .construction result => result.frag
+  | .memoryLoops result => result.frag
+  | .memoryLoopScopes result => result.frag
   | .memoryCalls result _ => result.frag
+  | .memoryCopy result => result.frag
+  | .fixedMemory result => result.frag
+  | .copyConstruction result => result.frag
 
+/-- Identify the legacy finite-memory path; loop memory has `isMemoryLoops`. -/
 def isMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .core _ _ => false
   | .memory _ => true
-  | .referenceArrays _ | .objects _ | .construction _ | .memoryCalls .. => false
+  | .referenceArrays _ | .objects _ | .construction _ => false
+  | .memoryLoops _ => false
+  | .memoryLoopScopes _ => false
+  | .memoryCalls .. | .memoryCopy .. | .fixedMemory .. | .copyConstruction .. => false
 
 /-- Select the supplementary, nonallocating reference-array relation. -/
 def isReferenceArray {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .referenceArrays _ => true
-  | .core .. | .memory .. | .objects .. | .construction .. | .memoryCalls .. => false
+  | .core .. | .memory .. | .objects .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. | .memoryCalls .. | .memoryCopy .. | .fixedMemory .. | .copyConstruction .. => false
 
 /-- Select full object ownership for the headerless fixed-array path. -/
 def isObject {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .objects _ => true
-  | .core .. | .memory .. | .referenceArrays .. | .construction .. | .memoryCalls .. => false
+  | .core .. | .memory .. | .referenceArrays .. | .construction .. | .memoryLoops .. | .memoryLoopScopes .. | .memoryCalls .. | .memoryCopy .. | .fixedMemory .. | .copyConstruction .. => false
 
 /-- Select checked reference-array construction with a complete allocator. -/
 def isConstruction {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .construction _ => true
-  | .core .. | .memory .. | .referenceArrays .. | .objects .. | .memoryCalls .. => false
+  | .core .. | .memory .. | .referenceArrays .. | .objects .. | .memoryLoops .. | .memoryLoopScopes .. | .memoryCalls .. | .memoryCopy .. | .fixedMemory .. | .copyConstruction .. => false
+
+/-- Distinguish prefix-capacity loop inputs from legacy finite-memory inputs. -/
+def isMemoryLoops {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .memoryLoops _ => true
+  | _ => false
+
+/-- Identify checked loops composed beneath enclosing scopes. -/
+def isMemoryLoopScopes {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .memoryLoopScopes _ => true
+  | _ => false
 
 /-- The stronger memory backend with expanded internal call frames. -/
 def isMemoryCalls {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
@@ -103,15 +152,37 @@ def usesMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
 def requiredFrame {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Nat
   | .memoryCalls out _ => out.need
+  | .memoryLoops out => out.cert.need
+  | .memoryLoopScopes out => out.cert.need
   | _ => Memory.frameNeedProg P
 
-/-- Reached allocation cost; failed arguments do not reach return allocation. -/
+/-- Reached allocation cost for finite-memory paths; failed call arguments do not
+reach return allocation. Loop paths use their certificate's `Cost` relation in
+`Rep` and prefix-capacity `Room` in `Input`, rather than this finite metric. -/
 def allocationCost {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → State C Γ → Nat
   | .memoryCalls out _ => out.cost
   | .construction _ => Memory.Construction.allocationCostProg P
   | .referenceArrays _ | .objects _ => fun _ => 0
+  | .memoryCopy out => out.cert.cost
+  | .copyConstruction _ => Memory.Construction.allocationCostProg P
+  | .fixedMemory _ => fun _ => 0
   | _ => Memory.allocationCostProg P
+
+def isMemoryCopy {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .memoryCopy _ => true
+  | _ => false
+
+def isFixedMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .fixedMemory _ => true
+  | _ => false
+
+def isCopyConstruction {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .copyConstruction _ => true
+  | _ => false
 
 def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -126,9 +197,21 @@ def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | .construction _ => Memory.Objects.StateRepr L b frame F σ base m ∧
       b + Memory.frameNeedProg P ≤ frame ∧
       Memory.Objects.AllocationInput b frame (Memory.Construction.allocationCostProg P σ) σ base m
-
+  | .memoryLoops out => Memory.StateRepr L b frame F σ base m ∧
+      b + out.cert.need ≤ frame ∧ Memory.Loops.Room out.cert frame σ base m
+  | .memoryLoopScopes out => Memory.StateRepr L b frame F σ base m ∧
+      b + out.cert.need ≤ frame ∧ Memory.LoopScopes.Room out.cert frame σ base m
   | .memoryCalls out _ => Memory.StateRepr L b frame F σ base m ∧ b + out.need ≤ frame ∧
       Memory.AllocationInput b frame (out.cost σ) σ base m
+  | .memoryCopy out => Memory.StateRepr L b frame F σ base m ∧
+      b + Memory.frameNeedProg P ≤ frame ∧
+      Memory.AllocationInput b frame (out.cert.cost σ) σ base m ∧
+      Memory.copyBoundProg P σ ≤ L
+  | .fixedMemory _ => Memory.FixedStateRepr L b frame F σ base m ∧ Memory.copyBoundProg P σ ≤ L
+  | .copyConstruction _ => Memory.Objects.StateRepr L b frame F σ base m ∧
+      b + Memory.frameNeedProg P ≤ frame ∧
+      Memory.Objects.AllocationInput b frame (Memory.Construction.allocationCostProg P σ) σ base m ∧
+      Memory.copyBoundProg P σ ≤ L
 
 /-- Open the memory premises without reducing the certified compiler result. -/
 theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -143,7 +226,12 @@ theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | referenceArrays out => cases hm
   | objects out => cases hm
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
   | memoryCalls out _ => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
 
 /-- Open a reference-array input without unfolding the computed compiler result. -/
 theorem referenceArray_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -156,7 +244,12 @@ theorem referenceArray_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C �
   | referenceArrays out => rfl
   | objects out => cases hm
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
   | memoryCalls out _ => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
 
 /-- Open the full object input without unfolding the computed compiler. -/
 theorem object_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -170,7 +263,12 @@ theorem object_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | referenceArrays out => cases hm
   | objects out => rfl
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
   | memoryCalls out _ => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
 
 /-- Open the growing constructor premises without unfolding proof data. -/
 theorem construction_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -185,7 +283,12 @@ theorem construction_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ 
   | referenceArrays out => cases hm
   | objects out => cases hm
   | construction out => rfl
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
   | memoryCalls out _ => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
 
 /-- Open expanded-call premises without unfolding the compiler's code or proof. -/
 theorem memoryCalls_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -200,7 +303,12 @@ theorem memoryCalls_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ �
   | referenceArrays _ => cases hm
   | objects _ => cases hm
   | construction _ => cases hm
+  | memoryLoops _ => cases hm
+  | memoryLoopScopes _ => cases hm
   | memoryCalls _ _ => rfl
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
 
 def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -217,10 +325,27 @@ def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
       Memory.BaseExtends entry.H base base' ∧
       Memory.Objects.GrowsAllocator b frame (Memory.Construction.allocationCostProg P entry)
         entry base initial σ base' m
-
+  | .memoryLoops out => ∃ base' cost, ∃ e : entry.H <+: σ.H,
+      Memory.Loops.Cost out.cert entry ⟨σ, e⟩ cost ∧
+      Memory.StateRepr L b frame out.frag σ base' m ∧ Memory.BaseExtends entry.H base base' ∧
+      Memory.GrowsAllocator b frame cost entry base initial σ base' m
+  | .memoryLoopScopes out => ∃ base' cost, ∃ e : entry.H <+: σ.H,
+      Memory.LoopScopes.Cost out.cert entry ⟨σ, e⟩ cost ∧
+      Memory.StateRepr L b frame out.frag σ base' m ∧ Memory.BaseExtends entry.H base base' ∧
+      Memory.GrowsAllocator b frame cost entry base initial σ base' m
   | .memoryCalls out _ => ∃ base', Memory.StateRepr L b frame out.frag σ base' m ∧
       Memory.BaseExtends entry.H base base' ∧
       Memory.GrowsAllocator b frame (out.cost entry) entry base initial σ base' m
+  | .memoryCopy out => ∃ base', Memory.StateRepr L b frame out.frag σ base' m ∧
+      Memory.BaseExtends entry.H base base' ∧
+      Memory.GrowsAllocator b frame (out.cert.cost entry) entry base initial σ base' m
+  | .fixedMemory out => Memory.FixedStateRepr L b frame out.frag σ base m ∧
+      m.mem = initial.mem ∧ σ.H = entry.H ∧ HEq σ.heap entry.heap
+
+  | .copyConstruction _ => ∃ base', Memory.Objects.StateRepr L b frame result.frag σ base' m ∧
+      Memory.BaseExtends entry.H base base' ∧
+      Memory.Objects.GrowsAllocator b frame (Memory.Construction.allocationCostProg P entry)
+        entry base initial σ base' m
 
 /-- Expose the full output relation without reducing a certified compiler value. -/
 theorem object_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -236,8 +361,12 @@ theorem object_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | referenceArrays out => cases hm
   | objects out => rfl
   | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
   | memoryCalls out _ => cases hm
-
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
 
 /-- Open the complete constructor output relation without unfolding the compiler. -/
 theorem construction_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -255,7 +384,166 @@ theorem construction_rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ
   | referenceArrays out => cases hm
   | objects out => cases hm
   | construction out => rfl
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
   | memoryCalls out _ => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
+
+/-- Open the source-prefix capacity premises of the loop path. -/
+theorem memoryLoops_input_of {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.Loops.CompiledProg b F P) (L frame : Nat) (base : Nat → Fin W)
+    (σ : State C Γ) (m : Machine) :
+    (Compilation.memoryLoops out).Input L frame base σ m ↔
+      Memory.StateRepr L b frame F σ base m ∧ b + out.cert.need ≤ frame ∧
+        Memory.Loops.Room out.cert frame σ base m := Iff.rfl
+
+/-- Recover the loop certificate without unfolding a computed compiler result. -/
+def memoryLoopsResult {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoops = true) : Memory.Loops.CompiledProg b F P :=
+  match result with
+  | .memoryLoops out => out
+  | .core _ _ => False.elim (Bool.noConfusion hm)
+  | .memory _ => False.elim (Bool.noConfusion hm)
+  | .referenceArrays _ => False.elim (Bool.noConfusion hm)
+  | .objects _ => False.elim (Bool.noConfusion hm)
+  | .construction _ => False.elim (Bool.noConfusion hm)
+  | .memoryLoopScopes _ => False.elim (Bool.noConfusion hm)
+  | .memoryCalls .. => False.elim (Bool.noConfusion hm)
+  | .memoryCopy .. => False.elim (Bool.noConfusion hm)
+  | .fixedMemory .. => False.elim (Bool.noConfusion hm)
+  | .copyConstruction .. => False.elim (Bool.noConfusion hm)
+
+theorem memoryLoops_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoops = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.StateRepr L b frame F σ base m ∧
+      b + (result.memoryLoopsResult hm).cert.need ≤ frame ∧
+      Memory.Loops.Room (result.memoryLoopsResult hm).cert frame σ base m := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => cases hm
+  | objects out => cases hm
+  | construction out => cases hm
+  | memoryLoops out => rfl
+  | memoryLoopScopes out => cases hm
+  | memoryCalls out _ => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
+
+/-- Open the source-prefix capacity premises of the loop path. -/
+theorem memoryLoopScopes_input_of {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (out : Memory.LoopScopes.CompiledProg b F P) (L frame : Nat) (base : Nat → Fin W)
+    (σ : State C Γ) (m : Machine) :
+    (Compilation.memoryLoopScopes out).Input L frame base σ m ↔
+      Memory.StateRepr L b frame F σ base m ∧ b + out.cert.need ≤ frame ∧
+        Memory.LoopScopes.Room out.cert frame σ base m := Iff.rfl
+
+/-- Recover the loop certificate without unfolding a computed compiler result. -/
+def memoryLoopScopesResult {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoopScopes = true) : Memory.LoopScopes.CompiledProg b F P :=
+  match result with
+  | .memoryLoopScopes out => out
+  | .core _ _ => False.elim (Bool.noConfusion hm)
+  | .memory _ => False.elim (Bool.noConfusion hm)
+  | .referenceArrays _ => False.elim (Bool.noConfusion hm)
+  | .objects _ => False.elim (Bool.noConfusion hm)
+  | .construction _ => False.elim (Bool.noConfusion hm)
+  | .memoryLoops _ => False.elim (Bool.noConfusion hm)
+  | .memoryCalls .. => False.elim (Bool.noConfusion hm)
+  | .memoryCopy .. => False.elim (Bool.noConfusion hm)
+  | .fixedMemory .. => False.elim (Bool.noConfusion hm)
+  | .copyConstruction .. => False.elim (Bool.noConfusion hm)
+
+theorem memoryLoopScopes_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryLoopScopes = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.StateRepr L b frame F σ base m ∧
+      b + (result.memoryLoopScopesResult hm).cert.need ≤ frame ∧
+      Memory.LoopScopes.Room (result.memoryLoopScopesResult hm).cert frame σ base m := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => cases hm
+  | objects out => cases hm
+  | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => rfl
+  | memoryCalls out _ => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
+
+/-- The copy-bearing route retains its reached copy bound explicitly. -/
+theorem memory_copy_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryCopy = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.StateRepr L b frame F σ base m ∧
+      b + Memory.frameNeedProg P ≤ frame ∧
+      Memory.AllocationInput b frame (Memory.StorageCopy.allocationCostProg P σ) σ base m ∧
+      Memory.copyBoundProg P σ ≤ L := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => cases hm
+  | objects out => cases hm
+  | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
+  | memoryCalls out hz => cases hm
+  | memoryCopy out => rfl
+  | fixedMemory out => cases hm
+  | copyConstruction out => cases hm
+
+theorem fixed_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isFixedMemory = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.FixedStateRepr L b frame F σ base m ∧ Memory.copyBoundProg P σ ≤ L := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => cases hm
+  | objects out => cases hm
+  | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
+  | memoryCalls out hz => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => rfl
+  | copyConstruction out => cases hm
+
+theorem copyConstruction_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isCopyConstruction = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.Objects.StateRepr L b frame F σ base m ∧
+      b + Memory.frameNeedProg P ≤ frame ∧
+      Memory.Objects.AllocationInput b frame (Memory.Construction.allocationCostProg P σ) σ base m ∧
+      Memory.copyBoundProg P σ ≤ L := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => cases hm
+  | objects out => cases hm
+  | construction out => cases hm
+  | memoryLoops out => cases hm
+  | memoryLoopScopes out => cases hm
+  | memoryCalls out hz => cases hm
+  | memoryCopy out => cases hm
+  | fixedMemory out => cases hm
+  | copyConstruction out => rfl
+
+theorem memory_copy_free_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isMemoryCopy = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine)
+    (hcopy : Memory.hasArrayCopy P = false := by decide) :
+    result.Input L frame base σ m ↔ Memory.StateRepr L b frame F σ base m ∧
+      b + Memory.frameNeedProg P ≤ frame ∧
+      Memory.AllocationInput b frame (Memory.StorageCopy.allocationCostProg P σ) σ base m := by
+  rw [result.memory_copy_input hm, Memory.copyBoundProg_zero P hcopy σ]
+  simp only [Nat.zero_le, and_true]
 
 /-- The compiler preserves typed states and the evaluation stack, or both
 executions revert; the existing panic and payment cases retain their guards. -/
@@ -301,10 +589,46 @@ theorem correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
       ⟨o, m', base', ho, hc, hm, hst, he, ha⟩ | ⟨ho, hc⟩
     · exact .inl ⟨o, m', ho, hc, hst, base', hm, he, ha⟩
     · exact .inr (.inl ⟨.inl ho, hc⟩)
+  | memoryLoops out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero]
+    rcases out.cert.correct h.1 h.2.1 h.2.2 with
+      ⟨o, m', base', cost, ho, hc, hcost, hm, hst, he, ha⟩ | ⟨ho, hc⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, base', cost, o.ext, hcost, hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+    · exact .inr (.inr (.inr ⟨ho, .inl hc⟩))
+
+  | memoryLoopScopes out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero]
+    rcases out.cert.correct σ base m h.1 h.2.1 h.2.2 with
+      ⟨o, m', base', cost, ho, hc, hcost, hm, hst, he, ha⟩ | ⟨ho, hc⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, base', cost, o.ext, hcost, hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+    · exact .inr (.inr (.inr ⟨ho, .inl hc⟩))
 
   | memoryCalls out hz =>
     simp only [Agrees, code, Rep, hz, Nat.add_zero]
     rcases out.sound h.1 h.2.1 h.2.2 with
+      ⟨o, m', base', ho, hc, hm, hst, he, ha⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, base', hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+
+  | memoryCopy out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero]
+    rcases out.cert.correct h.1 h.2.1 h.2.2.1 h.2.2.2 with
+      ⟨o, m', base', ho, hc, hm, hst, he, ha⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, base', hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+
+  | fixedMemory out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero]
+    rcases out.cert.correct h.1 h.2 with
+      ⟨o, m', ho, hc, hm, hst, hmem, hH, hheap⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, hm, hmem, hH, hheap⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+
+  | copyConstruction out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero, frag]
+    rcases out.cert.correct h.1 h.2.1 h.2.2.1 h.2.2.2 with
       ⟨o, m', base', ho, hc, hm, hst, he, ha⟩ | ⟨ho, hc⟩
     · exact .inl ⟨o, m', ho, hc, hst, base', hm, he, ha⟩
     · exact .inr (.inl ⟨.inl ho, hc⟩)

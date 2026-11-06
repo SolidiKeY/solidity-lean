@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalUintWrite.lean:Solidity.Backend.MemoryOps.Physical.UintArrayAt.write_cell": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

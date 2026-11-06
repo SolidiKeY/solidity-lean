@@ -1,0 +1,73 @@
+{
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.first_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.initial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.initial_vector": [],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.reused_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.scope_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.second_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.source_first_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.source_second_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.stale_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.stale_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentScopeControls.lean:Solidity.Backend.Passes.UnsignedDependentScopeControls.zero_quotient_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

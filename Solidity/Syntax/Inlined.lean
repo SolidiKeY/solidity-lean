@@ -33,12 +33,18 @@ def Args.declStrs {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → L
   | _, .snocMemory as R x e =>
     as.declStrs ns ++ [s!"{Ty.toStr (.ref R)} memory {x} = {e.toStr ns};"]
 
+/-- `T r;` for each of several return variables, a memory one `T memory r;`. -/
+def RetBinders.declStrs : {ρ : Ctx} → RetBinders ρ → List String
+  | _, .nil => []
+  | _, .snoc bs p x => bs.declStrs ++ [s!"{Ty.toStr (.prim p)} {x};"]
+  | _, .snocMem bs R x _ _ => bs.declStrs ++ [s!"{Ty.toStr (.ref R)} memory {x};"]
+
 /-- `T r;` for each return variable, at its default; a memory return as the
 `T memory r;` its body begins with. -/
 def CallRet.declStrs {Γ : Ctx} : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List String
   | _, _, .none => []
   | _, _, .val p r _ => [s!"{Ty.toStr (.prim p)} {r};"]
-  | _, _, .rets bs => bs.toList.map fun (p, r) => s!"{Ty.toStr (.prim p)} {r};"
+  | _, _, .rets bs => bs.declStrs
   | _, _, .mem R r _ _ => [s!"{Ty.toStr (.ref R)} memory {r};"]
   | _, _, .storage R r => [s!"{Ty.toStr (.ref R)} storage {r};"]
 

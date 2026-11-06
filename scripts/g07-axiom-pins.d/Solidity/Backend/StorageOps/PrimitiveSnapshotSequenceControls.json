@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.failures_and_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.graph_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.header_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.retained_and_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.storage_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.whole_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSequence.Controls.wrong_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

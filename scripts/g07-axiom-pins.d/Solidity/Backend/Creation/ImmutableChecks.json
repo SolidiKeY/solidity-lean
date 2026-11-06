@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/Creation/ImmutableChecks.lean:Solidity.Backend.Creation.combined_installs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ImmutableChecks.lean:Solidity.Backend.Creation.compatible_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ImmutableChecks.lean:Solidity.Backend.Creation.immutable_link_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ImmutableChecks.lean:Solidity.Backend.Creation.ImmutableTable.read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ImmutableChecks.lean:Solidity.Backend.Creation.patched_installs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ImmutableChecks.lean:Solidity.Backend.Creation.patchImmutables_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ImmutableChecks.lean:Solidity.Backend.Creation.patchImmutables_length": [
+  "Quot.sound",
+  "propext"
+ ]
+}

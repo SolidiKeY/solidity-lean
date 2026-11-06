@@ -1,0 +1,24 @@
+{
+ "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutAccess.resolve_bounded": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutAccess.resolved_families_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutAccess.resolved_family_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutAccess.resolveMany_bounded": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutAccess.resolveMany_length": [
+  "Quot.sound",
+  "propext"
+ ]
+}

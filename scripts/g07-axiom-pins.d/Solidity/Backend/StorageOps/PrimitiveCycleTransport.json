@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.element_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.headers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.outcome_queries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.query_compatible": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.query_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.represented_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

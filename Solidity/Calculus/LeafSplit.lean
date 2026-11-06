@@ -101,7 +101,9 @@ theorem holds_upd_iteCase {Δ : Ctx} {m : Modality} {U U' : Upd C Γ Δ} {φ : F
 def Fml.SplitTo {Γ : Ctx} (φ ψ₁ ψ₂ : Fml C Γ) : Prop :=
   ∀ σ : State C Γ, holds σ ψ₁ → holds σ ψ₂ → holds σ φ
 
-/-- A split leaf is valid where both its cases are. -/
+/-- A split leaf is valid where both its cases are: for Solidity
+`if (c) { x = 1; } else { x = 2; }`, validity of the true and false
+joined-update cases gives validity of the joined leaf. -/
 theorem Fml.SplitTo.valid {φ ψ₁ ψ₂ : Fml C []} (h : Fml.SplitTo φ ψ₁ ψ₂) (h₁ : Fml.Valid ψ₁)
     (h₂ : Fml.Valid ψ₂) : Fml.Valid φ := fun σ => h σ (h₁ σ) (h₂ σ)
 
@@ -146,12 +148,16 @@ theorem Fml.SplitTo.imp (a : Fml C Γ) {φ ψ₁ ψ₂ : Fml C Γ}
     (h : Fml.SplitTo φ ψ₁ ψ₂) : Fml.SplitTo (.imp a φ) (.imp a ψ₁) (.imp a ψ₂) :=
   fun σ a₁ a₂ ha => h σ (a₁ ha) (a₂ ha)
 
-/-- The split in a conjunction's left side. -/
+/-- The split in a conjunction's left side: the postcondition of Solidity
+`if (c) { x = 1; } else { x = 2; }` may assert both the joined property
+and an unchanged property of `y`. -/
 theorem Fml.SplitTo.andL {φ ψ₁ ψ₂ : Fml C Γ} (r : Fml C Γ)
     (h : Fml.SplitTo φ ψ₁ ψ₂) : Fml.SplitTo (.and φ r) (.and ψ₁ r) (.and ψ₂ r) :=
   fun σ a₁ a₂ => ⟨h σ a₁.1 a₂.1, a₁.2⟩
 
-/-- The split in a conjunction's right side. -/
+/-- The split in a conjunction's right side: the postcondition of Solidity
+`if (c) { x = 1; } else { x = 2; }` may keep a property of `y` on the left
+while splitting the joined property of `x` on the right. -/
 theorem Fml.SplitTo.andR (l : Fml C Γ) {φ ψ₁ ψ₂ : Fml C Γ}
     (h : Fml.SplitTo φ ψ₁ ψ₂) : Fml.SplitTo (.and l φ) (.and l ψ₁) (.and l ψ₂) :=
   fun σ a₁ a₂ => ⟨a₁.1, h σ a₁.2 a₂.2⟩

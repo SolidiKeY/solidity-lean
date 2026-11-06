@@ -247,6 +247,22 @@ def Binders.all {Γ : Ctx} : {ρ : Ctx} → Binders ρ → Fml C (ρ ++ Γ) → 
       (fun bs p x φ => Binders.all bs (.all x p φ)) φ
   termination_by structural _ bs => bs
 
+/-- `∀ xs. φ` over a call's several return variables, the first bound
+outermost. A memory one has no quantifier here: the formula is false, so a
+callee's contract ("post", `Fml.callResult`) is never used for a call with a
+memory return among several, which is inlined instead. -/
+def RetBinders.all {Γ : Ctx} : {ρ : Ctx} → RetBinders ρ → Fml C (ρ ++ Γ) → Fml C Γ
+  | _, bs, φ => RetBinders.casesOn (motive := fun ρ _ => Fml C (ρ ++ Γ) → Fml C Γ) bs
+      (fun φ => φ)
+      (fun bs p x φ => RetBinders.all bs (.all x p φ))
+      (fun bs _ _ _ _ _ => RetBinders.all bs .ff) φ
+  termination_by structural _ bs => bs
+
+theorem Binders.toRet_all {Γ : Ctx} : {ρ : Ctx} → (bs : Binders ρ) → (φ : Fml C (ρ ++ Γ)) →
+    bs.toRet.all φ = bs.all φ
+  | _, .nil, _ => rfl
+  | _, .snoc bs _ _, φ => Binders.toRet_all bs _
+
 /-- A block of a `try`: the locals `bs` its outcome binds, on top of `Γ`,
 and its statements; and what its goal may assume of the state the
 statement starts in (`hyp`: a self-call's `catch` block is reached only

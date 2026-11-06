@@ -1,0 +1,27 @@
+{
+  "scope": "18 ParserBasics + 10 ParserChecks theorems; task MCP cache/config repair; elementary checkpoint only",
+  "finder": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "accepted for checkpoint",
+    "findings": []
+  },
+  "skeptic": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "elementary parser checkpoint accepted only",
+    "findings": []
+  },
+  "trust": {
+    "total_statements": 136,
+    "new_empty": 21,
+    "new_propext": 7,
+    "audit": "h28-type-7eb3da22354c.json",
+    "allowlist_unchanged": true
+  },
+  "remaining": [
+    "qualified/mapping/function/static-array raw completeness",
+    "full root-array completeness",
+    "all-type syntax identity and exact layout equivalence",
+    "solc grammar fixtures",
+    "final full gates and full-scope reviews"
+  ]
+}

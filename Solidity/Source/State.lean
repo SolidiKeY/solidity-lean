@@ -95,7 +95,10 @@ inductive Val (D : Layout) : STy → Type where
       (hs : sel.length = 4) : Val D (.fn true ps rs m)
   | memRef {τ : STy} (h : τ.loc? = some .memory) (addr : Nat) : Val D τ
   | storRef {τ : STy} (h : τ.loc? = some .storage) (p : SPath) : Val D τ
-  | cdRef {τ : STy} (h : τ.loc? = some .calldata) (off : Nat) : Val D τ
+  /-- A `calldata` reference (lane FU2-B): the absolute offset of its data in
+  the frame's call data (`Fr.cd`) and its length (elements of an array,
+  bytes of `bytes`/`string`). -/
+  | cdRef {τ : STy} (h : τ.loc? = some .calldata) (off len : Nat) : Val D τ
 
 /-- The key contents of a mapping's key type: bytes for `bytes`/`string`,
 the value otherwise. -/

@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/V08/SourceSessionCreditControls.lean:Solidity.Lowering.V08.SourceSessionCreditControls.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionCreditControls.lean:Solidity.Lowering.V08.SourceSessionCreditControls.installed_credit_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionCreditControls.lean:Solidity.Lowering.V08.SourceSessionCreditControls.next_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionCreditControls.lean:Solidity.Lowering.V08.SourceSessionCreditControls.payload_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionCreditControls.lean:Solidity.Lowering.V08.SourceSessionCreditControls.session_credit_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionCreditControls.lean:Solidity.Lowering.V08.SourceSessionCreditControls.wrong_event_only": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

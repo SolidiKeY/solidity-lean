@@ -13,7 +13,7 @@
 //
 // Usage: node scripts/check-axiom-pins.mjs [--write]
 // Exit 0 = inventory matches, 1 = drift or a non-standard axiom.
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync, rmdirSync, unlinkSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { blankLean } from "./check-trust.mjs";
@@ -67,12 +67,39 @@ export function compare(found, recorded) {
   return { errors, notes };
 }
 
+// The inventory is generated from one fragment per Lean file,
+// `scripts/g07-axiom-pins.d/<file without .lean>.json`, holding that file's
+// pins (`scripts/coord-tools/fragments.sh`); `--write` rewrites both.
+export const FRAGMENTS = "scripts/g07-axiom-pins.d";
+export function writeFragments(root, obj) {
+  const parts = new Map();
+  for (const [key, axioms] of Object.entries(obj)) {
+    const i = key.indexOf(".lean:");
+    const f = `${FRAGMENTS}/${key.slice(0, i)}.json`;
+    if (!parts.has(f)) parts.set(f, {});
+    parts.get(f)[key] = axioms;
+  }
+  const dir = join(root, FRAGMENTS);
+  (function prune(d) {
+    if (!existsSync(d)) return;
+    for (const f of readdirSync(d)) {
+      const p = join(d, f);
+      if (statSync(p).isDirectory()) { prune(p); if (!readdirSync(p).length) rmdirSync(p); }
+      else if (!parts.has(p.slice(root.length + 1))) unlinkSync(p);
+    }
+  })(dir);
+  for (const [f, part] of parts) {
+    mkdirSync(dirname(join(root, f)), { recursive: true });
+    writeFileSync(join(root, f), JSON.stringify(part, null, 1) + "\n");
+  }
+}
+
 export function collect(root) {
   const files = [];
   (function walk(dir) {
     for (const f of readdirSync(join(root, dir)).sort()) {
       const p = dir ? join(dir, f) : f;
-      if (p === "Solidity/Scratch" || p.startsWith(".") || p === "vendor" || p === "node_modules") continue;
+      if (f === ".lake" || p === "Solidity/Scratch" || p.startsWith(".") || p === "vendor" || p === "node_modules") continue;
       if (statSync(join(root, p)).isDirectory()) { if (!dir && !["Solidity", "Bridge", "tests"].includes(p)) continue; walk(p); }
       else if (p.endsWith(".lean")) files.push(p);
     }
@@ -90,6 +117,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (process.argv.includes("--write")) {
     const obj = Object.fromEntries([...found].sort(([a], [b]) => a.localeCompare(b)).map(([n, { axioms }]) => [n, axioms]));
     writeFileSync(path, JSON.stringify(obj, null, 1) + "\n");
+    writeFragments(root, obj);
   }
   const recorded = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
   const { errors, notes } = compare(found, recorded);

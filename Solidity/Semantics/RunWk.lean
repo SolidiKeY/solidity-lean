@@ -1206,6 +1206,61 @@ end TLoop
 
 /-! ## A weakened statement runs as the statement -/
 
+/-- Several returns entered alike whatever their names (`uint a; uint[]
+memory b;` and `uint x; uint[] memory y;`). -/
+theorem RetBinders.enterT_eq {ps : Ctx} (τ : State C ps) :
+    {ρ : Ctx} → (bs bs' : RetBinders ρ) → bs.enterT τ = bs'.enterT τ
+  | _, .nil, .nil => rfl
+  | _, .snoc (ρ := ρ) bs p _, .snoc bs' _ _ =>
+    congrArg (fun o : Out C τ.H (ρ ++ ps) =>
+        (⟨o.st.push (t := .val p) (PrimTy.dflt p), o.ext⟩ : Out C τ.H (.val p :: (ρ ++ ps))))
+      (RetBinders.enterT_eq τ bs bs')
+  | _, .snocMem (ρ := ρ) bs R _ _ hm, .snocMem bs' _ _ _ _ =>
+    congrArg (fun o : Out C τ.H (ρ ++ ps) =>
+        let g := o.st.allocDefaultG R hm
+        (⟨g.st.push (t := .mem R) (some g.val), o.ext.trans g.ext⟩ :
+          Out C τ.H (.mem R :: (ρ ++ ps))))
+      (RetBinders.enterT_eq τ bs bs')
+
+/-- **Several returns entered over a lifted state** are entered over the
+state, lifted with them kept on top, the background weakened along the
+objects they allocate (`uint a; uint[] memory b;` declared on a frame's
+parameters, the caller's locals below). -/
+theorem RetBinders.enterT_lift {ps Δ : Ctx} (h : Thin ps Δ) (τ : State C ps)
+    (d : TEnv C τ.H Δ) : {ρ : Ctx} → (bs : RetBinders ρ) →
+    (bs.enterT (τ.lift h d)).st = (bs.enterT τ).st.lift (Thin.keepAll ρ h)
+      (TEnv.append ρ (TEnv.take ρ (bs.enterT τ).st.env) (TEnv.wk (bs.enterT τ).ext Δ d))
+  | _, .nil => by
+    show τ.lift h d = τ.lift h (TEnv.wk (List.prefix_refl _) Δ d)
+    rw [TEnv.wk_self]
+  | _, .snoc (ρ := ρ) bs p _ => by
+    show (bs.enterT (τ.lift h d)).st.push (t := .val p) (PrimTy.dflt p) =
+      ((bs.enterT τ).st.push (t := .val p) (PrimTy.dflt p)).lift (Thin.keep (Thin.keepAll ρ h))
+        (PrimTy.dflt p, TEnv.append ρ (TEnv.take ρ (bs.enterT τ).st.env)
+          (TEnv.wk (bs.enterT τ).ext Δ d))
+    rw [RetBinders.enterT_lift h τ d bs]
+    rfl
+  | _, .snocMem (ρ := ρ) bs R _ _ hm => by
+    let F : State C (ρ ++ Δ) → State C (.mem R :: (ρ ++ Δ)) := fun s =>
+      (s.allocDefaultG R hm).st.push (t := .mem R) (some (s.allocDefaultG R hm).val)
+    show F (bs.enterT (τ.lift h d)).st = _
+    rw [RetBinders.enterT_lift h τ d bs]
+    let o := bs.enterT τ
+    let g := o.st.allocDefaultG R hm
+    show ((o.st.lift (Thin.keepAll ρ h) _).allocDefaultG R hm).st.push (t := .mem R)
+        (some ((o.st.lift (Thin.keepAll ρ h) _).allocDefaultG R hm).val) =
+      (g.st.push (t := .mem R) (some g.val)).lift (Thin.keep (Thin.keepAll ρ h))
+        (some g.val, TEnv.append ρ (TEnv.take ρ g.st.env) (TEnv.wk (o.ext.trans g.ext) Δ d))
+    rw [State.allocDefaultG_lift]
+    have hoff : TEnv.off (Thin.keepAll ρ h) (TEnv.wk g.ext (ρ ++ Δ)
+          (TEnv.append ρ (TEnv.take ρ o.st.env) (TEnv.wk o.ext Δ d))) =
+        TEnv.off (Thin.keepAll ρ h)
+          (TEnv.append ρ (TEnv.take ρ g.st.env) (TEnv.wk (o.ext.trans g.ext) Δ d)) := by
+      rw [TEnv.append_wk, TEnv.off_keepAll, TEnv.off_keepAll, TEnv.wk_trans]
+    show g.st.withEnv (Δ := .mem R :: (ρ ++ Δ)) (some g.val, TEnv.put (Thin.keepAll ρ h) g.st.env _) =
+      g.st.withEnv (Δ := .mem R :: (ρ ++ Δ)) (some g.val, TEnv.put (Thin.keepAll ρ h) g.st.env _)
+    rw [TEnv.put_congr _ _ hoff]
+
 theorem CallRet.enterT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {rs Γ' : Ctx} (ret : CallRet Γ rs Γ')
     {ps : Ctx} (τ : State C ps) : (ret.wk h).2.2.enterT τ = ret.enterT τ := by
   cases ret <;> rfl
@@ -1307,12 +1362,12 @@ theorem TRun.catchBytes_wk {Γ Δ ρ ps Γf : Ctx} (h : Thin Γ Δ) (τ : State 
     rw [ExtCall.keyT_wk]
     rfl
   rw [hp]
-  have hc := TRun.call_wk h τ d sargs (.rets rets) hs sbody
+  have hc := TRun.call_wk h τ d sargs (.rets rets.toRet) hs sbody
   change TWkRel (Thin.keepAll _ h) _ _
-    (TRun.call (sargs.wk h) (.rets rets) hs sbody (τ.lift h d)) at hc
+    (TRun.call (sargs.wk h) (.rets rets.toRet) hs sbody (τ.lift h d)) at hc
   revert hc
-  generalize TRun.call sargs (.rets rets) hs sbody τ = r₀
-  generalize TRun.call (sargs.wk h) (.rets rets) hs sbody (τ.lift h d) = r
+  generalize TRun.call sargs (.rets rets.toRet) hs sbody τ = r₀
+  generalize TRun.call (sargs.wk h) (.rets rets.toRet) hs sbody (τ.lift h d) = r
   intro hc
   cases r₀ with
   | ok a => cases r with
@@ -1539,12 +1594,12 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
     split
     · rfl
     split
-    · have hc := TRun.call_wk h τ d sargs (.rets rets) sbody.ext sbody.runR
+    · have hc := TRun.call_wk h τ d sargs (.rets rets.toRet) sbody.ext sbody.runR
       change TWkRel (Thin.keepAll _ h) _ _
-        (TRun.call (sargs.wk h) (.rets rets) sbody.ext sbody.runR (τ.lift h d)) at hc
+        (TRun.call (sargs.wk h) (.rets rets.toRet) sbody.ext sbody.runR (τ.lift h d)) at hc
       revert hc
-      generalize TRun.call sargs (.rets rets) sbody.ext sbody.runR τ = r₀
-      generalize TRun.call (sargs.wk h) (.rets rets) sbody.ext sbody.runR (τ.lift h d) = r
+      generalize TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR τ = r₀
+      generalize TRun.call (sargs.wk h) (.rets rets.toRet) sbody.ext sbody.runR (τ.lift h d) = r
       intro hc
       cases r₀ with
       | ok a =>

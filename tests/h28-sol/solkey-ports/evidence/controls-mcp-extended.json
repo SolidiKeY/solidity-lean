@@ -1,0 +1,15 @@
+{
+  "command": [
+    "scripts/coord-tools/lean-mcp",
+    "diag",
+    "tests/h28-sol/solkey-ports/Controls.lean"
+  ],
+  "exit": 0,
+  "seconds": 3.2007110560000456,
+  "max_rss_kib": 12808,
+  "lean_num_threads": "1",
+  "memory.max": "12884901888",
+  "memory.swap.max": "0",
+  "memory.peak": "1007779840",
+  "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+}

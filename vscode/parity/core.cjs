@@ -84,7 +84,9 @@ class ProcessSampler {
   }
   sample() {
     if (process.platform !== 'linux') return;
-    const table = procTable(), ids = new Set([this.root]);
+    const table = procTable();
+    if(this.rootStart===undefined)this.rootStart=table.get(this.root)?.start;
+    const ids = new Set(table.get(this.root)?.start===this.rootStart?[this.root]:[]);
     // Retain known detached descendants, checking start time against PID reuse.
     for (const [pid, start] of this.seen) if (table.get(pid)?.start === start) ids.add(pid);
     let changed = true;
@@ -103,7 +105,7 @@ class ProcessSampler {
       this.previous.set(row.pid,{start:row.start,ticks:row.ticks});
     }
     this.samples.push({ms:performance.now()-this.start,rssBytes:rows.reduce((s,r)=>s+r.rssBytes,0),cpuTicks,
-      activeCpuProcesses,activeVerifierProcesses,processes:rows.map(({pid,ppid,name,ticks,rssBytes})=>({pid,ppid,name,ticks,rssBytes}))});
+      activeCpuProcesses,activeVerifierProcesses,processes:rows.map(({pid,ppid,name,ticks,rssBytes,start})=>({pid,ppid,name,ticks,rssBytes,start}))});
   }
   stop() {
     clearInterval(this.timer); this.sample();
@@ -133,12 +135,14 @@ function summarize(runs) {
     groups.get(key).push(run);
   }
   return [...groups.values()].map(rows => {
+    const valid=rows.filter(r=>['passed','passed-with-gaps'].includes(r.status));
     const metrics = [...new Set(rows.flatMap(r=>Object.keys(r.result?.metrics || {})))];
     return {target:rows[0].target,workers:rows[0].workers,cache:rows[0].cache,suite:rows[0].suite,trials:rows.length,
+      validTrials:valid.length,excludedTimingTrials:rows.length-valid.length,
       failures:rows.filter(r=>!['passed','passed-with-gaps'].includes(r.status)).length,
       capabilityGaps:rows.reduce((s,r)=>s+(r.result?.scenarios?.filter(t=>['missing','partial','unexamined'].includes(t.status)).length||0),0),
       timeoutRate:rows.filter(r=>r.status === 'timeout').length/rows.length,
-      metrics:Object.fromEntries(metrics.map(key=>[key,statistics(rows.map(r=>r.result?.metrics[key]))])),
+      metrics:Object.fromEntries(metrics.map(key=>[key,statistics(valid.map(r=>r.result?.metrics[key]))])),
       peakRssBytes:statistics(rows.map(r=>r.resources?.peakRssBytes)),cpuTicks:statistics(rows.map(r=>r.resources?.cpuTicks)),
       cpuSeconds:statistics(rows.map(r=>r.resources?.cpuSeconds)),averageCpuCores:statistics(rows.map(r=>r.resources?.averageCpuCores)),
       activeVerifierProcesses:statistics(rows.map(r=>r.resources?.maxActiveVerifierProcesses))};
@@ -147,11 +151,12 @@ function summarize(runs) {
 function scaling(summary) {
   return summary.map(row=>{
     const baseline=summary.find(s=>s.target===row.target&&s.cache===row.cache&&s.suite===row.suite&&s.workers===1);
-    const latency=row.metrics.initialVerificationMs?.median,base=baseline?.metrics.initialVerificationMs?.median;
+    const metric='initialVerificationMs';
+    const latency=row.metrics[metric]?.median,base=baseline?.metrics[metric]?.median;
     return {target:row.target,cache:row.cache,workers:row.workers,baselineWorkers:1,
-      speedup:row.target==='dafny'&&base&&latency?base/latency:null,
-      efficiency:row.target==='dafny'&&base&&latency?base/latency/row.workers:null,
-      scope:row.target==='dafny'?'End-to-end within-file declaration workload; frontend serialization and startup are included.':'Worker setting unsupported; no scaling claim.'};
+      speedup:base&&latency?base/latency:null,
+      efficiency:base&&latency?base/latency/row.workers:null,
+      scope:row.target==='dafny'?'End-to-end within-file declaration workload; frontend serialization and startup are included.':'End-to-end within-file function workload; listing and worker startup are included.'};
   });
 }
 function protocol(tracePath) {
@@ -159,9 +164,12 @@ function protocol(tracePath) {
   let records;try{records=readFileSync(tracePath,'utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l));}
   catch(error){return {status:'unexamined',reason:error.message};}
   const methods={},errors=[],states=new Map(),queueMs=[],executionMs=[];
+  let messages=0,framingErrors=0;const finalized=new Set();
   for(const record of records) {
-    if(record.error){errors.push(record.error);continue;}
+    if(record.framingFinalized)finalized.add(record.direction);
+    if(record.error){errors.push(record.error);framingErrors++;continue;}
     const message=record.message,method=message?.method;
+    if(message)messages++;
     if(method)methods[record.direction+':'+method]=(methods[record.direction+':'+method]||0)+1;
     if(message?.error)errors.push(message.error);
     if(method==='dafny/textDocument/symbolStatus')for(const symbol of message.params.namedVerifiables) {
@@ -172,7 +180,46 @@ function protocol(tracePath) {
       states.set(key,previous);
     }
   }
-  return {status:'observed',methods,errors,queueMs:statistics(queueMs),symbolExecutionMs:statistics(executionMs),
+  return {status:framingErrors?'broken':!messages?'unexamined':finalized.size===2?'observed':'partial',messageCount:messages,methods,errors,queueMs:statistics(queueMs),symbolExecutionMs:statistics(executionMs),
+    framingFinalized:[...finalized],
     scope:'Native status notification intervals include transport and notification throttling; they do not isolate pure solver or VC time.'};
 }
-module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol};
+function terminalSdkIdentity(output,executable,version){
+ const lines=require('node:util').stripVTControlCharacters(output).split(/\r?\n/).map(line=>line.trim()).filter(Boolean),fs=require('node:fs');
+ if(!version||lines[0]!==executable||lines[1]!==version)throw Error('Terminal SDK path/version differs from selected executable');
+ const resolved=fs.realpathSync(lines[0]),selected=fs.realpathSync(executable),sha256=require('node:crypto').createHash('sha256').update(fs.readFileSync(resolved)).digest('hex');
+ if(resolved!==selected)throw Error('Terminal SDK canonical executable differs from selected SDK');
+ return{executable:resolved,sha256,version,lines};
+}
+function hostEvidenceErrors(result,config) {
+  const errors=[];
+  if(result?.runId!==config.runId||result?.target!==config.target||result?.schemaVersion!==1)errors.push('stale or foreign identity');
+  if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
+  const ids=result.scenarios.map(s=>s.id);
+  if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
+  if(config.suite==='custom-default-commands'){
+    if(!ids.includes('command-custom-default-build-keybinding'))errors.push('missing native default custom command scenario');
+    if(config.target==='dafny'){for(const id of ['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action'])if(!ids.includes(id))errors.push('missing native observation '+id);}
+  } else if(config.suite==='custom-commands'){
+    if(!ids.includes('command-custom-build-keybinding'))errors.push('missing native custom command scenario');
+  } else if(config.suite==='commands'){
+    if(!ids.includes('command-build-keybinding'))errors.push('missing native command scenario');
+  } else if(config.suite==='visual') {
+    // Visual capture has its own five scenarios. Missing early phases remain
+    // missing, never passed checks; the aggregate below must retain those gaps.
+    for(const id of ['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'])
+      if(!ids.includes(id))errors.push('missing visual scenario '+id);
+  } else {
+    if(!result.scenarios.some(s=>s.id==='initial-verification'))errors.push('missing initial verification scenario');
+    if(['passed','passed-with-gaps'].includes(result.status)&&!result.scenarios.some(s=>s.id==='initial-verification'&&s.status==='passed'))errors.push('initial verification did not pass');
+  }
+  const passed=result.scenarios.filter(s=>s.status==='passed').map(s=>s.id).sort();
+  if(JSON.stringify([...result.checks].sort())!==JSON.stringify(passed))errors.push('checks do not match passed scenarios');
+  if(result.scenarios.some(s=>!['passed','partial','missing','unexamined','broken','timeout'].includes(s.status)))errors.push('invalid scenario status');
+  const status=result.scenarios.some(s=>s.status==='timeout')?'timeout':result.scenarios.some(s=>s.status==='broken')?'broken':
+    result.scenarios.every(s=>s.status==='passed')?'passed':'passed-with-gaps';
+  // A fatal error outside a scenario may make a report worse, never better.
+  if(result.status!==status&&!(['broken','timeout'].includes(result.status)&&result.error))errors.push('aggregate status contradicts scenarios');
+  return errors;
+}
+module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity};

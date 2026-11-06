@@ -741,7 +741,7 @@ returning one where the function returns a memory reference (`rets`, its
 reference returns), and passing one to a callee's `memory` parameter the
 callee writes.  `fuel` bounds the callees followed. -/
 partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro rets : List String)
-    (body : List RawStmt) : Except String Unit := do
+    (body : List RawStmt) (fnValues : List (String × String) := []) : Except String Unit := do
   if let some r := sliceRefusal? body then throw r
   if ro.isEmpty then return
   -- Callee memory-argument checks below retain conservative mentions: a
@@ -785,6 +785,25 @@ partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro ret
         if offends then
           throw s!"{g}: calldata passed to a `memory` parameter it writes: solc copies it, \
             the model would share it"
+      -- A call through a function value (`fnValues`: the names of function
+      -- type, with their spelled types) passes a memory reference argument by
+      -- reference (`dispatchCaptures`); its candidates are not followed here,
+      -- so calldata there is refused outright: any argument that mentions it
+      -- (`roMentions`, as for a named callee above), not only one rooted at
+      -- it, so `h(b ? xs : xs)` and `h(id(xs))` are refused too. A callee
+      -- that is not a name (`callValueName`) has no known type: any argument
+      -- mentioning calldata is.
+      let shares := e.any fun
+        | .call g as => match lookupBy g fnValues with
+          | some ty => match fnParts? ty with
+            | some (ps, _, _) => (ps.zip as).any fun (p, a) =>
+                p.endsWith "memory" && ro.any (fun x => a.roMentions x)
+            | none => false
+          | none => g == callValueName && (as.drop 1).any fun a => ro.any (fun x => a.roMentions x)
+        | _ => false
+      if shares then
+        throw "calldata passed to a `memory` parameter of a function value: solc copies it, \
+          the model would share it"
 
 /-- The largest index among the fresh variables a raw statement writes. -/
 def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
@@ -975,7 +994,11 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
         (vs, origins, k, pre.push (.declMemory (.named "#sliceBase") base (some b)))
       pure { base, off := .num 0, fin := .field (.name base) "length" }
   let i ← i.mapM sliceNode
-  let j ← (if j matches .call "#sliceEnd" [] then pure outer.len else j.mapM sliceNode)
+  -- `b[i:]` ends at the outer view's length: its `e <= len` check is
+  -- `len <= len`, true, and not emitted (a premise the closer would carry
+  -- to every leaf; test 31, `sliceRead`).
+  let toEnd := j matches .call "#sliceEnd" []
+  let j ← (if toEnd then pure outer.len else j.mapM sliceNode)
   let fixed : RawExpr → Bool
     | .num _ => true
     | .field (.name x) "length" => x == outer.base
@@ -992,7 +1015,7 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
     | _, _ => ss.push (.require (.binop .le st e))
   -- Check relative bounds before adding an offset. An invalid large bound
   -- must revert as a slice, rather than overflowing offset + bound.
-  let ss := ss.push (.require (.binop .le e outer.len))
+  let ss := if toEnd then ss else ss.push (.require (.binop .le e outer.len))
   let (off, ss) := bind "o" (sliceAdd outer.off st) ss
   let (fin, ss) := bind "f" (sliceAdd outer.off e) ss
   modifyThe SliceSt fun (vs, origins, k, pre) => (vs, origins, k, pre ++ ss)

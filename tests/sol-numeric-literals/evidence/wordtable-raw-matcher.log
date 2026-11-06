@@ -1,0 +1,1584 @@
+ERROR 11:3 Tactic `split` failed: Could not split an `if` or `match` expression in the type
+  (List.casesOn raw ((fun x => WordClass.other) []) fun head tail =>
+      if h_1 : head = 97 then
+        ⋯ ▸
+          ⋯ ▸
+            List.casesOn tail ((fun x => WordClass.other) [97]) fun head tail =>
+              if h_1 : head = 98 then
+                ⋯ ▸
+                  ⋯ ▸
+                    List.casesOn tail ((fun x => WordClass.other) [97, 98]) fun head tail =>
+                      if h_1 : head = 115 then
+                        ⋯ ▸
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [97, 98, 115]) fun head tail =>
+                              if h_1 : head = 116 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [97, 98, 115, 116]) fun head tail =>
+                                      if h_1 : head = 114 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [97, 98, 115, 116, 114])
+                                              fun head tail =>
+                                              if h_1 : head = 97 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail
+                                                      ((fun x => WordClass.other) [97, 98, 115, 116, 114, 97])
+                                                      fun head tail =>
+                                                      if h_1 : head = 99 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun x => WordClass.other)
+                                                                [97, 98, 115, 116, 114, 97, 99])
+                                                              fun head tail =>
+                                                              if h_1 : head = 116 then
+                                                                ⋯ ▸
+                                                                  ⋯ ▸
+                                                                    List.casesOn tail
+                                                                      ((fun _ => WordClass.tok (Tok.kw Kw.abstract)) ())
+                                                                      fun head => ⋯
+                                                              else
+                                                                (fun x => WordClass.other)
+                                                                  (97 ::
+                                                                    98 :: 115 :: 116 :: 114 :: 97 :: 99 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (97 :: 98 :: 115 :: 116 :: 114 :: 97 :: head :: tail)
+                                              else
+                                                (fun x => WordClass.other)
+                                                  (97 :: 98 :: 115 :: 116 :: 114 :: head :: tail)
+                                      else (fun x => WordClass.other) (97 :: 98 :: 115 :: 116 :: head :: tail)
+                              else (fun x => WordClass.other) (97 :: 98 :: 115 :: head :: tail)
+                      else (fun x => WordClass.other) (97 :: 98 :: head :: tail)
+              else
+                if h_2 : head = 110 then
+                  Eq.ndrec (motive := fun head => ¬head = 98 → (fun x => WordClass) (97 :: head :: tail))
+                    (fun h_1 =>
+                      ⋯ ▸
+                        List.casesOn tail ((fun x => WordClass.other) [97, 110]) fun head tail =>
+                          if h_1 : head = 111 then
+                            ⋯ ▸
+                              ⋯ ▸
+                                List.casesOn tail ((fun x => WordClass.other) [97, 110, 111]) fun head tail =>
+                                  if h_1 : head = 110 then
+                                    ⋯ ▸
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [97, 110, 111, 110])
+                                          fun head tail =>
+                                          if h_1 : head = 121 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun x => WordClass.other) [97, 110, 111, 110, 121])
+                                                  fun head tail =>
+                                                  if h_1 : head = 109 then
+                                                    ⋯ ▸
+                                                      ⋯ ▸
+                                                        List.casesOn tail
+                                                          ((fun x => WordClass.other) [97, 110, 111, 110, 121, 109])
+                                                          fun head tail =>
+                                                          if h_1 : head = 111 then
+                                                            ⋯ ▸
+                                                              ⋯ ▸
+                                                                List.casesOn tail
+                                                                  ((fun x => WordClass.other)
+                                                                    [97, 110, 111, 110, 121, 109, 111])
+                                                                  fun head tail =>
+                                                                  if h_1 : head = 117 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                  else
+                                                                    (fun x => WordClass.other)
+                                                                      (97 ::
+                                                                        110 ::
+                                                                          111 ::
+                                                                            110 :: 121 :: 109 :: 111 :: head :: tail)
+                                                          else
+                                                            (fun x => WordClass.other)
+                                                              (97 :: 110 :: 111 :: 110 :: 121 :: 109 :: head :: tail)
+                                                  else
+                                                    (fun x => WordClass.other)
+                                                      (97 :: 110 :: 111 :: 110 :: 121 :: head :: tail)
+                                          else (fun x => WordClass.other) (97 :: 110 :: 111 :: 110 :: head :: tail)
+                                  else (fun x => WordClass.other) (97 :: 110 :: 111 :: head :: tail)
+                          else (fun x => WordClass.other) (97 :: 110 :: head :: tail))
+                    ⋯ h_1
+                else
+                  if h_3 : head = 115 then
+                    Eq.ndrec (motive := fun head =>
+                      ¬head = 98 → ¬head = 110 → (fun x => WordClass) (97 :: head :: tail))
+                      (fun h_1 h_2 =>
+                        ⋯ ▸
+                          List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.as_)) ()) fun head tail =>
+                            if h_1 : head = 115 then
+                              ⋯ ▸
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [97, 115, 115]) fun head tail =>
+                                    if h_1 : head = 101 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [97, 115, 115, 101])
+                                            fun head tail =>
+                                            if h_1 : head = 109 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail
+                                                    ((fun x => WordClass.other) [97, 115, 115, 101, 109])
+                                                    fun head tail =>
+                                                    if h_1 : head = 98 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [97, 115, 115, 101, 109, 98])
+                                                            fun head tail =>
+                                                            if h_1 : head = 108 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [97, 115, 115, 101, 109, 98, 108])
+                                                                    fun head tail => if h_1 : head = 121 then ⋯ else ⋯
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (97 :: 115 :: 115 :: 101 :: 109 :: 98 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other)
+                                                        (97 :: 115 :: 115 :: 101 :: 109 :: head :: tail)
+                                            else (fun x => WordClass.other) (97 :: 115 :: 115 :: 101 :: head :: tail)
+                                    else (fun x => WordClass.other) (97 :: 115 :: 115 :: head :: tail)
+                            else (fun x => WordClass.other) (97 :: 115 :: head :: tail))
+                      ⋯ h_1 h_2
+                  else
+                    if h_4 : head = 100 then
+                      Eq.ndrec (motive := fun head =>
+                        ¬head = 98 → ¬head = 110 → ¬head = 115 → (fun x => WordClass) (97 :: head :: tail))
+                        (fun h_1 h_2 h_3 =>
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [97, 100]) fun head tail =>
+                              if h_1 : head = 100 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [97, 100, 100]) fun head tail =>
+                                      if h_1 : head = 114 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [97, 100, 100, 114])
+                                              fun head tail =>
+                                              if h_1 : head = 101 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail
+                                                      ((fun x => WordClass.other) [97, 100, 100, 114, 101])
+                                                      fun head tail =>
+                                                      if h_1 : head = 115 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun x => WordClass.other) [97, 100, 100, 114, 101, 115])
+                                                              fun head tail =>
+                                                              if h_1 : head = 115 then
+                                                                ⋯ ▸
+                                                                  ⋯ ▸
+                                                                    List.casesOn tail
+                                                                      ((fun _ => WordClass.tok (Tok.elem Elem.address))
+                                                                        ())
+                                                                      fun head => ⋯
+                                                              else
+                                                                (fun x => WordClass.other)
+                                                                  (97 ::
+                                                                    100 :: 100 :: 114 :: 101 :: 115 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (97 :: 100 :: 100 :: 114 :: 101 :: head :: tail)
+                                              else (fun x => WordClass.other) (97 :: 100 :: 100 :: 114 :: head :: tail)
+                                      else (fun x => WordClass.other) (97 :: 100 :: 100 :: head :: tail)
+                              else (fun x => WordClass.other) (97 :: 100 :: head :: tail))
+                        ⋯ h_1 h_2 h_3
+                    else
+                      if h_5 : head = 102 then
+                        Eq.ndrec (motive := fun head =>
+                          ¬head = 98 →
+                            ¬head = 110 → ¬head = 115 → ¬head = 100 → (fun x => WordClass) (97 :: head :: tail))
+                          (fun h_1 h_2 h_3 h_4 =>
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [97, 102]) fun head tail =>
+                                if h_1 : head = 116 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [97, 102, 116]) fun head tail =>
+                                        if h_1 : head = 101 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun x => WordClass.other) [97, 102, 116, 101])
+                                                fun head tail =>
+                                                if h_1 : head = 114 then
+                                                  ⋯ ▸
+                                                    ⋯ ▸
+                                                      List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                        fun head tail =>
+                                                        (fun x => WordClass.other)
+                                                          (97 :: 102 :: 116 :: 101 :: 114 :: head :: tail)
+                                                else
+                                                  (fun x => WordClass.other) (97 :: 102 :: 116 :: 101 :: head :: tail)
+                                        else (fun x => WordClass.other) (97 :: 102 :: 116 :: head :: tail)
+                                else (fun x => WordClass.other) (97 :: 102 :: head :: tail))
+                          ⋯ h_1 h_2 h_3 h_4
+                      else
+                        if h_6 : head = 108 then
+                          Eq.ndrec (motive := fun head =>
+                            ¬head = 98 →
+                              ¬head = 110 →
+                                ¬head = 115 → ¬head = 100 → ¬head = 102 → (fun x => WordClass) (97 :: head :: tail))
+                            (fun h_1 h_2 h_3 h_4 h_5 =>
+                              ⋯ ▸
+                                List.casesOn tail ((fun x => WordClass.other) [97, 108]) fun head tail =>
+                                  if h_1 : head = 105 then
+                                    ⋯ ▸
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [97, 108, 105]) fun head tail =>
+                                          if h_1 : head = 97 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun x => WordClass.other) [97, 108, 105, 97])
+                                                  fun head tail =>
+                                                  if h_1 : head = 115 then
+                                                    ⋯ ▸
+                                                      ⋯ ▸
+                                                        List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                          fun head tail =>
+                                                          (fun x => WordClass.other)
+                                                            (97 :: 108 :: 105 :: 97 :: 115 :: head :: tail)
+                                                  else
+                                                    (fun x => WordClass.other) (97 :: 108 :: 105 :: 97 :: head :: tail)
+                                          else (fun x => WordClass.other) (97 :: 108 :: 105 :: head :: tail)
+                                  else (fun x => WordClass.other) (97 :: 108 :: head :: tail))
+                            ⋯ h_1 h_2 h_3 h_4 h_5
+                        else
+                          if h_7 : head = 112 then
+                            Eq.ndrec (motive := fun head =>
+                              ¬head = 98 →
+                                ¬head = 110 →
+                                  ¬head = 115 →
+                                    ¬head = 100 → ¬head = 102 → ¬head = 108 → (fun x => WordClass) (97 :: head :: tail))
+                              (fun h_1 h_2 h_3 h_4 h_5 h_6 =>
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [97, 112]) fun head tail =>
+                                    if h_1 : head = 112 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [97, 112, 112]) fun head tail =>
+                                            if h_1 : head = 108 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [97, 112, 112, 108])
+                                                    fun head tail =>
+                                                    if h_1 : head = 121 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                            fun head tail =>
+                                                            (fun x => WordClass.other)
+                                                              (97 :: 112 :: 112 :: 108 :: 121 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other)
+                                                        (97 :: 112 :: 112 :: 108 :: head :: tail)
+                                            else (fun x => WordClass.other) (97 :: 112 :: 112 :: head :: tail)
+                                    else (fun x => WordClass.other) (97 :: 112 :: head :: tail))
+                              ⋯ h_1 h_2 h_3 h_4 h_5 h_6
+                          else
+                            if h_8 : head = 117 then
+                              Eq.ndrec (motive := fun head =>
+                                ¬head = 98 →
+                                  ¬head = 110 →
+                                    ¬head = 115 →
+                                      ¬head = 100 →
+                                        ¬head = 102 →
+                                          ¬head = 108 → ¬head = 112 → (fun x => WordClass) (97 :: head :: tail))
+                                (fun h_1 h_2 h_3 h_4 h_5 h_6 h_7 =>
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [97, 117]) fun head tail =>
+                                      if h_1 : head = 116 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [97, 117, 116])
+                                              fun head tail =>
+                                              if h_1 : head = 111 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                      fun head tail =>
+                                                      (fun x => WordClass.other)
+                                                        (97 :: 117 :: 116 :: 111 :: head :: tail)
+                                              else (fun x => WordClass.other) (97 :: 117 :: 116 :: head :: tail)
+                                      else (fun x => WordClass.other) (97 :: 117 :: head :: tail))
+                                ⋯ h_1 h_2 h_3 h_4 h_5 h_6 h_7
+                            else (fun x => WordClass.other) (97 :: head :: tail)
+      else
+        if h_2 : head = 98 then
+          Eq.ndrec (motive := fun head => ¬head = 97 → (fun x => WordClass) (head :: tail))
+            (fun h_1 =>
+              ⋯ ▸
+                List.casesOn tail ((fun x => WordClass.other) [98]) fun head tail =>
+                  if h_1 : head = 114 then
+                    ⋯ ▸
+                      ⋯ ▸
+                        List.casesOn tail ((fun x => WordClass.other) [98, 114]) fun head tail =>
+                          if h_1 : head = 101 then
+                            ⋯ ▸
+                              ⋯ ▸
+                                List.casesOn tail ((fun x => WordClass.other) [98, 114, 101]) fun head tail =>
+                                  if h_1 : head = 97 then
+                                    ⋯ ▸
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [98, 114, 101, 97])
+                                          fun head tail =>
+                                          if h_1 : head = 107 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.break_)) ())
+                                                  fun head tail =>
+                                                  (fun x => WordClass.other)
+                                                    (98 :: 114 :: 101 :: 97 :: 107 :: head :: tail)
+                                          else (fun x => WordClass.other) (98 :: 114 :: 101 :: 97 :: head :: tail)
+                                  else (fun x => WordClass.other) (98 :: 114 :: 101 :: head :: tail)
+                          else (fun x => WordClass.other) (98 :: 114 :: head :: tail)
+                  else
+                    if h_2 : head = 111 then
+                      Eq.ndrec (motive := fun head => ¬head = 114 → (fun x => WordClass) (98 :: head :: tail))
+                        (fun h_1 =>
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [98, 111]) fun head tail =>
+                              if h_1 : head = 111 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [98, 111, 111]) fun head tail =>
+                                      if h_1 : head = 108 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun _ => WordClass.tok (Tok.elem Elem.bool)) ())
+                                              fun head tail =>
+                                              (fun x => WordClass.other) (98 :: 111 :: 111 :: 108 :: head :: tail)
+                                      else (fun x => WordClass.other) (98 :: 111 :: 111 :: head :: tail)
+                              else (fun x => WordClass.other) (98 :: 111 :: head :: tail))
+                        ⋯ h_1
+                    else
+                      if h_3 : head = 121 then
+                        Eq.ndrec (motive := fun head =>
+                          ¬head = 114 → ¬head = 111 → (fun x => WordClass) (98 :: head :: tail))
+                          (fun h_1 h_2 =>
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [98, 121]) fun head tail =>
+                                if h_1 : head = 116 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [98, 121, 116]) fun head tail =>
+                                        if h_1 : head = 101 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun _ => WordClass.reserved) ()) fun head tail =>
+                                                (fun x => WordClass.other) (98 :: 121 :: 116 :: 101 :: head :: tail)
+                                        else (fun x => WordClass.other) (98 :: 121 :: 116 :: head :: tail)
+                                else (fun x => WordClass.other) (98 :: 121 :: head :: tail))
+                          ⋯ h_1 h_2
+                      else (fun x => WordClass.other) (98 :: head :: tail))
+            ⋯ h_1
+        else
+          if h_3 : head = 99 then
+            Eq.ndrec (motive := fun head => ¬head = 97 → ¬head = 98 → (fun x => WordClass) (head :: tail))
+              (fun h_1 h_2 =>
+                ⋯ ▸
+                  List.casesOn tail ((fun x => WordClass.other) [99]) fun head tail =>
+                    if h_1 : head = 97 then
+                      ⋯ ▸
+                        ⋯ ▸
+                          List.casesOn tail ((fun x => WordClass.other) [99, 97]) fun head tail =>
+                            if h_1 : head = 108 then
+                              ⋯ ▸
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [99, 97, 108]) fun head tail =>
+                                    if h_1 : head = 108 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [99, 97, 108, 108])
+                                            fun head tail =>
+                                            if h_1 : head = 100 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [99, 97, 108, 108, 100])
+                                                    fun head tail =>
+                                                    if h_1 : head = 97 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [99, 97, 108, 108, 100, 97])
+                                                            fun head tail =>
+                                                            if h_1 : head = 116 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [99, 97, 108, 108, 100, 97, 116])
+                                                                    fun head tail => if h_1 : head = 97 then ⋯ else ⋯
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (99 :: 97 :: 108 :: 108 :: 100 :: 97 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other)
+                                                        (99 :: 97 :: 108 :: 108 :: 100 :: head :: tail)
+                                            else (fun x => WordClass.other) (99 :: 97 :: 108 :: 108 :: head :: tail)
+                                    else (fun x => WordClass.other) (99 :: 97 :: 108 :: head :: tail)
+                            else
+                              if h_2 : head = 116 then
+                                Eq.ndrec (motive := fun head =>
+                                  ¬head = 108 → (fun x => WordClass) (99 :: 97 :: head :: tail))
+                                  (fun h_1 =>
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [99, 97, 116]) fun head tail =>
+                                        if h_1 : head = 99 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun x => WordClass.other) [99, 97, 116, 99])
+                                                fun head tail =>
+                                                if h_1 : head = 104 then
+                                                  ⋯ ▸
+                                                    ⋯ ▸
+                                                      List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.catch_)) ())
+                                                        fun head tail =>
+                                                        (fun x => WordClass.other)
+                                                          (99 :: 97 :: 116 :: 99 :: 104 :: head :: tail)
+                                                else (fun x => WordClass.other) (99 :: 97 :: 116 :: 99 :: head :: tail)
+                                        else (fun x => WordClass.other) (99 :: 97 :: 116 :: head :: tail))
+                                  ⋯ h_1
+                              else
+                                if h_3 : head = 115 then
+                                  Eq.ndrec (motive := fun head =>
+                                    ¬head = 108 → ¬head = 116 → (fun x => WordClass) (99 :: 97 :: head :: tail))
+                                    (fun h_1 h_2 =>
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [99, 97, 115]) fun head tail =>
+                                          if h_1 : head = 101 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun _ => WordClass.reserved) ()) fun head tail =>
+                                                  (fun x => WordClass.other) (99 :: 97 :: 115 :: 101 :: head :: tail)
+                                          else (fun x => WordClass.other) (99 :: 97 :: 115 :: head :: tail))
+                                    ⋯ h_1 h_2
+                                else (fun x => WordClass.other) (99 :: 97 :: head :: tail)
+                    else
+                      if h_2 : head = 111 then
+                        Eq.ndrec (motive := fun head => ¬head = 97 → (fun x => WordClass) (99 :: head :: tail))
+                          (fun h_1 =>
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [99, 111]) fun head tail =>
+                                if h_1 : head = 110 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [99, 111, 110]) fun head tail =>
+                                        if h_1 : head = 115 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun x => WordClass.other) [99, 111, 110, 115])
+                                                fun head tail =>
+                                                if h_1 : head = 116 then
+                                                  ⋯ ▸
+                                                    ⋯ ▸
+                                                      List.casesOn tail
+                                                        ((fun x => WordClass.other) [99, 111, 110, 115, 116])
+                                                        fun head tail =>
+                                                        if h_1 : head = 97 then
+                                                          ⋯ ▸
+                                                            ⋯ ▸
+                                                              List.casesOn tail
+                                                                ((fun x => WordClass.other)
+                                                                  [99, 111, 110, 115, 116, 97])
+                                                                fun head tail =>
+                                                                if h_1 : head = 110 then
+                                                                  ⋯ ▸
+                                                                    ⋯ ▸
+                                                                      List.casesOn tail
+                                                                        ((fun x => WordClass.other)
+                                                                          [99, 111, 110, 115, 116, 97, 110])
+                                                                        fun head => ⋯
+                                                                else
+                                                                  (fun x => WordClass.other)
+                                                                    (99 ::
+                                                                      111 :: 110 :: 115 :: 116 :: 97 :: head :: tail)
+                                                        else
+                                                          if h_2 : head = 114 then
+                                                            Eq.ndrec (motive := fun head =>
+                                                              ¬head = 97 →
+                                                                (fun x => WordClass)
+                                                                  (99 :: 111 :: 110 :: 115 :: 116 :: head :: tail))
+                                                              (fun h_1 =>
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [99, 111, 110, 115, 116, 114])
+                                                                    fun head tail =>
+                                                                    if h_1 : head = 117 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                    else
+                                                                      (fun x => WordClass.other)
+                                                                        (99 ::
+                                                                          111 ::
+                                                                            110 :: 115 :: 116 :: 114 :: head :: tail))
+                                                              ⋯ h_1
+                                                          else
+                                                            (fun x => WordClass.other)
+                                                              (99 :: 111 :: 110 :: 115 :: 116 :: head :: tail)
+                                                else
+                                                  (fun x => WordClass.other) (99 :: 111 :: 110 :: 115 :: head :: tail)
+                                        else
+                                          if h_2 : head = 116 then
+                                            Eq.ndrec (motive := fun head =>
+                                              ¬head = 115 → (fun x => WordClass) (99 :: 111 :: 110 :: head :: tail))
+                                              (fun h_1 =>
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [99, 111, 110, 116])
+                                                    fun head tail =>
+                                                    if h_1 : head = 105 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [99, 111, 110, 116, 105])
+                                                            fun head tail =>
+                                                            if h_1 : head = 110 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [99, 111, 110, 116, 105, 110])
+                                                                    fun head tail =>
+                                                                    if h_1 : head = 117 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                    else
+                                                                      (fun x => WordClass.other)
+                                                                        (99 ::
+                                                                          111 ::
+                                                                            110 :: 116 :: 105 :: 110 :: head :: tail)
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (99 :: 111 :: 110 :: 116 :: 105 :: head :: tail)
+                                                    else
+                                                      if h_2 : head = 114 then
+                                                        Eq.ndrec (motive := fun head =>
+                                                          ¬head = 105 →
+                                                            (fun x => WordClass)
+                                                              (99 :: 111 :: 110 :: 116 :: head :: tail))
+                                                          (fun h_1 =>
+                                                            ⋯ ▸
+                                                              List.casesOn tail
+                                                                ((fun x => WordClass.other) [99, 111, 110, 116, 114])
+                                                                fun head tail =>
+                                                                if h_1 : head = 97 then
+                                                                  ⋯ ▸
+                                                                    ⋯ ▸
+                                                                      List.casesOn tail
+                                                                        ((fun x => WordClass.other)
+                                                                          [99, 111, 110, 116, 114, 97])
+                                                                        fun head tail =>
+                                                                        if h_1 : head = 99 then ⋯
+                                                                        else
+                                                                          (fun x => WordClass.other)
+                                                                            (99 ::
+                                                                              111 ::
+                                                                                110 :: 116 :: 114 :: 97 :: head :: tail)
+                                                                else
+                                                                  (fun x => WordClass.other)
+                                                                    (99 :: 111 :: 110 :: 116 :: 114 :: head :: tail))
+                                                          ⋯ h_1
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (99 :: 111 :: 110 :: 116 :: head :: tail))
+                                              ⋯ h_1
+                                          else (fun x => WordClass.other) (99 :: 111 :: 110 :: head :: tail)
+                                else
+                                  if h_2 : head = 112 then
+                                    Eq.ndrec (motive := fun head =>
+                                      ¬head = 110 → (fun x => WordClass) (99 :: 111 :: head :: tail))
+                                      (fun h_1 =>
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [99, 111, 112]) fun head tail =>
+                                            if h_1 : head = 121 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [99, 111, 112, 121])
+                                                    fun head tail =>
+                                                    if h_1 : head = 111 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [99, 111, 112, 121, 111])
+                                                            fun head tail =>
+                                                            if h_1 : head = 102 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                                    fun head tail =>
+                                                                    (fun x => WordClass.other)
+                                                                      (99 ::
+                                                                        111 :: 112 :: 121 :: 111 :: 102 :: head :: tail)
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (99 :: 111 :: 112 :: 121 :: 111 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other)
+                                                        (99 :: 111 :: 112 :: 121 :: head :: tail)
+                                            else (fun x => WordClass.other) (99 :: 111 :: 112 :: head :: tail))
+                                      ⋯ h_1
+                                  else (fun x => WordClass.other) (99 :: 111 :: head :: tail))
+                          ⋯ h_1
+                      else (fun x => WordClass.other) (99 :: head :: tail))
+              ⋯ h_1 h_2
+          else
+            if h_4 : head = 100 then
+              Eq.ndrec (motive := fun head =>
+                ¬head = 97 → ¬head = 98 → ¬head = 99 → (fun x => WordClass) (head :: tail))
+                (fun h_1 h_2 h_3 =>
+                  ⋯ ▸
+                    List.casesOn tail ((fun x => WordClass.other) [100]) fun head tail =>
+                      if h_1 : head = 101 then
+                        ⋯ ▸
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [100, 101]) fun head tail =>
+                              if h_1 : head = 108 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [100, 101, 108]) fun head tail =>
+                                      if h_1 : head = 101 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [100, 101, 108, 101])
+                                              fun head tail =>
+                                              if h_1 : head = 116 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail
+                                                      ((fun x => WordClass.other) [100, 101, 108, 101, 116])
+                                                      fun head tail =>
+                                                      if h_1 : head = 101 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun _ => WordClass.tok (Tok.kw Kw.delete)) ())
+                                                              fun head tail =>
+                                                              (fun x => WordClass.other)
+                                                                (100 :: 101 :: 108 :: 101 :: 116 :: 101 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (100 :: 101 :: 108 :: 101 :: 116 :: head :: tail)
+                                              else (fun x => WordClass.other) (100 :: 101 :: 108 :: 101 :: head :: tail)
+                                      else (fun x => WordClass.other) (100 :: 101 :: 108 :: head :: tail)
+                              else
+                                if h_2 : head = 102 then
+                                  Eq.ndrec (motive := fun head =>
+                                    ¬head = 108 → (fun x => WordClass) (100 :: 101 :: head :: tail))
+                                    (fun h_1 =>
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [100, 101, 102]) fun head tail =>
+                                          if h_1 : head = 97 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun x => WordClass.other) [100, 101, 102, 97])
+                                                  fun head tail =>
+                                                  if h_1 : head = 117 then
+                                                    ⋯ ▸
+                                                      ⋯ ▸
+                                                        List.casesOn tail
+                                                          ((fun x => WordClass.other) [100, 101, 102, 97, 117])
+                                                          fun head tail =>
+                                                          if h_1 : head = 108 then
+                                                            ⋯ ▸
+                                                              ⋯ ▸
+                                                                List.casesOn tail
+                                                                  ((fun x => WordClass.other)
+                                                                    [100, 101, 102, 97, 117, 108])
+                                                                  fun head tail =>
+                                                                  if h_1 : head = 116 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                  else
+                                                                    (fun x => WordClass.other)
+                                                                      (100 ::
+                                                                        101 :: 102 :: 97 :: 117 :: 108 :: head :: tail)
+                                                          else
+                                                            (fun x => WordClass.other)
+                                                              (100 :: 101 :: 102 :: 97 :: 117 :: head :: tail)
+                                                  else
+                                                    (fun x => WordClass.other) (100 :: 101 :: 102 :: 97 :: head :: tail)
+                                          else
+                                            if h_2 : head = 105 then
+                                              Eq.ndrec (motive := fun head =>
+                                                ¬head = 97 → (fun x => WordClass) (100 :: 101 :: 102 :: head :: tail))
+                                                (fun h_1 =>
+                                                  ⋯ ▸
+                                                    List.casesOn tail ((fun x => WordClass.other) [100, 101, 102, 105])
+                                                      fun head tail =>
+                                                      if h_1 : head = 110 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun x => WordClass.other) [100, 101, 102, 105, 110])
+                                                              fun head tail =>
+                                                              if h_1 : head = 101 then
+                                                                ⋯ ▸
+                                                                  ⋯ ▸
+                                                                    List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                                      fun head tail =>
+                                                                      (fun x => WordClass.other)
+                                                                        (100 ::
+                                                                          101 ::
+                                                                            102 :: 105 :: 110 :: 101 :: head :: tail)
+                                                              else
+                                                                (fun x => WordClass.other)
+                                                                  (100 :: 101 :: 102 :: 105 :: 110 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (100 :: 101 :: 102 :: 105 :: head :: tail))
+                                                ⋯ h_1
+                                            else (fun x => WordClass.other) (100 :: 101 :: 102 :: head :: tail))
+                                    ⋯ h_1
+                                else (fun x => WordClass.other) (100 :: 101 :: head :: tail)
+                      else
+                        if h_2 : head = 111 then
+                          Eq.ndrec (motive := fun head => ¬head = 101 → (fun x => WordClass) (100 :: head :: tail))
+                            (fun h_1 =>
+                              ⋯ ▸
+                                List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.do_)) ()) fun head tail =>
+                                  (fun x => WordClass.other) (100 :: 111 :: head :: tail))
+                            ⋯ h_1
+                        else
+                          if h_3 : head = 97 then
+                            Eq.ndrec (motive := fun head =>
+                              ¬head = 101 → ¬head = 111 → (fun x => WordClass) (100 :: head :: tail))
+                              (fun h_1 h_2 =>
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [100, 97]) fun head tail =>
+                                    if h_1 : head = 121 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [100, 97, 121]) fun head tail =>
+                                            if h_1 : head = 115 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun _ => WordClass.tok (Tok.denom Denom.days)) ())
+                                                    fun head tail =>
+                                                    (fun x => WordClass.other) (100 :: 97 :: 121 :: 115 :: head :: tail)
+                                            else (fun x => WordClass.other) (100 :: 97 :: 121 :: head :: tail)
+                                    else (fun x => WordClass.other) (100 :: 97 :: head :: tail))
+                              ⋯ h_1 h_2
+                          else (fun x => WordClass.other) (100 :: head :: tail))
+                ⋯ h_1 h_2 h_3
+            else
+              if h_5 : head = 101 then
+                Eq.ndrec (motive := fun head =>
+                  ¬head = 97 → ¬head = 98 → ¬head = 99 → ¬head = 100 → (fun x => WordClass) (head :: tail))
+                  (fun h_1 h_2 h_3 h_4 =>
+                    ⋯ ▸
+                      List.casesOn tail ((fun x => WordClass.other) [101]) fun head tail =>
+                        if h_1 : head = 108 then
+                          ⋯ ▸
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [101, 108]) fun head tail =>
+                                if h_1 : head = 115 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [101, 108, 115]) fun head tail =>
+                                        if h_1 : head = 101 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.else_)) ())
+                                                fun head tail =>
+                                                (fun x => WordClass.other) (101 :: 108 :: 115 :: 101 :: head :: tail)
+                                        else (fun x => WordClass.other) (101 :: 108 :: 115 :: head :: tail)
+                                else (fun x => WordClass.other) (101 :: 108 :: head :: tail)
+                        else
+                          if h_2 : head = 109 then
+                            Eq.ndrec (motive := fun head => ¬head = 108 → (fun x => WordClass) (101 :: head :: tail))
+                              (fun h_1 => ⋯ ▸ List.casesOn tail ((fun x => WordClass.other) ⋯) ⋯) ⋯ ⋯
+                          else ⋯)
+                  ⋯ ⋯ ⋯ ⋯ ⋯
+              else ⋯) =
+    ⋯
+of `h`
+
+Hint: Use `set_option trace.split.failure true` to display additional diagnostic information
+
+raw : Bytes
+n : NumLit
+h :
+  (List.casesOn raw ((fun x => WordClass.other) []) fun head tail =>
+      if h_1 : head = 97 then
+        ⋯ ▸
+          ⋯ ▸
+            List.casesOn tail ((fun x => WordClass.other) [97]) fun head tail =>
+              if h_1 : head = 98 then
+                ⋯ ▸
+                  ⋯ ▸
+                    List.casesOn tail ((fun x => WordClass.other) [97, 98]) fun head tail =>
+                      if h_1 : head = 115 then
+                        ⋯ ▸
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [97, 98, 115]) fun head tail =>
+                              if h_1 : head = 116 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [97, 98, 115, 116]) fun head tail =>
+                                      if h_1 : head = 114 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [97, 98, 115, 116, 114])
+                                              fun head tail =>
+                                              if h_1 : head = 97 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail
+                                                      ((fun x => WordClass.other) [97, 98, 115, 116, 114, 97])
+                                                      fun head tail =>
+                                                      if h_1 : head = 99 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun x => WordClass.other) [97, 98, 115, 116, 114, 97, 99])
+                                                              fun head tail =>
+                                                              if h_1 : head = 116 then
+                                                                ⋯ ▸
+                                                                  ⋯ ▸
+                                                                    List.casesOn tail
+                                                                      ((fun _ => WordClass.tok (Tok.kw Kw.abstract)) ())
+                                                                      fun head => ⋯
+                                                              else
+                                                                (fun x => WordClass.other)
+                                                                  (97 ::
+                                                                    98 :: 115 :: 116 :: 114 :: 97 :: 99 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (97 :: 98 :: 115 :: 116 :: 114 :: 97 :: head :: tail)
+                                              else
+                                                (fun x => WordClass.other) (97 :: 98 :: 115 :: 116 :: 114 :: head :: tail)
+                                      else (fun x => WordClass.other) (97 :: 98 :: 115 :: 116 :: head :: tail)
+                              else (fun x => WordClass.other) (97 :: 98 :: 115 :: head :: tail)
+                      else (fun x => WordClass.other) (97 :: 98 :: head :: tail)
+              else
+                if h_2 : head = 110 then
+                  Eq.ndrec (motive := fun head => ¬head = 98 → (fun x => WordClass) (97 :: head :: tail))
+                    (fun h_1 =>
+                      ⋯ ▸
+                        List.casesOn tail ((fun x => WordClass.other) [97, 110]) fun head tail =>
+                          if h_1 : head = 111 then
+                            ⋯ ▸
+                              ⋯ ▸
+                                List.casesOn tail ((fun x => WordClass.other) [97, 110, 111]) fun head tail =>
+                                  if h_1 : head = 110 then
+                                    ⋯ ▸
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [97, 110, 111, 110])
+                                          fun head tail =>
+                                          if h_1 : head = 121 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun x => WordClass.other) [97, 110, 111, 110, 121])
+                                                  fun head tail =>
+                                                  if h_1 : head = 109 then
+                                                    ⋯ ▸
+                                                      ⋯ ▸
+                                                        List.casesOn tail
+                                                          ((fun x => WordClass.other) [97, 110, 111, 110, 121, 109])
+                                                          fun head tail =>
+                                                          if h_1 : head = 111 then
+                                                            ⋯ ▸
+                                                              ⋯ ▸
+                                                                List.casesOn tail
+                                                                  ((fun x => WordClass.other)
+                                                                    [97, 110, 111, 110, 121, 109, 111])
+                                                                  fun head tail =>
+                                                                  if h_1 : head = 117 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                  else
+                                                                    (fun x => WordClass.other)
+                                                                      (97 ::
+                                                                        110 ::
+                                                                          111 :: 110 :: 121 :: 109 :: 111 :: head :: tail)
+                                                          else
+                                                            (fun x => WordClass.other)
+                                                              (97 :: 110 :: 111 :: 110 :: 121 :: 109 :: head :: tail)
+                                                  else
+                                                    (fun x => WordClass.other)
+                                                      (97 :: 110 :: 111 :: 110 :: 121 :: head :: tail)
+                                          else (fun x => WordClass.other) (97 :: 110 :: 111 :: 110 :: head :: tail)
+                                  else (fun x => WordClass.other) (97 :: 110 :: 111 :: head :: tail)
+                          else (fun x => WordClass.other) (97 :: 110 :: head :: tail))
+                    ⋯ h_1
+                else
+                  if h_3 : head = 115 then
+                    Eq.ndrec (motive := fun head => ¬head = 98 → ¬head = 110 → (fun x => WordClass) (97 :: head :: tail))
+                      (fun h_1 h_2 =>
+                        ⋯ ▸
+                          List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.as_)) ()) fun head tail =>
+                            if h_1 : head = 115 then
+                              ⋯ ▸
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [97, 115, 115]) fun head tail =>
+                                    if h_1 : head = 101 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [97, 115, 115, 101])
+                                            fun head tail =>
+                                            if h_1 : head = 109 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [97, 115, 115, 101, 109])
+                                                    fun head tail =>
+                                                    if h_1 : head = 98 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [97, 115, 115, 101, 109, 98])
+                                                            fun head tail =>
+                                                            if h_1 : head = 108 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [97, 115, 115, 101, 109, 98, 108])
+                                                                    fun head tail => if h_1 : head = 121 then ⋯ else ⋯
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (97 :: 115 :: 115 :: 101 :: 109 :: 98 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other)
+                                                        (97 :: 115 :: 115 :: 101 :: 109 :: head :: tail)
+                                            else (fun x => WordClass.other) (97 :: 115 :: 115 :: 101 :: head :: tail)
+                                    else (fun x => WordClass.other) (97 :: 115 :: 115 :: head :: tail)
+                            else (fun x => WordClass.other) (97 :: 115 :: head :: tail))
+                      ⋯ h_1 h_2
+                  else
+                    if h_4 : head = 100 then
+                      Eq.ndrec (motive := fun head =>
+                        ¬head = 98 → ¬head = 110 → ¬head = 115 → (fun x => WordClass) (97 :: head :: tail))
+                        (fun h_1 h_2 h_3 =>
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [97, 100]) fun head tail =>
+                              if h_1 : head = 100 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [97, 100, 100]) fun head tail =>
+                                      if h_1 : head = 114 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [97, 100, 100, 114])
+                                              fun head tail =>
+                                              if h_1 : head = 101 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail
+                                                      ((fun x => WordClass.other) [97, 100, 100, 114, 101])
+                                                      fun head tail =>
+                                                      if h_1 : head = 115 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun x => WordClass.other) [97, 100, 100, 114, 101, 115])
+                                                              fun head tail =>
+                                                              if h_1 : head = 115 then
+                                                                ⋯ ▸
+                                                                  ⋯ ▸
+                                                                    List.casesOn tail
+                                                                      ((fun _ => WordClass.tok (Tok.elem Elem.address))
+                                                                        ())
+                                                                      fun head => ⋯
+                                                              else
+                                                                (fun x => WordClass.other)
+                                                                  (97 :: 100 :: 100 :: 114 :: 101 :: 115 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (97 :: 100 :: 100 :: 114 :: 101 :: head :: tail)
+                                              else (fun x => WordClass.other) (97 :: 100 :: 100 :: 114 :: head :: tail)
+                                      else (fun x => WordClass.other) (97 :: 100 :: 100 :: head :: tail)
+                              else (fun x => WordClass.other) (97 :: 100 :: head :: tail))
+                        ⋯ h_1 h_2 h_3
+                    else
+                      if h_5 : head = 102 then
+                        Eq.ndrec (motive := fun head =>
+                          ¬head = 98 →
+                            ¬head = 110 → ¬head = 115 → ¬head = 100 → (fun x => WordClass) (97 :: head :: tail))
+                          (fun h_1 h_2 h_3 h_4 =>
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [97, 102]) fun head tail =>
+                                if h_1 : head = 116 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [97, 102, 116]) fun head tail =>
+                                        if h_1 : head = 101 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun x => WordClass.other) [97, 102, 116, 101])
+                                                fun head tail =>
+                                                if h_1 : head = 114 then
+                                                  ⋯ ▸
+                                                    ⋯ ▸
+                                                      List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                        fun head tail =>
+                                                        (fun x => WordClass.other)
+                                                          (97 :: 102 :: 116 :: 101 :: 114 :: head :: tail)
+                                                else (fun x => WordClass.other) (97 :: 102 :: 116 :: 101 :: head :: tail)
+                                        else (fun x => WordClass.other) (97 :: 102 :: 116 :: head :: tail)
+                                else (fun x => WordClass.other) (97 :: 102 :: head :: tail))
+                          ⋯ h_1 h_2 h_3 h_4
+                      else
+                        if h_6 : head = 108 then
+                          Eq.ndrec (motive := fun head =>
+                            ¬head = 98 →
+                              ¬head = 110 →
+                                ¬head = 115 → ¬head = 100 → ¬head = 102 → (fun x => WordClass) (97 :: head :: tail))
+                            (fun h_1 h_2 h_3 h_4 h_5 =>
+                              ⋯ ▸
+                                List.casesOn tail ((fun x => WordClass.other) [97, 108]) fun head tail =>
+                                  if h_1 : head = 105 then
+                                    ⋯ ▸
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [97, 108, 105]) fun head tail =>
+                                          if h_1 : head = 97 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun x => WordClass.other) [97, 108, 105, 97])
+                                                  fun head tail =>
+                                                  if h_1 : head = 115 then
+                                                    ⋯ ▸
+                                                      ⋯ ▸
+                                                        List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                          fun head tail =>
+                                                          (fun x => WordClass.other)
+                                                            (97 :: 108 :: 105 :: 97 :: 115 :: head :: tail)
+                                                  else (fun x => WordClass.other) (97 :: 108 :: 105 :: 97 :: head :: tail)
+                                          else (fun x => WordClass.other) (97 :: 108 :: 105 :: head :: tail)
+                                  else (fun x => WordClass.other) (97 :: 108 :: head :: tail))
+                            ⋯ h_1 h_2 h_3 h_4 h_5
+                        else
+                          if h_7 : head = 112 then
+                            Eq.ndrec (motive := fun head =>
+                              ¬head = 98 →
+                                ¬head = 110 →
+                                  ¬head = 115 →
+                                    ¬head = 100 → ¬head = 102 → ¬head = 108 → (fun x => WordClass) (97 :: head :: tail))
+                              (fun h_1 h_2 h_3 h_4 h_5 h_6 =>
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [97, 112]) fun head tail =>
+                                    if h_1 : head = 112 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [97, 112, 112]) fun head tail =>
+                                            if h_1 : head = 108 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [97, 112, 112, 108])
+                                                    fun head tail =>
+                                                    if h_1 : head = 121 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                            fun head tail =>
+                                                            (fun x => WordClass.other)
+                                                              (97 :: 112 :: 112 :: 108 :: 121 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other) (97 :: 112 :: 112 :: 108 :: head :: tail)
+                                            else (fun x => WordClass.other) (97 :: 112 :: 112 :: head :: tail)
+                                    else (fun x => WordClass.other) (97 :: 112 :: head :: tail))
+                              ⋯ h_1 h_2 h_3 h_4 h_5 h_6
+                          else
+                            if h_8 : head = 117 then
+                              Eq.ndrec (motive := fun head =>
+                                ¬head = 98 →
+                                  ¬head = 110 →
+                                    ¬head = 115 →
+                                      ¬head = 100 →
+                                        ¬head = 102 →
+                                          ¬head = 108 → ¬head = 112 → (fun x => WordClass) (97 :: head :: tail))
+                                (fun h_1 h_2 h_3 h_4 h_5 h_6 h_7 =>
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [97, 117]) fun head tail =>
+                                      if h_1 : head = 116 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [97, 117, 116]) fun head tail =>
+                                              if h_1 : head = 111 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail ((fun _ => WordClass.reserved) ()) fun head tail =>
+                                                      (fun x => WordClass.other) (97 :: 117 :: 116 :: 111 :: head :: tail)
+                                              else (fun x => WordClass.other) (97 :: 117 :: 116 :: head :: tail)
+                                      else (fun x => WordClass.other) (97 :: 117 :: head :: tail))
+                                ⋯ h_1 h_2 h_3 h_4 h_5 h_6 h_7
+                            else (fun x => WordClass.other) (97 :: head :: tail)
+      else
+        if h_2 : head = 98 then
+          Eq.ndrec (motive := fun head => ¬head = 97 → (fun x => WordClass) (head :: tail))
+            (fun h_1 =>
+              ⋯ ▸
+                List.casesOn tail ((fun x => WordClass.other) [98]) fun head tail =>
+                  if h_1 : head = 114 then
+                    ⋯ ▸
+                      ⋯ ▸
+                        List.casesOn tail ((fun x => WordClass.other) [98, 114]) fun head tail =>
+                          if h_1 : head = 101 then
+                            ⋯ ▸
+                              ⋯ ▸
+                                List.casesOn tail ((fun x => WordClass.other) [98, 114, 101]) fun head tail =>
+                                  if h_1 : head = 97 then
+                                    ⋯ ▸
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [98, 114, 101, 97]) fun head tail =>
+                                          if h_1 : head = 107 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.break_)) ())
+                                                  fun head tail =>
+                                                  (fun x => WordClass.other)
+                                                    (98 :: 114 :: 101 :: 97 :: 107 :: head :: tail)
+                                          else (fun x => WordClass.other) (98 :: 114 :: 101 :: 97 :: head :: tail)
+                                  else (fun x => WordClass.other) (98 :: 114 :: 101 :: head :: tail)
+                          else (fun x => WordClass.other) (98 :: 114 :: head :: tail)
+                  else
+                    if h_2 : head = 111 then
+                      Eq.ndrec (motive := fun head => ¬head = 114 → (fun x => WordClass) (98 :: head :: tail))
+                        (fun h_1 =>
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [98, 111]) fun head tail =>
+                              if h_1 : head = 111 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [98, 111, 111]) fun head tail =>
+                                      if h_1 : head = 108 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun _ => WordClass.tok (Tok.elem Elem.bool)) ())
+                                              fun head tail =>
+                                              (fun x => WordClass.other) (98 :: 111 :: 111 :: 108 :: head :: tail)
+                                      else (fun x => WordClass.other) (98 :: 111 :: 111 :: head :: tail)
+                              else (fun x => WordClass.other) (98 :: 111 :: head :: tail))
+                        ⋯ h_1
+                    else
+                      if h_3 : head = 121 then
+                        Eq.ndrec (motive := fun head =>
+                          ¬head = 114 → ¬head = 111 → (fun x => WordClass) (98 :: head :: tail))
+                          (fun h_1 h_2 =>
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [98, 121]) fun head tail =>
+                                if h_1 : head = 116 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [98, 121, 116]) fun head tail =>
+                                        if h_1 : head = 101 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun _ => WordClass.reserved) ()) fun head tail =>
+                                                (fun x => WordClass.other) (98 :: 121 :: 116 :: 101 :: head :: tail)
+                                        else (fun x => WordClass.other) (98 :: 121 :: 116 :: head :: tail)
+                                else (fun x => WordClass.other) (98 :: 121 :: head :: tail))
+                          ⋯ h_1 h_2
+                      else (fun x => WordClass.other) (98 :: head :: tail))
+            ⋯ h_1
+        else
+          if h_3 : head = 99 then
+            Eq.ndrec (motive := fun head => ¬head = 97 → ¬head = 98 → (fun x => WordClass) (head :: tail))
+              (fun h_1 h_2 =>
+                ⋯ ▸
+                  List.casesOn tail ((fun x => WordClass.other) [99]) fun head tail =>
+                    if h_1 : head = 97 then
+                      ⋯ ▸
+                        ⋯ ▸
+                          List.casesOn tail ((fun x => WordClass.other) [99, 97]) fun head tail =>
+                            if h_1 : head = 108 then
+                              ⋯ ▸
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [99, 97, 108]) fun head tail =>
+                                    if h_1 : head = 108 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [99, 97, 108, 108])
+                                            fun head tail =>
+                                            if h_1 : head = 100 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [99, 97, 108, 108, 100])
+                                                    fun head tail =>
+                                                    if h_1 : head = 97 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [99, 97, 108, 108, 100, 97])
+                                                            fun head tail =>
+                                                            if h_1 : head = 116 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [99, 97, 108, 108, 100, 97, 116])
+                                                                    fun head tail => if h_1 : head = 97 then ⋯ else ⋯
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (99 :: 97 :: 108 :: 108 :: 100 :: 97 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other)
+                                                        (99 :: 97 :: 108 :: 108 :: 100 :: head :: tail)
+                                            else (fun x => WordClass.other) (99 :: 97 :: 108 :: 108 :: head :: tail)
+                                    else (fun x => WordClass.other) (99 :: 97 :: 108 :: head :: tail)
+                            else
+                              if h_2 : head = 116 then
+                                Eq.ndrec (motive := fun head =>
+                                  ¬head = 108 → (fun x => WordClass) (99 :: 97 :: head :: tail))
+                                  (fun h_1 =>
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [99, 97, 116]) fun head tail =>
+                                        if h_1 : head = 99 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun x => WordClass.other) [99, 97, 116, 99])
+                                                fun head tail =>
+                                                if h_1 : head = 104 then
+                                                  ⋯ ▸
+                                                    ⋯ ▸
+                                                      List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.catch_)) ())
+                                                        fun head tail =>
+                                                        (fun x => WordClass.other)
+                                                          (99 :: 97 :: 116 :: 99 :: 104 :: head :: tail)
+                                                else (fun x => WordClass.other) (99 :: 97 :: 116 :: 99 :: head :: tail)
+                                        else (fun x => WordClass.other) (99 :: 97 :: 116 :: head :: tail))
+                                  ⋯ h_1
+                              else
+                                if h_3 : head = 115 then
+                                  Eq.ndrec (motive := fun head =>
+                                    ¬head = 108 → ¬head = 116 → (fun x => WordClass) (99 :: 97 :: head :: tail))
+                                    (fun h_1 h_2 =>
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [99, 97, 115]) fun head tail =>
+                                          if h_1 : head = 101 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun _ => WordClass.reserved) ()) fun head tail =>
+                                                  (fun x => WordClass.other) (99 :: 97 :: 115 :: 101 :: head :: tail)
+                                          else (fun x => WordClass.other) (99 :: 97 :: 115 :: head :: tail))
+                                    ⋯ h_1 h_2
+                                else (fun x => WordClass.other) (99 :: 97 :: head :: tail)
+                    else
+                      if h_2 : head = 111 then
+                        Eq.ndrec (motive := fun head => ¬head = 97 → (fun x => WordClass) (99 :: head :: tail))
+                          (fun h_1 =>
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [99, 111]) fun head tail =>
+                                if h_1 : head = 110 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [99, 111, 110]) fun head tail =>
+                                        if h_1 : head = 115 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun x => WordClass.other) [99, 111, 110, 115])
+                                                fun head tail =>
+                                                if h_1 : head = 116 then
+                                                  ⋯ ▸
+                                                    ⋯ ▸
+                                                      List.casesOn tail
+                                                        ((fun x => WordClass.other) [99, 111, 110, 115, 116])
+                                                        fun head tail =>
+                                                        if h_1 : head = 97 then
+                                                          ⋯ ▸
+                                                            ⋯ ▸
+                                                              List.casesOn tail
+                                                                ((fun x => WordClass.other) [99, 111, 110, 115, 116, 97])
+                                                                fun head tail =>
+                                                                if h_1 : head = 110 then
+                                                                  ⋯ ▸
+                                                                    ⋯ ▸
+                                                                      List.casesOn tail
+                                                                        ((fun x => WordClass.other)
+                                                                          [99, 111, 110, 115, 116, 97, 110])
+                                                                        fun head => ⋯
+                                                                else
+                                                                  (fun x => WordClass.other)
+                                                                    (99 :: 111 :: 110 :: 115 :: 116 :: 97 :: head :: tail)
+                                                        else
+                                                          if h_2 : head = 114 then
+                                                            Eq.ndrec (motive := fun head =>
+                                                              ¬head = 97 →
+                                                                (fun x => WordClass)
+                                                                  (99 :: 111 :: 110 :: 115 :: 116 :: head :: tail))
+                                                              (fun h_1 =>
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [99, 111, 110, 115, 116, 114])
+                                                                    fun head tail =>
+                                                                    if h_1 : head = 117 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                    else
+                                                                      (fun x => WordClass.other)
+                                                                        (99 ::
+                                                                          111 ::
+                                                                            110 :: 115 :: 116 :: 114 :: head :: tail))
+                                                              ⋯ h_1
+                                                          else
+                                                            (fun x => WordClass.other)
+                                                              (99 :: 111 :: 110 :: 115 :: 116 :: head :: tail)
+                                                else (fun x => WordClass.other) (99 :: 111 :: 110 :: 115 :: head :: tail)
+                                        else
+                                          if h_2 : head = 116 then
+                                            Eq.ndrec (motive := fun head =>
+                                              ¬head = 115 → (fun x => WordClass) (99 :: 111 :: 110 :: head :: tail))
+                                              (fun h_1 =>
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [99, 111, 110, 116])
+                                                    fun head tail =>
+                                                    if h_1 : head = 105 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [99, 111, 110, 116, 105])
+                                                            fun head tail =>
+                                                            if h_1 : head = 110 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail
+                                                                    ((fun x => WordClass.other)
+                                                                      [99, 111, 110, 116, 105, 110])
+                                                                    fun head tail =>
+                                                                    if h_1 : head = 117 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                    else
+                                                                      (fun x => WordClass.other)
+                                                                        (99 ::
+                                                                          111 :: 110 :: 116 :: 105 :: 110 :: head :: tail)
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (99 :: 111 :: 110 :: 116 :: 105 :: head :: tail)
+                                                    else
+                                                      if h_2 : head = 114 then
+                                                        Eq.ndrec (motive := fun head =>
+                                                          ¬head = 105 →
+                                                            (fun x => WordClass)
+                                                              (99 :: 111 :: 110 :: 116 :: head :: tail))
+                                                          (fun h_1 =>
+                                                            ⋯ ▸
+                                                              List.casesOn tail
+                                                                ((fun x => WordClass.other) [99, 111, 110, 116, 114])
+                                                                fun head tail =>
+                                                                if h_1 : head = 97 then
+                                                                  ⋯ ▸
+                                                                    ⋯ ▸
+                                                                      List.casesOn tail
+                                                                        ((fun x => WordClass.other)
+                                                                          [99, 111, 110, 116, 114, 97])
+                                                                        fun head tail =>
+                                                                        if h_1 : head = 99 then ⋯
+                                                                        else
+                                                                          (fun x => WordClass.other)
+                                                                            (99 ::
+                                                                              111 ::
+                                                                                110 :: 116 :: 114 :: 97 :: head :: tail)
+                                                                else
+                                                                  (fun x => WordClass.other)
+                                                                    (99 :: 111 :: 110 :: 116 :: 114 :: head :: tail))
+                                                          ⋯ h_1
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (99 :: 111 :: 110 :: 116 :: head :: tail))
+                                              ⋯ h_1
+                                          else (fun x => WordClass.other) (99 :: 111 :: 110 :: head :: tail)
+                                else
+                                  if h_2 : head = 112 then
+                                    Eq.ndrec (motive := fun head =>
+                                      ¬head = 110 → (fun x => WordClass) (99 :: 111 :: head :: tail))
+                                      (fun h_1 =>
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [99, 111, 112]) fun head tail =>
+                                            if h_1 : head = 121 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun x => WordClass.other) [99, 111, 112, 121])
+                                                    fun head tail =>
+                                                    if h_1 : head = 111 then
+                                                      ⋯ ▸
+                                                        ⋯ ▸
+                                                          List.casesOn tail
+                                                            ((fun x => WordClass.other) [99, 111, 112, 121, 111])
+                                                            fun head tail =>
+                                                            if h_1 : head = 102 then
+                                                              ⋯ ▸
+                                                                ⋯ ▸
+                                                                  List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                                    fun head tail =>
+                                                                    (fun x => WordClass.other)
+                                                                      (99 ::
+                                                                        111 :: 112 :: 121 :: 111 :: 102 :: head :: tail)
+                                                            else
+                                                              (fun x => WordClass.other)
+                                                                (99 :: 111 :: 112 :: 121 :: 111 :: head :: tail)
+                                                    else
+                                                      (fun x => WordClass.other) (99 :: 111 :: 112 :: 121 :: head :: tail)
+                                            else (fun x => WordClass.other) (99 :: 111 :: 112 :: head :: tail))
+                                      ⋯ h_1
+                                  else (fun x => WordClass.other) (99 :: 111 :: head :: tail))
+                          ⋯ h_1
+                      else (fun x => WordClass.other) (99 :: head :: tail))
+              ⋯ h_1 h_2
+          else
+            if h_4 : head = 100 then
+              Eq.ndrec (motive := fun head => ¬head = 97 → ¬head = 98 → ¬head = 99 → (fun x => WordClass) (head :: tail))
+                (fun h_1 h_2 h_3 =>
+                  ⋯ ▸
+                    List.casesOn tail ((fun x => WordClass.other) [100]) fun head tail =>
+                      if h_1 : head = 101 then
+                        ⋯ ▸
+                          ⋯ ▸
+                            List.casesOn tail ((fun x => WordClass.other) [100, 101]) fun head tail =>
+                              if h_1 : head = 108 then
+                                ⋯ ▸
+                                  ⋯ ▸
+                                    List.casesOn tail ((fun x => WordClass.other) [100, 101, 108]) fun head tail =>
+                                      if h_1 : head = 101 then
+                                        ⋯ ▸
+                                          ⋯ ▸
+                                            List.casesOn tail ((fun x => WordClass.other) [100, 101, 108, 101])
+                                              fun head tail =>
+                                              if h_1 : head = 116 then
+                                                ⋯ ▸
+                                                  ⋯ ▸
+                                                    List.casesOn tail
+                                                      ((fun x => WordClass.other) [100, 101, 108, 101, 116])
+                                                      fun head tail =>
+                                                      if h_1 : head = 101 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun _ => WordClass.tok (Tok.kw Kw.delete)) ())
+                                                              fun head tail =>
+                                                              (fun x => WordClass.other)
+                                                                (100 :: 101 :: 108 :: 101 :: 116 :: 101 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (100 :: 101 :: 108 :: 101 :: 116 :: head :: tail)
+                                              else (fun x => WordClass.other) (100 :: 101 :: 108 :: 101 :: head :: tail)
+                                      else (fun x => WordClass.other) (100 :: 101 :: 108 :: head :: tail)
+                              else
+                                if h_2 : head = 102 then
+                                  Eq.ndrec (motive := fun head =>
+                                    ¬head = 108 → (fun x => WordClass) (100 :: 101 :: head :: tail))
+                                    (fun h_1 =>
+                                      ⋯ ▸
+                                        List.casesOn tail ((fun x => WordClass.other) [100, 101, 102]) fun head tail =>
+                                          if h_1 : head = 97 then
+                                            ⋯ ▸
+                                              ⋯ ▸
+                                                List.casesOn tail ((fun x => WordClass.other) [100, 101, 102, 97])
+                                                  fun head tail =>
+                                                  if h_1 : head = 117 then
+                                                    ⋯ ▸
+                                                      ⋯ ▸
+                                                        List.casesOn tail
+                                                          ((fun x => WordClass.other) [100, 101, 102, 97, 117])
+                                                          fun head tail =>
+                                                          if h_1 : head = 108 then
+                                                            ⋯ ▸
+                                                              ⋯ ▸
+                                                                List.casesOn tail
+                                                                  ((fun x => WordClass.other)
+                                                                    [100, 101, 102, 97, 117, 108])
+                                                                  fun head tail =>
+                                                                  if h_1 : head = 116 then ⋯ ▸ ⋯ ▸ ⋯
+                                                                  else
+                                                                    (fun x => WordClass.other)
+                                                                      (100 ::
+                                                                        101 :: 102 :: 97 :: 117 :: 108 :: head :: tail)
+                                                          else
+                                                            (fun x => WordClass.other)
+                                                              (100 :: 101 :: 102 :: 97 :: 117 :: head :: tail)
+                                                  else
+                                                    (fun x => WordClass.other) (100 :: 101 :: 102 :: 97 :: head :: tail)
+                                          else
+                                            if h_2 : head = 105 then
+                                              Eq.ndrec (motive := fun head =>
+                                                ¬head = 97 → (fun x => WordClass) (100 :: 101 :: 102 :: head :: tail))
+                                                (fun h_1 =>
+                                                  ⋯ ▸
+                                                    List.casesOn tail ((fun x => WordClass.other) [100, 101, 102, 105])
+                                                      fun head tail =>
+                                                      if h_1 : head = 110 then
+                                                        ⋯ ▸
+                                                          ⋯ ▸
+                                                            List.casesOn tail
+                                                              ((fun x => WordClass.other) [100, 101, 102, 105, 110])
+                                                              fun head tail =>
+                                                              if h_1 : head = 101 then
+                                                                ⋯ ▸
+                                                                  ⋯ ▸
+                                                                    List.casesOn tail ((fun _ => WordClass.reserved) ())
+                                                                      fun head tail =>
+                                                                      (fun x => WordClass.other)
+                                                                        (100 ::
+                                                                          101 :: 102 :: 105 :: 110 :: 101 :: head :: tail)
+                                                              else
+                                                                (fun x => WordClass.other)
+                                                                  (100 :: 101 :: 102 :: 105 :: 110 :: head :: tail)
+                                                      else
+                                                        (fun x => WordClass.other)
+                                                          (100 :: 101 :: 102 :: 105 :: head :: tail))
+                                                ⋯ h_1
+                                            else (fun x => WordClass.other) (100 :: 101 :: 102 :: head :: tail))
+                                    ⋯ h_1
+                                else (fun x => WordClass.other) (100 :: 101 :: head :: tail)
+                      else
+                        if h_2 : head = 111 then
+                          Eq.ndrec (motive := fun head => ¬head = 101 → (fun x => WordClass) (100 :: head :: tail))
+                            (fun h_1 =>
+                              ⋯ ▸
+                                List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.do_)) ()) fun head tail =>
+                                  (fun x => WordClass.other) (100 :: 111 :: head :: tail))
+                            ⋯ h_1
+                        else
+                          if h_3 : head = 97 then
+                            Eq.ndrec (motive := fun head =>
+                              ¬head = 101 → ¬head = 111 → (fun x => WordClass) (100 :: head :: tail))
+                              (fun h_1 h_2 =>
+                                ⋯ ▸
+                                  List.casesOn tail ((fun x => WordClass.other) [100, 97]) fun head tail =>
+                                    if h_1 : head = 121 then
+                                      ⋯ ▸
+                                        ⋯ ▸
+                                          List.casesOn tail ((fun x => WordClass.other) [100, 97, 121]) fun head tail =>
+                                            if h_1 : head = 115 then
+                                              ⋯ ▸
+                                                ⋯ ▸
+                                                  List.casesOn tail ((fun _ => WordClass.tok (Tok.denom Denom.days)) ())
+                                                    fun head tail =>
+                                                    (fun x => WordClass.other) (100 :: 97 :: 121 :: 115 :: head :: tail)
+                                            else (fun x => WordClass.other) (100 :: 97 :: 121 :: head :: tail)
+                                    else (fun x => WordClass.other) (100 :: 97 :: head :: tail))
+                              ⋯ h_1 h_2
+                          else (fun x => WordClass.other) (100 :: head :: tail))
+                ⋯ h_1 h_2 h_3
+            else
+              if h_5 : head = 101 then
+                Eq.ndrec (motive := fun head =>
+                  ¬head = 97 → ¬head = 98 → ¬head = 99 → ¬head = 100 → (fun x => WordClass) (head :: tail))
+                  (fun h_1 h_2 h_3 h_4 =>
+                    ⋯ ▸
+                      List.casesOn tail ((fun x => WordClass.other) [101]) fun head tail =>
+                        if h_1 : head = 108 then
+                          ⋯ ▸
+                            ⋯ ▸
+                              List.casesOn tail ((fun x => WordClass.other) [101, 108]) fun head tail =>
+                                if h_1 : head = 115 then
+                                  ⋯ ▸
+                                    ⋯ ▸
+                                      List.casesOn tail ((fun x => WordClass.other) [101, 108, 115]) fun head tail =>
+                                        if h_1 : head = 101 then
+                                          ⋯ ▸
+                                            ⋯ ▸
+                                              List.casesOn tail ((fun _ => WordClass.tok (Tok.kw Kw.else_)) ())
+                                                fun head tail =>
+                                                (fun x => WordClass.other) (101 :: 108 :: 115 :: 101 :: head :: tail)
+                                        else (fun x => WordClass.other) (101 :: 108 :: 115 :: head :: tail)
+                                else (fun x => WordClass.other) (101 :: 108 :: head :: tail)
+                        else
+                          if h_2 : head = 109 then
+                            Eq.ndrec (motive := fun head => ¬head = 108 → (fun x => WordClass) (101 :: head :: tail))
+                              (fun h_1 => ⋯ ▸ List.casesOn tail ((fun x => WordClass.other) ⋯) ⋯) ⋯ ⋯
+                          else ⋯)
+                  ⋯ ⋯ ⋯ ⋯ ⋯
+              else ⋯) =
+    ⋯
+⊢ False
+diag: 1 errors

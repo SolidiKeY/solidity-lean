@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.changed_prefix_late_underflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.changed_prefix_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.frozen_initial_is_not_late_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateControls.wrong_expression_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

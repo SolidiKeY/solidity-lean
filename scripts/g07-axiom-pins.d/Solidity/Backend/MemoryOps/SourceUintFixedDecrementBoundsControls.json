@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBoundsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementBoundsControls.exact_endpoint_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBoundsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementBoundsControls.stale_valid_index_is_not_endpoint_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBoundsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDecrementBoundsControls.valid_index_changes_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

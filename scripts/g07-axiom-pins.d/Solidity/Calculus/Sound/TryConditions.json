@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/Sound/TryConditions.lean:Solidity.try_condition_formula": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -53,6 +53,14 @@ syntax:70 dl_term:70 " / " dl_term:71 : dl_term
 /-- `a * b`: a product (KeY's `mul`), checked as Solidity multiplies. -/
 syntax:70 dl_term:70 " * " dl_term:71 : dl_term
 syntax:70 dl_term:70 " % " dl_term:71 : dl_term
+/-- `a +% b`, `a -% b`, `a *% b`: the wrapping `uint` operators (`BinOp.addW`,
+`subW`, `mulW`), which the elaborator writes (a `bytesN`'s byte shift). -/
+syntax:65 dl_term:65 " +% " dl_term:66 : dl_term
+syntax:65 dl_term:65 " -% " dl_term:66 : dl_term
+syntax:70 dl_term:70 " *% " dl_term:71 : dl_term
+/-- `a >> b`, `a << b`: the `uint` shifts (`BinOp.shr`, `shl`), below `+`. -/
+syntax:60 dl_term:60 " >> " dl_term:61 : dl_term
+syntax:60 dl_term:60 " << " dl_term:61 : dl_term
 /-- `a && b`, `a || b`: the `bool` operators of a value, short-circuiting. -/
 syntax:30 dl_term:30 " && " dl_term:31 : dl_term
 syntax:25 dl_term:25 " || " dl_term:26 : dl_term

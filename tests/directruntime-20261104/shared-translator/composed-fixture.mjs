@@ -1,0 +1,12 @@
+import {retainCompilerMetadata} from './retained-metadata.mjs';
+import {compileFixture} from '../../../scripts/solc-ast.mjs';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+const owned='tests/directruntime-20261104/shared-translator';
+const bulk=owned+'/artifacts/h68-bulk';
+const sha=x=>createHash('sha256').update(x).digest('hex');
+const result=compileFixture({args:['--solkey','/workspace/.setup/solkey','--soljson','/workspace/.setup/soljson','--source',owned+'/ComposedReaders.sol','--out',owned+'/artifacts/ComposedReaders.normalized.json','--no-wrapper'],quiet:true});
+const {fixture,fields}=retainCompilerMetadata(result);
+const out=bulk+'/ComposedReaders.ast.json';writeFileSync(out,JSON.stringify(fixture,null,2)+'\n');
+writeFileSync(bulk+'/evidence/h68/composed-compilation.json',JSON.stringify({compiler:result.compiler,sourceSha256:result.sourceHash,rawAstSha256:sha(JSON.stringify(result.rawAst)),fixture:out,fixtureSha256:sha(readFileSync(out)),compilerMetadataFieldsRetainedBySourceIdentity:fields,canonicalSyntaxAndBuiltinNormalizationUnchanged:true,boundary:'H68-authorized retention of typeIdentifier/tryCall metadata on existing normalized producer AST. Existing builtin-ID normalization and loopSpec extraction are retained; no new translation semantics/source proof.'},null,2)+'\n');
+console.log('Pinned fixture generated through existing normalization; required metadata retained by source identity; normalized syntax/builtin IDs unchanged.');

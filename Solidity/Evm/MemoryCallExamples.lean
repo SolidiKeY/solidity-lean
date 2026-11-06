@@ -272,7 +272,7 @@ private def recursive : Prog C [] [] := .cons (.callRec "recursive" 1 .nil .none
 private def payment : Prog C [] [] :=
   .cons (.transfer (.simple (.lit 1 rfl)) (.simple (.lit 0 rfl))) .nil
 private def externalCall : Prog C [] [] :=
-  .cons (.tryCall ⟨.lit 1 rfl, "other", []⟩ .nil .nil .nil .none .nil .nil .nil .nil false) .nil
+  .cons (.tryCall ⟨.lit 1 rfl, "other", [], .call, .unknown⟩ .nil .nil .nil .none .nil .nil .nil .nil false) .nil
 example : (Compiler.compile 1 (Frag.init []) recursive).isSome = false := by decide +kernel
 example : (Calls.compile 1 (Frag.init []) payment).isSome = false := by decide +kernel
 example : (Compiler.compile 1 (Frag.init []) externalCall).isSome = false := by decide +kernel

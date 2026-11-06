@@ -1,0 +1,92 @@
+{
+  "reviews": [
+    {
+      "area": "rules-calculus",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-finder.md",
+      "sha256": "f5166c20c447a7287fdca2b56e35da82d8ccf79811b2658ab49eb3bccb5280ca",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "callbacks",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-finder.md",
+      "sha256": "f5166c20c447a7287fdca2b56e35da82d8ccf79811b2658ab49eb3bccb5280ca",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "compiler",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-finder.md",
+      "sha256": "f5166c20c447a7287fdca2b56e35da82d8ccf79811b2658ab49eb3bccb5280ca",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "checker-evidence",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-finder.md",
+      "sha256": "f5166c20c447a7287fdca2b56e35da82d8ccf79811b2658ab49eb3bccb5280ca",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "rules-calculus",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-skeptic.md",
+      "sha256": "08f4ef5f43e9c3e90ab09c8d966c47cea4af1c9e9e0f1dbb35cf11ae4168f4f4",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "callbacks",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-skeptic.md",
+      "sha256": "08f4ef5f43e9c3e90ab09c8d966c47cea4af1c9e9e0f1dbb35cf11ae4168f4f4",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "compiler",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-skeptic.md",
+      "sha256": "08f4ef5f43e9c3e90ab09c8d966c47cea4af1c9e9e0f1dbb35cf11ae4168f4f4",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "checker-evidence",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/expanded-skeptic.md",
+      "sha256": "08f4ef5f43e9c3e90ab09c8d966c47cea4af1c9e9e0f1dbb35cf11ae4168f4f4",
+      "scope": "expanded joint-input checkpoint only; not whole-assignment acceptance"
+    }
+  ]
+}

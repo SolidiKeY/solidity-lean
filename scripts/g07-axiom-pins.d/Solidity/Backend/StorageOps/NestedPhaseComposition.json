@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/NestedPhaseComposition.lean:Solidity.Backend.StorageOps.NestedPhaseComposition.finish_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

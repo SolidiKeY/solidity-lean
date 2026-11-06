@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/DeclarationReduction.lean:Solidity.DeclarationReadReduction.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

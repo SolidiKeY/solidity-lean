@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.log_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.numeric_log": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.sequence_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.target_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

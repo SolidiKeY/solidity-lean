@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.Controls.empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.Controls.graph_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.Controls.numeric_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.Controls.target_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.Controls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
