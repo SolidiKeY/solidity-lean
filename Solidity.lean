@@ -292,6 +292,8 @@ import Solidity.Backend.FailurePaths.BooleanReturnControls
 import Solidity.Backend.FailurePaths.CheckedGuards
 import Solidity.Backend.FailurePaths.CheckedGuardsControls
 import Solidity.Backend.FailurePaths.Controls
+import Solidity.Backend.FailurePaths.EncodedError
+import Solidity.Backend.FailurePaths.EncodedErrorControls
 import Solidity.Backend.FailurePaths.FramedEmission
 import Solidity.Backend.FailurePaths.FramedEmissionControls
 import Solidity.Backend.FailurePaths.GuardBlockSelection
@@ -311,6 +313,8 @@ import Solidity.Backend.FailurePaths.LogicalGuardSelection
 import Solidity.Backend.FailurePaths.LogicalGuardSelectionControls
 import Solidity.Backend.FailurePaths.Parametric
 import Solidity.Backend.FailurePaths.ParametricControls
+import Solidity.Backend.FailurePaths.PrefixFailure
+import Solidity.Backend.FailurePaths.PrefixFailureControls
 import Solidity.Backend.FailurePaths.Premises
 import Solidity.Backend.FailurePaths.ReasonCodec
 import Solidity.Backend.FailurePaths.ReasonCodecControls
