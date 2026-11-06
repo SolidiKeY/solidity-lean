@@ -1,0 +1,34 @@
+[
+  {
+    "original": "tests/sol-expression-uniqueness/evidence/environment-audit-gates/1.log",
+    "archive": "tests/sol-expression-uniqueness/evidence/environment-audit-gates/1.log.gz",
+    "uncompressed_bytes": 497393242,
+    "uncompressed_sha256": "2af3cb122fa94c8c90f5868d632c46acf2d37a9859c5377ec549a967d6809d98",
+    "compressed_bytes": 9983027,
+    "compressed_sha256": "cf88c15be18186ba7b820863424cb157fb0cd5731e19d46bd7a397cfa6c5340e"
+  },
+  {
+    "original": "tests/sol-expression-uniqueness/evidence/environment-audit-gates-sealed/1.log",
+    "archive": "tests/sol-expression-uniqueness/evidence/environment-audit-gates-sealed/1.log.gz",
+    "uncompressed_bytes": 497393242,
+    "uncompressed_sha256": "2af3cb122fa94c8c90f5868d632c46acf2d37a9859c5377ec549a967d6809d98",
+    "compressed_bytes": 9983027,
+    "compressed_sha256": "cf88c15be18186ba7b820863424cb157fb0cd5731e19d46bd7a397cfa6c5340e"
+  },
+  {
+    "original": "tests/sol-expression-uniqueness/kernel-declarations.json",
+    "archive": "tests/sol-expression-uniqueness/kernel-declarations.json.gz",
+    "uncompressed_bytes": 497590406,
+    "uncompressed_sha256": "2b8584b37d15162ad96badc40f89369a8f115b8e66e80052c5f5a63b553b629a",
+    "compressed_bytes": 9924115,
+    "compressed_sha256": "877623e5ef646b2bd5c54adbc8f9bc3cf3c4c546cddfde6d6550d55de607c2d7"
+  },
+  {
+    "original": "tests/sol-expression-uniqueness/kernel-emissions.json",
+    "archive": "tests/sol-expression-uniqueness/kernel-emissions.json.gz",
+    "uncompressed_bytes": 497938045,
+    "uncompressed_sha256": "af331c7b58e6e427b22c9d08f84a7ffbc94d2e339462a63d3517bbc2a3b7bafd",
+    "compressed_bytes": 9982456,
+    "compressed_sha256": "d4aaf13eb9a288d34d083dcff5b2042793c22448abef75ec225d009a976e29c5"
+  }
+]
