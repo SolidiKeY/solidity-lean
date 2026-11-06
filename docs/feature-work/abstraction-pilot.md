@@ -200,10 +200,58 @@ lane. Only declarations were read.
   Keep autoParams to `rfl`/`decide`. Order helper arguments so that the
   indices of later arguments are fixed first.
 
-## Reviews
+## Finder and skeptic reviews
 
-See [Finder and skeptic reviews](#finder-and-skeptic-reviews) below.
+Two read-only reviews covered every applied abstraction, without the Lean
+server: a finder over `git diff 706e3682..HEAD` and a skeptic arguing for
+reverting.
+
+- **Statement preservation.** Both reviews confirmed it independently. The
+  only added declarations are the nine `private` helpers. No header,
+  `variable`, attribute or docstring of an existing declaration changed.
+  No arm was lost: every removed arm calls a helper with the same
+  constructor and fragment proof.
+- **Fixed** (commit "review fixes"):
+  - `lvlLift`'s docstring claimed every `hLevels_hashIn` case used it.
+  - `LTm.cut_src_binop`'s docstring said `mk` rebuilds the node.
+    `cut2_default` does; `mk` only puts it in the fragment.
+  - The `hop` autoParam restates `cut2_default`'s 12-way side condition.
+    The docstring now says it must stay in step. Naming the condition in
+    `QuotientCut.lean` would change `cut2_default`'s statement, which H82
+    excludes, so it is left as a follow-up.
+  - An identity repack of `nodeLevel?_spec` in HashKinds.
+  - Lambda binders that shadowed `h` in HashKinds.
+  - Seven new lines over 100 characters.
+  - Redundant parentheses around `Flattened.seq` and `.and`/`.or`/`.eqB`/`.neB`.
+- **Kept, with the skeptic's verdict.**
+  - FlattenTotality and CutTotality: kept. These are real abstractions.
+  - HashKinds: kept. It costs nothing to keep, and reverting is churn.
+  - MemSwap: kept, though marginal. It is a readability change only. Most
+    of its diff is re-indentation, which moves `git blame`; with
+    whitespace ignored the diff is +53/−80.
+- **Missed clusters** the finder listed are recorded under
+  [Remaining clusters](#remaining-clusters-not-taken), plus:
+  - CutTotality's "cut a, then b, then `defs_append`" bodies in
+    `zseq`/`zadd`/`zsub`/`zcmp`/`key`/`seq*` (8×).
+  - The `pvV`/`pvS`/`pvZ` fallbacks in MemSwap (2 lines each).
 
 ## Gates
 
-See below.
+- **Lean MCP diagnostics.** Errors and warnings are clean on all four
+  touched files, after the review fixes.
+- **`GATE_BASE=706e3682 gate.sh checkpoint`.**
+  - Passed: `build-touched` (2025 s), `library` (`lake build Solidity`,
+    2257 s; the cache re-fetch failed after a container restart, so the
+    build was mostly cold), `examples`, `trust`, `orphans`, `layers`,
+    `roots`, `fragments`.
+  - `doc-paths` FAIL. Five missing paths, all in
+    `docs/feature-work/h62-*.md`, `scripts/h62/` and `tests/h62/`, none in
+    files this lane touched.
+  - `axiom-pins` FAIL. "0 errors, 99 unrecorded changes": new pins in
+    `GenericP10`/`Migrate*` fixtures, none in this lane's modules.
+  - Both failures predate this lane.
+  - The first checkpoint attempt died when the container was restarted
+    (exit 137). Peak memory on the rerun was 10.4 GB.
+- **`./run-lean.sh`**: PASS: "Build completed successfully (6546 jobs)", rc=0, no `error:` lines in the log (its pre-steps check layers, roots and fragments).
+- **No new `sorry`, `axiom` or `maxHeartbeats`.** The finder checked every
+  added line.
