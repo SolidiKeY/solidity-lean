@@ -3,7 +3,7 @@
 import json,os,pathlib,tempfile,unittest
 from unittest.mock import patch
 import inventory
-EVIDENCE=pathlib.Path(os.environ.get('H62_AUDIT_EVIDENCE','/workspace/h62-audit-precompiles-evidence-3'))
+EVIDENCE=pathlib.Path(os.environ.get('H62_AUDIT_EVIDENCE','/workspace/h62-audit-precompiles-evidence-4'))
 class InventoryTests(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
@@ -63,6 +63,29 @@ class InventoryTests(unittest.TestCase):
   r=self.rows['Solidity.Precompiles.Bls12381.msmGas_mono']
   self.assertFalse(r['isolated_joint_constraint_fixture']['counts_as_original_statement_witness'])
   self.assertFalse(r['kernel_applicability_checked'])
+ def test_exclusive_pending_wait_groups(self):
+  groups=self.value['pending_wait_disposition']['groups']
+  self.assertEqual({k:v['statements'] for k,v in groups.items()},{'Bls12381':29,'Syntax-Raw':12,'Bridge-compatible-dependencies':73})
+  pending=[r for r in self.rows.values() if not r['kernel_applicability_checked']]
+  self.assertEqual(len(pending),114);self.assertTrue(all(not r['dependency_receipt_accepted'] for r in pending))
+ def test_partial_raw_does_not_accept_dependency(self):
+  raw=self.value['pending_wait_disposition']['partial_Raw']
+  self.assertTrue(raw['content_hashes_verified']);self.assertFalse(raw['trust_accepted']);self.assertFalse(raw['dependency_accepted'])
+  self.assertEqual(raw['reported_axiom_growth_entries'],30)
+  packet=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/partial-Raw-receipt.json').read_text())
+  packet['dependency_accepted']=True
+  disposition=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/h70-waits.json').read_text())
+  with patch('inventory.json.loads',side_effect=[packet,disposition]):
+   with self.assertRaises(AssertionError):inventory.pending_wait_disposition(list(self.rows.values()),EVIDENCE)
+ def test_staged_compiler_route_is_not_delivered(self):
+  d=self.value['pending_wait_disposition']['current_disposition']
+  self.assertEqual(d['compiler_success_owner'],'claudecloud/move5-20261106/v14-g43')
+  self.assertEqual(d['compiler_route_status'],'staged-pending-delivery');self.assertFalse(d['compiler_delivery_confirmed'])
+  packet=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/partial-Raw-receipt.json').read_text())
+  disposition=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/h70-waits.json').read_text())
+  disposition['current_disposition']['compiler_delivery_confirmed']=True
+  with patch('inventory.json.loads',side_effect=[packet,disposition]):
+   with self.assertRaises(AssertionError):inventory.pending_wait_disposition(list(self.rows.values()),EVIDENCE)
  def test_failed_full_type_receipt_rejected(self):
   p=EVIDENCE/'type-fidelity-final.json';meta=json.loads(p.read_text());meta['exit']=1
   with tempfile.TemporaryDirectory(dir=str(EVIDENCE)) as d:

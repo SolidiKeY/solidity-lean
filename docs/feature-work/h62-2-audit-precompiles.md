@@ -60,30 +60,34 @@ LengthPriced p and one related input pair. Its witness remains pending behind BL
 
 ## Typed owner blockers and decision
 
-Concrete tickets, evidence, repair choices and delivery state are in
+Concrete tickets, evidence and delivery state are in
 [owner-tickets.json](../../tests/h62/item2/audit-precompiles/owner-tickets.json).
 
 * OBL-SUCCESS: **decision resolved; theorem pending**. The coordinator answered H62 item 2:
   “the totality obligation is met by a SEPARATE compiler-success theorem proved for the owner's
   compiler (it does not reject everything / always revert on the stated inputs); do not change
-  any frozen interface statement.” G43/V14 (`v12-v17/v14-payments-bytecode`) must supply that
-  theorem for its actual compiler and stated supported success inputs. Its qualified name,
+  any frozen interface statement.” The current owner `claudecloud/move5-20261106/v14-g43` must supply that
+  theorem for its actual compiler and stated supported success inputs. Its route is staged pending
+  delivery; its qualified name,
   source path, compiler identity and commit remain pending in
   [compiler-success-pending.json](../../tests/h62/item2/audit-precompiles/compiler-success-pending.json).
   The audit will check it alongside the original obligation. Existing precompile totality and
   data-domain samples do not discharge this owner-compiler obligation. No frozen repair is requested.
 * DEP-RAW-435: pinned Lean rejects frozen Syntax/Raw String APIs, preventing Stipend imports.
-  The migration Syntax/Source owner must supply a compatible overlay; this lane cannot edit it.
+  A partial producer patch is available with verified content hashes, but 30 reported axiom-growth
+  entries require root review. No trust acceptance, dependency acceptance or hold lifting occurred.
+  The migration Syntax owner must supply the accepted prerequisite; this lane cannot edit it.
 * DEP-BLS-435: frozen Bls12381 discount length proofs at 171/172 hit the existing recursion budget.
   The assigned migrate-precompiles producer owns the fix, without raised proof budgets.
 * DEP-BRIDGE-435: the frozen optional Bridge pins v4.24 dependencies, and no compatible packages
   are installed in this worktree. Migration/Bridge and live SOL-PC producer coordination remains required.
 
-relay.sh is **host-only**. H70 records the five recipient lanes in
+relay.sh is **host-only**. H70 records the historical recipient plan and corrected current routes in
 [h70-waits.json](../../tests/h62/item2/audit-precompiles/h70-waits.json). No local relay call is
-needed or attempted. The recipient plan is not a producer receipt and grants no original-file
-edit permission. Await the V14/G43 theorem, migrate-syntax Raw, migrate-precompiles BLS and
-migrate-bridge dependency receipts, coordinated with the live precompile-agreement owner.
+needed or attempted. Corrected relays are migrate-syntax, migrate-precompiles, migrate-bridge
+and precompile-agreement. The current Claude G43 route is staged, not delivered. Routing grants
+no original-file edit permission. Await the actual compiler-success theorem, accepted Raw and
+BLS prerequisites, and compatible pinned-v4.35 Bridge dependencies from BOTH Bridge providers.
 The scope decision is resolved; the actual theorem/receipts remain pending.
 H55-G49 work is untouched. None of these blockers is an exclusion or a weakened statement.
 
@@ -96,7 +100,9 @@ Lake: 5.0.0-src+eb6cafb, Lean 4.35.0. No v4.24 per-master cache was reused.
 The owned alternate config disables artifact caches and passes explicit -j1.
 The original core and Bridge toolchain files were preserved.
 
-Current evidence directory: `/workspace/h62-audit-precompiles-evidence-3`.
+Current evidence directory: `/workspace/h62-audit-precompiles-evidence-4`.
+The supplied Raw inline diff and its content-only verification are retained here; previous
+evidence-3/delivery-3 and earlier deliveries are preserved unchanged.
 The H70 readable per-declaration inventory is `hypothesis-inventory.md`; machine-readable
 rows, all binders, package/import/open context and full source types are in `hypothesis-inventory.json`. Both are generated
 by committed inventory.py; bulk output remains off git. Source classification is complete,
@@ -118,6 +124,8 @@ through the run. The ledger verifies every recorded proof/config/import-source b
 | core-signatures / bounded lake env lean CoreSignatures | Exit 0; 24 public type checks with pp.all |
 | coverage-mutations-continuation / test_coverage.py | Six tests pass: valid partial input, failed exit, wrong cwd, stale import, failed axiom log, missing data receipt |
 | doc-paths / bash scripts/check-doc-paths.sh | Exit 1: existing archived after-roadmap-va1.md reference to absent optional MathlibTest/SplitIfs.lean; owned handoff link resolves |
+| receipt-inventory / inventory.py --check | Existing source classification retained; exact waits cover 29 BLS + 12 Raw + 73 Bridge cases, no status promotion |
+| receipt-inventory-tests / test_inventory.py | 17 tests pass; partial acceptance and staged-delivery guards retained |
 | h70-inventory / inventory.py | All 138 source signatures/binders classified; 114 kernel obligations remain |
 | h70-inventory-tests / test_inventory.py | 14 tests pass, including member-vs-data classification, active C, scope endings, closed/private status, failed type receipt and no fixture promotion |
 | joint-fixture / bounded lake env lean JointPremiseFixture | Exit 0; one joint table/cap/k/l fixture and private helper, propext only; no original BLS coverage increment |
@@ -187,10 +195,43 @@ distinction; pointEval_result needs one real successful KZG input/output pair, n
 Closed statements receive no artificial exists-True witness: after receipts they need whole
 frozen-statement and axiom fidelity checks. All 30 remaining proof-premise cases must prove
 one joint data/configuration tuple; all 56 data-domain cases need faithful input instantiation.
-H70 routing is recorded for migrate-bridge, migrate-precompiles, migrate-syntax, live SOL-PC
-precompile-agreement, and solidity-v12-v17-20261031/v14-payments-bytecode. No receipt has
-been substituted by the routing plan. New source classification and isolated-fixture work
+Corrected H70 relays are recorded for migrate-bridge, migrate-precompiles, migrate-syntax
+and live SOL-PC precompile-agreement. The previous V14 recipient plan is explicitly historical;
+current Claude owner delivery remains staged. No receipt is substituted by routing. New source classification and isolated-fixture work
 introduce no original-file changes and do not discharge the V14 compiler-success obligation.
+
+## Corrected H70 wait disposition and partial Raw receipt
+
+No independent queue item was established by this disposition. This update only records the
+producer receipt/current routes and refines existing pending hypothesis/source classification.
+No Lean job was run, no supplied patch was applied, and no witness/type status advanced.
+The same 114 pending cases have exclusive primary wait groups (transitive providers overlap):
+
+| Primary prerequisite | Cases | Proof-premise | Data-domain | Closed |
+|---|---:|---:|---:|---:|
+| BLS, including PointEval/Osaka dependents | 29 | 10 | 16 | 3 |
+| Syntax/Raw for Stipend | 12 | 2 | 10 | 0 |
+| Compatible Bridge dependencies | 73 | 18 | 30 | 25 |
+
+The Raw producer head is 72441d298484976c48dd14b4e095c9149b852025; its partial source commit
+is 074e62c1840dd2d7ab19c95ca5d437ebfe57dbb8. Supplied patch SHA256
+34fc66ea93a8a2c956ebb51f225b03593109239c5b46631aaa28bfb24efb2a9a and reconstructed source SHA256
+a463aa0f978da5d5bae6ba5cffdfa95861a495a8d69942502b706b7b157ec506 match. Verification checks
+all five hunks strictly in memory against unchanged Raw source. The first inline transcription
+had one extra whitespace character; corrected before either hash was accepted. The host path
+is not mounted here; identical supplied inline bytes are content-address verified. Producer
+Git commit containment and the 30 reported axiom-growth entries were not reviewed here.
+[partial-Raw-receipt.json](../../tests/h62/item2/audit-precompiles/partial-Raw-receipt.json)
+retains all acceptance flags false and root review pending. Content identity is not acceptance.
+
+The source inventory's 138 signatures, all hypotheses and 24 checked/114 pending statuses
+remain unchanged. Seventeen inventory regressions plus eight census and six receipt tests
+now pass (31 total); guards prevent partial availability or staged routes from advancing status.
+Wait specifically for claudecloud/move5-20261106/v14-g43's actual compiler-success theorem
+for Solidity.Stipend.Obligation; migrate-syntax's accepted Raw prerequisite; migrate-precompiles'
+actual Solidity/Precompiles/Bls12381.lean:171/172 prerequisite (the disposition used the shorter
+Solidity/Bls12381.lean label); and compatible pinned-v4.35 Bridge dependencies from
+migrate-bridge AND precompile-agreement. Holds and original-file permissions are unchanged.
 
 ## Reviews and continuation handoff
 

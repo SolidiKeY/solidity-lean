@@ -1,7 +1,7 @@
 {
   "id": "G43-COMPILER-SUCCESS",
   "status": "pending-owner-theorem",
-  "owner_lane": "solidity-v12-v17-20261031/v14-payments-bytecode",
+  "owner_lane": "claudecloud/move5-20261106/v14-g43",
   "owner_key": "G43",
   "consumed_with": "Solidity.Stipend.Obligation",
   "authority_verbatim": "the totality obligation is met by a SEPARATE compiler-success theorem proved for the owner's compiler (it does not reject everything / always revert on the stated inputs); do not change any frozen interface statement.",
@@ -23,5 +23,8 @@
     "17 unconditional data-input samples"
   ],
   "frozen_interface_changes_authorized": false,
-  "h70_recipient_plan": "Recorded; actual theorem/name/path/commit/compiler identity still awaited. No original-file edit authorization."
+  "h70_recipient_plan": "Corrected disposition: current Claude route is staged, not delivered. Actual theorem/name/path/commit/compiler identity remain awaited. No original-file edit authorization.",
+  "previous_owner_lane": "solidity-v12-v17-20261031/v14-payments-bytecode",
+  "route_status": "staged-pending-delivery",
+  "delivery_confirmed": false
 }

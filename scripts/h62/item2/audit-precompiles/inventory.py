@@ -109,6 +109,62 @@ def checked_fixture_receipt(evidence):
  return dict(theorem='H62.AuditPrecompiles.msm_joint_premises_fixture',receipt='joint-fixture.json',kind='isolated numeric constraints; original BLS interface not imported',counts_as_original_statement_witness=False)
 
 
+def in_memory_raw_target(source,patch):
+ """Strict supplied Raw diff reconstruction; never writes or invokes patch tools."""
+ text=patch.decode();parts=text.splitlines(keepends=True);lines=source.decode().splitlines(keepends=True)
+ assert parts[0]=='diff --git a/Solidity/Syntax/Raw.lean b/Solidity/Syntax/Raw.lean\n'
+ assert parts[2]=='--- a/Solidity/Syntax/Raw.lean\n' and parts[3]=='+++ b/Solidity/Syntax/Raw.lean\n'
+ out=[];cursor=0;i=4;hunks=0
+ while i<len(parts):
+  m=re.match(r'@@ -(\d+),(\d+) \+(\d+),(\d+) @@',parts[i]);assert m,'unexpected hunk'
+  start,count,new_start,new_count=map(int,m.groups());assert start-1>=cursor
+  out.extend(lines[cursor:start-1]);cursor=start-1;assert len(out)==new_start-1
+  i+=1;old_used=new_used=0
+  while i<len(parts) and not parts[i].startswith('@@ '):
+   line=parts[i];kind=line[0];body=line[1:];assert kind in ' +-'
+   if kind in ' -':assert lines[cursor]==body,'source context differs';cursor+=1;old_used+=1
+   if kind in ' +':out.append(body);new_used+=1
+   i+=1
+  assert (old_used,new_used)==(count,new_count)
+  hunks+=1
+ assert hunks==5
+ out.extend(lines[cursor:])
+ return ''.join(out).encode()
+
+
+def pending_wait_disposition(rows,evidence):
+ """Attach current producer waits. Content-addressed partial input is never acceptance."""
+ packet=json.loads((ROOT/'tests/h62/item2/audit-precompiles/partial-Raw-receipt.json').read_text())
+ raw=(evidence/packet['inline_patch_evidence']).read_bytes()
+ assert hashlib.sha256(raw).hexdigest()==packet['reported_host_patch_sha256']==packet['inline_excerpt_sha256']
+ source=(ROOT/'Solidity/Syntax/Raw.lean').read_bytes()
+ assert hashlib.sha256(in_memory_raw_target(source,raw)).hexdigest()==packet['reconstructed_source_sha256']==packet['reported_source_sha256']
+ assert (ROOT/'Solidity/Syntax/Raw.lean').read_bytes()==source
+ assert packet['reconstructed_source_sha_verified'] and packet['strict_in_memory_hunks_verified']==5
+ assert packet['reported_axiom_growth_entries']==30 and packet['axiom_growth_root_review'].startswith('pending')
+ assert not packet['dependency_accepted'] and not packet['trust_accepted'] and not packet['holds_lifted'] and not packet['original_source_modified']
+ disposition=json.loads((ROOT/'tests/h62/item2/audit-precompiles/h70-waits.json').read_text())['current_disposition']
+ assert disposition['compiler_success_owner']=='claudecloud/move5-20261106/v14-g43'
+ assert disposition['compiler_route_status']=='staged-pending-delivery' and not disposition['compiler_delivery_confirmed']
+ assert not disposition['partial_Raw_is_dependency_acceptance']
+ matrix={}
+ for row in rows:
+  if row['kernel_applicability_checked']:continue
+  if row['file'].startswith('Bridge/'):
+   group='Bridge-compatible-dependencies';target='Compatible pinned-v4.35 Bridge dependencies from migrate-bridge AND precompile-agreement; transitive BLS prerequisite still pending.'
+  elif row['file']=='Solidity/Stipend/Rule.lean':
+   group='Syntax-Raw';target='Solidity/Syntax/Raw.lean; partial source received, root review of 30 reported axiom-growth entries and full dependency acceptance still pending.'
+  else:
+   assert row['file'] in ['Solidity/Precompiles/Bls12381.lean','Solidity/Precompiles/PointEval.lean','Solidity/Precompiles/Osaka.lean']
+   group='Bls12381';target='Solidity/Precompiles/Bls12381.lean:171/172; migrate-precompiles receipt pending.'
+  row['pending_wait_group']=group;row['pending_wait_target']=target;row['dependency_receipt_accepted']=False
+  counts=matrix.setdefault(group,{'statements':0,'categories':collections.Counter()})
+  counts['statements']+=1;counts['categories'][row['category']]+=1
+ assert {k:v['statements'] for k,v in matrix.items()}=={'Bls12381':29,'Syntax-Raw':12,'Bridge-compatible-dependencies':73}
+ assert sum(v['statements'] for v in matrix.values())==114
+ return dict(groups=matrix,current_disposition=disposition,partial_Raw=dict(status='partial-held',content_hashes_verified=True,trust_accepted=False,dependency_accepted=False,reported_axiom_growth_entries=30,root_review='pending'),boundary='Exclusive primary wait groups classify the same 114 pending cases. Transitive providers may overlap. No kernel status or witness count changes.')
+
+
 def generate(evidence):
  fixture=checked_fixture_receipt(evidence)
  type_receipt=checked_type_receipt(evidence)
@@ -166,7 +222,8 @@ def generate(evidence):
  assert sum(r['kernel_applicability_checked'] for r in rows)==24
  pending=collections.Counter(r['category'] for r in rows if not r['kernel_applicability_checked'])
  assert pending=={'proof-premises':30,'unconditional-data-domain':56,'closed-statement':28},pending
- return dict(base=BASE,source_classification_complete=True,kernel_inventory_complete=False,statements=138,source_classified=138,isolated_fixtures_checked=1,proof_hypothesis_statements=37,proof_hypothesis_binders=47,configuration_proof_binders=7,input_proof_binders=40,unconditional_data_statements=73,closed_statements=28,kernel_applicability_checked=24,pending=114,pending_categories=dict(pending),boundary='Source classification is complete; kernel signature/applicability census remains incomplete. No pending statement, owner theorem, or producer receipt is promoted.',global_context_notes=[
+ waits=pending_wait_disposition(rows,evidence)
+ return dict(base=BASE,pending_wait_disposition=waits,source_classification_complete=True,kernel_inventory_complete=False,statements=138,source_classified=138,isolated_fixtures_checked=1,proof_hypothesis_statements=37,proof_hypothesis_binders=47,configuration_proof_binders=7,input_proof_binders=40,unconditional_data_statements=73,closed_statements=28,kernel_applicability_checked=24,pending=114,pending_categories=dict(pending),boundary='Source classification is complete; kernel signature/applicability census remains incomplete. No pending statement, owner theorem, or producer receipt is promoted.',global_context_notes=[
   {'name':'FieldOps','kind':'implementation typeclass','source':'Solidity/Precompiles/Field.lean:85','distinction':'No active quantified FieldOps/NeZero premise binder occurs in these 138 theorem signatures. Concrete field instances are implementation context, not per-input validity witnesses.'},
   {'name':'Solidity.Precompiles.Osaka.fixed','kind':'global data object','source':'Solidity/Precompiles/Osaka.lean:84','distinction':'The frozen definition supplies one Fixed object. Source presence/record inhabitance does not establish a successful call on every input or an actual compiler-success theorem; BLS-dependent revalidation still waits.'},
   {'name':'Solidity.Stipend.Obligation','kind':'global compiler predicate, not a premise record in this census','source':'Solidity/Stipend/Rule.lean:173','distinction':'Separate actual V14/G43 compiler-success theorem remains pending under the coordinator decision; data/function assignments are not compiler execution witnesses.'},
@@ -192,6 +249,7 @@ def markdown(data):
   if not r['binders']:out += ['- None: closed statement.']
   for b in r['binders']:
    out += ['- '+b['name']+' : '+b['type'].replace('\n',' ')+'; '+b['role']+'; '+str(b['premise_scope'])+'; '+b['origin']]
+  if r.get('pending_wait_target'):out += ['', 'Exact producer wait: '+r['pending_wait_target']+' Dependency accepted: False.']
   out += ['', 'Joint requirement: '+r['joint_premises']['requirement'],
           'Remaining: '+r['remaining_work'], 'Wait for: '+(', '.join(r['wait_for']) or 'assignment-wide producer/final gates')]
   if r.get('dependent_domain_caution'):out += ['Caution: '+r['dependent_domain_caution']]
