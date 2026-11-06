@@ -161,4 +161,16 @@ theorem run_none_iff : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.C
   intro ctx control code policy fuel state
   simp only [run, Option.map_eq_none_iff]
 
+/-- Pre-capturing the current view preserves every exact later run, including
+timeouts and full captured outcomes. Sparse overlay metadata need not agree. -/
+theorem run_snapshot : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.run code policy fuel
+ (Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state)) =
+ Solidity.Yul.RawFrame.run code policy fuel state := by
+  intro ctx control code policy fuel state
+  rfl
+
 end Solidity.Yul.RawFrame
