@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "execution": "paused by explicit user retirement, not complete",
+  "work_queue": [
+    {
+      "checkpoint": 1,
+      "state": "partial",
+      "finished": [
+        "147 frozen files and656 source identities retained",
+        "source producer attribution complete;51 absent H30 reservations explicit",
+        "1914 header groups plus88 leading result groups/513 binder groups source-partitioned",
+        "10 manual source inspections and7 frozen definition excerpts"
+      ],
+      "open": [
+        "exact elaborated frozen signatures, including inferred and inherited binders",
+        "classify every actual hypothesis and bundled global structure",
+        "establish global inhabitance separately from same-input feasibility",
+        "retain private/source name versus kernel-name distinction"
+      ]
+    },
+    {
+      "checkpoint": 2,
+      "state": "not completed",
+      "open": [
+        "simultaneous witness for ALL hypotheses of EACH eligible unchanged statement",
+        "import unchanged interfaces through an authorized compatible dependency tree",
+        "no separate-inhabitant or invented-premise substitutes"
+      ]
+    },
+    {
+      "checkpoint": 3,
+      "state": "not completed",
+      "open": [
+        "meaningful supported-program totality/success theorems",
+        "reject-all and always-revert negative compiler controls",
+        "observable failure, gas and fork boundaries",
+        "no synthetic success theorem detached from public compiler contracts"
+      ]
+    },
+    {
+      "checkpoint": 4,
+      "state": "not completed",
+      "open": [
+        "Lean verification of all witnesses and exact statement-fidelity census",
+        "report all uncovered statements and owners",
+        "full affected/final core and Bridge gates",
+        "independent read-only finder/skeptic proof milestone reviews",
+        "exact transitive axiom audit and before/after performance comparison with >10% STOP policy"
+      ]
+    }
+  ],
+  "backfill_queue": [
+    {
+      "item": "scanner/census and source classification",
+      "state": "substantial source-only tooling finished; all656 candidates still uncovered"
+    },
+    {
+      "item": "negative trivial-compiler controls",
+      "state": "open; scanner negatives do not satisfy compiler-contract negatives"
+    },
+    {
+      "item": "isolated fixture proofs and additional witness/case coverage",
+      "state": "open; no actual audit witness checked"
+    },
+    {
+      "item": "deterministic reproduction and timing tooling",
+      "state": "generator/replay/serial probe present; full proof acceptance and comparable passing timings pending"
+    },
+    {
+      "item": "new cleanup candidates",
+      "state": "only coordinator/registry-claimed in-scope candidates; never steal producer/H55 scope"
+    }
+  ],
+  "h82_checkpoint": {
+    "hash": "Owner checksum-pinned overlay applied under H82; KeySort and Hash per-file checks passed; seven existing Hash axiom guards passed; full64-theorem axiom comparison/reviews still pending",
+    "reserved_names": "Proof-only rfl->by decide attempt kept; still fails existing recursion limit; do not raise budget",
+    "source_ctor": "No proof edits; serial check interrupted at user retirement; no passing claim",
+    "audit_proofs": "Zero elaborated audit witnesses; zero totality controls completed"
+  },
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Syntax/Raw.lean String/Slice compatibility requires definition-body owner authority; no repair made"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-frontend",
+      "item": "Frontend/Checked/Token.lean Bytes.str constructor compatibility requires definition-body owner authority"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-backend",
+      "item": "Backend/Scalar/Slice.lean:303 frozen ternary axiom guard mismatch; no axiom-set or definition change authorized"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-bridge",
+      "item": "Common v4.35 package/toolchain dependency overlay; existing Bridge manifest pins v4.24 packages"
+    },
+    {
+      "lane": "goal-runtime",
+      "item": "No PAUSED operation exposed; available stop_goal supports only complete/blocked, neither used as a substitute"
+    }
+  ],
+  "runtime_boundary": "Lean v4.35 KeySort/Hash checks do not prove source/EVM/gas/fork/compiler correctness. Source routing is not elaboration or simultaneous feasibility.",
+  "independent_items_at_retirement": [
+    {
+      "item": "Source/Ctor proof-only repair",
+      "state": "available under H82 without exact-file agreement; not implemented; diagnostic interrupted by explicit retirement"
+    },
+    {
+      "item": "ReservedNames count proof optimization",
+      "state": "available under H82; preserved attempt fails; no raised budget or further implementation after retirement"
+    },
+    {
+      "item": "Hash full64-theorem axiom/source audit and focused integration",
+      "state": "no exact-file proof agreement wait; focused Hash gate passes but complete axiom/affected validation unfinished"
+    },
+    {
+      "item": "Audit witness and negative compiler controls after compatible imports",
+      "state": "entire queue remains unfinished; successor responsible after handoff"
+    }
+  ],
+  "withdrawn_exact_file_agreement_waits": [
+    "Hash proof-only overlay application",
+    "ReservedNames proof-only changes",
+    "Source/Ctor proof-only changes"
+  ]
+}

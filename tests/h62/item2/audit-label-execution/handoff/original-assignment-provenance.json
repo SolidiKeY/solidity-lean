@@ -1,0 +1,7 @@
+{
+  "source": "Complete original assignment user-message text transcribed from this original conversation; no original prompt file was available",
+  "observed_file_sha256": "3b908fd1747425fbd119496e78fa22ff9de464e3412fff1c11ea2411e025dec8",
+  "launcher_rendered_prompt_sha256": "2a800684701f0d85802cd42e8ba14d7e8b5bc70bb2c5a53e8d63d9d874dcd7c4",
+  "byte_identity_to_launcher_rendering": false,
+  "limitation": "The launcher rendering envelope/raw byte serialization is not exposed; do not claim equality to its hash unless exact match. The complete user assignment, owner map, queue and constraints are preserved here."
+}

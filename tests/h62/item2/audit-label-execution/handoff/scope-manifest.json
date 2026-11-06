@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-2-20261106",
+  "slug": "audit-label-execution",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-2-20261106/audit-label-execution",
+  "repository": "/workspace/solidity-lean",
+  "original_write_scope": [
+    "tests/h62/item2/audit-label-execution/**",
+    "scripts/h62/item2/audit-label-execution/**",
+    "docs/feature-work/h62-2-audit-label-execution.md"
+  ],
+  "original_other_files": "READ ONLY; later H82 supersedes only as explicitly stated",
+  "frozen_area": "docs/module-map/label-execution.md at pinned base:147 files;656 named candidates",
+  "h82_standing_permission": "Statement-preserving proof-only changes, additive lemmas/definitions, module splits/import/doc fixes may cross original write scope without exact-file agreement",
+  "h82_still_requires_owner": [
+    "existing statement changes",
+    "definition bodies on which statements depend",
+    "interface signatures",
+    "proof budgets",
+    "axiom sets",
+    "exclusions"
+  ],
+  "frozen_repair_policy": "H57 versioned pair; never weaken statements or invent premises",
+  "h82_edits_outside_original_scope": [
+    "Solidity/Hash/CollisionBound.lean (supplied checksum-pinned proof-only overlay, per-file check passed)",
+    "Solidity/Yul/ReservedNames.lean (count proof attempt only; still fails recursion limit; preserve WIP)"
+  ],
+  "retirement_state": "PAUSED BY USER; no further implementation or automatic continuation authorized",
+  "handoff_to": "solidity-parallel-20261103/executable-bytecode",
+  "successor_authority": "Successor integration only after final stopped/head acknowledgement; this worker does not take over successor scope",
+  "forbidden": [
+    "new/reset/replacement goal or VM",
+    "master push",
+    "merge/pre-gate/publication/deployment",
+    "new proof implementation after retirement",
+    "new axiom/sorry/native_decide or raised budgets",
+    "Claude-owned source edits or messages"
+  ],
+  "push": "Not performed: no H71 push permission was supplied; original no-push instruction remains binding",
+  "toolchain_pin": "leanprover/lean4:v4.35.0 official archive; SHA256 7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+  "resource_limits": {
+    "lean_threads": 1,
+    "explicit_j": 1,
+    "address_space_cap_bytes": 12884901888,
+    "vm_memory_cap_bytes": 17179869184,
+    "available_reserve_bytes": 4294967296,
+    "swap": false,
+    "systemd_run": false
+  },
+  "later_named_requirements": [
+    "H44 off-git hashed bulk evidence",
+    "H68 full PassCorrect bridges",
+    "H69 witness versus intentional contradiction",
+    "H78 generated public API shims",
+    "H80 editor requirements",
+    "H81 current resource policy"
+  ],
+  "later_named_requirement_details": "Only the descriptions quoted in retirement are available here; no additional approvals are inferred",
+  "goal_pause_api": {
+    "available_tool": "stop_goal",
+    "supported_outcomes": [
+      "complete",
+      "blocked"
+    ],
+    "pause_operation_exposed": false,
+    "action": "Do not substitute blocked or complete for PAUSED; leave backend goal unchanged and stop per user instruction"
+  }
+}

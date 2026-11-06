@@ -1,8 +1,10 @@
 # H62 item 2: label-execution empty-statement audit
 
-Status: **BLOCKED; none of the four audit checkpoints is complete.** This is a
-reviewable tooling/backfill checkpoint with concrete migration-owner tickets.
-The persistent assignment must resume after compatible owner overlays arrive.
+Status: **PAUSED BY EXPLICIT USER RETIREMENT; none of the four audit checkpoints
+is complete.** No automatic implementation continuation is authorized.
+Successor: `solidity-parallel-20261103/executable-bytecode`; integration follows
+this worker's final stopped/head acknowledgement. Preserve this VM, branch and
+original goal. Historical blocked/resume notes below do not override this pause.
 
 Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-label-execution`.
@@ -299,3 +301,55 @@ roots, pins or intrinsic representations changed. No runtime slowdown claim is
 possible without a passing migration baseline. This is a fresh handoff after
 receipt inspection, result/module source partition and test/review work; the
 coordinator retains the same VM, branch and original unfinished goal.
+
+
+## H82 retirement checkpoint — stop, preserve and hand off
+
+The user explicitly retired this worker after the H82 standing permission.
+Only the smallest preservation checkpoint was completed after that instruction;
+no new proof implementation was started. The in-flight serial probe was stopped
+by terminating only its owned parent and Lean process group; exit 143. A defunct
+adopted child can remain visible under PID 1, but no task Lean job is running.
+
+Immediately before retirement, H82 authorized two proof-only dependency edits:
+
+- The exact supplied Hash overlay was applied. Pinned v4.35 per-file checking
+  passed, including seven existing axiom-message guards. All 64 raw named source
+  signatures are unchanged. Full affected gates and a complete 64-theorem
+  transitive axiom-set comparison remain pending.
+- `Yul/ReservedNames.lean` changes only reservedNames_count from rfl to by decide.
+  The preserved attempt still fails at line 43 with the unchanged recursion
+  limit. It is WIP, not a repair claimed complete. No budget was raised.
+
+KeySort passed again. Yul.Builtins and Source.Syntax passed as prerequisites.
+Source.Ctor was interrupted by retirement and has no new passing result. Its
+previous errors are retained. Syntax.Raw/Token require definition-body migration;
+Scalar/Slice retains the frozen axiom-guard issue; Bridge packages remain pending.
+No other original source was changed. The inspection helper now honestly reports
+whether the working file is the exact frozen preimage or verified owner postimage;
+26 scanner tests pass after that preservation change.
+
+The complete original assignment, original work/backfill queue, exact original
+scope plus H82 exception, current retirement instruction and all open queue items
+are committed under `tests/h62/item2/audit-label-execution/handoff/`, authenticated
+by SCOPE-SHA256SUMS and included in the cumulative patch/bundle. The original
+assignment was recovered from the original conversation. Its saved SHA256 is
+reported explicitly; byte equality to the launcher's separately claimed rendered
+prompt hash is not established because its rendering envelope is unavailable.
+No launcher-hash match is invented.
+
+No H71 branch-push permission was supplied; no push was performed. The available
+goal API exposes only stop_goal outcomes complete/blocked, with no PAUSED
+operation. Neither is substituted for the requested PAUSED state. The backend
+goal is left unchanged; execution is paused by the explicit user instruction.
+No goal was created, reset, replaced or completed. No automatic continuation is
+authorized. No post-retirement owner messages or new proof work were performed.
+
+Retirement exports are under
+`/workspace/h62-audit-label-execution-evidence/retirement/`. They include the final
+base/head/branch, clean state, cumulative/delta patches, bundle, full mandatory
+scope files, all open queues/waits, copied evidence and SHA256SUMS. Prior evidence
+and the VM are preserved. Post-edit proof milestone reviews, full axiom auditing,
+full validation and meaningful before/after passed-baseline timings are unfinished.
+Successor `solidity-parallel-20261103/executable-bytecode` is responsible for
+integration after the final acknowledgement; this worker is stopped.

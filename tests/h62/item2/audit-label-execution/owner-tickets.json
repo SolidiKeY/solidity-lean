@@ -60,7 +60,8 @@
       ],
       "audit_may_edit_original": false,
       "partial_overlay_receipt": "tests/h62/item2/audit-label-execution/owner-overlays/hash-partial-receipt.json",
-      "partial_overlay_disposition": "Advertised checksum and frozen contexts verified in memory; 64 ordered raw source signatures unchanged; not applied or Lean-validated. Full migration gate remains pending."
+      "partial_overlay_disposition": "Advertised checksum and frozen contexts verified in memory; 64 ordered raw source signatures unchanged; not applied or Lean-validated. Full migration gate remains pending.",
+      "h82_current_state": "Checksum-pinned proof-only patch applied; focused bounded Lean check and seven frozen guards pass; full transitive axiom/affected validation pending, not an exact-file permission wait"
     },
     {
       "id": "B03",
@@ -116,7 +117,8 @@
         "Migration owner repairs proof or API compatibility while preserving the full frozen statement and trust requirements.",
         "Coordinator supplies an already reviewed compatible migration overlay from the same assigned owner; audit replays all affected gates."
       ],
-      "audit_may_edit_original": false
+      "audit_may_edit_original": false,
+      "h82_current_state": "No proof edit started; diagnostic interrupted at retirement; independent proof repair available under H82, not an owner permission wait"
     },
     {
       "id": "B05",
@@ -143,7 +145,8 @@
         "Migration owner repairs proof or API compatibility while preserving the full frozen statement and trust requirements.",
         "Coordinator supplies an already reviewed compatible migration overlay from the same assigned owner; audit replays all affected gates."
       ],
-      "audit_may_edit_original": false
+      "audit_may_edit_original": false,
+      "h82_current_state": "Proof-only attempt preserved and still fails recursion; successor may continue under standing H82; no exact-file permission wait"
     },
     {
       "id": "B06",
@@ -181,5 +184,6 @@
       "detail": "Tracked Bridge vendor roots were resolved; Mathlib/CSLib/Batteries packages require an authorized common v4.35 overlay. Existing Bridge manifest pins v4.24 dependencies; their caches were not consumed.",
       "requested_action": "Provide the coordinated v4.35 Bridge dependency overlay and reproducible official pin set; do not alter the intrinsic dependency-free core."
     }
-  ]
+  ],
+  "h82_disposition": "Exact-file agreement waits for proof-only Hash/ReservedNames/Source.Ctor changes withdrawn under H82. Definition-body/API/axiom/exclusion changes still require owner authority. Explicit user retirement now pauses this worker; successor handles independent proof work."
 }

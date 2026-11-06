@@ -207,7 +207,8 @@ class OverlayInspectionTests(unittest.TestCase):
         r=self.inspector.inspect(ROOT,ROOT/'tests/h62/item2/audit-label-execution/owner-overlays/hash-partial-receipt.json')
         self.assertEqual(r['source_signatures_unchanged'],64)
         self.assertEqual(r['patch_sha256'],'3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff')
-        self.assertFalse(r['overlay_applied'])
+        self.assertEqual(r['original_files_written'],0)
+        self.assertEqual(r['overlay_applied'],r['worktree_state']=='verified-owner-postimage')
         self.assertFalse(r['lean_executed'])
 
     def test_relocated_artifact_still_requires_the_exact_routed_checksum(self):

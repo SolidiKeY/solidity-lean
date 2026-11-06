@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inspect the routed single-file Hash overlay entirely in memory.
 
-No original write or Lean execution. Equal source signatures do not prove the
+The inspection performs no original write or Lean execution. Equal source signatures do not prove the
 replacement proofs, their axioms, migration completion, or permission to apply.
 """
 import argparse
@@ -61,10 +61,12 @@ def inspect(root, receipt_path, artifact_override=None):
     actual = hashlib.sha256(data).hexdigest()
     if actual != receipt['reported_sha256']: raise ValueError('routed patch checksum mismatch')
     if receipt['source_path'] != PATH: raise ValueError('receipt path mismatch')
-    before = census.frozen_bytes(root, PATH)
+    before = subprocess.check_output(['git','show',census.BASE+':'+PATH],cwd=root)
     after = apply_in_memory(before.decode(), data.decode()).encode()
     def signatures(source):
         return [(r['name'],r['signature_sha256']) for r in census.declarations(source.decode(),PATH)]
+    worktree=(root/PATH).read_bytes()
+    if worktree not in (before,after): raise ValueError('worktree is neither exact frozen preimage nor verified owner postimage')
     old_sigs,new_sigs = signatures(before),signatures(after)
     if old_sigs != new_sigs: raise ValueError('overlay changes named source signatures')
     def blob(data): return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
@@ -75,7 +77,9 @@ def inspect(root, receipt_path, artifact_override=None):
                 reported_source_head=receipt['reported_source_head'],reported_heads_independently_verified=False,
                 preimage_sha256=census.digest(before),postimage_sha256=census.digest(after),
                 source_signatures_unchanged=len(old_sigs),frozen_hunks_match=True,
-                original_files_written=0,overlay_applied=False,lean_executed=False,
+                original_files_written=0,inspection_writes_originals=False,
+                worktree_state="verified-owner-postimage" if worktree==after else "frozen-preimage",
+                overlay_applied=worktree==after,lean_executed=False,
                 proof_validation='pending; source text inspection only',
                 migration_gate='pending; partial owner overlay does not discharge other blockers',
                 routing='delivery acceptance is not owner agreement or validation')
