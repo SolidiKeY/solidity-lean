@@ -10,9 +10,9 @@ import Solidity.Optimizer.DeadCode
 
 One round inlines covered internal calls, propagates constants and copies,
 simplifies and folds expressions (removing dead branches), removes code after a
-halting statement in every scope and dead local stores, eliminates common subexpressions and unused
-declarations, in that order (`round`); `Prog.optimize n`
-runs `n` rounds. Each stage is a proved pass of the O01 interface
+halting statement in blocks, branches and loop bodies and dead local stores,
+eliminates common subexpressions and unused declarations, in that order
+(`round`); `Prog.optimize n` runs `n` rounds. Each stage is a proved pass of the O01 interface
 (`Preserves SameRun`), so the pipeline is one by `Preserves.pipeline`
 (`round_preserves`, `optimize_preserves`): the optimized program's typed run
 equals the original's in every state (`Prog.optimize_runC`).

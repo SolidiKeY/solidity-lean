@@ -13,13 +13,16 @@ would have declared, so its run is unchanged: `cut_scope` states that the run
 of a cut sequence, its scope ended, is the run of the original, its scope
 ended. The halt itself (revert or Panic) is kept.
 
-`Prog.dce` cuts every scope of a program; `Prog.dce_runC` is equality of the
+`Prog.dce` cuts every block, `if` branch and loop body of a program (call,
+`try`/`catch` and receiver-call bodies are left as written; `revertData` is
+not treated as halting); `Prog.dce_runC` is equality of the
 typed run. A top-level sequence is not cut (its output context is the
 program's type).
 
 Dead local stores: `x = e₁; x = e₂;` becomes `x = e₂;` when `e₁` is a simple
 value (it cannot fail, so dropping it hides no halt) and `e₂` does not read `x`
-(`Val.indep`), in every sequence (`Prog.dse`, `Prog.dse_runC`). Storage and
+and has no storage/memory read (both checked by `Val.indep`), in every sequence
+reached through blocks, `if` branches and loop bodies (`Prog.dse`, `Prog.dse_runC`). Storage and
 memory stores are not touched (they wait for X06's aliasing facts).
 -/
 namespace Solidity.Optimizer.ConstFold

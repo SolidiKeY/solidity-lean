@@ -1227,3 +1227,11 @@ Owner requests (unchanged from the Codex handoff, still open): X01 — frozen D6
 and D1 artifact/gas-oracle API; V09/VY3 — `Compilation.correct` adapters covering
 optimizer output (the agreement premises read `asserts`/`pays`/`pushes`); X06 — aliasing
 facts; COORD — Optimizer entries in `scripts/check-layers.mjs` CORE (not edited here).
+
+Dead-code review (read-only finder+skeptic): no soundness issue (halts are kept and carry
+no state; `ite`/`loop`/`block` drop with the branch's own `Ext`, which `scopeRun` takes;
+`assignLocal` targets only value locals, distinct `TEnv` slots, so no aliasing). Fixed:
+coverage wording (only blocks, `if` branches and loop bodies; `revertData` not treated as
+halting; `Val.indep` also rejects storage/memory reads in `e₂`); `o02_pipeline_preserves`
+now includes `Prog.dce` and `Prog.dse`. Added controls `guarded_kept` (non-literal
+`require` not cut), `branch_cut` (cut inside an `if` branch), `different_targets_kept`.

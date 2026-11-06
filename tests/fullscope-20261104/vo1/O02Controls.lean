@@ -225,6 +225,18 @@ theorem after_halt_cut :
 theorem after_halt_reverts (σ : State C []) :
     Prog.runC (Prog.dce (Prog.cfold (.cons afterHalt .nil))) σ = .error .revert := rfl
 
+/-- A non-literal `require(a > 1)` is not a halt: the rest of the block stays. -/
+def guarded : Stmt C G G :=
+  .block (.cons (.require (gt x (lit 1))) (.cons (.assignLocal .here (lit 3)) .nil))
+
+theorem guarded_kept : Prog.dce (.cons guarded .nil) = .cons guarded .nil := rfl
+
+/-- Inside an `if` branch: `if (a > 1) { revert; a = 3; }` loses `a = 3`. -/
+theorem branch_cut :
+    Prog.dce (.cons (.ite (gt x (lit 1)) (.cons .revert (.cons (.assignLocal .here (lit 3)) .nil))
+      .nil) .nil : Prog C G G) =
+      .cons (.ite (gt x (lit 1)) (.cons .revert .nil) .nil) .nil := rfl
+
 /-- The `require` itself is never cut: dropping it would turn the revert into success. -/
 theorem halt_kept_wrong (σ : State C []) :
     Prog.runC (.cons afterHalt .nil) σ ≠
@@ -239,6 +251,12 @@ def y : Val C G2 .uint := .simple (.local (.there .here))
 /-- `a = 1; a = b + 2;` becomes `a = b + 2;`. -/
 def deadStore (e₁ e₂ : Val C G2 .uint) : Prog C G2 G2 :=
   .cons (.assignLocal .here e₁) (.cons (.assignLocal .here e₂) .nil)
+
+/-- Stores to different locals are both kept. -/
+theorem different_targets_kept :
+    Prog.dse (.cons (.assignLocal .here (lit 1)) (.cons (.assignLocal (.there .here) (lit 2)) .nil) :
+      Prog C G2 G2) =
+      .cons (.assignLocal .here (lit 1)) (.cons (.assignLocal (.there .here) (lit 2)) .nil) := rfl
 
 theorem dead_store_removed :
     Prog.dse (deadStore (lit 1) (add y (lit 2))) =
@@ -287,7 +305,8 @@ theorem failing_init_drop_wrong (σ : State C []) :
 /-- Composition of the O02 passes in the O01 pipeline is still certified. -/
 theorem o02_pipeline_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ'))
-      (Pass.pipeline [Prog.cprop Facts.empty, Prog.simplify, Prog.cfold, Prog.uve]) :=
+      (Pass.pipeline [Prog.cprop Facts.empty, Prog.simplify, Prog.cfold, Prog.dce, Prog.dse,
+        Prog.uve]) :=
   Preserves.pipeline (Related := SameRun) (fun _ => rfl)
     (fun a b => show SameRun _ _ from Eq.trans a b) _ fun pass mem => by
     rcases List.mem_cons.mp mem with rfl | mem
@@ -296,6 +315,10 @@ theorem o02_pipeline_preserves (Γ Γ' : Ctx) :
     · exact vopt_preserves simpFoldPass Γ Γ'
     rcases List.mem_cons.mp mem with rfl | mem
     · exact cfold_preserves Γ Γ'
+    rcases List.mem_cons.mp mem with rfl | mem
+    · exact dce_preserves Γ Γ'
+    rcases List.mem_cons.mp mem with rfl | mem
+    · exact dse_preserves Γ Γ'
     rcases List.mem_cons.mp mem with rfl | mem
     · exact uve_preserves Γ Γ'
     exact absurd mem List.not_mem_nil
