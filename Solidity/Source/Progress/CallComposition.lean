@@ -13,7 +13,7 @@ inductive ComposedExpr (A B : Decl → Prop) {Γ : RCtx} : {τ : STy} → RExpr 
   | call {d : Decl} {ps rs : List STy} (signature : d.fnSig E = some (ps,rs))
       {args : RConvArgs E Γ ps} : B d → ComposedArgs A B args →
       ComposedExpr A B (.call d signature args)
-  | same {τ} {e : RExpr E Γ τ} (identity : Conv E.isBase τ τ) :
+  | same {τ} {e : RExpr E Γ τ} (identity : Conv E.isBase E.mapFree τ τ) :
       ComposedExpr A B e → ComposedExpr A B (.conv e identity)
   | branch {τ} {condition : RExpr E Γ .bool} {yes no : RExpr E Γ τ} :
       ComposedExpr A B condition → ComposedExpr A B yes → ComposedExpr A B no →
@@ -25,7 +25,7 @@ inductive ComposedArgs (A B : Decl → Prop) {Γ : RCtx} :
     {ts : List STy} → RConvArgs E Γ ts → Prop
   | nil : ComposedArgs A B .nil
   | cons {τ ts} {e : RExpr E Γ τ} {es : RConvArgs E Γ ts}
-      (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ) :
+      (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ) :
       ComposedExpr A B e → ComposedArgs A B es → ComposedArgs A B (.cons e same es)
 end
 
@@ -44,7 +44,7 @@ theorem sub_ready_memory_call_mem {G : Glob E} {c : String} {ds : List Decl}
   rw [actual] at result
   have finish (valid : MemOK E s.heap.ty (last,after)) : MemOK E H (l,after) :=
     Preservation.relocalize (valid.weaken outer.le) l (LocalsOK.mono valid.le l outer.1.2)
-  have actual' : callInternal G F n d vs rs (.nil,s) = (r,(last,after)) := actual
+  have actual' : callInternal (plan := none) G F n d vs rs (.nil,s) = (r,(last,after)) := actual
   cases r with
   | ok a =>
     simp only [ExceptT.run,ExceptT.mk,actual']

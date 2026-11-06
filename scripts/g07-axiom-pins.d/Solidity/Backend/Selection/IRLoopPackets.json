@@ -1,0 +1,29 @@
+{
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.finite_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.iter_three": [
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.iter_two": [
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.out_bind_self": [],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.single_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.turn_continue": [
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.turn_done": [
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.turn_empty": [],
+ "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.turn_word": [
+  "propext"
+ ]
+}

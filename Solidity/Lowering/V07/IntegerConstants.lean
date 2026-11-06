@@ -10,7 +10,7 @@ theorem fits (t : Source.IntTy) (z : Int) (bound : t.lo ≤ z ∧ z ≤ t.hi) :
     Int.natCast_one,Int.ediv_one,BEq.rfl,true_and] using bound
 
 theorem allowed (E : Source.Env) (t : Source.IntTy) (z : Int) (bound : t.lo ≤ z ∧ z ≤ t.hi) :
-    (Source.STy.rational (Source.Q.ofInt z)).implicit E.isBase (.int t) = true := by
+    (Source.STy.rational (Source.Q.ofInt z)).implicit E.isBase E.mapFree (.int t) = true := by
   rw [Source.STy.implicit_rational_int]
   exact decide_eq_true (fits t z bound)
 
@@ -97,7 +97,7 @@ theorem source_refused {D : Source.Layout} (t : Source.IntTy) (z : Int)
 
 theorem not_allowed (E : Source.Env) (t : Source.IntTy) (z : Int)
     (outside : ¬ (t.lo ≤ z ∧ z ≤ t.hi)) :
-    (Source.STy.rational (Source.Q.ofInt z)).implicit E.isBase (.int t) = false := by
+    (Source.STy.rational (Source.Q.ofInt z)).implicit E.isBase E.mapFree (.int t) = false := by
   rw [Source.STy.implicit_rational_int]
   apply decide_eq_false
   intro h

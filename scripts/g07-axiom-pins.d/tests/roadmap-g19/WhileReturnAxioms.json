@@ -1,0 +1,67 @@
+{
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.captured_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.false_not_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.falseSource": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.falseTarget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.no": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.nontrivial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.same_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.true_not_fallthrough": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.Controls.yes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/WhileReturnAxioms.lean:Solidity.Lowering.G19.WhileReturn.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
