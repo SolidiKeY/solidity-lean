@@ -283,3 +283,29 @@ first commit's whitespace check failed and is not counted as a passing check.
 Updated proposal metadata and controls are sealed in
 `/workspace/migrate-backend-evidence/checkpoint3-linking-v2/`; the earlier
 evidence directory is retained unchanged.
+
+## API tooling static review; compiler validation pending
+
+The committed `api_inventory.py` and `ApiInventory.lean.in` are preparation
+and checking tools, not an accepted elaborated API inventory. They preserve
+all imported Backend declaration candidates, including private/generated
+names, and structurally serialize types with strict binder names/annotations.
+The serializer uses structural expression caching and streams declarations;
+Python computes hashes independent of DAG sharing. Only expression metadata
+is omitted. No generated declaration or type difference is silently excluded.
+
+Independent finder and skeptic reviews found and fixed three acceptance
+hazards: undeclared universe parameters, noncanonical numeric name encodings,
+and duplicate declarations silently collapsed during comparison. Index
+schema/count/module/row/digest checks precede comparison. Scoped resolved
+output guards reject aliases and existing destinations, and the Lean exporter
+uses exclusive creation for its temporary file. Nineteen Python controls
+pass, including direct malformed-index, open-universe and output-guard cases.
+
+Static evidence, generated drafts and reviews are sealed under
+`/workspace/migrate-backend-evidence/api-tooling-static/`; the committed
+`EVIDENCE-API-STATIC.sha256` records their hashes. Both official Lean compiler
+checks, complete declaration inclusion, provenance, runtime resource checks
+and actual old/new API comparison remain pending. Self-reported declaration
+count consistency does not independently prove completeness. The unchanged
+old baseline remains the sole Lean job; no production source was edited.
