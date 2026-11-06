@@ -1,7 +1,7 @@
 # H28 G08 nonnumeric literal decoder completeness
 
-Status: **partial: everything done except the fresh solc fixture rerun, which is blocked by the network** (see "Claude VM
-completion"). The lane moved from a Codex VM to a Claude VM on 2026-11-05;
+Status: **done** (see "Claude VM completion"; the solc fixture rerun,
+queue item 3, ran on 2026-11-06). The lane moved from a Codex VM to a Claude VM on 2026-11-05;
 all 26 `Solidity/Frontend/LiteralGrammarH28/**` modules are registered in the
 generated `Solidity.lean` root, so the former registration blocker
 (Q-ROOT-01) and the cache-delivery question (Q-CACHE-01) are closed.
@@ -190,11 +190,11 @@ by `\u` escapes (`hexQuad_lt65536`), and `IsQuote q` is necessary for
 - Shared files were allowed wholesale.
 - `adopted-master.json` was stale.
 
+Fixed later: **printable-boundary fixtures** (raw control bytes, the other
+quote inside a literal) were added on 2026-11-06; see queue item 3.
+
 Not fixed:
 
-- **Printable-boundary fixtures.** No compiler fixture has a raw control
-  byte, or the other quote raw inside a literal. These are covered only by
-  kernel rows, and new fixtures need the blocked compiler.
 - **Model/compiler hex agreement.** Agreement on cases both accept is a
   property of the data, not asserted by the gate. This is by design.
 
@@ -240,6 +240,6 @@ Master's `4492e6ed9` ("Audit external H44 evidence after published
 integration") added `--evidence-dir`/`--published-integration` modes to the
 Codex-era `audit.py` for evidence under the Codex VM's `/workspace/scratch`
 and recorded a PASS there; `bulk-artifacts-h44.json` lists those off-git
-artifacts. The 2026-11-07 merge kept this branch's rewritten `audit.py`,
+artifacts. The 2026-11-06 merge kept this branch's rewritten `audit.py`,
 which checks the committed `evidence/axioms.log` and scopes to the merge
 base, so those two flags are gone; that historical PASS stays in git history.
