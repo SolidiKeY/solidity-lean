@@ -71,3 +71,17 @@ its SHA-256 is recorded in the external handoff checksum manifest. The baseline
 and post-migration speed comparison, independent finder and skeptic reviews,
 exact Raw case accounting, table migration patches and production owner
 handoffs remain pending. The current compile timings are not that comparison.
+
+## Fixture control generator preparation
+
+`PYTHONDONTWRITEBYTECODE=1 python3 scripts/h55/vectors-tables/fixture_controls.py
+check` reproduces all 45 complete StatementGrammar FixtureControls modules and
+checks the ordered 45 corresponding definitions in FixtureData. `emit --output`
+writes to a new directory outside the checkout. A committed manifest pins the
+FixtureData bytes and every control file; their hashes were checked independently
+against the base Git blobs. Missing, extra, wrong-position, changed proof schema,
+and missing/renamed fixture definition controls pass. Seven Python tests pass
+across both vector and fixture helpers. This preparation does not edit owned files,
+provide a production migration patch, compile these fixture controls, or prove
+anything beyond the stated byte and inventory comparisons. WordTable migration,
+actual owner handoff and full acceptance remain pending.
