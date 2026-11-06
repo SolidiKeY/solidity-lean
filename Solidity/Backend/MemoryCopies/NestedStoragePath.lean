@@ -66,7 +66,7 @@ theorem nested_storage_path_copy {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
   · rw [resolved] at refused
     cases refused
 
-theorem nested_storage_path_declare_source {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+theorem nested_storage_path_declare_source {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (state : State C Γ) (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive))))))
     (reference : SRef C (.ref (.array (.ref (.array (.prim primitive))))))
     (value : SVal (.ref (.array (.ref (.array (.prim primitive))))))
@@ -112,7 +112,7 @@ theorem nested_storage_path_declare {C : Contract} {Γ : Ctx} {primitive : PrimT
   · right
     exact ⟨refusal.1,run_append_revert refusal.2⟩
 
-theorem nested_storage_path_rebind_source {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+theorem nested_storage_path_rebind_source {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (state : State C Γ) (destination : Idx Γ (.mem (.array (.ref (.array (.prim primitive))))))
     (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive))))))
     (reference : SRef C (.ref (.array (.ref (.array (.prim primitive))))))
