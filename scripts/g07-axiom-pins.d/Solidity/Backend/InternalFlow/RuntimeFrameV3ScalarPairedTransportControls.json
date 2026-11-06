@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransportControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPairedTransport.Controls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

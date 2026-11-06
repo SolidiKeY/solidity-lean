@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/AbiWorld/PanicCallFrame.lean:Solidity.Backend.AbiWorld.PanicCallFrame.call_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/PanicCallFrame.lean:Solidity.Backend.AbiWorld.PanicCallFrame.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

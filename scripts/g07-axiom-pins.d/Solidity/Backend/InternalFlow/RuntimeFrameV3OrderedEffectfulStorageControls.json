@@ -1,0 +1,68 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.available": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.before_observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.binding": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.changed_count": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.current": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.fragile_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.live": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.no_struct": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.not_keeps": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.outside_old_condition": [],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.public_root": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.ref_base": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.shallow_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.Controls.specification": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

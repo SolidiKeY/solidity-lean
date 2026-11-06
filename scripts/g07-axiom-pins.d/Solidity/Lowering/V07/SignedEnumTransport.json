@@ -1,0 +1,43 @@
+{
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.allowed": [],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.enum_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.source_failed_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.source_value_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.transport_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.transport_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumTransport.lean:Solidity.Lowering.V07.SignedEnumTransport.word_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

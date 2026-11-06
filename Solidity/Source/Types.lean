@@ -59,6 +59,12 @@ inductive STy where
   | tuple (ts : List STy)
   deriving Repr
 
+/-- A one-word value type (an ABI head word): `STy.isValue` without
+function types. -/
+def STy.oneWord : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | _ => false
+
 /-! ## Integer and fixed-point ranges -/
 
 /-- `uint256`. -/
@@ -195,13 +201,37 @@ def STy.sameList : List STy → List STy → Bool
 
 end
 
+/-- A reference type moved to a location (nested arrays with it). -/
+def STy.withLoc (l : DataLoc) : STy → STy
+  | .bytes _ => .bytes l
+  | .string _ => .string l
+  | .array _ τ n => .array l (τ.withLoc l) n
+  | .struct _ d => .struct l d
+  | τ => τ
+
 /-- solc's location rule for an implicit reference conversion: a copy to
 `memory`, or the same location (a pointer). -/
 def DataLoc.implicit (l l' : DataLoc) : Bool := l' == .memory || l == l'
 
+/-- Whether a type holds no mapping, through arrays, given which structs
+hold none (`mapFree d`; `Env.mapFree` answers it from the declarations). -/
+def STy.noMapping (mapFree : DeclName → Bool) : STy → Bool
+  | .mapping _ _ => false
+  | .array _ σ _ => σ.noMapping mapFree
+  | .struct _ d => mapFree d
+  | _ => true
+
 /-- **Implicit conversion** between types, given the inheritance relation
-on contracts (`isBase d d'`: `d'` is `d` or one of its bases). -/
-def STy.implicit (isBase : DeclName → DeclName → Bool) : STy → STy → Bool
+on contracts (`isBase d d'`: `d'` is `d` or one of its bases) and which
+structs hold no mapping (`mapFree d`, `Env.mapFree`). An array's element
+types are compared at the target's location (`STy.withLoc`, as
+`STy.copiesTo` does): the location change of a nested copy to `memory`
+(`uint256[2][] calldata` to `uint256[2][] memory`) is implicit, as in solc
+(user decision 2026-11-06). A copy to another location (a struct, or an
+array of structs, out of `storage`) holding a mapping is refused, as solc
+refuses it (user decision 2026-11-06); a pointer at the same location is
+not a copy. -/
+def STy.implicit (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) : STy → STy → Bool
   | .int t, .int t' => t.implicit t'
   | .bool, .bool => true
   | .address p, .address p' => p || !p'
@@ -211,8 +241,9 @@ def STy.implicit (isBase : DeclName → DeclName → Bool) : STy → STy → Boo
   | .enum d, .enum d' | .udvt d, .udvt d' => d == d'
   | .contract d, .contract d' => isBase d d'
   | .bytes l, .bytes l' | .string l, .string l' => l.implicit l'
-  | .array l τ n, .array l' τ' n' => τ.same τ' && n == n' && l.implicit l'
-  | .struct l d, .struct l' d' => d == d' && l.implicit l'
+  | .array l τ n, .array l' τ' n' =>
+    (τ.withLoc l').same τ' && n == n' && l.implicit l' && (l == l' || τ.noMapping mapFree)
+  | .struct l d, .struct l' d' => d == d' && l.implicit l' && (l == l' || mapFree d)
   | .mapping k v, .mapping k' v' => k.same k' && v.same v'
   | .fn e ps rs m, .fn e' ps' rs' m' => e == e' && STy.sameList ps ps' && STy.sameList rs rs' && m == m'
   | .rational q, .int t => decide (q.FitsInt t)
@@ -228,8 +259,8 @@ def STy.implicit (isBase : DeclName → DeclName → Bool) : STy → STy → Boo
 /-- **Explicit conversion** (`T(e)`), beyond the implicit ones: at most one
 change of sign, width or category (solc 0.8); the fixed-point readings of
 the second round; addresses, contracts and enums. -/
-def STy.explicit (isBase : DeclName → DeclName → Bool) (s t : STy) : Bool :=
-  s.implicit isBase t ||
+def STy.explicit (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (s t : STy) : Bool :=
+  s.implicit isBase mapFree t ||
   match s, t with
   | .int a, .int b => a.signed == b.signed || a.bits == b.bits
   | .int a, .fixedBytes n _ | .fixedBytes n _, .int a => !a.signed && a.bits == 8 * n
@@ -254,14 +285,14 @@ def STy.explicit (isBase : DeclName → DeclName → Bool) (s t : STy) : Bool :=
   | .hexConst q _, .enum _ => q.isInt && decide (0 ≤ q.toInt)
   | _, _ => false
 
-theorem STy.implicit_rational_int (B : DeclName → DeclName → Bool) (q : Q) (t : IntTy) :
-    STy.implicit B (.rational q) (.int t) = decide (q.FitsInt t) := rfl
+theorem STy.implicit_rational_int (B : DeclName → DeclName → Bool) {M : DeclName → Bool} (q : Q) (t : IntTy) :
+    STy.implicit B M (.rational q) (.int t) = decide (q.FitsInt t) := rfl
 
-theorem STy.implicit_hexConst_int (B : DeclName → DeclName → Bool) (q : Q) (n : Nat) (t : IntTy) :
-    STy.implicit B (.hexConst q n) (.int t) = decide (q.FitsInt t) := rfl
+theorem STy.implicit_hexConst_int (B : DeclName → DeclName → Bool) {M : DeclName → Bool} (q : Q) (n : Nat) (t : IntTy) :
+    STy.implicit B M (.hexConst q n) (.int t) = decide (q.FitsInt t) := rfl
 
-theorem STy.explicit_of_implicit {isBase : DeclName → DeclName → Bool} {s t : STy}
-    (h : s.implicit isBase t = true) : s.explicit isBase t = true := by
+theorem STy.explicit_of_implicit {isBase : DeclName → DeclName → Bool} {mapFree : DeclName → Bool} {s t : STy}
+    (h : s.implicit isBase mapFree t = true) : s.explicit isBase mapFree t = true := by
   simp only [STy.explicit, h, Bool.true_or]
 
 /-- **A constant that fits a type fits every type it converts to
