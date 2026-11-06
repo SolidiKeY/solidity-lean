@@ -298,3 +298,12 @@ and the default array location. Per-file Lean 4.35 MCP diagnostics returned
 `success=true`, `partial=false`, no failed dependencies and the same three
 `[propext]` axiom reports. The patch proposal was regenerated after these
 additions; its applicability check is not a semantic or full-gate pass.
+
+## Scoped successor audit tooling recut
+
+The external audit-probe generator preserves the published helper declaration
+text and all anonymous examples. It queries the 31 named declarations once,
+including source files that already print some axiom dependencies. Anonymous
+examples and compiler-generated helpers are outside this named-query inventory.
+Neither inferencer nor Shared.lean is changed. Prior c16efd4ed validation remains
+historical; production integration and full affected validation remain open.
