@@ -8,33 +8,21 @@ namespace SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1
 open IndexedRefusalInterfaceV1
 
 theorem dup : DupClaim := by
-  first
-  | solve | simp only [DupClaim]
-  | solve | decide
-  | solve | rfl
-  | intro valid n site words m fuel represented short gas
-    exact ⟨InstructionSelectionRefusal.dup_refusal valid n site words m represented short gas fuel,
-      InstructionSelectionRefusal.dup_native_refusal valid n site words short gas fuel⟩
+  intro valid n site words m fuel represented short gas
+  exact ⟨InstructionSelectionRefusal.dup_refusal valid n site words m represented short gas fuel,
+    InstructionSelectionRefusal.dup_native_refusal valid n site words short gas fuel⟩
 
 theorem swap : SwapClaim := by
-  first
-  | solve | simp only [SwapClaim]
-  | solve | decide
-  | solve | rfl
-  | intro valid n site words m fuel represented short gas
-    exact ⟨InstructionSelectionRefusal.swap_refusal valid n site words m represented short gas fuel,
-      InstructionSelectionRefusal.swap_native_refusal valid n site words short gas fuel⟩
+  intro valid n site words m fuel represented short gas
+  exact ⟨InstructionSelectionRefusal.swap_refusal valid n site words m represented short gas fuel,
+    InstructionSelectionRefusal.swap_native_refusal valid n site words short gas fuel⟩
 
 theorem producer : Producer := ⟨dup, swap⟩
 
-/-- info: 'SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.dup' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
+/-- info: 'SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.dup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms dup
-/-- info: 'SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.swap' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
+/-- info: 'SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.swap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms swap
 /-- info: 'SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.producer' depends on axioms: [propext,
