@@ -1470,6 +1470,8 @@ import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
+import Solidity.Backend.Payments.CompilerExact
+import Solidity.Backend.Payments.CoreExact
 import Solidity.Backend.PrimitivePackets.BitNot.Agreement
 import Solidity.Backend.PrimitivePackets.BitNot.Controls
 import Solidity.Backend.PrimitivePackets.BitNot.Selected
@@ -3991,7 +3993,10 @@ import Solidity.Source.FailureCursor
 import Solidity.Source.FailureResources
 import Solidity.Source.Hoare
 import Solidity.Source.Horizon
+import Solidity.Source.HorizonConst
 import Solidity.Source.HorizonDeploy
+import Solidity.Source.HorizonFuel
+import Solidity.Source.HorizonGrow
 import Solidity.Source.Infer
 import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples

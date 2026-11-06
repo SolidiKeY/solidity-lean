@@ -139,6 +139,8 @@
 | `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Payments/CoreExact.lean` | G43: the core compiler with no refused-payment outcome (`compile_paid`, `compile_success`); `Sim` carries the joint world/payment relation. |
+| `Backend/Payments/CompilerExact.lean` | G43: `AgreesExact`, `correct_exact` and the compiler-success theorem `compile_success` over every `Compilation` result. |
 | `Evm/MemoryLoopHorizonObjectHeapGrowth.lean` | Actual allocating-body heap extension and exact initial-length-plus-count growth through scope exit. |
 | `Evm/MemoryLoopHorizonObjectHeapControls.lean` | Existentially witnessed selected-loop execution with matched object count and cursor observations. |
 | `Evm/MemoryLoopHorizonObjectHeapKeeps.lean` | Original typed objects survive actual empty-array allocation prefixes. |
