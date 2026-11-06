@@ -127,7 +127,7 @@ elab_rules : command
   | `(#h62_census $path:str $ns:ident) => do
     let env ← getEnv
     let names := env.constants.toList.toArray.filterMap fun (name, _) =>
-      if ns.getId.isPrefixOf name then some name else none
+      if ns.getId.isPrefixOf ((privateToUserName? name).getD name) then some name else none
     if names.isEmpty then throwError "empty H62 namespace census: {ns.getId}"
     writeExport path.getString names s!"all elaborated declarations in namespace {ns.getId}; includes generated declarations"
 end H62

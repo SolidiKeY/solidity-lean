@@ -1,5 +1,6 @@
 import tests.h62.item5.«statement-graph».Exporter
 namespace H62Fixture
+private theorem privateWitness (n : Nat) : n = n := rfl
 @[h62_statement] theorem base : True := True.intro
 @[h62_premise] def Accepted (n : Nat) : Prop := n = n
 @[h62_helper] theorem reflexive (n : Nat) : n = n := rfl

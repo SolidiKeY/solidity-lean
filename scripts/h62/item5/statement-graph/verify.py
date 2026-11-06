@@ -107,8 +107,9 @@ def main():
         census = (evidence/'fixture-census.json').read_bytes()
         assert census == (evidence/'fixture-census-repeat.json').read_bytes()
         census_rows = json.loads(census)['declarations']
-        assert len(census_rows)>len(exported) and all(r['declaration'].startswith('H62Fixture.') for r in census_rows)
+        assert len(census_rows)>len(exported) and all('H62Fixture.' in r['declaration'] for r in census_rows)
         assert any(r['constantKind']=='constructor' for r in census_rows)
+        assert any(r['declaration'].startswith('_private.') and r['declaration'].endswith('.H62Fixture.privateWitness') for r in census_rows)
         assert original == (evidence/'fixture-repeat.json').read_bytes(), 'same-process nondeterminism'
         run('fixture-fresh',[lean,*flags,str(SCOPE/'Fixture.lean')])
         assert original == (evidence/'fixture.json').read_bytes(), 'fresh-process nondeterminism'
