@@ -58,7 +58,7 @@ def main():
             assert hashlib.sha256(artifact.read_bytes()).hexdigest() == record["olean_sha256"]
         env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(EVIDENCE/"olean"))
         results = []
-        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean", TESTS+"ValuesDefaultsWitnesses.lean", TESTS+"ValuesDefaultsFidelity.lean", TESTS+"UnitsSuccess.lean", TESTS+"UnitsSuccessFidelity.lean", TESTS+"ValuesHeredWitnesses.lean", TESTS+"ValuesHeredFidelity.lean", TESTS+"ProvisionedCensus.lean"]:
+        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean", TESTS+"ValuesDefaultsWitnesses.lean", TESTS+"ValuesDefaultsFidelity.lean", TESTS+"UnitsSuccess.lean", TESTS+"UnitsSuccessFidelity.lean", TESTS+"ValuesHeredWitnesses.lean", TESTS+"ValuesHeredFidelity.lean", TESTS+"ValuesOpsWitnesses.lean", TESTS+"ValuesOpsFidelity.lean", TESTS+"ProvisionedCensus.lean"]:
             current = int(Path("/sys/fs/cgroup/memory.current").read_text())
             cap = int(Path("/sys/fs/cgroup/memory.max").read_text())
             assert cap-current >= 4*1024**3, "Insufficient 4 GiB reserve"
@@ -141,6 +141,12 @@ def main():
         assert len(hered_checked) == len(set(hered_checked)) == 10
         assert set(hered_checked) == expected_hered
         assert "sorryAx" not in hered_log
+        ops_log = (EVIDENCE/"ValuesOpsFidelity-checked.log").read_text()
+        ops_checked = re.findall(r"^AUDIT-FULL-INPUTS (\S+) via", ops_log, re.M)
+        expected_ops = {"Solidity."+n for n in ['SVal.strip_all', 'SFields.strip_all', 'SVec.strip_all', 'SVal.defaultOf_all', 'SFields.defaultOf_all', 'SVec.defaultOf_all', 'SVal.overlay_all', 'SFields.overlay_all', 'SVec.overlayOn_all']}
+        assert len(ops_checked) == len(set(ops_checked)) == 9
+        assert set(ops_checked) == expected_ops
+        assert "sorryAx" not in ops_log
         module_inventory = json.loads((EVIDENCE/"provisioned-module-inventory.json").read_text())
         assert module_inventory["base"] == BASE
         provisioned = {r["module"]: r for r in module_inventory["selected"]}
@@ -155,12 +161,12 @@ def main():
         for module, count in module_counts.items():
             assert count == sum(row["module"] == module for row in all_rows)
         witnesses = {}
-        for log_name in ["ClosureFidelity", "ValuesListsFidelity", "ValuesDefaultsFidelity", "UnitsSuccessFidelity", "ValuesHeredFidelity"]:
+        for log_name in ["ClosureFidelity", "ValuesListsFidelity", "ValuesDefaultsFidelity", "UnitsSuccessFidelity", "ValuesHeredFidelity", "ValuesOpsFidelity"]:
             content = (EVIDENCE/(log_name+"-checked.log")).read_text()
             for name, witness in re.findall(r"^AUDIT-(?:WITNESS|FULL-INPUTS) (\S+) via (\S+):", content, re.M):
                 assert name not in witnesses
                 witnesses[name] = witness
-        assert len(witnesses) == 49
+        assert len(witnesses) == 58
         assert set(witnesses) <= {r["name"] for r in all_rows}
         for row in all_rows:
             provenance = provisioned[row["module"]]
@@ -180,7 +186,7 @@ def main():
         uncovered = [r for r in all_rows if not r["witness"]]
         (EVIDENCE/"uncovered-statements.tsv").write_text("name\tmodule\towner_status\n"+"".join(
             r["name"]+"\t"+r["module"]+"\tlive-producer-identity-unconfirmed\n" for r in uncovered))
-        print(f"{len(all_rows)} exact theorem constants in {len(provisioned)} modules; 49 witnessed; {len(uncovered)} pending; full assignment pending")
+        print(f"{len(all_rows)} exact theorem constants in {len(provisioned)} modules; 58 witnessed; {len(uncovered)} pending; full assignment pending")
 
 if __name__ == "__main__":
     main()

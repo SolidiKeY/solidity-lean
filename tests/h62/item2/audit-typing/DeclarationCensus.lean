@@ -89,7 +89,7 @@ elab "#audit_full_inputs " original:ident " via " witness:ident : command => do
       `Solidity.SFields.dfltBelow_eq, `Solidity.SVal.dflt_all,
       `Solidity.SFields.dflt_all, `Solidity.SVal.dfltBelow_all,
       `Solidity.Frontend.Static.unitsChecker_complete,
-      `Solidity.SVal.all_mono, `Solidity.SFields.all_mono, `Solidity.SList.all_mono, `Solidity.SVec.all_mono, `Solidity.SMap.all_mono, `Solidity.SVal.allB_iff, `Solidity.SFields.allB_iff, `Solidity.SList.allB_iff, `Solidity.SVec.allB_iff, `Solidity.SMap.allB_iff]
+      `Solidity.SVal.all_mono, `Solidity.SFields.all_mono, `Solidity.SList.all_mono, `Solidity.SVec.all_mono, `Solidity.SMap.all_mono, `Solidity.SVal.allB_iff, `Solidity.SFields.allB_iff, `Solidity.SList.allB_iff, `Solidity.SVec.allB_iff, `Solidity.SMap.allB_iff, `Solidity.SVal.strip_all, `Solidity.SFields.strip_all, `Solidity.SVec.strip_all, `Solidity.SVal.defaultOf_all, `Solidity.SFields.defaultOf_all, `Solidity.SVec.defaultOf_all, `Solidity.SVal.overlay_all, `Solidity.SFields.overlay_all, `Solidity.SVec.overlayOn_all]
     unless names.contains original.getId do
       throwError "unreviewed full-input signature"
     let originalInfo ← getConstInfo original.getId
