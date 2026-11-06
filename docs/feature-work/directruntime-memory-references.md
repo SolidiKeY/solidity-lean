@@ -941,3 +941,51 @@ remain open alongside the two current raw-archive waits.
 Final finder/skeptic packaging review verifies all eight metadata archive
 members and receipt flags. No findings. Owned documentation references,Python
 syntax and whitespace pass; the unchanged global failure remains relayed.
+
+## H77 exact raw archive inspection
+
+Both requested current archives are delivered and locally hash-verified
+(da15f10b replay,40436ffb reconciliation). Safe extraction verifies every
+member type/path,unique name,manifest size and hash:197members,195payload
+files. Exact archived incoming handoff/journal bytes match our originals.
+Saved browser wires reconstruct the entire537822-byte journal byte-for-byte;
+all84 selectors,wire hashes and native stream/inventory/browser result objects
+reconcile. Counts remain64proved,16refuted,fourpending per backend. Exact
+Identity diamond is positive in both compiler settings on both backends.
+This inspects recorded native/Chromium execution;it does not run new queries.
+
+The executed harness decompresses to SHA37be7c06 and the committed harness
+matches63a01fa7 and owner Gitcc62220. Their sole changed line initializes the
+report boundary field;remaining lines match. The authenticated committed owner
+checker419791ae is reused only for data comparison/selector helpers;no older
+checker execution is inferred. Companion source/header/fixture hashes and
+recorded WASM boot/backend/environmentImports fields are checked separately.
+
+There are72 concrete fixture halt expectations(48success,16revert,8panic),
+plus12conditional labels. They are metadata,not72 independently observed
+runtime halt fields. The first inspector assumed every label was concrete and
+failed;that attempt is retained. Corrected inspection passes0.201s. Kernel
+rusage records self20744KiB and child maximum15416KiB,separate maxima;the
+0.2s aggregate sampler missed this short process and reported0. All work ran
+inside12GiB/no-swap scope. No browser/build/benchmark/STOP gate was rerun.
+
+Finder and skeptic independently checked all195payload hashes and exact
+wire/result/harness lineage with no findings;neither used Lean/server.
+Both raw-archive waits are cleared. Bulk and exact archives remain outside Git;
+browser-raw-inspection-receipt.json records reproducible commands,hashes and
+sealed evidence. Historical lost binary/cache remain UNVERIFIABLE.
+
+The already-present68fd8400 master merge was preserved. Fresh origin/master
+e8247d92 and code were checked before this item;the missing SourceCounterexample
+extension is not present. The refreshed global documentation check exits1
+with five missing references. PanicBytes prior reference is resolved;three
+prior references remain and two new references are routed through
+doc-reference-master-update.json. No checker policy or source is weakened.
+Four live diamond certifications,source/compiler preservation,universal
+machine correctness and original final gates remain open;RUNTIME_GATE_PASS
+is not claimed. No other completed census/classification work was repeated.
+
+Final finder/skeptic packaging review verified the16-member sealed evidence
+archive,inspector hash and current documentation routing. No findings. Owned
+references,Python syntax and whitespace pass;global five-reference gate fails
+as recorded. No unchanged browser/build/STOP gate was rerun.
