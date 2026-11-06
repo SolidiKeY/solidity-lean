@@ -68,8 +68,8 @@ theorem undo_reentry (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
 /-- All old byte-event vector fields are retained, with each changed transient
 and journal boundary separately recorded. Complete payload is never projected away. -/
 theorem complete_boundary_vector (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
-    ((nextEnded pipeline bytes).ex.world.accounts sender).balance.val = 93 ∧
-    ((nextEnded pipeline bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((nextEnded pipeline bytes).ex.world.accounts sender).balance = 93 ∧
+    ((nextEnded pipeline bytes).ex.world.accounts self).balance = 7 ∧
     ((nextEnded pipeline bytes).ex.world.accounts self).code = some 0 ∧
     ((nextEnded pipeline bytes).ex.world.accounts self).nonce = 1 ∧
     ((nextEnded pipeline bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧

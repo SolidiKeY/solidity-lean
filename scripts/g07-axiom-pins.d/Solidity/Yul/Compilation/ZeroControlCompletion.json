@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/ZeroControlCompletion.lean:Solidity.Yul.Compilation.ZeroControlCompletion.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroControlCompletion.lean:Solidity.Yul.Compilation.ZeroControlCompletion.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

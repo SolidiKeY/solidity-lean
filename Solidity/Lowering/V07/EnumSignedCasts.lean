@@ -9,7 +9,7 @@ open SignedWidthCasts (ty)
 
 theorem allowed (E : Source.Env) (d : Source.DeclName) (bits : Nat)
     (width : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) :
-    (Source.STy.enum d).explicit E.isBase (.int (ty bits width)) = true := rfl
+    (Source.STy.enum d).explicit E.isBase E.mapFree (.int (ty bits width)) = true := rfl
 
 theorem source_value {D : Source.Layout} (d : Source.DeclName) (bits : Nat)
     (width : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (i : Fin (D.enumSize d)) :

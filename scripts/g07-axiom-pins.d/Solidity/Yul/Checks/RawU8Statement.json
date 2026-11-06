@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Checks/RawU8Statement.lean:Solidity.Yul.RawFrame.uncheckedU8Add_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawU8Statement.lean:Solidity.Yul.RawFrame.uncheckedU8Add_word_congr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
