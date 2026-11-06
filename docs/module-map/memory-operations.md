@@ -558,6 +558,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/FixedReferenceStorageParentInterface.lean` | Signature-only fixed-parent storage-copy contract: source representation, typed adoption, exact demand/growth and refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageParent.lean` | Full fixed storage representation, existing reservation/traversal/typed adoption, exact demand/growth and total size refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageParentControls.lean` | Empty/mixed/64-child typed parents, exact payloads/growth, alias retention, static code refusal and real reservation-prefix child failure. |
+| `Backend/MemoryCopies/FixedReferencePathInterface.lean` | Contract only for compiled storage-path selection of arbitrary-shadow fixed reference values and their live representation. |
 | `Backend/MemoryCopies/FixedReferenceStorageTurnInterface.lean` | Headerless fixed-parent storage-child step with actual checked copying, allocator/gap/framing and refusal contracts. |
 | `Backend/MemoryCopies/FixedReferenceStorageTurn.lean` | Actual checked child copying and header0 pointer-store with complete allocator/gap/framing and total refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean` | Actual fixed reservations, empty/pair/64-element child payloads, headerless-pointer negative and represented saturated refusals. |
