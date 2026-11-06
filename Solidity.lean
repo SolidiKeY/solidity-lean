@@ -2936,6 +2936,7 @@ import Solidity.Frontend.StatementGrammarH28.FramedStatementList
 import Solidity.Frontend.StatementGrammarH28.G0List
 import Solidity.Frontend.StatementGrammarH28.HeadPr
 import Solidity.Frontend.StatementGrammarH28.LeafCoverage
+import Solidity.Frontend.StatementGrammarH28.ListMeasures
 import Solidity.Frontend.StatementGrammarH28.LoopCoverage
 import Solidity.Frontend.StatementGrammarH28.MixedSplit
 import Solidity.Frontend.StatementGrammarH28.NearestElse
