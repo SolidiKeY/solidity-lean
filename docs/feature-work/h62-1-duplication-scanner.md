@@ -97,3 +97,28 @@ subsequent edits, checks involving writes, and commits used the specified lock.
 Pending work remains as listed above; the index and reproducible lexical
 reports do not complete the scanner, ownership, backfill, full validation or
 final handoff.
+
+## Binder coverage follow-up
+
+The lexical normalizer now supports simple explicit, implicit and named
+instance binders, including Unicode names, while retaining binder delimiters.
+It rejects anonymous binders, escaped identifiers and nested binding syntax in
+binder types. These refusals are deliberate: the tool still does not resolve
+Lean names or establish intrinsic signature equality. Finder and skeptic
+independently identified anonymous-binder, nested-binder, Unicode-token and
+escaped-identifier cases; fixes and negative controls were added and both
+reviewers rechecked them without Lean.
+
+The V07 sample took 3.225 and 3.145 seconds after this change, compared with
+3.038 and 3.298 seconds before it (means 3.185 and 3.168 seconds, approximately
+0.6% slower). Both new runs emitted SHA-256
+`4f07d6877235f5a497f131cb3b5dd6492bae1c982d3ec2d1bce22ee7cc986088`.
+The comparison uses the same input and VM; output differs because the scanner
+changed. The whole-tree reports above predate this binder change and are
+historical evidence, not a current-head census. A first edit attempt failed
+with a Python quoting syntax error before writing files; the following test
+ran the old code and is not evidence for the attempted edit.
+
+The scanner remains incomplete. Full current-head census and incremental
+reports, live owner verification, remaining backfill, and final validation are
+still required.

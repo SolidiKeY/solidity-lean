@@ -8,8 +8,8 @@ import re
 from pathlib import Path
 
 DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
-TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[\w\u0080-\uffff\']+(?:\.[\w\u0080-\uffff\']+)*|[^\s]')
-BINDER = re.compile(r"\(\s*([A-Za-z_][\w]*(?:\s+[A-Za-z_][\w]*)*)\s*:\s*([^()]*)\)\s*")
+TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[\w\']+(?:\.[\w\']+)*|[^\s]')
+BINDER = re.compile(r"([({\[])\s*((?:[^\W\d]|_)[\w']*(?:\s+(?:[^\W\d]|_)[\w']*)*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
 
 def mask(text):
     out = list(text)
@@ -74,20 +74,25 @@ def tokenize(s):
 
 def normalize(header):
     # Types are read before introducing the names bound by their group.
+    if "«" in header or "»" in header: return None
     env = {}
     out = []
     pos = 0
     while True:
         match = BINDER.match(header, pos)
         if not match: break
-        ns = match.group(1).split()
-        if len(set(ns)) != len(ns) or any(n in env for n in ns): return None
-        typ = tokenize(match.group(2))
+        opening, closing = match.group(1), match.group(4)
+        if {"(": ")", "{": "}", "[": "]"}[opening] != closing: return None
+        ns = match.group(2).split()
+        if "_" in ns or len(set(ns)) != len(ns) or any(n in env for n in ns): return None
+        type_text = match.group(3)
+        if any(c in type_text for c in "λ∀") or re.search(r"\b(fun|let|forall|match)\b", type_text): return None
+        typ = tokenize(type_text)
         if any("." in t and any(n in t.split(".") for n in env) for t in typ): return None
         if any(typ[i] == "." and i + 1 < len(typ) and typ[i+1] in env for i in range(len(typ))): return None
-        out.extend(["("] + ["$binder" + str(len(env)+i) for i in range(len(ns))] + [":"])
+        out.extend([opening] + ["$binder" + str(len(env)+i) for i in range(len(ns))] + [":"])
         out.extend(env.get(t, t) for t in typ)
-        out.append(")")
+        out.append(closing)
         for n in ns: env[n] = "$binder" + str(len(env))
         pos = match.end()
     rest = header[pos:]
