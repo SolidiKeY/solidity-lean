@@ -3680,6 +3680,7 @@ import Solidity.SolcValidation.IrHelperSteps
 import Solidity.SolcValidation.IrHelpers
 import Solidity.SolcValidation.IrParse
 import Solidity.SolcValidation.IrPushHelpers
+import Solidity.SolcValidation.IrPushSim
 import Solidity.SolcValidation.IrSyntax
 import Solidity.Solkey.ComputedRevert
 import Solidity.Solkey.Constructors
