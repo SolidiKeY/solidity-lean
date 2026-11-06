@@ -1665,7 +1665,7 @@ These modules extend specialized intrinsic source selection inside recursion. Th
 ## General closure inventory and boundary (V12-P1 cloud lane, 2026-11-06)
 
 This lane took over the V12 runtime-frame write scope from the Codex
-`v12-flow-calls` lane (H75). It merged `origin/master` (already up to date).
+`v12-flow-calls` lane (H75).
 
 ### Inventory: what P1 provides on master
 
@@ -1680,14 +1680,14 @@ This lane took over the V12 runtime-frame write scope from the Codex
   (`ScalarDual`, `ScalarDemandDual`), its scoped variant
   (`FrozenScopeCoverage.with_profile`) and the allocating countdown, each
   taking only the external approved-domain agreement. No general recursive
-  compiler: `Mutation.compileRecursive` still refuses every unrolling.
+  compiler: `Mutation.compileRecursive` still refuses every `recUnroll`.
 - `RuntimeFrameRestoredRepresentation.restorationProducer` inhabits V1
   `PendingRestoration`.
 
 ### What G49 requests (H68, family 3 "P1 frame claims")
 
-The H68 request (relayed to the Codex lane only as an off-git payload) is
-also recorded in Git on the unmerged branch
+The H68 request (which the Codex lane's last report asked to receive as an
+off-git payload) is also recorded in Git on the unmerged branch
 `codex/solidity-h55-sol-20261106/g49-final-theorem` at `62377f31`, file
 `docs/feature-work/h55-g49-final-theorem.md`, section "3. P1 frame claims":
 
@@ -1705,7 +1705,7 @@ target prefix of the canonical target language to map back to a source prefix,
 and the request forbids turning success and bare-revert evidence into
 all-outcome adequacy.
 
-This bridge is not proved here, for three reasons that a proof cannot remove:
+This bridge is not proved here, for three reasons this lane cannot remove:
 
 1. `PassCorrect`, `Behaviour` and `BridgeGoal` exist only on the unmerged G49
    branch (`Solidity/Roadmap/G49Final/PassCorrect.lean`); master has none.
@@ -1721,28 +1721,41 @@ This bridge is not proved here, for three reasons that a proof cannot remove:
 `RuntimeFrameV3GeneralBoundary` makes the scope of a "general P1 closure"
 precise without changing any interface:
 
-- `callRec_run`: a `callRec` runs as the ordinary call of its body.
-  `return_of_call`, `bare_revert_of_call`, `successful_of_call`,
-  `reverting_of_call` transport every V3 field along it.
-- `of_unrolled` is generic recursive `callRec` transport: a V3
-  `PendingRecursiveReturns` for any `step` from the ordinary-call obligations
-  of each actual unrolled body `recUnroll Prog.recBase step n` with one code
-  image. `unrolled_returns` is its converse, so these hypotheses are exactly
-  as strong as the frozen structure.
-- `no_call_producer`, `no_fixed_producer`, `no_recursive_producer`: each
-  dual-outcome V3 structure is empty for a source that never bare-reverts.
-  `trivial_never_reverts` and `no_unrestricted_closure`: for every contract,
-  fragment and domain, the uniform empty-body family has no V3 recursive
-  producer, so "every family has a V3 producer" is false. A general closure
-  must be stated over a source class, or with a success-only companion
-  interface (a versioned V4, H57).
+- `callRec_run` is the existing definitional `Stmt.run_callRec`: a
+  `callRec` runs as the ordinary call of its body. `return_of_call`,
+  `bare_revert_of_call`, `successful_of_call` and `reverting_of_call` carry
+  each V3 field along it.
+- `of_unrolled` and its converse `unrolled_returns` are a definitional
+  repackaging, the recursive analogue of `V3FixedThunkProducer.of_call`: the
+  V3 `PendingRecursiveReturns` for any `step` is exactly the ordinary-call
+  obligations of each unrolled body `recUnroll Prog.recBase step n` with one
+  code image. This reduces a general recursive closure to per-body ordinary
+  calls; it proves no such call.
+- `no_call_producer`, `no_fixed_producer`, `no_recursive_producer` restate
+  formally the limitation the V3 docstring already records: each dual-outcome
+  V3 structure is empty for a source that never bare-reverts.
+  `trivial_never_reverts` and `no_unrestricted_closure`: for every contract
+  and fragment, and in particular the full domain (an empty domain refutes it
+  trivially), the uniform empty-body family has no V3 recursive producer, so
+  "every family has a V3 producer" is false. A general closure must be stated
+  over a source class, or with a success-only companion interface; a frozen
+  interface change needs a versioned pair (H57) and a user decision.
 
 Controls (`RuntimeFrameV3GeneralBoundaryControls`): `rebuilt` round-trips the
 scoped scalar-family producer through `unrolled_returns`/`of_unrolled` with
-the same plan (`rebuilt_plan`); the trivial family exhausts at index 0,
-succeeds at index 1 (`trivial_exhausts`, `trivial_succeeds`) and is empty
-(`trivial_empty`). All theorems use only `propext`, `Classical.choice` and
-`Quot.sound` (pinned with `#guard_msgs`).
+the same plan (`rebuilt_plan`), which shows only that the repackaging is
+faithful; the trivial family exhausts at index 0, succeeds at index 1
+(`trivial_exhausts`, `trivial_succeeds`) and is empty at the full domain
+(`trivial_empty`). The five pinned declarations (`no_unrestricted_closure`,
+`of_unrolled`, `unrolled_returns`, `rebuilt`, `trivial_empty`) use only
+`propext`, `Classical.choice` and `Quot.sound` (`#guard_msgs` and
+`scripts/g07-axiom-pins.d`).
+
+Reviews: read-only finder and skeptic reviews found no proof defect. Fixed
+from their findings: the duplicate `callRec_run` proof now reuses
+`Stmt.run_callRec`; the repackaging and restatement character is stated
+plainly; `no_fixed_producer` needs one index only; the axiom claim names
+the pinned declarations; the pins are recorded; docstrings tightened.
 
 Still open: a general recursive compiler with per-body `ReturnClaim`
 (the inputs to `of_unrolled` for arbitrary `step`), approved-profile

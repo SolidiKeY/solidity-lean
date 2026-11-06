@@ -3,12 +3,13 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCoverage
 
 /-! Controls for `V3GeneralBoundary`.
 
-Positive: the generic `callRec` transport `of_unrolled` rebuilds the existing
-scoped scalar-family V3 producer from the ordinary-call claims of its actual
-unrolled bodies, with the same plan and code image. The only remaining input
-is the same external approved-domain agreement `with_profile` needs.
+Round trip: `of_unrolled ∘ unrolled_returns` type-checks on the existing
+scoped scalar-family V3 producer with the same plan and code image. This only
+shows that the repackaging is faithful on a real producer; it is not
+independent evidence of ordinary-call claims. The only external input is the
+approved-domain agreement `with_profile` already needs.
 
-Negative: the trivial uniform family has no V3 producer at any domain, and its
+Negative: the trivial uniform family has no V3 producer even at the full domain, and its
 source is not exhausted at a positive index, so the emptiness comes from the
 missing bare revert, not from exhaustion. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls
@@ -32,7 +33,8 @@ theorem rebuilt_plan (approved : Nat → InterfaceV3.Admission SameCallInputs.C 
     (rebuilt approved agreement).plan = (FrozenScopeCoverage.with_profile approved agreement).plan :=
   rfl
 
-/-- The trivial family is empty at every domain, including the full one. -/
+/-- The trivial family is empty at the full domain, where emptiness is not
+caused by an empty admission. -/
 theorem trivial_empty (C : Contract) (F : Frag ([] : Ctx)) :
     ¬ Nonempty (InterfaceV3.PendingRecursiveReturns (C := C) 0 F
       (fun _ _ _ _ _ _ _ => True) (fun _ _ _ _ _ _ _ => True) "f" .nil .none trivialStep) :=
@@ -51,3 +53,14 @@ theorem trivial_exhausts {C : Contract} (σ : State C []) :
   rfl
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.rebuilt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.rebuilt
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.trivial_empty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.trivial_empty

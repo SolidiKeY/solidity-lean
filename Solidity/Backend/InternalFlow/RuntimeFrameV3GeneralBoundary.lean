@@ -1,34 +1,38 @@
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3
-import Solidity.Backend.InternalFlow.RuntimeFrameSemantics
 
 /-! Boundary of a *general* P1 closure over the frozen V3 interface.
 
-`no_call_producer`, `no_fixed_producer` and `no_recursive_producer` show that
-each dual-outcome V3 structure is empty for a source that never bare-reverts,
-whatever the plan, domain or approved profile. `trivial_never_reverts` gives a
+`no_call_producer`, `no_fixed_producer` and `no_recursive_producer` restate
+formally the limitation the V3 interface already documents ("a success-only
+source cannot inhabit this dual-outcome evidence class"): each dual-outcome V3
+structure is empty for a source that never bare-reverts, whatever the plan,
+domain or approved profile. They follow in one step from the
+`required_reverting_entry` field. `trivial_never_reverts` gives a
 uniform, index-independent recursive family (empty body, no arguments, void
 return) with that property, so the unrestricted statement "every recursive
-family has a V3 producer" is false (`no_unrestricted_closure`). A general P1
+family has a V3 producer" is false (`no_unrestricted_closure`); the
+meaningful instance is a nonempty domain such as the full one, since an empty
+domain refutes it trivially. A general P1
 closure must therefore be stated over a source class or with a success-only
 companion interface; choosing either is a frozen-interface (H57) decision.
 
-`of_unrolled` is the positive generic piece: recursive `callRec` transport.
-Universal return/bare-revert claims for the ordinary call of each unrolled
-body, with one code image, give the recursive claims, with no new premise.
-The interfaces themselves are unchanged. -/
+`of_unrolled` and `unrolled_returns` are a definitional repackaging, not a
+new closure result: since `callRec` runs as the ordinary call of its body by
+definition (`Stmt.run_callRec`), the V3 recursive structure is exactly the
+ordinary-call obligations of each unrolled body with one code image. They
+reduce a general recursive closure to per-body ordinary-call claims and add
+no premise. The interfaces themselves are unchanged. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary
 open Evm Evm.Memory
 
 variable {C : Contract}
 
 /-- `callRec` runs exactly as the ordinary call of its body; the quotation
-index is not consulted. -/
+index is not consulted. This is the existing `Stmt.run_callRec`. -/
 theorem callRec_run {Γ Δ ps rs : Ctx} (f : Name) (d : Nat) (args : Args C Γ ps)
     (ret : CallRet Γ rs Δ) (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) (σ : State C Γ) :
-    (Stmt.callRec f d args ret body).run σ = (Stmt.call f args ret (body ())).run σ := by
-  have l := congrFun (statement_run (Stmt.callRec f d args ret body)) σ
-  have r := congrFun (statement_run (Stmt.call f args ret (body ()))) σ
-  exact l.symm.trans r
+    (Stmt.callRec f d args ret body).run σ = (Stmt.call f args ret (body ())).run σ :=
+  Stmt.run_callRec σ f d args ret body
 
 /-- Transport of the frozen return claim along `callRec_run`. -/
 theorem return_of_call {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ} (f : Name) (d : Nat)
@@ -59,6 +63,7 @@ theorem successful_of_call {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ} (f : Name
   exact ⟨L, frame, caller, base, machine, start, out, adm, entry,
     (callRec_run f d args ret body caller).trans run⟩
 
+/-- Witness transport for reverting entries, as `successful_of_call`. -/
 theorem reverting_of_call {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ} (f : Name) (d : Nat)
     (args : Args C Γ ps) (ret : CallRet Γ rs Δ) (body : Unit → Prog C (rs ++ ps) (rs ++ ps))
     (admitted : InterfaceV3.Admission C Γ) (plan : InterfaceV1.Emission C Γ Δ)
@@ -158,9 +163,9 @@ theorem no_call_producer {Γ Δ ps rs Γf : Ctx} {b : Nat} {F : Frag Γ}
 theorem no_fixed_producer {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
     {approved admitted : InterfaceV3.Admission C Γ} {f : Name} {args : Args C Γ ps}
     {ret : CallRet Γ rs Δ} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
-    (never : ∀ d, NeverReverts (.callRec f d args ret body)) :
+    (d : Nat) (never : NeverReverts (.callRec f d args ret body)) :
     ¬ Nonempty (InterfaceV3.PendingFixedCallRecProducer b F approved admitted f args ret body) :=
-  fun ⟨p⟩ => no_reverting_entry (never 0) (p.required_reverting_entry 0)
+  fun ⟨p⟩ => no_reverting_entry never (p.required_reverting_entry d)
 
 theorem no_recursive_producer {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
     {approved admitted : Nat → InterfaceV3.Admission C Γ} {f : Name} {args : Args C Γ ps}
@@ -185,8 +190,9 @@ theorem trivial_never_reverts {Γ : Ctx} (f : Name) (n : Nat) :
   | succ n => exact nomatch h
 
 /-- The unrestricted closure (a V3 recursive producer for every family, at
-any fixed plan domain) is false: it already fails for the trivial uniform
-family, for every contract, frame index, fragment and domain. -/
+any fixed domain) is false: it already fails for the trivial uniform family,
+for every contract, frame index, fragment and domain. For an empty domain this
+is trivial; the full domain is the meaningful case (see the controls). -/
 theorem no_unrestricted_closure (C : Contract) (b : Nat) (F : Frag ([] : Ctx))
     (approved admitted : Nat → InterfaceV3.Admission C []) (f : Name) :
     ¬ ∀ step : Nat → (Unit → Prog C [] []) → Prog C [] [],
