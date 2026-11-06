@@ -1412,3 +1412,30 @@ proof-help/lifecycle/adversarial scenario rows are appended (489total), all
 partial. Stale H49 help-exclusion assessment claims are corrected under H80;
 no row/premise/exclusion or judge contract was weakened. Exact committed-head
 native and full lightweight checks remain required after this development slice.
+
+
+### Handoffs — cooperative Lean retirement (2026-11-06)
+
+Real normal Lean disposal previously left two exact-owned descendant PID births
+as zombies. The retained failing regression exits1; cooperative shutdown now
+exits0 and all three sampled process entries disappear (61ms in the first
+after sample). Idle production workers use internal shutdown IPC irrespective
+of successful result metadata. Active cancellation retains immediate force
+retirement. Asynchronous startup guards and tracked native version probes
+prevent work from escaping terminal disposal, within the original 1000ms bound.
+
+Finder and skeptic found and re-reviewed the failed-task metadata and startup/
+probe races; no remaining concrete finding. Serial targeted checks pass41
+with two explicit actual-Lean opt-in skips. The actual compiler/kernel pool
+observation passes, including a deliberately rejected source-hash task followed
+by exact descendant readback. Its first missing-SOLKEY_ROOT failure is retained.
+These samples do not establish forced/crash/direct/mixed or solver retention.
+
+The small [evidence manifest](dafny-retention-evidence-manifest.json) binds
+off-git development receipts, exact270 native proof-help observations and
+the executable KeySort check:377 parsed taclets,131 read-bearing,131 covered,
+annotations match. Lean4.24.0/Lake5.0.0-src+797c613 are observed; this is not an
+overall RUNTIME_GATE_PASS. FullSource.Horizon retains its resource STOP; full
+build/TestSuite/timed strict, clause metadata, H70 raw packet, native macOS,
+paired rendered/performance/scaling evidence and both judgments remain open.
+All489 obligations/frozen270 and gate/judge/budget contracts remain unchanged.
