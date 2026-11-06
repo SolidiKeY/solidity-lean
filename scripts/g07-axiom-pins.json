@@ -5526,6 +5526,56 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebind.lean:Solidity.Backend.MemoryCopies.fixed_reference_rebind_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebind.lean:Solidity.Backend.MemoryCopies.fixed_reference_rebind_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebind.lean:Solidity.Backend.MemoryCopies.fixedReferenceRebind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.all_payloads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.capacity_refusal_after_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.empty_child_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.long_child_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.populated_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.rebind_separates_old_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_loop_abort": [
   "Classical.choice",
   "Quot.sound",
@@ -5951,6 +6001,200 @@
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/HeapContents.lean:Solidity.Backend.MemoryCopies.storageHeapContents": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPath.lean:Solidity.Backend.MemoryCopies.nestedMemoryPath": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPath.lean:Solidity.Backend.MemoryCopies.SelectedAlias.nestedDeepBindExecute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPath.lean:Solidity.Backend.MemoryCopies.SelectedAlias.nestedDeepExecute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.actual_deep_bind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.alias_keeps_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.capacity_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.copied_children_are_distinct": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.deep_bind_preserves_inhabited_gap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.deep_changes_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.gap_overlapping_old_child_refuted": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.old_child_is_shared": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.populated_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.wrong_alias_for_deep_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathFrame.lean:Solidity.Backend.MemoryCopies.nestedMemoryPathFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathFrame.lean:Solidity.Backend.MemoryCopies.SelectedAlias.nestedDeepFramedBindExecute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nested_storage_live_bound": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nested_storage_live_copy": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nested_storage_live_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nested_storage_live_representation": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nested_storage_live_rows": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nestedStorageLive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.actual_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.arbitrary_values": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.many_empty_children_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.shadow_counts": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.size_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.wrong_shallow_demand": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_declare": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_declare_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_demand": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_rebind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_rebind_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nestedStoragePath": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.capacity_refusal_after_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.declaration_capacity_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.declare_preserves_aliases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.empty_child_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.long_child_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.path_copy_growth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.populated_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean:Solidity.Backend.MemoryCopies.NestedStoragePathControls.rebind_separates_old_alias": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ],
