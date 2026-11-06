@@ -29,3 +29,5 @@
 | `Source/Agreement/BoolSlotReadWrite.lean` | Actual paired-index get/set, last-write and read-after-write restoration laws over existing locals/environments. |
 | `Source/Agreement/BoolSlotRepeated.lean` | Both actual two-computed-update executions at arbitrary slots, with internally derived intermediate reads and normal composition. |
 | `Source/Agreement/BoolSlotRepeatedControls.lean` | Both-run importing client, insufficient-horizon refusal and different-slot countercontrol. |
+| `Source/Agreement/BoolSlotSaved.lean` | Fixed-code saved old copy followed by computed inverse update of the shifted original slot, through actual Source/model runs. |
+| `Source/Agreement/BoolSlotSavedControls.lean` | Internally instantiated saved-copy client, horizon and polarity/liveness controls. |
