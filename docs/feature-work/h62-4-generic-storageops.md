@@ -340,3 +340,29 @@ were restored byte-for-byte to the committed tree, and the rejected patch and
 measurements remain outside Git. No unchanged retry, accepted generic helper,
 correspondence result or completed family migration is claimed. All 1623
 original control proof obligations remain in the retained plan.
+
+## Additive append law and typed fixtures
+
+A distinct proof-only optimization proves modifyMany_append by explicit Option
+cases and list induction. It retains the original scheduler definition, key
+order, repeated keys, partial failures and actual intermediate slots. The law
+and four additive fixture theorems use no axioms. A typed five-case fixture
+table covers empty execution, successful clear, repetition, first failure and
+late failure; the arbitrary-split theorem uses the generic law rather than
+a table of expected outputs. The final scheduler file measured 1.93 seconds
+against the unchanged 1.88-second warm baseline (2.66% increase, one sample).
+
+The attempted original-control instances were rejected: their new proofs used
+propext and Quot.sound where the original proofs used no axioms. Both original
+consumer proofs were restored exactly. No existing axiom set was widened.
+The accepted scope is the additive zero-axiom law and test fixtures only, not
+a completed control migration or full correspondence. All 1623 original claim
+obligations remain in the frozen plan.
+
+append_acceptance.py verifies that removing precisely the additive theorem
+packet reproduces the frozen OperationFamilies source byte-for-byte, and that
+all original declaration signatures remain exact. Its tampering tests are
+source-preservation checks, not kernel proofs or full-family acceptance.
+The failed consumer guards and previous timing rejection remain preserved;
+full affected validation, whole-family correspondence and all original holds
+remain open.
