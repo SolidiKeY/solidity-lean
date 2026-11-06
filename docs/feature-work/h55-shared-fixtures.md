@@ -63,3 +63,25 @@ negative signed values; the Bool/Signed copy examples also have differently
 sized case sets. A parameterisation needs explicit acceptance for each original
 observation and refusal, including empty, short-fuel and static executions.
 These examples are leads, not a claim that the family census is complete.
+
+## Full-file review aids
+
+`change_ledger.py` inventories every baseline Lean file in the four areas by
+default and partitions all old and current lines into equal, added, deleted or
+changed spans with hashes. It exits nonzero if any byte differs. Empty ranges
+represent insertions or deletions; line ranges are one-based inclusive and an
+empty range has its start one greater than its end. The ledger accounts for
+all source lines but does not parse Lean, prove unchanged theorem types, match
+cases or approve a migration. Those checks remain required.
+
+`family_inventory.py` scans all baseline Lean files in those areas for the
+listed helper, storage, Source execution, declaration and branch signals. It
+reports every file, even files with no matching signals, with file hashes and
+line locations. It is a lexical lead inventory: comments can match and names
+or semantic near-copies can be missed. Full family review and exact case
+acceptance remain open. Neither script substitutes for the affected-module Lean
+checks or independent finder and skeptic reviews.
+
+H70: V08 world-lowering and V10 storage-operations accepted the owner ticket
+relays. Review of the unapplied extract-failure packet is still requested from
+those owners; no original-file transfer follows from the relay.
