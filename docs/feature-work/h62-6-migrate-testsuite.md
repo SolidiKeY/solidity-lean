@@ -1,0 +1,121 @@
+# H62 item 6: TestSuite migration overlay
+
+Repository: `/workspace/solidity-lean`. Assigned branch:
+`codex/solidity-h62-6-20261106/migrate-testsuite`.
+Published pinned base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+The base was fetched from origin/master and remote ancestry verified before
+creating this branch. The previous clean `work` branch was preserved.
+
+This directory lane does not own live producer files. No existing Lean file,
+root module, module-map fragment, axiom pin or tracked lean-toolchain was changed.
+All 49 original TestSuite files are frozen byte-for-byte; no theorem statement,
+premise, exclusion, observation or proof budget was changed. No new axiom,
+sorry, native_decide, trust shortcut or heartbeat increase was introduced.
+
+## Evidence and reproducibility
+
+Bulk evidence lives off git at `/workspace/h62-migrate-testsuite/evidence`.
+The deterministic source census covers all 49 assigned modules, 333 local
+import-closure modules and eight direct edges outside TestSuite. It records
+all closure source SHA256 values and checks pinned-base identity. It is a
+lexical source census, not an elaborated declaration/type census. In particular,
+the 563 scoped obligations and Report's 617/552/0/65 counts require Lean's
+original guard-message acceptance gates. No source-hash claim substitutes for
+these gates or frozen elaborated interfaces.
+
+The pinned official toolchain is from the coordinator's verified
+`/workspace/h62-coordinator-inputs/toolchain-pin.json`:
+`leanprover/lean4:v4.35.0`, linux release archive SHA256
+`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
+Lean reports commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+Lake reports `5.0.0-src+eb6cafb (Lean version 4.35.0)`.
+The old release reports Lean 4.24.0 commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, Lake `5.0.0-src+797c613`.
+No get_goal tool was exposed; coordinator explicitly confirmed that absence
+is not a blocker and the original persistent goal was retained.
+
+`measure.py` builds each module's olean facet in topological order with
+one Lake invocation at a time. Every Lean invocation has `-j1` and
+`LEAN_NUM_THREADS=1`; build outputs and caches are private and fresh, with
+artifact cache disabled. Wall timing includes serial Lake invocation overhead.
+The hard job cgroup cap is 12 GiB with swap allowance zero, inside the
+16 GiB VM. No virtual-address limit is applied: Lean reserves large virtual
+stacks. The immutable runtime is
+`python@sha256:4209fae09a3e20afd863e528bfddc235da5fd5977983e1996cd54cc9a72e6267`.
+The repository and both official toolchains are mounted read-only; only the
+evidence directory is writable. The runner verifies the job cap/swap values
+and that its read-only parent cgroup mount matches observed VM limits.
+The 4 GiB available reserve is sampled every 200 ms using the minimum of
+MemAvailable and parent cap minus current usage plus reclaimable inactive file
+cache. Each summary records runtime image, parent/job limits, CPU settings,
+source hashes, commands, exits, timings and sampled aggregate RSS. No systemd-run
+was used. CPU quota is four CPUs and affinity is 0–4. No Lean MCP tool was exposed.
+
+The exploratory old-clean-01 was interrupted for review corrections.
+old-clean-02 stopped at TermSize with a thread-creation failure under the wrong
+virtual-address limiter. Both are unaccepted baselines. TermSize subsequently
+passed the controlled hard-cgroup probe (30.986 s, 1,272,651,776 bytes sampled
+peak RSS). That reused dependencies and is diagnostic only; a fresh complete
+old-toolchain cold build remains required. No incomplete wall time is a baseline.
+`compare.py` rejects incomplete/subset runs, source/resource/config differences,
+wrong Lean commits or Lake versions, config tampering and invalid metrics.
+Any regression escalates; a wall or sampled peak RSS regression above 10%
+stops. Exactly 10% escalates.
+
+## Backfill and review
+
+The isolated StandardAPIs fixture reproduces the exact kernel refusal
+classifier in MemoryLoopReplay/Refusals.lean. It checks a genuine good lemma,
+a false lemma, successful action, and propagation of both non-refusal error
+classes. It cannot establish Solidity obligation validity or imported API
+compatibility. The Python controls cover nested/line comments, strings,
+import ordering/cycles, source identity and mutation, incomplete builds,
+config mismatches/tampering, wrong versions, NaN/zero metrics and timing/RSS
+thresholds. Twenty-one Python controls pass; both official toolchains pass the isolated Lean fixture.
+
+Independent read-only finder and skeptic reviews ran without Lean/server
+or edits. Confirmed findings were fixed: unsafe arbitrary subset probes,
+swap parsing, missing replay-resume inventory, incomplete provenance,
+float threshold boundary, invalid metrics, config digests and toolchain checks.
+Both re-reviews passed the static tooling scope. The recorded runtime checks
+and remaining owner blockers are recorded in the off-git handoff and result.
+
+## Ownership and remaining gates
+
+Direct external edges and all 284 external closure modules are recorded in
+`dependency-report.json`. Existing source adaptations require exact-file owner
+coordination. `scripts/coord-tools/relay.sh` was absent in this VM; no absence
+was treated as permission. Cross-directory fixes remain their migration owners'
+work. This lane never imports another VM's old per-master cache.
+
+The complete migration requires all four checkpoints: clean old build;
+pinned-release API adaptation with exact interfaces; clean new full build and
+accepted comparison; migration patch/bundle and root-gate handoff with compiled
+interface hashes. A failed or partial build does not complete any missing gate.
+No RUNTIME_GATE_PASS is claimed by this document. Root-wide run-lean.sh final
+validation remains pending until the migration dependency graph is available.
+No push, merge, PR, master change, pre-gate or cut-over action is authorized here.
+
+## Current STOP and unfinished checkpoints
+
+The matched isolated fixture passes on both releases but regresses:
+old wall 1.809733351 s / sampled peak RSS 636,497,920 bytes;
+new wall 2.412217539 s / sampled peak RSS 1,626,386,432 bytes.
+This is +33.29% wall and +155.52% sampled RSS. It is one probe per version,
+not a full-directory comparison or a throughput conclusion. It triggers a
+conservative STOP under the assignment's >10% rule. Further Lean execution is
+paused pending Q-PERF-API; commit/export/review work can continue.
+
+1. Import/source census is complete; required full clean old build is unfinished.
+2. Exact release archive and versions are verified; new KeySort and isolated
+   API controls pass. All-assigned-module compatibility/adaptation is unfinished.
+3. Full clean new build and accepted before/after directory comparison are pending.
+4. Reviewable tooling patch and dependency/source-hash handoff are supplied;
+   compiled old/new interface hashes and full migration patch acceptance remain pending.
+
+Q-PERF-API (sources: H62/H63 checkpoint 3, isolated replay-refusal API fixture):
+The unchanged isolated fixture passed on both pinned releases but exceeded 10%
+wall/RSS growth. Should migration owners investigate before any further Lean,
+authorize only bounded repeated fixture measurements, or authorize full clean
+directory measurements before deciding the performance gate while retaining
+this fixture regression? No option has been assumed approved.
