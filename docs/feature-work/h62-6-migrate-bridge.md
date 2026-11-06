@@ -95,6 +95,31 @@ provisioned in this clean worktree. This is a pending dependency gate, not a
 passing check, and its citing document is outside this lane's scope. Do not
 change the document or manufacture the dependency path to silence this result.
 
+## Timing comparison backfill
+
+`compare-timings.py --old <run-directory> --new <run-directory>` requires
+completed bounded-run receipts, matching explicit command/resource/cache/rules
+profiles, expected actual Lean/Lake versions, finite positive durations, and a
+completed independent watchdog receipt for the active old attempt. Missing,
+interrupted or malformed evidence returns structured `blocked` output and exit
+2. The actual current comparison returns this pending state because the old
+build has not finished; it does not produce an estimated timing delta.
+
+Classification uses exact rational arithmetic: any positive slowdown returns
+`escalate`/exit 3, strictly above 10 percent returns `stop`/exit 4, and no
+slowdown returns exit 0. Exactly 10 percent still requires escalation. These
+exits describe timings and never establish theorem or full-gate acceptance.
+Fifteen synthetic controls passed, including incomplete watchdogs, equally
+invalid profiles, malformed receipt objects, interrupted builds and a slowdown
+infinitesimally above the threshold. These fixtures are external tooling tests,
+not Lean measurements or proofs.
+
+Independent finder and skeptic reviews found missing-field/profile checks and
+rounding at the strict threshold. All confirmed findings were fixed; final
+read-only reviews report none remaining. Their timing review evidence is saved
+with the next versioned checkpoint artifact export. Full build/proof milestone
+reviews remain outstanding.
+
 ## Dependencies and next work
 
 `DEP-ROOT-01` (migration root/gate): provide the authorized v4.35 core overlay,
