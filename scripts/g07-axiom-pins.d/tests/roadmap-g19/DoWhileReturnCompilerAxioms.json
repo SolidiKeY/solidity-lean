@@ -1,0 +1,77 @@
+{
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.Controls.core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.Controls.eager_condition_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.Controls.eagerCondition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.Controls.wrong_return_flag_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileReturnCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileReturn.body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileReturn.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileReturn.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileReturn.reached": [
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileReturn.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileReturn.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/DoWhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileReturn.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

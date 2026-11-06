@@ -1,0 +1,47 @@
+{
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.Controls.condition_is_effectful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.Controls.no": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.Controls.same_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.Controls.trailing_write_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.Controls.yes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentDoWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileBreak.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
