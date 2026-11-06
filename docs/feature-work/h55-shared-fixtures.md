@@ -98,3 +98,13 @@ and every consumer require owner approval and exact file transfers. The packet
 has passed only `git apply --check`; no Lean check, full case acceptance,
 performance comparison, registration or independent review has occurred.
 It is a proposal for a subset, not completion of the family.
+
+## Storage near-copy case census
+
+`storage_case_census.py` emits baseline file hashes and declaration-block
+locations for Bool/Int array deletion, Bool/Signed dynamic copy, and Bool fixed
+copy source/target controls. The Bool deletion controls contain theorems named
+`word_agrees` and `false_and_absent` that the Int file does not. The census
+reports all matched theorem names and asymmetries for the selected pairs;
+common names do not establish equal statements or cases. It is a lexical
+review aid, not a complete semantic census or acceptance of the family.
