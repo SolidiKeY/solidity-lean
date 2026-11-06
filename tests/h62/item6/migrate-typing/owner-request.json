@@ -1,0 +1,55 @@
+{
+  "archive_sha256": "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+  "blocked_modules": [
+    "Solidity.Typing.CanonTest",
+    "Solidity.Typing.CleanTail",
+    "Solidity.Typing.CleanTailRun",
+    "Solidity.Typing.Constructibility",
+    "Solidity.Typing.Fits",
+    "Solidity.Typing.HeredRun",
+    "Solidity.Typing.Reachability",
+    "Solidity.Typing.Sorts",
+    "Solidity.Typing.Soundness",
+    "Solidity.Typing.Tight",
+    "Solidity.Typing.TypedRunInv",
+    "Solidity.Typing.Values"
+  ],
+  "candidate_fixture": "tests/h62/item6/migrate-typing/StringAPIFixture.lean",
+  "dependency_base_sha256": "7c137f7e8e4c70f4868dc41a437687ab42e2d63e887cdde3ba3ccd1ea764b76f",
+  "dependency_file": "Solidity/Syntax/Raw.lean",
+  "errors": [
+    {
+      "error": "String.drop returns String.Slice; HashKind.ofName? expects String",
+      "line": 597
+    },
+    {
+      "error": "String.Slice.toList absent after String.drop",
+      "line": 650
+    },
+    {
+      "error": "String.Slice passed to splitTopCommas expecting String",
+      "line": 665
+    },
+    {
+      "error": "polymorphic c.endsWith is not a String -> Bool predicate without eta expansion",
+      "line": 682
+    },
+    {
+      "error": "String.dropRight absent",
+      "line": 684
+    }
+  ],
+  "evidence": "/workspace/migrate-typing-evidence/new-clean/Solidity.Syntax.Raw.log",
+  "fixture_limit": "candidate adapter witnesses only; does not prove general parser equivalence",
+  "id": "B-SYNTAX-RAW-435",
+  "owner": "migration Syntax owner via migrate-root-gate/coordinator",
+  "relay_status": "relay.sh not present in VM checkout/workspace; no owner reply or authorization inferred",
+  "request": "Supply an owner-reviewed migration overlay for this exact file at pinned base and identical official toolchain, preserving statements, parsing semantics and budgets. Return a coordinator-approved test overlay and exact producer coordination before any owned source edit. Re-run full closure after overlay; additional blockers may then surface.",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "type": "external-owner-migration-dependency",
+  "upstream_prefix_passed": [
+    "Solidity.KeySort",
+    "Solidity.AST",
+    "Solidity.SpecSyntax"
+  ]
+}
