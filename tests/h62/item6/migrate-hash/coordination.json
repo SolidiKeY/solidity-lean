@@ -1,0 +1,41 @@
+{
+  "status": "blocked",
+  "requests": [
+    {
+      "id": "Q-HASH-OWNER",
+      "type": "OWNER_COORDINATION_REQUIRED",
+      "sources": [
+        "H62 checkpoint 2",
+        "assignment exact-file owner coordination"
+      ],
+      "files": [
+        "Solidity/Hash/CollisionBound.lean",
+        "Solidity/Hash/Adaptive.lean"
+      ],
+      "action": "Apply the validated migration-candidate.patch as the isolated migration overlay, preserving live producer ownership. Exact owner response required before existing-file edits. Required relay.sh is absent; no alternate coordinator relay supplied.",
+      "options": [
+        "Provide relay path or exact-file owner coordination response, then apply and validate the overlay.",
+        "Keep originals unchanged and have the owner apply the exported tested candidate in the migration integration lane."
+      ]
+    },
+    {
+      "id": "Q-HASH-RSS",
+      "type": "PERFORMANCE_RSS_REGRESSION",
+      "sources": [
+        "H62 checkpoint 3",
+        "performance.json"
+      ],
+      "action": "Resolve migration memory regression before accepting Hash performance gate; unchanged frozen theorem statements and resource budgets remain mandatory.",
+      "options": [
+        "Root migration lane investigates the pinned-toolchain RSS increase before accepting the migration.",
+        "Root migration lane explicitly evaluates the measured RSS increase within existing resource bounds and records its disposition before full gates."
+      ]
+    }
+  ],
+  "pending_gates": [
+    "production overlay application",
+    "full affected importer validation",
+    "./run-lean.sh in root migration environment",
+    "migrate-root-gate receipt"
+  ]
+}
