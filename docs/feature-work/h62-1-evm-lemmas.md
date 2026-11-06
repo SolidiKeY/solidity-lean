@@ -60,3 +60,16 @@ server; neither found a material defect. Fixture checking is not affected-file
 validation, extraction acceptance, or a before/after performance comparison.
 Original-file owner agreement, module registration, final gates and timing
 remain pending.
+
+
+H70 follow-up while owner deliveries are pending: the sequencing fixture now
+checks panic and nonempty revert-data heads and a successful intrinsic require
+followed by a reverting tail, for every supplied state. The location fixture
+uses the existing `Loc.word_data_alias` for distinct sibling offsets and gives
+a root/child alias in the one-word, constant-hash model. The latter is not an
+EVM/Keccak collision. Both fixtures passed bounded serial Lean checks; the
+independent read-only finder and skeptic found no material defect. These are
+fixture proofs, not integration, closed-state existence, external tests, or
+before/after performance evidence. The owner-delivery routing now identifies
+`claudecloud/move5-20261106/v14-g43` for the seven EVM consumers and V10 for
+the staged StorageOps consumers; delivery is not owner agreement.
