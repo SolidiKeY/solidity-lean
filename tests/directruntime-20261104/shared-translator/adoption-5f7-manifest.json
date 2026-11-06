@@ -1,0 +1,10 @@
+{
+  "publication": "5f7bb1441566aaad64a34436904afc61de762fd2",
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/adoption-5f7/evidence-7ea5df486b5f1f3a.tar.zst",
+  "archiveBytes": 9179,
+  "archiveSha256": "7ea5df486b5f1f3a06475e14e0464623a7ddfd4952b9f0da8f1a9a91a15ca9f7",
+  "contents": "Actual gate commands/outputs,axiom signatures,resource measurements,regression receipt,rebase preservation and independent read-only reviews.",
+  "outcome": "PASS;45.132692s,RSS1257256KiB,minOuterAvailable12611284992B;12GiB/no-swap/threads1/-j1;Lean4.24.0/Lake5.0.0-src+797c613;KeySort and SolKey377/131/131;native18+2.",
+  "boundary": "Adoption/selected external controls and unchanged proof signatures only;not full source/native/WASM closure.",
+  "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/adoption-5f7/evidence-7ea5df486b5f1f3a.tar.zst"
+}
