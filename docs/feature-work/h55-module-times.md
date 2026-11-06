@@ -127,3 +127,25 @@ scripts may depend on custom fixtures, special contexts or intentionally
 failing behavior; their expected outcomes, imports and scope still require
 owner review. All 7,166 paths remain in the inventory, and no duplicate names
 were observed within a candidate context.
+
+## H70 resource-control prototype
+
+`resource_guard.py` fails closed when the cgroup layout or values cannot be
+read, the memory limit exceeds 12 GiB, swap is enabled, or available host or
+cgroup headroom falls below 4 GiB. It never changes a cap. Its experimental
+command helper samples those constraints during a subprocess, stops on a
+resource failure or timeout and cleans up its process group before reaping the
+leader. Synthetic tests cover boundaries, spawn and process failures, timeout,
+resource loss and refusal before spawn. The executor preflight returned
+`resource state unavailable or unsupported` (its observed cgroup limit is
+16 GiB and swap limit is unrestricted); no Lean job was launched.
+
+This is not production timeout/resource acceptance: sampling is periodic,
+caller lock ownership is assumed, and no check binds the toolchain, command,
+Lean thread/job settings, exact tree, cache or H56 identity. It does not
+prevent a child from escaping the process group, and it does not authenticate
+clocks or measurement results. The fixed 300-second production orchestration,
+complete inventory and independent finder/skeptic reviews remain outstanding.
+The full synthetic suite passed 14 test methods. An initial commit command for
+the census failed at shell parsing and made no edits; the corrected command
+succeeded.
