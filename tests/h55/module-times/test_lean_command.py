@@ -16,6 +16,7 @@ class LeanCommand(unittest.TestCase):
             root = pathlib.Path(tmp)
             binary = root / "lean"
             binary.write_bytes(b"fake-lean-test-only")
+            binary.chmod(0o700)
             source = root / "Bridge" / "X.lean"
             source.parent.mkdir()
             source.write_text("-- fixture")
@@ -28,6 +29,9 @@ class LeanCommand(unittest.TestCase):
                                                    ("Bridge/X.lean", "bridge", "0" * 64)]:
                 with self.subTest(path=invalid_path, context=context), self.assertRaises(ValueError):
                     command.prepare(binary, digest, root, invalid_path, context, {})
+            for key in ["LD_PRELOAD", "LD_LIBRARY_PATH", "LEAN_OPTS", "LEAN_EXTRA_OPTS"]:
+                with self.subTest(env=key), self.assertRaises(ValueError):
+                    command.prepare(binary, pin, root, "Bridge/X.lean", "bridge", {key: "unverified"})
             (root / "alias.lean").symlink_to(source)
             with self.assertRaises(ValueError):
                 command.prepare(binary, pin, root, "alias.lean", "root", {})

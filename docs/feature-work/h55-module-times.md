@@ -196,3 +196,11 @@ prototype and cannot authenticate the supplied executable pin, environment,
 import path, toolchain, tree, cache or H56 VM. It does not independently enforce
 one heavy job or process containment. The complete gate and independent
 finder and skeptic reviews are still pending.
+
+## H70 command hardening
+
+The additive command constructor now also requires an executable Lean file
+and rejects selected dynamic-loader and Lean-option environment variables.
+The 21-method synthetic suite passes after all current backfill changes. This
+is not an environment allowlist or proof that the supplied executable hash,
+import path, cache and runtime are trustworthy; no production pass is claimed.

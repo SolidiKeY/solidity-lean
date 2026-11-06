@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Prepare a narrowly shaped Lean invocation; does not authenticate a VM."""
 import hashlib
+import os
 import pathlib
 
 
 def prepare(binary, expected_sha256, checkout, path, context, env):
     binary = pathlib.Path(binary)
     checkout = pathlib.Path(checkout)
-    if not binary.is_absolute() or binary.name != "lean" or binary.is_symlink() or not binary.is_file():
+    if (not binary.is_absolute() or binary.name != "lean" or binary.is_symlink()
+            or not binary.is_file() or not os.access(binary, os.X_OK)):
         raise ValueError("Lean binary must be an absolute regular file named lean")
     if not isinstance(expected_sha256, str) or hashlib.sha256(binary.read_bytes()).hexdigest() != expected_sha256:
         raise ValueError("Lean executable hash mismatch")
@@ -28,6 +30,8 @@ def prepare(binary, expected_sha256, checkout, path, context, env):
     relative = str(source.relative_to(cwd))
     if not isinstance(env, dict) or any(not isinstance(k, str) or not isinstance(v, str) for k, v in env.items()):
         raise ValueError("invalid environment")
+    if any(k.startswith("LD_") or k in ("LEAN_OPTS", "LEAN_EXTRA_OPTS") for k in env):
+        raise ValueError("environment permits unverified runtime injection")
     # The caller must authenticate LEAN_PATH and other runtime configuration.
     clean_env = dict(env)
     clean_env["LEAN_NUM_THREADS"] = "1"
