@@ -225,3 +225,24 @@ does not pin ignored files, imported objects, caches, environment, VM identity,
 file stability during execution or an approved tool hash, and it is not wired
 to the runner. The full 21-method synthetic suite passed. Independent finder
 and skeptic reviews, containment and production acceptance remain pending.
+
+## Synthetic escaped-process containment control
+
+After fetching origin/master at `5f7bb1441566aaad64a34436904afc61de762fd2`,
+`tests/h55/module-times/container-containment.sh` builds a tiny static C
+fixture locally and runs it without network or Lean in an owned disposable
+Docker container. The child calls `setsid`, leaving the parent process group.
+The test verifies distinct session IDs and process start times, kills only its
+own container, and checks that neither original process identity remains.
+The final hardened run exited 0 with memory and memory-swap both 67,108,864
+bytes, pids limit 16 and network none; the container reported exit 137 without
+OOM. Evidence is `/workspace/h55-module-times-evidence/containment-control-02`.
+Docker server was 28.4.0 and compiler was Debian 14.2.0. A prior exploratory
+fixture also passed; neither run is a timing or Lean proof receipt.
+
+This establishes one local synthetic containment observation, not production
+acceptance. The timing runner is not integrated with Docker or a trusted
+containment backend, and the control does not demonstrate an automated timeout,
+resource-stop cleanup, cache/provenance binding or behavior on H56. No hard
+resource limit was raised. Independent finder and skeptic reviews remain
+pending; no production timing pass is claimed.
