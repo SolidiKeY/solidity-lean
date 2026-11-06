@@ -446,5 +446,16 @@
     "coordinator_pull_observed": false,
     "archive_seconds": 50.43605456399746,
     "process_maxrss_kib": 75772
+  },
+  "final_replay_validation": {
+    "authorization": "H44",
+    "archive": "/workspace/h28-final-replay-after-6cf/validation.tar.gz",
+    "bytes": 2746,
+    "sha256": "dc3e3c3a11e3c4acbdb87541aec7c0960b87eecd658fd17cc54c8ec1f0a92466",
+    "members": 17,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/final-replay-50a5679e/manifest.json",
+    "gate_head": "50a5679e38aeaf468850d8f46645bdf5e71aa706",
+    "commands": 7,
+    "scope_complete": false
   }
 }
