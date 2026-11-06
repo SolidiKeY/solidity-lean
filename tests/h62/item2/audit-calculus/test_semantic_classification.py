@@ -66,6 +66,49 @@ class SemanticClassificationControls(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "reviewed file"):
                     classify(self.source, self.curated)
 
+    def owner_record(self):
+        self.source["sources"] = [{"path": "f", "sha256": "0" * 64}, {"path": "g", "sha256": "1" * 64}]
+        return {"status": "confirmed", "owner": "master (coordinator), no live producer",
+                "authority_kind": "coordinator-user-answer", "authority": "Q-SEM-OWNER-01, GitHub #52",
+                "source_sha256": "0" * 64}
+
+    def test_explicit_owner_confirmation_is_separate_from_role_review(self):
+        self.curated["semantic_owner_by_file"] = {"f": self.owner_record()}
+        result = classify(self.source, self.curated)
+        self.assertEqual(result["counts"]["semantic_owners_unresolved"], 1)
+        self.assertEqual(result["counts"]["role_pending"], 1)
+        self.assertEqual(result["counts"]["new_joint_witnesses"], 0)
+
+    def test_owner_confirmation_can_cover_an_unreviewed_role(self):
+        owner = self.owner_record()
+        owner["source_sha256"] = "1" * 64
+        self.curated["semantic_owner_by_file"] = {"g": owner}
+        result = classify(self.source, self.curated)
+        self.assertEqual(result["counts"]["semantic_owners_unresolved"], 1)
+        self.assertEqual(result["declarations"][1]["semantic_owner"]["status"], "confirmed")
+        self.assertIn("pending", result["declarations"][1]["role_status"])
+
+    def test_family_hint_is_not_authoritative_confirmation(self):
+        owner = self.owner_record()
+        owner["authority_kind"] = "migration-writer-hint"
+        self.curated["semantic_owner_by_file"] = {"f": owner}
+        with self.assertRaisesRegex(ValueError, "authoritative"):
+            classify(self.source, self.curated)
+
+    def test_changed_or_unknown_owner_source_refused(self):
+        owner = self.owner_record()
+        owner["source_sha256"] = "changed"
+        self.curated["semantic_owner_by_file"] = {"f": owner}
+        with self.assertRaisesRegex(ValueError, "source hash"):
+            classify(self.source, self.curated)
+        self.curated["semantic_owner_by_file"] = {"unknown": owner}
+        with self.assertRaisesRegex(ValueError, "unknown semantic-owner"):
+            classify(self.source, self.curated)
+
+    def test_role_annotation_alone_cannot_confirm_owner(self):
+        self.curated["declarations"][0]["semantic_owner"] = {"status": "confirmed", "owner": "unsupported guess"}
+        self.assertEqual(classify(self.source, self.curated)["counts"]["semantic_owners_unresolved"], 2)
+
     def test_premise_cannot_be_both_global_and_local(self):
         self.curated["declarations"][0]["per_input_proof_facts"]["proved"] = "incorrect local role"
         with self.assertRaisesRegex(ValueError, "two roles"):
