@@ -295,3 +295,62 @@ These are candidates, not proved generic lemmas or owner-approved migrations.
 | `RuntimeFrameV3ScalarSourceCompilerControls.lean` | 26 | 17 |
 | `RuntimeFrameV3ScopedScalarControls.lean` | 11 | 7 |
 | `RuntimeFrameV3TypedHeapExtensionalityControls.lean` | 5 | 1 |
+
+## Embedded classification tranche 1 (latest H70 disposition)
+
+Completed classification of explicit `Checks` namespaces only in:
+
+| Original file | Namespace lines | Theorems | Fixtures |
+|---|---|---:|---:|
+| RuntimeFrameV3AllocatingSource.lean | 130–244 | 14 | 3 |
+| RuntimeFrameV3MutatingSource.lean | 180–324 | 15 | 10 |
+| RuntimeFrameV3AllocatingResume.lean | 216–317 | 11 | 6 |
+| RuntimeFrameV3MutatingResume.lean | 210–381 | 20 | 7 |
+
+All 86 declarations retain every original inventory field and lexical header/hash.
+This adds 60 original theorem declarations and 26 fixtures to the earlier 57-file
+classification, not 60 new executions. All other embedded controls remain pending;
+full checkpoint 1 is partial. Core declarations outside these bounded namespaces
+are not silently classified. No original or Lean source changed.
+
+Source map: `tests/h62/item4/generic-internalflow/embedded-cases.txt`; expander:
+`scripts/h62/item4/generic-internalflow/embedded.py`. It validates exact frozen
+inventory/source hashes and current source bytes, namespace start/end lines, absence
+of nested blocks, exact case sets and duplicate/unknown facets. Generated bulk:
+`/workspace/h62-evidence/generic-internalflow/embedded1/embedded-inventory.json`,
+SHA256 `26d74afd7017cdad06ac88feb3c9f726929c8b3c632e1d8ad83b5f945c98f133`.
+
+Allocating specifications assert actual Heap.Keeps; mutating Resume specifications
+preserve old array lengths only. Continuation relates all residual source horizons
+and retains all error classes, rather than asserting only success. The map keeps
+non-revert/non-success separate from exhaustion, representation failure separate
+from compiler refusal, and the wrong-reference read-bound counterexample separate
+from allocation/admission refusal. Complete headers retain every original conjunct.
+Audit 9 preserves allocating/mutating effects; audit 11 typed halt separation remains
+a candidate after actual semantic witnesses; audit 16 permits data indexing only,
+not replacing source execution proofs with decide tables. No H55 work is duplicated.
+
+Independent read-only finder and skeptic reviewed all four regions without Lean,
+servers, builds or writes. Finder requested an explicit read-bound counterexample
+facet; applied. Skeptic passed conservation and semantic distinctions. Final review
+receipt is saved with the evidence. Acceptance command:
+`bash scripts/h62/item4/generic-internalflow/acceptance.sh /workspace/h62-evidence/generic-internalflow/embedded1`
+passes 19 tests (7 census, 9 suffix classification, 3 embedded), exact current/base
+byte preservation and deterministic reproduction. No new Lean check, semantic
+gate, timing comparison, axiom or sorry claim. Historical KeySort success and Raw
+migration failure remain unchanged; full affected validation is pending.
+
+Latest routing supersedes earlier current-owner notes: syntax ticket destination
+`solidity-h62-6-20261106/migrate-syntax`; current V12 delivery is pending to
+`claudecloud/move5-20261106/v12-p1` for exact files
+`RuntimeFrameV3CallerStorageFrameControls.lean` (`no_ref`) and
+`RuntimeFrameV3OrderedEffectfulStorageControls.lean` (`no_struct`). Host journals
+determine delivery acceptance. No relay establishes owner agreement or validation.
+Do not edit originals while waiting. No relay installation task.
+
+Next read-only work: continue remaining embedded Checks/Client regions (including
+ParentPrefixes, AllocatingPrefixes and MutatingPrefixes) with explicit boundaries,
+full conservation and independent reviews; do not count them complete now. Full
+proof/fixture/correspondence/migration/timing queue remains unfinished. Export:
+`/workspace/h62-artifacts/generic-internalflow/embedded1/` with cumulative patch,
+handoff and SHA256 manifest; prior exports preserved.

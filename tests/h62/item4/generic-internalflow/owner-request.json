@@ -17,5 +17,6 @@
     "682 String.endsWith higher-order mismatch",
     "684 String.dropRight absent"
   ],
-  "delivery": "H70 coordinator routing: ticket relay accepted by solidity-h62-6-20261106/migrate-syntax and solidity-v12-v17-20261031/v12-flow-calls. relay.sh is host-only; no VM installation task. Dependency overlay and exact-file owner agreement remain pending; routing grants no original-file edit permission."
+  "delivery": "H70 coordinator routing: ticket relay accepted by solidity-h62-6-20261106/migrate-syntax and solidity-v12-v17-20261031/v12-flow-calls. relay.sh is host-only; no VM installation task. Dependency overlay and exact-file owner agreement remain pending; routing grants no original-file edit permission.",
+  "current_routing": "Latest H70: syntax ticket destination migrate-syntax; current V12 delivery pending to claudecloud/move5-20261106/v12-p1. Host journals govern acceptance; no owner agreement or validation inferred."
 }
