@@ -103,3 +103,19 @@ surface_classification.py now retains all 3281 rows in one static ledger. It rec
 syntax and markers only, without treating any row as premise-free or witnessed.
 Thirteen selected declarations have manual joint-input classifications, including
 eight address/read/write/copy contracts; their witness count remains zero.
+
+## H70 Hash partial overlay and next semantic batch
+
+Owner message provides a reviewed PARTIAL Hash overlay, not completed migration.
+[Static overlay review](hash-overlay-review.md) records exact checksum/context/header
+checks, no application and no Lean validation. Full migration and Syntax.Raw remain
+pending. The current router lists no ticket destinations or pending current-owner
+deliveries; this worker creates no outgoing relay request from that receipt.
+Current requested waits: migrate-syntax Raw, migrate-hash CollisionBound and
+migrate-source Ctor. Earlier timing/backend holds have no explicit release here.
+
+Manual source planning now covers 25 statements in four complete selected modules:
+LoopLaws: 3, SourceWordRead: 2, TargetOperations: 14, LayoutAccess: 6. This is not witness
+coverage: all 3281 rows remain uncovered. SC/LS plan aliases in candidate-bundles.json
+preserve nonempty query/access/family cases, universal hash range and every correlated
+input. No original proof, premise, interface or budget is changed.

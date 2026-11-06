@@ -7,6 +7,7 @@ import json
 import pathlib
 import subprocess
 import census
+from surface_classification import classify, groups
 
 
 def main():
@@ -28,6 +29,19 @@ def main():
         matches=[d for d in inventory['declarations'] if d['path']==row['path'] and d['source_name']==name]
         assert len(matches)==1, row['theorem']
         declaration=matches[0]
+        assert row['binder_order_scope'] in {'initial-forall','declaration-prefix'}, row['theorem']
+        syntax=classify(declaration['signature'])
+        names=[n for b in syntax['declaration_binders'] for n in b['names']]
+        if row['binder_order_scope']=='initial-forall':
+            assert not syntax['declaration_binders'], row['theorem']
+            assert syntax['leading_forall_source'] is not None, row['theorem']
+            raw=syntax['leading_forall_source']
+            quantifiers,unknown=groups(raw,census.mask(raw))
+            assert not unknown, row['theorem']
+            names += [n for b in quantifiers for n in b['names']]
+        if row['binder_order_scope']=='declaration-prefix' and syntax['leading_forall_source'] is not None:
+            assert row.get('universal_conclusion_retained') is True, row['theorem']
+        assert names==row['binder_order'], (row['theorem'],names,row['binder_order'])
         assert not row['counts_as_verified_witness']
         hypotheses=[h['name'] for h in row['hypotheses']]
         data=[n for n in row['binder_order'] if n not in hypotheses]

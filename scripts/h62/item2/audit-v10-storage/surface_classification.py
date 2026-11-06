@@ -100,6 +100,7 @@ def collect(root):
     assert len(rows)==len({r['id'] for r in rows})==inventory['counts']['declarations']
     return dict(schema=1,base=inventory['base'],
                 boundary='Static syntax/markers for routing only. No semantic premise inference, interface exclusion, satisfiability, or proof coverage.',
+                manual_plan_definitions=manual.get('planned_definitions',{}),
                 counts=dict(rows=len(rows),syntax_classes=dict(sorted(classes.items())),
                             surface_marker_rows=dict(sorted(markers.items())),
                             manual_source_classifications=len(covered_manual),

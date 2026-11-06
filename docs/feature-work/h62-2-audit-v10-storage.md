@@ -217,3 +217,75 @@ the universal hash bound and the same after state, and found no concrete mismatc
 Source-only counts and the new backend wait are accurate; old holds stay unreleased.
 The ledger explicitly defines binder offsets relative to the signature suffix after
 the declaration name. No semantic or proof coverage is promoted by successful parsing.
+
+## H70 semantic premise and feasibility planning: 25 selected statements
+
+Starting head: 166c529477b3767cd6362fe73dd1c9072c9f0a5e. The owner supplied a
+partial Hash overlay; the requester directs continued semantic premise planning and
+waits on migrate-syntax Raw, migrate-hash CollisionBound and migrate-source Ctor.
+No ticket destinations or current-owner delivery are pending in this routing pass.
+No repair application, owner agreement, permission, validation or hold release is
+inferred. No Lean/MCP/Lake/build or new timing runs were made.
+
+The selected plan set now contains every explicit theorem in four modules:
+LoopLaws(3), SourceWordRead(2), TargetOperations(14), LayoutAccess(6), total 25.
+Twelve are new manual classifications; the previous thirteen are not counted twice.
+The remaining 3256 census rows lack manual analysis; all 3281 lack new verified
+witnesses. The deterministic all-row ledger retains every original ID/signature/hash
+and uncovered status. Its syntactic class/marker totals are unchanged.
+
+The new TargetOperations plans retain all local fitting, membership, raw read,
+representation and target-agreement premises. represented_copy also retains one
+FiniteRun structure, numeric transport, performed graph copy, support, graph apart,
+symbolic nonaliasing and all source/target/query footprint coverage on one SC tuple.
+The selected certificate includes the global function-range field ∀ pre, H pre < N;
+this is not weakened to pre ∈ P. It is not a universal Source compiler producer.
+SC is a proposed local fixture using the existing public Schema0, a bool-to-bool
+mapping, source keytrue/destination keyfalse, nonempty source-observation query,
+source word1/destination word0, numeric addresses4/2, N8/L1/R1, selected preimages
+entry00/entry10 and bounded hash outputs2/4 (otherwise0). All fields still require
+joint proof. Target observations are constructed from the same symbolic store.
+The getD-defined graph result is not itself proof of successful copying.
+
+LayoutAccess.resolve_bounded/resolveMany_length/resolveMany_bounded distinguish layout
+fit and placement from successful resolution. The LS plan uses a two-word struct at
+root0 with L1/R2 and keeps repeated field0/field0/field1 requests and repeated
+root0/root0/root1 results. mem_runPreimages uses a nonempty hashed address with its
+actual entry00 preimage. resolved_families_commute uses two nonempty disjoint resolved
+families at roots0/1; partial effects write true/false and are not required to succeed
+by the frozen theorem. Matching failure remains in its contract. resolved_family_outside
+DOES require performed success and keeps the same independently resolved outside
+query, combined family-plus-query preimages and full hash-range premise. Its getD
+result also needs an actual success proof. Root-only LS preimage lists are empty
+because those actual accesses hash nothing, not because accesses were dropped.
+
+SC/LS entries are plan aliases only, not new Lean declarations. The binder checker
+now compares selected source binder order with metadata. It distinguishes the two
+SourceWordRead initial forall input blocks from retained universal conclusions in
+write_agreement and resolveMany_bounded. The latter remain statements about EVERY
+location/address member; they are not reduced to existential selected observations.
+The first draft check caught this distinction and was corrected before acceptance.
+No input premise or conclusion was removed from any frozen statement.
+
+[Hash overlay review](../../tests/h62/item2/audit-v10-storage/hash-overlay-review.md)
+verifies the routed checksum and context, reconstructs the advertised new blob only
+in memory, and compares 65 exact source theorem headers unchanged. The canonical
+artifact passes git apply --check. It was NOT applied or Lean-checked; full migration,
+axiom/guard-message checks and all earlier holds remain pending. The first transcription
+had one extra context-space; its failed receipt is kept distinct from the corrected,
+SHA256-matching canonical artifact. These dependency checks add no v10 witness rows.
+The deterministic review reproducer is tracked, while bulk patches/receipts stay off Git.
+
+Independent read-only finder/skeptic reviews are required for this checkpoint and
+exported with the final evidence. Static binder/field checks, deterministic generation
+and source-header equality do not imply satisfiability or checked theorem fidelity.
+All four checkpoints and the original goal remain unfinished. Zero new Lean helpers,
+axioms, sorry, heartbeat increases, registration edits or original-file changes.
+
+Final review closure for this checkpoint: both independent reviewers found no concrete
+mismatch in the twelve new correlated plans, binder scopes, producer/global-field
+limits, overlay script or routing status. The finder independently reproduced the
+canonical checksum/context/new blob and 65 unchanged source headers, without Lean or
+application. The ledger now carries the same SC/LS plan definitions as its companion
+candidate artifact, so shared aliases remain available in either static output.
+The canonical/initial-transcription receipts remain distinct. No witness is promoted.
