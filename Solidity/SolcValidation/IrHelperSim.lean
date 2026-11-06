@@ -80,6 +80,9 @@ open Solidity.Yul
 @[simp] theorem pure_iszero (xs : Fin 1 → Word) : Pure.eval .«iszero» xs = truth ((xs 0).val == 0) := rfl
 end PureShapes
 
+/-- The flow test after a normal statement, without deciding anything else. -/
+theorem ite_normal {α : Type} (a b : α) : (if Flow.normal = Flow.normal then a else b) = a := if_pos rfl
+
 /-- A block without functions adds nothing to the environment. -/
 @[simp] theorem lookup_empty_group {F : List FnSig} {s : FnSig} (E : FunEnv F) (m : Mem ([] ++ F) s) :
     (FunEnv.group [] Bodies.nil E).lookup m = E.lookup m := rfl
