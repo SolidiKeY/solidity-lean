@@ -758,3 +758,14 @@ H44 final VM gates PASS: all10affected-file MCP diagnostics0errors(280.760s,scop
 
 Frozen archive: /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h44/bulk-0de09096a654c43c.tar.zst
 207427bytes;SHA256 0de09096a654c43ce6ecf6bf2ae958bffca8dbc2732273b4db881ffba28978a5;50datafiles/3229786bytes. verify-bulk.py and independent actual extraction roundtrip passed. Independent final finder/skeptic read-only reviews found no hidden bulk,scope or completion defect. Manifest is committed;archive stays on this VM for coordinator pull. No publication or shipment is claimed. Full lane and RUNTIME_GATE_PASS remain pending CR migration,D WASM,full parity/closure and final gates.
+
+
+## Adopt published5f7 checkpoint
+
+Coordinator2026-11-06 published5f7bb1441566aaad64a34436904afc61de762fd2,including e778 through fb30388ff. Fetch and both original-base/e778 ancestry checks passed. Startup checkout da74bc6b contained two automatic publication merges and matched5f7 byte-for-byte;refs/codex-recovery/shared-translator/pre-5f7bb1441 preserves it. Requested rebase completed cleanly to5f7 without source/data loss. No runtime Shared/DirectRuntime source differs from4095.
+
+H68 ownership-baseline.json is explicitly updated to that exact recorded5f7 commit;no moving reference determines the pin. The disposable regression now reads this recorded pin for its checkout and receipt. Its old moving-audit control still uses the original4095 code,so the reported defect remains independently reproduced after future authorized recorded-pin updates. H44 archive/data inventory remain immutable. Existing Import.lean still uses printer/parser/macro;no CR migration was delivered by this publication. Full-lane limits remain unchanged.
+
+Fresh post-adoption gates PASS45.133s,RSS1257256KiB,minouter12611284992B. Owned344-job build,exact axiom inventory,old57-kind/806variant suites,modal/direct controls,KeySort,native18+2,pinned-audit regression and SolKey377/131/131 annotations OK. Actual Lean4.24.0/Lake5.0.0-src+797c613;12GiB/swap0,CPU1,threads1/-j1. No Lean source changed;no new theorem or axiom. Independent finder/skeptic read-only,no Lean/server,verified ancestry,pin behavior and unchanged runtime/data;no findings.
+
+H44 external evidence manifest: tests/directruntime-20261104/shared-translator/adoption-5f7-manifest.json. Archive /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/adoption-5f7/evidence-7ea5df486b5f1f3a.tar.zst;9179bytes;SHA256 7ea5df486b5f1f3a06475e14e0464623a7ddfd4952b9f0da8f1a9a91a15ca9f7. Commands/exits/wall/RSS,axiom signatures,rebase and review receipts are retained there. H41 exact-head cache preparation follows this commit;delivery remains coordinator-pending. Original CR migration/WASM/full-closure obligations remain open.
