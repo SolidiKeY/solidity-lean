@@ -55,6 +55,19 @@
 | `Backend/Environment/Frames.lean` | Exact environment/ledger-footprint stability, repeated BALANCE/EnvKey reads, source/oracle framing and exhaustive composed opcode refusals. |
 | `Backend/Environment/CompositionChecks.lean` | Inhabited mixed environment/metadata/hash certificate, retained source effects, order/forced-credit/time counterexamples and axiom pins. |
 
+# VX1 OOM split of the power thresholds
+
+| Module | What it defines |
+|---|---|
+| `Backend/Scalar/PowerBounds/Part01.lean` | Generated power-threshold rows for widths 8–32 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+| `Backend/Scalar/PowerBounds/Part02.lean` | Generated power-threshold rows for widths 40–64 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+| `Backend/Scalar/PowerBounds/Part03.lean` | Generated power-threshold rows for widths 72–96 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+| `Backend/Scalar/PowerBounds/Part04.lean` | Generated power-threshold rows for widths 104–128 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+| `Backend/Scalar/PowerBounds/Part05.lean` | Generated power-threshold rows for widths 136–160 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+| `Backend/Scalar/PowerBounds/Part06.lean` | Generated power-threshold rows for widths 168–192 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+| `Backend/Scalar/PowerBounds/Part07.lean` | Generated power-threshold rows for widths 200–224 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+| `Backend/Scalar/PowerBounds/Part08.lean` | Generated power-threshold rows for widths 232–256 and their kernel-checked bounds (`rowBounds`); split from `PowerBounds.lean`, which assembles `threshold_bounds`, to keep each module under the 8 GiB pre-gate bound. |
+
 Memory-loop validation helpers: `scripts/memory-loop-evm.mjs` records actual
 four-mode upstream EVM observations and refusal controls;
 `scripts/check-memory-loop-timing.py` freshly checks the entire original

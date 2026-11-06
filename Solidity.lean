@@ -1544,6 +1544,14 @@ import Solidity.Backend.Scalar.Heights
 import Solidity.Backend.Scalar.Modular
 import Solidity.Backend.Scalar.Negation
 import Solidity.Backend.Scalar.PowerBounds
+import Solidity.Backend.Scalar.PowerBounds.Part01
+import Solidity.Backend.Scalar.PowerBounds.Part02
+import Solidity.Backend.Scalar.PowerBounds.Part03
+import Solidity.Backend.Scalar.PowerBounds.Part04
+import Solidity.Backend.Scalar.PowerBounds.Part05
+import Solidity.Backend.Scalar.PowerBounds.Part06
+import Solidity.Backend.Scalar.PowerBounds.Part07
+import Solidity.Backend.Scalar.PowerBounds.Part08
 import Solidity.Backend.Scalar.PowerGuard
 import Solidity.Backend.Scalar.Select
 import Solidity.Backend.Scalar.Shifts
