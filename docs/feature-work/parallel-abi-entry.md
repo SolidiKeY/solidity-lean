@@ -74,3 +74,33 @@ source in the local optional-package checkout. That file is outside this
 lane; the raw output is retained. All five relative links in this new note
 resolve. This external path-check failure remains recorded, without a full
 gate or runtime pass claim.
+
+
+## H82 independent cf1 decoder replay
+
+Added `tests/abi-entry/replay-cf1-length.py`, which extracts all 34 saved
+legacy/viaIR observations from the first immutable cf1 fixture,
+`calldata_array_length_v2.sol`. The generated Lean runtime check invokes
+actual `Solidity.AbiEntry.entry` on the saved argument bytes with four inert
+selector bytes prepended. It checks acceptance and the dynamic outer length
+(or the declared fixed-array length) against the first saved return word.
+Nested arrays retain their exact noncanonical input bytes. The first fixture
+passed all 34 observations against a freshly compiled current AbiEntry module.
+This is a bounded runtime regression, not a new kernel theorem, body execution,
+full return-byte comparison or replay of the remaining 41 fixtures.
+
+Initial harness attempts are retained in evidence: Except has no BEq instance,
+and fixed-array reference lengths are zero rather than the declared array
+length. The latter was a harness projection error, not a decoder/reference
+mismatch. The corrected projection preserves all recorded observations.
+Finder and skeptic independently caught the fixed-length and malformed-word
+issues. Return parsing now validates complete hex word sequences; unexpected
+value entries produce test errors, never fabricated semantic fuel failures.
+Validation uses explicit exceptions even under Python optimization.
+
+Remaining waits: V11/P6 concrete physical byte-world production; V09/G24.03
+statement production; memory-reference-structs whole-decoder execution
+integration; V15 canonical H68 P10 execution endpoints. These do not prevent
+continuing independent G40 controls or G46 branch work. G40 full composition,
+remaining fixture replay, G46.02 and G46.03 stay open. No pending exact-file
+request for these statement-preserving test additions is retained under H82.
