@@ -3291,3 +3291,37 @@ Reviews (read-only, without the Lean server):
 `gate.sh checkpoint` at 3449b61d passed: build-touched, library, trust,
 orphans, layers, roots, doc-paths and axiom-pins all PASS. The full gate was
 not rerun.
+
+### Master merge afd7287e9 and port (2026-11-06)
+
+Merged origin/master afd7287e9 (includes the a176e8aa7 duplicate-namespace
+fix); doc conflicts in `docs/README.md`, `docs/module-map/source-definitions.md`
+and `docs/solidity-scope.md` kept both sides. Thirty-two master modules used
+the pre-help Source shapes and were ported over four checkpoint rounds
+(84ec7ed1e, fb43ae860, ecda06166, 4ffa5a674), each round exposing the
+modules downstream of the previous failures:
+
+- `evalE`/`callInternal` applied directly gain `(plan := none)` (the optParam
+  default, so the terms are unchanged).
+- `St` anonymous literals gain `Source.FailureExecution.Cursor.empty`;
+  balances are Nat (`balance:=73`, `.balance` for `.balance.val`).
+- Slice proofs unfold `STy.cdStride` (1 for bytes).
+  `Backend/MemoryOps/SourceCalldataSliceRead.lean` keeps its `oneWord`
+  premise and derives `sliceable` and the 32-byte stride from it
+  (`oneWord_cdStaticWords`, `oneWord_sliceable`, `oneWord_cdStride`).
+- `Lowering/V08/WorldImageAccess.account_balance` takes a
+  `Monetary.Balance` (a generalization; its only callers are in the same
+  file), and `account_transfer` is reproved against `transferNat`.
+- `docs/feature-work/after-roadmap-va1.md` no longer cites an absent Mathlib
+  cache path; axiom pins rewritten (0 errors).
+
+Finder: no weakened, specialized or vacuous statement; no new sorry or axiom;
+no remaining old shapes in touched files. Low: the three `oneWord_*` lemmas
+are general Source facts placed in the Backend namespace; the pin rewrite adds
+3659 repo-wide entries, which makes the pin diff hard to audit (all sets are
+within propext, Quot.sound, Classical.choice). Both recorded, not changed.
+Skeptic: claim survives (slice node built only in one place, `(plan := none)`
+is the default, Word ⟨73,_⟩ and Nat 73 agree, doc edit faithful).
+
+Checkpoint PASS @4ffa5a674 (build-touched, library, trust, orphans, layers,
+roots, doc-paths, axiom-pins). The H16 APIs are landable at this head.
