@@ -28,16 +28,6 @@
   "isPartial": false,
   "axioms": ["propext", "Classical.choice", "Quot.sound"]},
  {"signature":
-  "∀ (z : Int) (bits : Nat),\n  And (Eq.{1} (HMod.hMod.{0, 0, 0} bits 8) 0) (And (LE.le.{0} 8 bits) (LE.le.{0} bits 256)) →\n    And (LE.le.{0} 0 z) (LT.lt.{0} z ↑(HPow.hPow.{0, 0, 0} 2 256)) → Not (Eq.{1} z ↑(Int.toNat z)) → False",
-  "name":
-  "Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_3",
-  "module": "Solidity.Backend.PrimitivePackets.Constants.Target",
-  "levels": [],
-  "kind": "theorem",
-  "isUnsafe": false,
-  "isPartial": false,
-  "axioms": ["propext", "Quot.sound"]},
- {"signature":
   "(motive : Solidity.Evm.Out → Sort u_1) →\n  (o : Solidity.Evm.Out) →\n    ((state : Solidity.Evm.Machine) → (skip : Nat) → motive (Solidity.Evm.Out.ok state skip)) →\n      ((x : Solidity.Evm.Out) → motive x) → motive o",
   "name":
   "Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_word.match_1_1",
@@ -69,7 +59,7 @@
  {"signature":
   "∀ (n : Int), Eq.{1} (Solidity.Evm.sword n) (Solidity.Evm.wmod (Solidity.Evm.toWord n))",
   "name": "Solidity.Evm.sword.eq_1",
-  "module": "Solidity.Backend.PrimitivePackets.Constants.Target",
+  "module": "Solidity.Evm.Signed",
   "levels": [],
   "kind": "theorem",
   "isUnsafe": false,
@@ -130,6 +120,16 @@
   "isUnsafe": false,
   "isPartial": false,
   "axioms": ["propext", "Quot.sound", "Classical.choice"]},
+ {"signature":
+  "∀ (z : Int) (bits : Nat),\n  And (Eq.{1} (HMod.hMod.{0, 0, 0} bits 8) 0) (And (LE.le.{0} 8 bits) (LE.le.{0} bits 256)) →\n    And (LE.le.{0} 0 z) (LT.lt.{0} z ↑(HPow.hPow.{0, 0, 0} 2 256)) → Not (Eq.{1} z ↑(Int.toNat z)) → False",
+  "name":
+  "Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_2",
+  "module": "Solidity.Backend.PrimitivePackets.Constants.Target",
+  "levels": [],
+  "kind": "theorem",
+  "isUnsafe": false,
+  "isPartial": false,
+  "axioms": ["propext", "Quot.sound"]},
  {"signature":
   "∀ {D : Solidity.Source.Layout} (t : Solidity.Source.IntTy) (z : Int),\n  Not (And (LE.le.{0} (Solidity.Source.IntTy.lo t) z) (LE.le.{0} z (Solidity.Source.IntTy.hi t))) →\n    Eq.{1} (Solidity.Source.constVal (Solidity.Source.Q.ofInt z) (Solidity.Source.STy.int t))\n      (Except.error.{0, 0} (Solidity.Source.Halt.stuck \"integer out of range\"))",
   "name": "Solidity.Backend.PrimitivePackets.Constants.source_refused",

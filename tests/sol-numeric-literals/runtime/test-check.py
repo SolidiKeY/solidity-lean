@@ -5,7 +5,7 @@ from unittest.mock import patch
 folder=pathlib.Path(__file__).resolve().parents[1]
 def control(process_exit):
  label='mock-resource-stop-'+uuid.uuid4().hex
- paths=[folder/'evidence'/(label+ext) for ext in ('.json','.log')]
+ paths=[pathlib.Path('/workspace/sol-numeric-literals-gate-output')/(label+ext) for ext in ('.json','.log')]
  assert not any(p.exists() for p in paths)
  original_read=pathlib.Path.read_text;original_open=builtins.open
  samples=iter((8,8,3));state=dict(stopped=False,inspections=0)
