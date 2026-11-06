@@ -190,3 +190,27 @@ there is no PAUSED operation. Do not infer that this worker paused the existing
 goal. Coordinator must pause it without reset or replacement. The source H71
 push permission was not available in the provided decision snapshot; the
 original no-push instruction therefore remains and no branch was pushed.
+
+## H82b successor intake (2026-11-06)
+
+The surviving VY1 branch verified the H82b metadata archive, manifest and
+SHA256SUMS against the coordinator relay; all 557 listed files passed.
+The authenticated assignment and words scope plus verified final stop/pause
+record supersede the retirement-era missing-assignment wait above. The
+published final Git object `5f941aa2ec609a6992a63e14b933b2a834dfbfa3`
+was fetched and merged before member work. No worker Git bundle or executable
+cache was supplied or claimed verified.
+
+At successor merge head `c4a40146fa014479be10568f5f0f193e73762368`,
+all 17 generator tests and the separate isolated owner-commit test passed.
+Baseline reproduction/census preserved 39 import nodes and 33 documentation
+blocks. Commit-backed VY1 conservation against
+`3ac8f06d84bd4da165bcf958ab7c7a63e9dd712a` reports
+`interface_delta_match`, with no registered or observed extensions and exact
+pinned bytes. Its `owner_completeness` remains `unverified`: this is not a
+decision that every candidate producer is exported or that VY3 is reconciled.
+
+Raw logs are under `/workspace/vy1-words-evidence/h82b-*` on the successor VM.
+No Lean migration build was repeated; existing failed prerequisite evidence
+and all four incomplete checkpoint obligations remain. No marker/gate patch
+has been applied, and no ordering or semantic admission change is made.
