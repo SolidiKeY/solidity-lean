@@ -1032,3 +1032,228 @@ explicitly authorized pushing this corrected lane head; no merge/PR/default
 branch change or goal mutation is authorized/performed. Whole original parity
 assignment remains partial with all previous kernel/runtime/rendered/performance/
 adversarial/paired-judge obligations and actual failed gates still outstanding.
+
+### Restored inputs and original command keybindings — 2026-11-06
+
+Explicit Q-PUSH-ADB authorization fast-forwarded only the remote lane from bca
+to adb; no force/master push. Restart had removed the temporary lock directory,
+so it was recreated before Git ran. Both committed checksum-bound input bundles
+were restored at their gate paths with local DAFNY_PARITY_BULK_DIR and
+DAFNY_PARITY_INVENTORY_DIR set. All376 evidence files and the484-row inventory
+were already present; only the generated gate report differed and was preserved
+before restoration. Unchanged gate still exited1,0/484,inventory passed: rows
+were incomplete, not rejected for absent bulk. Preserved raw report and restore
+receipts are under `/workspace/dafny-parity-resume-20261106/`.
+
+Original contribution slice: build/run/test keys copy pinned source chords,
+including macOS declarations, and invoke existing truthful local commands only
+in trusted file-backed Solidity editors. F6/custom and F7/F8 trace remain absent,
+not substituted with verification. Missing-binding regression retained.
+Existing headless harness now has `--suite commands --targets local`: actual
+Linux renderer Ctrl+Shift+B leads to fresh compiler output, exact current-source
+hash and AST header, with portable AST/rendered screenshot/DOM/accessibility
+captures. Dirty buffer is set to CRLF through actual VSCode edit API and contains
+Unicode; Build saves it and disk bytes must match exactly. Earlier mixed-EOL
+fixture failed because VSCode normalizes to its model EOL; failure retained and
+no exact-source predicate weakened. Ordinary Build sample also retained.
+
+This proves neither native Dafny compilation equivalence, concrete Run/Test,
+macOS dispatch nor kernel proof. Automatic verification is disabled. Linux
+compiler AST is not a binary/proof result. Status-bar cancellation display after
+Build remains visible and is not reclassified as proved. Source guards and full
+proof-suite requirements remain intact; unfocused key dispatch is rejected.
+
+Two native scenarios are additive judged obligations:486 total, all previous484
+and frozen270 retained. Updated inventory bundle/index and new evidence archive
+remain VM-only, bound by committed inventory and keybindings manifests. Restore
+uses new inventory directory `/workspace/dafny-parity-resume-20261106`; previous
+archives/manifests/checksums remain untouched. Final exact-head receipts follow
+in that directory. Whole original implementation/proof/rendered/performance/
+adversarial/scaling/paired-judge/final-gate queue remains unfinished; no budgets,
+Lean sources/theorems, row requirements, judge prompts or goal status changed.
+
+### Held macOS binding syntax correction — 2026-11-06
+
+Coordinator finder rejected the 848ffc710f checkpoint: copying upstream display
+glyphs into `mac` declarations did not produce valid VS Code binding syntax.
+Build now uses `shift+cmd+b`; Test uses `shift+f5`. The contribution regression
+requires these exact strings and rejects display glyphs in the configured key
+tokens. Linux chords, commands and trust/file/focus guards are unchanged.
+README now distinguishes UTF-8 source encoding, CRLF line endings and UTF-16 LSP
+position units. The unsupported prior review claim above was removed.
+
+The corrected-syntax regression fails before the manifest fix; before/after
+results are retained in
+`/workspace/dafny-parity-macos-fix-20261106/`. No native macOS test is claimed.
+All 486 obligations and frozen 270 IDs remain; no row, gate/judge, budget, theorem or Lean
+source changed. Whole original parity and mandatory proof/runtime/rendered/
+performance/adversarial/scaling/paired-judge obligations remain unfinished.
+
+### H70 first strict failure: context submenu — 2026-11-06
+
+Rebased next work onto `origin/master` at
+`5f7bb1441566aaad64a34436904afc61de762fd2`. The coordinator wrapper merge
+`d7ddbc0457b7eafed57e10ced7b0d538cef33384` is preserved under
+`refs/archive/solidity-dafny-20261105/dafny-parity-pre-5f7bb1441`.
+H70's exact first failure is `submenus:dafny.context` (partial), with inventory
+passed and 486 obligations. Only that existing row's assessment is updated;
+all 486 IDs/order and frozen 270 IDs remain unchanged. H70 routing supplied no owner
+ticket permission; no other-lane/original Lean files were edited.
+
+The supported context menu now includes F6 custom Build using the existing
+compiler's includePaths/remappings JSON contract. Defaults come from resource
+settings; per-invocation overrides do not change workspace settings. Unknown
+proof/runtime/deadline fields are rejected. Save/trust/current-source/generation/
+cancellation/disposal checks remain. Native multi-source compiler evidence and
+injected cancel/invalid/close/configuration tests are explicitly distinguished.
+Dafny accepts arbitrary CLI strings; this finite import-only interface does not
+claim that correspondence or binary/kernel execution equivalence.
+
+Finder/skeptic caught a real argv escape: a flag-looking include value activated
+compiler flags. Native failing regression retained; absolute include arguments
+now match project resolution and four flag-shaped names leave compiler settings
+unchanged. Source and review evidence is checksum-bound by
+[dafny-custom-build-evidence-manifest.json](dafny-custom-build-evidence-manifest.json),
+including its explicit REVIEWS.md member hash.
+
+Native first-row observation retains failures and diagnostic pixels: the menu
+was present inside an open shadow root while the first selector missed it.
+Traversal was corrected, without dropping visibility assertions or raising
+deadlines. A separate DevTools connection timeout is retained. Final precommit
+Linux capture shows all ten supported local actions, including F6, before
+ordinary Build succeeds. This establishes local visibility, not custom-action
+execution or full context-menu equivalence. Native macOS remains separately
+pending. Trace show/hide/copy actions, paired Dafny menus and complete action/
+lifecycle/performance correspondence plus both row judgments remain missing;
+the first row stays partial.
+
+H44 data remains VM-only in `/workspace/dafny-parity-custom-build-20261106/`,
+with updated inventory/evidence archive manifests and local inputs.env. Prior
+bundles/artifact checksums remain untouched. Exact-head receipts follow there.
+Whole original queue and all mandatory proof/runtime/rendered/performance/
+adversarial/scaling/fresh-judge gates remain unfinished; no gate, theorem,
+axiom/sorry, budget, exclusion or goal status changed. No push/merge/PR.
+
+A follow-up native compiler regression for the same first obligation reproduced
+a change-back race: an imported unit changed during compilation and returned to
+its admitted disk bytes before completion. Main-source and final-disk checks
+alone accepted the mismatched artifact. Build now checks every emitted unit's
+name, uniqueness and hash against the admitted project snapshot. Single-source
+header checks remain; valid remapped multi-source builds still pass. The runtime
+wrapper injects the race; the compiler itself is real. Before/after results and
+read-only reviews are bound by the existing custom-build evidence manifest's
+provenanceFollowup entry. No IDs/row requirements or proof budgets changed;
+native macOS and full parity remain pending.
+
+### Native Linux custom F6 and pinned trace observation (2026-11-06)
+
+The first strict failure `submenus:dafny.context` remains partial. The existing
+headless observer now exercises actual F6 and its real input prompt. A native
+single-file default-options local build saves the dirty CRLF/Unicode source and
+returns a source-bound compiler AST. The separate imported/annotated case fails
+at the existing specification adapter boundary; its receipt remains failed.
+Pinned Dafny accepts its unchanged default build arguments, verifies one method,
+then exits 3 because its integrated terminal cannot find dotnet. No runtime or
+proof profile was substituted. Its actual positioned counterexample RPC drives
+show/copy/hide observations, clipboard equality and native menu/pixel captures.
+Local model-prestate data has no corresponding positioned verifier trace; no
+fake decoration or copy action was added. Menu branding/grouping/actions and
+finite JSON versus arbitrary CLI inputs differ; native macOS remains pending.
+
+[The small evidence manifest](dafny-native-f6-evidence-manifest.json) binds the
+VM-only archive and its COMPARISON.md/REVIEWS.md members. Read-only finder and
+skeptic found terminal-execution mixing, omitted trace-scenario validation and
+a post-terminal source-stability gap. Repairs bind exact command arguments and
+pinned executable hash, execution IDs, new/changed artifacts and current source;
+tests retain distinct-execution and omission regressions. Final reviews found no
+further concrete defect. Reviews are not paired row judgments.
+
+All 486 obligations/order and frozen 270 remain unchanged. Full build, TestSuite,
+timed strict, KeySort, positioned local verifier metadata, rendered lifecycle,
+performance/scaling/adversarial matrices and both fresh judges remain required.
+Classification-only strict is not timed strict; no RUNTIME_GATE_PASS. No heavy
+resource-failing gate retried, no goal state changed, no push/merge/PR. Exact-head
+lightweight gates and full-scope handoff are exported under
+`/workspace/dafny-parity-native-f6-20261106/`.
+
+### Existing SDK terminal provisioning and owned source failures (2026-11-06)
+
+The first obligation remains partial. Pinned CsharpBackend emits `net8.0`; the
+existing SDK8.0.427/.NET8.0.33 is now exposed through supported isolated terminal
+environment settings. The actual shell resolves that exact canonical binary and
+version; its hash is recorded. No new SDK/target/profile or Dafny argument change.
+Native Linux F6 now builds successfully after one verified obligation. Separate
+registered upstream Run/Test actions produce the expected real output and exit0,
+using upstream's existing default arguments. Their `--no-verify` is an observed
+upstream default, not a locally selected proof profile. Native macOS and local
+runtime/EVM/kernel correspondence remain pending. Owned descendant readback is
+empty after retirement, including the real dotnet build server.
+
+The unchanged annotated imported local custom fixture still fails the admission
+guard. Current admitted source commands now publish structured started/completed/
+failed receipts bound to command ID, session, URI/version/source hash and explicit
+verification-not-run. The observer reports that real rejection promptly rather
+than waiting for success output. Cancellation/edit/config/close/reopen/disposal
+and registered restart regressions reject stale failures; injected boundaries
+are labeled. No specification admission was bypassed or fixture stripped.
+
+[The checksum manifest](dafny-sdk-failure-evidence-manifest.json) binds VM-only
+provenance, native traffic/artifacts, failures and source review receipts. Finder
+identified weak SDK substring attribution, repaired with exact canonical identity.
+Finder/skeptic final reviews found no further concrete defect. Retained attempts
+include ANSI SDK parsing, CRLF workload mismatch and a wrong-root restart fixture;
+none is counted as a pass. Source reviews do not replace paired row judgments.
+
+All486 row IDs/order, frozen270 and original gates/budgets remain unchanged.
+Full build/TestSuite/timed strict/KeySort, verifier-owned positioned metadata,
+complete paired rendered/lifecycle/performance/adversarial/scaling matrices and
+both fresh judges per row remain unfinished. Classification-only strict is not
+timed strict; no RUNTIME_GATE_PASS, goal mutation, heavy failing retry or
+push/merge/PR. Exact-head handoff/checks live under
+`/workspace/dafny-parity-sdk-failure-20261106/`.
+
+### Native trace presentation and lifecycle assertions (2026-11-06)
+
+The existing harness now asserts actual DOM pseudo-element text/source line,
+default dark/light and configured colors, all margin sides, disappearance after
+hide and rendered Show/Hide/Copy menu transitions. Copy matches real native
+assumptions joined by two newlines, restoring prior clipboard finally. Capture
+ACKs bind metadata hashes; active document object/session, URI/version/text hash
+and replayed UTF16/CRLF wire-open lifetime bind responses and captures.
+
+Native observations retain differences: switching to a trace-free document
+leaves Hide in the menu; a late response restores annotations after hide with
+no matching cancellation. Exact source tabs close, but the document model stays
+live through the original60000ms deadline. True close/reopen remains timed out.
+A separate tab reopening confirms the same cached model/session, not a new
+lifetime. Immediate light-theme continuity fails with empty annotations; a
+distinct fresh Show under selected light theme passes, without replacing that
+failed obligation. Local positioned trace, full lifecycle/disposal and native
+macOS remain missing. No upstream patch or model-prestate reinterpretation.
+
+[Checksum-bound VM evidence](dafny-trace-presentation-evidence-manifest.json)
+retains raw phases/protocol, failures, comparison and source reviews. Reviews
+found an errorful-success ACK and a close-race authority conflation; both were
+reproduced and repaired. Final finder/skeptic found no further concrete defect.
+These reviews are not paired row judgments. All486 rows/frozen270, original
+gates/budgets and proof semantics remain unchanged; no complete row or runtime
+pass is claimed. H80's incoming scoped instructions are the next provisioning,
+metadata and proof-help work; no goal mutation or integration is authorized.
+
+### H80 scoped implementation and provisioning (2026-11-06)
+
+Incoming user message H80 supplies scoped answers: provision pinned CLI/Frontend
+dependencies with the specified12GiB no-swap serial-j1 fallback; add real
+kernel-checked verifier identity/source-span metadata; open project proof docs
+for help; compiler-only Build leaves runtime/test equivalence incomplete. It
+supersedes the earlier proof-help exclusion claim; no row is waived. No
+integration or goal-state change is authorized.
+
+The conditional help action now opens the configured project's docs/README.md,
+which links docs/calculus.md. It uses qualified current summary state, canonical
+file containment, trust and existing picker document/session/version guards.
+Injected regressions cover current running/error/completed state, edit/close/
+switch/configuration/disposal/trust rejection and no backend restart. Finder and
+skeptic found no concrete defect; this is source evidence, not native UI parity
+or either fresh row judgment. Metadata and mandatory proof gates continue after
+dependency provisioning; no local positioned trace is fabricated.

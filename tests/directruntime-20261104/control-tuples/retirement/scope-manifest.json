@@ -1,0 +1,63 @@
+{
+  "batch": "solidity-directruntime-20261104",
+  "slug": "control-tuples",
+  "original_base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "retirement_start_head": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "branch": "codex/solidity-directruntime-20261104/control-tuples",
+  "original_exclusive_writes": [
+    "Solidity/Frontend/ExecutableAst/ControlTuple/**",
+    "tests/directruntime-20261104/control-tuples/**",
+    "docs/feature-work/directruntime-control-tuples.md"
+  ],
+  "families": [
+    "DoWhileStatement",
+    "TupleExpression",
+    "multiple declarations",
+    "flat tuple assignment/declaration/read/return when existing intrinsic semantics supports whole shape"
+  ],
+  "original_exclusions": [
+    "grammar uniqueness",
+    "numeric/constant evaluation",
+    "name resolution",
+    "internal/overloaded calls",
+    "backend producers"
+  ],
+  "frozen": [
+    "H16/H19/H25 Source",
+    "Core ExtCall"
+  ],
+  "constraints": [
+    "no axiom/sorry/admit",
+    "no statement/premise/exclusion weakening",
+    "no trust expansion",
+    "no proof-budget increase",
+    "unsupported stays unknown",
+    "core dependency-free and intrinsically typed",
+    "ordinary runtime loads no kernel/elaborator/tactic frontend/serialized environment",
+    "certificates optional"
+  ],
+  "original_backfill": [
+    "fixture inventory",
+    "evaluation-order controls",
+    "owned controls while producer boundary unavailable"
+  ],
+  "current_H82": "Statement-preserving edits broadly authorized, but retirement now forbids new proof implementation or automatic continuation; no scope takeover until final stopped/head acknowledgement.",
+  "runtime_executed_limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "LEAN_NUM_THREADS": 1,
+    "Lean_args": "-j1",
+    "reserve_bytes": 4294967296
+  },
+  "policy_references_not_fully_retrieved": [
+    "H44 bulk evidence off git",
+    "H68 full PassCorrect bridges",
+    "H69 witness/intentional contradiction distinction",
+    "H78 public API shims",
+    "H80 editor requirements",
+    "H81 current resource policy"
+  ],
+  "unavailable_policy_text_warning": "These reference names are retained from the retirement instruction; no unavailable full text is invented.",
+  "retirement": "existing VM/goal preserved; no complete/reset/new goal; PAUSED requested, pause API unavailable",
+  "push_policy": "H71 forbids pushes from model turns; host prefetcher owns non-forced original branch publication; no push performed"
+}
