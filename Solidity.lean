@@ -2959,6 +2959,7 @@ import Solidity.Frontend.StatementGrammarH28.SyntaxPair
 import Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance
 import Solidity.Frontend.StatementGrammarH28.TokenRoot
 import Solidity.Frontend.StatementGrammarH28.YieldSplit
+import Solidity.Frontend.StatementGrammarH28.YulControlFree
 import Solidity.Frontend.Static.C3
 import Solidity.Frontend.Static.Certificates
 import Solidity.Frontend.Static.Closure
