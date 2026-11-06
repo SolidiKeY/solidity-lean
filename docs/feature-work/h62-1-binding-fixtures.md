@@ -28,3 +28,72 @@ necessary before modifying V07 originals; relation unification stays with its
 owners. The assigned source controls are separately leased, but they do not
 contain the named relations, so their relationship to this extraction needs
 careful case-by-case analysis.
+
+## H70 case reconciliation (source inspection, not a Lean proof)
+
+`python3 scripts/h62/item1/binding-fixtures/reconcile.py` produces per-file
+SHA256s, declaration names and line numbers, lexical `BindingRel` occurrences,
+and source import reachability for the two named sets. At the base it reports
+18 leased files with 105 named top-level theorems, ten V07 definitions, and
+seven G19 abbreviations. None of the leased files contains the token; neither
+set reaches a file in the other set through the scanned imports. The scanner
+follows only column-zero, single-line `import` commands for files present in the
+checkout: this is evidence about that source graph, not a Lean elaborator or a
+proof of semantic independence. The output lists every named declaration so
+that counts cannot stand in for case accounting.
+
+The leased controls are separate source/model observations:
+
+| Control file (`Solidity/Source/Agreement/`) | Cases, including negative and fuel controls |
+|---|---|
+| `BoolSlotAndControls.lean` | conjunction client, horizon, selected/skipped writes, short fuel, operator distinction |
+| `BoolSlotConditionalControls.lean` | conditional client, horizon, true/false branches, reversal, selected/skipped writes |
+| `BoolSlotControls.lean` | middle-slot source/model writes and wrong-slot refusal |
+| `BoolSlotNotControls.lean` | negation client, horizon, both Boolean inputs and identity refusal |
+| `BoolSlotOrControls.lean` | disjunction client, horizon, selected/skipped writes, short fuel and conjunction distinction |
+| `BoolSlotReadControls.lean` | read then assign, client, two fuel controls, distinct copy and alias refusal |
+| `BoolSlotRepeatedControls.lean` | double toggle, insufficient horizon, different slots and restoration refusal |
+| `BoolSlotSavedControls.lean` | saved toggle, insufficient horizon, both inputs and overwrite refusal |
+| `BoolSlotToggleControls.lean` | toggle client, horizon, both inputs, twice-toggle source/model and old-result refusal |
+| `NormalBoolAssignControls.lean` | Boolean initialization and assignment, source/model/client, two horizons and wrong value |
+| `NormalBoolControls.lean` | two Boolean initializations, source/model/client, two horizons and wrong value |
+| `NormalControls.lean` | skips, agreement/client, zero horizon, early return and revert refusal |
+| `NormalDefaultControls.lean` | defaults source/model/client, two horizons, names and wrong value |
+| `PrimitiveCopySequenceControls.lean` | head/deep preservation, model heads, swap refusal, inward copy and order |
+| `PrimitiveSavedAssignControls.lean` | middle/heads, Boolean case and old-target refusal |
+| `PrimitiveSlotAssignControls.lean` | middle source/model, uint/int cases, reverse model and refusal |
+| `PrimitiveSlotControls.lean` | primitive read client, horizon, uint/int copy and wrong value |
+| `PrimitiveSlotReverseControls.lean` | middle/tail, Boolean case and direction refusal |
+
+The ten V07 relation definitions are separately accounted for below. Reference
+arms are exact initial memory/storage identities and unmatched cases are false
+where the definitions say so; their removal or broadening is not authorized.
+
+| Control file (`Solidity/Lowering/V07/`) | `BindingRel` cases |
+|---|---|
+| `P12Controls.lean` | Boolean equality, unsigned integer keys, fixed memory/storage identities, otherwise false |
+| `AddressConversionControls.lean` | nonpayable address relation; other cases delegate to P12 |
+| `AddressQualifierControls.lean` | address relation for qualifier `p`; other cases delegate to P12 |
+| `EnumConversionControls.lean` | enum relation, fixed reference identities, otherwise false |
+| `EnumSignedCastControls.lean` | enum relation, fixed reference identities, otherwise false, in its own environment |
+| `FixedBytesAssignmentControls.lean` | fixed-byte relation, fixed reference identities, otherwise false |
+| `UdvtAddressAssignmentControls.lean` | address UDVT relation, fixed reference identities, otherwise false |
+| `UdvtAssignmentControls.lean` | integer UDVT relation with typed cast, fixed reference identities, otherwise false |
+| `UdvtBoolAssignmentControls.lean` | Boolean UDVT relation with underlying-type witness, fixed reference identities, otherwise false |
+| `UdvtFixedBytesAssignmentControls.lean` | fixed-byte UDVT relation, fixed reference identities, otherwise false |
+
+The G19 files `AssignmentDoWhileBreakControls.lean`,
+`AssignmentDoWhileContinueControls.lean`, `AssignmentForBreakControls.lean`,
+`AssignmentForReturnControls.lean`, `AssignmentReturnFlagControls.lean`,
+`AssignmentWhileBreakControls.lean`, and `WhileReturnControls.lean` each
+abbreviate `P12Controls.BindingRel`; the aliases do not define seven new
+relations. Their control-flow cases differ and are not covered by the leased
+Source Agreement controls. No assertion of interchangeability follows from
+similar cases, nor is moving a statement across modules validated here.
+
+Independent finder and skeptic reviews remain outstanding. This reconciliation
+is preliminary backfill; all fixture extraction checkpoints and their Lean
+proof, resource, timing, acceptance, and full validation gates remain pending.
+The coordinator has stated V07 is Claude-owned and that no original-file
+permission is inferred; any required exact-file request must go through the
+coordinator, not a VM installation of `relay.sh`.
