@@ -993,3 +993,28 @@ control; `checked_exp_vs_evm_halts`; docstring names; `exp` wording and payload 
 lemma (`h`, `body`, `hw`, `h₁`, `h₂`) stay untyped, as in C09. Kernel cost (warning,
 per AGENTS.md): `census_certified` takes about a minute and the generated Census
 modules elaborate in about a minute more; they are leaf modules of this lane.
+
+### C10 gates
+- Per-file Lean diagnostics (MCP), 0 errors: IrRename, IrCensusCreation, IrCensusDeployed,
+  IrLinkedCode, IrCensusTree, IrCensusMaps, IrCensusTransfer, IrCensusUnique, IrExpEvm,
+  IrErase, IrCensusParse; test IrCensusGen (`CENSUS_TREE 172 lines`, file unchanged).
+- `#print axioms`: `census_certified`, `sim_push_cd`, `census_tables_unique`,
+  `duplicate_counterexample`, `parse_rejects_duplicate` [propext]; `evalBlock_ren`
+  [propext, Quot.sound]; `helpers_named_cd` none; `census_checked_add_matches_source`,
+  `census_checked_exp_overflow_halts`, `census_constructor_push_body`, `expUnsigned_evm`,
+  `expUnsigned_opcode`, `census_checked_exp_vs_evm` [propext, Classical.choice, Quot.sound].
+- `VT1_SKIP_LEAN=1 check-ir.sh`: CENSUS_MODULES_CHECK_PASS, VT1_IR_CHECKS_PASS.
+  `check-layers.mjs`: "857 core modules, 0 reach the elaborator".
+- `./run-lean.sh` at `52ed5830`: master's `docs/README.md` carries a row no fragment
+  produces (master's, not this lane's), so `fragments.sh --check` fails before the build;
+  for the gate only, the file was regenerated with `fragments.sh --force` and restored
+  after the check stage (never committed). The cold build (no shipped artifacts) hit the
+  2 h session limit at 5987/6257; three incremental reruns followed, in which other lanes'
+  `Source/Horizon` and `Backend/Scalar/PowerBounds` were OOM-killed (exit 137) while the Lean
+  server held ~4 GB, until both built. Final run: "Build completed successfully (6428 jobs)",
+  then `check-solkey.sh` against the unpinned sibling `../solkey`: "167 mismatch(es)" (as in
+  C09). Rerun with the pinned rules,
+  `SOLKEY_RULES=tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key scripts/check-solkey.sh`:
+  "OK — annotations match" (377 taclets, 131 read-bearing), exit 0.
+- Fresh solc fixture rerun: still blocked (`binaries.soliditylang.org` unreachable; no
+  unpinned compiler is run); the fixtures remain the pinned-binary outputs.
