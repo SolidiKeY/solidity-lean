@@ -637,3 +637,17 @@ following broad candidates records their named public control observations.
 These are partial manual case notes, not an exact G19 scope determination,
 complete private/generated declaration review, proof of a migration or
 independent review.
+
+### Remaining G19 lexical execS/evalE candidate cases
+
+The following is a read-only statement census, not a proof of fixture equivalence or a determination of the original G19 scope. Together with the preceding G19 tables it covers the 18 lexical candidate control files; declarations and cases outside those candidates still need scope identification and acceptance.
+
+| Control | Original obligations to preserve |
+| --- | --- |
+| AssignmentReturnFlag | For every pipeline, fuel and checked flag, true assignment returns and false assignment continues normally, with source/target related; same-slot alias runs normally. Captured true, stale guard and wrong map refusals, and live memory/storage input are separate obligations. |
+| ConditionalReturn | Every pipeline, fuel, flag and checked setting yields source return, target reachability and related environments. Observe `[true,true,flag,true]`; wrong donor and wrong return flag are refused; return is not normal. |
+| ConditionalReturnContinuation | Same quantified joined return and relation with a tail; normal observation `[true,true,flag,true]`, eager tail `[true,false,flag,true]`, refusal for both flags, and evidence that the skipped tail actually writes. |
+| ConditionalStatement | Both choices, arbitrary pipeline and fuel preserve normal source/target runs and relation; source and target snapshots distinguish branch values. Refuse stale condition; preserve aliased reached relation and `[false,false,true]` snapshot. |
+| ConditionalSequence | Both choices and arbitrary pipeline/fuel preserve normal source/target runs and relation with subsequent assignment; source and target snapshots agree, wrong scope index is refused. Heterogeneous Boolean/numeric fixture has reached relation and `[1,1,7]` snapshot. |
+| ReturnPair | Arbitrary pipeline, fuel and flag: source returns on true and continues on false, target reaches related environment. Observe `[flag,!flag,true,true]`; refuse stale second donor and omitted second write; preserve captured-false/caller-true witness. |
+| ReturnTail | Both choices and arbitrary pipeline/fuel preserve return versus normal outcome, related target and captured flag; preserve source/target snapshots and eager-tail refusal. Aliased initial relation, reached relation, `[false,true,true,false]` snapshot and clobbered-flag refusal are independent obligations. |
