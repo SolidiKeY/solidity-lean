@@ -12,6 +12,7 @@ class Mapping(unittest.TestCase):
     def test_contexts_and_unresolved(self):
         for path, context, module in [
             ("Solidity/Examples/Foo.lean", "root", "Solidity.Examples.Foo"),
+            ("SoliditySlowExamples.lean", "root", "SoliditySlowExamples"),
             ("Bridge/SolidityBridge/Foo.lean", "bridge", "SolidityBridge.Foo"),
             ("Bridge/vendor/Loom/Foo.lean", "bridge-vendor", "Loom.Foo"),
             ("Bridge/vendor/Loom/DoNames'.lean", "bridge-vendor", "Loom.DoNames'"),

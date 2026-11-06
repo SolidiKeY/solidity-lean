@@ -1115,3 +1115,44 @@ ESCALATE: after two unsuccessful Terra runner designs, return runner design
 to Sol or use a coordinator-supplied authenticated serial runner. Neither
 option grants the pin migration window or changes the proof/resource budget.
 The five-module A/B and H109 final gates remain pending.
+
+## Post-merge standalone census and H62 examples
+
+The candidate mapper now recognizes the H109-generated
+`SoliditySlowExamples.lean` as a root module. On task head
+`798a5f217` before this mapper edit, the refreshed tracked census has 7,721
+Lean paths and 540 unresolved standalone candidates. Relative to the earlier
+504-row snapshot, 36 unresolved paths were added and none removed. The
+updated mapper source hash, full new row list and delta are recorded in
+`/workspace/h55-module-times-evidence/h109-postmerge-standalone.json` and
+checksum-bound by `tests/h55/module-times/h109-postmerge-census.sha256`.
+The head and mapper hash are separate because the census used an uncommitted
+mapper edit. Neither this tracked-only snapshot nor its candidate contexts
+are an authenticated runnable inventory.
+
+Independent read-only source reviews examined these current fixture groups:
+
+- `tests/h62/item2/audit-bytecode-selection/` has five files:
+  `Witnesses`, `LiteralSuccess`, `RuntimePremiseWitness`, `ValueGateSuccess`
+  and `HypothesisDomains`. Its `verify.py` lists them as roots, resolves
+  local imports, uses a fresh private evidence/olean directory and serial Lean
+  checks, and requires successful exit and source/hash checks. The guarded
+  negative diagnostics and rejection controls are expected to elaborate
+  successfully; they are not process-level expected failures. Exact current
+  prerequisites, containment and the pinned base require validation.
+- `tests/h62/item2/audit-evm-compiler/` now has eight tracked files.
+  `measure.py` explicitly invokes `LayoutAudit`, `SuccessAudit` and
+  `HeadlineAudit` with a caller-supplied config and evidence.
+  `JointImpossible`, `JointWitness`, `IntentionalAudit`, `JumpdestAudit` and
+  `OpcodeAudit` supply contradiction, witness or audit controls, but their
+  current standalone drivers and outcomes were not established by that
+  script. An intentional contradiction is not a joint witness.
+- `tests/h62/item6/migrate-examples/ApiFixture.lean` exercises Lean API
+  behavior; `InterfaceDump.lean` requires `H62_INTERFACE_OUTPUT` and writes
+  an audit JSONL at that path. Its exact current direct driver and complete
+  inputs remain unverified. A dump hash is not semantic equivalence proof,
+  and the output-writing command needs an explicitly owned destination.
+
+These are source-backed classifications, not observed Lean runs. The other
+standalone rows, generated controls, H56 provenance and the complete execution
+inventory remain open; no fixture is excluded or accepted by this note.

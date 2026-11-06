@@ -12,7 +12,7 @@ spec = importlib.util.spec_from_file_location("h55_census", ROOT / "scripts/h55/
 census = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(census)
 IDENT = re.compile(r"^[A-Za-z_][A-Za-z_0-9\x27]*$")
-ROOT_MODULES = {"Solidity.lean", "SolidityExamples.lean", "SolidityCorpus.lean",
+ROOT_MODULES = {"Solidity.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean", "SolidityCorpus.lean",
                 "SolkeyTestSuite.lean", "SolkeyCheck.lean", "SolidityLean.lean",
                 "SolCases.lean", "TrustAudit.lean"}
 
