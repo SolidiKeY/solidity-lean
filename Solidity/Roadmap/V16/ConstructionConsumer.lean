@@ -16,6 +16,9 @@ theorem construction_allocation_cost {C : Contract} {b : Nat} {Γ Δ : Ctx}
     (path : compiled.isConstruction = true) (σ : State C Γ) :
     compiled.allocationCost σ = Memory.Construction.allocationCostProg P σ := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -33,6 +36,9 @@ theorem construction_result {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
     Memory.Objects.GrowingResult L b frame (compiled.allocationCost σ) compiled.frag σ base m
       (P.run σ) (run compiled.code m) := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -53,6 +59,9 @@ theorem construction_rep_iff {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
         Memory.BaseExtends σ.H base base' ∧
         Memory.Objects.GrowsAllocator b frame (compiled.allocationCost σ) σ base m τ base' m' := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -325,6 +334,9 @@ def constructionCertificate {C : Contract} {b : Nat} {Γ Δ : Ctx}
     {F : Frag Γ} {P : Prog C Γ Δ} (compiled : Compiler.Compilation b F P)
     (path : compiled.isConstruction = true) : Memory.Construction.CompiledProg b F P :=
   match compiled with
+  | .memoryCopy _ => False.elim (Bool.noConfusion path)
+  | .fixedMemory _ => False.elim (Bool.noConfusion path)
+  | .copyConstruction _ => False.elim (Bool.noConfusion path)
   | .construction out => out
   | .core _ _ => False.elim (Bool.noConfusion path)
   | .memory _ => False.elim (Bool.noConfusion path)
@@ -339,6 +351,9 @@ theorem construction_reconstruct {C : Contract} {b : Nat} {Γ Δ : Ctx}
     (path : compiled.isConstruction = true) :
     Compiler.Compilation.construction (constructionCertificate compiled path) = compiled := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -354,6 +369,9 @@ theorem construction_public_cert {C : Contract} {b : Nat} {Γ Δ : Ctx}
     (path : compiled.isConstruction = true) :
     Memory.Construction.ProgFrag b F compiled.frag P compiled.code := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path

@@ -18,6 +18,9 @@ theorem memory_call_result {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
     Memory.GrowingResult L b frame (compiled.allocationCost σ) compiled.frag σ base m
       (P.run σ) (run compiled.code m) := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -38,6 +41,9 @@ theorem memory_call_rep_iff {C : Contract} {b L frame : Nat} {Γ Δ : Ctx}
         Memory.BaseExtends σ.H base base' ∧
         Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m τ base' m' := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
