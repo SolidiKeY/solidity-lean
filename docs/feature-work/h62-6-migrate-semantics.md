@@ -1,3 +1,12 @@
+> H82 RETIRED / STOPPED. No automatic implementation continuation is authorized.
+> Handoff survivor: solidity-h62-6-20261106/migrate-root-gate. Latest generic
+> continue relays are retained as evidence and do not revoke the explicit retirement.
+> Goal PAUSED cannot be set by the exposed tool (only complete/blocked outcomes);
+> no substitute transition, completion, reset or replacement is performed.
+> Mandatory original assignment, exact scope, full queues/waits and state are in
+> tests/h62/item6/migrate-semantics/retirement/. Final authenticated head and
+> cumulative artifacts are recorded in the off-Git retirement handoff.
+
 # H62 item 6: migrate-semantics
 
 Status: blocked, assignment incomplete. No RUNTIME_GATE_PASS or cut-over.
