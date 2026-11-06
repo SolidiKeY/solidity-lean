@@ -45,3 +45,11 @@ The staged `tests/h62/item1/packet-panic/PanicBytes.lean` and `CheckedMulEquival
 ## H71 isolated fixture and Q1 routing
 
 Q1 is an owner wait, routed to `solidity-compiler10-20261028/memory-internal-calls` for `Q1 panic_not_empty proof`; the two-proof owner proposal stays unchanged. The `Init`-only `PanicBytesFixture.lean` has eight independently reviewed fixture theorems diagnosed successfully under the pinned Lean MCP, with no axioms reported. Its locally copied byte recurrence is textually compared to pinned Source bytes by `test_fixture_source_shape.py`; no kernel connection to actual `Source.panicData`, producer equivalence, or target behavior has been proved. The prior real-helper diagnostic remains failed on unavailable imports, and all original gates remain open. Details and resource/cleanup limitations are in `tests/h62/item1/packet-panic/H71-CANDIDATE.md`.
+
+## H82 successor validation of the actual Source helper
+
+The stopped final checkpoint is preserved, including its failed stale-import diagnostics. In the successor, `tests/h62/item1/packet-panic/PanicBytes.lean` now checks with the live Lean 4.24 toolchain against the actual imported `Solidity.Source.Observe`. Its three existing theorems `exact_panic_bytes`, `panic_not_truncated` and `panic_not_empty` each report no axioms. These establish the arithmetic panic's canonical source bytes, nontruncation and nonemptiness; the copied fixture is not used as their justification.
+
+The initial successor check also failed on a missing `Observe.olean`. Lake reported a cache fetch without materializing that object. Preserving the incomplete traces and rebuilding the small required closure with artifact fetching disabled repaired that operational failure; the helper then checked. This does not establish a 4.35 migration result. The historical failed diagnostics remain evidence of those attempts.
+
+The helper remains in the additive test scope. Production placement/registration, original consumer instance/equivalence checks, complete case accounting, helper-inclusive before/after measurements, affected/full gates and final reviews remain open. The source-byte observations make no claim about the coarse selected-target revert or its payload. H82 supersedes the earlier permission waits for statement-preserving proof edits; it does not weaken these semantic or validation obligations.
