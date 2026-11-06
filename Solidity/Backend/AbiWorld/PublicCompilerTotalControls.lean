@@ -8,13 +8,17 @@ independently, by kernel evaluation of the public entry. A signed `&`
 formerly refused is now accepted. Negative controls kernel-observe refusals
 for two remaining side conditions (self balance, a non-`uint` mapping key);
 the word-fit conditions are refusals of `locIn` by its code without a kernel
-control; the alias conditions are domain choices, not refusals. -/
+control. H96: an alias bound through an array index (`row = rows[x]`, rebound
+inside a loop) is accepted by the theorem and by kernel evaluation, with a
+fresh-machine `Agrees` witness; a kind-changing rebind in a loop and a read of
+an unset alias are kernel-observed refusals. -/
 namespace Solidity.Backend.AbiWorld.PublicCompilerTotalControls
 open Solidity.Evm Solidity.Backend.AbiWorld.PublicCompilerTotal
 
 def C : Contract :=
   { vars := [("total", .prim .uint), ("balances", .ref (.mapping .uint (.prim .uint))),
-    ("signed", .ref (.mapping .int (.prim .uint)))] }
+    ("signed", .ref (.mapping .int (.prim .uint))),
+    ("rows", .ref (.array (.ref (.array (.prim .uint))))), ("list", .ref (.array (.prim .uint)))] }
 
 abbrev Γ₀ : Ctx := []
 abbrev Γ₁ : Ctx := [.val .uint]
@@ -59,7 +63,7 @@ def program : Solidity.Prog C Γ₀ Γ₂ :=
   .cons (.require (.binop .eqB rfl rfl (.binop .bor rfl rfl sx (.binop .bxor rfl rfl sx sx)) sx)) <|
   .cons (.call "f" fArgs (.val .uint (.user "r") (some (.there .here))) fBody) .nil
 
-theorem program_ok : ProgOk program :=
+theorem program_ok : ProgOk [] program :=
   .cons (.declSome _ _ (.read (.root _ _))) <|
   .cons (.declStorage _ _ (.root _ _)) <|
   .cons (.loop _ (.binop _ _ _ (.local _) (.lit _ _))
@@ -67,7 +71,7 @@ theorem program_ok : ProgOk program :=
   .cons (.ite (.binop _ _ _ (.local _) (.lit _ _))
     (.cons (.assign (.map (.alias _) (.local _)) (.local _)) <|
      .cons (.opAssign _ _ _ (.root _ _) (.local _)) <|
-     .cons (.rebind _ (.root _ _)) <|
+     .cons (.rebind _ rfl (.root _ _)) <|
      .cons (.opAssign _ _ _ (.index (.map (.alias _) (.local _))) (.lit _ _)) .nil)
     (.cons .revert .nil)) <|
   .cons (.incDec _ _ (.root _ _)) <|
@@ -96,9 +100,98 @@ contract (`Sim.init`), so the observation is reached, not vacuous. -/
 theorem program_agrees_fresh : ∃ result, Compiler.compile 0 (Frag.init Γ₀) program = some result ∧
     ∀ (frame : Nat) (base : Nat → Fin W), result.Agrees 1 frame base
       (freshT C 0 W_pos ⟨0, W_pos⟩) (Machine.init (fun _ => 0) ⟨0, W_pos⟩) := by
-  obtain ⟨result, accepted, agrees⟩ := compile_agrees 0 (Readable.init Γ₀) program_ok
+  obtain ⟨result, accepted, agrees⟩ := compile_agrees 0 (Matches.init Γ₀) program_ok
   exact ⟨result, accepted, fun frame base =>
     agrees 1 frame base _ _ (Sim.init C 0 W_pos (fun _ => 0) ⟨0, W_pos⟩ rfl) (by unfold Lmax; decide)⟩
+
+/-! ## Aliases bound through an array index (H96) -/
+
+abbrev A : RefTy := .array (.prim .uint)
+abbrev Γa : Ctx := [.alias A, .val .uint]
+
+def xa : Solidity.Val C Γa .uint := .simple (.local (.there .here))
+
+def row : Solidity.SPath C Γa (.ref A) := .alias .here
+
+def litA (n : Nat) (h : PrimTy.uint.inRange n = true := by decide) : Solidity.Val C Γa .uint :=
+  .simple (.lit n h)
+
+/-- `rows[i]`, an indexed path. -/
+def rowsAt {Γ : Ctx} (i : Solidity.Val C Γ .uint) : Solidity.SPath C Γ (.ref A) :=
+  .loc (.index (.arr .dyn) (.loc (.root "rows" rfl)) i)
+
+/-- `uint x = 2; uint[] storage row = rows[x];
+while (x < 3) { row[0] += x; row = rows[x]; x += 1; }
+if (x == 3) { row = rows[0]; } else { revert(); }
+row[1] = x; require(row[0] == row[0]);` -/
+def indexed : Solidity.Prog C Γ₀ Γa :=
+  .cons (.declLocal .uint (.user "x") (some (.simple (.lit 2 (by decide))))) <|
+  .cons (.declStorage A (.user "row") (some (.path (rowsAt (.simple (.local .here)))))) <|
+  .cons (.loop .auto (.binop .lt rfl rfl xa (litA 3))
+    (.cons (.opAssign .add rfl rfl (.index (.arr .dyn) row (.lit 0 (by decide))) xa) <|
+     .cons (.rebind .here (.path (rowsAt xa))) <|
+     .cons (.opAssign .add rfl rfl (.local (.there .here)) (litA 1)) .nil)) <|
+  .cons (.ite (.binop .eqB rfl rfl xa (litA 3))
+    (.cons (.rebind .here (.path (rowsAt (litA 0)))) .nil)
+    (.cons .revert .nil)) <|
+  .cons (.assign (.index (.arr .dyn) row (litA 1)) (.val xa)) <|
+  .cons (.require (.binop .eqB rfl rfl (.read (.index (.arr .dyn) row (litA 0)))
+    (.read (.index (.arr .dyn) row (litA 0))))) .nil
+
+theorem indexed_ok : ProgOk [] indexed :=
+  .cons (.declSome _ _ (.lit _ _)) <|
+  .cons (.declIndexed _ _ (.loc (.dyn (.loc (.root _ _)) (.local _))) .dyn) <|
+  .cons (.loop _ (.binop _ _ _ (.local _) (.lit _ _))
+    (.cons (.opAssign _ _ _ (.index (.dyn (.alias _) (.lit _ _))) (.local _)) <|
+     .cons (.rebindIndexed _ rfl (.loc (.dyn (.loc (.root _ _)) (.local _))) .dyn) <|
+     .cons (.opAssign _ _ _ (.local _) (.lit _ _)) .nil)) <|
+  .cons (.ite (.binop _ _ _ (.local _) (.lit _ _))
+    (.cons (.rebindIndexed _ rfl (.loc (.dyn (.loc (.root _ _)) (.lit _ _))) .dyn) .nil)
+    (.cons .revert .nil)) <|
+  .cons (.assign (.dyn (.alias _) (.lit _ _)) (.local _)) <|
+  .cons (.require (.binop _ _ _ (.read (.dyn (.alias _) (.lit _ _)))
+    (.read (.dyn (.alias _) (.lit _ _))))) .nil
+
+theorem indexed_accepted (b : Nat) : (Compiler.compile b (Frag.init Γ₀) indexed).isSome = true :=
+  compile_init b indexed_ok
+
+theorem indexed_kernel : (Compiler.compile 0 (Frag.init Γ₀) indexed).isSome = true := by
+  decide +kernel
+
+/-- Joint satisfiability: the fresh contract meets every premise of
+`compile_agrees` for the indexed-alias program. -/
+theorem indexed_agrees_fresh : ∃ result, Compiler.compile 0 (Frag.init Γ₀) indexed = some result ∧
+    ∀ (frame : Nat) (base : Nat → Fin W), result.Agrees 1 frame base
+      (freshT C 0 W_pos ⟨0, W_pos⟩) (Machine.init (fun _ => 0) ⟨0, W_pos⟩) := by
+  obtain ⟨result, accepted, agrees⟩ := compile_agrees 0 (Matches.init Γ₀) indexed_ok
+  exact ⟨result, accepted, fun frame base =>
+    agrees 1 frame base _ _ (Sim.init C 0 W_pos (fun _ => 0) ⟨0, W_pos⟩ rfl) (by unfold Lmax; decide)⟩
+
+/-- Rebinding an indexed alias to a plain path inside a loop changes its kind:
+the loop fixed-point check refuses it, and the judgement excludes it. -/
+def kindChange : Solidity.Prog C Γ₀ Γa :=
+  .cons (.declLocal .uint (.user "x") (some (.simple (.lit 2 (by decide))))) <|
+  .cons (.declStorage A (.user "row") (some (.path (rowsAt (.simple (.local .here)))))) <|
+  .cons (.loop .auto (.binop .lt rfl rfl xa (litA 3))
+    (.cons (.rebind .here (.path (.loc (.root "list" rfl)))) .nil)) .nil
+
+theorem kindChange_refused : (Compiler.compile 0 (Frag.init Γ₀) kindChange).isNone = true := by
+  decide +kernel
+
+theorem kindChange_outside : ¬ ProgOk [] kindChange := fun h => by
+  have accepted := compile_init 0 h
+  rw [Option.isSome_iff_ne_none] at accepted
+  exact accepted (Option.isNone_iff_eq_none.mp kindChange_refused)
+
+/-- Reading an unset alias is refused (and solc rejects it). -/
+def unsetRead : Solidity.Prog C Γ₀ [.alias A] :=
+  .cons (.declStorage A (.user "u") none) <|
+  .cons (.require (.binop .eqB rfl rfl
+    (.read (.index (.arr .dyn) (.alias .here) (.simple (.lit 0 (by decide)))))
+    (.simple (.lit 0 (by decide))))) .nil
+
+theorem unsetRead_refused : (Compiler.compile 0 (Frag.init Γ₀) unsetRead).isNone = true := by
+  decide +kernel
 
 /-! ## Former and remaining refusals -/
 
@@ -130,7 +223,7 @@ theorem intKey_refused : (Compiler.compile 0 (Frag.init Γ₀) intKey).isNone = 
   decide +kernel
 
 /-- Contrapositive of totality: the refused program is outside the domain. -/
-theorem intKey_outside : ¬ ProgOk intKey := fun h => by
+theorem intKey_outside : ¬ ProgOk [] intKey := fun h => by
   have accepted := compile_init 0 h
   rw [Option.isSome_iff_ne_none] at accepted
   exact accepted (Option.isNone_iff_eq_none.mp intKey_refused)
