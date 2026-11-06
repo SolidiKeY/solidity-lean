@@ -1767,3 +1767,56 @@ reported 167 sort-annotation mismatches between the SolKey checkout beside the
 repository (`5c448df`) and the annotation table. This change touches neither;
 re-pinning is the SolKey migration's job (`docs/solkey-migration.md`).
 Per-file Lean diagnostics of both new modules are clean.
+
+## Frozen interface v4: success-only companion (H57 pair, user decision 2026-11-06)
+
+The user chose a versioned success-only companion over the frozen V3
+interface (Q1 of the V12-P1 result). `RuntimeFrameInterfaceV4.lean`,
+namespace `…RuntimeFrame.InterfaceV4`, declares `PendingCallProducer`,
+`PendingFixedCallRecProducer` and `PendingRecursiveReturns` with every V3
+field except `required_reverting_entry`: the same external admission domain
+and agreement, universal Entry coverage, an admitted successful entry, the
+universal `ReturnClaim` and conditional `BareRevertClaim`, and for recursive
+families source coherence. V3 is unchanged. No claim is weakened; only one
+non-vacuity witness is dropped. Provenance of the approved domain stays
+external.
+
+### Closure under V4 and its boundary
+
+- `RuntimeFrameV4TrivialFamily.producer` is a real V4 recursive producer for
+  the never-reverting empty-body family, over the populated `CompileExamples`
+  caller with the publicly selected void-call image at every index. Return
+  and bare-revert claims are `NoneProducer.returns`/`bare_revert` at positive
+  indices and vacuous at the exhausted index 0; coherence is derived from the
+  source; coverage is universal over a physical domain with no index filter;
+  the successful entry is a real admitted caller at index 1. `satisfiable`
+  shows all V4 fields jointly satisfiable (with `approved := domain`, which
+  is not provenance). `v3_empty`: V3 is empty for the same family and domain,
+  so V4 strictly extends V3.
+- V4 still does not close every recursive family, and cannot:
+  `V4Migration.no_success_producer` empties it for any family with no
+  successful run (`exhaustingStep`, `exhausting_empty`), and it keeps source
+  coherence, which one code image needs. The remaining gap for a universal
+  closure is a general recursive compiler: the inputs of
+  `V4Migration.of_unrolled` (per-body ordinary-call `ReturnClaim`) for an
+  arbitrary `step`. Only selected families have them.
+
+### Migration notes for V3 consumers
+
+- Nothing changes for V3 consumers: V3 is frozen and its producers remain.
+- `V4Migration.call_ofV3`, `fixed_ofV3`, `recursive_ofV3` turn any V3
+  producer into a V4 producer with the same plan. A consumer that uses only
+  successful-return transport (ReturnClaim, coverage, coherence, the success
+  witness) should take the V4 structure; it then also accepts success-only
+  sources.
+- `call_toV3`, `fixed_toV3`, `recursive_toV3` turn a V4 producer plus an
+  admitted `RevertingEntry` for its plan back into V3. Consumers that need the
+  reverting witness keep asking for V3.
+- `V4Migration.of_unrolled` is the V4 analogue of `V3GeneralBoundary.of_unrolled`.
+
+### G49 bridge: waiting
+
+The user chose to merge the G49 `PassCorrect` modules to master first (Q2).
+Wait: {lane: cloud/move6-20261106/g49-final, item: PassCorrect on master}.
+After that lands, this lane defines the canonical P1 Event/Outcome languages
+and proves `p1_frame_bridge`.

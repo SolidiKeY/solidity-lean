@@ -339,6 +339,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameFootprint
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3
+import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4
 import Solidity.Backend.InternalFlow.RuntimeFrameMutation
 import Solidity.Backend.InternalFlow.RuntimeFrameNested
 import Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer
@@ -598,6 +599,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3SecondAllocatingEntry
 import Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionalityControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV4Migration
+import Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
