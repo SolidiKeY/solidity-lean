@@ -129,17 +129,41 @@ def wrongInline : Stmt C G G :=
 
 theorem wrong_inline_reverts : Stmt.runC wrongInline (withA 5) = .error .revert := rfl
 
-/-- A call with a return value is left as written. -/
-def callRet : Stmt C G G :=
-  .call "g" .nil (.val .uint (.user "r") (some .here))
-    (.cons (.assignLocal .here (lit 7)) .nil)
+/-- `a = g(a)` for `function g(uint x) internal returns (uint r) { r = x + 2; }`. -/
+def gBody : Prog C ([.val .uint] ++ [.val .uint]) [.val .uint, .val .uint] :=
+  .cons (.assignLocal .here (add (.simple (.local (.there .here))) (lit 2))) .nil
 
-theorem ret_call_kept : Stmt.inl callRet = callRet := rfl
+def callRet : Stmt C G G :=
+  .call "g" (.snoc .nil .uint (.user "x") (.simple (.local .here)))
+    (.val .uint (.user "r") (some .here)) gBody
+
+/-- The call becomes `{ uint x = a; uint r; { r = x + 2; } a = r; }`. -/
+theorem ret_call_inlined : Stmt.inl callRet =
+    .block (.cons (.declLocal .uint (.user "x") (some (.simple (.local .here))))
+      (.cons (.declLocal .uint (.user "r") none)
+        (.cons (.block (.cons (.assignLocal .here (add (.simple (.local (.there .here))) (lit 2)))
+          .nil))
+          (.cons (.assignLocal (.there (.there .here)) (.simple (.local .here))) .nil)))) := rfl
+
+/-- The caller's `a` after the call / the inlined block, from `a = 5`. -/
+def aAfter (r : TRes (Out C (withA 5).H G)) : TRes Int :=
+  r.map fun o => (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+
+theorem ret_call_seven : aAfter (Stmt.runC callRet (withA 5)) = .ok 7 := rfl
+theorem ret_inlined_seven : aAfter (Stmt.runC (Stmt.inl callRet) (withA 5)) = .ok 7 := rfl
+
+/-- A call with a memory return is left as written. -/
+def callMem : Stmt C G (.mem (.array (.prim .uint)) :: G) :=
+  .call "m" .nil (.mem (.array (.prim .uint)) (.user "r") rfl rfl) .nil
+
+theorem mem_call_kept : Stmt.inl callMem = callMem := rfl
 
 #print axioms inlineBlock_runC
 #print axioms Prog.inl_runC
 #print axioms call_inlined
 #print axioms wrong_inline_reverts
+#print axioms inlineBlockVal_runC
+#print axioms ret_inlined_seven
 #print axioms Val.pbeq_eq
 #print axioms Val.cse_evalT
 #print axioms Prog.cse_empty_runC

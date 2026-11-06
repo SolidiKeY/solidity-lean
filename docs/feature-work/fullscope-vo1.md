@@ -1099,3 +1099,18 @@ solc's inliner trades, are not modelled — the latter is a D1/D6 benchmark item
 Added controls: a two-argument call whose second argument reads the caller's local
 (`two_args_inlined`, `two_args_ok`, `two_args_call_ok`) and the negative control
 `wrong_inline_reverts` (an inliner without re-indexing reverts where the call succeeds).
+
+### Inlining with one value return — 2026-11-06
+
+`inlineBlockVal_runC f args h p r res body : Stmt.runC (inlineBlockVal args h p r res body) =
+Stmt.runC (.call f args (.val p r res) body)` (premise `args.allVal = true` only). The call
+`x = g(args)` (or `g(args);` with the value discarded, `res = none`) becomes
+`{ params; T r; { body' } x = r; }`. It rests on the new `frame_runC`: the weakened body,
+its scope ended, leaves exactly its frame's final locals on top of the caller's locals
+weakened along the heap (`TEnv.append qs (drop body.ext …) (TEnv.wk … σ.env)`), proved from
+`Prog.run_wk`/`TWkRel.drop` with `put_top_gen` and `off_bot_inj`. `inlineCall` now inlines
+`CallRet.none` and `CallRet.val`; `Prog.inl_runC` is unchanged in statement. Controls:
+`ret_call_inlined` (exact syntax), `ret_call_seven`/`ret_inlined_seven` (both leave
+`a = 7` from `a = 5`), `mem_call_kept` (a memory return is left as written). Still not
+inlined: several returns (`rets`), memory/storage returns, reference parameters,
+`callRec`, receiver calls.
