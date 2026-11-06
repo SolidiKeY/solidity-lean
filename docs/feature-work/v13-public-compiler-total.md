@@ -97,3 +97,16 @@ session language, and the P1 success producers (V12/MRS/V17).
 The Codex lane's last item, G42.04 library body/binding adequacy, still waits
 on the actual library body producer (`Lowering/V08/LibraryPremises.lean`
 names it as an explicit producer duty); `LibraryResultPacket` is unchanged.
+
+## Reviews
+
+Read-only finder and skeptic reviews (no Lean server) of the two modules and
+this document. No soundness or vacuity defect. Confirmed findings, fixed:
+the Controls docstring overclaimed refusal controls for every side condition
+(now three kernel refusals, the word-fit conditions stated as code-only);
+`Agrees` was written with ↔ (now one-directional pairs); the returndata
+refusal is proved only for the core branch; `BridgeGoal` is a schema name, not
+a Lean declaration; the domain's dependence on `Evm.offset` and its being a
+restatement of the core fragment are stated explicitly (framing left to the
+user as a scope question). The skeptic confirmed `compile_agrees` adds no
+premise to `Compilation.correct` and that `Sim.init` meets its premise.
