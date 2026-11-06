@@ -11,6 +11,7 @@ import json
 import os
 import pathlib
 import resource
+import signal
 import subprocess
 import tempfile
 import time
@@ -38,14 +39,62 @@ def headroom():
 
 
 def limit_memory():
-    limit = 12 * 1024 ** 3
+    limit = 8 * 1024 ** 3
     resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+
+def pinned_tools(lean, archive=None, lake=None):
+    lean = pathlib.Path(lean).resolve()
+    extraction = lean.parent.parent
+    archive = pathlib.Path(archive).resolve() if archive is not None else pathlib.Path(str(extraction) + '.tar.zst')
+    expected = archive.parent / 'lean-4.35.0-linux/bin'
+    if lean != expected / 'lean' or (lake is not None and pathlib.Path(lake).resolve() != expected / 'lake'):
+        raise ValueError('toolchain paths do not match the pinned archive extraction')
+    digest = hashlib.sha256()
+    with archive.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(chunk)
+    if digest.hexdigest() != '7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d':
+        raise ValueError('official toolchain archive checksum mismatch')
+    version = subprocess.check_output([str(lean), '--version'], text=True).strip()
+    if 'version 4.35.0' not in version or 'eb6cafb' not in version:
+        raise ValueError('toolchain does not match pinned Lean 4.35.0 release')
+    return version
+
+
+def run_bounded(command, cwd, env, timeout):
+    """One bounded process group; never leave a lake/Lean child after abort."""
+    headroom()
+    started = time.monotonic()
+    process = subprocess.Popen(command, cwd=cwd, env=env,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               text=True, preexec_fn=limit_memory, start_new_session=True)
+    try:
+        while True:
+            try:
+                output, _ = process.communicate(timeout=0.25)
+                break
+            except subprocess.TimeoutExpired:
+                headroom()
+                if time.monotonic() - started > timeout:
+                    raise TimeoutError('bounded Lean process timed out')
+        headroom()
+    except BaseException:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.communicate()
+        raise
+    return process.returncode, output, time.monotonic() - started
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--lean', required=True, type=pathlib.Path)
+    parser.add_argument('--archive', type=pathlib.Path, help='official archive; defaults beside the extraction')
     args = parser.parse_args()
+    print(pinned_tools(args.lean, args.archive))
     source = FIXTURE.read_text()
     assert source.count(ALLOW) == 1 and source.count(NAME) == 1
     # A synthetic baseline pin is used only in this isolated fixture process.
@@ -68,26 +117,10 @@ def main():
         env = dict(os.environ, LEAN_NUM_THREADS='1', LEAN_PATH=str(tmp_root))
 
         def run(label, arguments, expect_success, diagnostic):
-            headroom()
-            process = subprocess.Popen([str(args.lean), '-j1', '--tstack=131072', *arguments],
-                                       cwd=tmp_root, env=env, stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT, text=True, preexec_fn=limit_memory)
-            deadline = time.monotonic() + 120
-            try:
-                while True:
-                    try:
-                        output, _ = process.communicate(timeout=0.25)
-                        break
-                    except subprocess.TimeoutExpired:
-                        headroom()
-                        if time.monotonic() > deadline:
-                            raise TimeoutError('fixture timed out')
-            except BaseException:
-                process.kill()
-                process.communicate()
-                raise
-            print(f'{label}: exit={process.returncode}; expected diagnostic={diagnostic!r}')
-            if (process.returncode == 0) != expect_success or diagnostic not in output:
+            code, output, _ = run_bounded(
+                [str(args.lean), '-j1', '--tstack=131072', *arguments], tmp_root, env, 120)
+            print(f'{label}: exit={code}; expected diagnostic={diagnostic!r}')
+            if (code == 0) != expect_success or diagnostic not in output:
                 print(output)
                 raise SystemExit(1)
 
