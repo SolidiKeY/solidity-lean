@@ -631,5 +631,20 @@ reviews found no issue. The initial namespace-qualification error is retained
 as a rejected elaboration. This is totality for the existing symbolic-slot
 operation code, not Source compiler admission, packed/physical expansion or
 EVM gas/fork adequacy. The 49 mapped premise/data references and 3232 unmapped
-rows are unchanged. The recent published Source changes require separate
-revalidation of Source-dependent historical witnesses before fresh claims.
+rows are unchanged. The published Source changes required separate revalidation of Source-dependent
+historical witnesses; the C213 section below records that completed check.
+
+## Revalidation after the published Source update
+
+C213 rechecked all nine pinned witness modules against the adopted owner
+publication. Seven Source-free files passed first, then the Source read file
+built its updated shared imports and passed, followed by the Source write file.
+All 126 theorem axiom guards passed with unchanged witness source bytes and
+unchanged proof limits. Reference corruption tests also passed. Kernel-source
+metadata now points to the fresh receipts and their dependency head.
+
+Coverage remains 49 mapped references (38 joint bundles and eleven data inputs),
+with 3232 unmapped. This establishes current compatibility of those selected
+witnesses, not general Source compiler admission, numeric/physical adequacy,
+world rollback or release of the separate v4.35 timing/trust STOP holds. No
+Source producer, frozen contract or witness statement was edited.
