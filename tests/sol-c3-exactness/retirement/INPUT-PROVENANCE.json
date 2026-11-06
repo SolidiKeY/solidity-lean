@@ -1,0 +1,11 @@
+{
+  "original_prompt_source": "Original first user message in this conversation, copied from rendered thread because no pre-existing original prompt file was found",
+  "frozen_text_is_not_resume_authorization": true,
+  "later_retirement_instruction_controls": true,
+  "files": {
+    "ORIGINAL-PROMPT.md": "c885d815e771c17eaef4b3f7f5575b84dced633c7c64baede6f6af283c7bd407",
+    "ORIGINAL-QUEUES.md": "238324a6adc17b3fd13255901a9f6ac671cf209d7dd5cd9ab19e7f6d5b2f4d9f",
+    "SCOPE-MANIFEST.json": "0770ec400c4f1ee6033556180c64d6eb05a555992e8aa1ae52ee41586c10f4b2",
+    "RETIREMENT-INSTRUCTION.md": "56f4ea29541548d8d4382186073416724bef8a7b130ee688bbb17fa15ca17453"
+  }
+}
