@@ -19,6 +19,59 @@ The current section below supersedes older H55 statements about missing public
 theorem syntax or unavailable typed counts; the older checkpoint remains history.
 No partial checkpoint or prerequisite pass is full completion.
 
+## H70 Contracts ticket and dependency-inventory continuation
+
+The new ticket Q-H70-CONTRACTS reports that the exact no-axioms guard for
+`Solidity.Roadmap.PublicCorrectness.transfer` fails on requester Lean 4.35.0,
+with propext, Classical.choice and Quot.sound observed. Requester head is
+`372e46284787e57e294d7c549f325f82f24ccfb2`. Routing authorizes no proof, guard,
+pin or statement edits; the ticket therefore stays pending owner/fleet migration.
+The original ticket-file bytes are not on this VM; its coordinator-reported
+SHA256 is recorded as reported provenance, not independently verified evidence.
+The requester's validation-input hash has no independently established meaning
+here. Its Contracts source hash is unknown, so source equality is not claimed.
+The local Contracts SHA256 remains
+`96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79`.
+The old bounded 4.24 Contracts command passed, but no individual transfer axiom
+row was exported into the selected fourteen-row inventory. The 4.35 report is
+not diagnosed as a compiler regression or reconciled by broadening the guard.
+
+The migrate-hash partial overlay at reported source
+`2a18afcdba00a85645b0b3079704f78ffcd78860` is acknowledged only as owner input.
+No patch was applied or validated here. Full migration gates and Syntax.Raw
+remain pending; its arrival does not discharge the Contracts ticket or the
+published V08 migration requirement. H68 timing HOLD remains +14.46%.
+
+[The dependency frontier generator](../../scripts/h55/g49-final-theorem/dependency-frontier.py)
+reuses the hash-bound successful run and existing owner-account checks without
+Lean. It exhausts direct edges of the **selected export only**: fourteen rows,
+450 distinct edges, 215 dependency names without selected typed rows. It lists
+all edges, the selected reachable closure and the unexported frontier per root.
+`PublicCorrectness.transfer` is an actual direct dependency of the conditional
+aggregate, but its type/body is outside that selected export. Missing rows stay
+missing; they are not inferred proof nodes, axiom failures or open premises.
+The existing 24 owner-tagged constructor binders are retained: fifteen public
+proof fields, three full-certificate packages, two implementation parameters,
+four interface parameters. This is progress toward the exhaustive inventory,
+not its completion. Expanded atomic open-premises remain null, as do the
+standalone production selections described below.
+
+[The inventory manifest](../../tests/h55/g49-final-theorem/h70-dependency-inventory.json)
+records hashes for `/workspace/h70-g49-contracts/dependency-frontier.json` and
+`/workspace/h70-g49-contracts/contracts-disposition.json`. Full evidence and
+handoff are in `/workspace/h70-g49-contracts`; bulk inventory stays off Git.
+Metadata verification includes independent edge reconstruction, deterministic
+rerun and refusal of a failed saved-run status. No new Lean/server/build run,
+proof edit, axiom-policy change or trust shortcut occurs. Independent read-only
+finder/skeptic reviews and gate outcomes are recorded in this continuation's
+handoff. Both reviews found missing pinned-owner and external-output guards in
+the new helper; these were fixed using the existing strict decoder, manifest
+hash, registered source hashes and external writer, with no-clobber retained.
+Negative checks pass for changed ownership, in-repository bulk output, existing
+evidence and failed run status. Finder and skeptic reinspected the fixes and
+found no further confirmed defect; neither used Lean, servers, builds or tests.
+The original assignment remains blocked, and no goal was replaced.
+
 ## H70 current work: producer inventory relay for statement-graph
 
 This continuation supplies metadata for requester
