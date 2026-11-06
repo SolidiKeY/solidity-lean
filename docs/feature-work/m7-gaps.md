@@ -164,3 +164,17 @@ refuted there (their `proved` verdicts are in `Examples/DecisionArrayGaps.lean`)
   cites a Mathlib file under `Bridge/.lake`, absent on this VM.
   `check-axiom-pins.mjs` reports about 4,380 inventory entries that were not
   recorded before this lane. This lane's 5 new pins are recorded.
+
+Round 2 gate (HEAD `ff40b3b6`): `./run-lean.sh` printed `Build completed
+successfully (6413 jobs).` and again exits 1 only in `check-solkey.sh`
+(`167 mismatch(es)`, unchanged). An earlier round-2 run was killed for memory
+(exit 137 in `DecisionHashThreeKinds`) while language-server workers were
+resident; the rerun with them stopped passed. Slowest touched modules:
+`Examples/DecisionGaps.lean` 192 s and `Examples/DecisionGapOperators.lean`
+153 s, under the 300 s limit but above the 105 s/90 s recorded earlier; this
+lane has not attributed the difference (parallel load versus the gap
+searches its interpreted unknown verdicts now run). Round-2 finder/skeptic:
+the skeptic confirmed every semantic claim; the finder's circular-membership
+finding is fixed by `partialOrSub_complete`, and its wording findings by
+narrowed residue rows.
+
