@@ -169,3 +169,33 @@ an owned recovery ref. Fresh rebased build/axioms/Lean controls/native18+2/owner
 checks passed. Current migration-packet pins the new published base;native source/
 C hashes still bind the same binary. Original CR/WASM/exhaustive closure obligations
 are unchanged. No RuntimeGate or whole-lane completion is claimed.
+
+## H68 consumer decision (2026-11-06)
+
+CR and DR-D: retain required `typeDescriptions.typeIdentifier` and `tryCall` in producer output; migrate compatibility fixtures. Preserve existing builtin-ID normalization and loop annotations. Human selected option 1; the adapter alternative is closed. This packet is for coordinator relay; no producer-owned path was edited. Deliver exact reviewed producer commits for consumption. Metadata retention does not establish intrinsic/source preservation or remove any refusal.
+
+H68 compatibility packet: `compatibility-fixtures.mjs` regenerates all five owned source fixtures with the pinned compiler and `retained-metadata.mjs`. `preflight-metadata.py` independently binds raw identities/metadata and all other normalized JSON values to recorded4095. Receipts/raw compiler outputs and before/after hashes are in `evidence/h68/metadata-*`. Dedicated composed/modality/Yul generators retain the same metadata policy. No edits to scripts/solc-ast.mjs or CR/D paths. All affected controls and native18+2 passed; see metadata-gates.log.
+
+## H44 external data prerequisite
+
+The held a073878c data is preserved locally and removed from the source increment. `bulk-manifest.json` records its absolute VM archive path, size, SHA-256 and repository-relative destination. Copy the archive to `archiveRelative`, create `tests/directruntime-20261104/shared-translator/artifacts/h68-bulk`, and extract there with `tar --zstd -xf ARCHIVE -C PACKET_ROOT`. Run `python3 tests/directruntime-20261104/shared-translator/verify-bulk.py` before the controls. Missing or changed data fails closed; no historical-fixture fallback is provided.
+
+Current H68 receipts are under `artifacts/h68-bulk/evidence/h68`; the source packet's earlier evidence/h68 references are historical. Tracked4095 fixture/census/coverage/matrix data is restored unchanged. Current migrated fixture hashes and806 selected-field observations are in the retained packet, not those historical ledgers. The original57-kind suites keep their exact frozen baseline inputs.
+
+## H90 narrow-local increment
+
+New `Shared.localTypeName : Json → Except String (Ty × RawTy)` preserves canonical narrow local spelling; `Shared.localPrim : Json → Except String Ty` is only a tuple scalar shape gate. `localTypeName_of_narrow` proves the exact result under node/name/narrowTy hypotheses, with[propext, Classical.choice, Quot.sound]. The Reader record and state/parameter/typeName APIs are unchanged. Local statement callbacks use the new reader, and ControlTuple.scalar uses localPrim; no failure is retried through another translator.
+
+Pinned78-file comparison:236→245 canonical admissions,9gains/12refined refusals/no losses,1655functions/1486printed bodies. CR's exact six-function probe now admits narrowLocal while narrowParam stays refused. Do not migrate the existing importer yet: other narrow/contextual types and many expression/statement forms remain open. H68 fixture/pin migration remains CR-owned. See the three H90 manifests for authentic source/data boundaries; ordinary native/WASM closure on this head is not claimed.
+
+Primitive-return repair: `Shared.primitiveReturnObligation : BodyLoopLowerer → PlainEntryPre → Contract → FunDecl → Bool → Except String (Fml C [])` is called by the existing assertion boundary for returning functions. Only primitive/empty-width declarations enter it; reference/width-bearing return refusals stay. Fresh slots plus existing lowerers preserve evaluation/early-exit handling in the checked model. No-return branch is exact under the pinned audit; Reader/callback signatures unchanged. See committed primitive-return-manifest.json for source hashes, compiler receipts, finite/trusted-checker evidence and limits. Native/WASM revalidation remains consumer work.
+
+Fixed-byte locals: existing localTypeName/localPrim now admit canonicalbytes1..32 only in primitive-local/tuple contexts while retaining raw spelling for existing byte markers. New general decoder theorem localTypeName_of_fixedBytes; no Reader signature change. Parameters/state/reference refusals remain.20box/diamond requests give12proved/4refuted/4unsupported; positive.length proof/backendgap explicit.78-file function admission remains245 with3refinedrefusals. See fixed-byte-manifest.json for exact baseline/source/data hashes and limits.
+
+H90 address increment: `Shared.localValueTypeName : Json → Except String (Ty × RawTy)`
+is the shape-dispatched local callback used by both statement paths. Explicit
+nonpayable addresses retain `.named "address"`; original `localTypeName` and
+Reader signatures remain intact. The guarded `msg.sender` bridge uses `.env
+.msgSender`; malformed/user identities keep field decoding and error order.
+See address-manifest.json for exact source hashes,30passing file gates and
+245/1486matched census boundary. This is not full address or importer parity.

@@ -82,4 +82,12 @@ example : (witness.run 16).map (fun outcome => outcome.flow.isNormal) = some tru
 example : Solidity.Yul.WordSyntax.prepare ["x"] (list mulDiv) = .ok witness.words := witness.old_result
 
 def text := Solidity.Yul.Checks.WordSyntax.text
+/-- info: 'Solidity.Yul.OccurrenceSyntax.Prepared.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.OccurrenceSyntax.Prepared.unique
+
+/-- info: 'Solidity.Yul.OccurrenceSyntax.Prepared.run_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.OccurrenceSyntax.Prepared.run_unique
+
 end Solidity.Yul.Checks.Occurrences

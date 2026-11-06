@@ -1,0 +1,202 @@
+{
+  "boundary": "Static source locator intake only; no fresh Lean, declaration-existence proof, typed edges or premise discharge.",
+  "checkpoint": "5f7c70b16090b25ea706dddf3e666d94fb5a09fe",
+  "inventorySha256": "af4f1a69410a9df1f408d2e2d9d9b82b39f926ce48c6bb601c16092514ed733e",
+  "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "sourceCounts": {
+    "atomicOpenPremises": null,
+    "certificatePackageAssumptions": 3,
+    "dischargedPremises": 0,
+    "distinctLocatedTheorems": 1,
+    "explicitDeclarationLocators": 32,
+    "namedOpenPublicFields": 15,
+    "ownerViews": 5,
+    "reportedBridgeRequests": 5,
+    "typedDeclarations": 0
+  },
+  "sourcePins": {
+    "scripts/h62/item5/statement-graph/graph.py": "7df09e5014691f415cb5a31700fd7ce90971b1fab7d2fd51f3e0d7bd53eaa09b",
+    "scripts/h62/item5/statement-graph/source_intake.py": "6fb5b051321cba75a490b6f5a6e61cf48bf731779a3d13fcd18309eeabe1c5a1",
+    "tests/h62/item5/statement-graph/h70-routing.json": "3e1e091f89dd2aa644a35f46beb6ad8cc66a05c81561e6435136f18a5e6640c3",
+    "tests/h62/item5/statement-graph/pending-inputs.json": "2d36f1374b1f4f574a61028a3639337bdfdf91bcf9adf3c8a818c2adb7d71426",
+    "tests/h62/item5/statement-graph/test_graph.py": "2820b0fd799b4bbd2137f59770de7ed7d89a9bf25ca6c28398f0837d4ecb6ed4",
+    "tests/h62/item5/statement-graph/test_source_intake.py": "0307935b4d70cbe054f50e4652584cd095c0c61e6849eb005a0ed86678bc5370"
+  },
+  "tests": {
+    "command": "python3 -B -m unittest discover -s tests/h62/item5/statement-graph -p 'test_*.py' -v",
+    "outcome": "52 tests pass"
+  },
+  "timing": {
+    "afterLazy": {
+      "cli": [
+        {
+          "maxRssKiB": 12416,
+          "seconds": 0.04112830400117673
+        },
+        {
+          "maxRssKiB": 12416,
+          "seconds": 0.04237545499927364
+        },
+        {
+          "maxRssKiB": 12416,
+          "seconds": 0.04277854799875058
+        },
+        {
+          "maxRssKiB": 12416,
+          "seconds": 0.038614590994257014
+        },
+        {
+          "maxRssKiB": 12416,
+          "seconds": 0.04479312200419372
+        },
+        {
+          "maxRssKiB": 12416,
+          "seconds": 0.039478277998568956
+        },
+        {
+          "maxRssKiB": 12416,
+          "seconds": 0.04356076299882261
+        }
+      ],
+      "cliDeltaPercent": 5.587366820684747,
+      "cliMedian": 0.04237545499927364,
+      "cliWarmup": {
+        "maxRssKiB": 12416,
+        "seconds": 0.04598550999799045
+      },
+      "graphSourceSha256": "7df09e5014691f415cb5a31700fd7ce90971b1fab7d2fd51f3e0d7bd53eaa09b",
+      "maxSelfRssKiB": 13056,
+      "outputSha256": "a7e213ce526d90d80fbd5a21055cc8af005391890cd01a99f3755dd6e2038796",
+      "warm": [
+        0.0003964208799879998,
+        0.00033836083981441333,
+        0.0003383513999870047,
+        0.0003134960401803255,
+        0.000322679840028286,
+        0.0003758656801073812,
+        0.00033939972025109455
+      ],
+      "warmDeltaPercent": -7.996137189229591,
+      "warmMedian": 0.00033836083981441333
+    },
+    "before": {
+      "boundary": "Legacy typed-fixture control only; no new Lean/proof/inventory claim.",
+      "cli": [
+        {
+          "maxRssKiB": 13696,
+          "seconds": 0.04624914799933322
+        },
+        {
+          "maxRssKiB": 13696,
+          "seconds": 0.03944704199966509
+        },
+        {
+          "maxRssKiB": 13696,
+          "seconds": 0.04019837400119286
+        },
+        {
+          "maxRssKiB": 13696,
+          "seconds": 0.03996968999854289
+        },
+        {
+          "maxRssKiB": 13696,
+          "seconds": 0.04013307299464941
+        },
+        {
+          "maxRssKiB": 13696,
+          "seconds": 0.03890528700139839
+        },
+        {
+          "maxRssKiB": 13696,
+          "seconds": 0.041575728995667305
+        }
+      ],
+      "cliMedian": 0.04013307299464941,
+      "cliWarmup": {
+        "maxRssKiB": 13696,
+        "seconds": 0.046364542999072
+      },
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item5/statement-graph/graph.py",
+        "build",
+        "--export",
+        "/workspace/h62-statement-graph-evidence/h70-refusal-acceptance/fixture.json",
+        "--catalog",
+        "tests/h62/item5/statement-graph/catalog.json",
+        "--base",
+        "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+        "--tree",
+        "1111111111111111111111111111111111111111",
+        "--output",
+        "/workspace/h62-statement-graph-evidence/g49-source-intake/control-graph.json"
+      ],
+      "graphSourceSha256": "b009e517fc1d0c6be6d874127a977b73a567cca3b06fa6afede29bd34a4194f8",
+      "maxSelfRssKiB": 13696,
+      "outputSha256": "a7e213ce526d90d80fbd5a21055cc8af005391890cd01a99f3755dd6e2038796",
+      "warm": [
+        0.00043393811996793373,
+        0.0004297705600038171,
+        0.0003677680800319649,
+        0.0003799129600520246,
+        0.00033329919999232517,
+        0.0003337198402732611,
+        0.0003355221200035885
+      ],
+      "warmMedian": 0.0003677680800319649
+    },
+    "stoppedInline": {
+      "cli": [
+        {
+          "maxRssKiB": 12800,
+          "seconds": 0.04494774500199128
+        },
+        {
+          "maxRssKiB": 12800,
+          "seconds": 0.049909492998267524
+        },
+        {
+          "maxRssKiB": 12800,
+          "seconds": 0.04502997100644279
+        },
+        {
+          "maxRssKiB": 12928,
+          "seconds": 0.0516597850000835
+        },
+        {
+          "maxRssKiB": 12800,
+          "seconds": 0.04210233799676644
+        },
+        {
+          "maxRssKiB": 12800,
+          "seconds": 0.04170000700105447
+        },
+        {
+          "maxRssKiB": 12800,
+          "seconds": 0.04117042400321225
+        }
+      ],
+      "cliDeltaPercent": 11.996768869365582,
+      "cliMedian": 0.04494774500199128,
+      "cliWarmup": {
+        "maxRssKiB": 12800,
+        "seconds": 0.0458270010058186
+      },
+      "graphSourceSha256": "8dee9f754f5651aeb45f36d449b7dc4708f51f526067c5461288f9164e056b62",
+      "maxSelfRssKiB": 13568,
+      "outputSha256": "a7e213ce526d90d80fbd5a21055cc8af005391890cd01a99f3755dd6e2038796",
+      "warm": [
+        0.0003372361199581064,
+        0.00032777376007288696,
+        0.0003325124800903723,
+        0.00041259232006268576,
+        0.00042496408015722407,
+        0.0003800980799132958,
+        0.00036113584006670864
+      ],
+      "warmDeltaPercent": -1.8033756395279932,
+      "warmMedian": 0.00036113584006670864
+    }
+  }
+}

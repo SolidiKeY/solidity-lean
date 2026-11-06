@@ -12,6 +12,17 @@ const renderer=require('./renderer.cjs');
 const {servePhases}=require('./phase-capture.cjs');
 const repo=resolve(__dirname,'../..');
 
+function retireSampledSurvivors(sampler){
+ const survivors=sampler.survivors(),refused=[],terminated=[];
+ for(const owned of survivors)if(sampler.survivors().some(p=>p.pid===owned.pid&&p.start===owned.start))try{terminateTree({pid:owned.pid,processBirth:owned.start});terminated.push(owned);}catch(error){refused.push({pid:owned.pid,birth:owned.start,error:error.message});}
+ return {survivors,refused,terminated};
+}
+
+function assertRetirementComplete(run){
+ const cleanup=run?.resources?.cleanup;if(!Array.isArray(cleanup?.remaining)||!Array.isArray(cleanup.identityRefusals))throw Error('Missing cleanup ownership evidence');
+ if(cleanup.remaining.length||cleanup.identityRefusals.length)throw new Error(run.error||'Owned process retirement incomplete');
+}
+
 function parse(args) {
   const options={trials:5,warmups:1,workers:[1,2,4],obligations:8,timeoutMs:300000,operationTimeoutMs:60000,targets:['dafny','local'],cache:['none','basic'],trace:'on',suite:'full'};
   const keys={'--code':'code','--dafny':'dafny','--dafny-extension':'dafnyExtension','--dotnet':'dotnet','--output':'output',
@@ -33,7 +44,10 @@ function parse(args) {
   for(const key of ['workers','targets','cache'])if(new Set(options[key]).size!==options[key].length)throw new Error('Duplicate '+key);
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
-  if(!['full','benchmark','visual'].includes(options.suite))throw new Error('Invalid suite');
+  if(!['full','benchmark','visual','commands','custom-commands','custom-default-commands','trace-visibility','trace-light-show','proof-help'].includes(options.suite))throw new Error('Invalid suite');
+  if(['trace-visibility','trace-light-show'].includes(options.suite)&&(options.targets.length!==1||options.targets[0]!=='dafny'))throw Error('Native trace visibility suite requires --targets dafny; local producer remains absent');
+  if(options.suite==='proof-help'&&(options.targets.length!==1||options.targets[0]!=='local'||options.workers.some(w=>w!==1)||options.obligations!==1||options.trace!=='on'))throw Error('Certified proof-help observation requires one local worker, one obligation and protocol recording');
+  if(options.suite==='commands'&&(options.targets.length!==1||options.targets[0]!=='local'))throw new Error('Concrete command suite requires --targets local; no Dafny command equivalence is claimed');
   for(const key of ['memoryReserveMiB','memoryMaxMiB'])if(options[key]!==undefined&&(!Number.isSafeInteger(options[key])||options[key]<1))throw new Error('Invalid '+key);
   return options;
 }
@@ -64,15 +78,20 @@ async function launch(config,options) {
     'dafny.verificationVirtualCores':config.workers,'dafny.verificationCachingPolicy':cache,'dafny.verificationTimeLimit':20,
     'dafny.automaticVerification':'onchange','dafny.displayGutterStatus':true,'dafny.markGhostStatements':true} : {
     'solidityLean.backendPath':repo,'solidityLean.nodePath':process.execPath,'solidityLean.timeoutMs':options.operationTimeoutMs};
+  if(config.target==='dafny'&&process.platform==='linux'){const sdk=dirname(resolve(options.dotnet));settings['terminal.integrated.env.linux']={PATH:sdk+':${env:PATH}',DOTNET_ROOT:sdk};}
   settings['files.autoSave']='off';settings['telemetry.telemetryLevel']='off';settings['update.mode']='none';
   settings['git.enabled']=false;settings['workbench.secondarySideBar.defaultVisibility']='hidden';
+  if(options.suite==='proof-help')settings['solidityLean.counterexamples']=true;
   if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']=options.suite==='visual'?'onchange':'never';}
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
   writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
-  const hostConfig={...config,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  const hostConfig={...config,backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
+  const resource=require('./resource-state.cjs'),admission=process.platform==='linux'?resource.resourceState():null;
+  writeFileSync(join(config.dir,'resource-admission.json'),JSON.stringify({snapshot:admission,options:{memoryMaxMiB:options.memoryMaxMiB??4096,memoryReserveMiB:options.memoryReserveMiB??12288},scope:'Native process-tree RSS sampling, no aggregate cgroup'}));
+  if(admission&&!resource.resourcesAllowed(admission,options))throw Error('Native editor resource admission denied before launch');
   const logfile=openSync(join(config.dir,'editor.log'),'w');
   const debugPort=await renderer.availablePort();
   // VS Code's Unix socket path is limited to 107 bytes. Artifact paths may be
@@ -86,22 +105,27 @@ async function launch(config,options) {
     cwd:repo,detached:process.platform!=='win32',stdio:['ignore',logfile,logfile],
     env:{...process.env,VSCODE_CLI:'1',VSCODE_PORTABLE:portable,PARITY_HOST_CONFIG:configPath}});
   const sampler=new ProcessSampler(child.pid);
-  let timedOut=false,interrupted=false,resourceStop=false,rendererClient,rendererCapture,rendering=false,probe,probing=false,probeTask,captureTask;
+  let timedOut=false,interrupted=false,resourceStop=false,resourceStopDetails,rendererClient,rendererCapture,rendering=false,probe,probing=false,probeTask,captureTask;
   const stop=()=>{interrupted=true;terminateTree(child);};
   process.once('SIGINT',stop);process.once('SIGTERM',stop);
   const resourceTimer=setInterval(()=>{
     if(process.platform!=='linux')return;
-    const last=sampler.samples.at(-1),available=Number(readFileSync('/proc/meminfo','utf8').match(/MemAvailable:\s+(\d+)/)[1])*1024;
-    if(last?.rssBytes>(options.memoryMaxMiB??4096)*1024**2||available<(options.memoryReserveMiB??12288)*1024**2){resourceStop=true;terminateTree(child);}
+    try{const last=sampler.samples.at(-1),state=resource.resourceState();
+      if(!resource.resourcesAllowed(state,options,last?.rssBytes??0)){resourceStop=true;resourceStopDetails={...state,rssBytes:last?.rssBytes??0};terminateTree(child);}
+    }catch(error){resourceStop=true;resourceStopDetails={error:error.message};terminateTree(child);}
   },500);
   // Capture before VS Code's test runner closes the window. The host writes a
   // completion marker then waits briefly for this observer's acknowledgement.
   const seenPhases=new Set();let phaseTask,phaseBusy=false;
+  let keybindingTask,keybindingStarted=false;
   const renderTimer=setInterval(()=>{
-    if(options.suite==='visual'&&!phaseBusy){
+    if(['commands','custom-commands','custom-default-commands'].includes(options.suite)&&!keybindingStarted&&existsSync(join(config.dir,'keybinding-request.json'))){
+      keybindingStarted=true;keybindingTask=(async()=>{let client;try{const request=JSON.parse(readFileSync(join(config.dir,'keybinding-request.json'),'utf8'));if(request.runId!==config.runId)throw Error('Foreign keybinding request');client=await renderer.connect(debugPort);const menuDirectory=join(config.dir,'context-menu');mkdirSync(menuDirectory,{recursive:true});const contextMenu=await renderer.contextSubmenu(client,menuDirectory,config.target==='dafny'?{label:'Dafny',expected:'Build with Custom Arguments'}:undefined);const promptDirectory=join(config.dir,'custom-prompt');mkdirSync(promptDirectory,{recursive:true});const observation={...await renderer.buildKeybinding(client,{custom:['custom-commands','custom-default-commands'].includes(options.suite),input:request.customInput,directory:promptDirectory}),contextMenu};writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,requestId:request.requestId,observation}));}catch(error){writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,error:error.message}));}finally{client?.close();}})();
+    }
+    if((['visual','proof-help'].includes(options.suite)||['custom-default-commands','trace-visibility','trace-light-show'].includes(options.suite)&&config.target==='dafny')&&!phaseBusy){
       phaseBusy=true;
-      phaseTask=servePhases(config.dir,config.runId,async directory=>{
-        const client=await renderer.connect(debugPort);try{return await renderer.capture(client,directory,true);}finally{client.close();}
+      phaseTask=servePhases(config.dir,config.runId,async (directory,request)=>{
+        const client=await renderer.connect(debugPort);try{if(request.phase.startsWith('proof-help-'))return await renderer.captureProofHelp(client,directory,request.metadata);if(request.phase.startsWith('trace-'))return await renderer.captureTrace(client,directory,request.metadata);const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{client.close();}
       },seenPhases).catch(error=>{rendererCapture={captured:false,error:error.message};}).finally(()=>{phaseBusy=false;});
     }
     if(!probing&&existsSync(join(config.dir,'renderer-probe.json'))) {
@@ -138,16 +162,16 @@ async function launch(config,options) {
   await new Promise(resolvePromise=>{child.on('error',e=>{error=e.message;resolvePromise();});child.on('close',code=>{exitCode=code;resolvePromise();});});
   clearTimeout(timer);clearInterval(renderTimer);clearInterval(resourceTimer);
   if(phaseTask)await phaseTask;
+  if(keybindingTask)await keybindingTask;
   if(probeTask)await probeTask;
   if(deadlineTask)await deadlineTask;
   if(captureTask)await captureTask;
   process.removeListener('SIGINT',stop);process.removeListener('SIGTERM',stop);closeSync(logfile);
   const resources=sampler.stop();
-  const survivors=sampler.survivors();
-  for(const owned of survivors)if(sampler.survivors().some(p=>p.pid===owned.pid&&p.start===owned.start))terminateTree({pid:owned.pid});
+  const cleanup=retireSampledSurvivors(sampler);
   const cleanupStart=performance.now();
   while(sampler.survivors().length&&performance.now()-cleanupStart<1000)await new Promise(resolve=>setTimeout(resolve,20));
-  resources.cleanup={terminatedOwnedSurvivors:survivors,remaining:sampler.survivors()};
+  resources.cleanup={observedOwnedSurvivors:cleanup.survivors,terminatedOwnedSurvivors:cleanup.terminated,identityRefusals:cleanup.refused,remaining:sampler.survivors()};
   writeFileSync(join(config.dir,'resources.json'),JSON.stringify(resources));
   // A successful exit alone is insufficient; this path belongs to this launch.
   let result;try{result=JSON.parse(readFileSync(config.result,'utf8'));}catch(e){error=error||'No fresh extension-host report: '+e.message;}
@@ -160,7 +184,9 @@ async function launch(config,options) {
   if(result&&hostEvidenceErrors(result,config).length) {
     error='Host evidence is stale, incomplete or inconsistent: '+hostEvidenceErrors(result,config).join('; ');result=undefined;
   }
+  if(cleanup.refused.length)error='Owned process identity changed during cleanup; no subsequent trial admitted';
   if(resources.cleanup.remaining.length)error='Owned verifier processes survived cleanup; subsequent trials must not run';
+  writeFileSync(join(config.dir,'resource-terminal.json'),JSON.stringify({resourceStop,resourceStopDetails:resourceStopDetails??null}));
   const run={target:config.target,workers:config.workers,cache:config.cache,suite:options.suite||'full',trial:config.trial,warmup:config.warmup,
     status:interrupted?'interrupted':resourceStop?'resource-stop':timedOut||result?.status==='timeout'?'timeout':
       !error&&exitCode===0&&['passed','passed-with-gaps'].includes(result?.status)?result.status:'broken',exitCode,error,
@@ -223,7 +249,7 @@ async function main(args=process.argv.slice(2)) {
       process.stdout.write(`Running ${target}, workers=${workers}, cache=${cache}, trial=${trial}\n`);
       runs.push(await launch(config,options));save();
       if(['interrupted','resource-stop'].includes(runs.at(-1).status))throw new Error('Run stopped: '+runs.at(-1).status);
-      if(runs.at(-1).resources.cleanup.remaining.length)throw new Error(runs.at(-1).error);
+      assertRetirementComplete(runs.at(-1));
     }
     for(const left of runs.filter(r=>r.target==='dafny'&&!r.warmup)) {
       const right=runs.find(r=>r.target==='local'&&r.trial===left.trial&&r.workers===left.workers&&r.cache===left.cache);
@@ -243,5 +269,5 @@ async function main(args=process.argv.slice(2)) {
   return report;
   } finally {rmSync(lock,{recursive:true,force:true});}
 }
-module.exports={parse,main,launch,shortSummary};
+module.exports={parse,main,launch,shortSummary,retireSampledSurvivors,assertRetirementComplete};
 if(require.main===module)main().catch(error=>{process.stderr.write(error.stack+'\n');process.exitCode=1;});

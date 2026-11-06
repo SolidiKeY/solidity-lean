@@ -1,0 +1,25 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean:SolidityBridge.AccessBridge.HeadSizeControls.boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean:SolidityBridge.AccessBridge.HeadSizeControls.native_and_predicate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean:SolidityBridge.AccessBridge.HeadSizeControls.protected_and_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean:SolidityBridge.AccessBridge.HeadSizeControls.representability_matters": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean:SolidityBridge.AccessBridge.HeadSizeControls.semantic_short": [
+  "propext"
+ ]
+}

@@ -1,7 +1,9 @@
 import Solidity.Tools.DirectRuntime
 
 /-! Actual DirectRuntime request selection/listing controls. A ready listing
-establishes obligation construction only, not proof closure or runtime correctness. -/
+establishes obligation construction only, not proof closure or runtime correctness.
+Guards exact overload identity after primitive-return admission: both wide
+primitive overloads must construct; malformed sibling/refusal controls remain. -/
 namespace SharedTranslatorSelectionControls
 open Lean Solidity Solidity.Frontend
 private def checked {α : Type} : Except String α → IO α
@@ -26,13 +28,13 @@ private def noSelection (source : Json) (name : String) (id : Int) : IO Unit := 
   | .error "no selected functions" => pure ()
   | _ => throw (IO.userError "unmatched identity/name was accepted")
 private def controls : IO Unit := do
-  let source ← contractFrom "tests/directruntime-20261104/shared-translator/ReaderFixtures.ast.json"
+  let source ← contractFrom "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/ReaderFixtures.ast.json"
   for id in [(209 : Int), 219] do
     let row ← oneRow source "overloaded" id
-    unless (← checked (row.getObjValAs? String "status")) == "unsupported" do
-      throw (IO.userError "plain-return overload refusal changed")
-    unless (← checked (row.getObjValAs? String "reason")) == "plain return obligation" do
-      throw (IO.userError "overload refusal reason changed")
+    unless (← checked (row.getObjValAs? String "status")) == "ready" do
+      throw (IO.userError "primitive-return overload did not construct")
+    unless (← checked (row.getObjValAs? String "reason")) == "" do
+      throw (IO.userError "ready overload diagnostic changed")
   let ready ← oneRow source "specified" 161
   unless (← checked (ready.getObjValAs? String "status")) == "ready" do
     throw (IO.userError "supported selected obligation no longer constructs")
@@ -51,7 +53,7 @@ private def controls : IO Unit := do
   let bad ← oneRow mutated "overloaded" 219
   unless (← checked (bad.getObjValAs? String "reason")) == "a malformed boolean literal" do
     throw (IO.userError "selected malformed sibling was not refused")
-  let unsupported ← contractFrom "tests/directruntime-20261104/shared-translator/UnsupportedContract.ast.json"
+  let unsupported ← contractFrom "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/UnsupportedContract.ast.json"
   match Tools.DirectRuntime.check (Json.mkObj [("contract", unsupported), ("listing", .bool true)]) with
   | .error "contract member" => pure ()
   | _ => throw (IO.userError "unsupported contract member was silently dropped")

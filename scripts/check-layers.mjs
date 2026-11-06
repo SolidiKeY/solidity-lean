@@ -10,6 +10,7 @@
 // Exit 0 = no core module reaches the elaborator, 1 = at least one does
 // (each printed with one import path down to it).
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
+import { loadAllowlist, closureViolations, closureGraph } from "./core-import-closure.mjs";
 
 const CORE = [
   /^Solidity\.Yul\.(RawDoWhileHorizon|Checks\.RawDoWhileHorizon)$/, // Concrete body-first adapter completed-frame horizons.
@@ -170,6 +171,7 @@ const CORE = [
   /^Solidity\.Yul\.(BlockHeaders|Checks\.Headers)$/, // VY1 direct syntax-to-header collection.
   /^Solidity\.Yul\.(ExternalCheck|GlobalExternal|Checks\.External|Checks\.GlobalExternal)$/, // VY1 checked external resolution.
   /^Solidity\.Yul(?:$|\.(?:Builtins|Words|WordLaws|Syntax|Static|CatalogLaws|ExpressionCheck|LocalScope|FunctionScope)$|\.Checks\.(?:(?:Arithmetic|Shifts)(?:\.Part[0-9][0-9])?|Bytes|Powers|Static|Contracts|Expressions|Scope)$)/, // Intrinsic assembly core; frontend adapters stay separate.
+  /^Solidity\.Yul\.Composition\./, // VY5 intrinsic producer-bound consumer proofs.
   /^Solidity\.(KeySort|Eqns|AST|TypeGraph|Scope|SpecSyntax|Hashes|Keccak|ERC7201|Secp256k1|RevertBytes|Syntax|Semantics|Signature|Update)$/,
   /^Solidity\.Syntax\.(Raw|Grammar|Contract|Scoped|Checked|Inlined|PushSource|Join)$/,
   /^Solidity\.(Semantics|Typing|Theory)\./,
@@ -223,4 +225,15 @@ for (const m of core) {
   console.log(`PARSER_LAYER  ${findPath(graph, m, hit).join(" → ")}`);
 }
 console.log(`${core.length} core modules, ${parserBad} reach the checked parser adapters`);
-process.exit(bad || parserBad ? 1 : 0);
+let closureBad = 0;
+try {
+  const allowed = loadAllowlist();
+  const violations = closureViolations(closureGraph(graph), isCore, allowed);
+  for (const path of violations) console.log(`CORE_CLOSURE  ${path.join(" → ")}`);
+  closureBad = violations.length;
+  console.log(`${core.length} core modules, ${closureBad} new core → non-core edges (${allowed.size} pinned allowances)`);
+} catch (error) {
+  console.error(`CORE_CLOSURE_BASELINE ${error.message}`);
+  closureBad = 1;
+}
+process.exit(bad || parserBad || closureBad ? 1 : 0);

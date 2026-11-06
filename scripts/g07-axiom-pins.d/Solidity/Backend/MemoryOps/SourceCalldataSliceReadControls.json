@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceReadControls.lean:Solidity.Backend.MemoryOps.SliceReadControls.boolean_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceReadControls.lean:Solidity.Backend.MemoryOps.SliceReadControls.bounds_and_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceReadControls.lean:Solidity.Backend.MemoryOps.SliceReadControls.checked_copy_read_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceReadControls.lean:Solidity.Backend.MemoryOps.SliceReadControls.complete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceReadControls.lean:Solidity.Backend.MemoryOps.SliceReadControls.eager_copy_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataSliceReadControls.lean:Solidity.Backend.MemoryOps.SliceReadControls.uint_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_empty_many": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_following_statement_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_general_atom_yield": [],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_greedy_suffix_consumed": [],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_greedy_suffix_not_frame": [],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_list_relation_inhabited": [],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_many_counter_refusal": [],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_many_malformed_clause_refusal": [],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_noncatch_suffixes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_pairs_bound": [],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_pairs_count": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_pairs_many": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.catch_pairs_many_aux": [
+  "Quot.sound",
+  "propext"
+ ]
+}
