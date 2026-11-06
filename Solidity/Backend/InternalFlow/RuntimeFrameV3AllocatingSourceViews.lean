@@ -1,6 +1,6 @@
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificate
 
-/-! Context-generalized eliminators over actual intrinsic syntax. Views keep
+/-! The read views generalize context indices over actual intrinsic syntax. Views keep
 all source contexts and constructor equations. No indexed AST match, untyped
 IR, source evaluator, target assumption or compiler admission is introduced.
 The executable base checker certifies only the exact existing recBase. -/
