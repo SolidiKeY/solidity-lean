@@ -60,7 +60,7 @@ def validate_inventory(census,fresh,baseline):
     if baseline and any(row["sha256"]!=row["base_sha256"] for row in census["closure_sources"]):
         raise RuntimeError("Baseline source closure differs from pinned base")
 def main():
-    a=argparse.ArgumentParser(); a.add_argument("--root",required=True); a.add_argument("--toolchain",required=True); a.add_argument("--census",required=True); a.add_argument("--out",required=True); a.add_argument("--image",required=True); a.add_argument("--archive",required=True); a.add_argument("--pin"); a.add_argument("--target",action="append",default=[]); a.add_argument("--exclude-dependency"); a.add_argument("--keep-going",action="store_true"); a.add_argument("--fixture",action="append",default=[]); a.add_argument("--baseline",action="store_true"); a.add_argument("--keysort-only",action="store_true"); args=a.parse_args()
+    a=argparse.ArgumentParser(); a.add_argument("--root",required=True); a.add_argument("--toolchain",required=True); a.add_argument("--census",required=True); a.add_argument("--out",required=True); a.add_argument("--image",required=True); a.add_argument("--archive",required=True); a.add_argument("--pin"); a.add_argument("--cache-root",action="append",default=[]); a.add_argument("--target",action="append",default=[]); a.add_argument("--exclude-dependency"); a.add_argument("--keep-going",action="store_true"); a.add_argument("--fixture",action="append",default=[]); a.add_argument("--baseline",action="store_true"); a.add_argument("--keysort-only",action="store_true"); args=a.parse_args()
     root=Path(args.root).resolve(); toolchain=Path(args.toolchain).resolve(); out=Path(args.out).resolve()
     lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a"); fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     if out.exists(): raise RuntimeError("Output exists; preserve it and use a fresh measurement directory")
@@ -106,6 +106,15 @@ def main():
         fixture_sources.append(dict(path=str(path),sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
         modules.append("fixture:"+str(path))
     installation=verify_install(Path(args.archive),toolchain)
+    cache_condition=None
+    if args.cache_root:
+        spec=importlib.util.spec_from_file_location("cache_condition",Path(__file__).with_name("cache.py"))
+        cache_module=importlib.util.module_from_spec(spec);spec.loader.exec_module(cache_module)
+        cache_condition=cache_module.advise_roots(args.cache_root)
+        cache_source=Path(__file__).with_name("cache.py").read_bytes()
+        cache_condition["helper_sha256"]=hashlib.sha256(cache_source).hexdigest()
+        (out/"executed-cache.py").write_bytes(cache_source)
+        (out/"cache-condition.json").write_text(json.dumps(cache_condition,indent=2)+"\n")
     overlay=out/"toolchain"; (overlay/"bin").mkdir(parents=True)
     for path in toolchain.iterdir():
         if path.name!="bin": (overlay/path.name).symlink_to(path,target_is_directory=path.is_dir())
@@ -125,6 +134,7 @@ def main():
     docker += [args.image,"/bin/sleep","infinity"]
     record=dict(root=str(root),head=command(["git","-C",str(root),"rev-parse","HEAD"]).strip(),toolchain=str(toolchain),image=args.image,command=docker,settings=dict(memory=CAP,swap=0,cpus=1,reserve=RESERVE,threads=1),results=[],status="running")
     def save(): (out/"result.json").write_text(json.dumps(record,indent=2)+"\n")
+    record["cache_condition"]=cache_condition
     record["invocation"]=[sys.executable]+sys.argv
     record["scope"]=dict(requested_targets=args.target,assigned_count=len(assigned),excluded_dependency=args.exclude_dependency,excluded_modules=excluded,planned_modules=modules,keysort_only=args.keysort_only)
     record["fixture_sources"]=fixture_sources
@@ -154,10 +164,14 @@ def main():
         if "version "+expected_version+"," not in record["lean_version"] or "Lean version "+expected_version+")" not in record["lake_version"]:
             raise RuntimeError("Unexpected Lean/Lake version")
         def headroom():
+            nonlocal minimum
             mem={k:int(v.split()[0])*1024 for k,v in (line.split(":",1) for line in Path("/proc/meminfo").read_text().splitlines())}
             current=int(Path("/sys/fs/cgroup/memory.current").read_text()); maximum=int(Path("/sys/fs/cgroup/memory.max").read_text())
             available=min(mem["MemAvailable"],maximum-current)
-            if available<RESERVE: raise RuntimeError("4GiB reserve violated")
+            minimum=min(minimum,available)
+            if available<RESERVE:
+                record["rejected_memory_snapshot"]=dict(available=available,mem_available=mem["MemAvailable"],cgroup_current=current,cgroup_maximum=maximum,reserve=RESERVE)
+                raise RuntimeError("4GiB reserve violated")
             return available
         failed=set()
         for index,module in enumerate(modules):

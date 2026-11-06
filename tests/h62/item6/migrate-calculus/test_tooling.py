@@ -1,12 +1,12 @@
 """Negative controls for migration admission and header discovery; no Lean server."""
-import copy, importlib.util, sys, unittest
+import copy, importlib.util, sys, tempfile, unittest
 from pathlib import Path
 sys.dont_write_bytecode=True
 ROOT=Path(__file__).resolve().parents[4]
 def load(name):
     spec=importlib.util.spec_from_file_location(name,ROOT/"scripts/h62/item6/migrate-calculus"/(name+".py"))
     module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module); return module
-census=load("census"); bounded=load("bounded")
+census=load("census"); bounded=load("bounded"); cache=load("cache")
 class Tooling(unittest.TestCase):
     def test_nested_comment_and_module_header(self):
         self.assertEqual(census.header_imports("/- x /- import False -/ -/\nmodule\npublic import Solidity.Calculus.Fml -- comment\nmeta import Lean.Meta.Tactic.Assert\nnamespace N\nimport NotAHeader"),["Solidity.Calculus.Fml","Lean.Meta.Tactic.Assert"])
@@ -16,6 +16,14 @@ class Tooling(unittest.TestCase):
         with self.assertRaises(ValueError): census.header_imports("import Foo; malicious")
     def test_unterminated_comment_rejected(self):
         with self.assertRaises(ValueError): census.header_imports("/- unfinished")
+    def test_cache_advice_preserves_bytes_and_skips_symlinks(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder); data=root/"owned";data.write_bytes(b"preserve exact bytes")
+            (root/"link").symlink_to(data)
+            result=cache.advise_roots([root])
+            self.assertEqual(result["files"],1)
+            self.assertEqual(data.read_bytes(),b"preserve exact bytes")
+            self.assertTrue((root/"link").is_symlink())
     def test_zombie_lean_does_not_count_as_live_worker(self):
         snapshot="PID PPID RSS STAT COMMAND COMMAND\n10 1 100 S lean lean -j1 file.lean\n11 1 0 Z lean [lean] <defunct>"
         self.assertEqual(bounded.observe_processes(snapshot),102400)

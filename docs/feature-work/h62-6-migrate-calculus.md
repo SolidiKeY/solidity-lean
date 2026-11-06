@@ -174,3 +174,40 @@ items; this worker never self-launches a replacement. Whole-goal completion is
 blocked by owner dependencies and the RSS STOP. Full old baseline, full new
 build, semantic interface validation, full comparison and final gates must never
 be inferred from the passing subset or this handoff.
+
+## Resource recovery before the fresh old baseline
+
+`old-clean-03` was correctly stopped at RuleShapes after 262 successful modules:
+2005.496787837 s partial wall and 3460091904 bytes sampled aggregate RSS.
+The failure was the 4 GiB parent reserve guard, not a reported proof error.
+It is not an accepted clean baseline and is not combined with another run.
+
+At idle, the VM cgroup charged 9468493824 bytes, including 8757678080 bytes of
+file cache, with no Lean process active. The allowed-memory calculation remains
+conservative: min(host MemAvailable, parent memory.max - memory.current).
+No cap, swap setting, reserve, thread setting or theorem budget was relaxed.
+
+`cache.py` applies POSIX_FADV_DONTNEED only to specified regular files opened
+read-only, skipping symlinks. It neither deletes nor modifies file contents.
+It is advisory cache conditioning, not a guarantee that every page is evicted.
+The three roots are this task's evidence directory, the verified old toolchain,
+and its archive. The evidence directory includes the verified new toolchain
+and all retained prior attempts. Thus the same old/new inputs can receive the
+same policy before any later authorized full comparison. No global drop_caches
+or sysfs resource write is used. All historical logs and build products remain.
+
+`cache-recovery.json` records usage falling 9468493824 to 3458945024 bytes,
+a recovery of 6009548800 bytes, with file cache falling 5853618176 bytes.
+The bounded runner conditions after archive/install verification but before
+workload admission, records all roots/pre/post readings and helper SHA256,
+and saves executed-cache.py alongside executed-bounded.py. It also now retains
+the exact offending memory reading before any reserve stop.
+
+The cache byte-preservation/symlink control passes in the authorized worker,
+bringing Python controls to nine. The finder independently passed eight
+nonwriting controls; its read-only sandbox could not create the temporary
+control file. Both finder and skeptic accepted the advisory method with
+unchanged limits and required the same policy for later comparisons. The
+finder's cache-helper provenance request was implemented before rerunning.
+The fresh complete old baseline is now `old-clean-04`; all prior attempts remain
+partial/invalid for acceptance. The RSS STOP on new-toolchain work remains.
