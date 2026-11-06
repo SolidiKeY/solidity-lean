@@ -224,3 +224,32 @@ during this run, so its timing is not a matched-cache before/after comparison.
 The canonical retired-member thread-copy transcription remains e270551e; the
 unavailable historical 22740ba5 rendering is UNVERIFIABLE under H30/H86 and
 is neither claimed to match nor reconstructed.
+
+## Complete cf1 model replay inventory
+
+The existing unchanged runner replayed all 42 immutable cf1 fixtures at source
+head fe92bcdeee42369ef7cac013dc0dd2f0141493b9 with pinned solc 0.8.38,
+120,000 ms per job, fuel 1,000 and serial Lean under the original memory bound.
+The 93-module replay import closure matched its exact current Lake artifacts.
+All 42 reports are present: 31 working, 11 blocked, zero broken. Across 55
+required pipeline reports, 390 observations match the saved after-baseline
+exactly, including 271 successful and 119 failed observations. Neither top-level
+nor pipeline classifications changed; the saved fixture SHA256 is unchanged.
+Recorded per-fixture durations sum to 440,369 ms, not a compiler timing claim.
+
+The eleven adapter blockers remain: one nominal-enum ABI adaptation, nine
+physical calldata/memory assembly adaptations and one value-bearing expectation
+format. They are not relabelled as passes or decoder failures. Consequently
+the strict comparison exits 1 and all-runtime-working remains false, despite
+zero comparison discrepancies. The original full compiled-decoder replay and
+whole G40/G46 obligations are still open. These are Source/intrinsic model
+observations, not backend compilation, native-EVM, gas or whole-session proofs.
+
+Independent read-only finder and skeptic reviews verified the results and
+identified two comparison gaps: provenance needed independent current-source
+pins, and pipeline statuses needed explicit comparison. Both were fixed and
+confirmed. Four intentional corrupt-report controls now detect uniformly stale
+provenance, changed pipeline status, missing pipeline and changed return bytes.
+Those controls mutate only disposable copies; they are not source witnesses
+or genuine fixture failures. All raw reports, logs, the comparison scripts and
+checksums are exported outside Git; fixtures and production runner are unchanged.
