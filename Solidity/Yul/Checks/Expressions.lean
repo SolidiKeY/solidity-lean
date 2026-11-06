@@ -46,4 +46,11 @@ def singleReturnEnv : ExprEnv [⟨1, 1⟩] [] 0 := ⟨[], [("split", ⟨⟨1, 1�
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.ArgsD.result_unique
 
+/-- info: 'Solidity.Yul.ExprD.term_result_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ExprD.term_result_unique
+/-- info: 'Solidity.Yul.ArgsD.terms_result_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ArgsD.terms_result_unique
+
 end Solidity.Yul.Checks.Expressions
