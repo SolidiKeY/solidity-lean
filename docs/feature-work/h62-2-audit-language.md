@@ -9,6 +9,106 @@ The exported `handoff.json` records the full committed head without a self-hash
 inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
 
+## Subsequent H70 partial deliveries and remaining-domain refinements
+
+Current follow-up parent: `c2ffe26194e661f11b6ef4673090fdc97021ed74`.
+The existing generic classifier is unchanged. A separate, narrow source pass
+records 418 refinements across 279 rows: 212 closed primitive denotations,
+60 already-known generic primitive values, 137 fixed-point values and nine
+nested address subtypes. It resolves 221 previously unknown binder domains
+and enriches 197 data domains with their existing range constraints. This
+makes 139 additional rows source-resolved: current totals are 3,664 source
+rows resolved and 482 still unresolved, from the same 4,146 candidates.
+Zero exclusions, signature changes, owner changes or new witnesses occur.
+
+The facts are read from frozen `AST`, `Semantics`, `ContractWorld` and
+`Language/FixedPoint` declarations. The closed bool branch stays Bool;
+uint/int retain their `inRange` subtypes; generic primitive values keep
+branch uncertainty. Address retains both its outer 160-bit bound and nested
+word range; it is not silently replaced by Roadmap's Fin address. Fixed-point
+values retain `t.inRange v = true`. Every actual argument and proof component
+still needs a simultaneous witness. These source annotations establish no
+inhabitance, imported semantic telescope or compiler success theorem.
+
+The pass requires the exact reviewed baseline SHA256, recomputes the frozen
+census, uses exact family/alias evidence and tracks lexical namespaces rather
+than dotted theorem-name parents. It refuses arbitrary suffix methods,
+unsupported root namespace blocks, function-returning-address domains,
+wrong/unbound receivers, qualified local shadows and near-prefix namespaces.
+Generic `p.Denote` enrichment additionally requires existing evidence for the
+exact frozen family and an explicitly primitive-typed receiver. Active-open
+resolution remains outside this narrow pass; ambiguous cases stay pending.
+
+### Partial owner receipts
+
+The two received artifacts are preserved off Git in `h70-received/` and
+registered in `tests/h62/item2/audit-language/received-overlays.json`:
+
+| Component | Latest reported ticket | Advertised SHA256 | Source-only review |
+|---|---|---|---|
+| Hash/CollisionBound | `a3f49ee0ec1829e63022c90194048d5a1ffe0d22` | `3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff` | Seven strict hunks; postimage prefix `092971eda`; 65 theorem headers unchanged. |
+| Language/FixedPoint | `479f6e0079409a1867483dbffe5051932b8fa754` | `a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82` | Eleven strict hunks; postimage `0a4d4cfc2a241fa46dd1183c895f9ac54d18beef`; 37 theorem headers unchanged. |
+
+The Hash artifact's earlier ticket was `78c110f83dc1a30700acd1b5bd34b19f61da6ccd`;
+its reported source remains `2a18afcdba00a85645b0b3079704f78ffcd78860`.
+FixedPoint's reported source is `d8e1d9721455d3671882f19aa7155fbbd2d91415`.
+Reported commit identity is distinct from local Git-object verification.
+Both artifact bytes now match the advertised SHA256. Three errors in the
+first local FixedPoint transcription were corrected only after the recovered
+bytes matched that exact digest; the initial `f686…` capture remains unchanged
+as negative-control evidence. This was a local capture correction, not a
+repair to owner source or an accepted fuzzy patch.
+
+`overlay_review.py` reconstructs strictly in memory, checking the allowlisted
+path, original/postimage Git blobs, every hunk position/count/context, theorem
+headers/captured section variables, declaration headers and source trust/options.
+It never writes the postimage, applies a patch or invokes Lean. The original
+files remain byte-identical to the frozen base. All 102 source theorem
+headers remain unchanged; elaborated fidelity and proof validity are pending.
+
+Host receipt paths and journal delivery do not establish owner agreement,
+validation, new original-file permission or cut-over. Both producers say full
+migration/affected gates remain pending. The Hash relay additionally reports
+`Solidity/Syntax/Raw.lean` pending; its migration owner is recorded from the
+pinned snapshot. No new Raw failure or passing gate is claimed by this worker.
+Internal worker obligations now use the actual audit-language owner key,
+with no separate relay requested, instead of descriptive pseudo-destinations
+such as “audit-language after prerequisite delivery.” Producer-resolution
+information for the same 262 exact paths remains a coordinator request.
+
+### Continuation validation and remaining work
+
+- `overlay_review.py --registry tests/h62/item2/audit-language/received-overlays.json
+  --output <evidence>/h70-overlay-review-final`: source-only pass, 102 unchanged
+  theorem headers, zero applied overlays and Lean validation explicitly pending.
+- `refine_remaining.py` final output is `h70-remaining-reviewed/`; the replay
+  `h70-remaining-reproduced/` matches classification, unresolved-domain and
+  summary files byte for byte. Exact commands/timings/resources are in
+  `h70-remaining-generation-gates.json`. The earlier `h70-remaining-final/`
+  is a historical pre-hardening snapshot, marked by `NOT-AUTHORITATIVE.json`;
+  use `h70-remaining-reviewed/` for the current result.
+- `continuation_acceptance.py` passes all 4,146 row identities, preserved
+  owners/signatures/conclusions, frozen fact hashes, branch/subtype/shadowing
+  guards and ten corruption/fidelity controls. The controls reject wrong
+  old/new blobs, context drift, truncation, extra files, traversal, changed
+  premises, changed budgets, forged owners and unauthenticated transcription.
+  Evidence: `h70-continuation-acceptance.log` and its `negative-controls.json`.
+
+This continuation adds no Lean module or theorem and runs no new Lean gate.
+The previous twelve joint certificates are unchanged. The generic source
+classifier, all originals, toolchain and proof/resource budgets are unchanged.
+The measured source pass/replay is separate from a Lean before/after benchmark;
+full affected build/timing gates remain pending with the owners.
+
+The four continuation items are authenticated partial-receipt review,
+remaining-domain/feasibility annotations, corruption/shadowing controls and
+repeatable validation/handoff. Finder and skeptic reviews are read-only,
+without edits or Lean jobs/servers; confirmed hardening requests were fixed.
+The original four-checkpoint goal remains unfinished. Continue imported
+semantic classification, joint witnesses and meaningful supported-program
+compiler success/failure/gas/fork obligations after validated prerequisites;
+retain all unclassified statements/owners and full gates as typed blockers.
+
 ## H70 continuation: exhaustive source classification, semantic boundary retained
 
 H70 accepted both migration owner relays. Their repairs remain waits, not

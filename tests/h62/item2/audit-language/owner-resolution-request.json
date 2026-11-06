@@ -16,12 +16,13 @@
     {
       "owner": "solidity-h62-6-20261106/migrate-hash",
       "path": "Solidity/Hash/CollisionBound.lean",
-      "relay": "accepted H70; waiting"
+      "relay": "Partial overlay transport/source-header review completed; owner agreement, Lean and affected-gate validation remain pending."
     },
     {
       "owner": "solidity-h62-6-20261106/migrate-language",
       "path": "Solidity/Language/FixedPoint.lean",
-      "relay": "accepted H70; waiting"
+      "relay": "Partial overlay transport/source-header review completed; owner agreement, Lean and affected-gate validation remain pending."
     }
-  ]
+  ],
+  "host_relay_boundary": "Host journals determine delivery acceptance; delivery does not establish owner agreement or validation. No VM relay installation task."
 }
