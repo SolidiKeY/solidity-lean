@@ -324,3 +324,14 @@ consumer diff and helper are preserved off Git as
 uncommitted consumer edits and the helper were removed from the worktree. The
 prior extract-failure checkpoint is unaffected. No fitting proof, after timing,
 review or acceptance is claimed.
+
+## Extract-failure equivalence backfill
+
+`tests/h55/shared-fixtures/ExtractFailureEquivalence.lean` retains the original
+proof locally, applies the shared theorem at the exact original statement and
+proves equality of the two proofs by proof irrelevance for arbitrary inputs.
+`lake env lean -j1 --tstack=131072` passed with Lean 4.24.0; both public
+backfill theorems reported no axioms. This is a kernel check of this helper's
+reuse and proof equivalence, not an external behavioral test, independent
+review or full-scope acceptance of item 1. Evidence remains off Git at
+`/workspace/h55-shared-fixtures-evidence/extract-equivalence.log`.
