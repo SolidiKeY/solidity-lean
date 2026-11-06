@@ -272,3 +272,19 @@ and simultaneous feasibility remain unverified. This adds no theorem or premise.
 All four original checkpoints remain unfinished; no Lean run is authorized by
 the partial receipt. Source-only acceptance and independent review evidence are
 saved with the return-frontier checkpoint.
+
+## Human H82 retirement: stopped handoff
+
+Implementation is stopped, not complete. Handoff to
+solidity-inline-assembly5-20261031/vy3-compilation takes effect only after the
+final stopped/head acknowledgement. Original assignment, original goal context,
+work/backfill queues, exact scope and all remaining work/waits are committed
+under tests/h62/item2/audit-v09-passes/handoff/. No in-flight source-reading work
+created uncommitted proof changes. No H71 push permission is available, so no
+push was performed. No new proof implementation is authorized on this worker.
+
+PAUSED was requested by the human. The exposed goal tool supports only complete
+or blocked and cannot express PAUSED; prior calls also lacked trusted CCA goal
+context. No substitute completion/reset/new goal is attempted. This precise
+limitation is saved in retirement-state.json; the worker stops regardless.
+The successor must retrieve the original scope and waits before integrating.
