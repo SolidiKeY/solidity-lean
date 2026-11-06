@@ -15,7 +15,7 @@ All original Source files and tracked lean-toolchain remain byte-identical to ba
 | Checkpoint | State | Decisive evidence |
 |---|---|---|
 | 1 Census and clean old baseline | Done, with bounded evidence below | All 199 assigned Source modules / 246 local prerequisites pass; complete old type ledger and hashes |
-| 2 Official release adaptation | Blocked | Exact official pin installed; isolated Ctor repair passes; unchanged original and external dependencies fail; source-use target validation incomplete |
+| 2 Official release adaptation | Blocked | Exact official pin installed; isolated Ctor repair passes; external dependencies fail; H78 public shim compatibility incomplete |
 | 3 New full build and matched timing | Blocked | 15 target modules pass, 3 fail, 228 import-blocked; no complete target run or valid timing delta |
 | 4 Reviewed migration handoff | Partial | Reviewable unapplied proof patch, tooling and diagnostic artifacts ready; integration/whole migration gate unfinished |
 
@@ -137,26 +137,21 @@ Partial old/new inventories explicitly say complete=false and request 5/199 modu
 2365 old entries,2422 new;18 missing names,75 additions,555 changed raw type/universe
 records,1792 identical. Independent reviews matched139 explicitly named authored
 declarations with identical raw types. This is bounded evidence, not full-directory
-compatibility. Missing16 enum toCtorIdx helpers and2 hygienic names are recorded compiler-generated
-changes, not frozen source-written statement changes under the coordinator ruling.
+compatibility. Missing16 enum toCtorIdx helpers and2 hygienic names remain compatibility
+reconciliation items under H78; generated origin does not waive public APIs.
 All555 changed rows are generated, but not all changes are alpha/formatting:
 Syn.noConfusion and FrameBudget.noConfusionType change argument structure; Q.isInt's
-generated equation uses a changed BEq Int instance. The coordinator has now clarified that generated signatures are outside the
-exact-type freeze; source-written statements and proof budgets remain frozen.
+generated equation uses a changed BEq Int instance. Under H78 these public generated differences require compatibility preservation;
+source-written statements and proof budgets remain frozen.
 
-**Q-MS-API-01 is resolved by the coordinator.** The exact-type freeze covers
-source-written statements and their proof budgets, not compiler-generated
-auxiliaries such as noConfusion, recOn, casesOn or matchers. Every affected source
-use still must be adapted and every adapted use listed for cut-over review.
-No custom replacement elaborator or restoration of old generated signatures is
-required on the strength of signature differences alone. This clarification does
-not authorize original-file edits, trust changes, budget increases or a passing gate.
-
-The complete old raw declaration/type ledger is a reference superset containing
-both authored and generated declarations. Its hashes do not define the frozen
-contract by themselves. Raw generated differences alone are not migration blockers.
-The earlier scope-question record remains historical evidence; the authoritative
-answer is in h70-generated-scope-resolution/decision.json within the evidence directory.
+**H78 supersedes the earlier Q-MS-API-01 answer. Generated public API is
+frozen too.** Compatibility shims must keep the old shapes available to existing
+users; do not edit users to accommodate changed generated signatures. Authored
+statements, semantics, proof/resource budgets and trust policy remain unchanged.
+The earlier exemption and its receipt are historical, not current authority.
+Each shim must be listed with its name and old/new signature for cut-over review.
+The complete old raw declaration ledger remains a reference superset; public versus
+private/generated classification still needs semantic verification, not regex waiver.
 
 A bounded semantic bridge in IntegerInstanceSemantics checks Q.isInt=true iff its
 numerator modulo denominator is zero, plus an inhabited zero positive control,
@@ -222,9 +217,9 @@ The Ctor proposal still contains only proposed proof-body adaptations to
 Syn.nodes_eq and Syn.excl_ctor, validated in an isolated fixture. It remains
 unapplied and is not recorded as an accomplished Source edit. Target Source file
 checks, including implicit generated uses, remain blocked by the saved Hash/Raw
-owner dependencies and original-file coordination. Each future actual source-use
-adaptation must enter the cut-over manifest with file/declaration/old/new use and
-proof/statement-budget validation. This preparatory audit rejects every tracked or untracked Source difference.
+owner dependencies and original-file coordination. H78 prohibits adapting existing users to generated signature changes; future
+compatibility shims must enter the cut-over manifest with name/old/new signature
+and proof/statement-budget validation. This preparatory audit rejects every tracked or untracked Source difference.
 It does not accept or validate an adaptation manifest; that validator remains
 future work when approved original-file changes are available.
 
@@ -233,3 +228,73 @@ migrate-lowering full handoff was requested by exact coordinator staged path and
 SHA in the updated receipt; it has not been delivered or reviewed. Existing
 performance/trust STOP dispositions remain untouched. No new Lean runs were made
 for this policy/documentation update.
+
+## H78 compatibility work and retained STOP
+
+The H78 receipt is /workspace/h62-migrate-source-evidence/h78-compatibility.
+h78-shims.py deterministically reproduces the prototype fixture/Source.Syntax
+proposal and complete signature manifest. No Source original or user was edited.
+The16 old toCtorIdx names are absent in4.35, and every old raw function type equals
+the replacement ctorIdx type. Conditional test declarations restore the exact old
+names in the new isolated environment and preserve existing declarations in old.
+All16 constructor-exhaustive pointwise equality proofs pass both compilers, with
+no axioms, using fixture SHA2d36de90b3aa57f7643c1c3e6639c666426eedffc67efb10f3d01e167d078310.
+These are **type/value prototypes, not accepted unchanged-user API shims**.
+
+Finder identified missing alias metadata: old aliases are protected, reducible
+abbreviations, while the prototype uses plain def. Old ctorIdx itself was reducible;
+new ctorIdx is regular. Reducible/protected behavior, deprecation and completion
+metadata need reconciliation and new validation after STOP disposition. A simple
+alias to the new target must not be called full backward compatibility yet.
+
+The old-shaped H78Compat.Syn.noConfusionType/noConfusion namespace candidates do
+not restore original public names. The old-role check fails executable generation
+for noConfusion and its example; a noncomputable correction is unvalidated.
+The new-role check was not run. Empty printed axiom lists after this failed run
+are not a passing proof gate. The official compiler automatically installs changed
+original-name declarations; duplicate replacement is rejected and exact qualified
+name resolution returns the real constant before fallback aliases. Namespace-only
+wrappers cannot satisfy H78. A root-owned supported naming/generation strategy is
+required under the same official compiler and dependency-free-core constraints.
+
+**MS-H78-SHIM-PERF-STOP:** old fixture wall4.404726603s, new5.213439807s
+(+18.3601226%); sampled RSS645775360→1652035584 bytes (+155.8220221%).
+The old role skips existing declarations while the new role elaborates16 extra
+prototype defs. This is not an attributable full Source regression comparison;
+the observation nevertheless retains STOP. No further Lean checks or repeated
+measurements are authorized by inference. Root review/disposition is pending.
+
+The16 public-name prototypes below all have old signature and proposed shim
+signature T→Nat (new4.35 original name absent; replacement T.ctorIdx : T→Nat):
+
+| Name under Solidity.Source | Old signature | Proposed shim signature |
+|---|---|---|
+| AddOp.toCtorIdx | AddOp → Nat | AddOp → Nat |
+| AssignOp.toCtorIdx | AssignOp → Nat | AssignOp → Nat |
+| Constness.toCtorIdx | Constness → Nat | Constness → Nat |
+| CtorVis.toCtorIdx | CtorVis → Nat | CtorVis → Nat |
+| DataLoc.toCtorIdx | DataLoc → Nat | DataLoc → Nat |
+| Denom.toCtorIdx | Denom → Nat | Denom → Nat |
+| EqOp.toCtorIdx | EqOp → Nat | EqOp → Nat |
+| MulOp.toCtorIdx | MulOp → Nat | MulOp → Nat |
+| Mutability.toCtorIdx | Mutability → Nat | Mutability → Nat |
+| OrderOp.toCtorIdx | OrderOp → Nat | OrderOp → Nat |
+| PrefixOp.toCtorIdx | PrefixOp → Nat | PrefixOp → Nat |
+| ShiftOp.toCtorIdx | ShiftOp → Nat | ShiftOp → Nat |
+| StateVis.toCtorIdx | StateVis → Nat | StateVis → Nat |
+| SuffixOp.toCtorIdx | SuffixOp → Nat | SuffixOp → Nat |
+| UserOp.toCtorIdx | UserOp → Nat | UserOp → Nat |
+| Visibility.toCtorIdx | Visibility → Nat | Visibility → Nat |
+
+All16 remain unapplied and incomplete for H78 because of the documented metadata
+findings. The separate failed shape candidates have these signatures:
+
+| Candidate (not original public API) | Legacy shape | v4.35 original generated shape |
+|---|---|---|
+| H78Compat.Syn.noConfusionType | {c : Cat} → (P : Sort u) → Syn c → Syn c → Sort u | (P : Sort u) → {c : Cat} → Syn c → {c' : Cat} → Syn c' → Sort u |
+| H78Compat.Syn.noConfusion | {c : Cat} → {P : Sort u} → {x y : Syn c} → x=y → legacy noConfusionType P x y | {P : Sort u} → {c} → {x : Syn c} → {c'} → {y : Syn c'} → c=c' → HEq x y → new noConfusionType P x y |
+
+No production shims have been installed or accepted. Source/Ctor's earlier proof
+proposal stays unapplied and is not a substitute for H78 public API compatibility.
+Other generated public signatures across199 modules remain to reconcile after
+owner overlays, permission and STOP resolution. Goal remains incomplete.

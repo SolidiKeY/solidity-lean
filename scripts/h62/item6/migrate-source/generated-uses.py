@@ -41,7 +41,7 @@ def main():
     changed=sorted(set(changed) | set(subprocess.check_output(["git","-C",str(root),"ls-files","--others","--exclude-standard","--","Solidity/Source"],text=True).splitlines()))
     from collections import Counter
     result={"schema":1,"base":c["base"],"inspected_head":subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip(),
-      "policy":{"source":"coordinator answer to Q-MS-API-01","frozen":"source-written statements and proof budgets","generated_signatures_frozen":False,"all_adapted_source_uses_must_be_listed":True},
+      "policy":{"source":"H78 human correction","frozen":"authored statements, generated public API, and proof budgets","generated_signatures_frozen":True,"existing_users_must_remain_unchanged":True,"all_shims_must_be_listed":True},
       "boundary":"Lexical qualified/receiver candidates only; unqualified references and implicit uses omitted. Not elaborated name resolution or successful v4.35 validation. Preparatory unchanged-tree audit; no adaptation-manifest input supported.",
       "source_files_scanned":len(c["files"]),"candidate_count":len(records),"by_file":dict(sorted(Counter(r["path"] for r in records).items())),
       "source_files_changed":changed,"adapted_source_uses":[],"records":records,
