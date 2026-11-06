@@ -8,13 +8,29 @@ import re
 from pathlib import Path
 
 DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
-TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|[\w\']+(?:\.[\w\']+)*|[^\s]')
+TOKEN = re.compile(r"""r(#+)"[\s\S]*?"\1|'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'|«[^»]*»|"(?:\\.|[^"\\])*"|[\w\']+(?:\.[\w\']+)*|[^\s]""")
+RAW_START = re.compile(r'r(#+)"')
+CHAR = re.compile(r"'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'")
 BINDER = re.compile(r"([({\[])\s*((?:[^\W\d]|_)[\w']*(?:\s+(?:[^\W\d]|_)[\w']*)*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
+
+def raw_literal(text, i):
+    if text[i] != "r" or (i and (text[i-1].isalnum() or text[i-1] in "_'")): return None
+    match = RAW_START.match(text, i)
+    if not match: return None
+    close = '"' + match.group(1)
+    end = text.find(close, match.end())
+    if end < 0: raise ValueError("unterminated raw string")
+    return end + len(close)
+
+def char_literal(text, i):
+    if text[i] != "'" or (i and (text[i-1].isalnum() or text[i-1] in "_'")): return None
+    return CHAR.match(text, i)
 
 def mask(text):
     out = list(text)
     i = depth = 0
     string = False
+    quoted = False
     while i < len(text):
         if depth:
             if text.startswith("/-", i):
@@ -28,13 +44,23 @@ def mask(text):
             else:
                 if text[i] != "\n": out[i] = " "
                 i += 1
+        elif quoted:
+            if text[i] == "»": quoted = False
+            i += 1
         elif string:
             if text[i] == "\\": i += 2
             else:
                 if text[i] == '"': string = False
                 i += 1
+        elif text[i] == "r" and i+1 < len(text) and text[i+1] == "#" and (end := raw_literal(text, i)):
+            i = end
+        elif text[i] == "'" and (literal := char_literal(text, i)):
+            i = literal.end()
         elif text[i] == '"':
             string = True
+            i += 1
+        elif text[i] == "«":
+            quoted = True
             i += 1
         elif text.startswith("/-", i):
             depth = 1
@@ -46,16 +72,20 @@ def mask(text):
             out[i:j] = " " * (j-i)
             i = j
         else: i += 1
-    if depth or string: raise ValueError("unterminated comment or string")
+    if depth or string or quoted: raise ValueError("unterminated comment, string or escaped identifier")
     return "".join(out)
 
 def hide_strings(text):
     out = list(text)
     i = 0
     inside = False
+    quoted = False
     while i < len(text):
         c = text[i]
-        if inside:
+        if quoted:
+            if c == "»": quoted = False
+            if c != "\n": out[i] = " "
+        elif inside:
             if c == "\\" and i+1 < len(text):
                 out[i] = " "
                 if text[i+1] != "\n": out[i+1] = " "
@@ -63,14 +93,28 @@ def hide_strings(text):
                 continue
             if c == '"': inside = False
             if c != "\n": out[i] = " "
+        elif c == "r" and i+1 < len(text) and text[i+1] == "#" and (end := raw_literal(text, i)):
+            for j in range(i, end):
+                if text[j] != "\n": out[j] = " "
+            i = end
+            continue
+        elif c == "'" and (literal := char_literal(text, i)):
+            end = literal.end()
+            for j in range(i, end):
+                if text[j] != "\n": out[j] = " "
+            i = end
+            continue
         elif c == '"':
             inside = True
+            out[i] = " "
+        elif c == "«":
+            quoted = True
             out[i] = " "
         i += 1
     return "".join(out)
 
 def tokenize(s):
-    return TOKEN.findall(s)
+    return [match.group(0) for match in TOKEN.finditer(s)]
 
 def normalize(header):
     # Types are read before introducing the names bound by their group.
@@ -106,22 +150,34 @@ def normalize(header):
 
 def split_definition(content):
     """Find a top-level :=, ignoring strings and bracketed default values."""
-    depth = 0
-    string = False
-    i = 0
-    while i < len(content):
-        c = content[i]
-        if string:
-            if c == "\\": i += 2; continue
-            if c == '"': string = False
-        elif c == '"': string = True
-        elif c in "([{": depth += 1
-        elif c in ")]}":
-            depth -= 1
-            if depth < 0: return None
-        elif depth == 0 and content.startswith(":=", i):
-            return content[:i], content[i+2:]
-        i += 1
+    result = split_declaration(content, allow_equations=False)
+    return None if result is None else result[:2]
+
+def split_declaration(content, allow_equations=True, skeleton=None):
+    """Recognize := or an unambiguous line-initial equation case."""
+    if skeleton is None: skeleton = hide_strings(content)
+    stack = []
+    pairs = {")": "(", "]": "[", "}": "{"}
+    line_start = 0
+    has_result_type = False
+    for i, c in enumerate(skeleton):
+        if c == "\n":
+            line_start = i + 1
+            continue
+        if c in "([{": stack.append(c); continue
+        if c in ")]}":
+            if not stack or stack.pop() != pairs[c]: return None
+            continue
+        if stack: continue
+        if c == ":":
+            if skeleton.startswith(":=", i):
+                return content[:i], content[i+2:], "assignment"
+            if not skeleton.startswith("::", i): has_result_type = True
+        if allow_equations and c == "|" and not skeleton[line_start:i].strip():
+            line_end = skeleton.find("\n", i)
+            if line_end < 0: line_end = len(skeleton)
+            if not has_result_type or "=>" not in skeleton[i:line_end]: return None
+            return content[:i], content[i:], "equations"
     return None
 
 def scan(path, root, source=None):
@@ -131,38 +187,61 @@ def scan(path, root, source=None):
     matches = list(DECL.finditer(skeleton))
     context_commands = list(re.finditer(r"(?m)^[ \t]*(?:import|namespace|section|end|open|variable|universe)\b[^\n]*", skeleton))
     rows = []
+    relative_path = path.relative_to(root).as_posix()
+    def indent(m):
+        prefix = re.match(r"[ \t]*", skeleton[m.start():m.start(1)]).group()
+        return len(prefix.expandtabs(8))
     for i, match in enumerate(matches):
         end = matches[i+1].start() if i+1 < len(matches) else len(text)
         content = text[match.end():end]
-        command = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", hide_strings(content))
-        if command: content = content[:command.start()]
+        content_skeleton = skeleton[match.end():end]
+        command = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", content_skeleton)
+        command_inside = False
+        if command:
+            prefix = re.match(r"[ \t]*", command.group()).group()
+            command_inside = len(prefix.expandtabs(8)) > indent(match)
+            content = content[:command.start()]
+            content_skeleton = content_skeleton[:command.start()]
         qualifiers = sorted(re.findall(r"\b(?:partial|unsafe|noncomputable)\b", skeleton[match.start():match.start(1)]))
         context = digest([m.group().strip() for m in context_commands if m.start() < match.start()])
         unsupported = match.group(1) in {"structure", "inductive", "class", "axiom", "constant"}
-        parts = None if unsupported else split_definition(content)
+        parts = None if unsupported else split_declaration(content, skeleton=content_skeleton)
         reason = "unsupported-declaration-form" if unsupported else "missing-top-level-definition"
         if parts is not None:
-            head_skeleton = hide_strings(parts[0])
+            head_skeleton = content_skeleton[:len(parts[0])]
             if re.search(r"\bwhere\b", head_skeleton):
                 parts, reason = None, "unsupported-where-declaration"
             elif re.search(r"(?m)^[ \t]*\|", head_skeleton):
                 parts, reason = None, "unsupported-equation-declaration"
         if parts is None:
-            rows.append(dict(path=path.relative_to(root).as_posix(),
+            rows.append(dict(path=relative_path,
                              line=text.count("\n", 0, match.start())+1,
                              kind=match.group(1), name=match.group(2) or "<anonymous>",
-                             statement=None, body=[], owner="unknown", context_hash=context, qualifiers=qualifiers,
+                             statement=None, body=[], body_form=None, body_reject_reason=reason,
+                             owner="unknown", context_hash=context, qualifiers=qualifiers,
                              reject_reason=reason))
             continue
-        header, body = parts
-        boundary = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", hide_strings(body))
-        if boundary: body = body[:boundary.start()]
-        rows.append(dict(path=path.relative_to(root).as_posix(),
+        header, body, body_form = parts
+        next_is_nested = i + 1 < len(matches) and indent(matches[i+1]) > indent(match)
+        body_reject_reason = "nested-declaration-boundary" if next_is_nested else None
+        if "«" in header or "»" in header: body_reject_reason = "escaped-identifier-boundary"
+        if command_inside: body_reject_reason = "indented-command-boundary"
+        body_skeleton = content_skeleton[len(header) + (2 if body_form == "assignment" else 0):]
+        if re.search(r"\bwhere\b", body_skeleton):
+            body_reject_reason = "body-may-have-local-helpers"
+        boundary = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", body_skeleton)
+        if boundary:
+            prefix = re.match(r"[ \t]*", boundary.group()).group()
+            if len(prefix.expandtabs(8)) > indent(match):
+                body_reject_reason = "indented-command-boundary"
+            body = body[:boundary.start()]
+        normalized = normalize(header.strip())
+        rows.append(dict(path=relative_path,
                          line=text.count("\n", 0, match.start())+1,
                          kind=match.group(1), name=match.group(2) or "<anonymous>",
-                         statement=normalize(header.strip()), body=tokenize(body),
-                         owner="unknown", context_hash=context, qualifiers=qualifiers,
-                         reject_reason="unsupported-binder-syntax" if normalize(header.strip()) is None else None))
+                         statement=normalized, body=tokenize(body), body_form=body_form,
+                         body_reject_reason=body_reject_reason, owner="unknown", context_hash=context, qualifiers=qualifiers,
+                         reject_reason="unsupported-binder-syntax" if normalized is None else None))
     return rows
 
 def digest(obj):
@@ -226,8 +305,8 @@ def main():
                 action="weak-lexical-lead-review-signatures-and-ownership"))
     bodies = {}
     for row in rows:
-        if row["body"]:
-            bodies.setdefault(digest(row["body"]), []).append(row)
+        if row["body"] and row["body_reject_reason"] is None:
+            bodies.setdefault(digest([row["body_form"], row["body"]]), []).append(row)
     body_candidates = []
     for key, group in sorted(bodies.items()):
         if len(group) > 1:

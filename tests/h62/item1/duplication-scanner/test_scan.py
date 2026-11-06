@@ -70,13 +70,140 @@ class ScannerControls(unittest.TestCase):
             source.write_text('partial def e : Nat → Nat\n  | 0 => 0\n  | n+1 => n\ndef w : T where\n  source := id\ndef s : String := "where"\n')
             rows = scanner.scan(source, root)
             self.assertEqual(len(rows), 3)
-            self.assertEqual(rows[0]["reject_reason"], "missing-top-level-definition")
+            self.assertIsNone(rows[0]["reject_reason"])
+            self.assertEqual(rows[0]["body_form"], "equations")
             self.assertEqual(rows[0]["qualifiers"], ["partial"])
             self.assertEqual(rows[1]["reject_reason"], "unsupported-where-declaration")
             self.assertIsNone(rows[2]["reject_reason"])
             report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
             self.assertEqual(report["rejections"]["by_reason"],
-                             {"missing-top-level-definition": 1, "unsupported-where-declaration": 1})
+                             {"unsupported-where-declaration": 1})
+
+    def test_equation_bodies_and_local_helpers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text(
+                "def a : Nat → Nat\n  | 0 => 0\n  | n => let q := n; q\n"
+                "def b : Nat → Nat\n  | 0 => 0\n  | n => let q := n; q\n"
+                "def c : Nat → Nat\n  | 0 => 1\n  | n => let q := n; q\n"
+                "def d : Int → Nat\n  | 0 => 0\n  | n => let q := n; q\n"
+                "def noType\n  | 0 => 0\n"
+                "def outerA : Nat := helper where\n  def helper : Nat := 1\n"
+                "def outerB : Nat := helper where\n  def helper : Nat := 2\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            inventory = data["inventory"]
+            rows = {row["name"]: row for row in inventory}
+            self.assertEqual(rows["a"]["body_form"], "equations")
+            self.assertIsNone(rows["a"]["reject_reason"])
+            self.assertEqual(rows["noType"]["reject_reason"], "missing-top-level-definition")
+            self.assertIsNotNone(rows["outerA"]["body_reject_reason"])
+            self.assertIsNotNone(rows["outerB"]["body_reject_reason"])
+            body_groups = [{r["name"] for r in group["members"]} for group in data["body_candidates"]]
+            self.assertIn({"a", "b", "d"}, body_groups)
+            matching = next(group for group in data["body_candidates"] if {r["name"] for r in group["members"]} == {"a", "b", "d"})
+            self.assertIn("different-or-unsupported-statements", matching["reject_reasons"])
+            self.assertFalse(any("outerA" in group or "outerB" in group for group in body_groups))
+            self.assertFalse(any("c" in group for group in body_groups))
+
+    def test_indentation_excludes_modifiers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "A.lean"
+            source.write_text("def a : Nat := 0\nprivate def b : Nat := 0\n")
+            rows = scanner.scan(source, root)
+            self.assertIsNone(rows[0]["body_reject_reason"])
+            source.write_text("private def a : Nat := 0\n  def b : Nat := 0\n")
+            rows = scanner.scan(source, root)
+            self.assertEqual(rows[0]["body_reject_reason"], "nested-declaration-boundary")
+
+    def test_equation_delimiters_fail_closed(self):
+        self.assertIsNone(scanner.split_declaration(" : Nat → Nat\n  | 0\n    => 0"))
+        self.assertIsNone(scanner.split_declaration(" : (Nat | Nat)\n  | 0"))
+        self.assertIsNone(scanner.split_declaration(" (x : Nat)\n  | 0 => 0"))
+        self.assertIsNone(scanner.split_declaration(scanner.mask(" : Nat /- | 0 => 0 -/")))
+        assignment = scanner.split_declaration(' : String := " | x => y "')
+        self.assertEqual(assignment[2], "assignment")
+        assignment = scanner.split_declaration(" : Nat := by\n  match 0 with\n  | 0 => 1")
+        self.assertEqual(assignment[2], "assignment")
+
+    def test_escaped_identifiers_do_not_conflate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text(
+                "def «a:=b» : Nat := 1\n"
+                "def x : Nat := «a b»\n"
+                "def y : Nat := «a  b»\n"
+                "def z : Nat := «a--b»\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            self.assertEqual(len(data["inventory"]), 4)
+            self.assertEqual(data["inventory"][0]["reject_reason"], "unsupported-binder-syntax")
+            self.assertEqual(data["inventory"][0]["body_reject_reason"], "escaped-identifier-boundary")
+            self.assertEqual(data["body_candidates"], [])
+            self.assertNotEqual(scanner.tokenize("«a b»"), scanner.tokenize("«a  b»"))
+            self.assertIn("«a--b»", scanner.mask("«a--b»"))
+
+    def test_character_literals_do_not_confuse_identifier_or_string_masks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text("""def a : Char := '«'\ndef b : Char := '»'\ndef c : Char := '"'\ndef d' : Nat := 1\n""")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            self.assertEqual(len(data["inventory"]), 4)
+            self.assertEqual(data["errors"], [])
+            self.assertEqual(data["body_candidates"], [])
+            self.assertNotEqual(scanner.tokenize("'«'"), scanner.tokenize("'»'"))
+
+    def test_escaped_character_literal_boundaries(self):
+        for literal in (r"'\''", r"'\\'", r"'\n'", r"'\u{00ab}'"):
+            with self.subTest(literal=literal):
+                source = "def x : Char := " + literal + "\ndef y : Nat := 0\n"
+                self.assertEqual(scanner.mask(source), source)
+                self.assertEqual(len(scanner.hide_strings(source)), len(source))
+                self.assertEqual(scanner.tokenize(literal), [literal])
+        self.assertEqual(scanner.tokenize("f' x"), ["f'", "x"])
+
+    def test_raw_strings_preserve_delimiters_and_content(self):
+        raw = 'r#"one " -- «not an identifier»\ndef fake : Nat := 0\ntwo"#'
+        source = 'def a : String := ' + raw + '\ndef b : String := r#"one  two"#\n'
+        self.assertEqual(scanner.mask(source), source)
+        self.assertEqual(len(list(scanner.DECL.finditer(scanner.hide_strings(source)))), 2)
+        self.assertEqual(scanner.tokenize(raw), [raw])
+        self.assertNotEqual(scanner.tokenize('r#"one two"#'), scanner.tokenize('r#"one  two"#'))
+        self.assertEqual(scanner.tokenize('r##"a "# b"##'), ['r##"a "# b"##'])
+        with self.assertRaises(ValueError): scanner.mask('def x := r#"unterminated"')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            literal = 'r##"a "# -- fake comment\ndef fake : Nat := 0\nend"##'
+            (root / "A.lean").write_text("def a : String := " + literal + "\ndef b : String := " + literal + "\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            self.assertEqual([row["name"] for row in data["inventory"]], ["a", "b"])
+            self.assertEqual(len(data["body_candidates"]), 1)
+
+    def test_full_skeleton_slice_alignment(self):
+        source = (
+            "def «a:=b» : Nat := 1\n"
+            "def x : Char := '«'\n"
+            "def text : String := r##\"quote \"# -- literal\ndef fake : Nat := 1\nend\"##\n"
+            "def f : Nat → Nat\n  | 0 => 1\n  | n => let q := n; q\n"
+            "def g : Nat := 1 -- comment «not a quote»\n")
+        text = scanner.mask(source)
+        skeleton = scanner.hide_strings(text)
+        matches = list(scanner.DECL.finditer(skeleton))
+        self.assertEqual(len(matches), 5)
+        for i, match in enumerate(matches):
+            end = matches[i+1].start() if i+1 < len(matches) else len(text)
+            self.assertEqual(skeleton[match.end():end], scanner.hide_strings(text[match.end():end]))
+
+    def test_indented_command_does_not_group_truncated_bodies(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text(
+                "theorem a : True := by\n  open Foo in\n  exact 1\n"
+                "theorem b : True := by\n  open Bar in\n  exact 2\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            rows = {row["name"]: row for row in data["inventory"]}
+            self.assertEqual(rows["a"]["body_reject_reason"], "indented-command-boundary")
+            self.assertEqual(rows["b"]["body_reject_reason"], "indented-command-boundary")
+            self.assertEqual(data["body_candidates"], [])
 
     def test_structure_defaults_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

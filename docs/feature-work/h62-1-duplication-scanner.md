@@ -170,3 +170,52 @@ remaining backfill and final repository gates remain unfinished.
 The repository `./scripts/check-doc-paths.sh` exited 0: every checked
 backticked Lean path resolved; it reported 115 ambiguous references under its
 non-strict mode. Its complete output is retained off Git.
+
+## Equation forms, literal boundaries, and matched performance pair
+
+The scanner now recognizes a conservative subset of equation-style
+definitions with explicit result types and keeps equation bodies distinct
+from assignment bodies. It suppresses body grouping when an indented
+declaration, local helper, command boundary or escaped header can make the
+captured body incomplete. Escaped identifiers, character literals and Lean
+raw strings are kept opaque to comment and declaration-boundary discovery;
+raw and escaped literal contents remain distinct body tokens. Other Lean
+syntax remains unsupported or unrecognized. Body matches and signatures are
+still lexical leads with unresolved intrinsic-signature and ownership reasons.
+
+Independent read-only finder and skeptic reviews identified false delimiter
+and truncated-body cases involving local helpers, indented commands, escaped
+identifiers, character literals and raw strings. Controls were added for the
+reported examples and their reviews found no further concrete collision in
+their focused final pass. Their reviews did not use Lean. Two preliminary
+whole-tree scans were interrupted before completion to fix literal handling.
+
+The initial extension's two complete whole-tree incremental runs took 110 and
+114 seconds versus the previous 102 seconds. The 114-second repeat exceeded
+the required 10% stop threshold; the stopped uncommitted work and reports
+remain in `/workspace/h62-duplication-scanner-evidence/perf-stop/`. The
+coordinator subsequently directed one matched before/after pair on the same
+input and VM. Profiling identified repeated full-text masking, path resolution
+and signature normalization. Reusing the aligned full-file skeleton and
+caching those values produced the pair 103.565 seconds before and 99.170
+seconds after, a 4.24% improvement. Both used the same 6,657-file selection,
+registry, previous report, 8 GiB virtual-memory ceiling and 4 GiB
+available-memory precheck. This satisfies that timing decision; it does not
+make the scanner or full task complete.
+
+The optimized records matched the preserved unoptimized implementation on
+166 real files and an opaque-literal fixture. The full optimized incremental
+report also matched the earlier unoptimized full report after replacing only
+the recorded scanner SHA256; both normalized to
+`fa3f6023b816705877225db067f808e2499f22fc1e64c599619bba9c82768a04`.
+The finder and skeptic independently reviewed the optimization and alignment
+control. The full report recognized 114,487 declarations, including 6,064
+equation forms, and 65,368 explicit declaration rejections; other omitted
+forms remain unknown. Its scanner hash changed and candidate-key changes
+therefore include scanner changes, not established cleanup opportunities.
+The paired timing, differential and bulk reports are retained off Git.
+
+The current scanner acceptance suite passed 20 tests and the pinned audit
+index suite passed 2. These are external tests, not kernel proofs. Live owner
+verification, full declaration accounting, intrinsic signature resolution,
+remaining backfill and final repository gates remain pending.
