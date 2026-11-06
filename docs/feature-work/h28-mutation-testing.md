@@ -1,5 +1,33 @@
 # H28 semantic mutation testing
 
+Status: RESULT-PENDING (filled in from the recorded run below).
+
+The lane moved from a Codex VM to a Claude VM on 2026-11-05. Its earlier
+history, which used a Docker backend and caches that exist only on the Codex
+VM, is kept unchanged under [History (Codex VM)](#history-codex-vm). The
+sections up to there describe the work redone on the Claude VM.
+
+- Branch: `cloud/moved4-20261105/mutation-testing`.
+- Start: `origin/cloud/mutation-testing-move` (e25db89b) merged at master
+  `aec9adf1ad8666a7e591e42a537069a93dc858cb`.
+- The production inputs are byte-identical to the original semantic base
+  `6f3eedf0`: `Calculus/Rules.lean`, `Calculus/RuleShapes.lean`,
+  `Calculus/CallbackRules.lean`, `TestSuite/Refuted.lean` and
+  `tests/upstream/README.md`.
+- No production file, statement, premise, exclusion, budget, shared root or
+  module registration changed. The lane writes only
+  `tests/h28-sol/mutation-testing/**`, this file and its docs/README row
+  fragment.
+
+RESULT-SECTIONS
+
+## History (Codex VM)
+
+The text below is the Codex VM record as it was moved. Its paths under
+`/workspace`, its Docker backend, caches, bulk archive and seals are not
+available on the Claude VM, and nothing below was re-certified here except
+through the fresh runs above. Old status line:
+
 Status: partial. Three concrete guard/control development cases have checked
 semantic witnesses; the frozen assignment is not complete. The full candidate
 manifest is not frozen, the general runner has passed its committed six-case pilot, and no full-assignment mutation
@@ -11,7 +39,7 @@ Branch: `codex/solidity-h28-sol-20261104/mutation-testing`.
 No production input, statement, premise, exclusion, refusal, intrinsic type,
 proof budget, shared root or producer implementation has changed.
 
-## Checked concrete witnesses
+### Checked concrete witnesses
 
 The development cases are
 [guard-cases.draft.json](../../tests/h28-sol/mutation-testing/guard-cases.draft.json).
@@ -52,7 +80,7 @@ child RSS was 1,461,844 KiB. Cgroup peak charged memory was 548,257,792 bytes.
 These are different measurements: shared mapped pages may be charged to a
 parent cgroup. Neither number is substituted for the other.
 
-## Bounded execution and cache trust
+### Bounded execution and cache trust
 
 [bounded.py](../../tests/h28-sol/mutation-testing/tools/bounded.py) runs one Lean
 process at a time with `LEAN_NUM_THREADS=1`, explicit `-j1`, unchanged stack and
@@ -82,7 +110,7 @@ can be reused. Input source hashes are checked before and after Lean commands.
 This older scoped development driver supports Rules targets only; the
 committed-manifest engine and its executed pilot are documented below.
 
-## Validation and reviews
+### Validation and reviews
 
 [Final launcher controls](../../tests/h28-sol/mutation-testing/evidence/backend-controls-final/result.json)
 pass all four actual checks: an allowed cache import succeeds; an excluded
@@ -121,7 +149,7 @@ The fully qualified signature probes and rebuilt cache address those failures.
 Earlier unit timing collection also records that `/usr/bin/time` was absent;
 Python resource accounting was used for those Python test processes.
 
-## Inventory, publication and full queue
+### Inventory, publication and full queue
 
 The reproducible
 [draft census](../../tests/h28-sol/mutation-testing/inventory.draft.json)
@@ -162,7 +190,7 @@ refusal, observation, budget, intrinsic type, H16/H19/H25 Source freeze, frozen
 H22 Core ExtCall and H21/shared registry boundary intact. Do not push or merge.
 
 
-## Committed runner implementation and executed pilot
+### Committed runner implementation and executed pilot
 
 `tools/engine.py` requires a clean assigned branch, exact base ancestry, a
 committed schema-2 frozen manifest, committed inventory/cache metadata/oracles,
@@ -217,7 +245,7 @@ the unchanged nine-family queue; this pilot is not whole-family or
 whole-assignment completion.
 
 
-## Pilot outcomes and immutable input identity
+### Pilot outcomes and immutable input identity
 
 The executed manifest hash is
 `16a05d59974830d848051b58873f1004e6f960dd6537f0dbc77f1250bf18fc1d`.
@@ -249,7 +277,7 @@ out or OOMed, and every launched container has confirmed removal. The current
 full-queue obligations above remain binding and unfinished.
 
 
-## Unsigned overflow development checkpoint
+### Unsigned overflow development checkpoint
 
 Two further source-linked semantic witnesses pass12 fresh normal/mutant checks
 in `evidence/overflow-checked-complete`: replacing the typed compound numeric
@@ -285,7 +313,7 @@ independent revert known-kill control. Its committed runner execution is still
 pending. This is not whole-overflow-family or whole-assignment acceptance.
 
 
-## Adaptive bounded memory profiles
+### Adaptive bounded memory profiles
 
 Two frozen overflow pilot attempts refused before launching Lean because the
 6 GiB cap could not leave the required 4 GiB reserve. Their unchanged results
@@ -302,7 +330,7 @@ fetched and verified at origin/master. The assigned branch remains based on
 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5 without merging producer changes.
 
 
-## Executed overflow pilot and inventory erratum
+### Executed overflow pilot and inventory erratum
 
 The frozen overflow pilot ran from 79041a2834070ad37c79fa0e68381207ce97a462.
 All three cases were killed with checked semantic witnesses, including the
@@ -319,7 +347,7 @@ increments while leaving sub decrements unchanged. This does not invalidate
 the actual localOpAssign source link; full clause/operator coverage is pending.
 
 
-## Division development checkpoint
+### Division development checkpoint
 
 A distinct conditional helper-body edit substitutes subtraction only for div,
 preserving all numeric/compound typing premises. Six fresh normal/mutant
@@ -348,7 +376,7 @@ Separate read-only finder and skeptic audits pass for these 12 phases; see
 checks used 4 GiB/no-swap profiles and preserved at least 4 GiB reserve.
 
 
-## H35 VM build, axiom inventory and cache transport
+### H35 VM build, axiom inventory and cache transport
 
 H35 adds cache transport as a checkpoint acceptance requirement. Previous
 pilot execution results remain valid, but H35 integration acceptance is pending
@@ -420,7 +448,7 @@ No option is assumed or recommended. The existing persistent full objective
 remains unfinished; no goal has been created, reset or completed.
 
 
-## H41 cache pull and continuation
+### H41 cache pull and continuation
 
 H41 authorizes leaving VM cache packs with path and SHA256 for coordinator
 pull. This resolves Q-H35-TRANSPORT without an invented transfer receipt. The
@@ -434,7 +462,7 @@ its ancestry verified. The owned branch and immutable 6f3eedf0 base are
 unchanged; no producer changes were merged.
 
 
-## Index-bound development checkpoint
+### Index-bound development checkpoint
 
 `bounds.array-read-skipped` changes only storageIndexReadArrayFind RHS from
 find(storage, arr[ie]) to the target local v. It preserves every typed receiver,
@@ -478,7 +506,7 @@ prior H35 pack provides the exact pinned dependency cache. Coordinator pull
 has not been observed. These pilot outcomes do not complete the full queue.
 
 
-## Pop/delete development checkpoint
+### Pop/delete development checkpoint
 
 Two distinct constructor RHS edits omit the storage update: storagePopSave
 and storageIndexArrayDelete. The original simple-receiver and nonmapping
@@ -508,7 +536,7 @@ path/hash, referencing the unchanged pinned dependency pack. Coordinator pull
 is not observed. Continue the original queue with push-tail/update ordering.
 
 
-## Push recycled-tail and update-order development
+### Push recycled-tail and update-order development
 
 `push.reference-tail-cleared` wraps the typed STerm.pushSlot helper result in
 a deletion of the just-appended slot, leaving the original helper interface
@@ -552,7 +580,7 @@ H41 pack path/hash with the separately pinned dependency cache. No observed
 coordinator transfer or full-family/assignment completion is claimed.
 
 
-## Authorized delivery rebase onto e6849d3b
+### Authorized delivery rebase onto e6849d3b
 
 The coordinator explicitly instructed rebasing onto
 e6849d3bdf516099d20c33d3581d523449764018 before the next commit. Fetch and
@@ -588,7 +616,7 @@ H41 pack path/hash with the unchanged dependency pack. This validates delivery
 provenance, not completion of the remaining semantic-family queue.
 
 
-## Alias receiver captured once development
+### Alias receiver captured once development
 
 `alias.receiver-getter-twice` evaluates the storage-returning getter twice,
 then appends exactly once. The disposable rule uses an explicit typed premise
@@ -614,7 +642,7 @@ callback frames and final original assignment gates remain pending.
 
 The frozen alias pilot from64d7def6ef0a417ceb3a964450220930d6f1588c now passes all12 VM checks,8 retained compiled outputs and48 complete owned theorem axiom exports. The selected alias denominator is1/1; independent revert control passes, unrun=[] and scope_complete=false. Separate actual-run and H41 archive finder/skeptic reviews PASS. All checks used -j1,6GiB/no swap and confirmed cleanup; peakRSS1,467,752KiB. Evidence is `evidence/alias-pilot-64d7def6`; its cache-pack.json records the verified6,034,421byte H41 pack path/SHA, ready for coordinator pull with no transfer observed. Full family/assignment obligations above remain pending.
 
-## Payment success flag development
+### Payment success flag development
 
 `payment.success-flag-false` changes only the sendNoCallbackBox successful return flag from true to false. Both branches and the payment booking remain present. A funded accepted send books -5 at receiver9, leaves balance5 and returns true. A concrete recipient refusal returns false and preserves the full original state except that return local. The mutant admits a false-return postcondition contradicted by the actual accepted run. Actual typed landings of both mutant updates, with exact paid/unchanged ledger and balances, prevent vacuous box controls. Finder requested these explicit landings; added without changing statements or budgets.
 
@@ -622,11 +650,11 @@ Initial configuration, term notation and local-function conversion failures rema
 
 The committed payment pilot from5b2317f359f9105050012ae6a249252357f0c3bb passes all12 VM phases,8retained compiled outputs and27full owned theorem axiom exports. Selecteddenominator1/1, independentcontrol killed, unrun=[], scope_complete=false. Separate finder/skeptic actualrun andH41 archive reviews PASS. Checks used -j1,6GiB/no swap/confirmedcleanup; peakRSS1,455,308KiB. `evidence/payment-pilot-5b2317f3` contains exactcommands/exits/timings/axioms/hashes and verified5,970,900byte pack receipt, readyforpull with noobservedtransfer. Original Work queue1 remains partial (candidate draft not exhaustive clause/operator/fixture acceptance); queue2 runner implementation and controls pass but assignment acceptance remains pending; queue3 selected pilot witnesses pass except callback-frame work remains open; queue4 wholecombinedmanifest/finalrepositorygates/finalreviews remain pending. No backfill or producer repair was substituted for those obligations.
 
-## Coordinator automerge 32dd5bef provenance
+### Coordinator automerge 32dd5bef provenance
 
 The coordinator merged published master32dd5befce264eb9a5d1b622b9270e71c50a0f5a into owned headb5e2d9c97c1ef5c7d6f1512eac8357ad63b840ec, producing clean head9bd8e542c463b4dc08f42c2ab081f16f3139758d. Delivery/patch scope now anchors at32dd; immutable semantic/cache base6f3eedf0 is unchanged. All71unique pinned input files remain byteidentical. No production source was edited. The scope guard retains --no-renames and real-Git producer-edit, rename and missing-ancestry rejection controls; all66 tests pass. Exactsetup/unit receipts are in `evidence/automerge-32dd5bef`.
 
-## Callback semantic cache and frame development
+### Callback semantic cache and frame development
 
 The original68-module cache remains unchanged. The authenticated extension adds exactly FirstOrder, Semantics.Callback and CallbackHolds from pinned6f3eedf0, with71source/output identities. Separate finder/skeptic reviews caught and closed mutable-receipt and output-validation gaps before execution: reuse now requires committed receipt bytes plus its fixed SHA, exact module inventories and regular nonempty artifacts; CLI acquires the writer lock. All70unitcontrols pass, including real-Git receipt forgeries, diagnostic fault cases and callback import requirements.
 
@@ -636,7 +664,7 @@ The first cache attempt stopped on the pinned producer's existing unused-simp wa
 
 The initial oracle's four elaboration failures remain unscored in callback-development. All six strengthened phases pass in callback-typed-development with37owned theorem axiom exports and separate finder/skeptic PASS. callback-pilot.json freezes exact sources, signatures, edit, cache and distinct revert control. Committed pilot artifacts/axioms/H41pack follow. Exhaustive constructor/clause/operator/fixture coverage, combinedmanifest and original final repository gates remain open.
 
-## H44 reviewable delivery split
+### H44 reviewable delivery split
 
 H44 requires bulk evidence/fixtures out of Git. The exact pre-split snapshot atbe546c1dc41728361a687eeb979f3b9261a08d4a is preserved in a local backup ref and bundle. All1029data files (6,446,281bytes) are copied byte-for-byte under `/workspace/h28-h44-bulk-be546c1dc/files`, indexed in its files.json and sealed in its bulk-data.tar.gz (885,301bytes). The compact committed `tests/h28-sol/mutation-testing/bulk-data.json` records absolute paths, sizes and SHA256 identities. Existing repository paths remain ignored mirrors for unchanged commands. Prior evidence references in this document refer to these authenticated VM files, not tracked dumps.
 
