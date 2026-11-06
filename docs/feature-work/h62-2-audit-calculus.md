@@ -235,3 +235,26 @@ No assignment checkpoint is complete.
 Coordinator registration proposal only: all fourteen audit Lean modules remain
 additive tests modules under the exclusive tests scope. No area registration or
 relocation is authorized by this note.
+
+
+## Successor fresh witness validation (2026-11-06)
+
+Before this item, fetched master `33eb46304cdb536e6c8b686223c6d8e456b703ae`, verified the four fixture sources were already published, and rebased preserving the retired final member as an ancestor. No fixture theorem, original interface, budget or dependent definition changed. The isolated validation worktree stays on frozen `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`; only the published additive test helpers/fixtures and new axiom collector are overlaid.
+
+| Fixture | Explicit theorems | Joint certificates | Kernel theorems |
+|---|---:|---:|---:|
+| FailureWitnesses | 24 | 19 | 25 |
+| FailureAdditionalWitnesses | 35 | 35 | 36 |
+| CreationWitnesses | 9 | 9 | 10 |
+| CreationAdditionalWitnesses | 27 | 26 | 29 |
+
+Fresh per-file gates passed for all four. The new WitnessAxiomChecks command inventories all 100 actual imported theorem constants, including four private/generated declarations, runs literal `#print axioms` for each and refuses axioms outside the unchanged standard-three boundary. Its guarded nonexistent-module control prevents an empty successful inventory. All 95 explicit source theorems are accounted, with 89 distinct joint requests reconciled to frozen census file/signature identities. These certificates establish their exact universe-zero leading-input telescopes; semantic conditions embedded in conclusions remain pending. The remaining fresh joint-record count is 5,194 of 5,283 candidates. This does not change the independent 78 reviewed/owner-confirmed roles or 5,205 unresolved role/owner classifications.
+
+Actual toolchain: Lean 4.24.0 commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake 5.0.0-src+797c613. Permitted KeySort prerequisite passed before the controlled fixture gates. Each check used one bounded Docker scope, CPU1, 8GiB/no swap, 4GiB reserve, explicit Lean -j1 and unchanged proof budgets. LAKE_OVERRIDE_LEAN=true selects the captured serial toolchain proxy. Exact argv, exits, wall/RSS, native/runtime/import fingerprints and source hashes are in the external gate summary and archive. Initial profile-bypassing attempts are diagnostic only. Failed collector iterations are retained. The accepted v5 run has a pre-run source snapshot; v4 source identity was captured only afterwards. This is fresh 4.24 evidence, not historical-byte recovery or 4.35 migration acceptance.
+
+Finder and skeptic independently reviewed both areas without Lean/server use. Fixed findings: pre-run collector source capture; reject complete marker streams after command failure or trailing error; compare literal axiom prints independently; publish reconciliation exclusively. Four negative tooling controls pass. Both final reviews pass this bounded slice. New owned-module build also passes; seven owned helper/fixture caches are packed for coordinator pull, delivery coordinator-pending under H41. No ship-cache.sh was run.
+
+Bulk logs, scripts used to reconcile these results, snapshots, failed attempts and caches remain off Git, indexed by `tests/h62/item2/audit-calculus/witness-validation-evidence-manifest.json`. No matched speed comparison, full source-compiler adequacy, gas/fork/world proof, full affected gate or RUNTIME_GATE_PASS is claimed. H89 removes the external SolKey gate requirement in older historical notes; the permitted Lean KeySort prerequisite was still run. The previous RuleShapes reserve stop was not rerun unchanged. H28 dependent checks remain explicitly paused pending Raw compatibility and the ambient Context axiom audit. All four original audit checkpoints remain unfinished. Continue full-file role classification and independent witness slices; do not rerun the paused or unchanged stopped checks.
+
+
+The repository-wide `bash scripts/check-doc-paths.sh` gate failed (exit 1, five missing references). Each citing source is byte-identical to inspected master: docs/feature-work/h62-1-infer-helpers.md, docs/feature-work/h62-6-migrate-theory.md, scripts/h62/item2/audit-abi-world/test_census.py and tests/h62/item4/generic-structuredflow/registration.md (two references). No citing source is part of this increment. Exact diagnostics, checked-master identity and comparison results are in the external doc-paths receipt linked by the evidence manifest. This failure remains explicit; the owned Lean passes do not discharge it.
