@@ -129,3 +129,11 @@
 | `Source/Agreement/PrimitiveSlotReverseControls.lean` | Retained source/tail/neighbors and real opposite-direction controls. |
 | `Source/Agreement/PrimitiveCopySequence.lean` | Both orders of concrete primitive copies, actual intermediate reads, normal agreements/clients and horizon-four timeouts. |
 | `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, same-input model noncommutation and swap refusal controls. |
+
+# VX1 OOM split of the horizon development
+
+| Module | What it defines |
+|---|---|
+| `Source/Horizon/Below.lean` | Horizon monotonicity (`Below`, `belowAt`, `deploy_below`, `runTx_below`) and horizon independence (`runTx_stable`, `deploy_stable`, `firstDone_runTx`, `runTx_stuck_stable`); split from `Source/Horizon.lean` to keep each module under the 8 GiB pre-gate bound. |
+| `Source/Horizon/Grow.lean` | Every interpreter function only appends events: `Grow` helper lemmas, the `grow_go` tactic and `growAt`. |
+| `Source/Horizon/Const.lean` | Helpers that keep the events: `Const` lemmas and the `const_go` tactic. |

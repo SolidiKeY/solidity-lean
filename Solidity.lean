@@ -3973,6 +3973,9 @@ import Solidity.Source.FailureCursor
 import Solidity.Source.FailureResources
 import Solidity.Source.Hoare
 import Solidity.Source.Horizon
+import Solidity.Source.Horizon.Below
+import Solidity.Source.Horizon.Const
+import Solidity.Source.Horizon.Grow
 import Solidity.Source.HorizonDeploy
 import Solidity.Source.Infer
 import Solidity.Source.Inheritance
