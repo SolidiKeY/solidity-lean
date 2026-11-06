@@ -492,3 +492,22 @@ The original 25 source-planned statements have 20 checked joint-premise bundles
 and five data-only classifications; three additional Source-write bundles were
 checked separately. This remains a small reviewed subset of the conservative
 3281-row ledger, not a completed elaborated census or full assignment acceptance.
+
+## Bounded checkpoint after the witness packet
+
+At source head 5a12b4c8adcb6367b37f32bea33e4da63e69624e, the shared checkpoint
+affected-module build exited 124 after 600.66 seconds under its existing
+600-second limit. Peak sampled aggregate RSS was 1137885184 bytes, with no
+resource stop or OOM. This is a timeout, not a diagnosed source proof failure.
+The prerequisite guard refused the subsequent library build; no unchanged
+retry or larger limit was used. Full affected validation remains unfinished.
+
+The initial trust, orphan, layer, fragment and inventory commands lacked Node
+in the checkpoint PATH. Separate checks with the installed Node directory
+restored passed trust, orphans, layers and fragments. Roots passed in the
+original checkpoint. The inventory check still fails with zero errors and
+4552 unrecorded changes; pins were not rewritten. Raw documentation checking
+fails with five missing and 126 ambiguous references. These receipts remain
+separate from historical baseline failures and do not establish a checkpoint
+or whole-lane pass. Independent read-only finder and skeptic confirmed the
+timeout/infrastructure distinction without running Lean or changing files.
