@@ -261,5 +261,13 @@
         "bytes": 36528
       }
     ]
+  },
+  "held_fix_validation": {
+    "archive": "/workspace/h28-held-fix-6f2390ee/validation.tar.gz",
+    "sha256": "b232314cde37bb1f8a0c2b10ae7ff14975c5fe28c1309d16c923eb5f1430b676",
+    "bytes": 3957,
+    "gate_head": "6f2390eecd3d62655f8a0042134e1e1307f78233",
+    "commands": 8,
+    "scope_complete": false
   }
 }

@@ -652,15 +652,15 @@ The coordinator published this lane on mastera6fa01380efd373d85f7a8e6c13811e2d55
 
 The eight retained evidence verifier entrypoints now authenticate every external receipt/catalog read through the committed H44 manifest and index, rather than trusting ignored local JSON. Explicit failure checks replace bare Python asserts, so optimization cannot remove the checks. The bulk verifier similarly keeps its checks active under -O. The initial tracked-support branch checked only HEAD bytes and was subsequently rejected by the coordinator. That relaxation is superseded below: tracked mirrors must also match indexed size and SHA; all1012off-Git bulk mirrors remain byte-exact. New real-Git and optimized-interpreter controls pass, alongside all prior controls (74tests total). Existing archive hashes, theorem statements, proof budgets and gate criteria are unchanged. Actual normal/-O archive runs and read-only reviews are recorded in the external checkpoint receipt; no logs or generated data are added to Git. Full original assignment inventory/acceptance obligations remain open.
 
-Atcommittedgateheada310f670da30fbc0964477073fbf05829457e014 all8archiveverifiers pass in both normal and optimized Python (16executions). All74unitcontrols and full1029-file bulkverification pass in both modes. Separate finder/skeptic actualevidence reviews PASS. PeakRSS23,528KiB across20scriptgates. The first measurement launcher used a relative interpreter unsupported by execv and exited127; it remains separate from accepted absolute-interpreter runs. The compact bulk-data.json archive_verifier_review pointer seals commands/exits/timings/RSS/source/loghashes and preservation provenance; no new bulk is tracked.
+At committed gate head `a310f670da30fbc0964477073fbf05829457e014`, all eight archive verifiers pass in both normal and optimized Python (16 executions). All 74 unit controls and full 1029-file bulk verification pass in both modes. Separate finder/skeptic actual evidence reviews PASS. Peak RSS is 23,528 KiB across 20 script gates. The first measurement launcher used a relative interpreter unsupported by execv and exited 127; it remains separate from accepted absolute-interpreter runs. The compact bulk-data.json archive_verifier_review pointer seals commands, exits, timings, RSS, source/log hashes and preservation provenance; no new bulk is tracked.
 
 ## Held strict-mirror check correction
 
 The coordinator correctly rejected the HEAD-only tracked-mirror branch. `verify_snapshot_files` now retains the bytes returned by bulk_inputs.read and requires both their indexed byte count and SHA256, in addition to committed HEAD authentication. Regression controls reject same-length and different-length Git-committed replacements, plus uncommitted and external-copy tampering. Prior relaxed-check bulk gate results are historical and cannot establish the restored strict criterion.
 
-The restored check first rejected the old snapshot in normal and optimized Python, as expected: its eight verifier source pins predated the reviewed authentication changes. The original1029-file snapshot/index/archive remain untouched. A separate versioned snapshot refreshes exactly those eight source files from committed61724cdf; all other1021files, including all1012off-Git data files and nine frozen pilot configurations, are byte-identical. Both versions and their hashes are explicitly linked in bulk-data.json. No proof artifact, semantic source, witness, case, log, statement or budget was changed to obtain a pass.
+The restored check first rejected the old snapshot in normal and optimized Python, as expected: its eight verifier source pins predated the reviewed authentication changes. The original 1029-file snapshot/index/archive remain untouched. A separate versioned snapshot refreshes exactly those eight source files from committed 61724cdf; all other 1021 files, including all 1012 off-Git data files and nine frozen pilot configurations, are byte-identical. Both versions and their hashes are explicitly linked in bulk-data.json. No proof artifact, semantic source, witness, case, log, statement or budget was changed to obtain a pass.
 
-DELIVERY_BASE is the write-scope comparison anchor, not the semantic trust base. Earlier a6fa0138 was the then-published integration boundary; the coordinator now names published86253aba9aad8b457190f9e5f14c77c7ad030318, already an ancestor of this checkout. Advancing that anchor attributes published upstream work to master while retaining the same exclusive-scope rejection for this lane's held/new changes. BASE remains6f3eedf0788ee1f8a3bcf230558c712ecdca04d5; all71cache-source hashes and every frozen input/proof budget remain unchanged. New strict normal/optimized gates and read-only reviews are recorded separately from the superseded results.
+DELIVERY_BASE is the write-scope comparison anchor, not the semantic trust base. Earlier a6fa0138 was the then-published integration boundary; the coordinator now names published 86253aba9aad8b457190f9e5f14c77c7ad030318, already an ancestor of this checkout. Advancing that anchor attributes published upstream work to master while retaining the same exclusive-scope rejection for this lane's held/new changes. BASE remains 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5; all 71 cache-source hashes and every frozen input/proof budget remain unchanged. New strict normal/optimized gates and read-only reviews are recorded separately from the superseded results.
 
 At strict gate head `34d40f376ee7b2ca228d84d2e8c74acf97b82a99`, all 20 actual normal/optimized archive, 74-test and full bulk gates pass. Separate finder/skeptic strict reviews PASS; peak RSS is 23,544 KiB. The active 1029-file snapshot totals 6,450,844 bytes, with exactly eight reviewed verifier revisions and 1021 unchanged entries. Every tracked mirror now matches HEAD plus indexed size/SHA. Original stale-index failures and superseded relaxed-policy results remain separate. The strict_mirror_validation pointer seals the new commands, exits, log hashes, timings, RSS and reviews outside Git.
 
@@ -732,3 +732,22 @@ in a fresh directory; it is not counted as a pass. Exact commands, exits,
 timings and process RSS are in the H44 validation archive referenced by
 `bulk-data.json.combined_validation`; no source changed between attempts.
 This receipt does not replace pending repository-wide final gates.
+
+### Held delivery review correction (2026-11-06)
+
+At `6f2390eecd3d62655f8a0042134e1e1307f78233`, all eight normal/optimized
+Python gates pass: 85 controls per mode, explicit H44 inventory/cache pins,
+five existing validation archives, strict 1029-file bulk verification, combined
+101-check/70-output/267-export replay and 294-export census replay. Both
+read-only finder and skeptic reviews PASS; peak gate RSS is 26,712 KiB.
+The touched gate passes with targets none. Exact commands, exits, timings,
+RSS, source hashes and reviews are in bulk-data.json.held_fix_validation.
+The pre-commit census test refused uncommitted manifest bytes; that attempt
+is explicitly excluded from passing gates. No Lean source, theorem, proof
+budget or original evidence archive changed. This receipt adds a sixth
+validation archive for subsequent bulk verification.
+
+The delivery-only anchor is published `7d8a48cabffa81e7cea2a1e5a87013b0fca79db4`,
+already included in coordinator-reviewed merge `54e50f69d`. The semantic base
+remains `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. Repository-wide final gates
+and broader original-assignment acceptance remain open.
