@@ -1087,3 +1087,15 @@ done. Open, no claim.
 - LICM of pure expressions: a hoisted expression may fail when the loop runs zero
   times, so only failure-free expressions could move; not done.
 - Unused-function pruning (above), inlining with return values/reference parameters.
+
+Inlining review (separate read-only finder+skeptic, no Lean server): no defect in the
+theorem; `inlineBlock_runC` is function equality with the single premise
+`args.allVal = true`, halts and their order match `Args.evalT`, the caller's locals
+match `leaveT`, and nothing else in `TRun.call` changes. Fixed: the module doc named
+`inlineCall_runC` for the main lemma (now `inlineBlock_runC`); coverage text now says
+calls inside `try`/receiver/non-inlined call bodies are not rewritten, and that only
+`Stmt.runC` is preserved (the call name, and gas/code-size/stack-depth effects that
+solc's inliner trades, are not modelled — the latter is a D1/D6 benchmark item).
+Added controls: a two-argument call whose second argument reads the caller's local
+(`two_args_inlined`, `two_args_ok`, `two_args_call_ok`) and the negative control
+`wrong_inline_reverts` (an inliner without re-indexing reverts where the call succeeds).

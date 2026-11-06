@@ -99,6 +99,36 @@ theorem call_reverts : Stmt.runC callF (withA 1) = .error .revert := rfl
 
 theorem inline_same : Stmt.runC (Stmt.inl callF) = Stmt.runC callF := Stmt.inl_runC callF
 
+/-- `function h(uint x, uint y) internal { require(y < x); }` called as
+`h(a + 10, a)`: the second argument reads the caller's `a`, one local below the
+first parameter once inlined. -/
+def hBody : Prog C ([] ++ [.val .uint, .val .uint]) [.val .uint, .val .uint] :=
+  .cons (.require (.binop .lt rfl rfl (.simple (.local .here)) (.simple (.local (.there .here)))))
+    .nil
+
+def callH : Stmt C G G :=
+  .call "h" (.snoc (.snoc .nil .uint (.user "x") (add (.simple (.local .here)) (lit 10)))
+    .uint (.user "y") (.simple (.local .here))) .none hBody
+
+theorem two_args_inlined : Stmt.inl callH =
+    .block (.cons (.declLocal .uint (.user "x") (some (add (.simple (.local .here)) (lit 10))))
+      (.cons (.declLocal .uint (.user "y") (some (.simple (.local (.there .here)))))
+        (.cons (.require (.binop .lt rfl rfl (.simple (.local .here))
+          (.simple (.local (.there .here))))) .nil))) := rfl
+
+theorem two_args_ok : (Stmt.runC (Stmt.inl callH) (withA 5)).toBool = true := rfl
+theorem two_args_call_ok : (Stmt.runC callH (withA 5)).toBool = true := rfl
+
+/-- Negative control: an inliner that does not re-index the later argument
+makes `y` read the parameter `x` (`a + 10`), so `require(y < x)` reverts. -/
+def wrongInline : Stmt C G G :=
+  .block (.cons (.declLocal .uint (.user "x") (some (add (.simple (.local .here)) (lit 10))))
+    (.cons (.declLocal .uint (.user "y") (some (.simple (.local .here))))
+      (.cons (.require (.binop .lt rfl rfl (.simple (.local .here))
+        (.simple (.local (.there .here))))) .nil)))
+
+theorem wrong_inline_reverts : Stmt.runC wrongInline (withA 5) = .error .revert := rfl
+
 /-- A call with a return value is left as written. -/
 def callRet : Stmt C G G :=
   .call "g" .nil (.val .uint (.user "r") (some .here))
@@ -109,6 +139,7 @@ theorem ret_call_kept : Stmt.inl callRet = callRet := rfl
 #print axioms inlineBlock_runC
 #print axioms Prog.inl_runC
 #print axioms call_inlined
+#print axioms wrong_inline_reverts
 #print axioms Val.pbeq_eq
 #print axioms Val.cse_evalT
 #print axioms Prog.cse_empty_runC
