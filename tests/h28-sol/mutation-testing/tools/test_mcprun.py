@@ -270,6 +270,25 @@ class Summary(unittest.TestCase):
         self.assertFalse(run("∀ (k : Nat), Solidity.Premise.Sound m s p H28.T.start"))
         self.assertFalse(run("True"))
 
+    def test_semantic_control(self):
+        link = REG["oracle"][0] + 1  # source_link line of the stripped body
+        sc = mcprun.semantic_control
+        # failure in the kill argument, after the link: the control passes
+        self.assertTrue(sc([item(link + 2, "rfl failed")], REG, ORACLE)["ok"])
+        # the link itself failing is not a semantic control
+        self.assertFalse(sc([item(link, "Type mismatch Taclet.x")], REG, ORACLE)["ok"])
+        # the target failing, a runtime limit: never ok
+        self.assertFalse(sc([item(50, "x"), item(link + 2, "y")], REG, ORACLE)["ok"])
+        self.assertFalse(sc([item(link + 2, "maximum recursion depth")], REG, ORACLE)["ok"])
+        # no error: the kill went through (a production rule would be unsound)
+        r = sc([], REG, ORACLE)
+        self.assertFalse(r["ok"])
+        self.assertTrue(r["killed"])
+        s = self.survivor({"normal-witness": {"ok": True}}, kind="semantic-control")
+        self.assertEqual(s["semantic"]["s"]["outcome"], "semantic-witness-failed")
+        s = self.survivor({"normal-witness": {"ok": False, "killed": True}}, kind="semantic-control")
+        self.assertEqual(s["semantic"]["s"]["outcome"], "killed")
+
     def test_negative_control_expectation(self):
         s = self.survivor({"mutant-witness": {"ok": False, "witness_failed": True}}, kind="negative-control")
         self.assertEqual(s["semantic"]["s"]["outcome"], "witness-failed")

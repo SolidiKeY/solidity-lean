@@ -384,6 +384,33 @@ def source_link_rejection(items, regions, oracle_text, constructor=None):
     return {"ok": True, "line": link, "first_error": first["message"][:600], "errors": len(errors)}
 
 
+def semantic_control(items, regions, oracle_text):
+    """A kill witness whose `source_link` names the production premise: the
+    link must elaborate, the target must, and the witness must fail in its
+    kill argument (after the link), never succeed.  `ok` means that failure
+    happened as required; `killed` would mean a production rule is unsound."""
+    lines = body(oracle_text).splitlines()
+    idx = [i for i, l in enumerate(lines) if re.match(r"theorem source_link\b", l)]
+    if len(idx) != 1:
+        return {"ok": False, "reason": "no unique source_link"}
+    link = regions["oracle"][0] + idx[0]
+    stop = next((j for j in range(idx[0] + 1, len(lines)) if not lines[j].startswith(" ")), len(lines))
+    span = range(link, regions["oracle"][0] + stop)
+    errors = [x for x in items if x["severity"] == "error"]
+    if not errors:
+        return {"ok": False, "killed": "checked_kill" in owned(oracle_text)[1] and not any(
+            "sorryAx" in x["message"] for x in items), "reason": "the kill argument went through"}
+    if any(regions["target"][0] <= x["line"] <= regions["target"][1] for x in errors):
+        return {"ok": False, "reason": "normal target failed"}
+    if any(x["line"] in span for x in errors):
+        return {"ok": False, "reason": "the link itself failed: not a semantic control"}
+    if any(not (regions["oracle"][0] <= x["line"] <= regions["oracle"][1]) or RUNTIME.search(x["message"])
+           for x in errors):
+        return {"ok": False, "reason": "error outside the witness or a runtime limit"}
+    return {"ok": True, "first_error": {"line": errors[0]["line"], "message": errors[0]["message"][:400]},
+            "errors": len(errors), "link_line": link}
+
+
 # ------------------------------------------------------------------- driver
 
 def check(repo, scratch, bridge, name, target, target_text, oracle_text):
@@ -439,12 +466,16 @@ def run(args):
         return text[:a] + "end Solidity\n"
 
     for c in manifest.get("semantic_cases", []):
-        mt = table_only(c["target"], mutate(texts[c["target"]], c["old"], c["new"]))
         nt = table_only(c["target"], texts[c["target"]])
-        for phase, ttext, ofile in (("normal-oracle", nt, c.get("oracle")),
-                                    ("normal-witness", nt, c.get("witness")),
-                                    ("mutant-witness", mt, c.get("witness")),
-                                    ("mutant-oracle", mt, c.get("oracle"))):
+        if c["kind"] == "semantic-control":
+            # a kill argument aimed at the production premise: only the
+            # oracle and the witness on the normal table
+            phases = (("normal-oracle", nt, c.get("oracle")), ("normal-witness", nt, c.get("witness")))
+        else:
+            mt = table_only(c["target"], mutate(texts[c["target"]], c["old"], c["new"]))
+            phases = (("normal-oracle", nt, c.get("oracle")), ("normal-witness", nt, c.get("witness")),
+                      ("mutant-witness", mt, c.get("witness")), ("mutant-oracle", mt, c.get("oracle")))
+        for phase, ttext, ofile in phases:
             if ofile:
                 otext = (repo / ofile).read_text()
                 if sha(otext) != c[("oracle" if phase.endswith("oracle") else "witness") + "_sha256"]:
@@ -546,6 +577,8 @@ def run(args):
                     record["result"]["witness_failed"] = bool(errs) and all(
                         regs["oracle"][0] <= x["line"] <= regs["oracle"][1] and
                         not RUNTIME.search(x["message"]) for x in errs)
+            elif phase == "normal-witness" and entry["kind"] == "semantic-control":
+                record["result"] = semantic_control(items, regs, otext)
             elif phase == "normal-witness":
                 record["result"] = source_link_rejection(items, regs, otext, link_constructor(otext))
                 record["result"]["link"] = link_constructor(otext)
@@ -614,6 +647,10 @@ def summarize(manifest, out):
         ok = lambda p: rs[p] is not None and rs[p]["result"].get("ok") is True
         if c["kind"] == "equivalent-control":
             o = "equivalent" if ok("normal-oracle") and ok("mutant-witness") else "unrun-or-error"
+        elif c["kind"] == "semantic-control":
+            o = "unrun" if rs["normal-oracle"] is None or rs["normal-witness"] is None else \
+                "semantic-witness-failed" if ok("normal-oracle") and ok("normal-witness") else \
+                "killed" if rs["normal-witness"]["result"].get("killed") else "error"
         elif any(rs[p] is None for p in ("normal-oracle", "normal-witness", "mutant-witness")):
             o = "unrun"
         elif c["kind"] == "sound-survivor":

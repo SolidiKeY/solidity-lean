@@ -4655,6 +4655,32 @@
    "clause": "capture: se = e"
   },
   {
+   "id": "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.2",
+   "constructor": "Taclet.storageIndexWriteCaptureAllNonSimpleIndex",
+   "operator": "clause:capture-use-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | storageIndexWriteCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp' = sp; T ie = nse₁; sp'[ie] = se; ]⟩ }\n",
+   "new": "  | storageIndexWriteCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp' = sp; T ie = nse₁; sp[ie] = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexWriteCaptureAllNonSimpleIndex"
+   ],
+   "clause": "capture: sp' = sp"
+  },
+  {
+   "id": "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.3",
+   "constructor": "Taclet.storageIndexWriteCaptureAllNonSimpleIndex",
+   "operator": "clause:capture-use-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | storageIndexWriteCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp' = sp; T ie = nse₁; sp'[ie] = se; ]⟩ }\n",
+   "new": "  | storageIndexWriteCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T storage sp' = sp; T ie = nse₁; sp'[nse₁] = se; ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexWriteCaptureAllNonSimpleIndex"
+   ],
+   "clause": "capture: ie = nse₁"
+  },
+  {
    "id": "clause.storageIndexWriteStorageRefCaptureAllNonSimpleIndex.capture-use-reevaluated.1",
    "constructor": "Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex",
    "operator": "clause:capture-use-reevaluated",
@@ -4666,6 +4692,19 @@
     "Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex"
    ],
    "clause": "capture: sp' = sp"
+  },
+  {
+   "id": "clause.storageIndexWriteStorageRefCaptureAllNonSimpleIndex.capture-use-reevaluated.2",
+   "constructor": "Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex",
+   "operator": "clause:capture-use-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | storageIndexWriteStorageRefCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse] = path; ]⟩ ⇝ ⟨[ T storage sp' = sp; T ie = nse; sp'[ie] = path; ]⟩ }\n",
+   "new": "  | storageIndexWriteStorageRefCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse] = path; ]⟩ ⇝ ⟨[ T storage sp' = sp; T ie = nse; sp'[nse] = path; ]⟩ }\n",
+   "affected": [
+    "Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex"
+   ],
+   "clause": "capture: ie = nse"
   },
   {
    "id": "clause.storageRootWriteValueRhsCapture.capture-use-reevaluated.1",
@@ -5082,6 +5121,19 @@
     "Taclet.binopUnfoldLeft"
    ],
    "clause": "arith: se ⊕ e"
+  },
+  {
+   "id": "clause.binopUnfoldRight.side-condition-flipped.1",
+   "constructor": "Taclet.binopUnfoldRight",
+   "operator": "clause:side-condition-flipped",
+   "family": "side-condition",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | binopUnfoldRight (hsc : BinOp.shortCircuits op = false := by side_cond) :\n      dl{ ⟨[ v = se ⊕ nse; ]⟩ ⇝ ⟨[ T se' = nse; v = se ⊕ se'; ]⟩ }\n",
+   "new": "  | binopUnfoldRight (hsc : BinOp.shortCircuits op = true := by side_cond) :\n      dl{ ⟨[ v = se ⊕ nse; ]⟩ ⇝ ⟨[ T se' = nse; v = se ⊕ se'; ]⟩ }\n",
+   "affected": [
+    "Taclet.binopUnfoldRight"
+   ],
+   "clause": "side condition: hsc : BinOp.shortCircuits op = false"
   },
   {
    "id": "clause.binopUnfoldRight.capture-use-reevaluated.1",
@@ -5662,11 +5714,24 @@
    "family": "other:access",
    "target": "Solidity/Calculus/Rules.lean",
    "old": "  | memoryStorageCopy :\n      dl{ ⟨[ mv = sp; ]⟩ ⇝\n          { mv := freshId(copySt(memory, find(storage, sp))) ‖\n            memory := copySt(memory, find(storage, sp)) } ⟨[ ]⟩ }\n",
-   "new": "  | memoryStorageCopy :\n      dl{ ⟨[ mv = sp; ]⟩ ⇝\n          { mv := mv } ⟨[ ]⟩ }\n",
+   "new": "  | memoryStorageCopy :\n      dl{ ⟨[ mv = sp; ]⟩ ⇝\n          { mv := mv ‖\n            memory := copySt(memory, find(storage, sp)) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.memoryStorageCopy"
    ],
-   "clause": "binding: mv := freshId(copySt(memory, find(storage, sp))) ‖\n            memory := copySt(memory, find(storage, sp))"
+   "clause": "binding: mv := freshId(copySt(memory, find(storage, sp)))"
+  },
+  {
+   "id": "clause.memoryStorageCopy.binding-identity.2",
+   "constructor": "Taclet.memoryStorageCopy",
+   "operator": "clause:binding-identity",
+   "family": "other:access",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | memoryStorageCopy :\n      dl{ ⟨[ mv = sp; ]⟩ ⇝\n          { mv := freshId(copySt(memory, find(storage, sp))) ‖\n            memory := copySt(memory, find(storage, sp)) } ⟨[ ]⟩ }\n",
+   "new": "  | memoryStorageCopy :\n      dl{ ⟨[ mv = sp; ]⟩ ⇝\n          { mv := freshId(copySt(memory, find(storage, sp))) ‖\n            memory := memory } ⟨[ ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryStorageCopy"
+   ],
+   "clause": "binding: memory := copySt(memory, find(storage, sp))"
   },
   {
    "id": "clause.memoryToStorageStoreRoot.binding-identity.1",
@@ -5719,6 +5784,19 @@
     "Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex"
    ],
    "clause": "capture: sp' = sp"
+  },
+  {
+   "id": "clause.memoryToStorageIndexCaptureAllNonSimpleIndex.capture-use-reevaluated.2",
+   "constructor": "Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex",
+   "operator": "clause:capture-use-reevaluated",
+   "family": "alias-capture-once",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | memoryToStorageIndexCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse] = mpath; ]⟩ ⇝ ⟨[ T storage sp' = sp; T ie = nse; sp'[ie] = mpath; ]⟩ }\n",
+   "new": "  | memoryToStorageIndexCaptureAllNonSimpleIndex :\n      dl{ ⟨[ sp[nse] = mpath; ]⟩ ⇝ ⟨[ T storage sp' = sp; T ie = nse; sp'[nse] = mpath; ]⟩ }\n",
+   "affected": [
+    "Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex"
+   ],
+   "clause": "capture: ie = nse"
   },
   {
    "id": "clause.ifElseUnfold.capture-use-reevaluated.1",
@@ -5823,6 +5901,32 @@
     "Taclet.tryCallNoCallbackBox"
    ],
    "clause": "branch: call succeeded binds rets"
+  },
+  {
+   "id": "clause.tryCallNoCallbackBox.hand.3",
+   "constructor": "Taclet.tryCallNoCallbackBox",
+   "operator": "clause:hand",
+   "family": "rollback-payment",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | tryCallNoCallbackBox :\n      dl{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ panicBody ] ; \"other failure caught\": [ otherBody ] }\n",
+   "new": "  | tryCallNoCallbackBox :\n      dl{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ ] ; \"other failure caught\": [ otherBody ] }\n",
+   "affected": [
+    "Taclet.tryCallNoCallbackBox"
+   ],
+   "clause": "branch: Panic caught binds code"
+  },
+  {
+   "id": "clause.tryCallNoCallbackBox.hand.4",
+   "constructor": "Taclet.tryCallNoCallbackBox",
+   "operator": "clause:hand",
+   "family": "rollback-payment",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | tryCallNoCallbackBox :\n      dl{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ panicBody ] ; \"other failure caught\": [ otherBody ] }\n",
+   "new": "  | tryCallNoCallbackBox :\n      dl{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ panicBody ] ; \"other failure caught\": [ errorBody ] }\n",
+   "affected": [
+    "Taclet.tryCallNoCallbackBox"
+   ],
+   "clause": "branch: other failure caught runs otherBody"
   },
   {
    "id": "clause.blockEmpty.hand.1",
@@ -5955,6 +6059,19 @@
    "clause": "binding: v := hash(memory, mpath)"
   },
   {
+   "id": "clause.storageMemorySourceSave.side-condition-flipped.1",
+   "constructor": "LeanTaclet.storageMemorySourceSave",
+   "operator": "clause:side-condition-flipped",
+   "family": "side-condition",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | storageMemorySourceSave {Γ : Ctx} {T : Ty} {nlhs : Loc C Γ T} {src : Src C Γ T}\n      (hmem : src.isMemory = true) :\n      dl[LeanTaclet C k]{ ⟨[ nlhs = src; ]⟩ ⇝\n        { storage := save(storage, nlhs, src) } ⟨[ ]⟩ }\n",
+   "new": "  | storageMemorySourceSave {Γ : Ctx} {T : Ty} {nlhs : Loc C Γ T} {src : Src C Γ T}\n      (hmem : src.isMemory = false) :\n      dl[LeanTaclet C k]{ ⟨[ nlhs = src; ]⟩ ⇝\n        { storage := save(storage, nlhs, src) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "LeanTaclet.storageMemorySourceSave"
+   ],
+   "clause": "side condition: hmem : src.isMemory = true"
+  },
+  {
    "id": "clause.storageMemorySourceSave.binding-identity.1",
    "constructor": "LeanTaclet.storageMemorySourceSave",
    "operator": "clause:binding-identity",
@@ -5966,6 +6083,19 @@
     "LeanTaclet.storageMemorySourceSave"
    ],
    "clause": "binding: storage := save(storage, nlhs, src)"
+  },
+  {
+   "id": "clause.storageFixedCopySave.side-condition-flipped.1",
+   "constructor": "LeanTaclet.storageFixedCopySave",
+   "operator": "clause:side-condition-flipped",
+   "family": "side-condition",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | storageFixedCopySave {Γ : Ctx} {T : Ty} {nlhs : Loc C Γ T} {src : Src C Γ T}\n      (hshape : src.isFixedCopy = true) :\n      dl[LeanTaclet C k]{ ⟨[ nlhs = src; ]⟩ ⇝\n        { storage := save(storage, nlhs, src) } ⟨[ ]⟩ }\n",
+   "new": "  | storageFixedCopySave {Γ : Ctx} {T : Ty} {nlhs : Loc C Γ T} {src : Src C Γ T}\n      (hshape : src.isFixedCopy = false) :\n      dl[LeanTaclet C k]{ ⟨[ nlhs = src; ]⟩ ⇝\n        { storage := save(storage, nlhs, src) } ⟨[ ]⟩ }\n",
+   "affected": [
+    "LeanTaclet.storageFixedCopySave"
+   ],
+   "clause": "side condition: hshape : src.isFixedCopy = true"
   },
   {
    "id": "clause.storageFixedCopySave.binding-identity.1",
@@ -6072,6 +6202,19 @@
    "clause": "term: one unrolled call frame"
   },
   {
+   "id": "clause.loopLexErase.side-condition-flipped.1",
+   "constructor": "LeanTaclet.loopLexErase",
+   "operator": "clause:side-condition-flipped",
+   "family": "side-condition",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | loopLexErase {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {brk : Bool} {qs : List (LoopQ C Γ)}\n      {body : Prog C Γ Γb}\n      (he : LoopLex.eraseAllowed m brk qs body.frame = true := by side_cond) :\n      LeanTaclet C k m (.loop (.invLex inv metrics brk qs) cond body)\n        (.unfold (.cons (.loop (.inv inv none brk qs) cond body) .nil) .refl)\n",
+   "new": "  | loopLexErase {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {brk : Bool} {qs : List (LoopQ C Γ)}\n      {body : Prog C Γ Γb}\n      (he : LoopLex.eraseAllowed m brk qs body.frame = false := by side_cond) :\n      LeanTaclet C k m (.loop (.invLex inv metrics brk qs) cond body)\n        (.unfold (.cons (.loop (.inv inv none brk qs) cond body) .nil) .refl)\n",
+   "affected": [
+    "LeanTaclet.loopLexErase"
+   ],
+   "clause": "side condition: he : LoopLex.eraseAllowed m brk qs body.frame = true"
+  },
+  {
    "id": "clause.loopLexErase.hand.1",
    "constructor": "LeanTaclet.loopLexErase",
    "operator": "clause:hand",
@@ -6083,6 +6226,19 @@
     "LeanTaclet.loopLexErase"
    ],
    "clause": "term: the loop with its plain invariant (break flag kept)"
+  },
+  {
+   "id": "clause.whileInvariantLexDiamond.side-condition-flipped.1",
+   "constructor": "LeanTaclet.whileInvariantLexDiamond",
+   "operator": "clause:side-condition-flipped",
+   "family": "side-condition",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | whileInvariantLexDiamond {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {body : Prog C Γ Γb}\n      {brk : Bool} {qs : List (LoopQ C Γ)}\n      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}\n      (hf : body.frame = some (xs, hv) := by side_cond)\n      (hb : brk = false := by side_cond) (hq : qs = [] := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases ‹metrics›\n          while (cond) body; ⟩ ⇝\n        lexInvariant(\"invariant initially valid\": inv, ‹metrics›, cond,\n          \"invariant preserved and used\": body) }\n",
+   "new": "  | whileInvariantLexDiamond {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {body : Prog C Γ Γb}\n      {brk : Bool} {qs : List (LoopQ C Γ)}\n      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}\n      (hf : body.frame = some (xs, hv) := by side_cond)\n      (hb : brk = true := by side_cond) (hq : qs = [] := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases ‹metrics›\n          while (cond) body; ⟩ ⇝\n        lexInvariant(\"invariant initially valid\": inv, ‹metrics›, cond,\n          \"invariant preserved and used\": body) }\n",
+   "affected": [
+    "LeanTaclet.whileInvariantLexDiamond"
+   ],
+   "clause": "side condition: hb : brk = false"
   },
   {
    "id": "clause.whileInvariantLexDiamond.hand.1",
@@ -6098,6 +6254,32 @@
    "clause": "clause: invariant initially valid"
   },
   {
+   "id": "clause.whileInvariantLexDiamond.hand.2",
+   "constructor": "LeanTaclet.whileInvariantLexDiamond",
+   "operator": "clause:hand",
+   "family": "guard-polarity",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | whileInvariantLexDiamond {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {body : Prog C Γ Γb}\n      {brk : Bool} {qs : List (LoopQ C Γ)}\n      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}\n      (hf : body.frame = some (xs, hv) := by side_cond)\n      (hb : brk = false := by side_cond) (hq : qs = [] := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases ‹metrics›\n          while (cond) body; ⟩ ⇝\n        lexInvariant(\"invariant initially valid\": inv, ‹metrics›, cond,\n          \"invariant preserved and used\": body) }\n",
+   "new": "  | whileInvariantLexDiamond {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {body : Prog C Γ Γb}\n      {brk : Bool} {qs : List (LoopQ C Γ)}\n      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}\n      (hf : body.frame = some (xs, hv) := by side_cond)\n      (hb : brk = false := by side_cond) (hq : qs = [] := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases ‹metrics›\n          while (cond) body; ⟩ ⇝\n        lexInvariant(\"invariant initially valid\": inv, ‹metrics›, !cond,\n          \"invariant preserved and used\": body) }\n",
+   "affected": [
+    "LeanTaclet.whileInvariantLexDiamond"
+   ],
+   "clause": "clause: the loop condition"
+  },
+  {
+   "id": "clause.whileInvariantLexDiamond.hand.3",
+   "constructor": "LeanTaclet.whileInvariantLexDiamond",
+   "operator": "clause:hand",
+   "family": "other:loop-invariant",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | whileInvariantLexDiamond {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {body : Prog C Γ Γb}\n      {brk : Bool} {qs : List (LoopQ C Γ)}\n      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}\n      (hf : body.frame = some (xs, hv) := by side_cond)\n      (hb : brk = false := by side_cond) (hq : qs = [] := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases ‹metrics›\n          while (cond) body; ⟩ ⇝\n        lexInvariant(\"invariant initially valid\": inv, ‹metrics›, cond,\n          \"invariant preserved and used\": body) }\n",
+   "new": "  | whileInvariantLexDiamond {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}\n      {metrics : LoopMetrics C Γ (n + 2)} {body : Prog C Γ Γb}\n      {brk : Bool} {qs : List (LoopQ C Γ)}\n      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}\n      (hf : body.frame = some (xs, hv) := by side_cond)\n      (hb : brk = false := by side_cond) (hq : qs = [] := by side_cond) :\n      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv\n          /// @custom:key decreases ‹metrics›\n          while (cond) body; ⟩ ⇝\n        lexInvariant(\"invariant initially valid\": inv, ‹metrics›, cond,\n          \"invariant preserved and used\": ) }\n",
+   "affected": [
+    "LeanTaclet.whileInvariantLexDiamond"
+   ],
+   "clause": "clause: invariant preserved and used runs body"
+  },
+  {
    "id": "clause.functionCallArgCapture.hand.1",
    "constructor": "LeanTaclet.functionCallArgCapture",
    "operator": "clause:hand",
@@ -6109,6 +6291,19 @@
     "LeanTaclet.functionCallArgCapture"
    ],
    "clause": "term: the first non-simple argument captured"
+  },
+  {
+   "id": "clause.internalCallSummary.side-condition-flipped.1",
+   "constructor": "LeanTaclet.internalCallSummary",
+   "operator": "clause:side-condition-flipped",
+   "family": "side-condition",
+   "target": "Solidity/Calculus/Rules.lean",
+   "old": "  | internalCallSummary {Γ : Ctx} {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}\n      {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {u : Upd C Γ Γ'}\n      (hexp : args.firstNonSimple = none := by side_cond)\n      (hrets : CallRet.isRets ret = false := by side_cond)\n      (hs : CallRet.summary? args ret body = some u := by side_cond) :\n      LeanTaclet C k m (.call f args ret body) (.update u)\n",
+   "new": "  | internalCallSummary {Γ : Ctx} {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}\n      {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {u : Upd C Γ Γ'}\n      (hexp : args.firstNonSimple = none := by side_cond)\n      (hrets : CallRet.isRets ret = true := by side_cond)\n      (hs : CallRet.summary? args ret body = some u := by side_cond) :\n      LeanTaclet C k m (.call f args ret body) (.update u)\n",
+   "affected": [
+    "LeanTaclet.internalCallSummary"
+   ],
+   "clause": "side condition: hrets : CallRet.isRets ret = false"
   },
   {
    "id": "clause.internalCallSummary.hand.1",
@@ -6148,6 +6343,32 @@
     "CallbackTaclet.tryCallWithCallbackBox"
    ],
    "clause": "branch: call succeeded binds rets"
+  },
+  {
+   "id": "clause.tryCallWithCallbackBox.hand.3",
+   "constructor": "CallbackTaclet.tryCallWithCallbackBox",
+   "operator": "clause:hand",
+   "family": "callback-frames",
+   "target": "Solidity/Calculus/CallbackRules.lean",
+   "old": "  | tryCallWithCallbackBox :\n      dl[CallbackTaclet C k]{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ panicBody ] ; \"other failure caught\": [ otherBody ] }\n",
+   "new": "  | tryCallWithCallbackBox :\n      dl[CallbackTaclet C k]{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ ] ; \"other failure caught\": [ otherBody ] }\n",
+   "affected": [
+    "CallbackTaclet.tryCallWithCallbackBox"
+   ],
+   "clause": "branch: Panic caught binds code"
+  },
+  {
+   "id": "clause.tryCallWithCallbackBox.hand.4",
+   "constructor": "CallbackTaclet.tryCallWithCallbackBox",
+   "operator": "clause:hand",
+   "family": "callback-frames",
+   "target": "Solidity/Calculus/CallbackRules.lean",
+   "old": "  | tryCallWithCallbackBox :\n      dl[CallbackTaclet C k]{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ panicBody ] ; \"other failure caught\": [ otherBody ] }\n",
+   "new": "  | tryCallWithCallbackBox :\n      dl[CallbackTaclet C k]{ [ try call returns (rets) body catch Error errorBody\n              catch Panic (code) panicBody catch otherBody; ] ⇝\n          \"call succeeded\": ∀ rets. [ body ] ; \"Error caught\": [ errorBody ]\n          ; \"Panic caught\": ∀ code. [ panicBody ] ; \"other failure caught\": [ errorBody ] }\n",
+   "affected": [
+    "CallbackTaclet.tryCallWithCallbackBox"
+   ],
+   "clause": "branch: other failure caught runs otherBody"
   }
  ],
  "state": "frozen",
@@ -6188,7 +6409,11 @@
   "control.negative.alias-capture-once",
   "control.negative.callback-frames",
   "control.negative.rollback-payment",
-  "control.negative.guard-polarity"
+  "control.negative.guard-polarity",
+  "control.semantic.index-bounds",
+  "control.semantic.push-tail-length",
+  "control.semantic.division-minimum",
+  "control.semantic.pop-delete"
  ],
  "semantic_cases": [
   {
@@ -6758,6 +6983,62 @@
    "from_pilot": null,
    "expect": "witness-failed",
    "note": "the guard.require-success-false kill witness checked against requireSimple.guard-false-to-true.1: it must not kill"
+  },
+  {
+   "id": "control.semantic.index-bounds",
+   "kind": "semantic-control",
+   "family": "index-bounds",
+   "constructor": "Taclet.storageIndexReadArrayFind",
+   "target": "Solidity/Calculus/Rules.lean",
+   "oracle": "tests/h28-sol/mutation-testing/oracles/BoundsBaseline.lean",
+   "oracle_sha256": "059db341369f65869183ce8c422d2852b4fd9c2cf102678ee7641a1252e91cdc",
+   "witness": "tests/h28-sol/mutation-testing/oracles/BoundsZeroOnProduction.lean",
+   "witness_sha256": "34bd7528ffc9aebde0440e57e05acc45145271be67e99caa3aff46e3d40888c5",
+   "from_pilot": null,
+   "expect": "semantic-witness-failed",
+   "note": "the family's kill argument, aimed at the production premise, must fail after the link"
+  },
+  {
+   "id": "control.semantic.push-tail-length",
+   "kind": "semantic-control",
+   "family": "push-tail-length",
+   "constructor": "Taclet.storagePushAddAssign",
+   "target": "Solidity/Calculus/Rules.lean",
+   "oracle": "tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.lean",
+   "oracle_sha256": "a80cda87cbfbe10b940740335d890c62c893e7f1725acc5cf63937e363016510",
+   "witness": "tests/h28-sol/mutation-testing/oracles/PushLastSlotOnProduction.lean",
+   "witness_sha256": "9206a0f440fbe6a25e2bcc30a30b38919973c89af8186893c42b87b1f7476230",
+   "from_pilot": null,
+   "expect": "semantic-witness-failed",
+   "note": "the family's kill argument, aimed at the production premise, must fail after the link"
+  },
+  {
+   "id": "control.semantic.division-minimum",
+   "kind": "semantic-control",
+   "family": "division-minimum",
+   "constructor": "Taclet.binopAssignment",
+   "target": "Solidity/Calculus/Rules.lean",
+   "oracle": "tests/h28-sol/mutation-testing/oracles/DivAssignBaseline.lean",
+   "oracle_sha256": "3e0c2c00043a2bb8cd85fcf06230c0e9c772baa4d0283b7a90382c22cc769c51",
+   "witness": "tests/h28-sol/mutation-testing/oracles/DivisionOperandsOnProduction.lean",
+   "witness_sha256": "04a121747033341077ef6e4a67a3ddccb92f9610a139e4c654fac266235fcc67",
+   "from_pilot": null,
+   "expect": "semantic-witness-failed",
+   "note": "the family's kill argument, aimed at the production premise, must fail after the link"
+  },
+  {
+   "id": "control.semantic.pop-delete",
+   "kind": "semantic-control",
+   "family": "pop-delete",
+   "constructor": "Taclet.storageRootDelete",
+   "target": "Solidity/Calculus/Rules.lean",
+   "oracle": "tests/h28-sol/mutation-testing/oracles/RootDeleteBaseline.lean",
+   "oracle_sha256": "a44fa5baf23e6ec7e37246eaab964635ff955494c2709b42203446590d06e0a8",
+   "witness": "tests/h28-sol/mutation-testing/oracles/RootDeleteSkippedOnProduction.lean",
+   "witness_sha256": "779fca9eb7e691195d41b448e2c4361d2a0e55e55a98dc5eb0c9c2686463488d",
+   "from_pilot": null,
+   "expect": "semantic-witness-failed",
+   "note": "the family's kill argument, aimed at the production premise, must fail after the link"
   }
  ],
  "clause_inventory": [
@@ -6814,6 +7095,18 @@
      "family": "alias-capture-once",
      "operator": "capture-use-reevaluated",
      "fixture": "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.1"
+    },
+    {
+     "clause": "capture: sp' = sp",
+     "family": "alias-capture-once",
+     "operator": "capture-use-reevaluated",
+     "fixture": "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.2"
+    },
+    {
+     "clause": "capture: ie = nse₁",
+     "family": "alias-capture-once",
+     "operator": "capture-use-reevaluated",
+     "fixture": "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.3"
     }
    ]
   },
@@ -6828,6 +7121,12 @@
      "family": "alias-capture-once",
      "operator": "capture-use-reevaluated",
      "fixture": "clause.storageIndexWriteStorageRefCaptureAllNonSimpleIndex.capture-use-reevaluated.1"
+    },
+    {
+     "clause": "capture: ie = nse",
+     "family": "alias-capture-once",
+     "operator": "capture-use-reevaluated",
+     "fixture": "clause.storageIndexWriteStorageRefCaptureAllNonSimpleIndex.capture-use-reevaluated.2"
     }
    ]
   },
@@ -7261,6 +7560,12 @@
    "line": 541,
    "census": "no-family-site",
    "clauses": [
+    {
+     "clause": "side condition: hsc : BinOp.shortCircuits op = false",
+     "family": "side-condition",
+     "operator": "side-condition-flipped",
+     "fixture": "clause.binopUnfoldRight.side-condition-flipped.1"
+    },
     {
      "clause": "capture: se' = nse",
      "family": "alias-capture-once",
@@ -7778,10 +8083,16 @@
    "census": "no-family-site",
    "clauses": [
     {
-     "clause": "binding: mv := freshId(copySt(memory, find(storage, sp))) ‖\n            memory := copySt(memory, find(storage, sp))",
+     "clause": "binding: mv := freshId(copySt(memory, find(storage, sp)))",
      "family": "other:access",
      "operator": "binding-identity",
      "fixture": "clause.memoryStorageCopy.binding-identity.1"
+    },
+    {
+     "clause": "binding: memory := copySt(memory, find(storage, sp))",
+     "family": "other:access",
+     "operator": "binding-identity",
+     "fixture": "clause.memoryStorageCopy.binding-identity.2"
     }
    ]
   },
@@ -7838,6 +8149,12 @@
      "family": "alias-capture-once",
      "operator": "capture-use-reevaluated",
      "fixture": "clause.memoryToStorageIndexCaptureAllNonSimpleIndex.capture-use-reevaluated.1"
+    },
+    {
+     "clause": "capture: ie = nse",
+     "family": "alias-capture-once",
+     "operator": "capture-use-reevaluated",
+     "fixture": "clause.memoryToStorageIndexCaptureAllNonSimpleIndex.capture-use-reevaluated.2"
     }
    ]
   },
@@ -7934,6 +8251,18 @@
      "family": "rollback-payment",
      "operator": "hand",
      "fixture": "clause.tryCallNoCallbackBox.hand.2"
+    },
+    {
+     "clause": "branch: Panic caught binds code",
+     "family": "rollback-payment",
+     "operator": "hand",
+     "fixture": "clause.tryCallNoCallbackBox.hand.3"
+    },
+    {
+     "clause": "branch: other failure caught runs otherBody",
+     "family": "rollback-payment",
+     "operator": "hand",
+     "fixture": "clause.tryCallNoCallbackBox.hand.4"
     }
    ]
   },
@@ -8060,6 +8389,12 @@
    "census": "no-family-site",
    "clauses": [
     {
+     "clause": "side condition: hmem : src.isMemory = true",
+     "family": "side-condition",
+     "operator": "side-condition-flipped",
+     "fixture": "clause.storageMemorySourceSave.side-condition-flipped.1"
+    },
+    {
      "clause": "binding: storage := save(storage, nlhs, src)",
      "family": "other:access",
      "operator": "binding-identity",
@@ -8073,6 +8408,12 @@
    "line": 1003,
    "census": "no-family-site",
    "clauses": [
+    {
+     "clause": "side condition: hshape : src.isFixedCopy = true",
+     "family": "side-condition",
+     "operator": "side-condition-flipped",
+     "fixture": "clause.storageFixedCopySave.side-condition-flipped.1"
+    },
     {
      "clause": "binding: storage := save(storage, nlhs, src)",
      "family": "other:access",
@@ -8186,6 +8527,12 @@
    "census": "no-premise-text",
    "clauses": [
     {
+     "clause": "side condition: he : LoopLex.eraseAllowed m brk qs body.frame = true",
+     "family": "side-condition",
+     "operator": "side-condition-flipped",
+     "fixture": "clause.loopLexErase.side-condition-flipped.1"
+    },
+    {
      "clause": "term: the loop with its plain invariant (break flag kept)",
      "family": "other:loop-invariant",
      "operator": "hand",
@@ -8200,10 +8547,42 @@
    "census": "no-family-site",
    "clauses": [
     {
+     "clause": "side condition: hb : brk = false",
+     "family": "side-condition",
+     "operator": "side-condition-flipped",
+     "fixture": "clause.whileInvariantLexDiamond.side-condition-flipped.1"
+    },
+    {
      "clause": "clause: invariant initially valid",
      "family": "other:loop-invariant",
      "operator": "hand",
      "fixture": "clause.whileInvariantLexDiamond.hand.1"
+    },
+    {
+     "clause": "clause: the loop condition",
+     "family": "guard-polarity",
+     "operator": "hand",
+     "fixture": "clause.whileInvariantLexDiamond.hand.2"
+    },
+    {
+     "clause": "clause: invariant preserved and used runs body",
+     "family": "other:loop-invariant",
+     "operator": "hand",
+     "fixture": "clause.whileInvariantLexDiamond.hand.3"
+    },
+    {
+     "clause": "side condition: hf : body.frame = some (xs, hv)",
+     "family": "side-condition",
+     "operator": null,
+     "fixture": null,
+     "reason": "a computed side condition (an equation to `some …`, `none` or `[]`, or a shape): no one-change edit names another inhabited value; the premise term it fixes is covered by the constructor's other clauses"
+    },
+    {
+     "clause": "side condition: hq : qs = []",
+     "family": "side-condition",
+     "operator": null,
+     "fixture": null,
+     "reason": "a computed side condition (an equation to `some …`, `none` or `[]`, or a shape): no one-change edit names another inhabited value; the premise term it fixes is covered by the constructor's other clauses"
     }
    ]
   },
@@ -8218,6 +8597,13 @@
      "family": "alias-capture-once",
      "operator": "hand",
      "fixture": "clause.functionCallArgCapture.hand.1"
+    },
+    {
+     "clause": "side condition: hcap : Args.capture args = some ⟨p, v, as'⟩",
+     "family": "side-condition",
+     "operator": null,
+     "fixture": null,
+     "reason": "a computed side condition (an equation to `some …`, `none` or `[]`, or a shape): no one-change edit names another inhabited value; the premise term it fixes is covered by the constructor's other clauses"
     }
    ]
   },
@@ -8228,10 +8614,30 @@
    "census": "no-premise-text",
    "clauses": [
     {
+     "clause": "side condition: hrets : CallRet.isRets ret = false",
+     "family": "side-condition",
+     "operator": "side-condition-flipped",
+     "fixture": "clause.internalCallSummary.side-condition-flipped.1"
+    },
+    {
      "clause": "term: the callee's summary update",
      "family": "callback-frames",
      "operator": "hand",
      "fixture": "clause.internalCallSummary.hand.1"
+    },
+    {
+     "clause": "side condition: hexp : args.firstNonSimple = none",
+     "family": "side-condition",
+     "operator": null,
+     "fixture": null,
+     "reason": "a computed side condition (an equation to `some …`, `none` or `[]`, or a shape): no one-change edit names another inhabited value; the premise term it fixes is covered by the constructor's other clauses"
+    },
+    {
+     "clause": "side condition: hs : CallRet.summary? args ret body = some u",
+     "family": "side-condition",
+     "operator": null,
+     "fixture": null,
+     "reason": "a computed side condition (an equation to `some …`, `none` or `[]`, or a shape): no one-change edit names another inhabited value; the premise term it fixes is covered by the constructor's other clauses"
     }
    ]
   },
@@ -8282,6 +8688,18 @@
      "family": "callback-frames",
      "operator": "hand",
      "fixture": "clause.tryCallWithCallbackBox.hand.2"
+    },
+    {
+     "clause": "branch: Panic caught binds code",
+     "family": "callback-frames",
+     "operator": "hand",
+     "fixture": "clause.tryCallWithCallbackBox.hand.3"
+    },
+    {
+     "clause": "branch: other failure caught runs otherBody",
+     "family": "callback-frames",
+     "operator": "hand",
+     "fixture": "clause.tryCallWithCallbackBox.hand.4"
     }
    ]
   }

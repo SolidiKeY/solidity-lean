@@ -483,6 +483,42 @@
     "Solidity.Calculus.Rules",
     "Solidity.Calculus.PremiseSound"
    ]
+  },
+  {
+   "path": "tests/h28-sol/mutation-testing/oracles/BoundsZeroOnProduction.lean",
+   "namespace": "H28.BoundsZeroOnProduction",
+   "kind": "standalone per-file checked oracle",
+   "imports": [
+    "Solidity.Calculus.Rules",
+    "Solidity.Calculus.PremiseSound"
+   ]
+  },
+  {
+   "path": "tests/h28-sol/mutation-testing/oracles/DivisionOperandsOnProduction.lean",
+   "namespace": "H28.DivisionOperandsOnProduction",
+   "kind": "standalone per-file checked oracle",
+   "imports": [
+    "Solidity.Calculus.Rules",
+    "Solidity.Calculus.PremiseSound"
+   ]
+  },
+  {
+   "path": "tests/h28-sol/mutation-testing/oracles/PushLastSlotOnProduction.lean",
+   "namespace": "H28.PushLastSlotOnProduction",
+   "kind": "standalone per-file checked oracle",
+   "imports": [
+    "Solidity.Calculus.Rules",
+    "Solidity.Calculus.PremiseSound"
+   ]
+  },
+  {
+   "path": "tests/h28-sol/mutation-testing/oracles/RootDeleteSkippedOnProduction.lean",
+   "namespace": "H28.RootDeleteSkippedOnProduction",
+   "kind": "standalone per-file checked oracle",
+   "imports": [
+    "Solidity.Calculus.Rules",
+    "Solidity.Calculus.PremiseSound"
+   ]
   }
  ],
  "shared_roots_changed": false,

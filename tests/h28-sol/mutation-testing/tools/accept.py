@@ -3,9 +3,10 @@
 
 Reads a frozen schema-3 manifest with a clause inventory
 (`manifests/h28-final.json`) and the run directory `mcprun.py` wrote for it,
-recomputes the summary from the per-check records, and checks every
-obligation below.  `scope_complete` is true only if all hold; each failure is
-listed.  It never reads a decision it did not recompute.
+recomputes the summary from the per-check records (each record's own
+classification is read as stored; `mcprun.py` made it from the record's
+diagnostics), and checks every obligation below.  `scope_complete` is true
+only if all hold; each failure is listed.
 
 1. The run is of this manifest (sha256) and has a summary; the summary equals
    the one recomputed from the records.
@@ -16,11 +17,12 @@ listed.  It never reads a decision it did not recompute.
    sites, or a clause-inventory row whose every clause has a fixture with a
    record, or a stated reason; and the two sets partition the constructors.
 5. Every one of the nine families has a census- or clause-linked semantic
-   verdict (`killed` or `survivor-sound`) of a mutant whose proof entry is
-   in the manifest.
+   verdict (`killed` or `survivor-sound`) of a mutant of that family whose
+   proof entry is in the manifest.
 6. Every semantic case has a decision, none `unrun` or `error`; every
-   control meets its expectation; and every family has a negative control
-   (a check that must not kill) that passed.
+   control meets its expectation; and every family has a semantic negative
+   control (a witness check that must not kill) that passed.  Constructors
+   with no compiled mutant are listed, not failed.
 """
 import argparse
 import json
@@ -32,7 +34,8 @@ import mcprun  # noqa: E402
 
 FAMILIES = ["guard-polarity", "overflow", "division-minimum", "index-bounds", "push-tail-length",
             "pop-delete", "alias-capture-once", "rollback-payment", "callback-frames"]
-NEGATIVE = {"witness-failed", "link-mismatch", "equivalent", "equivalent-certified", "invalid-compilation"}
+# semantic checks that must not kill (a proof-oracle control is not one)
+NEGATIVE = {"witness-failed", "link-mismatch", "equivalent", "semantic-witness-failed"}
 
 
 def accept(manifest_path, run_dir):
@@ -82,12 +85,14 @@ def accept(manifest_path, run_dir):
             elif summary["mutants"].get(c["fixture"], {}).get("outcome") in (None, "unrun", "error"):
                 fails.append(f"clause fixture undecided: {c['fixture']}")
     # 5
-    ids = {m["id"] for m in manifest["mutants"]}
+    fam_of_mutant = {m["id"]: m["family"] for m in manifest["mutants"]}
     verdicts = {}
     for c in manifest["semantic_cases"]:
         o = summary["semantic"][c["id"]]["outcome"]
-        if c.get("census_id") in ids and c["kind"] in ("mutant", "known-kill", "sound-survivor") and \
-                o in ("killed", "survivor-sound"):
+        # the verdict counts for a family only if the mutant it is about
+        # carries that family
+        if fam_of_mutant.get(c.get("census_id")) == c["family"] and \
+                c["kind"] in ("mutant", "known-kill", "sound-survivor") and o in ("killed", "survivor-sound"):
             verdicts.setdefault(c["family"], []).append(c["id"])
     for f in FAMILIES:
         if f not in verdicts:
@@ -109,7 +114,18 @@ def accept(manifest_path, run_dir):
     for f in FAMILIES:
         if f not in negatives:
             fails.append(f"family without a passing negative control: {f}")
+    compiled = {m["constructor"] for m in manifest["mutants"]
+                if summary["mutants"].get(m["id"], {}).get("outcome") in ("detected", "equivalent-certified")}
+    no_compiled = sorted(c for c in all_ctors if c not in compiled)
+    semantic_negatives = {f: [k for k in v if fam_of.get(k) == f and
+                              summary["controls"][k]["expect"] == "semantic-witness-failed"]
+                          for f, v in negatives.items()}
     return {"scope_complete": not fails, "failures": fails,
+            # disclosed, not a failure: every one-change edit of these the
+            # census or the inventory tried is refused by the rule language
+            # (or the constructor is a premise-less wrapper)
+            "constructors_without_compiled_mutant": no_compiled,
+            "family_semantic_negative_controls": {f: v for f, v in semantic_negatives.items() if v},
             "manifest": str(manifest_path), "manifest_sha256": mcprun.sha(manifest_path.read_bytes()),
             "run": run_dir.name, "head": stored and stored.get("head"),
             "constructors": len(all_ctors), "census_constructors": len(with_sites),

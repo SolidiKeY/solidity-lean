@@ -12,8 +12,10 @@ the pilot and census semantic cases, the controls), plus:
   since its only compiled census site, the `Tms.Term.binop` operand swap,
   reaches length arithmetic, not a division);
 * per-family negative controls: a family's real kill witness checked against
-  another mutant of the same constructor (or, for alias, of another
-  constructor), which must not kill.
+  another mutant (same constructor, or for alias and the helper families a
+  related one), which must not kill; these fail at the link;
+* semantic negative controls for four families: the kill argument with its
+  premise replaced by the production one, which must fail after the link.
 
 `scope` names what `accept.py` checks for `scope_complete`.
 """
@@ -98,9 +100,25 @@ def main():
             c["require"] = s["require"]
         new.append(c)
 
+    # Semantic negative controls: a real kill argument aimed at the production
+    # premise.  The link elaborates on the unchanged table; the argument must
+    # then fail (`semantic-witness-failed`); a pass would show the rule unsound.
+    for fam, ctor, base, wit in [
+            ("index-bounds", "Taclet.storageIndexReadArrayFind", "BoundsBaseline", "BoundsZeroOnProduction"),
+            ("push-tail-length", "Taclet.storagePushAddAssign", "PushOrderBaseline", "PushLastSlotOnProduction"),
+            ("division-minimum", "Taclet.binopAssignment", "DivAssignBaseline", "DivisionOperandsOnProduction"),
+            ("pop-delete", "Taclet.storageRootDelete", "RootDeleteBaseline", "RootDeleteSkippedOnProduction")]:
+        new.append({"id": f"control.semantic.{fam}", "kind": "semantic-control", "family": fam,
+                    "constructor": ctor, "target": "Solidity/Calculus/Rules.lean",
+                    "oracle": O + base + ".lean", "oracle_sha256": sha(O + base + ".lean"),
+                    "witness": O + wit + ".lean", "witness_sha256": sha(O + wit + ".lean"),
+                    "from_pilot": None, "expect": "semantic-witness-failed",
+                    "note": "the family's kill argument, aimed at the production premise, must fail after the link"})
+
     data["mutants"] = full["mutants"] + fixtures
     data["semantic_cases"] = full["semantic_cases"] + new
-    data["controls"] = full["controls"] + [c["id"] for c in new if c["kind"] == "negative-control"]
+    data["controls"] = full["controls"] + [c["id"] for c in new if c["kind"] in ("negative-control",
+                                                                                "semantic-control")]
     data["clause_inventory"] = rows
     data["base_manifest"] = {"path": "tests/h28-sol/mutation-testing/manifests/h28-full.json",
                              "sha256": sha("tests/h28-sol/mutation-testing/manifests/h28-full.json")}

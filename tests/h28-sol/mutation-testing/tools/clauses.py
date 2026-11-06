@@ -22,6 +22,9 @@ Clause kinds, read off the premise text after `⇝` (or the premise term):
               `⊖se`: operator dropped (division-minimum / overflow);
 * constant  short-circuit results `&& true`, `|| false`, `v = false`, `v = true`
               flipped (guard-polarity);
+* side      a Boolean side condition `(h : c = true)`: polarity flipped;
+              a computed one (`= some …`, `= none`, `= []`) is listed with a
+              reason;
 * term      a premise built by a Lean term: a hand fixture (closing flipped,
               modality swapped, a flag negated, the premise closed).
 
@@ -59,12 +62,20 @@ HAND = {
         ("branch: Error caught runs errorBody", "rollback-payment",
          "\"Error caught\": [ errorBody ]", "\"Error caught\": [ otherBody ]"),
         ("branch: call succeeded binds rets", "rollback-payment",
-         "\"call succeeded\": ∀ rets. [ body ]", "\"call succeeded\": ∀ rets. [ ]")],
+         "\"call succeeded\": ∀ rets. [ body ]", "\"call succeeded\": ∀ rets. [ ]"),
+        ("branch: Panic caught binds code", "rollback-payment",
+         "\"Panic caught\": ∀ code. [ panicBody ]", "\"Panic caught\": ∀ code. [ ]"),
+        ("branch: other failure caught runs otherBody", "rollback-payment",
+         "\"other failure caught\": [ otherBody ]", "\"other failure caught\": [ errorBody ]")],
     "CallbackTaclet.tryCallWithCallbackBox": [
         ("branch: Error caught runs errorBody", "callback-frames",
          "\"Error caught\": [ errorBody ]", "\"Error caught\": [ otherBody ]"),
         ("branch: call succeeded binds rets", "callback-frames",
-         "\"call succeeded\": ∀ rets. [ body ]", "\"call succeeded\": ∀ rets. [ ]")],
+         "\"call succeeded\": ∀ rets. [ body ]", "\"call succeeded\": ∀ rets. [ ]"),
+        ("branch: Panic caught binds code", "callback-frames",
+         "\"Panic caught\": ∀ code. [ panicBody ]", "\"Panic caught\": ∀ code. [ ]"),
+        ("branch: other failure caught runs otherBody", "callback-frames",
+         "\"other failure caught\": [ otherBody ]", "\"other failure caught\": [ errorBody ]")],
     "Taclet.whileUnwind": [
         ("branch: one-armed if (cond)", "guard-polarity",
          "⟨[ if (cond) {", "⟨[ if (!cond) {"),
@@ -78,7 +89,10 @@ HAND = {
          "Upd.ifJoin? se.lower thenStm elseStm", "Upd.ifJoin? se.lower elseStm thenStm")],
     "LeanTaclet.whileInvariantLexDiamond": [
         ("clause: invariant initially valid", "other:loop-invariant",
-         "\"invariant initially valid\": inv,", "\"invariant initially valid\": true,")],
+         "\"invariant initially valid\": inv,", "\"invariant initially valid\": true,"),
+        ("clause: the loop condition", "guard-polarity", "‹metrics›, cond,", "‹metrics›, !cond,"),
+        ("clause: invariant preserved and used runs body", "other:loop-invariant",
+         "\"invariant preserved and used\": body)", "\"invariant preserved and used\": )")],
     "LeanTaclet.tryCallSelfBox": [
         ("term: trySelfStep (five goals)", "rollback-payment",
          "(trySelfStep call rets body errorBody code panicBody otherBody selfArgs selfBody)",
@@ -128,7 +142,11 @@ NO_FIXTURE = {
         "no premise of its own: `Rule.lean d` has `d`'s premise, so every LeanTaclet clause and fixture covers it")],
 }
 
-CAPTURE = re.compile(r"(?:T|bool|uint|aliasType)(?: storage| memory)? (\w+'?) = ([^;]+?); (.*?)\]⟩", re.S)
+# The declaration only is consumed, the rest read by lookahead: a capture
+# followed by more captures yields one match each.
+CAPTURE = re.compile(r"(?:T|bool|uint|aliasType)(?: storage| memory)? (\w+'?) = ([^;]+?); (?=(.*?)\]⟩)", re.S)
+# a side condition stated as a Boolean equation: its polarity flipped
+SIDE = re.compile(r"\((h\w*) : ([^()]*?) = (true|false)( := by side_cond)?\)")
 UPDATE = re.compile(r"\{ ((?:[^{}]|\{[^{}]*\})*?) \}\s*⟨\[")
 IFELSE = re.compile(r"if \((\w+)\) \{ (.*?) \} else \{ (.*?) \}")
 IFSTM = re.compile(r"if \((\w+)\) thenStm else elseStm")
@@ -140,9 +158,13 @@ SHORT = [("&& true", "&& false"), ("|| false", "|| true"), ("v = false;", "v = t
 def mechanical(cid, span):
     """(clause, family, operator, a, b, new) over the premise text."""
     arrow = span.find("⇝")
-    if arrow == -1:
-        return []
     out = []
+    for m in SIDE.finditer(span, 0, arrow if arrow != -1 else len(span)):
+        flip = "false" if m[3] == "true" else "true"
+        out.append((f"side condition: {m[1]} : {m[2]} = {m[3]}", "side-condition", "side-condition-flipped",
+                    m.start(3), m.end(3), flip))
+    if arrow == -1:
+        return out
     for m in CAPTURE.finditer(span, arrow):
         name, expr, rest = m[1], m[2], m[3]
         new = re.sub(r"\b" + re.escape(name) + r"(?![\w'])", lambda _: expr, rest)
@@ -151,15 +173,18 @@ def mechanical(cid, span):
             out.append((f"capture: {name} = {expr}", fam, "capture-use-reevaluated", m.start(3), m.end(3), new))
     for m in UPDATE.finditer(span, arrow):
         body, off = m[1], m.start(1)
-        pos = 0
-        for part in body.split(" ‖ "):
-            lhs, sep, rhs = part.partition(" := ")
+        # bindings are separated by `‖`, with any whitespace (also a newline)
+        for part in re.finditer(r"[^‖]+", body):
+            text = part[0]
+            lead = len(text) - len(text.lstrip())
+            text = text.strip()
+            lhs, sep, rhs = text.partition(" := ")
             if sep and rhs.strip() != lhs.strip():
                 ident = lhs.strip()
                 fam = "pop-delete" if cid in POP_DELETE else "other:access"
-                out.append((f"binding: {part.strip()}", fam, "binding-identity",
-                            off + pos, off + pos + len(part), f"{ident} := {ident}"))
-            pos += len(part) + len(" ‖ ")
+                a = off + part.start() + lead
+                out.append((f"binding: {' '.join(text.split())}", fam, "binding-identity",
+                            a, a + len(text), f"{ident} := {ident}"))
     for m in IFELSE.finditer(span, arrow):
         new = f"if ({m[1]}) {{ {m[3]} }} else {{ {m[2]} }}"
         out.append((f"branch: if ({m[1]})", "guard-polarity", "branches-swapped", m.start(), m.end(), new))
@@ -211,6 +236,16 @@ def inventory(root):
                             "target": target, "old": span, "new": mutated, "affected": [cid],
                             "clause": clause})
             clauses.append({"clause": clause, "family": fam, "operator": op, "fixture": mid})
+        arrow = span.find("⇝") if "⇝" in span else len(span)
+        for h in re.finditer(r"\((h\w*) : ([^()]*(?:\([^()]*\)[^()]*)*?)\)", span[:arrow] if "⇝" in span else span):
+            if SIDE.fullmatch(h[0]) or any(old in h[0] for _, _, old, _ in HAND.get(cid, [])):
+                continue
+            stmt = " ".join(h[2].split(" := ")[0].split())
+            clauses.append({"clause": f"side condition: {h[1]} : {stmt}", "family": "side-condition",
+                            "operator": None, "fixture": None,
+                            "reason": "a computed side condition (an equation to `some …`, `none` or `[]`, or a "
+                                      "shape): no one-change edit names another inhabited value; the premise "
+                                      "term it fixes is covered by the constructor's other clauses"})
         for clause, fam, reason in NO_FIXTURE.get(cid, []):
             clauses.append({"clause": clause, "family": fam, "operator": None, "fixture": None, "reason": reason})
         if cid in PAYMENT:
