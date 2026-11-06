@@ -105,6 +105,7 @@ def watch(container_id, nonce, seconds):
         raise ValueError("invalid owned-container watch arguments")
     start = time.monotonic_ns()
     boot = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+    observed_running = False
     try:
         while True:
             if not host_headroom():
@@ -135,7 +136,9 @@ def watch(container_id, nonce, seconds):
             if elapsed >= seconds or boot_elapsed >= seconds:
                 return {"status": "timeout", "exit_code": stop_owned(container_id, nonce)}
             if not running:
-                return {"status": "exited", "exit_code": code}
+                status = "unobserved-exit" if not observed_running else "exited" if code == 0 else "failed"
+                return {"status": status, "exit_code": code}
+            observed_running = True
             time.sleep(min(.05, max(0, seconds - elapsed)))
     except (OSError, subprocess.SubprocessError, ValueError, RuntimeError):
         # A failed inspection may mean ownership cannot be verified. Attempt

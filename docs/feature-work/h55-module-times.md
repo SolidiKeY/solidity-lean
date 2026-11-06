@@ -467,3 +467,21 @@ metadata is not claimed as a verified exact rendered prompt. The final Git
 bundle/patch and the exact prompt bytes or a verified byte-reconstruction
 procedure remain required before member integration or task work. No contact to
 the retired worker was made.
+
+## Synthetic unobserved-exit correction
+
+The experimental container watcher now returns `unobserved-exit` if its first
+successful observation finds the container already stopped; an observed nonzero
+exit is classified as `failed`. Synthetic controls cover both cases. The
+47-method synthetic unit suite passes, and the escaped-child deadline fixture
+control 12 also passes. Its off-Git evidence is bound by
+`tests/h55/module-times/observed-exit-evidence.sha256`. This does not prove
+production execution, trusted provenance or H56 identity, and the watcher
+remains outside an accepted production runner. No Lean job was run.
+
+The H82b metadata checksum verification and paused head remain valid, but no
+member Git bundle was included or fetchable at the named exact SHA. Common
+newline transformations of the supplied assignment field did not reproduce
+the member objective rendered-prompt hash. Exact prompt-byte provenance and
+the final Git artifact therefore remain waits before H28 integration; no H28
+files were edited.

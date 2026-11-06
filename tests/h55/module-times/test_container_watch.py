@@ -79,6 +79,20 @@ class WatchControls(unittest.TestCase):
              patch.object(watch, "stop_owned", return_value=0):
             self.assertEqual({"status": "invalid-clock", "exit_code": 0}, watch.watch(self.container, self.nonce, 2))
 
+    def test_unobserved_exit_cannot_claim_observed_execution(self):
+        with patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch.time, "monotonic_ns", side_effect=[0, 100_000_000, 150_000_000]), \
+             patch.object(watch.time, "clock_gettime_ns", side_effect=[0, 100_000_000, 150_000_000]), \
+             patch.object(watch, "state", return_value=(False, 0)):
+            self.assertEqual({"status": "unobserved-exit", "exit_code": 0}, watch.watch(self.container, self.nonce, 1))
+
+    def test_observed_nonzero_exit_is_failure(self):
+        with patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch.time, "monotonic_ns", side_effect=[0, 100_000_000, 150_000_000, 200_000_000, 250_000_000]), \
+             patch.object(watch.time, "clock_gettime_ns", side_effect=[0, 100_000_000, 150_000_000, 200_000_000, 250_000_000]), \
+             patch.object(watch.time, "sleep"), patch.object(watch, "state", side_effect=[(True, 0), (False, 7)]):
+            self.assertEqual({"status": "failed", "exit_code": 7}, watch.watch(self.container, self.nonce, 1))
+
     def test_lost_host_reserve_stops_owned_container(self):
         with patch.object(watch, "host_headroom", return_value=False), \
              patch.object(watch, "stop_owned", return_value=137) as stop:
