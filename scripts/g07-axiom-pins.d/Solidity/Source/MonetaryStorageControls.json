@@ -1,0 +1,57 @@
+{
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_fit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_undo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.persistent_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.seed_fit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.static_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_fit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_undo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.transient_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorageControls.lean:Solidity.Source.MonetaryStorage.Controls.wrong_type_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

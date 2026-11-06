@@ -52,7 +52,7 @@ def pdWord24 : Roadmap.Word := ⟨0xaabbffffffffffffffffffffffffffffffffffffffff
 def pdRaw : SlotView := fun q => if q = 0 ∨ q = 1 ∨ q = 2 then 0 else if q = 1000 then pdWord0 else if q = 1001 then pdWord1 else if q = 2000 then pdWord24 else 77
 
 def pdState : Source.EMState pdEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := pdEnv.layout) (pdEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := pdEnv.layout) (pdEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def pdResidual : ResidualJournal complementCarrierOwnership :=
   ⟨fun k => if k.transient then 0 else packedMask pdLayout.registrations pdRaw k.slot,[]⟩
 

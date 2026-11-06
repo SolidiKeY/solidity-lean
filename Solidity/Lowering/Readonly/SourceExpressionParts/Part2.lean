@@ -92,7 +92,7 @@ theorem evalE_tuple_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history 
      | split
      | dsimp only
 
-theorem evalE_conv_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : Conv E.isBase σ τ) :
+theorem evalE_conv_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : Conv E.isBase E.mapFree σ τ) :
     Effect F.static (evalE G F (fuel+1) (RExpr.conv (E := E) (Γ := Γ) e h)) := by
   simp only [Solidity.Source.evalE]
   repeat' first
@@ -135,7 +135,7 @@ theorem evalE_conv_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history :
      | split
      | dsimp only
 
-theorem evalE_convExplicit_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : σ.explicit E.isBase τ = true) :
+theorem evalE_convExplicit_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : σ.explicit E.isBase E.mapFree τ = true) :
     Effect F.static (evalE G F (fuel+1) (RExpr.convExplicit (E := E) (Γ := Γ) e h)) := by
   simp only [Solidity.Source.evalE]
   repeat' first
