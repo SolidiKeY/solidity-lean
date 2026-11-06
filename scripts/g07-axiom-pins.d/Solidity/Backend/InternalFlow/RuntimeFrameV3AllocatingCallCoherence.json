@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.bodies": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.continuation_steps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.source_coherence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCallCoherence.successor_steps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

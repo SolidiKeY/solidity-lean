@@ -130,7 +130,7 @@ def check (t : Source.IntTy) (p : Roadmap.Pipeline) (checked : Bool) (old rhs : 
   match Source.convVal (.udvt e) v,
       (assignLocalOperand .here (.there .here)).run (target .u8 0 255 (by decide) (by decide)) with
   | .error (.stuck why),.ok (out,.prim n) => v.key == w.key &&
-      !(Source.STy.udvt d).implicit (E .u8).isBase (.udvt e) &&
+      !(Source.STy.udvt d).implicit (E .u8).isBase (E .u8).mapFree (.udvt e) &&
       why == "user-defined value type" && n.val == 255 && (TEnv.get .here out.st.env).val == 255
   | _,_ => false))
 
