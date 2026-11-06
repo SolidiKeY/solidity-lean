@@ -236,6 +236,24 @@ Not fixed:
 - Lean MCP diagnostics are clean (severity error) on `Lengths.lean`,
   `Utf8Shape.lean` and `FullPins.lean`.
 
+### Follow-up gates (2026-11-06)
+
+- Merged origin/master in 44e41be2. The Lake cache release
+  returned 404, so the build was cold.
+- `./run-lean.sh`: the first run reached job 6350/6430 with no `error:`
+  before the 2-hour background limit stopped it. The rerun completed:
+  layers, `register.sh --check` and `fragments.sh --check` pass, and
+  "Build completed successfully (6463 jobs)", exit 0, 13m33s. The SolKey
+  checker is no longer part of the script (master a897dac76).
+  `FullControls` (`fullControls_pass`, 118 rows) built in the first run.
+- `audit.py --record <first run log>`: `evidence/axioms.log` is
+  byte-identical. Only the `FullControls.lean` hash in
+  `proof-source-identities.json` changes. `audit.py` (committed log) and
+  `audit.py <first run log>`: PASS, 219 exact theorem axiom sets, 255
+  kernel control rows, 8 safe declarations, exclusive scope (21 paths).
+- `solc-fixtures.mjs … check` against the pinned soljson: "PASS 71 cases
+  x legacy/viaIR".
+
 ### Retained deviations
 
 - Unicode surrogate escapes: the model accepts them, but solc rejects
