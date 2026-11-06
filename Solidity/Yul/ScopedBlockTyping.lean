@@ -532,4 +532,32 @@ theorem checkBlock_iff {F n} (E : Env F n) (c : Control) (body : Syn (.list .yul
     rw [d.complete]
     rfl
 
+/-- The same scoped input determines the complete packed typing result,
+including the final local count, intrinsic environment and derivation. -/
+theorem StatementD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn .yulStmt) (firstCount secondCount : Nat)
+ (firstEnv : Solidity.Yul.BlockTyping.Env F firstCount)
+ (secondEnv : Solidity.Yul.BlockTyping.Env F secondCount)
+ (first : Solidity.Yul.ScopedBlockTyping.StatementD scope E control tree firstEnv)
+ (second : Solidity.Yul.ScopedBlockTyping.StatementD scope E control tree secondEnv),
+ (⟨firstCount,firstEnv,first⟩ : (count : Nat) × (final : Solidity.Yul.BlockTyping.Env F count) ×
+ Solidity.Yul.ScopedBlockTyping.StatementD scope E control tree final) = ⟨secondCount,secondEnv,second⟩ := by
+  intro X scope F n E control tree firstCount secondCount firstEnv secondEnv first second
+  exact Option.some.inj ((StatementD.complete first).symm.trans (StatementD.complete second))
+
+/-- The same scoped input determines the complete packed typing result,
+including the final local count, intrinsic environment and derivation. -/
+theorem WalkD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.list .yulStmt)) (firstCount secondCount : Nat)
+ (firstEnv : Solidity.Yul.BlockTyping.Env F firstCount)
+ (secondEnv : Solidity.Yul.BlockTyping.Env F secondCount)
+ (first : Solidity.Yul.ScopedBlockTyping.WalkD scope E control tree firstEnv)
+ (second : Solidity.Yul.ScopedBlockTyping.WalkD scope E control tree secondEnv),
+ (⟨firstCount,firstEnv,first⟩ : (count : Nat) × (final : Solidity.Yul.BlockTyping.Env F count) ×
+ Solidity.Yul.ScopedBlockTyping.WalkD scope E control tree final) = ⟨secondCount,secondEnv,second⟩ := by
+  intro X scope F n E control tree firstCount secondCount firstEnv secondEnv first second
+  exact Option.some.inj ((WalkD.complete first).symm.trans (WalkD.complete second))
+
 end Solidity.Yul.ScopedBlockTyping
