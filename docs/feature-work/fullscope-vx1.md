@@ -907,3 +907,36 @@ The coordinator's 1422Z publication message independently identifies snapshot
 source modules; those modules remain published byte-identically. Nothing was
 moved from another lane or used to claim X01/X02 completion. Original seals are
 preserved rather than relocating historical evidence and invalidating receipts.
+
+
+### H70 all-30 staged manifest and generator inventory
+
+On input19acbfdd2aff80a0d9bf26127e67d676339a04d4, prepared
+tests/fullscope-20261104/vx1/manifest-rescope/all30-proposal.json. Exactly30
+former exclusions are proposed as model/missing open obligations, preserving all
+localEvidence and upstream locations and retaining old decisions in before records.
+Missing is a conservative catalog inspection status, not a claim that existing
+fragments do not exist. Requirements now state full-language obligations rather
+than withdrawn profile exclusions. Every affected upstream family/symbol reference
+is recorded. Active generated outputs remain untouched until the generator owner
+decouples unsupported diagnostics from scope. No H38 freeze or producer completion
+is inferred.
+
+ADAPTERS.md inventories render_lean/render_lean_info, decision validation, report
+rendering and Source outsideDiagnostic/ScopeScan boundaries, plus BlockField
+consumers. VY5 alone owns Source. Changing scope must not bypass unsupported
+construct rejection or weaken existing admission certificates. H70 routes Source
+review to VY5 and EVM/resource review to V14/V15; H67 pins stay coordinator-owned.
+
+Checks: proposal check.py PASS30 exact transitions, original provenance/evidence
+and all affected ledger references; solidity-feature-audit.py --check PASS212
+features/783symbols, active baseline still30 exclusions. This is staged source
+work, not regenerated-catalog readiness, kernel proof, compiler/EVM evidence or
+whole-lane completion. No Lean code/import change or heavy build in this increment.
+
+Independent read-only finder confirmed exact30 rows and provenance; found the
+initial consumer census omitted Source.unmodelled?. Fixed by adding Source:306,
+ScopeScan admission/diagnostic and compiler-artifact boundaries to ADAPTERS.md.
+Independent skeptic found no blocking scope/provenance defect and recommended
+explicit unchanged category/syntax assertions; added them to check.py. Neither
+review used Lean/server/builds; skeptic ran the lightweight Python checker.

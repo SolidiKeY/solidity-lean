@@ -1,0 +1,2319 @@
+{
+  "schemaVersion": 1,
+  "status": "staged-owner-adapter-required",
+  "authorization": "H37 full scope; H70 continue manifest rescope; D1-D6 binding",
+  "inputHead": "19acbfdd2aff80a0d9bf26127e67d676339a04d4",
+  "manifestSha256": "55fafa3420e4548c8161ef72dc423f9db2f041e4d8b929c04b3606d9637ab716",
+  "ledgerSha256": "3923f901a953648f4eb4c86ca574e315aa6e65e0ccdc22de24cb0683dd0a0f3e",
+  "rows": [
+    {
+      "id": "blockCoinbase",
+      "before": {
+        "id": "blockCoinbase",
+        "category": "environment",
+        "syntax": "block.coinbase",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; coinbase requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4185
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockCoinbase",
+        "category": "environment",
+        "syntax": "block.coinbase",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.coinbase as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4185
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockDifficulty",
+      "before": {
+        "id": "blockDifficulty",
+        "category": "environment",
+        "syntax": "block.difficulty",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; difficulty requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4188
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockDifficulty",
+        "category": "environment",
+        "syntax": "block.difficulty",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.difficulty as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4188
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockPrevrandao",
+      "before": {
+        "id": "blockPrevrandao",
+        "category": "environment",
+        "syntax": "block.prevrandao",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; prevrandao requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4189
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockPrevrandao",
+        "category": "environment",
+        "syntax": "block.prevrandao",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.prevrandao as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4189
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockNumber",
+      "before": {
+        "id": "blockNumber",
+        "category": "environment",
+        "syntax": "block.number",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; number requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4190
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockNumber",
+        "category": "environment",
+        "syntax": "block.number",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.number as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4190
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockGaslimit",
+      "before": {
+        "id": "blockGaslimit",
+        "category": "environment",
+        "syntax": "block.gaslimit",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; gaslimit requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4191
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockGaslimit",
+        "category": "environment",
+        "syntax": "block.gaslimit",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.gaslimit as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4191
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockChainid",
+      "before": {
+        "id": "blockChainid",
+        "category": "environment",
+        "syntax": "block.chainid",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; chainid requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4192
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockChainid",
+        "category": "environment",
+        "syntax": "block.chainid",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.chainid as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4192
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockBasefee",
+      "before": {
+        "id": "blockBasefee",
+        "category": "environment",
+        "syntax": "block.basefee",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; basefee requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4193
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockBasefee",
+        "category": "environment",
+        "syntax": "block.basefee",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.basefee as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4193
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockBlobbasefee",
+      "before": {
+        "id": "blockBlobbasefee",
+        "category": "environment",
+        "syntax": "block.blobbasefee",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; blobbasefee requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4194
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockBlobbasefee",
+        "category": "environment",
+        "syntax": "block.blobbasefee",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.blobbasefee as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4194
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockSlotnum",
+      "before": {
+        "id": "blockSlotnum",
+        "category": "environment",
+        "syntax": "block.slotnum",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile supplies only block.timestamp; slotnum requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4195
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockSlotnum",
+        "category": "environment",
+        "syntax": "block.slotnum",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model block.slotnum as a universally quantified chain input with approved chain premises and exact fork availability; never replace it with an invented constant.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4195
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "txOrigin",
+      "before": {
+        "id": "txOrigin",
+        "category": "environment",
+        "syntax": "tx.origin",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Transaction-origin identity is not carried by the current call environment; it must not be replaced by msg.sender.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4207
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "txOrigin",
+        "category": "environment",
+        "syntax": "tx.origin",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Carry universally quantified transaction-origin identity independently of msg.sender through source, admission, lowering and compiler semantics.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4207
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "txGasprice",
+      "before": {
+        "id": "txGasprice",
+        "category": "environment",
+        "syntax": "tx.gasprice",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Transaction pricing lies outside the chosen functional environment and gas abstraction.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4208
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "txGasprice",
+        "category": "environment",
+        "syntax": "tx.gasprice",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Carry universally quantified transaction gas price with approved chain premises through source, admission, lowering and compiler semantics.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4208
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blockhashBuiltin",
+      "before": {
+        "id": "blockhashBuiltin",
+        "category": "environment",
+        "syntax": "blockhash(n)",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Requires chain history, fork rules and the bounded block-hash window absent from this profile.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 87
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blockhashBuiltin",
+        "category": "environment",
+        "syntax": "blockhash(n)",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model universally quantified chain history, fork rules and the bounded block-hash window with approved chain premises.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 87
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "blobhashBuiltin",
+      "before": {
+        "id": "blobhashBuiltin",
+        "category": "environment",
+        "syntax": "blobhash(i)",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Requires transaction blob metadata and fork rules absent from this profile.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 119
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "blobhashBuiltin",
+        "category": "environment",
+        "syntax": "blobhash(i)",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model universally quantified transaction blob metadata, indexed hash behavior and fork availability with approved chain premises.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 119
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "inlineAssembly",
+      "before": {
+        "id": "inlineAssembly",
+        "category": "excluded",
+        "syntax": "arbitrary assembly / Yul including memory-safe flags",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+        "upstream": [
+          {
+            "path": "docs/grammar/SolidityParser.g4",
+            "line": 520
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "inlineAssembly",
+        "category": "excluded",
+        "syntax": "arbitrary assembly / Yul including memory-safe flags",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Admit general Yul, including non-memory-safe assembly; track loss of MemOK and recover it only by proved writeback; preserve opaque optimization boundaries and fork-dependent effects.",
+        "upstream": [
+          {
+            "path": "docs/grammar/SolidityParser.g4",
+            "line": 520
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "gasleft",
+      "before": {
+        "id": "gasleft",
+        "category": "excluded",
+        "syntax": "gasleft()",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Requires dynamic gas accounting, memory expansion, refunds and call forwarding absent from functional semantics.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 90
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "gasleft",
+        "category": "excluded",
+        "syntax": "gasleft()",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Read compiler-artifact-dependent gas through a run-indexed target-supplied gas oracle; preserve exact observations and Osaka accounting.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 90
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "gasOption",
+      "before": {
+        "id": "gasOption",
+        "category": "excluded",
+        "syntax": "{gas:g}; exact forwarded gas/stipend",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "An exact gas budget can change success, failure and reentrancy; it cannot be silently discarded.",
+        "upstream": [
+          {
+            "path": "docs/control-structures.rst",
+            "line": 83
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "gasOption",
+        "category": "excluded",
+        "syntax": "{gas:g}; exact forwarded gas/stipend",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model explicit call gas, exact forwarding, the 63/64 rule, stipends and resource-sensitive success or failure.",
+        "upstream": [
+          {
+            "path": "docs/control-structures.rst",
+            "line": 83
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "rawCalldata",
+      "before": {
+        "id": "rawCalldata",
+        "category": "excluded",
+        "syntax": "msg.data; msg.sig; fallback(bytes) input",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "This profile starts with typed arguments and lacks raw transaction payload/selector dispatch; typed calldata views remain in scope.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4202
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "rawCalldata",
+        "category": "excluded",
+        "syntax": "msg.data; msg.sig; fallback(bytes) input",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model exact raw transaction bytes, selectors, byte-memory copying and typed decoding with dirty-input rejection.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 4202
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "rawReturndata",
+      "before": {
+        "id": "rawReturndata",
+        "category": "excluded",
+        "syntax": "arbitrary raw low-level return bytes; fallback raw output",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Exact arbitrary external return bytes and machine return-buffer behavior are outside typed external-call outcomes; caught revert bytes are separate.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 557
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "rawReturndata",
+        "category": "excluded",
+        "syntax": "arbitrary raw low-level return bytes; fallback raw output",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Preserve exact arbitrary raw return and revert bytes and machine return-buffer behavior.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 557
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "lowLevelCall",
+      "before": {
+        "id": "lowLevelCall",
+        "category": "excluded",
+        "syntax": "address.call(arbitraryBytes)",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Arbitrary selector dispatch and byte-oriented external world effects exceed the recognized empty-data payment form.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 557
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "lowLevelCall",
+        "category": "excluded",
+        "syntax": "address.call(arbitraryBytes)",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model byte-oriented call dispatch, world effects, reentrancy, resource-sensitive outcomes and exact return bytes.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 557
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "delegatecall",
+      "before": {
+        "id": "delegatecall",
+        "category": "excluded",
+        "syntax": "address.delegatecall(bytes)",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Arbitrary foreign code executes against caller storage and context; requires a code/world semantics beyond typed library abstractions.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 559
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "delegatecall",
+        "category": "excluded",
+        "syntax": "address.delegatecall(bytes)",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model execution of foreign code against caller storage and context, exact bytes and resource-sensitive world effects.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 559
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "lowLevelStaticcall",
+      "before": {
+        "id": "lowLevelStaticcall",
+        "category": "excluded",
+        "syntax": "address.staticcall(bytes)",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Arbitrary byte-oriented dispatch/static-context return bytes require a richer external world than typed view calls.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 560
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "lowLevelStaticcall",
+        "category": "excluded",
+        "syntax": "address.staticcall(bytes)",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model arbitrary byte-oriented static dispatch, static-context restrictions and exact return bytes.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 560
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "selfdestruct",
+      "before": {
+        "id": "selfdestruct",
+        "category": "excluded",
+        "syntax": "selfdestruct(payableAddress)",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Balance transfer, account deletion and creation-in-transaction exceptions depend on fork-specific world semantics.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 101
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "selfdestruct",
+        "category": "excluded",
+        "syntax": "selfdestruct(payableAddress)",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model fork-specific balance transfer, account deletion and creation-in-transaction exceptions.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/GlobalContext.cpp",
+            "line": 101
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "create2Salt",
+      "before": {
+        "id": "create2Salt",
+        "category": "excluded",
+        "syntax": "new C{salt:s}(...); deterministic deployment address",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Address derivation requires init-code hashing and account/world collision rules absent from this profile.",
+        "upstream": [
+          {
+            "path": "docs/control-structures.rst",
+            "line": 257
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "create2Salt",
+        "category": "excluded",
+        "syntax": "new C{salt:s}(...); deterministic deployment address",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model salted address derivation, init-code hashing, collision rules and creation failures including code-size limits.",
+        "upstream": [
+          {
+            "path": "docs/control-structures.rst",
+            "line": 257
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "addressCode",
+      "before": {
+        "id": "addressCode",
+        "category": "excluded",
+        "syntax": "address.code; extcodesize",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Observes deployed bytecode/code size, including construction/deletion states, absent from the source interpreter.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 555
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "addressCode",
+        "category": "excluded",
+        "syntax": "address.code; extcodesize",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Observe exact deployed bytecode and size, including construction/deletion states, using the run-indexed artifact/world.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 555
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "addressCodehash",
+      "before": {
+        "id": "addressCodehash",
+        "category": "excluded",
+        "syntax": "address.codehash; extcodehash",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Observes account existence and deployed bytecode hashing, absent from the source interpreter.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 556
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "addressCodehash",
+        "category": "excluded",
+        "syntax": "address.codehash; extcodehash",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Observe account existence and exact codehash with only approved cryptographic and chain premises.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.cpp",
+            "line": 556
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "storageLayout",
+      "before": {
+        "id": "storageLayout",
+        "category": "excluded",
+        "syntax": "layout at expr; physical slots/packing/offsets",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/AST.h",
+            "line": 635
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "storageLayout",
+        "category": "excluded",
+        "syntax": "layout at expr; physical slots/packing/offsets",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Follow solc physical storage slots, packing and layout-at semantics so raw observations agree.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/AST.h",
+            "line": 635
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "memoryLayout",
+      "before": {
+        "id": "memoryLayout",
+        "category": "excluded",
+        "syntax": "raw memory addresses; mload/mstore; free-memory pointer",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Typed heap objects have no exposed machine byte addresses, expansion cost or scratch/free-memory regions.",
+        "upstream": [
+          {
+            "path": "docs/grammar/SolidityLexer.g4",
+            "line": 304
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "memoryLayout",
+        "category": "excluded",
+        "syntax": "raw memory addresses; mload/mstore; free-memory pointer",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Refine the word-cell machine by byte memory; follow solc scratch space, free-memory pointer and zero slot with exact expansion costs.",
+        "upstream": [
+          {
+            "path": "docs/grammar/SolidityLexer.g4",
+            "line": 304
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "transientLayout",
+      "before": {
+        "id": "transientLayout",
+        "category": "excluded",
+        "syntax": "physical transient slots; tload/tstore through assembly",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Logical transaction-local values can be modeled separately; physical transient slot access is a machine observation.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/TypeChecker.cpp",
+            "line": 787
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "transientLayout",
+        "category": "excluded",
+        "syntax": "physical transient slots; tload/tstore through assembly",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Model physical transient slots and transaction lifetime consistently with solc layout and raw observations.",
+        "upstream": [
+          {
+            "path": "libsolidity/analysis/TypeChecker.cpp",
+            "line": 787
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "eventLog",
+      "before": {
+        "id": "eventLog",
+        "category": "excluded",
+        "syntax": "log contents/topics/order/gas; indexed/anonymous observation",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "The selected observation model erases logs after evaluating arguments; properties about emitted logs require a new observable trace.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.h",
+            "line": 1276
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "eventLog",
+        "category": "excluded",
+        "syntax": "log contents/topics/order/gas; indexed/anonymous observation",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Preserve exact emitted logs, topics, payload bytes and order as observations.",
+        "upstream": [
+          {
+            "path": "libsolidity/ast/Types.h",
+            "line": 1276
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    },
+    {
+      "id": "machineResources",
+      "before": {
+        "id": "machineResources",
+        "category": "excluded",
+        "syntax": "gas exhaustion/refunds, stack limits, exact allocation limits",
+        "scope": "exclude",
+        "current": "notApplicable",
+        "requirement": "Mathematical execution/fuel bounds are not real gas or stack accounting; exact resource-sensitive outcomes need an EVM semantics.",
+        "upstream": [
+          {
+            "path": "docs/control-structures.rst",
+            "line": 61
+          }
+        ],
+        "localEvidence": [],
+        "decision": {
+          "date": "2026-10-29",
+          "question": "G00 Q1",
+          "outcome": "approvedExclusion",
+          "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
+        }
+      },
+      "proposed": {
+        "id": "machineResources",
+        "category": "excluded",
+        "syntax": "gas exhaustion/refunds, stack limits, exact allocation limits",
+        "scope": "model",
+        "current": "missing",
+        "requirement": "Charge the pinned Osaka resource schedule exactly, including expansion, warm/cold accesses, refunds and call forwarding; preserve failures and artifact-indexed values.",
+        "upstream": [
+          {
+            "path": "docs/control-structures.rst",
+            "line": 61
+          }
+        ],
+        "localEvidence": []
+      },
+      "obligationStatus": "open",
+      "admissionEvidence": "No new production admission or end-to-end correctness claim in this proposal."
+    }
+  ],
+  "upstreamReferences": {
+    "blockCoinbase": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.coinbase"
+      }
+    ],
+    "blockDifficulty": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.difficulty"
+      }
+    ],
+    "blockPrevrandao": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.prevrandao"
+      }
+    ],
+    "blockNumber": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.number"
+      }
+    ],
+    "blockGaslimit": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.gaslimit"
+      }
+    ],
+    "blockChainid": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.chainid"
+      }
+    ],
+    "blockBasefee": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.basefee"
+      }
+    ],
+    "blockBlobbasefee": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.blobbasefee"
+      }
+    ],
+    "blockSlotnum": [
+      {
+        "family": "globalNames",
+        "symbol": "block"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Block.slotnum"
+      }
+    ],
+    "txOrigin": [
+      {
+        "family": "globalNames",
+        "symbol": "tx"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Transaction.origin"
+      }
+    ],
+    "txGasprice": [
+      {
+        "family": "globalNames",
+        "symbol": "tx"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Transaction.gasprice"
+      }
+    ],
+    "blockhashBuiltin": [
+      {
+        "family": "functionKinds",
+        "symbol": "BlockHash"
+      },
+      {
+        "family": "globalNames",
+        "symbol": "blockhash"
+      }
+    ],
+    "blobhashBuiltin": [
+      {
+        "family": "functionKinds",
+        "symbol": "BlobHash"
+      },
+      {
+        "family": "globalNames",
+        "symbol": "blobhash"
+      }
+    ],
+    "inlineAssembly": [
+      {
+        "family": "parserRules",
+        "symbol": "assemblyFlags"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "assemblyStatement"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulAssignment"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulBlock"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulBoolean"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulExpression"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulForStatement"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulFunctionCall"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulFunctionDefinition"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulIfStatement"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulLiteral"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulPath"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulStatement"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulSwitchCase"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulSwitchStatement"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "yulVariableDeclaration"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Assembly"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyBlockCOMMENT"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyBlockComma"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyBlockLINE_COMMENT"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyBlockLParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyBlockRParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyBlockWS"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyDialect"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyFlagString"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "AssemblyLBrace"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulArrow"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulAssign"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulBreak"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulCOMMENT"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulCase"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulComma"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulContinue"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulDecimalNumber"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulDefault"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulEVMBuiltin"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulFalse"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulFor"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulFunction"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulHex"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulHexNumber"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulHexStringLiteral"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulIdentifier"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulIdentifierPart"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulIdentifierStart"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulIf"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulLBrace"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulLINE_COMMENT"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulLParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulLeave"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulLet"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulPeriod"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulRBrace"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulRParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulStringLiteral"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulSwitch"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulTrue"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "YulWS"
+      },
+      {
+        "family": "astClasses",
+        "symbol": "InlineAssembly"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "add"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "addmod"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "address"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "and"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "balance"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "basefee"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "blobbasefee"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "blobhash"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "blockhash"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "byte"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "call"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "callcode"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "calldatacopy"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "calldataload"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "calldatasize"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "caller"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "callvalue"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "chainid"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "clz"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "coinbase"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "create"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "create2"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "delegatecall"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "difficulty"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "div"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "eq"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "exp"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "extcodecopy"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "extcodehash"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "extcodesize"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "gas"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "gaslimit"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "gasprice"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "gt"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "invalid"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "iszero"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "keccak256"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "log0"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "log1"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "log2"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "log3"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "log4"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "lt"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "mcopy"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "mload"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "mod"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "msize"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "mstore"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "mstore8"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "mul"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "mulmod"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "not"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "number"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "or"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "origin"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "pop"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "prevrandao"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "return"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "returndatacopy"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "returndatasize"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "revert"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "sar"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "sdiv"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "selfbalance"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "selfdestruct"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "sgt"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "shl"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "shr"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "signextend"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "sload"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "slotnum"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "slt"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "smod"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "sstore"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "staticcall"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "stop"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "sub"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "timestamp"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "tload"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "tstore"
+      },
+      {
+        "family": "yulBuiltins",
+        "symbol": "xor"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Assembly"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "AssemblyAssign"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Leave"
+      }
+    ],
+    "gasleft": [
+      {
+        "family": "functionKinds",
+        "symbol": "GasLeft"
+      },
+      {
+        "family": "globalNames",
+        "symbol": "gasleft"
+      }
+    ],
+    "gasOption": [
+      {
+        "family": "expressionAlternatives",
+        "symbol": "FunctionCallOptions"
+      },
+      {
+        "family": "astClasses",
+        "symbol": "FunctionCallOptions"
+      },
+      {
+        "family": "functionKinds",
+        "symbol": "SetGas"
+      }
+    ],
+    "rawCalldata": [
+      {
+        "family": "parserRules",
+        "symbol": "fallbackFunctionDefinition"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "External"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Fallback"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "LParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "RParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Returns"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Semicolon"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Virtual"
+      },
+      {
+        "family": "globalNames",
+        "symbol": "msg"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "External"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Fallback"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "LParen"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "RParen"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Returns"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Semicolon"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Virtual"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Message.data"
+      },
+      {
+        "family": "magicMembers",
+        "symbol": "Message.sig"
+      }
+    ],
+    "rawReturndata": [
+      {
+        "family": "parserRules",
+        "symbol": "fallbackFunctionDefinition"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "External"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Fallback"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "LParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "RParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Returns"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Semicolon"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Virtual"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "External"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Fallback"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "LParen"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "RParen"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Returns"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Semicolon"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Virtual"
+      }
+    ],
+    "lowLevelCall": [
+      {
+        "family": "functionKinds",
+        "symbol": "BareCall"
+      },
+      {
+        "family": "AddressTypeMembers",
+        "symbol": "call"
+      },
+      {
+        "family": "nativeMemberOwners",
+        "symbol": "AddressType"
+      }
+    ],
+    "delegatecall": [
+      {
+        "family": "functionKinds",
+        "symbol": "BareDelegateCall"
+      },
+      {
+        "family": "AddressTypeMembers",
+        "symbol": "delegatecall"
+      },
+      {
+        "family": "nativeMemberOwners",
+        "symbol": "AddressType"
+      }
+    ],
+    "lowLevelStaticcall": [
+      {
+        "family": "functionKinds",
+        "symbol": "BareStaticCall"
+      },
+      {
+        "family": "AddressTypeMembers",
+        "symbol": "staticcall"
+      },
+      {
+        "family": "nativeMemberOwners",
+        "symbol": "AddressType"
+      }
+    ],
+    "selfdestruct": [
+      {
+        "family": "functionKinds",
+        "symbol": "Selfdestruct"
+      },
+      {
+        "family": "globalNames",
+        "symbol": "selfdestruct"
+      }
+    ],
+    "create2Salt": [
+      {
+        "family": "expressionAlternatives",
+        "symbol": "FunctionCallOptions"
+      },
+      {
+        "family": "expressionAlternatives",
+        "symbol": "NewExpr"
+      },
+      {
+        "family": "astClasses",
+        "symbol": "FunctionCallOptions"
+      },
+      {
+        "family": "functionKinds",
+        "symbol": "Creation"
+      }
+    ],
+    "addressCode": [
+      {
+        "family": "AddressTypeMembers",
+        "symbol": "code"
+      },
+      {
+        "family": "nativeMemberOwners",
+        "symbol": "AddressType"
+      }
+    ],
+    "addressCodehash": [
+      {
+        "family": "AddressTypeMembers",
+        "symbol": "codehash"
+      },
+      {
+        "family": "nativeMemberOwners",
+        "symbol": "AddressType"
+      }
+    ],
+    "storageLayout": [
+      {
+        "family": "parserRules",
+        "symbol": "contractDefinition"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Abstract"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "At"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Contract"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "LBrace"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Layout"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "RBrace"
+      },
+      {
+        "family": "astClasses",
+        "symbol": "StorageLayoutSpecifier"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Abstract"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Contract"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "LBrace"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "RBrace"
+      }
+    ],
+    "memoryLayout": [],
+    "transientLayout": [],
+    "eventLog": [
+      {
+        "family": "parserRules",
+        "symbol": "eventDefinition"
+      },
+      {
+        "family": "parserRules",
+        "symbol": "eventParameter"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Anonymous"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Comma"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Event"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Indexed"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "LParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "RParen"
+      },
+      {
+        "family": "lexerRules",
+        "symbol": "Semicolon"
+      },
+      {
+        "family": "functionKinds",
+        "symbol": "Event"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Anonymous"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Comma"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Event"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Indexed"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "LParen"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "RParen"
+      },
+      {
+        "family": "compilerTokens",
+        "symbol": "Semicolon"
+      }
+    ],
+    "machineResources": []
+  }
+}
