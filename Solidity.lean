@@ -2928,6 +2928,7 @@ import Solidity.Frontend.SourceUnits
 import Solidity.Frontend.StatementGrammarH28.AtomAsm
 import Solidity.Frontend.StatementGrammarH28.AtomCall
 import Solidity.Frontend.StatementGrammarH28.AtomConditional
+import Solidity.Frontend.StatementGrammarH28.AtomDerives
 import Solidity.Frontend.StatementGrammarH28.AtomNested
 import Solidity.Frontend.StatementGrammarH28.AtomSimple
 import Solidity.Frontend.StatementGrammarH28.AtomTry
