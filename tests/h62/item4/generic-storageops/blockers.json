@@ -1,0 +1,31 @@
+[
+  {
+    "id": "B-TOOLCHAIN-RAW",
+    "type": "external-owner-dependency",
+    "status": "blocked",
+    "source": "coordinator toolchain-pin.json; exclusive write scope",
+    "file": "Solidity/Syntax/Raw.lean",
+    "lines": [
+      597,
+      650,
+      665,
+      682,
+      684
+    ],
+    "action": "Coordinator migration owner supplies Lean4.35-compatible upstream dependency; revalidate ancestry and rerun isolated dependency gate before StorageOps proof work.",
+    "evidence": "/workspace/h62-generic-storageops/reproduction/dependencies.log",
+    "relay_state": "H70 ticket accepted by solidity-h62-6-20261106/migrate-syntax; await authorized migration dependency"
+  },
+  {
+    "id": "B-V10-RELAY",
+    "type": "owner-agreement",
+    "status": "awaiting-exact-file-agreement",
+    "owner": "V10",
+    "exact_files": [
+      "Solidity/Backend/StorageOps/OperationControls.lean"
+    ],
+    "action": "Before any migration of original controls or registration, obtain exact-file owner relay agreement; no request delivered and no permission inferred. Candidate file only, no prepared migration patch.",
+    "evidence": "H70 router: relay accepted; no original-file permission implied. relay.sh is host-only, not a VM installation task.",
+    "relay_state": "H70 ticket accepted by solidity-v07-v11-20261030/v10-storage-operations; exact-file agreement still pending"
+  }
+]

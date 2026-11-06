@@ -1211,3 +1211,49 @@ both fresh judges per row remain unfinished. Classification-only strict is not
 timed strict; no RUNTIME_GATE_PASS, goal mutation, heavy failing retry or
 push/merge/PR. Exact-head handoff/checks live under
 `/workspace/dafny-parity-sdk-failure-20261106/`.
+
+### Native trace presentation and lifecycle assertions (2026-11-06)
+
+The existing harness now asserts actual DOM pseudo-element text/source line,
+default dark/light and configured colors, all margin sides, disappearance after
+hide and rendered Show/Hide/Copy menu transitions. Copy matches real native
+assumptions joined by two newlines, restoring prior clipboard finally. Capture
+ACKs bind metadata hashes; active document object/session, URI/version/text hash
+and replayed UTF16/CRLF wire-open lifetime bind responses and captures.
+
+Native observations retain differences: switching to a trace-free document
+leaves Hide in the menu; a late response restores annotations after hide with
+no matching cancellation. Exact source tabs close, but the document model stays
+live through the original60000ms deadline. True close/reopen remains timed out.
+A separate tab reopening confirms the same cached model/session, not a new
+lifetime. Immediate light-theme continuity fails with empty annotations; a
+distinct fresh Show under selected light theme passes, without replacing that
+failed obligation. Local positioned trace, full lifecycle/disposal and native
+macOS remain missing. No upstream patch or model-prestate reinterpretation.
+
+[Checksum-bound VM evidence](dafny-trace-presentation-evidence-manifest.json)
+retains raw phases/protocol, failures, comparison and source reviews. Reviews
+found an errorful-success ACK and a close-race authority conflation; both were
+reproduced and repaired. Final finder/skeptic found no further concrete defect.
+These reviews are not paired row judgments. All486 rows/frozen270, original
+gates/budgets and proof semantics remain unchanged; no complete row or runtime
+pass is claimed. H80's incoming scoped instructions are the next provisioning,
+metadata and proof-help work; no goal mutation or integration is authorized.
+
+### H80 scoped implementation and provisioning (2026-11-06)
+
+Incoming user message H80 supplies scoped answers: provision pinned CLI/Frontend
+dependencies with the specified12GiB no-swap serial-j1 fallback; add real
+kernel-checked verifier identity/source-span metadata; open project proof docs
+for help; compiler-only Build leaves runtime/test equivalence incomplete. It
+supersedes the earlier proof-help exclusion claim; no row is waived. No
+integration or goal-state change is authorized.
+
+The conditional help action now opens the configured project's docs/README.md,
+which links docs/calculus.md. It uses qualified current summary state, canonical
+file containment, trust and existing picker document/session/version guards.
+Injected regressions cover current running/error/completed state, edit/close/
+switch/configuration/disposal/trust rejection and no backend restart. Finder and
+skeptic found no concrete defect; this is source evidence, not native UI parity
+or either fresh row judgment. Metadata and mandatory proof gates continue after
+dependency provisioning; no local positioned trace is fabricated.

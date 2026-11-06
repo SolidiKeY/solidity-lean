@@ -702,6 +702,13 @@ import Solidity.Backend.MemoryCopies.FixedReferenceDeclareInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceLive
 import Solidity.Backend.MemoryCopies.FixedReferenceLiveControls
 import Solidity.Backend.MemoryCopies.FixedReferenceLiveInterface
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoop
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopInterface
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryRows
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurn
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurnControls
+import Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurnInterface
 import Solidity.Backend.MemoryCopies.FixedReferencePath
 import Solidity.Backend.MemoryCopies.FixedReferencePathControls
 import Solidity.Backend.MemoryCopies.FixedReferencePathCopy
@@ -849,6 +856,9 @@ import Solidity.Backend.MemoryCopies.SingletonCopyInterface
 import Solidity.Backend.MemoryCopies.SnapshotPathControls
 import Solidity.Backend.MemoryCopies.SnapshotPathInterface
 import Solidity.Backend.MemoryCopies.SnapshotPaths
+import Solidity.Backend.MemoryCopies.SnapshotRestore
+import Solidity.Backend.MemoryCopies.SnapshotRestoreControls
+import Solidity.Backend.MemoryCopies.SnapshotRestoreInterface
 import Solidity.Backend.MemoryCopies.SnapshotTransport
 import Solidity.Backend.MemoryCopies.SnapshotTransportControls
 import Solidity.Backend.MemoryCopies.SnapshotTransportInterface
@@ -2066,6 +2076,7 @@ import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
 import Solidity.Calculus.DecisionPrefixNormalizationResidue
+import Solidity.Calculus.DecisionResidue
 import Solidity.Calculus.DecisionResidueReasons
 import Solidity.Calculus.DecisionSourceAnswer
 import Solidity.Calculus.DecisionSourceBoundary
@@ -3564,6 +3575,7 @@ import Solidity.Lowering.V08.BoolErrorLowering
 import Solidity.Lowering.V08.BoolErrorStatement
 import Solidity.Lowering.V08.BoolErrorStatementControls
 import Solidity.Lowering.V08.Callable
+import Solidity.Lowering.V08.CallableBodyPremises
 import Solidity.Lowering.V08.CallableMetadata
 import Solidity.Lowering.V08.CallableReflection
 import Solidity.Lowering.V08.CallbackControls
