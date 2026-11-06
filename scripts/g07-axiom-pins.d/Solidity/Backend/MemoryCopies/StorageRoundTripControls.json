@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/MemoryCopies/StorageRoundTripControls.lean:Solidity.Backend.MemoryCopies.StorageRoundTripControls.pair_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/StorageRoundTripControls.lean:Solidity.Backend.MemoryCopies.StorageRoundTripControls.uncleared_suffix_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/StorageRoundTripControls.lean:Solidity.Backend.MemoryCopies.StorageRoundTripControls.empty_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/StorageRoundTripControls.lean:Solidity.Backend.MemoryCopies.StorageRoundTripControls.long_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/StorageRoundTripControls.lean:Solidity.Backend.MemoryCopies.StorageRoundTripControls.same_slot_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/StorageRoundTripControls.lean:Solidity.Backend.MemoryCopies.StorageRoundTripControls.first_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/StorageRoundTripControls.lean:Solidity.Backend.MemoryCopies.StorageRoundTripControls.later_refusal_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

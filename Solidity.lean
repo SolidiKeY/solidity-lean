@@ -927,6 +927,9 @@ import Solidity.Backend.MemoryCopies.SourceStringsInterface
 import Solidity.Backend.MemoryCopies.StorageMemoryPipeline
 import Solidity.Backend.MemoryCopies.StorageMemoryPipelineControls
 import Solidity.Backend.MemoryCopies.StorageMemoryPipelineInterface
+import Solidity.Backend.MemoryCopies.StorageRoundTrip
+import Solidity.Backend.MemoryCopies.StorageRoundTripControls
+import Solidity.Backend.MemoryCopies.StorageRoundTripInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFootprint
 import Solidity.Backend.MemoryCopies.TraversalFootprintControls
@@ -2962,6 +2965,14 @@ import Solidity.Frontend.SolcJson.YulWalkPath
 import Solidity.Frontend.SolcJson.YulWords
 import Solidity.Frontend.Source
 import Solidity.Frontend.SourceUnits
+import Solidity.Frontend.StatementGrammarH28.AtomAsm
+import Solidity.Frontend.StatementGrammarH28.AtomCall
+import Solidity.Frontend.StatementGrammarH28.AtomConditional
+import Solidity.Frontend.StatementGrammarH28.AtomDerives
+import Solidity.Frontend.StatementGrammarH28.AtomNested
+import Solidity.Frontend.StatementGrammarH28.AtomSimple
+import Solidity.Frontend.StatementGrammarH28.AtomTry
+import Solidity.Frontend.StatementGrammarH28.AtomYield
 import Solidity.Frontend.StatementGrammarH28.Balance
 import Solidity.Frontend.StatementGrammarH28.BalanceAtoms
 import Solidity.Frontend.StatementGrammarH28.BalancePr
@@ -3033,6 +3044,8 @@ import Solidity.Frontend.StatementGrammarH28.FlagCounterexample
 import Solidity.Frontend.StatementGrammarH28.FramedItemList
 import Solidity.Frontend.StatementGrammarH28.FramedStatementList
 import Solidity.Frontend.StatementGrammarH28.G0List
+import Solidity.Frontend.StatementGrammarH28.G0Nodes
+import Solidity.Frontend.StatementGrammarH28.G0Rejections
 import Solidity.Frontend.StatementGrammarH28.HeadPr
 import Solidity.Frontend.StatementGrammarH28.LeafCoverage
 import Solidity.Frontend.StatementGrammarH28.ListMeasures
