@@ -18,7 +18,10 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean` | Typed complete new-object inventory, every-reference coverage, distinct addresses and same-state physical observations. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object address distinctness. |
 | `Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean` | Intrinsic object/heap extensionality, derived output typings and uniqueness from exact old/new contents. |
-| `Backend/InternalFlow/RuntimeFrameV3NativeHeapProfile.lean` | Actual native recursive allocation run supplies exact new-object contents for every sufficient quotation index. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeHeapProfile.lean` | Actual native recursive allocation supplies exact new-object contents and State-field preservation for every sufficient quotation index. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeDescentHeap.lean` | Actual native output and reached target descent have identical complete dependent heaps; local return transport remains separate. |
 | `Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionalityControls.lean` | Two actual allocations preserve old objects yet differ in fresh contents; the altered heap fails the exact profile. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeDescentHeapControls.lean` | Populated source/target heap identity with the native-result versus descent-slot mismatch retained. |
+| `Backend/InternalFlow/RuntimeFrameV3StateShell.lean` | Equality of existing non-memory State fields for allocation-only internal execution; no external/world-call adequacy. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean` | Actual native recursive output represented after actual target parent returns, with derived heaps, locals and remaining State fields. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentationControls.lean` | Populated actual-output representation, complete ordered 20-word observation vector and cursor/alias/halt negatives. |
