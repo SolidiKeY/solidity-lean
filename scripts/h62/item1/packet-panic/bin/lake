@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+pinned=/workspace/h62-toolchain/lean-4.35.0-linux/bin/lake
+if [[ "${1:-}" == serve ]]; then
+  exec "$pinned" "$@" -j1 --tstack=131072
+fi
+exec "$pinned" "$@"

@@ -1,5 +1,7 @@
 import Solidity.Frontend.Checked.Check
 import Solidity.Frontend.StatementGrammarH28.G0List
+import Solidity.Frontend.StatementGrammarH28.G0Nodes
+import Solidity.Frontend.StatementGrammarH28.G0Rejections
 
 /-! Finite kernel controls for every assigned statement/block constructor.
 Acceptance and constructor observations are checked, not AST equality or
@@ -26,7 +28,7 @@ def fixtureListCtors {c : Cat} (f : Syn c → List Ctor)
 
 private def optionalBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
   apply Syn.casesOn (motive := fun _ _ => List Ctor) tree
-  case some => intro category body; exact body.nodes.map Node.ctor
+  case some => intro category body; exact g0NodeCtors body
   all_goals intros; exact []
 
 private def functionBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
@@ -57,6 +59,10 @@ private def fixtureBodyCtorsAt {category : Cat} (tree : Syn category) : List Cto
 
 def fixtureBodyCtors (u : Syn .unit) : List Ctor := fixtureBodyCtorsAt u
 
+/-- The profile observation is `Syn.rejections`, read through its Gate G0 twin. -/
+theorem statementFixtureCheck_profile (u : Syn .unit) : (g0Rejections u).isEmpty = u.rejections.isEmpty := by
+  rw [g0Rejections_eq]
+
 theorem fixtureListCtors_zero {c : Cat} (f : Syn c → List Ctor) (xs : Syn (.list c)) :
     fixtureListCtors f 0 xs = [] := rfl
 
@@ -78,7 +84,7 @@ theorem topBodyCtors_contract (abstract : Bool) (name : String) (layout : Syn (.
 def statementFixtureCheck (c : StatementFixture) : Bool :=
   match parse (ascii c.source) with
   | .error _ => !c.accepts
-  | .ok u => c.accepts && (u.rejections.isEmpty == c.profile) &&
+  | .ok u => c.accepts && ((g0Rejections u).isEmpty == c.profile) &&
       c.required.all (fun ctor => (fixtureBodyCtors u).contains ctor)
 
 def statementFixture0 : StatementFixture :=
