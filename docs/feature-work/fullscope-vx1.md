@@ -955,8 +955,9 @@ Measured on a cold full build (`LEAN_NUM_THREADS=1 ./run-lean.sh`, 4 cores,
 v13-abi-world increment, `0bf90a41`) peaked at **7877 MiB, 203 s**: 32
 `decide +kernel` row checks in one module, at the 8 GiB pre-gate bound once
 Lake's own memory is counted. Every lane touching the library root rebuilds it.
-The next heaviest modules sampled so far stay under 2.7 GiB (full table below
-when the build finishes).
+The second module near the bound is `Solidity/Source/Horizon.lean` (same
+increment): **7447 MiB, 201 s**. The full table of modules over 4 GiB is at
+the end of this section.
 
 Fix (`[oom-fix]` commit `cb07a2c3`): `scripts/backend-scalar-thresholds.py`
 now emits `PowerBounds/Part01`–`Part08` (four widths each: rows
@@ -966,6 +967,15 @@ now emits `PowerBounds/Part01`–`Part08` (four widths each: rows
 proofs. Constants, statements and row proofs are unchanged up to placement
 (multiset and order checked); the 64 row names lose `private`. Parts measured: Part04 2099 MiB / 26 s, Part08 2337 MiB / 26 s;
 `--check` of the generator and `check-backend-scalar.mjs` pass.
+
+Second fix (`[oom-fix]` commit `ce77a3f1`): `Source/Horizon.lean` is now the
+linear chain `Horizon/Below` → `Horizon/Grow` → `Horizon/Const` → `Horizon`
+(the Approx layer and its `#guard_msgs` axiom pins), cut at its own section
+boundaries; every original line is present in order and only module
+preambles and docstrings were added, so importers of `Solidity.Source.Horizon`
+see the same declarations. Measured: Below 2182 MiB / 51 s, Grow 3871 MiB /
+90 s, Const 1440 MiB / 26 s, Horizon 4091 MiB / 105 s (batch, one thread).
+This touches a VY5-owned file under the assignment's OOM authorization only.
 
 ### Frozen G01 relation contracts D1–D6 (`FullScope.V1`)
 
