@@ -27,7 +27,7 @@ def usage():
         try:
             text = path.read_text()
             fields = text[text.rfind(')')+2:].split()
-            rows.append((int(path.parent.name), int(fields[2]), int(fields[21])*os.sysconf('SC_PAGE_SIZE')))
+            rows.append((int(path.parent.name), int(fields[2]), int(fields[21])*os.sysconf('SC_PAGE_SIZE'), int(fields[20]), int(fields[17])))
         except (OSError, ValueError, IndexError): pass
     return rows
 
@@ -39,11 +39,15 @@ def available():
     return min(host, int(cap)-used) if cap != 'max' else host
 
 def child_limits():
-    resource.setrlimit(resource.RLIMIT_AS, (CAP, CAP))
+    # The VM already has a hard cgroup memory cap. Stack reservations are
+    # virtual, not RSS; RLIMIT_AS can break bounded --tstack=131072 checks.
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
 def run(cmd, root, env, logfile):
     if available() < RESERVE: raise RuntimeError('RESOURCE_HEADROOM_STOP')
     peak = 0
+    peak_virtual = 0
+    peak_threads = 0
     start = time.monotonic()
     stop = None
     def interrupted(signum, frame):
@@ -55,7 +59,10 @@ def run(cmd, root, env, logfile):
             p = subprocess.Popen(cmd, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT,
                                  start_new_session=True, preexec_fn=child_limits)
             while p.poll() is None:
-                rss = sum(r for _, group, r in usage() if group == p.pid)
+                rows = [row for row in usage() if row[1] == p.pid]
+                rss = sum(row[2] for row in rows)
+                peak_virtual = max(peak_virtual, sum(row[3] for row in rows))
+                peak_threads = max(peak_threads, sum(row[4] for row in rows))
                 peak = max(peak, rss)
                 if rss > CAP or available() < RESERVE:
                     stop = 'RESOURCE_CAP_STOP' if rss > CAP else 'RESOURCE_HEADROOM_STOP'
@@ -80,7 +87,8 @@ def run(cmd, root, env, logfile):
         finally:
             for sig, handler in previous.items(): signal.signal(sig, handler)
     return {'command':cmd,'exit':p.returncode if p is not None else None,'wall_seconds':round(time.monotonic()-start,6),
-            'peak_group_rss_bytes_sampled':peak,'stop':stop,'log':str(logfile)}
+            'peak_group_rss_bytes_sampled':peak,'peak_group_virtual_bytes_sampled':peak_virtual,
+            'peak_group_threads_sampled':peak_threads,'stop':stop,'log':str(logfile)}
 
 def main():
     ap=argparse.ArgumentParser()
@@ -118,7 +126,7 @@ def main():
     # Absolute external buildDir separates versions and prohibits old per-master caches.
     config=(root/'lakefile.toml').read_text().replace('enableArtifactCache = true','enableArtifactCache = false')
     config=config.replace('version = "0.1.0"','version = "0.1.0"\nbuildDir = '+json.dumps(str(out/'build')))
-    config=config.replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1"]')
+    config=config.replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1", "-DElab.async=false"]')
     private=out/'lakefile.toml'
     private.write_text(config)
     env=dict(os.environ,PATH=str(args.toolchain.resolve()/'bin')+':'+os.environ['PATH'],
@@ -126,8 +134,8 @@ def main():
     lake=str(args.toolchain.resolve()/'bin/lake')
     lean=str(args.toolchain.resolve()/'bin/lean')
     versions={name:subprocess.check_output([exe,'--version'],text=True,env=env).strip() for name,exe in [('lean',lean),('lake',lake)]}
-    meta={'versions':versions,'settings':{'threads':1,'lean_args':['--tstack=131072','-j1'],
-           'cap_bytes':CAP,'reserve_bytes':RESERVE,'swap_bytes':0,'poll_seconds':0.1,
+    meta={'versions':versions,'settings':{'lean_num_threads_env':1,'lean_args':['--tstack=131072','-j1','-DElab.async=false'],
+           'rss_monitor_cap_bytes':CAP,'virtual_address_cap':None,'vm_hard_memory_cap':Path('/sys/fs/cgroup/memory.max').read_text().strip(),'reserve_bytes':RESERVE,'swap_bytes':0,'poll_seconds':0.1,
            'artifact_cache':False,'clean_build':True,'cpu_affinity':[cpu],'os_page_cache':'uncontrolled; no cache-dropping permission'},
           'root':str(root),'head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
           'census_sha256':hashlib.sha256(args.census.read_bytes()).hexdigest(),

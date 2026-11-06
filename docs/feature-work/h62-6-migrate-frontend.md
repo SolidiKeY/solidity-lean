@@ -56,12 +56,15 @@ Lean reports 4.24.0, release commit
 hashes, disables Lake artifact caching and cache downloads, writes an off-Git
 private Lake configuration with a fresh absolute build directory and `-j1`,
 and runs one target at a time in dependency order. It pins one CPU, sets
-`LEAN_NUM_THREADS=1`, verifies no host swap, caps per-process virtual memory
-at 12 GiB, monitors process-group aggregate RSS and requires at least 4 GiB
-of host/cgroup headroom. Its 0.1-second sampled aggregate RSS is not an exact
+`LEAN_NUM_THREADS=1`, `-j1` and `-DElab.async=false`, verifies no host swap,
+retains the supplied 16 GiB hard VM cgroup bound, monitors aggregate RSS
+with a 12 GiB sampled stop threshold and requires at least 4 GiB of
+host/cgroup headroom. Runtime thread counts are sampled separately; the
+configured Lean worker count is not an observed OS-thread count. Its 0.1-second sampled aggregate RSS is not an exact
 kernel peak. Signal/error cleanup kills only its own build process group.
 OS page cache is uncontrolled and explicitly recorded. No `systemd-run` is used.
-No tracked toolchain or root Lake configuration is changed.
+No tracked toolchain or root Lake configuration is changed. RSS and reserve
+guards are sampled controls, not hard cgroup guarantees.
 
 A first old KeySort probe was deliberately stopped because its initial
 `--only` selection included unrelated modules. It is retained under
@@ -100,3 +103,35 @@ Existing Frontend originals remain untouched pending exact-file coordination.
 No scope expansion is inferred from the migration overlay exception.
 No second persistent goal has been created; get_goal is not exposed here,
 which the coordinator explicitly confirmed is not a blocker.
+
+## Resource-method correction checkpoint
+
+The first clean old run (`old-clean/measurement.json`) failed, not passed:
+83 successful closure modules (60 Frontend), then UnitExamples failed with
+`failed to create thread`, Lean exit 134, Lake exit 1. Attempt wall time
+343.604841 seconds; sampled peak group RSS 2,539,126,784 bytes. This is not
+a complete clean baseline and provides no migration timing delta.
+
+The initial harness added a 12 GiB virtual-address limit. That was inappropriate
+for Lean's large thread stack reservations (the repository warns that virtual
+reservations are not resident RAM). The same module without that extra limit
+reserved 28,103,172,096 virtual bytes and reached 7,704,879,104 sampled RSS bytes,
+but hit the conservative 4 GiB headroom guard after 100.614966 seconds; no proof
+verdict was obtained. Both diagnostic attempts are retained and excluded from
+baseline comparisons. The VM had no cgroup OOM/max events and no swap.
+
+A separate private diagnostic with `-DElab.async=false` passed UnitExamples,
+exit 0, in 120.735350 seconds, sampled RSS 1,716,277,248 bytes, virtual size
+5,676,617,728 bytes, 12 maximum sampled group threads. Source, proof budgets,
+CPU affinity and kernel checking were preserved. This diagnostic reused built
+dependencies and is explicitly not a clean baseline. Both official releases
+support this scheduling option; it avoids retaining many simultaneous theorem
+elaborations despite the single configured Lean worker. Future old/new clean
+measurements use identical revised settings and fresh build directories.
+
+Read-only finder confirmed proc-stat indexing and owned-group cleanup, and
+requested accurate configured-versus-observed thread labels (fixed). Read-only
+skeptic confirmed the virtual-limit diagnosis was supported but initially
+unproved, and then confirmed synchronous elaboration is a scheduling control,
+not a kernel-check bypass or heartbeat increase. Neither review used Lean/server.
+The conservative cache-inclusive headroom guard remains unchanged.
