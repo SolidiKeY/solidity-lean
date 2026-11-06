@@ -176,7 +176,7 @@ theorem guarded_run {E : Source.Env} {Γ : Source.RCtx}
 
 theorem implicit_copy (n : Width) (isBase : Source.DeclName → Source.DeclName → Bool) (mapFree : Source.DeclName → Bool) :
     Source.STy.implicit isBase mapFree (.array .calldata (.int n.intTy) none) (ArrayTy n) = true := by
-  change ((Source.STy.int n.intTy).same (.int n.intTy) && true && true) = true
+  change ((Source.STy.int n.intTy).same (.int n.intTy) && true && true && _) = true
   rw [Source.STy.same_refl]
   rfl
 
