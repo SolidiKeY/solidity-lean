@@ -1,0 +1,10 @@
+{
+  "publication": "002f4f1786a5378f7e06dced5548d714f3e73a38",
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/manifest-followup/evidence-8e6e9df3e718dd9e.tar.zst",
+  "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/manifest-followup/evidence-8e6e9df3e718dd9e.tar.zst",
+  "archiveBytes": 10092,
+  "archiveSha256": "8e6e9df3e718dd9e50e0b01c7b4d0706124703d4c9e5646cb554bc5f9bdd5c07",
+  "contents": "Exact bounded commands/exits/output,resource measurements,axiom signatures,frozen controls,12 manifest rejections,setup preservation and independent reviews.",
+  "outcome": "PASS fullgate43.693784s/RSS1251300KiB/min14984622080B;finalcontrols10.246939s/RSS330724KiB/min14682075136B. Lean4.24.0/Lake5.0.0-src+797c613;12GiB/no-swap/threads1/-j1.",
+  "boundary": "Artifact consistency/adoption only;not source semantics or complete runtime closure."
+}
