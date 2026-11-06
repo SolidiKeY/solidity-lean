@@ -21,7 +21,7 @@ DECL = re.compile(r"(?P<mods>(?:(?:private|protected|noncomputable|unsafe|partia
 def digest(s):
     return hashlib.sha256(s.encode()).hexdigest()
 
-def mask(source):
+def mask(source, preserve_newlines=True):
     out = list(source)
     i = 0
     depth = 0
@@ -34,7 +34,7 @@ def mask(source):
             elif pair == "-/":
                 out[i:i+2] = "  "; depth -= 1; i += 2
             else:
-                if source[i] != "\n": out[i] = " "
+                if not preserve_newlines or source[i] != "\n": out[i] = " "
                 i += 1
         elif string:
             if source[i] == "\\":
@@ -43,7 +43,7 @@ def mask(source):
             elif source[i] == '"':
                 out[i] = " "; string = False; i += 1
             else:
-                if source[i] != "\n": out[i] = " "
+                if not preserve_newlines or source[i] != "\n": out[i] = " "
                 i += 1
         elif pair == "/-":
             out[i:i+2] = "  "; depth = 1; i += 2
@@ -56,7 +56,7 @@ def mask(source):
     if depth or string: raise ValueError("Unterminated comment or string")
     return "".join(out)
 
-def signature_end(code):
+def legacy_signature_end(code):
     stack = []
     for i, c in enumerate(code):
         if c in "([{⟨": stack.append(c)
@@ -66,6 +66,26 @@ def signature_end(code):
                             re.match(r"where\b", code[i:])):
             return i
     return len(code)
+
+def signature_end(code):
+    """Find declaration assignment, skipping assignments inside proposition lets."""
+    stack = []
+    pending_lets = 0
+    for i, c in enumerate(code):
+        if c in "([{⟨": stack.append(c)
+        elif c in ")] }⟩".replace(" ", ""):
+            if stack: stack.pop()
+        elif not stack:
+            boundary = i == 0 or not (code[i-1].isalnum() or code[i-1] in "_'.«")
+            if boundary and re.match(r"let\b", code[i:]):
+                pending_lets += 1
+            elif code[i:i+2] == ":=":
+                if pending_lets: pending_lets -= 1
+                else: return i
+            elif c == "|" or (boundary and re.match(r"where\b", code[i:])):
+                return i
+    return len(code)
+
 
 def declarations(source, path):
     code = mask(source)
@@ -94,6 +114,7 @@ def declarations(source, path):
         if not d: continue
         end = start + signature_end(chunk)
         statement = source[start:end].rstrip()
+        legacy = source[start:start+legacy_signature_end(chunk)].rstrip()
         # Exclude trailing comments from proof/body hash by using next command;
         # whole-file hash remains the authoritative complete preservation pin.
         rows.append(dict(path=path, name=".".join(namespaces+[d["name"]]),
@@ -104,6 +125,7 @@ def declarations(source, path):
             statement=statement, header_sha256=digest(statement),
             ambient_binders=list(context),
             statement_sha256=digest("\n".join(context+[statement])),
+            legacy_v1_statement_sha256=digest("\n".join(context+[legacy])),
             declaration_sha256=digest(source[start:stop].rstrip())))
     return rows
 
@@ -115,7 +137,7 @@ def census(root=ROOT):
         source = p.read_text()
         files.append(dict(path=path, sha256=digest(source), bytes=len(source.encode())))
         rows.extend(declarations(source,path))
-    return dict(format=1, base=BASE, family=FAMILY,
+    return dict(format=2, base=BASE, family=FAMILY,
         policy="All declarations; candidate cases include private control helpers; no semantic exclusions.",
         files=files, declarations=rows,
         totals=dict(files=len(files), declarations=len(rows),
@@ -132,7 +154,7 @@ def main():
         parser.error("bulk output must remain outside git (H44)")
     result=census()
     rendered=json.dumps(result,ensure_ascii=False,indent=2)+"\n"
-    pins=dict(format=1,base=BASE, totals=result["totals"], files=result["files"],
+    pins=dict(format=2,base=BASE, totals=result["totals"], files=result["files"],
               inventory_sha256=digest(rendered))
     manifest=json.dumps(pins,ensure_ascii=False,indent=2)+"\n"
     if args.write: DEST.write_text(manifest)

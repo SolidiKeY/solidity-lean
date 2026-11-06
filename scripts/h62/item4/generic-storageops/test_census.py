@@ -37,6 +37,14 @@ end N
         self.assertEqual(a["statement_sha256"],b["statement_sha256"])
         self.assertNotEqual(a["declaration_sha256"],b["declaration_sha256"])
         self.assertNotEqual(a["statement_sha256"],c["statement_sha256"])
+    def test_proposition_let_assignments_are_part_of_statement(self):
+        source="theorem t : let x := 1; let y := x + 1; y = 2 := by rfl\n"
+        row=census.declarations(source,"Controls.lean")[0]
+        self.assertEqual(row["statement"],source.split(" := by")[0])
+        self.assertNotEqual(row["statement_sha256"],row["legacy_v1_statement_sha256"])
+    def test_where_substring_is_not_keyword(self):
+        row=census.declarations("theorem somewhere : True := trivial\n","Controls.lean")[0]
+        self.assertEqual(row["statement"],"theorem somewhere : True")
     def test_unterminated_refuses(self):
         with self.assertRaises(ValueError): census.mask("/- unfinished")
         with self.assertRaises(ValueError): census.mask('"unfinished')

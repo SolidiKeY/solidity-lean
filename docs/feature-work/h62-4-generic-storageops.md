@@ -1,7 +1,8 @@
 # H62 item 4: generic StorageOps controls
 
-Status: **blocked, full assignment unfinished**. This checkpoint delivers a
-reviewed textual census and deterministic reproduction backfill. It does not
+Status: **blocked, full assignment unfinished**. Checkpoint 1 now delivers a
+reviewed census and complete source-contract classification of all 230 original
+files and 6,036 declarations, with deterministic acceptance. It does not
 claim a generic StorageOps proof, semantic correspondence, migration, runtime
 gate, or acceptable before/after checking-cost delta.
 
@@ -26,13 +27,20 @@ qualified source name, visibility, kind, exact source header, ambient binders,
 contextual statement SHA256 and declaration SHA256. These are source pins,
 not kernel-elaborated type hashes. File SHA256 pins also preserve definitions,
 imports, options, observations, proofs and comments. A conservative namespace,
-section and mutual-block scanner masks nested comments and strings. Six scanner
-regressions include binder changes, mutual scope, proof-only drift and malformed
-input. Current-corpus independent sweeps found no missed declaration starts.
+section and mutual-block scanner masks nested comments and strings. Eight scanner
+regressions include binders, mutual scope, proof-only drift, proposition-level
+let assignments, keyword boundaries and malformed input. Current-corpus independent sweeps found no missed declaration starts.
 
-Full inventory (about 4.73 MiB) stays off git under H44:
+Current format-2 full inventory stays off git under H44:
 `/workspace/h62-generic-storageops/evidence/inventory.json`.
-SHA256: `fd5361469fe3e59603d8e1612e5abb306c586ad1a2f97a2576ab7c178179f336`.
+SHA256: `30e9490cd6efae5027c910b827a675e3afdc8b614fd462a27b3e0debb4f8af90`.
+The prior format-1 inventory is retained as `evidence/inventory-v1.json`, digest
+`fd5361469fe3e59603d8e1612e5abb306c586ad1a2f97a2576ab7c178179f336`.
+Format 1 truncated 105 theorem headers (72 family laws and 33 public control
+claims) at proposition-level `let` assignments. Format 2 retains the full
+contracts and **every** old hash in `legacy_v1_statement_sha256`. Acceptance
+reconstructs all 6,036 old rows and checks the exact prior inventory digest.
+No underlying Lean statement or declaration bytes changed.
 The compact [manifest](../../tests/h62/item4/generic-storageops/inventory-manifest.json)
 pins all 230 files, totals and full inventory digest. Regenerate with:
 
@@ -54,15 +62,76 @@ The coordinator's verified audit has SHA256
 
 | Item | StorageOps application and remaining obligation |
 | --- | --- |
-| 9, parameterize twin controls | Applicable method: preserve intrinsic element/path/operation types and all observations while sharing a law. The named Passes/PrimitivePackets/InternalFlow/MemoryCopies examples are other families. No ownership is claimed over them. This census retains every StorageOps control; semantic grouping and exact-instance migration remain pending. |
-| 11, shared lemmas and fixtures | Applicable method: e.g. repeated private names `graph` (48), `hash` (48), `locations` (46), `ix` (43), `one` (40), `zero` (39), `run` (36). Name repetition is a search lead, not proof of equivalent definitions. No helper extraction or shared HeapRepr/AllocatorRepr replacement is claimed. |
+| 9, parameterize twin controls | Applicable method: preserve intrinsic element/path/operation types and all observations while sharing a law. The named Passes/PrimitivePackets/InternalFlow/MemoryCopies examples are other families. No ownership is claimed over them. Every row now has a parameter-regime disposition; all runtime/result quantifiers are retained. Proved semantic equivalence and exact-instance migration remain checkpoint 2 work. |
+| 11, shared lemmas and fixtures | Applicable method: e.g. repeated private names `graph` (48), `hash` (48), `locations` (46), `ix` (43), `one` (40), `zero` (39), `run` (36). The classifier additionally records 435 exact source-template repeat groups (1,535 declarations), erasing only the declaration name; these are source-backed helper candidates, not proof of equivalent resolved types. No helper extraction or shared HeapRepr/AllocatorRepr replacement is claimed. |
 | 16, table plus one semantic lemma | Applicable method to per-case StorageOps controls. Tables must retain negative/refusal and retained-versus-live observations and accompany an intrinsic parameterized semantic law. No `decide` table substitutes for that law. Yul Raw/vector generation remains H55; no generator is duplicated here. |
 
-This is family-level applicability, **not a completed per-semantic-case audit**.
-The full inventory supports the remaining per-case disposition work without
-padding the case count. A proposed small starting point was the actual
-`modifyMany` scheduler behind OperationControls failure/success cases; its
-upstream dependencies fail before a new proof can be checked.
+Every declaration has all three audit dispositions plus evidence: parameter
+regime for item 9, exact source-template group or unique-template retention for
+item 11, and whole control-claim versus supporting-declaration treatment for
+item 16. These are complete applicability/preservation dispositions, not proved
+semantic equivalence groups or selected original migration patches. Those are
+checkpoint 2 obligations, pending owner/dependency gates.
+
+## Complete source-contract classification (H70)
+
+The full additive classification is `evidence/semantic-classification.json`,
+SHA256 `ea9995ef1ff96bcea13c16b5154127a6c8cfc16fa0cbdabddbdf9d5d9873e945`.
+The 22 MB bulk artifact stays off git under H44. The tracked
+[classification manifest](../../tests/h62/item4/generic-storageops/classification-manifest.json)
+pins it; the manually enumerated
+[domain map](../../tests/h62/item4/generic-storageops/semantic-domains.json)
+covers exactly all 230 original files, including the declaration-free
+`SourceSelfCopy` compatibility import.
+
+| Declaration disposition | Count |
+| --- | ---: |
+| Public control claims | 1,007 |
+| Private control claims (including fixture lemmas) | 616 |
+| Control fixtures and adapters | 3,214 |
+| Other family proof claims | 922 |
+| Other family definitions and adapters | 274 |
+| Interface/type definitions | 3 |
+| **Total original declarations** | **6,036** |
+
+All 1,623 original control claims are retained as whole contracts; tuple/list
+fields and conjunctions are not padded into independent case counts. Each row
+retains source identity, exact formal parameters, ambient binders, result type,
+all four hash pins, and source documentation. All 3,491 nonclaim definitions
+retain their full original definition text, including endpoint fields. These
+JSON audit records are not a replacement untyped semantic model.
+
+The classification records exact proposition structure and meaning: quantified
+contracts, local let bindings, generated-value or ordered-observation equalities,
+partial outcomes, graph observation absence, explicit compiler refusal/revert,
+coverage/bounds, predicate facts and distinguishing inequalities. It keeps
+implication premises, disjunction alternatives, equivalence sides and negations
+separate from positively asserted outcomes. In particular `some none` is a
+present outer result; `readLive = none` is an unavailable graph observation; a
+composed map/bind returning none is not automatically compiler refusal. Exact
+origins remain in the stored contract where no narrower interpretation is
+justified. All 309 local-let nodes are traversed. Runtime parameters are never
+replaced by finite table enumeration.
+
+The per-file scope taxonomy covers 34 intrinsic-graph, 47 numeric-access/trace,
+90 represented-composition, 28 structured-target, 24 represented-target-adapter,
+two mixed-control, two published-compiler-fragment, two reached-endpoint and one
+compatibility-import modules. These are broad layer boundaries; the exact
+per-declaration contracts remain authoritative. No Source, bytecode, gas, world,
+rollback or cryptographic closure is inferred from lower-layer facts.
+
+```sh
+python3 -B scripts/h62/item4/generic-storageops/accept_classification.py \
+  --output /workspace/h62-generic-storageops/evidence/semantic-classification.json
+```
+
+This acceptance runs frozen-tree identity checks, eight scanner regressions and
+13 classification regressions, validates all 6,036 declaration identities and
+contracts, refuses missing/duplicated cases or lost audit fields, checks the
+classification/domain manifests, and reconstructs the complete old inventory.
+It establishes complete source-contract inventory classification. It does not
+establish parameterized semantic equivalence, a typed Lean fixture table,
+exact owner-approved original instances or any runtime/proof/timing gate.
 
 ## Validation and resource evidence
 
@@ -99,7 +168,8 @@ is inferred from provisioning or from the prerequisite.
 
 | Check | Result / evidence |
 | --- | --- |
-| Six census scanner tests | Pass, exit 0. |
+| Eight census scanner tests | Pass, exit 0. |
+| H70 complete classification acceptance (13 classifier tests plus frozen source/pin validation) | Pass, exit 0; `evidence/classification-acceptance.log`. |
 | Frozen-source deterministic census acceptance | Pass, exit 0; all 230/230 original file hashes match the exact base. |
 | Pinned v4.35 KeySort | Pass, exit 0; 1.517 s, sampled peak group RSS 519,495,680 bytes. `evidence/keysort-v435.log{,.json}`. |
 | v4.35 `lake ... --no-cache build Solidity.Backend.StorageOps.OperationFamilies` | **Fail**, exit 1; 20.011 s, sampled peak group RSS 1,657,294,848 bytes. `evidence/dependencies-v435.log{,.json}`. |
@@ -154,23 +224,40 @@ coordinator must supply the migration owner's compatible dependency and arrange
 an authorized integration overlay. The exact errors and failing command are in
 the saved dependency logs.
 
-`B-V10-RELAY` is the required future owner agreement, not permission inferred
-from silence. No relay script is present in the checkout, no request was
-delivered and no existing family file was edited. Obtain V10 exact-file approval
+`B-V10-RELAY` remains the required exact-file owner agreement. H70 reports
+tickets accepted by `solidity-h62-6-20261106/migrate-syntax` and
+`solidity-v07-v11-20261030/v10-storage-operations`. Accepted ticket routing
+does not grant original-file permission. `relay.sh` is host-only; no worker
+installation or new relay mechanism is attempted. No existing family file was edited. Obtain V10 exact-file approval
 before changing `Solidity/Backend/StorageOps/OperationControls.lean` or another
 original selected after the census; owner applies migration patches. New helpers
 stay additive in the assigned test directory, registration fragments await the
 coordinator, and generated roots/module maps/axiom pins stay untouched.
 
-All four queue checkpoints remain open: (1) textual census done, semantic-case
-classification unfinished; (2) parameterized intrinsic lemma and typed fixture
-table pending; (3) correspondence, refusal coverage and semantic acceptance
-pending; (4) same-condition before/after timings and full final validation
-pending. No H55 work was duplicated. The goal must remain blocked/unfinished,
-not complete. Resume on this VM/branch after the dependency is supplied; do not
-create a replacement goal or push, merge, publish or pre-gate.
+Checkpoint 1 source census/classification is complete. Checkpoints 2–4 remain
+blocked: prove the intrinsic parameterized law and typed fixture table; establish
+correspondence and retain negative/refusal coverage with semantic acceptance;
+measure same-condition before/after timings and complete all final validation.
+No H55 work was duplicated. The goal remains blocked/unfinished, not complete.
+Resume on this same VM/branch after the dependency is supplied; do not create a
+replacement goal or push, merge, publish, pre-gate or change proof budgets.
 
 Final static checks: Python syntax and this document's relative link pass;
 `git diff --check` passes. Guard regression output is saved in
 `evidence/guard-tests.log`; optimization-enabled census acceptance output is
 saved in `evidence/acceptance-optimized.log`.
+
+H70 independent read-only reviews covered the entire regenerated classification.
+Finder and skeptic verified all 6,036 exact contracts/hashes, 230 file rows,
+all 3,491 nonclaim definitions, and all old pins. Confirmed findings fixed:
+masked literal/comment operators; overly narrow module domains; confusing
+generated-data equations with observations; tuple recognition; condition versus
+asserted-result handling; and quantified result contracts mislabeled closed.
+The final finder recheck passes all 13 classifier regressions and manifest
+`ea9995ef1ff96bcea13c16b5154127a6c8cfc16fa0cbdabddbdf9d5d9873e945`.
+The skeptic independently confirmed source preservation, 309 traversed let
+nodes, and 435 source-template groups/1,535 members. Its final recheck also
+passes all 13 classifier regressions and the exact final artifact digest. Neither
+reviewer ran Lean or wrote files. No new Lean validation is claimed in H70; the
+earlier pinned 4.35 prerequisite/failure evidence above remains explicitly prior
+run evidence on unchanged original sources.

@@ -1,5 +1,5 @@
 {
-  "format": 1,
+  "format": 2,
   "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "totals": {
     "files": 230,
@@ -1159,5 +1159,5 @@
       "bytes": 11469
     }
   ],
-  "inventory_sha256": "fd5361469fe3e59603d8e1612e5abb306c586ad1a2f97a2576ab7c178179f336"
+  "inventory_sha256": "30e9490cd6efae5027c910b827a675e3afdc8b614fd462a27b3e0debb4f8af90"
 }
