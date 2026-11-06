@@ -18,7 +18,9 @@ under `tests/sol-qualified-units/claude-evidence/`:
              since `probe`
   gatelog L  record `scripts/coord-tools/gate.sh full` output L (its own
              PASS/FAIL lines and per-gate logs) as the build/repository gates
-  keysort    run the built solkeycheck against the vendored solkey taclets
+
+The SolKey taclet checker (solkeycheck) is in no gate since master a897dac76
+(H89), so this driver no longer runs it.
 
 Every receipt binds the owned sources, inputs, this driver and lakefile.
 Nothing here is evidence that the old Codex seals hold.
@@ -44,6 +46,14 @@ OUT = ROOT / "tests/sol-qualified-units/claude-evidence"
 # Base commit of this Claude lane (moved4 batch).
 REPOSITORY_BASE = "aec9adf1ad8666a7e591e42a537069a93dc858cb"
 LANE = ROOT / "Solidity/Frontend/QualifiedUnits"
+# gate.sh failures that master has independently of this lane (coordinator note,
+# moved4 follow-up). They stay listed in the repository receipt and the lane doc.
+MASTER_ONLY = {
+    "doc-paths": "missing-file references in h62 docs, scripts and tests (master)",
+    "axiom-pins": "repository-wide axiom-pin inventory has unrecorded pins outside this lane (master)",
+    "testsuite": "sibling solkey checkout's TestSuite.sol differs from the imported AST pin (master)",
+    "corpus": "same sibling solkey TestSuite.sol pin as testsuite (master)",
+}
 
 
 def sha(path):
@@ -230,24 +240,23 @@ def gatelog(path):
     receipt("build", status["run-lean"] == "PASS", build_log, ["scripts/coord-tools/gate.sh", "full"], None,
             {"gate_sh": status, "lane_modules_built_or_replayed": sorted(built)})
     repo_log = OUT / "candidate-repository.log"
-    repo_log.write_text(summary.read_text())
-    # doc-paths fails on master before this lane (a Bridge Mathlib path); recorded, not waived.
-    receipt("repository", all(v == "PASS" for v in status.values()), repo_log, ["scripts/coord-tools/gate.sh", "full"], None,
-            {"gate_sh": status})
+    failed = sorted(name for name, result in status.items() if result != "PASS")
+    master_only = {name: MASTER_ONLY[name] for name in failed if name in MASTER_ONLY}
+    lane_failures = [name for name in failed if name not in MASTER_ONLY]
+    if "axiom-pins" in master_only:
+        # The repository-wide inventory fails on master; none of its findings may name this lane.
+        assert "QualifiedUnits" not in logs["axiom-pins"].read_text(), "axiom-pins finding inside the lane"
+    if "doc-paths" in master_only:
+        missing = [l for l in logs["doc-paths"].read_text().splitlines() if l.startswith("missing:")]
+        assert not [l for l in missing if "qualified" in l.lower()], "doc-paths finding inside the lane"
+    repo_log.write_text(summary.read_text() + "".join(f"MASTER_ONLY {n}: {r}\n" for n, r in master_only.items())
+                        + f"LANE_FAILURES {json.dumps(lane_failures)}\n")
+    # Repository-wide failures that master already has are recorded, not hidden: the
+    # receipt passes only when every other gate passes.
+    receipt("repository", not lane_failures, repo_log, ["scripts/coord-tools/gate.sh", "full"], None,
+            {"gate_sh": status, "master_only_failures": master_only, "lane_failures": lane_failures})
     print("gate.sh:", status)
     return status
-
-
-def keysort():
-    key = "tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
-    command = ["./.lake/build/bin/solkeycheck", "--key", key]
-    result = subprocess.run(command, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    log = OUT / "candidate-keysort.log"
-    log.write_text(result.stdout)
-    passed = result.returncode == 0 and bool(re.search(r"parsed \d+ taclets", result.stdout))
-    receipt("keysort", passed, log, command, result.returncode)
-    print(result.stdout.strip().splitlines()[-1] if result.stdout.strip() else "no output")
-    return passed
 
 
 if __name__ == "__main__":
@@ -266,6 +275,4 @@ if __name__ == "__main__":
     if len(command) == 2 and command[0] == "gatelog":
         status = gatelog(command[1])
         sys.exit(0 if status.get("run-lean") == "PASS" else 1)
-    if command == ["keysort"]:
-        sys.exit(0 if keysort() else 1)
     raise SystemExit(__doc__)

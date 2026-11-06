@@ -37,7 +37,7 @@ def sha(path):
 
 CLAUDE_EV = ROOT / "tests/sol-qualified-units/claude-evidence"
 CLAUDE_MANIFEST = ROOT / "tests/sol-qualified-units/claude-evidence-manifest.json"
-CLAUDE_GATES = ["solc", "signature-probes", "resolution-probes", "axioms", "declarations", "queries", "build", "keysort", "repository"]
+CLAUDE_GATES = ["solc", "signature-probes", "resolution-probes", "axioms", "declarations", "queries", "build", "repository"]
 
 
 def claude_files():
@@ -67,6 +67,23 @@ def write_claude_manifest():
 
 
 
+def verify_bulk_h44():
+    """Structural check of the H44 bulk manifest. Its files stay on the Codex VM, so only the
+    index itself is checkable here: no file content is verified by this function."""
+    bulk = json.loads((ROOT / "tests/sol-qualified-units/bulk-evidence-H44.json").read_text())
+    assert bulk["decision"] == "H44" and bulk["preserved_head"] == "364bd1e47fa1267a05343e1130e0eb728a32fc77", "H44 identity"
+    files = bulk["files"]
+    assert len({f["path"] for f in files}) == len({f["original"] for f in files}) == len(files) == 269, "H44 file count"
+    for f in files:
+        assert f["path"] == bulk["bulk_directory"] + "/" + f["original"], "H44 path " + f["original"]
+        assert f["original"].startswith("tests/sol-qualified-units/evidence/"), "H44 scope " + f["original"]
+        assert re.fullmatch(r"[0-9a-f]{64}", f["sha256"]) and f["bytes"] >= 0, "H44 digest " + f["original"]
+    assert sum(f["bytes"] for f in files) == bulk["total_bytes"] == 73851319, "H44 byte total"
+    tracked = subprocess.check_output(["git", "ls-files", "tests/sol-qualified-units/evidence"], cwd=ROOT, text=True)
+    assert not tracked.strip(), "H44 evidence must stay off git"
+    print(f"BULK_H44_MANIFEST_PASS: {len(files)} files, {bulk['total_bytes']} bytes indexed; contents are off this VM")
+
+
 def audit(inventory_only=False, foundation_only=False, claude=False):
     ev = ROOT / ("tests/sol-qualified-units/claude-evidence" if claude else "tests/sol-qualified-units/evidence")
     runner_file = ROOT / ("tests/sol-qualified-units/claude-gates.py" if claude else "tests/sol-qualified-units/run-candidate-gates.py")
@@ -74,8 +91,7 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
     artifact_shas = {a["sha256"] for a in artifacts["artifacts"]}
     # The accepted artifact set is pinned here, not only in the editable JSON.
     assert artifacts["version"] == "0.8.38+commit.1835d247.Emscripten.clang" and artifact_shas == {
-        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
-        "0b15fcb24fe784ed60f3853afc7f7e133a427bf1ac0d682e3f808d44b8e2fa6c"}, "compiler artifact pin set changed"
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"}, "compiler artifact pin set changed"
     scope = json.loads((ROOT / "tests/sol-qualified-units/scope.json").read_text())
     matrix = json.loads((ROOT / "tests/sol-qualified-units/constructors.json").read_text())
     syntax = ROOT / "Solidity/Source/Syntax.lean"
@@ -102,6 +118,7 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
     assert constructors == scope["inductive_constructors"], "inductive constructor inventory drift"
     declaration_pins = json.loads((ROOT / scope["reflection_pins"]).read_text())
     if claude:
+        verify_bulk_h44()
         manifest = json.loads(CLAUDE_MANIFEST.read_text())
         assert manifest["decision"] == "H44" and [r for r in manifest["receipts"]] == CLAUDE_GATES, "manifest shape"
         present = claude_files()
@@ -261,7 +278,7 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
         runner_sha = sha(runner_file)
         assert declaration_report["sources"] == sources and declaration_report["runner_sha256"] == runner_sha, "stale foundation reflection"
         assert declaration_report["input_sha256"] == sha(ev / ("probe-declarations.lean" if claude else "declarations-input.lean.txt")), "stale foundation input"
-        for mode in ["build", "axioms", "declarations", "signature-probes", "resolution-probes", "keysort", "solc", "queries"]:
+        for mode in ["build", "axioms", "declarations", "signature-probes", "resolution-probes", "solc", "queries"]:
             saved = json.loads((ev / f"gate-{mode}.json").read_text())
             assert saved["passed"] and saved["mode"] == mode and saved["process_exit"] == 0, "foundation gate failure " + mode
             assert saved["sources"] == sources and saved["runner_sha256"] == runner_sha, "stale foundation gate " + mode
@@ -272,7 +289,7 @@ def audit(inventory_only=False, foundation_only=False, claude=False):
         print(f"SIGNATURE_FOUNDATION_PASS: {len(actual)} modules, {len(all_declarations)} declarations, {len(pins)} theorem pins, {len(signature_matrix['rows'])} H27 theorem rows, 7 supplementary compiler probes, 17 direct queries; full G12 acceptance pending")
         return
     gate_results = {}
-    for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "keysort", "repository"]:
+    for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "repository"]:
         saved = json.loads((ev / f"gate-{mode}.json").read_text())
         assert saved["mode"] == mode and saved["runner_sha256"] == runner_sha and saved["sources"] == sources, "stale gate evidence " + mode
         assert saved["lakefile_sha256"] == sha(ROOT / "lakefile.toml"), "stale Lake configuration " + mode
@@ -311,7 +328,7 @@ if __name__ == "__main__":
         ev = ROOT / "tests/sol-qualified-units/evidence"
         if not args.inventory_only and not args.audit_only and not args.signature_foundation_only and not args.claude_vm and not args.write_claude_manifest:
             gates = []
-            for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "keysort", "repository"]:
+            for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "repository"]:
                 command = [sys.executable, str(ROOT / "tests/sol-qualified-units/run-candidate-gates.py"), mode]
                 result = subprocess.run(command, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 with open("/tmp/solidity-lean-feature-groups-20261025/writer.lock", "a") as lock:
