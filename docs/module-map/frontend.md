@@ -280,5 +280,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/StatementGrammarH28/AtomCall.lean` | `emit`/`revert` statement steps under the stated path and argument premises `PathAtom`, `ArgsAtom`. |
 | `Frontend/StatementGrammarH28/AtomYield.lean` | Printer premise `AtomYield`, the yield relation `AtomYields` for the atom-condition fragment, `Derives` characterisation and yield uniqueness (`atom_statements_yield_unique`). |
 | `Frontend/StatementGrammarH28/AtomTry.lean` | `try`/catch premises `ExprAtomBrace`, `ExprAtomReturns`, `RetsAtom`, `ParamsAtom`; the catch-open spine `catchOpen` and `CatchFrame`; the actual `try` and catch-signature step equations. |
-| `Frontend/StatementGrammarH28/AtomAsm.lean` | `assembly` premises `YulBodyAtom` (on `yulBody`) and `FlagsAtom` (on the flag list); the actual `assembly` step `asm_step`. |
+| `Frontend/StatementGrammarH28/AtomAsm.lean` | `assembly` premises `YulBodyAtom` (on `yulBody`) and `FlagsAtom` (on the flag list); the actual `assembly` step `asm_step`; the canonical rethrow body `rethrow_yul_body` by composed parser steps. |
 | `Frontend/StatementGrammarH28/AtomDerives.lean` | Printer premises `Prints`/`PrintsTo`, the print relations `AtomStmtP`/`AtomItemsP`/`AtomCatchP`/`AtomCatchesP`, layout-free yields, `Derives` characterisation and yield uniqueness for the mutual fragment. |

@@ -3009,7 +3009,8 @@ Changed statements, all in this lane's own moved-lane modules:
 `atom_stmt_prefix_unique` takes catch frames for both suffixes;
 `atom_stmt_token_unique` is unchanged. The general coverage theorem is
 slightly weaker: a tree without `try` must now discharge the new frame too,
-and no lemma does so in general. Every earlier control discharges it by
+and no lemma did so in general (superseded by
+`catch_frame_of_no_try` in checkpoint AH). Every earlier control discharges it by
 computation (`Or.inl rfl`, or `Or.inl (by cases n <;> rfl)` for the
 arbitrary-depth family). `simpleHead` now also excludes `catch`, which is
 needed for the no-catch lemma. The dispatch lemma's statement is unchanged
@@ -3066,8 +3067,9 @@ rethrow body exceeded the heartbeat budget (not raised), so that body is
 covered by a kernel parse of the whole statement in the controls
 (`rethrow_asm_kernel`, which also checks through the linked twin that it is
 not rejected). `AtomStmt.asm` has budget `a + 1`. The accepted assembly
-fixtures (Cases 22, 23, 24, 27) are therefore not covered by the `AtomStmt`
-relation; their parse is the fixture evidence and the kernel control. A refusal control covers an
+fixtures' statements were therefore not covered by the `AtomStmt` relation
+(superseded for the Case 24 rethrow statement in checkpoint AH; Cases 22,
+23 and 27 have other Yul bodies and remain outside the relation). A refusal control covers an
 unknown dialect string.
 
 ## Moved-lane checkpoint AF: revert-headed statements
@@ -3192,8 +3194,12 @@ The coordinator asked for four more steps on 2026-11-06.
    statement under the else frame alone. Controls:
    `revert_block_coverage_no_try` (node inventory by `decide +kernel`) and
    `try_tree_has_try` (the lemma does not apply to a tree with a `try`). This
-   removes the weakening recorded in checkpoint AD: every `try`-free witness
-   gets its catch frame from the lemma.
+   removes the weakening recorded in checkpoint AD for abstract families:
+   every `try`-free witness gets its catch frame from the lemma. For a
+   concrete tree, `Or.inl rfl` on `catchOpen` remains the cheapest check: it
+   looks only at the last-body spine, so it also succeeds for trees that hold
+   a `try` inside a block. The lemma's hypothesis over all nodes is stronger
+   than necessary; a spine-only version was not stated.
 2. **Rethrow Yul body.** `rethrow_yul_body : YulBodyAtom … 6` proves the
    canonical body `{ revert(add(raw, 32), mload(raw)) }` at every fuel of at
    least 6 and every suffix. Heartbeats are not raised. Small `rfl` steps are
@@ -3207,7 +3213,8 @@ The coordinator asked for four more steps on 2026-11-06.
 
    `AtomStmt.asm` now covers the accepted rethrow fixture's statement
    `assembly ("memory-safe") { … }` (`rethrow_asm_relation`, budget 7, with
-   coverage at every suffix). The note in checkpoint AE that this body is
+   coverage at every suffix). Its tokens are copied by hand from the fixture
+   source; they are not the lexer's output on `p24-canonical-rethrow.sol`. The note in checkpoint AE that this body is
    only a fixed-fuel kernel parse is superseded.
 3. **`AtomStmtP` from `AtomStmt`: not derived, and why.** The parse premises
    (`ExprAtomSemi`, `SimpleAtom`, `ArgsAtom`, …) say that a sub-parser reads
@@ -3237,3 +3244,28 @@ The coordinator asked for four more steps on 2026-11-06.
 - `check-trust`: 0 findings.
 - `check-doc-paths`: one missing reference, the same one that predates this
   lane.
+
+### Reviews of moved-lane checkpoint AH
+
+Read-only finder and skeptic reviews of `1311182e..ec45eb58`. Skeptic verdict:
+PASS-with-fixes. Neither review found a soundness issue. Both confirmed:
+
+- `yulItemStep` is the parser's own loop step;
+- `catchOpen_false_of_no_try` covers all 13 statement constructors;
+- `rethrow_yul_body` holds at every fuel of at least 6 and every suffix, with
+  no heartbeat raise;
+- the gate reporting is accurate.
+
+Fixes made:
+
+- Stale "not covered" and "no lemma" sentences in checkpoints AD and AE now
+  point forward to AH.
+- The module-map row for `AtomAsm` names `rethrow_yul_body`.
+- A no-op rewrite in `AtomAsm` was dropped; the file re-checks clean, and the
+  change is a proof step only.
+- The catch-frame claim was narrowed: `Or.inl rfl` stays the minimal check
+  for concrete trees.
+- The hand-copied fixture tokens are now stated.
+
+The finder also noted that budget 6 is not tight; 5 suffices. The doc does
+not claim tightness, so this is left as is.

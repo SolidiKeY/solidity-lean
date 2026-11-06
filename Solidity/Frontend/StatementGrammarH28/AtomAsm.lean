@@ -153,7 +153,7 @@ theorem rethrow_yul_body :
       .ok (.yulExprStmt rethrowCall, locatedInput [.punct .rbrace] s) := by
     have hl : rethrowCallToks ++ [.punct .rbrace] = .ident "revert" :: .punct .lparen ::
         (rethrowCallToks.drop 2 ++ [.punct .rbrace]) := rfl
-    rw [hl, yul_stmt_call_prefix, ← hl, show n + 4 = n + 4 from rfl, rethrow_call_expr n []]
+    rw [hl, yul_stmt_call_prefix, ← hl, rethrow_call_expr n []]
     rfl
   have hstep : yulItemStep (n + 5) (locatedInput (rethrowCallToks ++ [.punct .rbrace]) s) =
       .ok (some (.yulExprStmt rethrowCall), locatedInput [.punct .rbrace] s) := by
