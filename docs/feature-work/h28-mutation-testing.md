@@ -820,3 +820,55 @@ archive and its committed 11-member checksum manifest. No Lean source changed.
 The coordinator published this fix in a91a6cca; the current delivery-only
 anchor follows that published head while frozen snapshot provenance remains
 86253aba and semantic inputs remain 6f3eedf0. Full assignment work continues.
+
+
+### Direct rollback-state checkpoint (frozen input)
+
+The rollback pilot adds `payment.failure-books-payment`: only the failed arm of
+`Taclet.sendNoCallbackBox` books a payment. Its Boolean result remains false.
+The normal funded/refused controls retain the real rollback behavior. The mutant
+proof supplies inhabited typed update landings for both arms, proves the ledger
+postcondition for every update landing, and proves that the real refused send
+rejects it. `checked_kill` negates `Premise.Sound` without an added premise.
+All 19 new theorem signatures and axiom inventories are pinned; the independent
+revert control is unchanged. Development checks are not scored as a frozen run.
+
+`DELIVERY_BASE` and the current bulk delivery anchor advance together to the
+verified published `5c407a0ba004d8cf234c2600283f582a91789b76`. This only
+accounts for upstream integration in the owned-write guard; semantic/cache base
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5` and the historical snapshot
+delivery base remain unchanged. The new pilot explicitly declares its two
+VM-only H44 inputs in its manifest and `bulk-data.json`. Current source census
+now sees 32 fixtures, 11 profiles and 18 distinct case variants; historical
+census receipts remain immutable. Frame-effect witnesses, final selection
+ledger, expanded combined execution and final repository gates remain pending.
+
+
+Rollback frozen run at `ade0ec29779a21e2b71841e40f7d90b5691a87ad` completed all 12 checks: the direct
+mutant and independent known-kill were killed; the scored denominator is one.
+Eight isolated compiled outputs and all 27 owned theorem axiom exports
+(including 19 new theorems) are retained. Summed check time 62.833s;
+peak process RSS 1,455,936 KiB; minimum estimated reserve
+4,866,527,232 bytes. Lean 4.24.0 / Lake 5.0.0-src+797c613
+and fresh bounded KeySort passed before RUNTIME_GATE_PASS. Normal and optimized
+Python controls each passed all 86 tests. Finder and skeptic independently
+passed the actual evidence audit, with no findings.
+
+The H41 pack `/workspace/h28-rollback-export-ade0ec29/proof-worlds.tar.gz` has 5976656 bytes, SHA256
+`8a080a1e83ef060b50de077b77703a55f08cf3ff1b63216e030e3c53e537ec37`. Its H44 per-member manifest is committed. It is ready
+for coordinator pull; no transfer is claimed. Normal dependencies remain pinned
+separately and mutant outputs must stay isolated. `verify_combined.py --profile
+rollback` replays the same strict certificate/artifact checks using fixed rollback
+counts; its default combined profile retains the original 17/13 count pins.
+This is a completed rollback checkpoint, not full assignment completion. The
+frame-effect witness, exhaustive selection ledger, expanded combined run and
+final repository gates remain outstanding. The earlier full repository gate
+failed; no passing full gate is inferred from the owned proof checks.
+
+
+Final finder review identified a packaging check gap: member maps at proof-pack
+keys were skipped by validation/review-only traversal. Bulk verification now
+authenticates every declared member map regardless of its key. The real-Git
+control checks the rollback-pack location and rejects changed member hash, size
+and membership there. Archive integrity had passed; the missing enforcement
+was fixed before checkpoint seal acceptance. No proof or budget changed.
