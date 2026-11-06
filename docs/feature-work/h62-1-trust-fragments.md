@@ -1,0 +1,14 @@
+# H62 item 1: TrustAudit fragments — incomplete work
+
+Base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The isolated branch contains a prototype ordered raw-byte collector, a baseline splitter, 44 fragments, six external Python tests, and an unapplied central-file marker patch. The central `TrustAudit.lean`, theorem statements, axiom allowlist and generated roots were not edited. No new theorem, axiom, `sorry`, `native_decide`, or proof-budget change is claimed. This is a partial checkpoint, not acceptance of the migration.
+
+The frozen baseline is 106217 bytes, SHA-256 `ece2e6cebbee95d82fec246892993662e81dcfd895831981583d2b0867a37482`. The external census counts 44 `run_cmd` blocks and 44 identical `[``propext, ``Classical.choice, ``Quot.sound]` allowlists, 17 `#print axioms` commands and 1380 quoted `Solidity` occurrences. Raw concatenation reproduces all baseline bytes, including the imports and output commands. The first fragment contains the header and print commands. A migration patch adds a generated-file marker only; a test applies the patch to a temporary copy and compares the result to `collect.py --migration --stdout`. It does not integrate generation into CI or establish producer ownership.
+
+Commands observed passing:
+
+- `python3 -B -m unittest discover -s tests/h62/item1/trust-fragments -p 'test_*.py' -v`: six external tests, including dropped and mutated fragments.
+- `python3 scripts/h62/item1/trust-fragments/collect.py`: exact original reproduction.
+- `git apply --check scripts/h62/item1/trust-fragments/migration.patch`: patch applies; it has not been applied.
+- Pinned official archive SHA-256 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`; Lean 4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`; Lake 5.0.0-src+eb6cafb. `LEAN_NUM_THREADS=1 lean -j1 --tstack=131072 Solidity/KeySort.lean` passed with a 12 GiB virtual-memory limit, no configured swap, and at least 4 GiB available before launch. This is only the prerequisite, not a runtime gate or proof of the audit.
+
+Remaining: producer-facing lane naming/ownership and registration design; robust fragment and coverage acceptance for future additions; review and completion of the migration integration patch; independent read-only finder and skeptic reviews and fixes; full affected Lean validation and repository final gates on the official toolchain; controlled same-tree/cache/resource before/after timings and the 10% gate; committed completed-checkpoint handoffs; and any remaining explicitly assigned backfill. No full build, audit elaboration, Lean proof/axiom analysis, timing comparison, or independent review is claimed. The splitter's textual heuristic is not a Lean parser and must not be treated as a proof of coverage for future syntax. The numbered fragment scheme still needs an ownership and concurrent-addition solution. H58's held generated axiom audit was not started.
