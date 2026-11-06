@@ -2268,3 +2268,14 @@ lane (`docs/feature-work/after-roadmap-va1.md` cites a Mathlib test path),
 and the lane adds no failure. `check-axiom-pins.mjs` reports drift only for
 other lanes' pins: the lane has no `#guard_msgs` pins, and none of the
 reported lines is in `StatementGrammarH28`. `check-trust.sh`: 0 findings.
+
+Full gate on `e08557db` (run after a container restart, Lake 4.24.0):
+`./run-lean.sh` printed "Build completed successfully (5828 jobs)", with no
+Lean errors (wall time 54 min, warm partial cache). It then exited 1 in its
+last step, `scripts/check-solkey.sh` (`solkeycheck: 167 mismatch(es)`,
+unknown tokens and sorts and unannotated reads in solkey storage taclets).
+The branch changes nothing that step reads: its diff from
+`aec9adf1` touches only `Solidity/Frontend/StatementGrammarH28/**`,
+`tests/h28-sol/statement-grammar/**`, this document, the module map and the
+generated root. The failure predates this lane and belongs to the solkey
+annotation owners.
