@@ -1,0 +1,695 @@
+{
+ "schema": "h68-timing-rerun/v1",
+ "protocol": "scripts/h55/g49-final-theorem/check-pass-correct.py, unchanged; five interleaved pairs fixed in advance; decision on medians; controls excluded",
+ "lean": "leanprover/lean4:v4.24.0 (elan)",
+ "host": "cloud move6 VM, 4 cores, no swap",
+ "baselineTree": "current tree with FoldStatement, its conjunct and have folded removed from FoldedPublic.lean",
+ "baselineFoldedPublicSha256": "dfb667c5d683627c1ec66a5515b7cbbe255630653f5cb25c82c4b20aaf93198c",
+ "medianBaseline": 17.016,
+ "medianCurrent": 17.422,
+ "deltaPercent": 2.39,
+ "threshold": 10,
+ "verdict": "pass",
+ "runs": [
+  {
+   "order": 1,
+   "variant": "base",
+   "pair": 1,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.811,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.34,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.609,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 2.314,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 4.022,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.304,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.404,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "dfb667c5d683627c1ec66a5515b7cbbe255630653f5cb25c82c4b20aaf93198c"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 2.012,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 17.814
+  },
+  {
+   "order": 2,
+   "variant": "cur",
+   "pair": 1,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.611,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.95,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.506,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.912,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 3.822,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.506,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.304,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.404,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 2.014,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 17.52
+  },
+  {
+   "order": 3,
+   "variant": "base",
+   "pair": 2,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.509,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.646,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.711,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 3.822,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.304,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.405,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.506,
+     "exit": 0,
+     "source_sha256": "dfb667c5d683627c1ec66a5515b7cbbe255630653f5cb25c82c4b20aaf93198c"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 2.014,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 16.913
+  },
+  {
+   "order": 4,
+   "variant": "cur",
+   "pair": 2,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.513,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.34,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.611,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 2.011,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 3.922,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.304,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.711,
+     "exit": 0,
+     "source_sha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 3.332,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 17.422
+  },
+  {
+   "order": 5,
+   "variant": "base",
+   "pair": 3,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.613,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.447,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.711,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 3.826,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.506,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.305,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.405,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.404,
+     "exit": 0,
+     "source_sha256": "dfb667c5d683627c1ec66a5515b7cbbe255630653f5cb25c82c4b20aaf93198c"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 1.813,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 16.722
+  },
+  {
+   "order": 6,
+   "variant": "cur",
+   "pair": 3,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.41,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.543,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.911,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 3.822,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.41,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.304,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.405,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.606,
+     "exit": 0,
+     "source_sha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 1.912,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 16.916
+  },
+  {
+   "order": 7,
+   "variant": "base",
+   "pair": 4,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.51,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.543,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.511,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.913,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 4.024,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.407,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.406,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.405,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.614,
+     "exit": 0,
+     "source_sha256": "dfb667c5d683627c1ec66a5515b7cbbe255630653f5cb25c82c4b20aaf93198c"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 2.421,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 17.333
+  },
+  {
+   "order": 8,
+   "variant": "cur",
+   "pair": 4,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.409,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.973,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.707,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.711,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 4.123,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.406,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.304,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.405,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.509,
+     "exit": 0,
+     "source_sha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 1.913,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 17.547
+  },
+  {
+   "order": 9,
+   "variant": "base",
+   "pair": 5,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.512,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.342,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.508,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.811,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 4.124,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.304,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.405,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "dfb667c5d683627c1ec66a5515b7cbbe255630653f5cb25c82c4b20aaf93198c"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 2.117,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 17.016
+  },
+  {
+   "order": 10,
+   "variant": "cur",
+   "pair": 5,
+   "modules": [
+    {
+     "module": "Solidity.KeySort",
+     "seconds": 1.409,
+     "exit": 0,
+     "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+     "module": "Solidity.Hash.CollisionBound",
+     "seconds": 7.354,
+     "exit": 0,
+     "source_sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+     "module": "Solidity.Keccak",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+     "module": "Solidity.Roadmap.Evm",
+     "seconds": 1.911,
+     "exit": 0,
+     "source_sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+     "module": "Solidity.Roadmap.Contracts",
+     "seconds": 3.821,
+     "exit": 0,
+     "source_sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrect",
+     "seconds": 0.506,
+     "exit": 0,
+     "source_sha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58"
+    },
+    {
+     "module": "Solidity.Lowering.P8b.Frozen",
+     "seconds": 0.306,
+     "exit": 0,
+     "source_sha256": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+     "seconds": 0.405,
+     "exit": 0,
+     "source_sha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    {
+     "module": "Solidity.Roadmap.G49Final.FoldedPublic",
+     "seconds": 0.505,
+     "exit": 0,
+     "source_sha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925"
+    },
+    {
+     "module": "H64Controls",
+     "seconds": 2.013,
+     "exit": 0,
+     "source_sha256": "726302b5dc0aaa77b3574536fffb448b9daede1468c943cbdb73b34b4622664d"
+    }
+   ],
+   "nineModuleSeconds": 16.722
+  }
+ ]
+}
