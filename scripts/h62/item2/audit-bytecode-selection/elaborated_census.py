@@ -3,7 +3,7 @@
 
 Run the emitted program against source-checked imports. It records kernel type
 expressions and pretty types for named/generated theorems, structure projections,
-and all constants in Interface/Premises modules, without proving new statements.
+and all remaining constants, with predicate bodies, without proving new statements.
 The program imports Lean only in this external audit; the core is unchanged.
 """
 import argparse
@@ -43,11 +43,13 @@ run_cmd do
       let isTheorem := wasOriginallyTheorem env name
       let isProjection := fields.contains name
       let isInterface := decide ((moduleString.splitOn "Interface").length > 1 ∨ (moduleString.splitOn "Premises").length > 1)
-      if isTheorem || isProjection || isInterface then
-        let (pretty, isProof, binders) ← liftTermElabM do
+      do
+        let (pretty, isProof, predicateValued, binders) ← liftTermElabM do
           let pretty ← ppExpr info.type
           let isProof ← isProp info.type
-          let binders ← forallTelescope info.type fun xs _ => do
+          let (predicateValued, binders) ← forallTelescope info.type fun xs result => do
+            let result ← whnf result
+            let predicateValued := result == .sort .zero
             let mut entries : Array Json := #[]
             for x in xs do
               let localDecl ← x.fvarId!.getDecl
@@ -59,19 +61,33 @@ run_cmd do
                 ("type", toJson binderType.pretty),
                 ("proof_binder", toJson proofBinder),
                 ("head_constant", toJson (localDecl.type.getAppFn.constName?.map Name.toString))]
-            pure entries
-          pure (pretty.pretty, isProof, binders)
+            pure (predicateValued, entries)
+          pure (pretty.pretty, isProof, predicateValued, binders)
         let parents : Array Json := match getStructureInfo? env name with
           | none => #[]
           | some structureInfo => structureInfo.parentInfo.map fun (parent : StructureParentInfo) =>
             Json.mkObj [("structure", toJson parent.structName.toString),
               ("projection", toJson parent.projFn.toString),
               ("subobject", toJson parent.subobject)]
+        let ranges ← findDeclarationRanges? name
+        let rangeJson := ranges.map fun r => Json.mkObj [
+          ("start_line", toJson r.range.pos.line),
+          ("end_line", toJson r.range.endPos.line),
+          ("selection_line", toJson r.selectionRange.pos.line)]
+        let body := if isTheorem then none else info.value? (allowOpaque := true)
         let record := Json.mkObj [
           ("manifest_sha256", toJson manifestFingerprint),
           ("name", toJson name.toString),
+          ("user_name", toJson (privateToUserName name).toString),
+          ("private", toJson (isPrivateName name)),
+          ("original_kind", toJson ((getOriginalConstKind? env name).map reprStr)),
+          ("declaration_range", toJson rangeJson),
           ("module", toJson moduleString),
-          ("kind", toJson (if isProjection then "field" else if isTheorem then "theorem" else "interface_constant")),
+          ("kind", toJson (if isProjection then "field" else if isTheorem then "theorem" else "constant")),
+          ("interface_or_premises_module", toJson isInterface),
+          ("predicate_valued", toJson predicateValued),
+          ("body_expr", toJson (body.map reprStr)),
+          ("body_status", toJson (if isTheorem then "proof body intentionally omitted" else if body.isSome then "available expression; not unfolded dependency closure" else "no available value")),
           ("is_theorem", toJson isTheorem),
           ("is_projection", toJson isProjection),
           ("proof_type", toJson isProof),

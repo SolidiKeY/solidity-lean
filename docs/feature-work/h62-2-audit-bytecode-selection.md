@@ -1,6 +1,6 @@
 # H62 item 2: audit-bytecode-selection
 
-Partial checkpoint; the full four-checkpoint assignment remains unfinished.
+Retired by explicit H82 stop-and-handoff; the full four-checkpoint assignment remains unfinished.
 This is additive audit work on the assigned branch, based on
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. No original interface, generated
 root, module map, axiom pin, or toolchain was edited. No H55/G49 proof is supplied.
@@ -394,3 +394,62 @@ Original patch, bundle, handoff and checksum manifest are exported under the
 evidence root. The final CLOUDVM-RESULT gives their absolute paths and committed
 head. Bulk census/logs/oleans remain off Git; only generators, small fixtures
 and this handoff are committed.
+
+
+## H82 final retirement handoff
+
+The human has explicitly retired this worker and accepted the successor relay to
+solidity-parallel-20261103/executable-bytecode. No further proof implementation
+or automatic continuation is authorized. This final checkpoint preserves the
+small in-progress census edit and required assignment/scope handoff files only.
+The successor integrates the final committed head recorded in the off-Git
+retirement metadata; this worker does not take scope from the survivor.
+
+The expanded inspector now retains all constants, original kinds, normalized
+private names, optional declaration line ranges, predicate-valued result tags
+and available non-theorem bodies. A bounded three-module smoke check passed in
+8.420 s, producing 31 records; normalization confirms ExecutionTrace.Safe and
+FailurePaths.Emits are predicate-valued definitions with bodies, not proof evidence.
+The expanded version has NOT had a full census rerun or performance gate. Its
+changed template rejects old pins. Preserve the earlier generated source/pins/logs
+and 190-module/3111-record report as historical evidence from commit9a0c1b2bd;
+never relabel it as output of this expansion. Private source-name mapping, UTF-8
+positions and flattened parent edges remain incomplete. More body output may
+increase runtime/storage; no full expanded-resource measurement is claimed.
+
+Mandatory authenticated handoff files are tracked in
+`tests/h62/item2/audit-bytecode-selection/handoff/`:
+original-rendered-prompt.txt (complete visible original message from this thread,
+including owner table), original-work-backfill-queue.md (verbatim extraction),
+scope-manifest.json (all227 frozen mapped source paths/hashes, original scopes
+and H82 changes), coordinator-updates.txt (all subsequent task instructions,
+including retirement), remaining-queue.json (every open checkpoint/backfill/wait),
+and PROVENANCE.md. Their actual file digests travel in the final SHA256SUMS.
+The transcript-copy digest differs from the historical launcher-prompt digest;
+no get_goal or original prompt file was exposed to verify unavailable launcher
+payload bytes. This provenance limit is explicit, with the complete visible
+assignment retained rather than summarized away. Coordinator-local paths are
+not assumed accessible to the successor.
+
+H82 withdraws any exact-file permission wait for statement-preserving edits.
+Owner attribution gaps remain report data. The real waits are the P6/V11 checked
+ByteWorld producer/code provenance and the existing legacy V1 owner repair
+proposal. Neither is a blanket blocker to the successor's independent queue.
+All four original checkpoints, remaining scanner/fidelity/witness work, supported
+families, charged/fork acceptance and final full/performance gates remain partial;
+remaining-queue.json is the comprehensive checklist. No new theorem, original
+statement/definition/interface, proof budget, axiom set or exclusion was changed
+in this retirement step. H68 bridges and H78 shims were not touched; intentional
+contradictions remain distinct from positive witnesses.
+
+No push is performed: H71's text/authorization is absent from available inputs,
+while the original explicit no-push instruction remains in force. The cumulative
+patch and branch bundle, source/evidence archive, original inputs, review records
+and checksum manifests are exported off Git; no master push or Claude-owned source
+edit/message occurs.
+
+The requested PAUSED transition cannot be executed with exposed tools: the sole
+goal mutation accepts only complete|blocked, with no pause/get/update endpoint.
+No invalid completion/block transition, reset or new goal is used as a substitute.
+The human's explicit retirement governs: this worker stops after the final saved
+head acknowledgement and will not automatically resume this assignment.
