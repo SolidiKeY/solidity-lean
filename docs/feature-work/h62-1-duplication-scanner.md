@@ -219,3 +219,73 @@ The current scanner acceptance suite passed 20 tests and the pinned audit
 index suite passed 2. These are external tests, not kernel proofs. Live owner
 verification, full declaration accounting, intrinsic signature resolution,
 remaining backfill and final repository gates remain pending.
+
+## Isolated elaborated-signature fixture
+
+The additive test-only `SignatureFingerprint.lean` serializes elaborated
+`ConstantInfo.type` structures. It preserves fully structured names, constant
+universe arguments, level constructors, de Bruijn indices, binder kinds,
+applications, literals, let flags and projections; it renames binder display
+names and maps declared universe names by parameter position. Free or
+metavariables, loose bound variables, undeclared or duplicate universe
+parameters, universe metavariables and expression metadata are refused. Its
+`#h62_signature` command labels records `environment_binding: unbound`:
+module names and Lean versions do not bind source bytes, imported artifacts or
+the dependency closure. The scanner does not consume these records or treat
+them as resolved candidates. Equal serialized types alone do not establish
+body equality, safe extraction or permission to edit.
+
+The isolated fixture checks six elaborated declaration comparisons, thirteen
+synthetic expression comparisons, seven refusals, six refusal reasons and
+universe arity. The theorem fixtures themselves use `rfl`; guarded
+`#print axioms` controls verify that all ten depend on no axioms. These
+kernel-checked small fixture theorems and axiom observations are distinct from
+the encoder's `run_cmd` comparisons and Python record checks, which are
+tooling acceptance rather than proofs that serialization is injective. A
+separate importing consumer emits five fixed records; its pinned 4 KiB
+expectation and checker refuse eight mutations and two malformed-JSON cases.
+A guarded missing-name control verifies resolver refusal. The fixture check is
+not authentication of arbitrary records or the imported environment.
+
+Reproduce with Lean 4.24.0 available on PATH:
+
+```sh
+bash scripts/h62/item1/duplication-scanner/check_signature_fixture.sh /absolute/evidence/directory
+```
+
+It locks the checkout, verifies the toolchain, uses serial Lean `-j1`, checks
+visible cgroup and host headroom before each invocation, refuses unsupported
+nested cgroups and swap, and bounds virtual memory without systemd. Its
+headroom checks are snapshots; other allocations or hidden ancestor limits
+are not continuously observed. The run at
+`/workspace/h62-duplication-scanner-evidence/signature-fixture/h62-signature.1dbDUt4w`
+passed build, consumer, missing-name and axiom controls and has a SHA256
+manifest. The first Lean attempt failed on a reserved identifier; its
+diagnostic is retained in `signature-first.log` and the identifier was fixed.
+No full repository gate or RUNTIME_GATE_PASS is claimed.
+
+Independent read-only finder and skeptic reviews identified missing refusal
+and structural controls, insufficient fixture-output checking and a
+host-only memory guard. The current controls pin the complete fixture records,
+check malformed and fabricated records, and the runner checks visible cgroup
+headroom. Both reviewers rechecked those changes without using Lean.
+
+Proposed registration fragment for coordinator review, if these test-only
+helpers are later placed in an owner-approved area; no registration is applied:
+
+| Module or fixture | Purpose |
+|---|---|
+| `SignatureFingerprint.lean` | Conservative elaborated-type serialization and isolated controls |
+| `SignatureConsumer.lean` | Imported-command fixture |
+| `SignatureMissing.lean` | Guarded missing-name refusal |
+| `SignatureAxioms.lean` | Axiom checks for ten isolated fixture theorems |
+
+The historical whole-tree scanner reports predate these four added Lean test
+files. Current-head scanning, actual environment binding, scanner
+integration, full declaration accounting, live ownership, backfill and final
+repository gates remain pending.
+
+A staged whitespace check initially rejected a trailing blank line in the
+axiom fixture. The line was removed and the guarded fixture was rerun against
+the final bytes. The subsequent staged whitespace and proof-shortcut checks
+passed. The repository doc-path check exited 0 with 115 ambiguous references.
