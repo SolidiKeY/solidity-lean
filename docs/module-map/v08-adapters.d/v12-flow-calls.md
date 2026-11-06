@@ -28,6 +28,7 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object alias negatives. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean` | Frozen recursive-return source-coherence duty for the allocating family, all compatible callers/arguments/return binders and quotation indices. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherenceControls.lean` | Actual outer calls at indices two/four with private allocation and preserved caller scalar; zero-index exhaustion distinguished from bare revert. |
-
-| `Solidity.Backend.InternalFlow.RuntimeFrameV3OuterScalarRestore` | Same-reference outer scalar restore preserving the live result and reached heap. |
-| `Solidity.Backend.InternalFlow.RuntimeFrameV3OuterAllocatingCall` | Executed allocating scalar call with actual exported caller representation and ordered result/control observations. |
+| `Backend/InternalFlow/RuntimeFrameV3OuterScalarRestore.lean` | Same-reference outer scalar restore preserving the live result and reached heap. |
+| `Backend/InternalFlow/RuntimeFrameV3OuterAllocatingCall.lean` | Executed allocating scalar call with actual exported caller representation and ordered result/control observations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamily.lean` | Fixed-image actual outer return over all capacity-admitted counts and sufficient source indices, with exported caller representation and allocator ownership. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamilyControls.lean` | Inhabited zero/one-allocation families, complete ordered observation vectors and wrong scalar/halt controls. |
