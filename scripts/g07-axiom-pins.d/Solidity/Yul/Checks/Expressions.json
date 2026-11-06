@@ -1,0 +1,18 @@
+{
+ "Solidity/Yul/Checks/Expressions.lean:Solidity.Yul.ArgsD.result_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Expressions.lean:Solidity.Yul.ArgsD.terms_result_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Expressions.lean:Solidity.Yul.ExprD.result_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Expressions.lean:Solidity.Yul.ExprD.term_result_unique": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,67 @@
+{
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.actual_body_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.actual_child_layout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.actual_declaration_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.body_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.declaration_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.full_budget_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.old_children_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.root_offsets": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.source_declarations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.strict_refusals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.wrong_parent_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean:Solidity.Backend.MemoryCopies.BudgetedFiniteControls.zero_budget_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
