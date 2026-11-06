@@ -480,3 +480,19 @@ Commands, timing and differential logs are outside Git in
 `/workspace/h62-duplication-scanner-evidence/postmerge-timing/`. The earlier
 repository documentation-path gate remains failed on the five unrelated
 published-tree references recorded above.
+
+### Post-merge deterministic replay
+
+A repeat of the committed selector against the same caller-pinned prior report
+and current tree exited 0 in 105.414 seconds. It was byte-identical to the
+97.746-second report, SHA256
+`fb7e40a93e687b7a0865908d85cde9bf1c490be53430dc098ada7760806bdf9b`.
+Both selected 6,932 files and recognized 118,563 declarations, with no errors
+or unmatched patterns; all recognized owners remain unknown. The input delta
+versus the older caller-pinned report is 271 added, 22 changed and none
+removed. The scanner identity also changed, so candidate-group deltas include
+possible normalization and selection changes and cannot be attributed solely
+to source edits. The prior pin identifies bytes, not an authenticated scan.
+Independent finder and skeptic reviewed the evidence without Lean; these two
+runs establish byte repeatability only. Full outputs and timing records are in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`.
