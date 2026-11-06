@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-6-20261106",
+  "slug": "migrate-examples",
+  "branch": "codex/solidity-h62-6-20261106/migrate-examples",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "integrated_master": "ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6",
+  "state": "active assignment; reviewed old-inventory checkpoint; full migration incomplete",
+  "supersedes": [
+    "tests/h62/item6/migrate-examples/handoff/OPEN-QUEUE-AND-WAITS.json retirement state",
+    "tests/h62/item6/migrate-examples/handoff/CONTINUATION-STATE.json prior incremental-build wait"
+  ],
+  "original_assignment": "tests/h62/item6/migrate-examples/handoff/ORIGINAL-THREAD-ASSIGNMENT.txt",
+  "original_work_and_backfill_queue": "tests/h62/item6/migrate-examples/handoff/ORIGINAL-WORK-BACKFILL-QUEUES.txt",
+  "exact_scope": "tests/h62/item6/migrate-examples/handoff/EXACT-SCOPE-MANIFEST.json",
+  "checkpoint_statuses": [
+    {
+      "name": "1: census/API compatibility and clean old baseline",
+      "status": "partial",
+      "done": [
+        "354 source census,1075 unchanged closure files",
+        "old complete ModuleData kernel+compiler name occurrences with structural kernel types"
+      ],
+      "open": [
+        "completed clean old wall/RSS baseline",
+        "authoritative export visibility and compiler-extra signature provenance"
+      ]
+    },
+    {
+      "name": "2: official4.35 migration",
+      "status": "partial",
+      "done": [
+        "official archive/binary provenance",
+        "both versions KeySort and native encoder controls pass"
+      ],
+      "open": [
+        "accepted external Syntax.Raw prerequisite",
+        "adapt/build all assigned modules preserving statements/semantics/budgets"
+      ]
+    },
+    {
+      "name": "3: new builds and matched timings",
+      "status": "partial",
+      "done": [],
+      "open": [
+        "complete new directory build",
+        "clean before/after timing pair under identical configuration/cache preparation/resources",
+        "escalate any valid regression; STOP above10percent"
+      ]
+    },
+    {
+      "name": "4: complete compatibility and root-gate handoff",
+      "status": "partial",
+      "done": [
+        "reviewed old inventory and scoped export tooling"
+      ],
+      "open": [
+        "complete new generated-public API inventory/comparison and producer shims",
+        "meaning/definition-value/axiom checks",
+        "final ./run-lean.sh and complete root-gate handoff"
+      ]
+    }
+  ],
+  "backfill": {
+    "source_scanner_and_dependency_census": "done",
+    "negative_controls": "25 Python controls and sealed native provenance negatives pass",
+    "isolated_fixture_proofs": "previous API fixture pass both versions; no general Solidity theorem claim",
+    "reproduction_and_timing_tools": "reviewed; old timing baseline remains unfinished",
+    "additional_solidity_witness_cases": "not implemented; no padding or unclaimed-scope takeover"
+  },
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "DEP-SYNTAX-RAW-435: accepted String/Slice and dependent-pattern compatibility prerequisite missing. Solidity/Syntax/Raw.lean unchanged SHA2567c137f7e8e4c70f4868dc41a437687ab42e2d63e887cdde3ba3ccd1ea764b76f is in assigned closure. Existing committed testsuite owner report records4.35 errors597,650,665,682,684; not reexecuted here.",
+      "source": "docs/feature-work/h62-6-migrate-testsuite.md; tests/h62/item6/migrate-testsuite/resumed-checkpoint.json"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78 compiler-extra signature/export visibility and new public/generated parity remain unresolved; all occurrences retained, no exclusions or implemented shims."
+    }
+  ],
+  "independent_next_items": [
+    "Complete clean old baseline with unchanged bounds; first use a pinned-base owned fixture worktree or exact original354-target configuration. Current master SolidityExamples root includes additional unassigned DecisionResidue; existing measure.sh root target requires this scope check before reuse.",
+    "prepare/validate new-stage collector and comparison when accepted migration prerequisites arrive",
+    "within-scope original witness/case coverage if justified; no scope expansion"
+  ],
+  "implemented_shims": [],
+  "shim_records": [],
+  "new_axiom_declarations": 0,
+  "new_sorry": 0,
+  "frozen_statements_touched": [],
+  "goal_created_reset_or_completed": false,
+  "goal_inspect_resume_tool_exposed": false,
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "fresh_thread_reason": "three reviewed checkpoint items: complete old ModuleData inventory, sealed native controls, portable manifested handoff",
+  "tooling_dependencies": [
+    {
+      "owner": "solidity-h62-6-20261106/migrate-testsuite",
+      "repository_path": "scripts/h62/item6/migrate-testsuite/expr_dag.py",
+      "access": "read-only",
+      "integrated_commit": "ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6"
+    },
+    {
+      "owner": "solidity-h62-6-20261106/migrate-testsuite",
+      "repository_path": "scripts/h62/item6/migrate-testsuite/dag_codec.py",
+      "access": "read-only",
+      "integrated_commit": "ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6"
+    }
+  ]
+}
