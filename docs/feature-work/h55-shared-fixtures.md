@@ -85,3 +85,16 @@ checks or independent finder and skeptic reviews.
 H70: V08 world-lowering and V10 storage-operations accepted the owner ticket
 relays. Review of the unapplied extract-failure packet is still requested from
 those owners; no original-file transfer follows from the relay.
+
+## Uint syntax owner proposal
+
+`uint_syntax_packet.py` emits an unapplied exact-base proposal for 22 identical
+private `uintSyntax` definitions in lowering StorageOps, plus a proposed new
+same-area helper. It retains each local name and declared type by delegating
+its body to the helper; public definitions and non-identical variants are not
+included. The generator enumerates the entire baseline directory, verifies
+current file bytes and requires exactly 22 textual matches. The proposed helper
+and every consumer require owner approval and exact file transfers. The packet
+has passed only `git apply --check`; no Lean check, full case acceptance,
+performance comparison, registration or independent review has occurred.
+It is a proposal for a subset, not completion of the family.
