@@ -231,6 +231,27 @@ theorem halt_kept_wrong (σ : State C []) :
   intro h
   cases h
 
+/-! ## Dead local stores -/
+
+def y : Val C G2 .uint := .simple (.local (.there .here))
+
+/-- `a = 1; a = b + 2;` becomes `a = b + 2;`. -/
+def deadStore (e₁ e₂ : Val C G2 .uint) : Prog C G2 G2 :=
+  .cons (.assignLocal .here e₁) (.cons (.assignLocal .here e₂) .nil)
+
+theorem dead_store_removed :
+    Prog.dse (deadStore (lit 1) (add y (lit 2))) = .cons (.assignLocal .here (add y (lit 2))) .nil :=
+  rfl
+
+/-- `a = 1; a = a + 2;` is kept: the second right side reads `a`. -/
+theorem self_read_kept :
+    Prog.dse (deadStore (lit 1) (add (.simple (.local .here)) (lit 2))) =
+      deadStore (lit 1) (add (.simple (.local .here)) (lit 2)) := rfl
+
+/-- `a = max + 1; a = 3;` is kept: the first store reverts. -/
+theorem failing_store_kept :
+    Prog.dse (deadStore (add maxU (lit 1)) (lit 3)) = deadStore (add maxU (lit 1)) (lit 3) := rfl
+
 /-! ## Unused-variable elimination -/
 
 /-- `{ uint y = 5; require(1 > 0); }`: `y` is unused and dropped. -/
@@ -290,6 +311,7 @@ theorem o02_pipeline_preserves (Γ Γ' : Ctx) :
 #print axioms Prog.uve_runC
 #print axioms Prog.dce_runC
 #print axioms cut_scope
+#print axioms Prog.dse_runC
 #print axioms blockDecl_runC
 #print axioms unused_dropped
 

@@ -129,7 +129,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MachineSarPins.lean` | `#guard_msgs` axiom guards for the MachineSar results. |
 | `Optimizer/CSE.lean` | O03 common-subexpression elimination: typed syntactic equality on pure values (`Val.pbeq_eq`), available-expression invariant; `ConstFold.Prog.cse_empty_runC`. |
 | `Optimizer/ConstFold.lean` | O02 constant folding on the typed `Val`; failing operations kept; `Val.cfold_evalT` (equal result in every state). |
-| `Optimizer/DeadCode.lean` | O02 dead code after a halting statement in every scope (`Prog.cut`, `cut_scope`); `ConstFold.Prog.dce_runC`. |
+| `Optimizer/DeadCode.lean` | O02 dead code after halting statements (`Prog.cut`, `cut_scope`, `Prog.dce_runC`) and dead local stores (`Prog.dse_runC`). |
 | `Optimizer/Inline.lean` | O03 inlining of void internal calls with value arguments (`inlineBlock_runC` via `Prog.run_wk`); `ConstFold.Prog.inl_runC`. |
 | `Optimizer/Pipeline.lean` | Certified O02/O03 pipeline (`round`, `Prog.optimize n`): inline, propagate, simplify, fold, CSE, unused-variable elimination; `Prog.optimize_runC`. |
 | `Optimizer/Propagate.lean` | O02 constant and copy propagation with a fact invariant on locals; `Prog.cprop_empty_runC`. |

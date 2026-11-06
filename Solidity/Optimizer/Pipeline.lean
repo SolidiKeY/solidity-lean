@@ -10,7 +10,7 @@ import Solidity.Optimizer.DeadCode
 
 One round inlines covered internal calls, propagates constants and copies,
 simplifies and folds expressions (removing dead branches), removes code after a
-halting statement in every scope, eliminates common subexpressions and unused
+halting statement in every scope and dead local stores, eliminates common subexpressions and unused
 declarations, in that order (`round`); `Prog.optimize n`
 runs `n` rounds. Each stage is a proved pass of the O01 interface
 (`Preserves SameRun`), so the pipeline is one by `Preserves.pipeline`
@@ -24,8 +24,8 @@ variable {C : Contract}
 
 /-- The stages of one round, in order. -/
 def stages (Γ Γ' : Ctx) : List (Lowering.Pass C Γ Γ') :=
-  [Prog.inl, Prog.cprop Facts.empty, Prog.simplify, Prog.cfold, Prog.dce, Prog.cse [],
-    Prog.uve]
+  [Prog.inl, Prog.cprop Facts.empty, Prog.simplify, Prog.cfold, Prog.dce, Prog.dse,
+    Prog.cse [], Prog.uve]
 
 /-- One optimizer round. -/
 def round (Γ Γ' : Ctx) : Lowering.Pass C Γ Γ' := Pass.pipeline (stages Γ Γ')
@@ -35,12 +35,13 @@ theorem round_preserves (Γ Γ' : Ctx) :
   Preserves.pipeline (Related := SameRun) (fun _ => rfl)
     (fun a b => show SameRun _ _ from Eq.trans a b) _ fun pass mem => by
     simp only [stages, List.mem_cons, List.not_mem_nil, or_false] at mem
-    rcases mem with rfl | rfl | rfl | rfl | rfl | rfl | rfl
+    rcases mem with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
     · exact inl_preserves Γ Γ'
     · exact cprop_preserves Γ Γ'
     · exact vopt_preserves simpFoldPass Γ Γ'
     · exact cfold_preserves Γ Γ'
     · exact dce_preserves Γ Γ'
+    · exact dse_preserves Γ Γ'
     · exact cse_preserves Γ Γ'
     · exact uve_preserves Γ Γ'
 

@@ -1,4 +1,6 @@
 import Solidity.Optimizer.StmtFold
+import Solidity.Optimizer.CSE
+import Solidity.Optimizer.UnusedVar
 
 /-!
 # O02 dead-code elimination after a halting statement
@@ -14,6 +16,11 @@ ended. The halt itself (revert or Panic) is kept.
 `Prog.dce` cuts every scope of a program; `Prog.dce_runC` is equality of the
 typed run. A top-level sequence is not cut (its output context is the
 program's type).
+
+Dead local stores: `x = e₁; x = e₂;` becomes `x = e₂;` when `e₁` is a simple
+value (it cannot fail, so dropping it hides no halt) and `e₂` does not read `x`
+(`Val.indep`), in every sequence (`Prog.dse`, `Prog.dse_runC`). Storage and
+memory stores are not touched (they wait for X06's aliasing facts).
 -/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
@@ -238,5 +245,270 @@ end
 theorem dce_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.dce : Lowering.Pass C Γ Γ') :=
   fun P => (Prog.dce_runC P).symm
+
+/-! ## Dead local stores -/
+
+theorem tenv_set_set {H : HTy} : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → (v w : t.TDenote C H) →
+    (e : TEnv C H Γ) → TEnv.set i w (TEnv.set i v e) = TEnv.set i w e
+  | _, _, .here, _, _, _ => rfl
+  | _, _, .there i, v, w, e => congrArg (Prod.mk e.1) (tenv_set_set i v w e.2)
+
+/-- A local assignment's target and value. -/
+def stmtAssign? {Γ Γ₁ : Ctx} : Stmt C Γ Γ₁ → Option ((q : PrimTy) × Idx Γ (.val q) × Val C Γ q)
+  | .assignLocal j e => some ⟨_, j, e⟩
+  | .assign .. | .rebind .. | .declLocal .. | .declStorage .. | .opAssign .. | .incDec ..
+  | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop .. | .transfer .. | .send ..
+  | .declMem .. | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete .. | .deleteMem ..
+  | .assignNew .. | .ite .. | .require .. | .assert .. | .revert | .assumeFalse | .call ..
+  | .tryCall .. | .loop .. | .block .. | .pushOpAssign .. | .pushIncDec .. | .callReceiver ..
+  | .callReceiverPush .. | .callRec .. | .revertData .. | .catchData .. => none
+
+/-- The first local assignment of a sequence. -/
+def headAssign? {Γ : Ctx} : {Δ : Ctx} → Prog C Γ Δ →
+    Option ((q : PrimTy) × Idx Γ (.val q) × Val C Γ q)
+  | _, .nil => none
+  | _, .cons s _ => stmtAssign? s
+
+/-- `x = e₁;` before a sequence: dropped when the sequence starts with `x = e₂;`,
+`e₁` cannot fail and `e₂` does not read `x`. -/
+def dseCons : {Γ Γ₁ Δ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Δ → Prog C Γ Δ
+  | _, _, _, .assignLocal (p := p) i e₁, P =>
+    match headAssign? P with
+    | some ⟨q, j, e₂⟩ =>
+      if Val.isSimple e₁ && j.toNat == i.toNat && Val.indep i.toNat e₂ then P
+      else .cons (.assignLocal i e₁) P
+    | none => .cons (.assignLocal i e₁) P
+  | _, _, _, s@(.assign ..), P => .cons s P
+  | _, _, _, s@(.rebind ..), P => .cons s P
+  | _, _, _, s@(.declLocal ..), P => .cons s P
+  | _, _, _, s@(.declStorage ..), P => .cons s P
+  | _, _, _, s@(.opAssign ..), P => .cons s P
+  | _, _, _, s@(.incDec ..), P => .cons s P
+  | _, _, _, s@(.assignIncDec ..), P => .cons s P
+  | _, _, _, s@(.assignLocalPush ..), P => .cons s P
+  | _, _, _, s@(.push ..), P => .cons s P
+  | _, _, _, s@(.pop ..), P => .cons s P
+  | _, _, _, s@(.transfer ..), P => .cons s P
+  | _, _, _, s@(.send ..), P => .cons s P
+  | _, _, _, s@(.declMem ..), P => .cons s P
+  | _, _, _, s@(.rebindMem ..), P => .cons s P
+  | _, _, _, s@(.assignFromMem ..), P => .cons s P
+  | _, _, _, s@(.assignMem ..), P => .cons s P
+  | _, _, _, s@(.delete ..), P => .cons s P
+  | _, _, _, s@(.deleteMem ..), P => .cons s P
+  | _, _, _, s@(.assignNew ..), P => .cons s P
+  | _, _, _, s@(.ite ..), P => .cons s P
+  | _, _, _, s@(.require ..), P => .cons s P
+  | _, _, _, s@(.assert ..), P => .cons s P
+  | _, _, _, s@(.revert), P => .cons s P
+  | _, _, _, s@(.assumeFalse), P => .cons s P
+  | _, _, _, s@(.call ..), P => .cons s P
+  | _, _, _, s@(.tryCall ..), P => .cons s P
+  | _, _, _, s@(.loop ..), P => .cons s P
+  | _, _, _, s@(.block ..), P => .cons s P
+  | _, _, _, s@(.pushOpAssign ..), P => .cons s P
+  | _, _, _, s@(.pushIncDec ..), P => .cons s P
+  | _, _, _, s@(.callReceiver ..), P => .cons s P
+  | _, _, _, s@(.callReceiverPush ..), P => .cons s P
+  | _, _, _, s@(.callRec ..), P => .cons s P
+  | _, _, _, s@(.revertData ..), P => .cons s P
+  | _, _, _, s@(.catchData ..), P => .cons s P
+
+theorem headAssign?_eq {Γ Δ : Ctx} {P : Prog C Γ Δ} {q : PrimTy} {j : Idx Γ (.val q)}
+    {e : Val C Γ q} (h : headAssign? P = some ⟨q, j, e⟩) :
+    ∃ Q : Prog C Γ Δ, P = .cons (.assignLocal j e) Q := by
+  cases P with
+  | nil => simp only [headAssign?, reduceCtorEq] at h
+  | cons s Q =>
+    cases s with
+    | assignLocal j' e' =>
+      simp only [headAssign?, stmtAssign?, Option.some.injEq, Sigma.mk.injEq] at h
+      obtain ⟨rfl, h2⟩ := h
+      simp only [heq_eq_eq, Prod.mk.injEq] at h2
+      obtain ⟨rfl, rfl⟩ := h2
+      exact ⟨Q, rfl⟩
+    | assign | rebind | declLocal | declStorage | opAssign | incDec | assignIncDec
+    | assignLocalPush | push | pop | transfer | send | declMem | rebindMem | assignFromMem
+    | assignMem | delete | deleteMem | assignNew | ite | require | assert | revert
+    | assumeFalse | call | tryCall | loop | block | pushOpAssign | pushIncDec | callReceiver
+    | callReceiverPush | callRec | revertData | catchData =>
+      simp only [headAssign?, stmtAssign?, reduceCtorEq] at h
+
+theorem dseCons_runC : {Γ Γ₁ Δ : Ctx} → (s : Stmt C Γ Γ₁) → (P : Prog C Γ₁ Δ) →
+    Prog.runC (dseCons s P) = Prog.runC (.cons s P)
+  | _, _, _, .assignLocal (p := p) i e₁, P => by
+    simp only [dseCons]
+    split
+    · next q j e₂ hh =>
+      split
+      · next hc =>
+        simp only [Bool.and_eq_true, beq_iff_eq] at hc
+        obtain ⟨⟨hs, hji⟩, hind⟩ := hc
+        obtain ⟨eq, hj⟩ := Idx.eq_of_toNat i j hji
+        cases eq
+        subst j
+        obtain ⟨Q, rfl⟩ := headAssign?_eq hh
+        funext σ
+        cases e₁ with
+        | simple t =>
+          simp only [Prog.runC, TRun.seq, Stmt.runC, TRun.assignLocal, Val.evalT, bind,
+            Except.bind, pure, Except.pure]
+          rw [Val.evalT_setLocal_indep σ i _ e₂ hind]
+          cases e₂.evalT σ with
+          | error err => rfl
+          | ok w =>
+            show Except.map _ (Prog.runC Q ((σ.setLocal i w))) =
+              Except.map _ (Except.map _ (Prog.runC Q ((σ.setLocal i (t.evalT σ)).setLocal i w)))
+            show Except.map _ (Prog.runC Q (σ.withEnv (TEnv.set i w σ.env))) =
+              Except.map _ (Except.map _
+                (Prog.runC Q (σ.withEnv (TEnv.set i w (TEnv.set i (t.evalT σ) σ.env)))))
+            rw [tenv_set_set]
+            cases Prog.runC Q (σ.withEnv (TEnv.set i w σ.env)) <;> rfl
+        | read | binop | unop | ternary | readMem | len | mlen | modular | hash =>
+          simp only [Val.isSimple, Bool.false_eq_true] at hs
+      · rfl
+    · rfl
+  | _, _, _, .assign .., _
+  | _, _, _, .rebind .., _
+  | _, _, _, .declLocal .., _
+  | _, _, _, .declStorage .., _
+  | _, _, _, .opAssign .., _
+  | _, _, _, .incDec .., _
+  | _, _, _, .assignIncDec .., _
+  | _, _, _, .assignLocalPush .., _
+  | _, _, _, .push .., _
+  | _, _, _, .pop .., _
+  | _, _, _, .transfer .., _
+  | _, _, _, .send .., _
+  | _, _, _, .declMem .., _
+  | _, _, _, .rebindMem .., _
+  | _, _, _, .assignFromMem .., _
+  | _, _, _, .assignMem .., _
+  | _, _, _, .delete .., _
+  | _, _, _, .deleteMem .., _
+  | _, _, _, .assignNew .., _
+  | _, _, _, .ite .., _
+  | _, _, _, .require .., _
+  | _, _, _, .assert .., _
+  | _, _, _, .revert, _
+  | _, _, _, .assumeFalse, _
+  | _, _, _, .call .., _
+  | _, _, _, .tryCall .., _
+  | _, _, _, .loop .., _
+  | _, _, _, .block .., _
+  | _, _, _, .pushOpAssign .., _
+  | _, _, _, .pushIncDec .., _
+  | _, _, _, .callReceiver .., _
+  | _, _, _, .callReceiverPush .., _
+  | _, _, _, .callRec .., _
+  | _, _, _, .revertData .., _
+  | _, _, _, .catchData .., _ => rfl
+
+mutual
+/-- Dead local stores removed in every sequence of a statement. -/
+def Stmt.dse : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
+  | _, _, .ite c thn els => .ite c (Prog.dse thn) (Prog.dse els)
+  | _, _, .block body => .block (Prog.dse body)
+  | _, _, .loop a c body => .loop a c (Prog.dse body)
+  | _, _, s@(.assign ..) => s
+  | _, _, s@(.rebind ..) => s
+  | _, _, s@(.assignLocal ..) => s
+  | _, _, s@(.declLocal ..) => s
+  | _, _, s@(.declStorage ..) => s
+  | _, _, s@(.opAssign ..) => s
+  | _, _, s@(.incDec ..) => s
+  | _, _, s@(.assignIncDec ..) => s
+  | _, _, s@(.assignLocalPush ..) => s
+  | _, _, s@(.push ..) => s
+  | _, _, s@(.pop ..) => s
+  | _, _, s@(.transfer ..) => s
+  | _, _, s@(.send ..) => s
+  | _, _, s@(.declMem ..) => s
+  | _, _, s@(.rebindMem ..) => s
+  | _, _, s@(.assignFromMem ..) => s
+  | _, _, s@(.assignMem ..) => s
+  | _, _, s@(.delete ..) => s
+  | _, _, s@(.deleteMem ..) => s
+  | _, _, s@(.assignNew ..) => s
+  | _, _, s@(.require ..) => s
+  | _, _, s@(.assert ..) => s
+  | _, _, s@(.revert) => s
+  | _, _, s@(.assumeFalse) => s
+  | _, _, s@(.call ..) => s
+  | _, _, s@(.tryCall ..) => s
+  | _, _, s@(.pushOpAssign ..) => s
+  | _, _, s@(.pushIncDec ..) => s
+  | _, _, s@(.callReceiver ..) => s
+  | _, _, s@(.callReceiverPush ..) => s
+  | _, _, s@(.callRec ..) => s
+  | _, _, s@(.revertData ..) => s
+  | _, _, s@(.catchData ..) => s
+
+/-- Dead local stores removed in a sequence. -/
+def Prog.dse : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
+  | _, _, .nil => .nil
+  | _, _, .cons s P => dseCons (Stmt.dse s) (Prog.dse P)
+end
+
+mutual
+theorem Stmt.dse_runC : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runC (Stmt.dse s) = Stmt.runC s
+  | _, _, .ite c thn els => by
+    simp only [Stmt.dse, Stmt.runC]
+    rw [Prog.dse_runC thn, Prog.dse_runC els]
+    exact TRun.ite_congr (fun _ => rfl) _ _ _ _ _ _
+  | _, _, .block body => by
+    simp only [Stmt.dse, Stmt.runC]
+    rw [Prog.dse_runC body]
+    exact TRun.block_congr _ _ _
+  | _, _, .loop a c body => by
+    simp only [Stmt.dse, Stmt.runC]
+    rw [Prog.dse_runC body]
+    exact TRun.loop_congr (fun _ => rfl) _ _ _
+  | _, _, .assign ..
+  | _, _, .rebind ..
+  | _, _, .assignLocal ..
+  | _, _, .declLocal ..
+  | _, _, .declStorage ..
+  | _, _, .opAssign ..
+  | _, _, .incDec ..
+  | _, _, .assignIncDec ..
+  | _, _, .assignLocalPush ..
+  | _, _, .push ..
+  | _, _, .pop ..
+  | _, _, .transfer ..
+  | _, _, .send ..
+  | _, _, .declMem ..
+  | _, _, .rebindMem ..
+  | _, _, .assignFromMem ..
+  | _, _, .assignMem ..
+  | _, _, .delete ..
+  | _, _, .deleteMem ..
+  | _, _, .assignNew ..
+  | _, _, .require ..
+  | _, _, .assert ..
+  | _, _, .revert
+  | _, _, .assumeFalse
+  | _, _, .call ..
+  | _, _, .tryCall ..
+  | _, _, .pushOpAssign ..
+  | _, _, .pushIncDec ..
+  | _, _, .callReceiver ..
+  | _, _, .callReceiverPush ..
+  | _, _, .callRec ..
+  | _, _, .revertData ..
+  | _, _, .catchData .. => rfl
+
+theorem Prog.dse_runC : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.runC (Prog.dse P) = Prog.runC P
+  | _, _, .nil => rfl
+  | _, _, .cons s P => by
+    simp only [Prog.dse]
+    rw [dseCons_runC]
+    simp only [Prog.runC]
+    rw [Stmt.dse_runC s, Prog.dse_runC P]
+end
+
+theorem dse_preserves (Γ Γ' : Ctx) :
+    Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.dse : Lowering.Pass C Γ Γ') :=
+  fun P => (Prog.dse_runC P).symm
 
 end Solidity.Optimizer.ConstFold

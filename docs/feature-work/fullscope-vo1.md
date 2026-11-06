@@ -1188,3 +1188,9 @@ there; no evaluation reordering; pipeline premise-free). Doc drift fixed: StmtFo
 header (locations of `assign/delete/push/pop`, receivers of compound assignments and
 `pushIncDec` left as written), stale location sentences in this document, `KeepsLocals`
 wording.
+
+Dead local stores (`DeadCode.lean`): `x = e₁; x = e₂;` → `x = e₂;` when `e₁` is simple
+(cannot fail) and `e₂` does not read `x`; `dseCons_runC`, `ConstFold.Prog.dse_runC` (no
+premise), `dse_preserves`; a stage of `round` after `Prog.dce`. Controls:
+`dead_store_removed`, `self_read_kept`, `failing_store_kept`. Storage/memory dead stores
+stay with X06.
