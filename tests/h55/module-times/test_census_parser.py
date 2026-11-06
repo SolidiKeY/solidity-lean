@@ -51,6 +51,8 @@ class CensusParser(unittest.TestCase):
         self.assertTrue(parser.coverage(inventory, good, 124))
         self.assertTrue(parser.coverage(inventory + inventory, good, 0))
         self.assertTrue(parser.coverage([], good, 0))
+        apostrophe = "Loom.DoNames" + chr(39)
+        self.assertEqual([], parser.coverage([{"module": apostrophe, "path": "Bridge/vendor/Loom/DoNames" + chr(39) + ".lean"}], parser.parse("✔ [1/1] Built " + apostrophe + " (1s)"), 0))
         self.assertTrue(parser.coverage([{"module": "Solidity.A", "path": "../A.lean"}], good, 0))
         self.assertTrue(parser.coverage([{"module": "A..B", "path": "A.lean"}], good, 0))
 

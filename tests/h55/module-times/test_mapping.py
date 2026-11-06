@@ -14,8 +14,9 @@ class Mapping(unittest.TestCase):
             ("Solidity/Examples/Foo.lean", "root", "Solidity.Examples.Foo"),
             ("Bridge/SolidityBridge/Foo.lean", "bridge", "SolidityBridge.Foo"),
             ("Bridge/vendor/Loom/Foo.lean", "bridge-vendor", "Loom.Foo"),
-            ("tests/X.lean", None, None),
-            ("Bridge/tests/X.lean", None, None),
+            ("Bridge/vendor/Loom/DoNames'.lean", "bridge-vendor", "Loom.DoNames'"),
+            ("tests/X.lean", "standalone-root-review", None),
+            ("Bridge/tests/X.lean", "standalone-bridge-review", None),
             ("Solidity/invalid-name.lean", "root", None),
         ]:
             with self.subTest(path=path):

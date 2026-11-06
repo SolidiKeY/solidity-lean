@@ -62,7 +62,7 @@ def coverage(inventory, parsed, exit_code):
     if not isinstance(inventory, list) or not inventory:
         return ["empty or invalid module inventory"]
     if any(not isinstance(row, dict) or not isinstance(row.get("module"), str)
-           or not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*", row["module"])
+           or not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9\x27]*(?:\.[A-Za-z_][A-Za-z_0-9\x27]*)*", row["module"])
            or not isinstance(row.get("path"), str) or not row["path"].endswith(".lean")
            or row["path"].startswith("/") or "\\" in row["path"]
            or any(part in ("", ".", "..") for part in row["path"].split("/")) for row in inventory):

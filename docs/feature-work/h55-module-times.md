@@ -115,3 +115,15 @@ rejects traversal or malformed module/path mappings. Regression controls and
 the full 11-method synthetic suite pass. This local check is not a substitute
 for either required independent review. The parser remains a log consumer,
 not authenticated proof that any measurement occurred.
+
+## H70 census reconciliation
+
+The previous 270 rows now receive candidate dispositions: 269 standalone
+file-check candidates (nine Bridge and 260 root-context candidates), plus the
+Bridge vendor DoNames module with an apostrophe in its name. Apostrophes are
+accepted in candidate module names and the log parser. These are classification
+results, not established execution recipes or exclusions. Standalone tests and
+scripts may depend on custom fixtures, special contexts or intentionally
+failing behavior; their expected outcomes, imports and scope still require
+owner review. All 7,166 paths remain in the inventory, and no duplicate names
+were observed within a candidate context.

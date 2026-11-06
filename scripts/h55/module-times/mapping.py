@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[3]
 spec = importlib.util.spec_from_file_location("h55_census", ROOT / "scripts/h55/module-times/census.py")
 census = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(census)
-IDENT = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
+IDENT = re.compile(r"^[A-Za-z_][A-Za-z_0-9\x27]*$")
 ROOT_MODULES = {"Solidity.lean", "SolidityExamples.lean", "SolidityCorpus.lean",
                 "SolkeyTestSuite.lean", "SolkeyCheck.lean", "SolidityLean.lean",
                 "SolCases.lean", "TrustAudit.lean"}
@@ -31,6 +31,8 @@ def candidate(row):
         context, relative = "root-vendor", path[len("vendor/LeanTeX/"):]
         # srcDir is vendor/LeanTeX, verify any candidate against actual lake config.
     else:
+        result["context"] = "standalone-bridge-review" if path.startswith("Bridge/tests/") else "standalone-root-review"
+        result["resolution"] = "file-check-review"
         return result
     parts = relative[:-5].split("/")
     result["context"] = context
