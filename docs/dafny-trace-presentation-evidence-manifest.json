@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "940922ba9efe8512a5fc7b5e76b39280c7c4a9aa",
+  "obligations": [
+    "submenus:dafny.context",
+    "behavior:verification-trace"
+  ],
+  "status": "partial",
+  "archive": {
+    "path": "/workspace/dafny-parity-trace-presentation-20261106/evidence.tar.gz",
+    "bytes": 16917070,
+    "sha256": "31d5773d1857ecb105a295211bdf8a41f205762dca65536ea1c998e31a76663a"
+  },
+  "files": 880,
+  "members": [
+    "REVIEWS.md",
+    "COMPARISON.md",
+    "before-observer-gap.json"
+  ],
+  "boundary": "Native pinned presentation/lifecycle; original model-close timeout and theme-continuity failure retained. No local positioned producer or complete row."
+}
