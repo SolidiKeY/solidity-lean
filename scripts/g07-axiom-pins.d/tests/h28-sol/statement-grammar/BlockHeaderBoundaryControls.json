@@ -1,0 +1,24 @@
+{
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_actual_attribute_fragment_layout_checked": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_actual_call_options_consumed": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_all_simple_alternatives_checked": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_all_statement_constructor_inventory": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_all_statement_constructors_checked": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_arbitrary_depth_prec": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_arbitrary_width_postLoop": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_both_item_forms_checked": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_colon_suffix_nonident_stop": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_empty_block_closing_brace": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_invalid_revert_contract": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_literal_payload_is_atomic": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_named_pair_negative": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_repeat_all": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_repeat_prec": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_repeat_yield": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean:Solidity.Frontend.StatementGrammarH28.header_zero_fuel_rejected": []
+}

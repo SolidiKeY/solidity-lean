@@ -1,0 +1,77 @@
+{
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.captured_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.false_not_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.falseSource": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.falseTarget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.no": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.nontrivial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.same_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.true_not_fallthrough": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.Controls.yes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.iter_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForReturnAxioms.lean:Solidity.Lowering.G19.AssignmentForReturn.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

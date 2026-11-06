@@ -1,0 +1,32 @@
+{
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.Account.wide_balance": [],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.CallFrame.rollback_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.apply_balanceFits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.endTx_balancesFit": [],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.transfer_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.transferNat_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.undo_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.ExecState.undoN_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.savedWide_current_fit": [],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.savedWide_undo_not_fit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.World.set_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryWorld.lean:Solidity.Source.World.wordView_exact": [
+  "propext"
+ ]
+}

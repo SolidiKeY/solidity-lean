@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/V07/SignedComplement.lean:Solidity.Lowering.V07.SignedComplement.local_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedComplement.lean:Solidity.Lowering.V07.SignedComplement.minus_one_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedComplement.lean:Solidity.Lowering.V07.SignedComplement.source_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedComplement.lean:Solidity.Lowering.V07.SignedComplement.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedComplement.lean:Solidity.Lowering.V07.SignedComplement.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

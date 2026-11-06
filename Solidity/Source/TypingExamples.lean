@@ -304,8 +304,8 @@ def w_declTuple : StmtD (k := .body) Γ Γ.locals
 
 /-- **A hole refuses an empty component** (review fix, lane FU2-B):
 `(, uint a) = (g(), 1)` with `g` returning nothing fits no slots. -/
-theorem slotsFit_hole_empty (B : DeclName → DeclName → Bool) :
-    slotsFit B [Option.none, Option.some (.int IntTy.u256)] [.tuple [], .int IntTy.u256] = false := rfl
+theorem slotsFit_hole_empty (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    slotsFit B M [Option.none, Option.some (.int IntTy.u256)] [.tuple [], .int IntTy.u256] = false := rfl
 
 /-- **Every statement constructor is classified.** -/
 theorem stmtCoverage_total {k : SCtx} (s : Syn (.stmt k)) : (stmtCoverage s.ctor).isSome = true := by

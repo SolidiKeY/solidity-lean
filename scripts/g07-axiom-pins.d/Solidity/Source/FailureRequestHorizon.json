@@ -1,0 +1,12 @@
+{
+ "Solidity/Source/FailureRequestHorizon.lean:Solidity.Source.FailureExecution.requestScope_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizon.lean:Solidity.Source.FailureExecution.requestScope_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

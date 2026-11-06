@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/MemoryCopies/BudgetedDefault.lean:Solidity.Backend.MemoryCopies.budget_default_guard_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefault.lean:Solidity.Backend.MemoryCopies.budgeted_default_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefault.lean:Solidity.Backend.MemoryCopies.budgeted_default_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefault.lean:Solidity.Backend.MemoryCopies.budgeted_default_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefault.lean:Solidity.Backend.MemoryCopies.budgetedDefault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefault.lean:Solidity.Backend.MemoryCopies.physical_default_live_spans": [
+  "Quot.sound",
+  "propext"
+ ]
+}

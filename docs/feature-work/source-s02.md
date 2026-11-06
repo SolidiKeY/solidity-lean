@@ -453,8 +453,10 @@ These items are also listed under `limitations:`.
   decoder's types, `calldata` slices and inline arrays of one-word elements:
   lane FU2-B).
 - **Nested arrays.** `uint[][]` keeps the inner location in S01's type
-  elaboration, so storage-to-memory conversion of nested arrays is not
-  typable, and the copy helpers move inner element types with `withLoc`.
+  elaboration and the copy helpers move inner element types with
+  `withLoc`. Storage-to-memory and calldata-to-memory conversion of nested
+  arrays was not typable until `STy.implicit` compared elements at the
+  target's location (user decision 2026-11-06, G18.05).
 - **Allocation order of struct constructors.** Legacy and via-IR differ
   here, but addresses are unobservable, so this is not modelled.
 - **Literal evaluation order inside `abi.encode*`.** Fixed at left to

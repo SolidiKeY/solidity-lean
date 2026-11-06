@@ -1,0 +1,84 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.actual_cursor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.actual_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.actual_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.heterogeneous_cost": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.heterogeneous_pointers_payloads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.heterogeneous_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.later_refusal_has_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.repeated_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.repeated_freshness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.saturated_empty_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.saturated_first_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.suffix_prefix_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.wrong_first_child": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.wrong_retained_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.wrong_total_cursor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.zero_outer_reservation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
