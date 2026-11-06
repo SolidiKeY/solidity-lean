@@ -298,3 +298,26 @@ No production shims have been installed or accepted. Source/Ctor's earlier proof
 proposal stays unapplied and is not a substitute for H78 public API compatibility.
 Other generated public signatures across199 modules remain to reconcile after
 owner overlays, permission and STOP resolution. Goal remains incomplete.
+
+
+## H82 retirement handoff
+
+This worker is stopped by the explicit human H82 retirement instruction. Handoff
+to solidity-h62-6-20261106/migrate-root-gate; the original goal remains incomplete.
+The goal interface exposes only complete/blocked, not PAUSED, so coordinator must
+apply the authorized pause. No implementation or Lean/timing check was resumed.
+The later generic standing-guidance continuation does not explicitly unpause this lane.
+
+The complete original assignment transcription, full original work/backfill queue,
+exact199-file scope hashes and all open obligations are saved under
+tests/h62/item6/migrate-source/retirement. Bulk receipts and signatures stay off git
+in /workspace/h62-migrate-source-evidence/retirement. The cumulative authenticated
+patch/bundle handoff is /workspace/h62-migrate-source-artifacts/retirement.
+Historical rendered-prompt byte serialization is unavailable; the transcription
+is hashed independently and is not claimed to match its historical coordinator hash.
+
+H82 withdraws MS-OWNER-CTOR as a proof-only exact-file permission wait. Its patch
+remains unapplied because of retirement. Definition/interface/axiom/budget/exclusion
+changes retain owner requirements; frozen changes need H57 versioned pairs.
+H78 generated public API freeze and all performance/trust holds remain.
+No H71 push authorization was delivered, so no branch push was attempted.
