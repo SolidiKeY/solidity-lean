@@ -57,5 +57,13 @@
   "goal": "Original launcher-created goal,unfinished; ID/get_goal not exposed; no new/reset goal",
   "push_policy": "No H71 lane push permission provided. Original no-push instruction retained; no push performed.",
   "original_case_inventory": "../census-manifest.json; full raw census in off-git authenticated prior-evidence archive",
-  "complete_coordinator_inputs": "Portable external handoff archive contains verified decisions/audit/finishing-report/ownership/pin/sha256 files; coordinator-local paths are provenance only"
+  "complete_coordinator_inputs": "Portable external handoff archive contains verified decisions/audit/finishing-report/ownership/pin/sha256 files; coordinator-local paths are provenance only",
+  "retirement": {
+    "confirmed": true,
+    "handoff_to": "solidity-compiler10-20261028/memory-reference-structs",
+    "broadcasts_cannot_resume": true,
+    "implementation": "STOP; no proof implementation",
+    "goal_pause": "Worker has no PAUSED method; coordinator pauses existing goal after final head report and idle turn",
+    "new_goal": false
+  }
 }
