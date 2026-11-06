@@ -403,7 +403,7 @@ def main():
         candidate_categories=dict(collections.Counter(r['classification'] for r in candidate_rows)),
         new_checked_witnesses=0,elaborated_telescope_claim=False)
     result = dict(base=BASE,
-        h70_wait_plan=dict(contacts=['solidity-h62-6-20261106/'+lane for lane in ['migrate-backend','migrate-hash','migrate-source','migrate-syntax']],
+        h70_wait_plan=dict(contacts=['solidity-h62-6-20261106/'+lane for lane in ['migrate-backend','migrate-hash','migrate-sortcheck','migrate-source','migrate-syntax']],
             boundary='Plan-wide requester routing only; not per-row dependency edges, live ownership or edit permission; relay.sh is host-only'),
         structure_field_scope='Direct source fields only; inherited/generated projections are not elaborated or expanded',
         h70_boundary='source census only; routed owners do not grant edits',

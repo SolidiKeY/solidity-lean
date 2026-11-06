@@ -1,4 +1,4 @@
-# H62 item 2 audit-roadmap — H70 source-census handoff
+# H62 item 2 audit-roadmap — H70 result-family handoff
 
 Batch `solidity-h62-2-20261106`, worker `audit-roadmap`.
 Repository `/workspace/audit-roadmap`, branch
@@ -78,8 +78,9 @@ and theorem text returned as String are not kernel semantic proofs.
 Global versus per-input roles derived from source-type patterns are explicitly
 provisional. All input worlds still need simultaneous checked evidence.
 
-The ledger deliberately retains 226 dependent/inferred-result classifications
-and 20 aliases requiring semantic expansion. Those are unresolved obligations,
+The initial H70 ledger retained 226 dependent/inferred-result classifications
+and 20 aliases requiring semantic expansion. The followup below adds source-family
+evidence for all 246 while preserving exact-type and kernel obligations. Those are unresolved obligations,
 not proof-free exclusions. All other source categories likewise add zero proof
 coverage. H69's three intentional contradiction controls and 44 outer-world
 refutation obligations remain as previously recorded.
@@ -98,6 +99,74 @@ H70 source-level work is reviewable; all four original checkpoints and full
 validation remain unfinished. Waits and owner tickets remain typed. No source
 classification is a substitute for the frozen statement's checked joint witness
 or an H69 checked impossibility proof.
+
+## H70 owner followup and result-family review
+
+The followup to head `63d6ef9f5a50b93a1e2666bfc3c295c4514e2a88` is preserved in
+`tests/h62/item2/audit-roadmap/h70-owner-followup.txt`. All five migration
+recipients are now explicitly routed, including migrate-sortcheck for Parser.
+“Current-owner pending: none” is recorded as requester routing status; it does
+not transfer original proving ownership or file-edit authority.
+
+Partial Hash and Raw overlay metadata is recorded in
+`tests/h62/item2/audit-roadmap/owner-partial-overlays.json`, including owner heads,
+reported source revisions, host receipt paths and reported patch/source hashes.
+Host receipt bytes were not available locally for hash verification.
+**Neither overlay is applied or trust-accepted.** Hash full affected gates remain
+pending. Raw additionally reports 30 axiom-growth entries requiring root review;
+no trust acceptance or lifting of holds follows. No owner file was edited and no
+Lean job was run during this source-only followup. Ctor, Creation/Linking,
+CollisionBound, Raw and Parser remain typed owner waits.
+
+The latest source refinement artifacts are:
+
+- `/workspace/audit-roadmap-evidence/h70-semantic/semantic-results.json`;
+- `/workspace/audit-roadmap-evidence/h70-semantic/semantic-summary.md`;
+- `/workspace/audit-roadmap-evidence/h70-semantic-reproduction/semantic-results.json`.
+
+All 246 prior pending result/alias records now have source-directed family
+reviews: 20 exact one-line alias RHS expansions, four inferred private naming
+string definitions, and 222 declared result-family entries. The output retains
+all 1,000 original source records and adds no exclusions. Frozen source references
+and excerpts carry file/excerpt hashes; all 20 RHS values must match their
+authored expected expansions. Unsupported/unreviewed result heads, namespace
+cases, fold codomains or alias layouts fail closed rather than invent a type.
+
+Fifteen namespace-sensitive heads receive explicit source-identity reviews.
+Roadmap.Word is not unified with Scalar.Word or Evm.Word: the latter includes a
+symbolic Slot constructor alongside Fin-valued words. Source and intrinsic State,
+Heap and Program families remain distinct. Seven concrete Fold maps record their
+V/F/L/W/M codomains: printing/list/encoding data, proof-indexed rename results or
+Expr syntax, rather than calling every Fold proof-free. Twenty aliases retain
+their exact RHS, including primitive ranges, resource-indexed observations,
+history-dependent functions, dependent state fixtures and Gen/RM monads.
+
+Bounds and proof fields remain explicit: Site.pcFits, SVal/Source array bounds,
+PrimTy denotation subtypes, dependent heap structure and transitive Glob.Fixed
+constraints. Generic Gen alpha, RM alpha and primitive denotation parameters are
+not instantiated away. Ten external EVM state definitions remain unexpanded.
+The count of seven alpha/beta/p.Denote matches is explicitly a **nonexhaustive
+syntactic marker count**, not a count of all dependent payloads.
+
+These classifications establish neither kernel type equality nor semantic
+correctness, law satisfaction, runtime success or a joint premise witness.
+The source tool derives 17/334 as historical input-snapshot references and
+explicitly does not refresh checked status. The separate hash-bound audit gate
+remains responsible for current validation. Proof coverage is unchanged.
+
+Combined parser/refinement acceptance now has 26 passing tests. Controls check
+wrong alias RHS, unsupported multiline aliases, ambiguous family heads, unknown
+results, opaque external state, generic payload markers and required namespace/
+Fold reviews. Source and semantic outputs reproduce byte-for-byte. Independent
+finder/skeptic reviews found no false mapping; their historical-count and marker
+label concerns were fixed, and direct TRes/concrete Fold source evidence added.
+No reviewer ran Lean/server, edited files or released owner holds.
+
+The source-alias, result-family, concrete-fold and namespace-review subitems are
+committed as a bounded handoff. Continue on this same VM, branch and original
+goal; do not launch/reset a replacement. Full proof, semantic closure, source
+fidelity and acceptance obligations remain unfinished while owner gates/holds
+are pending.
 
 ## H69 criterion resolution
 

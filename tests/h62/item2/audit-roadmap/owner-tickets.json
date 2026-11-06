@@ -18,7 +18,9 @@
     "evidence": "Pinned official v4.35.0: line76 String.trim absent; exit1; actual taclet comparison not executed.",
     "log": "/workspace/audit-roadmap-evidence/lean-pinned/Solidity_SortCheck_Parser.lean.log",
     "request": "Owner supplies compatible isolated migration overlay preserving exact frozen interfaces. No file edits authorized here.",
-    "status": "blocked"
+    "status": "blocked",
+    "migration_recipient": "solidity-h62-6-20261106/migrate-sortcheck",
+    "routing_evidence": "H70 followup explicitly relayed to migrate-sortcheck; no pending recipient. Original proving ownership and file permissions unchanged."
   },
   {
     "id": "DEP-HASH-01",
@@ -30,7 +32,8 @@
     "request": "Owner supplies compatible isolated migration overlay preserving exact frozen statements/proof budgets. No file edits authorized here.",
     "status": "blocked",
     "migration_recipient": "solidity-h62-6-20261106/migrate-hash",
-    "routing_evidence": "H70 requester disposition; host coordinator routes; does not transfer live ownership or authorize edits"
+    "routing_evidence": "H70 requester disposition; host coordinator routes; does not transfer live ownership or authorize edits",
+    "partial_owner_overlay": "Received H70 metadata and diff; see owner-partial-overlays.json; not applied, full gates pending."
   },
   {
     "id": "DEP-RAW-01",
@@ -42,7 +45,8 @@
     "request": "Compatible owner-approved overlay preserving frozen interfaces; no original edits in audit scope.",
     "status": "blocked",
     "migration_recipient": "solidity-h62-6-20261106/migrate-syntax",
-    "routing_evidence": "H70 requester disposition; host coordinator routes; does not transfer live ownership or authorize edits"
+    "routing_evidence": "H70 requester disposition; host coordinator routes; does not transfer live ownership or authorize edits",
+    "partial_owner_overlay": "Received H70 metadata and diff; see owner-partial-overlays.json; not applied, full gates pending."
   },
   {
     "id": "DEP-LINKING-01",
