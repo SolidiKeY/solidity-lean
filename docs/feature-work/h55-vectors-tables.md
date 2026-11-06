@@ -254,3 +254,51 @@ and owner-retained table migrations await their owner handoffs. No H71 lane-push
 permission was available; the original no-push rule remains in force.
 
 The isolated oracle compile cache pack is `/workspace/scratch/h55-vectors-tables/oracle-lean-objects.tar.gz` with SHA-256 `1be228d4e98c915bdc7628d5f5d3ccd1078fd0564da16fd7a82e4369f4b3a9bf`. The worker exposed no goal-pause API; its only goal tool accepts complete or blocked. PAUSED could not be set here. No goal was reset or marked complete.
+
+## H82b successor intake (2026-11-06)
+
+The surviving VY1 branch verified all 557 entries in the authenticated H82b
+metadata package, including the full assignment, current words scope and final
+stop/pause record. This resolves the metadata-only retirement wait above.
+Final Git object `f6860dea3e12122b8dd3567dbf1d5e1e095321d9` was fetched
+and merged after the P16-generator final head. No worker evidence archive or
+oracle cache was present; their reported hashes are not independently verified.
+
+The inherited 25-test suite first failed on the live tree: frozen Raw checks
+expect 102 files, while master has 103, and pinned FixtureData differs.
+That failed log is retained at
+`/workspace/vy1-words-evidence/h82b-inherited-python-checks.log`.
+The same current tooling/tests then passed all 25 checks against an isolated
+Git snapshot of their exact base
+`4d3790eadb8a5212233bc7d5e345817476b2f590`, without modifying production
+inputs or reducing assertions. Snapshot evidence is
+`/workspace/vy1-words-evidence/h82b-frozen-python-tests.log`.
+This validates frozen-source reproduction and negative controls, not current
+semantic Raw coverage, production parametrisation or migrated FixtureControls.
+
+Both final member deltas are confined to the authenticated words scope; no
+production Lean source changed in these merges. Semantic case accounting,
+meaningful Lean preservation, substantive table migration, independent full
+acceptance and same-resource before/after timings remain incomplete.
+The previous failed v4.35 prerequisite build was not rerun unchanged.
+
+## Reproducible frozen-input validation runner
+
+`python3 -B scripts/h55/vectors-tables/validate_frozen.py --report REPORT`
+runs current tooling and its complete discovered Python suite against an isolated
+snapshot of the authenticated frozen Git base. REPORT must be a new path outside
+the checkout. The runner records the source archive hash, actual tooling head
+and per-file tooling hashes, exits with the suite result, removes its disposable
+snapshot and never edits production inputs. Git environment overrides are
+cleared, and symlinked tooling inputs are refused. This is deliberately not a
+live-tree coverage check, a Lean gate or a migration acceptance claim.
+
+The first read-only skeptic review found that directory-root symlinks were
+not covered by descendant checks. The runner now rejects every tooling-area
+path component before Git access. Two focused isolation tests cover root,
+parent and descendant symlinks and require refusal before a Git call. Both
+reviewers passed the fix read-only. The complete frozen suite, now 27 tests,
+passed twice with identical JSON reports and verified snapshot cleanup.
+Existing-report and in-checkout report destinations were refused without
+overwriting or creating those files. Logs are under
+`/workspace/vy1-words-evidence/h55-frozen-runner-*`.
