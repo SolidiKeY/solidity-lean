@@ -33,7 +33,8 @@ function parse(args) {
   for(const key of ['workers','targets','cache'])if(new Set(options[key]).size!==options[key].length)throw new Error('Duplicate '+key);
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
-  if(!['full','benchmark','visual'].includes(options.suite))throw new Error('Invalid suite');
+  if(!['full','benchmark','visual','commands'].includes(options.suite))throw new Error('Invalid suite');
+  if(options.suite==='commands'&&(options.targets.length!==1||options.targets[0]!=='local'))throw new Error('Concrete command suite requires --targets local; no Dafny command equivalence is claimed');
   for(const key of ['memoryReserveMiB','memoryMaxMiB'])if(options[key]!==undefined&&(!Number.isSafeInteger(options[key])||options[key]<1))throw new Error('Invalid '+key);
   return options;
 }
@@ -97,7 +98,11 @@ async function launch(config,options) {
   // Capture before VS Code's test runner closes the window. The host writes a
   // completion marker then waits briefly for this observer's acknowledgement.
   const seenPhases=new Set();let phaseTask,phaseBusy=false;
+  let keybindingTask,keybindingStarted=false;
   const renderTimer=setInterval(()=>{
+    if(options.suite==='commands'&&!keybindingStarted&&existsSync(join(config.dir,'keybinding-request.json'))){
+      keybindingStarted=true;keybindingTask=(async()=>{let client;try{const request=JSON.parse(readFileSync(join(config.dir,'keybinding-request.json'),'utf8'));if(request.runId!==config.runId)throw Error('Foreign keybinding request');client=await renderer.connect(debugPort);const observation=await renderer.buildKeybinding(client);writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,requestId:request.requestId,observation}));}catch(error){writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,error:error.message}));}finally{client?.close();}})();
+    }
     if(options.suite==='visual'&&!phaseBusy){
       phaseBusy=true;
       phaseTask=servePhases(config.dir,config.runId,async directory=>{
@@ -138,6 +143,7 @@ async function launch(config,options) {
   await new Promise(resolvePromise=>{child.on('error',e=>{error=e.message;resolvePromise();});child.on('close',code=>{exitCode=code;resolvePromise();});});
   clearTimeout(timer);clearInterval(renderTimer);clearInterval(resourceTimer);
   if(phaseTask)await phaseTask;
+  if(keybindingTask)await keybindingTask;
   if(probeTask)await probeTask;
   if(deadlineTask)await deadlineTask;
   if(captureTask)await captureTask;
