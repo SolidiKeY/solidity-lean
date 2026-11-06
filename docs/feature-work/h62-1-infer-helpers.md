@@ -323,3 +323,17 @@ existing12GiB/no-swap cap and4GiB reserve. Execution records are outside Git at
 shared-agreement-files/1.log. Read-only finder and skeptic reviews passed.
 This establishes helper correspondence, not complete inferencer equivalence,
 production migration,4.35overlay acceptance or full affected validation.
+
+### Existing consumer compatibility
+
+SharedConsumers.lean now transports the shared observations into the actual
+static delete, elementary-conversion and payable-conversion completeness
+consumers. It retains the context-refusal flag, inferred-operand membership,
+nonpayable-element restriction and exact conversion/payable conditions.
+No production body or existing theorem statement is changed. All three new
+lemmas pass the updated per-file gate on masterf160e517f in1.064s and print
+only propext/Classical.choice/Quot.sound. Read-only finder and skeptic reviews
+passed. Logs remain off Git at shared-consumers-check.json and
+shared-consumers-files/1.log under /workspace/sol-numeric-literals-gate-output.
+This is premise transport for three existing consumers, not full inference
+equivalence, compiler totality, production migration or a speed comparison.
