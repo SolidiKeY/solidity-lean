@@ -2346,6 +2346,8 @@ import Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget
 import Solidity.Evm.MemoryLoopHorizonObjectBodyScope
 import Solidity.Evm.MemoryLoopHorizonObjectCapacity
 import Solidity.Evm.MemoryLoopHorizonObjectCapacityControls
+import Solidity.Evm.MemoryLoopHorizonObjectCheckedNested
+import Solidity.Evm.MemoryLoopHorizonObjectCheckedReads
 import Solidity.Evm.MemoryLoopHorizonObjectCompile
 import Solidity.Evm.MemoryLoopHorizonObjectCompileAllocating
 import Solidity.Evm.MemoryLoopHorizonObjectCompletedAllocator
@@ -2359,6 +2361,16 @@ import Solidity.Evm.MemoryLoopHorizonObjectHeapGrowth
 import Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps
 import Solidity.Evm.MemoryLoopHorizonObjectHeapTypes
 import Solidity.Evm.MemoryLoopHorizonObjectLiveCells
+import Solidity.Evm.MemoryLoopHorizonObjectLocalAlias
+import Solidity.Evm.MemoryLoopHorizonObjectLocalAliasControls
+import Solidity.Evm.MemoryLoopHorizonObjectLocalBounds
+import Solidity.Evm.MemoryLoopHorizonObjectLocalLoadControls
+import Solidity.Evm.MemoryLoopHorizonObjectLocalLoads
+import Solidity.Evm.MemoryLoopHorizonObjectLocalReads
+import Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads
+import Solidity.Evm.MemoryLoopHorizonObjectNestedBounds
+import Solidity.Evm.MemoryLoopHorizonObjectNestedControls
+import Solidity.Evm.MemoryLoopHorizonObjectNestedLoads
 import Solidity.Evm.MemoryLoopHorizonObjectNewArrays
 import Solidity.Evm.MemoryLoopHorizonObjectNewInventory
 import Solidity.Evm.MemoryLoopHorizonObjectNewSeparation
@@ -2372,6 +2384,7 @@ import Solidity.Evm.MemoryLoopHorizonObjectPendingAllocator
 import Solidity.Evm.MemoryLoopHorizonObjectPrefix
 import Solidity.Evm.MemoryLoopHorizonObjectResume
 import Solidity.Evm.MemoryLoopHorizonObjectRetainedNew
+import Solidity.Evm.MemoryLoopHorizonObjectRetainedRefs
 import Solidity.Evm.MemoryLoopHorizonObjectRuns
 import Solidity.Evm.MemoryLoopHorizonObjectScope
 import Solidity.Evm.MemoryLoopHorizonObjectScopeControls
