@@ -1,0 +1,247 @@
+{
+  "added_helpers": 8,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "original_declarations": 32,
+  "original_inventory": [
+    {
+      "kind": "def",
+      "name": "u",
+      "private": true,
+      "statement_sha256": "6d3954aa84754b36f290f8f6a93f46f279b869f8937742d93499a893c5cce1ab",
+      "unchanged_body": true
+    },
+    {
+      "kind": "def",
+      "name": "spill",
+      "private": true,
+      "statement_sha256": "59c1b95b00af7f69b611549a803955044fc3edb3fcb8d76aef2534ed4272b4a5",
+      "unchanged_body": true
+    },
+    {
+      "kind": "def",
+      "name": "seed",
+      "private": true,
+      "statement_sha256": "ff25e543d7dd0f67f3e8a75f53d5c1200454d45122bc2256b5d98c3ca50da97d",
+      "unchanged_body": true
+    },
+    {
+      "kind": "def",
+      "name": "site",
+      "private": true,
+      "statement_sha256": "5095903b1f6ba2f4d324d763b18be4cc5378211d9d5133d579b301c77ec63acc",
+      "unchanged_body": true
+    },
+    {
+      "kind": "def",
+      "name": "input",
+      "private": true,
+      "statement_sha256": "c007c708a1ae28334a2009e8c4f7e03d379a30d445805c3abf8f3c8034af653a",
+      "unchanged_body": true
+    },
+    {
+      "kind": "def",
+      "name": "expected",
+      "private": true,
+      "statement_sha256": "7a9aa74a488af6558671776461c20fe7c30bd95df33e9800291f6af6750a0120",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "observed",
+      "private": true,
+      "statement_sha256": "50d66fda3843115b17788427a6714a7fe71329b30d792453870cfc017624212f",
+      "unchanged_body": false
+    },
+    {
+      "kind": "def",
+      "name": "payload",
+      "private": true,
+      "statement_sha256": "eb54e466b1e602496834a1da89bd5f460f16dec8ef2691032055e3c4afe2bf7b",
+      "unchanged_body": true
+    },
+    {
+      "kind": "def",
+      "name": "typed",
+      "private": true,
+      "statement_sha256": "fd851f1590c6e34b9f535ffce830d7775d768b4574e94e20e11b46d796e7ace1",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "first_byte",
+      "private": false,
+      "statement_sha256": "56a60a3661b96d54745ca805812ac03d6750c2b107ff4dd299bbe14da3e83983",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "second_byte",
+      "private": false,
+      "statement_sha256": "233289ad01b7266445849b4b57b3bf68469b9cd9641464ed17cd56a16b005e15",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "middle_zero",
+      "private": false,
+      "statement_sha256": "1a1a7cf7a393c6dae5e4ecb51b1bd0f97516970ed9639aa4ffb8f79a9cbd7420",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "penultimate_byte",
+      "private": false,
+      "statement_sha256": "bebc525339ff89aa779f262ed429af977cdabf0ea4336b0d1796299142ee6271",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "last_byte",
+      "private": false,
+      "statement_sha256": "2b31fedf36d5a9bc97b1e5efa9345d7e689913abb59e6012b90c650d46343b85",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "outside_word",
+      "private": false,
+      "statement_sha256": "ec93f95e9c6e34a65365c6cf2549f70e537eeddcfb299407bc7b5353984fdbcf",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "maximum_index",
+      "private": false,
+      "statement_sha256": "70f973b0fd8bb571ecd992a55743728a7f9cbb735efd1c17cb9bd643e4783102",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "zero_word",
+      "private": false,
+      "statement_sha256": "3353c3d4cd23d08ebdb0ae6a16563f33ad7b1821f82ca8c98217f3272007c93b",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "maximum_word",
+      "private": false,
+      "statement_sha256": "5d6413cef2acda5f58022a1d5e548246f9f158cd31b00e84305a2f397fc89f4f",
+      "unchanged_body": false
+    },
+    {
+      "kind": "theorem",
+      "name": "ordered_code",
+      "private": false,
+      "statement_sha256": "c5555132e3925253ed7b7532f6bdad83eedeb0bc2feba70350e9ef6af2095dd0",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "ordered_word_bytes",
+      "private": false,
+      "statement_sha256": "d18ceff0566495fe8fb8728322ee61504e5f38d755feca193bf68cbe79613e6a",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "wrong_endian",
+      "private": false,
+      "statement_sha256": "3e0653e10e4c126b590403e41ccc846d95650a3644679666cc99c6d39207209a",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "typed_image_client",
+      "private": false,
+      "statement_sha256": "1ab7f6e2ee3b4d646dc6a4fdb83d7a395b0aaee2bc4243380b163bfaff9c1eb2",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "stack_boundary",
+      "private": false,
+      "statement_sha256": "ea27f76b2d3fbd4b5143d9c7341f19b78732a68f6bff78d7d2da5f9929421790",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "gas_refusal",
+      "private": false,
+      "statement_sha256": "5e76fa9471972caf23d627599925456ad9285eb6a4129a2b92f2e545e1d07e09",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "fuel_precedes_gas",
+      "private": false,
+      "statement_sha256": "e5b27883e5b2c3273dfd0c64a41cb080a7687b4688d453096dc625c060470278",
+      "unchanged_body": true
+    },
+    {
+      "kind": "def",
+      "name": "short",
+      "private": true,
+      "statement_sha256": "577cccaa85239e3c854568ffdc35d91452428951af0fa47561f9cde015e9ce5f",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "gas_precedes_stack",
+      "private": false,
+      "statement_sha256": "69bea5530a1cffda4e189c63cfcabc8b776013dc1e19bc719a0153a6b9ae3c78",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "stack_refusal",
+      "private": false,
+      "statement_sha256": "f27d281b7096299436595eb7c2fc17af223d0fddcf30d325b3d28ce92f914032",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "overflow_tail",
+      "private": true,
+      "statement_sha256": "5aa9b6e984db68b148d17f351f0cf92073e69684276b02bc79dadfa77fbba47f",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "capacity_refusal",
+      "private": false,
+      "statement_sha256": "a62ad069645ce499df876fbc1f98e59898b68f9521f6db5ebd02414712088d65",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "image_index_requires_bound",
+      "private": false,
+      "statement_sha256": "756550abbe1de86743aab97a98675cf66495ab488f7f726443c3db20b86fd02d",
+      "unchanged_body": true
+    },
+    {
+      "kind": "theorem",
+      "name": "scalar_refusal_control",
+      "private": false,
+      "statement_sha256": "6053f224c2f68816f1db6521a272ad745dab431c59f36118cd82e632f50edb20",
+      "unchanged_body": true
+    }
+  ],
+  "original_source_sha256": "6972a0fa4ea0814ba40cb5de182b7a15b44240e050c678a36ca33470efb2c02a",
+  "positive_table_cases": {
+    "first_byte": "first",
+    "last_byte": "last",
+    "maximum_index": "maximumIndex",
+    "maximum_word": "maximumWord",
+    "middle_zero": "middle",
+    "outside_word": "outside",
+    "penultimate_byte": "penultimate",
+    "second_byte": "second",
+    "zero_word": "zero"
+  },
+  "proof_boundary": "Generic execution consumes byte_fetched; fixture byte algebra is kernel reflexivity;21EqProp/rfl checks compare complete public propositions; no original-control proof dependency in candidate.",
+  "proposed_source_sha256": "ae0f960bf933aca562e15eaeb90586d081ea90943e87752f38e0d6d1cf5e729b",
+  "public_original_propositions": 21,
+  "source": "Bridge/SolidityBridge/RoadmapV15/P10/ByteObservationControls.lean"
+}
