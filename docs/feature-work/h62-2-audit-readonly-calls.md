@@ -8,8 +8,7 @@ The separate compiler-success theorem is a pending deliverable of V13
 (`v12-v17/v13-abi-world`) for G42, with V15/P10 observation dependencies. It
 must prove success for that owner's compiler on the stated supported inputs;
 no frozen interface statement changes. The prior scope questions and Q-CALLBACK-INTENT are resolved; RO confirmed intentional no-callback specialization controls. H70 supplies the exact H69 rule: checked joint-impossibility proofs are the audit result for intentional negative controls/separation/refutations; ordinary interfaces still need joint witnesses. RO, V13 and V15 have accepted the ticket relays. Lean proof work remains on mandatory performance hold; independent offline audit backfill continues under H82.
-No frozen statement, hypothesis, exclusion, observation, proof budget,
-interface file or library root was edited.
+Worker edits preserve frozen hypotheses, exclusions, observations, budgets and axioms. Upstream readonly adoption removes three private helpers; all three remain explicitly counted and current frozen-tree fidelity fails, as recorded below.
 
 Assigned branch: `codex/solidity-h62-2-20261106/audit-readonly-calls`.
 Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
@@ -23,7 +22,7 @@ merge, PR, pre-gate, deployment, or replacement goal was performed.
 
 | Checkpoint | Result |
 |---|---|
-| 1. Frozen inventory and owners | Exact type/identity census complete: 129 files, 792 elaborated theorem types, all 33 private names resolved, owners retained. Semantic global-vs-input feasibility continues with the witness queue. |
+| 1. Frozen inventory and owners | Original-base type/identity census: 129 files, 792 elaborated theorem types, all 33 private names resolved, owners retained. Current upstream has three private removals; current kernel fidelity is pending. Semantic global-vs-input feasibility continues with the witness queue. |
 | 2. Simultaneous witnesses | Partial: 27 joint clients; 45 checked intentional impossibility results under H69; 256 statements with no top-level input hypotheses; two pending RO v2; 462 other entries pending. |
 | 3. Success/totality and negative controls | Partial, owner deliverable pending: Source success/failure/timeout and both-pipeline gas refusal checked; reject-all and nonempty target-revert controls checked. General compiler success and executable gas/fork adequacy remain unproved. |
 | 4. Fidelity census and uncovered owners | Partial: every named source declaration accounted exactly once, 32 explicit outcomes bound to signature hashes; all 792 bind to elaborated type hashes; remaining entries retain pending status and owners. Full all-witness acceptance and final integration gates have not passed. |
@@ -231,7 +230,7 @@ Current master was fetched and inspected; readonly source-history/world-call pro
 
 Final-head receipt reviews: independent read-only finder and skeptic found no issues. Both confirmed five satisfied pause acknowledgements, four locally matched final commits, missing proof-cleanup commit, no integrations or artifact-verification overclaim, and narrowed current waits. Neither used Lean or wrote files. Intake consistency, git diff check and full documentation path check passed (115 preexisting ambiguities, all references resolve).
 
-## H82b authenticated intake and scoped merges
+## H82b initial scoped merges — historical before upstream adoption
 
 The delivered package /workspace/h82-handoffs/h82b-20261106T180909Z matches the coordinator's archive, manifest and SHA256SUMS hashes; all 557 manifest entries verify. Original assignment payloads and the cleanup scope are authenticated by H82b, resolving prior metadata waits. Payload hashes are retained separately from historical rendered-envelope digests; no equality between those distinct representations is claimed. All five final head/report/pause records match.
 
@@ -240,3 +239,13 @@ Three eligible tool/doc/test member heads are now merged: duplication-scanner cb
 Readonly-bind 55bb870a494fa176f13103ad4e1f72cc6870c764 remains unmerged: it edits CapturePhases, CaptureFailures and EnvironmentCredit outside the delivered live-exclusive production scope, and deletes their three private run_bind declarations counted in the original frozen 792 census. Public-header preservation alone cannot erase those entries. Retain its final head pending an explicit scope and frozen-entry preservation/migration disposition; do not silently rebaseline to 789. No Claude-owned source edit or message was made.
 
 Independent scanner backfill fixed selected symlink identity/omission, passed 35 tests and a matched -8.997937% scanner pair with whole-report fidelity. The original Lean timing STOP remains failed and unchanged; no Lean or known-STOP benchmark was rerun. Own theorem accounting remains 792 = 27 joint + 45 intentional impossibility + 256 no-top-level-input + 2 RO v2 + 462 pending. No RUNTIME_GATE_PASS. Current intake ledger supersedes historical member waits above.
+
+## Current H82b state after upstream adoption
+
+Published master 5f14596531efea2be64f1a5e7a83afa5e151e865 already contained exact readonly-bind head 55bb870a494fa176f13103ad4e1f72cc6870c764. Following the coordinator instruction, rebase --rebase-merges origin/master completed cleanly. All four available original final member heads remain ancestors. No worker edit to Claude-owned production source was made; upstream adoption supersedes the earlier readonly-bind unmerged/scope wait. The pre-rebase checkpoint is retained at refs/h62-backups/pre-upstream-h82b and in exported history. Proof-cleanup final Git object is the only unresolved member integration object; its exact SHA fetch returned not our ref.
+
+The original 792 obligations are retained, including Solidity.Lowering.Readonly.CapturePhases.run_bind, Solidity.Lowering.Readonly.CaptureFailures.run_bind and Solidity.Lowering.Readonly.EnvironmentCredit.run_bind. fidelity_delta.py diagnoses 789 retained lexical headers and three absent upstream private helpers; all three remain pending with original signatures and owner. No 789-entry rebaseline, replacement theorem assumption or inferred kernel equivalence is accepted. Both the diagnostic and unchanged strict census exit 1; the strict gate reports FROZEN_DRIFT in CaptureFailures. Current kernel/type/import fidelity and checked mappings remain pending. Four mutation controls verify missing private retention, implicit-context drift, renamed declarations and duplicate identities.
+
+The scanner's final error-aware selector passes 40 tests. The last pre-rebase matched pair was 113.311471s to 107.120424s (-5.463742%); all report fields match except the scanner hash. Input hashes and membership are identical. These measurements do not cover the post-rebase corpus. Finder and skeptic confirmed the final selection fixes and fidelity diagnostic without Lean, benchmarks or writes; provenance is bound to current head/module/generator hashes in the export receipt. Three inherited shared-fixture ledger tests also pass.
+
+No Lean or known-STOP benchmark ran; the original +80.254967% Lean hold remains unresolved. Compiler success still belongs to V13 with V15/P10 fixed outcomes; RO v2 dispatch migration remains pending. Scanner signature/dependency binding and live ownership, H55 production work and full acceptance remain incomplete. No RUNTIME_GATE_PASS. This is a fresh-thread handoff after intake/integration and independent implementation checkpoints; continue the same VM/branch/goal through the coordinator, never create a replacement goal or count this checkpoint as full completion.

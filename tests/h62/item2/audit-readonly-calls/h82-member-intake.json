@@ -5,7 +5,7 @@
   "successor_acceptance": "Accepted on original VM/branch/goal; no retirement stop request issued. This local acceptance does not prove coordinator relay acceptance or member pause.",
   "namespace": "live",
   "master_push": false,
-  "integration_barrier": "H82b authenticated assignment/scope/head/pause metadata verified. Three eligible scoped heads merged. Proof-cleanup object unavailable; readonly-bind production scope and frozen-private-census conflict retained.",
+  "integration_barrier": "H82b metadata barrier resolved; four available final heads are ancestors. Proof-cleanup final Git object unavailable. Original strict frozen-tree gate fails after upstream readonly adoption; preserve all792 with3private removals pending mapping. No implementation work uses a guessed scope.",
   "members": [
     {
       "lane": "solidity-h28-terra-20261104/proof-cleanup",
@@ -74,7 +74,8 @@
       "turn_quiescence_verified": true,
       "metadata_wait_resolved": true,
       "merge_head": "c79929ce818bf1623a9236a4fb882f040e6a9e7c",
-      "pending_acceptance": "Inherited proof/signature and full acceptance obligations remain; integration is not validation."
+      "pending_acceptance": "Inherited proof/signature and full acceptance obligations remain; integration is not validation.",
+      "integration_ancestry_verified": true
     },
     {
       "lane": "solidity-h55-terra-20261106/shared-fixtures",
@@ -108,7 +109,8 @@
       "turn_quiescence_verified": true,
       "metadata_wait_resolved": true,
       "merge_head": "5b632b41b1e92cf88b5499f91572f21b3329eb61",
-      "pending_acceptance": "Inherited proof/signature and full acceptance obligations remain; integration is not validation."
+      "pending_acceptance": "Inherited proof/signature and full acceptance obligations remain; integration is not validation.",
+      "integration_ancestry_verified": true
     },
     {
       "lane": "solidity-h62-1-20261106/readonly-bind",
@@ -121,13 +123,9 @@
       "full_frozen_assignment_verified": true,
       "expected_assignment_sha256": "345c0b2c891faa42910ed21a9752f0a333d97f72e84bc43e5bd9be725a1642f7",
       "exact_scope_manifest_verified": true,
-      "merged": false,
+      "merged": true,
       "source_vm_manifest": "/workspace/scratch/h62-readonly-bind/SHA256SUMS",
       "source_vm_handoff": "/workspace/scratch/h62-readonly-bind/handoff.txt",
-      "wait": {
-        "lane": "coordinator/readonly-bind integration",
-        "item": "Final 55bb870a494fa176f13103ad4e1f72cc6870c764 edits three production paths outside live-exclusive scope and removes three frozen private run_bind entries. Resolve scope and explicit 792-entry preservation/migration before integration; keep head archived."
-      },
       "request": "Coordinator artifact transfer and original-thread prompt recovery required; source-VM paths are not local paths. Do not substitute a reconstruction or scope superset.",
       "previous_reported_head": "e4d55f75f45925f57599bbb480f8567da4b46f3b",
       "final_head_source": "Coordinator H82 final-head handoff receipt; goal paused-verified",
@@ -144,7 +142,10 @@
       "assignment_payload_sha256": "30b08c5d9e4b989ac70bf307fd6a01417cde5245ae8cbbd48bf40fe08f8f7d44",
       "assignment_verification_boundary": "Authenticated H82b original_assignment payload and scope accepted by coordinator as resolving frozen-assignment requests; no equality with historical rendered-envelope digest is asserted.",
       "turn_quiescence_verified": true,
-      "metadata_wait_resolved": true
+      "metadata_wait_resolved": true,
+      "integration_method": "Exact final head adopted via authorized rebase onto published master 5f14596531efea2be64f1a5e7a83afa5e151e865, which already contained it.",
+      "integration_ancestry_verified": true,
+      "frozen_accounting_status": "Three upstream-private run_bind removals remain explicit pending obligations in original792; current kernel mapping and frozen gate acceptance pending."
     },
     {
       "lane": "solidity-h62-1-20261106/duplication-scanner",
@@ -179,7 +180,8 @@
       "turn_quiescence_verified": true,
       "metadata_wait_resolved": true,
       "merge_head": "edeb37962359ebec29d22b99ccb544e3ea3d33c6",
-      "pending_acceptance": "Inherited proof/signature and full acceptance obligations remain; integration is not validation."
+      "pending_acceptance": "Inherited proof/signature and full acceptance obligations remain; integration is not validation.",
+      "integration_ancestry_verified": true
     }
   ]
 }
