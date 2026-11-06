@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "source": "Complete first user assignment message transcribed from original conversation; no filesystem original found. Later coordinator updates are separate in handoff.",
+  "transcription_sha256": "ea65216ca3ac347a938d4b1445c9662385abbc04f90ab278278b73ed3a48ece8",
+  "historical_goal_rendered_prompt_sha256": "71335b00c701811fd071a6d471ce30303066d242b9917095f67e1d7585292a83",
+  "rendered_goal_bytes_available": false,
+  "equality_with_goal_rendering_claimed": false
+}

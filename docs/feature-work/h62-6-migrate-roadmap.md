@@ -198,7 +198,7 @@ reviewable proposal is `/workspace/migrate-roadmap-evidence/evm-compatibility-pr
 It restores both legacy enum abbreviations and the exact termination-proof
 proposition. The abbreviations preserve the old compiler's reducible/protected
 status and deprecation target/date (`2025-08-25`), verified from official old
-`Lean/Meta/Constructions/CtorIdx.lean`. No existing Evm file has been edited;
+[Lean compiler CtorIdx source](/workspace/.setup/tools/lean-4.24.0-linux/src/lean/Lean/Meta/Constructions/CtorIdx.lean). No existing Evm file has been edited;
 absence of an owner reply is not permission to apply this proposal.
 
 The proposal's exact declarations are tested only in the additive fixture.
@@ -523,3 +523,32 @@ and outstanding gate boundary are saved in that directory's `HANDOFF.json`;
 checksums are `SHA256SUMS`. Root/coordinator may retrieve these locally. No push,
 merge, PR, external message, host-only relay installation, scope transfer or
 performance waiver is implied. The original goal remains unfinished.
+
+## H82 retirement handoff
+
+Human stop-and-handoff instruction ends this worker after its smallest metadata
+checkpoint. Successor is `solidity-h62-6-20261106/migrate-root-gate`. No new Lean
+run, proof, source, statement, guard, axiom, budget or toolchain edit. Original
+assignment, full queue, scope, prompt provenance and all open work are committed
+in `tests/h62/item6/migrate-roadmap/retirement/`. Production remains base-identical.
+H82 supersedes proof-only exact-file permission waits, but does not waive the
+performance STOP, frozen interfaces, empty Contracts guard, H78 compatibility or
+retirement. The later standing-rule reminders are preserved in the retirement
+record; no automatic implementation continuation is scheduled.
+
+Final cumulative patch/bundle, full committed head, evidence index, independent
+read-only reviews and checksum manifest are exported under
+`/workspace/migrate-roadmap-evidence/h82-retirement/`. Prior seals remain immutable.
+No H71 lane-push authorization is available, so no push is performed. No exposed
+goal operation supports PAUSED; no complete/blocked substitute is invoked. Actual
+goal pause is unconfirmed and this worker stops. Full migration remains unfinished.
+
+Independent read-only finder found no defect. Skeptic confirmed full queue and
+provenance coverage and requested replacing “authenticated” with
+“checksum-verified exported” to distinguish hash integrity from original-prompt
+authentication; applied. Neither reviewer ran Lean, builds, servers or tests.
+
+The final exporter review found a concurrent-writer integrity risk. It now holds
+the repository writer lock throughout export, anchors patch/diff/metadata reads to
+the captured committed head, and rechecks branch/head/clean status before sealing.
+Historical full gate scripts/results stay off Git with a committed hash index.
