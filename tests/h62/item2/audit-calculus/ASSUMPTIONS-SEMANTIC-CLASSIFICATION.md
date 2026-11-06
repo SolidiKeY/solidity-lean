@@ -1,0 +1,15 @@
+# Assumptions static semantic roles
+
+Regression guarded: inhabited reading records, syntactic certificates and Boolean verdict flags must not stand in for semantic validity, admission or simultaneous premise feasibility.
+
+Master was fetched and checked before this item at e8247d9277190b71488387dac594e82b2b191942. Existing Assumptions APIs are read-only inputs, not new implementations. Source SHA25698f64d789a27136d780d08d5737e86025f3521ac0c5c8972f7c02c408575ca8c equals the frozen source; successor classification is absent from master.
+
+All15 explicitly declared source theorems in Calculus/Assumptions.lean are reviewed. ValidA retains its order conjunction and universal ValidC state obligation. Overflow/hash/zeroAddress are unread labels in that definition; label independence does not permit changing source semantics, provenance or policy refusals. HashReading h in ValidA.labels is data, not a proof because of its name. Callback/order guards and restricted equality-or-solc-to-clean entailment remain explicit. No clean-store truth, arbitrary callback weakening or validity is manufactured by an equivalence.
+
+Structured premises are recorded explicitly: Invariant carries a closed formula and first-order syntax proof, not proof of semantic preservation. TransferSem carries such an invariant and callback flag. In wrap_clean_of_solc, I is instead a formula; no first-order certificate is invented. ProvedRow r retains modes, semantic validity and admission certificates. Inhabited Assumptions data does not establish a simultaneous ProvedRow witness. Boolean verdict characterization does not turn a flag into a validity proof. Universal policy-refusal premises remain universal and are intentional refusals, not compiler-failure findings.
+
+Previous35 reviewed rows are unchanged. The ledger accounts for all5283 frozen source candidates:50 roles reviewed,5233 pending,5283 semantic owners unresolved,zero new witnesses. Generated declarations remain separate. The actual --require-complete run FAILS exit1. Classifier code is unchanged in this data-only item; the prior74-test controls remain applicable. No Lean source or check was added.
+
+Independent read-only finder and skeptic passed all15 rows, their nested premises and unchanged prior rows; neither used Lean/server or writes. Exact source/gate receipts are external at /workspace/h62-successor-evidence/assumptions-classification-v4. The full dataset remains off Git, referenced by bulk-inputs-manifest.json with absolute path, size and SHA256.
+
+The original whole assignment is unfinished. Source/compiler success, witnesses, semantic owners, historical provenance and final gates remain open. No weakened theorem, contradiction, vacuity, arbitrary feasibility or live-owner claim was inferred. The explicit H28 pause, migration-only restriction, prior resource stop, timing/trust holds and UNVERIFIABLE historical-evidence dispositions remain binding. Further full-file static classifications are independent backfill; missing ownership information does not supply or preclude those role reviews.
