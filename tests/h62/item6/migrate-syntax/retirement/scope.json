@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-6-20261106",
+  "slug": "migrate-syntax",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-syntax",
+  "repository": "/workspace/solidity-lean-migrate-syntax",
+  "original_write_scope": [
+    "tests/h62/item6/migrate-syntax/**",
+    "scripts/h62/item6/migrate-syntax/**",
+    "docs/feature-work/h62-6-migrate-syntax.md",
+    "Solidity/Syntax/Checked.lean",
+    "Solidity/Syntax/CheckedExact.lean",
+    "Solidity/Syntax/Contract.lean",
+    "Solidity/Syntax/DispatchChain.lean",
+    "Solidity/Syntax/Elab.lean",
+    "Solidity/Syntax/Elab/Arms.lean",
+    "Solidity/Syntax/Elab/Context.lean",
+    "Solidity/Syntax/Elab/Lower.lean",
+    "Solidity/Syntax/Elab/SliceCopy.lean",
+    "Solidity/Syntax/Elab/Stmt.lean",
+    "Solidity/Syntax/Elab/Values.lean",
+    "Solidity/Syntax/Grammar.lean",
+    "Solidity/Syntax/Inlined.lean",
+    "Solidity/Syntax/Join.lean",
+    "Solidity/Syntax/LoopWarnings.lean",
+    "Solidity/Syntax/Numeric.lean",
+    "Solidity/Syntax/PushSource.lean",
+    "Solidity/Syntax/Quote.lean",
+    "Solidity/Syntax/Raw.lean",
+    "Solidity/Syntax/Scoped.lean",
+    "Solidity/Syntax/Splice.lean"
+  ],
+  "production_file_count": 21,
+  "forbidden_original_actions": [
+    "generated roots",
+    "central module maps",
+    "axiom pins",
+    "final lean-toolchain edit",
+    "master push",
+    "merge",
+    "PR",
+    "new goal/VM"
+  ],
+  "later_authorizations": [
+    "Coordinator registered this isolated Syntax lane as its writer; live producer ownership unchanged.",
+    "H64 permits kernel-checked decide +kernel.",
+    "Per-module performance growth is recorded, not a lane stop; matched clean comparison required.",
+    "H78 permits recorded RSS growth below 8GiB/module; historical -M11000 is not 8GiB enforcement.",
+    "H82 standing proof-only/additive/import/doc agreements supersede exact-file permission waits; changed statements, dependent definition bodies, budgets, axiom sets and exclusions still require owner/H57 as applicable."
+  ],
+  "retirement": "Explicit H82 stop-and-handoff to solidity-h62-6-20261106/migrate-root-gate CONFIRMED by coordinator. Generic Continue now broadcasts do not revoke retirement. No human decision pending."
+}

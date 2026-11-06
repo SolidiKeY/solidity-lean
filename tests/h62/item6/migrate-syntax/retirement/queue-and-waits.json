@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "checkpoints": [
+    {
+      "name": "1 Census/API compatibility and clean old build",
+      "status": "done",
+      "evidence": "All21 assigned files plus8 prerequisites; clean old29/29 pass; exact source census and declaration/header accounting."
+    },
+    {
+      "name": "2 Official pinned new toolchain and adaptation",
+      "status": "partial",
+      "evidence": "Official archive verified; all21 assigned modules adapted and pass within29-module closure. Frozen source header/signature checks pass; generatedAPI/axioms await root."
+    },
+    {
+      "name": "3 New build and matched performance/full acceptance",
+      "status": "partial",
+      "evidence": "New29/29 pass; wall207.377->102.747s(-50.454%), max childRSS885420->1688748KiB(+90.728%). H78 supersedes recorded RSS-only STOP. Whole repository gates/timing incomplete."
+    },
+    {
+      "name": "4 Reviewed patch/bundle/interface and dependency report",
+      "status": "partial",
+      "evidence": "Reviewed committed overlay and Raw producer exported; routing acknowledged, not adoption; root acceptance/cut-over remain."
+    }
+  ],
+  "backfill": [
+    {
+      "item": "Scanner/census and exact declaration/case accounting",
+      "status": "done",
+      "boundary": "877 original source declarations and898 headers retained; generated constants tracked separately."
+    },
+    {
+      "item": "Negative controls and isolated fixture proofs",
+      "status": "done-with-limits",
+      "boundary": "22 new finite kernel examples plus2 slice laws;22 old predicates runtime-checked,12 old/new runtime observations equal. These do not prove general migration equivalence."
+    },
+    {
+      "item": "Deterministic reproduction and timing tooling",
+      "status": "done-with-limits",
+      "boundary": "Same driver private clean29-module comparison; original whole-repository performance acceptance remains pending."
+    },
+    {
+      "item": "Additional within-scope witness/case coverage",
+      "status": "not-exhausted",
+      "boundary": "Open-ended backfill; no padding/new candidates claimed; H82 retirement prohibits new implementation here until clarified."
+    },
+    {
+      "item": "Newly unclaimed cleanup candidates",
+      "status": "none-assigned",
+      "boundary": "Requires coordinator/registry assignment; no scope stolen."
+    }
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Generated public API drift review: old/new environment 5711/6232 constants, 365 removed and 886 added generated/other entries; source 877 normalized declaration types preserved; rigid default-tactic helper-name difference retained."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Per-entry trust/meaning disposition for 637 source declaration transitive standard-axiom growth entries; no local new axiom declaration, no unchanged transitive-trust claim or pin expansion."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-sortcheck",
+      "item": "Historical actual annotation gate fails unchanged SortCheck/Parser.lean:76 removed String.trim API; comparison not executed. H82 eliminates proof/import/doc exact-file permission waits, not API/meaning validation."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "Historical actual full run-lean.sh first fails unchanged Hash/CollisionBound.lean:407,660,680 plus guard-message changes; no cross-directory overlay integrated here."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "After prerequisite integration: full affected examples/TestSuite/repository gates, whole-repository matched timing, possible further errors, meaning/axiom reconciliation and final acceptance. Historical M11000 resource profile must not be reported as 8GiB enforcement; successor must follow H81 current resource policy."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Worker lacks PAUSED operation (only complete|blocked exposed); coordinator explicitly will pause the existing goal after final head report and idle turn. No new/reset/completed goal."
+    }
+  ],
+  "followups": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-lowering",
+      "item": "Delivered historical d604931 payload gives a broad Syntax dependency, no exact Raw edge/failure. Exact edge/failure requested only if observed; not a blocker to ready Raw producer."
+    },
+    {
+      "lane": "coordinator",
+      "item": "H71 lane-push permission not delivered/available; no push. Local patch/bundle are retrieval mechanism."
+    }
+  ],
+  "execution": "Retirement confirmed; stop after preserved final head report. No new proofs/source edits/Lean runs. Original goal incomplete. Coordinator will set PAUSED after final report and idle turn because worker lacks pause operation."
+}
