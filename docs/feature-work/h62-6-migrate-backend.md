@@ -241,3 +241,37 @@ The old clean gate continues unchanged under the existing goal-owned writer
 lock (supervisor PID 20926, session 7208). All preparation above changed only
 this lane's scripts, tests and handoff in the assigned worktree; no input in
 the immutable baseline worktree changed, and no second Lean job was launched.
+
+## H70 Linking producer-ping proposal (unverified)
+
+The H70 relays identify `Solidity/Backend/Creation/Linking.lean:109` as a
+shared dependency of audit-roadmap, audit-v10-storage, migrate-roadmap and
+migrate-root-gate. Their complete staged handoffs have been requested from
+the coordinator; the host receipt files are not present on this VM. This
+section uses only the supplied diagnostic excerpt and the local pinned source,
+and does not claim review of those complete payloads.
+
+The committed `creation-linking-unverified.patch` changes one existing proof
+step in `Solidity.Backend.Creation.two_links_commute`: it adds
+`Location.Disjoint` to the `simpa only` list, explicitly exposing the original
+offset disjunction. The original statement, premises, imports, remaining
+source and proof budgets are untouched. The original Lean file is unchanged.
+The patch SHA256 is
+`b356c5597014e63afbbd24dcdabd835b44cb61d93240e7d94237142425a40d14`.
+
+`generate_linking_fixture.py` deterministically reproduces the proposal copy,
+patch and metadata. Resolved-path guards prevent original-source aliases,
+pairwise output collisions or writes outside the assigned tests/evidence
+areas. Three non-writing guard controls and the deterministic generator check
+pass. Independent read-only finder and skeptic reviews confirmed static scope
+preservation; neither used Lean or a Lean server. Full proposed copies remain
+off Git; sealed metadata and review summaries are under
+`/workspace/migrate-backend-evidence/checkpoint3-linking/`.
+
+**This is not a compatible or owner-approved migration patch.** Full H70
+payload review, exact-file coordination, actual Lean checks on both pinned
+releases, axiom/frozen-API validation, proof budgets, timings and full affected
+gates remain pending. No original-file permission is inferred from routing.
+The old clean baseline remains active and no second Lean job has been run.
+The separate MCP-helper generalization remains an uncommitted draft until
+its private-artifact/provenance and no-auto-build behavior are validated.
