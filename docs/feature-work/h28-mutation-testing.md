@@ -679,3 +679,37 @@ Atfinalverifierheadc78b96cac48b23c75cfd75782f56c7f8e2021ff0 all83unitcontrols, a
 ## Combined execution of the existing declared suite
 
 combined-pilot.json copies exactly17unique previously frozen case payloads from nine original profiles, retaining original mutation/source/oracle/signature hashes. Its13scoredprogramhashes are distinct; fourcontrols remain outside that denominator. Activeinventory is the existing270-row extendedsuperset: every used source/span/hash is identical to its originalprofile, including the older215-row runnerinventory. The existingauthenticated71-module callbackcache supplies alloracleimports without changingproduction/runtime/budgets. This tenthconfiguration adds no mutant or fixture. The earlier census proofworld records its nine originalprofiles atb85; currentenumeration includes the combinedconfiguration with the same17variants/30fixtures. Combinedexecution alone does not grant semanticcoverage of unselectedcandidates orwholeassignmentacceptance.
+
+### Combined declared-suite VM execution (2026-11-06)
+
+Input head `fb7ce29bc5305ca58bc4dd6264f4b30fc0fcbe56`, delivery base
+`38d38d87e74376d6b95daf9b792fa884333f20b3`; semantic base remains
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. The exact frozen
+`manifests/combined-pilot.json` ran all 17 IDs: 13 scored mutants killed,
+independent known-kill killed, invalid control rejected during compilation,
+label-equivalence certified, and weak-primary control surviving with its
+stronger concrete regression checked separately. No unrun case entered the
+denominator. Score 13/13 applies only to this declared suite.
+
+Command: `python3 -B tests/h28-sol/mutation-testing/tools/runner.py tests/h28-sol/mutation-testing/manifests/combined-pilot.json /workspace/h28-combined-pilot-fb7ce29b` (exit 0).
+Actual 101 phase checks, 70 isolated compiled outputs and 267 full owned
+theorem axiom exports; summed check time 569.018 seconds; peak child RSS
+1,466,012 KiB; minimum estimated reserve 6,469,640,192 bytes. Every Lean
+check used -j1, hard 6 GiB/no swap, network disabled and confirmed cleanup.
+Finder and skeptic independently replayed all saved checks and passed.
+Their draft replay-verifier findings about missing phases, output attribution
+and resource guarantees were fixed before using that verifier as a gate.
+
+H41 pack: `/workspace/h28-combined-export-fb7ce29b/proof-worlds.tar.gz`,
+49,560,922 bytes, SHA256
+`d79ae154926399af25b2c0a598f0924c26da493bcb917efb2fb562bd2656b83a`.
+`bulk-data.json` records the authenticated pointer and both dependency packs.
+All generated data remains off Git; normal and mutant outputs must stay
+isolated. Ready for coordinator pull; no transfer observed.
+
+`tools/verify_combined.py` authenticates the committed pointer and archived
+manifest, every regular member, required phase sets, source-linked failures,
+positive signature/axiom certificates, output identities and runtime bounds.
+The scope boundary remains false: unselected candidates in the 290-entry,
+308-unit census have no general semantic validation, the final acceptance
+scope question remains pending, and repository-wide final gates remain open.

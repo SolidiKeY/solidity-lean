@@ -213,5 +213,29 @@
       "finder": "PASS",
       "skeptic": "PASS"
     }
+  },
+  "combined_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-combined-export-fb7ce29b/proof-worlds.tar.gz",
+    "sha256": "d79ae154926399af25b2c0a598f0924c26da493bcb917efb2fb562bd2656b83a",
+    "bytes": 49560922,
+    "catalog": "/workspace/h28-combined-export-fb7ce29b/catalog.json",
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "coordinator_pull_observed": false,
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "input_head": "fb7ce29bc5305ca58bc4dd6264f4b30fc0fcbe56",
+    "members": 241,
+    "check_count": 101,
+    "compiled_artifact_count": 70,
+    "axiom_export_count": 267
   }
 }
