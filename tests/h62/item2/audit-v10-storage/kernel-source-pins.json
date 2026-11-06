@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "boundary": "Source identities from the separately executed bounded Lean4.24.0 kernel/axiom-guard checks. This metadata does not replace kernel execution or semantic review.",
+  "sources": {
+    "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean": {
+      "sha256": "c60e03615c0c3400c9f2dc2861523a850d1dc38d8888b7f90cd9143ef11b8637",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint195-final/1.log"
+    },
+    "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean": {
+      "sha256": "4b05fe6e6926b4ad3b50c68bc3835532fd135689990a1e41000d9b19958b90be",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint196-final/1.log"
+    },
+    "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean": {
+      "sha256": "c50c3da1fe1bc508f0638fe8698ac973a25d0f62d8e0b5947df626a3092c732c",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint197-final-r3/1.log"
+    }
+  }
+}

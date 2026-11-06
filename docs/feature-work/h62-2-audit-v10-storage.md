@@ -389,3 +389,27 @@ accepted as a proof or pin. The corrected source passes without recovery axioms.
 The companion map records three exact frozen signatures. Twelve premise bundles
 are now checked across these three audit packets; the full conservative census
 and compiler totality/failure/gas/fork obligations remain open.
+
+## Deterministic witness reference accounting
+
+The witness_registry tool exports the exact frozen Git inputs to a temporary
+tree and reuses the original conservative census, including all byte checks.
+The live census and its drift rejection remain unchanged. The registry accounts
+for all 3281 rows exactly once: 12 mapped witness references and 3269 unmapped
+rows. It checks unchanged mapped interface files, exact signatures and context
+hashes, witness declarations and the three kernel-checked test source hashes.
+The source lexer is not a complete elaborated-type or semantic fidelity checker;
+manual reviews and separately executed Lean/axiom-guard checks remain necessary.
+
+All twelve audit tooling tests pass, including seven corruption variants for
+duplicate/unknown rows, changed signatures, missing witness names, altered proof
+sources, changed interface files and stale kernel-source pins. Bulk registry
+output remains outside Git; only its deterministic generator, small source pins
+and tests are committed. No global axiom inventory is rewritten.
+
+During the preceding packet, an empty-list lemma refinement was committed before
+its failed check result was inspected. Commit f5010fe17 is not an accepted proof
+checkpoint. The corrective commit 4e83a94a3 followed a passing kernel and axiom
+guard check; its repaired source is the one pinned here. The failed receipt and
+history are retained. Full lane, compiler-totality and migration gates remain
+open.
