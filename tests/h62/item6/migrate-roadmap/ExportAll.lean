@@ -40,3 +40,62 @@ run_cmd do
       ("theorem_axioms", toJson (axioms.map Name.toString))]
     logInfo m!"ROADMAP_API {row.compress}"
   logInfo m!"ROADMAP_API_COUNT {rows.size}"
+
+/-! Kernel-checked legacy enum observations for comparison with the new fixture. -/
+
+open Solidity.Roadmap.Evm in
+#guard Fork.osaka.toCtorIdx == 0
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.ecrecover.toCtorIdx == 0
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.sha256.toCtorIdx == 1
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.ripemd160.toCtorIdx == 2
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.identity.toCtorIdx == 3
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.modexp.toCtorIdx == 4
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.bnAdd.toCtorIdx == 5
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.bnMul.toCtorIdx == 6
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.bnPairing.toCtorIdx == 7
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blake2f.toCtorIdx == 8
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.pointEvaluation.toCtorIdx == 9
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blsG1Add.toCtorIdx == 10
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blsG1Msm.toCtorIdx == 11
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blsG2Add.toCtorIdx == 12
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blsG2Msm.toCtorIdx == 13
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blsPairing.toCtorIdx == 14
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blsMapFpToG1.toCtorIdx == 15
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.blsMapFp2ToG2.toCtorIdx == 16
+
+open Solidity.Roadmap.Evm in
+#guard Precompile.p256Verify.toCtorIdx == 17

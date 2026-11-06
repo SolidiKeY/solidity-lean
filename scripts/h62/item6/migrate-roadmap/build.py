@@ -10,6 +10,12 @@ ROOT=Path(__file__).resolve().parents[4]
 EVIDENCE=Path("/workspace/migrate-roadmap-evidence")
 IMAGE="ubuntu@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852"
 DOCKER=["docker","--host=unix:///var/run/docker.sock"]
+def bounded_control(command, *, env, **kwargs):
+    """A daemon failure cannot indefinitely block the resource observer."""
+    kwargs.setdefault("timeout",2)
+    try:return subprocess.run(command,env=env,**kwargs)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(command,124,stdout="" if kwargs.get("text") else None,stderr="Docker control timeout")
 def main():
     if len(sys.argv) not in (3,4) or sys.argv[1] not in ("old","new") or sys.argv[2] not in ("prerequisite","baseline","after","fixtures","api","matrix"):
         raise SystemExit("usage: build.py old|new prerequisite|baseline|after")
@@ -25,7 +31,8 @@ def main():
     g=mod.graph(ROOT)
     inputs=[g.source(m) for m in c["closure"]]+[ROOT/"lakefile.toml",ROOT/"lean-toolchain",ROOT/"run-lean.sh",ROOT/"scripts/v08-build-graph.py",ROOT/"scripts/roadmap-v15-bounded-pidfd.py",ROOT/"scripts/roadmap-v15-bounded-observe.py"]
     inputs += [p for p in (ROOT/"lake-manifest.json",) if p.exists()]
-    if phase in ("fixtures","api","matrix"):inputs += list((ROOT/"tests/h62/item6/migrate-roadmap").glob("*.lean"))
+    helpers=("HashContainsFixture.lean","ExportEvm.lean") if phase=="fixtures" else (("ExportAll.lean",) if phase=="api" else ())
+    inputs += [ROOT/"tests/h62/item6/migrate-roadmap"/name for name in helpers]
     def fingerprint():
         return {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
     before=fingerprint()
@@ -59,8 +66,12 @@ def main():
     text=text.replace('version = "0.1.0"','version = "0.1.0"\nbuildDir = "'+str(reused_build or dest/"build")+'"',1)
     text=text.replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1"]')
     config.write_text(text)
-    shell='set -eu; export PATH=/opt/lean/bin:$PATH; lean -j1 --version; lake --version; '
+    shell='set -eu; export PATH=/opt/lean/bin:$PATH; '
     shell+='test "$(cat /sys/fs/cgroup/memory.max)" = 11811160064; test "$(cat /sys/fs/cgroup/memory.swap.max)" = 0; '
+    ready=dest/"limits-ready"
+    release=dest/"admitted"
+    shell+='touch '+shlex.quote(str(ready))+'; while ! test -f '+shlex.quote(str(release))+'; do sleep 0.05; done; '
+    shell+='lean -j1 --version; lake --version; '
     shell+="trap 'echo CGROUP_PEAK; cat /sys/fs/cgroup/memory.peak' EXIT; "
     if phase=="matrix":
         status_dir=dest/"status"
@@ -107,43 +118,57 @@ def main():
         identity["exe"]=str((toolchain/"bin/lean").resolve())
         return identity
     tracker=terminal.TerminalTracker(journal,exe=toolchain/"bin/lean",launch=launch)
-    started=time.monotonic();reason=None;peak_rss=0;samples=0
+    started=time.monotonic();reason=None;peak_rss=0;samples=0;admitted=False
     with (dest/"build.log").open("w") as log:
         process=subprocess.Popen(cmd,env=env,stdout=log,stderr=subprocess.STDOUT)
         while process.poll() is None:
+            if not admitted and time.monotonic()-started>15:
+                reason="startup admission deadline"
+                bounded_control(DOCKER+["kill",name],env=env,stdout=log,stderr=log);break
             limit=int(Path("/sys/fs/cgroup/memory.max").read_text())
             used=int(Path("/sys/fs/cgroup/memory.current").read_text())
             available=int(next(l.split()[1] for l in Path("/proc/meminfo").read_text().splitlines() if l.startswith("MemAvailable:")))*1024
             if min(limit-used,available)<4*1024**3:
                 reason="4GiB reserve violated"
-                subprocess.run(DOCKER+["kill",name],env=env,stdout=log,stderr=log)
+                bounded_control(DOCKER+["kill",name],env=env,stdout=log,stderr=log)
                 break
-            top=subprocess.run(DOCKER+["top",name,"-eo","pid,etimes,rss,stat,comm,args"],env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+            top=bounded_control(DOCKER+["top",name,"-eo","pid,etimes,rss,stat,comm,args"],timeout=min(2,max(0.01,15-(time.monotonic()-started))) if not admitted else 2,env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
             if top.returncode==0:
                 try:
                     normalized=tracker.snapshot(top.stdout)
                     rows=[r.split(None,5) for r in normalized.splitlines()[1:]]
                     peak_rss=max(peak_rss,sum(int(r[2])*1024 for r in rows));samples+=1
                     lean=[r for r in rows if r[4]=="lean" and not r[3].startswith("Z")]
+                    if not admitted:
+                        if time.monotonic()-started>15:raise terminal.GuardError("startup admission deadline")
+                        if lean:raise terminal.GuardError("Lean ran before startup admission")
+                        if ready.exists():
+                            release.touch();admitted=True
+                            journal(dict(event="startup-admitted",limits_verified=True))
                     if len(lean)>1 or any("-j1" not in r[5].split() for r in lean):
                         raise terminal.GuardError("serial Lean/-j1 guard violated")
                 except Exception as exc:
                     (dest/"rejected-top.txt").write_text(top.stdout)
                     reason="process observation rejected: "+str(exc)
-                    subprocess.run(DOCKER+["kill",name],env=env,stdout=log,stderr=log);break
+                    bounded_control(DOCKER+["kill",name],env=env,stdout=log,stderr=log);break
             else:
-                state=subprocess.run(DOCKER+["inspect","--format","{{.State.Status}}",name],env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+                state=bounded_control(DOCKER+["inspect","--format","{{.State.Status}}",name],env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
                 status=state.stdout.strip()
-                if status=="running" or (time.monotonic()-started>15 and status not in ("exited","dead")):
+                if (admitted and status not in ("exited","dead")) or (time.monotonic()-started>15 and status not in ("exited","dead")):
                     reason="process observation unavailable"
-                    subprocess.run(DOCKER+["kill",name],env=env,stdout=log,stderr=log);break
+                    bounded_control(DOCKER+["kill",name],env=env,stdout=log,stderr=log);break
             time.sleep(0.02)
-        code=process.wait()
+        try:code=process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            reason=(reason or "Docker client stalled")+"; container termination not confirmed"
+            bounded_control(DOCKER+["kill",name],env=env,stdout=log,stderr=log)
+            process.kill();code=process.wait(timeout=5)
     tracker.close()
+    if not admitted and code==0:reason="startup was never admitted"
     if samples==0 and code==0:reason="no process observations"
     after=fingerprint()
     if before!=after:reason="build inputs changed during run"
-    result=dict(command=cmd,exit=code,guard=reason,wall_seconds=time.monotonic()-started,
+    result=dict(command=cmd,exit=code,guard=reason,startup_admitted=admitted,wall_seconds=time.monotonic()-started,
                 sampled_peak_aggregate_rss_bytes=peak_rss,samples=samples,modules=targets,
                 source_hashes={m["path"]:m["sha256"] for m in c["modules"]},
                 inputs_before=before,inputs_after=after,

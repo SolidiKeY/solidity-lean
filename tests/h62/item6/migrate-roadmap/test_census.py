@@ -1,12 +1,27 @@
 """Source census controls. These tests make no Lean compatibility claim."""
-import importlib.util, pathlib, sys, unittest
+import importlib.util, pathlib, subprocess, sys, unittest
+from unittest.mock import patch
 sys.dont_write_bytecode=True
 ROOT=pathlib.Path(__file__).resolve().parents[4]
 spec=importlib.util.spec_from_file_location("census",ROOT/"scripts/h62/item6/migrate-roadmap/census.py")
 census=importlib.util.module_from_spec(spec);spec.loader.exec_module(census)
 spec=importlib.util.spec_from_file_location("graph",ROOT/"scripts/v08-build-graph.py")
 graph=importlib.util.module_from_spec(spec);spec.loader.exec_module(graph)
+spec=importlib.util.spec_from_file_location("bounded_build",ROOT/"scripts/h62/item6/migrate-roadmap/build.py")
+bounded_build=importlib.util.module_from_spec(spec);spec.loader.exec_module(bounded_build)
 class CensusControls(unittest.TestCase):
+    def test_daemon_timeout_is_failed_observation(self):
+        with patch.object(bounded_build.subprocess,"run",side_effect=subprocess.TimeoutExpired(["docker"],2)):
+            result=bounded_build.bounded_control(["docker"],env={},text=True,stdout=subprocess.PIPE)
+        self.assertEqual(result.returncode,124)
+        self.assertEqual(result.stdout,"")
+    def test_daemon_errors_remain_errors(self):
+        failure=subprocess.CompletedProcess(["docker"],1,stdout="",stderr="not running")
+        with patch.object(bounded_build.subprocess,"run",return_value=failure) as run:
+            result=bounded_build.bounded_control(["docker"],env={},text=True)
+        self.assertIs(result,failure)
+        self.assertEqual(run.call_args.kwargs["timeout"],2)
+
     def test_nested_comments_and_multiple_imports(self):
         self.assertEqual(graph.header_imports("/- import Fake /- nested -/ -/\nimport A B -- comment"),["A","B"])
     def test_qualifiers(self):
