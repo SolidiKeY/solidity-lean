@@ -772,6 +772,7 @@ import Solidity.Backend.MemoryCopies.NestedMemoryParentInterface
 import Solidity.Backend.MemoryCopies.NestedMemoryParentMixedControls
 import Solidity.Backend.MemoryCopies.NestedMemoryPath
 import Solidity.Backend.MemoryCopies.NestedMemoryPathControls
+import Solidity.Backend.MemoryCopies.NestedMemoryPathFrameInterface
 import Solidity.Backend.MemoryCopies.NestedMemoryPathInterface
 import Solidity.Backend.MemoryCopies.NestedMemoryRows
 import Solidity.Backend.MemoryCopies.NestedMemoryTurn
