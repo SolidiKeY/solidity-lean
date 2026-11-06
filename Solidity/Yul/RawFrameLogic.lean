@@ -329,4 +329,32 @@ theorem box_not_sparse : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul
   cases equal
   exact RawFrame.run_not_sparse ctx control code policy fuel state target cell missing done
 
+/-- A postcondition may be replaced when it agrees on every actual completed
+whole outcome. Agreement on unreachable outcomes is unnecessary; neither side
+asserts that the interpreter terminates. -/
+theorem holds_congr_on_completed :
+ ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (first second : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ (∀ fuel result, Solidity.Yul.RawFrame.run code policy fuel state = some result →
+   (first result ↔ second result)) →
+ (Solidity.Yul.RawFrame.Logic.holds mode code policy first state ↔
+  Solidity.Yul.RawFrame.Logic.holds mode code policy second state) := by
+  intros ctx control mode code policy first second state agree
+  cases mode with
+  | box =>
+    constructor
+    · intro valid fuel result done
+      exact (agree fuel result done).mp (valid fuel result done)
+    · intro valid fuel result done
+      exact (agree fuel result done).mpr (valid fuel result done)
+  | diamond =>
+    constructor
+    · rintro ⟨fuel,result,done,valid⟩
+      exact ⟨fuel,result,done,(agree fuel result done).mp valid⟩
+    · rintro ⟨fuel,result,done,valid⟩
+      exact ⟨fuel,result,done,(agree fuel result done).mpr valid⟩
+
 end Solidity.Yul.RawFrame.Logic
