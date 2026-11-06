@@ -872,3 +872,58 @@ authenticates every declared member map regardless of its key. The real-Git
 control checks the rollback-pack location and rejects changed member hash, size
 and membership there. Archive integrity had passed; the missing enforcement
 was fixed before checkpoint seal acceptance. No proof or budget changed.
+
+
+### Direct return-frame checkpoint (frozen input)
+
+`frames.return-parameter-projection` changes only the `rets` projection in
+`Premise.expandCall` when return and parameter contexts coincide. Its interface,
+all side conditions and the call body remain unchanged. The actual pure callee
+returns `(42, true)`; the wrong projection exports parameters `(3, false)`.
+Concrete typed landings, an inhabited equal-payload control and universal
+all-state frame projections accompany an unconditional negated `Premise.Sound`.
+The same mutated premise has a callback-modal counterexample in the pending
+caller continuation: the caller's send can resume with changed global state
+while preserving the differing numeric local. This does not claim a callback
+inside the pure callee or coverage of every call form.
+
+`inventory.frame-selected.json` is a small tracked two-span attribution index
+for this pilot and its unchanged independent revert control. It supplements the
+immutable exhaustive 290-declaration/308-unit census; it does not replace or
+shrink that candidate census. The callback cache receipt remains a VM-only H44
+pin, explicitly marked in the manifest and `bulk-data.json.frame_profile_inputs`
+and authenticated by the existing frozen bulk index and runner. The inventory
+itself is tracked, so this mixed-input profile is separate from the legacy
+two-off-Git-input declarations. Current census counts are 34 fixtures, 12
+profiles and 19 distinct variants. Development passes are unscored; the frozen
+whole pilot run, reviews and evidence seal remain pending.
+
+
+Coordinator publication `af972480b7eb44498a7d754f0761dd3adf5e39eb` is merged
+after the frozen frame run finished. The delivery anchor advances to this
+verified published master in engine and bulk metadata together; semantic/cache
+base and historical snapshot provenance remain immutable. Review nits are
+fixed: outcome errors name the selected profile, and any member-manifest pin
+without an archive key is rejected, with a real-Git receipt control. The frame
+profile's mixed-input annotation is descriptive; runner hash authentication
+enforces its actual tracked inventory and off-Git cache identities.
+
+
+Frozen frame run `e198e3fbe0d29687129e571cdc5a192b7755b753` passed all 12 checks; scored mutant
+and independent known-kill were killed, denominator one. Eight compiled outputs
+and 43 owned axiom exports include all 35 new theorem signatures. Summed check
+time 72.508s; peak RSS 1,467,400 KiB; minimum
+estimated reserve 4,566,003,712 bytes. Normal/optimized
+86 controls, actual Lean4.24.0/Lake5.0.0-src+797c613 and fresh bounded KeySort
+passed. Finder/skeptic development and actual-evidence reviews are separate from
+seal replay. `verify_combined.py --profile frame` uses fixed 2/1 accounting and
+the unchanged strict certificate/source/artifact/resource checks.
+
+H41 frame pack `/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz` has 6363366 bytes, SHA256
+`16236914543752364467b16717fdcd07eaf9147edc949726f6d5c85265625ab6`, with 41 H44-pinned regular members. It stays
+on this VM for coordinator pull; no transfer is claimed. Normal dependencies
+are separately pinned; mutant objects remain isolated. Frame semantics are
+restricted to the typed selected call and its pending caller callback, and
+provide no whole-compiler correctness claim. Full queue acceptance remains false:
+final selection ledger, expanded combined execution, and final repository gates
+are still pending.

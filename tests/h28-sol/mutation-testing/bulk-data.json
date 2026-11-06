@@ -2,7 +2,7 @@
   "schema": 1,
   "authorization": "H44",
   "source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
-  "delivery_base": "5c407a0ba004d8cf234c2600283f582a91789b76",
+  "delivery_base": "af972480b7eb44498a7d754f0761dd3adf5e39eb",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
   "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
@@ -332,5 +332,47 @@
     "archive_seconds": 5.760611116998916,
     "process_maxrss_kib": 23024,
     "member_manifest": "tests/h28-sol/mutation-testing/evidence/rollback-pilot-ade0ec29/manifest.json"
+  },
+  "frame_profile_inputs": {
+    "manifest": "tests/h28-sol/mutation-testing/manifests/frame-pilot.json",
+    "inventory": {
+      "path": "tests/h28-sol/mutation-testing/inventory.frame-selected.json",
+      "sha256": "9ebbba8a50d6ef8fabdfb9fa77419b9da7f31814fb953b3a8729f67c4ab78ba3",
+      "availability": "git-tracked"
+    },
+    "cache_manifest": {
+      "role": "cache_manifest",
+      "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+      "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+      "bytes": 36528,
+      "availability": "VM-only",
+      "authorization": "H44"
+    }
+  },
+  "frame_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz",
+    "bytes": 6363366,
+    "sha256": "16236914543752364467b16717fdcd07eaf9147edc949726f6d5c85265625ab6",
+    "members": 41,
+    "input_head": "e198e3fbe0d29687129e571cdc5a192b7755b753",
+    "check_count": 12,
+    "axiom_export_count": 43,
+    "compiled_artifact_count": 8,
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/frame-pilot-e198e3fb/manifest.json",
+    "coordinator_pull_observed": false,
+    "archive_seconds": 5.854443480000555,
+    "process_maxrss_kib": 23556
   }
 }

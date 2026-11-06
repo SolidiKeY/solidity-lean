@@ -57,6 +57,8 @@ def verify_validation_archives(manifest, repo=None):
     def walk(value, path=()):
         if not isinstance(value, dict):
             return
+        if "member_manifest" in value:
+            require("archive" in value, "member manifest pin missing archive")
         if "archive" in value and ("member_manifest" in value or any("validation" in key or "review" in key for key in path)):
             archive = Path(value["archive"])
             require(archive.is_absolute() and archive.is_file() and not archive.is_symlink(), "invalid validation archive")
