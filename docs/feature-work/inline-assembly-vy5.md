@@ -3502,3 +3502,11 @@ Reviews (read-only, without the Lean server):
 
 Check speed: no proof heavier; editing `Types.lean`/`Typing.lean` rebuilds
 about 6000 modules (about 2.2 h on this VM).
+
+Gates (follow-up 2): `gate.sh checkpoint` @719c5afb PASS (build-touched,
+library, trust, orphans, layers, roots, fragments, doc-paths, axiom-pins
+"0 errors, 0 unrecorded changes"); `./run-lean.sh` built all 6470 jobs
+(`Build completed successfully`), then `check-solkey.sh` failed against the
+unpinned `../solkey` (167 mismatches); with the pinned rules
+(`SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key`) it
+reports `OK — annotations match`.
