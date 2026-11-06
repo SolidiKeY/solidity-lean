@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "status": "source_only_pass",
+  "module_count": 162,
+  "theorem_slices": 968,
+  "explicit_binder_groups": 6254,
+  "result_input_groups": 28,
+  "untyped_result_groups": 4,
+  "classifier_regressions": 14,
+  "artifacts": {
+    "semantic-verification.log": {
+      "path": "/workspace/sol-numeric-literals-h82/v07-reproduction/semantic-verification.log",
+      "sha256": "eb23b5503cf2c7a58d844aab7fa226dac458a30b991ecba31702896e16136900"
+    },
+    "semantic.json": {
+      "path": "/workspace/sol-numeric-literals-h82/v07-reproduction/semantic.json",
+      "sha256": "3ed8c880f20f5decd9768afa8e7647ccb204c20b3c15b6874bbcc3717aed0f4f"
+    },
+    "source-verification.log": {
+      "path": "/workspace/sol-numeric-literals-h82/v07-reproduction/source-verification.log",
+      "sha256": "600cd9965161af463bea445824ba1865eb48f7f78ea0c59f2c5679b5f4597b8c"
+    },
+    "source.json": {
+      "path": "/workspace/sol-numeric-literals-h82/v07-reproduction/source.json",
+      "sha256": "43d0f854e22026978220b1e9925a12fbc866012ae4f01b5140c15aa1389e0db6"
+    }
+  },
+  "boundary": "Source identity/classifier reproduction only. No elaborated interface membership, inhabitation, joint witnesses or compiler totality/success proved."
+}

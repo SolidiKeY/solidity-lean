@@ -96,3 +96,13 @@ User retired this worker before any announced H82 proof repair was applied. Prio
 Mandatory original assignment, persistent-goal context, complete queues, exact scope manifest and their hashes are committed in tests/h62/item2/audit-v07-lowering/retirement/. The visible thread assignment is preserved; hidden rendered wrapper bytes are unavailable, so rendered-prompt SHA equality is not asserted. Cumulative patch, base-prerequisite Git bundle, bulk evidence archive, exact final head/clean status and hashes are exported under /workspace/h62-audit-v07-retirement/. Full original evidence and VM are preserved.
 
 PAUSED goal transition could not be set: the exposed tool only supports stop_goal complete|blocked and provides no pause operation. Neither was called as a substitute at retirement. Execution is stopped by the explicit user instruction; do not infer completion or automatic resumption. No H71 lane-push permission was supplied or found in coordinator inputs; no push attempted. No master push, merge, publication or new proof implementation.
+
+## H82 source-only reproduction
+
+All162 mapped source files still match the authenticated retirement hashes.
+The inherited tools reproduce968 theorem slices,6254 explicit binder groups,
+28 result-input groups and four unresolved result groups. Source identity
+checks and14 classifier regressions pass. Bulk inventories remain outside Git;
+paths and hashes are in tests/h62/item2/audit-v07-lowering/live-source-reproduction.json.
+These are source classifications, not elaborated interface membership, joint
+witnesses or compiler totality/success. Those original queues remain open.
