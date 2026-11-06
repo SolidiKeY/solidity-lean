@@ -1,0 +1,32 @@
+{
+ "Solidity/Yul/Compilation/SwitchSequenceControls.lean:Solidity.Yul.Compilation.SwitchSequence.Controls.first_fuel_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequenceControls.lean:Solidity.Yul.Compilation.SwitchSequence.Controls.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequenceControls.lean:Solidity.Yul.Compilation.SwitchSequence.Controls.second_fuel_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequenceControls.lean:Solidity.Yul.Compilation.SwitchSequence.Controls.second_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequenceControls.lean:Solidity.Yul.Compilation.SwitchSequence.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequenceControls.lean:Solidity.Yul.Compilation.SwitchSequence.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

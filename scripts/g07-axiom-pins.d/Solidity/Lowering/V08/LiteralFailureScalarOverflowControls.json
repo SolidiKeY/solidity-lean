@@ -1,0 +1,57 @@
+{
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflow.agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflow.failure_bytes": [],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflow.range_false": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflow.raw_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflow.source_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflow.target_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflow.test_flag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.no_success_on_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.populated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.positive_baseline": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.raw_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean:Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.retained_operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,27 @@
+{
+ "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Artifact.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.lower": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
