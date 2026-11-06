@@ -160,3 +160,33 @@ verified. Both are partial, and no overlay has been applied. The coordinator
 states Token, FixedPoint and CollisionBound overlays, complete migration gates,
 VY1/VY3 heads/snapshots, and ordering/integration agreement remain pending.
 Continue scoped backfill without editing any original owner files.
+
+## H82 retirement handoff
+
+The older generator test fixture was isolated after a skeptic review found it
+inherited Git settings and linked a temporary directory to the real worktree
+Git directory. The fixture now initializes a separate Git repository under
+`/workspace/scratch`, removes inherited `GIT_*` variables, disables hooks and
+external Git configuration, uses an empty template, asserts its root and no
+remotes, and creates a synthetic baseline commit. Copied census/conservation
+scripts reference that fixture baseline only. Independent finder and skeptic
+reviewed the isolation changes read-only before the test run, without Lean.
+`python3 -B tests/h62/item1/p16-generator/test_generator.py` passed 17 tests,
+exit 0; output is `/workspace/h62-p16-evidence/isolation-controls.log`. This is
+external fixture evidence; it does not prove live owner or Lean acceptance.
+
+The authorized Q1 owner-commit test had already passed and removed its scratch
+repository at the prior checkpoint. The H82 retirement instruction stops this
+lane and hands it to `solidity-inline-assembly5-20261031/vy1-words`; no further
+implementation is authorized from this thread. The original prompt's reported
+SHA and available assignment excerpts are recorded in
+`tests/h62/item1/p16-generator/handoff/frozen-assignment-available.md`; the
+exact original rendered prompt bytes were not exposed by a transcript or goal
+read tool and are still required from the coordinator. The complete available
+scope and queue manifest is in the sibling `scope-and-queue.md`.
+
+The only exposed goal operation is `stop_goal` with `complete` or `blocked`;
+there is no PAUSED operation. Do not infer that this worker paused the existing
+goal. Coordinator must pause it without reset or replacement. The source H71
+push permission was not available in the provided decision snapshot; the
+original no-push instruction therefore remains and no branch was pushed.
