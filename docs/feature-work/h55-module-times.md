@@ -764,3 +764,47 @@ mapping and Lake 4.24 source without Lean, a server or builds. Full reviewed
 coverage, atomic source binding, complete runtime provenance, bounded
 KeySort and H56 measurements remain outstanding; H93 cold timing remains
 deferred. No proof, production or runtime gate pass is claimed.
+
+## Standalone census reconciliation: execution boundaries
+
+At head `72c08267663d1e11f9803abb82211ab334b0f1aa`, the full 504-row
+tracked standalone candidate list, including individual paths and source
+hashes, is saved as
+`/workspace/h55-module-times-evidence/72c082676-standalone.json` with
+SHA-256 `efafe877faaf918e7591e4fcdd4de0f52dd1398b5191a8946d569f574d418337`.
+The largest path groups are `tests/h62` (187), `tests/h28-sol` (130),
+`tests/upstream` (41), `tests/roadmap-g19` (23),
+`tests/directruntime-20261104` (22), `tests/fullscope-20261104` (16),
+`tests/roadmap-g36` (14), and `Bridge/tests` (9). These groups are
+classification aids only; no item is excluded or assigned an approved
+execution recipe by its location.
+
+Independent read-only finder and skeptic reviews identified concrete reasons
+a uniform Lake file check cannot stand in for all intended controls:
+
+- `tests/automation/ClosedSpecRejected.lean` is driven by
+  `scripts/check-spec-proposal.py` with a deliberately corrupted native
+  plugin and checks for fallback markers; the enclosing Lean invocation is
+  expected to succeed.
+- `Bridge/tests/MemoryObserve.lean` is used by
+  `scripts/check-external-memory.sh` with generated native code and a
+  dynamically loaded library. A plain elaboration does not perform that
+  external native observation. `Bridge/tests/precompile-agreement/CacheRequest.lean`
+  imports Mathlib Cache tooling; its output is not proof or artifact hashes.
+- `scripts/ParseCorpus.lean` executes `#eval` against a manifest and writes
+  results. Its external data and effects must be accounted for in any
+  execution recipe.
+- `#guard_msgs` files such as
+  `tests/h62/item1/duplication-scanner/SignatureMissing.lean` contain
+  intentionally generated diagnostics but are not thereby expected to exit
+  nonzero; their drivers may also supply local roots and prerequisites.
+- Other scripts generate negative Lean drivers not present in the tracked
+  census, for example `scripts/h62/item5/statement-graph/verify.py`.
+  Their generated inputs and expected failures need explicit scope and
+  provenance review; the tracked path list cannot establish that coverage.
+
+The list and examples are static observations, not completed row-by-row
+resolution, runnable acceptance, a measurement, or an authorization to drop
+any file. The exact contexts, expected outcomes, side effects, auxiliary
+inputs, containment and resource provenance remain to be reviewed and
+measured on the authenticated runner. No Lean server or builds were used.
