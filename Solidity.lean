@@ -3338,6 +3338,7 @@ import Solidity.Source.Calldata
 import Solidity.Source.CalldataAggregates
 import Solidity.Source.CalldataExamples
 import Solidity.Source.CalldataLayout
+import Solidity.Source.CalldataStaticCopyControls
 import Solidity.Source.Const
 import Solidity.Source.ConstCheck
 import Solidity.Source.Ctor

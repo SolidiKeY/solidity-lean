@@ -1017,7 +1017,13 @@ Horizon's step proofs take them without new lemmas, except
   bytes; an array element by element, each validated (an invalid element
   reverts with no data at the copy, as solc's
   `abi_decode_available_length` copy); a `calldata` target keeps the
-  reference;
+  reference. A dynamic array of static arrays (`uint256[2][]`) and a static
+  array (`uint256[2]`) copy their statically encoded elements at the
+  element's head stride (`STy.cdHeadBytes`) through `cdStaticToMem`
+  (G18.05): inner arrays are allocated before the outer one, as `zeroData`
+  allocates (solc allocates the outer first; heap addresses are abstract
+  indices, so no observation here depends on the order). An element that is
+  not statically encoded is not inline and stays `stuck`;
 - `abi.decode(b, …)` on `bytes calldata` (`STy.decodeSrc` now admits it;
   `bytesOfRV` reads the reference).
 
@@ -1036,6 +1042,7 @@ and `OpsOK`. `x[i]`, `x.length` and copies were already typed by S01.
 | `decodeArg_cd_ok`, `decodeArg_entry_ok`, `decodeArgs_entry_ok` | every type dispatch decodes (`STy.entryDecodable`: the decoder's and `calldata` references) keeps `MemOK`, agrees, and is never `stuck` |
 | `readLoc_cd_ok`, `cdByte_ok`, `sliceR_ok` | element reads, byte reads and slices are never `stuck` |
 | `cdToMem_ok` | a copy into memory keeps `MemOK`; the copy agrees |
+| `cdStaticToMem_ok`, `cdToMem_static_ok` | the static-element copies (`STy.cdCopyElem`) keep `MemOK` and are never `stuck`; controls in `Source/CalldataStaticCopyControls.lean` |
 | `evalE_cdLength_ok`, `evalE_cdIndex_ok`, `evalE_cdSlice_ok` | the `x.length`, `x[j]` and `x[s:e]` nodes on `calldata` locals (index locals) keep `MemOK` and are never `stuck` (closed) |
 
 **Ledger.** `.slice` is typed (`exprCoverage` classifies it `typed`, witness

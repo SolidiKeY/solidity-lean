@@ -341,11 +341,36 @@ def abiDecodeData {Γ : RCtx} (data : Bytes) (τs : List STy) : EM E Γ (RVal E.
 end, as `calldataload`). -/
 def cdWordAt (F : Fr) (off : Nat) : Nat := beValue (fitBytes 32 (F.cd.drop off))
 
+/-- The `m` elements of a copied static `calldata` array: element `j` is
+`go (off + stride * j)`, each copied before the next (G18.05). -/
+def cdElems {Γ : RCtx} {σ : STy} (go : Nat → EM E Γ (Val E.layout σ)) (stride : Nat) :
+    Nat → (m : Nat) → EM E Γ (Fin m → Data E.layout σ)
+  | _, 0 => pure Fin.elim0
+  | off, m + 1 => do
+    let x ← go off
+    let f ← cdElems go stride (off + stride) m
+    pure (finCons (.val x) f)
+
+/-- **A statically encoded `calldata` element copied into memory** (G18.05):
+a one-word value decoded and validated from its word; a static array of
+statically encoded elements copied element by element at its head stride
+into a new memory array, inner arrays allocated first as `zeroData` does.
+A dynamically encoded element is not inline, so it is `stuck`. -/
+def cdStaticToMem {Γ : RCtx} (F : Fr) : (σ : STy) → Nat → EM E Γ (Val E.layout σ)
+  | .array .memory e (some m), off =>
+    if 0 < e.cdStaticWords then do
+      let xs ← cdElems (cdStaticToMem F e) e.cdHeadBytes off m
+      allocRef (Data.array (D := E.layout) (l := .memory) (n := some m) m (fun _ h => by cases h; rfl) xs)
+    else halt (.stuck "calldata conversion")
+  | σ, off => lift (decodeWord E.layout (cdWordAt F off) σ)
+
 /-- **A copy of `calldata` into memory** (lane FU2-B): `bytes`/`string` as
 their bytes; an array of one-word values decoded element by element, each
 validated (an invalid element reverts with no data, as solc's
 `abi_decode_available_length` copy); a `calldata` target keeps the
-reference. -/
+reference. A dynamic array of static arrays, and a static array, copy
+their statically encoded elements at the element's head stride
+(`cdStaticToMem`, G18.05). -/
 def cdToMem {Γ : RCtx} (F : Fr) (τ : STy) (off len : Nat) : EM E Γ (RVal E.layout τ) :=
   if h : τ.loc? = some .calldata then return .val (.cdRef h off len) else
   match τ with
@@ -353,10 +378,19 @@ def cdToMem {Γ : RCtx} (F : Fr) (τ : STy) (off len : Nat) : EM E Γ (RVal E.la
     return .val (← allocRef (Data.bytes (D := E.layout) (l := .memory) ((F.cd.drop off).take len)))
   | .string .memory => do
     return .val (← allocRef (Data.string (D := E.layout) (l := .memory) ((F.cd.drop off).take len)))
+  | .array .memory (.array .memory e (some m)) none => do
+    let xs ← cdElems (cdStaticToMem F (.array .memory e (some m)))
+      (STy.array .memory e (some m)).cdHeadBytes off len
+    return .val (← allocRef (Data.array (D := E.layout) (l := .memory) (n := none) len
+      (fun _ h => nomatch h) xs))
   | .array .memory σ none => do
     let xs ← (List.range len).mapM fun j => lift (decodeWord E.layout (cdWordAt F (off + 32 * j)) σ)
     return .val (← allocRef (Data.array (D := E.layout) (l := .memory) (n := none) xs.length
       (fun _ h => nomatch h) (fun k => .val (xs.get k))))
+  | .array .memory σ (some m) => do
+    let xs ← cdElems (cdStaticToMem F σ) σ.cdHeadBytes off m
+    return .val (← allocRef (Data.array (D := E.layout) (l := .memory) (n := some m) m
+      (fun _ h => by cases h; rfl) xs))
   | _ => halt (.stuck "calldata conversion")
 
 /-- **A slice `a[s:e]` of a `calldata` array or `bytes`** (lane FU2-B):

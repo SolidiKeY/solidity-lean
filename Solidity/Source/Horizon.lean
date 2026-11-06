@@ -1080,6 +1080,19 @@ theorem encodeParts_grow (F : Fr) (n : Nat) (packed : Bool) :
 theorem encodeVals_grow (F : Fr) (n : Nat) (packed : Bool) {τs : List STy} (vs : RVals E.layout τs) :
     Grow (encodeVals (Γ := Γ) F n packed vs) := by
   unfold encodeVals; grow_go [encodeParts_grow]
+theorem cdElems_grow {σ : STy} {go : Nat → EM E Γ (Val E.layout σ)} (hgo : ∀ off, Grow (go off))
+    (stride : Nat) : ∀ (off m : Nat), Grow (cdElems go stride off m)
+  | _, 0 => Grow.pure _
+  | off, m + 1 => Grow.bind (hgo off) fun _ =>
+      Grow.bind (cdElems_grow hgo stride (off + stride) m) fun _ => Grow.pure _
+theorem cdStaticToMem_grow (F : Fr) (σ : STy) (off : Nat) :
+    Grow (cdStaticToMem (E := E) (Γ := Γ) F σ off) := by
+  unfold cdStaticToMem
+  split
+  · split
+    · exact Grow.bind (cdElems_grow (fun o => cdStaticToMem_grow F _ o) _ _ _) fun _ => allocRef_grow _
+    · exact Grow.halt _
+  · exact Grow.lift _
 theorem cdToMem_grow (F : Fr) (τ : STy) (off len : Nat) : Grow (cdToMem (E := E) (Γ := Γ) F τ off len) := by
   unfold cdToMem
   split
@@ -1087,7 +1100,11 @@ theorem cdToMem_grow (F : Fr) (τ : STy) (off len : Nat) : Grow (cdToMem (E := E
   · split
     · exact Grow.bind (allocRef_grow _) fun _ => Grow.pure _
     · exact Grow.bind (allocRef_grow _) fun _ => Grow.pure _
+    · exact Grow.bind (cdElems_grow (cdStaticToMem_grow F _) _ _ _) fun _ =>
+        Grow.bind (allocRef_grow _) fun _ => Grow.pure _
     · exact Grow.bind (List.mapM_grow _ (fun _ => Grow.lift _) _) fun _ =>
+        Grow.bind (allocRef_grow _) fun _ => Grow.pure _
+    · exact Grow.bind (cdElems_grow (cdStaticToMem_grow F _) _ _ _) fun _ =>
         Grow.bind (allocRef_grow _) fun _ => Grow.pure _
     · exact Grow.halt _
 theorem convRV_grow (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
@@ -1699,6 +1716,19 @@ theorem encodeParts_const (F : Fr) (n : Nat) (packed : Bool) :
 theorem encodeVals_const (F : Fr) (n : Nat) (packed : Bool) {τs : List STy} (vs : RVals E.layout τs) :
     Const (encodeVals (Γ := Γ) F n packed vs) := by
   unfold encodeVals; const_go [encodeParts_const]
+theorem cdElems_const {σ : STy} {go : Nat → EM E Γ (Val E.layout σ)} (hgo : ∀ off, Const (go off))
+    (stride : Nat) : ∀ (off m : Nat), Const (cdElems go stride off m)
+  | _, 0 => Const.pure _
+  | off, m + 1 => Const.bind (hgo off) fun _ =>
+      Const.bind (cdElems_const hgo stride (off + stride) m) fun _ => Const.pure _
+theorem cdStaticToMem_const (F : Fr) (σ : STy) (off : Nat) :
+    Const (cdStaticToMem (E := E) (Γ := Γ) F σ off) := by
+  unfold cdStaticToMem
+  split
+  · split
+    · exact Const.bind (cdElems_const (fun o => cdStaticToMem_const F _ o) _ _ _) fun _ => allocRef_const _
+    · exact Const.halt _
+  · exact Const.lift _
 theorem cdToMem_const (F : Fr) (τ : STy) (off len : Nat) : Const (cdToMem (E := E) (Γ := Γ) F τ off len) := by
   unfold cdToMem
   split
@@ -1706,7 +1736,11 @@ theorem cdToMem_const (F : Fr) (τ : STy) (off len : Nat) : Const (cdToMem (E :=
   · split
     · exact Const.bind (allocRef_const _) fun _ => Const.pure _
     · exact Const.bind (allocRef_const _) fun _ => Const.pure _
+    · exact Const.bind (cdElems_const (cdStaticToMem_const F _) _ _ _) fun _ =>
+        Const.bind (allocRef_const _) fun _ => Const.pure _
     · exact Const.bind (List.mapM_const _ (fun _ => Const.lift _) _) fun _ =>
+        Const.bind (allocRef_const _) fun _ => Const.pure _
+    · exact Const.bind (cdElems_const (cdStaticToMem_const F _) _ _ _) fun _ =>
         Const.bind (allocRef_const _) fun _ => Const.pure _
     · exact Const.halt _
 theorem convRV_const (F : Fr) (n : Nat) {σ : STy} (τ : STy) (v : RVal E.layout σ) :
