@@ -11,10 +11,12 @@ V4, and the boundary of V4.
   producer; nothing else is missing.
 - `of_unrolled`: the recursive `callRec` reduction of `V3GeneralBoundary`
   for V4 (definitional, no premise added).
-- Boundary: V4 is still empty for a family that never succeeds at an admitted
-  input (`no_success_producer`), e.g. the always-exhausting family
-  (`exhaustingStep`), and it keeps source coherence (`coherence`). So V4 closes
-  the never-bare-revert gap of V3, not every recursive family. -/
+- Boundary: V4 is still empty for a family that succeeds from no caller
+  (`no_success_producer`), e.g. the always-exhausting family
+  (`exhaustingStep`), because it keeps the success witness on purpose; and it
+  is empty for an incoherent family (`no_incoherent_producer`; no concrete
+  incoherent instance is given here). So V4 closes the never-bare-revert gap of
+  V3, not every recursive family. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration
 open Evm Evm.Memory V3GeneralBoundary
 
@@ -74,6 +76,24 @@ def recursive_toV3 {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
   ⟨p.plan, p.required_profile, p.required_coverage, p.required_successful_entry,
     reverting, p.required_source_coherence, p.required_return, p.required_bare_revert⟩
 
+/-- `toV3 ∘ ofV3` is the identity, given the V3 producer's own reverting entry. -/
+theorem recursive_round_trip {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
+    {approved admitted : Nat → InterfaceV3.Admission C Γ} {f : Name} {args : Args C Γ ps}
+    {ret : CallRet Γ rs Δ}
+    {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
+    (p : InterfaceV3.PendingRecursiveReturns b F approved admitted f args ret step) :
+    recursive_toV3 (recursive_ofV3 p) p.required_reverting_entry = p := rfl
+
+/-- `ofV3 ∘ toV3` is the identity. -/
+theorem recursive_round_trip' {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
+    {approved admitted : Nat → InterfaceV3.Admission C Γ} {f : Name} {args : Args C Γ ps}
+    {ret : CallRet Γ rs Δ}
+    {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
+    (q : InterfaceV4.PendingRecursiveReturns b F approved admitted f args ret step)
+    (r : ∃ n, InterfaceV3.RevertingEntry b F (admitted n)
+      (InterfaceV1.recursiveSource f args ret step n) (q.plan.at n)) :
+    recursive_ofV3 (recursive_toV3 q r) = q := rfl
+
 /-- Recursive `callRec` reduction for V4 (definitional, as in V3). -/
 def of_unrolled {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
     {f : Name} {args : Args C Γ ps} {ret : CallRet Γ rs Δ}
@@ -119,7 +139,7 @@ theorem no_success_producer {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
     obtain ⟨n, _, _, caller, _, _, _, out, _, _, run⟩ := p.required_successful_entry
     exact never n caller out run
 
-/-- V4 retains source coherence; an incoherent family has no V4 producer. -/
+/-- V4 retains source coherence. -/
 theorem coherence {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
     {approved admitted : Nat → InterfaceV3.Admission C Γ} {f : Name} {args : Args C Γ ps}
     {ret : CallRet Γ rs Δ}
@@ -127,6 +147,14 @@ theorem coherence {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
     (p : InterfaceV4.PendingRecursiveReturns b F approved admitted f args ret step) :
     InterfaceV1.RecursiveReturnCoherence f args ret step :=
   p.required_source_coherence
+
+theorem no_incoherent_producer {Γ Δ ps rs : Ctx} {b : Nat} {F : Frag Γ}
+    {approved admitted : Nat → InterfaceV3.Admission C Γ} {f : Name} {args : Args C Γ ps}
+    {ret : CallRet Γ rs Δ}
+    {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
+    (incoherent : ¬ InterfaceV1.RecursiveReturnCoherence f args ret step) :
+    ¬ Nonempty (InterfaceV4.PendingRecursiveReturns b F approved admitted f args ret step) :=
+  fun ⟨p⟩ => incoherent p.required_source_coherence
 
 /-- Every activation calls the next one: every unrolling is the base. -/
 def exhaustingStep (_ : Nat) (k : Unit → Prog C [] []) : Prog C [] [] := k ()

@@ -3,13 +3,19 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3FixedThunkProducer
 
 /-! A V4 recursive producer for a family that has no V3 producer.
 
+The family is degenerate: `trivialStep` ignores its continuation, so no index
+makes a recursive call and every positive index is the same empty-body call.
+It shows that V4 admits a never-reverting family V3 rejects; it is not a
+producer for a genuinely recursive never-reverting family.
+
 The family is `V3GeneralBoundary.trivialStep` (empty body, no arguments, void
 return) over the populated `CompileExamples` caller. Index 0 exhausts, every
 positive index succeeds and no index bare-reverts, so V3 is empty for it
 (`v3_empty`). Here the publicly selected void-call image
 (`Mutation.compileCall`, `NoneProducer.plan`) serves every index: the return
-and bare-revert claims are `NoneProducer.returns`/`bare_revert` at positive
-indices and vacuous at the exhausted index 0; coherence is derived from the
+claim is `NoneProducer.returns` at positive indices and vacuous at the
+exhausted index 0; the bare-revert claim is vacuous at every index (the source
+never bare-reverts), discharged via `NoneProducer.bare_revert`; coherence is derived from the
 source; coverage is `V3FixedThunkProducer.coverage`; the successful witness is
 a real admitted caller at index 1.
 
@@ -139,18 +145,22 @@ theorem v3_empty (approved : Nat → InterfaceV3.Admission P.C P.Γ) :
       trivialStep) :=
   no_recursive_producer (trivial_never_reverts "trivial")
 
-/-- The always-exhausting family stays empty under V4, at the same domain. -/
+/-- The always-exhausting family stays empty under V4 (at every domain; shown
+here at this one). It is a different family and does not test `producer`. -/
 theorem exhausting_empty (approved : Nat → InterfaceV3.Admission P.C P.Γ) :
     ¬ Nonempty (InterfaceV4.PendingRecursiveReturns 0 F approved domain "trivial" .nil .none
       V4Migration.exhaustingStep) :=
   V4Migration.exhausting_empty 0 F approved domain "trivial"
 
-/-- Index 0 is admitted and covered, yet exhausts: coverage is not success. -/
+/-- Index 0 is admitted and has an Entry, yet exhausts: coverage is not success. -/
 theorem exhausted_is_covered :
-    domain 0 1 16 caller0 P.base machine0 10 ∧ (source 0).run caller0 = .error .exhausted :=
-  ⟨member, source_zero caller0⟩
+    domain 0 1 16 caller0 P.base machine0 10 ∧
+    InterfaceV1.Entry (plan.at 0) 1 0 16 F caller0 P.base machine0 10 ∧
+    (source 0).run caller0 = .error .exhausted :=
+  ⟨member, coverage 0 1 16 caller0 P.base machine0 10 member, source_zero caller0⟩
 
-/-- A changed frame is refused by the physical domain. -/
+/-- A changed frame is refused by the physical domain (as the V3
+`insufficient_frame_refused`; not specific to V4). -/
 theorem wrong_frame : ¬ domain 1 1 14 caller0 P.base machine0 10 := by
   intro h
   have := h.2.2.2.2.2.2.1

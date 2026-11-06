@@ -24,8 +24,14 @@ theorem same_plan (approved : Nat → InterfaceV3.Admission SameCallInputs.C Γ)
 /-- Back to V3, supplying the original reverting entry. -/
 theorem round_trip (approved : Nat → InterfaceV3.Admission SameCallInputs.C Γ)
     (agreement : InterfaceV3.FamilyAdmissionAgreement approved FrozenScopeCoverage.inputs) :
-    (recursive_toV3 (familyV4 approved agreement)
-      (family approved agreement).required_reverting_entry).plan =
-      (family approved agreement).plan := rfl
+    recursive_toV3 (familyV4 approved agreement)
+      (family approved agreement).required_reverting_entry = family approved agreement :=
+  recursive_round_trip _
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.V4MigrationControls
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.V4MigrationControls.round_trip' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.V4MigrationControls.round_trip

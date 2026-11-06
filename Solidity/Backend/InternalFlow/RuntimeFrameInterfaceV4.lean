@@ -9,7 +9,8 @@ V4 keeps every V3 field except `required_reverting_entry`: the same external
 admission domain and agreement duty, universal Entry coverage, an admitted
 successful entry, the universal `ReturnClaim`, the universal (conditional)
 `BareRevertClaim` and, for recursive families, source coherence. Dropping the
-reverting witness only removes a non-vacuity witness; no claim is weakened.
+reverting witness only removes a non-vacuity witness; no claim is weakened,
+but a V4 producer's `BareRevertClaim` may then hold only vacuously.
 
 These are signatures and pending duties only, with no instance. Provenance of
 the approved domain stays external, exactly as in V3; panic, payload,

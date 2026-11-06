@@ -1786,20 +1786,27 @@ external.
 - `RuntimeFrameV4TrivialFamily.producer` is a real V4 recursive producer for
   the never-reverting empty-body family, over the populated `CompileExamples`
   caller with the publicly selected void-call image at every index. Return
-  and bare-revert claims are `NoneProducer.returns`/`bare_revert` at positive
-  indices and vacuous at the exhausted index 0; coherence is derived from the
+  claims are `NoneProducer.returns` at positive indices and vacuous at the
+  exhausted index 0; the bare-revert claim holds vacuously at every index
+  (the source never bare-reverts); coherence is derived from the
   source; coverage is universal over a physical domain with no index filter;
   the successful entry is a real admitted caller at index 1. `satisfiable`
   shows all V4 fields jointly satisfiable (with `approved := domain`, which
   is not provenance). `v3_empty`: V3 is empty for the same family and domain,
-  so V4 strictly extends V3.
-- V4 still does not close every recursive family, and cannot:
-  `V4Migration.no_success_producer` empties it for any family with no
-  successful run (`exhaustingStep`, `exhausting_empty`), and it keeps source
-  coherence, which one code image needs. The remaining gap for a universal
-  closure is a general recursive compiler: the inputs of
-  `V4Migration.of_unrolled` (per-body ordinary-call `ReturnClaim`) for an
-  arbitrary `step`. Only selected families have them.
+  so V4 strictly extends V3. This family is degenerate: `trivialStep` ignores
+  its continuation, so no index recurses. A V4 producer for a genuinely
+  recursive never-reverting family is not supplied; the populated recursive
+  families reach V4 through `recursive_ofV3`
+  (`RuntimeFrameV4MigrationControls`), but those can also revert.
+- V4 still does not close every recursive family. By design it keeps the
+  success witness, so `V4Migration.no_success_producer` empties it for a
+  family that succeeds from no caller (`exhaustingStep`, `exhausting_empty`),
+  although its return claim would hold vacuously; and it keeps source
+  coherence, which one code image needs (`no_incoherent_producer`; no concrete
+  incoherent family is exhibited). The remaining gap for a universal closure
+  is a general recursive compiler: the inputs of `V4Migration.of_unrolled`
+  (per-body ordinary-call `ReturnClaim`, with coverage, coherence and a
+  success witness) for an arbitrary `step`. Only selected families have them.
 
 ### Migration notes for V3 consumers
 
@@ -1810,7 +1817,13 @@ external.
   witness) should take the V4 structure; it then also accepts success-only
   sources.
 - `call_toV3`, `fixed_toV3`, `recursive_toV3` turn a V4 producer plus an
-  admitted `RevertingEntry` for its plan back into V3. Consumers that need the
+  admitted `RevertingEntry` for its plan back into V3;
+  `recursive_round_trip`/`recursive_round_trip'` prove the two maps inverse
+  (by `rfl`), and `RuntimeFrameV4MigrationControls.round_trip` checks it on
+  the scoped scalar family.
+- Without the reverting witness, a V4 `BareRevertClaim` may hold only
+  vacuously (it does for every never-reverting source); it carries content
+  only for sources that can bare-revert. Consumers that need the
   reverting witness keep asking for V3.
 - `V4Migration.of_unrolled` is the V4 analogue of `V3GeneralBoundary.of_unrolled`.
 
@@ -1820,3 +1833,10 @@ The user chose to merge the G49 `PassCorrect` modules to master first (Q2).
 Wait: {lane: cloud/move6-20261106/g49-final, item: PassCorrect on master}.
 After that lands, this lane defines the canonical P1 Event/Outcome languages
 and proves `p1_frame_bridge`.
+
+Reviews: read-only finder and skeptic reviews found no proof defect or field
+mismatch with V3. Fixed from their findings: the trivial family is described
+as degenerate and its bare-revert claim as vacuous at every index; the V4
+boundary wording matches `NeverSucceeds`; `no_incoherent_producer` replaces an
+unproved docstring claim; full `rfl` round trips replace a plan-only check;
+`exhausted_is_covered` states the Entry; the migration control is pinned.
