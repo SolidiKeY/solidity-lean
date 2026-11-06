@@ -190,6 +190,15 @@ programs, and the check is a statement the rules already run.
   least as wide is expected, and a literal where it fits; `uint8 x = total;`
   and `uint8 x = 300;` are elaboration errors (`fitCheck`), as they are
   compile errors.  So a narrow variable only ever holds a value of its range.
+  Reference conversions (Source `STy.implicit`, 2026-11-06) compare array
+  elements at the target's location, so a nested `calldata` or `storage`
+  array converts to `memory` as in solc, and refuse a copy out of `storage`
+  of a struct holding a mapping, or of an array of such structs (solc's
+  "only valid in storage"); a storage pointer keeps its type. One
+  deviation remains: `bytes[]`, `string[]` and `uint256[][]` `calldata`
+  convert to `memory` as in solc, but the Source copy of dynamically
+  encoded elements is not modelled and is `stuck`
+  (`docs/feature-work/source-soundness.md`, stuck census).
 - **Casts.**  A cast keeps the low bits of its operand's 256-bit word, as
   solc's conversions do: `uintN(e)` of a `uint` is `e % 2^N`, of an `int`
   `uint(e) % 2^N` (`uint(i)`, `UnOp.toUint`, the two's complement word), and
