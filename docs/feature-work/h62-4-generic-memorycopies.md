@@ -293,3 +293,26 @@ same original VM, branch and goal; do not create a replacement goal/thread.
 The coordinator must arrange the next thread after resolving the blockers.
 Artifact metadata records the full committed head, patch, evidence archive and
 SHA256 manifest under `/workspace/h62-generic-memorycopies-artifacts/`.
+
+## H82 final retirement acknowledgement
+
+STOPPED for handoff to `solidity-parallel-20261103/memory-copies`. The explicit
+stop-and-handoff and subsequent ordering correction override routing to continue.
+No new proof implementation is authorized. Original full assignment, original
+queues and scope are committed under tests/h62/item4/generic-memorycopies/handoff/.
+The original rendered-prompt digest is recorded as provenance; the transcript
+file has its own independently reported checksum, not a claimed rendering match.
+
+H82 withdraws blanket exact-file waits for statement-preserving proof-only work.
+Dependent definition bodies, statements, interfaces, budgets, axioms and exclusions
+still require owner. Historical earlier blocker descriptions are not new policy.
+The Raw prerequisite and all unfinished proofs/gates pass to the survivor.
+
+H71 push permission is unavailable in this worker's inputs, so no branch was
+pushed; original no-push authorization remains. Only a preservation commit and
+cumulative patch/bundle export were made. No source, VM, branch or evidence was
+deleted. The goal is not complete. PAUSED was requested by the user, but no
+pause goal tool exists: exposed stop_goal permits only complete or blocked.
+Neither is a pause, so no misleading transition was attempted. Implementation
+is stopped locally and must not automatically resume. Successor integration
+begins only after this final stopped/head acknowledgement.
