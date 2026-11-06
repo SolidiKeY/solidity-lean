@@ -17,7 +17,7 @@ acceptance. There are zero introduced Lean helpers, axioms, sorry or frozen
 statement changes. No proof budget, premise, exclusion or observation changed.
 Core remains dependency-free. No push, merge, publication or PR occurred.
 
-The old full clean gate is running in a bounded serial session. Its completion
+The old full clean gate is running as attempt 3 in a bounded serial session. Its completion
 and old Bridge clean measurement remain pending. Official release provisioning
 and both KeySort prerequisites passed; proof/API migration and new full gates
 remain pending. No RUNTIME_GATE_PASS or slowdown claim is made.
@@ -63,13 +63,27 @@ follows merely from a runner label.
 
 The first old attempt was stopped after independent review found timeout group
 cleanup unsafe. It returned -15 after 81.05 seconds and is not a valid clean
-measurement. Its outputs are preserved outside git. The restarted attempt uses
-`/workspace/h62-migrate-bridge-evidence/old/clean-build-2`. Its exact launched
-runner is saved there as `active-attempt-runner.py`; an independent cgroup
-watchdog supplements its host guard. Require its eventual `receipt.json`,
-`cgroup-watchdog.json` and `build.log` together. No dependency package directory
-existed at launch or the reviewers' subsequent inspection. Do not restart or
-accept this attempt without inspecting the live process and logs first.
+measurement. Its outputs are preserved outside git. Attempt 2 ran for
+1,178.6967 seconds before the VM-headroom watchdog stopped it in core module
+`Solidity/Backend/Scalar/PowerBounds.lean`. Its runner receipt and independent
+watchdog receipt are both preserved under old/clean-build-2; this is a failed
+resource gate, not a clean timing result or a theorem failure.
+
+After stopping, cgroup accounting showed 4.58 GB of file cache. Advisory eviction
+of only this worker's unused downloaded v4.35 archive/extraction pages reduced VM
+usage from 4.95 GB to 1.05 GB. Files were opened read-only; no contents were
+changed or deleted, and no proof/resource limit was raised. The operation and
+counts are saved as old/cache-release.json. Failed attempt 2 build products
+were preserved separately before restarting.
+
+Attempt 3 is the active old clean gate at
+`/workspace/h62-migrate-bridge-evidence/old/clean-build-3`, using the reviewed
+runner's built-in host and VM guards, the same Lean `-j1 -M10240`, 300-second
+module limit and 4 GiB reserve. This provisioning retry has not passed. No
+Bridge dependency package directory existed at its clean start. Do not restart
+or accept it without inspecting the live process, starting state, receipt and
+log. Final before/after timing must use matching clean artifact/cache/resource
+conditions, with unused release-cache handling documented symmetrically.
 
 ## Independent review
 
@@ -80,7 +94,7 @@ Both found timeout process-group cleanup could leak Lean processes; finder
 found stale sysroot reuse and dependency-cache measurement gaps; skeptic found
 SolKey skip, clean-tree and VM-headroom risks. All reported code findings were
 fixed. Their final checks confirm the fixes, real compiler `-j1 -M10240`, and
-active watchdog. Final build acceptance and any proof edits need their own
+attempt 2's separate watchdog. Final build acceptance and any proof edits need their own
 milestone reviews. Full review text is exported in off-git `reviews.md`.
 
 ## Non-Lean checkpoint checks
@@ -100,7 +114,9 @@ change the document or manufacture the dependency path to silence this result.
 `compare-timings.py --old <run-directory> --new <run-directory>` requires
 completed bounded-run receipts, matching explicit command/resource/cache/rules
 profiles, expected actual Lean/Lake versions, finite positive durations, and a
-completed independent watchdog receipt for the active old attempt. Missing,
+completed independent watchdog receipt for historical attempt 2, whose saved
+launched-source marker selects that requirement. Attempt 3 uses its built-in
+guard and runner receipt. Missing,
 interrupted or malformed evidence returns structured `blocked` output and exit
 2. The actual current comparison returns this pending state because the old
 build has not finished; it does not produce an estimated timing delta.
@@ -129,7 +145,9 @@ Bridge pins still target v4.24 mathlib/CSLib/auto. Root owns toolchain edits;
 V15 owns live producer work. No existing producer file has been edited or
 claimed, and absent coordination replies grant no permission.
 
-Continue the same persistent goal; no replacement goal was created. Goal tool
+Continue the same persistent goal; no replacement goal was created. The reviewed
+backfill milestones are ready for coordinator-owned fresh-thread handoff; do
+not self-launch a replacement thread or goal. Goal tool
 inspection was unavailable and the coordinator explicitly waived that optional
 inspection. Inspect the running old gate, finish its measurement and acceptance,
 then resume proof migration once the dependency/ownership receipt arrives.
