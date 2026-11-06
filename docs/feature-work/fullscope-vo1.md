@@ -1430,3 +1430,18 @@ controls reduce them by `rfl` in seconds, and the pass family would move togethe
 passes share namespace `Solidity.Optimizer.ConstFold` (the lane's existing convention);
 private copies of `TEnv.get_set(_ne)` and `ArrTy.eq` in `Loads.lean` (avoid importing
 `RunFrame`/`Calculus.TermEq` there).
+
+### RLE extension: keyed storage loads
+
+After the reviews, `Load.sindex` adds primitive entries of a state-variable mapping or
+array at a simple key (`balances[msg.sender]`, `values[i]`) as static loads: load-load
+reuse for both, store-to-load forwarding for mapping entries (`balances[k] = s;`; an array
+element is not forwarded, its bounds check reading the array), killed by any write to
+the same state variable (root granularity: `balances[2] = 7` kills `balances[1]`) and by an
+assignment to a local the key reads; a write to another state variable keeps them
+(`Load.evalT_storage_write`, both the root reference and the entry reference keep their
+root). Controls `rle_keyed`, `rle_keyed_forwarded`, `rle_keyed_kill`,
+`rle_keyed_local_kill`, `rle_keyed_local_store_kept` and the `#guard`ed negative
+(forwarding past the key's assignment reads `5` where the program reads `0`). Still not
+covered: struct members of storage (`s.f`), nested paths, key-sensitive apartness of two
+entries of one mapping (different literal keys).

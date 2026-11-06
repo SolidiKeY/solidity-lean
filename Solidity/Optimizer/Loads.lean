@@ -12,6 +12,8 @@ to the same location reuses that value (store-to-load forwarding). The static
 loads (`Load`) are
 
 * `x` — a read of a primitive state variable (`Val.read (.root x _)`);
+* `v[k]` — a primitive entry of a state-variable mapping or array at a simple
+  key (`balances[msg.sender]`, `values[i]`);
 * `m.f` — a read of a primitive member of a memory local's struct
   (`Val.readMem (.field (.var m _) f _)`);
 * `m[k]` — a read of a primitive element of a memory local's array at a simple
@@ -32,8 +34,8 @@ proved against the semantics:
 
 * a local assignment `i = e` kills the entries whose holder or location reads
   `i` (`LEnt.reads`);
-* a storage write `assign l _` kills only the storage entries of the root `l`
-  starts at (`Loc.root?`; a write through a storage alias kills every storage
+* a storage write `assign l _` kills only the storage entries (keyed ones
+  included: the granularity is the state variable) of the root `l` starts at (`Loc.root?`; a write through a storage alias kills every storage
   entry); storage and memory are disjoint, so memory entries survive
   (`Storage.find_write_other`);
 * a memory write `assignMem l _` kills only the memory entries it may alias
@@ -66,6 +68,9 @@ inductive Load (C : Contract) (Γ : Ctx) : PrimTy → Type where
       (h : C.fieldType s f = some (.prim p)) : Load C Γ p
   | mindex {p : PrimTy} {R : RefTy} (a : ArrTy R (.prim p)) (i : Idx Γ (.mem R))
       (hm : (Ty.ref R).mapFree = true) (k : Simple C Γ .uint) : Load C Γ p
+  /-- `v[k]` of a state variable `v`, a mapping or an array, at a simple key. -/
+  | sindex {p : PrimTy} {R : RefTy} {k : PrimTy} (it : IndexTy R k (.prim p)) (r : Name)
+      (h : C.rootType r = some (.ref R)) (key : Simple C Γ k) : Load C Γ p
 
 namespace Load
 
@@ -74,10 +79,27 @@ def toVal {p : PrimTy} : Load C Γ p → Val C Γ p
   | .sroot r h => .read (.root r h)
   | .mfield i hm f h => .readMem (.field (.var i hm) f h)
   | .mindex a i hm k => .readMem (.index a (.var i hm) (.simple k))
+  | .sindex it r h key => .read (.index it (.loc (.root r h)) (.simple key))
+
+/-- A mapping's index (every key is in bounds), not an array's. -/
+def isMapB {R : RefTy} {k : PrimTy} {V : Ty} : IndexTy R k V → Bool
+  | .map => true
+  | .arr _ => false
+
+/-- A load a store of its location forwards: a state variable, or a mapping entry. -/
+def fwdOk {p : PrimTy} : Load C Γ p → Bool
+  | .sroot .. => true
+  | .sindex it .. => isMapB it
+  | .mfield .. | .mindex .. => false
+
+/-- The state variable a storage load reads. -/
+def sroot? {p : PrimTy} : Load C Γ p → Option Name
+  | .sroot r _ | .sindex _ r _ _ => some r
+  | .mfield .. | .mindex .. => none
 
 /-- The memory location of a memory load. -/
 def mloc? {p : PrimTy} : Load C Γ p → Option (MLoc C Γ (.prim p))
-  | .sroot .. => none
+  | .sroot .. | .sindex .. => none
   | .mfield i hm f h => some (.field (.var i hm) f h)
   | .mindex a i hm k => some (.index a (.var i hm) (.simple k))
 
@@ -97,20 +119,43 @@ theorem ofMLoc?_eq {p : PrimTy} {m : MLoc C Γ (.prim p)} {l : Load C Γ p}
   | .field (.var i hm) f h', h => cases h; rfl
   | .index a (.var i hm) (.simple k), h => cases h; rfl
 
+/-- A storage location as a load, if it is static. -/
+def ofLoc? {p : PrimTy} : Loc C Γ (.prim p) → Option (Load C Γ p)
+  | .root r h => some (.sroot r h)
+  | .index it b i =>
+    match b, i with
+    | .loc (.root r h), .simple key => some (.sindex it r h key)
+    | _, _ => none
+  | .field .. => none
+
+theorem ofLoc?_eq {p : PrimTy} {l : Loc C Γ (.prim p)} {ld : Load C Γ p}
+    (h : ofLoc? l = some ld) : ld.toVal = .read l := by
+  cases l with
+  | root r h' => cases h; rfl
+  | field => simp only [ofLoc?, reduceCtorEq] at h
+  | index it b i =>
+    cases b with
+    | alias => simp only [ofLoc?, reduceCtorEq] at h
+    | loc l' =>
+      cases l' with
+      | root r h' =>
+        cases i with
+        | simple key => cases h; rfl
+        | read | binop | unop | ternary | readMem | len | mlen | modular | hash =>
+          simp only [ofLoc?, reduceCtorEq] at h
+      | field | index => simp only [ofLoc?, reduceCtorEq] at h
+
 /-- An expression as a load, if it is one. -/
 def ofVal? {p : PrimTy} : Val C Γ p → Option (Load C Γ p)
-  | .read (.root r h) => some (.sroot r h)
+  | .read l => ofLoc? l
   | .readMem m => ofMLoc? m
-  | .read (.field ..) | .read (.index ..) | .simple _ | .binop .. | .unop .. | .ternary ..
+  | .simple _ | .binop .. | .unop .. | .ternary ..
   | .len .. | .mlen .. | .modular .. | .hash .. => none
 
 theorem ofVal?_eq {p : PrimTy} {v : Val C Γ p} {l : Load C Γ p} (h : ofVal? v = some l) :
     l.toVal = v := by
   cases v with
-  | read l =>
-    cases l with
-    | root r h' => cases h; rfl
-    | field | index => simp only [ofVal?, reduceCtorEq] at h
+  | read l => exact ofLoc?_eq h
   | readMem m => exact ofMLoc?_eq h
   | simple | binop | unop | ternary | len | mlen | modular | hash =>
     simp only [ofVal?, reduceCtorEq] at h
@@ -120,8 +165,12 @@ def beq {p : PrimTy} : Load C Γ p → Load C Γ p → Bool
   | .sroot r _, .sroot r' _ => r == r'
   | .mfield i _ f _, .mfield i' _ f' _ => i.toNat == i'.toNat && f == f'
   | .mindex _ i _ k, .mindex _ i' _ k' => i.toNat == i'.toNat && Simple.beq k k'
+  | .sindex (k := k) _ r _ key, .sindex (k := k') _ r' _ key' =>
+    r == r' && if hk : k' = k then Simple.beq key (hk ▸ key') else false
   | .sroot .., .mfield .. | .sroot .., .mindex .. | .mfield .., .sroot ..
-  | .mfield .., .mindex .. | .mindex .., .sroot .. | .mindex .., .mfield .. => false
+  | .mfield .., .mindex .. | .mindex .., .sroot .. | .mindex .., .mfield ..
+  | .sindex .., .sroot .. | .sindex .., .mfield .. | .sindex .., .mindex ..
+  | .sroot .., .sindex .. | .mfield .., .sindex .. | .mindex .., .sindex .. => false
 
 /-- Two positions of one context at one number have one type. -/
 theorem ty_of_toNat {t u : LTy} (i : Idx Γ t) (j : Idx Γ u) (h : i.toNat = j.toNat) : t = u := by
@@ -132,6 +181,15 @@ theorem ty_of_toNat {t u : LTy} (i : Idx Γ t) (j : Idx Γ u) (h : i.toNat = j.t
 
 theorem ArrTy.eq {R : RefTy} {E : Ty} (a b : ArrTy R E) : a = b := by
   cases a <;> cases b <;> rfl
+
+theorem IndexTy.eq {R : RefTy} {k : PrimTy} {V : Ty} (a b : IndexTy R k V) : a = b := by
+  cases a with
+  | map => cases b with
+    | map => rfl
+    | arr a' => cases a'
+  | arr a => cases b with
+    | map => cases a
+    | arr b' => rw [ArrTy.eq a b']
 
 theorem eq_of_beq {p : PrimTy} : (a b : Load C Γ p) → a.beq b = true → a = b
   | .sroot r h, .sroot r' h', e => by
@@ -159,8 +217,20 @@ theorem eq_of_beq {p : PrimTy} : (a b : Load C Γ p) → a.beq b = true → a = 
     obtain rfl := Idx.toNat_inj i i' hi
     obtain rfl := ArrTy.eq a a'
     rw [Simple.beq_eq k k' hk]
+  | .sindex (R := R) (k := k) it r h key, .sindex (R := R') (k := k') it' r' h' key', e => by
+    simp only [beq, Bool.and_eq_true, beq_iff_eq] at e
+    obtain ⟨rfl, e⟩ := e
+    obtain rfl : R = R' := Ty.ref.inj (Option.some.inj (h.symm.trans h'))
+    split at e
+    · next hk =>
+      subst hk
+      obtain rfl := IndexTy.eq it it'
+      rw [Simple.beq_eq key key' e]
+    · simp only [Bool.false_eq_true] at e
   | .sroot .., .mfield .., e | .sroot .., .mindex .., e | .mfield .., .sroot .., e
-  | .mfield .., .mindex .., e | .mindex .., .sroot .., e | .mindex .., .mfield .., e => by
+  | .mfield .., .mindex .., e | .mindex .., .sroot .., e | .mindex .., .mfield .., e
+  | .sindex .., .sroot .., e | .sindex .., .mfield .., e | .sindex .., .mindex .., e
+  | .sroot .., .sindex .., e | .mfield .., .sindex .., e | .mindex .., .sindex .., e => by
     simp only [beq, Bool.false_eq_true] at e
 
 end Load
@@ -195,6 +265,7 @@ def reads {p : PrimTy} (n : Nat) : Load C Γ p → Bool
   | .sroot .. => false
   | .mfield i .. => i.toNat == n
   | .mindex _ i _ k => i.toNat == n || readsAt n k
+  | .sindex _ _ _ key => readsAt n key
 
 theorem evalT_setLocal {p q : PrimTy} (σ : State C Γ) (i : Idx Γ (.val q)) (v : q.Denote) :
     (l : Load C Γ p) → l.reads i.toNat = false →
@@ -209,12 +280,19 @@ theorem evalT_setLocal {p q : PrimTy} (σ : State C Γ) (i : Idx Γ (.val q)) (v
     have hk := evalT_setLocal_of_not_reads σ i v k hr.2
     simp only [toVal, Val.evalT, MLoc.addrT, mvalT_var, State.setLocal] at hk ⊢
     rw [get_set_ne i j v σ.env (Ne.symm hr.1), hk]
+  | .sindex it r h key, hr => by
+    simp only [reads] at hr
+    have hk := evalT_setLocal_of_not_reads σ i v key hr
+    simp only [toVal, Val.evalT, Loc.resolveT, SPath.resolveT, ok_bind] at hk ⊢
+    rw [hk]
+    rfl
 
 /-- A load read one local deeper. -/
 def shift {t : LTy} {p : PrimTy} : Load C Γ p → Load C (t :: Γ) p
   | .sroot r h => .sroot r h
   | .mfield i hm f h => .mfield i.there hm f h
   | .mindex a i hm k => .mindex a i.there hm (shiftS k)
+  | .sindex it r h key => .sindex it r h (shiftS key)
 
 theorem evalT_shift {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {p : PrimTy} :
     (l : Load C Γ p) → (l.shift (t := t)).toVal.evalT (σ.push v) = l.toVal.evalT σ
@@ -225,11 +303,14 @@ theorem evalT_shift {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {p : Prim
   | .mindex a i hm k => by
     simp only [shift, toVal, Val.evalT, MLoc.addrT, mvalT_var, shiftS_evalT]
     rfl
+  | .sindex it r h key => by
+    simp only [shift, toVal, Val.evalT, Loc.resolveT, SPath.resolveT, ok_bind, shiftS_evalT]
+    rfl
 
 /-- A storage write leaves every memory load. -/
 theorem evalT_withStorage_mem {p : PrimTy} (σ : State C Γ) (st : Storage C) :
     (l : Load C Γ p) → l.mloc?.isSome = true → l.toVal.evalT (σ.withStorage st) = l.toVal.evalT σ
-  | .sroot .., h => by simp only [mloc?, Option.isSome_none, Bool.false_eq_true] at h
+  | .sroot .., h | .sindex .., h => by simp only [mloc?, Option.isSome_none, Bool.false_eq_true] at h
   | .mfield .., _ => by
     simp only [toVal, Val.evalT, MLoc.addrT, mvalT_var]
     rfl
@@ -238,9 +319,11 @@ theorem evalT_withStorage_mem {p : PrimTy} (σ : State C Γ) (st : Storage C) :
     rfl
 
 /-- A memory write leaves every storage load. -/
-theorem evalT_withHeap_sroot {p : PrimTy} (σ : State C Γ) (hp : Heap σ.H) (r : Name)
-    (h : C.rootType r = some (.prim p)) :
-    (Load.sroot (Γ := Γ) r h).toVal.evalT (σ.withHeap hp) = (Load.sroot r h).toVal.evalT σ := rfl
+theorem evalT_withHeap_storage {p : PrimTy} (σ : State C Γ) (hp : Heap σ.H) :
+    (l : Load C Γ p) → l.mloc? = none → l.toVal.evalT (σ.withHeap hp) = l.toVal.evalT σ
+  | .sroot .., _ => rfl
+  | .sindex .., _ => rfl
+  | .mfield .., h | .mindex .., h => by simp only [mloc?, reduceCtorEq] at h
 
 end Load
 
@@ -402,6 +485,9 @@ theorem Storage.find_write_prim {st st' : Storage C} {p : PrimTy} {ref : SRef C 
   simp only [SVal.isPrim, Ty.isPrimitive, ite_true] at h
   exact Storage.find_save_same h
 
+theorem find_root {st : Storage C} {T : Ty} (n : Name) (h : C.rootType n = some T) :
+    st.find (SRef.ofRoot n h) = some (st.get h) := rfl
+
 theorem Simple.evalT_withStorage (σ : State C Γ) (st : Storage C) {p : PrimTy} (s : Simple C Γ p) :
     s.evalT (σ.withStorage st) = s.evalT σ := by
   cases s <;> rfl
@@ -410,13 +496,33 @@ theorem Simple.evalT_withHeap (σ : State C Γ) (hp : Heap σ.H) {p : PrimTy} (s
     s.evalT (σ.withHeap hp) = s.evalT σ := by
   cases s <;> rfl
 
-theorem Load.evalT_sroot_write (σ : State C Γ) {st : Storage C} {U : Ty} {ref : SRef C U}
-    {v : SVal U} (hw : σ.storage.write ref v = some st) {p : PrimTy} (r : Name)
-    (h : C.rootType r = some (.prim p)) (hr : r ≠ ref.root) :
-    (Load.sroot (Γ := Γ) r h).toVal.evalT (σ.withStorage st) = (Load.sroot r h).toVal.evalT σ := by
-  simp only [Load.toVal, Val.evalT, Loc.resolveT, ok_bind]
-  rw [show (σ.withStorage st).storage = st from rfl,
-    Storage.find_write_other hw (SRef.ofRoot r h) hr]
+/-- A storage load reads only references at its state variable: a write at
+another root leaves it (`uint a = total; age = 5;` keeps `total`, and
+`balances[k]` survives `age = 5;`). -/
+theorem Load.evalT_storage_write (σ : State C Γ) {st : Storage C} {U : Ty} {ref : SRef C U}
+    {v : SVal U} (hw : σ.storage.write ref v = some st) {p : PrimTy} :
+    (l : Load C Γ p) → {r : Name} → l.sroot? = some r → r ≠ ref.root →
+      l.toVal.evalT (σ.withStorage st) = l.toVal.evalT σ
+  | .sroot r' h, r, hl, hr => by
+    simp only [Load.sroot?, Option.some.injEq] at hl
+    subst hl
+    simp only [Load.toVal, Val.evalT, Loc.resolveT, ok_bind]
+    rw [show (σ.withStorage st).storage = st from rfl,
+      Storage.find_write_other hw (SRef.ofRoot r' h) hr]
+  | .sindex it r' h key, r, hl, hr => by
+    simp only [Load.sroot?, Option.some.injEq] at hl
+    subst hl
+    simp only [Load.toVal, Val.evalT, Loc.resolveT, SPath.resolveT, Storage.checkIndex, ok_bind,
+      Simple.evalT_withStorage]
+    rw [show (σ.withStorage st).storage = st from rfl,
+      Storage.find_write_other hw (SRef.ofRoot r' h) hr]
+    simp only [TRes.ofOpt]
+    split
+    · simp only [pure, Except.pure, ok_bind]
+      rw [Storage.find_write_other hw ((SRef.ofRoot r' h).index it (key.evalT σ)) hr]
+    · rfl
+  | .mfield .., _, hl, _ | .mindex .., _, hl, _ => by
+    simp only [Load.sroot?, reduceCtorEq] at hl
 
 /-! ## Memory: field-sensitive apartness -/
 
@@ -619,18 +725,20 @@ theorem holds_decl {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {q
 write may reach any root). -/
 def keepS (n? : Option Name) (E : List (LEnt C Γ)) : List (LEnt C Γ) :=
   E.filter fun a =>
-    match a.l with
-    | .sroot r _ =>
+    match a.l.sroot? with
+    | some r =>
       match n? with
       | some n => r != n
       | none => false
-    | .mfield .. | .mindex .. => true
+    | none => true
 
-/-- The entry a store of a simple value at a state variable makes. -/
+/-- The entry a store of a simple value makes at a state variable, or at a
+mapping entry of one at a simple key (`balances[k] = s;`; an array element is
+not forwarded, its bounds being the array's). -/
 def storeEnt? {T : Ty} (l : Loc C Γ T) : Src C Γ T → Option (LEnt C Γ)
   | .val v =>
-    match l, v with
-    | .root n h, .simple s => some ⟨_, .sroot n h, s⟩
+    match simple? v, Load.ofLoc? l with
+    | some s, some ld => if ld.fwdOk then some ⟨_, ld, s⟩ else none
     | _, _ => none
   | .copy .. | .fixedCopy .. | .copyMem .. | .fixedCopyMem .. => none
 
@@ -716,42 +824,76 @@ theorem holds_store {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {
   rcases List.mem_append.mp ha with ha | ha
   · -- the forwarded store
     cases r with
-    | val v =>
-      cases l with
-      | root n h =>
-        cases v with
-        | simple s =>
-          simp only [storeEnt?, Option.toList_some, List.mem_singleton] at ha
-          subst ha
-          simp only [Src.valueT, Val.evalT, pure, Except.pure, bind, Except.bind,
-            Except.ok.injEq] at hsv
-          simp only [Loc.resolveT, Except.ok.injEq] at href
-          subst hsv href
-          show Val.evalT (σ.withStorage st) (.read (.root n h)) = _
-          simp only [Val.evalT, Loc.resolveT, ok_bind]
-          rw [show (σ.withStorage st).storage = st from rfl, Storage.find_write_prim hw,
-            Simple.evalT_withStorage]
-          rfl
-        | read | binop | unop | ternary | readMem | len | mlen | modular | hash =>
-          simp only [storeEnt?, Option.toList_none, List.not_mem_nil] at ha
-      | field | index => simp only [storeEnt?, Option.toList_none, List.not_mem_nil] at ha
     | copy | fixedCopy | copyMem | fixedCopyMem =>
       simp only [storeEnt?, Option.toList_none, List.not_mem_nil] at ha
+    | val v =>
+      simp only [storeEnt?] at ha
+      cases hs : simple? v with
+      | none => simp only [hs, Option.toList_none, List.not_mem_nil] at ha
+      | some s =>
+        cases hl : Load.ofLoc? l with
+        | none => simp only [hs, hl, Option.toList_none, List.not_mem_nil] at ha
+        | some ld =>
+          simp only [hs, hl] at ha
+          split at ha
+          · next hfw =>
+            simp only [Option.toList_some, List.mem_singleton] at ha
+            subst ha
+            have hv := simple?_eq hs
+            subst hv
+            have hlv := Load.ofLoc?_eq hl
+            simp only [Src.valueT, Val.evalT, pure, Except.pure, bind, Except.bind,
+              Except.ok.injEq] at hsv
+            subst hsv
+            cases ld with
+            | sroot n h =>
+              simp only [Load.toVal, Val.read.injEq] at hlv
+              subst hlv
+              simp only [Loc.resolveT, Except.ok.injEq] at href
+              subst href
+              show Val.evalT (σ.withStorage st) (.read (.root n h)) = _
+              simp only [Val.evalT, Loc.resolveT, ok_bind]
+              rw [show (σ.withStorage st).storage = st from rfl, Storage.find_write_prim hw,
+                Simple.evalT_withStorage]
+              rfl
+            | sindex it n h key =>
+              cases it with
+              | arr => simp only [Load.fwdOk, Load.isMapB, Bool.false_eq_true] at hfw
+              | map =>
+                simp only [Load.toVal, Val.read.injEq] at hlv
+                subst hlv
+                simp only [Loc.resolveT, SPath.resolveT, ok_bind, Storage.checkIndex,
+                  find_root, Storage.inBounds, TRes.ofOpt, Option.bind_eq_bind,
+                  Option.bind_some] at href
+                cases href
+                show Val.evalT (σ.withStorage st) (.read (.index .map (.loc (.root n h))
+                  (.simple key))) = _
+                simp only [Val.evalT, Loc.resolveT, SPath.resolveT, ok_bind,
+                  Storage.checkIndex, find_root, Storage.inBounds, TRes.ofOpt,
+                  Option.bind_eq_bind, Option.bind_some, Simple.evalT_withStorage, pure,
+                  Except.pure]
+                rw [show (σ.withStorage st).storage = st from rfl, Storage.find_write_prim hw]
+                rfl
+            | mfield | mindex => simp only [Load.fwdOk, Bool.false_eq_true] at hfw
+          · simp only [Option.toList_none, List.not_mem_nil] at ha
   · obtain ⟨hmem, hk⟩ := List.mem_filter.mp ha
     have hold := hE a hmem
     obtain ⟨q, ld, s⟩ := a
     rw [show (⟨q, ld, s⟩ : LEnt C Γ).s.evalT (σ.withStorage st) = s.evalT σ from
       Simple.evalT_withStorage σ st s]
-    cases ld with
-    | sroot rn h =>
-      simp only at hk
+    cases hs : ld.sroot? with
+    | some rn =>
+      simp only [hs] at hk
       cases hn : l.root? with
       | none => simp only [hn, Bool.false_eq_true] at hk
       | some n =>
         simp only [hn, bne_iff_ne] at hk
-        rw [Load.evalT_sroot_write σ hw rn h (by rw [Loc.resolveT_rootName l hn href]; exact hk)]
+        rw [Load.evalT_storage_write σ hw ld hs (by rw [Loc.resolveT_rootName l hn href]; exact hk)]
         exact hold
-    | mfield | mindex => rw [Load.evalT_withStorage_mem σ st _ rfl]; exact hold
+    | none =>
+      cases ld with
+      | sroot | sindex => simp only [Load.sroot?, reduceCtorEq] at hs
+      | mfield | mindex => rw [Load.evalT_withStorage_mem σ st _ rfl]; exact hold
 
 /-- The entries after a memory store hold where it returns (`xs[1] = 6;` keeps `xs[0] ↦ 4`). -/
 theorem holds_mstore {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {T : Ty}
@@ -784,10 +926,7 @@ theorem holds_mstore {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) 
     rw [show (⟨q, ld, s⟩ : LEnt C Γ).s.evalT (σ.withHeap hp) = s.evalT σ from
       Simple.evalT_withHeap σ hp s]
     cases hm0 : ld.mloc? with
-    | none =>
-      cases ld with
-      | sroot rn h => rw [Load.evalT_withHeap_sroot]; exact hold
-      | mfield | mindex => simp only [Load.mloc?, reduceCtorEq] at hm0
+    | none => rw [Load.evalT_withHeap_storage σ hp ld hm0]; exact hold
     | some m0 =>
       simp only [hm0] at hk
       rw [Load.evalT_write_apart σ had hw ld hm0 hk]

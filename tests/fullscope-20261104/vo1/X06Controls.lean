@@ -500,4 +500,71 @@ def balances1 (r : TRes (Out C start.H [])) : Option Int :=
 #print axioms Prog.inl_runC
 #print axioms bindArgs_runC
 
+/-! ## Keyed storage loads -/
+
+/-- `balances[k]` at a simple key. -/
+def bal {Γ : Ctx} (k : Simple C Γ .uint) : Val C Γ .uint :=
+  .read (.index .map (.loc (.root (T := .ref mapR) "balances" rfl)) (.simple k))
+
+def setBal {Γ : Ctx} (k : Simple C Γ .uint) (v : Val C Γ .uint) : Stmt C Γ Γ :=
+  .assign (.index .map (.loc (.root (T := .ref mapR) "balances" rfl)) (.simple k)) (.val v)
+
+def sender {Γ : Ctx} : Simple C Γ .uint := .env .msgSender rfl
+
+/-- `uint a = balances[msg.sender]; age = 1; uint b = balances[msg.sender];` reuses `a`. -/
+def keyedLoads : Prog C [] G2 :=
+  .cons (.declLocal .uint (.user "a") (some (bal sender)))
+    (.cons (setAge (lit 1)) (.cons (.declLocal .uint (.user "b") (some (bal sender))) .nil))
+
+theorem rle_keyed : Prog.rle [] keyedLoads =
+    .cons (.declLocal .uint (.user "a") (some (bal sender)))
+      (.cons (setAge (lit 1)) (.cons (.declLocal .uint (.user "b") (some here)) .nil)) := rfl
+
+/-- `balances[3] = 9; uint a = balances[3];` forwards `9`. -/
+def keyedFwd : Prog C [] [.val .uint] :=
+  .cons (setBal (.lit 3 (by decide)) (lit 9))
+    (.cons (.declLocal .uint (.user "a") (some (bal (.lit 3 (by decide))))) .nil)
+
+theorem rle_keyed_forwarded : Prog.rle [] keyedFwd =
+    .cons (setBal (.lit 3 (by decide)) (lit 9)) (.cons (.declLocal .uint (.user "a") (some (lit 9))) .nil) :=
+  rfl
+
+/-- A store at another key of the same mapping kills (root granularity):
+`uint a = balances[1]; balances[2] = 7; uint b = balances[1];` keeps the read. -/
+def keyedKill : Prog C [] G2 :=
+  .cons (.declLocal .uint (.user "a") (some (bal (.lit 1 (by decide)))))
+    (.cons (setBal (.lit 2 (by decide)) (lit 7))
+      (.cons (.declLocal .uint (.user "b") (some (bal (.lit 1 (by decide))))) .nil))
+
+theorem rle_keyed_kill : Prog.rle [] keyedKill = keyedKill := rfl
+
+/-- The key read a local: assigning it kills the entry. `uint b = balances[i]`
+after `i = 2;` is kept (a stale `a` would read `balances[0]`). -/
+def keyedLocal : Prog C [.val .uint] [.val .uint, .val .uint, .val .uint] :=
+  .cons (.declLocal .uint (.user "a") (some (bal (.local .here))))
+    (.cons (.assignLocal (.there .here) (lit 2))
+      (.cons (.declLocal .uint (.user "b") (some (bal (.local (.there .here))))) .nil))
+
+theorem rle_keyed_local_kill : Prog.rle [] keyedLocal = keyedLocal := rfl
+
+/-- Negative control: forwarding past the kill of the key gives the stale value. -/
+def keyedLocalStore : Prog C [.val .uint] [.val .uint, .val .uint] :=
+  .cons (setBal (.local .here) (lit 5)) (.cons (.assignLocal .here (lit 2))
+    (.cons (.declLocal .uint (.user "b") (some (bal (.local .here)))) .nil))
+
+def keyedLocalWrong : Prog C [.val .uint] [.val .uint, .val .uint] :=
+  .cons (setBal (.local .here) (lit 5)) (.cons (.assignLocal .here (lit 2))
+    (.cons (.declLocal .uint (.user "b") (some (lit 5))) .nil))
+
+theorem rle_keyed_local_store_kept : Prog.rle [] keyedLocalStore = keyedLocalStore := rfl
+
+def start1 : State C [.val .uint] := start.push (t := .val .uint) (uintOfNat 0)
+
+def top2 (r : TRes (Out C start1.H [.val .uint, .val .uint])) : TRes Int :=
+  r.map fun o => (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+
+-- Mapping writes do not reduce in the kernel here; pinned by the interpreter.
+#guard (top2 (Prog.runC keyedLocalStore start1)).toOption == some 0
+#guard (top2 (Prog.runC keyedLocalWrong start1)).toOption == some 5
+
 end Solidity.Optimizer.X06Controls
