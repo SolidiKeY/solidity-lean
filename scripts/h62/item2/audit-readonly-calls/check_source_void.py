@@ -53,6 +53,15 @@ def configure_world():
     NAMES=['source_code','locate','image','time_aligned','installed_account','storage_lookup','funds_at_receiver','caller_storage','reached_image','wrong_name','missing_account_refused','wrong_funds_refused']
     EXTRA_TARGETS=['Solidity.Lowering.V08.WorldCatalogueTransport'];MODE='world'
 
+def configure_callable():
+    global SOURCE,PREFIX,NAMES,LOCAL,EXTRA_TARGETS,MODE
+    configure_world()
+    LOCAL=LOCAL+[('SourceVoidWorld',SOURCE)]
+    SOURCE='tests/h62/item2/audit-readonly-calls/SourceVoidCallable.lean'
+    PREFIX='Solidity.H62.ReadonlyCalls.SourceVoidCallable.'
+    NAMES=['entered','settled','frame_run','call_run','source_internal','phase_complete','context_fields','source_and_typed','missing_account_refused','decoder_frame','decoder_failed']
+    EXTRA_TARGETS=EXTRA_TARGETS+['Solidity.Lowering.V08.CallableBodyPremises'];MODE='callable'
+
 def local_plan():
     plan=LOCAL+[(Path(SOURCE).stem,SOURCE)]
     names=[name for name,_ in plan]
@@ -66,7 +75,7 @@ def closure():
     return order,pins
 
 def inventory(raw):
-    expected=['SourceVoidSelection','Solidity.Lowering.V08.WorldCatalogueTransport'] if MODE=='world' else ['NativeFrameTransport','Solidity.Source.SemanticsExamples']
+    expected={'selection':['NativeFrameTransport','Solidity.Source.SemanticsExamples'],'world':['SourceVoidSelection','Solidity.Lowering.V08.WorldCatalogueTransport'],'callable':['SourceVoidWorld','Solidity.Lowering.V08.CallableBodyPremises']}[MODE]
     if m.profile.imports(raw.decode())!=expected:raise ValueError('Source void import drift')
     rows=m.joint.export.census.declarations_text(SOURCE,raw.decode())
     if [r['source_name'] for r in rows]!=[PREFIX+n for n in NAMES]:raise ValueError('Source void theorem inventory drift')
@@ -98,8 +107,9 @@ def capture_tools(roots,out,require_loaded=True):
     return pins,snapshots
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--native',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--world',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--native',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True);mode=p.add_mutually_exclusive_group();mode.add_argument('--world',action='store_true');mode.add_argument('--callable',action='store_true');a=p.parse_args()
     if a.world:configure_world()
+    if a.callable:configure_callable()
     local_plan()
     native=a.native.resolve();source=a.source.resolve();out=a.output.resolve()
     if out.is_relative_to(ROOT):raise ValueError('evidence must stay private')
