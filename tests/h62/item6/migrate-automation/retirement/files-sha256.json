@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/coordinator-inputs-manifest.json",
+      "sha256": "907305fa351a3356261c07fe89d87b54eb8808e6975a4704406475c936638387"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/h70-h78-owner-ticket.json",
+      "sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/h70-ticket-provenance.json",
+      "sha256": "f24e88b427fc8cd26c584798424d12e3021ed008baab07f7b1dbf0f45ee5fb71"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/original-assignment.txt",
+      "sha256": "dd0b1e40993da66af6d78676b703be6e688a4b6117d39e55967f8756cff5e3e0"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/original-goal-objective.txt",
+      "sha256": "69c231e1ee413f984e9f9ff29a9e4b8780853fba05cb4ffed902f9d8a570bd6a"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/original-work-backfill-queues.md",
+      "sha256": "c4d2e78aed0fa2972d075db7585aee639ae65c2637fa7041b22d2e24b41bf874"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/preservation-reviews.json",
+      "sha256": "f7b3242cbac9d3686524410200226a8f02e24b1cc452073936e05a9ff5ae3638"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/prompt-provenance.json",
+      "sha256": "13fd60647b6aa0123c4243fca48866ea37b0ebeeee71988ec8d12e221ca8c0fd"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/retirement-authority.txt",
+      "sha256": "122ea706c8d63e97e242b022ddc2713070a4c78c0274865a69e05d328d4147ae"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/scope-manifest.json",
+      "sha256": "78d87b490a619d8b1b8c2adfd3d8c0929f693c85c25c6fe6d325391b9c6ba72c"
+    },
+    {
+      "path": "tests/h62/item6/migrate-automation/retirement/stopped-state-and-open-queue.json",
+      "sha256": "d940209d7ccd9dda5b77623436b74ecdef1c027cf41f71720b449fa7b29a89a7"
+    }
+  ]
+}

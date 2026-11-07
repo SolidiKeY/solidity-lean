@@ -116,7 +116,7 @@ test('saves dirty files and passes configured executable, timeout and backend', 
   const env = setup(async (value, env) => { args = value; return { results: [row(env)], errors: [] }; });
   env.doc.isDirty = true; env.config.backendPath = '../other'; env.config.nodePath = '/custom/node'; env.config.timeoutMs = 123;
   await env.api.verify(env.doc);
-  assert.equal(env.doc.isDirty, false); assert.equal(args.backendPath, '/workspace/other');
+  assert.equal(env.doc.isDirty, false); assert.equal(args.backendPath, require('node:path').resolve(__dirname,'../../../other'));
   assert.equal(args.nodePath, '/custom/node'); assert.equal(args.timeoutMs, 123);
 });
 test('suppresses results from modified documents', async () => {
