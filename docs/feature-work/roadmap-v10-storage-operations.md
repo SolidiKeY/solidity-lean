@@ -906,3 +906,49 @@ Frontend.SpecOriginsV1 is editor/NatSpec provenance, not P8a.SourceOrigins for a
 actual Source program. H16/H57 question V10-H121-H24-REFUSAL stays pending for the
 mapping-bearing accepted-origin case. No Source typing or frozen interface edit
 is made; Y04 and separate4.35 trust/timing waits remain distinct.
+
+
+## Checkpoint 240: concrete LibraryTry identity intake
+
+The H71 ticket from memory-reference-structs at
+7bd9a5d3d06f58ec429312281768bab6e255a484 identifies the existing legacy/via-IR
+LibraryTry AST fixtures and retains G42.04 body/result work with that requester.
+After fresh fetch, master3a5b9de41 is adopted in merge
+5d6b0df2b9fe5b8c7888e72113cbcb22f971f531. No Source implementation or P8 frozen
+interface changes arrive in that merge. The new read-only intake tool records
+identities for Source construction without implementing a second parser or
+pretending an intrinsic ContractWorld import is Source.SrcProg.
+
+Observed input hashes are legacy
+7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784 and via-IR
+205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1. Both canonical
+JSON AST values are identical. Local raw Source bytes hash to
+4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384, matching both
+recorded header digests. This establishes local byte availability, not an
+independent compiler reproduction or actual P8 origin/realization proof. The
+requester's separate provenance manifest is not locally delivered, so matching
+its expected values is not claimed. Header validationStage remains analysis,
+and neither AST is represented as a bytecode artifact.
+
+All 26 declaration records and four functions retain AST IDs, owner/scope,
+parameter/result type strings, storage locations and body hashes. Library L is
+AST46, L.S is3, L.integer is23, L.stru is45, C is131 and C.t is53. The existing
+using directive links46/3; C.g's call targets45 through receiver53. C.f/C.g retain
+uint256 and string-memory results, and L.stru retains its struct-storage formal.
+AST IDs are explicitly not Source declaration positions or runtime code indexes.
+No code-account installation, dispatch body or delegated frame is manufactured.
+
+Five tests pass, including mutations for storage/string identity loss, duplicate
+IDs, pipeline/compiler drift and missing provenance. Reports stay off Git;
+inputs are not rewritten. Finder and skeptic independently reviewed tools and
+reports without Lean/server or edits and found no findings. The intake records
+the concrete mapping-free AST shape but is not the formal Source.Env admission
+proof; the general mapping-bearing H16/H57 question remains separate.
+
+Next local obligations are actual Source syntax/environment and typed body
+construction, canonical accepted-source/artifact binding, full failure-resource
+realization and reached caller/library catalogue/frame installation. String
+signatures, caller storage aliases, no second payment and all four existing
+native observations must be preserved; those observations are requirements,
+not a Source adequacy proof. No toy/model substitution, profile narrowing,
+frozen weakening or Source single-writer violation is authorized by this intake.
