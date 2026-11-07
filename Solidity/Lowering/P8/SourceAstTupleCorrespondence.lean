@@ -55,37 +55,13 @@ theorem tuple_ok_iff_each (fuel : Nat) (node : Json) (children : Array Json)
     | head :: tail => pure (Syn.tuple head (syntaxList tail))) : Except String (Syn .expr)) =
       .ok out ↔ _
   rw [adapter]
-  cases h : children.toList.mapM (SourceAstStatements.optionalExpression fuel) with
-  | error message =>
-    constructor
-    · intro bad
-      cases bad
-    · intro ⟨head, tail, each, _⟩
-      have bad := each.mapM_ok
-      rw [h] at bad
-      cases bad
-  | ok values =>
-    cases values with
-    | nil =>
-      constructor
-      · intro bad
-        cases bad
-      · intro ⟨head, tail, each, _⟩
-        have bad := each.mapM_ok
-        rw [h] at bad
-        cases bad
-    | cons head tail =>
-      constructor
-      · intro same
-        change Except.ok (.tuple head (syntaxList tail)) = Except.ok out at same
-        cases same
-        exact ⟨head, tail, each_of_mapM_ok h, rfl⟩
-      · intro ⟨other, rest, each, same⟩
-        have eq := each.mapM_ok
-        rw [h] at eq
-        cases eq
-        cases same
-        rfl
+  have law := nonempty_build_ok_iff_each (SourceAstStatements.optionalExpression fuel)
+    (fun (head : Syn (.opt .expr)) (tail : List (Syn (.opt .expr))) =>
+      (Syn.tuple head (syntaxList tail) : Syn .expr))
+    "empty tuple conversion not implemented" children.toList out
+  cases converted : children.toList.mapM (SourceAstStatements.optionalExpression fuel) with
+  | error message => simpa only [converted] using law
+  | ok values => cases values <;> simpa only [converted] using law
 
 /-- An empty tuple cannot silently become a successful expression. -/
 theorem empty_tuple_rejected (fuel : Nat) (node : Json)
