@@ -146,7 +146,7 @@ Twelve per-file ledger tests now restore the removed census row at its original 
 
 ## Attributed-header scan follow-up
 
-The original census omits same-line attributed declarations. `attributed_header_scan.py` checks only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. The scanner deliberately does not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its synthetic controls demonstrate a block-comment false positive. This does not establish absence of attributed declarations or full coverage.
+The original census omits same-line attributed declarations. At that earlier checkpoint, `attributed_header_scan.py` checked only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. The scanner deliberately does not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its synthetic controls demonstrate a block-comment false positive. This does not establish absence of attributed declarations or full coverage.
 
 ## SignedSub Controls continuation
 
@@ -166,7 +166,7 @@ The base-pinned checked-contract ledger records the quantified Source/target rea
 
 ## Panic occurrence navigation continuation
 
-The deterministic current-tree occurrence/window map records 42 raw panicData regex hits and zero unmapped among regenerated source windows. Synthetic controls cover multiple matches, unmapped and overlapping windows, source hash mismatch and the deliberate apostrophe-suffix false positive. Independent read-only finder and skeptic verified the mapping without Lean; the output now states that files beyond the base-pinned window set are not base-verified. Window membership is a navigation hint, not semantic attribution.
+At the earlier pre-registration snapshot, the occurrence/window map recorded 42 raw panicData regex hits and zero unmapped among regenerated source windows. Synthetic controls cover multiple matches, unmapped and overlapping windows, source hash mismatch and the deliberate apostrophe-suffix false positive. Independent read-only finder and skeptic verified the mapping without Lean; the output now states that files beyond the base-pinned window set are not base-verified. Window membership is a navigation hint, not semantic attribution.
 
 ## Proposal textual-check continuation
 
@@ -175,3 +175,15 @@ Mul/Sub review-only proposal tests now reject several malformed cross-declaratio
 ## Registered helper rebase reconciliation
 
 Upstream `3c2734000413fb142b186e93387306bbb01fd181` provides the canonical `Solidity/Backend/PrimitivePackets/PanicBytes.lean` module; earlier unregistered-module notes are historical. The rebased Mul/Sub tests retain restricted textual boundary controls and pin the canonical helper bytes. This does not independently establish Lean proofs, equivalence, axiom inventories, affected/full gates or timing.
+
+## Fail-closed panic occurrence follow-up
+
+The scanner now emits JSON and fails on zero or unmapped raw hits. The registered canonical helper is separately pinned to its upstream registration commit and contributes three supplemental navigation windows; the current tree has 45 raw matches and zero unmapped, while the original 474-header denominator is unchanged. Independent read-only finder and skeptic verified the locations and tests without Lean. Raw comments, strings, identifier suffixes and interval containment still prevent semantic attribution or proof claims.
+
+## Masked panic lexical-hint follow-up
+
+The occurrence mapper now reuses the original census mask, whose function body was moved unchanged into `lexical_mask.py`, and labels raw hits with a lexical-candidate hint. The current tree has 45 raw hits, 45 hints and zero unmapped. Synthetic controls cover nested comments, strings, attributes, identifier apostrophe prefixes and suffixes, and Unicode code-point columns. Independent read-only finder and skeptic reviewed without Lean; neither the mask nor the hint establishes Lean name resolution, semantic coverage, ownership or proof.
+
+## Expanded attributed-header follow-up
+
+The scanner now masks comments and strings and recognizes certain nested, multiple and multiline attributes, recording declaration-token positions and original-census coverage hints. The shared mask retains its former default behavior. The 48 pinned files yield zero candidates under this heuristic. Independent read-only finder and skeptic reviewed without Lean; they identified and rechecked a multiline-modifier location fix. Unsupported Lean syntax and modifiers remain possible, so the result is not full declaration or semantic coverage.
