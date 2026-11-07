@@ -280,3 +280,39 @@ preservation of every original case, Lean validity, axiom acceptance or timings.
 The four known failing dependency files have not changed since the prior
 checkpoint; no known failing Lean gate was rerun unchanged. Roadmap, Storage
 and Language waits and all original proof/coverage/timing obligations remain.
+
+## Timing acceptance backfill after 2a43bf4fc integration
+
+The coordinator reported prior head46b06b522 integrated and instructed rebaseline.
+Fetched origin/master was 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0; task source
+files matched, but prior changes had different integrated commit IDs. A
+fast-forward attempt failed without changing files. A normal merge preserved
+both histories and completed without conflict at8e5714f9293d1efa4ffdfee34238e8795cb076d2.
+No reset or push occurred. The four known dependency source files remain unchanged.
+
+Independent backfill adds `scripts/h62/item4/generic-yul-views/compare_timings.py`
+and `scripts/h62/item4/generic-yul-views/test_timings.py`. This validates recorded
+serial timing evidence, not actual performance. Inputs have schema_version1,
+conditions (pinned toolchain archive hash, cache/resource/case/statement hashes,
+lean_threads1, heavy_jobs1, lean_args including -j1), a module inventory and
+at least three trials. Each trial records exit, resource_stop, wall_seconds and
+module_seconds. Failed/resource-stopped, incomplete, nonfinite or nonpositive
+records fail. Candidate inventory must retain every baseline module. Median
+aggregate and each original module are checked; slowdown strictly above10%
+returns TIMING_STOP and exit1. Added helper modules count toward aggregate cost.
+Three trials is this tool's measurement protocol, not a raised Lean budget.
+
+Usage: python3 scripts/h62/item4/generic-yul-views/compare_timings.py BEFORE.json AFTER.json
+Bulk records stay off git. Six synthetic controls pass: aggregate/module-key collision, threshold/STOP, cache
+mismatch, unsuccessful/incomplete evidence, helper cost and nonfinite time.
+The caller must still prove the supplied inventories cover the full affected
+closure, bind identities to actual source, and establish actual cache/resource
+equivalence. Matching metadata alone does not establish these facts. No real
+before/after delta or runtime gate is claimed. The committed repo-relative
+source manifest now includes the two new tools (14 source pins).
+All original proof, refusal-coverage and measurement obligations remain open.
+
+Independent finder/skeptic both identified aggregate-row overwrite by a module
+named aggregate. Fixed by namespace-prefixing module row keys; the added
+regression retains TIMING_STOP for +20% wall slowdown with an unchanged module.
+Reviews used no Lean server, builds or writes.
