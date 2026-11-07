@@ -741,3 +741,64 @@ No original Lean declaration,statement,definition body,budget,axiom or exclusion
 changed. Original old-kernel inventory and this compiler-name accounting do not
 resolve H78 generated API shims,IR types/visibility/attributes,new builds,clean
 common-source performance comparison,KeySort35 or root runtime gates.
+
+
+## Nov7 4f0a2d6a rebaseline and compiler-signature sample
+
+Fetched and fast-forwarded the clean assigned branch onto coordinator-approved
+4f0a2d6abe3a920d8c5a20c8c06d373a1014824d; b8a940f3e is an ancestor. Read the
+updated AGENTS audit reference. No source reset,default merge,push or new goal.
+Current census has1811 Yul modules and2234 Yul-closure targets (2237
+source-union modules including KeySort-only inputs). Census and rebaseline state
+are off Git in resume-4f0a2d6ab. Original c6
+benchmark/inventory remain historical and are not current-tree acceptance.
+
+Additive external ExportCompilerSignatures.lean records every extraConstNames
+entry, optional IR lookup, parameter indices/borrow flags/types,result type and
+compiler visibility query separately from kernel types. Composite IR types have
+structured tags; terminal types retain exact compiler Repr text. Missing IR is
+retained as null, never silently dropped. Visibility query is an observation,
+not independently established public API classification; attribute coverage is
+still pending. No core imports or intrinsic representations changed.
+
+Source/output-bound Allocation probes pass on original4.24 and official4.35.
+Old20 compiler entries,new18: Frame.ctorIdx._boxed and Slots.ctorIdx._boxed are
+absent from the new extraConstNames snapshot. Direct new IR lookup of those
+old-only names was not performed. Exact old IR signatures and unobserved new
+signature nulls are in owner-requests.json for migrate-root-gate via coordinator. All18common IR
+signatures match. This does not discharge the previous eight kernel public API
+changes,prove these compiler entries private,implement a shim or authorize an
+exclusion. Implemented shims remain empty; all compatibility gates stay open.
+
+Performance STOP: old probe1.764966317s/912093184bytes sampled RSS; new
+2.520661854s/2003578880bytes. Observed+42.8164percent wall,+119.6682percent RSS.
+Do not expand or rerun unchanged newIR probes. This is compiler-inspection/import
+runtime,not the required clean migration-build comparison; original whole-build
+performance gate remains pending. Both used unchanged bounded policy,j1,12GiB
+sampled RSS limit,4GiB reserve,no swap. Initial diagnostic failures and absent
+optional private artifact preflight are preserved; only v4 probes accepted.
+Seven transport controls pass, including a found nested struct/union signature,
+identity mismatch and malformed IR rejection; null IR,counts,truncation and acceptance claims
+remain explicit. No Lean MCP tools were exposed; bounded per-file CLI used.
+
+Independent portability backfill removes the fixed VM path from build.py's
+KeY rules input. New key invocations require --key-rules KEY_RULES_FILE. Missing
+or nonexistent rules fail before artifact writes or Lean jobs; negative CLI
+control passes. Historical commands retain their original paths as provenance;
+new reusable examples should use --root CHECKOUT --toolchain TOOLCHAIN
+--artifacts ARTIFACTS --census CENSUS --label FRESH_LABEL --kind key --clean
+--key-rules KEY_RULES_FILE. The frozen baseline driver and historical manifests
+are unchanged. No known KeySort failure or timing STOP was rerun.
+
+Finder and skeptic independently reproduced signatures,missing names,source and
+output bindings,STOP metrics and input preflight; no blocking findings. Skeptic
+suggested nested found-signature controls; added and passing. Neither used Lean
+or wrote files. No production Lean declaration,frozen statement,definition body,
+proof budget,axiom or exclusion changed. Remaining original queue/backfill and
+six dependency/API waits stay open; performance STOP is an additional typed wait.
+
+Skeptic corrected the initial phrase "missing compiler-table entries": observed
+absence is from the new extraConstNames enumeration,not a failed direct new IR
+lookup for the old-only names. Owner records now label that boundary explicitly.
+No additional probe was run; performance STOP remains. Full60 Python tests pass
+in25.161s. Finder reports no findings; skeptic's wording finding is resolved.
