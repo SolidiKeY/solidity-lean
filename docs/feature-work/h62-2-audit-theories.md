@@ -1,3 +1,9 @@
+LATEST ROLE INVENTORY:44 original records reviewed,456 remaining. Eight new
+Pure inventories add no witnesses/H69 dispositions. All26 original Pure records
+are deterministically retained:8joint,17pending,1historicalempty. The original
+36-record companion remains separately hashed; cumulative44 uses a distinct file.
+Evidence: /workspace/h62-audit-theories-pure-roles-20261107-evidence.
+
 LATEST REBASE/PURE CHECKPOINT: assigned branch rebased to coordinator merge
  a8f684928fa085d8976ead33e3d0db30208e7a4f after preserving the unexpected clean
  f0801b2192c6ddfa6f0730995679f3deb815616e merge head in verified ancestry.
@@ -1185,3 +1191,37 @@ No residual findings or reviewer edits/Lean/server/build. Checkpoint handoff:
 continue independent original queue while scope questions wait; Pure still has
 17ordinary original inputs pending, its historicalempty and generated candidates
 remain separately classified, and no full module/assignment completion is claimed.
+
+## Pure premise-role checkpoint
+
+Fetched/logged origin/master before this item; stilla8f684928fa085d8976ead33e3d0db30208e7a4f,
+no landed duplicate or changed Pure prerequisite. pure_input_roles.py inventories
+the complete8 frozen telescopes with all inherited types/state/outside/function
+data, anonymous Simple no-state-read hypothesis and late iteration n/a. The
+loop hb/hc are universal over ALL inputs for fixed SAME functions, neither
+selected-a-only facts nor laws for every function choice. Data structures are
+not global admission premises; iterN's budget is not physical target gas, and
+run_map's original contract does not assert arbitrary loop termination.
+
+The generator reruns the authenticated36-role companion pipeline against current
+proof receipts, protects full original Pure source bytes, compares exact typed
+binders/Prop roles, checks the8 registry mappings and derives44disjoint originals/
+456remaining roles.43joint certificates+1ordinarypending impossibility remain
+separate; zero new witness/H69/generated disposition. all-reviewed-pure-input-roles
+uses its own filename; the hashed36-record companion is preserved, not overwritten.
+Both cumulative reviewed_role_records44/new8 and standalone8 counts are accurate.
+
+The deterministic generator also retains all26 original Pure signatures/type
+hashes/owners exactly once with8joint/17ordinarypending/1historicalempty. No hidden
+remaining declaration is excluded. Controls deleting late n, universal hc or the
+anonymous read premise all refuse;13Python tests pass. Finder and skeptic both
+passed semantics, full binders/current certificates, companion hash/disjointness,
+all26 dispositions and controls; no residual findings or reviewer edits/Lean/
+server/build. Bulk reports and reproducible validation commands remain off Git
+in the latest Pure-role evidence directory; generator is committed in scope.
+
+Checkpoint handoff: original103joint certificates/1,362witness-classification gaps
+unchanged by role inventory. Continue to cross-validate the44-record snapshot;
+remaining456roles,17ordinary Pure witnesses, other original witnesses/generated
+classifications and compiler/final gates remain independent work. No fullmodule
+or assignment acceptance, goal reset/replacement/completion or scope expansion.
