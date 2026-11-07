@@ -1250,3 +1250,59 @@ Independent read-only finder/skeptic confirmed marker/refusal/provenance limits
 and found no blocker; neither used Lean/server/builds/writes. Dynamic bytes/string
 implementation, parameter/storage handling, heap semantics, full H90 parity and
 original migration/runtime/final acceptance obligations remain open.
+
+
+### Historical environment intake and held dynamic-memory candidate
+
+H77 delivered all eight wrapper/index/evidence/runtime/cache inputs for historical
+sourceBuild4d7285. verify-environment-intake.py checks their exact outer SHA pins,
+safe unique regular members, embedded index equality and every payload hash.
+There are522evidence payloads,5runtime payloads and32cache payloads; each archive
+also embeds its own separately counted index. Twenty wrapper-index entries match
+their sealed executed-private payload bytes. Neither wrappers nor binaries run;
+no cache is extracted, installed or adopted.
+
+Native/WASM manifests contain the same343unique source-module rows and match
+actual delivered binary bytes. This is consistency, not Git source verification.
+The sealed box/diamond inventories have eight selected requests each plus one
+mandatory proved harness guard. Exact saved request hashes and core result
+objects match native/browser:16selected observations perbackend total8proved,
+4refuted,4unsupported, plus2provedguards. The29saved gate receipts retain27exit0
+and2exit1 records. The failed invariantCountsToBound request is bound to actual
+WASM5a5be87b and retains Maximum call stack size exceeded with nonempty frame
+indices. Those frames remain unmapped: old6ae symbols are not this binary's map.
+No fresh execution, cause diagnosis, current-reader qualification or STOP release
+follows. Original producer d8a141a7 evidence is a separate undelivered archive.
+
+The H90 default-memory candidate passed per-file MCP and a serial capture gate:
+strict bytes/string metadata to existing marker-bearing declMemory, initializers
+and other locations refused. Two bare-declaration witnesses proved construction/
+termination in both modalities; they do not observe empty contents or prove
+source default-memory adequacy. Finder/skeptic requested that semantic limit stay
+explicit and observable-content controls precede any such claim. The matched
+78-file census stays245canonical/241both;17refusals change to String expected.
+Six reader-profile refusals also change; no admission gain occurs in those sets.
+
+Automatic approval review rejected proposed frozen verifier/audit expectation
+updates because stripping the new decoder from comparison and capturing new
+baselines could mask regressions. No rejected edit ran. Candidate source, exact
+observations and failed/passing evidence are preserved off Git in the35-member
+f7501b31521131172ae774afb006adcee546a90ea503b592ddfb0dfaa55b12ab archive
+(630,918bytes), indexed by dynamic-memory-candidate-manifest.json. Production,
+legacy controls and frozen observations are restored; no candidate admission is
+integrated. Q-H90-DYNAMIC-VALIDATION is routed through coord-ask for a versioned
+validation contract or deferral; the question branch is
+coord-q/codex/solidity-directruntime-20261104/shared-translator/20261107T091354Z.
+
+The restored nine-target/six-file decoder runner passes25.0735s under unchanged
+12GiB/no-swap/threads1/-j1, child maximumRSS1,272,216KiB, cgrouppeak215,810,048bytes,
+minimum outer available11,104,948,224bytes. An initial ancestry-check failure
+pinned a subsequently advanced remote ref; it is retained and corrected to the
+exact fetched/merged8a710f9d44df publication. No allowlist changes. Existing185
+inputs, frozen78-file census and5,692reader observations verify unchanged.
+
+Environment-intake-manifest.json pins the new report/tool and off-Git H44 evidence.
+Independent read-only finder/skeptic confirmed mandatory guards, byte bindings,
+actual stack error and the limits; neither used Lean/server/builds/writes. Full
+source/importer migration, ReadBounds authority, runtime/performance repairs and
+original final acceptance remain open.

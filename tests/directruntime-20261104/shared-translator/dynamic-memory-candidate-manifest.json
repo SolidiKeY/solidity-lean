@@ -1,0 +1,84 @@
+{
+  "guardedRegression": "Unapproved dynamic-memory validation-contract changes must not be installed as accepted reader support",
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/dynamic-memory-candidate-f7501b3152113117.tar.gz",
+    "sha256": "f7501b31521131172ae774afb006adcee546a90ea503b592ddfb0dfaa55b12ab",
+    "bytes": 630918,
+    "regularMembers": 35,
+    "files": {
+      "before/cr-census-results.json": "f3ff65833fb0e48f13a674c07021a3122b296f7075696b98e4e09d9088640953",
+      "before/h90-census-manifest.json": "720ce5c7bbda3162dd54d4962b3c42fc35fcb458fa18891bf95fa8c01c1f52c3",
+      "before/h90-reader-profile-manifest.json": "17000ce346476fbf4bde0e820cdd71ed8622ead781efc70f9ea205df2e0acd80",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__corpus-readers__composed.json": "e91bd0a7ebf5cfd0ea65ee2d9facc8c3e28738db7e26126b73446523d71d09af",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__corpus-readers__default.json": "e7d1a9ae6c388da83a2d6a24a01c43bb1bcc08ddce58762b36f379affc129696",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__h68-bulk__composed-variant-reader-matrix.json": "b62201c56803bf8011412c5491ff5455fad9db94e534b872c424b6accf20d29a",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__h68-bulk__variant-reader-matrix.json": "d6491b37e160d5d693add09edc95229934d9507386146aeb87e7b0ab10004b9f",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__composed-construct-reader-matrix.json": "4b6ce78334b04be2f1c358a5626d4976b6fc5fbc2605d67d22ddab81ef81ab99",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__composed-fresh-construct-reader-matrix.json": "452ebcfd80d67931b2ad2b6051b6bbb5aa18d977220e395b6849e0135ca26c8d",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__construct-reader-matrix.json": "a6dbb6d8a9f5c73afe7d952ce88ac2d643ba27f153543fd6df89e1e13c46f222",
+      "before/reader-profile/tests__directruntime-20261104__shared-translator__fresh-construct-reader-matrix.json": "dc9bc329f03b9c60c5bb3a60bc62b238a232b23b4c569ba12f7905a74ae19db5",
+      "candidate-source/Solidity/Frontend/ExecutableAst/Shared/Compose.lean": "a55846f0a588094b9e8fab308ca2923001cd9f755825c894c4f246141d0d8e24",
+      "candidate-source/Solidity/Frontend/ExecutableAst/Shared/Translate.lean": "ba76ab232fe9768541f6966178a55e51e8ff62bd3c78e81cc2956a4e38895cb7",
+      "candidate-source/tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean": "c47a60157be3748514379d30434e328802104e6dc71b400f7b9babd61c055f16",
+      "candidate-source/tests/directruntime-20261104/shared-translator/DynamicBytesLocalControls.lean": "9ea02d4b0b07e12780a357fd1aa91ab2851942f0ea32e08627fcb758b4285067",
+      "candidate-summary.json": "00cb2fb8e405c4bdf83b5c301d4b48424cebcc2a383f77ff6d69a60688aa6d21",
+      "candidate.patch": "ddc52cfd0ef5ffe6a33ecbc12cf0b17055e87b80954fd5fee46f72a566827e33",
+      "capture-gates/1.log": "810184ba35af7eb4a1baf1260685ad65215755102f4ac4543c485d9059fc8dd7",
+      "capture-gates/2.log": "20676c35f7972ad85ddde943cd420c6135c389ed815e20b8175b7100f3bab6a9",
+      "capture-gates/3.log": "342a489fb2067d206ed23fcbac7fba1aa37216e0c60b500bbe98a56ebc7bacab",
+      "capture-gates/4.log": "88b1e83937b916fbea4d862628e8bbe17f94456332c7addcc9aa8bb3a8b6c040",
+      "capture-gates/5.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "capture-gates/HEAD": "a67c2abd44fcc00daad5a2d050018b6e7588d48d6e60c5c134ede5232ae5f552",
+      "capture-gates/gates.tsv": "f425ce6bfe668ba6c537d7e8dab59ab6bc6c12e5dd48d1f2224ae084ec70144d",
+      "capture.log": "347cafcdac96b52acf32a33e3fe1c263a36f621fa12860ec42a85be72f9f2323",
+      "captured/cr-census-results.json": "3fb0939cda9b19e274375ed27a7abcc926b8eda5bace912ce200966b9f580604",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__corpus-readers__composed.json": "ef3abdbf62b78e1a53221f699a7a106cb1ab04c2d8de97075e2ac59e27d1c48f",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__corpus-readers__default.json": "e7d1a9ae6c388da83a2d6a24a01c43bb1bcc08ddce58762b36f379affc129696",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__h68-bulk__composed-variant-reader-matrix.json": "b62201c56803bf8011412c5491ff5455fad9db94e534b872c424b6accf20d29a",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__h68-bulk__variant-reader-matrix.json": "d6491b37e160d5d693add09edc95229934d9507386146aeb87e7b0ab10004b9f",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__composed-construct-reader-matrix.json": "4b6ce78334b04be2f1c358a5626d4976b6fc5fbc2605d67d22ddab81ef81ab99",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__composed-fresh-construct-reader-matrix.json": "452ebcfd80d67931b2ad2b6051b6bbb5aa18d977220e395b6849e0135ca26c8d",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__construct-reader-matrix.json": "a6dbb6d8a9f5c73afe7d952ce88ac2d643ba27f153543fd6df89e1e13c46f222",
+      "captured/reader-profile/tests__directruntime-20261104__shared-translator__fresh-construct-reader-matrix.json": "dc9bc329f03b9c60c5bb3a60bc62b238a232b23b4c569ba12f7905a74ae19db5",
+      "mcp.log": "b7063cb47105afe9254b3c05bd24fa0dbe0e3f53451fcc8a72c8d7f379ed12a8"
+    }
+  },
+  "sourceFiles": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "ba76ab232fe9768541f6966178a55e51e8ff62bd3c78e81cc2956a4e38895cb7"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "sha256": "a55846f0a588094b9e8fab308ca2923001cd9f755825c894c4f246141d0d8e24"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean",
+      "sha256": "c47a60157be3748514379d30434e328802104e6dc71b400f7b9babd61c055f16"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/DynamicBytesLocalControls.lean",
+      "sha256": "9ea02d4b0b07e12780a357fd1aa91ab2851942f0ea32e08627fcb758b4285067"
+    }
+  ],
+  "censusBefore": {
+    "parsedUnits": 78,
+    "functions": 1655,
+    "existingPrinted": 1486,
+    "canonicalAdmitted": 245,
+    "candidateFiles": 78,
+    "both": 241
+  },
+  "censusAfter": {
+    "parsedUnits": 78,
+    "functions": 1655,
+    "existingPrinted": 1486,
+    "canonicalAdmitted": 245,
+    "candidateFiles": 78,
+    "both": 241
+  },
+  "changedCensusRefusals": 17,
+  "changedProfileRefusals": 6,
+  "acceptance": "Candidate preserved only; not integrated, frozen checks unchanged, validation-contract decision pending.",
+  "semanticLimit": "Two bare-declaration positive fixtures check construction/termination and marker syntax, not observable empty length/content or source default-memory adequacy."
+}
