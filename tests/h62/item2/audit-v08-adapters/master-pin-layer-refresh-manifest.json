@@ -1,0 +1,199 @@
+{
+  "scope": "Fresh master static-gate status and exact owned G07 registration proposal only; no Source/body/PassCorrect closure.",
+  "evidence": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107",
+  "checked_head": "8a0d28f3a6fc1eefb3d6643efdfb32b130de0191",
+  "origin_master": "254c60df6a3467ff636c1fdac27c82083a169b2f",
+  "actual_pin_gate": "FAIL: zero errors,13unrecordedownedpins; sourcefixtureskernel-checked, registryNOTedited.",
+  "actual_layer_gate": "PASS:zero newclosureedges,107publishedallowances; previouslayerwaitcleared.",
+  "proposal": {
+    "path": "tests/h62/item2/audit-v08-adapters/g07-pin-registration-request.json",
+    "sha256": "d57f19f3d75e3efc2407148e5589f794298419f56bfc1acb15f562c6984ade4a",
+    "request_id": "WORLD-G07-13"
+  },
+  "fixtures": {
+    "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean": "ddf8f8544bc014ea3fa0254292878ef62c2ca77cd915ddd07fb6e9f43494009b",
+    "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean": "b6252bfa608b07af9f36a2199ff7f66ff91845a5b488ad002a159a1440db12c4"
+  },
+  "files": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/dirty-helper-preservation.json",
+      "bytes": 634,
+      "sha256": "6cf07c75e7d782a570674a36abee6f76c98075229d3488cafbe118a8dbcff129"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-layers.log",
+      "bytes": 167,
+      "sha256": "32b09c9b860787b9dfaa720fe36f5f7d9d7fdec02923f1f9bd41857667c96c57"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-local-fixture/console.log",
+      "bytes": 176,
+      "sha256": "a4795782bef6bcfc45d3cbc3d85d3575501b4838cbe9a37a762ef91e28602e3f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-local-fixture/gates/1.log",
+      "bytes": 42435,
+      "sha256": "c1559e52360fd6149b5a59f610a6dd4ff18f54f28ae61d77ec629a2656e1d6d2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-local-fixture/gates/HEAD",
+      "bytes": 41,
+      "sha256": "1c8f2617fa2f334d7849fed7866e98994359fd1c4d1dde855ff39a9f50155aeb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-local-fixture/gates/gates.tsv",
+      "bytes": 263,
+      "sha256": "e04ae6840814b85168f934763bf51d5adf4b4178526176478e373c3327e3ddda"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-local-fixture/results.json",
+      "bytes": 397,
+      "sha256": "78350a697c7f24b3c903efd47641a91c43d5e93fd2f89a0e4ba6c8a0155bd1ff"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-pins.log",
+      "bytes": 1480,
+      "sha256": "b6eeefac1badae3a6958dd8770eea54f12bba1d158f8e6826ed8264d4891eb93"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-resource-fixture/console.log",
+      "bytes": 186,
+      "sha256": "5f11cd792159de9123dd5803a6165ac81ce1a27b3b0deea00b24c6c4f0cfa2b9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-resource-fixture/gates/1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-resource-fixture/gates/HEAD",
+      "bytes": 41,
+      "sha256": "1c8f2617fa2f334d7849fed7866e98994359fd1c4d1dde855ff39a9f50155aeb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-resource-fixture/gates/gates.tsv",
+      "bytes": 280,
+      "sha256": "fd82656fdbeb1888f701b8b7a33da749d5dadcecc25ec9d7977cee9f26c622f1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-resource-fixture/results.json",
+      "bytes": 404,
+      "sha256": "80109836f477d7f823439c6db262d8f771b0423f11b53863a7da35b09e8e073a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-results.json",
+      "bytes": 1203,
+      "sha256": "bad11de7e5b536763ec9e26eaf4dcd48abcaf963426dd79f9f50eaf2735534d0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-trust.log",
+      "bytes": 79,
+      "sha256": "8037d2f5448c4f650ece5b258a45a1e16bbb0e8fb7ee0afc5532519b524c42d6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/final-whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/fixture-source-binding.json",
+      "bytes": 526,
+      "sha256": "02162d71e3fc7660f23939767cab0f7da3326301ebfc5a3402e5d05537355adc"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/layers.log",
+      "bytes": 167,
+      "sha256": "32b09c9b860787b9dfaa720fe36f5f7d9d7fdec02923f1f9bd41857667c96c57"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/local-fixture/console.log",
+      "bytes": 171,
+      "sha256": "0e843e819173e8168e1c2b723fd7638a29cd551c1319c88e12169c5134d9774a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/local-fixture/gates/1.log",
+      "bytes": 42752,
+      "sha256": "fe2fb0cda9483067e02e3d7880f7d1fff58ac0add24ebb68fd4ab49ec995683d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/local-fixture/gates/HEAD",
+      "bytes": 41,
+      "sha256": "9fd990375b60daa3a15f6523650fb765f9aa6056aff47be0c2de716e96e62751"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/local-fixture/gates/gates.tsv",
+      "bytes": 258,
+      "sha256": "98bf8ee417c170b8e194fa1dfb58e8f669499080df7667c81b1da74d205458d1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/local-fixture/results.json",
+      "bytes": 399,
+      "sha256": "4930ee0ca4e1093763390cafff1971a6fc56ea4368107b30f79416c068808e04"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/merge-resolution.json",
+      "bytes": 386,
+      "sha256": "7c26f17abca5054cfe22591a9029e0733865b21460aad364379cd70181e17ba7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/pins.log",
+      "bytes": 1480,
+      "sha256": "b6eeefac1badae3a6958dd8770eea54f12bba1d158f8e6826ed8264d4891eb93"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/proposal-validation.json",
+      "bytes": 659,
+      "sha256": "78b866c2ea5ae9bd68c91be1db6aa3ff77368bdd4eb4bb5d11039e55fcc8a8b0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/resource-fixture/console.log",
+      "bytes": 180,
+      "sha256": "b44748a24fe4a8f93efb661ba400fcba20f040ba4b11c31b22461e5c56a2131a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/resource-fixture/gates/1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/resource-fixture/gates/HEAD",
+      "bytes": 41,
+      "sha256": "9fd990375b60daa3a15f6523650fb765f9aa6056aff47be0c2de716e96e62751"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/resource-fixture/gates/gates.tsv",
+      "bytes": 274,
+      "sha256": "1e10f9efd73af4823dc024d9a25421c41103f0d47a0464d47a382cd04c3ba293"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/resource-fixture/results.json",
+      "bytes": 404,
+      "sha256": "d8f0d929290812bd6365c7181d38e3b376be73b02fe25052b10761e60b9c34a7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/results.json",
+      "bytes": 1021,
+      "sha256": "3f2e3b711ddb7bc4768bc1c2a7fab53e07f5e9b8bdb93068f35eed04c23ce2db"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/reviews.json",
+      "bytes": 321,
+      "sha256": "ebdf11c15c76fe2cad0e19f323fed459e6f4a79ecea80ae69beb37c8d2e3cfe8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "8037d2f5448c4f650ece5b258a45a1e16bbb0e8fb7ee0afc5532519b524c42d6"
+    }
+  ]
+}

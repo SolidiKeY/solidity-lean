@@ -78,3 +78,16 @@ test('identical URI/version/text reopen cannot acquire an old command failure (i
  const e=fake(),u=ui(e),marker=path.join(e.root,'admitted');fs.writeFileSync(path.join(e.root,'scripts/solidity-lean.mjs'),`import fs from 'node:fs';fs.writeFileSync(${JSON.stringify(marker)},String(process.pid));setTimeout(()=>{process.stderr.write('current rejection');process.exitCode=2;},200);`);const old=u.env.doc,pending=u.env.commands.get('solidityLean.run')();
  try{const deadline=Date.now()+3000;while(!fs.existsSync(marker)){assert.ok(Date.now()<deadline);await new Promise(r=>setTimeout(r,5));}old.isClosed=true;u.env.events.close(old);const reopened={...old,isClosed:false};u.env.vscode.window.activeTextEditor={document:reopened};await u.env.commands.get('solidityLean.run')();await pending;const packets=u.logs.flatMap(line=>{try{return[JSON.parse(line)];}catch{return[];}}),starts=packets.filter(p=>p.phase==='started'),failures=packets.filter(p=>p.phase==='failed');assert.equal(starts.length,2);assert.notEqual(starts[0].sourceSession,starts[1].sourceSession);assert.notEqual(starts[0].commandId,starts[1].commandId);assert.equal(failures.length,1);assert.equal(failures[0].commandId,starts[1].commandId);assert.equal(failures[0].sourceSession,starts[1].sourceSession);}finally{await u.api.dispose();await pending;e.dispose();}
 });
+
+// Injected CLI with a real owned child. No compiler/kernel/rendered claim.
+test('opening then cancelling a superseding custom prompt retires the invalidated command first',async()=>{
+ const e=fake(),env=require('./mock.cjs').mock(),marker=path.join(e.root,'admitted'),logs=[];
+ env.doc.uri.fsPath=e.source;env.doc.text=fs.readFileSync(e.source,'utf8');env.vscode.window.activeTextEditor={document:env.doc};
+ fs.writeFileSync(path.join(e.root,'scripts/solc-ast.mjs'),`import fs from 'node:fs';fs.writeFileSync(${JSON.stringify(marker)},String(process.pid));setInterval(()=>{},100);`);
+ let promptSawLive;env.vscode.window.showInputBox=async()=>{try{process.kill(Number(fs.readFileSync(marker)),0);promptSawLive=true;}catch(error){if(error.code!=='ESRCH')throw error;promptSawLive=false;}return undefined;};
+ const api=require('../src/source-commands.cjs').install(env.vscode,env.context,{settings:()=>e.config,output:{show(){},appendLine:t=>logs.push(t)}}),first=env.commands.get('solidityLean.build')();
+ try{const deadline=Date.now()+3000;while(!fs.existsSync(marker)){assert.ok(Date.now()<deadline,'owned first child admitted');await new Promise(r=>setTimeout(r,5));}
+  await env.commands.get('solidityLean.buildCustomArgs')();assert.equal(promptSawLive,false,'lost-owner child must retire before a new prompt can be cancelled');await first;
+  assert.equal(logs.some(line=>{try{return JSON.parse(line).phase==='completed';}catch{return false;}}),false);assert.equal(env.notices.length,0);
+ }finally{await api.dispose();await first;e.dispose();}
+});

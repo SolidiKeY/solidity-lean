@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "scope": "39fixedreviewedbaselines,79unapprovedfiles;diagnosticnotsemanticaudit",
+  "files": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/vy5-correspondence-20261106/reviewed-correspondences.json",
+      "bytes": 52138,
+      "sha256": "ee1d5f673b32cf5649b85df930e2d9d9be0a4c8fdbb69ea38c6b9c9f28efb1eb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/vy5-correspondence-20261106/authorized-notes.json",
+      "bytes": 6606,
+      "sha256": "d406f02a84c1fab169870fdea07d9ecf1cb3df71ba0e54d56f3a7ac6d92e7f4b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/vy5-correspondence-20261106/updated-inventory.json",
+      "bytes": 274956,
+      "sha256": "af67a5ae9883fae24353846a93e963a46c620c9ea89be6735eb16aa0aa95b4a1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/vy5-correspondence-20261106/other-hunks.patch",
+      "bytes": 117538,
+      "sha256": "68d7f45dc0319f8680334ac5c9bd6d0c810556fd07d3c3678c9b5233d66f7861"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/vy5-correspondence-20261106/census-failure.txt",
+      "bytes": 239,
+      "sha256": "e2da38ee606f4fc6c8c17603834a13b70ae9925010050187390a9ebc991eb73e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/vy5-correspondence-20261106/tests-normal.log",
+      "bytes": 102,
+      "sha256": "8d452b2e6538d0dd9e5f4e8626eaaca34a2755c5cb9c34b352e1586b70aa69cc"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/vy5-correspondence-20261106/tests-optimized.log",
+      "bytes": 102,
+      "sha256": "4e6d45692ed1a035ad0ae66736d0f5aef7dfcf6425438ad113a7ef007707b9f4"
+    }
+  ]
+}
