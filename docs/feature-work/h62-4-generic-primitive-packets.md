@@ -1049,3 +1049,31 @@ The checked-cache diagnostic without Lake setup discovery then passes with zero
 errors in 1.864 seconds; it supplies diagnostic credit only. Independent
 read-only finder and skeptic found no semantic weakening, new premises or
 overclaim. No registered original declaration was changed.
+
+
+Rebinding execution follow-up after master a10b60f23: the two previously parked
+draft statements now kernel-check without changing their claims or the existing
+heartbeat limit. Restricted transparency must surround the entire staged proof,
+including intermediate theorem application and equality transport, rather than
+only its final exact. ReferenceRebindExecutionControls proves actual lifted bare
+failure with arbitrary journal/returndata and the positive old-graph snapshot
+through operational forget_run_lift. The snapshot remains diagnostic observation,
+not a replacement for StateRepr or all-outcome session adequacy. Initial check:
+0.734 seconds, 824936 KiB sampled workload RSS. Failed intermediate attempts and
+original memory stops remain historical evidence, not passing performance data.
+
+The requested coordinator disk.sh ran before this work and removed regenerable
+.lake builds and older checksum-verified checkpoint copies. Free space increased
+from 2138001408 bytes to over 12 GB. Some historical delivery paths are therefore
+no longer locally available; their exact-byte availability must not be inferred
+from old receipts. The latest rebinding agreement seal, owned raw isolation
+evidence, current Git history and authenticated audit object cache remain.
+Full original acceptance/performance gates and full P1/G42.04 stay open.
+
+Final execution-control receipt: 1.121 seconds, 841080 KiB sampled workload RSS;
+MCP zero errors in 1.943 seconds. Both theorem axiom closures contain only the
+existing standard axioms. Separate read-only finder/skeptic confirm exact same
+selected code/input and no failed-state, StateRepr or full-session substitution.
+These focused receipts discharge the two draft control proofs, not the original
+performance comparison or broader acceptance gates. Latest measured free disk:
+13574893568 bytes.

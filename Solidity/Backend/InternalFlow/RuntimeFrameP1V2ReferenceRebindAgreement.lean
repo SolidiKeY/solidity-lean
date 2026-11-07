@@ -6,10 +6,9 @@ the newly allocated default graph. The initial nested graph is constructed by
 an actual checked allocation prefix; the call is selected by the existing
 compiler. Typed body/selection aliases avoid eager compiler conversion during theorem
 application. Generic V2 agreement covers every index, while actual graph snapshots
-and missing-export/default-root controls distinguish the old aliases. The
-separate direct-failure and positive target-snapshot draft proofs remain parked
-after heartbeat failures; this module does not claim those or full session
-adequacy. -/
+and missing-export/default-root controls distinguish the old aliases. Separate direct-failure and positive target-snapshot importing controls are
+in RuntimeFrameP1V2ReferenceRebindExecutionControls. Neither module claims
+full session adequacy. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.P1V2ReferenceRebindAgreement
 open Evm Evm.Memory V3CallProducerRef.StructDefault.RebindControls
 
