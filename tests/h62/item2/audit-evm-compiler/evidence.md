@@ -31,11 +31,14 @@ source-only mode can use the indexed full-manifest path by default. Hash checks
 do not re-run Lean or prove provenance. The legacy full-manifest verification
 rules and proof gates are unchanged; the compact index adds transport integrity.
 
-The preserved data records 555 checked candidates, 235 direct closed equalities,
-320 unpromoted candidates and 300 total classified statements. Original proofs
+The historical closed-equality checkpoint recorded 555 checked candidates,
+235 direct closed equalities, 320 then-unpromoted candidates and 300 total
+classified statements. Original proofs
 are retained without replacement True lemmas. Closed-input accounting proves
 no semantic nonvacuity, supported-source totality or execution-gas theorem.
-The 1,530 remaining statements and 1,793 producer owners remain unfinished.
+That checkpoint left 1,530 statements pending. Current classification counts
+are in the authenticated manifest and feature report. Producer ownership
+remains unfinished.
 
 closed_census.py and reconcile.py reproduce the data from the manifested seed,
 kernel capture and ownership snapshot with serial configurations. Compile the
@@ -46,3 +49,14 @@ existing external receipts, --output for the external full manifest, and
 --archive for the external archive. Proofs, gate commands and budgets do not
 change in this packaging split. Archive ordering and gzip/tar metadata are
 normalized, so identical source/evidence bytes produce identical archives.
+
+The index archive_member continuation-2/evidence-manifest.json is intentional.
+The sealed archive contains exactly one regular member at that path; its size
+and SHA256 match the index, and its archive_root is continuation-2. This prefix
+is a transport compatibility name, not the current checkpoint number. The
+archive filename and integration metadata identify the checkpoint.
+
+The five LoopSelectorAudit witnesses give binder-level satisfiability only.
+They jointly instantiate all original arguments, including selector proofs.
+They do not show that Input, Room or Rep is satisfiable; those expressions are
+in equivalence conclusions. Success observations are separate Lean theorems.
