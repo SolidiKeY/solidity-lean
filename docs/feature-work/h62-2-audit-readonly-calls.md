@@ -1096,3 +1096,85 @@ admitted raw receipts. It requires the exported canonical prior ledger and raw
 VM artifact paths; no off-VM independent acceptance is implied. Next independent
 work: remaining433 original joint witnesses/refutations and precise input/type/
 source/owner binding under all existing holds.
+
+
+### Primitive initialization and authenticated dependency reuse (2026-11-07)
+
+Fetched master f5038bc02bc52ea08f5a3cec7de292aef424e7c8 and rebased prior audit
+checkpoints; proof-run head is f994997c163fa341adab6bb872f24dde7857c42c.
+`tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean` imports
+unchanged PrimitiveInitialization and instantiates zero_value,zero_values,
+exhausted_nonempty,exhausted_empty. Explicit Env, Bool locals and Source state
+observe horizon-one success, nonempty horizon-zero timeout, and empty horizon-zero
+success. Mixed bool/uint/int returns use the same input/seed in every run. A
+general pure-versus-timeout lemma and two concrete always-timeout refutations
+guard successful initialization. Ten new helper theorems, five input definitions;
+no original statement, definition, premise, exclusion, axiom or budget changed.
+
+Both final modes passed:four exact original raw kernel types,ten permitted
+helper axiom sets. Frozen:45 project nodes,43 reused and2 newly compiled modules,
+39.504 seconds,793149440 bytes peak aggregate RSS. Current:50 nodes,47 reused
+and3 newly compiled modules,34.237 seconds,792784896 bytes. The final client and
+query compile separately in both modes. These are CHECKED DEPENDENCY REUSE gates,
+not fresh full-closure rebuilds or timing comparisons. New dependencies compile
+in isolated libraries; no arbitrary cache fallback or old-library LEAN_PATH.
+The prior executed primitive pair is admitted by exact hashes; source/import/
+object/compiler/log pins are verified before/after and copied objects/staged
+sources checked. Historical Python tools changed by master are recovered ONLY
+as exact hash-matched Git bytes at the admitted receipt's head. Current tools
+stay untouched; missing/wrong objects or corrupted saved snapshots refuse
+recovery. Read-only replay refuses absent snapshots. This authenticates saved
+provenance, not execution of old tooling or SDK-library certification.
+
+The initial check refused changed scan.py before compilation. Exact Git recovery
+resolved that provenance mismatch. The next check compiled dependencies but
+found an ambiguous Heap.empty in the new fixture; qualifying the Source heap
+fixed it. The corrected per-file check passed in1.516 seconds. Those two failed
+attempts remain saved, with no passing credit. Final frozen/current receipts are
+separate and immutable. External controls cover actual temporary-Git recovery,
+bad Git digests, absent/corrupt snapshots, forbidden artifact recovery, source/
+object/destination substitution, unadmitted receipt bytes, held imports, changed/
+missing/duplicate types, mode/client substitution and original-row loss. Intake
+controls also keep lexical refusals separate from semantic credit. These are
+external tooling checks, not Lean proofs. Independent read-only finder and
+skeptic confirmed source logic, cache recovery and final accounting; neither
+ran Lean/server/tests or wrote files.
+
+Accounting changes exactly four original pending rows:joint53→57,pending433→429.
+Every other788 original row and all61 prior coverage entries are retained. All792
+identities, three private run_bind gaps and nineteen H19/H60 statement-transport
+waits remain. Horizons are NOT gas/depth/fork resources; initializer refutations
+are not negative controls for the public compiler. The historical Premises
++80.254966536% STOP remains; no unchanged held-workload run, before/after
+rebaseline, runtime-pass label or full assignment completion.
+
+Master now contains PublicCompilerTotal and its owner controls. Source-only
+intake binds exact Git blobs and nine requested header spans. The lexical census
+refused PublicCompilerTotal at an unmatched end; that file remains unbound,
+and candidate headers do not establish namespace or kernel signatures. Frozen
+census owner/kernel/witness defaults are removed from new producer rows; live
+ownership and kernel binding remain explicitly unverified. This
+refusal is recorded rather than hidden. Compiler-success source publication is
+available; consumer kernel validation and complete negative controls remain
+pending. Its stated ProgOk/Matches domain excludes external/self/library calls;
+G42.04 library body/binding adequacy remains open. Owner P1 documentation says
+gas/depth are not resources. Thus intake closes neither checkpoint3 nor our full
+H121 Source/callee/native-frame producer; no original792 credit comes from text.
+
+Artifacts: /workspace/h62-audit-readonly-calls/initialization/.
+Committed pins: `tests/h62/item2/audit-readonly-calls/initialization.sha256`.
+`initialization_coverage.py` reproduces its exact four-row delta from the immutable
+Git baseline and admitted proof/cache chain. Raw ledgers and exact absolute VM
+paths are required for replay; they are not independent off-VM acceptance.
+Next:remaining429 original joint inputs/refutations and exact source/type/owner
+binding, plus consumer validation of published compiler success under all holds.
+No new scope question, owner ticket, push, goal reset or goal completion.
+
+
+Final initialization acceptance:thirteen external controls pass; four accounting
+outputs and the source-only compiler intake reproduce byte-for-byte. Skeptic's
+unsupported inherited-owner finding is fixed by stripping all frozen owner,
+kernel-name and witness/premise defaults from new producer rows. Both reviewers
+confirm the fix. Actual bounded current KeySort passes (2.020 seconds), using
+Lean4.24.0/Lake5.0.0-src+797c613, without a runtime-pass claim. No full repository
+or producer compiler kernel gate is substituted by this prerequisite.

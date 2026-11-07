@@ -740,6 +740,58 @@
       "frozen_receipt_sha256": "4802c491d6e5bd616e8af86ecec8514da33480f573de1f04cc5dbe4e1ad57f48",
       "current_receipt_sha256": "16b93f2f1ca30d81538b405936413a69bb16271f68de5dc3f3cd025c10bc5d7b",
       "proof_boundary": "Joint premise satisfiability and applications only; no definition equivalence, compiler success or H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.PrimitiveInitialization.zero_value",
+      "signature_sha256": "9216ade442cd8b88112cbe148410328ef43bfa65b56206b59057a23c68e965d7",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.InitializationWitnesses.zero_value_joint",
+      "global_premises": "No assumed global compiler/model record. Explicit Env, Bool locals and Source state; actual runs use the SAME inhabited inputs.",
+      "per_input": "uint initialization and mixed bool/uint/int return slots at horizon one; nonempty and empty horizon-zero cases. Same seed/local state observes actual success or timeout. Horizons are not gas/fork resources.",
+      "evidence": "initialization/frozen-accepted/receipt.json and initialization/current-accepted/receipt.json",
+      "evidence_manifest": "tests/h62/item2/audit-readonly-calls/initialization.sha256",
+      "frozen_receipt_sha256": "3729422c8d4bff68ee467b341c606ce6fc9d608d2ffa9cf9ad662821af045d2e",
+      "current_receipt_sha256": "6410330958c46a8f59e0e978b0734e76f39489d5804e16c918401ec0fe7c7815",
+      "proof_boundary": "Joint premise satisfiability and applications only; no definition equivalence, compiler success or H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.PrimitiveInitialization.zero_values",
+      "signature_sha256": "c4afaf8a0a97a0f22d57ba1aa21eceb089e27b14474ddeac5f2259608022193b",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.InitializationWitnesses.zero_values_joint",
+      "global_premises": "No assumed global compiler/model record. Explicit Env, Bool locals and Source state; actual runs use the SAME inhabited inputs.",
+      "per_input": "uint initialization and mixed bool/uint/int return slots at horizon one; nonempty and empty horizon-zero cases. Same seed/local state observes actual success or timeout. Horizons are not gas/fork resources.",
+      "evidence": "initialization/frozen-accepted/receipt.json and initialization/current-accepted/receipt.json",
+      "evidence_manifest": "tests/h62/item2/audit-readonly-calls/initialization.sha256",
+      "frozen_receipt_sha256": "3729422c8d4bff68ee467b341c606ce6fc9d608d2ffa9cf9ad662821af045d2e",
+      "current_receipt_sha256": "6410330958c46a8f59e0e978b0734e76f39489d5804e16c918401ec0fe7c7815",
+      "proof_boundary": "Joint premise satisfiability and applications only; no definition equivalence, compiler success or H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.PrimitiveInitialization.exhausted_nonempty",
+      "signature_sha256": "e95e1d42f32bc6111210cb7ed0898252ed25e313e412e183049a09bb31044d36",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.InitializationWitnesses.exhausted_nonempty_joint",
+      "global_premises": "No assumed global compiler/model record. Explicit Env, Bool locals and Source state; actual runs use the SAME inhabited inputs.",
+      "per_input": "uint initialization and mixed bool/uint/int return slots at horizon one; nonempty and empty horizon-zero cases. Same seed/local state observes actual success or timeout. Horizons are not gas/fork resources.",
+      "evidence": "initialization/frozen-accepted/receipt.json and initialization/current-accepted/receipt.json",
+      "evidence_manifest": "tests/h62/item2/audit-readonly-calls/initialization.sha256",
+      "frozen_receipt_sha256": "3729422c8d4bff68ee467b341c606ce6fc9d608d2ffa9cf9ad662821af045d2e",
+      "current_receipt_sha256": "6410330958c46a8f59e0e978b0734e76f39489d5804e16c918401ec0fe7c7815",
+      "proof_boundary": "Joint premise satisfiability and applications only; no definition equivalence, compiler success or H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.PrimitiveInitialization.exhausted_empty",
+      "signature_sha256": "89da2cfd654040b299b205449ba380bc741a11a14ea32f05bcc455b8a54f3b7c",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.InitializationWitnesses.exhausted_empty_joint",
+      "global_premises": "No assumed global compiler/model record. Explicit Env, Bool locals and Source state; actual runs use the SAME inhabited inputs.",
+      "per_input": "uint initialization and mixed bool/uint/int return slots at horizon one; nonempty and empty horizon-zero cases. Same seed/local state observes actual success or timeout. Horizons are not gas/fork resources.",
+      "evidence": "initialization/frozen-accepted/receipt.json and initialization/current-accepted/receipt.json",
+      "evidence_manifest": "tests/h62/item2/audit-readonly-calls/initialization.sha256",
+      "frozen_receipt_sha256": "3729422c8d4bff68ee467b341c606ce6fc9d608d2ffa9cf9ad662821af045d2e",
+      "current_receipt_sha256": "6410330958c46a8f59e0e978b0734e76f39489d5804e16c918401ec0fe7c7815",
+      "proof_boundary": "Joint premise satisfiability and applications only; no definition equivalence, compiler success or H121 adequacy."
     }
   ]
 }
