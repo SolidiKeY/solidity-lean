@@ -7,6 +7,9 @@ The caller keeps its parent pointer on the stack. A child lies a statically
 known distance below it because default construction allocates children first.
 The store retains the parent pointer and every word below it.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 

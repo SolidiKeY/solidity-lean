@@ -9,6 +9,9 @@ default child and installs its weakened reference. Older aliases keep their
 previous objects. These source equalities precede the matching allocator and
 pointer-store simulation.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}
@@ -36,7 +39,8 @@ theorem clearStructField {Γ : Ctx} (σ : State C Γ) {s t f : Name}
           (σ.alloc (R := .struct t) (defaultFields (structDef t) hp)).2), List.prefix_append _ _⟩ := by
   have he := defaultStruct_alloc σ.heap hp hm
   simp only [TRun.clearT, State.allocDefaultG, State.grow]
-  with_unfolding_all exact adopt_clear_alloc σ r hf _ _ he _
+  with_unfolding_all
+    exact adopt_clear_alloc σ r hf _ _ he (σ.heap.allocDefault (.struct t) hm).ext
 
 theorem defaultArray_alloc {H : HTy} (hp : Heap H) (p : PrimTy) :
     hp.allocDefault (.array (.prim p)) rfl =
@@ -52,7 +56,8 @@ theorem clearArrayField {Γ : Ctx} (σ : State C Γ) {s f : Name} (p : PrimTy)
           (σ.alloc (defaultArray p (wmod 0))).2), List.prefix_append _ _⟩ := by
   have he := defaultArray_alloc σ.heap p
   simp only [TRun.clearT, State.allocDefaultG, State.grow]
-  with_unfolding_all exact adopt_clear_alloc σ r hf _ _ he _
+  with_unfolding_all
+    exact adopt_clear_alloc σ r hf _ _ he (σ.heap.allocDefault (.array (.prim p)) rfl).ext
 
 def clearReferenceCode (pointer allocation : List Instr) (offset : Nat) : List Instr :=
   pointer ++ (allocation ++ ([.swap 1] ++ writeFieldCode offset))
@@ -103,8 +108,9 @@ theorem deleteStructField_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
     simpa only [HRef.wk, allocationBase_old base cursor r, hid, upd_same] using
       (h.allocateStruct ha hb hp hm hspace).setReference (r.wk (List.prefix_append _ _)) hf
         (σ.alloc (R := .struct t) (defaultFields (structDef t) hp)).2
-  · have hid : (σ.alloc (R := .struct t) (defaultFields (structDef t) hp)).2.id = σ.H.length := rfl
-    simpa only [HRef.wk, allocationBase_old base cursor r, hid, upd_same] using
+  · have hid : (σ.heap.alloc (R := .struct t) (defaultFields (structDef t) hp)).2.id = σ.H.length := rfl
+    simpa only [State.withHeap, State.alloc, State.adopt, Grown.alloc,
+      HRef.wk, allocationBase_old base cursor r, hid, upd_same] using
       (ha.reserveStruct (s := t) (defaultFields (structDef t) hp)
         (defaultFields_defaults σ.heap hp hm) (structAllocationSize t) (Nat.le_max_right _ _) hspace).setReference
         (r.wk (List.prefix_append _ _)) hf (σ.alloc (R := .struct t) (defaultFields (structDef t) hp)).2
@@ -142,8 +148,10 @@ theorem deleteArrayField_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
     simpa only [HRef.wk, allocationBase_old base cursor r, hid, upd_same] using
       (h.allocate ha hb p (wmod 0) hspace).setReference (r.wk (List.prefix_append _ _)) hf
         (σ.alloc (defaultArray p (wmod 0))).2
-  · have hid : (σ.alloc (defaultArray p (wmod 0))).2.id = σ.H.length := rfl
-    simpa only [HRef.wk, allocationBase_old base cursor r, hid, upd_same] using
+  · have hid {R : RefTy} (o : MObj σ.H R) : (σ.heap.alloc o).2.id = σ.H.length := rfl
+    simpa only [State.withHeap, State.alloc, State.adopt, Grown.alloc,
+      HRef.wk, allocationBase_old base cursor r, hid, upd_same,
+      wmod_def, Nat.zero_mod, Nat.add_zero] using
       (ha.allocateArray p (wmod 0) hspace).setReference
         (r.wk (List.prefix_append _ _)) hf (σ.alloc (defaultArray p (wmod 0))).2
 

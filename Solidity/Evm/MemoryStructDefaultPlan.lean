@@ -11,6 +11,9 @@ Plans are indexed by the existing reference type and speak directly about
 Heap.allocDefault. Field certificates speak about the actual storage-default
 copy fold; no alternate value or heap representation is introduced.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 
@@ -97,20 +100,22 @@ private theorem defaultArray_sound (p : PrimTy) :
       Grown.alloc ⟨List.prefix_refl _, σ.heap, defaultArray p (wmod 0)⟩ := defaultArray_alloc σ.heap p
   have hshape : allocateMachine m cursor (wmod 0) =
       {m with mem := (allocateMachine m cursor (wmod 0)).mem} := rfl
+  have hz : (wmod 0).val = 0 := rfl
   have hspace : cursor.val + (wmod 0).val + 1 < W := hs
   dsimp only
   rw [he]
   refine ⟨upd base σ.H.length cursor, (allocateMachine m cursor (wmod 0)).mem, ?_, ?_, ?_, ?_, ?_⟩
   · simpa only [State.adopt, State.alloc, Grown.alloc, ← hshape] using
       h.allocate ha hb p (wmod 0) hspace
-  · simpa only [Grown.alloc, Nat.add_zero, ← hshape] using
+  · simpa only [Grown.alloc, hz, Nat.add_zero, ← hshape] using
       ha.allocateArray p (wmod 0) hspace
   · exact fun r => allocationBase_old base cursor r
   · simp only [Grown.alloc, Heap.alloc, upd_same, Nat.add_zero,
       wmod_of_lt cursor.isLt]
   · rw [run_append_ok (show run [.push w[0]] m = .ok (m.push w[0]) 0 from rfl)]
-    simpa only [Nat.add_zero, wmod_of_lt cursor.isLt] using
-      allocateArray_run m cursor (wmod 0) ha.arrays.free.cell
+    have hrun := allocateArray_run m cursor (wmod 0) ha.arrays.free.cell
+    rw [hshape] at hrun
+    simpa only [Nat.add_zero, wmod_of_lt cursor.isLt, wmod_def, Nat.zero_mod] using hrun
 
 def DefaultPlan.array (p : PrimTy) : DefaultPlan (.array (.prim p)) where
   cost := 1
@@ -137,11 +142,11 @@ private theorem defaultPrimitiveField_sound (f : Name) (p : PrimTy) {fs : List (
       have ht := SFields.lookupBy_cons_pos rfl hf
       cases ht
       simp only [MFields.get, dite_true, MVal.wk]
-    · simpa only [MFields.get, he, if_false] using hprim (SFields.lookupBy_cons_neg he hf)
+    · simpa only [MFields.get, he, ite_false, dite_false] using hprim (SFields.lookupBy_cons_neg he hf)
   · intro g R hf
     by_cases he : g = f
     · cases SFields.lookupBy_cons_pos he hf
-    · simpa only [MFields.get, he, if_false] using href (SFields.lookupBy_cons_neg he hf)
+    · simpa only [MFields.get, he, ite_false, dite_false] using href (SFields.lookupBy_cons_neg he hf)
 
 def DefaultFieldsPlan.consPrimitive (f : Name) (p : PrimTy) {fs : List (Name × Ty)}
     (tail : DefaultFieldsPlan fs) : DefaultFieldsPlan ((f, .prim p) :: fs) where
@@ -183,11 +188,11 @@ private theorem defaultReferenceField_sound (f : Name) {R : RefTy} {fs : List (N
   rw [SFields.dflt, SFields.copyStToM_cons]
   refine ⟨base₂, mem₂, ?_, ?_, hext₁.trans g₁.ext hext₂, ?_, ?_, ?_⟩
   · simpa only [σ₁, g₁, m₁, Heap.allocDefault, State.adopt, TEnv.wk_trans] using hst₂
-  · simpa only [cursor₁, Nat.add_assoc] using hal₂
+  · simpa only [σ₁, g₁, m₁, Heap.allocDefault, State.adopt, cursor₁, Nat.add_assoc] using hal₂
   · intro g p hf
     by_cases he : g = f
     · cases SFields.lookupBy_cons_pos he hf
-    · simpa only [MFields.get, he, if_false] using hprim₂ (SFields.lookupBy_cons_neg he hf)
+    · simpa only [σ₁, g₁, Heap.allocDefault, State.adopt, MFields.get, he, ite_false, dite_false] using hprim₂ (SFields.lookupBy_cons_neg he hf)
   · intro g Q hf
     by_cases he : g = f
     · subst g
@@ -195,7 +200,7 @@ private theorem defaultReferenceField_sound (f : Name) {R : RefTy} {fs : List (N
       cases ht
       simp only [MFields.get, dite_true, if_true, MVal.wk]
       exact (hext₂ g₁.val).trans href₁
-    · simpa only [MFields.get, he, if_false, cursor₁, Nat.add_assoc] using
+    · simpa only [σ₁, g₁, Heap.allocDefault, State.adopt, MFields.get, he, ite_false, dite_false, cursor₁, Nat.add_assoc] using
         href₂ (SFields.lookupBy_cons_neg he hf)
   · rw [run_append_ok hrun₁,
       run_append_ok (show run [.pop] (m₁.push (.val (wmod (cursor.val + head.root)))) =
@@ -217,7 +222,7 @@ def DefaultFieldsPlan.consReference (f : Name) {R : RefTy} {fs : List (Name × T
     · simp only [he, if_true]
       have hh := head.root_lt
       omega
-    · simp only [he, if_false]
+    · simp only [he, ite_false, dite_false]
       have ht := tail.offsets_lt (SFields.lookupBy_cons_neg he hf)
       omega
   sound := defaultReferenceField_sound f head tail
@@ -267,7 +272,7 @@ private theorem defaultStruct_sound (s : Name) (fields : DefaultFieldsPlan (stru
   · have hp := Eq.mp (congrArg (fun n => StructAllocatorRepr (σ₁.alloc (R := .struct s) g₁.val).1.heap
       (upd base₁ g₁.H'.length cursor₁) frame
       (⟨cursor₁.val + structAllocationSize s, hs₂⟩ : Fin W) n) hshape) hparent.2.2
-    simpa only [cursor₁, Nat.add_assoc, Grown.alloc] using hp
+    simpa only [σ₁, g₁, State.alloc, State.adopt, cursor₁, Nat.add_assoc, Grown.alloc] using hp
   · exact hext₁.trans g₁.ext (fun r => allocationBase_old base₁ cursor₁ r)
   · simp only [g₁, cursor₁, Grown.alloc, Heap.alloc, upd_same, wmod_of_lt hs₁]
   · rw [run_append_ok hrun₁]

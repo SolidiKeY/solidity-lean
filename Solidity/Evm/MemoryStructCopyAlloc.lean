@@ -8,6 +8,9 @@ actual field representation, preservation below the old cursor, and a zero
 tail after the new cursor. No assumption says that a populated struct is a
 default object or that older aliases have disappeared.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}

@@ -110,6 +110,7 @@ theorem DefaultPlan.deleteField_correct {C : Contract} {R : RefTy} (plan : Defau
     · intro c _ hc hcspace
       have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
       subst c
-      simpa only [r₁, HRef.wk, hext r] using hal₁.setReference r₁ hf g.val
+      simpa only [State.withHeap, σ₁, State.adopt, final, r₁, HRef.wk, hext r] using
+        hal₁.setReference r₁ hf g.val
 
 end Solidity.Evm.Memory

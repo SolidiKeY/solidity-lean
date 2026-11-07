@@ -8,6 +8,9 @@ parent. It preserves every older object, local pointer, interval and zeroed
 free region. Children must already exist in the typed heap; recursive default
 construction can compose this boundary after its child allocations.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}
