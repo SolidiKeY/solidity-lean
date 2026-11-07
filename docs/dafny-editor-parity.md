@@ -1603,3 +1603,47 @@ checks remain required. Fullbuild/TestSuite/timedstrict/trust, source-bound
 failed-postcondition/positioned-trace producers, paired rendered phases,
 macOS and the entire original performance/adversarial/scaling/judgment queue
 remain open; unchanged resource/timing STOPs are not retried.
+
+
+### Handoffs — confirmed transport closure and kernel split-slot foundation (2026-11-07)
+
+The retained original concurrent CI failure remains unattributed. A small
+actual owned-process fixture demonstrates a concrete failure family: root exit
+leaves a same-session descendant holding stdout; waiting for close before
+retiring the group exhausts the original1000ms. Both low-level and production
+LanguageClient regressions fail before1 and pass after0. The repair responds
+to actual root exit, retires only its owned private group and still requires
+physicalclose/group quiescence. It does not equate exit with close. Real ordered
+shutdownrequest/reply/exitnotification/process-exit/close observations and PID
+birth/group readback are retained. The server is explicitly injected, not a
+real verifier. Zombies remain visible, so this is not full entry-retention parity.
+
+Fixture cleanup now attempts and settles every admitted disposal before
+reporting aggregate errors. Ownership readback/receipt failures cannot pass or
+prevent other cleanup, and unconfirmed fixtures remain on disk. The bounded
+three-version-case replay passes with all three actual exit/close sequences;
+this does not reproduce original whole-run contention or prove its cause fixed.
+
+New owned module Solidity/Tools/VerifierMetadata.lean adds conditional kernel
+facts for exact typed postFails slots and final run states. Per-file MCP
+diagnostics0 and isolated214job modulebuild0; both lemmas depend only on
+propext/Classical.choice/Quot.sound. No new axioms/sorry/options/budget changes.
+Generated roots and modulemap were updated through required scripts. Canonical
+n/split provenance remains essential: conjN's last slot may contain a remaining
+conjunction. These lemmas do not identify a source ensures/span, associate the
+candidate/original obligation/entry premises, emit verifier metadata or drive
+a postcondition decoration. Producer-owned hooks remain required.
+
+Finder/skeptic source reviews for lifecycle and Lean foundation found no
+concrete defect. Initial unsolved proof/MCP-retirement failures are retained;
+the off-git wrapper now forwards EOF and confirms owned MCP retirement within
+the existing5s shutdown bound. No resource gate is weakened. Exact follow-up
+head checks remain required. [H44 evidence](dafny-child-closure-evidence-manifest.json)
+is off git. Only two existing assessments change and remain partial; all489
+ordered obligations, frozen270, expected observations, pairedjudge contracts
+and budgets remain. Firstfailed submenus:dafny.context still needs actual
+positioned producer/trace actions and paired rendered lifecycle evidence. Full
+build/TestSuite/timedstrict/kerneltrust, macOS, original proof/performance/
+adversarial/scaling matrices and every paired judgment remain unfinished. No
+unchanged stopped heavy command, goal status mutation, checkout creation,
+push, merge or PR occurs in this recovery.
