@@ -104,9 +104,12 @@ def prepare(root, head, context="lane-end"):
             imports.extend(line[7:].split())
         elif line.strip() and not line.startswith("--"):
             raise ValueError("Unexpected slow root syntax")
+    sources = {e["path"] for e in inventory}
+    rows_nine = "Solidity.Examples.Tactics.OpenLoops.RowsNine"
+    if rows_nine.replace(".", "/") + ".lean" in sources and rows_nine not in SLOW:
+        raise ValueError("RowsNine requires reviewed central slow-root and runner registration")
     if tuple(imports) != SLOW:
         raise ValueError("Slow root target inventory changed")
-    sources = {e["path"] for e in inventory}
     if any(module.replace(".", "/") + ".lean" not in sources for module in SLOW):
         raise ValueError("Missing committed slow source")
     if git(root, "diff", "HEAD", "--name-only") or git(root, "rev-parse", "HEAD").decode().strip() != head:
