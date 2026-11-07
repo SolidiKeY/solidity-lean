@@ -58,6 +58,15 @@ theorem unaligned_images_distinct :
   have lengths : 2 = 33 := congrArg List.length bytes
   omega
 
+/-- Joint inhabitance of the entire bytesObject_payload parameter telescope.
+The nonempty payload makes the live-index premise inhabited; this is neither
+per-input feasibility nor compiler totality. -/
+theorem byte_payload_joint :
+    ∃ (bs : List UInt8) (_hl : bs.length < 2 ^ 256) (_m : ByteView)
+      (_base i : Nat) (_hi : i < bs.length), True :=
+  ⟨[0], by decide, zero, 0, 0, by decide, True.intro⟩
+
+#print axioms byte_payload_joint
 #print axioms unaligned_images_distinct
 #print axioms all_fixtures
 #print axioms original_byte_component
