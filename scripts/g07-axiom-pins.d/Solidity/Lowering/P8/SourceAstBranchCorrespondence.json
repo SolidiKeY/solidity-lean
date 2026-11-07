@@ -1,0 +1,20 @@
+{
+ "Solidity/Lowering/P8/SourceAstBranchCorrespondence.lean:Solidity.Lowering.P8.SourceAstBranchCorrespondence.catch_plain_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstBranchCorrespondence.lean:Solidity.Lowering.P8.SourceAstBranchCorrespondence.catch_signature_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstBranchCorrespondence.lean:Solidity.Lowering.P8.SourceAstBranchCorrespondence.if_with_else_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstBranchCorrespondence.lean:Solidity.Lowering.P8.SourceAstBranchCorrespondence.if_without_else_exact": [
+  "Quot.sound",
+  "propext"
+ ]
+}

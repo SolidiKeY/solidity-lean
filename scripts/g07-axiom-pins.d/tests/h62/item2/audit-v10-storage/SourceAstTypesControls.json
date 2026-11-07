@@ -1,0 +1,6 @@
+{
+ "tests/h62/item2/audit-v10-storage/SourceAstTypesControls.lean:H62.StorageAudit.SourceAstTypesControls.invalid_bytes": [],
+ "tests/h62/item2/audit-v10-storage/SourceAstTypesControls.lean:H62.StorageAudit.SourceAstTypesControls.invalid_integer": [],
+ "tests/h62/item2/audit-v10-storage/SourceAstTypesControls.lean:H62.StorageAudit.SourceAstTypesControls.invalid_location": [],
+ "tests/h62/item2/audit-v10-storage/SourceAstTypesControls.lean:H62.StorageAudit.SourceAstTypesControls.noncanonical_integer": []
+}

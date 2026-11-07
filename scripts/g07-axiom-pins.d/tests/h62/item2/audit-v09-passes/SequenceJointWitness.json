@@ -1,0 +1,45 @@
+{
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.associations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.failure_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.not_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.source_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.successful_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.suffix_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.typed_association": [
+  "propext"
+ ]
+}

@@ -1,0 +1,67 @@
+{
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.compilation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.complete_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.joint_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.joint_satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.no_v1_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.no_v1_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.nontrivial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.source_backward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.source_block": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.source_forward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
