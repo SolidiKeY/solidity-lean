@@ -639,3 +639,25 @@ theorem production_frame_joint {K : Type} {caller : K}
 
 #print axioms production_frame_joint
 end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+
+/-- Exact legacy constructor correspondence retains the complete reached frame. -/
+theorem constructor_frame_rebuild (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) (agreement : ConstructorScalarTransport.FrameInputs frame address ctx) :
+    EnvironmentProjection.frameForContext frame address ctx = frame :=
+  EnvironmentProjection.frameForContext_eq_self frame address ctx
+    (ConstructorScalarTransport.toFrameAgreement agreement)
+
+/-- Delegated library correspondence rebuilds at caller storage, never code. -/
+theorem library_frame_rebuild {K : Type} {caller : K}
+    (owner : ContractWorld.Handle caller) (frame : Source.Fr) (ctx : ContractWorld.Context)
+    (agreement : LibraryFrameTransport.FrameInputs frame owner ctx) :
+    EnvironmentProjection.frameForContext frame owner.address ctx = frame :=
+  EnvironmentProjection.frameForContext_eq_self frame owner.address ctx
+    (LibraryFrameTransport.toFrameAgreement agreement)
+
+#print axioms constructor_frame_rebuild
+#print axioms library_frame_rebuild
+#print axioms EnvironmentProjection.frameForContext_fixed_iff
+end Solidity.Lowering.V08.H55Agreements

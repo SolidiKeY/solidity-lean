@@ -297,6 +297,28 @@ theorem frameForContext_preserves (template : Source.Fr) (address : ContractWorl
     (frameForContext template address ctx).cd = template.cd :=
   ⟨rfl, rfl, rfl, rfl⟩
 
+/-- Guarded regression: rebuilding an already agreeing frame must preserve
+its ENTIRE Source value, rather than just four observed projections. -/
+theorem frameForContext_eq_self (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) (agreement : FrameAgreement frame address ctx) :
+    frameForContext frame address ctx = frame := by
+  have sameAddress : lowerAddress address = frame.this :=
+    Fin.ext ((frame_nat_int_exact _ address.1).mpr agreement.address).symm
+  have sameSender : lowerAddress ctx.sender = frame.sender :=
+    Fin.ext ((frame_nat_int_exact _ ctx.sender.1).mpr agreement.sender).symm
+  have sameValue : lowerWord ctx.value = frame.value :=
+    Fin.ext ((frame_nat_int_exact _ ctx.value).mpr agreement.value).symm
+  unfold frameForContext
+  rw [sameAddress, sameSender, sameValue, ← agreement.static]
+
+/-- Exact fixed points exclude treating reconstruction of a mismatched frame
+as preservation. This is an input correspondence, not an execution theorem. -/
+theorem frameForContext_fixed_iff (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) :
+    frameForContext frame address ctx = frame ↔ FrameAgreement frame address ctx :=
+  ⟨fun same => same ▸ frameForContext_agrees frame address ctx,
+    frameForContext_eq_self frame address ctx⟩
+
 #print axioms frame_nat_int_exact
 
 end Solidity.Lowering.V08.EnvironmentProjection
