@@ -1,0 +1,6 @@
+{
+ "tests/h62/item4/generic-storageops/AppendFixtures.lean:H62.GenericStorageOps.AppendFixtures.every_split": [],
+ "tests/h62/item4/generic-storageops/AppendFixtures.lean:H62.GenericStorageOps.AppendFixtures.first_failure": [],
+ "tests/h62/item4/generic-storageops/AppendFixtures.lean:H62.GenericStorageOps.AppendFixtures.late_failure": [],
+ "tests/h62/item4/generic-storageops/AppendFixtures.lean:H62.GenericStorageOps.AppendFixtures.observations_match": []
+}
