@@ -31,3 +31,18 @@ position_a = 'theorem a : True := by\n  trivial\ninclude h\ntheorem b : True := 
 position_b = 'theorem a : True := by\n  trivial\ntheorem b : True := by\n  trivial\ninclude h\n'
 assert frozen_view(position_a) != frozen_view(position_b), 'command relocation missed'
 print('frozen text guard: command relocation rejected')
+
+for shortcut in ("sorry", "sorryAx", "admit", "native_decide", "ofReduceBool", "unsafe", "run_tac", "axiom"):
+    changed = original.replace("  rfl\n", "  " + shortcut + "\n", 1)
+    assert frozen_view(original) != frozen_view(changed), shortcut
+print("frozen text guard: new raw trust-shortcut indicators rejected")
+# The raw scan is deliberately conservative: comments and strings can flag too.
+assert frozen_view(original) != frozen_view(original + '-- sorry\n'), 'comment indicator missed'
+assert frozen_view(original) != frozen_view(original.replace('  rfl\n', '  exact "native_decide"\n', 1)), 'string indicator missed'
+assert frozen_view(original) == frozen_view(original.replace('  rfl\n', '  exact sorryThing\n', 1)), 'identifier substring flagged'
+print('frozen text guard: raw-scan false-positive boundary and identifier boundary checked')
+assert frozen_view(original) != frozen_view(original.replace('  rfl\n', "  exact sorry'\n", 1)), 'apostrophe false-positive boundary changed'
+comment_token = original.replace('  rfl\n', '  -- sorry\n  rfl\n', 1)
+relocated_token = original.replace('  rfl\n', '  -- note\n  sorry\n', 1)
+assert frozen_view(comment_token) == frozen_view(relocated_token), 'raw count limitation changed'
+print('frozen text guard: apostrophe false-positive and equal-count limitation documented')

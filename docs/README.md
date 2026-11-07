@@ -181,6 +181,7 @@ V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-wor
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 - [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
 - V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 | Assembly lane | Document |
 |---|---|
 | VY5 raw-local/physical, indexed-write/emit composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
