@@ -54,8 +54,11 @@ written-read inequality is not a separate failed representation judgment.
 typed cell writes, actual ordinary/writable execution and exact journal order.
 Mixed uint/bool controls retain nonempty locals, transient storage and a journal
 prefix: worlds agree while journals/states differ; overlap changes worlds.
-Explicit undo restores the seeded execution state. The routine combined adapter
-is pending in [TERRA-TODO](../../TERRA-TODO.md), without a compiled stub.
+Explicit undo restores the seeded execution state. The compiled `complete` adapter
+packages both runs, world equality and each exact journal order; the existing
+world-equality control consumes it. This closes only the C157 obligation in
+[TERRA-TODO](../../TERRA-TODO.md). Lane-history finder and skeptic reviews found
+no statement or semantic preservation issue in this adapter.
 
 `SourceWriteRollback` proves typed static refusal and actual `rollbackTo`
 restoration for a captured account-write-only poststate. Populated controls

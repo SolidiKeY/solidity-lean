@@ -1,4 +1,9 @@
 {
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.journal_order": [
   "Classical.choice",
   "Quot.sound",

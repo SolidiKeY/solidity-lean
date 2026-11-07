@@ -1,6 +1,6 @@
 """Guard omission of projection self/capacity binders and stale field types."""
 from pathlib import Path
-import copy,json,sys,unittest
+import copy,json,sys,unittest,hashlib,types,subprocess
 ROOT=Path(__file__).resolve().parents[4]
 sys.path.insert(0,str(ROOT/'scripts/h62/item2/audit-bytecode-selection'))
 import exact_domains as renderer
@@ -62,5 +62,28 @@ class FieldDomainTests(unittest.TestCase):
             self.assertIn('irStack [11]',w[name]['proof'])
             self.assertIn('caller, caller, rfl, True.intro',w[name]['proof'])
         self.assertTrue(all('False' not in p['proof'] for p in w.values()))
+
+
+    def test_shared_support_is_pinned_once_and_default_output_unchanged(self):
+        row,w=self.fixture()
+        support=(ROOT/'tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt').read_text()
+        source,pins=renderer.projection_domain_source(ROOT,[row],w,support_source=support)
+        self.assertEqual(source.count('def referenceDecoder ('),1)
+        self.assertEqual(pins['support_source_sha256'],hashlib.sha256(support.encode()).hexdigest())
+        for bad in [False, 'axiom invented : True', 'unsafe def invented := 1']:
+            with self.subTest(bad=bad),self.assertRaises(ValueError):renderer.projection_domain_source(ROOT,[row],w,support_source=bad)
+        old=types.ModuleType('old_field_renderer');old.__file__=str(ROOT/'scripts/h62/item2/audit-bytecode-selection/exact_domains.py')
+        raw=subprocess.check_output(['git','show','87b874958cc3d509e688b7ec3f867b613750e737:scripts/h62/item2/audit-bytecode-selection/exact_domains.py'],cwd=ROOT)
+        exec(compile(raw,old.__file__,'exec'),old.__dict__)
+        self.assertEqual(renderer.projection_domain_source(ROOT,[row],w),old.projection_domain_source(ROOT,[row],w))
+    def test_decoder_fixture_has_actual_closed_step_and_shared_self(self):
+        w=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/decoder-field-witnesses.json').read_text())
+        self.assertEqual({x['target'] for x in w.values()},{'Solidity.Backend.Selection.DecoderPremise.'+x for x in ['entry','closed','agrees','zero','succ']})
+        self.assertTrue(all('referenceDecoder [0x5b] 1' in x['proof'] for x in w.values()))
+        self.assertIn('reference_jumpdest_step',w['decoder_closed_joint_domain']['proof'])
+        support=(ROOT/'tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt').read_text()
+        self.assertIn('theorem decoder_missing_supported_step_refused',support)
+        self.assertIn('decoder_jumpdest_reject_all_refused',support)
+        self.assertIn('⟨1,[11]⟩',w['decoder_closed_joint_domain']['proof'])
 
 if __name__=='__main__':unittest.main()
