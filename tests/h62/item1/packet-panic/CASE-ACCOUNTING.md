@@ -91,3 +91,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## UnsignedDiv Execution and Composition
 
 `unsigned_div_execution_composition_ledger.py` adds ten base-pinned literal headers for intrinsic evaluation, selected execution and joint Source/target local cases. The original StateRepr and divisor premises, Source fuel n+3 and retained local/state pair remain binding; zero cases assert exact Source divZero panic data and coarse symbolic target revert. These are textual observations, not whole-state agreement, gas, ABI or target payload proofs. The ledgers now describe 353 of 474 observed literal headers; 121 of the original subtotal remain.
+
+## UnsignedDiv Witness
+
+`unsigned_div_witness_ledger.py` records eight base-pinned literal headers for the auxiliary initialized machine and StateRepr, arbitrary saved stack, nonzero Source div/mod success and zero-divisor Source divZero panic with coarse selected symbolic revert. Source local tails and state are retained as stated. There is no separately named witnessed zero-remainder theorem in this file; the general remainder-zero packet is a separate declaration in Composition. This is a textual auxiliary witness account, not deployment, native execution or target panic-payload proof. The ledgers now describe 361 of 474 observed literal headers; 113 of the original subtotal remain unclassified.

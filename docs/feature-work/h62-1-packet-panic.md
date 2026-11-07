@@ -117,3 +117,7 @@ The base-pinned eleven-row selection/numeric ledger includes scalar-guard payloa
 ## UnsignedDiv Execution and Composition continuation
 
 The base-pinned ten-row execution/composition ledger records Source, selection and symbolic target cases. Both-file modified-byte and forged-census negative controls pass. Independent read-only finder and skeptic matched all observations and premises without Lean; no material discrepancy was found. This is not full semantic closure or target payload proof.
+
+## UnsignedDiv Witness continuation
+
+The base-pinned eight-row witness ledger records the auxiliary machine, arbitrary saved stack, Source state retention and symbolic outcomes. Negative controls pass. Independent read-only finder and skeptic matched the declarations without Lean and noted that the general zero-remainder packet is not a separately named witness theorem. This ledger is not a deployment, native execution or target payload proof.
