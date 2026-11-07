@@ -119,3 +119,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## SignedSub Controls
 
 `signed_sub_controls_ledger.py` describes forty base-pinned literal headers, identifying repeated Seed and outer namespace names by original line and name. The observations separate unchecked Source execution, symbolic target outcomes and projections, the checked Source overflow projection, initial fixture memory, low-horizon timeout and refusal cases. Existing axiom guards were not edited. After registering this ledger, reconciliation covers 459 of 474 observed lexical headers; 15 original headers remain unclassified. Manual prose and lexical headers are not Lean proof or complete semantic coverage.
+
+## CheckedMul Populated
+
+`checked_mul_populated_ledger.py` records fourteen base-pinned literal headers for the two-array heap, its aliases, concrete machine, ArrayRepr, HeapRepr and StateRepr. Base-map arguments 0 and 1 yield addresses 16 and 20. The two private helpers were separately recorded. The original G25 fixture remains read-only. Reconciliation describes 473 of 474 observed lexical headers; one original header remains. These observations do not prove Lean statements or complete semantic coverage.

@@ -149,3 +149,7 @@ The original census omits same-line attributed declarations. `attributed_header_
 ## SignedSub Controls continuation
 
 The base-pinned 40-row controls ledger distinguishes same-named Seed and outer declarations by line. Its negative controls pass. Independent read-only finder and skeptic matched the statements without Lean; the checked overflow `revertOf` observation was corrected to specify `some` panic data and rechecked. No original proof or guard changed.
+
+## CheckedMul Populated continuation
+
+The base-pinned fourteen-row populated-fixture ledger accounts for the read-only heap, aliases, machine and representation statements. Negative controls pass. Independent read-only finder and skeptic matched all observations without Lean; both requested clarification of base-map indices versus addresses, which was corrected and rechecked. The G25 original was not edited.
