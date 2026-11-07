@@ -1590,3 +1590,32 @@ was not rerun. H44 records and import/artifact provenance are inventoried in
 `slice-capacity-evidence.json`, retained at
 `/workspace/vy3-slice-capacity-evidence-20261107`. Historical evidence is still
 missing; these fresh checks do not reconstruct it or finish the lane.
+
+
+Original VY3 backfill A emitted-reference extension:
+`tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean` reuses
+actual assemble_eq/tagIndex uniqueness and both absolute/relative reference
+certificates. Successful checked assembly supplies source-tag uniqueness; the
+general pair theorem derives the two actual emitted pushes, the same unique
+tag/JUMPDEST, absolute=base+relative, and scanner validity behind any correctly
+sized encoded prefix and suffix. This is emitted-code closure, not the earlier
+finite identity arithmetic or an actual jump-execution theorem.
+
+A genuinely assembled three-item Fin1/Empty section at base16 derives its
+output via the existing generic assembly-success theorem, and validates the
+correct destination after16 STOP instructions. The raw relative word differs
+from that target by16; it is not claimed universally to be an invalid offset
+or never another JUMPDEST. The initial attempted direct20/4 reduction lacked
+Decidable equality for Assembled and did not reduce the scanner; that draft
+and failed recovery placeholders are retained as failures, not proof credit.
+The final constructive proof uses no new equality instance or semantic table.
+
+Serial Lean4.24 final check passed in1.306s with three guarded standard axiom
+reports (propext,Classical.choice,Quot.sound), no resource stop or production
+edit. Three private artifacts match prior cold-checked source/byte hashes.
+Master was adopted by rebase; prior slot timingSTOPs were not rerun or cleared.
+New focused duration is not paired/full timing acceptance. Selected538/1259,
+721open unchanged. H44 logs/provenance are inventoried in
+`assembler-reference-evidence.json`, retained at
+`/workspace/vy3-assembler-reference-evidence-20261107`. Historical evidence,
+known doc failure, native/Source waits and full validation remain open.

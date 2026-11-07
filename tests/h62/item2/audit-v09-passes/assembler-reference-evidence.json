@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "purpose": "Original VY3 backfill A actual emitted absolute/relative reference closure; no finite-label-only or native claim.",
+  "module": "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean",
+  "theorems": [
+    "assembled_tag_unique",
+    "assembled_reference_pair",
+    "assembled_reference_witness"
+  ],
+  "domain": "Generic L/Lib and DecidableEq L, checked successful actual assembly, same-label actual pushTag/pushTagRel occurrences; no desired emitted instructions or target validity supplied.",
+  "inhabited_witness": "Fin1/Empty three-item reference section at base16, preceded by16 STOP instructions. Existing success theorem derives actual output; actual emitted relative and absolute words differ by16 and correct scanner destination is valid.",
+  "negative_limit": "Raw relative value is unequal to the correct absolute target. No universal claim that it cannot be another valid JUMPDEST.",
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "new_axiom_declarations": 0,
+  "production_sources_unchanged": true,
+  "dependency_artifacts": "Three exact previously cold-checked artifacts, source/artifact hashes verified after rebase.",
+  "focused_check": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--name",
+      "vy3-allocation-check",
+      "--network",
+      "none",
+      "--user",
+      "1000:1000",
+      "--read-only",
+      "--tmpfs",
+      "/tmp:rw,size=268435456",
+      "--memory",
+      "12884901888",
+      "--memory-swap",
+      "12884901888",
+      "--cpus",
+      "1",
+      "-v",
+      "/workspace/vy3-runtime/lean-4.24.0-linux:/lean:ro",
+      "-v",
+      "/workspace/solidity-lean:/repo:ro",
+      "-v",
+      "/workspace/vy3-assembler-reference-evidence-20261107:/evidence",
+      "-e",
+      "LEAN_NUM_THREADS=1",
+      "-w",
+      "/repo",
+      "ubuntu:24.04",
+      "/usr/bin/env",
+      "LEAN_PATH=/evidence/lib",
+      "/lean/bin/lean",
+      "-j1",
+      "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.306,
+    "resource_stop": null
+  },
+  "failed_attempt": "Initial direct reduction required unavailable Decidable equality on Assembled and did not reduce scanner. Abandoned numerical20/4 draft was not validated; recovery sorryAx in failed log is not accepted. Final uses constructive generic success/reference/scanner proofs.",
+  "selected_credit_added": 0,
+  "selected": 538,
+  "open": 721,
+  "limits": "Emission and scanner reference validity only, not jump execution, gas, Source/G24, native production or full-lane acceptance. All prior timing/trust/doc holds retained; focused duration is not paired timing acceptance.",
+  "files": [
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/dependency-reuse.json",
+      "size": 1484,
+      "sha256": "f500f068b369e18d6c925db49c64efc59d7572089901933ed2416aa3341dc978"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/bounded.py",
+      "size": 1665,
+      "sha256": "a31078e46053fdbd4835533e83ef9449825de83a8f9ed7c188c02a52f5a7bdb8"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/assembler-reference-first.log",
+      "size": 3008,
+      "sha256": "30a08d36ce00e6cd105ed6e855d541fecba0db454218c8ea2a8263697dc4d172"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/assembler-reference-first-result.json",
+      "size": 958,
+      "sha256": "7792c287362dcbe352964d5cb5da85f193d48f1702376a7a8a73c57591a6ec82"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/assembler-reference-constructive.log",
+      "size": 332,
+      "sha256": "237edcb02779bacb869b01fb5d71e3b3947bd4cb670efbec5ef124f9c795d546"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/assembler-reference-constructive-result.json",
+      "size": 958,
+      "sha256": "acd732b00fef3f42a19e873a98c46ebcbf2ec8a04a10489e7fc899002c7ef7cf"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/assembler-reference-final.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/assembler-reference-final-result.json",
+      "size": 958,
+      "sha256": "dff032953ca5163bb48e07f9c54a9abb79cf17a580174ba7d033cb557df32628"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/assembler-reference-final-resources.jsonl",
+      "size": 1300,
+      "sha256": "9c6406d8a5d03fd581b7a3d7fb680f0fc10b5de85e17e9ad2564342244a5934a"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/lib/Solidity/Backend/Opcode.olean",
+      "size": 3865448,
+      "sha256": "bc87b9b1d762566e68695618de7e044e27d0fdeae1a6ddeb6d98a8b6b21db283"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/lib/Solidity/Backend/Jumpdest.olean",
+      "size": 1060704,
+      "sha256": "a3efc0a9cf367821dd5869fc3f156127df13ea1167f882ba224b1a048b57aba0"
+    },
+    {
+      "path": "/workspace/vy3-assembler-reference-evidence-20261107/lib/Solidity/Backend/Assembler.olean",
+      "size": 1551768,
+      "sha256": "62a3ef39d86145aa54e566141b4d2d61c134adfb6fa919f0f92cf4997c5675cb"
+    }
+  ]
+}
