@@ -3,6 +3,9 @@ import Solidity.Backend.Scalar.Wrapping
 /-! Existing uint/int conversions are word reinterpretations, not checked
 numeric casts. Narrow range guards and enum checks remain separate source
 operations; this file does not silently strengthen explicit conversion guards. -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Backend.Scalar
 
 /-- Encoding a successfully range-checked intrinsic integer returns its word. -/

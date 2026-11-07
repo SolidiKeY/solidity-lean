@@ -4,6 +4,9 @@ import Solidity.Backend.Scalar.Widths
 /-! Wrapping arithmetic certificates against existing intrinsic operations.
 Narrow cleanup composition is separate from the frontend's width-expansion
 proof, which is not asserted here. -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Backend.Scalar
 
 /-- Source reduction modulo the word bound always produces an intrinsic uint;

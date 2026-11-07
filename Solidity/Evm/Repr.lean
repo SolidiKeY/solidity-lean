@@ -42,6 +42,9 @@ Beyond the two lemmas: a static value is copied by copying its leaves
 shrinks (`live_mono`).
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 namespace Evm
 

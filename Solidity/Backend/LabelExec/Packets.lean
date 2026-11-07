@@ -2,6 +2,9 @@ import Solidity.Backend.LabelExec.Fetch
 
 /-! Runtime jump packets, with the whole actual byte code and arbitrary
 physical stack tails. Invalid targets remain a computed branch. -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Backend.LabelExec
 
 /-- An actual encoded PUSH followed by an actual branch instruction. -/
@@ -69,6 +72,6 @@ theorem test_packet (pre : List UInt8) (n : Fin 33) (imm : Vector UInt8 n)
   have ho : ((1 : Scalar.Word) == 0) = false := rfl
   cases hw : condition == 0 <;>
     simpa only [branchCode, List.append_assoc, List.length_append, Instr.length_encode,
-      Instr.size, hw, Scalar.flag, Bool.false_eq_true, if_false, if_pos rfl, hz, ho] using hj
+      Instr.size, hw, Scalar.flag, Bool.false_eq_true, ite_false, ite_true, hz, ho] using hj
 
 end Solidity.Backend.LabelExec

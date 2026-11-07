@@ -9,6 +9,9 @@ Operands are already evaluated values: the binary Boolean certificates do not
 justify eager evaluation of short-circuiting source expressions. The target
 relation is the independent numeric slice, not the old symbolic EVM machine.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Backend.Scalar
 
 /-- Preserve the existing ABI-word observation, including signed two's complement. -/
@@ -38,8 +41,8 @@ theorem encode_uint_toNat (v : PrimTy.uint.Denote) :
 theorem encode_int_toInt (v : PrimTy.int.Denote) :
     (encodeValue .int v).toInt = v.val := by
   apply BitVec.toInt_ofInt_eq_self (by decide)
-  · simpa only [Int.natCast_pow] using (int_range v).1
-  · simpa only [Int.natCast_pow] using (int_range v).2
+  · simpa only [Int.natCast_pow, Int.ofNat_two, Nat.reduceSub] using (int_range v).1
+  · simpa only [Int.natCast_pow, Int.ofNat_two, Nat.reduceSub] using (int_range v).2
 
 /-- The signed value representation is injective on intrinsic inputs. -/
 theorem encode_int_injective {a b : PrimTy.int.Denote}

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "checkpoint": "H129-packets-scalar-repr",
+  "archive": {
+    "path": "/workspace/h62-migrate-root-gate-evidence/h129-v435-packets-scalar-repr-20261107.tar.gz",
+    "size_bytes": 1333350,
+    "sha256": "009195db71ddf8742427e9e664f8cac1a76294fde76d18d61dd37933e2440382"
+  },
+  "payload_files": 114,
+  "payload_size_bytes": 11888508,
+  "validated_prefix_modules": 124,
+  "planned_modules": 6630,
+  "checked_declarations": 407,
+  "outside_standard_three": [],
+  "changed_axiom_guard_expectations": [],
+  "old_new_api_and_axiom_acceptance": false,
+  "full_acceptance": false,
+  "timing_comparison": false
+}

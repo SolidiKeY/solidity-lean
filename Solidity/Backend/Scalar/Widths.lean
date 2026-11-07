@@ -9,6 +9,9 @@ source value or term language. Source width expansion and fixed-bytes markers
 remain owned by the existing elaborator. These cleanup laws are the local
 instruction contracts needed to relate that expansion to numeric stack code.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Backend.Scalar
 
 /-- Every Solidity integer/fixed-bytes width is a nonempty number of bytes. -/
