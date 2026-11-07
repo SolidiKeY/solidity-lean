@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 import subprocess
 
-from census import BASE, mask
+from census import BASE, MAP, mask, mapped_references
 
 MACRO_PATH = "tests/h62/item2/audit-bytecode-selection/HypothesisDomains.lean"
 FIXTURE_PATH = "tests/h62/item2/audit-bytecode-selection/exact-gate-domains.txt"
@@ -61,9 +61,24 @@ for method in ("correct", "capacity", "reference"):
 for method in ("raw", "reference"):
     TARGETS["raw_tail_method_" + method + "_domain"] = "Solidity.Backend.AbiEntry.RawTailGuard." + method
 
+for method in ("correct", "capacity", "lazy_revert", "eager_bytes_panic", "eager_array_panic"):
+    TARGETS["length_method_" + method + "_domain"] = "Solidity.Backend.AbiEntry.LengthCheck." + method
+for field in ("correct", "capacity", "lazy_revert"):
+    TARGETS["length_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate." + field
+
+for method in ("tail_raw", "region_raw", "tail_correct", "region_correct", "tail_capacity", "region_capacity"):
+    TARGETS["offset_method_" + method + "_domain"] = "Solidity.Backend.AbiEntry.OffsetChecks." + method
+for field in ("tail_correct", "region_correct", "tail_capacity", "region_capacity"):
+    TARGETS["offset_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate." + field
+
+for method in ("correct", "capacity", "classified", "early_revert"):
+    TARGETS["head_check_method_" + method + "_domain"] = "Solidity.Backend.AbiEntry.HeadCheck." + method
+for field in ("correct", "capacity", "classified", "early_revert"):
+    TARGETS["head_check_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate." + field
+
 
 PRODUCERS = ["Solidity/Backend/AbiEntry/" + name + ".lean" for name in
-             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls")]
+             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls", "LengthCheck", "LengthCheckInterface", "LengthCheckControls", "OffsetChecks", "OffsetChecksInterface", "OffsetChecksControls", "HeadCheck", "HeadCheckInterface", "HeadCheckControls")]
 
 
 def sha(raw):
@@ -89,7 +104,7 @@ def render(macro_source, fixture):
         raise ValueError("forbidden fixture mechanism")
     fragment = macro_fragment(macro_source)
     return ("import Lean\nimport Solidity.Backend.AbiEntry.HeadGate\n"
-            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\nimport Solidity.Backend.AbiEntry.RawTailGuard\nimport Solidity.Backend.AbiEntry.TailGuardControls\n\n"
+            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\nimport Solidity.Backend.AbiEntry.RawTailGuard\nimport Solidity.Backend.AbiEntry.TailGuardControls\nimport Solidity.Backend.AbiEntry.LengthCheckControls\nimport Solidity.Backend.AbiEntry.OffsetChecksControls\nimport Solidity.Backend.AbiEntry.HeadCheckControls\n\n"
             "/-! Guards omission of implicit/self/proof binders from joint hypotheses.\n"
             "Only the original conclusion is replaced by True; no census acceptance follows. -/\n"
             + fragment + "\n" + fixture + "\nend " + NAMESPACE + "\n")
@@ -99,6 +114,10 @@ def build(repo):
     repo = repo.resolve()
     macro_raw = (repo / MACRO_PATH).read_bytes()
     fixture_raw = (repo / FIXTURE_PATH).read_bytes()
+    frozen_map = subprocess.check_output(["git", "show", BASE + ":" + MAP], cwd=repo)
+    allowed, _ = mapped_references(frozen_map.decode())
+    if set(PRODUCERS) - set(allowed):
+        raise ValueError("explicit producer outside frozen mapped census: " + ", ".join(sorted(set(PRODUCERS) - set(allowed))))
     producers = {}
     for path in PRODUCERS:
         raw = (repo / path).read_bytes()
@@ -109,6 +128,8 @@ def build(repo):
     program = render(macro_raw.decode(), fixture_raw.decode())
     manifest = {
         "schema_version": 1, "base": BASE, "targets": TARGETS,
+        "scope_map_path": MAP, "scope_map_sha256": sha(frozen_map),
+        "producer_scope": "All explicit producer leaves mapped; transitive imports are not assigned targets.",
         "generator_sha256": sha(Path(__file__).read_bytes()),
         "macro_source_path": MACRO_PATH, "macro_source_sha256": sha(macro_raw),
         "macro_fragment_sha256": MACRO_SHA256, "fixture_path": FIXTURE_PATH,

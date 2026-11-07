@@ -16,6 +16,13 @@ def digest(raw):
 def extend(index, artifacts):
     if not isinstance(index, dict) or not isinstance(index.get('rows'), list):
         raise ValueError('invalid reference index')
+    tombstones = index.get('removed_from_candidate_set', [])
+    if not isinstance(tombstones, list) or tombstones:
+        raise ValueError('historical-record or tombstone schema is unsupported')
+    for item in index['rows']:
+        records = item.get('historical_reference_records', [])
+        if not isinstance(records, list) or records:
+            raise ValueError('historical-record or tombstone schema is unsupported')
     rows = {}
     for entry in index['rows']:
         candidate = entry['candidate']
