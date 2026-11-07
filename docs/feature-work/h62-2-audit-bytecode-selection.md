@@ -1928,3 +1928,36 @@ Checkpoint static exception: doc-paths exits1 for newly adopted master's
 `Solidity/Yul/Compilation/P20InterfaceV2Controls.lean` reference to missing
 `tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean`. This is preserved
 as an upstream documentation wait, not counted as a passing gate.
+
+
+### Ordered binder/head accounting (2026-11-07)
+
+The generic metadata helper now preserves each supplied declaration's ordered
+binder observations, dependent-prefix length, proof/data flag and head lookup.
+The actual saved 150-core inspection accounts for all 3,262 records (1,133
+private), 12,495 binders, 1,724 observed proof binders and 1,085 zero-binder
+records. Head joins distinguish 504 occurrences with a supplied record, 7,860
+outside this supplied record set, and 4,131 with no constant head observed;
+58 distinct supplied heads retain their exact observed types and hashes.
+Reversed-input reproduction is identical. No missing head is silently dropped.
+
+Three regression tests cover private/ordered/dependent prefixes, unresolved
+head categories, aliases, repeated binders, zero-binder declarations and
+malformed duplicate/mixed-manifest records. All 85 audit tests pass. Output and
+input bindings are preserved off Git under
+`/workspace/parallel-20261103/executable-bytecode/binder-head-accounting`.
+
+These are supplied metadata joins, not new inspection executions or source
+correspondence. Global-premise versus per-input feasibility remains unclassified;
+instantiated head types and simultaneous witnesses remain unaccepted. Neither
+names, proof flags nor a present head prove a certificate is globally inhabited.
+The full 190-core/37-Bridge census, 703-source closure and original proof/gate
+obligations remain open. No Lean workload, prerequisite build or new proof
+budget epoch was started; the prior epoch expired without extension. PowerBounds
+STOP and all producer waits remain unchanged.
+
+Independent read-only finder and skeptic found no material accounting or
+coverage-inference issue. Finder requested recipe/helper/test hashes for replay
+traceability; the final acceptance receipt now includes all three alongside
+input/output hashes. No reviewer used Lean, builds, server calls or edits.
+The inherited P20 documentation failure remains RED without an unchanged rerun.
