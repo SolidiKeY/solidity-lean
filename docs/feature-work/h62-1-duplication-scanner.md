@@ -565,3 +565,32 @@ for this snapshot, not complete census, Lean signature equivalence or live
 ownership. Independent finder and skeptic reviewed the replay without Lean;
 full reports and timing records are outside Git in the multiline-context
 evidence directory.
+
+## Multiline attribute declaration boundaries
+
+Line-initial attribute prefixes are now balanced and masked in the scanner's
+literal-hidden skeleton, preserving source offsets and newlines. This
+recognizes stacked and nested multiline attributes before declarations,
+reports the declaration keyword's line, avoids reading attribute text as
+qualifiers, and keeps a following declaration's attribute bytes out of the
+preceding body. An unterminated prefix reports a file error. Arbitrary syntax
+quotations, detached/custom commands, macro-generated declarations and
+modifiers split across lines remain outside complete lexical coverage.
+
+Independent finder and skeptic reviews found and rechecked nested attributes,
+qualifiers, indentation and preceding-body boundaries without Lean. The
+Python suite passed 39 tests; these are external tool controls. A preliminary
+regex approach and its timing were stopped after review findings, and are not
+passing measurements. The reviewed implementation took 110.962 seconds
+versus 114.443 seconds before (-3.04%) on the same tree and selection. Both
+scans selected identical inputs, recognized 122,786 declarations, and had no
+file errors or unmatched globs. Statement-group counts were 4,476 in both;
+body-group counts changed from 5,506 to 5,510. Counts do not establish equal
+group membership or semantic equivalence. Bulk reports, timing and test logs
+remain outside Git under
+`/workspace/h62-duplication-scanner-evidence/multiline-attributes/`.
+
+A separate notation example after a preceding declaration can still share a
+lexical context hash despite different expansions. Candidate signatures and
+ownership remain explicitly unresolved; full source/environment binding and
+complete declaration accounting remain open.
