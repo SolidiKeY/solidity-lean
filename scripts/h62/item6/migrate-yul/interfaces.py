@@ -4,6 +4,9 @@ Structural agreement is not semantic equivalence, proof replay or budget validat
 """
 import argparse,gzip,hashlib,json,os,pathlib,re,shutil,subprocess,sys
 sys.dont_write_bytecode=True
+import importlib.util
+_dag_spec=importlib.util.spec_from_file_location("h62_expr_dag",pathlib.Path(__file__).with_name("expr_dag.py"))
+expr_dag=importlib.util.module_from_spec(_dag_spec);_dag_spec.loader.exec_module(expr_dag)
 
 def digest(path):
     h=hashlib.sha256()
@@ -45,9 +48,10 @@ def inspect_snapshot(raw,expected_module):
             kind=row.get('record')
             if footer is not None:raise ValueError('data after completion footer')
             if header is None:
-                if kind!='header' or row.get('schema')!=2:raise ValueError('missing/unsupported snapshot header')
+                if kind!='header' or (type(row.get('schema')) is not int or row['schema'] not in [2,3]):raise ValueError('missing/unsupported snapshot header')
                 if row.get('module')!=wanted or row.get('import_level')!='private' or row.get('import_all') is not True:raise ValueError('module/import mode mismatch')
                 if row['extra_codegen_count']!=len(row['extra_codegen_names']):raise ValueError('IR coverage mismatch')
+                if row['schema']==3 and row.get('expression_encoding')!='canonical expr-dag-v1 JSON text, metadata erased only':raise ValueError('unknown DAG expression encoding')
                 header=row;continue
             if row.get('module')!=wanted:raise ValueError('record module mismatch')
             if kind=='complete':footer=row;continue
@@ -55,13 +59,18 @@ def inspect_snapshot(raw,expected_module):
             name=canonical(row['name'])
             if name in seen:raise ValueError('duplicate kernel declaration')
             seen.add(name)
+            if header['schema']==3:
+                expr_dag.loads(row['type'])
+                for field in ['implementation','proof']:
+                    if field in row['payload']:expr_dag.loads(row['payload'][field])
+                for rule in row['payload'].get('rules',[]):expr_dag.loads(rule['rhs'])
             signature={k:row[k] for k in ['name','kind','universes','unsafe','partial','type']}
             meta=dict(row['payload']);impl=meta.pop('implementation',None);proof=meta.pop('proof',None)
             rows.append(dict(name=row['name'],display_name=row['display_name'],kind=row['kind'],private=row['private'],shared=row['shared'],authoritative_origin=row['authoritative_origin'],type_sha256=expr_hash(row['type']),signature_sha256=fingerprint(signature),implementation_sha256=expr_hash(impl) if impl is not None else None,proof_sha256=expr_hash(proof) if proof is not None else None,declaration_metadata_sha256=fingerprint(meta)))
     if header is None or footer is None:raise ValueError('incomplete snapshot')
     if footer['count']!=len(rows) or header['expected_constants']!=len(rows):raise ValueError('declaration coverage/count mismatch')
     if len({canonical(n) for n in footer['axiom_union']})!=len(footer['axiom_union']):raise ValueError('duplicate axiom record')
-    return dict(schema=2,module=expected_module,header=header,footer=footer,declarations=rows)
+    return dict(schema=header['schema'],module=expected_module,header=header,footer=footer,declarations=rows)
 
 def seal(raw,probe_path,expected_module,output):
     raw=pathlib.Path(raw);output=pathlib.Path(output)
@@ -77,7 +86,12 @@ def seal(raw,probe_path,expected_module,output):
     if len(cmd)!=idx+4 or cmd[idx+2]!=expected_module:raise ValueError('exporter/module arguments mismatch')
     repo=pathlib.Path(probe['repository'])
     helper=(repo/cmd[idx+1]).resolve()
-    expected_helper=(repo/'tests/h62/item6/migrate-yul/ExportInterfaces.lean').resolve()
+    with raw.open() as stream:
+        try: first=json.loads(next(stream))
+        except (StopIteration,json.JSONDecodeError) as err:raise ValueError('missing/invalid snapshot header') from err
+    if not isinstance(first,dict) or type(first.get('schema')) is not int or first['schema'] not in [2,3]:raise ValueError('unknown snapshot schema')
+    helper_name='ExportInterfacesDag.lean' if first['schema']==3 else 'ExportInterfaces.lean'
+    expected_helper=(repo/'tests/h62/item6/migrate-yul'/helper_name).resolve()
     requested=(repo/cmd[idx+3]).resolve()
     if helper!=expected_helper or str(helper) not in probe['probe_sources_before'] or requested!=raw.resolve():raise ValueError('exporter/output argument binding mismatch')
     result=inspect_snapshot(raw,expected_module)
@@ -98,7 +112,7 @@ def seal(raw,probe_path,expected_module,output):
     return result
 
 def compare_snapshots(old,new):
-    if old['schema']!=2 or new['schema']!=2 or old['module']!=new['module']:raise ValueError('incomparable snapshot scope/schema')
+    if old['schema'] not in [2,3] or old['schema']!=new['schema'] or old['module']!=new['module']:raise ValueError('incomparable snapshot scope/schema')
     a={canonical(r['name']):r for r in old['declarations']};b={canonical(r['name']):r for r in new['declarations']}
     fields=['type_sha256','signature_sha256','implementation_sha256','proof_sha256','declaration_metadata_sha256']
     changes={field:[dict(name=a[n]['name'],display_name=a[n]['display_name'],old=a[n][field],new=b[n][field]) for n in sorted(a.keys() & b.keys()) if a[n][field]!=b[n][field]] for field in fields}
