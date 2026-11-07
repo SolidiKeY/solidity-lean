@@ -103,6 +103,42 @@ class PrivateArchiveControls(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 self.read(clone, commit)
 
+    def test_committed_symlink_cannot_supply_manifest_or_payload(self):
+        import subprocess
+        for member in ("bulk-inputs-manifest.json", "data.json"):
+            with self.subTest(member=member), tempfile.TemporaryDirectory() as name:
+                root = Path(name)
+                self.packet(root)
+                original = root / "packet" / member
+                target = original.with_name("target.json")
+                original.rename(target)
+                original.symlink_to(target.name)
+                subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+                subprocess.run(["git", "-C", str(root), "-c", "user.name=control", "-c", "user.email=control@example.invalid", "commit", "-qm", "symlink input"], check=True)
+                revision = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+                with self.assertRaisesRegex(ValueError, "regular tracked file"):
+                    self.read(root, revision)
+
+    def test_unavailable_commit_has_no_fallback(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            self.packet(root)
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.read(root, "0" * 40)
+
+    def test_unknown_packet_entry_has_no_fallback(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            self.packet(root)
+            (root / "packet/bulk-inputs-manifest.json").write_text("{}")
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            subprocess.run(["git", "-C", str(root), "-c", "user.name=control", "-c", "user.email=control@example.invalid", "commit", "-qm", "absent registered entry"], check=True)
+            revision = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+            with self.assertRaises(KeyError):
+                self.read(root, revision)
+
     def test_bad_digest_refused(self):
         with tempfile.TemporaryDirectory() as name:
             root = Path(name)
