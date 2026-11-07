@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4MigrationControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4MigrationControls.round_trip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,40 @@
+import Solidity.Backend.Aggregates.BoolArrayEntryControls
+
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntry.sourceCopy_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntry.lowerEntry_of_ok
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntry.lowerEntry_of_error
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntry.entry_error_iff_source_error
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntry.successful_import
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.good_import
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.good_source_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.good_source_result
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.good_heap_related
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.entry_joint_second
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.dirty_import
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.dirty_source_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.truncated_import
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.truncated_source_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.wrong_truncated_allocation
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.empty_import
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.empty_source_related
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.wrong_dirty_success
+#print axioms Solidity.Backend.Aggregates.BoolArrayEntryControls.good_not_refused
+#check Solidity.Backend.Aggregates.BoolArrayEntry.sourceCopy_run
+#check Solidity.Backend.Aggregates.BoolArrayEntry.lowerEntry_of_ok
+#check Solidity.Backend.Aggregates.BoolArrayEntry.lowerEntry_of_error
+#check Solidity.Backend.Aggregates.BoolArrayEntry.entry_error_iff_source_error
+#check Solidity.Backend.Aggregates.BoolArrayEntry.successful_import
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.good_import
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.good_source_run
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.good_source_result
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.good_heap_related
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.entry_joint_second
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.dirty_import
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.dirty_source_run
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.truncated_import
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.truncated_source_run
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.wrong_truncated_allocation
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.empty_import
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.empty_source_related
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.wrong_dirty_success
+#check Solidity.Backend.Aggregates.BoolArrayEntryControls.good_not_refused
