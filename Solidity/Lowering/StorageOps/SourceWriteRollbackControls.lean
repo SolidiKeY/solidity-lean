@@ -57,7 +57,8 @@ def ordered : Prop :=
 
 theorem outcome_certificate : outcomes := by
   unfold outcomes restored
-  rw [show failed=(.error (.revert []),(locals,written)) from rfl]
+  rw [show failed=(.error (.revert []),(locals,written)) from
+    SourceWriteRollback.run_refused frame rejector left v flag w locals seed rfl rfl rfl]
   dsimp only [mark,written]
   rw [rollback_certificate]
   rfl
