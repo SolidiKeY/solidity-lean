@@ -1,0 +1,57 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Typed helper body mutation; interface and numeric premises retained. Original schema-level fixed-sub candidate remains recorded as invalid.",
+  "cases": [
+    {
+      "id": "overflow.compound-sub-helper-max",
+      "kind": "mutant",
+      "family": "overflow",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "new": "  let _ := hop\n  .app2 (.binop .sub (BinOp.compound_accepts (op := .sub) rfl hp)) a b",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/OverflowBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/OverflowSubtractKill.lean",
+      "oracle_sha256": "c7af8a42a3a9a6c59c9c41ff31acc712e2e58c76626718e0b01b879e90850808",
+      "witness_sha256": "5ae5c5822db6a0199dc463055692ccaa440734f81113522de84b78a60a494fa3",
+      "oracle_declarations": [
+        "H28.OverflowBaseline.source_link",
+        "H28.OverflowBaseline.input_inhabited",
+        "H28.OverflowBaseline.overflowing_run"
+      ],
+      "witness_declarations": [
+        "H28.OverflowSubtractKill.source_link",
+        "H28.OverflowSubtractKill.input_inhabited",
+        "H28.OverflowSubtractKill.checked_kill",
+        "H28.OverflowSubtractKill.typed_landing"
+      ],
+      "source_symbol": "Tms.Term.binopC"
+    },
+    {
+      "id": "overflow.increment-erased-max",
+      "kind": "negative-control",
+      "family": "overflow",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | localIncrement :\n      dl{ \u27e8[ v\u2295\u2295; ]\u27e9 \u21dd { v := v \u00b1 1 } \u27e8[ ]\u27e9 }",
+      "new": "  | localIncrement :\n      dl{ \u27e8[ v\u2295\u2295; ]\u27e9 \u21dd { v := v } \u27e8[ ]\u27e9 }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/OverflowIncBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/OverflowIncSkipKill.lean",
+      "oracle_sha256": "4a309b8fd210e39138400b05d38da2d9f1723eb9682dbf5f8237fc47f05990aa",
+      "witness_sha256": "1c0e362275bdf2c2e48eed44fc9f2ad9f06c1b1657743b9e656937fec39fd730",
+      "oracle_declarations": [
+        "H28.OverflowIncBaseline.source_link",
+        "H28.OverflowIncBaseline.input_inhabited",
+        "H28.OverflowIncBaseline.overflowing_run"
+      ],
+      "witness_declarations": [
+        "H28.OverflowIncSkipKill.source_link",
+        "H28.OverflowIncSkipKill.input_inhabited",
+        "H28.OverflowIncSkipKill.checked_kill",
+        "H28.OverflowIncSkipKill.typed_landing"
+      ],
+      "source_symbol": "Taclet.localIncrement"
+    }
+  ]
+}

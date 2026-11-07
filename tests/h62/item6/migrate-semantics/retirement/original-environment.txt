@@ -1,0 +1,10 @@
+<environment_context>
+  <environments>
+    <environment id="ccarenv_b64_Y2NhcmVudl9kMDEyMDAzMTg2NTQ4MTkxYWQ4NzA2ZGFiZjE5NTQ0Mg">
+      <cwd>/workspace</cwd>
+      <status>starting</status>
+    </environment>
+  </environments>
+  <current_date>2026-11-06</current_date>
+  <timezone>Etc/UTC</timezone>
+</environment_context>
