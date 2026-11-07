@@ -1685,3 +1685,14 @@ Frontend proofhelper changes need independent validation for later native work.
 Full library/checkpoint/build/TestSuite/timedstrict/kerneltrust, actual source
 metadata/positionedtrace, paired rendering/macOS, full performance/adversarial/
 scaling matrices and both judgments per row remain mandatory and unfinished.
+
+
+### Handoffs — exact native hover popup and dismissal (2026-11-07)
+
+Fetched and fast-forwarded the lane to actual master95d1e9cb29dc5a34d1db68af3ca47e47b75e293f under the requested writer lock. Four unfinished observer files were saved, stashed and restored byte-for-byte; the stash and absolute preservation receipts remain. No push or goal mutation.
+
+The optional proof-hover suite preserves the existing single actual certified failure and both project documentation actions. It adds a second actual provider request, exact rendered documentation/signature and authentic compiler-ready decoration rows, current URI/source/session/version/hash ownership, before/after screenshot checks, and observed disappearance after Escape. The original one-hover proof-help assertion is unchanged. No fake verifier, proof delay, new proof job, changed deadline or inferred per-function progress.
+
+Retained native failures include the old unrecognized phase/dispatcher, a parent-limit launch without a host receipt, and the genuine successful host observations rejected by an incorrectly nested generic envelope reader. The corrected reader revalidates the untouched native receipt; its original exit1 is not rewritten. Targeted injected controls cover wrong nonempty content, stale/duplicate RPC, post-capture disappearance, missing observations and both documentation actions. Finder found the screenshot race; repaired and independently re-reviewed with no further source findings. Skeptic found no further defect after envelope/omission repairs. See checksum-bound [native evidence and review receipts](dafny-native-hover-evidence-manifest.json).
+
+Only the existing hover assessment is extended and stays partial. All489 IDs/order/expected observations, frozen270, prompts, judges and budgets remain. This is one Linux local observation, not pinned NeverVerifies, paired Dafny/macOS or full lifecycle correspondence. Positioned trace and same-candidate source-span metadata producer hook Q-REL-HOOK-01 remain pending. Full library/build/TestSuite/timed strict/kernel trust, full performance/adversarial/scaling matrices and both judgments per row remain mandatory; parity is not complete.
