@@ -5,6 +5,10 @@ Batch `solidity-h62-6-20261106`, lane `migrate-precompiles`, repository
 `codex/solidity-h62-6-20261106/migrate-precompiles`, base
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Persistent goal unfinished.
 
+Current merge-review repair restores the original `msmGas` and entire `Field.lean`;
+the earlier definition-body overlay is historical, not the current proposal.
+Targeted Field/BLS diagnostics pass8/8; full acceptance remains pending.
+
 ## Current checkpoint state
 
 1. **Done:** pinned-base census and original clean v4.24 baseline.
@@ -23,7 +27,7 @@ itself. Earlier OWNER-BLS/OWNER-POINT clearance questions are resolved by that
 explicit instruction, not by silence. `decide +kernel` is allowed under H64.
 The coordinator relays the following changes to the live owner at cut-over.
 
-## Every production change for live-owner relay
+## Historical overlay changes (superseded by the revert below)
 
 - `Solidity/Precompiles/Bls12381.lean`: both 128-entry discount-length proofs
   use kernel-checked `decide +kernel` instead of depth-failing `rfl`.
@@ -231,3 +235,23 @@ Independent read-only finder and skeptic verified all 500 archive members and
 all referenced hashes: 22 removed Git metadata files, 469 evidence files and nine
 additional referenced artifacts. Both found no proof, gate, budget or existing
 script change. No Lean rerun was necessary or performed for this packaging split.
+
+## Merge review correction: restore dependent definitions
+
+The coordinator's review of head `713f75a1430906476ffd7b87e5673aba038ebd4e`
+identified definition-body changes requiring owner agreement/versioned interfaces.
+The revert option is applied: `msmGas` again uses exactly the original table.getD
+expression; `finFieldOps` again inherits its original equality implementation.
+The now-unnecessary msmGas_succ proof normalization is removed. Private structural
+lookup and agreement lemma remain additive, disconnected from the existing gas
+definition. Kernel length proofs and other proof-only fixes remain. No original
+statement, axiom assertion, gate, budget or exclusion was weakened. Earlier
+validation/source hashes describe historical overlays and are not current gate
+acceptance; additional axiom failures may return with the restored definitions.
+No owner question remains for those two body changes because both were reverted.
+This is only the requested merge-review repair; retirement remains in force.
+
+Revert diagnostics: `bounded-build.py --fixture tests/h62/item6/migrate-precompiles/ReviewRevert.lean`
+with official4.35 and fresh output, archived fixture imports Field/BLS;8/8 pass.
+Independent finder/skeptic exact-original and contract checks pass; H44 evidence
+is off Git and authenticated by `tests/h62/item6/migrate-precompiles/review-revert.sha256`.

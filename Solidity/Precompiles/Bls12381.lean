@@ -188,7 +188,7 @@ private theorem msmLookup_eq_getD (table : List Nat) (index cap : Nat) :
 /-- The MSM gas of `k` pairs with base cost `c`, the discount table and its
 cap. -/
 def msmGas (c : Nat) (table : List Nat) (cap k : Nat) : Nat :=
-  k * c * (if k = 0 then 0 else msmLookup table (k - 1) cap) / 1000
+  k * c * (if k = 0 then 0 else table.getD (k - 1) cap) / 1000
 
 def g1MsmGas (d : Bytes) : Nat := msmGas 12000 g1Discount 519 (d.length / 160)
 
@@ -408,7 +408,6 @@ theorem msmGas_succ (c : Nat) (table : List Nat) (cap k : Nat) (hlen : table.len
     (htab : ∀ i < 128, (i + 1) * table.getD i cap ≤ (i + 2) * table.getD (i + 1) cap) :
     msmGas c table cap k ≤ msmGas c table cap (k + 1) := by
   unfold msmGas
-  simp only [msmLookup_eq_getD]
   apply Nat.div_le_div_right
   cases k with
   | zero => simp only [Nat.zero_mul, if_true, Nat.zero_le]
