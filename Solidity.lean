@@ -3261,6 +3261,7 @@ import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstParameters
 import Solidity.Lowering.P8.SourceAstStatements
 import Solidity.Lowering.P8.SourceAstTypes
+import Solidity.Lowering.P8.SourceAstUnit
 import Solidity.Lowering.P8.SourceMetadata
 import Solidity.Lowering.P8.SourceMetadataControls
 import Solidity.Lowering.P8.SourceMetadataObligations
