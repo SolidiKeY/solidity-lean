@@ -747,3 +747,14 @@ all nineteen requested consumer transports remain open. The control is not a
 library-containing Source/P8 producer or frozen-row registration. Existing
 interfaces, budgets and exclusions are unchanged. Validation and independent
 reviews are archived privately under H145; no new original-row credit follows.
+
+### Existing current-model Word specializations
+
+The same control now checks the exact Word-amount interfaces of the existing
+Readonly.StaticJournal.balance_storage_word and History.balance_word. The
+anonymous consumer checks retain state, entry, mode and history indices and
+reuse those published declarations directly. No compatibility implementation
+or duplicate named theorem is introduced. These are current-model type checks;
+they do not reconstruct the frozen old ExecState model or supply H57 transport.
+The exact declaration references and validation are delivered in the private
+supporting reply. All nineteen full transports remain open.
