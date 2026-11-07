@@ -1,5 +1,20 @@
 # Raw calldata and access bridge packets
 
+## H151: unavailable historical evidence
+
+The inherited audit archive, member checksum manifest, lost historical run logs
+and missing authenticated handoff exports are UNVERIFIABLE. Claims requiring
+those bytes remain unproven, and these historical gaps are removed from waits.
+The historical launcher rendering remains UNVERIFIABLE; no hash match is claimed
+for the distinct authorized thread-copy transcription. Explicit scope approvals
+remain operative; a missing full manifest is not reconstructed.
+
+Fresh checks of available code and fixtures are independent evidence with their
+own scope. The retained cf1 decoder subset does not replace a full fixture replay,
+old audit timing, archived gas/fork observations or whole-decoder execution.
+The absent pinned Mathlib cache is a current toolchain dependency, not evidence
+of a historical result. Original G40/G46 and audit obligations remain open.
+
 ## Typed uint sequence agreement
 
 `Solidity/Backend/AbiEntry/Consumers.lean` retains the existing byte-derived
