@@ -11,18 +11,21 @@ a `BridgeGoal` over V12's canonical version-2 P1 languages
   every depth.
 * **Target.** The code `Compiler.compile b F (s; )` emits, lifted to the
   version-2 machine (`lift`). It is compiler output, not a hand-written image.
-* **Domain** (`admitted`): exactly the compiler's own core input
-  (`Compilation.Input`): `Sim C L b F caller machine` and `L ≤ Lmax`. It does
-  not mention the outcome.
+* **Domain** (`admitted`): the compiler's own core input
+  (`Compilation.Input`, whose push bound is `L ≤ Lmax` here since the domain
+  pushes nothing): `Sim C L b F caller machine` and `L ≤ Lmax`. It does not
+  mention the outcome. It is not the P1 `InterfaceV1.Entry` admission: the
+  code is frame-free core output, and `frame`, `base`, `start` are unused.
 
 Every admitted input gives the same prefix on both sides (`agree`), from
 `PublicCompilerTotal.compile_agrees`: success with no data on both; a bare
 source revert as a version-2 revert with empty data and an unchanged journal;
 divergence as a fault (both unfinished). Payment cannot occur (the domain
-pays nothing). `Local` keeps the failure-only conclusion of
-`PendingBareRevertProducer` in version-2 form (`bare_revert`: a bare source
-revert is a target revert with empty data and the caller's journal) together
-with the frame agreement.
+pays nothing). `Local` is a version-2 analog of
+`PendingBareRevertProducer.required_bare_revert` (`bare_revert`: a bare
+source revert is a target revert with empty data and the caller's journal)
+together with the frame agreement. It is not built from such a producer and
+has no `RevertingEntry` field.
 
 Limits it depends on: callee code is never run (the domain makes no external
 call, so the version-2 `reply`/`accepts` oracles are not consulted); gas and

@@ -3,9 +3,9 @@ import Solidity.Evm.Correct
 
 /-! Controls for `P1RevertBridge`. One statement, `require(total != 0)`,
 compiled by the public compiler from a fresh frame. An admitted input from the
-published fresh contract (`Sim.init`) reverts on both sides: the genuine
-reverting entry of the failure-only producer, with the target revert derived
-from the bridge's `Local`. `require(total == 0)` succeeds on both sides at
+published fresh contract (`Sim.init`) reverts on both sides (a reverting admitted input, not an
+`InterfaceV2.RevertingEntry`), with the target revert derived from the
+bridge's `Local` and cross-checked by an independent kernel run. `require(total == 0)` succeeds on both sides at
 the same input. `assert(false)` shows why the context excludes `assert`: the
 source observes `revert(Panic(0x01))`, the compiled core code reverts without
 data. -/

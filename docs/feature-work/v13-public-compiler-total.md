@@ -141,7 +141,8 @@ H68 asks V13 for `p1_frame_bridge` in its P1-REVERT variant: a
 `plan.code` session, with `Local` the original `PendingBareRevertProducer`
 fields (`RevertingEntry`, `BareRevertClaim`).
 
-**Delivered (H114/H115, master `d3597eca2`).** With V12's canonical
+**Delivered on this branch (H114/H115; base master `d3597eca2` supplies the
+languages).** With V12's canonical
 version-2 P1 languages (`Backend/InternalFlow/RuntimeFrameP1LangV2`) and the
 version-2 machine (`Evm/MachineV2`) on master, `Backend/AbiWorld/P1RevertBridge`
 proves
@@ -158,8 +159,9 @@ p1_revert_bridge (b) (hF : Matches K F) (hs : StmtOk K s K')
 - **A / B:** `sourceLang (fun _ => s)` and `targetLang (lift code)` of
   `P1LangV2`, where `code` is what `Compiler.compile b F (s;)` emits (compiler
   output, not a hand-written image). No second language is defined.
-- **Domain (`admitted`):** exactly the compiler's own core `Input`:
-  `Sim C L b F caller machine ∧ L ≤ Lmax`; it does not mention the outcome.
+- **Domain (`admitted`):** the compiler's own core `Input`
+  (`Sim C L b F caller machine ∧ L + pushes ≤ Lmax`, with `pushes = 0` in the
+  domain); it does not mention the outcome.
 - **beta / nu:** the identity environment map and the unit bound, as in V12's
   `p1_frame_bridge`.
 - **Local:** for every admitted input, the version-2 form of
@@ -174,7 +176,8 @@ version-2 revert with empty data and an unchanged journal, divergence as a
 fault; payment is impossible in the domain.
 
 Controls (`P1RevertBridgeControls`): `require(total != 0)` from the published
-fresh contract (`Sim.init`) is a genuine reverting entry, with the target
+fresh contract (`Sim.init`) is a reverting admitted input (not an
+`InterfaceV2.RevertingEntry`), with the target
 revert derived from the bridge's `Local`; `require(total == 0)` succeeds on
 both sides at the same input; axioms are guarded.
 
@@ -189,11 +192,30 @@ both differ from solc, on reverts the source keeps data-free where solc
 returns data (checked-arithmetic `Panic(0x11)`, index `Panic` codes,
 message-carrying `require`/`revert`, `docs/solc-alignment.md`); `P1LangV2`
 calls itself canonical only when reverts carry their data in the source, so
-this bridge is a source-to-compiled-code refinement, not a solc-data claim.
-The bridge is not an instance of an
-InterfaceV1 `PendingBareRevertProducer` (no such producer instance exists);
-it delivers that producer's failure-only conclusion for compiled code
-directly.
+for those statements this bridge is a source-to-compiled-code refinement
+within the model, not a solc-data claim; `assert` is the only such case
+where source and compiled code themselves disagree.
+**Deviations from the H68 request, stated plainly (finder review).**
+
+1. It is not built from a `PendingBareRevertProducer` (InterfaceV2/V3;
+   instances exist: `RuntimeFrameNoneProducer.make_failure`,
+   `V3BareRevertProducer`). It gives a version-2 analog of
+   `required_bare_revert` for compiler output; `Local` has no
+   `RevertingEntry` existential (a reverting input exists only in the
+   Controls, and for many statements, e.g. a plain assignment, none exists).
+2. The endpoints are the core compiler's frame-free code, not the P1
+   `plan.code`/cursor/frame: admission is `Sim`, not `InterfaceV1.Entry`;
+   `Input.frame`, `base` and `start` are unconstrained and unused; the
+   requested StateRepr, protected stack, BaseExtends, allocator-growth and
+   cursor facts are not in `Local`, nor are the success-case stack and `Rep`
+   facts that `Agrees` provides.
+3. `Approved_frame` (the totality domain, no `assert`) is the compiler's
+   implemented fragment, which the request's wording forbids as an
+   `Approved_i`; it is this delivery's context, not a claim about P1 frames.
+
+Whether this delivery satisfies Q-H68-PAYLOAD, or the bridge must be built
+over a `PendingBareRevertProducer`'s P1 frame endpoints, is a scope question
+(CLOUD-RESULT Q1).
 
 ## Remaining V13 queue
 
@@ -252,3 +274,14 @@ inconsistently), `indexed_agrees_fresh` meets every premise jointly, no
 axiom/`sorry`/`maxHeartbeats`. Fixed: added `nested` controls; documented
 kind changes at top level as compiled-but-outside and the H96 signature
 changes.
+
+### P1-REVERT reviews
+
+Skeptic: no soundness or vacuity defect; every `Agrees` outcome covered;
+journal argument sound (lifted base code journals nothing; the domain has no
+transfer/send/recursion); no axiom/`sorry`/`maxHeartbeats`. Fixed: solc-data
+caveat; independent kernel runs for both guard controls. Finder: `agree`,
+`Local`, beta/nu and the assert exclusion confirmed. Fixed: wrong claim that
+no `PendingBareRevertProducer` instance exists; "delivered on master"
+wording; reverting-entry vocabulary; the three deviations above stated
+plainly and raised as a question.
