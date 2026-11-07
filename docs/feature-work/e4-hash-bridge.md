@@ -25,8 +25,8 @@ supply an injective finite-word encoding of all slots.
 | Adaptive model | `Solidity/Hash/CollisionBound.lean:928` `eagerQueries`; :939 `EagerAdaptiveBound`; `Solidity/Hash/Adaptive.lean:263` `eagerCollides`; :320 `eagerRegionsFail` | Every strategy-produced query lies in finite `dom`; repetitions retain the same answer. |
 | Adaptive counts | `Solidity/Hash/Adaptive.lean:493` `two_mul_eagerCollides_le`; :542 `two_mul_eager_stopped_le`; :567 `keccak_eager_collision_prob_le`; :577 `two_mul_eagerRegionsFail_le`; :642 `keccak_eager_region_prob_le`; :653 `eagerAdaptiveBound` | Cite these counts for the combined union bound, stopped collision corollary and 256-bit reading. |
 | Fixed concrete hash | `Solidity/Roadmap/Contracts.lean:472` `Fixed`; :479 `Fixed.hash`; :490 `Fixed.Sane`; :499 `HashPremise`; :505 `HashPremise.nil`; :509 `HashPremise.of_prefix`; :896 `Fixed.Keccak` | Byte hash wraps `F.evm.keccak` with its range proof. `Fixed.Keccak` is the real-keccak specialization, not an assumption imposed on a sampled random oracle. |
-| Language guards | `Solidity/Roadmap/Contracts.lean:820–829` intrinsic hash fields/guard; :850–873 `EvmSpec`, `hashed`, `slotHashed`, `guard_iff` | General guarded transfer uses EVM `guard_iff`. No arbitrary symbolic theorem is automatically hash-parametric. |
-| Compiler contract | `Solidity/Roadmap/Contracts.lean:937` `PublicCorrectness`; :960 `hashes_source`; :967 `refines`; :974 `decode_reach`; :982 `decode_commutes`; :1016 `PublicCorrectness.transfer` | Compiler result retains allowed/admissible environments, complete observations and the source forward/guard conditions. Target premise yields backward prefix refinement and decode reach. |
+| Language guards | `Solidity/Roadmap/Contracts.lean:814–829` intrinsic hash fields/guard; :853–873 `EvmSpec`, `hashed`, `slotHashed`, `guard_iff` | General guarded transfer uses EVM `guard_iff`. No arbitrary symbolic theorem is automatically hash-parametric. |
+| Compiler contract | `Solidity/Roadmap/Contracts.lean:937` `PublicCorrectness`; :958 `hashes_source`; :964 `refines`; :970 `decode_reach`; :976 `decode_commutes`; :1016 `PublicCorrectness.transfer` | Compiler result retains allowed/admissible environments, complete observations and the source forward/guard conditions. Target premise yields backward prefix refinement and decode reach. |
 | Refinement meaning | `Solidity/Roadmap/Contracts.lean:179` `RefinesUnder`; :213 `completes`; :224 `sound`; :249 `safety` | Do not turn target guard alone into unguarded two-sided refinement. |
 | Separate calculus premise | `Solidity/Calculus/HashPremise.lean:31–87` hash-input collectors/`Fml.HashFree`; :91 `holdsS`; :113 `holdsH`; :117 `ValidH`; :245–276 equivalences | Scope/formula guard, not definitionally Roadmap.HashPremise. No equivalence or calculus rework is claimed. |
 
@@ -225,3 +225,130 @@ compiler axiom pins instead of raw prints; these have been added. Actual
 axioms: Compiler.refines `[]`, Compiler.failure_le the standard triple.
 MCP diagnostics and Lean per-file checks for compiler and controls passed;
 library/full gates and registration remain outstanding.
+
+## Final registration fragment (supersedes the reserved fragment above)
+
+Only the coordinator may apply these entries. No generated registry or
+module-map file was modified by this worker.
+
+Solidity root import lines, to be generated with register.sh:
+
+```lean
+import Solidity.Hash.Bridge
+import Solidity.Hash.CollisionBridge
+import Solidity.Hash.CollisionBridgeCompiler
+import Solidity.Hash.CollisionBridgeControls
+```
+
+CORE entry:
+
+```javascript
+/^Solidity\.Hash\.(Bridge|CollisionBridge|CollisionBridgeCompiler|CollisionBridgeControls)$/,
+```
+
+Suggested language-area module-map fragment rows:
+
+| Module (Solidity prefix omitted) | Contents |
+|---|---|
+| `Hash/Bridge.lean` | Run-local ideal special case, exact region clearance, guard/prefix transfer, concrete collision control. |
+| `Hash/CollisionBridge.lean` | Combined adaptive oracle count, exact Fixed replacement, actual-query inclusion, corrected q=0/q=1 controls. |
+| `Hash/CollisionBridgeCompiler.lean` | PublicCorrectness guarded refinement, decoded reachability and hash-indexed compiler failure bound. |
+| `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
+
+Axiom-pin entries (all new, no existing pin changes):
+
+```json
+{
+  "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_unit_rootFree": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.transfer_prefix": [],
+  "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.two_mul_combined_le": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.run_premise_le": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.stopped_collision_le": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.refines": [],
+  "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.failure_le": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}
+```
+
+## Final validation and handoff (goal NOT complete)
+
+Saved proof head before final documentation: `7a092e0f0f4d6e1ba02ce18b9d6560707c468e0e`.
+The final full committed head is in the sealed manifest, avoiding a
+self-referential documentation commit hash.
+
+All new Lean modules pass per-file MCP diagnostics (0 errors), per-file
+Lean -j1 checks, and their own #guard_msgs pins. Final serial timings:
+Bridge 0.515 s; CollisionBridge 0.965 s; compiler 0.765 s; controls 0.407 s.
+KeySort passes: `lake lean Solidity/KeySort.lean -- -j1 --tstack=131072`,
+exit 0, 1.327 s. Lean 4.24.0 and Lake 5.0.0-src+797c613 were used.
+No RUNTIME_GATE_PASS is claimed. No existing Lean source or import graph
+was modified, so these times measure added leaf costs, not a demonstrated
+whole-library slowdown percentage. Full build timing delta is unmeasured;
+the >10% requirement is not asserted satisfied.
+
+Evidence: `/tmp/e4-evidence/per-file.json` and per-module logs;
+`/tmp/e4-evidence/full/gates.tsv`; earlier checkpoint evidence at
+`/tmp/e4-checkpoint2/gates.tsv`.
+
+| Command/check | Outcome and decisive output |
+|---|---|
+| node scripts/check-layers.mjs | PASS: 904 core, zero elaborator/parser reach, zero new core edges. Same registered base count. |
+| In-memory prospective CORE registration check | PASS: 908 core, zero elaborator/parser reach, zero new edges. Read-only registry preserved. |
+| bash scripts/check-trust.sh | PASS: 6699 sources, 289 inventoried sites, zero findings. Base: 6695 sources, same 289 sites, zero findings. |
+| node scripts/check-orphans.mjs | FAIL: exactly the four new modules are unregistered orphans; 6678 reachable. Base graph with the four additive files removed: 6678 reachable, zero orphans. |
+| bash scripts/check-doc-paths.sh | PASS: 143 ambiguities, all references resolving; same count as initial inventory check. |
+| register.sh --check | FAIL: exactly four missing root imports listed in the fragment above. |
+| fragments.sh --check | PASS; no coordinator-owned fragment changed. |
+| node scripts/check-axiom-pins.mjs | FAIL: zero policy errors, seven new unregistered changes. 17181 pins versus base 17174; no removed or enlarged pin. |
+| gate.sh full / bash run-lean.sh | FAIL: runner stops at read-only generated-root registration, before its library build. |
+| gate.sh checkpoint / lake build Solidity | INCOMPLETE: worker interrupted cold library build after 116 s while E4-Q1 awaited a decision; not a pass. |
+| check-testsuite.sh (initial activation) | Setup-path failure: external copied snapshot lacked adjacent pin. |
+| check-testsuite.sh with repository-pinned SOLKEY_EXAMPLES | PASS: 54 modules trust clean; 564 functions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip. Snapshot-path recovery changes no source. |
+| check-corpus.sh | INCOMPLETE: worker interrupted its cold Basic build after the full runner hit the read-only registration blocker; no corpus pass claimed. |
+| node scripts/check-automatic.mjs --strict | PASS. |
+
+The compiler probability event is a logical count over all sampled
+functions, not an empirical cryptographic-security experiment. The only
+kernel finite enumeration added is on tiny N=2 controls. No external test
+is used as a substitute for any proof. The toy compiler witnesses the
+corollary; no new concrete production compiler correctness proof is claimed.
+
+Finder/skeptic checkpoints 2, 3, 4 are recorded above. All proof findings
+were resolved; no premise/observation was weakened. Checkpoint 1 finder
+also confirmed the corrected statement boundaries. Frozen statements
+touched: none. New axioms/sorry/native_decide/implemented_by/maxHeartbeats:
+zero. Sole changed repository paths are these four additive Hash modules
+and this document. No push/merge/PR; the only remote write was the expressly
+required E4-Q1 coord-ask question relay, resolved by coordinator #168.
+
+Typed remaining blockers:
+
+- REGISTRATION_OWNER: generated roots, CORE, axiom pins and module maps are
+  outside this worker's exact write scope. The coordinator must apply the
+  fragment and regenerate its registries before the full runner can pass.
+- REQUIRED_GATES_PENDING: clean checkpoint library build, corpus audit/build,
+  full runner and whole-build timing comparison remain unpassed. The goal
+  must stay incomplete; a local leaf proof pass is not completion.
+
+No scope question remains open. E4-Q1 is resolved as option A, and the
+combined bound/premises were kept unchanged. Handoff patch, bundle,
+evidence archive and SHA256SUMS will be sealed under `/tmp/e4-handoff`.
+The manifest records exact base, branch, final head and artifact hashes.
