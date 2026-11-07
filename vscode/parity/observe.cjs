@@ -9,7 +9,7 @@ const {createHash,randomUUID}=require('node:crypto');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
 function observe(vscode, record, extensionPath, tracePath,workspacePath) {
-  const controllers = [], profiles = [], decorations = [], finalizers=[];
+  const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[];
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
       if (handlers[key]) return handlers[key];
@@ -57,7 +57,7 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
       createOutputChannel(...args) {
         const channel = vscode.window.createOutputChannel(...args),channelId=++outputSequence;
         record('output.create',{channel:args[0],channelId});
-        return instrument(channel, {appendLine(text) {record('output',{channel:args[0],channelId,text}); return channel.appendLine(text);},show(...values){record('output.show',{channel:args[0],channelId});return channel.show(...values);},dispose(){record('output.dispose',{channel:args[0],channelId});return channel.dispose();}});
+        const observed=instrument(channel, {appendLine(text) {record('output',{channel:args[0],channelId,text}); return channel.appendLine(text);},show(...values){record('output.show',{channel:args[0],channelId});return channel.show(...values);},dispose(){record('output.dispose',{channel:args[0],channelId});return channel.dispose();}});outputs.push({name:args[0],channelId,channel:observed});return observed;
       },
       showErrorMessage(...args) {record('error',{message:args[0]}); return vscode.window.showErrorMessage(...args);}
     })
@@ -103,6 +103,6 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
   const registration = vscode.languages.onDidChangeDiagnostics(event => {
     for (const uri of event.uris) record('diagnostics',{uri:uri.toString(),diagnostics:vscode.languages.getDiagnostics(uri)});
   });
-  return {controllers,profiles,decorations,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
+  return {controllers,profiles,decorations,outputs,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
 }
 module.exports = {observe};

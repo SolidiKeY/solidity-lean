@@ -202,7 +202,7 @@ function outputLifecycleErrors(o,target){
  if(!owned(o.startup)||!o.startup.data.text?.startsWith(text(false)))errors.push('missing owned initial readiness');
  const events=Array.isArray(o.events)?o.events:[],termination=events.findIndex(e=>owned(e)&&e.data.text?.startsWith('Terminating')),ready=events.findIndex(e=>owned(e)&&e.data.text?.startsWith(text(true)));
  if(termination<0||ready<=termination)errors.push('missing ordered owned restart output');
- const starts=events.filter(e=>e.kind==='command.start'&&e.data?.id===command),ends=events.filter(e=>e.kind==='command.end'&&e.data?.id===command);
+ const starts=events.filter(e=>e?.kind==='command.start'&&e.data?.id===command),ends=events.filter(e=>e?.kind==='command.end'&&e.data?.id===command);
  if(!Number.isFinite(o.channel?.ms)||!Number.isFinite(o.startup?.ms)||!Number.isFinite(starts[0]?.ms)||!(o.channel.ms<=o.startup.ms&&o.startup.ms<starts[0].ms))errors.push('missing initial output phase order');
  if(!(events.indexOf(starts[0])<termination&&termination<ready&&ready<events.indexOf(ends[0])))errors.push('output outside restart invocation');
  const source=s=>s&&s.uri===o.uri&&s.version===o.version&&s.textHash===o.sourceHash&&typeof s.session==='string'&&s.trusted===true&&!s.closed;
@@ -224,6 +224,8 @@ function hostEvidenceErrors(result,config) {
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
   if(config.suite==='output-lifecycle'){
     const observation=result.scenarios.find(s=>s.id==='native-output-restart')?.observation;errors.push(...outputLifecycleErrors(observation,config.target));
+    const outputEvents=Array.isArray(observation?.events)?observation.events:[],panel=observation?.panel,readinessPrefix=config.target==='local'?'Solidity Lean is ready again':'Dafny is ready again.',metadata={uri:observation?.uri,version:observation?.version,sourceHash:observation?.sourceHash,channelId:observation?.channel?.data?.channelId,channel:config.target==='local'?'Solidity Lean':'Dafny VSCode',readinessPrefix,readinessLine:outputEvents.find(e=>e?.kind==='output'&&e.data?.channelId===observation?.channel?.data?.channelId&&e.data?.text?.startsWith(config.target==='local'?`Solidity Lean is ready again for ${observation.uri} (`:'Dafny is ready again.'))?.data.text.split('\n')[0]};
+    if(panel?.runId!==config.runId||panel?.phase!=='output-channel'||panel?.status!=='captured'||panel?.metadataHash!==require('node:crypto').createHash('sha256').update(JSON.stringify(metadata)).digest('hex')||!panel?.capture?.captured||!panel?.capture?.screenshot||!panel?.capture?.output?.panelVisible||panel?.capture?.output?.selectedChannel!==metadata.channel||!metadata.readinessLine||!panel?.capture?.output?.text?.includes(metadata.readinessLine)||panel?.capture?.output?.readinessVisibility!=='not-certified'||!['before','after'].every(stage=>panel?.capture?.output?.[stage]?.visible&&panel.capture.output[stage].selectedChannel===metadata.channel&&panel.capture.output[stage].continuousText===panel.capture.output.text))errors.push('missing output panel/source DOM evidence');
   }else if(['proof-help','proof-hover'].includes(config.suite)){
     if(config.target!=='local'||!ids.includes('native-certified-proof-help'))errors.push('missing native certified proof-help observation');
     if(config.suite==='proof-hover'){
