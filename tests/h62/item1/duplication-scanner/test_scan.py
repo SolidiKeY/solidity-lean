@@ -279,6 +279,35 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(data["candidates"], [])
             self.assertIn("different-or-unsupported-statements", data["body_candidates"][0]["reject_reasons"])
 
+    def test_multiline_context_and_literal_boundaries(self):
+        root = Path("/virtual")
+        def row(source):
+            return scanner.scan(root / "A.lean", root, source.encode())[0]
+        prefix = "namespace N\nvariable\n  (T : "
+        suffix = ")\ntheorem same (x : T) : x = x := by rfl\nend N\n"
+        a, b = row(prefix + "Type" + suffix), row(prefix + "Type 1" + suffix)
+        self.assertEqual(a["statement"], b["statement"])
+        self.assertNotEqual(a["context_hash"], b["context_hash"])
+        self.assertEqual(a["context_hash"], row(prefix + "Type" + suffix)["context_hash"])
+        open_a = 'open scoped\n  A\nvariable (T : Type)\ntheorem same (x : T) : x = x := by rfl\n'
+        open_b = open_a.replace("  A\n", "  B\n")
+        self.assertNotEqual(row(open_a)["context_hash"], row(open_b)["context_hash"])
+        literal_a = 'variable (s : String := "x\nnamespace Fake\ny")\ntheorem same : True := by trivial\n'
+        literal_b = literal_a.replace('namespace Fake', 'namespace Other')
+        self.assertNotEqual(row(literal_a)["context_hash"], row(literal_b)["context_hash"])
+        comment = '/- variable\nnamespace Fake -/\n'
+        self.assertEqual(row(comment + prefix + "Type" + suffix)["context_hash"], a["context_hash"])
+
+    def test_equal_context_does_not_prove_local_definition_equivalence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, typ in (("A.lean", "Nat"), ("B.lean", "Int")):
+                (root / name).write_text("namespace N\ndef T := " + typ + "\ntheorem same (x : T) : x = x := by rfl\nend N\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            group = next(g for g in data["candidates"] if {m["path"] for m in g["members"]} == {"A.lean", "B.lean"} and all(m["name"] == "same" for m in g["members"]))
+            self.assertIn("intrinsic-signature-unresolved", group["reject_reasons"])
+            self.assertIn("ownership-requires-live-verification", group["reject_reasons"])
+
     def test_namespace_context_is_not_conflated(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

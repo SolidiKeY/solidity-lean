@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Conservative lexical duplicate discovery. Results are leads, not Lean proofs."""
 import argparse
+import bisect
 import fnmatch
 import hashlib
 import hmac
@@ -194,6 +195,14 @@ def scan(path, root, source=None):
     skeleton = hide_strings(text)
     matches = list(DECL.finditer(skeleton))
     context_commands = list(re.finditer(r"(?m)^[ \t]*(?:import|namespace|section|end|open|variable|universe)\b[^\n]*", skeleton))
+    # Preserve literal bytes and continuation lines until the next recognized
+    # boundary. This remains a lexical approximation of the Lean environment.
+    boundaries = sorted([m.start() for m in context_commands] + [m.start() for m in matches])
+    context_spans = []
+    for command in context_commands:
+        index = bisect.bisect_right(boundaries, command.start())
+        stop = boundaries[index] if index < len(boundaries) else len(text)
+        context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
     relative_path = path.relative_to(root).as_posix()
     def indent(m):
@@ -211,7 +220,7 @@ def scan(path, root, source=None):
             content = content[:command.start()]
             content_skeleton = content_skeleton[:command.start()]
         qualifiers = sorted(re.findall(r"\b(?:partial|unsafe|noncomputable)\b", skeleton[match.start():match.start(1)]))
-        context = digest([m.group().strip() for m in context_commands if m.start() < match.start()])
+        context = digest([span for start, span in context_spans if start < match.start()])
         unsupported = match.group(1) in {"structure", "inductive", "class", "axiom", "constant"}
         parts = None if unsupported else split_declaration(content, skeleton=content_skeleton)
         reason = "unsupported-declaration-form" if unsupported else "missing-top-level-definition"

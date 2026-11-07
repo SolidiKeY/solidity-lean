@@ -525,3 +525,26 @@ A separate review found that multiline section-variable continuations are not
 included in the lexical context hash. The scanner's intrinsic-signature
 rejection remains essential; this context hash does not establish elaborated
 signature equality. Resolving that limitation and live ownership remains open.
+
+## Multiline lexical context spans
+
+The context hash now includes comment-masked text from each recognized
+context command through the next recognized command or declaration boundary.
+This distinguishes the reported multiline section-variable universe case
+and retains literal contents while using the literal-hidden skeleton to find
+boundaries. It is still a lexical approximation: local definitions, notation,
+macros, syntax quotations and unrecognized commands can affect elaboration
+without proving different context hashes. A control with different local
+`T` definitions confirms that a remaining lexical candidate retains both
+`intrinsic-signature-unresolved` and ownership-verification rejection reasons.
+No candidate is promoted to an intrinsic-signature or unowned result.
+
+Finder and skeptic independently reviewed the implementation without Lean.
+The Python suite passed 38 tests. On the same tree and input selection, a
+bounded full scan took 104.998 seconds before and 108.550 seconds after
+(+3.38%); both read the same 7,143 input hashes and recognized 121,486
+declarations without file errors or unmatched patterns. Statement and body
+group counts remained 4,412 and 5,432 respectively, although group identities
+can change with the new context spans. These are external lexical-tool checks,
+not Lean proofs. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/multiline-context/`.
