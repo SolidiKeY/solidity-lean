@@ -89,26 +89,27 @@ async function captureTrace(client,directory,metadata){
  const menuDir=join(directory,'menu');require('node:fs').mkdirSync(menuDir,{recursive:true});observed.menu=await contextSubmenu(client,menuDir,{label:'Dafny',expected:'Build with Custom Arguments'});
  const rendered=await capture(client,directory,true);if(metadata.observeOnly){if(observed.activeUri!==metadata.binding.uri)throw Error('Native observation active URI mismatch');}else require('./trace-presentation.cjs').assertPresentation(observed,metadata);return{...rendered,tracePresentation:{...observed,binding:metadata.binding,asserted:!metadata.observeOnly,scope:metadata.observeOnly?'Native upstream state recorded without a lifecycle-success claim':'Exact content/style/disappearance/menu asserted'}};
 }
-async function buildKeybinding(client,{custom=false,input,cancel=false,directory}={}) {
+async function buildKeybinding(client,{custom=false,input,cancel=false,dismissOnSubmit=false,directory}={}) {
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
   if(!focused.result.value)throw Error('No focused source editor for build keybinding');
-  const started=Date.now();
+  const started=Date.now(),keyEvents=[],inputEvents=[];
+  const send=async(method,params,editing=false)=>{const started=Date.now();await client.request(method,params);(editing?inputEvents:keyEvents).push({method,params,started,finished:Date.now()});};
   const key=custom?'F6':'B',code=custom?'F6':'KeyB',windowsVirtualKeyCode=custom?117:66,modifiers=custom?0:10;
-  for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode,modifiers});
+  for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode,modifiers});
   let prompt;
   if(custom){
     const query='(()=>{const roots=[document];for(let i=0;i<roots.length;i++){const root=roots[i];const input=[...root.querySelectorAll(".quick-input-widget input")].find(e=>e.getClientRects().length);if(input)return{value:input.value,focused:input===input.ownerDocument.activeElement||input.getRootNode().activeElement===input};for(const e of root.querySelectorAll("*"))if(e.shadowRoot)roots.push(e.shadowRoot);}return null;})()';
     const deadline=Date.now()+3000;let before;
     while(Date.now()<deadline){before=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(before?.focused)break;await new Promise(r=>setTimeout(r,20));}
     if(!before?.focused)throw Error('Actual F6 input prompt is not focused');
-    if(input!==undefined){for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});await client.request('Input.insertText',{text:input});}
+    if(input!==undefined){for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2},true);await send('Input.insertText',{text:input},true);}
     const submitted=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!submitted?.focused||input!==undefined&&submitted.value!==input)throw Error('F6 prompt contents did not match requested input');
     const rendered=await capture(client,directory,true);prompt={before,submitted,rendered};
     const key=cancel?'Escape':'Enter',code=key,windowsVirtualKeyCode=cancel?27:13;
-    for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode});
-    if(cancel){let visible;do{visible=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!visible)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);if(visible)throw Error('Cancelled F6 prompt remains visible');const hidden=join(directory,'cancelled');require('node:fs').mkdirSync(hidden,{recursive:true});prompt.cancelled={visible:false,rendered:await capture(client,hidden,true)};}
+    for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode});
+    if(cancel||dismissOnSubmit){let visible;do{visible=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!visible)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);if(visible)throw Error('Submitted/cancelled F6 prompt remains visible');const hidden=join(directory,cancel?'cancelled':'dismissed');require('node:fs').mkdirSync(hidden,{recursive:true});prompt[cancel?'cancelled':'dismissed']={visible:false,rendered:await capture(client,hidden,true)};}
   }
-  return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
+  return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',keyEvents,inputEvents,prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
 }
 async function captureProofHover(client,directory,metadata){
  const checks=require('./proof-help.cjs');checks.popupExpected(metadata);
