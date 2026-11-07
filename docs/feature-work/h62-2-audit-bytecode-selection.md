@@ -2829,3 +2829,53 @@ is removed from this lane's waits. Any fresh owner regeneration is a separate
 result; neither its repaired documentation nor this archive supplies that proof.
 Current producer obligations and regenerable missing Bridge/Mathlib products
 remain distinct from these historical gaps.
+
+
+### Composition/control/lowering field domains with immutable evidence
+
+Eight additional proof-projection domains have separate simultaneous witnesses:
+`CompositionCertificate.lowering`, `control`, `assembly`, `roundtrip`;
+`LoweringCertificate.success`; and `ControlCertificate.shape`, `room`, `realize`.
+They reuse the existing checked empty certificate. The lowering domain admits a
+nonempty `[11,99]` numeric frame and caller, independently of the control
+instance's exact height zero. The latter supplies its actual structured run,
+assembly equality and artifact together; it is not execution of the composition
+at the wrong input height.
+
+A generic negative control derives uniqueness of the assembled result from the
+certificate's existing assembly equation and rejects an explicitly different
+code artifact. Its concrete instance refuses a valid nonempty PUSH0 artifact as
+the result of assembling the certified empty block. No decoder equation alone
+is used as executable behavior.
+
+The first native check passed in 10.619 seconds (180113408-byte workload peak),
+with standard-only axiom outputs and unchanged serial resource/proof bounds.
+The same 39 verified products suffice; there is no new prerequisite build or
+PowerBounds retry. Exact raw-type linkage to the seven earlier checked fields
+accounts for all fifteen proof projections observed in frozen Interface and
+InterfaceV2. This is per-statement domain accounting, not all kernel records,
+source authenticity, V1 conditional-capacity repair or a universal producer.
+The 130 Python tests check structural tooling/rosters; kernel acceptance is
+supported separately by the exact source and native records archived here:
+
+```text
+evidence: cab4c8a24052c60c35b92e48e1bb0aaf67ad557f evidence/solidity-parallel-20261103/executable-bytecode/
+```
+
+The private `composition-field-domains` packet contains generated source, pins,
+import manifests/hashes, kernel/axiom/resource records, reviews and the fifteen-
+field ledger. Its sibling upload index identifies the compiled kernel artifact
+archive; shared regenerable import products remain separately retained. Sixteen
+key archived files were read back and compared byte-for-byte. Separate finder
+and skeptic proof/provenance reviews found no issue. Coordinator integration
+acceptance and all original Source/runtime/G01, physical, Bridge, global census,
+performance and full-build obligations remain open.
+
+Master access was recovered through authenticated Git-data reads: eight commits,
+fifty-four trees and twenty-eight blobs were added only after exact published
+Git SHA checks. Offline connectivity found 123938 reachable objects and zero
+missing objects; remote and original-base ancestries passed. Master 513b4815 was
+merged cleanly at 6a974407, retaining all local work and regenerating roots.
+This recovered Git transport, not Lean build artifacts or historical evidence.
+The later b89c3af4 publication arrived after the native check and remains the
+next adoption input; no acceptance on that later tree is inferred.
