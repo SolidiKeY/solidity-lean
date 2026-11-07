@@ -1,0 +1,55 @@
+{
+  "files": [
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h86-regenerate-v1/run.json",
+      "bytes": 2197363,
+      "sha256": "4337cbd5dbdae903bd53bbaae93e2c9497ba782fc3027939f6d5ad6060cf8f57"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/runtime-v1/baseline/lean-commands.jsonl",
+      "bytes": 779770,
+      "sha256": "a6dce9a63929e4466323f716c9fb2423a7c4c3555034632b10501c92b75f0ca6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/runtime-v1/baseline/runs/1793990294327953041-53/logs/Solidity/Calculus/RuleShapes.log",
+      "bytes": 42,
+      "sha256": "05b9bee4cb17dd5453e76cee6ee484e9692a13b802b7845ee7cd27803f41cb54"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h86-keysort-v1/run.json",
+      "bytes": 329289,
+      "sha256": "4f2db5b7c80e71022f0fe348f1c9a9a348fd88e0e9fcfabaa12eab4dfbac074b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/h70-classification-v1/completeness/SHA256SUMS",
+      "bytes": 86,
+      "sha256": "63df158913647dd9f23e97bc10daf03269d1a380d11a9d72b77a3bcccc7401aa"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/h70-classification-v1/completeness/classification.json",
+      "bytes": 2763653,
+      "sha256": "d32cb3f7cd2ebbfcc71fa2af778776e03464b0eab00413908caf36bff4689c27"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/h70-classification-v1/completeness-gate.json",
+      "bytes": 629,
+      "sha256": "aa7bed33b4a6b493bf517bc113fe858a96268cd3819764ab38710b9259f5ac4d"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/h70-classification-v1/python-controls.json",
+      "bytes": 291,
+      "sha256": "1fb547ee6a35b7350162f22b667c232ddfbb9c45a205e864d7e96e8525a58a2f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/h70-classification-v1/python-controls.log",
+      "bytes": 161,
+      "sha256": "8b53b9e17145ebb2957938b5951ddd446a5ca8be2b7ae3c16648039f66307dbe"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/h70-classification-v1/regeneration-stop.json",
+      "bytes": 939,
+      "sha256": "bbe45571b09972d2924a00b0851e6d55c62d99a165ae65f5c660578f8782672c"
+    }
+  ],
+  "boundary": "Partial static classification and stopped regeneration; not full acceptance"
+}
