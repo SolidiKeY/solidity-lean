@@ -50,4 +50,17 @@ class FieldDomainTests(unittest.TestCase):
         self.assertIn('rfl, rfl, True.intro',w['legacy_prefixes_joint_domain']['proof'])
         self.assertTrue(all('literalCertificate value' in w[k]['proof'] for k in ['instruction_success_joint_domain','instruction_refusal_joint_domain']))
 
+
+    def test_compiler_fixture_retains_global_self_and_relation(self):
+        w=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/compiler-field-witnesses.json').read_text())
+        self.assertEqual({p['target'] for p in w.values()},{
+            'Solidity.Backend.Selection.CompilerPremise.preserves',
+            'Solidity.Backend.Selection.V2.CompilerPremise.preserves',
+            'Solidity.Backend.Selection.V2.CompilerPremise.inhabited'})
+        self.assertTrue(all('identityCompiler' in p['proof'] for p in w.values()))
+        for name in ['compiler_v1_preserves_joint_domain','compiler_v2_preserves_joint_domain']:
+            self.assertIn('irStack [11]',w[name]['proof'])
+            self.assertIn('caller, caller, rfl, True.intro',w[name]['proof'])
+        self.assertTrue(all('False' not in p['proof'] for p in w.values()))
+
 if __name__=='__main__':unittest.main()

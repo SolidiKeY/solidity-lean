@@ -2492,3 +2492,39 @@ archived separately under H145. Earlier frame-field evidence must be replayed
 from its recorded historical commit because its checker-read fixture was
 renamed and extended. No inherited instantiation, global ledger, full census,
 Source/runtime adequacy or original closure acceptance is claimed.
+
+### Compiler-premise inspection and joint domains
+
+Two previously uninspected frozen modules, Selection.Premises and PremisesV2,
+now have native all-constant inspection packets: 41 records and 11 proposition
+fields. Their fingerprints remain separate from the earlier 150-module packet.
+This brings independently observed core modules to 152; 38 core and 37 Bridge
+modules remain uninspected. Native type/module observations establish no Source
+identity, actor ownership or statement correspondence. All 41 records remain
+accounted for, including the eight fields not witnessed by this checkpoint.
+
+Three exact field domains are witnessed: V1 CompilerPremise.preserves, and V2
+CompilerPremise.inhabited/preserves. They reuse Controls.identityCompiler and
+its preserves field, with all global parameters and real certificate self.
+Preservation cases include a concrete caller whose numeric stack is [11] and
+the actual final=initial relation proof. This demonstrates coexistence of the
+producer and per-input hypotheses. The identity relation remains source-
+independent; this is not Source coverage or a general G24/G49/runtime producer.
+The existing reject_false_compiler control was kernel-checked and reused.
+
+Three missing frozen support modules were checked serially in one 4.793-second
+group under a single 180-second prerequisite allowance. No allowance was
+multiplied per import. The two-module inspection took 6.797 seconds; the three
+field-domain proofs took 11.728 seconds. Every checked file stayed below 60
+seconds. Positive proofs use standard axioms only; the shared empty-certificate
+refutation remains axiom-free. No PowerBounds or other timing STOP was retried.
+
+The checker-read compiler-field-witnesses.json fixture and its regression test
+are code. The 123-test suite and independent finder/skeptic reviews pass. Native
+source, products, guard receipts and deterministic replay are sealed off-branch
+at /workspace/parallel-20261103/executable-bytecode/compiler-premise-inspection/
+and archived under H145. Owned inactive regenerable build outputs were removed
+for disk headroom; source, frozen products, shared cache and evidence remain
+intact. Future full builds may need those outputs fetched or rebuilt. Original
+closure, full census, source adequacy, runtime/Bridge and performance gates
+remain open; no global ledger or full-source acceptance is inferred.
