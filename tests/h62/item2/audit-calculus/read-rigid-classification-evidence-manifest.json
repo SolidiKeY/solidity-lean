@@ -1,0 +1,42 @@
+{
+  "scope": "five static declared-type/rigid roles; zero new joint witnesses or runtime acceptance",
+  "counts": {
+    "role_reviewed": 263,
+    "role_pending": 5020,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/read-rigid-classification-v21/evidence.tar.gz",
+      "bytes": 1854862,
+      "sha256": "860875a9c1a40294c0dd054fff3484ffe9e8f9ab43e5dd1149fdc8dc2ab20f14"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/read-rigid-classification-v21/inputs.json",
+      "bytes": 1004,
+      "sha256": "5ce12b7e94c6ba9a9d2c3c7af54bf565256bd50139ceaec3ffbf78cbf80614f0"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/read-rigid-classification-v21/gates.json",
+      "bytes": 4921,
+      "sha256": "afb614c9e63d8499bd75f49b5017c3e4809e764d0dd8001d665e9a2b2cb20770"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/read-rigid-classification-v21/reviews.md",
+      "bytes": 1131,
+      "sha256": "25d15a92578e273eadef17463b827fd2205ea1b1c48d557edd706d960a6eed76"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/read-rigid-classification-v21/doc-metrics.json",
+      "bytes": 221,
+      "sha256": "0508399bd059e3250dacce10d7cf1dba960e1835daf752d4f648e80808230eeb"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/read-rigid-classification-v21/semantic-roles-reviewed.json",
+      "bytes": 730258,
+      "sha256": "5ec6cb1d9d24fec4d47ea4dfb4dfe0d7f70bff9f10d54015fda16c3ece0edd14"
+    }
+  ]
+}
