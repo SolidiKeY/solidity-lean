@@ -7,7 +7,7 @@
   "local_archive_hash_verified": true,
   "coordinator_received_reported": true,
   "coordinator_reported_sha_verification": true,
-  "coordinator_receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/c3-exactness-cache-received-20261105T020449Z.json",
+  "coordinator_receipt": "$XDG_STATE_HOME/cloudvm-coord/receipts/c3-exactness-cache-received-20261105T020449Z.json",
   "coordinator_receipt_source": "Coordinator message supplied verbatim by user on 2026-11-05; remote receipt file not read from this VM",
   "coordinator_import_status": "not reported",
   "resolved_questions": [

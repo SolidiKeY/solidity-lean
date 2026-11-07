@@ -66,7 +66,7 @@ H41 cache delivery remains coordinator-pending. Retained archive:
 /workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/h35-4a949a392f7a9087ba4f600ffa7cc3d9281be43f/cache-export/cache.tar.gz
 SHA256 95342ae5f29dc9999bbfbeea80df80ba7d079aa8e16d447d0afed1a30a8cee32.
 Coordinator reports pull/hash-verification at its receipt
-/home/guilherme/.local/state/cloudvm-coord/receipts/c3-exactness-cache-received-20261105T020449Z.json;
+$XDG_STATE_HOME/cloudvm-coord/receipts/c3-exactness-cache-received-20261105T020449Z.json;
 this is user-supplied remote evidence, not a local read/import success. Fresh
 scoped identity checks verify 24 identical Lean sources/Lake mappings and 72
 built/cache/retained object hashes; they do not replay historical tooling gates

@@ -3,7 +3,7 @@
   "owner": "solidity-h62-6-20261106/migrate-hash",
   "owner_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
   "reported_source": "2a18afcd",
-  "host_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
+  "host_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
   "host_path_available_on_vm": false,
   "local_patch": "/workspace/migrate-optimizer-evidence/owner-overlays/collision-bound-overlay.patch",
   "sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",

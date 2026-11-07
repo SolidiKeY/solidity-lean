@@ -63,7 +63,7 @@
     {
       "recipient": "COORD",
       "id": "DELIVER160530-1",
-      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md",
+      "source_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md",
       "expected_sha256": "9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392",
       "expected_bytes": 17276,
       "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested."
@@ -71,7 +71,7 @@
     {
       "recipient": "COORD",
       "id": "DELIVER160530-2",
-      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md",
+      "source_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md",
       "expected_sha256": "dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c",
       "expected_bytes": 15154,
       "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested."
@@ -79,7 +79,7 @@
     {
       "recipient": "COORD",
       "id": "DELIVER160530-3",
-      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch",
+      "source_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch",
       "expected_sha256": "c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72",
       "expected_bytes": 75555,
       "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested."
