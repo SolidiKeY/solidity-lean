@@ -83,3 +83,7 @@ The base-byte-pinned `signed_div_selected_ledger.py` adds twelve literal declara
 ## Additional private and protected headers
 
 The original census matches only unmodified line-start headers and omitted private or protected declarations. `private_header_ledger.py` scans the same independently enumerated 48 pinned files and finds nine additional literal `private theorem` headers. Their manual observations cover fixture heap references, representation uniqueness, unsigned success/refusal observations, numeric conversion, Source result lifting, and local-word representation. With these separately counted rows, 332 of 474 observed literal headers have manual observations; 142 of the original 465 remain unclassified. Neither scanner is a Lean parser: modifier combinations, alternate formatting, comments and declarations beyond the fixed files may be missed or misidentified. These counts are not full declaration, semantic or dependency coverage.
+
+## UnsignedDiv Selection and Numeric
+
+`unsigned_div_selection_numeric_ledger.py` records eleven base-pinned literal declarations for public selection, two operand loads and binTail, nonzero operator results and Source transport. The scalar divisionFailure equality concerns Source panic bytes; symbolic EVM revert does not expose a payload. These textual observations are not Lean validation or complete dependency accounting. The ledgers now describe 343 of 474 observed literal headers; 131 of the original subtotal remain.
