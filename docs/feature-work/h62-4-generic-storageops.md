@@ -308,3 +308,190 @@ permission claimed. Deterministic plan reproduction passes. The fixture-plan
 tests check full coverage and reject five corruptions: case omission,
 duplication, changed result, removed fixture and fabricated proved equivalence.
 No Lean validation was run for this planning-only follow-up.
+
+## H82 successor: deterministic frozen plan tests
+
+The authenticated final member head was merged into the surviving storage branch.
+The original plan test read the edited working tree while comparing the frozen
+manifest, so it correctly rejected inventory drift before exercising the plan
+checks. The test now obtains its exact pinned family from Git into a temporary
+tree and binds both inventory and declaration-body reads to that tree. The
+classifier, acceptance commands, manifests and frozen counts are unchanged.
+A corruption test confirms that a changed inventory hash is still rejected.
+
+All 26 generic tooling tests pass; the ten inherited audit tooling tests also
+pass. The earlier live-drift failure and the intermediate mixed-tree failure
+are retained. These are scanner/plan tests, not Lean proofs, witness coverage,
+semantic correspondence or acceptance of the modified live family. All 1623
+claim proof obligations and the original trust/migration holds remain open.
+
+## Rejected scheduler append extraction
+
+A candidate additive generic append law over the unchanged modifyMany
+definition was tried in two exact-statement late-failure controls. The generic
+law and repaired consumers passed kernel checks. The first consumer scripts
+failed on list normalization/partial application; those failed receipts are
+retained and not accepted. The repaired consumer file took 4.36 seconds against
+a 3.60-second unchanged warm baseline, a 21.1% increase exceeding the frozen
+10% STOP limit. The scheduler file itself measured 1.90 versus 1.88 seconds.
+
+The complete candidate was rejected. OperationFamilies and OperationControls
+were restored byte-for-byte to the committed tree, and the rejected patch and
+measurements remain outside Git. No unchanged retry, accepted generic helper,
+correspondence result or completed family migration is claimed. All 1623
+original control proof obligations remain in the retained plan.
+
+## Additive append law and typed fixtures
+
+A distinct proof-only optimization proves modifyMany_append by explicit Option
+cases and list induction. It retains the original scheduler definition, key
+order, repeated keys, partial failures and actual intermediate slots. The law
+and four additive fixture theorems use no axioms. A typed five-case fixture
+table covers empty execution, successful clear, repetition, first failure and
+late failure; the arbitrary-split theorem uses the generic law rather than
+a table of expected outputs. The final scheduler file measured 1.93 seconds
+against the unchanged 1.88-second warm baseline (2.66% increase, one sample).
+
+The attempted original-control instances were stopped after guards incorrectly
+expected no axioms. C212 directly checked the exact frozen original source:
+both original controls already use propext and Quot.sound, matching the
+optimized candidates. The prior axiom-growth interpretation was wrong. All
+31 local import files match the C207 dependency context byte-for-byte. Both
+original consumer proofs remain restored; no migration or optimized-consumer
+performance acceptance is claimed. The accepted scope remains the additive
+zero-axiom law and test fixtures only. All 1623 original claim obligations
+remain in the frozen plan.
+
+append_acceptance.py verifies that removing precisely the additive theorem
+packet reproduces the frozen OperationFamilies source byte-for-byte, and that
+all original declaration signatures remain exact. Its tampering tests are
+source-preservation checks, not kernel proofs or full-family acceptance.
+The failed consumer guards and previous timing rejection remain preserved;
+full affected validation, whole-family correspondence and all original holds
+remain open.
+
+## Correction of the C207 axiom comparison
+
+C212 preserves the original and candidate axiom messages and exact dependency
+hashes. A reflexive proof is not sufficient evidence of an empty axiom set: its
+referenced fixture definitions also matter. The measured original and candidate
+sets are both [propext, Quot.sound]. Historical sealed reports are retained,
+but their claim of growth from an empty set is superseded by this correction.
+The independent C206 21.1% timing STOP remains unchanged. Neither this correction
+nor the additive law completes the 1623-case generic migration.
+
+## Optimized consumer timing STOP
+
+After correcting the original axiom baseline, C214 measured the distinct
+explicit-case/direct-term optimized consumer instances under fresh matched
+serial conditions. Both original and candidate files passed kernel checks.
+The optimized file took 4.33 seconds against 3.65 seconds for the unchanged
+original, an 18.6% increase exceeding the 10% limit. The two proof rewrites
+were rejected and OperationControls restored byte-for-byte. No unchanged retry
+was made after this STOP.
+
+This is a performance rejection, not axiom growth. C212's measured original
+and candidate sets remain equal. The additive generic append law and typed
+fixtures remain available, but no original-case migration is accepted and all
+1623 frozen migration obligations remain open. Rejected source and raw timing
+receipts remain outside Git with their exact before/after context.
+
+## Fifteen finite coverage proof instances
+
+The published lexical scanner identified fifteen identical two-index coverage
+patterns in the nested-array transport controls. A general bounded-Nat to
+dependent-Fin helper now discharges those exact finite membership obligations.
+The helper permits arbitrary outer/inner bounds and uses no axioms; the fixed
+fixture sizes remain original data, not admitted-source restrictions. Every
+semantic correctness theorem application, store, location, observation and
+negative case remains unchanged. Decidable coverage checks do not replace the
+operation correctness proof with expected outputs.
+
+Exact packet accounting preserves all 286 original declaration statements and
+all fixture definitions, with precisely fifteen proof-body replacements and
+one added helper. Six tampering controls pass. Both original and candidate
+files pass kernel checks and existing guards; the otherwise unguarded child
+bridge was directly checked on both sides with equal standard axiom sets.
+One matched warm sample measured 53.61 seconds before and 54.38 seconds after
+(1.4% increase, within 10%); no speedup is claimed. Independent read-only
+reviews found no issue.
+
+This is a bounded coverage-proof refactor, not full semantic classification,
+fixture-table correspondence or acceptance of all 1623 control claims. The
+earlier timing STOPs and corrected C207 axiom interpretation remain retained.
+Full affected/lane validation and all original producer obligations stay open.
+
+## Second coverage stage
+
+C216 reuses the same general helper for fifteen additional finite membership
+subproofs in the same fifteen callers. Cumulative accounting now covers thirty
+subproof replacements, not thirty semantic theorem migrations. All 286 original
+statements and fixture definitions remain unchanged. Both kernel checks and
+existing axiom guards pass; the remaining child bridge has equal directly
+measured standard axiom sets. One matched warm sample measured 51.83 seconds
+before and 52.62 seconds after (1.5% increase, within 10%). Exact-byte packet
+checks and six tampering controls pass. Independent read-only finder and skeptic
+found no issue. Full-family correspondence and original lane closure remain open.
+
+## Retained-cycle semantic case ledger
+
+C218 records manual source obligations for all five frozen controls in
+TargetRetainedCycle.Controls: three successful execution equations, seven
+ordered tuple components, the successful uncleared-child counterexample, two
+refusal orders, and five changed-payload conjuncts. The ordered case retains
+all 18 store slots and nine sampled context fields. Whole-machine execution
+equalities remain distinct from those finite observations. Stable reuse of an
+already-cleared child does not restore its original payload; older retained
+tail, opaque cell and outside words remain separately accounted for. Neither
+a revert result nor the final execution index establishes rollback or gas
+adequacy. No Source or physical-machine adequacy follows.
+
+The generator checks exact frozen module bytes, all five statements and
+fixture support. Source drift, omitted/duplicated cases, shortened observations,
+changed statements and a fabricated proof-acceptance flag are rejected. Both
+independent read-only reviewers found no issue. This ledger adds zero verified
+proofs and supplies no generic instance or correspondence acceptance; the
+1623-claim implementation queue and all existing timing/resource holds remain
+open. No production source, premise, definition or axiom inventory was edited.
+
+## Target-only self-copy case ledger
+
+C220 accounts for all three frozen SourceSelfCopyTargetControls statements.
+The first is actual structured Evm.run returning the original whole Machine
+after consuming equal source/destination operands. The second records the
+original and self-copy ten-slot views plus nine sampled context fields. The
+third is only a different-empty-source afterCopy view equation, not an execution
+or refusal theorem. It clears the live destination prefix while preserving
+older nested tail11, older outer child2 header1/payload71 and outside sentinel99.
+The historical SourceSelfCopy filename and compatibility namespace supply no
+ordinary Source evaluator, numeric/physical bridge, static-call, gas or world
+rollback adequacy.
+
+The two ledgers reuse one source-accounting builder. A regression compares the
+entire retained-cycle report with its frozen C218 generator; every prior field
+and manual obligation remains identical. Exact module bytes, all three original
+statements and fixture support remain pinned. Source/case/observation/statement
+and fabricated-proof-acceptance mutations are rejected. This adds three manual
+source plans and zero new verified proofs or generic correspondence instances;
+the full 1623-claim queue remains unfinished. Production sources are unchanged.
+
+## H113 parent page-cache accounting correction
+
+Coordinator decision H113 authorizes the lane monitor to exclude active_file
+and inactive_file page-cache charges from parent headroom accounting. The
+monitor now records parent and runtime non-reclaimable usage separately, each
+as max(0, memory.current - active_file - inactive_file), and sets parent_other
+to max(0, parent_non_reclaimable - runtime_non_reclaimable). Raw parent_other
+and every cache/non-cache term remain in each receipt. This avoids subtracting
+runtime-owned cache from other users twice. The preserved monitor's 12 GiB cap,
+zero swap, serial thread check, 16 GiB parent cap, 1 GiB reserve and host-headroom
+checks are unchanged. H111 changes only the launching shell stack limit.
+
+The fresh preflight passes: raw parent_other 5184303104 bytes becomes adjusted
+286285824 bytes. Four controls pass, including rejection of actual non-cache
+pressure and consistent handling of runtime-owned cache. Separate direct Lean
+and Lake version probes and the serial KeySort build pass; an earlier configured
+driver version probe rejected its flag ordering and is retained as a failed
+probe. Both read-only reviewers found no issue. Historical resource refusals
+and the denied reclaim attempt remain failed receipts; they are not relabeled.
+This resource correction establishes no new theorem or whole-lane validation.
