@@ -2603,3 +2603,20 @@ since the preceding snapshot. Independent read-only finder and skeptic checked
 roles, hashes and history preservation without Lean or a server. Evidence hashes
 are in `tests/h55/module-times/bytecode-witness-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Yul byte-object view observations
+
+`yul_views_controls.py` records two previously unreferenced Yul view sources
+with hashes and the feature document hash. They describe a typed schema over
+bytes, addresses and residual memory, plus a seven-row table with original
+statement instances and boundary cases. Current invocation, inputs, effects and
+outcomes remain unresolved; these source observations do not establish
+whole-model or native runtime acceptance.
+
+At `4ba389750144438633a43808af9d85f6257adeab`, the refreshed static index has
+823 candidates, 632 with supplied current references and 191 without; ten retain
+historical references for review. No candidates were added, changed or removed
+since the preceding snapshot. Independent read-only finder and skeptic checked
+roles, hashes and history preservation without Lean or a server. Evidence hashes
+are in `tests/h55/module-times/yul-views-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
