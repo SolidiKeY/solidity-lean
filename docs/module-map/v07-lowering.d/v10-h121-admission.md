@@ -12,3 +12,4 @@
 | `Lowering/P8/SourceAstCorrespondence.lean` | Ordered child-by-child syntax conversion relation and traversal equivalence; no Source meaning/origin claim |
 | `Lowering/P8/SourceAstExpressionCorrespondence.lean` | Structural receiver/operand/argument correspondence for unchanged expression conversion; no meaning or origin claim |
 | `Lowering/P8/SourceAstTupleCorrespondence.lean` | Tuple hole/order and ordinary string-byte conversion laws; no source provenance or semantic claim |
+| `Lowering/P8/SourceAstLiteralCorrespondence.lean` | Supported literal kind/value and expression-wrapper correspondence; no source binding or semantic claim |
