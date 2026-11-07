@@ -1,12 +1,14 @@
 {
   "schema_version": 1,
   "archive": "evidence.tar.gz",
-  "archive_sha256": "e104e967aeb6e249de84e5eb7ec94f748b7970e90fcf48cf662c07f29d7af8bb",
-  "manifest": "/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/portable-evidence.sha256",
-  "manifest_sha256": "f1ae02f864f60a63027210765024cd3e461d7294d058bf4faccae191cf114446",
-  "archive_entries": 1524,
+  "archive_sha256": "2f6fe142462ee544c660d8fdb127735cdc2ef67951e8190d812b9a6a88fbae39",
+  "archive_bytes": 6563937,
+  "manifest": "/workspace/audit-abi-world-evidence/resume-8863-20261107/portable-evidence.sha256",
+  "manifest_sha256": "c6bc50c8935034335ca7eb092027873a9f93500415846e877092781e29a0fb1b",
+  "manifest_bytes": 224846,
+  "archive_entries": 1898,
   "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest PATH_TO_OFF_GIT_MANIFEST",
-  "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
+  "integration": "8863c41276f9340d3d1960df9e4808294614189b",
   "coverage": {
     "mapped_modules": 24,
     "statements": 177,
@@ -17,9 +19,9 @@
   },
   "full_lean_build_complete": true,
   "assignment_complete": false,
-  "final_acceptance": "blocked: PIN-2a43bf4f central inventory110 new standard-only registrations,0 errors",
-  "owner_ticket": "/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/axiom-pin-owner-ticket.json",
-  "normal_build_record": "resume-20261107/checkpoints/final-blocked-acceptance/full-resource.json",
-  "boundary": "Portable byte integrity; current full6555-job Lean and fresh audit diagnostics pass. Archived external gas/fork observations reused only for byte-identical fixtures; not formal gas/world/general compiler proofs.",
+  "final_acceptance": "blocked: PIN-8863c412 central inventory184 new standard-only registrations,0errors",
+  "owner_ticket": "/workspace/audit-abi-world-evidence/resume-8863-20261107/axiom-pin-owner-ticket.json",
+  "normal_build_record": "resume-8863-20261107/full-2-resource.json",
+  "boundary": "Portable byte integrity; current6640-job full gate and9audit+KeySort diagnostics pass. Archived external gas/fork observations reused only for identicalfixtures, not freshEVM or formal gas/world/generalcompiler proofs. Transfer VM files before off-VM verification.",
   "bulk_manifest": "tests/h62/item2/audit-abi-world/bulk-artifacts.sha256"
 }
