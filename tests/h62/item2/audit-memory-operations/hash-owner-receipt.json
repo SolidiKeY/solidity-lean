@@ -1,0 +1,26 @@
+{
+  "owner": "solidity-h62-6-20261106/migrate-hash",
+  "ticket_head": "78c110f83dc1a30700acd1b5bd34b19f61da6ccd",
+  "source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+  "expected_sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+  "actual_sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+  "checksum_match": true,
+  "source": "exact patch text reconstructed from coordinator message; no remote file read claimed",
+  "applied_to_checkout": false,
+  "full_migration_gates": "pending",
+  "compatible_prerequisite_bundle": "not received",
+  "ownership_agreement": "V11/CR CopyPaths agreement remains pending; delivery is not agreement",
+  "initial_reconstruction_sha256": "f306974eca224afed53581482c0d42d60d42b3411ddfa9b7079f4f8de5118ebf",
+  "initial_reconstruction_error": "one extra context-space before distinct preimages; corrected against supplied diff and unchanged source",
+  "read_only_applicability": {
+    "command": "git apply --check /workspace/h62-audit-memory-headers-evidence/collision-bound-overlay.patch",
+    "exit": 0
+  },
+  "source_head_verification": "reported by coordinator; owner source commit not fetched or imported",
+  "ticket_head_verification": "coordinator-reported receipt only",
+  "initial_ticket_head": "78c110f83dc1a30700acd1b5bd34b19f61da6ccd",
+  "latest_ticket_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
+  "host_only_receipt_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
+  "host_receipt_path_retrieved": false,
+  "latest_payload_status": "Same supplied patch bytes/checksum; no new validation or compatible bundle implied"
+}

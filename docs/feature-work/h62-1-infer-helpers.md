@@ -298,3 +298,67 @@ and the default array location. Per-file Lean 4.35 MCP diagnostics returned
 `success=true`, `partial=false`, no failed dependencies and the same three
 `[propext]` axiom reports. The patch proposal was regenerated after these
 additions; its applicability check is not a semantic or full-gate pass.
+
+## Integration and proposal drift controls
+
+The coordinator reported the prior lane head integrated with a touched gate
+and finder/skeptic review. `origin/master` was fetched and the clean lane
+fast-forwarded to `b7c3cc5110b1ebee1eab45e8b1b9894ecada7237`. That tree
+contains `tests/h55/source-relations/HelperCompatibility.lean` at SHA-256
+`52d196ff64fe34b366d8b3f0456abd50e05ccf0284c522cd91432f4213eb302a`,
+matching the separately supplied H55 handoff. That interface includes the
+full conversion result-type premise, six adapters and three completeness
+consumers. The H55 handoff reports a standalone 4.24 check and independent
+reviews; it does not establish 4.35 validation or approval of this extraction
+proposal. Do not duplicate the H55 interface.
+
+`test_propose_migration.py` independently exercises the proposal generator on
+copied fixtures: each of the six original declaration anchors is altered in
+turn, and an already occupied destination is supplied. Every case is rejected
+before any patch text is emitted. These are external controls for proposal
+drift, not proof that applying the proposal preserves Lean statements or
+axioms. The proposed patch still applies in check mode and remains unapplied.
+The new control itself needs the usual independent finder/skeptic review.
+
+Source/Ctor 4.35 errors, the full Hash and language migration gates, H55
+agreement on existing definition bodies, frozen-statement and axiom checks,
+full affected validation, acceptance and timing comparison remain open. No
+prior stopped Lean build was rerun unchanged. No new owner source edit was
+made, and no master push was performed.
+
+## Re-baseline after drift-control integration
+
+The coordinator reported the lane change integrated on master with touched gate
+pass and finder/skeptic reviews. On fetch, master was
+`2a43bf4fcdaf24750265afc8f8be5b420d1d22b0`. The reported lane commit
+`07a49ac680edb41984c427aebc3049680a738e02` was not its ancestor, but the
+cherry-picked commit `1a12272db` has the identical stable patch ID
+`cb8071c8419de76ab4a255021c83b26b1f66f315`, and all lane scope files matched.
+A normal merge retained the original lane ancestry and produced
+`7e053a71fb811d3ae9f348480d477b038dcf76c4` without conflicts.
+
+This tree includes Source/Ctor proof migration `087f76aa8360db0b89aa99b4f8fcc0022b925e4d`.
+Using official Lean 4.35.0 and a freshly generated current-tree alternate Lake
+configuration with explicit `-j1`, one open MCP file, `LEAN_NUM_THREADS=1`,
+the writer lock, a 12 GiB virtual-memory limit and a 4 GiB available-memory
+guard, the direct `Solidity/Source/Ctor.lean` diagnostic returned success
+without items or failed dependencies. This is a per-file diagnostic, not a
+full gate or timing comparison.
+
+The candidate `CaseSpecifications.lean` still returned
+`diagnostics_unavailable` with failed dependencies including the source and
+static inferencer files. Separately, `Solidity/Frontend/Static/Infer.lean`
+returned success with two unused-variable warnings. `Solidity/Source/Infer.lean`
+returned six errors: dependent slice type mismatches at lines 308, 312, 315
+and 316, and type mismatches at 345 and 382. The exact structured MCP logs
+are exported; this lane did not edit the H55 inferencer or weaken types.
+H55/source-relations must assess these current-tree diagnostics before the
+combined candidate can be validated. The case file is still not known clean.
+
+The proposal generator output remains byte-identical to its checked-in patch
+and `git apply --check` passes on this tree; no proposal was applied. The seven
+external scanner/control tests pass when temporary-file writes are permitted.
+A first test attempt in the read-only sandbox failed because no writable
+scratch directory was available; that attempt is not counted as a pass.
+Owner agreement, independent reviews of any new changes, full affected gates,
+axiom comparison, acceptance and timing remain outstanding.
