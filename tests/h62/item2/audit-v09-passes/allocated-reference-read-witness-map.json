@@ -1,0 +1,123 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/AllocatedReferenceReadControls.lean",
+  "interface_sha256": "ab5484c3911658e99434bb788bf73a1ab85220c905ab41990ace6fe461380c2e",
+  "joint_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead",
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.AllocatedReferenceReadControls.0.",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.runs",
+      "signature_sha256": "21396acdae51611db77d183ea693b7dd16fea4cc6037633aefb2c9bdf91d4c1c",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.old_alias_fails",
+      "signature_sha256": "4326a83d059be6845e3233d3031af9b3baca2d3690145d828f9ecf70af46dbe0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.fresh_reference_succeeds",
+      "signature_sha256": "5ff1b3d922d3a74aeeab9e1d3b5b5cd5e22067c6e2e645fc71f519b0a7964535",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell0",
+      "signature_sha256": "382e7a8a3dd4e6f8bb8a18bbacf3278367b555c5cc0b7b333d6e15a16216f082",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell1",
+      "signature_sha256": "3e5a301f4c88fa7266e0b4a61b1041a90284d98a14826e065c6c84fc89195c67",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell2",
+      "signature_sha256": "0e6b4d410be4999c3c4b0cee17ee0597c77702ce96cb1e8ce165103d55f3d6ab",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell3",
+      "signature_sha256": "85b25a1558d26c2bdf578c98858572d582c8e58dcec1b8a147d8f93201081582",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell4",
+      "signature_sha256": "8286d867b8d3e4dae658211ec36a9818a5487abbfb2834bfac6f1c6574003fbb",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell5",
+      "signature_sha256": "ace9dad441f5e53fe5ea07f40eada104f50682cfe003a2267e402c4fc5a37ca5",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell6",
+      "signature_sha256": "86df401778cd886a5582d07c6296ed4f8b1f33b9b29c06b5bb46d194ccf7d347",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell7",
+      "signature_sha256": "ac2dacc765d1e5a33839dcbc9dccd50538f05c5db367d49222af0dd75cd0ed00",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell8",
+      "signature_sha256": "2262d2d79d990495a370ab0a91bc40683a9bd43ffa8642a975d4ee706ddc7bca",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell9",
+      "signature_sha256": "e04d4ce5c688da0455267ce0daa7f0d5e92a18e43aeb5eecba7fc3ebe0a934ce",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell10",
+      "signature_sha256": "ecc8a63fc269d3cea93cce602fcd3d97096e92772e10dafe1654a00cc945a2b0",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell11",
+      "signature_sha256": "7a42326a61b7fb7166c28e7fd28064866db365db06d743aa502d091e7679b9d5",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell12",
+      "signature_sha256": "74c43a56180b9dea6c7019c2d0ce91ac7dbff3096a77173b77de1df6155f8fd8",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell13",
+      "signature_sha256": "72eacb6f4f6edfdee1f8d30c4854bd53cefdfd0efcbb259250d5eb66ca362aba",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell14",
+      "signature_sha256": "94e354c6f122619275d960c9aa3992eaed973525824d20c5adb73bacd30d8164",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.cell15",
+      "signature_sha256": "1d7b4d3748715544d9deccc04a465489bf6f87b5812d1d948b9b6c5388c9097a",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.complete_memory",
+      "signature_sha256": "0dd55dda37ef08ee13323fe328ebc1ba16889f499670b34db1be2a5006156349",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.AllocatedReferenceRead.Controls.corrupted_tail",
+      "signature_sha256": "1c644236fc86728818b609c76c4825accaaecfc1f75f131d8a76a9f82f14aed1",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 361,
+  "aggregate_remaining": 898,
+  "limits": "Five public and sixteen exact private allocated-reference model observations; no native ByteWorld/emission, gas/resources or full Source/G24 adequacy.",
+  "private_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
+}
