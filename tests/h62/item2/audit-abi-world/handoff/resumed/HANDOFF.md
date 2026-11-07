@@ -101,3 +101,17 @@ fullbuildpending281changedinputs. Prior6555pass/archiveindex remain historical.
 Currentwaits: PIN-806a972a85standard-only registrations, and2foreignsynthetic
 A/B docreferences. Ticket is offGit in resume-806-20261107 and authenticated by
 the small bulk manifest. No statement/budget/pin edits, newgoal or push.
+
+## Superseding e0 checkpoint
+
+Exact current integratione0f4251ff40ad79c37bae53795b7419afe52e8d9 was fast-forwarded
+only after safe owned-guard cancellation/cleanup of806full2 at coordinator
+request. That4801.177983second partial4665 build is not a pass. Current full
+policy requires SoliditySlowExamples as well as defaults and SolkeyTestSuite.
+Owned serial config preserves all targets with -j1/stack131072; no budget change.
+Fresh9+KeySort,7986boundinputs,177/439/7/10 acceptance+3controls pass. Timing
++1.234531929%within10. All static gates except pin metadata pass. Current sole
+ownerwait is149standard-only registrations (PIN-e0f4251f offGit, hash-bound by
+smallmanifest); the former foreign docreference wait is resolved upstream.
+Full expanded gate remains pending. No historical pass is relabelled, no goal
+created/reset/completed or push. Required originalprompt/queue/scope preserved.
