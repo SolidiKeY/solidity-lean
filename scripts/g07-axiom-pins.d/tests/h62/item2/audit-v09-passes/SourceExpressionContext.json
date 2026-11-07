@@ -1,0 +1,19 @@
+{
+ "tests/h62/item2/audit-v09-passes/SourceExpressionContext.lean:Solidity.Backend.Passes.AuditSourceContext.E": [],
+ "tests/h62/item2/audit-v09-passes/SourceExpressionContext.lean:Solidity.Backend.Passes.AuditSourceContext.frame": [],
+ "tests/h62/item2/audit-v09-passes/SourceExpressionContext.lean:Solidity.Backend.Passes.AuditSourceContext.globals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SourceExpressionContext.lean:Solidity.Backend.Passes.AuditSourceContext.program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SourceExpressionContext.lean:Solidity.Backend.Passes.AuditSourceContext.sourceState": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

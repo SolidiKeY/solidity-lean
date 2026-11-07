@@ -9,6 +9,12 @@ class InstanceExtraction(unittest.TestCase):
     def setUp(self):
         self.row = dict(path='fixture', name='Scope.observed', statement='theorem observed : True',
                         statement_sha256=instances.c.sha('theorem observed : True'))
+    def test_refreshed_hash_drift(self):
+        changed = dict(self.row, statement='theorem observed : False',
+                       statement_sha256=instances.c.sha('theorem observed : False'))
+        with self.assertRaises(ValueError): instances.verify_frozen([changed], [self.row])
+    def test_context_drift(self):
+        with self.assertRaises(ValueError): instances.verify_frozen({'source': 'namespace New'}, {'source': 'namespace Old'})
     def test_exact(self):
         self.assertEqual(instances.select([self.row], 'fixture', 'observed'), self.row)
     def test_missing(self):

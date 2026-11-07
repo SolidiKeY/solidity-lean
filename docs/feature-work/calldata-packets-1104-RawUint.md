@@ -105,3 +105,20 @@ pass. They do not authenticate the missing inherited archive. The broad Python
 discovery failure is retained because artifact-dependent acceptance scripts
 require their original inputs and CLI arguments. Historical missing bytes and
 performance receipts are not recreated or reassigned to the current head.
+
+## Array container composition
+
+UIntViews.semantic_uint_containers reuses the typed byte-derived sequence in
+the actual dynamic and fixed cval constructors, for every raw input, base,
+count and fuel. Success requires positive fuel and either an empty container
+or at least count+3 fuel. Fixed arrays ignore the arbitrary runtime length exactly as
+the semantic decoder does. The same indexed sequence witnesses both forms;
+no decoded payload, successful run or canonical layout is assumed.
+
+Boundary controls distinguish empty containers at fuel zero/one and one-element
+containers at fuel three/four, including arbitrary fixed-array runtime length.
+The general theorem and derived one-element control use only propext,
+Classical.choice and Quot.sound; the empty-container control is axiom-free.
+These additions do not provide compiler selection, Source object transport,
+native execution or whole-decoder dispatch/body composition. Those original
+G40 obligations remain open. Evidence is archived privately under H145.
