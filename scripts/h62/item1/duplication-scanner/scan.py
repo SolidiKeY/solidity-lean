@@ -307,7 +307,7 @@ def scan(path, root, source=None):
         keyword = re.match(r"in\b", skeleton[pos:])
         if not keyword: raise ValueError("unsupported guard_msgs header")
         pos += keyword.end()
-        if re.match(r"[ \t]+(?:@\[|#guard_msgs\b|(?:open|set_option|include|omit|private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[pos:]):
+        if re.match(r"[ \t]*(?:@\[|#guard_msgs\b|(?:open|set_option|include|omit|private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[pos:]):
             raise ValueError("unsupported same-line guard_msgs declaration")
     matches = list(DECL.finditer(skeleton))
     attribute_ends = [end for _, end in attribute_spans]
@@ -333,7 +333,7 @@ def scan(path, root, source=None):
         # inline declaration prefixes that the line recognizer would miss.
         scoped = re.match(r"[ \t]*(set_option|open|include|omit)\b", command.group())
         if (scoped and
-            re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
+            re.search(r"\bin[ \t]*(?:@\[|#guard_msgs\b|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
             raise ValueError("unsupported same-line scoped " + scoped.group(1) + " declaration")
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []

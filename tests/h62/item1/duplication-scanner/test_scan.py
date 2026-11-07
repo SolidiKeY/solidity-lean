@@ -587,9 +587,18 @@ class ScannerControls(unittest.TestCase):
         clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
         self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
 
+    def test_outer_scoped_guard_declarations_fail_closed(self):
+        root = Path("/virtual")
+        for source in (b'open Nat in #guard_msgs in theorem hidden : True := by trivial\n', b'set_option autoImplicit false in #guard_msgs in theorem hidden : True := by trivial\n'):
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                scanner.scan(root / "A.lean", root, source)
+
     def test_guard_msgs_inline_declarations_fail_closed(self):
         root = Path("/virtual")
         cases = (
+            b'#guard_msgs in@[simp] theorem hidden : True := by trivial\n',
+            b'#guard_msgs in@[simp]\n theorem hidden : True := by trivial\n',
+
             b"#guard_msgs in theorem hidden : True := by trivial\ndef visible : Nat := 0\n",
             b"#guard_msgs in #guard_msgs in theorem hidden : True := by trivial\n",
             b"#guard_msgs in open Nat in theorem hidden : True := by trivial\n",
