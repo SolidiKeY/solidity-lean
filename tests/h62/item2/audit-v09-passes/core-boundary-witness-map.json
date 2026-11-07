@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface_path": "Solidity/Backend/Passes/CoreBoundary.lean",
+  "interface_sha256": "9ff64dc40e4f5b0e14c0f2fc3b6879c3efb062ff5da2846a0aac6741c1097fa8",
+  "witness_module": "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean",
+  "covered_premise_bundles": [
+    {
+      "name": "Solidity.Backend.Passes.mapped_output_core",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/CoreBoundary.lean",
+      "line": 10,
+      "character_span": [
+        380,
+        620
+      ],
+      "signature": "theorem mapped_output_core (result : Compilation b F P)\n    {base outBase : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {initial m : Machine} {\u03c4 : State C \u0394}\n    (h : MappedOutput result L frame base \u03c3 initial \u03c4 m outBase) :\n    Sim C L b result.frag \u03c4 m",
+      "signature_sha256": "d751d907798da0a31c7f71c0cb570911c852b84cdb9b16382b7158bb5683b8b7",
+      "source_sha256": "9ff64dc40e4f5b0e14c0f2fc3b6879c3efb062ff5da2846a0aac6741c1097fa8",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditCoreBoundary.joint_reached",
+      "witness_status": "kernel_checked_concrete_reached_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_rep_core",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/CoreBoundary.lean",
+      "line": 31,
+      "character_span": [
+        1173,
+        1386
+      ],
+      "signature": "theorem compilation_rep_core (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {initial m : Machine} {\u03c4 : State C \u0394}\n    (h : result.Rep L frame base \u03c3 initial \u03c4 m) : Sim C L b result.frag \u03c4 m",
+      "signature_sha256": "df45930601967b42f3e23b81e468efda40e4bd4af666da3698fa889e9e846982",
+      "source_sha256": "9ff64dc40e4f5b0e14c0f2fc3b6879c3efb062ff5da2846a0aac6741c1097fa8",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditCoreBoundary.rep_projection",
+      "witness_status": "kernel_checked_concrete_reached_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_core_mapped_link",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/CoreBoundary.lean",
+      "line": 39,
+      "character_span": [
+        1657,
+        1958
+      ],
+      "signature": "theorem compilation_core_mapped_link (left : Compilation b F P)\n    {G : Frag \u039e} (cert : inFragP left.frag Q = some G)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (bound : (L + Evm.Prog.pushes P) + Evm.Prog.pushes Q \u2264 Lmax) :\n    MappedBoundaryLink left (.core G cert) L frame base \u03c3 m",
+      "signature_sha256": "b342531424741d7ae78b53ace4f29fb19d8d2249f03af8d31060fa5e07603480",
+      "source_sha256": "9ff64dc40e4f5b0e14c0f2fc3b6879c3efb062ff5da2846a0aac6741c1097fa8",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditCoreBoundary.reached_suffix_input",
+      "witness_status": "kernel_checked_concrete_reached_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_core_link",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/CoreBoundary.lean",
+      "line": 47,
+      "character_span": [
+        2037,
+        2343
+      ],
+      "signature": "theorem compilation_core_link (left : Compilation b F P)\n    {G : Frag \u039e} (cert : inFragP left.frag Q = some G)\n    {base nextBase : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (bound : (L + Evm.Prog.pushes P) + Evm.Prog.pushes Q \u2264 Lmax) :\n    BoundaryLink left (.core G cert) L frame base nextBase \u03c3 m",
+      "signature_sha256": "1b4dcae44f3d4caba881ab94eda8a7ba08ba37d7c328259b9b3d5e51a7a30185",
+      "source_sha256": "9ff64dc40e4f5b0e14c0f2fc3b6879c3efb062ff5da2846a0aac6741c1097fa8",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditCoreBoundary.link",
+      "witness_status": "kernel_checked_concrete_reached_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.core_input_refused",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/CoreBoundary.lean",
+      "line": 56,
+      "character_span": [
+        2493,
+        2727
+      ],
+      "signature": "theorem core_input_refused {G : Frag \u0394} (cert : inFragP F P = some G)\n    {\u03c3 : State C \u0393} {m : Machine} {base : Nat \u2192 Fin W}\n    (bound : Lmax < L + Evm.Prog.pushes P) :\n    \u00ac (Compilation.core (b := b) G cert).Input L frame base \u03c3 m",
+      "signature_sha256": "6729350b006c7ed609f0cc696f6944bffa09ab1fb6fd82992795fb80f25d8e99",
+      "source_sha256": "9ff64dc40e4f5b0e14c0f2fc3b6879c3efb062ff5da2846a0aac6741c1097fa8",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditCoreBoundary.resource_premises",
+      "witness_status": "kernel_checked_intentional_negative_premises",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    }
+  ],
+  "negative_distinction": "core_input_refused has an inhabited certificate/over-limit premise bundle and refused Input, not an inhabited Input. No contradictory conjunction asserted.",
+  "scope": "Actual checked core branch only; no heap ownership upgrade, other branch witness, resource adequacy, gas/fork or whole-audit claim. Source signature joins are not full elaborated census.",
+  "join": "Nineteen distinct supplemental interface rows across these maps. None belongs to the original179-file/1259-row selection; all1259 selected rows remain uncovered by these fixtures. Prior subtraction counts withdrawn.",
+  "original_census_accounting": {
+    "selected_files": 179,
+    "selected_rows": 1259,
+    "covered_selected_rows_by_this_map": 0,
+    "remaining_selected_rows": 1259,
+    "classification": "supplemental interfaces, not selected census members"
+  }
+}
