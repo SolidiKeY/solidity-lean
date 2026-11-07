@@ -119,6 +119,24 @@ theorem localValueTypeName_of_address (j : Json)
   simp only [localValueTypeName, hkind, hname, hmut, Except.toOption,
     beq_self_eq_true, Bool.and_self, ↓reduceIte]
 
+/-- Guards existing environment reads against ordinary member/name confusion.
+Only compiler magic roots with negative builtin identity and the expected result
+spelling use the existing EnvKey map. Other members stay on the field path.
+This metadata decoder is not a source/environment adequacy certificate. -/
+def environmentMember? (base : Json) (member resultType : String) : Option EnvKey := do
+  if (node base).toOption != some "Identifier" then none else do
+  let root ← (str base "name").toOption
+  let key ← EnvKey.ofParts root member
+  let expectedMagic ← match root with
+    | "msg" => some "t_magic_message"
+    | "block" => some "t_magic_block"
+    | _ => none
+  let metadata ← (field base "typeDescriptions").toOption
+  if (str metadata "typeIdentifier").toOption != some expectedMagic then none else do
+  if !(J.ref? base).any (· < 0) then none else do
+  let expectedType := match key with | .msgSender => "address" | _ => "uint256"
+  if resultType != expectedType then none else some key
+
 def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except String RawExpr := do
   let kind ← node j
   let type := ((j.getObjVal? "typeDescriptions").toOption.bind fun d => (d.getObjValAs? String "typeString").toOption).getD ""
@@ -146,14 +164,7 @@ def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except S
     let base ← field j "expression"
     let decoded ← read base
     let member ← str j "memberName"
-    -- H90: only the compiler's magic message builtin has this environment meaning.
-    -- A user declaration named `msg`, or absent identity metadata, stays a field.
-    let magic := ((base.getObjVal? "typeDescriptions").toOption.bind fun d =>
-      (d.getObjValAs? String "typeIdentifier").toOption) == some "t_magic_message"
-    if (node base).toOption == some "Identifier" &&
-        (str base "name").toOption == some "msg" && magic &&
-        (J.ref? base).any (· < 0) && member == "sender" && type == "address" then
-      return .env .msgSender
+    if let some key := environmentMember? base member type then return .env key
     return .field decoded member
   | "BinaryOperation" =>
     let some op := BinOp.ofSym? (← str j "operator") | throw "binary operator"

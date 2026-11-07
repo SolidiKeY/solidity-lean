@@ -974,3 +974,39 @@ boundary count. `fixed-byte-intake.json` records provenance, counts, saved gate
 commands and limits. No production Lean, theorem, axiom or budget changed.
 CR relay remains held under H118; full importer parity/migration, address-native
 qualification, authorized stack/cost repair and whole-goal acceptance remain open.
+
+### Existing environment members (2026-11-07)
+
+`Shared.environmentMember?` reuses `EnvKey.ofParts` for guarded `msg.sender`,
+`msg.value` and `block.timestamp`. Both executable expression paths share it.
+Root kind/name, compiler magic type identifier, negative builtin reference and
+result spelling are checked. Matching metadata is not authentication. Ordinary
+fields, unsupported members and base-before-member error order remain intact.
+No Source/Core, Reader signature, entry premise, import or proof budget changed.
+The helper's axiom inventory is empty; no new source adequacy theorem is claimed.
+
+Nine owned modules build and 31 affected Lean files pass. The final strengthened
+control file also passes MCP and a per-file gate with exact source-ID assertions.
+Its 16 box/diamond requests produce eight proved, four refuted and four unsupported
+outcomes; block.number and tx.origin keep their exact unsupported reasons.
+These exercise the existing intrinsic model, not source/world/native adequacy.
+The compiler first rejected an invalid nonpayable msg.value fixture; the valid
+fixture uses payable functions. An initial incomplete MCP response during adopted
+master dependency setup is preserved; retry and final validation pass. Neither
+failed attempt is retroactively counted as passing.
+
+The strict environment transition requires zero changes across eight saved
+profiles, both 55,218-row occurrence matrices and the pinned 78-file census.
+All replay unchanged: canonical admissions remain 245 versus 1,486 existing
+printed functions among 1,655 functions. This preserves observed outcomes, not
+decoded-term equality. The fresh model controls cover the new routing separately.
+
+`environment-manifest.json` records exact commands, source/fixture hashes, source
+identities, reviews, resources, timing boundaries and the H44 archive path/hash.
+Source checking took four seconds versus six in the earlier address gate; these
+are separate warmed runs with different dependency states, not matched runtime
+performance acceptance. The production delta is 19 added/eight removed Lean
+lines, no new production module and one test module. Global timing STOPs remain.
+Finder/skeptic final read-only reviews found no checkpoint blocker. CR relay
+remains held under H118; importer parity/migration, fresh native/WASM qualification,
+source/physical adequacy and the remaining original queues remain open.
