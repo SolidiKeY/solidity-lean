@@ -66,15 +66,16 @@ theorem source_selected {D : Source.Layout} (C : Contract) (checked : Bool)
   simpa only [Option.map_map, Option.map_some, Function.comp_def,
     execute base op hop w x y hx hy m left right] using hs
 
-/-- The signed carrier is outside the memory compiler bitwise profile. -/
+/-- The signed carrier: since H87 the memory compiler accepts `&`, `|`, `^` at
+`int` (the opcode on two's-complement words, `Evm.stail_simT`). -/
 def signedExpression (C : Contract) (op : Source.BinOp) :
     Solidity.Val C [.val .int, .val .int] .int :=
   .binop (coreOp op) (by cases op <;> rfl) (by cases op <;> rfl)
     (.simple (.local .here)) (.simple (.local (.there .here)))
 
-theorem signed_refused (C : Contract) (base : Nat) (op : Source.BinOp)
+theorem signed_accepted (C : Contract) (base : Nat) (op : Source.BinOp)
     (hop : Supported op) :
-    (Memory.compileVal base (Frag.init _) (signedExpression C op)).isNone = true := by
+    (Memory.compileVal base (Frag.init _) (signedExpression C op)).isSome = true := by
   rcases hop with rfl | rfl | rfl <;> rfl
 
 /-- There is no dirty-word extension of the narrow Source operand relation. -/

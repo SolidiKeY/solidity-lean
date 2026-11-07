@@ -155,11 +155,15 @@ import Solidity.Backend.AbiWorld.MutatingWritePhysical
 import Solidity.Backend.AbiWorld.MutatingWritePhysicalControls
 import Solidity.Backend.AbiWorld.NativeParentWord
 import Solidity.Backend.AbiWorld.NativeParentWordControls
+import Solidity.Backend.AbiWorld.P1RevertBridge
+import Solidity.Backend.AbiWorld.P1RevertBridgeControls
 import Solidity.Backend.AbiWorld.PacketPrefix
 import Solidity.Backend.AbiWorld.PacketPrefixControls
 import Solidity.Backend.AbiWorld.PanicCallFrame
 import Solidity.Backend.AbiWorld.PanicCallFrameControls
 import Solidity.Backend.AbiWorld.PanicReadWindow
+import Solidity.Backend.AbiWorld.PublicCompilerTotal
+import Solidity.Backend.AbiWorld.PublicCompilerTotalControls
 import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.AbiWorld.TypedPacketMaterialize
