@@ -1486,5 +1486,19 @@ stop. Both used the same 8 GiB cap and 4 GiB sampled cgroup and zero-swap
 guard. These observations do not establish equal cache state or continuous
 system-wide reserve. Evidence is in
 `/workspace/h62-duplication-scanner-evidence/guard-msgs/`. The documentation
-path gate failed on an unrelated missing `ExecutionTransport.lean` reference
+path gate failed on an unrelated missing ExecutionTransport.lean reference
 in `docs/feature-work/h62-4-generic-v08.md`; see `doc-paths.log` there.
+
+
+### Shared-file report replay
+
+A second scan using the same scanner, selected source bytes, registry and
+pinned prior produced a byte-identical complete report, SHA256
+`286f1fb39ee4f5b2cf4dac6a6d33b368cc37997dba1c3d9179e414c4b4b0aca1`.
+The runs took 115.588 and 115.586 seconds, with no resource stop. Finder and
+skeptic reviewed without Lean. Content hashes alone do not establish stable
+hard-link topology, and identity equivalence classes were not independently
+captured across runs. Matching reports establish repeatability for these
+observed runs only. The registry and prior pin do not prove live ownership or
+authenticated producer history. The evidence is outside Git under the
+`guard-msgs` evidence directory described above.
