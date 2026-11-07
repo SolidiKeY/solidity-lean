@@ -24,9 +24,6 @@
 | `Lowering/V07/AcceptedGraphProducer.lean` | `RecursiveGraph.produce` bound to the P8a accepted source. |
 | `Lowering/V07/LocationGraphInterface.lean` | Admissible-location policy, `LocationDeclarationGraph` and the per-location `Admission` target. |
 | `Lowering/V07/LocationGraphLaws.lean` | Mixed-location certificates; `refusal_missing` (Source admits a memory local of a mapping struct). |
-| `Lowering/V07/SourceRefusal.lean` | H15 Source refusal on current Source: `refuses_iff` (refusal iff nameable structs are mapping-free); environment-aware `envLocOK` repair, sound and conservative; `decl_inversion`. |
-| `Lowering/V07/GraphAdmissionAssembly.lean` | H24 `Admission`/`DeclarationGraphAdmission.Producer` from per-environment `EnvAdmission` (`GraphPremises` + refusal); mapping-free chain admitted, mixed chain refused on refusal alone. |
-| `Lowering/V07/P12LocalCaptures.lean`, `Lowering/V07/P12LocalCaptureControls.lean` | Generic P12 `StorageCapture`/`MemoryCapture` producers for any Source local under relation nonnull/faithfulness premises; fixture instance, same native code, collapsing-relation negative. |
 | `Lowering/V07/LocationGraphProducer.lean`, `Lowering/V07/LocationProducerControls.lean` | Computed admissible-location graph producer. |
 | `Lowering/V07/RankConvergence.lean` | `rankIter` stabilization past a valid comparison rank. |
 | `Lowering/V07/NodeRank.lean` | Stabilization at the node count; discharges the producer's rank check. |
@@ -143,3 +140,6 @@
 | `Lowering/V07/P12AtomicConditionControls.lean` | Mixed caller framing, actual negated Source composition and discriminating wrong atomic clauses |
 | `Lowering/V07/P12StorageCaptureControls.lean` | Concrete full P12 storage-capture producer with derived initial alias reflection, exact caller frames and empty-alias negative |
 | `Lowering/V07/P12MemoryCaptureControls.lean` | Concrete full memory-capture record, derived heap-typed identity and equal-content fresh-allocation counterexample |
+| `Lowering/V07/SourceRefusal.lean` | H15 Source refusal on current Source: `refuses_iff` (refusal iff nameable structs are mapping-free); environment-aware `envLocOK` repair, sound and conservative; `decl_inversion`. |
+| `Lowering/V07/GraphAdmissionAssembly.lean` | H24 `Admission`/`DeclarationGraphAdmission.Producer` from per-environment `EnvAdmission` (`GraphPremises` + refusal); mapping-free chain admitted, mixed chain refused on refusal alone. |
+| `Lowering/V07/P12LocalCaptures.lean`, `Lowering/V07/P12LocalCaptureControls.lean` | Generic P12 `StorageCapture`/`MemoryCapture` producers for any Source local under relation nonnull/faithfulness premises; fixture instance, same native code, collapsing-relation negative. |
