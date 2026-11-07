@@ -1513,3 +1513,28 @@ base-identical generic-v08 feature document (ExecutionTransport citation).
 No changed-file citation failed. The exact source hash and owner request are
 retained in the external evidence's owner-ticket.json; the checker and other
 owner's document remain unchanged. This is not a passing global doc gate.
+
+
+Original VY3 backfill A numeric stack-slot extension:
+`tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean` derives the actual
+exchange result from a prefix/selected-cell/tail split and uses the existing
+readSlot/writeSlot API. For every accessible prefix and arbitrary full-width
+words/tail, writes preserve all other cells and read-then-writeback is a genuine
+identity execution. Separate read/write underflow laws reject the missing cell
+at stack.length even when the Fin16 opcode index is valid. A nonzero-index
+combination witness preserves the preceding cell and arbitrary caller tail.
+No new instruction, interface structure or production-source edit was added.
+
+All six original imports were cold kernel-checked serially into a private
+off-Git artifact directory. The final companion check passed in1.205s with all
+eight axiom guards: exchange prefix/end lemmas are axiom-free, others use
+propext and Quot.sound. The first syntax failure (reserved prefix identifier)
+and its failed-elaboration recovery placeholders are retained as failures only;
+none contributes a proof or axiom acceptance claim. Records/resources/artifact
+hashes are inventoried in `stack-slot-evidence.json` and retained at
+`/workspace/vy3-stack-slot-evidence-20261107`. The12GiB/no-swap serial bound and
+4GiB headroom remained satisfied. Numeric none is not an EVM exception theorem;
+1024 capacity, gas/observations, Source/G24 and native production remain separate.
+Selected538/1259,721open unchanged. All prior timing/trust holds and known
+base-documentation failure remain open; no unchanged STOP workload was retried.
+Historical off-Git evidence is still missing and has not been reconstructed.

@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "purpose": "Original VY3 backfill A actual numeric stack-slot certificates using existing generic APIs; no selected-row witness credit.",
+  "module": "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean",
+  "theorems": [
+    "exchange_prefix",
+    "readSlot_prefix",
+    "writeSlot_prefix",
+    "read_writeSlot_prefix",
+    "exchange_at_end",
+    "readSlot_at_end",
+    "writeSlot_at_end",
+    "stack_slot_witness"
+  ],
+  "domain": "Every prefix with length<16, arbitrary full-width value/old words and arbitrary caller tail. End-of-stack refusals require only the same opcode-index bound.",
+  "production_dependencies_unchanged": true,
+  "dependency_count": 6,
+  "focused_check": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--name",
+      "vy3-allocation-check",
+      "--network",
+      "none",
+      "--user",
+      "1000:1000",
+      "--read-only",
+      "--tmpfs",
+      "/tmp:rw,size=268435456",
+      "--memory",
+      "12884901888",
+      "--memory-swap",
+      "12884901888",
+      "--cpus",
+      "1",
+      "-v",
+      "/workspace/vy3-runtime/lean-4.24.0-linux:/lean:ro",
+      "-v",
+      "/workspace/solidity-lean:/repo:ro",
+      "-v",
+      "/workspace/vy3-stack-slot-evidence-20261107:/evidence",
+      "-e",
+      "LEAN_NUM_THREADS=1",
+      "-w",
+      "/repo",
+      "ubuntu:24.04",
+      "/usr/bin/env",
+      "LEAN_PATH=/evidence/lib",
+      "/lean/bin/lean",
+      "-j1",
+      "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.205,
+    "resource_stop": null
+  },
+  "axioms": {
+    "exchange_prefix": [],
+    "exchange_at_end": [],
+    "all_other_new_theorems": [
+      "propext",
+      "Quot.sound"
+    ]
+  },
+  "selected_credit_added": 0,
+  "selected": 538,
+  "open": 721,
+  "limits": "Independent gasless numeric-slice execution only. Capacity1024, gas/failure observations, Source/G24, native/emission provenance and full affected validation remain separate. All previous timing/meaning/axiom holds remain; no unchanged STOP rerun.",
+  "failed_attempt": "Reserved identifier prefix caused syntax errors; resulting failed-elaboration recovery placeholders are not accepted proofs. Raw log retained. Final guards exclude sorryAx.",
+  "files": [
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/dependency-plan.json",
+      "size": 1716,
+      "sha256": "8ed1484976ff68fcebb6d6b591d06740b8ed5c2119e82c17d66f60fed78ec122"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/bounded.py",
+      "size": 1656,
+      "sha256": "5bdbac5317a9f3d1ac0aed9e100f817fbcb207c20277421fc889271d56953e08"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/stack-slot-first.log",
+      "size": 4004,
+      "sha256": "4dd922253a02aae1c3495f2c2a528b00885421f6acfa6c7b834463f5b9ea9f62"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/stack-slot-first-result.json",
+      "size": 940,
+      "sha256": "ce7049ccb8979061b43a6ab8d6dd4ac14a14b15d467ca252b8771bedff639a83"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/stack-slot-final.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/stack-slot-final-result.json",
+      "size": 940,
+      "sha256": "e534a5a3897642cc09087daa1cb2137e23f4a1b9ce6ebebd5f64f5ec86cec0dc"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/stack-slot-final-resources.jsonl",
+      "size": 1200,
+      "sha256": "c006c0ca0ede25d762ece7dc7d42ff8d0b8815882a677a05bb8f858d20878dc6"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/lib/Solidity/Backend/Opcode.olean",
+      "size": 3865448,
+      "sha256": "bc87b9b1d762566e68695618de7e044e27d0fdeae1a6ddeb6d98a8b6b21db283"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/lib/Solidity/Backend/Jumpdest.olean",
+      "size": 1060704,
+      "sha256": "a3efc0a9cf367821dd5869fc3f156127df13ea1167f882ba224b1a048b57aba0"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/lib/Solidity/Backend/Assembler.olean",
+      "size": 1551768,
+      "sha256": "62a3ef39d86145aa54e566141b4d2d61c134adfb6fa919f0f92cf4997c5675cb"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/lib/Solidity/Backend/Scalar/Slice.olean",
+      "size": 798896,
+      "sha256": "c729e33e068430cd1a2779cd5ab5f7d6865bf704b52b264ee5347c15d28acba1"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/lib/Solidity/Backend/Scalar/Heights.olean",
+      "size": 623824,
+      "sha256": "115c734c237b681a00384050052e3de4a64fe68e58f09339ce183d0dc90f538c"
+    },
+    {
+      "path": "/workspace/vy3-stack-slot-evidence-20261107/lib/Solidity/Yul/Compilation/Slices.olean",
+      "size": 182192,
+      "sha256": "72a3ee4ee3343c0011179189699aadc8dfa8290e108a58c0aac5633c5d6029af"
+    }
+  ]
+}
