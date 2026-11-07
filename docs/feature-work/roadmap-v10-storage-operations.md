@@ -1749,3 +1749,42 @@ transport proofs and original/consolidated proof/backfill/coverage/final gates.
 Incoming library-try/Error Source support, Y04 physical and separate 4.35 waits
 remain; unrelated STOPs stay binding. Coverage is still 72 mapped / 3281 rows,
 3209 uncovered. No model-control witness credit or whole-lane completion.
+
+### C270 — whole resolved-unit computed graphs
+
+SourceAstResolvedGraphs composes the existing full-unit converter, resolver and
+location graph producer. Result retains the complete Source.Resolution plus
+the optional existing graph/certificate at its exact environment. No struct-only
+environment or new AST. resolution_exact preserves unit/body/declaration data,
+full environment, pipeline and coder. certified_output jointly ties successful
+conversion and graph output to the original Source resolution relation and a
+certificate for that converted unit's environment. The existing empty-link
+premise is explicit for Resolves', not hidden as a new conversion filter.
+Seven production guards use the standard trio. Original readers/resolver/graph
+producer and all frozen Source/P8 interfaces remain unchanged.
+
+Runtime checks on both unchanged actual LibraryTry AST files retain all eight
+declarations and produce storage, memory and calldata views for L.S, field
+x:uint, each using Source declaration index 1. That index is not compiler AST
+ID 3. Exact fixture/source hashes and these observations are recorded. The
+generic kernel laws do not make the IO checks closed kernel witnesses or prove
+compiler/Source semantics. The supplied graph origin string is only a label,
+not SourceOrigins or accepted-artifact provenance.
+
+The existing inline-cycle Source unit is reused: coherent resolution and its
+old WellFormed proof remain, while runtime graph output is None. Conversion
+error and graph component None are distinct; neither manufactures Source
+rejection or a profile exclusion. Existing inspector and all previous controls
+remain. Initial new control namespace qualification failed and was corrected;
+that receipt remains, with no recovery proof accepted. One new control guard
+uses the standard trio. Read-only finder/skeptic reviews report no findings;
+neither ran Lean/server/builds or edited. No Source cases copied.
+
+Actual library Source program typing/admission, accepted-artifact/independent
+origin, frame/session/lifecycle/S03-PANIC41 and H121b producer obligations remain
+open. Incoming library-try/Error support is still separate; C246's manual full
+elaboration failure remains. This component supplies computed resolved metadata
+and conditional certificate soundness, not a concrete P8 producer or v1 Inputs
+inhabitant. Original/consolidated proof/backfill/coverage/final gates, exact-19
+transport proofs, Y04 physical and separate 4.35 waits and unrelated STOPs remain.
+Coverage stays 72 mapped / 3281 rows, 3209 uncovered; no fixture IO witness credit.

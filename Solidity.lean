@@ -3277,6 +3277,7 @@ import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
 import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Lowering.P8.SourceAstResolvedGraphs
 import Solidity.Lowering.P8.SourceAstStatementCorrespondence
 import Solidity.Lowering.P8.SourceAstStatements
 import Solidity.Lowering.P8.SourceAstTryCorrespondence

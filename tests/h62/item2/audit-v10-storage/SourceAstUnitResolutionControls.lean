@@ -1,5 +1,7 @@
 import Solidity.Lowering.P8.SourceAstDeclarationCorrespondence
 import Solidity.Source.WellFormed
+import Solidity.Lowering.P8.SourceAstResolvedGraphs
+import Solidity.Lowering.V07.GraphAdmissionBoundary
 
 /-! Conversion/resolution checks independent of the pending full-elaboration
 acceptance probe. Regression purpose: preserve the same eight owned catalogue
@@ -131,7 +133,54 @@ def topChecks : Except String Unit := do
   | .pragma actual => unless actual == tokens do throw "pragma tokens changed"
   | _ => throw "pragma category changed"
 
+/-- Actual whole-unit graph checks retain all eight declarations and scoped IDs.
+The origin string is a graph label, not a SourceOrigins or artifact certificate. -/
+def inspectGraphs (doc : Json) (pipeline : Solidity.Roadmap.Pipeline) : Except String (List Nat) := do
+  let expected ← inspect doc pipeline
+  let ast ← doc.getObjVal? "ast"
+  let mut ids := []
+  for loc in [DataLoc.storage, .memory, .calldata] do
+    let result ← Solidity.Lowering.P8.SourceAstResolvedGraphs.produce
+      "library-whole-unit" 128 {pipeline := pipeline} ast loc
+    unless result.1.env.decls.length == expected.env.decls.length &&
+        result.1.pipeline == pipeline && result.1.coder == expected.coder do
+      throw "whole resolution or settings lost"
+    let some packed := result.2 | throw "actual library location graph not produced"
+    let count := (Solidity.Lowering.V07.LocationGraphProducer.choices result.1.env loc).length
+    unless count == 1 do throw "actual library struct selection changed"
+    if positive : 0 < count then
+      let index : Fin count := ⟨0, positive⟩
+      let physical := packed.2.sourceIndex index
+      let source := result.1.env.decls[physical]
+      unless source.kind == .struct && source.scope == some "L" && source.name == "S" do
+        throw "graph names the wrong Source declaration"
+      unless packed.1.declId index == physical.val && packed.1.name index == "S" do
+        throw "source physical declaration identity changed"
+      match packed.1.fields index with
+      | [("x", .prim .uint)] => pure ()
+      | _ => throw "actual library field graph changed"
+      ids := physical.val :: ids
+    else throw "missing actual library struct"
+  return ids.reverse
+
+/-- Reuse the existing coherent, well-formed inline-cycle metadata boundary.
+Runtime checks below establish component None separately, never Source rejection. -/
+theorem cycle_resolution_retained (settings : Settings) :
+    (Solidity.Lowering.P8.SourceAstResolvedGraphs.produceUnit "inline-cycle" settings
+      Solidity.Lowering.V07.GraphAdmissionBoundary.directUnit .storage).1 =
+      Solidity.Source.resolveUnit settings Solidity.Lowering.V07.GraphAdmissionBoundary.directUnit ∧
+    Solidity.Source.WellFormed (Solidity.Source.resolveUnit settings
+      Solidity.Lowering.V07.GraphAdmissionBoundary.directUnit) :=
+  ⟨rfl, (Solidity.Lowering.V07.GraphAdmissionBoundary.direct_well_formed settings).1⟩
+
+/-- info: 'H62.StorageAudit.SourceAstUnitControls.cycle_resolution_retained' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms cycle_resolution_retained
+
 #eval do
+  let cycle := Solidity.Lowering.P8.SourceAstResolvedGraphs.produceUnit "inline-cycle"
+    {pipeline := .legacy} Solidity.Lowering.V07.GraphAdmissionBoundary.directUnit .storage
+  unless cycle.2.isNone && cycle.1.env.decls.length == 1 do
+    throw (IO.userError "graph component failure lost its complete resolution")
   match topChecks with
   | .ok () => pure ()
   | .error why => throw (IO.userError why)
@@ -145,5 +194,8 @@ def topChecks : Except String Unit := do
     let raw ← IO.FS.readFile file
     match (do inspect (← Json.parse raw) pipeline) with
     | .ok _ => IO.println s!"{file}: complete unit conversion and eight Source identities passed"
+    | .error why => throw (IO.userError why)
+    match (do inspectGraphs (← Json.parse raw) pipeline) with
+    | .ok ids => IO.println s!"{file}: storage/memory/calldata graph Source IDs {ids}"
     | .error why => throw (IO.userError why)
 end H62.StorageAudit.SourceAstUnitControls
