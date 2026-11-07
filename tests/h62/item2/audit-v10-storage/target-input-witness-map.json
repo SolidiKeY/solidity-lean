@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "kind": "data-inhabitance",
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "ff5594d1dc41a90777a5fbef081dd62be4ca07723848c68a1372102fdf59e2ce",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:30:toSlot_ofSlot",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.toSlot_ofSlot",
+      "signature": "theorem toSlot_ofSlot (slot : Evm.Slot) :\n    toSlot (Solidity.Storage.ofSlot slot) (Solidity.Storage.keysBelow_ofSlot slot) = slot",
+      "signature_sha256": "c599706cef46e3dd85d83f3a23f05829983a527202c1d00c938bbc53caf024c9",
+      "witness": "H62.StorageAudit.TargetInputWitnesses.slot_input",
+      "status": "kernel-checked data-input inhabitance; independent signature/type classification reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:75:run_read",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_read",
+      "signature": "theorem run_read (slot : Evm.Slot) (machine : Evm.Machine) :\n    Evm.run (readCode slot) machine = .ok { machine with stack := .val (machine.store.cells slot) :: machine.stack } 0",
+      "signature_sha256": "353bfd739ee83d2a64edd3d3c791fa855834dcfd898e44b6d05909fc64c604a4",
+      "witness": "H62.StorageAudit.TargetInputWitnesses.read_inputs",
+      "status": "kernel-checked data-input inhabitance; independent signature/type classification reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:78:run_write",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_write",
+      "signature": "theorem run_write (slot : Evm.Slot) (word : Semantics.Word) (machine : Evm.Machine) :\n    Evm.run (writeCode slot word) machine =\n      .ok { machine with store := Evm.WordStore.write machine.store slot (encodeWord word).val } 0",
+      "signature_sha256": "464de8dba2b25e8bfd0ec3d6ad129deb72e0cbc5f64e3fcd1c02b09806be7f33",
+      "witness": "H62.StorageAudit.TargetInputWitnesses.write_inputs",
+      "status": "kernel-checked data-input inhabitance; independent signature/type classification reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:82:run_copy",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_copy",
+      "signature": "theorem run_copy (dst src : Evm.Slot) (machine : Evm.Machine) :\n    Evm.run (copyCode dst src) machine =\n      .ok { machine with store := Evm.WordStore.write machine.store dst (machine.store.cells src).val } 0",
+      "signature_sha256": "80300ede816430b25a34e4cbb0f15cd7bb18800293c67a9990ff491d96c95003",
+      "witness": "H62.StorageAudit.TargetInputWitnesses.copy_inputs",
+      "status": "kernel-checked data-input inhabitance; independent signature/type classification reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:125:run_copy_self",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_copy_self",
+      "signature": "theorem run_copy_self (slot : Evm.Slot) (machine : Evm.Machine) :\n    Evm.run (copyCode slot slot) machine = .ok machine 0",
+      "signature_sha256": "3a875a5950f285d5658ea7d8c0046bb67f4c4b6e484a79c59358f891f1c33d87",
+      "witness": "H62.StorageAudit.TargetInputWitnesses.self_copy_inputs",
+      "status": "kernel-checked data-input inhabitance; independent signature/type classification reviews passed"
+    }
+  ],
+  "scope": "Five frozen target equations have only data parameters. Nonempty input tuples are separate from logical-premise bundles and compiler contracts."
+}
