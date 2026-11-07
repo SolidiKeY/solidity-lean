@@ -1400,5 +1400,22 @@ advice does not prove identical operating-system cache state. Evidence is
 outside Git under
 `/workspace/h62-duplication-scanner-evidence/include-omit/`.
 
-A separate bare-binder example can still be recorded with a fictitious name;
-that declaration-accounting case remains open.
+## Anonymous examples and unsupported binders
+
+Examples are recorded as anonymous: identifiers after `example` are not
+source declaration names. An example signature is rejected from statement and
+body grouping unless its result type follows only supported explicit binder
+groups. In particular, bare binders both before and after typed binders are
+rejected. This conservative lexical rule can refuse valid complex examples;
+it does not identify generated kernel declarations or establish source binding.
+
+The Python suite passed 204 tests. Independent finder and skeptic reviews
+without Lean identified and rechecked the mixed-binder case. A bounded scan
+of the same selected tree and pinned previous report took 123.593 seconds
+before and 124.583 seconds after (+0.80%), with an 8 GiB address-space cap
+and a sampled 4 GiB reserve monitor that did not stop either scan. Cache
+advice does not prove identical cache state and sampling does not prove
+continuous reserve. Evidence is outside Git in
+`/workspace/h62-duplication-scanner-evidence/example-binders/`. Complete
+Lean declaration and case accounting, authenticated source/dependency binding,
+current ownership and final gates remain open.

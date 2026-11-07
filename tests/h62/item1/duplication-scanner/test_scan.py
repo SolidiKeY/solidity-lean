@@ -278,6 +278,30 @@ class ScannerControls(unittest.TestCase):
             self.assertNotEqual(report.returncode, 0)
             self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
 
+    def test_examples_with_bare_binders_stay_anonymous_and_rejected(self):
+        root = Path("/virtual")
+        source = ("example x : x = (x : Nat) := rfl\n"
+                  "example y z : y = (y : Nat) := rfl\n"
+                  "example (x : Nat) y : y = x → y = x := id\n"
+                  "example {x : Nat} y : y = x → y = x := id\n"
+                  "example (x : Nat) : x = x := by rfl\n"
+                  "example : True := by trivial\ndef next : Nat := 0\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([r["name"] for r in rows], ["<anonymous>"] * 6 + ["next"])
+        for row in rows[:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-example-binder")
+            self.assertEqual(row["body_reject_reason"], "unsupported-example-binder")
+            self.assertIsNone(row["statement"])
+        self.assertIsNone(rows[4]["reject_reason"])
+        self.assertIsNone(rows[5]["reject_reason"])
+        self.assertEqual(rows[-1]["body"], ["0"])
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("example x : x = (x : Nat) := rfl\nexample y : y = (y : Nat) := rfl\nexample (x : Nat) y : y = x → y = x := id\n")
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"]))
+            self.assertEqual(report["candidates"], [])
+            self.assertEqual(report["body_candidates"], [])
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))

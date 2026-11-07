@@ -327,8 +327,12 @@ def scan(path, root, source=None):
         return len(prefix.expandtabs(8))
     for i, match in enumerate(matches):
         end = declaration_starts[i+1] if i+1 < len(matches) else len(text)
-        content = text[match.end():end]
-        content_skeleton = skeleton[match.end():end]
+        kind = " ".join(match.group(1).split())
+        # `example` has no declaration name; any following identifier belongs
+        # to its signature and must not be consumed as a name.
+        content_start = match.end(1) if kind == "example" else match.end()
+        content = text[content_start:end]
+        content_skeleton = skeleton[content_start:end]
         command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|include|omit|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
         command_inside = False
         if command:
@@ -338,8 +342,7 @@ def scan(path, root, source=None):
             content_skeleton = content_skeleton[:command.start()]
         qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
         context = digest([span for start, span in context_spans if start < match.start()])
-        kind = " ".join(match.group(1).split())
-        name = match.group(2) or "<anonymous>"
+        name = "<anonymous>" if kind == "example" else match.group(2) or "<anonymous>"
         escaped_name = False
         if kind not in {"example", "initialize", "builtin_initialize"}:
             raw_name = SOURCE_NAME.match(text, match.end(1))
@@ -424,13 +427,22 @@ def scan(path, root, source=None):
             body_reject_reason = "escaped-identifier-boundary"
         if priority:
             body_reject_reason = "unsupported-instance-priority"
-        normalized = None if escaped_name or priority else normalize(header.strip())
+        example_header = header.strip()
+        example_pos = 0
+        if kind == "example":
+            while binder := BINDER.match(example_header, example_pos):
+                example_pos = binder.end()
+        bare_example = kind == "example" and not example_header[example_pos:].lstrip().startswith(":")
+        if bare_example:
+            body_reject_reason = "unsupported-example-binder"
+        normalized = None if escaped_name or priority or bare_example else normalize(header.strip())
         rows.append(dict(path=relative_path,
                          line=text.count("\n", 0, match.start(1))+1,
                          kind=kind, name=name,
                          statement=normalized, body=tokenize(body), body_form=body_form,
                          body_reject_reason=body_reject_reason, owner="unknown", context_hash=context, qualifiers=qualifiers,
                          reject_reason=("unsupported-instance-priority" if priority else
+                                        "unsupported-example-binder" if bare_example else
                                         "unsupported-binder-syntax" if normalized is None else None)))
     return rows
 
