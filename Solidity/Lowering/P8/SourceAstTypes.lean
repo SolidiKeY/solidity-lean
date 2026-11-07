@@ -58,8 +58,9 @@ def elementary (name : String) : Except String Elem := do
       else throw "invalid bytes width"
     else throw "unimplemented elementary type conversion"
 
-/-- Nonrecursive leaf conversion only; array/mapping/function nodes remain
-explicit gaps for a future recursive reader, not accepted-program refusals. -/
+/-- Nonrecursive leaf conversion only. SourceAstCompoundTypes extends this
+reader for arrays/mappings/functions; failures here are conversion gaps,
+not accepted-program refusals. -/
 def typeNameLeaf (node : Json) : Except String (Syn .typeName) := do
   let kind ← node.getObjValAs? String "nodeType"
   match kind with
