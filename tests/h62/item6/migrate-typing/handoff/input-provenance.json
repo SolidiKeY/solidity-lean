@@ -1,0 +1,17 @@
+{
+  "H71_available": false,
+  "H82_agreement_update": "Any prior blanket exact-file agreement prerequisite for statement-preserving edits is withdrawn; semantic/interface/budget/axiom/exclusion changes retain owner requirements. Retirement still forbids new implementation.",
+  "coordinator_local_paths": "Provenance only; not assumed accessible or retrieved.",
+  "original_assignment_source": "Full original user assignment text read from this same thread; saved as UTF-8 with final newline.",
+  "pause_tool": "No pause/get/update goal tool exposed. stop_goal accepts only complete|blocked. No inappropriate substitute call made.",
+  "prior_stop_tool_failure": "Previous turn: stop_goal requires trusted goal and source-turn context from CCA.",
+  "push_decision": "No push: no H71 lane-push authorization available; original no-push restriction retained.",
+  "rendered_hash_limitation": "Renderer preimage unavailable. Do not claim the separately hashed UTF-8 assignment reproduces that rendered hash. Full visible original assignment, owner map, queues and exact scope are preserved.",
+  "reported_frozen_rendered_prompt_sha256": "7449ae681d52106a88299eda2533c81cb8ba19c491c469db81fbdbab872c86e8",
+  "routed_H78_capture": "Inline JSON payload copied from coordinator message; local file has its own checksum. No remote delivery/authentication inferred.",
+  "routed_H78_declared_filename": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5-owner-requests.json",
+  "routed_H78_declared_source_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+  "routed_H78_source_file_retrieved": false,
+  "routed_H78_ticket_source_head": "16d7e371a1e013f492784b596397cf500dbd7543",
+  "schema_version": 1
+}
