@@ -1546,3 +1546,26 @@ The new section adds no backticked Lean path. This pre-existing global failure
 is retained, not represented as a passing gate; exact baseline evidence is in
 engine-native-1000-doc-path-baseline.json. Whitespace checking is recorded
 separately. No unrelated source or documentation was edited to hide the failure.
+
+
+## H145 evidence storage and continuation
+
+Lane receipts, checksum manifests, ticket records and handoffs now belong in the
+private SolidiKeY/solidity-lean-coord repository under
+`evidence/solidity-h62-3-20261106/g52-differential/`. The prior public test-directory
+manifest and reference ticket report were archived before removal. Historical
+references above describe the original locations; consult that private archive
+and the current VM handoff for their preserved bytes and subsequent validation.
+The deterministic generators, executable tests and dependency pins remain here.
+New bulk results and their checksum manifest remain outside this code checkout;
+no replacement evidence manifest is registered under tests.
+
+Native Engine-X continuation remains distinct from source/runtime agreement.
+The complete H121b producer and H121c p10_execution_bridge are owned unfinished
+work here; V17 is downstream. Canonical source/session, world/frame, physical/pass
+and original compiler certificates remain prerequisites as inventoried above.
+Full Approved_i, all public obligations and the previously routed reference
+failures remain open. Current observations, exact commands, counts, limits,
+independent reviews and the next disjoint range are in the private evidence
+handoff; these external tests establish no new Lean theorem. The original
+persistent goal remains unfinished.
