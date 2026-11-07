@@ -82,6 +82,18 @@ theorem abi_calldatacopy_slice_word (m : ByteView) (input : Roadmap.Bytes)
       ((abi_beValue_readBytes (calldataBytes input) (base + 32 * i) 32).trans
         (abi_wordAt_slice_calldataload input base i).symm))
 
+/-- The actual generic ABI word decoder observes the same copied word and
+explicit source slice, including unchanged success, revert and stuck results.
+No per-type decoder or canonical-memory cleaning is introduced. -/
+theorem abi_calldatacopy_decodeWord (D : Source.Layout) (ty : Source.STy)
+    (m : ByteView) (input : Roadmap.Bytes) (dst base i : Nat) :
+    Source.decodeWord D (mload (calldatacopy m input dst (base + 32 * i) 32) dst).val ty =
+      Source.decodeWord D (Source.wordAt (input.drop base) i) ty := by
+  -- Infer the elementary numeric equality before applying the decoder; an
+  -- expected decoder/Fin projection type causes expensive unfolding here.
+  have same := congrArg Fin.val (abi_calldatacopy_slice_word m input dst base i)
+  exact congrArg (fun value : Nat => Source.decodeWord D value ty) same
+
 /-- Exact zero padding transported back to the actual source input reader. -/
 theorem abi_wordAt_past_input (input : Roadmap.Bytes) (i : Nat) (outside : input.length≤32*i) :
     Source.wordAt input i=0 := by
