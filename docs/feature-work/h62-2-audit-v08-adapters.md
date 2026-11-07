@@ -733,3 +733,30 @@ All four current component files passed serial bounded checks with stable source
 Consumed the newly published generic PublicCompilerTotal APIs without duplicating their producer. `NativeEntryCompilerJoint` proves the structural domain for the existing V08 entry's exact saved=3/scratch=9 body, hence actual public compiler acceptance at every base and non-None output for that body. The published freshT/Machine.init Sim and actual L1 bound inhabit the public agreement premises; the accepted native result retains Agrees for all original frame/base parameters. No acceptance or desired target-run equation is assumed.
 
 This producer module is outside the original frozen audit snapshot and adds zero original target/fidelity counts. It is supported-program backfill on an existing V08 body, not entry payment/dispatch/result compilation, an arbitrary-compiler/always-revert refutation, independent Source admission or the production frame/world/H68 bridge. The fresh native model is not asserted to be an actual reached Source boundary. The cold serial check passed in 176.269 seconds including import builds, one Lean, peak sampled aggregate RSS 1,134,284,800 bytes, no STOP; trust and registration passed. No matched timing or hold release. Exact bindings: `tests/h62/item2/audit-v08-adapters/native-entry-compiler-joint-manifest.json`. Residual records and full original joint-witness/fidelity queues remain open.
+
+### Source-effect kernel/name checkpoint (2026-11-07)
+
+The frozen SourceEnvironment, SourceKeccak, SourceEmit and SourceRethrow inputs
+produce 381 kernel records and 32 lexical name candidates (31 public, one
+private). Every target remains pending for ownership, simultaneous feasibility
+and statement fidelity. No new witness or full-certificate evidence is claimed.
+The small source-effects-census manifest records absolute evidence paths, sizes
+and hashes; generated diagnostics and captures remain outside Git.
+
+The original four-module diagnostic and several sorted splits failed with
+out-of-memory panics. Those receipts remain retained. Environment-only and the
+event/rethrow split passed. Hash-only passed after removing only the global
+constant mergeSort from its generated diagnostic; its selection predicate and
+captured fields are unchanged, and saved rows are sorted afterward. This is a
+diagnostic cost reduction, not a source theorem change or release of earlier
+proof timing STOPs. All runs retain the original serial and resource limits.
+
+The V10 H128/H24 v2 packet supplies a separate local-refusal contract. Its own
+limitations exclude actual Source programs/bindings, origin/session/lifecycle
+and v1 LibraryPremises.Inputs inhabitants. It therefore does not close those
+producer waits or the assigned canonical H68 world-phase bridge.
+
+Independent read-only finder and skeptic found no issue in the retained
+captures, hash bindings or sort-only diagnostic difference. Neither ran Lean or
+a server. The 349 kernel-only records also remain pending; a matched name is
+not statement acceptance. Review receipt remains with the off-Git evidence.
