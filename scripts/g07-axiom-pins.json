@@ -8109,12 +8109,32 @@
  "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.stale_bytes": [],
  "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.word_fit_is_not_byte_fit": [],
  "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.wrong_scale": [],
+ "Solidity/Backend/AbiWorld/P1RevertBridgeControls.lean:Solidity.Backend.AbiWorld.P1RevertBridge.p1_revert_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/P1RevertBridgeControls.lean:Solidity.Backend.AbiWorld.P1RevertBridgeControls.guardNe_target_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/AbiWorld/PanicCallFrame.lean:Solidity.Backend.AbiWorld.PanicCallFrame.call_data": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Backend/AbiWorld/PanicCallFrame.lean:Solidity.Backend.AbiWorld.PanicCallFrame.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/PublicCompilerTotalControls.lean:Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/PublicCompilerTotalControls.lean:Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_core": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -46082,6 +46102,10 @@
  "Solidity/Lowering/P8/SourceAstCompoundTypes.lean:Solidity.Lowering.P8.SourceAstCompoundTypes.zero_depth": [
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.bind_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.block_ok_iff_each": [
   "Quot.sound",
   "propext"
@@ -46111,12 +46135,30 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.function_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.member_exact": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.pragma_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.state_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.struct_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.top_ok_iff_each": [
   "Quot.sound",
   "propext"
  ],
@@ -46243,6 +46285,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.elementary_leaf_exact": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.function_exact": [
   "Quot.sound",
   "propext"
@@ -46251,8 +46297,26 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.nonpayable_address_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.optional_name_exact": [],
  "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.optional_name_missing": [],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.payable_address_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_name_path_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_path_node_exact": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstTypes.lean:Solidity.Lowering.P8.SourceAstTypes.elementary": [],
  "Solidity/Lowering/P8/SourceAstTypes.lean:Solidity.Lowering.P8.SourceAstTypes.parameter": [
   "propext"
