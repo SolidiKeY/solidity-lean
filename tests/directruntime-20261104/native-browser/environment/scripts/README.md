@@ -1,7 +1,8 @@
 # Historical validation wrappers
 
-These twenty source/configuration snapshots are copied byte for byte from the
-sealed environment evidence archive. The repository-relative
+The twenty indexed source/configuration snapshots are copied byte for byte from
+the sealed environment evidence archive. Original checks.sh and
+remaining-checks.sh are now under historical/; the other indexed paths are unchanged. The repository-relative
 [`wrapper-index.json`](../wrapper-index.json) records each archive member, size
 and SHA256. They cover build orchestration, per-file diagnostics, compiler
 provenance, native/browser controls, closure auditing and evidence packaging.
@@ -9,10 +10,18 @@ The generic harnesses they call remain at their original tracked paths.
 
 These are review artifacts, **not a replay launcher**. Original paths, assertions,
 output ownership and historical setup failures are preserved. In particular,
-`checks.sh` stopped at the first candidate-exclusion setup failure;
-`remaining-checks.sh` records the continuation after correcting the private
-output path. Its `|| true` retains the browser-negative failure receipt and
-continues independent checks; it does not turn that gate into a pass.
+`historical/checks.sh` stopped at the first candidate-exclusion setup failure;
+`historical/remaining-checks.sh` records the continuation after correcting the
+private output path. Their original blanket bypass is preserved only for
+historical inspection. The maintained checks.sh and remaining-checks.sh copies
+now invoke ../known-stack-continuation.py after a nonzero browser gate. It
+permits continuation only for the exact known invariantCountsToBound source
+stack overflow with all sibling controls healthy, matching binary/request
+identities, retained source/AST bytes and a healthy bounded runner. The failing
+wire/fixture hashes are pinned to the reviewed receipt; a new fixture identity
+requires review rather than automatic continuation. Any other failure stops the script.
+Even when continuation is permitted, the browser gate remains FAIL and the
+stack/performance STOPs stay open.
 Packaging/manifest generators describe their historical capture and must not be
 used to overwrite sealed outputs or current documentation.
 
@@ -39,3 +48,8 @@ metadata; **bulk retrieval and recipient inspection remain coordinator-pending**
 These locators are not public download links. H41 prohibits VM `ship-cache.sh`.
 Original failures, pending storage cases, timing STOPs and proof boundaries
 remain in the qualification manifest.
+
+The strict continuation guard also needs the six retained baseline source files
+under docs/benchmarks/directruntime-2026-11-04/before/existing-controls (H44
+external data), the tracked ClosedSpecs source and the actual retained input
+source/AST files. Missing inputs fail closed; they are not regenerated here.
