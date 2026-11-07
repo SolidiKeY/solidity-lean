@@ -1,0 +1,69 @@
+/-! Guard empty decoder reachability and corrupted-stack observations.
+This is a reference self-adapter for joint-domain feasibility only. It is not
+an external Bridge adapter, source admission or charged EVM agreement. -/
+def referenceDecoder (code : List UInt8) (height : Nat) :
+    Solidity.Backend.Selection.DecoderPremise code height
+      (Solidity.Backend.LabelExec.step code)
+      (fun count => Solidity.Backend.LabelExec.advance count code)
+      (fun _ => True) where
+  entry := fun _ _ => True.intro
+  closed := fun _ _ _ _ => True.intro
+  agrees := fun _ _ => rfl
+  zero := fun _ => rfl
+  succ := fun _ _ => rfl
+
+/-- Intentional refusal: even the local self-adapter requires an entry. -/
+theorem decoder_empty_reachable_refused :
+    ¬ Nonempty (Solidity.Backend.Selection.DecoderPremise [0x5b] 1
+      (Solidity.Backend.LabelExec.step [0x5b])
+      (fun count => Solidity.Backend.LabelExec.advance count [0x5b])
+      (fun _ => False)) := by
+  rintro ⟨certificate⟩
+  exact certificate.entry [11] rfl
+
+/-- Actual reference step; no fault, gas or external-decoder claim. -/
+theorem reference_jumpdest_step :
+    Solidity.Backend.LabelExec.step [0x5b] ⟨0,[11]⟩ = some ⟨1,[11]⟩ := rfl
+
+/-- Guard a corrupted protected stack in the domain's concrete step. -/
+theorem reference_jumpdest_corrupted_stack_refused :
+    Solidity.Backend.LabelExec.step [0x5b] ⟨0,[11]⟩ ≠ some ⟨1,[12]⟩ := by
+  decide
+
+
+/-- Any admitted supported reference step excludes an always-none adapter. -/
+theorem decoder_missing_supported_step_refused
+    {code : List UInt8} {height : Nat}
+    {stack : Solidity.Backend.Scalar.Stack}
+    {next : Solidity.Backend.LabelExec.State}
+    (admitted : stack.length = height)
+    (supported : Solidity.Backend.LabelExec.step code ⟨0,stack⟩ = some next)
+    (bridgeRun : Nat → Solidity.Backend.LabelExec.State → Option Solidity.Backend.LabelExec.State)
+    (reachable : Solidity.Backend.LabelExec.State → Prop) :
+    ¬ Nonempty (Solidity.Backend.Selection.DecoderPremise code height
+      (fun _ => none) bridgeRun reachable) := by
+  rintro ⟨certificate⟩
+  have entry : reachable ⟨0,stack⟩ := certificate.entry stack admitted
+  have aligned : (none : Option Solidity.Backend.LabelExec.State) =
+      Solidity.Backend.LabelExec.step code ⟨0,stack⟩ :=
+    certificate.agrees ⟨0,stack⟩ entry
+  have impossible : (none : Option Solidity.Backend.LabelExec.State) = some next :=
+    aligned.trans supported
+  cases impossible
+
+/-- Concrete nonempty-program instance of the generic always-none refusal. -/
+theorem decoder_jumpdest_reject_all_refused
+    (bridgeRun : Nat → Solidity.Backend.LabelExec.State → Option Solidity.Backend.LabelExec.State)
+    (reachable : Solidity.Backend.LabelExec.State → Prop) :
+    ¬ Nonempty (Solidity.Backend.Selection.DecoderPremise [0x5b] 1
+      (fun _ => none) bridgeRun reachable) :=
+  decoder_missing_supported_step_refused (code := [0x5b]) (height := 1)
+    (stack := [11]) (next := ⟨1,[11]⟩) rfl reference_jumpdest_step bridgeRun reachable
+
+#print axioms referenceDecoder
+#print axioms decoder_empty_reachable_refused
+#print axioms reference_jumpdest_step
+#print axioms reference_jumpdest_corrupted_stack_refused
+
+#print axioms decoder_missing_supported_step_refused
+#print axioms decoder_jumpdest_reject_all_refused

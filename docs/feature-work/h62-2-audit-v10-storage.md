@@ -729,3 +729,32 @@ roots pass. The current strict axiom-inventory check remains FAIL:16301 pinned
 theorems,zero errors,260 unrecorded changes. No inventory write or trust-policy
 change was made; H30 coordinator reconciliation remains separate. Local measured
 guards establish only their recorded axiom sets, not global inventory acceptance.
+
+## H19 supporting account-range control
+
+[H19ReachableBalanceControls.lean](../../tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean)
+is a standalone per-file audit control using the existing funding-success and
+nonpayable-revert Source fixtures. Its observation list retains four account
+balances from those two distinct runs. Existing published endpoint proofs
+establish the values; execution_ranges derives their word bounds without a
+caller-supplied Fits premise. lossless_observations then reuses the published
+monetary projection law in observation order. No Source program, state or
+interpreter is copied, and the existing monetary boundary controls remain.
+
+This supports two named CURRENT balance observations. Exact original/current
+H57 statement transport, global world/journal range, typed-program evidence and
+all nineteen requested consumer transports remain open. The control is not a
+library-containing Source/P8 producer or frozen-row registration. Existing
+interfaces, budgets and exclusions are unchanged. Validation and independent
+reviews are archived privately under H145; no new original-row credit follows.
+
+### Existing current-model Word specializations
+
+The same control now checks the exact Word-amount interfaces of the existing
+Readonly.StaticJournal.balance_storage_word and History.balance_word. The
+anonymous consumer checks retain state, entry, mode and history indices and
+reuse those published declarations directly. No compatibility implementation
+or duplicate named theorem is introduced. These are current-model type checks;
+they do not reconstruct the frozen old ExecState model or supply H57 transport.
+The exact declaration references and validation are delivered in the private
+supporting reply. All nineteen full transports remain open.
