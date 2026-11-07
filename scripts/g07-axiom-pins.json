@@ -69374,6 +69374,41 @@
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanTry.attempt": [],
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix": [],
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix_head": [],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.envLocOK_implies_locOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.envLocOK_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.checkItems_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.checkStmt_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.declaration_admissible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.declaration_location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.StmtD.ofV1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaA": [],
  "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaB": [],
  "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.differentBinder": [],
