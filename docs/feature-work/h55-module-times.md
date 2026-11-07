@@ -1495,3 +1495,20 @@ skeptic reviewed these distinctions without Lean, server or builds. The
 skeptic corrected which component reads the JSONL: the controls check
 declarations, and the separate acceptance script reads records. No H56 run
 or production acceptance is inferred.
+
+## Compiler transport audit candidates from the merged-tree delta
+
+`compiler_transport_controls.py` records ten supplied delta rows with source
+hashes; this subset does not establish inventory coverage. H69 intentional
+contradictions are not inhabited witnesses. A proof-bearing carrier record
+is not global inhabitation; the selected dependent witness is not universal
+compiler adequacy. The optimizer models and intrinsic success controls do
+not establish Solidity bytecode, gas or fork adequacy.
+
+The witness search and reflection commands can write caller-selected JSON.
+The historical `h69_validate.py` lists all ten, but current inputs and
+execution remain unverified. Its bounded runner defaults to 900 seconds,
+not the H55 300-second gate; its address-space limit is not an RSS cap. A
+retained totality draft had failed and remains unvalidated, rather than a
+passing proof. Independent read-only finder and skeptic reviewed these
+boundaries without Lean, server or builds. No runtime acceptance is inferred.
