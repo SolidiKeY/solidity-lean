@@ -1,0 +1,11 @@
+{
+  "requested_state": "PAUSED",
+  "performed": false,
+  "failure": "No goal pause/get/update tool exposed. Sole goal tool codex_goals_stop_goal accepts outcome complete|blocked only;neither is PAUSED. No substitute transition attempted.",
+  "available_goal_tool": "mcp__codex_apps__codex_goals_stop_goal",
+  "accepted_outcomes": [
+    "complete",
+    "blocked"
+  ],
+  "worker_action": "Implementation stopped;no automatic continuation authorized;existing goal not created/reset/completed."
+}

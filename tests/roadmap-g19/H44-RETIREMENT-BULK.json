@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "purpose": "H44 retirement preservation only; no proof acceptance",
+  "source_head": "077af4097918f0f662855ade9370c6f58de8ed97",
+  "comparison_base": "b7c3cc5110b1ebee1eab45e8b1b9894ecada7237",
+  "archive": {
+    "path": "/workspace/scratch/h82-h44-retirement-split-077af4097/retirement-bulk.tar.gz",
+    "bytes": 93134,
+    "sha256": "7458682bdcd195ef5d06063a981a18f3075ef02191750a620fa3e7c0e39d9f3e"
+  },
+  "files": [
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/ATTEMPT-SOURCES.json",
+      "bytes": 1050,
+      "sha256": "b09c14873d9c35c22f6a988795e07eb369cd8c120f949a834077e9281015b48f"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/OPEN-QUEUE.json",
+      "bytes": 29213,
+      "sha256": "0eab16c099a8fb3739b6e417462fd00521443e8c9e14dc0b99f7c51b099a628c"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/SCOPE-MANIFEST.json",
+      "bytes": 24358,
+      "sha256": "95be32a3e9247a1a2173c0ae48888e796ef925e49c4d38b3a68be0d2bd2119b9"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/SHA256SUMS",
+      "bytes": 2029,
+      "sha256": "1263c0a067dcf2417b35233c800f412925f279eca7a289acb9066ed056f99d77"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/h82-turn-01-LoopContracts.lean.txt",
+      "bytes": 13578,
+      "sha256": "16bf2f49d7293cb726dbd8e8943e18634d5d1fcc4f0ef562c6d9ccdb08f66718"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/h82-turn-02-LoopContracts.lean.txt",
+      "bytes": 15640,
+      "sha256": "17bb75f8cc6dd25124484715913d83bf58bd1f97574366d02bab0aa15605f7f8"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/h82-turn-03-LoopContracts.lean.txt",
+      "bytes": 16035,
+      "sha256": "0a1c947b23bba1292cbd0bb518b42306556b0f3b873e5d7d763518e49ec2a8cf"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/check.py.wip",
+      "bytes": 75274,
+      "sha256": "7b891fc24347c27d741d36423ef5d0b7edc4e44479ef86352556fdf6734e96dd"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/checker-tests.py.wip",
+      "bytes": 18609,
+      "sha256": "23a4bc067b026667bf250809a271379edba446b6a1be6e920f8ed2657de8d5ca"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean.wip",
+      "bytes": 16035,
+      "sha256": "0a1c947b23bba1292cbd0bb518b42306556b0f3b873e5d7d763518e49ec2a8cf"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/prepare-cache.py.wip",
+      "bytes": 6112,
+      "sha256": "e8128378982443fcf13fb79504261c40f3f411ba93b784c28f67ae06fc0d771b"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs.wip",
+      "bytes": 4597,
+      "sha256": "78eed8ffb9e146aef27bd3fea7f059e98e4520fb52ac6c7e9b20ccb7d31063e7"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/preservation.json",
+      "bytes": 4666,
+      "sha256": "34d52cbc5cae6231eb3a08322d0c3781081a9b45ccbbefab894ecb647aa2178f"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/reviews.json",
+      "bytes": 923,
+      "sha256": "f204d34036aa5b9801fb42131db126e338163657fa9ae3797b1bb10f506dc6b9"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/retirement-h82/unfinished-work.patch",
+      "bytes": 24337,
+      "sha256": "709eed9e5d526f6561e4ebcaee438f4dc6013d5153a4db44054c6d2835a58822"
+    },
+    {
+      "path": "tests/h62/item2/audit-exact-verification/handoff/original-assignment.txt",
+      "bytes": 16078,
+      "sha256": "f4fb90fcc6c6ccb30408089303aafd4d03b614d490b12ee8350f07401f7a36b3"
+    },
+    {
+      "path": "tests/h62/item2/audit-exact-verification/handoff/queues.md",
+      "bytes": 3889,
+      "sha256": "a78367a198b85a41b929298138fdccd31ef9bbbda5d0a88b8a7e81025604328d"
+    },
+    {
+      "path": "tests/h62/item2/audit-exact-verification/handoff/retirement.md",
+      "bytes": 1892,
+      "sha256": "3d8ecdd8648a374dc0d5c721b340cc80dcb2d2e548578f1cbf3a69159a30a4ca"
+    },
+    {
+      "path": "tests/h62/item2/audit-exact-verification/handoff/scope-manifest.json",
+      "bytes": 1488,
+      "sha256": "c753c89689f1a000443ec75b7272f79b80efd8814241576269d0cb098afc2383"
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/handoff/STOPPED.md",
+      "bytes": 4062,
+      "sha256": "fd392d458d346336d4a8097a685a24e51d4ecc4bd1eaecaea4b363ce8d1b7a68"
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/handoff/continuations-and-retirement.txt",
+      "bytes": 5063,
+      "sha256": "2a347562c96baeac20524b992802f453af10442585aae6decaa8e265de5d99f6"
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/handoff/original-assignment.txt",
+      "bytes": 15951,
+      "sha256": "fbd71b180c08ff7ce3dae58dae6dcc663d439333f6e8149bd58b9e5189c8e731"
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/handoff/original-goal-objective.txt",
+      "bytes": 2223,
+      "sha256": "ac637dd4d99c549a3ba2c19cc782f2d6a8bab23a413464a1c8e30c888f0db227"
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/handoff/queues.md",
+      "bytes": 6350,
+      "sha256": "bd890f90f2b5e1ae2e9c7eab4f86cebe06f0a87e1a6021b26cbb50a2cd4a095a"
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/handoff/scope-manifest.json",
+      "bytes": 65337,
+      "sha256": "1c16b3eacd2865d66e2bf71bb419abf1d9cee8cef629cea75bc45b89c33162af"
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/handoff/source-provenance.json",
+      "bytes": 1137,
+      "sha256": "f9fd8b790d7c50def160e474867017a46ac56948388618ae9d238abe0239972e"
+    }
+  ],
+  "limitations": "Archive verified byte-for-byte locally; historical gates and unfinished proofs not revalidated."
+}

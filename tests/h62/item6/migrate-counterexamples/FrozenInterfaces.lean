@@ -1,0 +1,46 @@
+import Solidity.Counterexamples.DeleteFamilyGenericOverlap
+import Solidity.Counterexamples.DiamondTry
+import Solidity.Counterexamples.PreFixSortAnnotations
+import Solidity.Counterexamples.StaticRuntimeSort
+
+set_option pp.universes true
+set_option pp.explicit true
+set_option pp.fullNames true
+set_option format.width 100000
+
+#check @Solidity.Counterexamples.DeleteFamilyGenericOverlap.delValue_overlap_inconsistent
+#print axioms Solidity.Counterexamples.DeleteFamilyGenericOverlap.delValue_overlap_inconsistent
+#check @Solidity.Counterexamples.DeleteFamilyGenericOverlap.selectStDelNode_overlap_inconsistent
+#print axioms Solidity.Counterexamples.DeleteFamilyGenericOverlap.selectStDelNode_overlap_inconsistent
+#check @Solidity.Counterexamples.DiamondTry.caller_revert
+#print axioms Solidity.Counterexamples.DiamondTry.caller_revert
+#check @Solidity.Counterexamples.DiamondTry.callback_diamond_false
+#print axioms Solidity.Counterexamples.DiamondTry.callback_diamond_false
+#check @Solidity.Counterexamples.PreFixSortAnnotations.People
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.People
+#check @Solidity.Counterexamples.PreFixSortAnnotations.Flags
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.Flags
+#check @Solidity.Counterexamples.PreFixSortAnnotations.person_not_int
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.person_not_int
+#check @Solidity.Counterexamples.PreFixSortAnnotations.bool_not_int
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.bool_not_int
+#check @Solidity.Counterexamples.PreFixSortAnnotations.aliceCopy
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.aliceCopy
+#check @Solidity.Counterexamples.PreFixSortAnnotations.preFix_rootCopy_not_faithful
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.preFix_rootCopy_not_faithful
+#check @Solidity.Counterexamples.PreFixSortAnnotations.current_rootCopy_faithful
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.current_rootCopy_faithful
+#check @Solidity.Counterexamples.PreFixSortAnnotations.preFix_rootCopyStruct_faithful
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.preFix_rootCopyStruct_faithful
+#check @Solidity.Counterexamples.PreFixSortAnnotations.flagRead
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.flagRead
+#check @Solidity.Counterexamples.PreFixSortAnnotations.preFix_readSelect_not_faithful
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.preFix_readSelect_not_faithful
+#check @Solidity.Counterexamples.PreFixSortAnnotations.current_readSelect_faithful
+#print axioms Solidity.Counterexamples.PreFixSortAnnotations.current_readSelect_faithful
+#check @Solidity.Counterexamples.StaticRuntimeSort.array_runtime_not_le_static
+#print axioms Solidity.Counterexamples.StaticRuntimeSort.array_runtime_not_le_static
+#check @Solidity.Counterexamples.StaticRuntimeSort.mapping_runtime_not_le_static
+#print axioms Solidity.Counterexamples.StaticRuntimeSort.mapping_runtime_not_le_static
+#check @Solidity.Counterexamples.StaticRuntimeSort.prim_runtime_eq_static
+#print axioms Solidity.Counterexamples.StaticRuntimeSort.prim_runtime_eq_static
