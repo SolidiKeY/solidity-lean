@@ -608,3 +608,21 @@ Six negative controls pass, including rejection of changed premises, omitted
 candidates and invented historical owners. Independent read-only finder and
 skeptic reviews accept this narrow integration of the existing generic rules.
 The original historical acceptance and ownership checks remain unchanged.
+
+Fresh fixed-point law feasibility is checked in
+`tests/h62/item2/audit-language/FixedPointLawWitness.lean`. It reuses the imported
+full-telescope reflector for six previously uncovered laws: tdiv_trunc, tdiv_rem,
+tdiv_tdiv, result_unchecked_of_checked, result_agree and div_agree_of_inRange.
+Every selected current header matches its frozen source header. All leading
+parameters and hypotheses are jointly instantiated; signed division uses
+nontrivial remainders, and the agreement tuple explicitly exercises a nonzero,
+in-range division branch. This adds six local certificates, without rewriting
+the historical witness index or claiming full coverage.
+
+The serial bounded Lean 4.24 check passes. Five witness axiom sets and the branch
+check are empty; the checked-success witness reports propext, Classical.choice
+and Quot.sound through imported dependencies. No axiom or assumption was added.
+Both independent read-only reviews pass. These certificates establish local
+reference-semantics feasibility, not compiler totality or solc code generation.
+Original 4.35, full affected acceptance and remaining witnesses stay open; logs,
+resource records and exact source bindings belong to the private H145 archive.
