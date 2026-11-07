@@ -1216,3 +1216,83 @@ Existing source axiom guards are text only, not freshly executed. Exact signatur
 Whole assignment/four audit checkpoints unfinished. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context trust waits persist; no notice releases performance/trust STOPs. Documentation gate outcome remains actual and explicit. No statement/dependent-definition/budget/axiom/exclusion/toolchain change or new kernel/runtime/cache/performance acceptance; historical unavailable exact-byte gaps remain.
 
 Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and93controls pass; complete acceptance remains FAIL exit1.
+
+## Direct standing-owner controls (V69)
+
+Guarded regression: executing test_standing_owners.py directly must actually execute its ten existing controls rather than silently exit without tests. Added only a guarded unittest.main entry point; test bodies, imports, ownership policy and discovery behavior unchanged. Actual before direct command exited0 with no test output; after and discovery results are recorded separately. This is a test invocation correction, not a matched performance improvement.
+
+Fresh mastere286f1843 adopted. Static role inventory unchanged at761 reviewed/4522pending,1537 owners unresolved,0 fresh witnesses. SoundCatch source read remains uncredited pending complete ledger review. Existing h82-static-handoff verify.py reads immutable historical absolute manifest paths; relocation support and review-note doc spacing remain separate follow-up. Other-lane sourceFiles naming is not edited here. No Lean/source/proof/budget/axiom/exclusion/toolchain change or fresh runtime acceptance. H28 proof/replay pause and existing timing/trust STOPs remain.
+
+Exact command logs, exits/timing/RSS and before/after source bytes stay off Git under /workspace/h62-successor-evidence/direct-owner-controls-v69 with a small manifest. Whole assignment/four audit checkpoints remain unfinished; completeness failure is not cleared by these Python controls.
+
+V69 gates: direct10 PASS, discovery93 PASS; documentation FAIL exit1 on unchanged master audit-v09-passes reference to missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/log archived, no waiver. Independent finder/skeptic PASS. Guard-only change, zero new Lean lines/modules.
+
+## Catch-data soundness static roles (V70)
+
+Guarded regression: catch soundness must retain exact raw data, byte bounds/matches and fixed-state allocation guards, plus existing box/diamond refusal. Conditional soundness must not become normal-return or premise-inhabitation credit.
+
+Complete frozen-selected Solidity/Calculus/SoundCatch.lean and all9 named signatures match frozen/current master bytes. Prior761 rows and owners unchanged. All5283 candidates accounted:770 reviewed/4513 pending;3746 owners confirmed/1537 unresolved. Zero fresh joint witnesses. Supporting definitions/generated declarations receive no extra census credit.
+
+decodeError_encodePanic states exact selector incompatibility. catchBytes_self_mem requires actual kind.datas success, actual self-call status-to-payload result and successful SAME decoder, concluding membership of RAW datum d, not decoded bs. Reason rejects plain-empty/Panic data; raw includes empty revert, listed literals/patterns and Pat.panic when sbody.asserts=true. When asserts=false, panic is ruled out internally. Historical broad module-introduction remarks do not override these actual proof branches or introduce a no-assert premise.
+
+Pat.lenTm_eval and byteTm_eval retain length<2^256 and actual indexed byte lookup. byteFmls_holds retains every known-byte offset condition and guards output formulas by membership; unknown bytes remain unconstrained. fml_holds additionally requires actual pattern length/matching and concludes holding only at the actual allocated object state, not global validity or physical-byte-world adequacy.
+
+catch_alloc_sound requires Q returns SAME original state, bounded actual bytes, fixed allocated-state optional-guard holding and ACTUAL box allocation-goal holding. Its output is BOX afterRunTR for exact body/local drop/continuation/frames, not guaranteed normal success. The optional guard law quantifies formulas at a fixed allocated state, not all states. With hy=none its antecedent is intentionally impossible; the actual allocation-goal obligation remains and no positive witness is inferred.
+
+Premise.sound_catchDataBox has no extra outer proof premise but concludes conditional Premise.Sound; it does not assert the premise holds. Actual proof covers nonself/unknown-data generic byte allocation and known self literal/pattern allocation. Stmt.sound_catchData retains exact step equation with fresh index k; box uses conditional soundness and diamond keeps existing false/done refusal. No new exclusion, weakened theorem, callback success or universal compiler correctness is introduced.
+
+Exact source/signature bindings and complete self/raw/reason/modality roster stay off Git under /workspace/h62-successor-evidence/catch-soundness-roles-v70 and /workspace/h62-successor-bulk/catch-soundness-roles-v70 with path/size/hash manifests. Fresh mastere286f1843 inspected/already adopted; direct standing-owner test fix remains intact. No production Lean, statement/dependent-definition/budget/axiom/exclusion/toolchain changes or fresh kernel/runtime/cache/performance acceptance.
+
+Whole assignment/four audit checkpoints unfinished. H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw/Context waits and actual documentation gate limitations persist. Existing rejected prototype/timing/reserve STOPs and historical unavailable-byte gaps remain. Relocatable historical-evidence verification remains independent backfill.
+
+Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and93controls pass; complete acceptance remains FAIL exit1.
+
+## Historical packet relocation (V71)
+
+Guarded regression: relocating byte-identical historical artifacts must not require changing recorded provenance or silently accept missing/changed files. Historical h82-static-handoff verifier now supports explicit optional component-prefix mappings, longest first, without rewriting manifest/state/proposal. Duplicate/traversal/escaping roots and missing mapped files fail; no original-path fallback. All20 hashes, live source/pin comparisons, historical refusal flags and patch dry-run remain required, including under optimized Python. Importing the utility has no side effects.
+
+Eight synthetic checksum/path controls supplement actual20-entry relocation/tamper/missing/restoration checks. These are external utility checks, not formal proofs. Actual original/default and relocated packet checks PASS; same-size tampering under python -O and missing mapped file are refused. Historical status flags remain historical, not assertions that audit-calculus is currently unmerged. No Lean or proposal application occurred.
+
+Three serial default runs per version: median0.051932681s before,0.050586582s after (-2.592%); within10% stop threshold, no speedup claim from short uncontrolled-cache timings. Exact all runs, median/p95 wall/RSS, commands/errors and original input hashes remain off Git under /workspace/h62-successor-evidence/packet-relocation-v71 with a small manifest. Source/proof benchmarks, heartbeats/replay/proof size are not measured by this Python-only checkpoint.
+
+Fresh master32d810f1d adopted with prior head archived/member ancestry retained. Static census unchanged770reviewed/4513pending/1537ownerunresolved/0freshwitnesses. Whole assignment/four audit checkpoints, H28 replay/option pause, Raw/Context trust waits and all timing/reserve STOPs remain. Historical unavailable bytes elsewhere remain UNVERIFIABLE; no proof/axiom/budget/exclusion/toolchain change or new runtime/cache acceptance.
+
+V71 final gates:8 direct/101 aggregate controls PASS; actual20-entry default and relocated/restored static packet checks PASS; real same-size tamper under -O and missing mapped bytes correctly refused. Documentation FAIL1 persists on unchanged master SelectedHeapBoundaryWitness reference. Independent finder/skeptic PASS. No frozen semantic/witness completeness gate cleared.
+
+## Typed freshness static roles (V72)
+
+Guarded regression: typed freshness must retain the actual heap threshold and write/copy certificates. Backward allocation transport must not become forward freshness, and preserved identities must not become mirrored contents after writes.
+
+Complete frozen-selected Solidity/Calculus/SolkeyAgreementH28/Freshness.lean and all 15 named signatures match frozen/current master bytes. Prior 770 rows and owners are unchanged. All 5283 candidates remain accounted: 785 reviewed, 4498 pending; 3746 owners confirmed and 1537 unresolved. Zero fresh joint witnesses. Supporting relation constructors and generated declarations receive no extra census credit.
+
+Fresh means H.length<=id, exactly equivalent to absence of any intrinsically typed reference at that identity. Successful writeT certificates preserve object typing, not contents. Actual Writes spines preserve the same threshold and old-reference separation. No arbitrary write is asserted successful, and nil spines are not used as the sole claimed coverage.
+
+newFromCopySt transports final freshness backward for any map-free source type; primitive copies need not strictly allocate. Reference-copy witness and nonconverse results retain actual supplied heap/value/mapFree data. The copied root is fresh in the old typing and allocated in the grown typing; forward freshness therefore fails. copy_witness also retains the supplied old typed reference, whereas copy_not_converse does not require one. Existing witness-shaped conclusions are source theorems, not newly checked audit certificates.
+
+Operations certificates describe actual finite interleavings of typed writes and copies. Their prefix result derives growth, fresh_back is backward only, and separate preserves old identity and inequality against a finally fresh id. copy_then_witness retains copied-root identity through an actual suffix. copies_ordered retains both reference-source guards and actual middle operations before deriving strict root order; no caller separation/injectivity premise is added. None asserts unchanged copied contents after writes.
+
+copy_mirror is the immediate structural Mirrors certificate at the original threshold, including nested allocations, for the exact source/result heap/value. It is not a physical allocator/copy implementation theorem or a post-suffix mirror assertion. Existing axiom-print commands were read, not executed; no new axiom inventory or runtime acceptance is inferred.
+
+Exact signatures, source snapshot and complete operation/direction/axiom-command roster remain off Git under /workspace/h62-successor-evidence/freshness-roles-v72 and /workspace/h62-successor-bulk/freshness-roles-v72 with path/size/hash manifests. Fresh master48ff6a2eb was already adopted; no duplicate implementation. No production Lean, statement, dependent definition, budget, axiom, exclusion or toolchain change.
+
+Whole assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context trust waits persist, as do existing rejected prototype/timing/reserve STOPs and historical unavailable-byte gaps. Documentation gate outcome stays explicit. No fresh kernel, runtime, cache or performance acceptance.
+
+Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and101controls pass; complete acceptance remains FAIL exit1.
+
+## Closer symbol static roles (V73)
+
+Guarded regression: utility wp must remain distinct from full modal holding; nonempty-type, numeric and typed-operator guards plus exact optional/lazy/identity behavior must not disappear in classification.
+
+Complete frozen-selected Solidity/Calculus/CloseLemmas.lean and all 75 named signatures match frozen/current master bytes. Prior 785 rows and owners are unchanged. All 5283 candidates remain accounted: 860 reviewed and 4423 pending; 3746 owners confirmed and 1537 unresolved. Zero fresh joint witnesses. This is inherited read-only census work: no VA1/closer implementation, fixture sharing or TF work. Exact signatures and section-variable history are separately recorded for every declaration, not a sample.
+
+Nine WP lemmas preserve the existing utility: every THalt maps to onHalt, box True and diamond False. wp_box is a successful-result implication, while wp_diamond is a successful-result existential equivalence; neither unconditionally supplies a result/postcondition. This utility is distinct from full afterRunTR, including its panic/exhaustion reading, and cannot replace full modal holding. Bind and decidable-conditional equivalences retain the same result, continuation, modality and postcondition.
+
+Eighteen general utilities retain Nonempty alpha for alpha:Type, not a proposition binder; actual Decidable c is a branch decision, not c truth. PUnit and result identities keep their exact carriers/errors. Bitwise numeral/zero/one results retain the original Nat/Int interpretation. Bitwise self requires ONLY the stated lower bound x>=-2^255; no upper bound is introduced. Nonpositive tmod keeps a<=0 and arbitrary divisor, including zero. Ledger equations preserve conditional lookup/set semantics and actual address-value equality, not physical-world balance adequacy.
+
+All 48 typed operator equations are enumerated with exact RHS descriptions and every declaration/type/operator/mapFree guard: seven Op0, sixteen Op1, twenty-one Op2 and four Op3. They preserve fixed g/heap and exact optional operands. Storage find/read/index/pop/shrink and memory reads may refuse. Ref passes an identity through; mat/mfield construct bare addresses. mlen/copyMem explicitly resolve a typed identity; hash uses hashId without a new lookup-success premise. Copy and allocation retain mapFree; zbin/zcmp retain their exact acceptance flags. Push keeps its value thunk, and conditional/binop helpers keep selected/lazy behavior. No general operand success, physical hash/copy adequacy or solver/compiler completeness follows.
+
+Exact signatures, source and full per-operator/guard rosters remain off Git under /workspace/h62-successor-evidence/closer-symbol-roles-v73 and /workspace/h62-successor-bulk/closer-symbol-roles-v73 with path/size/hash manifests. Fresh master48ff6a2eb inspected/already adopted. No production source, theorem/definition, budget, axiom, exclusion or toolchain change and no fresh kernel/runtime/cache/performance acceptance.
+
+Whole assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context waits persist. The missing SelectedHeapBoundaryWitness documentation reference is routed to vy3-compilation, not a new owner guess; no duplicate ping or doc-gate pass inferred. Existing rejected prototype/timing/reserve STOPs and historical unavailable-byte gaps remain.
+
+Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and101controls pass; complete acceptance remains FAIL exit1.

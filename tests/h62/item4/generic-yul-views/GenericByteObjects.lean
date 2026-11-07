@@ -38,5 +38,19 @@ theorem byteObjectFacts {D : Source.Layout} (f : ByteObjectFixture D) : ByteObje
   source_payload := bytesObject_source_payload f.bytes f.length_bound f.residual f.base
   idempotent := bytesObject_idempotent f.bytes f.length_bound f.residual f.base
 
+/-- Regression guard against collapsing distinct payloads into one image at the
+same base. Decoding recovers arbitrary bytes despite residual/alignment choices;
+this does not assert allocator or compiler adequacy. -/
+theorem byteObjectBytes_injective {D : Source.Layout}
+    (left right : ByteObjectFixture D) (same_base : left.base = right.base)
+    (same_view : left.view = right.view) : left.bytes = right.bytes := by
+  have observed : decodeBytesObject D left.view left.base =
+      decodeBytesObject D right.view left.base :=
+    congrArg (fun memory => decodeBytesObject D memory left.base) same_view
+  rw [(byteObjectFacts left).bytes] at observed
+  rw [same_base, (byteObjectFacts right).bytes] at observed
+  exact Source.Data.bytes.inj observed
+
+#print axioms byteObjectBytes_injective
 #print axioms byteObjectFacts
 end Solidity.Yul.Views.H62
