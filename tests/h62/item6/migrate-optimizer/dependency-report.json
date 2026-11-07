@@ -1,0 +1,230 @@
+{
+  "requester": "solidity-h62-6-20261106/migrate-optimizer",
+  "recipient": "solidity-h62-6-20261106/migrate-root-gate",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "dependency_closure": [
+    {
+      "module": "Solidity.KeySort",
+      "path": "Solidity/KeySort.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-root-gate"
+      ],
+      "sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+      "module": "Solidity.AST",
+      "path": "Solidity/AST.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-root-gate"
+      ],
+      "sha256": "d5463f24e3b12577a04099593cf2640b68a1ccb14cb3db513254d633c849c54b"
+    },
+    {
+      "module": "Solidity.SpecSyntax",
+      "path": "Solidity/SpecSyntax.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-root-gate"
+      ],
+      "sha256": "0d93503bea09cc6e1174fa5bcf6150705f5db360dfffa0fc33885bad23b3e236"
+    },
+    {
+      "module": "Solidity.Syntax.Raw",
+      "path": "Solidity/Syntax/Raw.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-syntax"
+      ],
+      "sha256": "7c137f7e8e4c70f4868dc41a437687ab42e2d63e887cdde3ba3ccd1ea764b76f"
+    },
+    {
+      "module": "Solidity.Syntax.Grammar",
+      "path": "Solidity/Syntax/Grammar.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-syntax"
+      ],
+      "sha256": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8"
+    },
+    {
+      "module": "Solidity.Syntax.Contract",
+      "path": "Solidity/Syntax/Contract.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-syntax"
+      ],
+      "sha256": "25f04a46318dd766e6ac468972c2bf11bf75add95a069dde17a7171e85d5c70a"
+    },
+    {
+      "module": "Solidity.Syntax",
+      "path": "Solidity/Syntax.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-root-gate"
+      ],
+      "sha256": "81e376192590dacc20ae1b3c1cb27e4cf144289d89be28beb40452d4fe7340e8"
+    },
+    {
+      "module": "Solidity.Scope",
+      "path": "Solidity/Scope.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-root-gate"
+      ],
+      "sha256": "d37a9e4393e9b9da12bcd85beb428965becc2d3947838b1d11f510b07170c4ff"
+    },
+    {
+      "module": "Solidity.Syntax.Scoped",
+      "path": "Solidity/Syntax/Scoped.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-syntax"
+      ],
+      "sha256": "85d626e454f350c6043046352101ce2bd53c7cebdebb93698f4a34e9deed7532"
+    },
+    {
+      "module": "Solidity.Yul.Builtins",
+      "path": "Solidity/Yul/Builtins.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-yul"
+      ],
+      "sha256": "8aa94548f3650126628cbc4f5131736047884e9bc52187e2f7d97b0c8dba0cdb"
+    },
+    {
+      "module": "Solidity.Hash.CollisionBound",
+      "path": "Solidity/Hash/CollisionBound.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-hash"
+      ],
+      "sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+    },
+    {
+      "module": "Solidity.Keccak",
+      "path": "Solidity/Keccak.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-root-gate"
+      ],
+      "sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    {
+      "module": "Solidity.Roadmap.Evm",
+      "path": "Solidity/Roadmap/Evm.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-roadmap"
+      ],
+      "sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+    },
+    {
+      "module": "Solidity.Roadmap.Contracts",
+      "path": "Solidity/Roadmap/Contracts.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-roadmap"
+      ],
+      "sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    {
+      "module": "Solidity.Yul.Words",
+      "path": "Solidity/Yul/Words.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-yul"
+      ],
+      "sha256": "45d5ed2f4a66a670f1ea0b894c41c2ac61cad7a57cf296e5958c3da91c89d97c"
+    },
+    {
+      "module": "Solidity.Yul.Syntax",
+      "path": "Solidity/Yul/Syntax.lean",
+      "owners": [
+        "solidity-h62-6-20261106/migrate-yul"
+      ],
+      "sha256": "7555149d716a78d959c819c0ec226c587398f2a1935f3844028051443bc3dc1f"
+    }
+  ],
+  "incoming_external_importer": "Solidity.lean (generated root; unchanged)",
+  "direct_external_imports": [
+    "Solidity.Syntax.Scoped",
+    "Solidity.Yul.Syntax",
+    "Solidity.Roadmap.Contracts"
+  ],
+  "typed_blockers": [
+    {
+      "id": "MIG-OPT-SYNTAX-RAW",
+      "type": "OWNER_MIGRATION_REQUIRED",
+      "owner": "solidity-h62-6-20261106/migrate-syntax",
+      "file": "Solidity/Syntax/Raw.lean",
+      "locations": [
+        597,
+        650,
+        665,
+        682,
+        684
+      ],
+      "request": "Provide reviewed v4.35.0-compatible owner patch preserving exact APIs and proof budgets; optimizer worker will not edit this file. String.drop returns String.Slice; toList/dropRight/endsWith applications no longer elaborate.",
+      "evidence": "/workspace/migrate-optimizer-evidence/reviewed-new/build.log",
+      "exit": 1
+    },
+    {
+      "id": "MIG-OPT-HASH-COLLISION",
+      "type": "OWNER_MIGRATION_REQUIRED",
+      "owner": "solidity-h62-6-20261106/migrate-hash",
+      "file": "Solidity/Hash/CollisionBound.lean",
+      "locations": [
+        407,
+        660,
+        680,
+        950,
+        953,
+        956,
+        959,
+        962,
+        968
+      ],
+      "request": "Repair the owner proofs under the shared official v4.35.0 pin without raising budgets or weakening statements. Initial unsolved contains equality and omega failures precede diagnostic sorryAx and guard mismatches; no failed proof artifact is accepted.",
+      "evidence": "/workspace/migrate-optimizer-evidence/isolated-new/build.log",
+      "exit": 1
+    },
+    {
+      "id": "MIG-OPT-PERF-STOP",
+      "type": "PERFORMANCE_STOP_GT_10_PERCENT",
+      "owner": "solidity-h62-6-20261106/migrate-root-gate",
+      "action": "ESCALATE: root gate must investigate and disposition the fixed-resource 27-declaration generic fixture regression before further Lean validation. No rerun or budget adjustment after STOP.",
+      "fixture": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/Generic.lean",
+      "wall_percent": 121.93194216871967,
+      "kernel_wall_percent": 74.36557304138312,
+      "kernel_max_child_rss_percent": 40.8202048084559,
+      "caveat": "Single short fixture run per version; not a full migration slowdown estimate. Full comparison blocked by failed dependencies.",
+      "evidence": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/measurements.json",
+      "historical_fixture_original_path": "tests/h62/item6/migrate-optimizer/Generic.lean",
+      "bulk_manifest": "tests/h62/item6/migrate-optimizer/BULK-MANIFEST.json",
+      "h44_h112_note": "Archived copied-definition fixture sample, not canonical real-module validation or a whole-library verdict. STOP disposition remains pending; no rerun authorized."
+    }
+  ],
+  "coordination": "No relay.sh exists in this VM checkout and no coordinator relay endpoint is configured. These self-contained exact-file requests are saved for coordinator retrieval; no permission to edit owned originals is inferred. No existing source file edited.",
+  "registration": "No production modules or generated roots added/edited. Direct test fixtures are intentionally outside the library roots; if area registration is desired, coordinator may register tests after owner review. No root or axiom-pin edits.",
+  "affected_read_only_consumers": [
+    {
+      "file": "tests/fullscope-20261104/vo1/PipelineControls.lean",
+      "line": 1,
+      "import": "Solidity.Optimizer.Laws",
+      "new_toolchain_validation": "pending owner repairs, performance disposition and final affected-consumer checks"
+    },
+    {
+      "file": "tests/fullscope-20261104/vo1/YulValidatorControls.lean",
+      "line": 1,
+      "import": "Solidity.Optimizer.Laws",
+      "new_toolchain_validation": "pending owner repairs, performance disposition and final affected-consumer checks"
+    },
+    {
+      "file": "tests/fullscope-20261104/vo1/ValueValidatorControls.lean",
+      "line": 1,
+      "import": "Solidity.Optimizer.Laws",
+      "new_toolchain_validation": "pending owner repairs, performance disposition and final affected-consumer checks"
+    }
+  ],
+  "h44_split": {
+    "manifest": "tests/h62/item6/migrate-optimizer/BULK-MANIFEST.json",
+    "archive": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/bulk.tar.gz",
+      "bytes": 12749,
+      "sha256": "7869fa0ffb7eb8ba2760a4ed285d0cd3f6813e8fa7f7a60d54a21721a70339cf",
+      "deterministic_generator": "python3 scripts/h62/item6/migrate-optimizer/bulk.py --pack <new-absolute-output-path>"
+    },
+    "canonical_fixtures": [
+      "tests/h62/item6/migrate-optimizer/Acceptance.lean",
+      "tests/h62/item6/migrate-optimizer/Interfaces.lean"
+    ],
+    "scope": "Packaging correction only; original production statements, gates and budgets unchanged."
+  }
+}

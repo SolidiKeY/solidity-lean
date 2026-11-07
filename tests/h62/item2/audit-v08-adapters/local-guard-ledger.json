@@ -1,0 +1,91 @@
+{
+  "allowed_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "census_fixture": "tests/h62/item2/audit-v08-adapters/LocalGuardStatementCensus.lean",
+  "controls": [
+    "actual_contract",
+    "rejectAll_not_contract",
+    "alwaysRevert_not_contract",
+    "selected_correct_joint",
+    "both_pipeline_runs",
+    "views_joint"
+  ],
+  "fixture": "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean",
+  "limits": [
+    "Instruction interpreter only; zero is pending jump count, not gas.",
+    "Global funded-call, gas and fork adequacy remain pending.",
+    "Unmapped generated declarations remain explicitly pending interface classification."
+  ],
+  "module": "Solidity.Backend.FailurePaths.LocalGuardSelection",
+  "reviewed": [
+    {
+      "classification": "no_propositional_premises",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.actual_contract",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.accepts_local"
+    },
+    {
+      "classification": "joint_witness",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.selected_correct_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.selected_correct"
+    },
+    {
+      "classification": "coherent_carrier_proof_field",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.View.contexts"
+    },
+    {
+      "classification": "coherent_carrier_proof_field",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.View.same"
+    },
+    {
+      "classification": "coherent_carrier_proof_field",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.BoolLocalView.type"
+    },
+    {
+      "classification": "coherent_carrier_proof_field",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.BoolLocalView.same"
+    },
+    {
+      "classification": "inhabited_structure_carrier",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.View"
+    },
+    {
+      "classification": "inhabited_structure_carrier",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.BoolLocalView"
+    },
+    {
+      "classification": "inhabited_carrier_data_field",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.View.index"
+    },
+    {
+      "classification": "inhabited_carrier_data_field",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.views_joint",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.BoolLocalView.index"
+    },
+    {
+      "classification": "implementation_definition_supported_case",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.actual_contract",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.compile"
+    },
+    {
+      "classification": "implementation_definition_supported_case",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.actual_contract",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.view"
+    },
+    {
+      "classification": "implementation_definition_supported_case",
+      "proof": "H62.AuditV08Adapters.LocalGuardSuccess.actual_contract",
+      "target": "Solidity.Backend.FailurePaths.LocalGuardSelection.boolLocal"
+    }
+  ],
+  "source": "Solidity/Backend/FailurePaths/LocalGuardSelection.lean"
+}

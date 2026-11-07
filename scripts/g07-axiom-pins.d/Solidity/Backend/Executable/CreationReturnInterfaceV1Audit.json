@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/Executable/CreationReturnInterfaceV1Audit.lean:Solidity.Backend.Executable.CreationReturnInterfaceV1.Controls.not_reverted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Executable/CreationReturnInterfaceV1Audit.lean:Solidity.Backend.Executable.CreationReturnInterfaceV1.Producer.returned_address": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Executable/CreationReturnInterfaceV1Audit.lean:Solidity.Backend.Executable.CreationReturnInterfaceV1.Producer.same_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
