@@ -59,9 +59,9 @@
       "checked_head": "f869a9173e50390a3f88f8444453b42fb73fb6ce"
     },
     "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean": {
-      "sha256": "c5859b60d4106399b798be0c0ef233b2022db93ca7b05f10fed7b150a45662fe",
-      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint231-exact-head.log",
-      "checked_head": "e90ef087062dc975455b436c63b7b292329f7a2e",
+      "sha256": "f937349d71926cc7aee4afad89ca36d7669d941a9fc0eb2386d7371ee19301ab",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint234-exact-head.log",
+      "checked_head": "83ca445d1aed1e9099d398193543abe4643e2561",
       "historical_checks": [
         {
           "sha256": "1e3ab539bfcce7a29123380bd100fe683b17e172f42df32965716f0bef102748",
@@ -77,6 +77,11 @@
           "sha256": "e266c0bc2e49f1d0343272c6da0fa2023fc230e5f91528648b251a74f01c3b58",
           "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint230-corrected-exact-head.log",
           "checked_head": "f2189455bb6c61b10022b6d81e5a49cb241c4461"
+        },
+        {
+          "sha256": "c5859b60d4106399b798be0c0ef233b2022db93ca7b05f10fed7b150a45662fe",
+          "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint231-exact-head.log",
+          "checked_head": "e90ef087062dc975455b436c63b7b292329f7a2e"
         }
       ]
     }
@@ -91,9 +96,9 @@
     "boundary": "Only these two unchanged Source witness modules were freshly checked. validated_dependency_head retains the historical complete nine-module check; other checked_head values and receipts are unchanged."
   },
   "latest_additive_validation": {
-    "head": "e90ef087062dc975455b436c63b7b292329f7a2e",
+    "head": "83ca445d1aed1e9099d398193543abe4643e2561",
     "source": "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean",
-    "guards": 51,
-    "boundary": "Only this extended audit module was freshly checked. Earlier source identities/receipts retained in historical_checks; all other source-specific and complete validations remain historical."
+    "guards": 54,
+    "boundary": "Only this extended audit module was freshly checked. Historical source receipts and validated_dependency_head remain unchanged."
   }
 }
