@@ -231,8 +231,8 @@ Owned worker retirement now waits for closure before reusing capacity. The match
 ### Concrete execution contract (human decision Q-CLI-01)
 
 Build Compiler Artifact saves the current file and runs the pinned compiler,
-writing an AST plus source-hash manifest under the backend's ignored
-`.lake/editor-source-artifacts/`. It does not prove obligations or claim an EVM
+writing an AST plus source-hash manifest under
+`solidityLean.compilerOutputDir` (default `bin`, relative to this file's workspace folder, or an absolute path). Each build writes a fresh source-named child directory; the report records that directory and the source hash. This setting affects Build and custom Build only; concrete Run/Test retain their existing artifact storage. It does not prove obligations or claim an EVM
 binary. Concrete Run uses the existing `scripts/solidity-lean.mjs run` typed-model
 executor (`Solidity.Frontend.Cli`), with an explicit `Contract::function(signature)`
 selection and JSON arguments (booleans or exact integer strings). Initial state
@@ -324,3 +324,5 @@ proof performance, EVM equivalence or complete menu/trace parity.
 Starting another source command now retires the invalidated older command
 before asking a prompt that might be cancelled. Retirement still uses the
 existing ownership checks and deadline; new work cannot bypass a failed cleanup.
+
+The existing headless parity runner supports `--suite compiler-output --targets local` for Settings UI/resource JSON, ordinary/custom key builds and actual two-folder pending-prompt configuration ownership. It reuses the compiler/import fixture with verification disabled. The observations distinguish local AST directory placement from Dafny executable stems; paired upstream settings, macOS and full lifecycle evidence remain incomplete.

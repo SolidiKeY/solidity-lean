@@ -3261,9 +3261,18 @@ import Solidity.Lowering.P8.ShapeSchema
 import Solidity.Lowering.P8.ShapeSchemaControls
 import Solidity.Lowering.P8.SourceAllSettings
 import Solidity.Lowering.P8.SourceAstCompoundTypes
+import Solidity.Lowering.P8.SourceAstCorrespondence
+import Solidity.Lowering.P8.SourceAstExpressionCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressions
+import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
+import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Lowering.P8.SourceAstStatementCorrespondence
+import Solidity.Lowering.P8.SourceAstStatements
+import Solidity.Lowering.P8.SourceAstTupleCorrespondence
+import Solidity.Lowering.P8.SourceAstTypeCorrespondence
 import Solidity.Lowering.P8.SourceAstTypes
+import Solidity.Lowering.P8.SourceAstUnit
 import Solidity.Lowering.P8.SourceMetadata
 import Solidity.Lowering.P8.SourceMetadataControls
 import Solidity.Lowering.P8.SourceMetadataObligations
@@ -4887,6 +4896,8 @@ import Solidity.Yul.Compilation.OpenExpressions
 import Solidity.Yul.Compilation.OpenStatements
 import Solidity.Yul.Compilation.P20InterfaceV1
 import Solidity.Yul.Compilation.P20InterfaceV1Controls
+import Solidity.Yul.Compilation.P20InterfaceV2
+import Solidity.Yul.Compilation.P20InterfaceV2Controls
 import Solidity.Yul.Compilation.PhysicalCombination
 import Solidity.Yul.Compilation.PhysicalHash
 import Solidity.Yul.Compilation.PhysicalHashControls

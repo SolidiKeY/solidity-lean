@@ -50,9 +50,11 @@ function parse(args) {
   for(const key of ['workers','targets','cache'])if(new Set(options[key]).size!==options[key].length)throw new Error('Duplicate '+key);
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
-  if(!['full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','output-lifecycle','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
+  if(!['full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output','output-lifecycle','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
   if(['trace-visibility','trace-light-show'].includes(options.suite)&&(options.targets.length!==1||options.targets[0]!=='dafny'))throw Error('Native trace visibility suite requires --targets dafny; local producer remains absent');
   if(['proof-help','proof-hover'].includes(options.suite)&&(options.targets.length!==1||options.targets[0]!=='local'||options.workers.some(w=>w!==1)||options.obligations!==1||options.trace!=='on'))throw Error('Certified proof-help observation requires one local worker, one obligation and protocol recording');
+  if(options.suite==='dafny-compiler-output'&&(options.targets.length!==1||options.targets[0]!=='dafny'))throw Error('Upstream output observation requires --targets dafny');
+  if(options.suite==='compiler-output'&&(options.targets.length!==1||options.targets[0]!=='local'))throw Error('Compiler-output observation requires --targets local; paired upstream configuration remains pending');
   if(options.suite==='commands'&&(options.targets.length!==1||options.targets[0]!=='local'))throw new Error('Concrete command suite requires --targets local; no Dafny command equivalence is claimed');
   for(const key of ['memoryReserveMiB','memoryMaxMiB'])if(options[key]!==undefined&&(!Number.isSafeInteger(options[key])||options[key]<1))throw new Error('Invalid '+key);
   return options;
@@ -78,7 +80,7 @@ function shortSummary(report) {
 }
 async function launch(config,options) {
   config={...config,suite:options.suite||'full',runId:randomUUID()};
-  mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});
+  mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});config.filesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
     'dafny.verificationVirtualCores':config.workers,'dafny.verificationCachingPolicy':cache,'dafny.verificationTimeLimit':20,
@@ -92,6 +94,7 @@ async function launch(config,options) {
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
   writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
+  if(['compiler-output','dafny-compiler-output'].includes(options.suite)){config.foreignWorkspace=join(config.dir,'unrelated-resource');mkdirSync(join(config.foreignWorkspace,'.vscode'),{recursive:true});writeFileSync(join(config.foreignWorkspace,'.vscode/settings.json'),'{}');config.workspaceFile=join(config.dir,'output.code-workspace');writeFileSync(config.workspaceFile,JSON.stringify({folders:[{name:'Primary',path:config.workspace},{name:'Unrelated',path:config.foreignWorkspace}],...(options.suite==='dafny-compiler-output'?{settings}: {})}));}
   const hostConfig={...config,backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
@@ -105,7 +108,7 @@ async function launch(config,options) {
   const editorState=mkdtempSync(join(tmpdir(),'slp-'));
   const portable=join(editorState,'p');mkdirSync(portable,{recursive:true});writeFileSync(join(portable,'argv.json'),'{}');
   const start=performance.now(),launchedWallTime=Date.now();
-  const child=spawn(resolve(options.code),[config.workspace,'--disable-gpu','--disable-workspace-trust','--skip-welcome','--skip-release-notes','--no-sandbox',
+  const child=spawn(resolve(options.code),[config.workspaceFile||config.workspace,'--disable-gpu','--disable-workspace-trust','--skip-welcome','--skip-release-notes','--no-sandbox',
     '--disable-updates','--remote-debugging-port='+debugPort,'--user-data-dir',join(editorState,'u'),'--extensions-dir',join(editorState,'e'),
     '--extensionDevelopmentPath='+extension,'--extensionTestsPath='+join(__dirname,'host.cjs')],{
     cwd:repo,detached:process.platform!=='win32',stdio:['ignore',logfile,logfile],
@@ -125,7 +128,7 @@ async function launch(config,options) {
   const seenPhases=new Set();let phaseTask,phaseBusy=false;
   const seenKeybindingRequests=new Set();let keybindingTask,keybindingBusy=false,lastKeybindingReadError;
   const renderTimer=setInterval(()=>{
-    if(['commands','custom-commands','custom-default-commands','custom-import-actions'].includes(options.suite)&&!keybindingBusy&&existsSync(join(config.dir,'keybinding-request.json'))){
+    if(['commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output'].includes(options.suite)&&!keybindingBusy&&existsSync(join(config.dir,'keybinding-request.json'))){
       const read=readKeybindingRequest(join(config.dir,'keybinding-request.json'),seenKeybindingRequests);
       if(read.error){const signature=JSON.stringify(read.error);if(signature!==lastKeybindingReadError){appendFileSync(join(config.dir,'keybinding-read-errors.jsonl'),JSON.stringify({at:Date.now(),...read.error})+'\n');lastKeybindingReadError=signature;}}
       const request=read.request;if(request)lastKeybindingReadError=undefined;
@@ -134,19 +137,20 @@ async function launch(config,options) {
         keybindingTask=(async()=>{let client;try{
           if(request.runId!==config.runId)throw Error('Foreign keybinding request');
           client=await renderer.connect(debugPort);
-          const base=options.suite==='custom-import-actions'?join(config.dir,request.cancel?'cancel-action':'build-action'):config.dir;
+          if(['compiler-output','dafny-compiler-output'].includes(options.suite)&&!/^[a-z]+(?:-[a-z]+)*$/.test(request.caseId||''))throw Error('Invalid configuration action identity');
+          const base=['compiler-output','dafny-compiler-output'].includes(options.suite)?join(config.dir,'configuration-actions',request.caseId):options.suite==='custom-import-actions'?join(config.dir,request.refusal==='syntax'?'invalid-json-action':request.refusal==='options'?'unsupported-option-action':request.cancel?'cancel-action':'build-action'):config.dir;
           mkdirSync(base,{recursive:true});const menuDirectory=join(base,'context-menu');mkdirSync(menuDirectory,{recursive:true});
           const contextMenu=await renderer.contextSubmenu(client,menuDirectory,config.target==='dafny'?{label:'Dafny',expected:'Build with Custom Arguments'}:undefined);
           const promptDirectory=join(base,'custom-prompt');mkdirSync(promptDirectory,{recursive:true});
-          const observation={...await renderer.buildKeybinding(client,{custom:options.suite!=='commands',input:request.customInput,cancel:request.cancel===true,directory:promptDirectory}),contextMenu};
+          const observation={...await renderer.buildKeybinding(client,{custom:options.suite!=='commands'&&request.ordinary!==true,onPrompt:request.hold?async prompt=>{atomicJson(join(config.dir,'keybinding-held.json'),{runId:config.runId,requestId:request.requestId,heldAt:Date.now(),prompt});while(Date.now()<prompt.deadline){const file=join(config.dir,'keybinding-resume.json');if(existsSync(file)){const resume=JSON.parse(readFileSync(file,'utf8'));if(resume.runId===config.runId&&resume.requestId===request.requestId)return;}await new Promise(resolve=>setTimeout(resolve,20));}throw Error('Pending F6 configuration handshake exhausted original prompt deadline');}:undefined,input:request.customInput,cancel:request.cancel===true,dismissOnSubmit:request.refusal==='syntax'||request.refusal==='options',directory:promptDirectory}),contextMenu};
           atomicJson(join(config.dir,'keybinding-reply.json'),{runId:config.runId,requestId:request.requestId,observation});
         }catch(error){atomicJson(join(config.dir,'keybinding-reply.json'),{runId:config.runId,requestId:request.requestId,error:error.message});}finally{client?.close();keybindingBusy=false;}})();
       }
     }
-    if((['visual','proof-help','proof-hover','output-lifecycle'].includes(options.suite)||['custom-default-commands','trace-visibility','trace-light-show'].includes(options.suite)&&config.target==='dafny')&&!phaseBusy){
+    if((['visual','proof-help','proof-hover','output-lifecycle','compiler-output','dafny-compiler-output'].includes(options.suite)||['custom-default-commands','trace-visibility','trace-light-show'].includes(options.suite)&&config.target==='dafny')&&!phaseBusy){
       phaseBusy=true;
       phaseTask=servePhases(config.dir,config.runId,async (directory,request)=>{
-        const client=await renderer.connect(debugPort);try{if(request.phase==='output-channel')return await renderer.captureOutput(client,directory,request.metadata);if(request.phase.startsWith('proof-help-'))return await renderer.captureProofHelp(client,directory,request.metadata);if(request.phase.startsWith('trace-'))return await renderer.captureTrace(client,directory,request.metadata);const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{client.close();}
+        const client=await renderer.connect(debugPort);try{if(request.phase.startsWith('compiler-output-')||request.phase.startsWith('dafny-output-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase==='output-channel')return await renderer.captureOutput(client,directory,request.metadata);if(request.phase.startsWith('proof-help-'))return await renderer.captureProofHelp(client,directory,request.metadata);if(request.phase.startsWith('trace-'))return await renderer.captureTrace(client,directory,request.metadata);const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{client.close();}
       },seenPhases).catch(error=>{rendererCapture={captured:false,error:error.message};}).finally(()=>{phaseBusy=false;});
     }
     if(!probing&&existsSync(join(config.dir,'renderer-probe.json'))) {
@@ -224,7 +228,7 @@ async function launch(config,options) {
 }
 async function main(args=process.argv.slice(2)) {
   const options=parse(args);
-  if(options.help) {process.stdout.write('node vscode/parity/run.cjs --code PATH --dafny PATH --dafny-extension DIR --dotnet PATH [--output DIR] [--trials 5] [--warmups 1] [--workers 1,2,4] [--cache none,basic] [--targets dafny,local] [--suite full|commands|custom-commands|custom-default-commands|custom-import-actions|visual|proof-help|proof-hover]\n');return;}
+  if(options.help) {process.stdout.write('node vscode/parity/run.cjs --code PATH --dafny PATH --dafny-extension DIR --dotnet PATH [--output DIR] [--trials 5] [--warmups 1] [--workers 1,2,4] [--cache none,basic] [--targets dafny,local] [--suite full|commands|custom-commands|custom-default-commands|custom-import-actions|compiler-output|dafny-compiler-output|visual|proof-help|proof-hover]\n');return;}
   for(const key of ['code',...(options.targets.includes('dafny')?['dafny','dafnyExtension','dotnet']:[])])if(!options[key]||!existsSync(options[key]))throw new Error('Missing executable/source --'+key);
   const output=resolve(options.output||join(repo,'.cache/editor-parity',new Date().toISOString().replaceAll(':','-')));
   if(existsSync(join(output,'report.json')))throw new Error('Output already contains a report; choose a new directory');

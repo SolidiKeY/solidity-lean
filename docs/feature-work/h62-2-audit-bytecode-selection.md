@@ -1771,3 +1771,242 @@ Final checkpoint82tests, trust/orphans, roots/fragments, doc paths and
 whitespacePASS. These checks do not replace the explicit native probe/strict
 receipts. Scoped global28pin registrations remain coordinator work; full
 source/kernel/runtime gates and original proof obligations remain unwaived.
+
+
+## Joint length-check domains and observable failure ordering
+
+Fetched master8863c4127 already adopted at3960af263; registries regenerated
+without delta. Extend the same existing renderer/fixture with LengthCheck's five
+public methods and three certificate fields, yielding85exactdomains. Common
+64byte input encodes relative offset32 and length2^64; BOTH pointer0 and tail
+header32 have valid32byte spans. Tail fit, length-prefix and oversized-length
+premises coexist, rather than relying on an out-of-range header. Actual common
+certificate/code/suffix258,513 jointly exhibit safezero flag1, oversized flag0,
+lazy tail-reference revert, eager bytes/array panic, and capacity3/refusal1024.
+A related63byte truncation keeps the zero-padded loaded2^64 but reverts at the
+head-span check; zero fuel yields fuelerror first. These are original scalar/
+ABI-model observations, not charged gas, native loading or allocation behavior.
+Existing producer proofs/control results reused, no source implementation copy.
+
+Initial direct probeFAIL27.326s at three nested lazy-length decidability goals
+with existing recursion limit; compiler error-recovery sorryAx appears ONLY in
+rejected diagnostic output, never accepted/source proof. Named proved load0/
+load32/address facts plus simp only remove nested normalization without changing
+any premise or maxRecDepth/maxHeartbeats. MCPstatus found no existing server.
+Provided try-tactics first invocation used a non-file proposition, which the
+script interprets as a declaration; all candidates failed before the intended
+goal. Corrected unchanged proposition via goalfile: rfl and decidePASS, other
+candidatesFAIL; runner exits0. A documented nonbuilding lake-env-lean adapter
+forces pinned-j1/-M8192, original prefix and serial guard environment. Failed
+invocation/recursion outputs remain preserved. No prerequisite build or cache
+rekey. Successful repaired probe groupPASS38.326s including8.265s tactic run.
+
+Probe's unused existential binder warning removed by alpha-renaming self to
+_self; no linter disabled and proposition meaning unchanged. Final strict
+PASS62.482s (>60s explicitly reported), emptydiagnostics, bothmonitorsPASS under
+12GiB/noSwap/CPU1/4GiBreserve+margin/300sgroup limits. Same05:20→09:20aggregate
+epoch/deadline retained, no reset/extension/PowerBounds retry or proof-budget
+increase. Timing variants are not paired performance trials; no speed/fullgate
+acceptance asserted.92guards cover85domains+7transport/joint/refusal lemmas:
+16none/25propext/2standardpair/49standardtrio, plus2classifierrefusals. Three
+private load-fact support lemmas are transitively covered by public guard sets.
+22frozenproducerleaves/250importproducts matched; all exact target types bind
+to sealed150module observations without global witness/sourcegate acceptance.
+
+Independent readonly finder/skepticPASS nofindings, including valid common
+input, premise retention, actual derived failure classes/order, discarded error
+recovery, approved limits, alpha-only rename, native hashes and all open scope.
+No reviewer edits/builds/Lean/server. Final reproducer reconstructs exact source/
+manifest, checks successful probe/strict outputs, tactic outcome, expected-only
+probe warning, code-token equality modulo guard commands/one alpha rename and
+actual92guardsets. Generated source/oleans/reports stay offGit; trusted fixture
+still requires explicit native checking beyond82Python tests/seven-file roster.
+
+No production/interface/statement/definition/premise/exclusion/axiom/trust
+change. All original703sourceSTOP,40remainingcore+37Bridge, owner/private/type/
+source/correspondence/global-input-inherited classification, remaining joint
+witness/globalledger, Source/native/gas/fork, P10production and Bridge/package/
+performance obligations remain. No RUNTIME_GATE_PASS or whole-goal completion.
+Evidence: /workspace/parallel-20261103/executable-bytecode/length-check-domains/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, doc paths and
+whitespacePASS. Explicit native/replay/tactic receipts remain separate; no
+original Source/correspondence/native/full-gate obligation or global28pin
+registration is waived by these checks.
+
+
+## Scope preflight and mapped offset domains
+
+Rebased the single newer length checkpoint onto published7265ee136 at
+6d7f46cd; owned audit tree remained source-identical to6107d1bb,82tests and
+registriesPASS. An attempted WordValidation support extension checked natively
+but its nine targets are memory-operations, outside the frozen bytecode-selection
+roster. Metadata linker correctly refused them. All three edits/proofs saved
+in sealed word-validation-domains proposal, then tracked files restored before
+further work; those nine are NOT committed/countedasassignedcoverage. Scope
+questionQ-WV-SCOPE-01 sent withcoord-ask(ref20261107T071956Z), pending support-
+only versus explicit supplemental scope decision. Original census unchanged.
+
+Factored existing frozen-map reference normalization without changing valid
+roster/dedup/reference-count behavior. Renderer now reads BASE's map, pins its
+hash and refuses unmapped EXPLICIT producer leaves before proof. Regression
+injects WordValidation expecting refusal. This preflight is not a scope sandbox:
+transitive target origins still require actual metadata validation; all95current
+targets pass that check. Imported dependencies remain usable without becoming
+assigned census targets. Frozen mapped_paths still rejects altered live maps.
+
+Continued independent mappedOffsetChecks: four certificate fields plus six
+public methods yield95exactdomains, not the parked proposal's94. Sharedactual
+certificate covers BOTH tail/region code, numeric operands, protected suffix
+258,513 and real room premises. Joint witness preserves opposite boundary
+flags, signed-negative relative offset acceptance despite larger unsigned value,
+wrapped-product acceptance, exact V2frames output[1]/peak1, and actual height
+checks:tail1024false,region1024true. No unsigned/canonicality precondition is
+invented, and a true local predicate is not full-reference/entry admission.
+Reuses existing producer controls instead of reproving arithmetic semantics.
+
+Two initial probes rejected with defaultrecursion limit in dependent-frame
+output normalization; rejected recovery sorryAx remains only diagnostics.
+Provided bounded try-tactics goalfile finds decidePASS; other candidatesFAIL.
+Flag equalities derived from existing correct-run/control agreement, then a
+general equality-elimination lemma transports the original frame witness to
+EXACToutput[1], preserving code/peak. No statement weakened, output relaxed,
+maxRecDepth/maxHeartbeats raised or linter disabled. Successful repairedprobe
+PASS49.551s; finalstrictPASS27.643s emptylog, bothmonitorsPASS.
+
+103guards=95domains+8transport/joint/refusal lemmas,22none/25propext/2pair/
+54standardtrio,2classifierrefusals; four private supportlemmas transitively
+audited.25explicitproducerleaves in frozenmap/251importproducts matched.
+Verifier reconstructs accepted source/manifest with scopehash, binds native
+probe/strict outputs/logs/monitors, tacticreceipt, actualguardcounts and all
+95targets to sealed150module observations. Global source/witness flagsFalse.
+Probe/strict timings not pairedperformance; no new module>60s here. Same
+05:20→09:20aggregate window,12GiB/noSwap/CPU1/4GiBreserve/300sgroup bounds
+retained; no new epoch, deadlineextension, prerequisite or PowerBoundsretry.
+
+Independent readonly finder/skepticPASS, no findings; preflight limitation,
+parked/uncredited proposal, mappedtargetsource, signed/wrapped semantics, exact
+frame transport, failures and all partial boundaries reviewed. No reviewer
+edits/builds/Lean/server. No production/interface/statement/definition/premise/
+exclusion/axiom/trust changes. Generated evidence offGit, explicitnativecheck
+needed beyond82tests/seven-file verifier. All original703/40core+37Bridge,
+owner/private/type/source/correspondence/global-input-inherited classification,
+remainingjointwitness/ledger, Source/native/gas/fork, P10production, Bridge/
+package/performance and producer waits remain; no RUNTIME_GATE_PASS.
+Evidence: /workspace/parallel-20261103/executable-bytecode/offset-check-domains/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, documentation and
+whitespacePASS. Strict native/replay/tactic evidence remains separately required.
+PendingQ-WV-SCOPE-01 is not a blocker to original mapped work; no answer is
+interpreted as supplemental-scope approval. Global28pins/fullsource/runtime
+validation and original obligations remain unwaived.
+
+
+### Head-check simultaneous domains (2026-11-07)
+
+The existing exact-domain renderer now covers eight mapped HeadCheck method and
+certificate fields, for 103 selected original declarations. The additive joint
+witness binds the same code/certificate to a 35-byte short head (flag 1), the
+36-byte head boundary (false short-head flag), short-head rejection before fuel,
+and a dirty 36-byte payload that still reverts. It also preserves the saturated
+huge-layout metadata control, peak-one frame code, valid capacity and height-1024
+refusal. Clearing the short-head predicate is not payload admission.
+
+The guarded native probe passed in 29.475 s and strict axiom guards in 27.171 s;
+112 guards use only the existing standard axiom sets. All 252 selected imports
+were rebound to the saved source/product receipts. Finder and skeptic found no
+material fidelity or vacuity issue; their flag-polarity clarity note is reflected
+here. No producer, statement, budget, exclusion or toolchain changed.
+
+Evidence: `/workspace/parallel-20261103/executable-bytecode/head-check-domains`.
+This is selected hypothesis/packet evidence, not Source/native/gas/fork adequacy,
+global census coverage, or a full lane pass. The original PowerBounds STOP and
+703-source/190-core/37-Bridge obligations remain. Q-WV-SCOPE-01 is unanswered;
+the separate nine WordValidation domains remain uncredited.
+
+Checkpoint static exception: doc-paths exits1 for newly adopted master's
+`Solidity/Yul/Compilation/P20InterfaceV2Controls.lean` reference to missing
+`tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean`. This is preserved
+as an upstream documentation wait, not counted as a passing gate.
+
+
+### Ordered binder/head accounting (2026-11-07)
+
+The generic metadata helper now preserves each supplied declaration's ordered
+binder observations, dependent-prefix length, proof/data flag and head lookup.
+The actual saved 150-core inspection accounts for all 3,262 records (1,133
+private), 12,495 binders, 1,724 observed proof binders and 1,085 zero-binder
+records. Head joins distinguish 504 occurrences with a supplied record, 7,860
+outside this supplied record set, and 4,131 with no constant head observed;
+58 distinct supplied heads retain their exact observed types and hashes.
+Reversed-input reproduction is identical. No missing head is silently dropped.
+
+Three regression tests cover private/ordered/dependent prefixes, unresolved
+head categories, aliases, repeated binders, zero-binder declarations and
+malformed duplicate/mixed-manifest records. All 85 audit tests pass. Output and
+input bindings are preserved off Git under
+`/workspace/parallel-20261103/executable-bytecode/binder-head-accounting`.
+
+These are supplied metadata joins, not new inspection executions or source
+correspondence. Global-premise versus per-input feasibility remains unclassified;
+instantiated head types and simultaneous witnesses remain unaccepted. Neither
+names, proof flags nor a present head prove a certificate is globally inhabited.
+The full 190-core/37-Bridge census, 703-source closure and original proof/gate
+obligations remain open. No Lean workload, prerequisite build or new proof
+budget epoch was started; the prior epoch expired without extension. PowerBounds
+STOP and all producer waits remain unchanged.
+
+Independent read-only finder and skeptic found no material accounting or
+coverage-inference issue. Finder requested recipe/helper/test hashes for replay
+traceability; the final acceptance receipt now includes all three alongside
+input/output hashes. No reviewer used Lean, builds, server calls or edits.
+The inherited P20 documentation failure remains RED without an unchanged rerun.
+
+
+### P20 documentation owner-answer intake (2026-11-07)
+
+Coordinator delivered the owner report for VY3 head
+c9cf710a8459581006150a462b69ae8c4f0d13e0. It reports a comment-only correction
+that identifies the immutable published controls snapshot and distinguishes it
+from master integration. This is an owner answer, not locally verified bytes.
+The exact commit is absent locally, the approved relay directories contain no
+P20 correction artifact, and fetched master902e87762 retains the missing-file
+citation. The inherited documentation gate therefore remains RED; no owner
+file was reconstructed or changed and no unchanged failing gate was rerun.
+
+Exact failed object/file reads and an authenticated-artifact request are saved
+under `/workspace/parallel-20261103/executable-bytecode/p20-owner-answer-intake`.
+Await the exact owner file/patch or bundle with checksums through the coordinator
+relay before adoption and applicable gates. The reported owner handoff hash
+cannot be verified until its bytes arrive. No proof/source/control acceptance,
+producer adequacy, budget/STOP clearance or goal completion follows from this
+intake. Other original independent audit/witness work and all prior waits remain.
+
+
+### Master merge and P20 documentation adoption (2026-11-07)
+
+Resolved the audit-document conflict with master9d5ea20 by retaining the full
+reviewed local P20 intake appendix; upstream's conflict side was empty. The
+resolved document was byte-identical to the local parent, preserving historical
+failure evidence and every wait. Independent read-only finder/skeptic passed.
+
+The subsequently announced masterdf554535 was merged cleanly. It now includes
+the exact owner correction c9cf710a8459581006150a462b69ae8c4f0d13e0 and controls
+snapshot e36cd2491ea6deced730ee103f999847574c2124. Local correction bytes match
+the owner commit; control bytes match the immutable snapshot and reported
+SHA25624566bc7ba6855181af2c933f72dc5ee9034fd847ef3a7ad507a2ec768358917.
+This resolves the earlier local Git-object/control-file delivery wait through
+published master, without reconstructing a peer file or editing production.
+The old missing-file gate receipt remains historical; changed-input doc-path
+validation is now appropriate. Owner HANDOFF bytes were not separately verified.
+No P20 adequacy, proof pass, PowerBounds clearance or original-goal completion
+follows from this documentation adoption. Evidence is retained under
+`/workspace/parallel-20261103/executable-bytecode/merge-9d5ea20`.
+
+
+Changed-input doc-path gate exits1: the P20 missing-file finding is gone, but
+an inherited reference in docs/feature-work/h62-2-audit-v09-passes.md names missing
+SelectedHeapBoundaryWitness.lean. This distinct upstream documentation finding
+is retained RED for owner routing. All85 audit Python tests and generated
+roots/fragments/whitespace checks pass. No full Lean/Bridge gate was run or
+claimed; the merge does not release the original PowerBounds STOP.

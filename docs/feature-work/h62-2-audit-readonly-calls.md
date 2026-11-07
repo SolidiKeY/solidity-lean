@@ -435,3 +435,301 @@ open. H121 compiler-success/G42.04 adequacy still belongs to
 solidity-compiler10-20261028/memory-reference-structs; our full RO source/callee
 outcome and physical-frame producer remains unfinished. The historical exact
 proof-cleanup object remains UNVERIFIABLE without original recovered bytes.
+
+
+## Frozen callback witness fidelity and coverage (2026-11-07)
+
+Two original interface rows now have checked joint witnesses against the exact
+assigned base c6f550e281a7e5affa9a99bc2cdaed556dec00e4:
+Solidity.Lowering.Readonly.EnvironmentSteps.refused and
+Solidity.Lowering.Readonly.EnvironmentCredit.callback_credit_failed. The first
+has depth and static-value cases; the second has one admitted credit-overflow
+case. These are three joint cases for two statements, not three new obligations.
+The unchanged additive CallbackBoundaryControls module supplies actual choice/
+guard and instance/credit equations together, and clients check the resulting
+source runs. No statement, premise, definition, exclusion or budget was repaired.
+
+`scripts/h62/item1/readonly-bind/check_original_callback.py` reads the original
+Git blobs and freshly compiles the complete57-module unheld callback closure in
+an isolated library with pinned SDK root and no current project-cache fallback.
+It then checks all eight witness theorems and exports both original public
+interface types using the existing metadata helper's kind/module/name checks.
+Their raw type digests match the prior792-declaration export. All eight new
+axiom sets contain only propext,Classical.choice and Quot.sound. SDK modules
+remain toolchain inputs, not independently source-certified dependencies.
+
+Review fixed two analogous digest-retention gaps: the authenticated census
+artifact digest and Git-base toolchain digest are retained before compilation,
+then verified at final sealing rather than adopted from a later read. Five
+external refusal controls passed. The final sealed gate passed in376.049s with
+1675214848bytes aggregate peak RSS. Earlier390.981s and382.576s observations are
+retained separately; they are not matched speed comparisons or a rebaseline.
+Actual tools remain Lean4.24.0/Lake5.0.0-src+797c613,-j1,12GiB cap,4GiB reserve,
+no swap. Original KeySort compiled successfully within the frozen closure.
+The held Premises module is rejected before dependency compilation.
+
+An owned detached C6 checkout was used only for the strict source census.
+All129 module hashes and all792 declaration identities, source headers, variable
+contexts and visibilities match the authenticated original inventory. Only the
+callback closure/two interfaces received new kernel validation. Other790 semantic
+records retain their previous evidence; the current three deleted private IDs
+are not restored by historical objects.
+
+Coverage now contains26 joint-witness rows plus3 target-failure joint rows.
+The retained full ledger has45 intentional impossibility rows,256 no-top-level
+input-hypothesis rows,2 frozen-V1-refuted/versioned-migration rows and460 pending
+ordinary rows:792 total. These are bookkeeping categories, not a whole-goal
+completion claim. The source-only census separately reports758 pending because
+it does not rerun the retained semantic classification; it is not a replacement
+for that full ledger. Exactly two witness statuses changed from the previous
+current coverage view, with all other790 rows retained.
+
+`tests/h62/item1/readonly-bind/original-callback.sha256` pins the frozen receipt,
+types, raw probe log, inventory, outer bounded receipt and coverage/fidelity
+reports. Raw bulk evidence remains off Git under
+`/workspace/h62-audit-readonly-calls/original-callback/`.
+Independent read-only finder and skeptic confirmed the fixes and final two-row
+integration; neither executed Lean or wrote files. The current callback checker
+also now derives its PASS counts from observed records; five controls and its
+current kernel check passed. Exact older helper bytes are preserved with the
+frozen validation provenance. Rebased onto coordinator master a10b60f23315.
+No Lean theorem/proof changed in this checkpoint; no new axioms/sorry/native_decide.
+All remaining original/inherited queues, full acceptance, broader binding/live
+ownership and RO source/callee plus physical-frame adequacy remain open. The
+historical +80.254966536% Premises STOP is unchanged; no RUNTIME_GATE_PASS.
+
+
+## Known, unknown and failed credit joint witnesses (2026-11-07)
+
+Three additional original interfaces now have explicit simultaneous input
+witnesses: EnvironmentCredit.known, EnvironmentCredit.unknown and
+EnvironmentCredit.failed. CreditJointControls checks choice, post-record instance
+lookup and actual successful/failed credit at the same state sequence; the
+unknown case supplies its two hypotheses without inventing a credit equation.
+Clients apply the unchanged laws and verify success bytes[7], skipped unknown
+credit or overflow halt. Further observations check the model's permitted static
+balance credit with storage preservation and the unknown case's unchanged
+execution state. Eight supplementary theorems cover three original obligations.
+No compiler/EVM/gas/fork, constructor reachability or whole-world claim follows.
+
+The new checker admits only the exact executed frozen/current parent receipts.
+Frozen mode rechecks all57 Git-base source/snapshot hashes and58 parent objects;
+current mode checks its77-module source graph and80 objects. Parent logs, trusted
+compiler/toolchain input pins, SDK root and the new source/object/probe/logs are
+checked before and after. Authenticated parent and original792 artifact digests
+are retained, never resampled after authentication. This is checked dependency
+artifact reuse, not a fresh rebuild or independent SDK source certification.
+
+The frozen gate passed in5.028s at796049408bytes peak aggregate RSS; the separate
+current gate passed in4.524s at795627520bytes. Each checked eight theorem axiom
+sets (only propext, Classical.choice, Quot.sound) and exported the three original
+interface types with module/name/kind checks. Frozen and current results remain
+separate: equal source or type hashes would not prove model-definition equality.
+Their balance representations differ; a kernel-checked closed calculation proves
+the same balance equality in both models, without changing the statement.
+Initial representation-specific proof failures are retained separately.
+
+Six external refusal controls passed for parent profile/byte binding, frozen
+source/object/log mutation and missing objects, flat extra-module aliases,
+forged census data, unauthorized/missing/duplicate axioms and retained digest
+substitution. Five existing census tests passed. Independent read-only finder
+and skeptic confirmed the final proofs and exactly three-row integration; neither
+executed Lean or wrote files. Nine raw evidence pins are committed in
+`tests/h62/item1/readonly-bind/credit-joints.sha256`.
+
+All792 rows remain accounted once. The retained semantic ledger now has29 joint,
+3 target-failure joint,45 impossibility,256 no-top-level-input,2 frozen-V1-refuted
+migration and457 pending ordinary rows. Exactly three records changed; other789
+retain prior evidence and all three current private-ID gaps remain. The strict
+original source census separately reports755 pending because it does not replay
+the retained semantic classification; it is not a replacement for that ledger.
+The whole original/inherited assignment is unfinished. Historical Premises
++80.254966536%STOP remains; no held workload rerun, rebaseline or runtime pass.
+Actual tools remain Lean4.24.0/Lake5.0.0-src+797c613 with -j1,12GiB cap,4GiB
+reserve,no swap; passing KeySort evidence is retained in the admitted parents.
+No original statement, definition, premise, exclusion, axiom or budget changed;
+no new sorry/native_decide. Evidence and handoff are under
+`/workspace/h62-audit-readonly-calls/credit-joints/`.
+
+
+## Joint actual capture-failure inputs (2026-11-07)
+
+Four original CaptureFailures laws now have closed simultaneous witnesses:
+target_failed, value_failed, arguments_failed and code_rejected. The conjunctions
+include the declaration signature, integer validity when required, every actual
+phase run and the rejection guard. The code-rejection witness evaluates arguments
+from before to after; encoding, lookup and rejection all use after. Its client
+preserves the local mutation while adding no callee events. The three timeout
+clients preserve timeout and their exact state. Nine supplementary theorems
+discharge four original input-feasibility obligations, with no compiler-success,
+EVM, gas/fork, constructor-reachability or physical-frame adequacy claim.
+
+The existing credit checker now selects one fixed suite; its default credit path
+is preserved. Frozen capture checking reconstructs the exact C6 import graph,
+compiles 11 missing unheld modules and copies 54 reused objects into one private
+namespace after checking authenticated source/object pins. All 58 parent objects
+are verified before and after. A first sparse-root attempt failed because Lean
+selected a partial namespace; finder and skeptic independently identified that
+issue. The corrected complete namespace retains copied object hashes. An
+explicit intrinsic Vals address type fixed an elaboration ambiguity; neither
+failure is reported as a pass. No historical held Premises workload was run.
+
+Final frozen checking passed in 21.101 seconds at 818544640 bytes peak aggregate
+RSS; separate current checking passed in 8.079 seconds at 797831168 bytes, reusing
+its authenticated 80-object parent. Default credit checking passed in 4.527
+seconds at 791777280 bytes. These are bounded gate measurements, not a matched
+before/after build comparison or a release of the +80.254966536% STOP. The nine
+capture axiom sets contain only propext, Classical.choice and Quot.sound. Actual
+tools are Lean 4.24.0 / Lake 5.0.0-src+797c613; passing KeySort prerequisite
+remains in the admitted parent evidence. All checks ran serially with -j1,
+12 GiB cap, 4 GiB reserve and no swap. Artifact reuse is not a fresh closure
+rebuild or independent SDK source certification; frozen/current model definitions
+are not asserted equal.
+
+Eight external refusal controls and five census tests pass. Independent read-only
+finder and skeptic confirmed the fixed namespace and exactly four-row coverage
+addition; neither executed Lean or wrote files. All 792 original rows remain:
+33 joint, 3 target-failure joint, 45 checked impossibility, 256 no-top-level-input,
+2 frozen-V1-refuted migration and 453 ordinary pending. The other 788 records
+retain prior evidence; three current private identities remain unmatched. The
+strict original source census separately reports 751 pending because it does
+not replay the full semantic classification. Ten raw evidence hashes are in
+`tests/h62/item1/readonly-bind/capture-joints.sha256`.
+
+Raw gates, sources, objects, failed attempts, census and handoff are under
+`/workspace/h62-audit-readonly-calls/capture-joints/`. No original statement,
+dependent definition, premise, exclusion, axiom or budget changed; no new
+sorry/native_decide. Full original/inherited acceptance and RO G42.02 execution
+plus source/callee and physical-frame correspondence remain open. No runtime
+pass, goal completion, publication or master merge is claimed.
+
+
+## Complete encoding and composition inputs (2026-11-07)
+
+Rebased the clean assigned branch onto master
+80c156bf13d1900acf9cdae1556496ee3473e0cd. Its intervening changes did not
+supply these witnesses or alter the relevant readonly sources. The authenticated
+current parent still matches its complete source/import graph after the rebase.
+
+Two more original laws have simultaneous witnesses: CaptureFailures.encoding_failed
+and CapturePhases.compose. The encoding conjunction includes signature, integer
+bounds and all four actual phase runs. Its typed array argument points to an
+allocated heap object, and the encoder actually reports not ABI-encodable. The
+composition conjunction includes signature, integer bounds, all five phase runs
+and admission: receiver/value start at before, arguments mutate before to after,
+and encoding/lookup/admission use after. The unchanged law produces CapturedAt;
+its client resumes at after with the original receiver rather than the assigned
+local address. Seven supplementary theorems cover two original obligations.
+Capture success is not callee success or an owner's compiler-success theorem.
+
+The existing fixed-suite checker now compiles the unchanged allocated-array
+helper separately in its isolated library. Its source, staged source, object and
+logs are sealed, and imports must belong to the authenticated project closure or
+trusted SDK; held, unverified and foreign dependencies are refused. The default
+credit suite remains unchanged. Frozen validation still compiles 11 missing
+unheld original modules and copies 54 authenticated reused objects into one
+private namespace; 58 parent objects are verified. Current validation reuses
+its independently source-bound 80-object parent. No equality of frozen/current
+model definitions or independent SDK source certification follows from reuse.
+
+The final frozen gate passed in 22.618 seconds at 811257856 bytes peak aggregate
+RSS; current passed in 5.540 seconds at 799129600 bytes. Default credit regression
+passed in 5.029 seconds at 792158208 bytes. These are bounded individual checks,
+not a matched before/after speed comparison or a performance STOP release.
+The initial frozen pass preceded a state-sequence comment correction; the final
+frozen/current gates check the corrected bytes. Finder and skeptic both requested
+that comment correction and otherwise found no defect. Final independent reviews
+also confirm the two-row coverage addition; neither reviewer executed Lean or
+wrote files. Ten external refusal controls and five census tests passed.
+
+All seven new axiom sets contain only propext, Classical.choice and Quot.sound.
+Actual tools are Lean 4.24.0 and Lake 5.0.0-src+797c613, serial -j1 with 12 GiB
+cap, 4 GiB reserve and no swap; passing KeySort remains in admitted parent
+evidence. No original statement, dependent definition, premise, exclusion, axiom
+or budget changed; no new sorry/native_decide. No held Premises workload ran.
+
+All 792 original obligations remain: 35 joint, 3 target-failure joint,
+45 intentional impossibility, 256 no-top-level-input, 2 refuted-V1 migration
+and 451 ordinary pending. Exactly two records changed; the other 790 retain
+prior evidence. All three current private identity gaps remain. Strict original
+source accounting covers 129 modules/792 names with 749 source-only pending;
+it does not replace the fuller semantic ledger. Ten raw evidence pins are in
+`tests/h62/item1/readonly-bind/capture-composition.sha256`. Raw gates, helper
+provenance and the handoff are under
+`/workspace/h62-audit-readonly-calls/capture-composition/`.
+
+Whole original/inherited acceptance, broader binding/live ownership, actual
+compiler success and full RO G42.02 source/callee execution plus physical-frame
+correspondence remain unfinished. Historical +80.254966536% Premises STOP remains;
+no runtime pass, goal completion or master publication is claimed.
+
+
+## Executed native reply adapter (2026-11-07)
+
+The H121 producer investigation found that MachineV2 CALLIN still reads reply
+and accepts oracles; SourceCallProducerV2.returndata_any does not relate a source
+callee to executed code. A new additive ExecutionReplies helper makes a narrower
+piece explicit: prepare the target child receiver/caller/value header and exact
+input memory window, run an explicit native code image, and derive reply/status
+from the existing OutV2.exit observation. No source outcome or desired bytes are
+arguments of attach. Actual success/revert payloads are retained; fault and
+pending execution produce no adapter. Funded and poor CALLIN cases are both
+accounted for, with caller memory/storage preservation proved at callInStep.
+Native echo/revert images and fault/pending controls distinguish outcomes.
+
+This precomputes a target execution reply and configures the frozen machine's
+oracle for one selected call. It does not replace CALLIN with recursive callee
+execution. Its reply is input-specific, while accepts(address,value) has no input
+parameter, so acceptance affects every input at that pair. The adapter is for
+single-input use. Child final state is discarded; no world code selection,
+callee state commit, emitted caller program, Source-to-core compiler, nested-call,
+gas/fork, heap/allocator P1 or full G42.02 adequacy follows. The existing native
+frame proof is only caller memory/storage at callInStep. These limits leave our
+full RO source/callee execution and physical-frame producer unfinished.
+
+Final validation freshly compiled all 16 project dependencies (including
+KeySort) and the helper in a private library, without shared project cache
+fallback or any held Premises import. The exact current source/import graph,
+staged sources, objects, tool inputs and logs are sealed before success. Eleven
+theorem axiom sets contain only propext, Classical.choice and Quot.sound. The
+final-reused gate passed in 69.847 seconds at 828407808 bytes peak aggregate RSS.
+Actual Lean 4.24.0 / Lake 5.0.0-src+797c613; explicit -j1, 12 GiB cap, 4 GiB
+reserve, no swap. Initial elaboration/proof failures and earlier successful
+pre-reuse checks are retained separately, not substituted for this final gate.
+
+Self-review replaced a duplicate outcome classifier with existing OutV2.exit.
+Five paired warm-cache runs from the same source path, dependency library,
+compiler and flags measured 0.978159551 seconds before and 0.943724352 after
+(medians, -3.520407%); median peak RSS was 571092992 and 570155008 bytes.
+This native-adapter measurement does not rebaseline or clear the historical
+Premises +80.254966536% STOP. The first timing utility missed staged-file and
+final-log checks; finder and skeptic independently found the gap. The corrected
+utility verifies actual staged bytes before/after each compiler run, seals all
+logs, pins instrumentation, and checks the exact current dependency graph. Its
+library receipt is caller-supplied: byte binding is not build authentication or
+SDK source certification. Only the corrected sealed measurement is pinned as
+final timing evidence; earlier timing is historical. Five external controls
+include staged-file/log substitution and unauthorized/incomplete proof evidence.
+
+Independent read-only finder and skeptic confirmed the target-only scope and
+reviewed the integrity fixes; neither executed Lean/tests or wrote files.
+Nine raw pins are in
+`tests/h62/item2/audit-readonly-calls/execution-replies.sha256`; evidence and
+handoff are under `/workspace/h62-audit-readonly-calls/execution-replies/`.
+No original obligation is discharged by this adapter. Coverage remains
+byte-identical: all 792 rows, 451 ordinary pending, three private-identity gaps,
+and all previous witness/refutation classifications remain. No frozen statement,
+dependent definition, premise, exclusion, axiom or budget changed; no new
+sorry/native_decide. Full original/inherited acceptance, owner compiler success,
+our full H121 producer and runtime gates remain unfinished. No runtime pass or
+master publication is claimed.
+
+
+Post-rebase validation on coordinator master 658d1b1d14c68a031c137f576764ec7e9e7a6359
+found one inherited documentation failure: the Claude-origin compatibility
+module `Solidity/Yul/Compilation/P20InterfaceV2Controls.lean` cites the absent
+file tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean. Ticket
+RO-DOC-P20-REF routes this exact docstring repair to the live Yul/original vy3
+owner through the coordinator. That source remains read-only here. The global
+documentation gate is failing, not waived; native source/object bindings and
+proof results remain unchanged. Original/inherited full acceptance is pending.

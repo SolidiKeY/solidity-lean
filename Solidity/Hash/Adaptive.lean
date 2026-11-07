@@ -497,8 +497,8 @@ theorem two_mul_eagerCollides_le (hs : ∀ t, s t ∈ dom) (N : Nat) :
     have h0 : (tuples N dom.length).countP (eagerCollides s dom 0) = 0 := by
       rw [List.countP_eq_zero]
       intro g _
-      simp only [eagerCollides, eagerQueries, decide_eq_true_eq, Classical.not_not]
-      exact CollisionFree.nil
+      simp only [eagerCollides, eagerQueries]
+      exact fun h => (of_decide_eq_true h) CollisionFree.nil
     rw [h0]; exact Nat.zero_le _
   | q + 1 => by
     have ih : 2 * N * (tuples N dom.length).countP (eagerCollides s dom q) ≤
@@ -582,8 +582,8 @@ theorem two_mul_eagerRegionsFail_le (hs : ∀ t, s t ∈ dom) (N L : Nat) {roots
     have h0 : (tuples N dom.length).countP (eagerRegionsFail s dom N L roots 0) = 0 := by
       rw [List.countP_eq_zero]
       intro g _
-      simp only [eagerRegionsFail, eagerQueries, decide_eq_true_eq, Classical.not_not]
-      exact RegionsDisjoint.nil
+      simp only [eagerRegionsFail, eagerQueries]
+      exact fun h => (of_decide_eq_true h) RegionsDisjoint.nil
     rw [h0]; exact Nat.zero_le _
   | q + 1 => by
     have ih : 2 * N * (tuples N dom.length).countP (eagerRegionsFail s dom N L roots q) ≤

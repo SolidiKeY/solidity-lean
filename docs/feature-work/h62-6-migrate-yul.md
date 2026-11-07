@@ -1017,3 +1017,45 @@ final generation matches byte for byte. Full queue, constraints and retrieval
 are in [the metadata plan handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-plan-handoff.md).
 All four original checkpoints remain partial. No model statements, budgets,
 axioms, interfaces, exclusions or shims changed.
+
+
+## Metadata binding follow-ups and nine old observations
+
+At coordinator rebaseline `81512fd7298eb0257a9bcbde9913d10eb8229951`, the planner
+now resolves relative summaries against `--baseline` and parses the same bytes
+it hashes. Tests additionally mutate sources and summaries during planning;
+final checks reject them before output. All 83 tests pass in 25.864 seconds,
+and final plans are byte-identical. Finder and skeptic approved without findings.
+
+All nine original modules with zero kernel declarations were then actually
+inspected with the unchanged external old metadata observer under serial bounded
+Lean 4.24.0. All probes passed with zero selected declaration/class/instance/
+default entries. This is finite observation, not absence of generic attributes,
+public classification or semantic/new compatibility proof. Peak sampled RSS
+was 1952473088 bytes; minimum available estimate 15164993536 bytes. Sum of
+individual probe walls was 17.683652906 seconds, not a clean-build comparison.
+No new-toolchain run or unchanged performance STOP retry occurred. Full scope,
+remaining queue and evidence retrieval are in
+[the binding handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-binding-handoff.md).
+All original checkpoints remain partial; no model statements, budgets, axioms,
+interfaces, exclusions or shims changed.
+
+
+## Selected old metadata coverage ledger
+
+At coordinator rebaseline `658d1b1d14c68a031c137f576764ec7e9e7a6359`, the prior
+checkpoint was verified patch-equivalent before the authorized rebase. The new
+`metadata-coverage.py` rebuilds the original source-bound plan and re-seals
+actual saved observations, rejecting duplicates, fixtures outside the corpus,
+stale records and input drift. It records ten unique original modules observed
+and 1764 explicitly pending, in exact original order. The complete zero-query
+plan and finite fixture evidence remain separate.
+
+All 93 Python tests pass in 26.406 seconds. Reversing actual observation arguments
+produces byte-identical output. Independent finder and skeptic verified all
+3970 input hashes and counts without findings or Lean/server/writes. This is
+selected old metadata coverage, not generic attribute, public API, proof or
+performance acceptance. No new Lean execution, model change or timing STOP retry.
+Full original scope, remaining queue and fresh-thread retrieval are recorded in
+[the coverage handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-coverage-handoff.md).
+All original checkpoints remain partial; the existing goal remains unfinished.
