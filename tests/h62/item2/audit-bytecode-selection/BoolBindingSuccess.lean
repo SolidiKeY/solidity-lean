@@ -4,7 +4,8 @@ import Solidity.Backend.AbiEntry.BoolBinding
 is mistaken for successful supported execution, allowing reject-all/revert-all
 implementations. Joint witnesses retain the actual selected program and initial
 word/size representation. These are gasless intrinsic IR observations, not a
-native byte loader, Source adequacy, charged execution or fork acceptance. -/
+native byte loader, Source adequacy, charged execution or fork acceptance.
+The generic fuel controls also guard against dropping the decoder fuel offset. -/
 namespace Solidity.H62.BytecodeSelection.BoolBindingFixture
 open Solidity.Evm Solidity.Backend.AbiEntry
 open Solidity.Backend.AbiEntry.Interface
@@ -365,5 +366,57 @@ theorem generic_short_frame_reverts (C : Solidity.Contract) (base : Nat)
 #guard_msgs (whitespace := lax) in #print axioms generic_decoded_success_jointWitness
 /-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_short_frame_reverts' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms generic_short_frame_reverts
+
+/-- The same successful selected gate cannot justify success of an unfueled
+semantic decoder. This is a fuel-boundary control, not a producer defect. -/
+theorem generic_fuel_boundary_jointWitness (C : Solidity.Contract) (base : Nat)
+    (kind : Solidity.AbiEntry.Kind) (label : Fin W) (input : Solidity.AbiEntry.Input)
+    (machine : Machine) (small : input.size < W) (full : ¬ input.size < 36)
+    (valid : kind.valid (Solidity.AbiEntry.load input.data 4) = true) :
+    ∃ (_certificate : SingleWordGateCertificate SingleWordGate.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx)
+        (SingleWordGate.program C kind label)) (prepared : Machine) (size : Fin W)
+      (value : Solidity.AbiEntry.Word kind),
+      Compiler.compile base (Frag.init RouteCtx) (SingleWordGate.program C kind label) = some result ∧
+      size.val = input.size ∧ prepared.mem base = .val (rawArgumentWord input) ∧
+      prepared.mem (base + 1) = .val size ∧
+      value.val = Solidity.AbiEntry.load input.data 4 ∧
+      run result.code prepared =
+        .ok {prepared with mem := upd prepared.mem (base + 1) (.val label)} 0 ∧
+      Solidity.AbiEntry.entry input 2 (singleWordParams kind) =
+        .ok (.cons (.val (.word value)) .nil) ∧
+      Solidity.AbiEntry.entry input 0 (singleWordParams kind) = .error .fuel ∧
+      Solidity.AbiEntry.entry input 1 (singleWordParams kind) = .error .fuel ∧
+      ¬ (run result.code prepared =
+          .ok {prepared with mem := upd prepared.mem (base + 1) (.val label)} 0 ↔
+        ∃ values, Solidity.AbiEntry.entry input 0 (singleWordParams kind) = .ok values) := by
+  obtain ⟨certificate, result, prepared, size, value, selected, represented,
+    initialWord, initialSize, rawValue, decoded, executed⟩ :=
+    generic_decoded_success_jointWitness C base kind label input 0 machine small full valid
+  have low :
+      Solidity.AbiEntry.entry input 0 (singleWordParams kind) = .error .fuel ∧
+      Solidity.AbiEntry.entry input 1 (singleWordParams kind) = .error .fuel :=
+    SingleWordGate.insufficient_fuel input kind full
+  refine ⟨certificate, result, prepared, size, value, selected, represented,
+    initialWord, initialSize, rawValue, executed, decoded, low.1, low.2, ?_⟩
+  intro unshifted
+  obtain ⟨values, success⟩ := unshifted.mp executed
+  rw [low.1] at success
+  cases success
+
+/-- Concrete zero-byte Boolean data inhabits all fuel-boundary hypotheses;
+this is not a conditional assertion over an empty supported-input domain. -/
+theorem fuel_boundary_input_inhabited :
+    ∃ input : Solidity.AbiEntry.Input,
+      input.data = List.replicate 36 (0 : UInt8) ∧ input.free = 0 ∧
+      input.size < W ∧ ¬ input.size < 36 ∧
+      Solidity.AbiEntry.Kind.bool.valid (Solidity.AbiEntry.load input.data 4) = true := by
+  exact ⟨{data := List.replicate 36 (0 : UInt8), free := 0},
+    rfl, rfl, by decide, by decide, by decide⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_fuel_boundary_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms generic_fuel_boundary_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.fuel_boundary_input_inhabited' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms fuel_boundary_input_inhabited
 
 end Solidity.H62.BytecodeSelection.BoolBindingFixture

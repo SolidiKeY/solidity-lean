@@ -870,3 +870,42 @@ The global pin scan has zero errors,29 unrecorded changes and99 baselined
 changes;18 own records remain proposed. The known off-scope documentation
 citation gate remains unresolved and was not repeated unchanged. No full-gate
 or whole-lane PASS follows. Coordinator producer waits remain unchanged.
+
+
+## Explicit generic decoder-fuel boundary
+
+After adopting published master cc1ea1c9 in merge083975bb, a new generic
+fuel-boundary witness reuses the existing SingleWordGate and the same represented
+raw input. It simultaneously proves selection, global certificate, both memory
+cells, decoded-value identity, IR success and semantic success at fuel2, together
+with semantic fuel errors at0 and1. It refutes the unshifted equivalence between
+that IR success and semantic success at0. This is an intentional boundary
+control guarding removal of the decoder offset, not a defect in a frozen
+producer theorem and not an EVM charged-gas statement.
+
+A closed36zero-byte Boolean input proves all size/full/valid hypotheses can
+coexist. Empty modeled kinds are not silently declared inhabited. This extends
+the existing generic audit in place: no new per-case family or producer.
+Both read-only reviews accepted the logic and requested an explicit local
+conjunction type; that annotation is included in the final check.
+
+First check11.337s PASS; final annotated source check9.945s PASS with empty
+diagnostics and twenty standard-only guards; both final monitors passed, parent
+maximum sampled parent peak1,871,368,192bytes. No module exceeded60s. These single runs are validation
+receipts, not paired performance measurements; final matched/package performance
+remains pending. No Lean or Lake pin, heartbeat, trust, budget or exclusion
+changed. Both runs retain the original generic epoch/deadline
+01:11:01.069665→05:11:01.069665UTC, without reset, prerequisite rebuild or
+PowerBounds retry. No new Source/native/selector, gas/fork, census coverage,
+full validation or RUNTIME_GATE_PASS follows. The scoped pin proposal now has
+twenty records, still not global registration.
+Evidence: /workspace/parallel-20261103/executable-bytecode/generic-fuel-boundary/.
+
+Both independent read-only postfix reviews confirm the explicit-type fix,
+source/output/log hashes and all twenty guards; no remaining findings.
+
+Checkpoint audit-tool tests63, trust/reachability, roots/fragments and whitespace
+pass. Global pins remain RED with0errors,31unrecorded and99baselined changes;
+twenty scoped records are proposals. The prior twelve external core-to-non-core
+layer edges and five off-scope citation failures remain unresolved; neither
+unchanged failure was repeated or waived.
