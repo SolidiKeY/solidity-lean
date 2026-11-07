@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/failure-local-roles-v107/semantic-roles-reviewed.json",
-    "bytes": 3706343,
-    "sha256": "1a32524ccd37aaf3843fdb50e7aa79d94f5b2c8b3102e04fbdf26fc2c1560baf"
+    "path": "/workspace/h62-successor-bulk/failure-control-roles-v108/semantic-roles-reviewed.json",
+    "bytes": 3726331,
+    "sha256": "cebea1ea876fbd1a9605102f0abcf3e6afb21a0adb380c4452be79564012c657"
   }
 }
