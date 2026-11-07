@@ -204,3 +204,39 @@ patch, bundle, evidence archive, final committed head and SHA256 manifest are
 recorded in `/workspace/generic-v08-export/HANDOFF.md`. Overall status remains
 blocked with all four original queue obligations preserved; no full completion
 or runtime-gate pass is asserted.
+
+## Explicit resume after coordinator integration
+
+The coordinator explicitly requested merging `origin/master` and continuing,
+superseding this worker's prior local retirement disposition. The checkout was
+already clean at published lane head `c6b1d20e933b8b4a822442dcb4676798d7dc7cce`,
+which contains retirement head `4a78ae839e026e1a9f8f575cd10fec4478e52305`.
+Fetched and verified the published ancestry, then fast-forwarded the original
+lane branch to `20e492ee99a3fa8679aa526de0b6e731d85e4134` without conflicts.
+No new/reset goal, push or default-branch write was performed. Coordinator
+reported touched/Bridge gates passed upstream; these are not new local gates.
+
+Independent authorized census backfill continues under the original additive
+scope. The current V08 family has 221 files and 4,430 declarations. All 220
+original files and 4,428 original declarations are unchanged. The sole added
+module is `Solidity.Lowering.V08.CallableBodyPremises`, with `Inputs` and
+`complete`. That producer-premise contract does not itself prove a populated
+execution witness or discharge this lane's correspondence obligations.
+
+New `audit_current.py` reports original integrity and every current addition;
+it does not weaken or replace strict `accept.py`, which still correctly refuses
+an expanded inventory. Four new addition/mutation/removal tests pass normally
+and under optimized Python; all twelve prior tests pass. Separate read-only
+finder and skeptic reviews pass, with no Lean processes/server or source edits.
+The report and complete current inventory stay off git with SHA256 in the report:
+`/workspace/generic-v08-evidence/resume-20e492ee9/current-audit.json`.
+Commands and outcomes: that directory's `verification.json`.
+
+No new Lean proof, trust pin, source definition, frozen statement or budget
+change. Historical SortCheck and Roadmap axiom-guard source files are unchanged;
+known heavy failures were not rerun. The all-width admission helper remains
+isolated backfill, not execution/correspondence proof. Original queue steps 2–4
+and runtime/elaborated validation of step 1 remain unfinished. Waits continue
+for the SortCheck migration and the axiom-preserving Roadmap prerequisite fix.
+H82 removes the former proof-only exact-file agreement wait. No automatic
+completion or passing family runtime gate is inferred from the merged work.
