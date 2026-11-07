@@ -14,3 +14,4 @@ requires area-owner approval; the fragment is a proposal only.
 | tests/h62/item2/audit-readonly-calls/CallBoundaryWitnesses.lean | Joint static-operation and short/reverted-return inputs with actual Source observations; no compiled callee/frame claim. |
 | tests/h62/item2/audit-readonly-calls/JournalWitnesses.lean | Funded distinct-account transfer, persistent storage history and actual credit inputs; no static-call or runtime-frame claim. |
 | tests/h62/item2/audit-readonly-calls/InvocationModeWitnesses.lean | Checked captured invocations for inherited/view/pure mode laws; no callee execution or physical-frame claim. |
+| tests/h62/item2/audit-readonly-calls/CallerStorageWitnesses.lean | Joint caller-storage premises with actual modeled Source call, nonempty field and caller-owned layout; no compiler/physical-frame claim. |

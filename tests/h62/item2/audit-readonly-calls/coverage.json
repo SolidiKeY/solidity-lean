@@ -1039,6 +1039,45 @@
       "frozen_receipt_sha256": "970f4c8780ec3a2eef8b995230fdcc9e0c8516429846e3a6b46800446c8c0478",
       "current_receipt_sha256": "eba160e987280b59a46be668fda0b70a965cf66bf841201a51d8088f01730418",
       "proof_boundary": "Joint mode premises and actual pre-callee capture only; explicit hasCode/callee model records are not callee execution, selected compiler/world binding, physical frames, gas/fork or H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.PrimitiveFields.caller_storage",
+      "signature_sha256": "72b0c18ce0385de26da44f312af64a03e14685702b27eaa735c8f4b85463f65e",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.CallerStorageWitnesses.storage_joint",
+      "global_premises": "Same actual captured Invocation and explicit external-model Glob; successful RawAt and RuntimeFrames checked together at the same Source endpoints.",
+      "per_input": "Nonself receiver2/caller0, actual success[7] and changed events, named persistent true Bool C.flag, caller-owned layout and same true intrinsic storage with both entry/exit relations.",
+      "evidence": "Private coordination archive: caller-storage/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: caller-storage/SHA256SUMS",
+      "frozen_receipt_sha256": "8a31e78f62c1d017a47064edae0802c48210ebc9c053740bd291c5d7eb90cf77",
+      "current_receipt_sha256": "e022e7b78f1129b4a61ed27f11f16604f683243a7c88ca312e33fbb8c2c55460",
+      "proof_boundary": "Joint premise satisfiability for original caller-storage transports, including the reflexive equality only. Explicit model reply is not compiled/resolved Source body execution, compiler/world binding, physical frames, gas/fork, semantic transport or full H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.PrimitiveFields.caller_exit",
+      "signature_sha256": "3312fc0ea38e43aa6ff50ea54bf5699b431880d2d98b0f5dab9d824c6ed09b9a",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.CallerStorageWitnesses.exit_joint",
+      "global_premises": "Same actual captured Invocation and explicit external-model Glob; successful RawAt and RuntimeFrames checked together at the same Source endpoints.",
+      "per_input": "Nonself receiver2/caller0, actual success[7] and changed events, named persistent true Bool C.flag, caller-owned layout and same true intrinsic storage with both entry/exit relations.",
+      "evidence": "Private coordination archive: caller-storage/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: caller-storage/SHA256SUMS",
+      "frozen_receipt_sha256": "8a31e78f62c1d017a47064edae0802c48210ebc9c053740bd291c5d7eb90cf77",
+      "current_receipt_sha256": "e022e7b78f1129b4a61ed27f11f16604f683243a7c88ca312e33fbb8c2c55460",
+      "proof_boundary": "Joint premise satisfiability for original caller-storage transports, including the reflexive equality only. Explicit model reply is not compiled/resolved Source body execution, compiler/world binding, physical frames, gas/fork, semantic transport or full H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.PrimitiveFields.lowered_caller_exit",
+      "signature_sha256": "1252040205b4758d47e5d5011fe932f003d52cb3db29b6b16e4d51dc133c8e47",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.CallerStorageWitnesses.owned_exit_joint",
+      "global_premises": "Same actual captured Invocation and explicit external-model Glob; successful RawAt and RuntimeFrames checked together at the same Source endpoints.",
+      "per_input": "Nonself receiver2/caller0, actual success[7] and changed events, named persistent true Bool C.flag, caller-owned layout and same true intrinsic storage with both entry/exit relations.",
+      "evidence": "Private coordination archive: caller-storage/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: caller-storage/SHA256SUMS",
+      "frozen_receipt_sha256": "8a31e78f62c1d017a47064edae0802c48210ebc9c053740bd291c5d7eb90cf77",
+      "current_receipt_sha256": "e022e7b78f1129b4a61ed27f11f16604f683243a7c88ca312e33fbb8c2c55460",
+      "proof_boundary": "Joint premise satisfiability for original caller-storage transports, including the reflexive equality only. Explicit model reply is not compiled/resolved Source body execution, compiler/world binding, physical frames, gas/fork, semantic transport or full H121 adequacy."
     }
   ]
 }

@@ -1744,3 +1744,48 @@ Full owned H121 Source/callee/selected compiler-world/physical-frame production,
 external type/semantic transports and G42.04, inherited cleanup queues and final
 acceptance remain unfinished. Next independent work remains the original joint
 inputs and that owned producer; no goal or scope change.
+
+
+### Joint caller-owned storage transport inputs (2026-11-07)
+
+The clean branch adopted master 77dbfca86aa107955b83529007fcaf3b57c32f29
+without conflict. CallerStorageWitnesses supplies all inputs of the original
+PrimitiveFields.caller_storage, caller_exit and lowered_caller_exit interfaces
+at the SAME captured invocation and final Source state. A nonself call through
+an explicit external-model reply returns [7] and changes its event trace. The
+actual raw run and structural history use those exact endpoints. A named, typed,
+persistent C.flag field contains true in both Source and intrinsic storage; the
+CallLayout ownership proof is tied to the caller frame's C contract name.
+
+The reflexive storage equality is premise satisfiability only. It establishes
+neither compiled/resolved Source-body execution nor general runtime-history
+production, compiler/world binding, physical frames, gas/fork or H121 adequacy.
+The event-change control and rejection of a false/default intrinsic cell make
+the Source execution and nonempty representation observable. No original
+statement, dependent definition, premise, exclusion, budget or axiom changed.
+
+The same additive module passes frozen/current isolated gates; all three
+original kernel types match and all nine theorem axiom sets match the existing
+propext/Classical.choice/Quot.sound sets. Exact dependency/tool/log/object
+authentication remains intact. The erased-cell proof uses constructor
+discrimination instead of assuming a decidable equality instance for typed
+Source values. Detailed commands, versions, measurements and attempts remain
+in private evidence under H145. No performance rebaseline, STOP release or
+runtime pass is claimed.
+
+The collector explicitly maps storage_joint, exit_joint and owned_exit_joint,
+rather than the preceding helper proofs. All 792 originals remain: 79 joint,
+407 ordinary pending including three private identity gaps, 3 target-failure
+joint, 45 intentional impossibility, 256 no-input and 2 frozen-v1 refutation/
+migration results. The other 789 rows are unchanged. Independent read-only
+finder and skeptic found no remaining issue in the premises, mappings, exact
+paired receipts or census; neither used Lean servers, execution, tests/builds
+or writes.
+
+The H70 owner reply at 8add331c8ee2a8f7d6bbf3bf1ee2999344c804e8 explicitly
+supplies ZERO exact H57 transports. Its current endpoint range/wordView results
+are supporting evidence only; all nineteen transports and three private gaps
+stay open. No Source or owner module was edited/imported for this reply.
+Full owned H121 Source/callee/selected compiler-world/physical-frame production,
+external compiler-success/G42.04, inherited queues and final acceptance remain
+unfinished. Next work remains original joint inputs and the owned producer.
