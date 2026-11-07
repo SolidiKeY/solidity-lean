@@ -1,0 +1,317 @@
+{
+  "scope": "Twelve frozen-mapped V08 callable/metadata defining modules; all-kind kernel inventory only.",
+  "checked_head": "a4845f3f0c7118e7b28e7aa027caa0cb733a79b8",
+  "groups": [
+    {
+      "group": 1,
+      "generation": {
+        "bindings": [
+          {
+            "blob": "ee13b2ab747de62aa83e0efa808f7989a6bcd1e5",
+            "file": "Solidity/Lowering/V08/CallableMetadata.lean",
+            "sha256": "15fad62fc7f10cc948cf317e7dc234069bc73782ad5c8441c0ba8740669e62d4"
+          },
+          {
+            "blob": "99a7fd9692d730359418f1f12209731e84d59421",
+            "file": "Solidity/Lowering/V08/InheritedMetadata.lean",
+            "sha256": "9f4fe12b321a6a48837e312e382a8fafc7436ec427b6157b6ac2a270af236dc6"
+          },
+          {
+            "blob": "612f009377b35b79812f28385b44e9e863e28b0e",
+            "file": "Solidity/Lowering/V08/PayableMetadata.lean",
+            "sha256": "18e9e34682becc63a892efdc9857412278cf72d1a7ec90102f24cb6dad79e5f7"
+          },
+          {
+            "blob": "0455e555a8d4fe8f91663062240d7e0f7fe40e5c",
+            "file": "Solidity/Lowering/V08/WorldCatalogueTransport.lean",
+            "sha256": "1641d5efa208d328eacccf7a050c801524cd40686d9e915dd4b17e19a302997d"
+          }
+        ],
+        "output": "/workspace/v08-world-lowering-published/tests/h62/item2/audit-v08-adapters/generated-census/Callable120261107.lean",
+        "sha256": "96d1af6a818e9992db52c9b8d097e7e731ad0ce2523374874e0094e241a3b177",
+        "snapshot_sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03",
+        "status": "GENERATED_NOT_LEAN_CHECKED",
+        "template_sha256": "b39743e3a6d45fd7d62f27da7cccc27e14d5808cde339d4ac3aceafe1fd79b58"
+      },
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/generated-census/Callable120261107.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 19.604,
+        "peak_sampled_aggregate_rss": 924622848,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "records": 73
+    },
+    {
+      "group": 2,
+      "generation": {
+        "bindings": [
+          {
+            "blob": "54b7c1a038aa8ce10a37dd0d8026befa5f113800",
+            "file": "Solidity/Lowering/V08/CallableReflection.lean",
+            "sha256": "17d938049d1669d7c903aee97ce094ebe10f5852f2082a3912a258f691818020"
+          },
+          {
+            "blob": "9711b668602ca812d50876b8fef6e728f9394f87",
+            "file": "Solidity/Lowering/V08/ConditionalCallable.lean",
+            "sha256": "abd0c90c588912e6e9820b05580cdb6cdd475f3f673789aef78b525f3eca28e7"
+          },
+          {
+            "blob": "6e12fac7bc48e7a891137292e54e26a09bb0212b",
+            "file": "Solidity/Lowering/V08/PureArgumentCallable.lean",
+            "sha256": "2ba9da15e03ff7751d3edae73d7f18fe52d88e4c44183a2e817022edba69c2b2"
+          },
+          {
+            "blob": "5fade6b577336171f9b847e33545a47cc937bd27",
+            "file": "Solidity/Lowering/V08/ScalarCallableTransport.lean",
+            "sha256": "947c8837b1d3348757f16cca210a976bc8f057c28108e26b16adf2dc599d6e89"
+          }
+        ],
+        "output": "/workspace/v08-world-lowering-published/tests/h62/item2/audit-v08-adapters/generated-census/Callable220261107.lean",
+        "sha256": "ae99b4b8dc4acc474c3424797921db5f2229118140129ec856c81b38c05561e9",
+        "snapshot_sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03",
+        "status": "GENERATED_NOT_LEAN_CHECKED",
+        "template_sha256": "b39743e3a6d45fd7d62f27da7cccc27e14d5808cde339d4ac3aceafe1fd79b58"
+      },
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/generated-census/Callable220261107.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 42.598,
+        "peak_sampled_aggregate_rss": 1142370304,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "records": 150
+    },
+    {
+      "group": 3,
+      "generation": {
+        "bindings": [
+          {
+            "blob": "2362ab09814e3cd94bc56a60f809cb0d5393cb32",
+            "file": "Solidity/Lowering/V08/IntegerCallable.lean",
+            "sha256": "95044564b701dc95a32d9443b3956df46d1ecf386c4f810edd2b300febe3f13a"
+          },
+          {
+            "blob": "224e1a599ed1f605ffc0b58525004a7a7281fd17",
+            "file": "Solidity/Lowering/V08/LocalCallableTransport.lean",
+            "sha256": "257c7dac96a8e8f2d23661b1cdf117490bb5d9f412e9c7735fbd833fc342d05e"
+          },
+          {
+            "blob": "fb51498c4d3e413ccd9973e5f502df6025515e49",
+            "file": "Solidity/Lowering/V08/TupleCallable.lean",
+            "sha256": "a33bb27cc5a107759e5d2246534ab51318cb897c428e2334a109c8ea1ec6e34a"
+          },
+          {
+            "blob": "021fabcc589ec13a152cd5d24be345cf9f641a36",
+            "file": "Solidity/Lowering/V08/WordCastCallable.lean",
+            "sha256": "84295df2163200eabf10afe86a9838777bb6016357b96ad3f20d6d688c70e896"
+          }
+        ],
+        "output": "/workspace/v08-world-lowering-published/tests/h62/item2/audit-v08-adapters/generated-census/Callable320261107.lean",
+        "sha256": "2729e2f1a07133815cf341b3a261845dcc59b5125bfaa174bb121990eb002090",
+        "snapshot_sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03",
+        "status": "GENERATED_NOT_LEAN_CHECKED",
+        "template_sha256": "b39743e3a6d45fd7d62f27da7cccc27e14d5808cde339d4ac3aceafe1fd79b58"
+      },
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/generated-census/Callable320261107.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 33.089,
+        "peak_sampled_aggregate_rss": 985133056,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "records": 353
+    }
+  ],
+  "records": 576,
+  "modules": {
+    "Solidity.Lowering.V08.PayableMetadata": 22,
+    "Solidity.Lowering.V08.CallableMetadata": 38,
+    "Solidity.Lowering.V08.InheritedMetadata": 4,
+    "Solidity.Lowering.V08.WorldCatalogueTransport": 9,
+    "Solidity.Lowering.V08.CallableReflection": 23,
+    "Solidity.Lowering.V08.ConditionalCallable": 44,
+    "Solidity.Lowering.V08.PureArgumentCallable": 20,
+    "Solidity.Lowering.V08.ScalarCallableTransport": 63,
+    "Solidity.Lowering.V08.LocalCallableTransport": 138,
+    "Solidity.Lowering.V08.IntegerCallable": 88,
+    "Solidity.Lowering.V08.TupleCallable": 67,
+    "Solidity.Lowering.V08.WordCastCallable": 60
+  },
+  "kinds": {
+    "theorem": 374,
+    "other_declaration": 187,
+    "proof_definition": 7,
+    "structure_carrier": 2,
+    "predicate_definition": 6
+  },
+  "axioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "new_witnesses": 0,
+  "fidelity_acceptances": 0,
+  "all_statuses": "PENDING",
+  "limitations": [
+    "Generated/private/support kernel records are retained; counts do not establish lexical-to-kernel correspondence.",
+    "No joint premise witness, compiler execution adequacy, public-contract nonvacuity or full Source/H68 certificate acceptance."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/batch-results.json",
+      "bytes": 186,
+      "sha256": "647f8bb239fc20ce67ba10a84690dbe224a5077cf8e214fd895801606ac1ec2d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/console-1.log",
+      "bytes": 377,
+      "sha256": "779753d1ade9abf73850b5534c0bef518e8a2276ffcdf3a928c9b284b7095a8f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/console-2.log",
+      "bytes": 378,
+      "sha256": "4ce5c89852b0c557718c8e1a47170501074db3638fb5e75cab52b8dde0037a26"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/console-3.log",
+      "bytes": 377,
+      "sha256": "933337bcd4eb73c4e6421539aba4ed17b0cf75a394725cf6951ca3183d8f5ded"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/generation-1.json",
+      "bytes": 1190,
+      "sha256": "14e1bdc8919d7509ba9f4ab0e406b36a784ccc1c420598f1d5c33d0c224b9a60"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/generation-1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/generation-2.json",
+      "bytes": 1199,
+      "sha256": "6d3b0b803640f0331dda965c1c38aa230fd69a0e3dc4d5336043e50c64ebd8cb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/generation-2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/generation-3.json",
+      "bytes": 1185,
+      "sha256": "c8d2ad857ce64f02db5edec8bafe06d522dfc0be3af43bb71856a8ba9fdfdc24"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/generation-3.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+      "bytes": 31717789,
+      "sha256": "2440a4983aee1f3e582cbf3961cdc12f68dbfbcefeb60f33317235675ac55a3a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-1/console.log",
+      "bytes": 178,
+      "sha256": "172dc65e383dbabaf7c00644ad2961f07a65eb5233bbe629258021f3c04df588"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-1/gates/1.log",
+      "bytes": 18337351,
+      "sha256": "3b0c3a818008f0adbd0a68e0f0ec6a93b1f5bf5cdde0c42bf9039f04f877c7b1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-1/gates/HEAD",
+      "bytes": 41,
+      "sha256": "0f83b5b5693834ce7bc1eebd8cc71560687f60ad272f761505b52d1428fcba3f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-1/gates/gates.tsv",
+      "bytes": 282,
+      "sha256": "c1df5324f0426d872a8a89d4f8b97418f4eec04d1d0a122d084bd205e45ec8d8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-1/results.json",
+      "bytes": 415,
+      "sha256": "937953c15dddc86a08a9f306f251c9decd5a28783b079bf575e8a4410b15d35a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-2/console.log",
+      "bytes": 178,
+      "sha256": "c445d267eb606dc2c4d533dd426be4d96950e4c5762e7b4b4f633701ec92c645"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-2/gates/1.log",
+      "bytes": 1938140,
+      "sha256": "7ec3f594eee7530bf2b910d1db62247ddb9fac46f76c452934cdd001845eff37"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-2/gates/HEAD",
+      "bytes": 41,
+      "sha256": "0f83b5b5693834ce7bc1eebd8cc71560687f60ad272f761505b52d1428fcba3f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-2/gates/gates.tsv",
+      "bytes": 282,
+      "sha256": "eaf3ea7655763922eeaea73da84e40de4847fba5c53e44e2a66813567af6520c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-2/results.json",
+      "bytes": 416,
+      "sha256": "72ad98b431e0f0a61c3c762307c2c9142b3648c58ea94dd03bf3d908ad08281d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-3/console.log",
+      "bytes": 178,
+      "sha256": "059ef5cfe05a6e34c3ba83ecbe687cd4d716afbced1557cb5476ee4824ac4436"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-3/gates/1.log",
+      "bytes": 11240296,
+      "sha256": "73b055638a4c7d9e0d36ce00de4162d70123c9c1919f426489058f71a013dcf1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-3/gates/HEAD",
+      "bytes": 41,
+      "sha256": "0f83b5b5693834ce7bc1eebd8cc71560687f60ad272f761505b52d1428fcba3f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-3/gates/gates.tsv",
+      "bytes": 282,
+      "sha256": "74f0bf434e4dbdb5c2d100fff0f7e9f8a0305472377b85fa97ded8aa0485c443"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/run-3/results.json",
+      "bytes": 415,
+      "sha256": "8dc1ac4c1f496dc6eb0375ca5f1967d1b1475005c182ef4caff6a4bce290b8c4"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic verified all source/generated hashes, 576 unique records, role counts and three bounded gate results; no findings and no reviewer tests/builds."
+}
