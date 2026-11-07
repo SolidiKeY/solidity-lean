@@ -69,7 +69,7 @@ attacker offline/grinding queries and system queries. A system-only count
 cannot replace this total. The finite domain contains every preimage the
 strategy can produce on every answer history, not only one sampled run.
 
-## Scope question E4-Q1 (open)
+## Scope question E4-Q1 (resolved: coordinator #168, option A)
 
 Source tags: assignment checkpoint 3; `Solidity/Hash/CollisionBound.lean:172,216`;
 `Solidity/Hash/Adaptive.lean:577–581`.
@@ -88,7 +88,10 @@ Options sent through coord-ask:
 - C: keep the literal universal combined-zero requirement; checkpoint 3
   remains blocked by this counterexample.
 
-No answer is assumed; no theorem or premise has been weakened.
+Coordinator answered A: replace the erroneous control with q=0 combined
+zero, q=1 collision-only zero, and a positive q=1 root-hit control. The
+combined bound and its premises are unchanged. The counterexample above is
+the reason for this assignment correction.
 Relay: `coord-q/codex/solidity-plan-e4-hash-bridge-20261107/e4-hash-bridge/20261107T162119Z`.
 
 ## Reviews
@@ -96,11 +99,16 @@ Relay: `coord-q/codex/solidity-plan-e4-hash-bridge-20261107/e4-hash-bridge/20261
 Checkpoint 1 finder (independent read-only thread, no Lean server):
 confirmed the root-hit counterexample and required preservation of the
 separate source forward/guard premises. Both findings are reflected above.
-Further finder/skeptic reviews after checkpoints 2–4 are pending.
+Checkpoint 2 independent finder and skeptic found no proof defects. Finder
+requested a concrete collision witness beyond the generic obstruction;
+`constantHash_collision` now supplies byte preimages `[]` and `[0]` under a
+constant replacement hash. No semantic execution is manufactured from the
+abstract EvmSpec. Both reviewers required recording actual axiom sets and
+updating stale checkpoint status. Checkpoint 3–4 reviews remain pending.
 
 ## Registration fragment (coordinator only)
 
-Reserved intended imports (not yet implemented or registered):
+Intended imports (Bridge implemented, CollisionBridge pending; not registered):
 
 ```lean
 import Solidity.Hash.Bridge
@@ -126,7 +134,26 @@ No runtime gate pass is claimed; KeySort and Lean build gates are pending.
 The active tool catalog exposes stop_goal but no get_goal; no new goal was
 created or reset.
 
-Checkpoint 1 is inventory/statements only; no Lean edits. Checkpoints 2–4,
-axiom pins, negative controls, module timing, full gates and final handoff
-remain pending. No new axioms, sorry, trust shortcuts or frozen-statement
-changes. No proof checking has yet been claimed.
+Checkpoint 1 committed as `b782c5968`; doc paths exit 0 (143 ambiguous
+references, all resolving). Checkpoint 2 Bridge implemented: MCP `diag`
+reports 0 errors; `lake lean Solidity/Hash/Bridge.lean -- -j1
+--tstack=131072` exits 0. Cold import build: CollisionBound 3.9 s, Adaptive
+1.0 s, Roadmap.Evm 1.0 s, Contracts 2.0 s (6 jobs, success). Initial
+`lake build -j1` was rejected because Lake 5 has no such option; corrected
+to LEAN_NUM_THREADS=1 for dependency build and explicit Lean -j1 for files.
+Module timing via Python monotonic/resource (no /usr/bin/time installed):
+Bridge 0.513 s wall, 230516 KiB child max RSS. No existing module changed;
+whole-library timing comparison remains pending. Actual pinned axioms:
+unit-root-free theorem `[propext, Quot.sound]`; prefix transfer `[]`.
+These are strictly below the requested standard triple, not artificially
+inflated to introduce Classical.choice. Negative controls include explicit
+constant-hash byte collision and generic root hit. Checkpoint gate evidence: `/tmp/e4-checkpoint2/gates.tsv`: layers PASS
+(904 core, 0 elaborator reach, 0 parser reach, 0 new edges); touched build
+PASS; trust PASS (6696 sources, 289 inventoried sites, 0 findings); fragments
+PASS; doc paths PASS (143 resolving ambiguities). Orphans FAIL (6678
+reachable, Bridge is the sole orphan); roots FAIL (missing Bridge import);
+axiom pins FAIL (new unregistered pins), all expected coordinator-owned
+registration deltas. Library gate was interrupted by this worker after
+116 s while awaiting the E4-Q1 decision; it is NOT a pass. Coordinator then
+answered A; the full library gate must be rerun. Registration fragment
+completion, checkpoint 3–4, lane-end gates and handoff remain pending. No new axioms, sorry, trust shortcuts or frozen statements.
