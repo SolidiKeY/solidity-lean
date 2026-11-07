@@ -1,3 +1,0 @@
-COMMAND: lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml build Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins
-✔ [3/10] Fetched Solidity.Keccak
-Build completed successfully (10 jobs).

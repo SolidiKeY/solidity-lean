@@ -1,9 +1,0 @@
-# Final separate read-only milestone reviews
-
-Both reviewers inspected current code, acceptance module hashes, all28 pins, per-file diagnostic logs, actual build/runtime/compiler/full-gate logs, and packet documentation. Neither used a Lean server, ran a build, or edited files.
-
-Finder verdict: component packet passes; no remaining substantive proof/control defect. Prior nonpayable/value0, readOnly, parenthesis and missing creation-interface-use findings are fixed. Arbitrary-after derivation, independent relation, complete machines and compiler/evidence boundaries were accepted. One wording correction payable=false is fixed. Full gate and immutable handoff were expressly not considered complete by the reviewer.
-
-Skeptic verdict: component packet acceptable; no remaining semantic proof defect. Verified concrete_ssNew_body, conditional external obligations in creation_from_inputs, full outputs/frame/address, controls and exact current hashes. Found a latent harness issue: after registration run-lean could select the tracked config without explicit-j1. Fixed the owned runtime lake wrapper to route build/exe through serial.toml, and added explicit-j1 for every library/executable there. The already-run full gate stopped before Lean, so no actual serial violation occurred. A separate skeptic follow-up inspected final-gates/serial-wrapper-options.log and confirmed the actual -f serial.toml invocation, option handling, explicit-j1 in every library/executable, and bounded PATH routing. The old KeySort trace is labeled Replayed and is not a new nonserial compilation. No kernel theorem changed.
-
-Overall assignment remains BLOCKED on QREG: required full gate fails at exactly four missing helper root imports; the orphan gate names the same four modules. Shared roots remain read-only. Admission/origin/runtime/restoration are retained external duties, not fabricated inhabitants. No EVM execution or whole P15/H16/H19 completion is claimed.

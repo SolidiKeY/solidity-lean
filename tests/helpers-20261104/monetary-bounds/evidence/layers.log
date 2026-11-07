@@ -1,3 +1,0 @@
-COMMAND: node scripts/check-layers.mjs
-559 core modules, 0 reach the elaborator
-559 core modules, 0 reach the checked parser adapters

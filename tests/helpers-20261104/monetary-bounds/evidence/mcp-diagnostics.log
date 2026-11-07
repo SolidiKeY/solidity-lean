@@ -1,4 +1,0 @@
-COMMAND: export LEAN_MCP_SERVER_CMD='/workspace/solidity-lean/.venv/bin/python -m lean_lsp_mcp --lean-project-path /workspace/monetary-producer-input'; export LEAN_MCP_START_WAIT=45 LEAN_MCP_TIMEOUT=90 LEAN_LSP_MAX_OPEN_FILES=1; trap 'scripts/coord-tools/lean-mcp stop' EXIT; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean
-diag: 0 errors
-diag: 0 errors
-diag: 0 errors

@@ -2,7 +2,7 @@
 """Run serial checks in the verified hard Docker envelope; retain exact outcomes."""
 import json, os, pathlib, subprocess, time
 root=pathlib.Path(__file__).resolve().parent
-out=pathlib.Path(os.environ.get('GATE_OUTPUT', str(root/'evidence'))); out.mkdir(parents=True, exist_ok=True)
+out=pathlib.Path(os.environ.get('GATE_OUTPUT', '/workspace/lane-evidence/monetary-bounds/producer-input')); out.mkdir(parents=True, exist_ok=True)
 producer='/workspace/monetary-producer-input'
 config='/workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/lakefile.toml'
 commands=[

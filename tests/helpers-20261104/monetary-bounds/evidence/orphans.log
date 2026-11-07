@@ -1,5 +1,0 @@
-COMMAND: node scripts/check-orphans.mjs
-ORPHAN   Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins
-ORPHAN   Solidity.Lowering.P8.HelperPackets.MonetaryBounds.Controls
-ORPHAN   Solidity.Lowering.P8.HelperPackets.MonetaryBounds.Laws
-3678 reachable, 3 orphaned, 3 not allowed

@@ -1,2 +1,0 @@
-COMMAND: ./run-lean.sh
-./run-lean.sh: line 23: node: command not found

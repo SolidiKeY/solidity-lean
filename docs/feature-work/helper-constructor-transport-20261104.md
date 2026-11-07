@@ -1,5 +1,10 @@
 # H26 constructor initialization/capture packet
 
+> H145 evidence location (2026-11-07): raw logs, historical handoffs, acceptance records, checksums and frozen migration snapshots were archived before removal from this code branch. Exact pre-cleanup bytes are in private repository `SolidiKeY/solidity-lean-coord`, commit `880f9e7935aeec975d2faf1d1b17bb703ae90138`, under `evidence/solidity-helpers-20261104/monetary-bounds/`, preserving their repository-relative paths. Historical evidence paths below refer to that archive, not current checkout files. Code, Lean guards, configuration and the Solidity fixture remain here. Historical acceptance scripts require the archived records and their original source revision; they are not current migration acceptance gates. Active validation runners now default to `/workspace/lane-evidence/`; override with `VALIDATE_OUTPUT` or `GATE_OUTPUT`.
+>
+> H57 implementation and targeted checks remain worker-complete at `ee8f4ec4245b2f2d21b59bb06d6861dd74f8318e`. H145 cleanup changes no Lean declarations, premises or axiom pins. Current-master combined validation and H41 cache intake remain coordinator-pending. No new kernel pass is inferred from the cleanup or master adoption.
+
+
 Current status (approved H57 Nat migration, 2026-11-07): all worker proofs, 41 constructor axiom guards, controls and targeted VM checks pass on the surviving monetary-bounds branch. CTOR-NAT-1 is resolved. Both packets are registered through generated scripts/fragments. Delivery and full combined validation are coordinator-pending; no full combined pass is claimed. Earlier pending/failure/intake records below are historical and superseded by nat-migration-20261107/migration-status.json and acceptance.json. H41 remains: retain verified cache packs for coordinator pull; never run ship-cache.sh on this VM.
 
 ## Identity and scope
@@ -89,7 +94,7 @@ Fetched fresh origin/master in this original owned checkout; it is exactly `b419
 
 CreationPremises and ConstructorScalarTransport, Source/** and frozen ExtCall declaration in Syntax/Scoped.lean are byte-for-byte unchanged between base and this publication. CreationReturnInterfaceV1 explicitly retains pending Producer laws and supplies no Source/profile/account/fetched-CREATE correspondence. The other published interfaces preserve their stated pending/bounded endpoints; none is a substitute for the actual constructor body duty or the retained external admission/runtime obligations. No producer is duplicated and no unrelated API import is needed for this pinned helper.
 
-The published root still omits all four helper modules, so QREG remains unresolved. The coordinator's exact-master gate/review receipt is acknowledged as reported at /home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261104T122441Z; those gates were not rerun here and do not validate the unintegrated helper. The original sealed payload, checksums, proof/control evidence and unfinished full-lane status remain unchanged. No Lean rerun was warranted by this read-only API inspection.
+The published root still omits all four helper modules, so QREG remains unresolved. The coordinator's exact-master gate/review receipt is acknowledged as reported at ~/.local/state/cloudvm-coord/receipts/sched-20261104T122441Z; those gates were not rerun here and do not validate the unintegrated helper. The original sealed payload, checksums, proof/control evidence and unfinished full-lane status remain unchanged. No Lean rerun was warranted by this read-only API inspection.
 
 Separate read-only finder and skeptic accepted this publication audit without findings; see tests/helpers-20261104/constructor-transport/publication-review-b419c3cf.md. The supplemental audit/review/documentation snapshot is bound by publication-audit-b419c3cf.SHA256; the original proof packet manifest is unchanged.
 
@@ -101,7 +106,7 @@ P12NextInterface retains explicit pending effectful condition/reference-capture 
 
 Correction to the earlier publication audit: ExtCall is a declaration in Solidity/Syntax/Scoped.lean; the earlier separate Scoped/ExtCall.lean path did not exist, making that path-only comparison vacuous. Actual Scoped.lean blobs have now been verified identical at the pinned base, b419 publication and89373 publication. This corrects the audit evidence, not a Lean proof or the frozen interface. The earlier JSON/checksum is preserved as historical evidence. The b419 supplemental checksum binds the documentation snapshot at commit ce52c38903dfdbc774332403d5c1a0cd47f442b8 and should be verified at that commit; the original proof artifacts/SHA256SUMS remains valid in this checkout.
 
-The published root still lacks all four helper imports; QREG and required full-lane validation remain pending. The coordinator-reported receipt /home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261104T182351Z is not locally reexecuted and does not validate the unintegrated packet. No Lean rerun was warranted by this API/doc-only audit. A new supplement checksum will bind stable audit/review/documentation-snapshot files rather than the mutable live document.
+The published root still lacks all four helper imports; QREG and required full-lane validation remain pending. The coordinator-reported receipt ~/.local/state/cloudvm-coord/receipts/sched-20261104T182351Z is not locally reexecuted and does not validate the unintegrated packet. No Lean rerun was warranted by this API/doc-only audit. A new supplement checksum will bind stable audit/review/documentation-snapshot files rather than the mutable live document.
 
 Separate read-only finder and skeptic accepted the89373 audit and ExtCall correction without findings; see publication-review-89373e34.md. The live document snapshot, audit and review are preserved in the owned supplement and bound by publication-audit-89373e34.SHA256. Original proof/full-gate statuses remain unchanged.
 
@@ -109,7 +114,7 @@ Separate read-only finder and skeptic accepted the89373 audit and ExtCall correc
 
 At source head f1b41e799e41adf459c093fed7202849c9121b0b, fresh owned VM gates pass: all four modules build with explicit-j1; all four per-file kernel checks, all28 exact axiom guards, explicit #print inventory and both pinned-solc controls pass. h35/gates.tsv and its logs record exact commands/exits and resource peaks/reserves. No proof/import or budget was changed.
 
-H35 shipping is BLOCKED, so no H35 checkpoint is reported done. The actual ship-cache.sh --dry-run preflight, with documented own-head override/actual VM cache/owned state directory, identified1698 artifacts and570 mappings before failing on absent /home/agent/.local/state/cloudvm-coord/poll-state.json. The catalogue and vmexec.py are absent too; the published script is a coordinator-to-lane relay. No actual transfer or successful shipping receipt exists. h35/cache-receipt.json accurately records this failed attempt.
+H35 shipping is BLOCKED, so no H35 checkpoint is reported done. The actual ship-cache.sh --dry-run preflight, with documented own-head override/actual VM cache/owned state directory, identified1698 artifacts and570 mappings before failing on absent ~/.local/state/cloudvm-coord/poll-state.json. The catalogue and vmexec.py are absent too; the published script is a coordinator-to-lane relay. No actual transfer or successful shipping receipt exists. h35/cache-receipt.json accurately records this failed attempt.
 
 A read-back-verified295KB cache handoff for the four owned modules (12 artifact files, mappings and traces) is prepared at /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/h35/cache-handoff/owned-cache.tar.gz. H35CACHE offers two paths: coordinator retrieval followed by a real import receipt, or a configured worker-to-coordinator cache command/destination. This prepared artifact is not delivery evidence and makes no dependency-closure transfer claim. Existing QREG/full-lane validation remains blocked. Original sealed packet/checksums and all proof/control/backfill evidence are preserved.
 
@@ -117,7 +122,7 @@ H35 separate read-only finder and skeptic accept the gate/cache evidence, includ
 
 ## H41 receipt and QREG decision
 
-The coordinator reports pulling the retained H35 archive and verifying SHA256083d6bf7f5702b4dad1ac8b250452f9b7f7913d4a7278e695bc317741916258a. Receipt: /home/guilherme/.local/state/cloudvm-coord/receipts/constructor-transport-cache-received-20261105T020250Z.json. This VM reverified the same archive hash; no coordinator-filesystem read or cache-import claim is made.
+The coordinator reports pulling the retained H35 archive and verifying SHA256083d6bf7f5702b4dad1ac8b250452f9b7f7913d4a7278e695bc317741916258a. Receipt: ~/.local/state/cloudvm-coord/receipts/constructor-transport-cache-received-20261105T020250Z.json. This VM reverified the same archive hash; no coordinator-filesystem read or cache-import claim is made.
 
 H41 amendment, verbatim: "Leave verified packs on the VM and record the path and sha; the coordinator pulls them; never run ship-cache.sh on a VM. Mark delivery coordinator-pending and continue."
 

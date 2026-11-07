@@ -3,7 +3,7 @@
 import hashlib,json,pathlib,subprocess,time,os
 here=pathlib.Path(__file__).resolve().parent
 repo=here.parents[3]
-out=here/'evidence';out.mkdir(exist_ok=True)
+out=pathlib.Path(os.environ.get('VALIDATE_OUTPUT','/workspace/lane-evidence/monetary-bounds/registration'));out.mkdir(parents=True,exist_ok=True)
 config=here/'serial.toml'
 commands=[
  ('runtime','lean --version; /workspace/.setup/tools/lean-4.24.0-linux/bin/lake --version; cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max'),

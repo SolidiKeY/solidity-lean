@@ -1,2 +1,0 @@
-COMMAND: lake env lean --tstack=131072 -j1 SolkeyCheck.lean; lake exe solkeycheck
-SolkeyCheck.lean:1:0: error: object file '/workspace/monetary-producer-input/.lake/build/lib/lean/Solidity/KeySort.olean' of module Solidity.KeySort does not exist

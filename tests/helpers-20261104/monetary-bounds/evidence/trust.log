@@ -1,2 +1,0 @@
-COMMAND: bash scripts/check-trust.sh
-trust: 3697 sources, 285 inventoried implementation/recovery sites, 0 findings

@@ -1,6 +1,0 @@
-ORPHAN   Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls
-ORPHAN   Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Producer
-ORPHAN   Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Source
-ORPHAN   Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Target
-3656 reachable, 4 orphaned, 4 not allowed
-OUTER_PEAK_BYTES 1466847232 RESERVE_MIN_BYTES 15713021952 STARTED True
