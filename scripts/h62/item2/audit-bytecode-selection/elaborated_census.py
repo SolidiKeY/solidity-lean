@@ -114,6 +114,12 @@ def manifest_sha256(pins):
     return hashlib.sha256(json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
 
 
+def inspection_source(modules, fingerprint):
+    """Reconstruct the exact external inspector, not an acceptance certificate."""
+    imports = "".join("import " + module + "\n" for module in modules)
+    return "import Lean\n" + imports + TEMPLATE.replace("MODULES", ", ".join("`" + module for module in modules)).replace("FINGERPRINT", fingerprint)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--repo", type=Path, required=True)
@@ -133,10 +139,9 @@ def main():
         if data != original:
             raise ValueError("frozen source differs: " + path)
         pins[path] = hashlib.sha256(data).hexdigest()
-    imports = "".join("import " + module + "\n" for module in modules)
     pins_data = {"base": BASE, "modules": modules, "source_sha256": pins, "inspection_template_sha256": hashlib.sha256(TEMPLATE.encode()).hexdigest()}
     fingerprint = manifest_sha256(pins_data)
-    source = "import Lean\n" + imports + TEMPLATE.replace("MODULES", ", ".join("`" + module for module in modules)).replace("FINGERPRINT", fingerprint)
+    source = inspection_source(modules, fingerprint)
     args.output.write_text(source)
     args.output.with_suffix(".pins.json").write_text(json.dumps(dict(pins_data, manifest_sha256=fingerprint, inspection_sha256=hashlib.sha256(source.encode()).hexdigest()), indent=2) + "\n")
     print(json.dumps({"modules": len(modules), "inspection": str(args.output)}))

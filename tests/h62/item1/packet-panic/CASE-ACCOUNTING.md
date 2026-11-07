@@ -95,3 +95,23 @@ The original census matches only unmodified line-start headers and omitted priva
 ## UnsignedDiv Witness
 
 `unsigned_div_witness_ledger.py` records eight base-pinned literal headers for the auxiliary initialized machine and StateRepr, arbitrary saved stack, nonzero Source div/mod success and zero-divisor Source divZero panic with coarse selected symbolic revert. Source local tails and state are retained as stated. There is no separately named witnessed zero-remainder theorem in this file; the general remainder-zero packet is a separate declaration in Composition. This is a textual auxiliary witness account, not deployment, native execution or target panic-payload proof. The ledgers now describe 361 of 474 observed literal headers; 113 of the original subtotal remain unclassified.
+
+## SignedSub Execution
+
+`signed_sub_execution_ledger.py` adds seven base-pinned literal declarations for unchecked signed subtraction, public selection and emitted code, arbitrary-tail symbolic execution and its retained StateRepr, and Source-only zero-horizon timeout. The original local-family, range, read and representation premises remain binding. Private `int_word_unique` is separately accounted and axiom guards remain untouched. This is textual accounting, not Lean proof or native execution. The ledgers now describe 368 of 474 observed literal headers; 106 of the original subtotal remain.
+
+## SignedMod Controls
+
+`signed_mod_controls_ledger.py` adds thirty base-pinned literal declarations for populated fixtures, Source and selected symbolic outcomes, separate raw/guarded numeric zero behavior, five signed remainder examples, low-horizon timeouts, saved-tail and short-frame refusals and an initial memory snapshot. Original ranges, checked/pipeline quantifiers and w77-prefixed arbitrary tails remain binding. Exact Source divZero data is not a symbolic target payload claim. The ledgers now describe 398 of 474 observed lexical headers; 76 of the original subtotal remain. This is not Lean proof or full semantic coverage.
+
+## SignedDiv Controls
+
+`signed_div_controls_ledger.py` adds twenty-one base-pinned literal declarations for the populated fixture, canonical word representation, zero-divisor and minimum/-1 Source/symbolic cases, -7/2 truncation, panic-class distinction, negative controls and numeric depth-4 stack bounds. It retains the original pipeline, checked-flag, fuel and arbitrary-tail quantifiers; Source exact panic data remains separate from coarse symbolic revert. Existing axiom guards are outside this ledger and were not edited. The ledgers now describe 419 of 474 observed lexical headers; 55 of the original subtotal remain. This is not Lean proof or full semantic coverage.
+
+## Reconciled totals
+
+`python3 scripts/h62/item1/packet-panic/ledger_totals.py --declarations <fresh-declarations.json>` regenerates the literal census and all sixteen ledgers, checks original-row membership and overlap, and emits per-ledger totals and unclassified rows. On this base-pinned tree it reports 465 original rows, nine private rows, 410 described original rows, 419 described total and 55 unclassified original rows. These replace prior hand addition of subtotals. The generator verifies textual identity and set membership; it does not mechanically verify the manual observation prose against Lean statements, establish proof validity or close the lexical/semantic gaps.
+
+## Same-line attribute candidate scan
+
+`attributed_header_scan.py` examines the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.

@@ -15,7 +15,7 @@ import re
 import stat
 from pathlib import Path
 
-DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
+DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+))?")
 ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
 ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
 IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
@@ -296,10 +296,10 @@ def scan(path, root, source=None):
         if index >= 0:
             prefix_start, prefix_end = attribute_spans[index]
             between = skeleton[prefix_end:match.start(1)]
-            if re.fullmatch(r"\s*(?:(?:private|protected|noncomputable|local|partial|unsafe)\s+)*", between):
+            if re.fullmatch(r"\s*(?:(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\s+)*", between):
                 start = min(start, prefix_start)
         declaration_starts.append(start)
-    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
+    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe|set_option)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
     # Preserve literal bytes and continuation lines until the next recognized
     # boundary. This remains a lexical approximation of the Lean environment.
     boundaries = sorted([m.start() for m in context_commands] + declaration_starts)
@@ -307,25 +307,32 @@ def scan(path, root, source=None):
     for command in context_commands:
         index = bisect.bisect_right(boundaries, command.start())
         stop = boundaries[index] if index < len(boundaries) else len(text)
+        # A scoped command may place `in` on a later line. Refuse an inline
+        # declaration that the line-initial recognizer would silently miss.
+        if (re.match(r"[ \t]*set_option\b", command.group()) and
+            re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
+            raise ValueError("unsupported same-line scoped set_option declaration")
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
     relative_path = path.relative_to(root).as_posix()
+    start_by_keyword = {match.start(1): start for match, start in zip(matches, declaration_starts)}
     def indent(m):
-        line_start = text.rfind("\n", 0, m.start(1)) + 1
-        prefix = re.match(r"[ \t]*", text[line_start:m.start(1)]).group()
+        start = start_by_keyword[m.start(1)]
+        line_start = text.rfind("\n", 0, start) + 1
+        prefix = re.match(r"[ \t]*", text[line_start:]).group()
         return len(prefix.expandtabs(8))
     for i, match in enumerate(matches):
         end = declaration_starts[i+1] if i+1 < len(matches) else len(text)
         content = text[match.end():end]
         content_skeleton = skeleton[match.end():end]
-        command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
+        command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
         command_inside = False
         if command:
             prefix = re.match(r"[ \t]*", command.group()).group()
             command_inside = len(prefix.expandtabs(8)) > indent(match)
             content = content[:command.start()]
             content_skeleton = content_skeleton[:command.start()]
-        qualifiers = sorted(re.findall(r"\b(?:partial|unsafe|noncomputable)\b", skeleton[match.start():match.start(1)]))
+        qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
         context = digest([span for start, span in context_spans if start < match.start()])
         unsupported = match.group(1) in {"structure", "inductive", "class", "axiom", "constant"}
         parts = None if unsupported else split_declaration(content, skeleton=content_skeleton)
@@ -352,7 +359,7 @@ def scan(path, root, source=None):
         body_skeleton = content_skeleton[len(header) + (2 if body_form == "assignment" else 0):]
         if re.search(r"\bwhere\b", body_skeleton):
             body_reject_reason = "body-may-have-local-helpers"
-        boundary = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", body_skeleton)
+        boundary = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", body_skeleton)
         if boundary:
             prefix = re.match(r"[ \t]*", boundary.group()).group()
             if len(prefix.expandtabs(8)) > indent(match):
@@ -407,8 +414,9 @@ def prior_map(records, key, label):
 def selected_paths(root, pattern, errors):
     """Path.glob-style selection with explicit enumeration errors.
 
-    Recursive ** does not follow directory symlinks. Explicit finite directory
-    components can follow them; resolved containment is checked before reading.
+    Recursive ** does not follow directory symlinks and reports their omission.
+    Explicit finite directory components can follow them; resolved containment
+    is checked before reading.
     """
     parts = Path(pattern).parts
     directories_only = pattern.endswith("/")
@@ -420,6 +428,12 @@ def selected_paths(root, pattern, errors):
                      reason="selection enumeration failed: " + str(exc))
         if error not in errors:
             errors.append(error)
+
+    def checked_link_directory(path):
+        resolved = path.resolve(strict=True)
+        if not resolved.is_relative_to(root):
+            raise ValueError("selected directory symlink resolves outside root")
+        return stat.S_ISDIR(resolved.stat().st_mode)
 
     def descend(base, index):
         if index == len(parts):
@@ -433,13 +447,21 @@ def selected_paths(root, pattern, errors):
         if part != "**" and not any(c in part for c in "*?["):
             path = base / part
             try:
-                path.lstat()
-                if index + 1 == len(parts) or path.is_dir():
-                    yield from descend(path, index + 1)
+                mode = path.lstat().st_mode
             except FileNotFoundError:
-                pass
+                return
             except OSError as exc:
                 failure(path, exc)
+                return
+            if index + 1 == len(parts):
+                yield from descend(path, index + 1)
+            else:
+                try:
+                    is_directory = checked_link_directory(path) if stat.S_ISLNK(mode) else stat.S_ISDIR(mode)
+                    if is_directory:
+                        yield from descend(path, index + 1)
+                except (OSError, ValueError, RuntimeError) as exc:
+                    failure(path, exc)
             return
         if part == "**":
             yield from descend(base, index + 1)
@@ -453,7 +475,13 @@ def selected_paths(root, pattern, errors):
             path = base / entry.name
             if part == "**":
                 try:
-                    if entry.is_dir(follow_symlinks=False):
+                    if entry.is_symlink():
+                        # Path.glob-style recursion skips directory links. A
+                        # whole-scope report must not silently call that complete.
+                        target = entry.stat(follow_symlinks=True)
+                        if stat.S_ISDIR(target.st_mode):
+                            failure(path, ValueError("recursive selection skips directory symlink"))
+                    elif entry.is_dir(follow_symlinks=False):
                         yield from descend(path, index)
                 except OSError as exc:
                     failure(path, exc)
@@ -462,9 +490,13 @@ def selected_paths(root, pattern, errors):
                     yield from descend(path, index + 1)
                 else:
                     try:
-                        if entry.is_dir():
+                        if entry.is_symlink():
+                            is_directory = checked_link_directory(path)
+                        else:
+                            is_directory = entry.is_dir(follow_symlinks=False)
+                        if is_directory:
                             yield from descend(path, index + 1)
-                    except OSError as exc:
+                    except (OSError, ValueError, RuntimeError) as exc:
                         failure(path, exc)
     yield from descend(root, 0)
 

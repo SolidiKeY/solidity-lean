@@ -2,7 +2,9 @@ import Solidity.Yul.RawGrowingBlock
 
 /-! One typed LOCAL binder can close without changing the raw frame type.
 Restoration and closure use actual Source operations. This supplies no
-initializer execution, physical layout or general admission theorem. -/
+initializer execution, physical layout or general admission theorem.
+Scope metadata and projection laws below are generic in the binder type; the
+projection uses existing clean backups, not dirty-readback Source semantics. -/
 namespace Solidity.Yul.RawTypedScope
 
 def functionRead {ctx : Solidity.Source.Ctx} (state : RawFrame.State ctx)
@@ -77,33 +79,47 @@ theorem drop_coherent : ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : So
   exact congrArg (localWordCells ctx)
     (LocalBoolItemScope.drop_clean ctx.env 1 (ctx.push name ty).tys state.clean)
 
+/-- Existing scope projection commutes with typed closure even for incoherent raw inputs. This equates clean-backup projections, not Source execution or dirty-readback adequacy. -/
+theorem project_close :
+ ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
+ (result : Solidity.Source.R Solidity.Yul.RawLoopBody.Flow × Solidity.Yul.RawFrame.State (ctx.push name ty)),
+ Solidity.Yul.RawTypedScope.project result =
+ Solidity.Yul.RawLoopBody.represented (Solidity.Yul.RawTypedScope.close result) := by
+  intros ctx name ty result
+  cases tag : result.1 with
+  | error halt =>
+    simp only [Solidity.Yul.RawTypedScope.close, Solidity.Yul.RawTypedScope.project,
+      Solidity.Yul.RawLoopBody.represented, tag, Except.map]
+    rfl
+  | ok flow =>
+    cases flow with
+    | normal =>
+      simp only [Solidity.Yul.RawTypedScope.close, Solidity.Yul.RawTypedScope.project,
+        Solidity.Yul.RawLoopBody.represented, tag, Except.map,
+        Solidity.Yul.RawLoopBody.out, Solidity.Source.Out.up, Solidity.Source.Out.close,
+        Solidity.Yul.RawTypedScope.restore_drop ctx name ty, Except.bind]
+      rfl
+    | break_ h =>
+      simp only [Solidity.Yul.RawTypedScope.close, Solidity.Yul.RawTypedScope.project,
+        Solidity.Yul.RawLoopBody.represented, tag, Except.map,
+        Solidity.Yul.RawLoopBody.out, Solidity.Source.Out.up, Solidity.Source.Out.close,
+        Solidity.Yul.RawTypedScope.restore_drop ctx name ty, Except.bind]
+      rfl
+    | continue_ h =>
+      simp only [Solidity.Yul.RawTypedScope.close, Solidity.Yul.RawTypedScope.project,
+        Solidity.Yul.RawLoopBody.represented, tag, Except.map,
+        Solidity.Yul.RawLoopBody.out, Solidity.Source.Out.up, Solidity.Source.Out.close,
+        Solidity.Yul.RawTypedScope.restore_drop ctx name ty, Except.bind]
+      rfl
+    | leave_ h => cases h
+
 theorem close_correct : ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
  (result : Solidity.Source.R Solidity.Yul.RawLoopBody.Flow × Solidity.Yul.RawFrame.State (ctx.push name ty)),
  Solidity.Yul.RawCoherent.coherent result.2 = true →
  Solidity.Yul.RawCoherent.coherent (Solidity.Yul.RawTypedScope.close result).2 = true ∧
  Solidity.Yul.RawTypedScope.project result = Solidity.Yul.RawLoopBody.represented (Solidity.Yul.RawTypedScope.close result) := by
   intro ctx name ty result same
-  constructor
-  · exact drop_coherent ctx name ty result.2 same
-  · cases tag : result.1 with
-    | error halt =>
-      simp only [close,project,RawLoopBody.represented,tag,Except.map]
-      rfl
-    | ok flow =>
-      cases flow with
-      | normal =>
-        simp only [close,project,RawLoopBody.represented,tag,Except.map,
-          RawLoopBody.out,Solidity.Source.Out.up,Solidity.Source.Out.close,restore_drop ctx name ty,Except.bind]
-        rfl
-      | break_ h =>
-        simp only [close,project,RawLoopBody.represented,tag,Except.map,
-          RawLoopBody.out,Solidity.Source.Out.up,Solidity.Source.Out.close,restore_drop ctx name ty,Except.bind]
-        rfl
-      | continue_ h =>
-        simp only [close,project,RawLoopBody.represented,tag,Except.map,
-          RawLoopBody.out,Solidity.Source.Out.up,Solidity.Source.Out.close,restore_drop ctx name ty,Except.bind]
-        rfl
-      | leave_ h => cases h
+  exact ⟨drop_coherent ctx name ty result.2 same, project_close ctx name ty result⟩
 
 theorem bool_drop_eq : ∀ (ctx : Solidity.Source.Ctx) (name : String)
  (state : Solidity.Yul.RawFrame.State (ctx.push name .bool)),
@@ -253,5 +269,29 @@ theorem drop_view_agrees : ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty :
     have projected := drop_function_agrees ctx name ty first second same (sourceFunctionAt ctx index)
     rw [functionRead_at,functionRead_at] at projected
     exact congrArg Prod.snd projected
+
+
+/-- Typed scope removal retains the existing clean backup tail. -/
+theorem drop_clean :
+ ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
+ (state : Solidity.Yul.RawFrame.State (ctx.push name ty)), (Solidity.Yul.RawTypedScope.drop state).clean = state.clean.drop 1 := by
+  intros; rfl
+
+/-- Typed scope removal preserves the complete represented world. -/
+theorem drop_world :
+ ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
+ (state : Solidity.Yul.RawFrame.State (ctx.push name ty)), (Solidity.Yul.RawTypedScope.drop state).world = state.world := by
+  intros; rfl
+
+/-- Scope closure produces the existing full word snapshot, not a sparse write set. -/
+theorem close_captured :
+ ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
+ (result : Solidity.Source.R Solidity.Yul.RawLoopBody.Flow × Solidity.Yul.RawFrame.State (ctx.push name ty)),
+ Solidity.Yul.RawFrame.capture (Solidity.Yul.RawTypedScope.close result).2
+   (Solidity.Yul.RawFrame.view (Solidity.Yul.RawTypedScope.close result).2) =
+ (Solidity.Yul.RawTypedScope.close result).2 := by
+  intros; rfl
+
+
 
 end Solidity.Yul.RawTypedScope

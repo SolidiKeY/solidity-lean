@@ -1,8 +1,11 @@
 import Solidity.Source.Types
+import Solidity.Lowering.V08.FixedBytesCallableArgumentControls
 
 /-!
 Isolated H62 backfill: width admission at the existing intrinsic Source.STy.
-This does not assert argument evaluation, state transport, or ABI agreement.
+The width-admission section alone does not assert argument evaluation, state
+transport, or ABI agreement. The later execution section consumes the existing
+operational producers; ABI agreement remains unclaimed.
 The two fixture rows retain the binary/maximal original width cases from
 FixedBytesCallableArgumentControls; original execution theorems are read-only.
 -/
@@ -62,3 +65,79 @@ theorem table_identity (isBase : DeclName → DeclName → Bool) :
 #print axioms fixedBytes_narrowing
 #print axioms fixture_identity
 end Solidity.H62.GenericV08
+
+/-! Guarded regression: width admission alone must not be reported as actual
+argument execution or post-local transport. The following additive consumers
+retain the published actual evaluator and joint Source/target producers.
+Proof-term instance identities are separate from operational evidence. -/
+namespace Solidity.H62.GenericV08.ExecutionTransport
+open Solidity Source
+open Solidity.Lowering.V07
+open FixedBytesAssignmentControls
+open Source.SemanticsExamples
+open MixedAssignmentControls (globals)
+open Solidity.Lowering.V08.FixedBytesCallableArgument
+
+/-- Exact Source execution for every typed fixture and extra sufficient
+horizon. Payload fitting is the existing producer, not a new length premise. -/
+theorem source_execution (fixture : WidthFixture) (pipeline : Roadmap.Pipeline)
+    (checked static : Bool) (extra : Nat) :
+    (Source.evalConvArgs (globals pipeline) {F0 with checked := checked,static := static}
+      (extra+4) (arguments (E := MixedAssignmentControls.E) fixture.width fixture.bound
+        (.here : Source.Idx (SrcCtx fixture.width fixture.bound) _) (.there .here))).run
+      (source fixture.width fixture.bound fixture.old fixture.rhs) =
+    (.ok (.cons (.fixedBytes (FixedBytesAssignmentControls.payload fixture.width fixture.rhs)
+        (Source.fitBytes_length fixture.width fixture.rhs)) .nil),
+      ((source fixture.width fixture.bound fixture.old fixture.rhs).1.set .here
+        (.fixedBytes (FixedBytesAssignmentControls.payload fixture.width fixture.rhs)
+          (Source.fitBytes_length fixture.width fixture.rhs)),
+        (source fixture.width fixture.bound fixture.old fixture.rhs).2)) := by
+  first
+  | exact argument_actual (globals pipeline) {F0 with checked := checked,static := static}
+      extra (source fixture.width fixture.bound fixture.old fixture.rhs)
+      fixture.width fixture.bound .here (.there .here)
+      (FixedBytesAssignmentControls.payload fixture.width fixture.rhs)
+      (Source.fitBytes_length fixture.width fixture.rhs) rfl
+  | rfl
+
+/-- Joint operational/result/post-local producer, not a decide table. It
+retains both complete machines and their actual reached typed local relation. -/
+def joint_execution (fixture : WidthFixture) (pipeline : Roadmap.Pipeline)
+    (checked static : Bool) (extra : Nat) :=
+  Controls.actual_client fixture.width fixture.bound pipeline checked static extra
+    fixture.old fixture.rhs
+
+/-- Exact original binary instance; no original theorem or input is rewritten. -/
+theorem binary_instance (pipeline : Roadmap.Pipeline) (checked static : Bool) :
+    joint_execution widthFixtures[0] pipeline checked static 0 =
+      Controls.binary_client pipeline checked static := by rfl
+
+/-- Exact original maximal-width instance under its original frame flags. -/
+theorem maximal_instance (pipeline : Roadmap.Pipeline) :
+    joint_execution widthFixtures[1] pipeline false false 0 =
+      Controls.maximum_client pipeline := by rfl
+
+
+/-- Original binary row inputs, separately from proof-irrelevant equalities. -/
+theorem binary_fields :
+    (widthFixtures[0]).width = 2 ∧ (widthFixtures[0]).old = [255,128] ∧
+      (widthFixtures[0]).rhs = [0,1] := by first | decide | exact ⟨rfl,rfl,rfl⟩
+
+/-- Original maximal row inputs; fitting remains the existing producer rule. -/
+theorem maximal_fields :
+    (widthFixtures[1]).width = 32 ∧ (widthFixtures[1]).old = [] ∧
+      (widthFixtures[1]).rhs = List.replicate 32 255 := by first | decide | exact ⟨rfl,rfl,rfl⟩
+
+end Solidity.H62.GenericV08.ExecutionTransport
+
+#print axioms Solidity.H62.GenericV08.ExecutionTransport.source_execution
+
+#print axioms Solidity.H62.GenericV08.ExecutionTransport.joint_execution
+
+#print axioms Solidity.H62.GenericV08.ExecutionTransport.binary_instance
+
+#print axioms Solidity.H62.GenericV08.ExecutionTransport.maximal_instance
+
+#print axioms Solidity.H62.GenericV08.ExecutionTransport.binary_fields
+
+#print axioms Solidity.H62.GenericV08.ExecutionTransport.maximal_fields

@@ -208,6 +208,33 @@ recorded in `/workspace/generic-v08-export/HANDOFF.md`. Overall status remains
 blocked with all four original queue obligations preserved; no full completion
 or runtime-gate pass is asserted.
 
+## Successor lexical drift accounting (2026-11-06)
+
+The acknowledged final member head `4a78ae839e026e1a9f8f575cd10fec4478e52305`
+was merged only after the captured assignment and scope/retirement hashes were
+verified. This is source adoption, not independent validation of external gates.
+`drift.py` retains all 4428 baseline and 4430 current declaration rows plus both
+full file-hash inventories. It reports 4355 equal lexical-header groups, 2 added
+groups, 5 unpaired anonymous groups and 27 ambiguous duplicate-name groups. Group
+counts are not declaration counts. Named keys omit namespace/section context;
+no lexical equality establishes elaborated statement or semantic preservation.
+
+Independent read-only finder and skeptic reviewed without Lean/server/builds.
+Finder identified unstable anonymous-ordinal pairing; anonymous rows now remain
+unpaired, and an insertion regression checks ordinal reuse. Both reviewers
+confirmed the fix. Five tests pass in normal and optimized Python. A file-only
+hash-change control preserves imports/body/context drift visibility. Original
+and corrected reports remain separately under the successor evidence directory.
+These checks do not close execution correspondence, semantic refusal acceptance,
+complete family census, proof validation or same-condition Lean timing. No Lean
+source, theorem, admission, toolchain, resource guard or frozen pin changed.
+
+### Checked execution consumers in the existing test module
+
+The original execution draft is preserved off Git. Its six additive declarations now live in `tests/h62/item4/generic-v08/IntrinsicWidths.lean`, avoiding an unregistered `tests` import prefix under the approved per-file Lake gate. Existing width declarations remain unchanged. `source_execution` consumes the actual published evaluator law; `joint_execution` consumes the complete actual-client result and reached local relation. Binary/maximal equalities are proof-term instance identities, with separate fixture field equations; they are not independent target-run proofs. Full generic-family correspondence, refusal coverage, migration-overlay acceptance and matched performance measurements remain open. Cache seeding was skipped; the environment toolchain was activated with one thread.
+
+Actual axiom reports retain the five original axiom-free width declarations. The new source/joint execution consumers and two instance identities depend on `propext`, `Classical.choice`, and `Quot.sound` through the existing producers; both input-field equations are axiom-free. No new axiom declaration is introduced. The preserved standalone draft has the same qualified names and must remain unregistered; do not import both copies. The final focused run took 2.245 seconds with one Lean process and 812314624 bytes sampled aggregate peak RSS. These are focused-check observations, not matched full-family performance acceptance or a full gate.
+
 ## Explicit resume after coordinator integration
 
 The coordinator explicitly requested merging `origin/master` and continuing,
@@ -244,6 +271,7 @@ for the SortCheck migration and the axiom-preserving Roadmap prerequisite fix.
 H82 removes the former proof-only exact-file agreement wait. No automatic
 completion or passing family runtime gate is inferred from the merged work.
 
+Successor merge note: both independent documentation updates are retained as historical reports. This merge does not resume any retired goal or alter the H82 chain ownership supplied by coordinator messages.
 
 ## Scheduled rebaseline and portable invocation (2026-11-07)
 
