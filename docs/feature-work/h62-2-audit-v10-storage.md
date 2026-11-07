@@ -712,3 +712,20 @@ Source compiler admission, physical-word bridge or world rollback follows.
 Both independent read-only reviewers found the joint premises non-circular,
 inhabited and faithful to the exact frozen hypotheses. Production interfaces,
 definitions, statements, budgets and axiom inventories remain unchanged.
+
+The C223 reference ledger adds exactly three frozen rows: two joint-premise
+bundles and one data input. It now records52 mapped rows (40 joint,12 data) and
+3229 unmapped rows. The new module has15 measured guards; source-specific pins
+record its actual checked source commit. Earlier complete/partial validation
+heads remain unchanged. Twelve additional success/negative/observation controls
+are not counted as extra mapped interfaces. Full semantic/elaborated census,
+compiler totality, gas/fork boundaries and original Source/physical/world
+composition remain incomplete.
+
+The corrected C223 registry checks pass, including targeted new-source and
+new-pin corruption controls. The initial stale nine-module expectation failed
+and its receipt is retained; the ledger now has ten witness modules. Trust and
+roots pass. The current strict axiom-inventory check remains FAIL:16301 pinned
+theorems,zero errors,260 unrecorded changes. No inventory write or trust-policy
+change was made; H30 coordinator reconciliation remains separate. Local measured
+guards establish only their recorded axiom sets, not global inventory acceptance.

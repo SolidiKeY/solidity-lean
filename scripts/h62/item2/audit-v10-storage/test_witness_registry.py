@@ -32,11 +32,11 @@ class RegistryTest(unittest.TestCase):
         return directory
     def test_complete_reference_ledger(self):
         result=m.build(self.inventory,m.maps())
-        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_rows=49,mapped_joint_bundles=38,mapped_data_inhabitants=11,unmapped=3232))
+        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_rows=52,mapped_joint_bundles=40,mapped_data_inhabitants=12,unmapped=3229))
         self.assertEqual(len({r["id"] for r in result["rows"]}),3281)
-        self.assertEqual(len(result["witness_source_sha256"]),9)
+        self.assertEqual(len(result["witness_source_sha256"]),10)
     def test_corruption_refused(self):
-        for kind in ["duplicate","unknown","signature","witness","source","interface","pin","kind"]:
+        for kind in ["duplicate","unknown","signature","witness","source","reuse-source","interface","pin","reuse-pin","kind"]:
             with self.subTest(kind=kind),tempfile.TemporaryDirectory() as temp:
                 root=Path(temp);directory=self.fixture(root)
                 path=next(directory.glob("*-witness-map.json"));packet=json.loads(path.read_text())
@@ -47,11 +47,17 @@ class RegistryTest(unittest.TestCase):
                 elif kind=="witness":packet["rows"][0]["witness"]="Missing.Namespace.theorem"
                 elif kind=="source":
                     source=directory/"LoopWitnesses.lean";source.write_text(source.read_text()+"\n")
+                elif kind=="reuse-source":
+                    source=directory/"TargetReuseWitnesses.lean";source.write_text(source.read_text()+"\n")
                 elif kind=="interface":
                     source=root/"Solidity/Backend/StorageOps/TargetOperations.lean";source.write_text(source.read_text()+"\n")
                 elif kind=="pin":
                     pins=directory/"kernel-source-pins.json";data=json.loads(pins.read_text())
                     next(iter(data["sources"].values()))["sha256"]="0"*64
+                    pins.write_text(json.dumps(data))
+                elif kind=="reuse-pin":
+                    pins=directory/"kernel-source-pins.json";data=json.loads(pins.read_text())
+                    data["sources"]["tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean"]["sha256"]="0"*64
                     pins.write_text(json.dumps(data))
                 path.write_text(json.dumps(packet))
                 with self.assertRaises(ValueError):m.build(self.inventory,m.maps(root),root)
