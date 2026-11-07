@@ -1,0 +1,196 @@
+{
+  "guardedRegression": "Historical gate wrappers and sealed evidence must remain reviewable without inaccessible private source paths or an inferred successful artifact transfer.",
+  "sourceBuildHead": "4d7285b80e89741e9da8cb49ce7ab8b62a828a72",
+  "recordedQualificationHead": "e7ef3733e8799451e9091ab9e8603ef138b18976",
+  "adoptedMaster": "d7a1cbdf597826add5af3533fdaf6b8d91e28f66",
+  "wrappers": [
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/B-kernel-controls.sh",
+      "archiveMember": "executed-private/B-kernel-controls.sh",
+      "bytes": 496,
+      "sha256": "79656e2305310680971f13fffad1fc71a2a45beb53a967caf4204e19d2ba5500",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/address-marker-gate.sh",
+      "archiveMember": "executed-private/address-marker-gate.sh",
+      "bytes": 507,
+      "sha256": "d4ef19a8810dbcbd242f2b89dbf68ee95f20bd051adf009f177fc9206831e3fd",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/browser-build.sh",
+      "archiveMember": "executed-private/browser-build.sh",
+      "bytes": 466,
+      "sha256": "f8758a472cb55cc996caed8b1d8324233cfcf9ee4672bc032ff4c172aac4254e",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/builds.py",
+      "archiveMember": "executed-private/builds.py",
+      "bytes": 2261,
+      "sha256": "b7f1ed276697ee698665a4efb59364e60f9e1a01e93984907424a1454927d97d",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/check-candidate-exclusion.py",
+      "archiveMember": "executed-private/check-candidate-exclusion.py",
+      "bytes": 3048,
+      "sha256": "342f0e7c1ad89b8d5478e01fc6e5681ba04e3c690747529e66d9ba86eb71514c",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/checks.sh",
+      "archiveMember": "executed-private/checks.sh",
+      "bytes": 5470,
+      "sha256": "65316b36daf4368174f0efcacaeaeec553da6b0078c8e9fcc9ce754237fc1d12",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/closure-audit.py",
+      "archiveMember": "executed-private/closure-audit.py",
+      "bytes": 7607,
+      "sha256": "fb09cb00738bc73304726b5fbc2db2ef585d18af99b8b12e1d2eb2bcbdee4e36",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/compile-producer-args.mjs",
+      "archiveMember": "executed-private/compile-producer-args.mjs",
+      "bytes": 2814,
+      "sha256": "90e6e1bb4ba2ba20520189457f69e93f890f992c94f3c7f3eb0b2f2e1a9fc864",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/finite-gate.sh",
+      "archiveMember": "executed-private/finite-gate.sh",
+      "bytes": 506,
+      "sha256": "4a14fbec5879dc063807419bfca72034b9989dc26652f3fc99cc3193a6e6fcf0",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/fixed-byte-gate.sh",
+      "archiveMember": "executed-private/fixed-byte-gate.sh",
+      "bytes": 505,
+      "sha256": "6c218d9a064890120ea34198c6eaa913ac7e02c9ee877c4c700d175b3e447099",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/marker-gate.sh",
+      "archiveMember": "executed-private/marker-gate.sh",
+      "bytes": 505,
+      "sha256": "3e840c580edbfc7fb569f04e818a0601680d88d56027e87d5c42ce701239f013",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/mcp.sh",
+      "archiveMember": "executed-private/mcp.sh",
+      "bytes": 2014,
+      "sha256": "12222d8cf192ffa01983e2d2221bd31bbff5986be6f3fbe7a0c76e8a646fe15e",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/native-negatives.py",
+      "archiveMember": "executed-private/native-negatives.py",
+      "bytes": 2478,
+      "sha256": "a09e55e155075a3ee6d2b856644f600bdb67cdd2613562b95c95e53a7bd5fcbe",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/pack-evidence.py",
+      "archiveMember": "executed-private/pack-evidence.py",
+      "bytes": 3400,
+      "sha256": "b2921aca5d58b97164ba5f01f478d7f7caba2b0a228c2c9badaa4ad180bd85a5",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/remaining-checks.sh",
+      "archiveMember": "executed-private/remaining-checks.sh",
+      "bytes": 3460,
+      "sha256": "13b8b20a57c959c94565fdf7f32d8fa55049c2db934d2459468f7545680ce6db",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/state-refusal-controls.mjs",
+      "archiveMember": "executed-private/state-refusal-controls.mjs",
+      "bytes": 6443,
+      "sha256": "141249484004442646bddc3bb7343d75d2e25b817166f89b28b7316ecea25bae",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/wasm-build.sh",
+      "archiveMember": "executed-private/wasm-build.sh",
+      "bytes": 564,
+      "sha256": "0f0303ab91d322dccecdbdb26f8af4305e1bc0d51febcd160ef6e9ac84a45bd2",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/write-manifest.py",
+      "archiveMember": "executed-private/write-manifest.py",
+      "bytes": 8678,
+      "sha256": "9aae38a90b2f4f76ce62e198013716f9308020dbff92dcae487a1d47b6a9b99b",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/native-browser-serial.toml",
+      "archiveMember": "intake/native-browser-serial.toml",
+      "bytes": 2552,
+      "sha256": "59c37dde773e775b4dd7a82d8202da1685238a88e19ad77d4f4af74e91061100",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    },
+    {
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/lake-prefix.sh",
+      "archiveMember": "intake/lake",
+      "bytes": 117,
+      "sha256": "44d8c8d27e02a058b791e26d1b5b6de5eeda7e4afec1586514f3112e679be484",
+      "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
+    }
+  ],
+  "delivery": {
+    "status": "coordinator-pending pull; H71 handoff metadata relayed, binary/archive transfer and recipient inspection not established",
+    "channel": "Existing coordinator bulk retrieval from original VM; no model push or VM ship-cache.",
+    "handoff": {
+      "vmPath": "/workspace/solidity-lean/.lake/native-browser-environment-handoff-e7ef3733e879/handoff.json",
+      "sha256": "a862664fee195d4c39646133406e19cdda0d7c73820b5b0f5adc16f544f34671"
+    },
+    "sealedArtifacts": [
+      {
+        "path": "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/evidence.tar.gz",
+        "bytes": 842207,
+        "sha256": "c3c9ce432635b63557700dc3bb01d217f266943a9bf908e964944e5735d7e705",
+        "archiveName": "evidence.tar.gz"
+      },
+      {
+        "path": "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/runtime-artifacts.tar.gz",
+        "bytes": 9954322,
+        "sha256": "b0f6775171d94000d1c4c944d2b4688b42fc39312dff6c2ede8824f19ceaa179",
+        "archiveName": "runtime-artifacts.tar.gz"
+      },
+      {
+        "path": "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/incremental-cache.tar.gz",
+        "bytes": 1334343,
+        "sha256": "0c3f22d411897b4f0822fa8b4f11b8ea4ec77e1bcd8cedc21fdbff4fabf85aee",
+        "archiveName": "incremental-cache.tar.gz"
+      },
+      {
+        "path": "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/evidence-files.json",
+        "bytes": 96092,
+        "sha256": "8a9c1aa9542561b541aeeccbae0ae2f9625b1e77a13754a5aa717b858023158b",
+        "archiveName": "evidence-files.json"
+      },
+      {
+        "path": "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/runtime-files.json",
+        "bytes": 727,
+        "sha256": "4e7ffa48711a3bf7ffa87a2f3c4cf6584016d2eab22d913db65312d7c71cbaa2",
+        "archiveName": "runtime-files.json"
+      },
+      {
+        "path": "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/cache-files.json",
+        "bytes": 6625,
+        "sha256": "1d5d390f4e035f94efcd4981115eb3ffc3ddd9c1b7fc002ee3d043a1d7cc39c9",
+        "archiveName": "cache-files.json"
+      }
+    ],
+    "boundary": "VM paths are courier locators, not public download URLs or proof that transport completed."
+  },
+  "boundary": "Exact source snapshots extracted from the hash-verified evidence archive; no runtime/control rerun or change to historical receipts. External fixtures, toolchains, private setup shims and candidates remain prerequisites; preservation is not replay acceptance."
+}
