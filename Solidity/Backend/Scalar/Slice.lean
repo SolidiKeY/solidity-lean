@@ -299,7 +299,8 @@ example : run [.op .ADDMOD] [BitVec.ofInt 256 (-1), 1, 7, 99] =
 #guard_msgs in #print axioms unary
 /-- info: 'Solidity.Backend.Scalar.binary' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms binary
-/-- info: 'Solidity.Backend.Scalar.ternary' does not depend on any axioms -/
+-- Port-only H129 observation: 4.35 adds standard propext; the 4.24 guard is unchanged.
+/-- info: 'Solidity.Backend.Scalar.ternary' depends on axioms: [propext] -/
 #guard_msgs in #print axioms ternary
 /-- info: 'Solidity.Backend.Scalar.step' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms step

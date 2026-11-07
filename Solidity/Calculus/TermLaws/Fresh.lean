@@ -9,6 +9,9 @@ premises about closed terms, and the pins.
 A piece of `Calculus/TermLaws.lean`, whose docstring describes the whole.
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Solidity (Srt Op0 Op1 Op2 Op3)

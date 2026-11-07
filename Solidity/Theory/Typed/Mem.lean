@@ -35,6 +35,9 @@ The laws are proved on the typed heap alone: no erasure is read (W10.5.4,
 `docs/intrinsic.md`).
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Semantics (lookupBy structDef tyRank fieldsRank)

@@ -9,6 +9,9 @@ and the laws of memory reads.
 A piece of `Calculus/TermLaws.lean`, whose docstring describes the whole.
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Solidity (Srt Op0 Op1 Op2 Op3)
@@ -796,7 +799,7 @@ theorem Tm.apart?_resolve (σ : State C Γ) {T U : Ty} {a : Tm C Γ (.addr T)} {
     simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at hra hrb
     obtain ⟨r, -, rfl⟩ := hra
     obtain ⟨r', -, rfl⟩ := hrb
-    simpa only [bne_iff_ne, ne_eq] using h
+    simpa only [MAddr.Apart, bne_iff_ne, ne_eq] using h
   · rename_i f i k hfa hfb
     obtain ⟨s, id, hf, rfl⟩ := Tm.addrShape?_eval σ hfa ha
     obtain ⟨id', E, arr, j, -, rfl, -⟩ := Tm.addrShape?_eval σ hfb hb

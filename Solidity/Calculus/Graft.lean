@@ -50,6 +50,9 @@ sequent's update rules in W3c `tactics`, both timed), since they run once a
 rule and not once a step.
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
@@ -111,8 +114,8 @@ theorem Srt.SameO.eq {H : HTy} {k : Srt} {x y : Option (k.Den C H)} (h : Srt.Sam
     x = y := by
   cases x <;> cases y
   · rfl
-  · exact Option.noConfusion h
-  · exact Option.noConfusion h
+  · cases h
+  · cases h
   · exact congrArg some (Srt.forget_injective k (Option.some.inj h))
 
 theorem Srt.SameO.refl {H : HTy} (k : Srt) (x : Option (k.Den C H)) : Srt.SameO k x x := rfl
@@ -121,7 +124,7 @@ theorem Srt.SameO.refl {H : HTy} (k : Srt) (x : Option (k.Den C H)) : Srt.SameO 
 typing: `y` rewritten to `x`. -/
 local macro "same_eq " h:ident x:ident y:ident : tactic =>
   `(tactic| (cases $x:ident <;> cases $y:ident <;>
-      first | rfl | exact Option.noConfusion $h | exact congrArg some (Option.some.inj $h)))
+      first | rfl | (solve | cases $h:ident) | exact congrArg some (Option.some.inj $h)))
 
 local macro "same_subst " h:ident x:ident y:ident : tactic =>
   `(tactic| (have hxy : $x = $y := (by same_eq $h $x $y); rw [← hxy]; clear hxy))
@@ -235,11 +238,11 @@ theorem _root_.Solidity.Op3.exhB_same {H₀ H₁ : HTy} {a b c s : Srt} (o : Op3
 
 theorem Srt.SameO.isSome {H₀ H₁ : HTy} {k : Srt} {x : Option (k.Den C H₀)}
     {y : Option (k.Den C H₁)} (h : Srt.SameO k x y) : x.isSome = y.isSome := by
-  cases x <;> cases y <;> first | rfl | exact Option.noConfusion h
+  cases x <;> cases y <;> first | rfl | cases h
 
 theorem Srt.SameO.isNone {H₀ H₁ : HTy} {k : Srt} {x : Option (k.Den C H₀)}
     {y : Option (k.Den C H₁)} (h : Srt.SameO k x y) : x.isNone = y.isNone := by
-  cases x <;> cases y <;> first | rfl | exact Option.noConfusion h
+  cases x <;> cases y <;> first | rfl | cases h
 
 /-- An update that writes locals only: the global part of the state it is
 applied in is the one it leaves. -/
@@ -566,8 +569,8 @@ theorem GlobT.map_val_bind {H₀ H₁ : HTy} {o₀ : Option (GlobT C H₀)} {o�
     (o₀.bind f₀).map (·.1) = (o₁.bind f₁).map (·.1) := by
   cases o₀ <;> cases o₁
   · rfl
-  · exact Option.noConfusion h
-  · exact Option.noConfusion h
+  · cases h
+  · cases h
   · exact hf _ _ (Option.some.inj h)
 
 /-- **A term out of gas in the state before is out of gas in every typed
@@ -800,8 +803,8 @@ theorem UpdElem.globT_substH (hL : U.Lands σ₀ g σ₁)
     revert hm
     cases x'.eval σ₀ <;> cases x.eval σ₁ <;> intro hm
     · rfl
-    · exact Option.noConfusion hm
-    · exact Option.noConfusion hm
+    · cases hm
+    · cases hm
     · exact congrArg some (GlobT.withMem_congr hG (Option.some.inj hm))
   | selfBalance op a =>
     simp only [UpdElem.substH] at h
@@ -1201,12 +1204,12 @@ theorem Upd.lands_dropTop (σ : State C Γ) (v : t.TDenote C σ.H) :
 theorem Tm.eval_dropTop (σ : State C Γ) (v : t.TDenote C σ.H) {k : Srt} (x : Tm C Γ k)
     {x' : Tm C (t :: Γ) k} (hx : x.substH (Upd.dropTop (C := C) Γ t).held true none = some x') :
     x'.eval (σ.push v) = x.eval σ :=
-  Srt.SameO.eq (Tm.eval_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) x hx)
+  Srt.SameO.eq (Tm.eval_substH (Upd.lands_dropTop σ v) (fun _ h => (by cases h)) x hx)
 
 theorem Rhs.eval_dropTop (σ : State C Γ) (v : t.TDenote C σ.H) {u : LTy} (r : Rhs C Γ u)
     {r' : Rhs C (t :: Γ) u} (hr : r.substH (Upd.dropTop (C := C) Γ t).held true none = some r') :
     r'.eval (σ.push v) = r.eval σ :=
-  Rhs.eval_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) r hr
+  Rhs.eval_substH (Upd.lands_dropTop σ v) (fun _ h => (by cases h)) r hr
 
 theorem UpdElem.globT_lift? {Δ : Ctx} (σ : State C Γ) (v : t.TDenote C σ.H) (e : UpdElem C Γ Δ)
     {e' : UpdElem C (t :: Γ) (t :: Δ)} (h : e.lift? = some e') (G : GlobT C σ.H) :
@@ -1270,13 +1273,13 @@ theorem Upd.exh_liftG? (σ : State C Γ) (v : t.TDenote C σ.H) : {Δ : Ctx} →
       cases e with
       | storage x =>
         obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 he
-        exact Tm.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) x hx'
+        exact Tm.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => (by cases h)) x hx'
       | memory x =>
         obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 he
-        exact Tm.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) x hx'
+        exact Tm.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => (by cases h)) x hx'
       | «local» _ r =>
         obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 he
-        exact Rhs.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) r hr'
+        exact Rhs.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => (by cases h)) r hr'
       | selfBalance _ _ | net _ _ _ | pay _ _ | netMt _ _ | setBalance _ => cases he
     simp only [Upd.exhAny, Upd.exhOk, Bool.or_eq_true, Bool.and_eq_true, hok]
     exact ⟨fun hx => hx.imp ih₁ hex, fun hx => ⟨ih₂ hx.1, hx.2.imp_right hex⟩⟩
@@ -1579,10 +1582,10 @@ theorem holds_upd_graft {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ�
   · rw [hV] at hG
     cases hw : W.globT σ with
     | none => rfl
-    | some _ => rw [hw] at hG; exact Option.noConfusion hG
+    | some _ => rw [hw] at hG; cases hG
   · rw [hL₂.1] at hG
     cases hw : W.globT σ with
-    | none => rw [hw] at hG; exact Option.noConfusion hG
+    | none => rw [hw] at hG; cases hG
     | some g₂' =>
       rw [hw] at hG
       have hg : g₂'.1 = g₂.1 := Option.some.inj hG
