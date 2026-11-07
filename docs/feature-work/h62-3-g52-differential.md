@@ -501,3 +501,73 @@ Final manifest clearance: both copies are identical with2,952entries and SHA256
 af86aad07e56852bed960d99850a6917ebe09c60124278e1e96e1c382a5debb4.
 The skeptic independently verified every required census/boundary artifact and
 all1,920boundary compiler files against those hashes. No outstanding findings.
+
+
+## Coordinator re-baseline and blockchain input preparation
+
+The coordinator authorized re-baselining on origin/master advertised at
+5da4771e63a4278ed53932ac39a032e3d7aea6ed. Fetch showed that it did **not** contain
+local6a68fe831eaa6b4a9132499e243c3a7a80732dcf in ancestry, despite the merge notice.
+The common ancestor was761bb4865dc5f7702549966061b84acdeecd6ac8; the remote owned
+lane files were unchanged from that ancestor. Fast-forward correctly refused.
+The worker performed a normal authorized merge into this lane, preserving both
+heads at2cd1303a269a129ef2a84a1478e9ec5d1a3f1470. No reset, discard or push occurred;
+no owned file changed as a result of the merge. The original c6f550e base and
+persistent goal remain unchanged. Evidence:blockchain-rebaseline.json. Coordinator
+retrieval must retain the local6a68checkpoint, rather than assuming it was already
+published; the integration patch includes it.
+
+The existing generic exporter now accepts --format blockchain_test. It reuses
+the pinned archive, verifies the full inventory hash/census binding, selects only
+exact-Osaka blockchain_test rows, rejects duplicate identities, checks every
+actual fixture's network and format, and verifies exhaustive selection coverage.
+It preserves complete genesis/pre-state/block/expected-post fixture data without
+interpreting those values as successful execution.
+
+All21,105selected records across2,693files were exported, with contiguous indices
+and status input-only-not-executed. No blockchain execution or source agreement
+is claimed. The stream is /workspace/h44/g52-differential/blockchain-inputs.jsonl.gz;
+SHA256:89082881102be9e9a6cf021c95636375c21810bb631844f8c345a336749866a3.
+A second export produced identical bytes and exact identity coverage. The original
+state-test input stream remains byte-identical at
+ d7dcc3b6f969359d44bfdaec88b7dffcbd80cddacc2b06b8a135964e2cbbc602;
+its completed rejection classification/runtime comparisons were not repeated.
+
+Reviewer inspection exposed an in-progress publication weakness: truncating a
+stream while its prior receipt was visible. The shared exporter now writes a
+partial stream and replaces the published path only after exhaustive validation;
+it publishes the receipt through a temporary file too. Stream and receipt hashes
+must still be checked together. A synthetic failed-export test proves the prior
+completed stream and receipt survive a wrong-fork refusal. All3controls pass.
+The final atomic full export matches the same reviewed hash. Module docstrings
+name guarded wrong-format/fork and partial-publication regressions per H90/H112.
+
+Read-only finder and skeptic independently verified coverage, identity, exact
+network/format, input-only status, default-state compatibility, and publication
+fix. Neither used Lean/server or executed blockchain EVM cases. Evidence includes
+blockchain-export.json,blockchain-export-replay.json,blockchain-atomic-export.log,
+blockchain-export-controls.log and blockchain-export-reviews.json. Bulk streams
+remain off Git and are included in the committed H44 manifest.
+
+Reproduce input preparation only:
+
+```sh
+python3 tests/h62/item3/g52-differential/test_blockchain_export.py
+python3 scripts/h62/item3/g52-differential/eest_export.py --format blockchain_test --bulk "$BULK"
+```
+
+Inspection of the pinned VM runBlock path found it requires a real
+blockchain.validateHeader method when header validation is enabled. The next
+independent work is to pin/provision that real provider, establish genesis/history
+and block validation bindings, then execute bounded admitted fixtures. Do not
+set skipHeaderValidation or fabricate a validator to turn preparation into a
+match. Engine, engine-X, sync and transition records remain outside this adapter's
+currently selected input format and explicitly accounted by the full census.
+
+Checkpoint Lean delta:+0files,+0lines; no existing theorem, definition, exclusion,
+axiom or proof-budget change. No Lean/full build or new checking-speed measurement
+was performed; H112's1.21Mlines/7,449files/~24min baseline remains context only.
+All full-goal obligations stay open. Waits remain V17/G49 arbitrary-contract/EEST
+source binding and claudecloud/move6-20261106/g49-final's full composed producer;
+independent reference-provider work remains actionable. No source mismatch ticket
+or complete-goal result is fabricated from input preparation.

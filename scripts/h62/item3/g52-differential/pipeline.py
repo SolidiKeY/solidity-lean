@@ -258,7 +258,7 @@ def manifest(root):
     paths += [root/name for name in ("upstream/solc", "upstream/solc-list.json",
               "upstream/fixtures_develop-v5.3.0.tar.gz",
               "reference/package.json", "reference/package-lock.json")]
-    for optional in ("archive-inventory.jsonl.gz", "eest-inputs.jsonl.gz", "upstream/reference-before-kzg-package-lock.json", "upstream/fixtures_stable-v5.3.0.tar.gz", "toolchain/lean-4.24.0-linux.tar.zst"):
+    for optional in ("blockchain-inputs.jsonl.gz", "archive-inventory.jsonl.gz", "eest-inputs.jsonl.gz", "upstream/reference-before-kzg-package-lock.json", "upstream/fixtures_stable-v5.3.0.tar.gz", "toolchain/lean-4.24.0-linux.tar.zst"):
         if (root/optional).is_file(): paths.append(root/optional)
     obj = {str(p.relative_to(root)): file_sha(p) for p in paths}
     write(root/"sha256.json", obj)
