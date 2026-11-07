@@ -1943,3 +1943,23 @@ read-only finder and skeptic checked the eight roles, hashes and index
 preservation without Lean or a server. Evidence hashes are recorded in
 `tests/h55/module-times/migration-fixtures-evidence.sha256`. The observation
 remains non-atomic and does not establish runtime coverage or acceptance.
+
+## Native browser control observations
+
+`native_browser_controls.py` binds three previously unreferenced native-browser
+controls to their source hashes and the historical browser feature document.
+The rows describe address marker/identity, fixed-byte marker and finite return
+model controls. The document proposes standalone per-file drivers; exact
+current invocation, inputs, side effects and outcomes remain unresolved. These
+finite observations do not establish source, ABI or native adequacy, and the
+fixed-byte length and return failure-payload gaps remain open. The classifier
+covers only the supplied subset and does not establish browser-control coverage.
+
+At `8bb6ca32db9f4beacfa1881a5ca2a68beac0f86f`, the refreshed static index
+contains 739 candidates, 482 with supplied current static references and 257
+without; five retain historical references for review. One candidate was added
+since the preceding snapshot and none was changed or removed. Independent
+read-only finder and skeptic reviewed roles, source hashes and index preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/native-browser-evidence.sha256`. The non-atomic scan
+and static observations do not establish runtime coverage or acceptance.
