@@ -1566,3 +1566,40 @@ order, expected fields/frozen270 and judge/gate/budget contracts are unchanged.
 Exact committed-head native/full lightweight checks remain required. Full
 build/TestSuite/timedstrict/trust, metadata/trace producers, hostedCI and the
 entire original performance/paired judgment queue remain unfinished.
+
+
+### Handoffs — hover validation and explicit CI prerequisites (2026-11-07)
+
+At fdd46539a2f75f1c26442d547b4f35c4cb766bde,421Node tests pass/four
+opt-ins skip; inventory/pins/audit/statictrust/classification exit0. Unchanged
+parity exits1,0/489. Native committed Code observation exits0/partial: hover
+25/26 before terminal33/proofresponse34, exact original payload/range and
+source/open/session/version/hash/sync. PeakRSS4195979264,no sampled survivors.
+This is registered-provider API evidence, not a rendered hover popup or paired
+Dafny/macOS observation.
+
+Fresh local checkout, no compiler/bulk/backend environment: exact current
+lean.yml editor-parity commands give discover/audit0 explicitly digest-only,
+then9native-test failures from missing SolKey compiler. Supplying real pinned
+compiler bytes removes those failures but exposes an incomplete PID marker
+read and a separate closure-deadline failure/stall. The already-failed run was
+explicitly cancelled; its exit1 and cancellation are retained, not a pass or
+workflow timeout. No assertion that the closure failure is repaired.
+
+Complete PID tuple observation now stays inside the original3000ms bound.
+A separate deterministic regression establishes valid version metadata could
+win after5000ms when its timeout callback was overdue (before exit1). Monotonic
+admission now preserves that exact deadline; before-deadline/early metadata
+still works, no initialization/disposal budget changed.23targeted tests pass;
+independent finder/skeptic found no concrete scoped defect.
+
+Owned editor-parity.yml now provisions/checksums the existing compiler before
+native tests and exports SOLKEY_ROOT. OT-CI-PARITY still needs the lean.yml
+owner to supply the same prerequisite and serial test runner, then an actual
+hosted Node22 fresh-checkout run. Local Node24 is not that result.
+[Native/failed CI receipts and review](dafny-hover-ci-evidence-manifest.json)
+remain off git. No complete row or paired judge claim. Exact follow-up-head
+checks remain required. Fullbuild/TestSuite/timedstrict/trust, source-bound
+failed-postcondition/positioned-trace producers, paired rendered phases,
+macOS and the entire original performance/adversarial/scaling/judgment queue
+remain open; unchanged resource/timing STOPs are not retried.
