@@ -46078,6 +46078,176 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.argsB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.boundB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.catalogueB_from_elaborate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.catalogueB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.checked_program_calls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.itemsB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.parentB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.readyB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.catalogue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.no_fuel_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.stray_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.undeclared_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.catalogue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultsB_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.zeroReadyB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.bytes_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_larger": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_one_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_zero_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.refused_fuel_not_refutation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.shared_list_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.struct_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.struct_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.struct_zero_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.all_at": [
   "Classical.choice",
   "Quot.sound",

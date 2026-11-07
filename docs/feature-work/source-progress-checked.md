@@ -935,7 +935,7 @@ coordinator pull; outgoing shipment is not a worker-side prerequisite.
 
 ## Executable bound-body catalogue recognition
 
-`Source/Calls/BoundRecognizer.lean` adds Boolean recognizers that imply the
+`Lowering/P9/BoundRecognizer.lean` adds Boolean recognizers that imply the
 unchanged propositions above. `readyB`/`exprB`, `argsB` and `parentB` cover
 `ReadyExpr`, `ReadyArgs` and `AllocationParent`; `stmtB`/`itemsB` and `boundB`
 cover `ReadyStmt`, `ReadyItems` and `BoundParentItems`; `finiteDefaultB`
@@ -953,7 +953,9 @@ implies `BoundMemoryCatalogue`. `catalogueB_from_elaborate` and
 `readyCoverage`: no catalogue proof is supplied. For `BoundParentItems` bodies,
 `catalogueB` is therefore a sound (not complete) Boolean check of body/default
 admission and actual selected-body identity, with caller-chosen default fuel.
-A `false` answer is not a refutation, and no theorem says which fuel suffices.
+A `false` answer is not a refutation. The finite-default component has
+existential fuel completeness and fuel monotonicity as described below; this
+does not establish completeness of the whole catalogue checker.
 Applying the check to a concrete unit still uses proved evaluation equations
 for dispatch and body lookup, because elaboration does not reduce by `rfl`.
 
@@ -985,3 +987,25 @@ corrected three overstatements: replacing hand-built catalogues, the strength of
 the refusals, and removing the limitation outright. The wording above and in
 the module docstring was narrowed, and the body-admission refusal and
 `Parent.whole` were added in response.
+
+
+### Finite-default recognizer fuel
+
+The adapter modules live in `Lowering/P9/`; they do not add to the Source
+single-writer implementation. `DefaultRecognizerCompleteness` proves
+`finiteDefaultB_step`, `finiteDefaultB_mono`, `finiteDefaultsB_exists`,
+`finiteDefaultB_complete` and `finiteDefaultB_iff`: a `FiniteDefault`
+certificate exists exactly when some recognizer fuel accepts the type, and
+one common fuel suffices for a finite list of such types. Struct fields use
+the maximum of their individual bounds. This is neither an evaluator horizon
+bound nor a completeness result for `catalogueB`.
+
+`DefaultRecognizerControls` checks nested fixed arrays: fuels zero and one
+refuse, fuel two accepts, and every larger fuel accepts. A refused small fuel
+coexists with a valid `FiniteDefault` certificate. Other controls combine
+different type depths and exercise the existing elaborated two-byte-field
+`Pair` layout: fuel zero refuses and one accepts. Existing catalogue controls
+retain both pipelines and their declaration/body/fuel refusal boundaries.
+All 34 reports across the four adapter modules are guarded against their
+actual standard-only axiom inventories. No theorem, syntax, evaluator policy,
+allocation condition or budget in Source was changed by this extension.

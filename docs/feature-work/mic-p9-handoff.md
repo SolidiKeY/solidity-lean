@@ -60,7 +60,7 @@ Exact waits:
 Before this change, `source-progress-checked.md` ("Bound-body catalogues with
 elaboration-derived frames") recorded that body/default admission and actual
 selected-body identity were explicit proof obligations, not automatic recognition.
-`Source/Calls/BoundRecognizer.lean` replaces it, for `BoundParentItems`
+`Lowering/P9/BoundRecognizer.lean` replaces it, for `BoundParentItems`
 bodies only, with a sound (not complete) Boolean check, `catalogueB`, with
 explicit default fuel. Concrete units still need proved dispatch and body-lookup
 evaluation equations. See
@@ -96,3 +96,21 @@ outcomes are in the external handoff. Both draft reviews found no static
 defect; neither supplies kernel evidence. Resume checking only after a
 verified exact-input dependency-cache delivery or a demonstrated performance
 repair; do not repeat the unchanged cold group or raise budgets.
+
+## Verified release-cache continuation and Source ownership
+
+The earlier cumulative dependency timeout remains failed. The H88 release for
+master `a8f684928` passed its SHA256 check. After correcting RAM-backed staging
+pressure and selecting the VM's actual XDG Lake cache, the official installer
+added 6006 entries. A fresh `lake --no-build build` fetched all 82 required
+dependencies, including `Source.StmtProgress`; no stale main-checkout artifact
+was used. The historical draft archive remains unchanged and unvalidated.
+
+The corrected working extension now checks separately. Its six general
+finite-default lemmas and ten controls are in `Lowering/P9/`, together with
+the relocated BoundRecognizer pair. Existing declaration namespaces and
+catalogue theorem statements are retained. No Source implementation is edited;
+the adapter pair was moved out of Source under the coordinator's ownership
+instruction. All 34 guarded axiom reports are standard only. Whole-program
+catalogue completeness, canonical endpoint production and the original
+producer waits are not closed by finite-default fuel completeness.

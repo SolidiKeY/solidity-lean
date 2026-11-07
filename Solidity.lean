@@ -3296,9 +3296,13 @@ import Solidity.Lowering.P8b.Merged
 import Solidity.Lowering.P8b.MergedControls
 import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Lowering.P9.AdmissionControls
+import Solidity.Lowering.P9.BoundRecognizer
+import Solidity.Lowering.P9.BoundRecognizerControls
 import Solidity.Lowering.P9.CallControls
 import Solidity.Lowering.P9.CatalogControls
 import Solidity.Lowering.P9.DeclarationIdentity
+import Solidity.Lowering.P9.DefaultRecognizerCompleteness
+import Solidity.Lowering.P9.DefaultRecognizerControls
 import Solidity.Lowering.P9.ElaboratedCalls
 import Solidity.Lowering.P9.ElaborationAdmission
 import Solidity.Lowering.P9.FragmentDecidable
@@ -4108,8 +4112,6 @@ import Solidity.Source.CalldataExamples
 import Solidity.Source.CalldataLayout
 import Solidity.Source.CalldataNestedCopyControls
 import Solidity.Source.CalldataStaticCopyControls
-import Solidity.Source.Calls.BoundRecognizer
-import Solidity.Source.Calls.BoundRecognizerControls
 import Solidity.Source.Const
 import Solidity.Source.ConstCheck
 import Solidity.Source.Ctor

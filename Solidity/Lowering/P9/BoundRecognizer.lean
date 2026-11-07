@@ -369,14 +369,32 @@ theorem checked_program_calls (res : Resolution)
   bound_memory_program_calls res elaborated G program c values memory checked
     (catalogueB_from_elaborate res elaborated G program c values memory fuel checked ok) complete
 
+/-- info: 'Solidity.Source.Calls.Recognize.readyB_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms readyB_sound
+/-- info: 'Solidity.Source.Calls.Recognize.argsB_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms argsB_sound
+/-- info: 'Solidity.Source.Calls.Recognize.parentB_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms parentB_sound
+/-- info: 'Solidity.Source.Calls.Recognize.itemsB_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms itemsB_sound
+/-- info: 'Solidity.Source.Calls.Recognize.boundB_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms boundB_sound
+/-- info: 'Solidity.Source.Calls.Recognize.finiteDefaultB_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms finiteDefaultB_sound
+/-- info: 'Solidity.Source.Calls.Recognize.catalogueB_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms catalogueB_sound
+/-- info: 'Solidity.Source.Calls.Recognize.catalogueB_from_elaborate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms catalogueB_from_elaborate
+/-- info: 'Solidity.Source.Calls.Recognize.checked_program_calls' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms checked_program_calls
 
 end Solidity.Source.Calls.Recognize

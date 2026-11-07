@@ -1,4 +1,4 @@
-import Solidity.Source.Calls.BoundRecognizer
+import Solidity.Lowering.P9.BoundRecognizer
 import Solidity.Source.Progress.BoundParentControls
 import Solidity.Source.Progress.BoundCatalogueParentControls
 
@@ -80,13 +80,31 @@ theorem whole (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
 
 end Parent
 
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Local.accepted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Local.accepted
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Local.catalogue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Local.catalogue
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Local.whole' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Local.whole
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Local.no_fuel_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Local.no_fuel_refused
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Local.undeclared_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Local.undeclared_refused
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Parent.accepted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Parent.accepted
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Parent.catalogue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Parent.catalogue
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Parent.whole' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Parent.whole
+/-- info: 'Solidity.Source.Calls.RecognizerControls.Local.stray_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Local.stray_refused
 end Solidity.Source.Calls.RecognizerControls
