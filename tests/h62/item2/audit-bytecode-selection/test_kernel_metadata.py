@@ -20,6 +20,42 @@ class MetadataSchemaTests(unittest.TestCase):
             "type_expr": "closed type expression", "type": "True", "level_params": [],
             "binders": [], "parents": [],
         }
+    def test_binder_join_keeps_order_private_heads_and_unresolved_categories(self):
+        row=self.row(); row["binders"]=[
+            {"name":"x","binder_info":"Lean.BinderInfo.implicit","type":"N.P", "proof_binder":False,"head_constant":"N.P"},
+            {"name":"h","binder_info":"Lean.BinderInfo.default","type":"x = x", "proof_binder":True,"head_constant":"Eq"},
+            {"name":"p","binder_info":"Lean.BinderInfo.default","type":"x", "proof_binder":True,"head_constant":None}]
+        parent=self.row();parent.update(name="N.P",user_name="N.P",private=False)
+        result=binder_metadata([row,parent]);entry=next(d for d in result["declarations"] if d["name"]==row["name"])
+        self.assertEqual([b["index"] for b in entry["binders"]],[0,1,2])
+        self.assertEqual([b["preceding_binder_count"] for b in entry["binders"]],[0,1,2])
+        self.assertEqual([b["head_status"] for b in entry["binders"]],["supplied_record_present","not_in_supplied_records","no_constant_head_observed"])
+        self.assertEqual([b["binder"] for b in entry["binders"]],row["binders"])
+        self.assertTrue(entry["private"])
+        self.assertEqual(result["head_records"][0]["name"],"N.P")
+        self.assertFalse(any(b["instantiated_type_accepted"] or b["joint_witness_established"] for b in entry["binders"]))
+        self.assertTrue(all(b["premise_role"].startswith("unclassified;") for b in entry["binders"]))
+        original=copy.deepcopy(result);row["binders"][0]["type"]="changed"
+        self.assertEqual(result,original)
+        result["head_records"][0]["binders"].append({"external":"mutation"})
+        self.assertEqual(parent["binders"],[])
+    def test_binder_join_accounts_zero_binders_and_rejects_duplicate_heads(self):
+        row=self.row();result=binder_metadata([row])
+        self.assertEqual(len(result["declarations"]),1)
+        self.assertEqual(result["declarations"][0]["binder_count"],0)
+        self.assertEqual(result["head_records"],[])
+        with self.assertRaises(ValueError):binder_metadata([row,row])
+        other=self.row();other.update(name="different",manifest_sha256="different")
+        with self.assertRaises(ValueError):binder_metadata([row,other])
+    def test_binder_join_is_order_independent_and_does_not_collapse_repeated_binders(self):
+        row=self.row();row["binders"]=[{"name":"h","binder_info":"Lean.BinderInfo.default","type":"True","proof_binder":True,"head_constant":"True"}]*2
+        other=self.row();other.update(name="True",user_name="True")
+        a=binder_metadata([row,other]);b=binder_metadata([other,row])
+        self.assertEqual(a,b)
+        entry=next(d for d in a["declarations"] if d["name"]==row["name"])
+        self.assertEqual(entry["binder_count"],2)
+        self.assertEqual([x["index"] for x in entry["binders"]],[0,1])
+
     def test_complete_row(self):
         self.assertEqual(validate_record(self.row())["user_name"], "N.t")
     def test_schema_and_flag_corruption(self):

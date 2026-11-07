@@ -1,0 +1,200 @@
+{
+  "guardedRegression": "Tracked historical wrappers must match sealed sources and reject changed source/archive identity without running historical controls.",
+  "adoptedMaster": "d7a1cbdf597826add5af3533fdaf6b8d91e28f66",
+  "commands": [
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py"
+      ],
+      "exitCode": 0,
+      "output": "PASS 20 wrapper/config snapshots; no wrappers executed"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py",
+        "--archive",
+        "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/evidence.tar.gz"
+      ],
+      "exitCode": 0,
+      "output": "PASS 20 wrapper/config snapshots; no wrappers executed"
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/B-kernel-controls.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/address-marker-gate.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/browser-build.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/checks.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--check",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/compile-producer-args.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/finite-gate.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/fixed-byte-gate.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/marker-gate.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/mcp.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/remaining-checks.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--check",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/state-refusal-controls.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/wasm-build.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/scripts/lake-prefix.sh"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/nb-wrapper-controls-2dl4vjz_/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py"
+      ],
+      "exitCode": 1,
+      "output": "Traceback (most recent call last):\n  File \"/workspace/scratch/nb-wrapper-controls-2dl4vjz_/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py\", line 57, in <module>\n    verify(parser.parse_args().archive)\n  File \"/workspace/scratch/nb-wrapper-controls-2dl4vjz_/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py\", line 30, in verify\n    raise ValueError(f\"Wrapper identity mismatch: {name}\")\nValueError: Wrapper identity mismatch: tests/directruntime-20261104/native-browser/environment/scripts/B-kernel-controls.sh"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py",
+        "--archive",
+        "/workspace/scratch/nb-wrapper-controls-2dl4vjz_/wrong-archive.tar.gz"
+      ],
+      "exitCode": 1,
+      "output": "Traceback (most recent call last):\n  File \"/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py\", line 57, in <module>\n    verify(parser.parse_args().archive)\n  File \"/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment/verify-wrapper-index.py\", line 38, in verify\n    raise ValueError(\"Sealed evidence archive identity mismatch\")\nValueError: Sealed evidence archive identity mismatch"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    }
+  ],
+  "syntaxValidated": [
+    "tests/directruntime-20261104/native-browser/environment/scripts/B-kernel-controls.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/address-marker-gate.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/browser-build.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/builds.py",
+    "tests/directruntime-20261104/native-browser/environment/scripts/check-candidate-exclusion.py",
+    "tests/directruntime-20261104/native-browser/environment/scripts/checks.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/closure-audit.py",
+    "tests/directruntime-20261104/native-browser/environment/scripts/compile-producer-args.mjs",
+    "tests/directruntime-20261104/native-browser/environment/scripts/finite-gate.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/fixed-byte-gate.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/marker-gate.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/mcp.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/native-negatives.py",
+    "tests/directruntime-20261104/native-browser/environment/scripts/pack-evidence.py",
+    "tests/directruntime-20261104/native-browser/environment/scripts/remaining-checks.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/state-refusal-controls.mjs",
+    "tests/directruntime-20261104/native-browser/environment/scripts/wasm-build.sh",
+    "tests/directruntime-20261104/native-browser/environment/scripts/write-manifest.py",
+    "tests/directruntime-20261104/native-browser/environment/scripts/native-browser-serial.toml",
+    "tests/directruntime-20261104/native-browser/environment/scripts/lake-prefix.sh"
+  ],
+  "negativeControls": 2,
+  "wallSeconds": 0.26900711200141814,
+  "historicalWrappersExecuted": false,
+  "LeanChecksRun": false,
+  "boundary": "Source/archive integrity and syntax only; no runtime/performance/source preservation claim. No production Lean edits; no axiom-set change.",
+  "reviews": {
+    "finder": "PASS: all20 source/archive snapshots, portable root from /tmp, exclusions/private prerequisites, final docs/receipt, two exact tamper refusals; no blocking finding. Read-only; no historical wrapper/Lean/build.",
+    "skeptic": "PASS: archive/source identity and fail-closed checks, final docs/receipt and pending transport boundaries; no blocking finding. Read-only; no historical wrapper/Lean/build."
+  },
+  "historicalManifestPolicy": "Original results-manifest.json is intentionally unchanged: its exact bytes are pinned by the existing e7ef handoff/SHA256SUMS. Portable sources/delivery refs are additive in wrapper-index.json and feature docs."
+}
