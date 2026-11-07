@@ -1633,3 +1633,37 @@ check or timing retry run. This is concrete consumption preparation only, not
 producer delivery or consumer integration. Original H121b actual Source/H24/
 origin/lifecycle/P8/S03-PANIC41 work, exact-19 transport proofs, proof/backfill/
 coverage/final gates and Y04/separate 4.35 waits remain open.
+
+### C266 — successful path components and compound leaf agreement
+
+path_components now derives the exact qualified-name split and successful
+nonempty-component guard from a successful path conversion. compound_leaf_exact
+connects both supported leaf node kinds to the unchanged compound reader at
+positive fuel. Each new measured axiom guard is propext only. Existing leaf
+controls are parameterized and reused for both typeNameLeaf and typeName at
+fuel 4; no duplicated cases, reader changes or new Source representation. Both
+actual pipeline fixtures still convert all 12 parameters/results. These are
+syntax laws, not declaration resolution or accepted-source/artifact evidence.
+
+The coordinator disk helper ran first with sealed evidence protected. More
+than 2 GB remained free. The previously deleted build target was recreated;
+bounded KeySort passed before further Lean work. Resource cap, swap, reserve,
+threads, stack and H113 accounting are unchanged. The initial proof supplied an
+equality already rewritten by case analysis; corrected proof passes, and the
+failed receipt remains. Finder/skeptic read-only review found no semantic issue;
+both noted guard installation pending, and the measured guards were installed.
+Neither reviewer used Lean, its server or builds.
+
+The initial master fetch succeeded at 65e69b6426a9a4fc3fb5541f41726a4bfefda5d0.
+A later refresh failed with Git's could-not-read-Username diagnostic. This
+checkpoint uses that already fetched baseline and claims no newer publication
+state. H125/H128 Source continuation is released, but draft integration still
+awaits vy1-words' published checkpoint head and actual gate/hash evidence. No
+TypingV2 import, Source migration or held timing retry occurred. Historical
+C246 manual full-elaboration failure remains; v1 H24 negatives stay frozen.
+
+H121b actual Source/H24/origin/lifecycle/P8/S03-PANIC41 and artifact binding,
+exact-19 H57/transport proofs, original/consolidated proof/backfill/coverage and
+all final gates remain open. Y04 physical, separate 4.35 disposition and all
+unrelated STOPs remain. Coverage stays 72 mapped / 3281 rows, 3209 uncovered;
+no syntax-control witness credit or whole-lane completion claim.
