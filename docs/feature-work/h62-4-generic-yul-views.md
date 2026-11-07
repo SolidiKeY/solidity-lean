@@ -309,3 +309,48 @@ Independent finder/skeptic both identified aggregate-row overwrite by a module
 named aggregate. Fixed by namespace-prefixing module row keys; the added
 regression retains TIMING_STOP for +20% wall slowdown with an unchanged module.
 Reviews used no Lean server, builds or writes.
+
+## Proof-only dependency repair after cc1ea1c9c integration
+
+The clean lane fast-forwarded to coordinator-reported integration
+cc1ea1c9c99522bff459dcc57e41339e1f347243. Under H82 standing permission, a
+proof-only Storage repair was tested in the isolated pinned-v4.35 snapshot
+before adoption. `Solidity/Storage/HashedLayout.lean:376` now explicitly reduces
+`STy.locate` in the impossible word/nonempty-path hypothesis before `cases h`.
+The exact theorem signatures, definitions, premises, exclusions, budgets and
+axiom guards are unchanged. No source representation or interface changed.
+History inspection found no speed-motivated change being undone.
+
+Bounded command: lake --fail-fast build Solidity.Storage.HashedLayout, with
+LEAN_NUM_THREADS=1 and explicit -j1 in snapshot Lake configuration. Exit0;
+2.0246s wall,640237568 bytes peak sampled aggregateRSS, one Lean process,
+no resource stop, process group quiescent. Existing no-sorry axiom guards for
+STy.locate_bounded and located_word_inj pass unchanged. The adopted file matches
+the validated snapshot SHA256:
+9ac3cd0d246769c84330e724e5326446d57ce2fe408d5dcce652fdaf5f62e507.
+This removes the prior targeted Storage compile blocker; full affected
+validation remains pending behind Roadmap. No valid before/after performance
+delta exists because the original v4.35 proof failed. No slowdown claim is made.
+
+Roadmap experiments were not adopted. An explicit existential-elimination
+rewrite and constructor-elimination rewrite both still fail the unchanged
+no-axiom guard for PublicCorrectness.transfer. Print-only diagnostics establish
+that RefinesUnder.safety, RefinesUnder.completes and Prefix.Le.final_eq have no
+axioms, while the generated PublicCorrectness.refines projection reports
+propext,Classical.choice,Quot.sound. This is a dependency localization, not
+permission to change the axiom set or guard. Original Roadmap source is unchanged
+in the assigned checkout and restored in the isolated snapshot after preserving
+failed experiments off git. Relevant logs are transfer-explicit-check,
+transfer-axiom-localization, transfer-constructor-check, storage-word-refusal-check
+and storage-word-refusal-explicit-check under the existing evidence directory.
+The initial Storage simplification attempt left none=some unresolved; adding
+constructor discrimination produced the passing result. All failed checks remain
+failed evidence, not proofs.
+
+Independent finder/skeptic reviews are read-only, no Lean server/builds/writes.
+The source manifest includes the adopted Storage file (15 source pins). Current
+owner waits are Roadmap projection axiom drift and Language migration; the
+former Storage owner-relay request is superseded by this passing proof-only
+repair, with affected validation still pending. Generic fixture proofs, full
+negative/refusal coverage, semantic inventory and actual matched timings remain
+unfinished.
