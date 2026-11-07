@@ -660,3 +660,63 @@ unwitnessed records are399 public +3 private +986 generated =1,388; generated
 candidates remain pending, not silently excluded. Q-FROZEN-REBASE is still
 pending; independent inventory/coverage continues. Full original Work/backfill
 queue, target ABI/gas/fork obligations and required final gates remain open.
+
+## Resumed checkpoint: explicit premise-role inventory
+
+A fresh master fetch observedac46c197828e8b0f17d6b59d93872d75101e0f83. Its
+new lane merges change no relevant Theory source, module map, audit producer
+or layer checker; no duplicate or new prerequisite was found. master-check.json
+records this. The current continuation remains based on5da4771e6.
+
+input_roles.py adds reviewed role records for all17 Bridge/Outcome statements,
+using the complete ordered frozen typed binder census and current checked joint
+certificates. It rejects missing or reordered binders (including w AFTER the
+Ends premise), omitted/invented logical premise roles and invalid configuration
+labels. Historical typed source bytes are hash-verified against their immutable
+manifest; current source headers and selected-source bytes remain frozen, and
+current helper dependencies/artifacts/logs are checked. Historical type hashes
+are explicitly historical, not a whole-tree equivalence assertion.
+
+The inventory distinguishes contract/type/context configuration data (including
+intrinsic structure invariants) from concrete per-input feasibility. g is a
+STATE VALUE, not a law about every state. BridgeO quantifies returned values for
+one selected option argument, not all arguments; concrete SOME witnesses avoid
+NONE-only vacuity. A callback is data, not an assumed universally successful
+callback. ends_of_notStuck excludes every stuck message for one result. NS.ends
+requires a global all-input law for fixed m AND an actual compatible input x,
+which its joint packet supplies together. ns_iff_ends has no frozen premise;
+extra NS/success support is not retroactively made a hypothesis. Negative
+not_ends_stuck remains ordinary inhabited data with a negative conclusion,
+without H69 drift. No frozen statement, definition, premise or proof changed.
+
+This inventory contributes17 role records and ZERO new joint witnesses or
+generated-candidate dispositions.483 explicit originals are outside this role
+snapshot; all remaining queue obligations persist. Current joint subset stays71
+and proof declaration total112 across versioned checkpoints. input-roles.json
+and role-subset-receipt.json are bulk outputs off Git; generator/specs/tests
+are committed. Live owner routes remain informationally unconfirmed under H82.
+
+A bookkeeping issue was found and fixed: the first generator reused the subset
+verifier's default output and overwrote the prior Outcome71report. The exact
+original payload was reconstructed and restored ONLY after its bytes matched
+the immutable recorded SHA2562055915c08824830873dad3a00668f65131c33941574ae0a8a048aaeb1e63c1a.
+No prior manifest was edited. New --report explicitly selects a separate off-Git
+destination, and the generator writes its17receipt inside its own evidence
+directory. Before/after hash checks confirm the original snapshot is preserved;
+repository report destinations are rejected without writing. The issue/fix and
+exact restoration are recorded in evidence-preservation-fix.json.
+
+Gates:13 Python tests pass, including rejected omission of the post-premise
+input and of the universal NS premise;17-record generation/current certificates
+pass; prior report immutability and forbidden repository output controls pass.
+Exact commands/outcomes are in role-gates.json. No Lean job or timing trial was
+needed, no RUNTIME_GATE_PASS/full acceptance is claimed. Finder and skeptic
+independently reviewed all17 role records, historical/current provenance and
+the evidence-preservation fix; no residual findings or reviewer Lean jobs.
+
+Checkpoint handoff: three reviewed items now committed in this continuation
+(Bridge8, Outcome9 and17-record role inventory). Q-FROZEN-REBASE and the12-edge
+merged-master layer failure remain unresolved; original pending records remain
+399 public +3 private +986 generated =1,388. Continue independent validation
+and original queue; preserve full target ABI/gas/fork obligations and all final
+gates. No new goal/reset/completion, owner exclusion or push is authorized.

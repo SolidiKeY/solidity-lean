@@ -16,8 +16,11 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--evidence",required=True,type=Path)
     ap.add_argument("--module",required=True,action="append")
+    ap.add_argument("--report",type=Path,help="Separate off-Git report destination; preserves proof evidence inputs")
     a=ap.parse_args();out=a.evidence.resolve()
     if out.is_relative_to(ROOT):refuse("use off-Git evidence")
+    report=a.report.resolve() if a.report else out/"verified-subset.json"
+    if report.is_relative_to(ROOT):refuse("use an off-Git report destination")
     if len(a.module)!=len(set(a.module)):refuse("duplicate module")
     frozen_map=subprocess.check_output(["git","show",BASE+":"+MAP],cwd=ROOT,text=True)
     allowed={"Solidity/"+f for f in re.findall(r"^\| `(Theory/[^`]+\.lean)`",frozen_map,re.M)}
@@ -49,7 +52,8 @@ def main():
       "selected_modules":a.module,"joint_explicit_statements":len(reports),"declarations":reports,
       "generated_candidates_dispositioned":0,"full_assignment_acceptance":False,
       "boundary":"Selected unchanged source files and checked input certificates only; no equivalence claim for changed definitions elsewhere. Full census and current/frozen version fidelity remain separate."}
-    (out/"verified-subset.json").write_text(json.dumps(payload,indent=2)+"\n")
+    report.parent.mkdir(parents=True,exist_ok=True)
+    report.write_text(json.dumps(payload,indent=2)+"\n")
     print("SUBSET_EXPLICIT_INPUT_PASS "+json.dumps({"modules":len(a.module),"joint_explicit_statements":len(reports),"full_assignment_acceptance":False}))
 
 if __name__=="__main__":main()
