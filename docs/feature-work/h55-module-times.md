@@ -2770,3 +2770,21 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, output effect, hashes and history preservation without Lean or a
 server. Evidence hashes are in `tests/h55/module-times/typing-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## TestSuite migration probe observations
+
+`testsuite_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. StandardAPIs isolates
+kernel typing-refusal classification, including distinguishing successful actions
+and propagating non-refusal errors. StringApiBoundary contains isolated String/
+Slice conversion witnesses. These do not validate imported Solidity obligations
+or the complete parser. Current invocation, inputs, effects and outcomes remain
+unresolved; this is supplied-subset evidence.
+
+At `cb6261f85de2ab71f4e8029dddaffe42a47d09fe`, the refreshed static index has
+837 candidates, 649 with supplied current references and 188 without; fourteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. Evidence
+hashes are in `tests/h55/module-times/testsuite-migration-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
