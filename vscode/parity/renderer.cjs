@@ -89,12 +89,13 @@ async function captureTrace(client,directory,metadata){
  const menuDir=join(directory,'menu');require('node:fs').mkdirSync(menuDir,{recursive:true});observed.menu=await contextSubmenu(client,menuDir,{label:'Dafny',expected:'Build with Custom Arguments'});
  const rendered=await capture(client,directory,true);if(metadata.observeOnly){if(observed.activeUri!==metadata.binding.uri)throw Error('Native observation active URI mismatch');}else require('./trace-presentation.cjs').assertPresentation(observed,metadata);return{...rendered,tracePresentation:{...observed,binding:metadata.binding,asserted:!metadata.observeOnly,scope:metadata.observeOnly?'Native upstream state recorded without a lifecycle-success claim':'Exact content/style/disappearance/menu asserted'}};
 }
-async function buildKeybinding(client,{custom=false,input,cancel=false,dismissOnSubmit=false,onPrompt,directory}={}) {
+async function buildKeybinding(client,{operation='build',custom=false,input,cancel=false,dismissOnSubmit=false,onPrompt,directory}={}) {
+  if(!['build','run','test'].includes(operation)||custom&&operation!=='build')throw Error('Unsupported native command key operation');
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
   if(!focused.result.value)throw Error('No focused source editor for build keybinding');
   const started=Date.now(),keyEvents=[],inputEvents=[];
   const send=async(method,params,editing=false)=>{const started=Date.now();await client.request(method,params);(editing?inputEvents:keyEvents).push({method,params,started,finished:Date.now()});};
-  const key=custom?'F6':'B',code=custom?'F6':'KeyB',windowsVirtualKeyCode=custom?117:66,modifiers=custom?0:10;
+  const key=custom?'F6':operation==='build'?'B':'F5',code=custom?'F6':operation==='build'?'KeyB':'F5',windowsVirtualKeyCode=custom?117:operation==='build'?66:116,modifiers=custom?0:operation==='build'?10:operation==='test'?8:0;
   for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode,modifiers});
   let prompt;
   if(custom){
@@ -110,7 +111,7 @@ async function buildKeybinding(client,{custom=false,input,cancel=false,dismissOn
     for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode});
     if(cancel||dismissOnSubmit){let visible;do{visible=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!visible)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);if(visible)throw Error('Submitted/cancelled F6 prompt remains visible');const hidden=join(directory,cancel?'cancelled':'dismissed');require('node:fs').mkdirSync(hidden,{recursive:true});prompt[cancel?'cancelled':'dismissed']={visible:false,rendered:await capture(client,hidden,true)};}
   }
-  return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',keyEvents,inputEvents,prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
+  return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':operation==='build'?'ctrl+shift+b':operation==='test'?'shift+f5':'f5',keyEvents,inputEvents,prompt,scope:'Actual Linux renderer key dispatch; outcome requires owned command/terminal or source compiler evidence. Not proof or macOS key-dispatch evidence.'};
 }
 async function captureProofHover(client,directory,metadata){
  const checks=require('./proof-help.cjs');checks.popupExpected(metadata);

@@ -105,7 +105,9 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(config.suite==='dafny-compiler-output'){
+    if(config.suite==='dafny-command-output'){
+      await scenario('native-dafny-command-output',()=>require('./dafny-command-output.cjs').run({vscode,config,events,keybindingRequest,until,observation}));
+    }else if(config.suite==='dafny-compiler-output'){
       await scenario('native-dafny-output-configuration',()=>require('./dafny-output.cjs').run({vscode,config,events,keybindingRequest,until,observation}));
     }else if(config.suite==='compiler-output'){
       await scenario('native-compiler-output-configuration',()=>require('./compiler-output.cjs').run({vscode,config,events,keybindingRequest,until}));
