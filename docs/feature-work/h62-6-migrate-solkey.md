@@ -267,3 +267,29 @@ against integration base d96f2406d, not a claim that unrelated imported master
 changes are this lane's edits. Earlier complete original assignment, queue,
 scope, original evidence and cumulative lane patch/bundle remain authenticated
 in /workspace/migrate-solkey-h82-final. No new goal/reset or lane push.
+
+## Portable evidence review follow-up at ac9d8db2a
+
+The coordinator merged8b325fb7a and explicitly instructed fetching master and
+continuing. The branch fast-forwarded cleanly to
+ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6 after verifying ancestry.
+Assigned Solkey and Raw sources remain unchanged. No Lean run or known timing
+STOP rerun occurred; the merge message is not a disposition of those holds.
+
+Review minor fixed: compact old-API and SDK summaries are now committed under
+tests/h62/item6/migrate-solkey/portable-evidence, referenced by repository-relative
+catalog paths. Existing absolute capture paths remain only in historical bulk.
+verify-portable-evidence.py can verify repository files without any VM-only
+artifact. External H44 archives use relative filenames/member paths and pinned
+hashes; --require-bulk refuses missing or corrupted input. With both supplied
+archives, all archive/member checks pass. Streaming uses no extraction or writes.
+The absence of bulk remains explicit unavailable, never acceptance.
+
+Independent read-only finder/skeptic verified repo-only and full supplied-bulk
+checks and reported no defect. Negative controls reject missing required bulk
+and corrupt bytes. This validates artifact integrity, not Lean/theorems or H78
+compatibility. No statements, definitions, proof budgets, axiom sets or exclusions
+changed. Raw/RSS/H81/H78 waits are retained in portable-evidence/status.json.
+Q-SOLKEY-HOLDS requests actual policy/disposition/prerequisite delivery, not a
+waiver. All presently independent static items are finished; further Lean and
+performance acceptance await those inputs. No push, new goal or reset.
