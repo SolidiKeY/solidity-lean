@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.SourceLoopInitializer
 /-! Reverse and exact normal-success transport for actual initialized Yul for
 compilation. No source failure/divergence/native/Source-G24 adequacy follows. -/
@@ -61,25 +62,10 @@ theorem completion_iff (initial : ProducerStatements.Compiled fi pre) (condition
    some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} =
    .ok {m with stack := (newer.toList++out.toList).map coreWord++caller} 0 := by
- constructor
- · rintro ⟨fuel,ran⟩
-   obtain ⟨actual,same,target⟩ := SourceLoopInitializer.source_to_model initial condition post body
-     depth block code emitted selected fuel locals ⟨sourceLocals out,.normal⟩ ran newer m caller
-   have values := congrArg Outcome.vars same
-   have equal : out = actual := SourceLoopCompletion.sourceLocals_injective values
-   cases equal
-   exact target
- · intro ran
-   obtain ⟨fuel,actual,source,_,frame⟩ := model_to_source initial condition post body depth block code
-     emitted selected locals newer m {m with stack := (newer.toList++out.toList).map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : (newer.toList++out.toList).map coreWord =
-     (newer.toList++actual.toList).map coreWord := List.append_cancel_right stacks
-   have lists : newer.toList++out.toList = newer.toList++actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp (List.append_cancel_left lists)
-   cases equal
-   exact ⟨fuel,source⟩
+ exact CompletionControls.completion_iff_of_transport (Solidity.Yul.Stmt.for_ pre test step work)
+   ⟨initial.profile, condition.profile, post.profile, body.profile⟩ code
+   (SourceLoopInitializer.source_to_model initial condition post body depth block code emitted selected)
+   (model_to_source initial condition post body depth block code emitted selected) locals out newer m caller
 
 /-- info: 'Solidity.Yul.Compilation.InitializedLoopCompletion.model_to_source' depends on axioms: [propext,
  Classical.choice,
