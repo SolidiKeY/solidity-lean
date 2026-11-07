@@ -26,7 +26,7 @@
     "roots": "pass",
     "fragments": "pass",
     "docPaths": "pass; existing ambiguity notices retained",
-    "axiomInventory": "Six own pins registered; zero existing-key changes. Global gate retains334 unrelated baseline changes; not a global PASS.",
+    "axiomInventory": "PASS after adopting published master254c60df6:0errors,0unrecorded,0baselined. Earlier340/334finding logs remain historical; no own baseline suppression.",
     "reviews": "Independent finder and skeptic accepted proofs and final bounded evidence; no reviewer native execution."
   },
   "unchanged": [
@@ -168,6 +168,24 @@
       "path": "/workspace/scratch/h121-compiler-success/h121-witness-first.log",
       "bytes": 3751,
       "sha256": "d2257ca23b24a193174541713375341974ddfc858c1ad0a7e047321d71f7c483"
+    },
+    {
+      "path": "/workspace/scratch/h121-merged-axiom-pins.log",
+      "bytes": 211,
+      "sha256": "5cc30a4f25ecd469ad8f85f7a286d67affc297b7950dcc8d065fb199e685f729"
     }
-  ]
+  ],
+  "registryFollowup": {
+    "publishedMaster": "254c60df6",
+    "mergeHead": "566c8177bb6c6c7fb8d6f9136109546f8b1a9328",
+    "sourceChanges": false,
+    "check": "node scripts/check-axiom-pins.mjs",
+    "status": "pass",
+    "evidence": {
+      "path": "/workspace/scratch/h121-merged-axiom-pins.log",
+      "bytes": 211,
+      "sha256": "5cc30a4f25ecd469ad8f85f7a286d67affc297b7950dcc8d065fb199e685f729"
+    },
+    "review": "Independent finder/skeptic verified exact master plus six owned pins, zero existing-key changes."
+  }
 }
