@@ -1228,3 +1228,69 @@ performance bound, complete census, signature equivalence or live ownership.
 No opt-in fixture or project signature binding was invoked. Independent
 finder and skeptic reviewed the replay without Lean. Full reports and timings
 are outside Git in the universe-names evidence directory.
+
+## Escaped declaration source spellings
+
+The inventory now recovers escaped declaration components from the
+comment-masked source spelling, including qualified, empty and multiline
+components. It preserves the distinction between a single escaped component
+such as `«a.b»` and an unescaped qualified spelling. This is lexical source
+text, not a resolved Lean `Name`; escaped-name statements and bodies remain
+explicitly rejected. Anonymous examples remain anonymous, and source bindings
+must still use their admitted exact-location and environment checks.
+
+Finder and skeptic independently reviewed the change without Lean; the
+skeptic identified the empty/multiline component case and the final controls
+cover it. The combined Python suite passed 199 tests. A matched bounded scan
+took 113.984 seconds before and 118.999 seconds after (+4.40%). Both used the
+same 7,369 inputs, recognized 124,000 declarations and reported no errors or
+unmatched globs. Three checked real rows changed from anonymous to the exact
+spellings `«return»`, `«split»` and `«a.b»`; their unsupported-signature and
+escaped-body refusals remain. Group counts are not a proof of equal members,
+full lexical coverage or Lean semantics. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/escaped-declaration-names/`.
+
+Named instances with explicit priority clauses remain a separate accounting
+limitation; the scanner can still report such a named instance as anonymous.
+
+## Named priority instances
+
+The lexical inventory now recovers an optional source-spelled instance name
+after a balanced priority clause and recognizes `scoped` among declaration
+modifiers. All priority-instance statements and bodies remain explicitly
+rejected as `unsupported-instance-priority`; anonymous instances remain
+anonymous, and malformed unterminated priority clauses make the file
+incomplete. Recovered private and scoped names are source spellings, not
+canonical kernel identities. This resolves the named-priority accounting
+case noted above without asserting priority semantics or full parser coverage.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 200 tests, including five real metadata-fixture
+names, anonymous and escaped names, scoped/private qualifiers and malformed
+clauses. A matched bounded scan took 118.999 seconds before and 112.620
+seconds after (-5.36%). Both used the same 7,369 inputs and reported no file
+errors or unmatched globs; recognized declaration count changed from 124,000
+to 124,001. In the checked fixture, five named rows are now recorded and each
+retains both statement and body refusal. Group counts do not establish equal
+membership, intrinsic signatures, proof semantics or live ownership. Evidence
+is outside Git under
+`/workspace/h62-duplication-scanner-evidence/priority-instances/`.
+
+### Priority-instance report replay
+
+Two bounded default-mode scans with the same tree, scanner, selection,
+registry and caller-pinned previous report took 112.620 and 118.052 seconds
+and produced byte-identical reports, SHA256
+`fea9d7989a7ec05ca4ad6c14bb6e94afd164721055f49291f5e0321ee5020417`.
+Both selected 7,369 files and recognized 124,001 declarations, with no file
+errors, unmatched globs or reported aliases; all recognized owners remain
+unknown. Relative to the older caller-pinned report, 48 inputs were added,
+seven changed and none removed. The scanner and tree both changed from that
+baseline, so candidate deltas combine tool and input effects. The prior pin
+identifies bytes, not an authenticated producer.
+
+No opt-in fixture or project signature binding was invoked. Finder and skeptic
+reviewed the replay without Lean. This establishes repeatability for these
+runs, not complete census, resolved kernel names, signature equivalence or
+live ownership. Full reports and timing records are outside Git in the
+priority-instances evidence directory.
