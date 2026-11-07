@@ -2752,3 +2752,21 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, output effect, hashes and history preservation without Lean or a
 server. Evidence hashes are in `tests/h55/module-times/source-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Typing migration probe observations
+
+`typing_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ExportInterfaces
+emits an old-toolchain imported Typing constant/type/axiom inventory to
+`TYPING_API_OUTPUT`; StringAPIFixture contains isolated new-toolchain candidate
+adapters for Raw dependency errors. The historical full new build remains blocked
+in Syntax.Raw. Current invocation and outcomes remain unresolved; this subset
+does not establish producer migration or global semantic equivalence.
+
+At `c7159a6690cc5527a94c43770fce1a5175434f6c`, the refreshed static index has
+837 candidates, 647 with supplied current references and 190 without; fourteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, output effect, hashes and history preservation without Lean or a
+server. Evidence hashes are in `tests/h55/module-times/typing-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
