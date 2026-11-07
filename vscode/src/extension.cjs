@@ -269,7 +269,10 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   );
   if(service) {
     editorServices=require('./editor-services.cjs').install(vscode,context,service,showError);
-    const open=doc=>{if(!disposed&&!doc.isClosed&&isSolidity(doc)){documents.set(key(doc.uri),doc);const generation=documentGenerations.get(key(doc.uri))||0;service.open(doc).catch(error=>{if(generation===(documentGenerations.get(key(doc.uri))||0)&&!doc.isClosed)showError(Object.assign(error,{uris:error.uris||[key(doc.uri)]}));});}};
+    const open=(doc,again=false)=>{if(!disposed&&!doc.isClosed&&isSolidity(doc)){documents.set(key(doc.uri),doc);const generation=documentGenerations.get(key(doc.uri))||0;
+      const current=()=>!disposed&&!doc.isClosed&&documents.get(key(doc.uri))===doc&&generation===(documentGenerations.get(key(doc.uri))||0);
+      return service.open(doc).then(client=>{if(current()&&client?.serverInfo?.name)output.appendLine(`Solidity Lean is ready${again?' again':''} for ${key(doc.uri)} (language services; version ${client.serverInfo.version||'unknown'}).`);}).catch(error=>{if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){output.appendLine(`Language server startup failed for ${key(doc.uri)}: ${error.message}`);showError(Object.assign(error,{uris:error.uris||[key(doc.uri)]}));}});
+    }};
     const receive=params=>{
       const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version||hash(doc.getText())!==params.sourceHash)return;
       try{accept(doc,params.report,settings(doc),params.selection);}catch(error){showError(error);}
@@ -298,12 +301,14 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     const log=message=>output.appendLine(message);
     service.on('status',receiveStatus);service.on('report',receive);service.on('diagnostics',receiveDiagnostics);service.on('serverError',serverError);service.on('log',log);
     const restart=async selected=>{
-      ++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
+      if(disposed)return;
+      const operation=++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
       if(!selected)cancel();
       for(const doc of targets){const id=key(doc.uri),generation=(documentGenerations.get(id)||0)+1;documentGenerations.set(id,generation);generations.set(id,generation);if(selected)cancel(doc.uri);clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);}
       const current=doc=>!disposed&&!doc.isClosed&&documentGenerations.get(key(doc.uri))===generations.get(key(doc.uri));
-      try{await service.restart(selected?targets.map(doc=>doc.uri):undefined);}catch(error){if(targets.some(current))showError(error);return;}
-      for(const doc of targets)if(current(doc))open(doc);
+      output.appendLine('Terminating Solidity Lean language services...');
+      try{await service.restart(selected?targets.map(doc=>doc.uri):undefined);}catch(error){if(targets.some(current)||!disposed&&!selected&&!targets.length&&restartGeneration===operation){output.appendLine('Language server stop failed: '+error.message);showError(error);}return;}
+      await Promise.all(targets.filter(current).map(doc=>open(doc,true)));
     };
     const serverSettings=['backendPath','nodePath','timeoutMs','workers','automaticVerification','verifyOnSave','includePaths','remappings','counterexamples','auditPreconditions'];
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(open),

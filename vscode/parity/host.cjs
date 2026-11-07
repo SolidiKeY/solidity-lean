@@ -104,7 +104,19 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(['trace-visibility','trace-light-show'].includes(config.suite)){
+    if(config.suite==='output-lifecycle'){
+      await scenario('native-output-restart',async()=>{
+        const name=target==='local'?'Solidity Lean':'Dafny VSCode',channel=events.filter(e=>e.kind==='output.create'&&e.data.channel===name);assert.equal(channel.length,1,'one actual extension output channel');
+        const doc=await open('output-lifecycle',1),source=doc.getText(),version=doc.version;
+        await until(()=>events.some(e=>e.kind==='output'&&e.data.channelId===channel[0].data.channelId&&e.data.text.startsWith(target==='local'?`Solidity Lean is ready for ${doc.uri.toString()} (`:'Dafny is ready')),'actual startup/version readiness output');
+        const startup=events.find(e=>e.kind==='output'&&e.data.channelId===channel[0].data.channelId&&e.data.text.startsWith(target==='local'?`Solidity Lean is ready for ${doc.uri.toString()} (`:'Dafny is ready'));
+        const start=events.length,command=target==='local'?'solidityLean.restartServer':'dafny.restartServer';await vscode.commands.executeCommand(command);
+        await until(()=>events.slice(start).some(e=>e.kind==='output'&&e.data.channelId===channel[0].data.channelId&&e.data.text.startsWith(target==='local'?`Solidity Lean is ready again for ${doc.uri.toString()} (`:'Dafny is ready again.')),'actual restart/version readiness output');
+        const rows=events.slice(start),termination=rows.findIndex(e=>e.kind==='output'&&e.data.channelId===channel[0].data.channelId&&e.data.text.startsWith('Terminating')),ready=rows.findIndex(e=>e.kind==='output'&&e.data.channelId===channel[0].data.channelId&&e.data.text.includes('ready again'));
+        assert.ok(termination>=0&&ready>termination);assert.ok(!rows.some(e=>e.kind==='output.dispose'&&e.data.channelId===channel[0].data.channelId));assert.equal(events.filter(e=>e.kind==='output.create'&&e.data.channel===name).length,1);assert.ok(!doc.isClosed);assert.equal(doc.version,version);assert.equal(doc.getText(),source);
+        const observed={status:'partial',channel:channel[0],channels:events.filter(e=>['output.create','output.dispose'].includes(e.kind)&&e.data.channel===name),startup,events:rows,uri:doc.uri.toString(),version,sourceHash:createHash('sha256').update(source).digest('hex'),scope:'Actual native output API and registered restart action. No output-panel rendering, failed/native overlap matrix, performance, kernel or exact branded-text parity. Upstream readiness is global; local readiness names the document.'};assert.deepEqual(require('./core.cjs').outputLifecycleErrors(observed,target),[]);return observed;
+      });
+    }else if(['trace-visibility','trace-light-show'].includes(config.suite)){
       await scenario(config.suite==='trace-light-show'?'native-trace-light-show-hide':'native-trace-tab-visibility-theme',async()=>{
         const tools=require('./trace-presentation.cjs'),records=()=>readFileSync(config.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line));let doc=await open('trace-visibility',1,true);await verify(doc,1,'failed');
         const snapshot=()=>{assert.ok(!doc.isClosed&&vscode.workspace.textDocuments.includes(doc));assert.equal(vscode.window.activeTextEditor?.document,doc);const wire=tools.wireDocument(records(),records().length,doc.uri.toString());assert.equal(wire.version,doc.version);assert.equal(wire.textHash,tools.digest(doc.getText()));return{uri:doc.uri.toString(),version:doc.version,textHash:wire.textHash,protocolOpenIndex:wire.openIndex,session:sessionFor(doc)};};

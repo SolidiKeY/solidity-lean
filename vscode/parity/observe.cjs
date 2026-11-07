@@ -17,7 +17,7 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
       return typeof value === 'function' ? value.bind(target) : value;
     }});
   }
-  const sessions=new WeakMap();let commandSequence=0;
+  const sessions=new WeakMap();let commandSequence=0,outputSequence=0;
   const diagnostic=value=>{try{return value instanceof Error?value.message:String(value);}catch{return 'Unprintable observation error';}};
   const commandSource=()=>{try{const doc=vscode.window.activeTextEditor?.document;if(!doc)return null;if(!sessions.has(doc))sessions.set(doc,randomUUID());return{uri:doc.uri.toString(),version:doc.version,session:sessions.get(doc),textHash:createHash('sha256').update(doc.getText()).digest('hex'),dirty:doc.isDirty,closed:doc.isClosed,trusted:vscode.workspace.isTrusted};}catch(error){return{unavailable:true,reason:diagnostic(error)};}};
   const api = {...vscode,
@@ -55,8 +55,9 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
         decorations.push({key:type.key,options}); record('decoration.register',{key:type.key,options}); return type;
       },
       createOutputChannel(...args) {
-        const channel = vscode.window.createOutputChannel(...args);
-        return instrument(channel, {appendLine(text) {record('output',{channel:args[0],text}); return channel.appendLine(text);}});
+        const channel = vscode.window.createOutputChannel(...args),channelId=++outputSequence;
+        record('output.create',{channel:args[0],channelId});
+        return instrument(channel, {appendLine(text) {record('output',{channel:args[0],channelId,text}); return channel.appendLine(text);},show(...values){record('output.show',{channel:args[0],channelId});return channel.show(...values);},dispose(){record('output.dispose',{channel:args[0],channelId});return channel.dispose();}});
       },
       showErrorMessage(...args) {record('error',{message:args[0]}); return vscode.window.showErrorMessage(...args);}
     })

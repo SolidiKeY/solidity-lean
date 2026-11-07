@@ -191,6 +191,24 @@ function protocol(tracePath) {
     framingFinalized:[...finalized],
     scope:'Native status notification intervals include transport and notification throttling; they do not isolate pure solver or VC time.'};
 }
+function outputLifecycleErrors(o,target){
+ const errors=[],name=target==='local'?'Solidity Lean':'Dafny VSCode',command=target==='local'?'solidityLean.restartServer':'dafny.restartServer';
+ if(!o||typeof o.uri!=='string'||!Number.isInteger(o.version)||!/^([a-f0-9]{64})$/.test(o.sourceHash||''))return ['missing output source identity'];
+ const id=o.channel?.data?.channelId;
+ if(o.channel?.kind!=='output.create'||o.channel?.data?.channel!==name||!Number.isInteger(id))errors.push('missing owned output channel');
+ if(!Array.isArray(o.channels)||o.channels.length!==1||o.channels[0]?.kind!=='output.create'||o.channels[0]?.data?.channelId!==id||o.channels[0]?.data?.channel!==name)errors.push('output channel replaced or disposed');
+ const text=again=>target==='local'?`Solidity Lean is ready${again?' again':''} for ${o.uri} (`:again?'Dafny is ready again.':'Dafny is ready';
+ const owned=e=>e?.kind==='output'&&e.data?.channelId===id&&e.data.channel===name;
+ if(!owned(o.startup)||!o.startup.data.text?.startsWith(text(false)))errors.push('missing owned initial readiness');
+ const events=Array.isArray(o.events)?o.events:[],termination=events.findIndex(e=>owned(e)&&e.data.text?.startsWith('Terminating')),ready=events.findIndex(e=>owned(e)&&e.data.text?.startsWith(text(true)));
+ if(termination<0||ready<=termination)errors.push('missing ordered owned restart output');
+ const starts=events.filter(e=>e.kind==='command.start'&&e.data?.id===command),ends=events.filter(e=>e.kind==='command.end'&&e.data?.id===command);
+ if(!Number.isFinite(o.channel?.ms)||!Number.isFinite(o.startup?.ms)||!Number.isFinite(starts[0]?.ms)||!(o.channel.ms<=o.startup.ms&&o.startup.ms<starts[0].ms))errors.push('missing initial output phase order');
+ if(!(events.indexOf(starts[0])<termination&&termination<ready&&ready<events.indexOf(ends[0])))errors.push('output outside restart invocation');
+ const source=s=>s&&s.uri===o.uri&&s.version===o.version&&s.textHash===o.sourceHash&&typeof s.session==='string'&&s.trusted===true&&!s.closed;
+ if(starts.length!==1||ends.length!==1||starts[0]?.data.invocationId!==ends[0]?.data.invocationId||!source(starts[0]?.data.source)||!source(ends[0]?.data.source)||starts[0]?.data.source?.session!==ends[0]?.data.source?.session)errors.push('missing source-owned restart invocation');
+ return errors;
+}
 function terminalSdkIdentity(output,executable,version){
  const lines=require('node:util').stripVTControlCharacters(output).split(/\r?\n/).map(line=>line.trim()).filter(Boolean),fs=require('node:fs');
  if(!version||lines[0]!==executable||lines[1]!==version)throw Error('Terminal SDK path/version differs from selected executable');
@@ -204,7 +222,9 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(['proof-help','proof-hover'].includes(config.suite)){
+  if(config.suite==='output-lifecycle'){
+    const observation=result.scenarios.find(s=>s.id==='native-output-restart')?.observation;errors.push(...outputLifecycleErrors(observation,config.target));
+  }else if(['proof-help','proof-hover'].includes(config.suite)){
     if(config.target!=='local'||!ids.includes('native-certified-proof-help'))errors.push('missing native certified proof-help observation');
     if(config.suite==='proof-hover'){
       const observation=result.scenarios.find(s=>s.id==='native-certified-proof-help')?.observation?.observations,popup=observation?.hoverPopup?.capture?.hoverPopup;
@@ -253,4 +273,4 @@ function hostEvidenceErrors(result,config) {
   if(result.status!==status&&!(['broken','timeout'].includes(result.status)&&result.error))errors.push('aggregate status contradicts scenarios');
   return errors;
 }
-module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity};
+module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity,outputLifecycleErrors};
