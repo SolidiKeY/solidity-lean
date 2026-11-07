@@ -1538,3 +1538,27 @@ hashes are inventoried in `stack-slot-evidence.json` and retained at
 Selected538/1259,721open unchanged. All prior timing/trust holds and known
 base-documentation failure remain open; no unchanged STOP workload was retried.
 Historical off-Git evidence is still missing and has not been reconstructed.
+
+
+Original VY3 backfill A capacity extension adds seven general certificates to
+`tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean`. Read and
+read/writeback have the exact prefix condition0<=height and height+1<=1024.
+A joint theorem combines actual identity execution with the existing height
+checker on the same stack. Controls distinguish height-safe empty-stack
+underflow from a successful mathematical identity at initial height1024 whose
+DUP prefix reaches1025 and fails the capacity checker. A nonzero-slot concrete
+witness satisfies both execution and capacity. No budget, instruction, Source
+encoding, existing theorem statement or production definition changed.
+
+The final serial Lean4.24 check passed in1.612s with all old and seven new axiom
+guards. The additions use propext, Classical.choice and Quot.sound; no axiom
+declaration or sorry was introduced. Reused private dependencies match their
+previous cold-checked source/artifact hashes. The initial1.414s observation
+exceeded the prior1.205s run by more than10%; proof-only trace simplification
+reduced an intermediate run to1.312s, but the final guarded check measured1.612s.
+That timing STOP is retained, not accepted or rerun unchanged. These are focused
+observations, not full affected/final or native acceptance. Gas and Source/G24
+observations remain separate. Selected538/1259,721open is unchanged. The H44
+records are inventoried in `stack-capacity-evidence.json`, retained at
+`/workspace/vy3-stack-capacity-evidence-20261107`. Historical evidence, prior
+trust/timing holds and the known baseline documentation failure remain open.
