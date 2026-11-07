@@ -706,3 +706,46 @@ inventory is written. Kernel/source-head receipts and portable relative artifact
 references distinguish prior focused validation from the later baseline merge.
 The V07 integration question remains pending; neither isolated compatibility nor
 a locally checked model proposal authorizes live integration or Source adequacy.
+
+
+## H121b actual-Source H24 intake
+
+The memory-reference-structs ticket at
+85b3741d0ac578696e147cf5d455e38c4f8671b6 requests the locally owned P8
+admission/origin producer, not transfer of its G42.04 body/result obligation.
+LibraryPremises.Inputs requires admission, origin and program/environment,
+pipeline and fixed-parameter agreements for the same library-containing Source
+program. A producer over empty environments cannot discharge libraryDeclared.
+The checked PlanWitness and P8b.Merged model results remain separate evidence.
+
+Source.Semantics.sessionAt is the existing actual evaluator. Its sourceLang uses
+Nat horizons and explicitly leaves resource failures, the hash premise and
+stipend rule uninstantiated. ResourceContractLaw1.nat_encodable_resource_impossible
+refutes the full failure replacement/projection contract when the resource
+retracts into Nat; it does not refute all non-Nat resources or all possible
+LibraryPremises.Inputs. LibraryPremises currently describes all such inputs as
+uninhabited: that blanket documentation claim is not justified by this theorem.
+This intake records the correction without editing the consumer-owned module.
+
+Source.FailureResources.Bound already supplies horizon plus full failure choices
+and replacement laws. Reuse this resource interface rather than duplicating it;
+its module explicitly does not make the evaluator consult those choices.
+Remaining local work is an actual-Source operational reference with justified
+failure resources, canonical frontend-derived origins, root/feature extraction
+and declaration admission for the same program, followed by lifecycle
+correspondence. Neither a caller-supplied execution equality nor an origin chosen
+from the producer itself completes those duties. No new instance, Source edit,
+frozen signature change or completed adequacy proof is claimed here.
+
+The protected V07 packet remains a separate pending integration route, not a
+reason to substitute its empty-environment model for actual library admission.
+Y04 physical adequacy/reached-state delivery and the separate 4.35 trust/timing
+disposition remain external waits. Existing proof/coverage and final-gate gaps
+remain open. Fresh master 05d2c2587 was inspected and merged before this intake;
+no kernel check is claimed for this documentation-only change.
+
+Independent read-only finder and skeptic checked this intake against the frozen
+P8 interface, ResourceContractLaw1, LibraryPremises and Source semantics; neither
+found an inaccuracy or ran Lean. The initial documentation append and master
+merge omitted the writer lock; subsequent edits and commit checks used it.
+No concurrent writer was observed in status; unobserved activity is not ruled out.
