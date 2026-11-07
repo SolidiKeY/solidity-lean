@@ -594,3 +594,25 @@ A separate notation example after a preceding declaration can still share a
 lexical context hash despite different expansions. Candidate signatures and
 ownership remain explicitly unresolved; full source/environment binding and
 complete declaration accounting remain open.
+
+## Notation command context and body boundaries
+
+Line-initial notation, infix, prefix and postfix commands, including local or
+scoped modifiers, now contribute lexical context spans. The same recognized
+commands terminate preceding bodies; an indented command boundary rejects the
+body fingerprint. This addresses the reported notation-after-declaration
+case, but macros, unrecognized commands, scope resolution and imported
+meaning remain unmodeled. Signature and ownership rejection reasons remain
+mandatory for every candidate.
+
+Finder and skeptic independently reviewed the implementation without Lean
+and found the initial preceding-body boundary omission, which the final
+controls cover. The Python suite passed 40 tests. The preliminary measurement
+was interrupted after that finding and is not passing evidence. A bounded
+same-input pair took 110.962 seconds before and 112.714 seconds after
+(+1.58%). Both scans selected identical inputs, recognized 122,786
+declarations and reported no file errors or unmatched globs. Statement-group
+counts were 4,476 in both and body-group counts were 5,510 and 5,511;
+counts do not prove equal group membership or semantic equivalence. Full
+reports, controls and timing are outside Git under
+`/workspace/h62-duplication-scanner-evidence/notation-context/`.
