@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "archive": "/workspace/h62-migrate-root-gate-evidence/h44-bulk-7e2ce17c-20261107/bulk-deterministic.tar.gz",
+  "size_bytes": 60606,
+  "sha256": "12ad0cc54a7d5605ccaebfc1d5afe6a8774d0174f13953687db74663c7c21289",
+  "file_count": 54,
+  "uncompressed_bytes": 217312,
+  "held_source_head": "7e2ce17ca644400be0b426e9b0f97ba645dd2c3f",
+  "source_base": "658d1b1d14c68a031c137f576764ec7e9e7a6359",
+  "boundary": "H44 archival split of existing tracked evidence/intake bytes only; not recovery or acceptance of missing historical compiler exports."
+}

@@ -4,7 +4,7 @@ Requires the frozen source census and successful final Lean receipts.
 """
 import argparse,collections,json,pathlib,re
 ROOT=pathlib.Path(__file__).resolve().parents[4]
-p=argparse.ArgumentParser();p.add_argument('--source',required=True);p.add_argument('--evidence',required=True);p.add_argument('--output',required=True);group=p.add_mutually_exclusive_group();group.add_argument('--selectors-only',action='store_true');group.add_argument('--copy-selectors-only',action='store_true');group.add_argument('--loop-selectors-only',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--source',required=True);p.add_argument('--evidence',required=True);p.add_argument('--output',required=True);group=p.add_mutually_exclusive_group();group.add_argument('--selectors-only',action='store_true');group.add_argument('--copy-selectors-only',action='store_true');group.add_argument('--loop-selectors-only',action='store_true');group.add_argument('--memory-premises-only',action='store_true');a=p.parse_args()
 census=json.loads(pathlib.Path(a.source).read_text());e=pathlib.Path(a.evidence)
 rows=census['statements'];links=[];seen=set()
 cases = [
@@ -13,6 +13,7 @@ cases = [
 if a.selectors_only:cases=[('SelectorAudit',r'#audit_joint_witness "([^"\n]+)" as ([^\s]+) := by','joint-witness-checked')]
 if a.copy_selectors_only:cases=[('CopySelectorAudit',r'#audit_joint_witness "([^"\n]+)" as ([^\s]+) := by','joint-witness-checked')]
 if a.loop_selectors_only:cases=[('LoopSelectorAudit',r'#audit_joint_witness "([^"\n]+)" as ([^\s]+) := by','joint-witness-checked')]
+if a.memory_premises_only:cases=[('MemoryPremiseAudit',r'#audit_joint_witness "([^"\n]+)" as ([^\s]+) := by','joint-witness-checked')]
 for module,pattern,status in cases:
  path='tests/h62/item2/audit-evm-compiler/'+module+'.lean';text=(ROOT/path).read_text()
  receipt=json.loads((e/('final-'+module+'.json')).read_text())
@@ -42,6 +43,11 @@ for module,pattern,status in cases:
    if original.endswith('.construction_rep'):
     classification='Complete original compilation/backend/resource/entry/output data tuple; construction output is arbitrary typed logical data. Binder-level satisfiability only: Rep is not shown satisfiable and source execution success does not follow. Existing closed construction fixture is reused unchanged.'
    marker='JOINT: '+original+' => '+proof
+  elif module=='MemoryPremiseAudit':
+   classification='Per-input complete original telescope jointly supplied by unchanged Memory.CompileExamples.writeAndRead and its real compiled certificate. For correctness statements the same populated aliasing state has StateRepr, frame capacity and AllocationInput. No GrowingResult conclusion or success premise is used; no global producer structure is assumed.'
+   if original.endswith('.allocationCostProg_zero'):
+    classification='Nonempty writeAndRead program, its contexts, populated source state and checked hasAllocation=false hypothesis jointly supplied. No allocation-cost conclusion is used.'
+   marker='JOINT: '+original+' => '+proof
   elif module=='RefutationAudit':
    reason=re.search(r'-- Intentional: ([^\n]+)\n$',text[:match.start()])
    if not reason:raise ValueError('missing intentional classification')
@@ -53,7 +59,7 @@ for module,pattern,status in cases:
   if marker not in log or "'"+proof+"' depends on axioms:" not in log:raise ValueError('missing checked proof evidence')
   links.append(dict(original=original,statement_id=key,source_signature_sha256=row['source_signature_sha256'],status=status,proof=proof,module=path,classification=classification))
 counts=collections.Counter(link['status'] for link in links)
-expected={'joint-witness-checked':5} if (a.selectors_only or a.copy_selectors_only or a.loop_selectors_only) else {'intentional-impossibility-checked':29,'joint-witness-checked':1}
+expected={'joint-witness-checked':5} if (a.selectors_only or a.copy_selectors_only or a.loop_selectors_only or a.memory_premises_only) else {'intentional-impossibility-checked':29,'joint-witness-checked':1}
 if counts!=expected:raise ValueError('unexpected enrollment split')
 pathlib.Path(a.output).write_text(json.dumps(dict(base=census['base'],links=links),indent=2)+'\n')
 print(json.dumps(dict(enrolled=len(links),intentional=counts.get('intentional-impossibility-checked',0),joint=counts.get('joint-witness-checked',0))))

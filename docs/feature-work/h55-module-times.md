@@ -1852,8 +1852,502 @@ The scan is non-atomic even under the writer lock; index flags, ignored or
 generated files, candidate resolution and runtime provenance remain
 unverified. Candidate-set changes may reflect reclassification. The
 adapter preserves historical reference labels but does not authenticate
-artifact contents or establish an executable recipe. The older
-`reference_index_update.py` ignores this adapter's historical field and must
-not consume its output until extended; identical path labels across eras do
-not preserve multiple artifact versions. Independent read-only
+artifact contents or establish an executable recipe. The earlier `reference_index_update.py` ignored this adapter's historical
+field; the version-preserving update below addresses that incompatibility.
+Identical path labels across eras do not alone preserve artifact versions. Independent read-only
 finder and skeptic reviewed the comparison without Lean, server or builds.
+
+## Reference index rebase with historical records
+
+`rebase_reference_index.py` consumes the exact extended index and drift
+artifacts, validates source and mapping transitions, and retains removed
+candidates separately. At the recorded `d0ddfa9f4ebfdea2edaf268b0da826b146f5a6ca`
+snapshot it produces 718 candidates: 471 with current-byte static references
+and 247 without. Five changed candidates retain prior candidate identity and
+reference labels as historical records; none of those stale references is
+counted current. No candidates were removed in this observation.
+
+The report is a separate schema: the older `reference_index_extend.py`
+rejects it when it has historical records or tombstones. The rebase helper
+now carries prior tombstones and rejects ambiguous reappearance.
+A skeptic found that an initial draft lost historical candidate identities on
+a second rebase; the helper now preserves them and tests repeat/removal.
+Artifact labels are paths rather than independently authenticated bytes;
+repeated labels across eras cannot by themselves prove distinct versions.
+The scan remains non-atomic and excludes ignored/generated inputs and runtime
+provenance. Independent read-only finder and skeptic reviewed the transition
+without Lean, server or builds. No execution acceptance is inferred.
+
+## Version-preserving reference updater
+
+`reference_index_update.py` now accepts extended drift with the matching
+prior index and an explicit artifact checksum manifest. It uses the rebase
+transition checks, preserves current and historical records and removed-row
+tombstones, and binds newly recorded stale artifact hashes to both the
+manifest and the earlier index's verified input lineage. The observed
+`d0ddfa9f4ebfdea2edaf268b0da826b146f5a6ca` snapshot yields 718 rows, 471
+current static references, 247 without current references and five rows with
+historical references. Their historical artifacts have recorded SHA-256s.
+The legacy path rejects extended drift instead of silently dropping fields.
+
+Pre-existing historical labels without versioned records are explicitly marked
+unbound; already recorded version entries are preserved as supplied by the hash-bound prior index,
+not independently signed attestations. Conflicting lineage versions and
+ambiguous reappearance of a removed path are refused. The older
+`reference_index_extend.py` rejects nonempty historical-record or tombstone
+schemas until it can preserve them. These are static inventory records, not
+proof, execution or runtime acceptance.
+
+The updater review found and corrected multi-generation record loss, prior
+tombstone loss, mutable artifact version attribution and historical records
+inside removed rows. Reappearing tombstones are refused rather than silently
+merged. Synthetic controls cover these paths; the current observation has no
+tombstones and no unbound historical labels. The version hashes are bound to
+the supplied checksum lineage, not independently signed attestations.
+
+## Post-merge reference inventory
+
+At merge head `9ba87cf1906a2afa11a97db111fcf7406c7d9124`, the
+version-preserving updater observed 7,986 tracked Lean paths and 735
+standalone candidates. Relative to the preceding 718-row snapshot, 17
+candidates were new, six changed and none was removed. The refreshed index
+retains 471 candidates with supplied current static references, 264 without,
+and five with historical references requiring review. None of the six
+changed candidates had a prior current reference; 63 rows have overlapping
+current references. The 23 new or changed candidates remain unresolved, not
+excluded. The evidence artifacts are bound by
+`tests/h55/module-times/reference-postmerge-evidence.sha256`.
+
+Independent read-only finder and skeptic checked the counts, input hashes and
+preservation of historical records; neither used Lean or a server. The scan is
+non-atomic and its source bindings and supplied static references do not prove
+execution context, generated-input coverage, runtime provenance or timing
+acceptance. H93 continues to defer h55b cold timing.
+
+## Precompile migration fixture observations
+
+`migration_fixture_controls.py` binds eight previously unreferenced isolated
+precompile migration fixtures to their snapshot source hashes and to the
+historical migration document. The rows describe their individual proof or
+axiom-print roles. The document reports historical isolated fixture passes;
+current driver, exact inputs, side effects and outcomes remain unresolved.
+No current execution, producer provenance or production acceptance is inferred.
+The classifier accepts supplied snapshot subsets and does not establish group
+coverage.
+
+At `d3ae4379ec7ab7f73158fc713cb9d3460d0c7cc4`, the refreshed static index
+has 738 candidates, 479 with supplied current static references and 259 without;
+five retain historical references requiring review. Since the previous snapshot
+three candidates were added and one changed, with none removed. Independent
+read-only finder and skeptic checked the eight roles, hashes and index
+preservation without Lean or a server. Evidence hashes are recorded in
+`tests/h55/module-times/migration-fixtures-evidence.sha256`. The observation
+remains non-atomic and does not establish runtime coverage or acceptance.
+
+## Native browser control observations
+
+`native_browser_controls.py` binds three previously unreferenced native-browser
+controls to their source hashes and the historical browser feature document.
+The rows describe address marker/identity, fixed-byte marker and finite return
+model controls. The document proposes standalone per-file drivers; exact
+current invocation, inputs, side effects and outcomes remain unresolved. These
+finite observations do not establish source, ABI or native adequacy, and the
+fixed-byte length and return failure-payload gaps remain open. The classifier
+covers only the supplied subset and does not establish browser-control coverage.
+
+At `8bb6ca32db9f4beacfa1881a5ca2a68beac0f86f`, the refreshed static index
+contains 739 candidates, 482 with supplied current static references and 257
+without; five retain historical references for review. One candidate was added
+since the preceding snapshot and none was changed or removed. Independent
+read-only finder and skeptic reviewed roles, source hashes and index preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/native-browser-evidence.sha256`. The non-atomic scan
+and static observations do not establish runtime coverage or acceptance.
+
+## Precompile audit observations
+
+`precompile_audit_controls.py` records ten previously unreferenced audit
+candidates, their source hashes and the precompile audit document hash. The
+roles distinguish BLS, Osaka, PointEval, bridge and stipend witnesses from
+frozen-type fidelity checks. `PointEvalSuccess` addresses a success premise;
+`PointEvalWitnesses` separately leaves its success premise open. Fidelity
+checks are not joint witnesses. Current driver, exact inputs, effects and
+outcomes remain unresolved; no compiler-success or native cryptography
+acceptance follows. The classifier covers only the supplied subset.
+
+At `a8d422b81b2b875ca7bdb5f10f7ac8ff79e32f29`, the static index contains
+739 candidates, 492 with supplied current references and 247 without; five
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked the roles, source hashes and index preservation without Lean or a
+server. Evidence hashes are in
+`tests/h55/module-times/precompile-audit-evidence.sha256`. The scan is
+non-atomic and these references do not establish runtime coverage or acceptance.
+
+## Duplication scanner observation candidates
+
+`scanner_observation_controls.py` records eight previously unreferenced scanner
+fixtures with their source hashes and the scanner feature document hash. The
+roles distinguish AST, KeySort and Scope observations, header parsing,
+metadata handling, fixture census and source ranges. `HeaderImports` reads a
+caller-supplied path; its actual input and invocation remain unresolved. The
+classifier covers a supplied subset. These observations do not establish global
+source coverage, ownership, body equivalence or current execution.
+
+At `644a70776c50532c722710242838cd5b411594bc`, the refreshed index has 762
+candidates, 499 with supplied current static references and 263 without; six
+retain historical references for review. Since the preceding snapshot, 23
+candidates were added, three changed and none removed. The prior packet-panic
+reference for changed `PanicBytes.lean` is retained as historical with its
+previous source identity and artifact hash, bound to the earlier index lineage
+and `packet-panic-controls-evidence.sha256`. The first update correctly refused
+the previous manifest because it lacked that artifact; the committed manifest
+provided the matching version on retry.
+
+Independent read-only finder and skeptic checked roles, hashes and historical
+record preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/scanner-observation-evidence.sha256`. This non-atomic
+static observation does not establish runtime coverage or acceptance.
+
+## Readonly-call audit observations
+
+`readonly_audit_controls.py` records six previously unreferenced readonly-call
+candidates with their source hashes and the audit feature document hash. The
+roles distinguish the negative always-revert relation, joint clients, dispatch
+refutations, static-mode flag inhabitation and isolated Source-success fixtures.
+These are not compiler-success replacements or producer adequacy proofs; current
+driver, exact inputs, effects and outcomes remain unresolved. The classifier
+covers only the supplied subset.
+
+At `11541784d177ac3404a9809222fe4438caf87b1d`, the refreshed static index
+has 765 candidates, 505 with supplied current references and 260 without; six
+retain historical references for review. Three candidates were added and none
+changed or removed since the preceding snapshot. Independent read-only finder
+and skeptic checked the roles, hashes and history preservation without Lean or a
+server. Evidence hashes are in
+`tests/h55/module-times/readonly-audit-evidence.sha256`. This non-atomic static
+observation does not establish runtime coverage or acceptance.
+
+## V08 adapter audit observations
+
+`v08_audit_controls.py` records six previously unreferenced adapter audit
+candidates with their source hashes and audit feature document hash. Four are
+kernel-environment censuses; two are failure-resource or local-guard
+witness/control modules. P8StatementCensus has an optional
+`H62_WORLD_CENSUS=1` diagnostic. Current driver, exact inputs, effects and
+outcomes remain unresolved. The supplied subset does not establish compiler,
+execution or gas/fork adequacy.
+
+At `bed243cb1fbca5b352aa68240ec2e36c4d148551`, the refreshed static index
+has 765 candidates, 511 with supplied current references and 254 without; six
+retain historical references for review. One previously unreferenced candidate
+changed and none was added or removed since the preceding snapshot. Independent
+read-only finder and skeptic checked roles, hashes and history preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/v08-audit-evidence.sha256`. This non-atomic static
+observation does not establish runtime coverage or acceptance.
+
+## Language audit observations
+
+`language_audit_controls.py` records four previously unreferenced language
+candidates with source hashes and the audit feature document hash. They cover
+ABI entry model controls, feature-catalog witnesses, feasibility of explicitly
+listed frozen theorem telescopes, and joint lattice/arithmetic hypotheses.
+The telescope helper does not prove the original theorem conclusions. Current
+driver, exact inputs, effects and outcomes remain unresolved. This supplied
+subset does not establish compiler correctness, progress or frontend coverage.
+
+At `a3b922c41f3b8d7a58385a521039e9a1004e7397`, the refreshed static index
+has 765 candidates, 515 with supplied current references and 250 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/language-audit-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
+
+## Theory audit witness observations
+
+`theories_audit_witnesses.py` records four previously unreferenced theory
+candidates with source hashes and the audit feature document hash. They cover
+Bridge/Denote, Closer, Progress/Outcome and Payable model inputs. The Payable
+empty-input certificate is a refutation; the source records Q-STATIC-VALUE as
+pending and does not H69-classify it or close the public witness gap. Positive
+Payable packets remain distinct. Current driver, exact inputs, effects and
+outcomes remain unresolved. This subset does not establish physical EVM or
+payment-settlement adequacy.
+
+At merge head `2e480e34ae3d43f21da9457ee33aab4d0e464e82`, the refreshed static
+index has 766 candidates, 519 with supplied current references and 247 without;
+six retain historical references for review. One candidate was added and one
+previously unreferenced candidate changed since the previous snapshot. Independent
+read-only finder and skeptic checked roles, hashes and history preservation
+without Lean or a server. The skeptic requested the explicit Payable refutation
+and pending-question boundary above; the regenerated artifact was rechecked.
+Evidence hashes are in `tests/h55/module-times/theories-witness-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
+
+## Compiler audit follow-up observations
+
+`compiler_audit_followup.py` records eight previously unreferenced compiler
+audit candidates with source hashes and the audit feature document hash. The
+roles distinguish correlated joint inputs and selector equivalences from H69
+intentional refutations. The copy selector includes a reverting destination;
+typed loop output and joint premises do not prove source success or compiler
+totality. Current driver, exact inputs, effects and outcomes remain unresolved.
+This supplied subset does not establish compiler acceptance.
+
+At `0bb0bb33e1037939e46d9d90cf018247efa496cb`, the refreshed static index
+has 766 candidates, 527 with supplied current references and 239 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/compiler-followup-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
+
+## Roadmap migration helper observations
+
+`roadmap_migration_controls.py` records four previously unreferenced migration
+helpers with source, audit document and historical driver hashes. The driver
+source maps CanonicalEvm to classify, ExportAll to api, and ExportEvm and
+HashContainsFixture to fixtures; api additionally requires a successful
+full-closure result. The actual current invocation, workspace, inputs, effects
+and outcomes remain unresolved. These structural inspections and versioned
+debug fingerprints do not establish cross-version kernel or semantic equivalence;
+the isolated Hash fixture does not repair its owner module. This is supplied
+subset evidence and does not authorize any H58-held change.
+
+At `fcbbf364d0c0cb45758e0073f9801562c18dcee8`, the refreshed static index
+has 766 candidates, 531 with supplied current references and 235 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, driver mapping, hashes and history preservation without Lean or a
+server. Evidence hashes are in
+`tests/h55/module-times/roadmap-migration-evidence.sha256`. This non-atomic
+static observation does not establish runtime acceptance.
+
+## Tools migration fixture observations
+
+`tools_migration_controls.py` records four previously unreferenced Tools
+migration fixtures with source hashes and the migration feature document hash.
+They distinguish isolated elaborator metaprogram execution, checked-environment
+inventory, new String candidates and copied old String reference fixtures.
+The new candidate character-list specifications do not establish universal
+old-version or original-function equivalence. Current driver, exact inputs,
+effects and outcomes remain unresolved; this is supplied-subset evidence.
+
+At `f8d40c0ac07190893241f41af56f3e9219b6a560`, the refreshed static index
+has 766 candidates, 535 with supplied current references and 231 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/tools-migration-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
+
+## Counterexample migration probe observations
+
+`counterexample_migration_controls.py` records three previously unreferenced
+counterexample migration probes with source hashes and the migration document
+hash. Two inspect selected imported interfaces and axioms; the third is an
+isolated negative model of the nonconflicting storage equations and pre-fix
+defaults, without changing either original inconsistency theorem premise. The
+document reports historical old probes for all three and new probes for only
+OverlapInterfaces and OverlapModel. Current invocation, inputs, effects and
+outcomes remain unresolved; this is supplied-subset evidence.
+
+At `1eb999d7d55ce9bae9492a54981a67b4f7c062b7`, the refreshed static index
+has 766 candidates, 538 with supplied current references and 228 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in
+`tests/h55/module-times/counterexample-migration-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
+
+## SolcValidation migration probe observations
+
+`solc_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover compiler-
+only operation/data-resolution controls, frozen declaration/axiom checks and a
+test-only imported kernel inventory. Raw cross-version inventory differences
+require classification; current invocation, inputs, effects and outcomes remain
+unresolved. This supplied subset does not establish full acceptance.
+
+At merge head `5fb1f5ad7970f9f72753caaa87e8e90a5b81e062`, the refreshed
+static index has 767 candidates, 540 with supplied current references and 227
+without; seven retain historical references for review. One candidate was added
+and the previously referenced LoopSelectorAudit changed. Its old compiler-audit
+reference and old source identity are retained as historical, bound to the
+prior lineage and committed compiler-followup checksum manifest; it is not
+counted current. Independent read-only finder and skeptic checked roles, hashes
+and history preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/solc-migration-evidence.sha256`. This non-atomic
+observation does not establish runtime acceptance.
+
+## Solkey migration probe observations
+
+`solkey_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover an
+off-root five-module kernel-expression inventory, isolated official String API
+controls and their axiom prints. The controls do not replace or prove the Raw
+parser. Current invocation, inputs, effects and outcomes remain unresolved;
+this supplied subset does not establish cross-version equivalence or acceptance.
+
+At `d0175ccf70944fd07538533581d6d94e8f9d6d57`, the refreshed static index
+has 771 candidates, 543 with supplied current references and 228 without; seven
+retain historical references for review. Four candidates were added and none
+changed or removed since the preceding snapshot. Independent read-only finder and
+skeptic checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/solkey-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Stipend migration probe observations
+
+`stipend_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover isolated
+acceptance/rejection and gas-boundary controls, explicitly named interface types,
+and a read-only public inventory including generated names. The controls do not
+prove Fitted or Enforced compiler obligations or cross-version equivalence.
+Current invocation, inputs, effects and outcomes remain unresolved; this is
+supplied-subset evidence.
+
+At `98248c5ef593c80baf38d7a61fcd6d3a943736c3`, the refreshed static index
+has 771 candidates, 546 with supplied current references and 225 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/stipend-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Storage migration probe observations
+
+`storage_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover isolated
+local predicate copies, metadata-stripped closed kernel type export for external
+hashing, and copied layout/locate rejection controls. These fixtures do not repair
+production or alter original premises; type syntax is not semantic equivalence.
+Current invocation, inputs, effects and outcomes remain unresolved; this is
+supplied-subset evidence.
+
+At `a087d25797fc5cc1bd29b4a8aeaf12cdd7cea035`, the refreshed static index
+has 771 candidates, 549 with supplied current references and 222 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/storage-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Theory migration probe observations
+
+`theory_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover imported
+Theory declaration/axiom introspection, five finite String boundary cases and
+an intentionally negative legacy String API control. The latter historically
+passes on old Lean and fails on new Lean with four checked diagnostics; it must
+not be treated as an ordinary expected-success module. The finite observations
+do not establish production function equivalence. Current invocation, inputs,
+effects and outcomes remain unresolved; this is supplied-subset evidence.
+
+At `ddc46c09ecd07b1627756ae8f5060a7ecdded140`, the refreshed static index
+has 772 candidates, 552 with supplied current references and 220 without; seven
+retain historical references for review. One candidate was added and none
+changed or removed since the preceding snapshot. Independent read-only finder and
+skeptic checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/theory-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Yul migration inspection observations
+
+`yul_migration_controls.py` records five previously unreferenced migration
+helpers with source hashes and the migration document hash. They cover instance
+metadata fixtures, single and batch compiler IR/visibility inspection, selected
+old-toolchain declaration metadata and private declaration snapshots. Four export
+CLIs open caller-supplied output paths for writing/truncation; the batch exporter
+also reads a caller-supplied jobs file. Exact current invocation and inputs remain
+unresolved. These observations do not establish semantic equivalence or public
+API acceptance; this is supplied-subset evidence.
+
+At `0ae61fcfbd9d133f8a6660dd08618e3789aa9423`, the refreshed static index
+has 772 candidates, 557 with supplied current references and 215 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. The
+finder identified the exporter file effects above; they were added and rechecked.
+Evidence hashes are in `tests/h55/module-times/yul-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Inference helper candidate observations
+
+`inference_helper_controls.py` records three previously unreferenced candidate
+modules with source hashes and the inference-helper document hash. They cover
+case specifications, compatibility statements and provisional unregistered
+shared definitions. The handoff distinguishes a historical per-file Shared
+diagnostic from unavailable CaseSpecifications diagnostics and incomplete full
+validation. Current invocation, inputs, effects and outcomes remain unresolved;
+this supplied subset does not establish an inferencer merge or production
+compatibility.
+
+At merge head `a915c7f512dd6a0750a4bd16de1d90c11fcd2408`, the refreshed static
+index has 775 candidates, 560 with supplied current references and 215 without;
+seven retain historical references for review. Three candidates were added and
+none changed or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, hashes and history preservation without Lean
+or a server. Evidence hashes are in
+`tests/h55/module-times/inference-helper-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Primitive arithmetic fixture observations
+
+`primitive_arithmetic_controls.py` records six previously unreferenced typed
+arithmetic fixtures with source hashes and the primitive-packets document hash.
+They classify addition, subtraction, multiplication, signed overflow and
+unsigned zero-divisor cases. The fixture layer alone does not establish Source
+or EVM execution; separate correspondence modules state those bridges. Current
+invocation, inputs, effects and outcomes remain unresolved; this is supplied-
+subset evidence.
+
+At `66d920db769240109a5703e508dde596c79ae09c`, the refreshed static index
+has 779 candidates, 566 with supplied current references and 213 without; seven
+retain historical references for review. Four candidates were added and one
+previously unreferenced candidate changed since the preceding snapshot.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/primitive-arithmetic-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Primitive correspondence observations
+
+`primitive_correspondence_controls.py` records eight previously unreferenced
+primitive correspondence sources with hashes and the primitive-packets document
+hash. Their stated scopes cover checked add, multiply and subtract, unsigned
+division/remainder, checked signed operations and unchecked signed subtraction.
+Source panic bytes and coarse target revert remain distinct. Current invocation,
+inputs, effects, outcomes and verification remain unresolved; these statements
+do not establish full world, session, gas or fetched-EVM adequacy.
+
+At `910590a3bc5f179ed3d9f587e6c360e671f7ff0d`, the refreshed static index
+has 779 candidates, 574 with supplied current references and 205 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in
+`tests/h55/module-times/primitive-correspondence-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
+
+## Additional primitive correspondence observations
+
+`primitive_correspondence_extra.py` records ten previously unreferenced
+primitive correspondence sources with hashes and the primitive-packets document
+hash. Their stated scopes include bitwise operations, comparisons, literals,
+unchecked shifts, signed and unsigned casts, signed division/remainder and
+unchecked unsigned multiplication. Out-of-range and zero-divisor refusals remain
+refusals; the unsigned cast remains restricted to smaller widths. Current
+invocation, inputs, effects, outcomes and verification remain unresolved. These
+statements do not establish full world, session, gas or fetched-EVM adequacy.
+
+At `bfe7194366fb3068956b00f6f9a6a725372982e8`, the refreshed static index
+has 779 candidates, 584 with supplied current references and 195 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/primitive-extra-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
