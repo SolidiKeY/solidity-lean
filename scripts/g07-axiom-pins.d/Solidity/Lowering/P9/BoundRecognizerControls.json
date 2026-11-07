@@ -1,0 +1,47 @@
+{
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.accepted": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.catalogue": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.whole": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.no_fuel_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.undeclared_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.accepted": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.catalogue": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.whole": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.stray_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}

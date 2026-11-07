@@ -1,0 +1,40 @@
+{
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.allocator": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.full_cost_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.heap": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.positive_legacy_input": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.positive_object_input": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.transported": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean:Solidity.Backend.Passes.AuditPrivateStack.zero_inputs": [
+  "Quot.sound",
+  "propext"
+ ]
+}

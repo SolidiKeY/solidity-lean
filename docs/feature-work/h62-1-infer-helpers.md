@@ -1,5 +1,13 @@
 # H62 item 1 infer helpers — preliminary handoff
 
+Current live status (2026-11-06): the canonical helper and test import shim are
+approved by coordinator decisions #47/#49. Both production inferencer files
+remain unchanged, including their generated public equations. Decision #50
+authorizes the four own-lane conversion conditions to pass `Γ.mapFree` exactly
+as current master requires. Scoped Lean 4.24 checks pass; the original full
+assignment and its isolated migration/acceptance obligations remain unfinished.
+The older preparation sections below are retained historical checkpoints.
+
 Base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4. This is an incomplete
 inventory, not a completed checkpoint. Scope is the copied helpers only;
 H55 retains both inferencers and their relations.
@@ -302,7 +310,11 @@ and the default array location. Per-file Lean 4.35 MCP diagnostics returned
 `[propext]` axiom reports. The patch proposal was regenerated after these
 additions; its applicability check is not a semantic or full-gate pass.
 
-## Integration and proposal drift controls
+## Integration and proposal drift controls (historical checkpoint)
+
+This b7c3cc511 checkpoint predates the successor work and coordinator decisions
+#49/#50 below. Its proposal status and owner waits describe that earlier tree;
+the accepted canonical agreement interface is the current status.
 
 The coordinator reported the prior lane head integrated with a touched gate
 and finder/skeptic review. `origin/master` was fetched and the clean lane
@@ -328,6 +340,10 @@ agreement on existing definition bodies, frozen-statement and axiom checks,
 full affected validation, acceptance and timing comparison remain open. No
 prior stopped Lean build was rerun unchanged. No new owner source edit was
 made, and no master push was performed.
+
+The following upstream re-baseline records historical Lean 4.35 diagnostics;
+it does not supersede the later live Lean 4.24 checks or the narrowed #49/#50
+owner decisions recorded below. Full original migration gates remain open.
 
 ## Re-baseline after drift-control integration
 
@@ -366,6 +382,9 @@ scratch directory was available; that attempt is not counted as a pass.
 Owner agreement, independent reviews of any new changes, full affected gates,
 axiom comparison, acceptance and timing remain outstanding.
 
+The following upstream lexical-control report concerns the historical alias
+proposal. It does not supersede the accepted #49/#50 interface decisions below.
+
 ## Proposal live-anchor control
 
 The lane fast-forwarded to the coordinator-reported master
@@ -388,3 +407,132 @@ The coordinator reported touched-gate success and finder/skeptic reviews for
 the integrated prior head. Independent review of this new control remains
 pending. H55 agreement, Source/Infer 4.35 repair, migration gates, full
 compatibility checks, axiom comparison and before/after timings remain open.
+
+## Successor correspondence and accepted interface
+
+## Scoped successor audit tooling recut
+
+The external audit-probe generator preserves the published helper declaration
+text and all anonymous examples. It queries the 31 named declarations once,
+including source files that already print some axiom dependencies. Anonymous
+examples and compiler-generated helpers are outside this named-query inventory.
+Neither inferencer nor Shared.lean is changed. Prior c16efd4ed validation remains
+historical; production integration and full affected validation remain open.
+
+## Shared extraction correspondence
+
+After fetching master and rebasing onto71c5963f3, the published source already
+contained Shared and its migration proposal, but no SharedAgreement module.
+The new additive SharedAgreement.lean proves simultaneous agreement of all
+three shared observations with both production helper families for arbitrary
+STy, and exposes six pointwise projection lemmas. All eight are axiom-free.
+No existing statement, helper definition or inferencer was modified.
+
+The bounded serial per-file check passed in0.567s on liveLean4.24.0, with the
+existing12GiB/no-swap cap and4GiB reserve. Execution records are outside Git at
+/workspace/sol-numeric-literals-gate-output/shared-agreement-check.json and
+shared-agreement-files/1.log. Read-only finder and skeptic reviews passed.
+This establishes helper correspondence, not complete inferencer equivalence,
+production migration,4.35overlay acceptance or full affected validation.
+
+### Existing consumer compatibility
+
+SharedConsumers.lean now transports the shared observations into the actual
+static delete, elementary-conversion and payable-conversion completeness
+consumers. It retains the context-refusal flag, inferred-operand membership,
+nonpayable-element restriction and exact conversion/payable conditions.
+No production body or existing theorem statement is changed. All three new
+lemmas pass the updated per-file gate on masterf160e517f in1.064s and print
+only propext/Classical.choice/Quot.sound. Read-only finder and skeptic reviews
+passed. Logs remain off Git at shared-consumers-check.json and
+shared-consumers-files/1.log under /workspace/sol-numeric-literals-gate-output.
+This is premise transport for three existing consumers, not full inference
+equivalence, compiler totality, production migration or a speed comparison.
+
+### Canonical adoption scope question
+
+Q-NL-SHARED-ADOPT1 was sent through the coordinator-prescribed coord-ask
+question channel at coord-q/codex/solidity-sol2-20261104/numeric-literals/20261106T212727Z.
+The published migration proposal needs producer-owned definition-body changes
+and a coordinated test Shared import shim to avoid duplicate canonical constants.
+The question offers owner adoption with registration/full gates, or retention of
+the additive interface without production deduplication. No producer patch has
+been applied, and only the question ref—not this source branch—was pushed.
+
+The coordinator resolved Q-NL-SHARED-ADOPT1 as A in GitHub#47: this successor
+lane is authorized to create the canonical module, change the two helper
+definition bodies as proposed, add the test import shim in the same commit,
+register the module and run checkpoint/full gates. Every existing statement and
+consumer condition must remain unchanged; any necessary statement change stops
+that migration for a scope question. Admission-transport/v16-correctness-transfer
+is the source-relations successor and must be notified in the result.
+
+## Canonical adoption: generated equation interface barrier
+
+Q-NL-SHARED-ADOPT1 (#47) authorized the canonical proposal subject to retaining
+every existing statement and consumer condition. The proposal SHA-256 matched
+`2906a075d7332560a770e986592861c049bd18806451b00c352b437eede58459`.
+The draft added the production helper, both sets of aliases, the test import
+shim and module registration. Both inferencers compiled; an initial consumer
+check encountered a stale test object containing the old duplicate definitions.
+
+An isolated Lean 4.24 probe using the saved original definitions generated 16
+public branch equations. The exact alias bodies instead generated six
+unconditional equations: six old `eq_1` statement types changed and ten other
+old names disappeared. Six dependent matcher signatures can be retained by
+forwarding shims, but explicit old equation theorems are rejected as reserved
+names. Thus the observation/consumer agreement proofs alone do not satisfy H78.
+
+Q-NL-SHARED-EQ1 was sent through `coord-ask`: retain original match-shaped
+helpers with canonical agreement lemmas, use a separate versioned alias
+interface, or supply an exact equation-registration solution. No production
+migration was committed. Its complete draft and before/after probes are
+preserved under `/workspace/sol-numeric-literals-helper-migration/`; production
+and registration files were restored. Full checkpoint and `run-lean.sh` gates
+await the conditional owner decision. No statement change, axiom addition,
+budget change or source push is claimed. Both read-only reviewers identified
+the generated API issue; the finder also identified the audit script's test-shim
+assumption, whose draft fix is preserved with the migration.
+
+## Accepted canonical agreement interface (#49/#50)
+
+The canonical module is registered at `Solidity/Source/InferHelpers.lean`.
+The former test module imports it, preserving the public shared namespace
+without duplicate definitions. Production helpers retain their original
+match-shaped definitions. `SharedAgreement.lean` and `SharedConsumers.lean`
+provide the pointwise and exact-consumer interface; no full-inferencer
+equivalence is claimed. The original plain-alias proposal remains a historical
+review artifact, not the accepted production patch.
+
+Exactly these four own-lane declarations now thread the existing `Γ.mapFree`
+argument into their conversion condition, with no other premise change:
+
+- `Solidity.H62.InferHelpers.source_conv_elem` in `CaseSpecifications.lean`.
+- `Solidity.H62.InferHelpers.static_conv_elem` in `CaseSpecifications.lean`.
+- `Solidity.H62.InferHelpers.source_convElem_mem` in `CompletenessCompatibility.lean`.
+- `Solidity.H62.InferHelpers.SharedConsumers.shared_convElem_mem` in `SharedConsumers.lean`.
+
+The fresh scoped run passes KeySort, all three helper test modules, the shim,
+the eight agreement declarations, three shared consumers and 31 named census
+queries. The environment-level API check confirms all 16 original branch
+equation signatures and six dependent matcher signatures. No axiom beyond
+`propext`, `Classical.choice` and `Quot.sound` is recorded; the shared rules
+and observation equalities are axiom-free. Six scanner regressions pass.
+Read-only finder and skeptic reviews accept statement and resource fidelity.
+
+The serial driver now uses package `weakLeanArgs = ["-j1"]` instead of treating
+thread count as a semantic artifact-cache input. Explicit per-process `-j1`,
+12 GiB/no swap and the 4 GiB headroom guard remain unchanged. The published
+master cache at ac9d8db2ad was checksum-verified and its Lean 4.24 toolchain
+matched. Cache reuse remains conditional on Lake's input hashes. One checkpoint
+was interrupted for this driver repair; a subsequent import build was stopped
+by the headroom guard after cache extraction. Clean intake file-cache pages
+were released without deleting files or relaxing limits, and the affected
+import closure then passed. Canceled/stopped attempts are not passing gates
+or a valid before/after timing comparison.
+
+Final whole-library gate outcomes and exact source bindings are recorded in
+the external `/workspace/sol-numeric-literals-helper-migration/` handoff.
+The shared G07 inventory is left to its separate reconciliation job (H67).
+This module also resolves this lane's missing documentation reference reported
+by the memory-reference owners; unrelated documentation tickets remain routed.

@@ -1,0 +1,47 @@
+{
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.readyB_sound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.argsB_sound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.parentB_sound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.itemsB_sound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.boundB_sound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_sound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.catalogueB_sound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.catalogueB_from_elaborate": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.checked_program_calls": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}
