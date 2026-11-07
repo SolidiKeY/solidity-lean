@@ -41,5 +41,10 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.returndata_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

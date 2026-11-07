@@ -63,7 +63,7 @@ only re-read `Step`'s own conjuncts and the determinism of `Evm.run`.
 
 ## Version 2: on `Evm.MachineV2` (H106)
 
-`Backend/Passes/SourceCallProducerV2.lean` closes the two gaps above on the
+`Backend/Passes/SourceCallProducerV2.lean` addresses the two gaps above on the
 versioned machine `Evm/MachineV2.lean` (master `d3597eca2`; H57 pair of the
 frozen `Evm.Machine`, which stays unchanged). The frozen-machine producer
 above stays as it is.
@@ -75,11 +75,21 @@ above stays as it is.
 | Input transport | `callIn_input`: `CALLIN` runs `callInStep` on exactly `i.captured.input` |
 | Every machine | `call_run`: returns with the caller's stack and storage. An entered call leaves `reply receiver value input` in the buffer and journals the captured input; an unentered one empties the buffer. |
 | Pinned relation | `Returndata i m out result`: a fixed definition. When `result` has a payload `(ok, d)` and the oracles agree (`OracleAgrees`: `reply` answers `d`, `accepts` is `ok`, the value is funded), `out` is `.ok` with buffer `d`, the caller's stack, and the journal extended by `⟨receiver, value, input, ok, d⟩` |
-| Proof | `returndata_holds`: the relation holds for every invocation and machine, with the actual source outcome `raw i` |
-| Joint satisfiability | `oracle_agrees`: every payload has agreeing oracles; `transported`: the conclusion is then reached |
+| Proof | `returndata_holds`: the relation holds for every invocation and machine at `raw i`; `returndata_any`: it holds for every source result, since the payload hypothesis is not used in the proof |
+| Joint satisfiability | `oracle_agrees`: every payload has agreeing oracles (the witness answers `d` only on the captured input and funds only the caller); `transported`: the conclusion is then reached |
 
-The relation is not trivial: `Controls.wrong_buffer_refused` refutes it for
-a run that leaves another buffer under agreeing oracles. The other controls
+What this proves: input transport plus `CALLIN`'s buffer law. `OracleAgrees`
+names the source payload `d` and asks the reply oracle to answer `d`; it does
+not refer to the source world's callee, so the buffer equality is
+`callIn_returndata` plus that premise. Tying the oracle to the source world's
+callee answer (so that `raw i` does work in the proof) is the remaining
+G42.02 step and needs V15's callee model.
+
+`Controls.wrong_buffer_refused` shows that the relation is not identically
+true in the target outcome: under agreeing oracles it refutes a hand-built
+outcome (not a run) with another buffer. `two_cells_read` checks, by kernel
+computation on explicit cells, that a 40-byte input spans two cells and reads
+back exactly. The other controls
 use the payment invocation (`ping()`, value 0, source `success []`):
 `transported_control`, `journaled_input` (the journal holds the `ping()`
 selector bytes), `liar_disagrees` and `liar_observed` (an oracle answering
@@ -93,6 +103,17 @@ Limits (from `MachineV2` and this emission):
 - Source halts (timeout, depth limit, static refusal) have no payload, so the
   relation says nothing about them.
 - `small`: the input length is below `2^256`.
+- The caller must be able to pay the value (`OracleAgrees.funded`). When it
+  cannot, MachineV2 empties the buffer and journals nothing, and the relation
+  says nothing.
+- The `CALLIN` status word is popped. The success/revert flag reaches only the
+  ghost journal (`accepts = ok`) and is not compared with a source flag on
+  the stack.
+- The stores overwrite memory cells `o … o + ⌈len/32⌉ - 1`. `call_run`
+  restores stack and storage only, not memory.
+- Controls cover a success payload, an empty reply and a one-cell input on
+  the run. Revert payloads and multi-cell inputs are covered by the general
+  theorems (and `two_cells_read` for the window).
 - The emission is a `MachineV2` program (`List InstrV2`). It does not
   instantiate the frozen-machine `WorldCalls.Premises`. `callIn_forget`
   relates its `CALLIN` to the frozen `CALL`.
@@ -116,3 +137,19 @@ Confirmed findings and their fixes:
   with `#guard_msgs` and recorded.
 - The V2 module-map rows moved from the language-area fragment to this lane's
   `readonly-calls.d/ro-v2.md`.
+
+### Reviews of version 2 (2026-11-07)
+
+Read-only finder and skeptic reviews (no Lean server) confirmed the input
+transport (`readBytes_stores`, `callIn_input`), the pins and the imports.
+Confirmed findings, fixed here:
+
+- The payload hypothesis was unused, and `OracleAgrees` restates the
+  conclusion's buffer value. Disclosed with `returndata_any` and the "What
+  this proves" paragraph; the wording "as the source world does" was removed.
+- The oracle witness answered every input and funded every account. It now
+  answers only the captured input and funds only the caller.
+- `wrong_buffer_refused` refutes a hand-built outcome. Its wording is
+  corrected.
+- Undisclosed limits added: the unpaid case, the popped status word and
+  memory clobbering. A multi-cell control (`two_cells_read`) was added.

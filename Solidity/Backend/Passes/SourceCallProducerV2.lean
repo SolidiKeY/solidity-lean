@@ -11,9 +11,13 @@ captured input (`call_run`), and the return buffer is the callee oracle's
 reply for that input.
 
 `Returndata` is a fixed relation, not a supplier-chosen `Prop`: whenever the
-source outcome has a payload and the machine's oracles answer as the source
-world does (`OracleAgrees`), the target run leaves exactly that payload in the
-return buffer. `returndata_holds` proves it for every invocation and machine.
+source outcome has a payload `d` and the machine's reply oracle answers `d`
+for the captured input (`OracleAgrees`), the target run leaves `d` in the
+return buffer and journals the input. `returndata_holds` proves it for every
+invocation and machine. It holds for every result (`returndata_any`): its
+content is input transport and `CALLIN`'s buffer law, not a link from the
+source world's callee to the oracle (V15). The caller must be able to pay;
+the `CALLIN` status word is popped and not compared with the source flag.
 
 Limits, inherited from `MachineV2`: the callee's code is not run; its answer is
 the `reply`/`accepts` oracle; there is no gas and no call depth; memory is
@@ -124,8 +128,10 @@ def payload : Except Halt Outcome → Option (Bool × List UInt8)
   | .ok (.revert d) => some (false, d)
   | .error _ => none
 
-/-- The machine's callee oracles answer this call as the source world did,
-and the caller can pay the value. -/
+/-- The machine's callee oracles answer this call with `d` (accepting iff
+`ok`), and the caller can pay the value. This premise names the source payload;
+it does not refer to the source world's callee, so the buffer equality it
+yields is `callIn_returndata` plus this premise (see `returndata_any`). -/
 structure OracleAgrees (i : InvocationFrame.Invocation E Γ dn ps rs) (m : MachineV2)
     (ok : Bool) (d : List UInt8) : Prop where
   reply : m.reply (receiver i) (amount i) (input i) = d
@@ -140,10 +146,27 @@ def Returndata (i : InvocationFrame.Invocation E Γ dn ps rs) (m : MachineV2) (o
     ∃ m', out = .ok m' 0 ∧ m'.returndata = d ∧ m'.base.stack = m.base.stack ∧
       m'.calls = m.calls ++ [⟨receiver i, amount i, input i, ok, d⟩]
 
-/-- **The relation holds for every invocation and machine.** -/
-theorem returndata_holds (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) (m : MachineV2)
-    (small : (input i).length < W) :
-    Returndata i m (runV2 (code i o) m) (SourceCallProducer.raw i) := by
+/-- Agreeing oracles: answer `d` on exactly the captured input (and `[]` on
+any other), accept iff `ok`, and fund only the caller. -/
+def oracle (i : InvocationFrame.Invocation E Γ dn ps rs) (m : MachineV2) (ok : Bool)
+    (d : List UInt8) : MachineV2 :=
+  { m with reply := fun _ _ x => if x = input i then d else [],
+           base := {m.base with accepts := fun _ _ => ok, bal := upd m.base.bal m.base.self W} }
+
+/-- **Joint satisfiability**: every source payload has agreeing oracles. -/
+theorem oracle_agrees (i : InvocationFrame.Invocation E Γ dn ps rs) (m : MachineV2)
+    (ok : Bool) (d : List UInt8) : OracleAgrees i (oracle i m ok d) ok d :=
+  ⟨if_pos rfl, rfl, by
+    show (amount i).1 ≤ upd m.base.bal m.base.self W m.base.self
+    rw [upd_same]
+    exact Nat.le_of_lt (amount i).isLt⟩
+
+/-- Disclosure: the pinned relation holds for every source result, not only
+`raw i`. Its content is input transport plus `CALLIN`'s buffer law; the
+source outcome only names which payload the oracle premise must give. -/
+theorem returndata_any (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) (m : MachineV2)
+    (small : (input i).length < W) (result : Except Halt Outcome) :
+    Returndata i m (runV2 (code i o) m) result := by
   intro ok d _ agree
   obtain ⟨m', run, stack, _, _, cases⟩ := call_run i o m small
   rcases cases with ⟨_, buffer, calls⟩ | ⟨poor, _, _⟩
@@ -151,25 +174,21 @@ theorem returndata_holds (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin
     rw [calls, agree.reply, agree.accepts]
   · exact absurd agree.funded (Nat.not_le_of_lt poor)
 
-/-- Agreeing oracles: answer `d`, accept iff `ok`, and fund the caller. -/
-def oracle (m : MachineV2) (ok : Bool) (d : List UInt8) : MachineV2 :=
-  { m with reply := fun _ _ _ => d,
-           base := {m.base with accepts := fun _ _ => ok, bal := fun _ => W} }
-
-/-- **Joint satisfiability**: every source payload has agreeing oracles. -/
-theorem oracle_agrees (i : InvocationFrame.Invocation E Γ dn ps rs) (m : MachineV2)
-    (ok : Bool) (d : List UInt8) : OracleAgrees i (oracle m ok d) ok d :=
-  ⟨rfl, rfl, Nat.le_of_lt (amount i).isLt⟩
+/-- **The relation holds for every invocation and machine.** -/
+theorem returndata_holds (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) (m : MachineV2)
+    (small : (input i).length < W) :
+    Returndata i m (runV2 (code i o) m) (SourceCallProducer.raw i) :=
+  returndata_any i o m small _
 
 /-- Non-vacuity: under the agreeing oracle the pinned relation's conclusion
 holds for the actual source payload. -/
 theorem transported (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) (m : MachineV2)
     (small : (input i).length < W) (ok : Bool) (d : List UInt8)
     (h : payload (SourceCallProducer.raw i) = some (ok, d)) :
-    ∃ m', runV2 (code i o) (oracle m ok d) = .ok m' 0 ∧ m'.returndata = d ∧
+    ∃ m', runV2 (code i o) (oracle i m ok d) = .ok m' 0 ∧ m'.returndata = d ∧
       m'.base.stack = m.base.stack ∧
       m'.calls = m.calls ++ [⟨receiver i, amount i, input i, ok, d⟩] :=
-  returndata_holds i o (oracle m ok d) small ok d h (oracle_agrees i m ok d)
+  returndata_holds i o (oracle i m ok d) small ok d h (oracle_agrees i m ok d)
 
 /-- The source half of the pair is still produced: raw outcome and history. -/
 theorem source (i : InvocationFrame.Invocation E Γ dn ps rs) :
@@ -208,3 +227,7 @@ end Solidity.Backend.Passes.SourceCallProducerV2
 /-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Backend.Passes.SourceCallProducerV2.source
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.returndata_any' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.returndata_any
