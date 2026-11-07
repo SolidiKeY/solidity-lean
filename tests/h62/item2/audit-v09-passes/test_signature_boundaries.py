@@ -195,12 +195,13 @@ class HeaderBoundaries(unittest.TestCase):
                 ref_key = (mapping['interface'],refutation['name'])
                 self.assertIn(ref_key,uncovered)
                 self.assertEqual(refutation['signature_sha256'],selected[ref_key]['legacy_signature_sha256'])
-                self.assertEqual(refutation['classification'],'checked-intentional-empty-heap-refutation')
+                stale = stem == 'loop-reframed-failure'
+                self.assertEqual(refutation['classification'],'checked-intentional-stale-pointer-refutation' if stale else 'checked-intentional-empty-heap-refutation')
                 self.assertEqual(refutation['kernel_name'],mapping['private_kernel_prefix']+refutation['name'])
-                self.assertEqual(refutation['premise_impossibility'],mapping['exercised_public_namespace']+'.noRefs_premises_impossible')
+                self.assertEqual(refutation['premise_impossibility'],mapping['exercised_public_namespace']+('.stale_pointer_premises_impossible' if stale else '.noRefs_premises_impossible'))
                 self.assertIsNone(refutation['joint_witness'])
                 self.assertEqual(refutation['selected_witness_credit'],0)
-                self.assertEqual(refutation['axioms'],['propext'])
+                self.assertEqual(refutation['axioms'],['propext','Classical.choice','Quot.sound'] if stale else ['propext'])
             if stem == 'memory-call-scope':
                 self.assertFalse(uncovered)
                 self.assertEqual(mapping['checked_private_names'],['final_some'])
@@ -236,6 +237,8 @@ class HeaderBoundaries(unittest.TestCase):
                 row, = [r for r in mapping['rows'] if r['kind']=='private-exact-kernel-signature']
                 self.assertEqual(row['simultaneous_witness'],'Solidity.Backend.Passes.AuditLoopScope.extraction_premise')
             if stem == 'loop-reframed-failure':
+                self.assertEqual(len(mapping['intentional_refutations']),1)
+                self.assertEqual(mapping['checked_refutation_names'],['stale_pointer'])
                 self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'stale_pointer'})
                 self.assertEqual(mapping['checked_private_names'],['guard_code','before_value'])
                 self.assertEqual(mapping['private_axioms_by_name'],{'guard_code':['propext','Quot.sound','Classical.choice'],'before_value':['propext','Classical.choice','Quot.sound']})

@@ -1265,3 +1265,16 @@ ordered axiom lists are recorded separately. Selected475/1259,784open.
 premises receive no positive witness credit. No private definition adds a row.
 Logs and reviews: `/workspace/vy3-evidence/loop-reframed-private-20261107`.
 Original production/acceptance obligations and producer waits remain open.
+
+
+Stale-pointer refutation checkpoint: the exact private `stale_pointer` kernel
+signature is checked unchanged. A general theorem proves its pointer-relation
+and observed-pointer premises cannot jointly hold for any target machine.
+Both original and derived theorem axiom reports are guarded. The compact map
+records one intentional stale-pointer refutation, null joint witness and zero
+selected witness credit; the row stays uncovered by an inhabited witness.
+Selected475/1259 and784open are unchanged. This is negative consistency evidence,
+not successful admission or native execution. Existing noRefs refutation checks
+retain their exact empty-heap classification, axioms and cardinality checks.
+Evidence: `/workspace/vy3-evidence/loop-stale-pointer-refutation-20261107`.
+All original producer waits, proof budgets, STOPs and final obligations remain.

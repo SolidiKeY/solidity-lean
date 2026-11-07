@@ -172,4 +172,33 @@ run_cmd do
       `Solidity.Backend.Passes.LoopReframedFailureControls ++ short
     let axes ← Lean.collectAxioms name
     Lean.logInfo m!"{name}: {axes}"
+
+-- Exact original private refutation; never register its premises as inhabited.
+example {target : Machine}
+    (pointers : PointerRepr LoopScopeControls.loopOut.st LoopScopeTrace.oldOnly 1 target)
+    (observed : (match target.mem 3 with
+      | .val value => some value.val | _ => none) = some 258) : False :=
+  (loopReframedPrivate% stale_pointer) pointers observed
+
+theorem stale_pointer_premises_impossible (target : Machine) :
+    ¬ (PointerRepr LoopScopeControls.loopOut.st LoopScopeTrace.oldOnly 1 target ∧
+      (match target.mem 3 with
+      | .val value => some value.val | _ => none) = some 258) := by
+  rintro ⟨pointers, observed⟩
+  exact (loopReframedPrivate% stale_pointer) pointers observed
+
+/-- info: 'Solidity.Backend.Passes.AuditLoopReframedFailure.stale_pointer_premises_impossible' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.AuditLoopReframedFailure.stale_pointer_premises_impossible
+/-- info: _private.Solidity.Backend.Passes.LoopReframedFailureControls.0.Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+run_cmd do
+  let name := (Lean.Name.num `_private.Solidity.Backend.Passes.LoopReframedFailureControls 0) ++
+    `Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer
+  let axes ← Lean.collectAxioms name
+  Lean.logInfo m!"{name}: {axes}"
 end Solidity.Backend.Passes.AuditLoopReframedFailure

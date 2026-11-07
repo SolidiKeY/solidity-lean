@@ -103,7 +103,7 @@
   "aggregate_selected": 475,
   "aggregate_remaining": 784,
   "joint_contract": "actual-shared-loop-output-and-shrinking-suffix-input-at-five-with-source-before-after",
-  "limits": "Fifteen public and two exact private original controls; both private helpers have no hypotheses, and the common joint retains actual Input/source/map obligations. The private stale_pointer refutation remains uncovered; no contradictory-premise witness credit. No native ByteWorld/emission, gas/ABI or full Source/G24 adequacy.",
+  "limits": "Fifteen public and two exact private original positive controls. stale_pointer now has checked exact-kernel and joint-premise impossibility evidence, but remains uncovered by an inhabited witness with zero positive credit. Its pointer representation and observed pointer cannot hold simultaneously. No private definition/supplemental credit. No native ByteWorld/emission, gas/ABI or full Source/G24 adequacy.",
   "checked_axioms": [
     "propext",
     "Classical.choice",
@@ -121,5 +121,24 @@
       "Classical.choice",
       "Quot.sound"
     ]
-  }
+  },
+  "intentional_refutations": [
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer",
+      "signature_sha256": "4221f4fad34ebe18e568ab3d48d3ab2afe444f9f41b9728ec8d72436ef63fa50",
+      "kernel_name": "_private.Solidity.Backend.Passes.LoopReframedFailureControls.0.Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer",
+      "classification": "checked-intentional-stale-pointer-refutation",
+      "premise_impossibility": "Solidity.Backend.Passes.AuditLoopReframedFailure.stale_pointer_premises_impossible",
+      "joint_witness": null,
+      "selected_witness_credit": 0,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "checked_refutation_names": [
+    "stale_pointer"
+  ]
 }
