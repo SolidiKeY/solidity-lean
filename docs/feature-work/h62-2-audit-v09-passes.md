@@ -1155,3 +1155,19 @@ Twelve available dependencies pass fresh serial checks. The first witness check 
 `LoopScopeWitness.lean` checks seventeen unchanged public controls and the actual private generic extraction rule at its full original telescope. Its joint supplies actual preparation Input, public loop-scope recognition, the real allocating body success, wrapped source success, positive source cost 3 and the distinct zero legacy metric. The source iteration witness remains the original finite `TLoop` argument: one allocating/rebinding body sets the condition false, rather than target execution being substituted as source semantics. A concrete preparation equality inhabits the private extraction hypothesis.
 
 Precise axiom reports include the full private kernel identity. Frozen whole-file visibility, signatures and disjoint accounting give 431 of 1,259 selected rows covered, leaving 828 open; supplemental/unselected/intentional-refutation accounting stays separate. The prior fresh source artifact is reused with recorded provenance; dependency kernel checking alone had received no row credit. No native ByteWorld/emission, gas/session resource or full Source/G24/lane adequacy is inferred. H44 bulk remains external and portable checks do not require it.
+
+
+Loop-prefix checkpoint: eighteen original public `LoopPrefixControls` rows now
+have exact frozen signature accounting and checked original-proof aliases in
+`tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean`. The common witness
+inhabits preparation Input and the reached failure/divergence Inputs at their
+respective actual source states. The original prefix effect, unreachable
+allocation cost, finite failing turn and nonterminating source proof remain
+distinct; internal revert/fault observations establish neither public ABI bytes
+nor native gas/resource adequacy. Private observer definitions receive no row
+credit. Selected accounting is 449/1259, leaving 810 open; supplemental rows
+remain separate. The memory-call intentional-refutation list again requires
+exactly one entry, with its existing null joint and zero-credit checks retained.
+Raw compatibility/axiom adjudication and checked ByteWorld realization with
+matching actual emission provenance remain producer waits. Bulk check/resource
+logs are external at `/workspace/vy3-evidence/loop-prefix-controls-20261107`.

@@ -157,7 +157,8 @@ class HeaderBoundaries(unittest.TestCase):
                     ('heap-boundary',14,3,'Solidity.Backend.Passes.AuditHeapBoundary.joint'),
                     ('reframed',11,0,'Solidity.Backend.Passes.AuditReframed.joint'),
                     ('reframed-triple',7,0,'Solidity.Backend.Passes.AuditReframedTriple.joint'),
-                    ('loop-scope',18,1,'Solidity.Backend.Passes.AuditLoopScope.joint')]
+                    ('loop-scope',18,1,'Solidity.Backend.Passes.AuditLoopScope.joint'),
+                    ('loop-prefix',18,0,'Solidity.Backend.Passes.AuditLoopPrefix.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -181,6 +182,7 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual({r['name'].rsplit('.',1)[-1] for r in mapping['rows'] if r['kind']=='private-exact-kernel-signature'},{'cell'+str(i) for i in range(17)})
                 self.assertEqual(mapping['private_axioms'],['propext','Quot.sound','Classical.choice'])
             if stem == 'memory-call':
+                self.assertEqual(len(mapping['intentional_refutations']),1)
                 self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'noRefs'})
                 self.assertEqual(set(mapping['checked_private_names']),{'first_some','second_some','final_some','source_get'})
                 self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
@@ -236,7 +238,7 @@ class HeaderBoundaries(unittest.TestCase):
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(431,828))
+        self.assertEqual((len(seen),1259-len(seen)),(449,810))
 
 
 
