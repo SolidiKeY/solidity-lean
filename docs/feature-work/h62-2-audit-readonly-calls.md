@@ -947,3 +947,92 @@ exclusion, axiom, sorry/native_decide or proof budget changed. Full original and
 inherited acceptance, joint witnesses, H121 Source/world/native-frame adequacy,
 compiler success and runtime gates remain open; historical Premises
 +80.254966536% STOP remains. No runtime pass, goal completion or publication.
+
+
+## Ten frozen/current EffectRules joint witnesses (2026-11-07)
+
+The same additive EffectRuleWitnesses client now proves joint inputs and applies
+all ten original EffectRules statements: of_same_ex, bind, sub, attempt, parent,
+pure, halt, st, locals and setLocals. The concrete Env, typed Bool locals and
+Source state are inhabited terms. Effect premises are proved for ALL locals and
+states; bind supplies the entire universally quantified Unit continuation, using
+the same first/next computations as the final application. This establishes
+premise satisfiability with original theorem applications, not compiler adequacy.
+
+The computations are actual Source EM primitives: emitting two ordered events,
+emitting then reverting with exact bytes, catching that failure while retaining
+the reached event, and changing locals. Four observation theorems distinguish
+events/locals from the journaled world tracked by Effect. EM.sub returns its
+inner locals alongside the value; the observation records that pair. This is
+not a deployed callback, ABI/body compiler bridge, general P1/G42.02 contract,
+gas/fork proof or compiler-success theorem. No supported-program exclusion or
+new premise is introduced. The module remains an unregistered additive audit
+fixture under tests; no production root or module map changed.
+
+Separate fresh isolated builds validate the exact c6f550e original dependency
+closure (24 project modules) and the current closure (29). The identical witness
+source compiles in BOTH; all ten original kernel type hashes match the original
+reviewed census in both, and all sixteen helper theorem axiom sets use only
+propext, Classical.choice and Quot.sound. These are two independent witnesses
+under their respective definitions, not a proof that changed model definitions
+are equivalent. Source snapshots, objects, queries, outputs and tools are sealed;
+no shared project-cache fallback or held Premises import is permitted.
+
+The final frozen gate passed in 263.208 seconds at 1686777856 bytes peak aggregate
+RSS; current passed in 242.363 seconds at 1626148864 bytes. Actual Lean 4.24.0 /
+Lake 5.0.0-src+797c613, explicit -j1 --tstack=131072, LEAN_NUM_THREADS=1,
+12 GiB virtual cap, 4 GiB reserve and no swap. Frozen/current elapsed times are
+not a before/after performance comparison. Bounded current KeySort separately
+passed, exit 0 and empty diagnostics, in 1.516 seconds. Historical Premises
++80.254966536% STOP remains; no unchanged stopped workload rerun or runtime pass.
+
+The checkout was adopted to coordinator master
+a8f684928fa085d8976ead33e3d0db30208e7a4f AFTER the stable proof runs; every
+current source/tool/log/object pin and the complete current dependency graph
+still matched. The receipt source head records the actual checking revision.
+The first frozen attempt reached the witness but failed its EM.sub observation
+(Unit instead of the actual value/inner-locals pair); the corrected per-file
+check and diagnostic passed before the two fresh final gates. That failure is
+preserved and is not a passing gate.
+
+Independent read-only finder and skeptic confirmed logical premise coverage.
+Finder identified toolchain digest resampling; skeptic independently found that
+and selection from a second live source read. The fixes retain the compared authenticated toolchain digest and
+select interfaces from the exact captured, hash-checked byte buffer. Both
+confirmed the fixes and exact accounting. Eleven external refusal/accounting
+controls pass, including snapshots, held imports, incomplete/duplicate/changed
+types, axiom records, mode/client substitution and collateral-entry changes.
+Neither reviewer ran Lean/server/tests or wrote files. Their reviews and the
+kernel evidence are separate artifacts.
+
+Coverage uses ONLY the two exact executed receipt hashes, re-parses their sealed
+probe logs, checks the same client bytes and exact original types, then updates
+ten pending originals. The generator reads its immutable Git baseline so it
+remains reproducible after the audit coverage file changes. A second invocation
+after the root update generated all four accounting outputs byte-identically. All other 782
+original rows and all 43 existing coverage entries are preserved. All 792
+identities remain: 45 joint witnesses (previously 35), three target-failure joint,
+45 intentional impossibility, 256 no-top-level-input, two V1 refutation/migration
+and 441 ordinary pending (previously 451). Three private-identity gaps and all
+nineteen signature-transport waits remain. No original statement, definition,
+axiom, exclusion, premise or proof budget was changed; no sorry/native_decide.
+Full original/inherited acceptance and H121 Source/world/native-frame adequacy
+remain open, as does owner compiler success/G42.04.
+
+P20's previously missing documentation reference is now actually resolved: its
+in-tree target matches the owner's exact published SHA256 and repair commit
+c9cf710a8459581006150a462b69ae8c4f0d13e0 is an ancestor. No P20 proof rerun is
+claimed. The initial pre-adoption docs check instead reported a V09 handoff reference
+to an absent external selected-heap witness. After adoption of a8f6849, the owner
+documentation explicitly names its external H44 source; the final GLOBAL DOCS
+GATE PASSES. That target was not materialized or proof-checked here. Both doc-only
+tickets are closed, with no cross-chain edit, waiver or proof inference.
+
+Raw paired proofs, accepted coverage delta, reviews and owner requests are under
+/workspace/h62-audit-readonly-calls/effect-rules/; pins are in
+`tests/h62/item2/audit-readonly-calls/effect-rules.sha256`. The committed checkers
+and coverage generator reproduce the evidence with the admitted artifacts.
+Receipt paths remain VM-specific; content verification is not independent SDK
+source certification. Next: continue remaining joint witnesses/refutations and
+live owner/type/source binding without treating these ten effect-algebra inputs
+as full compiler totality or the full H121 producer. No goal completion or push.
