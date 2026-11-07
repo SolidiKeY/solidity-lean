@@ -41,6 +41,8 @@ def check_headers(before,after,names):
 
 
 def main():
+    if not audit.MIGRATED:
+        raise ValueError("empty migrated consumer scope")
     p=argparse.ArgumentParser(description=__doc__);p.add_argument("--output",type=Path,required=True);p.add_argument("--before",required=True);args=p.parse_args()
     if not args.output.is_absolute():p.error("output must be absolute")
     args.output.mkdir(mode=0o700,exist_ok=False)
