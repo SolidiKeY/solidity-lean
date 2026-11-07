@@ -1975,4 +1975,28 @@ New interfaces: `readContractWithNormalizationV1`, `FunctionNormalizationRowV1`,
 
 Bounded real compiler/import controls link twelve clauses across the unchanged CRLF Origins fixture and additive pinned0.8.34 constructor/renamed-local/constant/duplicate fixture. Wrong spans, ordinals, source bytes/names, malformed AST and unsupported block-comment layouts refuse. Required exact clause multiplicities/refusals and negative coverage controls prevent silent scenario omission. Existing full-goal `bad` counterexamples are retained and axiom-audited, separately from source correspondence. New equality and retained-theorem axioms remain propext/Classical.choice/Quot.sound. Finder and skeptic found and repaired a carrier-linkage gap and optional-control-coverage gap; final read-only reviews found no concrete issue. They are not paired row judgments.
 
-Evidence: [checksum-bound manifest](dafny-ledger-transport-evidence-manifest.json), `/workspace/dafny-ledger-transport-20261107/control-final/`, `per-file/`, `PRESERVATION.json` and `REVIEWS.json`. Initial failures remain archived. MCP bridge stop leaves helpers; explicit birth-owned cleanup records and retires them before supervisor completion, with no survivor-guard relaxation. Systemd aggregate scope remains absent; original bounded fallback/resource guards remain. Small targeted checks do not establish the full performance matrix. All491 obligations and frozen270 remain; whole parity, typed selected-failure attribution, rendered/native/macOS/performance/scaling matrices, final library/TestSuite/timed gates and both independent judges per row remain unfinished. No integration, goal mutation or stopped-workload replay.
+The admission-ledger evidence is archived privately at `SolidiKeY/solidity-lean-coord@616b94a5446df63086036407104cc593cb74bc35`, under `evidence/solidity-dafny-20261105/dafny-parity/dafny-ledger-transport-20261107/` (H145). Initial failures remain archived. MCP bridge stop leaves helpers; explicit birth-owned cleanup records and retires them before supervisor completion, with no survivor-guard relaxation. Systemd aggregate scope remains absent; original bounded fallback/resource guards remain. Small targeted checks do not establish the full performance matrix. All491 obligations and frozen270 remain; whole parity, typed selected-failure attribution, rendered/native/macOS/performance/scaling matrices, final library/TestSuite/timed gates and both independent judges per row remain unfinished. No integration, goal mutation or stopped-workload replay.
+
+
+### Typed selected-postcondition foundation
+
+The authorized shared `specPiecesWithContextV1`, `specModalWithContextV1` and
+`specObligationWithContextV1` computations retain the actual typed post context,
+named output context and clause boundaries. Legacy entry points project the
+original results; each companion exposes a forget equality. Existing source
+admission, normalization, signatures and budgets remain unchanged.
+
+`Fml.retainedFailedPostSlotV1_of_true` connects a checked numeric post slot in
+the exact retained typed formula to a successful typed execution and a false
+clause at the same candidate. The split count is explicit; this is not a
+source-clause identity. Named-clause witnesses additionally require exact
+terminal-slot/context equality.
+
+Source span publication remains unavailable. `SpecExpr.fml` and other existing
+source compiler helpers are opaque partial definitions: native execution alone
+cannot supply their kernel equality. The experimental metadata diagnostic
+refuses at that boundary. Q-REL-PARTIAL-COMPILER-01 asks about a separately
+reviewed producer repair; it does not reopen the answered reader/context
+factoring authorizations. No located diagnostic, positioned trace, completed
+parity row or original final-gate pass follows from this foundation. New
+receipts and reviews are kept in the private evidence repository under H145.

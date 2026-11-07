@@ -1,5 +1,6 @@
 import Solidity.Frontend.SpecOriginsV1
 import Solidity.Frontend.Testing
+import Solidity.Tools.VerifierMetadata
 
 /-!
 # Retained-certificate metadata ingress, V1
@@ -325,6 +326,260 @@ def importedCanonicalSourceClauseV1? (N : Lean.Name) (rowIndex functionIndex cla
 theorem importedCanonicalSourceClauseV1_forget (metadata : ImportedCanonicalSourceClauseV1) :
     metadata.canonical.forget = .ok metadata.canonical.contract :=
   metadata.canonical.contractEquation
+
+/-- The typed ensures table used by the existing specification elaborator.
+Constructors are not accepted by SpecProblem.of and remain unavailable below. -/
+def importedEnsuresTableV1? (C : Contract) (name : String) : Option (List SpecExpr) := do
+  let declaration ← Semantics.lookupBy name C.funs
+  pure declaration.spec.ensures
+
+/-- Check one actual ensures ordinal at the supplied (already retained) inputs.
+The original typed formula, premise, update, call, framing and loop fuel are
+those of SpecProblem.of/Fml.postFails. A halt, unknown shape or non-failing
+selected clause returns false. This performs no candidate search. -/
+def selectedEnsuresFailsV1 (C : Contract) (name : String) (ensuresOrdinal : Nat)
+    (domain : TDom) (values : List (Var × Semantics.CallValue))
+    (state : State C []) : Bool :=
+  match Tools.SpecProblem.of C name with
+  | .error _ => false
+  | .ok problem =>
+    if ensuresOrdinal >= problem.decl.spec.ensures.length then false else
+    let ⟨_, current, body⟩ := Fml.peel values state problem.fml
+    Fml.enteredPostFailsV1 domain problem.posts.length (C.inv.length + ensuresOrdinal) current body
+
+/-- Semantic failure at the same retained inputs: the entry is true and the
+existing typed update/call reaches a concrete post-state with an exact false
+slot. The index is the actual invariant prefix plus the selected ensures ordinal. -/
+def IndexedSpecPostFailureV1 (C : Contract) (name : String) (ensuresOrdinal : Nat)
+    (_domain : TDom) (values : List (Var × Semantics.CallValue)) (state : State C []) : Prop :=
+  ∃ problem : Tools.SpecProblem C,
+    Tools.SpecProblem.of C name = .ok problem ∧
+    ensuresOrdinal < problem.decl.spec.ensures.length ∧
+    let ⟨_, current, body⟩ := Fml.peel values state problem.fml
+    Fml.EnteredFailedPostSlotV1 problem.posts.length (C.inv.length + ensuresOrdinal) current body
+
+/-- Convert a checked actual failure computation to the semantic false-slot
+witness. This theorem uses no premise about any other postcondition failing. -/
+theorem indexedSpecPostFailureV1_of_true (C : Contract) (name : String) (ensuresOrdinal : Nat)
+    (domain : TDom) (values : List (Var × Semantics.CallValue)) (state : State C [])
+    (checked : selectedEnsuresFailsV1 C name ensuresOrdinal domain values state = true) :
+    IndexedSpecPostFailureV1 C name ensuresOrdinal domain values state := by
+  cases problemResult : Tools.SpecProblem.of C name with
+  | error reason =>
+    simp only [selectedEnsuresFailsV1, problemResult] at checked
+    cases checked
+  | ok problem =>
+    by_cases bound : ensuresOrdinal < problem.decl.spec.ensures.length
+    · refine ⟨problem, problemResult, bound, ?_⟩
+      have selected : (let ⟨_, current, body⟩ := Fml.peel values state problem.fml
+          Fml.enteredPostFailsV1 domain problem.posts.length (C.inv.length + ensuresOrdinal) current body) = true := by
+        simpa only [selectedEnsuresFailsV1, problemResult, if_neg (Nat.not_le_of_gt bound)] using checked
+      exact Fml.enteredFailedPostSlotV1_of_true domain problem.posts.length (C.inv.length + ensuresOrdinal)
+        (Fml.peel values state problem.fml).2.1 (Fml.peel values state problem.fml).2.2 selected
+    · have outside : ensuresOrdinal >= problem.decl.spec.ensures.length := Nat.le_of_not_gt bound
+      simp only [selectedEnsuresFailsV1, problemResult, if_pos outside] at checked
+      cases checked
+
+/-- A concrete terminal-slot equality to the clause interpreted in the actual
+compiler-produced named context. No source string selects a terminal clause. -/
+def IndexedSpecPostMatchesV1 (C : Contract) (name : String) (ordinal : Nat)
+    (values : List (Var × Semantics.CallValue)) (state : State C []) (family : TypedPostFamilyV1 C) : Prop :=
+  match Tools.SpecProblem.of C name with
+  | .error _ => False
+  | .ok problem =>
+    let ⟨_, _, body⟩ := Fml.peel values state problem.fml
+    Fml.EnteredSlotMatchesV1 problem.posts.length (C.inv.length + ordinal) family body
+
+/-- Successful typed execution refutes the particular compiled named clause
+in its actual output context, at the original retained inputs. -/
+def NamedSpecPostFailureV1 (C : Contract) (name : String) (ordinal : Nat)
+    (_domain : TDom) (values : List (Var × Semantics.CallValue)) (state : State C [])
+    (family : TypedPostFamilyV1 C) : Prop :=
+  ∃ problem : Tools.SpecProblem C, Tools.SpecProblem.of C name = .ok problem ∧
+    ordinal < problem.decl.spec.ensures.length ∧
+    let ⟨_, current, body⟩ := Fml.peel values state problem.fml
+    Fml.EnteredNamedPostFailureV1 family current body
+
+theorem namedSpecPostFailureV1_of_indexed (C : Contract) (name : String) (ordinal : Nat)
+    (domain : TDom) (values : List (Var × Semantics.CallValue)) (state : State C [])
+    (family : TypedPostFamilyV1 C)
+    (failed : IndexedSpecPostFailureV1 C name ordinal domain values state)
+    (matched : IndexedSpecPostMatchesV1 C name ordinal values state family) :
+    NamedSpecPostFailureV1 C name ordinal domain values state family := by
+  rcases failed with ⟨problem, equation, bound, entered⟩
+  refine ⟨problem, equation, bound, ?_⟩
+  have slot : (let ⟨_, _, body⟩ := Fml.peel values state problem.fml
+      Fml.EnteredSlotMatchesV1 problem.posts.length (C.inv.length + ordinal) family body) := by
+    simpa only [IndexedSpecPostMatchesV1, equation] using matched
+  exact Fml.enteredNamedPostFailureV1_of_slot problem.posts.length (C.inv.length + ordinal) family
+    (Fml.peel values state problem.fml).2.1 (Fml.peel values state problem.fml).2.2 entered slot
+
+private def successfulPayloadV1? (expression : Expr) : TermElabM (Option Expr) := do
+  let value ← withTransparency .all (whnf expression)
+  let (head, arguments) := value.getAppFnArgs
+  if head == ``Except.ok || head == ``Option.some then return arguments.back?
+  else return none
+
+initialize registerTraceClass `Solidity.Frontend.selectedPostconditionV1
+
+/-- Retain a closed theorem only after the existing kernel/trust ceiling checks.
+The caller never supplies a proof to the public metadata publisher. -/
+private def retainSelectedCertificateV1? (namePrefix : Lean.Name) (type proof : Expr) :
+    TermElabM (Option Lean.Name) := do
+  let type ← instantiateMVars type
+  let proof ← instantiateMVars proof
+  if [type, proof].any (fun e => e.hasMVar || e.hasFVar || e.hasSorry || e.hasLevelMVar) then return none
+  unless ← isProp type do return none
+  let options ← getOptions
+  let current := maxHeartbeats.get options
+  let limit := if current == 0 then 100000 else min current 100000
+  let name ← mkFreshUserName namePrefix
+  let declaration := Declaration.thmDecl { name, levelParams := [], type, value := proof }
+  try
+    withOptions (fun _ => debug.skipKernelTC.set (maxHeartbeats.set options limit) false) (addDecl declaration)
+    let axioms ← collectAxioms name
+    unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do return none
+    pure (some name)
+  catch _ => pure none
+
+/-- Experimental diagnostic evidence, not failed-source publication. Exact
+retained inputs, typed execution and named-clause matching are all mandatory.
+Opaque partial source compilers can prevent the required kernel equalities;
+that case remains unavailable. No source span or certified-failed-clause flag
+is emitted and no second search is used. -/
+def checkedRetainedPostSlotV1? (N : Lean.Name) (rowIndex functionIndex clauseIndex : Nat)
+    (fixture : Json) (sourceName : String) (bytes : ByteArray)
+    (span : YulJson.SourceSpan) (report : Json) : CommandElabM (Option Json) :=
+  withScope (fun scope => { scope with opts := debug.skipKernelTC.set scope.opts false }) do
+    let some source ← importedCanonicalSourceClauseV1? N rowIndex functionIndex clauseIndex
+        fixture sourceName bytes span | return none
+    unless source.canonical.clause.1 == "ensures" do return none
+    let some retained ← retainedCounterexampleMetadataV1? N rowIndex fixture sourceName bytes report
+      | return none
+    -- The same source ID/signature is necessary but never replaces exact-goal checking.
+    unless retained.row.legacy.sourceId == source.row.sourceId &&
+        retained.row.legacy.name == source.row.name &&
+        retained.row.legacy.sourceSignature == source.row.sourceSignature do return none
+    liftTermElabM do
+      let saved ← Term.saveState
+      let messages ← Core.getMessageLog
+      let phase ← IO.mkRef "entry"
+      let result ← tryCatchRuntimeEx (do
+        let candidate := retained.candidate
+        unless candidate.contract.isConstOf N do return none
+        let ensures := source.canonical.functionData.specClauses.filter (·.1 == "ensures")
+        let ordinal := (source.canonical.functionData.specClauses.take clauseIndex).filter (·.1 == "ensures") |>.length
+        let mut expanded : List Expr := []
+        for (_, text) in ensures do
+          let parsed ← ofExcept (Parser.runParserCategory source.admission.context.env `spec_expr text)
+          let expression ← Term.withoutErrToSorry <| Term.elabTerm (← `(spec!($(⟨parsed⟩):spec_expr)))
+            (some (mkConst ``SpecExpr))
+          Term.synthesizeSyntheticMVarsNoPostponing
+          expanded := expanded ++ [← instantiateMVars expression]
+        phase.set "typed-table"
+        let table ← mkListLit (mkConst ``SpecExpr) expanded
+        let actual ← mkAppM ``importedEnsuresTableV1? #[candidate.contract, toExpr source.row.name]
+        let expected ← mkAppM ``Option.some #[table]
+        unless ← isDefEq actual expected do return none
+        let some tableCertificate ← retainSelectedCertificateV1? (N ++ `selectedEnsuresTableV1)
+            (← mkEq actual expected) (← mkEqRefl expected) | return none
+        phase.set "typed-formula"
+        let problem ← withTransparency .all (whnf (← mkAppM ``Tools.SpecProblem.of #[candidate.contract, toExpr source.row.name]))
+        let (``Except.ok, args) := problem.getAppFnArgs | do
+          phase.set ("typed-formula reader: " ++ (← ppExpr problem).pretty)
+          return none
+        let some problem := args.back? | return none
+        let formula ← mkAppM ``Tools.SpecProblem.fml #[problem]
+        unless ← isDefEq formula candidate.formula do
+          phase.set ("typed-formula mismatch: " ++ (← ppExpr formula).pretty ++ " <> " ++ (← ppExpr candidate.formula).pretty)
+          return none
+        let some formulaCertificate ← retainSelectedCertificateV1? (N ++ `selectedFormulaV1)
+            (← mkEq formula candidate.formula) (← mkEqRefl candidate.formula) | return none
+        let some valuesCertificate ← retainSelectedCertificateV1? (N ++ `selectedValuesV1)
+            (← inferType candidate.valuesEquation) candidate.valuesEquation | return none
+        phase.set "selected-computation"
+        let evaluated ← mkAppM ``selectedEnsuresFailsV1 #[candidate.contract, toExpr source.row.name,
+          toExpr ordinal, candidate.domain, candidate.values, candidate.state]
+        let failureType ← mkEq evaluated (mkConst ``Bool.true)
+        let failure ← mkDecideProof failureType
+        let some failureCertificate ← retainSelectedCertificateV1? (N ++ `selectedPostFailureV1)
+            failureType failure | return none
+        phase.set "semantic-witness"
+        let semanticType ← mkAppM ``IndexedSpecPostFailureV1 #[candidate.contract, toExpr source.row.name,
+          toExpr ordinal, candidate.domain, candidate.values, candidate.state]
+        let semanticProof ← mkAppM ``indexedSpecPostFailureV1_of_true #[candidate.contract,
+          toExpr source.row.name, toExpr ordinal, candidate.domain, candidate.values, candidate.state,
+          mkConst failureCertificate]
+        let some semanticCertificate ← retainSelectedCertificateV1? (N ++ `selectedPostSemanticV1)
+            semanticType semanticProof | return none
+        phase.set "actual-typed-context"
+        let some compilation ← successfulPayloadV1? (← mkAppM ``specObligationWithContextV1
+            #[candidate.contract, toExpr source.row.name]) | return none
+        let compiledFormula ← mkAppM ``SpecObligationContextV1.formula #[compilation]
+        unless ← isDefEq compiledFormula candidate.formula do return none
+        let some contextFormulaCertificate ← retainSelectedCertificateV1? (N ++ `selectedContextFormulaV1)
+            (← mkEq compiledFormula candidate.formula) (← mkEqRefl candidate.formula) | return none
+        let pieces ← mkAppM ``SpecObligationContextV1.pieces #[compilation]
+        let postContext ← mkAppM ``SpecPiecesContextV1.postContext #[pieces]
+        let compiledEnsures ← mkAppM ``SpecPiecesContextV1.ensures #[pieces]
+        let some selectedRead ← successfulPayloadV1? (← mkAppM ``List.get?
+            #[compiledEnsures, toExpr ordinal]) | return none
+        let some selectedExpression := expanded[ordinal]? | return none
+        phase.set "selected-typed-compilation"
+        let actualRead ← mkAppM ``SpecExpr.fml #[candidate.contract, postContext, selectedExpression]
+        let expectedRead ← mkAppM ``Except.ok #[selectedRead]
+        unless ← isDefEq actualRead expectedRead do return none
+        let some compilationCertificate ← retainSelectedCertificateV1? (N ++ `selectedCompilationV1)
+            (← mkEq actualRead expectedRead) (← mkEqRefl expectedRead) | return none
+        let modal ← mkAppM ``SpecObligationContextV1.modal #[compilation]
+        let names ← mkAppM ``SpecModalContextV1.names #[modal]
+        let interpreted := mkApp selectedRead names
+        let some selectedClause ← successfulPayloadV1? interpreted | return none
+        let expectedInterpretation ← mkAppM ``Except.ok #[selectedClause]
+        let some interpretationCertificate ← retainSelectedCertificateV1? (N ++ `selectedInterpretationV1)
+            (← mkEq interpreted expectedInterpretation) (← mkEqRefl expectedInterpretation) | return none
+        let contextEquation ← mkAppM ``SpecModalContextV1.contextEquation #[modal]
+        let terminalClause ← mkEqNDRec (mkApp (mkConst ``Fml) candidate.contract) selectedClause contextEquation
+        let family ← mkAppM ``typedPostFamilyV1 #[terminalClause]
+        phase.set "exact-terminal-slot"
+        let matchesType ← mkAppM ``IndexedSpecPostMatchesV1 #[candidate.contract, toExpr source.row.name,
+          toExpr ordinal, candidate.values, candidate.state, family]
+        let matchesProof ← Term.withoutErrToSorry <| Term.elabTerm (← `(by exact ⟨_, rfl, rfl⟩)) (some matchesType)
+        Term.synthesizeSyntheticMVarsNoPostponing
+        let some matchesCertificate ← retainSelectedCertificateV1? (N ++ `selectedSlotMatchesV1)
+            matchesType (← instantiateMVars matchesProof) | return none
+        phase.set "named-semantic-witness"
+        let namedType ← mkAppM ``NamedSpecPostFailureV1 #[candidate.contract, toExpr source.row.name,
+          toExpr ordinal, candidate.domain, candidate.values, candidate.state, family]
+        let namedProof ← mkAppM ``namedSpecPostFailureV1_of_indexed #[candidate.contract,
+          toExpr source.row.name, toExpr ordinal, candidate.domain, candidate.values, candidate.state,
+          family, mkConst semanticCertificate, mkConst matchesCertificate]
+        let some namedCertificate ← retainSelectedCertificateV1? (N ++ `selectedNamedFailureV1)
+            namedType namedProof | return none
+        let certificates := [retained.certificateDeclaration, tableCertificate, formulaCertificate,
+          valuesCertificate, failureCertificate, semanticCertificate, contextFormulaCertificate,
+          compilationCertificate, interpretationCertificate, matchesCertificate, namedCertificate]
+        let audited ← certificates.mapM fun name => do
+          let axioms ← collectAxioms name
+          pure (Json.mkObj [("declaration", toJson name.toString),
+            ("axioms", toJson (axioms.map Name.toString))])
+        pure (some (Json.mkObj [
+          ("schemaVersion", toJson (1 : Nat)), ("certifiedSlot", toJson true),
+          ("kind", toJson "retained-numeric-post-slot-v1"),
+          ("sourceAttribution", toJson "unavailable: kernel-checkable source compiler correspondence pending"),
+          ("source", toJson sourceName), ("sourceSha256", toJson source.origins.sourceSha256),
+          ("sourceId", toJson source.row.sourceId), ("signature", toJson source.row.sourceSignature),
+          ("canonicalClauseIndex", toJson clauseIndex), ("rawClauseOrdinal", toJson source.rawOrdinal),
+          ("ensuresOrdinal", toJson ordinal),
+          ("certificates", toJson audited)])))
+        fun error => do
+          phase.set ("exception: " ++ (← error.toMessageData.toString))
+          pure none
+      if result.isNone then
+        saved.restore
+        trace[Solidity.Frontend.selectedPostconditionV1] "unavailable at {(← phase.get)}"
+      else Core.setMessageLog messages
+      return result
 
 elab_rules : command
   | `(solc_import_origins_v1 $path:str hash $expected:num as $N:ident) => do

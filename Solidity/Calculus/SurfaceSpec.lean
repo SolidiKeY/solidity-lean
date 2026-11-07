@@ -591,24 +591,42 @@ def assignableFml (ctx : SpecCtx C) (locs : List SpecLoc) : Except String (List 
 
 variable [FreshNames]
 
-/-- **The pieces of the obligation of `f`**, solkey's `specifiedProblemText`:
-the premises every run meets by construction (`R`, `L` and what `msg.value`
-is, `M`), the premises the specification states (`I ∧ requires`), the
-update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
-`msg.value`), the call
-`T result; result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
-`A` one by one (a counterexample search names the one that fails).  For
-`constructor`, the deployment's (the module docstring).  The call is
-elaborated scoped, from the parameters in scope (newest first), each
-statement typed where it is read (`SProg`): the scoped obligation places it
-past the locals the update declares (`SProg.chain`, `Calculus/Spec.lean`). -/
-def specPieces (f : String) :
-    Except String (List (NRead C) × List (NRead C) × List (NUpdElem C) × SProg C × List (NRead C)) := do
+/-- Keep successful metadata from the SAME typed computation; proof fields
+are erased and no second compiler traversal is performed. -/
+def rememberSpecResultV1 {α : Type} (result : Except String α) :
+    Except String { value : α // result = .ok value } :=
+  match _h : result with
+  | .error reason => .error reason
+  | .ok value => .ok ⟨value, rfl⟩
+
+omit [FreshNames] in
+theorem rememberSpecResultV1_forget {α : Type} (result : Except String α) :
+    (rememberSpecResultV1 result).map Subtype.val = result := by
+  cases result <;> rfl
+
+/-- Actual typed post-compilation provenance, captured before its contexts and
+clause boundaries would be discarded. No source text or candidate is accepted. -/
+structure SpecPiecesContextV1 (C : Contract) (name : String) where
+  legacy : List (NRead C) × List (NRead C) × List (NUpdElem C) × SProg C × List (NRead C)
+  declaration : FunDecl
+  declarationEquation : (if name == "constructor" then C.ctor else lookupBy name C.funs) = some declaration
+  postContext : SpecCtx C
+  invariants : List (NRead C)
+  ensures : List (NRead C)
+  frame : List (NRead C)
+  ensuresEquation : declaration.spec.ensures.mapM (SpecExpr.fml C postContext) = .ok ensures
+  postsEquation : legacy.2.2.2.2 = invariants ++ ensures ++ frame
+
+def specPiecesWithContextV1 (f : String) :
+    Except String (SpecPiecesContextV1 C f) := do
   -- `constructor` names the contract's constructor (`Contract.ctor`)
   let ctor := f == "constructor"
-  let some d := if ctor then C.ctor else lookupBy f C.funs
-    | throw (if ctor then "the contract declares no constructor: an implicit one has no obligation"
-      else s!"{f} is not a function of the contract")
+  let chosen ← match h : (if ctor then C.ctor else lookupBy f C.funs) with
+    | none => throw (if ctor then "the contract declares no constructor: an implicit one has no obligation"
+        else s!"{f} is not a function of the contract")
+    | some declaration => pure (⟨declaration, h⟩ : { value : FunDecl //
+        (if ctor then C.ctor else lookupBy f C.funs) = some value })
+  let d := chosen.val
   if d.spec.skip then throw s!"{f} is marked `skip`: it has no obligation"
   let Γ ← d.paramCtx
   let ps := d.params.filterMap fun (n, T) => match T with
@@ -644,7 +662,8 @@ def specPieces (f : String) :
   let post : SpecCtx C := { pre with ensures := true, result := res, rets := rets }
   let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [], refs := [] })
   let reqs ← d.spec.requires.mapM (SpecExpr.fml C pre)
-  let enss ← d.spec.ensures.mapM (SpecExpr.fml C post)
+  let ensured ← rememberSpecResultV1 (d.spec.ensures.mapM (SpecExpr.fml C post))
+  let enss := ensured.val
   let frame ← match d.spec.assignable with
     | some locs =>
       assignableFml C { post with storage := .pv oldVar, ledger := some oldNetVar, result := none } locs
@@ -688,11 +707,34 @@ def specPieces (f : String) :
     (d.spec.assignable.getD []).flatMap SpecLoc.names
   -- a deployment assumes no invariant and no layout: both are of the
   -- storage it discards (solkey's has no `CInv(storage, net)` premise)
-  pure ((if Γ.any (fun (_, t) => t matches .alias _ | .mem _) then
+  let legacy := ((if Γ.any (fun (_, t) => t matches .alias _ | .mem _) then
         [NRead.refInputs (ECtx.toNCtx Γ)] else []) ++
       ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++
       (if ctor then [] else layoutFmls C read) ++ [msgValue],
     (if ctor then [] else inv) ++ reqs, U, P, inv ++ enss ++ frame)
+  pure {
+    legacy, declaration := d, declarationEquation := chosen.property,
+    postContext := post, invariants := inv, ensures := enss, frame,
+    ensuresEquation := ensured.property, postsEquation := rfl }
+
+/-- **The pieces of the obligation of `f`**, solkey's `specifiedProblemText`:
+the premises every run meets by construction (`R`, `L` and what `msg.value`
+is, `M`), the premises the specification states (`I ∧ requires`), the
+update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
+`msg.value`), the call
+`T result; result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
+`A` one by one (a counterexample search names the one that fails).  For
+`constructor`, the deployment's (the module docstring).  The call is
+elaborated scoped, from the parameters in scope (newest first), each
+statement typed where it is read (`SProg`): the scoped obligation places it
+past the locals the update declares (`SProg.chain`, `Calculus/Spec.lean`). -/
+def specPieces (f : String) :
+    Except String (List (NRead C) × List (NRead C) × List (NUpdElem C) × SProg C × List (NRead C)) :=
+  (specPiecesWithContextV1 C f).map (·.legacy)
+
+/-- The legacy result drops only the new provenance. -/
+theorem specPiecesWithContextV1_forget (f : String) :
+    (specPiecesWithContextV1 C f).map (·.legacy) = specPieces C f := rfl
 
 end Compile
 
