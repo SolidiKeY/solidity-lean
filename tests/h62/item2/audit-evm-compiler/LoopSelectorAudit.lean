@@ -1,10 +1,11 @@
 import tests.h62.item2.«audit-evm-compiler».SelectorAudit
 import Solidity.Evm.MemoryCompileExamples
 
-/-! Complete joint premise packages for the five remaining Compiler interfaces.
+/-! Binder-level satisfiability only for five unchanged Compiler interfaces.
 The nonempty loop fixtures are compiled by the unchanged lower compilers.
-The construction output is merely typed data: no Rep truth or source-success
-claim follows from the original equivalence or its premise witness. -/
+All original binders are jointly instantiated. This does not show that Input,
+Room or Rep is satisfiable; they occur in equivalence conclusions. The
+construction output is merely typed data, not a source-success witness. -/
 namespace Solidity.H62.EvmCompilerAudit.LoopSelectors
 open Evm
 open Evm.Memory.CompileExamples

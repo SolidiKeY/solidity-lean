@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
 """Focused old persisted metadata observations; no public/semantic acceptance."""
-import argparse,json,pathlib,sys
+import argparse,functools,json,pathlib,sys
 sys.dont_write_bytecode=True
 import interfaces
 name=interfaces.expr_dag.name
 
+def validation_input_errors(function):
+    """Malformed records/probes have one public error type; preserve the cause."""
+    @functools.wraps(function)
+    def checked(*args,**kwargs):
+        try:
+            return function(*args,**kwargs)
+        except (KeyError,TypeError,IndexError,AttributeError) as error:
+            raise ValueError(f"{function.__name__}: malformed validation input: {error}") from error
+    return checked
+
 def nat(x):return type(x) is int and x>=0
 def optional_name(x):
     if x is not None:name(x)
+@validation_input_errors
 def inspect(raw,module):
     rows=[json.loads(line) for line in pathlib.Path(raw).read_text().splitlines()]
     if len(rows)<2 or rows[0].get('record')!='header' or rows[-1].get('record')!='complete':raise ValueError('incomplete metadata snapshot')
     h,f=rows[0],rows[-1];wanted=interfaces.module_name(module)
-    if type(h.get('schema')) is not int or h['schema']!=1 or h.get('loaded_extensions') is not True or h.get('import_all') is not True or h.get('import_level')!='private':raise ValueError('unsupported schema/import/extension initialization')
+    if type(h.get('schema')) is not int or h['schema']!=1 or h.get('loaded_extensions') is not True or h.get('import_all') is not True or h.get('import_level')!='private':raise ValueError('unsupported schema/import/self-reported extension flag')
     if any(row.get('module')!=wanted for row in rows):raise ValueError('module mismatch')
     groups={'declaration':[],'class':[],'instance':[],'default_instance':[]};seen=set()
     for row in rows[1:-1]:
@@ -44,6 +55,7 @@ def inspect(raw,module):
     if f.get('migration_acceptance') is not False:raise ValueError('unsupported acceptance claim')
     return dict(schema_version=1,module=module,header=h,footer=f,records=groups,migration_acceptance=False)
 
+@validation_input_errors
 def seal(raw,probe_path,module):
     raw=pathlib.Path(raw).resolve();probe=interfaces.validate_probe(probe_path)
     if 'version 4.24.0,' not in probe['lean']:raise ValueError('old metadata observer only')
@@ -55,9 +67,10 @@ def seal(raw,probe_path,module):
     bound=probe['probe_outputs_after'].get(str(raw))
     if probe.get('probe_output_freshness_required') is not True or not bound or bound['sha256']!=interfaces.digest(raw) or bound['bytes']!=raw.stat().st_size:raise ValueError('unbound metadata bytes')
     result=inspect(raw,module)
-    result.update(raw=str(raw),raw_sha256=interfaces.digest(raw),probe=str(pathlib.Path(probe_path).resolve()),probe_sha256=interfaces.digest(probe_path),lean=probe['lean'],lake=probe['lake'],validator_sha256=interfaces.digest(__file__),limitation='Focused old persisted metadata and initialized-state observations only. Not all attributes, public classification, semantic proof, new compatibility or performance acceptance. Unsafe IO initialization is external to the model and proofs.')
+    result.update(raw=str(raw),raw_sha256=interfaces.digest(raw),probe=str(pathlib.Path(probe_path).resolve()),probe_sha256=interfaces.digest(probe_path),lean=probe['lean'],lake=probe['lake'],validator_sha256=interfaces.digest(__file__),limitation='Focused old persisted metadata observations; loaded_extensions is a self-reported flag and fixture controls separately corroborate initialization behavior. Not all attributes, public classification, semantic proof, new compatibility or performance acceptance. Unsafe IO initialization is external to the model and proofs.')
     return result
 
+@validation_input_errors
 def check_fixture(report,compile_path):
     compiled=interfaces.validate_probe(compile_path);observed=json.loads(pathlib.Path(report['probe']).read_text())
     if (compiled['lean'],compiled['lake'])!=(report['lean'],report['lake']):raise ValueError('fixture toolchain mismatch')
@@ -65,6 +78,15 @@ def check_fixture(report,compile_path):
     if len(outputs)!=1:raise ValueError('fixture compile coverage')
     for path,bound in outputs.items():
         if interfaces.digest(path)!=bound['sha256'] or observed['probe_sources_before'].get(path)!=bound['sha256']:raise ValueError('fixture compile/inspection binding')
+    cases=check_fixture_records(report)
+    return dict(status='pass',compile_probe_sha256=interfaces.digest(compile_path),cases=cases,scope='finite fixture observations only; header initialization flag is self-reported; no theorem/API acceptance')
+
+@validation_input_errors
+def check_fixture_records(report):
+    """Finite behavioral checks corroborate initialization; the header cannot."""
+    declarations=report['records']['declaration']
+    if len(declarations)!=18:
+        raise ValueError('fixture declaration count must be 18')
     ds={d['display_name']:d for d in report['records']['declaration']};es={e['entry']['display_name']:e['entry'] for e in report['records']['instance']};prefix='H62.MigrateYul.MetadataFixture.'
     expected={'global17':(17,'global',False),'global63':(63,'global',False),'private11':(11,'global',True),'Scoped.scoped41':(41,'scoped',False)}
     if set(es)!={prefix+k for k in expected}:raise ValueError('fixture serialized instance coverage')
@@ -80,8 +102,9 @@ def check_fixture(report,compile_path):
     classes=report['records']['class'];defaults=report['records']['default_instance']
     if len(classes)!=1 or classes[0]['name']!=ds[prefix+'Marker']['name'] or classes[0]['out_parameters']!=[]:raise ValueError('fixture class entry mismatch')
     if len(defaults)!=1 or defaults[0]['priority']!=7 or defaults[0]['instance_name']!=ds[prefix+'global17']['name'] or defaults[0]['class_name']!=classes[0]['name']:raise ValueError('fixture default entry mismatch')
-    return dict(status='pass',compile_probe_sha256=interfaces.digest(compile_path),cases=['global priorities17/63','private priority11 retained','scoped priority41 retained but inactive','local97 declaration retained without persistent attribute','default priority7','class/protected/private flags'],scope='finite fixture observations only; no theorem/API acceptance')
+    return ['global priorities17/63','private priority11 retained','scoped priority41 retained but inactive','local97 declaration retained without persistent attribute','default priority7','class/protected/private flags']
 
+@validation_input_errors
 def check_original_coverage(report,summary_path):
     original=json.loads(pathlib.Path(summary_path).read_text())
     if original['module']!=report['module']:raise ValueError('kernel summary module mismatch')
