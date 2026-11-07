@@ -1,0 +1,12 @@
+--- a/tests/h62/item6/migrate-solkey/StringApiControls.lean
++++ b/tests/h62/item6/migrate-solkey/StringApiControls.lean
+@@ -1,7 +1,8 @@
+ module
+ 
+ import all Init.Data.String.Basic
+-import Init.Data.String.Lemmas
++import Init.Data.String.Lemmas.TakeDrop
++import Init.Data.String.Lemmas.Pattern.TakeDrop.String
+ 
+ public section
+ 

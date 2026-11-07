@@ -11,6 +11,10 @@ async function waitForGroup(child,{deadline=Date.now()+1000,kill=false}={}){
 }
 async function waitForClose(child,{closed=trackChild(child),kill=false,timeoutMs=1000,deadline=Date.now()+timeoutMs}={}){
  if(kill&&(child.ownedGroup||child.pid&&child.exitCode===null&&child.signalCode===null))terminateTree(child);
- let timer;try{await Promise.race([closed,new Promise((resolve,reject)=>{timer=setTimeout(()=>reject(new Error('Owned child closure was not confirmed before shutdown deadline')),Math.max(0,deadline-Date.now()));})]);await waitForGroup(child,{deadline});}finally{clearTimeout(timer);}
+ // A private-session descendant may retain stdio after its root exits. Retire
+ // that owned group before waiting for pipe closure, never treating exit as close.
+ let timer,onExit;
+ const exitFailure=new Promise((resolve,reject)=>{if(!child.ownedGroup)return;onExit=()=>{try{if(groupMembers(child).some(running))terminateTree(child);}catch(error){reject(error);}};if(child.exitCode!=null||child.signalCode!=null)onExit();else child.once('exit',onExit);});
+ try{await Promise.race([closed,exitFailure,new Promise((resolve,reject)=>{timer=setTimeout(()=>reject(new Error('Owned child closure was not confirmed before shutdown deadline')),Math.max(0,deadline-Date.now()));})]);await waitForGroup(child,{deadline});}finally{clearTimeout(timer);if(onExit)child.removeListener('exit',onExit);}
 }
 module.exports={trackChild,waitForClose,waitForGroup};
