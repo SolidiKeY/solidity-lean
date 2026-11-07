@@ -300,3 +300,32 @@ statement, budget, original ledger or central pin was changed.
 Independent read-only finder and skeptic reviews passed. Generators run twice;
 verifiers run once against the first outputs. Failed attempts retain logs without
 a final success manifest. Neither reviewer used tests, Lean or a server.
+
+
+## Local-evidence association with the frozen census
+
+local-evidence-reconciliation.json associates six distinct frozen theorem
+identities with the existing successor checks, retaining each exact header hash
+and complete producer-module hash. Current producer bytes still match those
+frozen modules. Each audit module is checked against its earlier source-bound
+receipt, and the referenced gate record must have exit zero without a resource
+stop. This is evidence association, not another proof run or a promotion of the
+original ledger's pending statuses.
+
+The pair assignment has joint inputs and a derived postfamily; assignment-family
+transport has shared-state local executions. Node-count stabilization has the
+nonempty joint graph witness. The count and comparison-rank applications retain
+their respective bound premises and remain conditional evidence. The collapsed
+content theorem has a typed signature only, without a new feasibility or alias
+certificate. Thus six associated rows must not be described as six completed
+simultaneous-witness obligations. The other 962 frozen candidates have no receipt
+in this subset, rather than an assertion that their semantics were classified.
+
+Master cc1ea1c9c was fetched and relevant history/code inspected first; no equivalent
+association was present. No production source or original ledger was changed.
+The receipt is small metadata; source ledgers and execution logs remain off Git.
+This does not resolve inherited telescope membership, full semantic classification,
+compiler success, gas/fork coverage, original 4.35 migration or full audit gates.
+
+Independent read-only finder and skeptic reviews verified all six associations,
+source/header/audit hashes and packet bindings without findings or Lean/server use.
