@@ -599,3 +599,22 @@ serial affected-file gates pass in 1 and 14 seconds; no file exceeds 60 seconds.
 Independent read-only finder and skeptic report no defect and used no Lean,
 server, build or edits. These results do not clear original fidelity failures,
 full C4/migration/H68 gates, producer waits or prior timing STOPs.
+
+### Signed remainder correspondence
+
+`SignedModCorrespondence.lean` adds six theorems joining actual public compiler
+selection, Source local evaluation and populated target execution. Nonzero and
+zero divisor branches cover all signed-256 operands; Source globals, frame,
+state and local tail remain general. Target stacks retain the protected marker
+`w[77]` followed by an arbitrary saved tail, with all non-stack fields preserved
+on success. Negative-dividend execution gives -1 for -7 modulo 3 and refutes
+reject-all; minimum signed integer modulo -1 succeeds with zero. Fuel-zero
+Source timeout stays distinct from exact Source division-by-zero panic and
+coarse target revert. These new regressions do not replace original census rows
+or establish an arbitrary heap/world map, gas or session adequacy.
+
+The final six-theorem kernel check passes in 1.913 seconds, sampled workload
+peak 826016 KiB, with only existing standard axioms. Independent read-only
+finder and skeptic found no semantic defect and used no Lean/server/build/edit;
+the skeptic's fixed-marker stack qualification is explicit above. Earlier
+full-gate failures, original fidelity drift and timing STOPs remain open.
