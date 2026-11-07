@@ -222,4 +222,118 @@ theorem rescale_roundtrip_full : hypotheses_of% Fx.rescale_up_down := by
 theorem product_truncation_branch : decimalTy.scale = 10 ∧ (7 * 2 : Int) % decimalTy.scale ≠ 0 := by
   decide
 #print axioms product_truncation_branch
+
+/-- Widening changes both bit width and decimal precision, not only a type name. -/
+def widenedTy : FxTy := ⟨false, 16, 1, by decide⟩
+def signedDecimalTy : FxTy := ⟨true, 8, 1, by decide⟩
+
+theorem explicit_value_full : hypotheses_of% Fx.explicit_sameValue := by
+  exact ⟨decimalTy, ty, ⟨30, by decide⟩, (by intro _; decide), by decide, True.intro⟩
+#verify_hypotheses explicit_value_full for Solidity.Language.FixedPoint.Fx.explicit_sameValue
+#print axioms explicit_value_full
+
+theorem explicit_roundtrip_full : hypotheses_of% Fx.explicit_explicit := by
+  exact ⟨decimalTy, ty, ⟨30, by decide⟩, (by intro _; decide), by decide, True.intro⟩
+#verify_hypotheses explicit_roundtrip_full for Solidity.Language.FixedPoint.Fx.explicit_explicit
+#print axioms explicit_roundtrip_full
+
+theorem implicit_roundtrip_full : hypotheses_of% Fx.explicit_implicit := by
+  exact ⟨ty, widenedTy, by decide, seven, True.intro⟩
+#verify_hypotheses implicit_roundtrip_full for Solidity.Language.FixedPoint.Fx.explicit_implicit
+#print axioms implicit_roundtrip_full
+
+theorem integer_to_fixed_full : hypotheses_of% Fx.toIntTrunc_ofIntegerExplicit := by
+  exact ⟨decimalTy, 7, by decide, True.intro⟩
+#verify_hypotheses integer_to_fixed_full for Solidity.Language.FixedPoint.Fx.toIntTrunc_ofIntegerExplicit
+#print axioms integer_to_fixed_full
+
+theorem fixed_to_integer_full : hypotheses_of% Fx.ofIntegerExplicit_toIntTrunc := by
+  exact ⟨decimalTy, ⟨70, by decide⟩, by decide, True.intro⟩
+#verify_hypotheses fixed_to_integer_full for Solidity.Language.FixedPoint.Fx.ofIntegerExplicit_toIntTrunc
+#print axioms fixed_to_integer_full
+
+theorem integer_truncation_full : hypotheses_of% Fx.toIntTrunc_trunc := by
+  exact ⟨signedDecimalTy, ⟨-17, by decide⟩, True.intro⟩
+#verify_hypotheses integer_truncation_full for Solidity.Language.FixedPoint.Fx.toIntTrunc_trunc
+#print axioms integer_truncation_full
+
+theorem bits_to_value_full : hypotheses_of% Fx.toBits_ofBits := by
+  exact ⟨signedTy, 249, by decide, by decide, True.intro⟩
+#verify_hypotheses bits_to_value_full for Solidity.Language.FixedPoint.Fx.toBits_ofBits
+#print axioms bits_to_value_full
+
+theorem value_to_bits_full : hypotheses_of% Fx.ofBits_toBits := by
+  exact ⟨signedTy, negativeSeven, True.intro⟩
+#verify_hypotheses value_to_bits_full for Solidity.Language.FixedPoint.Fx.ofBits_toBits
+#print axioms value_to_bits_full
+
+theorem explicit_order_full : hypotheses_of% Fx.explicit_le := by
+  exact ⟨decimalTy, ty, ⟨15, by decide⟩, ⟨25, by decide⟩, by decide, by decide, by decide, True.intro⟩
+#verify_hypotheses explicit_order_full for Solidity.Language.FixedPoint.Fx.explicit_le
+#print axioms explicit_order_full
+
+theorem implicit_order_full : hypotheses_of% Fx.implicit_le := by
+  exact ⟨ty, widenedTy, by decide, two, seven, True.intro⟩
+#verify_hypotheses implicit_order_full for Solidity.Language.FixedPoint.Fx.implicit_le
+#print axioms implicit_order_full
+
+theorem implicit_injection_full : hypotheses_of% Fx.implicit_injective := by
+  exact ⟨ty, widenedTy, by decide, seven, seven, rfl, True.intro⟩
+#verify_hypotheses implicit_injection_full for Solidity.Language.FixedPoint.Fx.implicit_injective
+#print axioms implicit_injection_full
+
+theorem solc_conversion_full : hypotheses_of% FxTy.solcImplicit_of_subsumes := by
+  exact ⟨ty, widenedTy, by decide, True.intro⟩
+#verify_hypotheses solc_conversion_full for Solidity.Language.FixedPoint.FxTy.solcImplicit_of_subsumes
+#print axioms solc_conversion_full
+
+theorem implicit_test_full : hypotheses_of% FxTy.implicitOK_iff := by
+  exact ⟨ty, widenedTy, True.intro⟩
+#verify_hypotheses implicit_test_full for Solidity.Language.FixedPoint.FxTy.implicitOK_iff
+#print axioms implicit_test_full
+
+theorem lower_endpoint_full : hypotheses_of% FxTy.lo_inRange := by
+  exact ⟨signedTy, True.intro⟩
+#verify_hypotheses lower_endpoint_full for Solidity.Language.FixedPoint.FxTy.lo_inRange
+#print axioms lower_endpoint_full
+
+theorem upper_endpoint_full : hypotheses_of% FxTy.hi_inRange := by
+  exact ⟨decimalTy, True.intro⟩
+#verify_hypotheses upper_endpoint_full for Solidity.Language.FixedPoint.FxTy.hi_inRange
+#print axioms upper_endpoint_full
+
+theorem range_containment_full : hypotheses_of% FxTy.subsumes_iff := by
+  exact ⟨ty, widenedTy, True.intro⟩
+#verify_hypotheses range_containment_full for Solidity.Language.FixedPoint.FxTy.subsumes_iff
+#print axioms range_containment_full
+
+theorem reflexive_conversion_full : hypotheses_of% FxTy.subsumes_refl := by
+  exact ⟨ty, True.intro⟩
+#verify_hypotheses reflexive_conversion_full for Solidity.Language.FixedPoint.FxTy.subsumes_refl
+#print axioms reflexive_conversion_full
+
+theorem common_type_subsumes_full : hypotheses_of% FxTy.common?_subsumes := by
+  exact ⟨ty, widenedTy, widenedTy, by decide, True.intro⟩
+#verify_hypotheses common_type_subsumes_full for Solidity.Language.FixedPoint.FxTy.common?_subsumes
+#print axioms common_type_subsumes_full
+
+theorem implicit_preservation_full : hypotheses_of% Fx.implicit_preserves := by
+  exact ⟨ty, widenedTy, by decide, two, seven, True.intro⟩
+#verify_hypotheses implicit_preservation_full for Solidity.Language.FixedPoint.Fx.implicit_preserves
+#print axioms implicit_preservation_full
+
+theorem common_type_preservation_full : hypotheses_of% Fx.common?_preserves := by
+  exact ⟨ty, widenedTy, widenedTy, by decide, seven, ⟨20, by decide⟩, True.intro⟩
+#verify_hypotheses common_type_preservation_full for Solidity.Language.FixedPoint.Fx.common?_preserves
+#print axioms common_type_preservation_full
+
+theorem addition_associativity_full : hypotheses_of% Fx.add_assoc := by
+  exact ⟨ty, ⟨1, by decide⟩, two, ⟨3, by decide⟩, ⟨3, by decide⟩, ⟨6, by decide⟩, ⟨5, by decide⟩, ⟨6, by decide⟩, rfl, rfl, rfl, rfl, True.intro⟩
+#verify_hypotheses addition_associativity_full for Solidity.Language.FixedPoint.Fx.add_assoc
+#print axioms addition_associativity_full
+
+/-- The selected implicit conversion exercises genuine width and scale growth. -/
+theorem widening_branch : ty.bits < widenedTy.bits ∧ ty.digits < widenedTy.digits ∧ ty.subsumes widenedTy = true := by
+  decide
+#print axioms widening_branch
 end Solidity.H62.AuditLanguage.FixedPointLawWitness

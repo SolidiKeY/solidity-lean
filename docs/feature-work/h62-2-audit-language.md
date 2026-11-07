@@ -656,3 +656,21 @@ or proof budget is introduced. Independent read-only finder/skeptic reviews
 pass. The expanded witness check is not a matched migration timing comparison,
 compiler-success theorem, complete audit coverage or full acceptance. Validation
 logs, source bindings and resource records remain in the private H145 archive.
+
+The fixed-point law witness module now covers every one of the 58 named
+theorems in FixedPoint/Laws, adding the remaining 21 conversion, round-trip,
+containment and associativity tuples. The widening example increases both width
+and scale; exact downscaling retains divisibility; associativity supplies all
+four actual checked intermediate successes. All 58 frozen/current source headers
+match. The original anonymous multiplication non-associativity counterexample
+remains byte-identical and is not counted as a named theorem certificate.
+
+`scripts/h62/item2/audit-language/family_coverage.py` guards exact named-family
+accounting separately from Lean. Nine controls pass, including missing, duplicate,
+unexpected and commented/string-only commands, undeclared witness names and
+changed premises. Both independent read-only reviews pass after fixing inactive
+command credit and duplicate source-name collapse. The serial Lean check passes
+in 2.563 seconds with all 58 imported associations; actual axiom dependencies
+are recorded privately. This completes local leading-telescope feasibility for
+this named module family only. It does not establish compiler totality, the
+remaining audit families, historical ownership replay or full acceptance.
