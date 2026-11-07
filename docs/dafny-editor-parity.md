@@ -1647,3 +1647,41 @@ build/TestSuite/timedstrict/kerneltrust, macOS, original proof/performance/
 adversarial/scaling matrices and every paired judgment remain unfinished. No
 unchanged stopped heavy command, goal status mutation, checkout creation,
 push, merge or PR occurs in this recovery.
+
+
+### Handoffs — refreshed master and canonical clause-count facts (2026-11-07)
+
+Fetched actual master94f9862b6 and then announced master5da4771e6 before new
+work. The latest closure/metadata commit was not in that master tree, so it
+is retained locally after rebase as d7c9f22418bfe7d09baaea96737ed0b4021a5f04.
+Originalec16 and firstrebased9569 heads remain under checkpoint refs; exact WIP
+bytes/patch and retainedstash survive refresh. Editor code is byte-identical
+across rebases. Duplicate upstream patches were omitted only after empty-index
+readback or Git's patch-equivalence check. An initial combined command was
+rejected by automaticreview for skip-risk; nothing ran, and safer staged
+resolution/readback/explicit continuation completed. No push/masterchange or
+goal mutation.
+
+New general facts in Tools/VerifierMetadata prove that canonicalcount
+clauses.length recovers exactly the original typed list, even when its last
+clause is itself a conjunction. The canonical slot equivalence retains exact
+index/member identity and falsity in the same typed state. Earlier definitions
+and statements remain unchanged. Per-fileMCP0, isolated214job build0; actual
+axiom output uses only the existing allowedset. Finder/skeptic read-only source
+reviews found no defect.
+
+This is conditional on the actual canonical construction/count. Connecting
+that supplied list to source ensures, originalcandidate/obligation/entrypremises
+and exact locations remains a producer task; no JSON metadata or decoration is
+emitted. One existing related-diagnostics assessment changes and stayspartial.
+All489 IDs/order/expected observations, frozen270 and gate/judge/budgets remain.
+[Checksum-bound proof/rebase evidence](dafny-canonical-slot-evidence-manifest.json)
+stays off git. Exact committed-head checks remain required.
+
+Read-only upstream comparison found all334TestSuite sources/closure and24fresh
+replay modules unchanged. Horizon body is unchanged; a dependency proof change
+has no boundedcost-repair receipt. No stopped heavy gate is retried. Current
+Frontend proofhelper changes need independent validation for later native work.
+Full library/checkpoint/build/TestSuite/timedstrict/kerneltrust, actual source
+metadata/positionedtrace, paired rendering/macOS, full performance/adversarial/
+scaling matrices and both judgments per row remain mandatory and unfinished.

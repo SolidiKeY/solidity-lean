@@ -8,12 +8,27 @@ an arbitrary clause. A slot is tied to the exact typed postcondition and state
 used by `postFails`, with a proof that its clause does not hold. This additive
 foundation neither identifies source spans nor connects a displayed candidate
 to the original verification obligation; those producer obligations remain.
-It does not turn an unknown outcome, panic, or tested candidate into a proof.
+Canonical counting recovers the supplied clause list exactly, even when its
+last clause is itself a conjunction. Connecting that list to source ensures
+and their locations remains a producer obligation. It does not turn an unknown
+outcome, panic, or tested candidate into a proof.
 -/
 
 namespace Solidity
 
 variable {C : Contract} {Γ : Ctx}
+
+/-- Counting the actual canonical list recovers precisely its clauses, including
+an internally conjunctive last clause; an arbitrary count is not substituted. -/
+theorem Fml.conjN_conj (clauses : List (Fml C Γ)) :
+    Fml.conjN clauses.length (Fml.conj clauses) = clauses := by
+  induction clauses with
+  | nil => rfl
+  | cons head tail ih =>
+    cases tail with
+    | nil => rfl
+    | cons next rest =>
+      simpa only [List.length_cons, Fml.conj, Fml.conjN] using congrArg (List.cons head) ih
 
 /-- A reported index names a member of the exact typed postcondition split,
 and that clause is false in the same typed state. No source location is inferred. -/
@@ -44,5 +59,14 @@ theorem Fml.failedPostSlot_of_modal_postFails {Γ₁ Γ₀ : Ctx}
   simp only [Fml.postFails, hrun] at hresult
   cases hresult
   exact Fml.failedPostSlot_of_mem dom n post finalState i hindex
+
+/-- With the actual canonical count, a certified split slot names one member
+of that same input clause list. This does not associate the list with source spans. -/
+theorem Fml.failedPostSlot_conj_iff (clauses : List (Fml C Γ))
+    (σ : State C Γ) (i : Nat) :
+    Fml.FailedPostSlot clauses.length (Fml.conj clauses) σ i ↔
+      ∃ clause : Fml C Γ,
+        (i, clause) ∈ (List.range clauses.length).zip clauses ∧ ¬ holds σ clause := by
+  simp only [Fml.FailedPostSlot, Fml.conjN_conj]
 
 end Solidity
