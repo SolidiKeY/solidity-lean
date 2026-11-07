@@ -79,7 +79,7 @@
     {
       "question": "Q-REL-LEDGER-TRANSPORT-01",
       "decision": "Incoming user answer,2026-11-07",
-      "status": "authorized; implementation queued after active time-limit checkpoint",
+      "status": "implemented as versioned ledger-returning companions; full parity acceptance remains open",
       "authorization": "Factor reader/private forwarding bodies into shared internals and add versioned ledger-returning companions. Prove forget equalities preserving old signatures/defaults/results, no duplicate copies H112, no budget changes. Further refactors on these terms pre-approved; do not re-file this family."
     }
   ]
