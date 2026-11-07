@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "d7c9f22418bfe7d09baaea96737ed0b4021a5f04",
+  "status": "partial",
+  "fileCount": 47,
+  "uncompressedBytes": 340320,
+  "archive": {
+    "path": "/workspace/dafny-parity-upstream-20261107/evidence/bulk.tar.gz",
+    "bytes": 25316,
+    "sha256": "b521a33a43fee33a4df0352a82efc5fdd060fad4f3e0ba45e5e47978080f567f"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-upstream-20261107/evidence/files.json",
+    "bytes": 9192,
+    "sha256": "1416ee2eecbd8a4103cbd0d698772b8080722416a7530bac061fb12e82f907e8"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-canonical-slot-evidence-manifest.json --restore",
+  "boundaries": [
+    "Kernelcanonicalcount/suppliedtypedclauselistidentity only; noactualsourceensures/locations/candidate/originalobligation binding.",
+    "Masterrefreshpreservespriorcheckpointrefs/stash/artifacts; no publication/goal mutation.",
+    "All489originalorderedobligations/frozen270/contracts/budgets remain; no completerow/judgment."
+  ]
+}
