@@ -142,6 +142,16 @@ WITNESSES.update({
  "Solidity.Theory.Mutability.assignableCheck_sound": ("AssignableWitnesses", "assignable_check_joint_witness"),
  "Solidity.Theory.Mutability.committed_frames": ("AssignableWitnesses", "assignable_committed_joint_witness"),
 })
+WITNESSES.update({
+ "Solidity.Theory.Mutability.withOutside_outside": ("PureBoundaryWitnesses", "pure_restore_joint_witness"),
+ "Solidity.Theory.Mutability.outside_withOutside": ("PureBoundaryWitnesses", "pure_replace_joint_witness"),
+ "Solidity.Theory.Mutability.withOutside_withOutside": ("PureBoundaryWitnesses", "pure_replace_twice_joint_witness"),
+ "Solidity.Theory.Mutability.TRes.map_map": ("PureBoundaryWitnesses", "pure_result_map_joint_witness"),
+ "Solidity.Theory.Mutability.TLoop.step_map": ("PureBoundaryWitnesses", "pure_loop_step_joint_witness"),
+ "Solidity.Theory.Mutability.TLoop.iterN_map": ("PureBoundaryWitnesses", "pure_loop_iter_joint_witness"),
+ "Solidity.Theory.Mutability.TLoop.run_map": ("PureBoundaryWitnesses", "pure_loop_run_joint_witness"),
+ "Solidity.Theory.Mutability.Simple.evalT_withOutside": ("PureBoundaryWitnesses", "pure_simple_joint_witness"),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),

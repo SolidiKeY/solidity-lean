@@ -1,3 +1,12 @@
+LATEST REBASE/PURE CHECKPOINT: assigned branch rebased to coordinator merge
+ a8f684928fa085d8976ead33e3d0db30208e7a4f after preserving the unexpected clean
+ f0801b2192c6ddfa6f0730995679f3deb815616e merge head in verified ancestry.
+Eight new Pure joint packets and4support/controls pass; all148current helper
+receipts verified after bounded dependency refresh.103joint certificates,
+1,362original witness/classification gaps; Pure remains8joint/17pending/
+1historicalempty, not a fully witnessed module. Original goal remains unfinished.
+Evidence: /workspace/h62-audit-theories-a8-rebase-20261107-evidence.
+
 LATEST HANDOFF: three reviewed work items complete after the requested e0f4251ff
 rebase: Assignable8 joint packets/2controls,8 additional role inventories, and
 coherent original-scope acceptance snapshot. Same VM/branch/unfinished goal;
@@ -1118,3 +1127,61 @@ no RUNTIME_GATE_PASS. Actual Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613
 unchanged; fresh KeySort passes exit0/1.405s. No proof budgets/axioms/exclusions
 or timing thresholds changed. Historic authorized matched pair+2.073826% remains
 historical; no new before/after timing claim or unchanged STOP rerun.
+
+## Rebased Pure boundary checkpoint
+
+Actual clean checkout was at unexpected merge f0801b2192c6ddfa6f0730995679f3deb815616e.
+Fetched origin/master and verified that head, full deliveredc8f38c779c6eb3186fc9fc093272f402f49e9bf2
+and originalc6 base are ancestors of publisheda8f684928fa085d8976ead33e3d0db30208e7a4f.
+Actual git rebase origin/master succeeded without reset/discard. setup.json
+records parents, commands, remote ancestry and clean status. Same original
+VM/branch/unfinished goal retained; no competing goal or push/master merge.
+Inspected actual original26-statement Pure file/history before the item: byte
+unchanged fromc6, no duplicate landed witness item. No core refactor attempted.
+
+PureBoundaryWitnesses packs complete inputs for eight interfaces: three outside
+state laws, TRes.map_map, three loop mapping laws and Simple.evalT_withOutside.
+Type/function/result data, inherited state/outside/primitive/simple binders and
+late n/a are included. Universal hb AND hc hold simultaneously for the SAME
+selected functions at EVERY natural input. The map n+1 is nonidentity; original
+and mapped loops make actual steps and terminate0→1 and1→2, justified by checked
+iterN2 certificates. This is not an empty-domain or diverging-loop shortcut.
+An outside with populated storage visibly changes the real flag false→true;
+actual success accompanies result mapping and the no-state-read literal. The
+extra four support/controls prove visible replacement, both universal laws and
+both terminating runs. These are core semantic inputs, not compiler target
+admission/physical gas/fork/ABI success proofs.
+
+Final64347d7de01d receipt passes exit0,1.605s,659,513,344 sampled peak RSS,
+clean diagnostics, standard axiom allowlist only. New12 helpers/6fixture defs.
+KeySort freshly passes exit0,1.404s under unchanged serial -j1/thread/resource
+limits. No sorry, custom axiom, native_decide, budget/statement/premise/definition
+or exclusion changes. Original Theory sources/roots/maps/pins remain untouched.
+
+Whole-helper verifier initially correctly refused stale FailureGasForkBoundary
+provenance after the rebase. Refreshed all invalidated audit dependency closures
+serially under original bounds:296checks,62fresh/234cache,389.163fresh seconds,
+1,878,937,600-byte maximum sampled RSS,zero resource stops. Includes Source
+Eval/progress/preservation and current Outcome/Progress/Scope receipts. This is
+revalidation on a changed dependency tree, NOT a matched timing comparison or
+permission to rerun an unchanged STOP. All148helpers/37fixture defs/7private
+abbreviations now verify current source/import/artifact/log/axiom receipts.
+
+Original500 records remain exact once:103joint certificates,3acceptedH69,
+18historicalempty,373public+3private pending;986originalgenerated retained,
+so remaining-original-records has1,362unique names/owners. Pure's26rows are8joint,
+17ordinarypending,1historicalempty. Full Pure subset correctly refuses18missing
+joint-registry entries (includes that historicalempty, not18ordinarypending).
+Selected83full-file subset still passes; six refusal controls,13Python tests,
+layer gate904core/0elaborator/0parser/0newedges(107upstream allowances),register
+and fragments pass.26compiler-control receipts pass. Strict Payable and original
+census preserve their expected failures; full acceptance and runtime PASS absent.
+Exact commands/logs/exits: pure-final-gates.json; refresh-summary.json. Original
+frozen-version fidelity and Q-STATIC-VALUE remain separate pending obligations.
+
+Read-only finder and skeptic passed all8full packets,12newproofs,148current
+receipts/296dependencies,500original metadata and exact remaining names/owners.
+No residual findings or reviewer edits/Lean/server/build. Checkpoint handoff:
+continue independent original queue while scope questions wait; Pure still has
+17ordinary original inputs pending, its historicalempty and generated candidates
+remain separately classified, and no full module/assignment completion is claimed.
