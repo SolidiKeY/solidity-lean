@@ -1075,3 +1075,56 @@ off-Git proof program. Its four guarded proofs require the explicit renderer
 and recorded guarded native check; Python tests and the existing six-file
 standalone verifier roster do not replace that check. Full final validation,
 performance, metadata/ledger coverage and all producer waits remain open.
+
+
+## Sixteen public gate-contract hypothesis domains
+
+After adopting published master254c60df atc519675a, the existing renderer and
+single fixture now cover sixteen exact domains: all six public named theorems
+in HeadGate, all six in WordGate, and selected/executed fields of each certificate.
+Twelve witnesses are new; the preceding four remain. The same byte-pinned
+elaborator is unchanged. One new static regression accounts for this explicit
+public-method/field slice exactly once, bringing the suite to72 tests. This
+uses those frozen files existing lexical forms, not general discovery or census
+completeness. Private helpers, definitions, other files and ownership remain
+outside this slice. Producer leaves still must equal frozen c6f550 source.
+
+All implicit program/self and dependent proof binders remain captured. Original
+conclusions become True; no actual result or ledger/census coverage follows.
+Some data-only domains have few premises by their original signatures; global
+certificate fields still carry the same actual producer self, and executed
+methods retain selected result/frame/proofs. Existing supported-success and
+refusal controls are preserved separately.
+
+The first16-domain check rejected six overly narrow axiom-free annotations:
+Lean reported propext. Only those six guard comments changed; proof bodies,
+statements and the allowed standard axiom set did not change. Failed source,
+fixture and manifest stay retained separately. Final check2 passes6.645s with
+empty diagnostics,16guards (six propext-only,ten standard-trio) and both existing
+negative classifier controls. Both runtime monitors pass, no module here>60s.
+Same original generic epoch/deadline01:11:01.069665→05:11:01.069665UTC unchanged;
+no budget reset, prerequisite build, heartbeat increase or PowerBounds retry.
+
+Fixture remains trusted reviewed Lean, not a regex sandbox. Generated programs,
+manifests, native receipts and expected errors stay offGit; explicit native
+checking remains required beyond Python tests or the six-file verifier roster.
+No production module/root/map/pin registration is implied. The prior234selected
+import bindings remain applicable because producer/import inputs are unchanged;
+full703terminalRED is not promoted. Full703/190core/37Bridge, private/source/type/
+inherited joins, global ledger/owners, Source/native, gas/fork, Bridge/package
+and matchedperformance obligations remain open. Historic61.994s head-check and
+all prior failures/seals stay preserved; no RUNTIME_GATE_PASS is asserted.
+Evidence: /workspace/parallel-20261103/executable-bytecode/exact-gate-public-domains/.
+
+Independent finder and skeptic final reviews pass after reconciling the16
+targets, guard-only correction and actual source/manifest/native hashes. Current
+published layer inventory passes with107 pinned allowances (zero new edges);
+this does not repair or prove import-boundary semantics. The global axiom scan
+now has0errors,28unrecorded and0baselined changes after adopting master. Those
+28 belong to the existing scoped proposal; global registration remains with
+the coordinator. Prior larger pin/layer failures stay retained historically.
+
+All72 audit-tool tests, trust/reachability, roots/fragments, whitespace and
+documentation paths pass for this checkpoint. Exact native proofs still require
+the explicit generated-program check; package, ledger and performance acceptance
+remain pending. The active goal and all prior failed/sealed evidence are unchanged.

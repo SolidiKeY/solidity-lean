@@ -62,3 +62,110 @@ theorem head_semantic_rejection_domain :
 /-- error: hypothesis audit: universe-polymorphic target needs explicit review -/
 #guard_msgs in
 #check hypotheses_of% Eq.symm
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.admitted is retained; only the conclusion is removed. -/
+theorem head_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.admitted := by
+  exact ⟨sampleContract, sampleParameters, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms head_admitted_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.selected is retained; only the conclusion is removed. -/
+theorem head_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.selected := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms head_selected_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.run_program is retained; only the conclusion is removed. -/
+theorem head_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.run_program := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms head_run_program_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.executed is retained; only the conclusion is removed. -/
+theorem head_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.executed := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, HeadGate.compiled sampleContract 7 sampleParameters sampleLabel, HeadGate.selected sampleContract 7 sampleParameters sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_executed_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.rejected_iff is retained; only the conclusion is removed. -/
+theorem head_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.rejected_iff := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, HeadGate.compiled sampleContract 7 sampleParameters sampleLabel, HeadGate.selected sampleContract 7 sampleParameters sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_rejected_iff_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.Interface.HeadGateCertificate.selected is retained; only the conclusion is removed. -/
+theorem head_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadGateCertificate.selected := by
+  exact ⟨HeadGate.program, HeadGate.certificate, sampleContract, 7, sampleParameters, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_certificate_selected_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.admitted is retained; only the conclusion is removed. -/
+theorem word_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.admitted := by
+  exact ⟨sampleContract, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms word_admitted_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.selected is retained; only the conclusion is removed. -/
+theorem word_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.selected := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms word_selected_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.run_program is retained; only the conclusion is removed. -/
+theorem word_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.run_program := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms word_run_program_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.executed is retained; only the conclusion is removed. -/
+theorem word_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.executed := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, WordGate.compiled sampleContract 7 .bool sampleLabel, WordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_executed_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.rejected_iff is retained; only the conclusion is removed. -/
+theorem word_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.rejected_iff := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, WordGate.compiled sampleContract 7 .bool sampleLabel, WordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_rejected_iff_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.Interface.WordGateCertificate.selected is retained; only the conclusion is removed. -/
+theorem word_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.WordGateCertificate.selected := by
+  exact ⟨WordGate.program, WordGate.certificate, sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_certificate_selected_domain

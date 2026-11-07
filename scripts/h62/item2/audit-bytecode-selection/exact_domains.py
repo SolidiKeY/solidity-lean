@@ -23,6 +23,12 @@ TARGETS = {
     "word_correspondence_domain": "Solidity.Backend.AbiEntry.WordGate.correspondence",
     "head_semantic_rejection_domain": "Solidity.Backend.AbiEntry.HeadGate.semantic_rejection",
 }
+# Explicit public-method slice; private helpers and other modules remain out of this renderer.
+for gate, prefix in (("HeadGate", "head"), ("WordGate", "word")):
+    for method in ("admitted", "selected", "run_program", "executed", "rejected_iff"):
+        TARGETS[prefix + "_" + method + "_domain"] = "Solidity.Backend.AbiEntry." + gate + "." + method
+    TARGETS[prefix + "_certificate_selected_domain"] = "Solidity.Backend.AbiEntry.Interface." + gate + "Certificate.selected"
+
 PRODUCERS = ["Solidity/Backend/AbiEntry/" + name + ".lean" for name in
              ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface")]
 
