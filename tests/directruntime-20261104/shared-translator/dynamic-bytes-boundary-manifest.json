@@ -1,0 +1,126 @@
+{
+  "guardedRegression": "H90 dynamic bytes/string local controls must not erase markers or imply unsupported admission",
+  "checkpointBase": "ebc73a8a65821139472935bb661bbaaed20614e9",
+  "compiler": {
+    "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+  },
+  "sourceFiles": [
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/DynamicBytesBoundary.sol",
+      "sha256": "02f869c0e5ade2163f5bfd8052caab3696b41f6f9f2b9630ca7e1c40286b8cb6"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean",
+      "sha256": "47da2be23090e8090d9e043541942adc049250a6fac77324e43c6f75cd73dc5f"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/dynamic-bytes-fixture.mjs",
+      "sha256": "c4f6688878996d3717b074593ffadbe998cd07d8aca699f4b08f3b7a8407daa1"
+    }
+  ],
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/dynamic-bytes-boundary-c02a4db5d3f2f272.tar.gz",
+    "sha256": "c02a4db5d3f2f272dcc01b46a2de80c2a71766cf4173be7f5e46c99e928ea01e",
+    "bytes": 13933,
+    "regularMembers": 16,
+    "files": {
+      "DynamicBytesBoundary.ast.json": "9430fd6d686e8eefbd7aba8120d2e422513f3b77dd2014940b65db04c272e0f9",
+      "DynamicBytesBoundary.normalized.json": "1d4068f3d947667d0cfe3fcaafae57e51caffdec8647ba0cd00f0015c5445f97",
+      "DynamicBytesBoundary.raw.json": "8bdbf39ba1983f108d4f67f55af34bdb158526b26167e0945e69662b228ee0ac",
+      "checking-summary.json": "129d8cfc6ee214082c8defb7cab4fca0fb0dec907b8cf94c67c1f8062d7ad50a",
+      "compilation.json": "1d763c6647ba98c09729440e26307bc54f7bed09f2bd9cb9a73e3dc32f93bb4d",
+      "gates/1.log": "d0a9cebe4caa27d1ded6a171c80cb1789b2c1ee1ad3e01435ca1ab5e454439c6",
+      "gates/2.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gates/HEAD": "a21da76dda9857a6230c1a79ebc8fa9a18b307432c290019391f2dc140613c2d",
+      "gates/gates.tsv": "c3d5a60d2ddb2c79b44ebd69e58698547190e3bdd9f483e7d07bb2a1369d9bfd",
+      "kernel-gate.log": "ce3fae4b866ce32530120550dc699f61cead955639b35052de26cb8d20d7920b",
+      "mcp-gate.log": "bb173bc81cf05c502a8334d88cb55ad2eb63eed41fd31ea2ec0683c897c81303",
+      "prerequisite/1.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "prerequisite/HEAD": "a21da76dda9857a6230c1a79ebc8fa9a18b307432c290019391f2dc140613c2d",
+      "prerequisite/gates.tsv": "78d49b31ffb7a34b4bb8f72888d0eba915fa04eb2b93d2bf934e1ce7163d5d44",
+      "proof-attempt.log": "07443a0f53c71a16241eb30869e17cfe7800124f97547f452281e7743240b89a",
+      "recovery-mcp-gate.log": "69f0535d8f0b61c7b40369c2653bdb5290d953ae29b06d90fa326a6490796105"
+    }
+  },
+  "observations": {
+    "guardedRegression": "Dynamic byte/string controls must retain exact marker rows without premature reader admission",
+    "refusals": [
+      {
+        "name": "bytesDefault",
+        "reason": "compact verifier: unsupported type bytes"
+      },
+      {
+        "name": "stringDefault",
+        "reason": "compact verifier: unsupported type string"
+      },
+      {
+        "name": "bytesAlias",
+        "reason": "compact verifier: unsupported type bytes"
+      },
+      {
+        "name": "stringAlias",
+        "reason": "compact verifier: unsupported type string"
+      },
+      {
+        "name": "bytesAllocate",
+        "reason": "compact verifier: unsupported type bytes"
+      },
+      {
+        "name": "stringLiteral",
+        "reason": "compact verifier: unsupported type string"
+      },
+      {
+        "name": "bytesParameter",
+        "reason": "compact verifier: unsupported type bytes"
+      },
+      {
+        "name": "stringParameter",
+        "reason": "compact verifier: unsupported type string"
+      },
+      {
+        "name": "DynamicBytesState",
+        "reason": "compact verifier: unsupported type bytes"
+      },
+      {
+        "name": "DynamicStringState",
+        "reason": "compact verifier: unsupported type string"
+      }
+    ],
+    "newTheorem": "dynamicByteRows_preserved",
+    "axioms": [
+      "propext"
+    ],
+    "scope": "Preparation only. Alias/allocation/literal functions stop at their enclosing type gate; no expression-stage test or whole-form support claimed.",
+    "mcp": "Zero errors after explicit proof completion and normalized parameter-spelling correction. Initial failed diagnostics/trials retained.",
+    "kernelGate": {
+      "childMaxRssKiB": 1070132,
+      "command": [
+        "bash",
+        "-c",
+        "set -e; export GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/dynamic-bytes/gates; bash scripts/coord-tools/gate.sh per-file tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean Solidity/KeySort.lean"
+      ],
+      "exit": 0,
+      "scopeMemoryPeakBytes": "210022400",
+      "wallSeconds": 4.4878420640015975
+    },
+    "outerScope": {
+      "outerExit": 0,
+      "resourceStop": false,
+      "minimumOuterAvailableBytes": 11136221184,
+      "outerWallSeconds": 6.5274433190061245
+    }
+  },
+  "limits": [
+    "No production reader/theorem/definition/API/premise/budget change.",
+    "No dynamic byte/string admission added; these are versioned current-refusal and existing marker controls.",
+    "No semantic heap/content, compiler/source, ABI or runtime closure proof.",
+    "No pre-work equivalent for new additive controls; no performance acceptance or STOP rerun.",
+    "Raw/normalized ASTs and logs remain offGit H44; restore in artifacts/dynamic-bytes for replay."
+  ],
+  "reviews": {
+    "finder": "Read-only final review: ten exact refusal lines, marker theorem/propext and separate raw/normalized compiler provenance confirmed; no blocker. No Lean/server/build/writes.",
+    "skeptic": "Read-only final review: preparation only; alias/allocation/literal type-gate boundary explicit; no production admission change or completion claim. No blocker; no Lean/server/build/writes."
+  },
+  "archiveVerification": "Outer SHA/size, exact unique regular member set and all16member hashes pass."
+}

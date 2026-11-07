@@ -1,0 +1,75 @@
+{
+  "guardedRegression": "Full decoder validation must authenticate off-Git data and replay committed census expectations",
+  "checkpointBase": "80c156bf13d1900acf9cdae1556496ee3473e0cd",
+  "inputManifest": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/validation-inputs-manifest.json",
+    "sha256": "4d57f95ee5ace33fd6d13eea765cc655cc5632670c656c65dce68d92d5c5c04f"
+  },
+  "inputArchive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/validation-inputs-fde3beea1c7d20ec.tar.gz",
+    "sha256": "fde3beea1c7d20ec0af848db05907d3ff66d9f0b2cb3254dbc17f2ee293aad95",
+    "bytes": 1571832
+  },
+  "sourceFiles": [
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/validation-inputs.py",
+      "sha256": "648214dfb4561ec0499c2329ff5030a1d080ea08e9f2e0181ea076a2a261f34d"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/validation-input-controls.py",
+      "sha256": "7a9ffd37248c04eafdfe769b6e63a2b675351db817881904e9bc256afee80bb4"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh",
+      "sha256": "5cf4d7cd97929af3bb6f814ab553f3e44174718ac72cb7fa36468bd2a81fab0f"
+    },
+    {
+      "repositoryRelative": "scripts/h62/item1/binding-fixtures/validate_reference.py",
+      "sha256": "1f6727784bdfff3ac5c1d9572c717a38bf7c9f1a95051a7d932279f89a4bebea"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/ownership-baseline.json",
+      "sha256": "afe859a6fc94cd8a675790d7ce1c31c820b06a6eba5062461ce96269d5791f10"
+    }
+  ],
+  "evidenceArchive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/portable-validation-evidence-ba4e762080744d5b.tar.gz",
+    "sha256": "ba4e762080744d5b73b7e1e4eb3b13d728be14ab12826d5ee784128dd0cc62a9",
+    "bytes": 40271
+  },
+  "fullGate": {
+    "childMaxRssKiB": 1266512,
+    "command": [
+      "bash",
+      "-c",
+      "set -e; bash tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh; env -u GATE_LOGS PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item1/binding-fixtures/validate_reference.py"
+    ],
+    "exit": 0,
+    "scopeMemoryPeakBytes": "220766208",
+    "wallSeconds": 27.172179013003188
+  },
+  "outerScope": {
+    "outerExit": 0,
+    "resourceStop": false,
+    "minimumOuterAvailableBytes": 11132612608,
+    "outerWallSeconds": 28.08794595299696
+  },
+  "resources": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0,
+    "cpus": 1,
+    "LEAN_NUM_THREADS": 1,
+    "leanJobs": 1
+  },
+  "reviews": {
+    "finder": "Final read-only review: no confirmed blocker; original P12 hash, unchanged scope metadata and historical source pins verified. No Lean/server/build/writes.",
+    "skeptic": "Final read-only review: no confirmed blocker; consolidated scope enforcement, A10 source identity and frozen expectations preserved."
+  },
+  "limits": [
+    "185data inputs:73tracked read-only,112archived own artifacts. Git/toolchain/dependency setup are separate prerequisites.",
+    "No production Lean/proof/interface/premise/axiom/exclusion/budget change. Same verifiers run against committed expectations.",
+    "No native/browser benchmark, runtime acceptance, binary courier or whole-goal completion."
+  ],
+  "startedAtHead": "16c7ecb40198fb62187f4adf8dcaee6733e4990f",
+  "verificationNote": "Sandbox-only retry of Python controls could not create temporary directories; authorized writable retry passed all six. No implementation failure or new Lean rerun."
+}
