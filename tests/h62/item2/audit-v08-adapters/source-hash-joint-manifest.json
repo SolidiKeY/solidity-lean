@@ -1,0 +1,107 @@
+{
+  "status": "SOURCE_HASH_PIN_EXECUTION_ALLOCATION_JOINT",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceHashJoint.lean": "56880454662fa751ea355e91fbd2d18a13ef09661a03ad0fe7f27a5565ad8b0f",
+    "Solidity/Lowering/V08/SourceKeccak.lean": "da457d92de90b7c81a3dd7ca29a4be6f0b365530a212e331b4cf5ffd8254d507",
+    "Solidity/Lowering/V08/SourceCustomErrorControls.lean": "9dd4c65999c53ed2609f8db7f0b703933f004e83ef5fe05f81495572e53bf297"
+  },
+  "target_links": [
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceKeccak.lean:44:eval_transport",
+      "target": "Solidity.Lowering.V08.SourceKeccak.eval_transport",
+      "component": "joint: fixed pin and full execution",
+      "fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceKeccak.lean:65:retained",
+      "target": "Solidity.Lowering.V08.SourceKeccak.retained",
+      "component": "nonheap_retained: existing total identity",
+      "fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceKeccak.lean:71:allocated",
+      "target": "Solidity.Lowering.V08.SourceKeccak.allocated",
+      "component": "joint: same allocated object",
+      "fidelity": "PENDING"
+    }
+  ],
+  "new_body_fixtures": 0,
+  "fidelity_acceptances": 0,
+  "joint_premises": "Existing populated model supplies fixed.Keccak, actual full-word hash run and same-pointer heap lookup for all raw bytes, pipeline/static flags and sufficient fuel. No desired-run premise assumed.",
+  "negative": "Full result with exact hash but initial heap is unequal; heap.next is2 rather than1, even for empty input.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceHashJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.382,
+    "peak_sampled_aggregate_rss": 732078080,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axioms": {
+    "joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "unchanged_heap_refused": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "nonheap_retained": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "limitations": [
+    "One conditional target plus two existing total observation applications linked; all full fidelity remains pending. Four other original hash targets and residual accounting remain open.",
+    "nonheap_retained reuses an existing law; it is not a new fixture or independent producer result.",
+    "No hash noncollision, Source program admission/origin/session/lifecycle, selected target emitter/body/frame relation or canonical H68 certificate.",
+    "No matched timing, full-root acceptance or prior STOP release."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-hash-joint-20261107/check/console.log",
+      "bytes": 153,
+      "sha256": "fcb5ddc9e837859748d3704c899272f12ccbffbb8c44e94ff1c98fd44314b397"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-hash-joint-20261107/check/gates/1.log",
+      "bytes": 25677,
+      "sha256": "d09a3919e87350afaf961d5667fdb5f2921de7baf5f2342494d51fe696d9cbd7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-hash-joint-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "8ca9158cc01565b9b8f3caf36fd97a0b30b47506f4f1a63ca0fb8c742e9f64e1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-hash-joint-20261107/check/gates/gates.tsv",
+      "bytes": 238,
+      "sha256": "8204ca0349284a87667457c2cc26974753286f6ec3dc430f2e31b43568f3f4b6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-hash-joint-20261107/check/results.json",
+      "bytes": 395,
+      "sha256": "6f5120f2dffaa5f03871b4455578a64414726c8d2077444535ba8a965d24240e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-hash-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-hash-joint-20261107/trust.json",
+      "bytes": 253,
+      "sha256": "b1b7cc1b647e17d3c839553551384acfc158783e1ee4aaa436a585fe3eb1571b"
+    }
+  ]
+}

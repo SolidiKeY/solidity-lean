@@ -1,0 +1,71 @@
+{
+  "status": "EXISTING_SOURCE_CALL_COMPONENT_EXTENDED_WITH_EXPRESSION_SUCCESS",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean": "c1d3974ca4d2c17b09b52e928279a8c9282d788f7bc35a0d7e450af401808339",
+    "Solidity/Lowering/V08/SourceCallable.lean": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a",
+    "Solidity/Lowering/V08/SourceCallableControls.lean": "f1c63dc4e4b491bfe5c4c0f53652f7c779fe41b3e42085215a2b2ff9558094df"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceCallable.expression_complete"
+  ],
+  "joint_premises": "Same declaration signature, actual argument execution with post-argument caller locals/state and actual callee completion from that reached state. No argument/callee run equation is newly assumed.",
+  "domain": "Every Pipeline and extra sufficient horizon in the existing resolved callable fixture.",
+  "full_results": "Normal argument order returns false; reversed argument order returns true. Both update the caller local to false and retain the exact afterLiteral complete state.",
+  "negative_controls": [
+    "expression_order_refused compares full actual runs, deriving unequal return results despite matching caller updates/heaps.",
+    "original_caller_refused rejects the pre-argument true local even though return value and complete callee heap match."
+  ],
+  "new_joint_model_families": 0,
+  "additional_original_target_applications": 1,
+  "new_body_fixtures": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 2.664,
+    "peak_sampled_aggregate_rss": 751161344,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Existing manually supplied Source program only; no canonical syntax/body/admission or target compiler certificate.",
+    "No complete arbitrary-program/all-outcome/session/H68 adequacy.",
+    "Additional audit coverage, not a matched timing comparison or prior STOP release."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-expression-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "b201ce8da825f2745d4e9fcfcabf1703911dd2c9de7c97c9165c3782c3e5f591"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-expression-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-expression-joint-20261107/check/results.json",
+      "bytes": 399,
+      "sha256": "9574259b4fccb9e1896b8f75dc44d13b4f8f5e3e5e34c30b45520fbe69ffb240"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-expression-joint-20261107/check/gates/1.log",
+      "bytes": 28836,
+      "sha256": "c0daf3e2d2afeda12d38e79987d061f9302c2cf7b9b0ab5aad5bca636fa29742"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic: no findings on same-reached-state premises, exact expression outcomes, order and caller-effect controls. No reviewer scripts/tests/Lean/server.",
+  "source_binding_status": "Historical expression-extension test snapshot. Current additive boundary checks/source bindings are in source-call-boundaries-manifest.json; old evidence/hash retained unchanged."
+}

@@ -55,5 +55,6 @@
       "sha256": "d67c1ec6806eff1c9fc836bce5c5044b86d852fbd471457258a9b59f4bde5947"
     }
   ],
-  "reviews": "Independent read-only finder and skeptic: raw gate exits/summaries and evidence hashes verified, no findings. No reviewer tests/Lean/server."
+  "reviews": "Independent read-only finder and skeptic: raw gate exits/summaries and evidence hashes verified, no findings. No reviewer tests/Lean/server.",
+  "historical_result_note": "Retained prior failing-head evidence. Subsequent central publication registers matching WORLD-G07-13 fragments and current pin gate passes; see source-abi-prefix-joint-manifest.json. Old failure/results are not rewritten."
 }
