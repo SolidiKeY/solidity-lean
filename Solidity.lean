@@ -184,6 +184,8 @@ import Solidity.Backend.AbiWorld.NestedByteReadback
 import Solidity.Backend.AbiWorld.NestedReadback
 import Solidity.Backend.AbiWorld.NestedUintPacket
 import Solidity.Backend.AbiWorld.PacketEmission
+import Solidity.Backend.AbiWorld.P1RevertBridge
+import Solidity.Backend.AbiWorld.P1RevertBridgeControls
 import Solidity.Backend.AbiWorld.PacketPrefix
 import Solidity.Backend.AbiWorld.PacketPrefixControls
 import Solidity.Backend.AbiWorld.PanicCallFrame
@@ -198,6 +200,8 @@ import Solidity.Backend.AbiWorld.RecursiveEntry
 import Solidity.Backend.AbiWorld.RecursiveLayout
 import Solidity.Backend.AbiWorld.RecursiveReadback
 import Solidity.Backend.AbiWorld.ReferenceFields
+import Solidity.Backend.AbiWorld.PublicCompilerTotal
+import Solidity.Backend.AbiWorld.PublicCompilerTotalControls
 import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.AbiWorld.ReturnedBytes
@@ -440,6 +444,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindExecutionControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueBridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueBridgeControls
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
 import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore
@@ -4214,6 +4220,7 @@ import Solidity.Source.HorizonDeploy
 import Solidity.Source.HorizonFuel
 import Solidity.Source.HorizonGrow
 import Solidity.Source.Infer
+import Solidity.Source.InferHelpers
 import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger
