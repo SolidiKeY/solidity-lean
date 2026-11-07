@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/capture-premises-classification-v33/semantic-roles-reviewed.json",
-    "bytes": 1194838,
-    "sha256": "36d19d67c8e51c3ac4d3c3f666a39d01a605838005ca61135f0ce3926eb200b8"
+    "path": "/workspace/h62-successor-bulk/callback-payment-roles-v34/semantic-roles-reviewed.json",
+    "bytes": 1206764,
+    "sha256": "c91d726f73add9bbee5806f00d2a5ac8a30285918bb0077e036dcbc786fb10c1"
   }
 }
