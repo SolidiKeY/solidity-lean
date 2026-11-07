@@ -100,6 +100,7 @@ theorem newArrayField_correct {C : Contract} {L b frame : Nat} {Γ : Ctx} {F : F
     · intro c _ hc hcspace
       have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
       subst c
-      simpa only [Nat.add_assoc] using hanew.setReference q hf a.2
+      simpa only [State.withHeap, a, State.alloc, State.adopt, Grown.alloc, base', allocated,
+        final, size, Nat.add_assoc] using hanew.setReference q hf a.2
 
 end Solidity.Evm.Memory

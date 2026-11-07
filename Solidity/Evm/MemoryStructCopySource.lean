@@ -108,7 +108,7 @@ theorem copiedStruct_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
   · simp only [Storage.find, SRef.ofRoot, hv, SVal.find_nil]
   · rw [declareCopyStructCode, run_append_ok hc]; rfl
   · have hid : (σ.alloc (R := .struct s) (copiedFields (structDef s) hp v)).2.id = σ.H.length := rfl
-    simpa only [hid, upd_same] using
+    simpa only [State.allocPush, out, hid, upd_same] using
       hs.consMem (σ.alloc (R := .struct s) (copiedFields (structDef s) hp v)).2 hcap
   · exact hal.localWrite _ (by change 0 < b + Γ.length; omega)
       (by change b + Γ.length < frame; omega) _
