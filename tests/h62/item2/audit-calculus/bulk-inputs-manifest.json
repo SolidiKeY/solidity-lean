@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/frames-operators-classification-v22/semantic-roles-reviewed.json",
-    "bytes": 742236,
-    "sha256": "72fe5611a1cf90ad6081d975069836f3594f4c24b650e70e666973a7bb0c07da"
+    "path": "/workspace/h62-successor-bulk/sequent-tree-classification-v23/semantic-roles-reviewed.json",
+    "bytes": 763960,
+    "sha256": "2a44aa57f10aaba5b4c6611f21934eb5323bab390c26c8daa3a77b5c6876d0ee"
   }
 }
