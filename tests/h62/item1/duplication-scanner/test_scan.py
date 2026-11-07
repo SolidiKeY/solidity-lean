@@ -79,6 +79,32 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(scanner.mask(source), source)
             self.assertEqual(len(scanner.hide_strings(source)), len(source))
 
+    def test_multiline_and_stacked_attribute_declarations_are_inventoried(self):
+        root = Path("/virtual")
+        source = ("@[simp,\n  inline] def target : Nat := 1\n"
+                  "@[foo [bar],\n  baz]\n@[other] theorem next : True := by trivial\n"
+                  "def visible : String := \"@[fake] def hidden\"\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["name"], r["line"]) for r in rows],
+                         [("target", 2), ("next", 5), ("visible", 6)])
+        self.assertEqual([r["reject_reason"] for r in rows], [None, None, None])
+        with_comment = "@[simp, /- nested [ comment ] -/\n  inline] def x : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, with_comment.encode())[0]["name"], "x")
+        nested = "@[foo [[bar]]] def target : Nat := 1\ndef visible : Nat := 2\n"
+        self.assertEqual([r["name"] for r in scanner.scan(root / "C.lean", root, nested.encode())], ["target", "visible"])
+        rows = scanner.scan(root / "D.lean", root, b"@[unsafe] def a : Nat := 0\nunsafe def b : Nat := 0\n")
+        self.assertEqual(rows[0]["qualifiers"], [])
+        self.assertEqual(rows[1]["qualifiers"], ["unsafe"])
+        aligned = scanner.scan(root / "F.lean", root, b"@[simp] def first : Nat := 0\n  def inner : Nat := 1\n")
+        self.assertEqual(aligned[0]["body_reject_reason"], "nested-declaration-boundary")
+        following = ("def a : Nat := 1\n@[foo,\n bar] def b : Nat := 2\n"
+                     "def c : Nat := 1\n@[other,\n baz] def d : Nat := 3\n")
+        rows = scanner.scan(root / "G.lean", root, following.encode())
+        self.assertEqual(rows[0]["body"], rows[2]["body"])
+        self.assertEqual(rows[0]["body"], ["1"])
+        with self.assertRaisesRegex(ValueError, "unterminated attribute"):
+            scanner.scan(root / "E.lean", root, b"@[foo [bar]\ndef hidden := 0\n")
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))
@@ -279,6 +305,61 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(data["candidates"], [])
             self.assertIn("different-or-unsupported-statements", data["body_candidates"][0]["reject_reasons"])
 
+    def test_multiline_context_and_literal_boundaries(self):
+        root = Path("/virtual")
+        def row(source):
+            return scanner.scan(root / "A.lean", root, source.encode())[0]
+        prefix = "namespace N\nvariable\n  (T : "
+        suffix = ")\ntheorem same (x : T) : x = x := by rfl\nend N\n"
+        a, b = row(prefix + "Type" + suffix), row(prefix + "Type 1" + suffix)
+        self.assertEqual(a["statement"], b["statement"])
+        self.assertNotEqual(a["context_hash"], b["context_hash"])
+        self.assertEqual(a["context_hash"], row(prefix + "Type" + suffix)["context_hash"])
+        open_a = 'open scoped\n  A\nvariable (T : Type)\ntheorem same (x : T) : x = x := by rfl\n'
+        open_b = open_a.replace("  A\n", "  B\n")
+        self.assertNotEqual(row(open_a)["context_hash"], row(open_b)["context_hash"])
+        literal_a = 'variable (s : String := "x\nnamespace Fake\ny")\ntheorem same : True := by trivial\n'
+        literal_b = literal_a.replace('namespace Fake', 'namespace Other')
+        self.assertNotEqual(row(literal_a)["context_hash"], row(literal_b)["context_hash"])
+        comment = '/- variable\nnamespace Fake -/\n'
+        self.assertEqual(row(comment + prefix + "Type" + suffix)["context_hash"], a["context_hash"])
+
+    def test_notation_after_declaration_contributes_to_context(self):
+        root = Path("/virtual")
+        template = ('namespace N\ndef marker : Nat := 0\n'
+                    'local notation \"MyT\" => {typ}\n'
+                    'theorem same ({binder} : MyT) : {binder} = {binder} := by rfl\nend N\n')
+        def theorem(typ, binder):
+            source = template.format(typ=typ, binder=binder).encode()
+            return scanner.scan(root / "A.lean", root, source)[1]
+        nat, integer, renamed = theorem("Nat", "x"), theorem("Int", "x"), theorem("Nat", "y")
+        self.assertEqual(nat["statement"], integer["statement"])
+        self.assertNotEqual(nat["context_hash"], integer["context_hash"])
+        self.assertEqual(nat["context_hash"], renamed["context_hash"])
+        self.assertEqual(nat["statement"], renamed["statement"])
+        full = scanner.scan(root / "A.lean", root, template.format(typ="Nat", binder="x").encode())
+        self.assertEqual(full[0]["body"], ["0"])
+        indented = ('def outer : Nat := by\n  local notation \"x\" => Nat\n'
+                    '  exact 0\ndef next : Nat := 1\n')
+        rows = scanner.scan(root / "C.lean", root, indented.encode())
+        self.assertEqual(rows[0]["body_reject_reason"], "indented-command-boundary")
+        for keyword in ("notation", "infixl", "infixr", "infix", "prefix", "postfix"):
+            source = f'def marker : Nat := 0\nscoped {keyword}:50 \"##\" => Nat\ntheorem same : True := by trivial\n'
+            changed = source.replace('=> Nat', '=> Int')
+            a = scanner.scan(root / "A.lean", root, source.encode())[1]
+            b = scanner.scan(root / "B.lean", root, changed.encode())[1]
+            self.assertNotEqual(a["context_hash"], b["context_hash"], keyword)
+
+    def test_equal_context_does_not_prove_local_definition_equivalence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, typ in (("A.lean", "Nat"), ("B.lean", "Int")):
+                (root / name).write_text("namespace N\ndef T := " + typ + "\ntheorem same (x : T) : x = x := by rfl\nend N\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            group = next(g for g in data["candidates"] if {m["path"] for m in g["members"]} == {"A.lean", "B.lean"} and all(m["name"] == "same" for m in g["members"]))
+            self.assertIn("intrinsic-signature-unresolved", group["reject_reasons"])
+            self.assertIn("ownership-requires-live-verification", group["reject_reasons"])
+
     def test_namespace_context_is_not_conflated(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -381,6 +462,32 @@ class ScannerControls(unittest.TestCase):
             result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "../*.lean"], capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("patterns must stay within the root", result.stderr)
+
+    def test_nonrecursive_wildcard_walk_error_suppresses_deltas(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for folder in ("readable", "denied"):
+                (root / folder).mkdir()
+                (root / folder / "Target.lean").write_text("def x : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*/Target.lean"]
+            (root / "readable" / "deep").mkdir()
+            (root / "readable" / "deep" / "unrelated").symlink_to("missing")
+            first = subprocess.check_output(cmd)
+            baseline = root / "previous.json"
+            baseline.write_bytes(first)
+            actual_walk = scanner.os.walk
+            def failed_walk(top, *args, **kwargs):
+                kwargs["onerror"](PermissionError(13, "permission denied", str(root / "denied")))
+                yield from actual_walk(top, *args, **kwargs)
+            output = io.StringIO()
+            with mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*/Target.lean"] + pinned(baseline)), \
+                 mock.patch.object(scanner.os, "walk", failed_walk), contextlib.redirect_stdout(output):
+                self.assertTrue(scanner.main())
+            report = json.loads(output.getvalue())
+            self.assertTrue(any("permission denied" in e["reason"] for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            self.assertIsNone(report["incremental"]["candidate_groups"])
 
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:

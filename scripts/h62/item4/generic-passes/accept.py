@@ -8,7 +8,8 @@ import hashlib, importlib.util, json, os, subprocess, sys
 sys.dont_write_bytecode=True
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[4]; HERE=Path(__file__).parent
-E=Path('/workspace/h62-generic-passes-evidence'); OUT=E/'build-v4.35.0'
+from runtime_paths import EVIDENCE as E, load_pin
+OUT=E/'build-v4.35.0'
 spec=importlib.util.spec_from_file_location('census',HERE/'census.py'); census=importlib.util.module_from_spec(spec); spec.loader.exec_module(census)
 
 def check_lexing():
@@ -29,7 +30,8 @@ def check_candidates():
     import re
     leaf=ROOT/'tests/h62/item4/generic-passes'
     instances=(leaf/'Instances.lean').read_text()
-    correspondence=(leaf/'Correspondence.lean').read_text()
+    correspondence=census.blank((leaf/'Correspondence.lean').read_text())
+    declarations=list(census.DECL.finditer(correspondence))
     count=0
     for name in ['Addition','Subtraction','Multiplication']:
         source=(ROOT/('Solidity/Backend/Passes/Assignment'+name+'Pass.lean')).read_text()
@@ -39,7 +41,16 @@ def check_candidates():
         assert instances[start:instances.index(' := by',start)]==expected
         controls=(ROOT/('Solidity/Backend/Passes/Assignment'+name+'Controls.lean')).read_text()
         for theorem in re.findall(r'(?m)^theorem (\w+)',controls):
-            assert 'theorem '+name.lower()+'_'+theorem+' : type_of% ' in correspondence
+            original='Solidity.Backend.Passes.Assignment'+name+'Pass.Controls.'+theorem
+            alias=name.lower()+'_'+theorem
+            positions=[index for index,decl in enumerate(declarations) if decl[2]==alias]
+            assert len(positions)==1, 'missing or duplicate alias: '+alias
+            index=positions[0]
+            finish=declarations[index+1].start() if index+1<len(declarations) else len(correspondence)
+            body=correspondence[declarations[index].start():finish]
+            body=re.split(r'(?m)^end(?:\s|$)',body,maxsplit=1)[0].strip()
+            pattern=r'theorem '+re.escape(alias)+r' : type_of% '+re.escape(original)+r'\s*:=\s*'+re.escape(original)
+            assert re.fullmatch(pattern,body), 'substituted type or body: '+alias
             count+=1
     assert count==36
     print('PASS 3 exact original execution source signatures and 36 original theorem aliases (lexical only)')
@@ -53,7 +64,7 @@ if len(sys.argv)!=3 or sys.argv[1]!='--run-id' or not __import__('re').fullmatch
     raise SystemExit('usage: accept.py --run-id UNIQUE-ID (or --lexical-only)')
 run_id=sys.argv[2]
 subprocess.run([sys.executable,str(HERE/'census.py'),'--check',str(E/'original-census.json')],cwd=ROOT,check=True)
-pin=json.loads(Path('/workspace/h62-coordinator-inputs/toolchain-pin.json').read_text())
+pin=load_pin()
 with (E/pin['asset']).open('rb') as source:
     assert hashlib.file_digest(source,'sha256').hexdigest()==pin['sha256']
 seen=set(); order=[]
