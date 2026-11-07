@@ -102,4 +102,76 @@ def retainedCounterexampleMetadataV1? (N : Lean.Name) (rowIndex : Nat)
     let some candidate ← Tools.sourceCounterexampleCandidateV1? goal original | return none
     pure (some ⟨originRow, name, candidate⟩)
 
+
+/-- Full context for the exact H126 reader. This is an input carrier, not a
+certificate that a caller supplied the importer environment or current source. -/
+structure CanonicalImportInputV1 where
+  ast : Json
+  name : String
+  ren : List (String × String)
+  testing : Bool
+  entrypoints : Bool
+  env : Environment
+  sourceNames : List String
+  provenance : Source.Provenance
+  compilerCode : List (Int × (String × String))
+  namedErrorSourceOrder : Bool
+  compilationUnits : List Json := []
+
+/-- Reuse the entire admitted computation; no normalization callback is copied. -/
+def CanonicalImportInputV1.read (input : CanonicalImportInputV1) :
+    Except String SolcContract :=
+  readImportedContractV1 input.ast input.name input.ren input.testing input.entrypoints
+    input.env input.sourceNames input.provenance input.compilerCode
+    input.namedErrorSourceOrder input.compilationUnits
+
+/-- Guards the regression where a clause from another normalizer, function or
+ordinal is attached to a retained row. These equations identify the exact reader
+result and canonical clause. They do not bind the input to a live importer or
+prove that this clause failed, and deliberately contain no source span. -/
+structure CanonicalClauseV1 (input : CanonicalImportInputV1) (row : ImportRow) where
+  contract : SolcContract
+  contractEquation : input.read = .ok contract
+  functionIndex : Nat
+  functionData : SolcFun
+  functionEquation : (contract.funs ++ contract.ctor.toList)[functionIndex]? = some functionData
+  sourceIdEquation : functionData.sourceId = row.sourceId
+  nameEquation : functionData.name = row.name
+  signatureEquation : functionData.sourceSignature = row.sourceSignature
+  clauseIndex : Nat
+  clause : String × String
+  clauseEquation : functionData.specClauses[clauseIndex]? = some clause
+
+/-- Exact indexed lookup, preserving reader errors. Unadmitted/synthetic/foreign
+rows and absent ordinals yield no metadata; no text matching or index fallback.
+The producer must separately bind this context to its actual importer/candidate
+and prove source-origin and failed-clause correspondence before publication. -/
+def canonicalClauseV1? (input : CanonicalImportInputV1) (row : ImportRow)
+    (functionIndex clauseIndex : Nat) : Except String (Option (CanonicalClauseV1 input row)) :=
+  match h : input.read with
+  | .error reason => .error reason
+  | .ok contract =>
+    if !row.admissionChecked || input.provenance.legacyFixture || row.sourceId < 0 then .ok none
+    else match hf : (contract.funs ++ contract.ctor.toList)[functionIndex]? with
+    | none => .ok none
+    | some f =>
+      if hi : f.sourceId = row.sourceId then
+        if hn : f.name = row.name then
+          if hs : f.sourceSignature = row.sourceSignature then
+            match hc : f.specClauses[clauseIndex]? with
+            | none => .ok none
+            | some clause => .ok (some ⟨contract, h, functionIndex, f, hf, hi, hn, hs,
+                clauseIndex, clause, hc⟩)
+          else .ok none
+        else .ok none
+      else .ok none
+
+/-- Dropping the clause ledger returns the exact original reader result. -/
+def CanonicalClauseV1.forget {input : CanonicalImportInputV1} {row : ImportRow}
+    (_clause : CanonicalClauseV1 input row) : Except String SolcContract := input.read
+
+theorem canonicalClauseV1_forget {input : CanonicalImportInputV1} {row : ImportRow}
+    (clause : CanonicalClauseV1 input row) : clause.forget = .ok clause.contract :=
+  clause.contractEquation
+
 end Solidity.Frontend
