@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/V08/CallableBodyPremises.lean:Solidity.Lowering.V08.CallableBodyPremises.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CallableBodyPremises.lean:Solidity.Lowering.V08.CallableBodyPremises.Inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
