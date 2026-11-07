@@ -35,7 +35,7 @@ STATES = {
     "created": {"start-intent", "cleanup-unresolved", "drain-observed"},
     "start-intent": {"started", "start-unknown"},
     "started": {"kernel-observed", "cleanup-unresolved"},
-    "kernel-observed": {"worker-intent", "cleanup-unresolved"},
+    "kernel-observed": {"worker-intent", "cleanup-unresolved", "drain-observed"},
     "worker-intent": {"exit-observed", "worker-unknown"},
     "exit-observed": {"drain-observed", "cleanup-unresolved"},
     "create-unknown": {"cleanup-unresolved"},

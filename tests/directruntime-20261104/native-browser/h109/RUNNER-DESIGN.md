@@ -258,3 +258,43 @@ The source component is independent of toolchain, package, cache, image and CI
 identity authentication, resource containment, deadline enforcement and cleanup.
 It does not execute workers or authorize slow proof or timing replays. H127 needs
 all of those layers and the five-module A/B before runner acceptance.
+
+
+## Fixed Docker lifecycle diagnostic
+
+`docker-probe.py` is a fixed sleep-only diagnostic, with no arbitrary worker
+command or mount interface. The CLI holds the repository writer lock. It pins
+its source dependencies and local Docker client/socket/boot/daemon identity,
+uses an immutable local image ID without pulling, and checks the exact recipe
+and full-ID/name/nonce/image/plan ownership before destructive operations.
+The container has no network, bind mounts, extra capabilities or writable root;
+its requested memory/swap and single-CPU affinity/quota are checked in the
+PID-derived kernel hierarchy before a drain observation is eligible.
+
+A bounded background collector pins visible ancestor descriptors and samples
+reserve and configuration through cleanup. Recorded breaches or drift abort
+foreground calls. Cleanup continues despite a reserve stop. Monitoring is
+frozen, final-sampled and checked before a positive observation is recorded;
+sampling does not prove the absence of pressure between samples or reveal
+hidden ancestors. Docker calls have bounded output/time. One cleanup deadline
+includes daemon identity checks, stop/removal and pinned cgroup disappearance.
+A watchdog expiry is unresolved, never successful cleanup.
+
+Ambiguous creation attempts an exact-name lookup followed by full-ID/nonce
+ownership validation. An empty lookup does not prove no late creation. Signals,
+malformed responses, unknown ownership or unavailable kernel pins retain the
+active barrier. No name-only mutation, forced removal of unknown ownership or
+approval override is exposed. A positive diagnostic records only removal of
+this owned Docker identity and its pinned kernel group. The journal deliberately
+retains its post-create barrier, including after this observation. Production
+worker containment, authenticated cleanup/barrier release, sealed inputs,
+measurement provenance, CI and five-module A/B remain separate obligations.
+
+
+The diagnostic CLI also writes a one-shot reservation in the original checkout
+before container creation. It never removes or replaces that reservation;
+a different output directory cannot bypass an unresolved diagnostic. The
+component exposes no next-worker or force-reset operation. Any recovery needs
+its own reviewed protocol and cannot infer kernel drain from Docker command
+success or current path absence alone. Failure diagnostics retain the last
+kernel predicate facts when available; missing historical facts remain unknown.
