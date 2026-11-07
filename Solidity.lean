@@ -3261,6 +3261,7 @@ import Solidity.Lowering.P8.ShapeSchema
 import Solidity.Lowering.P8.ShapeSchemaControls
 import Solidity.Lowering.P8.SourceAllSettings
 import Solidity.Lowering.P8.SourceAstCompoundTypes
+import Solidity.Lowering.P8.SourceAstCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstParameters
 import Solidity.Lowering.P8.SourceAstStatements

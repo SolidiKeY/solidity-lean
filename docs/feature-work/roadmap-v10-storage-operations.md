@@ -1141,3 +1141,32 @@ blocked try support, original/consolidated audit/extraction/generic/backfill
 queues and full gates. Actual caller elaboration additionally awaits the exact
 H16 producer question above. General mapping-bearing H24, Y04 physical,
 separate4.35 trust/timing disposition and all historical STOPs remain separate.
+
+### C247 — ordered container conversion correspondence
+
+SourceAstCorrespondence adds a relational Each proposition over existing lists,
+independent of mapM. Both directions of successful Except traversal are proved:
+every child has its exact successful result in order; no child can be dropped,
+swapped or skipped after failure. A generic typed-container builder law applies
+to the unchanged block and Source-unit readers, exposing their exact node-kind
+and child-array fields. These are container-level syntax laws relative to the
+individual readers, not an independent proof that each child reader matches
+the compiler, accepted-artifact binding, Source meaning, origin or admission.
+The field hypotheses identify input syntax; they add no Source success filter.
+
+The length law is axiom-free. The six traversal/container proofs use propext
+and Quot.sound through the existing lawful-monad mapM equations. Generic kernel
+controls cover positive ordered traversal and omission/swap/failure rejection;
+three are axiom-free and the omitted-child control uses propext. All have exact
+measured guards. No new per-case Source fixture, existing converter edit, axiom
+declaration, budget, exclusion or frozen statement change was introduced.
+Unused simp arguments found by the linter were removed without disabling it.
+
+Independent read-only finder and skeptic found no findings and confirmed the
+limited correspondence scope without using Lean/server/build. Required actual
+Source whole-unit elaboration remains failed as recorded at C246; this syntax
+correspondence is not its substitute. H16 V10-C246-SOURCE-TRY support, general
+mapping-bearing H24 disposition, Y04 physical and separate4.35 trust/timing
+waits remain distinct. Local child-reader correspondence, accepted-artifact /
+Source-byte binding, original and consolidated proof/backfill/coverage and all
+full final gates remain open. No prior STOP or producer hold is released.
