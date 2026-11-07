@@ -2585,3 +2585,21 @@ skeptic checked roles, file effect, hashes and history preservation without Lean
 or a server. Evidence hashes are in
 `tests/h55/module-times/examples-migration-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Bytecode selection witness observations
+
+`bytecode_witness_controls.py` records two previously unreferenced bytecode
+selection sources with hashes and the audit document hash. One describes
+Boolean-binding joint witnesses and supported gasless intrinsic IR controls; the
+other describes source/encoding and checked terminal-slice failure witnesses.
+These do not establish a native byte loader, charged execution, fork agreement
+or general Source adequacy. Current invocation, inputs, effects and outcomes
+remain unresolved; this is supplied-subset evidence.
+
+At `ec6c7440857cb4b55872b1c33be7889921d8d7e1`, the refreshed static index has
+823 candidates, 630 with supplied current references and 193 without; ten retain
+historical references for review. No candidates were added, changed or removed
+since the preceding snapshot. Independent read-only finder and skeptic checked
+roles, hashes and history preservation without Lean or a server. Evidence hashes
+are in `tests/h55/module-times/bytecode-witness-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
