@@ -2000,3 +2000,23 @@ reviewed producer repair; it does not reopen the answered reader/context
 factoring authorizations. No located diagnostic, positioned trace, completed
 parity row or original final-gate pass follows from this foundation. New
 receipts and reviews are kept in the private evidence repository under H145.
+
+
+### Native contribution-menu lifecycle
+
+The existing runner now accepts a bounded `contribution-menus` suite. It opens
+native context menus with mouse input and captures the source editor, unrelated
+plaintext editor, untitled editor, source-tab context and restored source editor
+for each pinned target. It records ordered labels, raw disabled attributes,
+geometry, source/session ownership and before/after AX/DOM/PNG endpoints. It
+invokes no product build/run/test/verification/trace actions. Preparation keeps
+the original three-second deadline; failed captures retain their event audit.
+
+The paired Linux observation retains differences: local verification/status
+actions and grouping differ; Dafny offers Copy trace; Dafny's untitled submenu
+is visible while the local file-scheme guard suppresses it. No predicate was
+weakened to erase those differences. The tab phase observes a different native
+context, not an isolated editorTextFocus proof. Untrusted-window and macOS
+coverage, raster/ABA guarantees, full action lifecycle and both independent row
+judgments remain missing. These menu rows stay partial. Evidence and failed
+launch receipts remain off branch under H145.

@@ -225,7 +225,8 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='verification-time-limit'){errors.push(...require('./verification-limit.cjs').errors(result.scenarios.find(s=>s.id==='native-verification-time-limit')?.observation,config.runId,config.operationTimeoutMs,config.timeLimitReferenceImages,config.target));
+  if(config.suite==='contribution-menus'){errors.push(...require('./menu-lifecycle.cjs').validate(result.scenarios.find(s=>s.id==='native-contribution-menus')?.observation,config.runId,config.target,config.workspace));
+  }else if(config.suite==='verification-time-limit'){errors.push(...require('./verification-limit.cjs').errors(result.scenarios.find(s=>s.id==='native-verification-time-limit')?.observation,config.runId,config.operationTimeoutMs,config.timeLimitReferenceImages,config.target));
   }else if(config.suite==='testing-symbols'){errors.push(...require('./hierarchy-lifecycle.cjs').renderedErrors(result.scenarios.find(s=>s.id==='native-compiler-testing')?.observation,config.runId));
   }else if(config.suite==='trace-unavailable'){errors.push(...require('./trace-presentation.cjs').unavailableErrors(result.scenarios.find(s=>s.id==='native-trace-unavailable')?.observation,config.runId));
   }else if(config.suite==='dafny-command-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-command-output')?.observation;errors.push(...require('./dafny-command-output.cjs').errors(o,config.runId));
