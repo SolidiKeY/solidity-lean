@@ -1010,3 +1010,68 @@ documentation paths pass (133 ambiguous but resolving citations). Current
 layer gate remains RED with12 external edges. Global pins have0errors,
 268unrecorded and99baselined changes;28scoped records remain proposals.
 No full-gate or performance acceptance follows.
+
+
+## Exact dependent hypothesis-domain witnesses for gate contracts
+
+Published master dee876457 was adopted at4cf61672 before this checkpoint.
+The new exact_domains.py renderer reuses the existing HypothesisDomains.lean
+elaborator prefix byte-for-byte (SHA27ba183e9fc5db42bf9e4733d31ce7f988cbc564db4a5b7ded7405b239a1ebe6).
+Its implementation is not duplicated or changed in the repository, and the
+original consumer/imports remain untouched. Generated Lean imports only Lean
+and the frozen HeadGate/WordGate modules; it does not build unrelated composition
+fixtures or execute a census. The producer leaf sources must equal frozen c6f550
+bytes; manifests bind generator, original elaborator, fixture and emitted source.
+
+Four exact, kernel-derived dependent-existential domains are now witnessed:
+HeadGateCertificate.executed, WordGateCertificate.executed,
+WordGate.correspondence and HeadGate.semantic_rejection. The shared elaborator
+retains every syntactic forall binder, including implicit program parameters,
+certificate self and proof arguments; only the original conclusion becomes
+True. The head-rejection fixture actually derives its rejected-run premise.
+The cval fixture uses a nonzero zero-padded abstract offset with the same word,
+frame and input, without claiming native loading, span validity or success.
+These are exact local premise-feasibility proofs, not original conclusions,
+source/kernel census joins, owner attribution or witness-ledger acceptance.
+No uncovered global inventory counts were reduced.
+
+The fixture is trusted, independently reviewed Lean code. Regex/token checks are
+not a sandbox against arbitrary Lean metaprogramming or parser overrides.
+Acceptance binds the reviewed fixture, pinned elaborator, generated source,
+retained imports and native proof result. Eight new rendering/drift/output-policy
+regressions bring the tool suite to71 tests; unit tests do not replace the proof.
+Generated Lean and manifests stay off Git under H44; committed source is the
+renderer and proof fixture. No library module, new lowering framework, producer,
+frozen statement, premise, exclusion or budget was changed.
+
+Check1 failed because the fixture used a convenience name outside its minimal
+imports; rejected source/manifest/log remain separate, with no source sorry.
+The explicit one-word parameter literal fixes it; repository tactic probes
+confirm its36-byte extent. Check2 passes in4.417s with empty diagnostics and
+four exact standard-only axiom guards; both runtime monitors pass. Same original
+generic epoch/deadline01:11:01.069665→05:11:01.069665UTC, no reset/prerequisite
+build/PowerBounds retry. No module here exceeds60s; historical61.994s head-check
+receipt and all package/performance limits remain open. Full703/190core/37Bridge,
+metadata/ledger, Source/native, gas/fork, Bridge and package gates are not passed.
+Evidence: /workspace/parallel-20261103/executable-bytecode/exact-gate-domains/.
+
+The final fixture adds two expected elaboration refusals: HeadGate.program is
+not a theorem, and Eq.symm has uninstantiated universe parameters. Final check3
+passes in4.601s, empty diagnostics, four standard-only axiom guards plus both
+refusal controls. Earlier failed and corrected programs/manifests remain
+immutable and separate. No unrelated imports or proof policy was relaxed.
+Pure selected-import rechecking confirms234 repository source/product bindings
+against the retained625-record report and frozen graph. The saved terminal
+status stays RED; this is not process attestation or703-source-gate acceptance.
+
+Independent read-only finder and skeptic final reviews pass, including the
+two refusal controls, pinned source/fixture/manifest/native-result reconciliation
+and trusted-fixture limitation. The71 tests, trust/reachability, generated
+registries, whitespace and documentation paths pass (135 ambiguous resolving
+references). Existing global pin/layer inputs did not change from the prior
+checkpoint: their268 unrecorded changes/12 external edges remain RED, with
+prior receipts retained. No new global pin registration is claimed for the
+off-Git proof program. Its four guarded proofs require the explicit renderer
+and recorded guarded native check; Python tests and the existing six-file
+standalone verifier roster do not replace that check. Full final validation,
+performance, metadata/ledger coverage and all producer waits remain open.

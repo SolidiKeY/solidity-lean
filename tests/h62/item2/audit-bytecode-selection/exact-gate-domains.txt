@@ -1,0 +1,64 @@
+open Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+private def sampleContract : Solidity.Contract := {vars := []}
+private def sampleLabel : Fin W := wmod 13
+private def sampleWord : Fin W := wmod 0
+private def sampleMachine : Machine := {Machine.init with mem := fun _ => .val sampleWord}
+private def sampleInput : Solidity.AbiEntry.Input := {data := [], free := 0}
+private def sampleParameters : List Solidity.AbiEntry.Param := [{shape := .word .bool, loc := .value}]
+
+/-- Includes the program and global certificate self as well as every input/proof binder. -/
+theorem head_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadGateCertificate.executed := by
+  exact ⟨HeadGate.program, HeadGate.certificate, sampleContract, 7, sampleParameters,
+    sampleLabel, HeadGate.compiled sampleContract 7 sampleParameters sampleLabel,
+    HeadGate.selected sampleContract 7 sampleParameters sampleLabel,
+    sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- Includes one common program/self/result/frame, not separately inhabited structures. -/
+theorem word_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.WordGateCertificate.executed := by
+  exact ⟨WordGate.program, WordGate.certificate, sampleContract, 7, .bool,
+    sampleLabel, WordGate.compiled sampleContract 7 .bool sampleLabel,
+    WordGate.selected sampleContract 7 .bool sampleLabel,
+    sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- The exact loaded-word hypothesis is witnessed at a nonzero zero-padded offset.
+This is premise feasibility, not native loading or successful decoding. -/
+theorem word_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.correspondence := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel,
+    WordGate.compiled sampleContract 7 .bool sampleLabel,
+    WordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine,
+    sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- The stated rejected-run premise is actually derived for this short input. -/
+theorem head_semantic_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.semantic_rejection := by
+  have rejected : Solidity.Evm.run
+      (HeadGate.compiled sampleContract 7 sampleParameters sampleLabel).code sampleMachine = .revert :=
+    (HeadGate.rejected_iff sampleContract 7 sampleParameters sampleLabel _
+      (HeadGate.selected sampleContract 7 sampleParameters sampleLabel)
+      sampleMachine sampleWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel,
+    HeadGate.compiled sampleContract 7 sampleParameters sampleLabel,
+    HeadGate.selected sampleContract 7 sampleParameters sampleLabel,
+    sampleMachine, sampleWord, rfl, sampleInput, by decide, 0, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_certificate_executed_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_certificate_executed_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_correspondence_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_semantic_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_semantic_rejection_domain
+
+/-- error: hypothesis audit: target is not a theorem -/
+#guard_msgs in
+#check hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.program
+
+/-- error: hypothesis audit: universe-polymorphic target needs explicit review -/
+#guard_msgs in
+#check hypotheses_of% Eq.symm
