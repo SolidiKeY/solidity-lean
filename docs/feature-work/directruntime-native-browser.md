@@ -856,3 +856,29 @@ and changes no production Lean source, theorem, budget, trusted boundary or
 historical verdict. Syntax/identity controls and independent read-only reviews
 are recorded in the portable preservation receipt. No Lean build or unchanged
 stopped benchmark was rerun for these documentation/tooling changes.
+
+
+## Narrow browser-negative continuation
+
+The maintained environment checks.sh and remaining-checks.sh no longer use a
+blanket browser-negative failure bypass. A read-only
+[continuation guard](../../tests/directruntime-20261104/native-browser/environment/known-stack-continuation.py)
+permits independent checks to continue only when the sole failed control is the
+known invariantCountsToBound source with the documented WASM stack-overflow
+error. It requires the failed gate exit, bounded resources, complete requests,
+matching worker/binary and request identities, and healthy sibling verdicts.
+Other errors, missing results, timeouts, resource stops, changed source or
+unexpected sibling outcomes stop the wrapper. The original browser gate stays
+failed; no STOP or acceptance requirement is released.
+
+Both original scripts remain byte-identical in scripts/historical and are
+indexed against their sealed archive members. The maintained copies are
+explicitly distinct from those historical snapshots. The guard reconstructs request hashes from retained AST bytes, checks sources
+against the six retained baseline controls and tracked ClosedSpecs, and pins
+the runner plus reviewed failing fixture
+and wire. Offline tests use the
+retained receipt and twenty-six mutations; they run no browser/runtime or stopped
+workload. The first test harness attempt mistook pop()'s return value for an
+exit status; explicit status handling fixed the test setup. This was not a
+browser/runtime rerun or a guard-acceptance defect. Existing seals remain
+unchanged; no Lean source, theorem, budget or trust boundary changed.
