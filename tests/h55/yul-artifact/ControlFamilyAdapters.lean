@@ -1,3 +1,6 @@
+import Solidity.Yul.Compilation.SwitchSequenceCompletion
+import Solidity.Yul.Compilation.SwitchCompletion
+import Solidity.Yul.Compilation.SwitchCompilationControls
 import Solidity.Yul.Compilation.StructuredSequenceCompletion
 import Solidity.Yul.Compilation.StructuredSequenceCompilationControls
 import Solidity.Yul.Compilation.SequenceCompletion
@@ -1097,3 +1100,156 @@ end Controls
 #print axioms Controls.refused_original
 #print axioms Controls.source_completes
 end Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence
+
+/-! One-case/default switches instantiate shared certificates and optional
+preparation with original full-word selector and scoped arm evidence. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.Switch
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : SwitchCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code a.source_to_model (SwitchCompletion.model_to_source a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) := Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : SwitchCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+def prepare (a : SwitchCompilation.Compiled fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.afterSelection SwitchCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+theorem prepared (a : SwitchCompilation.Artifact fuel stmt) :
+    prepare a.compiled = some (encode a) :=
+  Artifact.afterSelection_some _ _ _ a.compiled a.block a.code a.emitted a.selected
+
+namespace Controls
+theorem selected : prepare SwitchCompilation.Controls.artifact.compiled =
+    some (encode SwitchCompilation.Controls.artifact) := prepared _
+
+theorem matching (c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode SwitchCompilation.Controls.artifact).code
+      {m with stack := coreWord SourceLoop.Controls.dirty :: coreWord c :: caller} =
+      .ok {m with stack := coreWord (ScopedControlCompilation.Controls.update SourceLoop.Controls.dirty) :: coreWord c :: caller} 0 := SwitchCompilation.Controls.matching_target c m caller
+
+theorem default (b c : Scalar.Word) (different : b.toFin ≠ SourceLoop.Controls.dirty.toFin)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode SwitchCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: coreWord c :: caller} =
+      .ok {m with stack := coreWord b :: coreWord c :: caller} 0 :=
+  SwitchCompilation.Controls.default_target b c different m caller
+
+theorem low_alias_default (c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode SwitchCompilation.Controls.artifact).code
+      {m with stack := coreWord SwitchCompilation.Controls.lowOnly :: coreWord c :: caller} =
+      .ok {m with stack := coreWord SwitchCompilation.Controls.lowOnly :: coreWord c :: caller} 0 :=
+  SwitchCompilation.Controls.low_alias_target c m caller
+
+def refusedSource : Stmt [] [] ⟨false, false⟩ 17 := .switch (.local 16) (.cons 0 .skip .nil) .skip
+def refused : SwitchCompilation.Compiled 1 refusedSource :=
+  (SwitchCompilation.compile 1 refusedSource).get (by rfl)
+theorem refused_emission : refused.emit = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refused).artifact = none :=
+  Artifact.afterSelection_first_none SwitchCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩)
+    refused refused_emission
+
+theorem refused_original : Artifact.recoverPreparation
+    (Artifact.toPreparationImage prepare refused) = refused :=
+  Artifact.preparation_source_roundtrip prepare refused
+
+theorem source_completes : evalStmt 3 .nil True.intro refusedSource refused.profile
+    (sourceLocals (Vector.replicate 17 0)) =
+      some ⟨sourceLocals (Vector.replicate 17 0), .normal⟩ := rfl
+#guard (SwitchCompilation.compile 0 refusedSource).isNone
+#guard (SwitchCompilation.lower 10 SwitchCompilation.Controls.multipleSource).isNone
+#guard (SwitchCompilation.lower 10 SwitchCompilation.Controls.emptySource).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms prepare
+#print axioms prepared
+#print axioms Controls.selected
+#print axioms Controls.matching
+#print axioms Controls.default
+#print axioms Controls.low_alias_default
+#print axioms Controls.refused_emission
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.Switch
+
+/-! The common joined-sequence certificate retains full original component
+data in its exact image; phase reflection remains explicitly available. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.SwitchSequence
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n f g : Nat} {left right : Stmt [] [] c n}
+
+def encode (a : Compilation.SwitchSequence.Artifact f g left right) : Artifact 0 (.seq left right) :=
+  Artifact.ofZero a.profile a.code a.source_to_model (by
+    intro locals m final caller skip ran
+    obtain ⟨ha, hb, mid, out, first, second, boundary, source, done, frame⟩ :=
+      SwitchSequenceCompletion.model_to_source a locals m final caller skip ran
+    exact ⟨max ha hb+1, out, source, done, frame⟩)
+
+abbrev Image (f g : Nat) (left right : Stmt [] [] c n) :=
+  Artifact.Image (encode (f := f) (g := g) (left := left) (right := right))
+
+theorem source_roundtrip (a : Compilation.SwitchSequence.Artifact f g left right) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image f g left right) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem code_preserved (a : Compilation.SwitchSequence.Artifact f g left right) : (encode a).code = a.code := rfl
+
+theorem components_preserved (a : Compilation.SwitchSequence.Artifact f g left right) :
+    (Artifact.fromImage (Artifact.toImage encode a)).left = a.left ∧
+    (Artifact.fromImage (Artifact.toImage encode a)).right = a.right := ⟨rfl, rfl⟩
+
+/-- Preserve the stronger original observation of both source phases and the
+actual intermediate machine frame, not just the common joined result. -/
+theorem phase_reflection (a : Compilation.SwitchSequence.Artifact f g left right)
+    (locals : Vector Scalar.Word n) (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)
+    (ran : Evm.run (encode a).code {m with stack := locals.toList.map coreWord ++ caller} = .ok final skip) :
+    ∃ (ha hb : Nat) (mid out : Vector Scalar.Word n),
+      evalStmt ha .nil True.intro left a.left.compiled.profile (sourceLocals locals) =
+        some ⟨sourceLocals mid, .normal⟩ ∧
+      evalStmt hb .nil True.intro right a.right.compiled.profile (sourceLocals mid) =
+        some ⟨sourceLocals out, .normal⟩ ∧
+      Evm.run a.left.code {m with stack := locals.toList.map coreWord ++ caller} =
+        .ok {m with stack := mid.toList.map coreWord ++ caller} 0 ∧
+      evalStmt (max ha hb+1) .nil True.intro (.seq left right) a.profile (sourceLocals locals) =
+        some ⟨sourceLocals out, .normal⟩ ∧
+      skip = 0 ∧ final = {m with stack := out.toList.map coreWord ++ caller} :=
+  SwitchSequenceCompletion.model_to_source a locals m final caller skip ran
+
+namespace Controls
+theorem ordered (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode Compilation.SwitchSequence.Controls.artifact).code
+      {m with stack := coreWord 0 :: coreWord 0 :: caller} =
+      .ok {m with stack := coreWord 0 :: coreWord 6 :: caller} 0 :=
+  Compilation.SwitchSequence.Controls.target_done m caller
+
+#guard (Compilation.SwitchSequence.lower 0 12 MultiSwitchCompilation.Controls.source
+  Compilation.SwitchSequence.Controls.second).isNone
+#guard (Compilation.SwitchSequence.lower 12 0 MultiSwitchCompilation.Controls.source
+  Compilation.SwitchSequence.Controls.second).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_preserved
+#print axioms components_preserved
+#print axioms phase_reflection
+#print axioms Controls.ordered
+end Solidity.Yul.Compilation.H55ControlFamilies.SwitchSequence

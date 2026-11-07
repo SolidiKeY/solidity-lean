@@ -270,6 +270,33 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence",
       "adapter_kind": "selected_artifact",
       "boundary": "Shared zero-prefix certificate and exact Image retain actual recursively changing-context source/profile/block/code evidence and owner execution/reflection laws. Genuine taken update, false identity and scope retirement controls; no native/resource/admission closure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SwitchCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Switch",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Shared actual emission/selection preparation and exact PreparationImage retain whole raw switch/condition/scoped arm data. Real source-completing local16 selector emission refusal remains None without runtime verdict; existing zero/multiple-case exclusions preserved."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SwitchCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Switch",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix Artifact derives both directions from original one-case/default source/model laws. Exact Image retains source/profile/block/code and full-word selector behavior; dirty match, default identity and low-bits-alias default controls preserve arbitrary caller/machine frames."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SwitchSequence.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.SwitchSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix joined-sequence Artifact retains both original components and independent compiler fuels through exact Image. Explicit phase_reflection preserves both independent source horizons, intermediate raw source locals and actual intermediate machine boundary, beyond joined completion. Actual ordered 0-to-3-to-6 dispatch retained."
     }
   ]
 }
