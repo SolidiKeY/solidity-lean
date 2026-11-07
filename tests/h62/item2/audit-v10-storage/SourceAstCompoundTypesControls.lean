@@ -1,8 +1,9 @@
-import Solidity.Lowering.P8.SourceAstParameterCorrespondence
+import Solidity.Lowering.P8.SourceAstTypeCorrespondence
 
 /-! Structural conversion regressions, not Source acceptance/execution proofs.
 Regression purpose: retain array bound and mapping names, nested function
-parameter location, anonymous/named qualifiers, and explicit refusal of malformed/payable mapping keys. -/
+parameter location, anonymous/named qualifiers, nonempty function results
+and function qualifiers, and explicit refusal of malformed/payable mapping keys. -/
 namespace H62.StorageAudit.SourceAstCompoundTypesControls
 open Lean Solidity.Source Solidity.Lowering.P8.SourceAstCompoundTypes
 
@@ -15,6 +16,12 @@ def parameterNode (ty : Json) : Json := Json.mkObj [
   ("name", .str "xs"), ("storageLocation", .str "memory")]
 def params (values : List Json) : Json := Json.mkObj [
   ("nodeType", .str "ParameterList"), ("parameters", .arr values.toArray)]
+
+def functionNode (results : Json) (visibility stateMutability : String) : Json :=
+  Json.mkObj [("nodeType", .str "FunctionTypeName"),
+    ("parameterTypes", params [parameterNode (arrayNode (elementaryNode "string") .null)]),
+    ("returnParameterTypes", results), ("visibility", .str visibility),
+    ("stateMutability", .str stateMutability)]
 
 def mappingShape : Syn .typeName → Bool
   | .mapping (.elem (.int false 256 _) _) (some "key")
@@ -36,10 +43,7 @@ def check : Except String Unit := do
     ("keyType", elementaryNode "uint256"), ("keyName", .str "key"),
     ("valueType", arrayNode (elementaryNode "bool") bound), ("valueName", .str "values")]
   unless mappingShape (← typeName 16 mapping) do throw "mapping/bound changed"
-  let fn := Json.mkObj [("nodeType", .str "FunctionTypeName"),
-    ("parameterTypes", params [parameterNode (arrayNode (elementaryNode "string") .null)]),
-    ("returnParameterTypes", params []), ("visibility", .str "external"),
-    ("stateMutability", .str "view")]
+  let fn := functionNode (params []) "external" "view"
   unless functionShape (← typeName 16 fn) do throw "nested function parameter changed"
   for node in [mapping, fn] do
     unless !(typeName 1 node).isOk do throw "depth exhaustion ignored"
@@ -58,6 +62,18 @@ def check : Except String Unit := do
       ("typeName", elementaryNode "uint256"), ("name", .str name), ("storageLocation", .str loc)]
     unless parameterShape expectedName expectedLoc (← parameterWith (typeName 16) node) do
       throw "parameter name or qualifier changed"
+
+  -- Guard a real result list and qualifier alternatives, not just empty returns.
+  for (vis, stateMut, expectedVis, expectedMut) in [
+      ("internal", "nonpayable", Visibility.internal, (none : Option Mutability)),
+      ("external", "payable", Visibility.external, some Mutability.payable)] do
+    let signature := functionNode (params [parameterNode (elementaryNode "string")]) vis stateMut
+    match ← typeName 16 signature with
+    | .fnType _ actualVis actualMut
+        (.cons (.param (.elem .string) (some .memory) (some "xs")) .nil) =>
+      unless decide (actualVis = some expectedVis ∧ actualMut = expectedMut) do
+        throw "function qualifier changed"
+    | _ => throw "function result list changed"
 
 #eval match check with
   | .ok _ => IO.println "compound type structure and refusal controls passed"

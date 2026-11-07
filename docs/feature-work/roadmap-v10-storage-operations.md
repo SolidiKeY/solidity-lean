@@ -1308,3 +1308,31 @@ artifact binding and remaining correspondence/coverage/full gates remain open.
 The historical C246 manual failed probe remains outside automated gates; H16
 exact try support, separate mapping-bearing H24, Y04 physical,4.35 trust/timing
 waits and all STOPs remain unchanged. Original/consolidated goal not complete.
+
+### C254 — mapping and function-type correspondence
+
+SourceAstTypeCorrespondence proves optional-name absence/spelling, exact
+converted mapping key/value and both names, and function argument/result lists,
+visibility and mutability. C252 ordered-list correspondence applies to both
+parameter readers. Exact field/child-output premises describe supported syntax,
+not Source feasibility, admission, provenance or execution. The two name laws
+are axiom-free; mapping/function laws use propext and Quot.sound. All four
+measured guards pass. No reader/decoder, protected Source, frozen statement/
+interface/premise/budget/exclusion, axiom declaration or trust policy changed.
+An initial reserved binder spelling failed; renaming it fixes syntax without
+changing the statement. Its failed receipt is retained, not accepted.
+
+Existing compound controls retain all earlier cases. The empty-result function
+fixture is factored through a generic builder without changing its data; added
+checks retain a nonempty string-memory result and internal/nonpayable versus
+external/payable qualifiers. These are syntax checks, not accepted Source
+program witnesses. No Source case copies or phase folders were added. C254 lane
+history records read-only finder/skeptic reviews with no findings; neither used
+Lean, its server or build commands.
+
+Actual Source origin/H24/lifecycle/S03-PANIC41 and artifact binding remain open
+local H121b duties. The C246 manual failed probe is outside automated gates and
+is not replaced by these structural laws. H16 exact library try support,
+separate mapping-bearing H24, Y04 physical and 4.35 trust/timing waits and all
+STOPs remain. Original/consolidated proof/backfill/coverage and full gates remain
+unfinished; no semantic producer or whole-lane completion is delivered here.
