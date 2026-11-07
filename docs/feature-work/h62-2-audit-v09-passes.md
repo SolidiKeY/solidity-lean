@@ -1643,3 +1643,18 @@ reports four errors from the existing frozen/live bitwise statement drift;
 the unmodified committed census source reproduces that same refusal. No missing
 archived JSON is involved, no guard/expected assertion was changed and no
 frozen inventory was repinned. This remains an open acceptance failure.
+
+
+The emitted-reference companion now also proves stable-width relocation of
+section-relative references using the existing relocated-offset and assembler
+reference laws. Both checked assemblies and the stable-width premise are
+retained. The actual emitted relative values stay equal; scanner validity uses
+the new base plus that value. A leading-tag fixture proves successful assembly
+uniformly at positive bases below256 and supplies a genuine delta15 witness
+from base1to16. Its base0-to16 control refutes stable widths, not assembly
+success. Existing emitted-reference statements and production definitions are
+unchanged, with no new interface. Verification, provenance, the formatting-only
+failed guard and retained timing hold are in the private H145 evidence directory
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-relative-reference-publish-20261107/`.
+This adds no selected-row credit and no jump-execution, Source/native or full
+validation claim. All prior holds and historical-evidence waits remain open.
