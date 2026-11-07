@@ -2046,3 +2046,21 @@ read-only finder and skeptic checked roles, hashes and history preservation
 without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/v08-audit-evidence.sha256`. This non-atomic static
 observation does not establish runtime coverage or acceptance.
+
+## Language audit observations
+
+`language_audit_controls.py` records four previously unreferenced language
+candidates with source hashes and the audit feature document hash. They cover
+ABI entry model controls, feature-catalog witnesses, feasibility of explicitly
+listed frozen theorem telescopes, and joint lattice/arithmetic hypotheses.
+The telescope helper does not prove the original theorem conclusions. Current
+driver, exact inputs, effects and outcomes remain unresolved. This supplied
+subset does not establish compiler correctness, progress or frontend coverage.
+
+At `a3b922c41f3b8d7a58385a521039e9a1004e7397`, the refreshed static index
+has 765 candidates, 515 with supplied current references and 250 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/language-audit-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
