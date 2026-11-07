@@ -1355,3 +1355,25 @@ not establish equal members or semantics. Evidence is outside Git under
 
 The repository documentation-path gate remains failed on the same missing
 witness reference in the upstream audit-v09-passes document noted above.
+
+### Initializer report replay
+
+Two bounded default-mode scans with the same tree, scanner, selection,
+registry and caller-pinned previous report took 118.580 and 124.087 seconds
+and produced byte-identical reports, SHA256
+`1f589f93859bf026421c9e3ef06bffc815f0dc3f73c1ef0c04db30b3ea7b52be`.
+Both selected 7,445 files and recognized 124,822 declarations, with no file
+errors or unmatched globs; all recognized owners remain unknown. All 26
+initializer rows retain statement and body rejection. Relative to the older
+caller-pinned report, 76 inputs were added, 11 changed and none removed. The
+scanner and tree both changed from that baseline, so candidate deltas combine
+tool and input effects. The prior pin identifies bytes, not an authenticated
+producer.
+
+No opt-in fixture or project signature binding was invoked. Finder and skeptic
+reviewed the replay without Lean. The 8 GiB cap and sampled reserve monitor
+did not trigger a resource stop; sampling and cache advice do not prove
+continuous or identical operating-system conditions. These runs demonstrate
+repeatability for this snapshot, not complete census, Lean semantics or live
+ownership. Full reports and timings are outside Git in the
+initializer-inventory evidence directory.
