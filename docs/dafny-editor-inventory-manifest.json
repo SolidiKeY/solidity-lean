@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
   "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
-  "sourceHead": "93c4864eb4776537f2579578a145d9c24d2ae869",
+  "sourceHead": "e31c419c538bcc7012fd9f3e90f2949a3a5af45a",
   "repository": "/workspace/solidity-lean",
   "fileCount": 1,
-  "uncompressedBytes": 723292,
+  "uncompressedBytes": 726497,
   "rowCount": 489,
   "frozenRowCount": 270,
   "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
   "archive": {
-    "path": "/workspace/dafny-parity-custom-import-20261107/inventory/bulk.tar.gz",
-    "bytes": 44703,
-    "sha256": "49f32bca681549cba670133be436948884210906d878bb2ba461afa51233095b"
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/inventory-final/bulk.tar.gz",
+    "bytes": 45727,
+    "sha256": "8f81a454632830a4b5768252cb426e160b3813bfdcc484fa044f44dd3ebc6e0f"
   },
   "index": {
-    "path": "/workspace/dafny-parity-custom-import-20261107/inventory/files.json",
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/inventory-final/files.json",
     "bytes": 186,
-    "sha256": "6edc5f69c50c47d70a2cded409ed5063aece6d132618b14c3559363de8cd2581"
+    "sha256": "8c8568c7cb6727cda2af32dfeff2ef4ddfa0c7ecb7b9ec43664cd88d434c758d"
   },
   "rawInventory": {
-    "path": "/workspace/dafny-parity-custom-import-20261107/inventory/inventory.json",
-    "bytes": 723292,
-    "sha256": "6830fb6d373af42ae6f31f2bf3c5dc3fd593a0b6eb737e88f2e6cad8d775955a"
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/inventory-final/inventory.json",
+    "bytes": 726497,
+    "sha256": "c2352b37931de8f644a216119e700a9d07810ff4813ff6e81aa9ad62b44d1216"
   },
   "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
   "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
@@ -35,6 +35,9 @@
     "docs/dafny-native-hover-evidence-manifest.json",
     "docs/dafny-candidate-hook-evidence-manifest.json",
     "docs/dafny-spec-origins-evidence-manifest.json",
-    "docs/dafny-custom-import-evidence-manifest.json"
+    "docs/dafny-custom-import-evidence-manifest.json",
+    "docs/dafny-output-lifecycle-evidence-manifest.json",
+    "docs/dafny-output-shutdown-evidence-manifest.json",
+    "docs/dafny-output-lifetime-evidence-manifest.json"
   ]
 }

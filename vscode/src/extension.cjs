@@ -12,6 +12,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   const diagnostics = vscode.languages.createDiagnosticCollection('solidity-lean');
   const controller = vscode.tests.createTestController('solidityLean', 'Solidity Lean');
   const output = vscode.window.createOutputChannel('Solidity Lean');
+  let outputClosed=false;const outputOwner={dispose(){if(!outputClosed){outputClosed=true;output.dispose();}}};
   const active = new Map(), saving = new Map(), reports = new Map(), metadata = new Map(), documents = new Map();
   let editorServices;
   const testingTree=require('./testing-tree.cjs').install(vscode,controller,metadata),symbolSnapshots=new Map();
@@ -22,7 +23,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   context.subscriptions.push({dispose:disposeTesting});
   const testRunCancellations=new Set();
   let discoveryVersion = 0;
-  let disposed=false,restartGeneration=0;
+  let disposed=false,restartGeneration=0,disposal;
   const documentGenerations=new Map();
   const key = uri => uri.toString();
   const isSolidity = doc => doc?.uri.scheme === 'file' && extname(doc.uri.fsPath).toLowerCase() === '.sol';
@@ -223,7 +224,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     }
   },true);
   context.subscriptions.push(
-    diagnostics, controller, output,
+    diagnostics, controller, outputOwner,
     vscode.commands.registerCommand('solidityLean.verify', () => activeCommand(false)),
     vscode.commands.registerCommand('solidityLean.list', () => activeCommand(true)),
     vscode.commands.registerCommand('solidityLean.cancel', () => {for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
@@ -269,7 +270,10 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   );
   if(service) {
     editorServices=require('./editor-services.cjs').install(vscode,context,service,showError);
-    const open=doc=>{if(!disposed&&!doc.isClosed&&isSolidity(doc)){documents.set(key(doc.uri),doc);const generation=documentGenerations.get(key(doc.uri))||0;service.open(doc).catch(error=>{if(generation===(documentGenerations.get(key(doc.uri))||0)&&!doc.isClosed)showError(Object.assign(error,{uris:error.uris||[key(doc.uri)]}));});}};
+    const open=(doc,again=false)=>{if(!disposed&&!doc.isClosed&&isSolidity(doc)){documents.set(key(doc.uri),doc);const generation=documentGenerations.get(key(doc.uri))||0;
+      const current=()=>!disposed&&!doc.isClosed&&documents.get(key(doc.uri))===doc&&generation===(documentGenerations.get(key(doc.uri))||0);
+      return service.open(doc).then(client=>{if(current()&&client?.serverInfo?.name){const feedback=again?require('./status-summary.cjs').issueURL(client):null;output.appendLine(`Solidity Lean is ready${again?' again':''} for ${key(doc.uri)} (language services; version ${client.serverInfo.version||'unknown'}).`+(feedback?'\nIf you have time, please let us know why you needed to restart by filing an issue:\n'+feedback:''));}}).catch(error=>{if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){output.appendLine(`Language server startup failed for ${key(doc.uri)}: ${error.message}`);showError(Object.assign(error,{uris:error.uris||[key(doc.uri)]}));}});
+    }};
     const receive=params=>{
       const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version||hash(doc.getText())!==params.sourceHash)return;
       try{accept(doc,params.report,settings(doc),params.selection);}catch(error){showError(error);}
@@ -298,12 +302,14 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     const log=message=>output.appendLine(message);
     service.on('status',receiveStatus);service.on('report',receive);service.on('diagnostics',receiveDiagnostics);service.on('serverError',serverError);service.on('log',log);
     const restart=async selected=>{
-      ++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
+      if(disposed)return;
+      const operation=++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
       if(!selected)cancel();
       for(const doc of targets){const id=key(doc.uri),generation=(documentGenerations.get(id)||0)+1;documentGenerations.set(id,generation);generations.set(id,generation);if(selected)cancel(doc.uri);clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);}
       const current=doc=>!disposed&&!doc.isClosed&&documentGenerations.get(key(doc.uri))===generations.get(key(doc.uri));
-      try{await service.restart(selected?targets.map(doc=>doc.uri):undefined);}catch(error){if(targets.some(current))showError(error);return;}
-      for(const doc of targets)if(current(doc))open(doc);
+      output.appendLine('Terminating Solidity Lean language services...');
+      try{await service.restart(selected?targets.map(doc=>doc.uri):undefined);}catch(error){if(targets.some(current)||!disposed&&!selected&&!targets.length&&restartGeneration===operation){output.appendLine('Language server stop failed: '+error.message);showError(error);}return;}
+      await Promise.all(targets.filter(current).map(doc=>open(doc,true)));
     };
     const serverSettings=['backendPath','nodePath','timeoutMs','workers','automaticVerification','verifyOnSave','includePaths','remappings','counterexamples','auditPreconditions'];
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(open),
@@ -313,7 +319,20 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
   return { verify, cancel, controller, diagnostics, reports, service,
-    async dispose(){if(disposed)return;disposed=true;disposeTesting();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();for(const item of context.subscriptions)item.dispose();const sourceRetirement=sourceCommands.dispose();try{await service?.dispose();}finally{await sourceRetirement;}} };
+    dispose(){
+      if(disposal)return disposal;disposed=true;
+      let resolveDisposal,rejectDisposal;disposal=new Promise((resolve,reject)=>{resolveDisposal=resolve;rejectDisposal=reject;});
+      const cleanup=async()=>{
+        const errors=[],pending=[];
+        const attempt=fn=>{try{const result=fn();if(result!==disposal&&result&&typeof result.then==='function')pending.push(Promise.resolve(result).catch(error=>{errors.push(error);}));}catch(error){errors.push(error);}};
+        attempt(disposeTesting);for(const cancellation of testRunCancellations)attempt(()=>cancellation.cancel());attempt(cancel);
+        for(const item of context.subscriptions)if(item!==outputOwner)attempt(()=>item.dispose());
+        attempt(()=>service?.dispose());attempt(()=>sourceCommands.dispose());
+        try{await Promise.all(pending);}finally{attempt(()=>outputOwner.dispose());}
+        const failures=[...new Set(errors)];if(failures.length)throw failures.length===1?failures[0]:new AggregateError(failures,'Extension cleanup failed');
+      };
+      cleanup().then(resolveDisposal,rejectDisposal);return disposal;
+    } };
 }
 let runtime;
 function activate(context) {
