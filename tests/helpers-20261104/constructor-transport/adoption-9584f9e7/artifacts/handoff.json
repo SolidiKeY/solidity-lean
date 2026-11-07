@@ -1,0 +1,139 @@
+{
+  "batch": "solidity-helpers-20261104",
+  "slug": "constructor-transport",
+  "status": "partial",
+  "repository": "/workspace/solidity-lean",
+  "branch": "codex/solidity-helpers-20261104/constructor-transport",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "patch_base": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "payload_head": "23910bbbb95f091f14bca7888ec22657fe7b193d",
+  "adoption_merge": "a27493c642ef5369ef680991ac319dbeec385d8d",
+  "artifact_commit": "Subsequent seal commit recorded in CLOUDVM-RESULT; no self-referential hash invented.",
+  "preservation": "Prior owned3a628a9d, f77, all older masters/original6f3 and seals retained. Worker-only delta vs9584 is confined to original3paths; roots/config exactly upstream.",
+  "worker_components": "Four unchanged helper proofs, actual Source/intrinsic constructor states/frame/address/body duty, all original static/timeout/wrong-order/boundary/nondefault controls ready; external admission/runtime duties retained.",
+  "fresh_gates": "195-job build,4 kernel checks,4 MCP0 diagnostics,28 exact axiom guards/explicit inventory, runtime/KeySort, both compiler pipelines, trust0 and documentation references pass under unchanged serial-j1/12GiB/no-swap/reserve bounds.",
+  "coordinator_gates": {
+    "root_registration": "exit1:4 missing helper imports",
+    "global_pin_registry": "exit1:28 unrecorded standard additions with0 axiom errors",
+    "full_validation": "pending coordinator merge, not passed or waived"
+  },
+  "cache": {
+    "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+    "gate_source_head": "a27493c642ef5369ef680991ac319dbeec385d8d",
+    "pack": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/h35/cache-handoff/owned-cache.tar.gz",
+    "sha256": "083d6bf7f5702b4dad1ac8b250452f9b7f7913d4a7278e695bc317741916258a",
+    "artifact_count": 12,
+    "mapping_count": 4,
+    "same_as_retained_pack": true,
+    "modules": [
+      {
+        "module": "Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.lean",
+        "depHash": "4920269081124377392",
+        "same_input_mapping": true,
+        "same_artifacts": [
+          {
+            "name": "5558982496389995532.olean",
+            "sha256": "f3921d70a7c59f65912cdd1595ceb1c17521fd67236ed30b13be065524177906",
+            "bytes": 358600
+          },
+          {
+            "name": "15979535302388352466.ilean",
+            "sha256": "5f13331358336fc5daef55a9adfb2d085fc3649bf450b3f3e2ac0466a014e1b2",
+            "bytes": 61535
+          },
+          {
+            "name": "4620733025702194744.c",
+            "sha256": "b7082a73e4edc9dc880dedf2d00f95cd7d669bffbe2de26163e16f92390d241c",
+            "bytes": 145381
+          }
+        ]
+      },
+      {
+        "module": "Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Target.lean",
+        "depHash": "612050478390060384",
+        "same_input_mapping": true,
+        "same_artifacts": [
+          {
+            "name": "8763109986167139898.olean",
+            "sha256": "e7f8e81a607310fbfc4f2abc2a720ee480e77ee7224306dc1a308b2f9febfbcb",
+            "bytes": 238120
+          },
+          {
+            "name": "2511571225144882031.ilean",
+            "sha256": "5c5404d6ad88a91d017a649b54d7c7ffff7ed2ac9becb2ad0e7ce16d77fb0ec6",
+            "bytes": 35615
+          },
+          {
+            "name": "3864093012605240098.c",
+            "sha256": "1600164ddff77a0e9b63efdef5c05434b382e7493b6f6ebc6894dd23e28c1175",
+            "bytes": 70430
+          }
+        ]
+      },
+      {
+        "module": "Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean",
+        "depHash": "7425106413826742956",
+        "same_input_mapping": true,
+        "same_artifacts": [
+          {
+            "name": "1731103543176537604.olean",
+            "sha256": "f6cadb7b31d9e9563a60a83d7754f8c3f5c7dcd1ca0d0e4559c2ca5341a0529b",
+            "bytes": 167336
+          },
+          {
+            "name": "9711932988836685986.ilean",
+            "sha256": "63f005326950c33a61893c154d4e845410a4b504612451131be0bbbd3a49a1ca",
+            "bytes": 41379
+          },
+          {
+            "name": "11726743255221488203.c",
+            "sha256": "abd8687f278534324de7afdc85ca01fe70cd3151efc7f823c8c3c50bb9036f26",
+            "bytes": 25069
+          }
+        ]
+      },
+      {
+        "module": "Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean",
+        "depHash": "2987784881782788472",
+        "same_input_mapping": true,
+        "same_artifacts": [
+          {
+            "name": "3830559827215740810.olean",
+            "sha256": "f32dd52645452933c27ebae989dcfa3ae2292b08413d61d9aea00f1bf166cd74",
+            "bytes": 158760
+          },
+          {
+            "name": "9454807620139008719.ilean",
+            "sha256": "6dc781fa33a717cdd04b96ecef39d7f71420f608f6d815899e3d69fefa78d73a",
+            "bytes": 26771
+          },
+          {
+            "name": "3033922285695823071.c",
+            "sha256": "1389446a136cfc6bbb282638b03b904ed9462bcc8de23d2cb8033767399a975c",
+            "bytes": 39807
+          }
+        ]
+      }
+    ],
+    "verification": "Actual post-build trace, shared-locked mapping and cache-byte comparison, not inferred from publication/cache notices.",
+    "receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/constructor-transport-cache-received-20261105T020250Z.json",
+    "receipt_source": "Coordinator-reported pull/hash verification; no recipient cache-import claim.",
+    "delivery_status": "coordinator-pending",
+    "limits": "Owned outputs only; no global master/Bridge/Mathlib freshness or complete dependency transfer inferred. H41 no-VM-shipping rule retained."
+  },
+  "delivery_status": "coordinator-pending",
+  "full_validation": "pending coordinator merge",
+  "questions": [],
+  "reviews": "Separate read-only finder and skeptic accepted integration adoption without findings.",
+  "scope_limits": "No duplicate producer, opaque callback change, withheld-owner repair, fabricated admission, automatic Source default, general new/try-new, EVM execution, global cache freshness/import or whole-lane completion claim. No ship-cache call, push or default-branch merge.",
+  "owner_integration": "Supply real unchanged external duties, register four modules/map rows/28 pins, and run required combined/full gates under coordinator authority. H41 retained verified pack remains on VM.",
+  "artifacts": {
+    "original_patch": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/adoption-9584f9e7/artifacts/original.patch",
+    "bundle": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/adoption-9584f9e7/artifacts/checkpoint.bundle",
+    "handoff": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/adoption-9584f9e7/artifacts/handoff.json",
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/adoption-9584f9e7/artifacts/evidence.tar.gz",
+    "checksums": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/adoption-9584f9e7/artifacts/SHA256SUMS"
+  }
+}

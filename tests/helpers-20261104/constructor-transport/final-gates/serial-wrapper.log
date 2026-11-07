@@ -1,0 +1,6 @@
+✔ [0/2] Ran job computation
+✔ [1/2] Ran «solidity-lean»:extraDep
+ℹ [2/2] Replayed Solidity.KeySort
+trace: .> LEAN_PATH=/workspace/solidity-lean/.lake/build/lib/lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --tstack=131072 /workspace/solidity-lean/Solidity/KeySort.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/KeySort.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/KeySort.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/KeySort.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/KeySort.setup.json --json
+Build completed successfully (2 jobs).
+OUTER_PEAK_BYTES 1583452160 RESERVE_MIN_BYTES 15596417024 STARTED True

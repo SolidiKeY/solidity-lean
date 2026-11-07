@@ -1,0 +1,15 @@
+# Coordinator integration adoption 9584f9e7
+
+Original base: 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5. Adopted master: 9584f9e7df09f638d9e0cb8930501d1660aa4b2f, descending from f77. Authorized merge a27493c642ef5369ef680991ac319dbeec385d8d preserves prior owned head 3a628a9d45cd2e0035f9becc02d4f231943c1e43, every earlier adoption and sealed packet. No reset/rebase, push or default-branch merge occurred.
+
+Constructor inputs, Source/**, actual Syntax/Scoped.lean and the four helper proof files remain unchanged. Roots/configuration match the published master. Worker delta relative to 9584 is restricted to the original three paths, with original/adopted ancestry asserted by acceptance. No theorem, premise, exclusion, refusal, heartbeat, trust rule or representation is weakened.
+
+Read integration-20261105T0840Z.md and relevant V08/V12 lane docs. LocalCallableTransport and scoped native-call increments do not replace this reserved constructor case or supply its external Source/admission/runtime duties. The standalone call-resumption helper does not change opaque callback execution. Published VA1/C3 repairs and other integrated fragments are not redone. H16/Monetary.wide and H38 holds stay with their owners. Coordinator full core/examples/Bridge/CLI/audit/review results remain reported publication evidence, not a worker whole-lane completion claim.
+
+Fresh actual VM evidence passes: 195-job owned build, four kernel checks, four MCP diagnostics with zero errors, 28 guarded axiom pins and explicit inventory, runtime/KeySort, both pinned compiler pipelines, and global trust with zero findings. Lean remains serial with explicit -j1/LEAN_NUM_THREADS=1, hard 12 GiB/no swap and monitored >=4 GiB reserve. Logs and gates.tsv preserve exact commands/exits/peaks.
+
+Read-only root registration exits 1 for four missing helper imports; global standard-pin registry exits 1 for 28 unrecorded standard additions despite zero axiom errors. Both remain coordinator registration duties under H41/QREG, not passing gates. Full validation remains pending coordinator merge; delivery coordinator-pending.
+
+Actual post-build cache comparison verifies that the unchanged H35 pack still matches all 12 current owned artifact files and four mappings. SHA256 083d6bf7f5702b4dad1ac8b250452f9b7f7913d4a7278e695bc317741916258a remains unchanged. No global master/Bridge/Mathlib cache freshness, complete dependency transfer or recipient import is inferred from cache notices. H41 no-VM-shipping policy remains in force; no ship-cache invocation occurs.
+
+All original implementation/proof/control/boundary/nondefault backfill obligations remain ready as worker components. No general new/try-new, automatic Source default initialization, fabricated admission, EVM execution or whole P15/H16/H19/lane completion is claimed. Historical packets retain their original bases/statuses. Current owner patch scope is relative to 9584; original base remains recorded. Separate reviews and checksum-bound current snapshots follow.

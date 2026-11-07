@@ -1,0 +1,45 @@
+{
+  "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "previous_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+  "adopted_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "prior_owned_head": "610c83cf2e0c6940f45903d31e2c82c4fbae4524",
+  "adoption_merge": "d9c9a7e2050bf1b2fb264a7ebbf69bb0f6410d60",
+  "parents": [
+    "610c83cf2e0c6940f45903d31e2c82c4fbae4524",
+    "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce"
+  ],
+  "authorization": "Coordinator: Adopt master in your existing owned lane without discarding producer work.",
+  "protected_files_identical": [
+    "Solidity/Lowering/V08/CreationPremises.lean",
+    "Solidity/Lowering/V08/ConstructorScalarTransport.lean",
+    "Solidity/Syntax/Scoped.lean",
+    "Solidity/Source/**"
+  ],
+  "proofs": "All4 helper hashes unchanged",
+  "announced_module_blobs": [
+    {
+      "path": "Solidity/Frontend/TypeGrammarH28/ParserBasics.lean",
+      "blob": "3f5be1460d9d82f8918143015f23f4e4803297d8"
+    },
+    {
+      "path": "Solidity/Frontend/TypeGrammarH28/ParserChecks.lean",
+      "blob": "00a088ee78a5a3a598834cba80dc95fba2eb26d7"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+      "blob": "53bbf80b2c82c08219ddbdbe91d3635ceefc1941"
+    },
+    {
+      "path": "Solidity/Frontend/ExpressionUniqueness/Statement.lean",
+      "blob": "540595810c78b1c4d155496587594872f708802a"
+    },
+    {
+      "path": "Solidity/Calculus/StorageOnlyHavoc.lean",
+      "blob": "5b879dfad9bea7f570bfcd904b42a969b7d1c46c"
+    }
+  ],
+  "scope": "Worker delta checked relative to new adopted master; original base and prior work retained as ancestors; shared roots/config match upstream, not authored here.",
+  "api_boundaries": "Shared.Intrinsic retains callbacks/reference refusals and no Source soundness certificate; Statement is uniqueness target only; StorageOnlyHavoc derives existing typed formula and no ExtCall implementation/adequacy. No duplicate producer or helper proof change needed.",
+  "holds": "Statement-grammar G0, VY5 Monetary.wide, VX1 review and other ownership holds untouched.",
+  "validation": "Fresh owned gates/cache checks below, not inferred from published gates or H21 cache notices. H41 still forbids VM ship-cache; delivery coordinator-pending; full validation pending coordinator merge."
+}

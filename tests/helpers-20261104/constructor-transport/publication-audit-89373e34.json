@@ -1,0 +1,64 @@
+{
+  "published_head": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "fetch": "git fetch origin master: exit0; b419c3cf..89373e34",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "base_is_ancestor": true,
+  "helper_head_at_audit": "ce52c38903dfdbc774332403d5c1a0cd47f442b8",
+  "merge_rebase_or_proof_change": false,
+  "protected_files": [
+    {
+      "path": "Solidity/Lowering/V08/CreationPremises.lean",
+      "base_and_published_blob": "bd00ae38026dbf1d469b6a65e4b67d5c0214535f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/ConstructorScalarTransport.lean",
+      "base_and_published_blob": "e9d28b1026c4c6b9442a50c6885cd13eaf49f2a0"
+    },
+    {
+      "path": "Solidity/Syntax/Scoped.lean",
+      "base_and_published_blob": "04ba84f9588aeb21c3ea05fc089a7bb62eb1c84c"
+    }
+  ],
+  "source_tree_unchanged": true,
+  "published_modules": [
+    {
+      "path": "Solidity/Lowering/V07/P12NextInterface.lean",
+      "blob": "0689284b7d6b1933f64e2bcce885561fb6722a33"
+    },
+    {
+      "path": "Solidity/Backend/MemoryCopies/SourceInterface.lean",
+      "blob": "0c0ece45a72f114a21ceddacb36d56c3165d8f20"
+    },
+    {
+      "path": "Solidity/Backend/Selection/FramedLoweringInterface.lean",
+      "blob": "64c579644cf364693368feee09da65f536f36049"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CalldataWordInterface.lean",
+      "blob": "4abfb77e4917275cb12a938682cb4fe8befe0bdf"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/CreationReturnConsumer.lean",
+      "blob": "9bdb5c6b0b41e877e0aacd3d33a10881aae11a33"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+      "blob": "12993a53cfdab4585baeba3aa92c1f5e8bb0b55c"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "blob": "aa17fe6b01251c742be44265fef2efdefe9e2fb8"
+    }
+  ],
+  "findings": [
+    "P12NextInterface retains pending condition/reference producer fields; this scalar capture packet does not need those reference APIs.",
+    "SourceInterface is a compatibility import; FramedLoweringInterface adds a local successful-IR reflection obligation; CalldataWordInterface states exact zero-padded accesses. None supplies helper registration or Source constructor body preservation.",
+    "CreationReturnConsumer proves finite constructor-copy complete RETURN observations using combined_installs, explicitly excluding Source constructor/account installation/resource/external EVM adequacy. It does not inhabit the pending producer.",
+    "Frontend executable-AST reader/translation boundaries remain distinct from this existing intrinsic resolved constructor fixture; no new parser/AST or producer is duplicated."
+  ],
+  "prior_audit_correction": "ExtCall is declared in Solidity/Syntax/Scoped.lean. The prior b419 audit named nonexistent Solidity/Syntax/Scoped/ExtCall.lean, so that path comparison alone was vacuous. Actual Scoped.lean blobs now verified identical at base, b419 and89373; no frozen declaration change found.",
+  "reported_receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261104T182351Z (coordinator reported, not locally rerun or used as helper validation)",
+  "status": "blocked_QREG",
+  "registration": "Published root still lacks4 helper imports. Prior required full/orphan failures and downstream pending gates remain unresolved.",
+  "validation": "No Lean code/import changed; original four module hashes unchanged. No Lean rerun warranted. Original artifact checksum manifest remains current."
+}

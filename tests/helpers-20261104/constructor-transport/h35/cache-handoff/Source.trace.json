@@ -1,0 +1,31 @@
+{"synthetic": false,
+ "outputs":
+ {"o": ["5558982496389995532"],
+  "i": "15979535302388352466",
+  "c": "4620733025702194744"},
+ "log":
+ [{"message":
+   ".> LEAN_PATH=/workspace/solidity-lean/.lake/build/lib/lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --tstack=131072 -j1 /workspace/solidity-lean/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.setup.json --json",
+   "level": "trace"}],
+ "inputs":
+ [["Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Source:deps",
+   [["deps",
+     [["«solidity-lean»/Solidity:extraDep",
+       [["@«solidity-lean»:extraDep", "1723"]]],
+      ["imports",
+       [["Solidity.Lowering.V08.CreationPremises transitive imports (legacy)",
+         "14457877881957921651"],
+        ["Solidity.Lowering.V08.CreationPremises:importAllArts",
+         "10955356470741820072"]]]]],
+    ["libs",
+     [["import dynlibs", "1723"],
+      ["package external libraries", "1723"],
+      ["module dynlibs", "1723"],
+      ["module plugins", "1723"]]]]],
+  ["Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+   "1165570713881806064"],
+  ["/workspace/solidity-lean/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.lean",
+   "1109698825324064967"],
+  ["options", "1723"],
+  ["Module.leanArgs: #[]", "1723"]],
+ "depHash": "4920269081124377392"}

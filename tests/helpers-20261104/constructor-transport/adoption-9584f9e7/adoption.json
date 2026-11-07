@@ -1,0 +1,18 @@
+{
+  "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "previous_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "prior_owned_head": "3a628a9d45cd2e0035f9becc02d4f231943c1e43",
+  "adoption_merge": "a27493c642ef5369ef680991ac319dbeec385d8d",
+  "parents": [
+    "3a628a9d45cd2e0035f9becc02d4f231943c1e43",
+    "9584f9e7df09f638d9e0cb8930501d1660aa4b2f"
+  ],
+  "authorization": "Coordinator: Fetch and adopt master while preserving your own committed/uncommitted work; existing VM/goal.",
+  "protection": "Constructor inputs, Source/**, actual Scoped.lean and all4 helper proof hashes unchanged; shared roots/config exactly upstream.",
+  "scope": "Worker delta relative to9584 restricted to original3paths; all original/prior heads retained as ancestors.",
+  "published_scope": "Read integration-20261105T0840Z.md and relevant V08/V12 per-lane docs. New LocalCallableTransport and scoped native-call checks do not replace the reserved constructor packet or discharge its remaining external producer duties. Call resumption remains standalone; no opaque callback execution/adequacy change inferred.",
+  "holds": "H16/Monetary.wide and H38 owner review remain with owners; no integrated fragment redone or producer stub supplied.",
+  "validation": "Fresh owned VM gates required below; published core/Bridge/audit/CLI results remain coordinator-reported. No cache freshness inferred from shipment notices.",
+  "policy": "H41 forbids VM ship-cache; retained verified packs for coordinator pull; delivery coordinator-pending and full validation pending coordinator merge."
+}
