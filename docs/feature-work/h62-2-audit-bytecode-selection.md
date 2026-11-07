@@ -1557,3 +1557,63 @@ roots/fragments and whitespacePASS. Independent readonly finder/skepticPASS
 with no findings and identical fixture/duplicate-control behavior confirmed.
 This resolves only the synthetic-citation documentation wait. Other producer,
 PowerBounds, owner/pin and full semantic/package obligations remain open.
+
+
+## Frozen ready-core inspection without stopped prerequisites
+
+Fetched unchanged master05d2c2587. The documentation-reference ticket in the
+router's older5284dd52 report is already resolved bydfa804415 with native
+fixture-byte preservation and passing doc-path gate; no v17 repair is needed.
+Continued independent original inspection work. A first read-only per-root
+planning walk was interrupted130 because it redundantly recomputed shared
+imports; no Lean/build was running. The replacement one-pass frozen703source
+topological closure matched the saved plan. Its625receipt prefix admits exactly
+150of190mappedcore roots;40core roots remain outside,37Bridge uninspected.
+All623imports needed by those150roots matched frozen-source/product receipt
+hashes. The saved full-source terminal status remainsRED.
+
+Existing expanded generator rendered those150frozen modules in one external
+inspector. Initial check1guard setup failed before a Lean child because copied
+budget receipt lacked formatted deadline_utc. Check2derived formatted UTC from
+the SAME numeric epoch/deadline and preserved check1evidence. One actual serial
+inspection passed129.764345851s (>60s, reported), below300sproof/group limit,
+with dualmonitorPASS,12GiB/noSwap/CPU1/4GiBreserve policy unchanged. Same fresh
+05:20documentation-window epoch is reused conservatively, not extended/reset;
+receipt's copied Lean_workloads0 is original-phase metadata, actualusage1 is
+recorded separately. No prerequisite or PowerBounds retry, heartbeat/budget
+increase, RUNTIME_GATE_PASS or paired performance claim.
+
+Actual3262records include1968originaltheorems,148proofconstants,56predicate
+constants and1090dataconstants;1133private records.1046lexical theorem candidates
+all have unique name/Unicode-position matches,189private.922originaltheorems
+remain outside those matches,422private. All68previously witnessed public
+targets occur as originaltheorems; this metadata does not itself link witnesses.
+Lossless partition:1046suppliedsourcecandidates,130directfields,1045without
+ranges,1041unmatchedranged records. No auxiliary-name heuristic infers source
+origin or owner. No global uncovered counts are decremented.
+
+One observed RawTailGuardCertificate parent edge has its structure/projection
+records present, but instantiated inherited-type obligations remain uncovered.
+Two frozen inspected sources differ from current live sources: the RawUint
+Execution/Controls leaves. Their metadata is explicitly frozen evidence, not
+current-source coverage; live equality flags retain this difference. Report
+reconstructs exact inspected source from shared template, validates pin sets,
+frozen base/mapped membership, native source/log/output hashes and monitors,
+reruns623product bindings and independently recomputes maximal ready-root sets.
+Source/name positions remain candidates, not statement correspondence or
+provenance acceptance. Owners, global/input premise classification and joint
+witness obligations remain open.
+
+Independent readonly finder/skepticPASS, with setup repair, >60s timing, live
+source drift and all partial boundaries reviewed. No reviewer builds, edits or
+Lean/server use. No production/interface/statement/definition/premise/axiom/
+exclusion changed; generated programs/logs/reports stay offGit. Original703/
+190core/37Bridge, source/correspondence/witness/globalledger, Source/native/
+selector/gas/fork, P10production, Bridge/package/performance and producer waits
+remain incomplete.
+Evidence: /workspace/parallel-20261103/executable-bytecode/ready-core-inspection/.
+
+Checkpoint documentation, roots/fragments and whitespace gatesPASS; no new
+Python or production source changed, existing82tooltests retained from the
+preceding passing checkpoint. Actual native full-record parser/reproducer
+validates every new record. No unchanged failed gate is relabeled green.
