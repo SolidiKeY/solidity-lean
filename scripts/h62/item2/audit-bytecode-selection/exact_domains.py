@@ -50,8 +50,12 @@ for gate, prefix, methods in (
     for field in ("selected", "executed"):
         TARGETS[prefix + "_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface." + gate + "Certificate." + field
 
+for field in ("correct", "capacity"):
+    TARGETS["tail_inherited_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.TailGuardCertificate." + field
+
+
 PRODUCERS = ["Solidity/Backend/AbiEntry/" + name + ".lean" for name in
-             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface")]
+             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls")]
 
 
 def sha(raw):
@@ -77,7 +81,7 @@ def render(macro_source, fixture):
         raise ValueError("forbidden fixture mechanism")
     fragment = macro_fragment(macro_source)
     return ("import Lean\nimport Solidity.Backend.AbiEntry.HeadGate\n"
-            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\n\n"
+            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\nimport Solidity.Backend.AbiEntry.RawTailGuard\nimport Solidity.Backend.AbiEntry.TailGuardControls\n\n"
             "/-! Guards omission of implicit/self/proof binders from joint hypotheses.\n"
             "Only the original conclusion is replaced by True; no census acceptance follows. -/\n"
             + fragment + "\n" + fixture + "\nend " + NAMESPACE + "\n")

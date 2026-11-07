@@ -1617,3 +1617,59 @@ Checkpoint documentation, roots/fragments and whitespace gatesPASS; no new
 Python or production source changed, existing82tooltests retained from the
 preceding passing checkpoint. Actual native full-record parser/reproducer
 validates every new record. No unchanged failed gate is relabeled green.
+
+
+## Typed raw-tail parent transport and joint witness
+
+Freshly fetched master05d2c2587 already adopted. Existing inspected raw-tail
+parent edge supplies an independent proof item: frozen RawTailGuard.certificate
+inhabits the child and projects the actual TailGuardCertificate at the SAME code
+parameter. Extend the one existing renderer/fixture, not a new lowering family.
+General typed lemmas transport parent correctness for all numeric operands and
+capacity with its suffix/room premise. Two new hypotheses_of% domains retain
+the exact parent code/self/operand/suffix/proof binders using the actual child
+projection. A closed conjunction exhibits child/parent equality, accepted
+scalar execution preserving suffix[258,513], capacity at height10 and refusing
+height1024, all on TailGuard.code, reusing existing producer controls.
+
+This checks instantiated parent-field use for this specific frozen edge; it is
+not general parent flattening or global inherited coverage. No native operand
+loading, encoded byte execution, Source admission or new compiler adequacy
+follows. Existing raw-tail direct fields/other public methods remain outside
+this explicit new two-field subset.70totalexactdomains+3newtransport/control
+lemmas checked;19frozenproducerleaves/249importproducts matched. Metadata
+observations for70targets use the sealed150module report without globalledger
+linkage or sourcegate promotion. Global/input premise classification and all
+other unmatched source, owner and witness obligations remain open.
+
+Direct first attempt27.948s failed ONLY two newly drafted no-axiom expected
+messages; Lean reported the approved standard pair propext/Quot.sound. Corrected
+those exact comments, not theorem statements/proofs; masked code-token equality
+verified. Initial program/manifests/diagnostics retained unaccepted. Accepted
+RawTailParentChecked nativePASS31.308s, empty diagnostics,73strictguards:
+4none/25propext/2standardpair/42standardtrio, plus2expected classifierrefusals.
+Both monitorsPASS under unchanged12GiB/noSwap/CPU1/4GiBreserve policy. Same
+05:20→09:20aggregate window retained, no reset/extension, prerequisite build,
+PowerBounds retry, heartbeat or trust increase. No new module>60s; these two
+failed/pass attempt timings are not a paired performance comparison.
+
+MCPstatus found no existing server; attempted diag in readonly sandbox failed
+socket-lock creation, not a passing diagnostic. No server installed/attached;
+native diagnostics identified the pin-only failure. Reproducer reconstructs
+accepted source/manifest from current generator, binds source/log/output hashes
+and monitors, derives axiom counts from guards, reruns import bindings and checks
+code-token equality across pin repair. Trusted fixture remains not regex-
+sandboxed, explicit native check required beyond existing82Python tests and
+seven-file verifier roster. Generated program/reports/products remain offGit.
+
+Independent readonly finder/skepticPASS, no edits/builds/Lean/server use. No
+production/interface/statement/definition/premise/exclusion/axiom-set change.
+Existing703sourceSTOP/40core+37Bridge, all broader source/correspondence/witness/
+globalledger, native/gas/fork, P10production, Bridge/package/performance and
+producer waits remain open. No RUNTIME_GATE_PASS or whole-goal completion.
+Evidence: /workspace/parallel-20261103/executable-bytecode/raw-tail-parent/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, documentation and
+whitespacePASS. Explicit native73guard/70domain check remains required; these
+static gates alone do not establish it. Existing28scoped global pins remain
+coordinator work, not changed or waived.
