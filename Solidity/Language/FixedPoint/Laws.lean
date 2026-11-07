@@ -440,9 +440,10 @@ theorem explicit_le {a b : Fx t} (h : le a b = true)
 theorem implicit_le (h : t.subsumes t' = true) (a b : Fx t) :
     le (implicit h a) (implicit h b) = le a b := by
   have hc : (0 : Int) < 10 ^ (t'.digits - t.digits) := Int.pow_pos (by decide)
-  simp only [le, implicit]
+  simp only [le]
   apply Bool.eq_iff_iff.mpr
   simp only [decide_eq_true_eq]
+  simp only [implicit]
   constructor
   · intro hl
     exact Int.le_of_mul_le_mul_right hl hc
@@ -530,13 +531,15 @@ theorem implicitOK_iff {t t' : FxTy} : t.implicitOK t' = true ↔ t.subsumes t' 
 theorem lo_inRange (t : FxTy) : t.inRange t.lo = true := by
   have h1 : (0 : Int) < 2 ^ (t.bits - 1) := t.half_pos
   have h2 : (2 : Int) ^ t.bits = 2 * 2 ^ (t.bits - 1) := t.pow_bits
-  simp only [inRange, lo, hi, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [inRange, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [lo, hi]
   split <;> omega
 
 theorem hi_inRange (t : FxTy) : t.inRange t.hi = true := by
   have h1 : (0 : Int) < 2 ^ (t.bits - 1) := t.half_pos
   have h2 : (2 : Int) ^ t.bits = 2 * 2 ^ (t.bits - 1) := t.pow_bits
-  simp only [inRange, lo, hi, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [inRange, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [lo, hi]
   split <;> omega
 
 /-- `subsumes` is range containment: it holds exactly when every value of
@@ -557,7 +560,8 @@ theorem subsumes_iff {t t' : FxTy} :
         have e : ((2 ^ (t.bits - 1) : Nat) : Int) = (2 : Int) ^ (t.bits - 1) := Int.natCast_pow 2 _
         have hp : (2 : Int) ^ t.bits = 2 * 2 ^ (t.bits - 1) := t.pow_bits
         have h7 : (2 : Nat) ^ 7 = 128 := by decide
-        simp only [inRange, lo, hi, Bool.and_eq_true, decide_eq_true_eq]
+        simp only [inRange, Bool.and_eq_true, decide_eq_true_eq]
+        simp only [lo, hi]
         split <;> omega
       obtain ⟨b, hb⟩ := h ⟨1, h1⟩
       simp only [Fx.SameValue, Int.one_mul] at hb
