@@ -1668,3 +1668,18 @@ stopped at +12.163%; no unchanged rerun or current timing pass is inferred.
 Current inputs and outcomes remain unresolved. Independent read-only finder
 and skeptic reviewed these boundaries without Lean, server or builds. This
 subset does not establish full census or production acceptance.
+
+## Packet-panic standalone candidates
+
+`packet_panic_controls.py` records four source-hashed rows from the historical
+reference index. The isolated list fixture is not linked to `Source.panicData`
+or target execution. The candidate Source observations and checked-sub/mul
+proof-term equalities do not assert a selected-target panic payload.
+
+Historical isolated Lean 4.35 diagnostics and the serial closure are candidate
+driver references. The closure failed in an upstream prerequisite before the
+helper, so it must not be represented as a passing helper or equivalence gate
+or rerun unchanged. Current inputs, per-file invocation and outcomes remain
+unresolved. Independent read-only finder and skeptic reviewed these boundaries
+without Lean, server or builds. No production timing or runtime acceptance is
+inferred.
