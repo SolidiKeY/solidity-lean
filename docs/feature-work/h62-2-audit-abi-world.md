@@ -499,3 +499,28 @@ backfill, portability work and reviews are complete. After a metadata-only owner
 repair, check the pin/fragments gates; preserve current proof receipts if source
 inputs stay identical. Any new source/config input requires appropriately fresh
 validation. No unsupported premise/exclusion is offered as a repair.
+
+## Re-baseline requested by coordinator (2026-11-07)
+
+The coordinator reported a37430cd merged at2a43bf4fc and requested another
+re-baseline/continuation. The assigned branch merged origin/master
+2a43bf4fcdaf24750265afc8f8be5b420d1d22b0 while preserving the later b08fa0ea
+full-build/handoff checkpoint. Mergeheadfcd012d856e25c33ce0bf8760744622b29fb2a21
+has both parents. The only conflict was the duplicate-row fixture using two
+different existing paths; upstream ABIEntry/Interface was retained, preserving
+the same assertion and four passing tests. No Lean conflict or proof edit.
+
+All24 frozen ABI files/map remain byte-identical. Current input pin covers7722
+Lean files; all9 audit files+KeySort pass fresh source/output/resource-bound
+diagnostics. Acceptance remains177/439/7/10. Three controls pass using an
+explicit H62_AUDIT_TEST_EVIDENCE location. Current same-identity matched timing
+1.611498644→1.609982393s (−0.094089499%, within10%) passes. Both independent
+read-only reviewers accepted ancestry, conflict choice, protected inputs, fresh
+receipts, ticket and timing; neither used Lean/server/builds or edited.
+
+The current global pin checker reports16151pins,0errors,110unrecorded additions.
+The new ticket PIN-2a43bf4f derives its base from the checked integration constant
+and contains110unique standard-only additions with matching centralSHA. No
+central pin update was made by this worker. Earlier full-build passes/99-entry
+tickets remain historical; they are not relabelled as current2a43 validation.
+The current full build remains to run after19 upstream validation-input changes.

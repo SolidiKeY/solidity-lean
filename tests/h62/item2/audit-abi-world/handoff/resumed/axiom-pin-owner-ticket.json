@@ -1,14 +1,111 @@
 {
   "schema_version": 1,
-  "id": "PIN-706",
+  "id": "PIN-2a43bf4f",
   "owner": "coordinator / G07 inventory fragment owners",
   "central_file": "scripts/g07-axiom-pins.json",
-  "central_sha256": "a09beb4ed0726d8fe157eed19215fc2a11d42eac41c95da3573c952f8aa575c5",
-  "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
-  "source_pins": 16118,
+  "central_sha256": "6695909a0a96494b60559f002419f1bcb51c4b8325d34a1634e839e22a2a7105",
+  "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
+  "source_pins": 16151,
   "nonstandard_or_growth_errors": [],
-  "unrecorded_changes": 99,
+  "unrecorded_changes": 110,
   "changes": [
+    {
+      "key": "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.coherent",
+      "previous": null,
+      "actual_axioms": [
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.mixed_aliases",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.mixed_transfer",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.mixed_values",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.transfer",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.uints",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/CalldataPackets/RawUint/Controls.lean:Solidity.Backend.CalldataPackets.RawUint.Controls.packed_alias_control",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/CalldataPackets/RawUint/Controls.lean:Solidity.Backend.CalldataPackets.RawUint.Controls.packed_prefix_values",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.packedViews_transfer",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.packedViews_uints",
+      "previous": null,
+      "actual_axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.rawViews_coherent",
+      "previous": null,
+      "actual_axioms": [
+        "Quot.sound",
+        "propext"
+      ]
+    },
     {
       "key": "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.decideGoal_proved_iff_off_residue",
       "previous": null,
