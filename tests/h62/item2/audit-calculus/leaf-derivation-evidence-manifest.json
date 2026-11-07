@@ -1,0 +1,52 @@
+{
+  "scope": "Complete16 LeafDerive semantic roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1035,
+    "pending": 4248,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-derivation-roles-v88/evidence.tar.gz",
+      "bytes": 275171,
+      "sha256": "f6e09a937c6e1cac9f8cb55cb6dc069bb7cc3ebaece16c68974b472c710fba68"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-derivation-roles-v88/inputs.json",
+      "bytes": 763,
+      "sha256": "0a7fbee809dc127d17686eb248624ac04e97e538ef1b34155b08dbf27c518d54"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-derivation-roles-v88/gates.json",
+      "bytes": 2832,
+      "sha256": "d81ecfecc98b292ad857e3d5df38fda97b30d81cf4df3173a8951f0ae252bbb6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-derivation-roles-v88/reviews.md",
+      "bytes": 517,
+      "sha256": "8b62b1e0e7065366dc3d7e2e17077c0646a90b469cf1d4d015d463c667969051"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-derivation-roles-v88/case-rosters.json",
+      "bytes": 1918,
+      "sha256": "4f22ab962e90712db8119ec7c8667afe9434335424f4b5917ddd36fe5b4d9797"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-derivation-roles-v88/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "4117820cbfadf99719a0ff191fc013d55257ba84a9f2a2c271f81c681b8d8e20"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-derivation-roles-v88/external-retention.json",
+      "bytes": 279711,
+      "sha256": "7efa01e5024087dda8d45a1dacf9ffc661b69835b27bee6cecc58f920d19df1b"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/leaf-derivation-roles-v88/semantic-roles-reviewed.json",
+      "bytes": 2768443,
+      "sha256": "454715d52296d271dcd575dc0f8427e12aca4e93b9ef31a9f5458410fc7ee55d"
+    }
+  ]
+}
