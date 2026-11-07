@@ -1546,3 +1546,23 @@ unreferenced row is not excluded. Independent read-only finder and skeptic
 reviewed overlap and snapshot provenance without Lean, server or builds.
 The skeptic found missing and numeric hash acceptance in drafts; both are
 now rejected and covered by synthetic controls.
+
+## Current reference drift after later merges
+
+`current_reference_drift.py` compares the static reference index with the
+tracked worktree/index scan at `9cf44aa56e9c8c5bbf0fd18a511edaa21dfe4c02`.
+It observed 7,824 tracked Lean paths and 640 standalone candidates: 19 new
+to the candidate set, two with changed bytes, 404 with supplied static
+references and 215 without supplied per-path references. No candidates
+were removed from that set or changed mapping fields. Both changed files
+had no supplied references: `tests/h62/item1/evm-lemmas/LocationFixture.lean`
+and `tests/h62/item2/audit-evm-compiler/JointWitness.lean`. Changed or new
+rows require review; old references do not establish current acceptance.
+
+The scan was captured under the writer lock but is non-atomic; index flags,
+ignored/generated inputs, mapping resolution and runtime provenance remain
+unverified. Candidate-set additions may reflect reclassification. Independent
+read-only finder and skeptic checked the drift without Lean, server or builds.
+The skeptic found empty artifact labels could count as references; all old
+rows, including removed rows, now require unique normalized absolute labels;
+this lexical check does not authenticate the referenced artifact bytes.
