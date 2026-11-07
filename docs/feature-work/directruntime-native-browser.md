@@ -1012,3 +1012,13 @@ The rebased branch preserves the 15-member slow-library registration. H127 has
 reviewed source-inventory and runtime dependency-order components, not a complete
 authenticated slow runner or five-module A/B result. Pin relocation still awaits
 a ready reviewed mapping and coordinator quiet window.
+
+H127 also has an independent read-only cgroup retirement diagnostic in
+`h109/cgroup-retirement.py`, with renamed/replaced-group and core-file controls.
+It requires a live FD/PID capture; link counts are informational. Observations
+explicitly decline kernel-build authentication, Docker ownership, cleanup
+acceptance and barrier release. The actual populated-group negative check and
+synthetic empty/deactivated fixtures do not establish live-kernel deactivation
+or repair the earlier failed drain. The diagnostic is not wired into gate or
+recovery paths. The authenticated controller/worker, offline verifier and
+five-module A/B measurements remain unfinished.
