@@ -816,3 +816,37 @@ verified ownership, body equivalence or global/private/unloaded coverage. All
 792 original audit obligations, owner compiler-success work and the original
 +80.254966536% Lean STOP remain. Raw captures, refusals, timings and manifests are
 retained at `/workspace/h62-audit-readonly-calls/scope-binding/` on the original VM.
+
+## Separate metadata-preserving type observations
+
+The additive `MetadataFingerprintV2.lean` exporter retains `Expr.mdata` entries,
+keys, value constructors, list order, duplicate keys and the wrapped expression.
+It reuses legacy primitive/name/universe/binder encodings. Syntax-valued metadata
+remains refused. Its declaration-type domain is explicitly versioned; metadata
+is neither erased nor interpreted as a semantic-equivalence result. The legacy
+exporter, pins, five-record contract and scanner annotations remain unchanged.
+
+The separate live producer `observe_metadata_types.py` first executes the pinned
+Scope closure, then compiles a fresh test-only exporter and probe. It verifies
+the exact additional helper artifact, dependencies, source/runtime/sidecar/log
+hashes and final child metadata seals. Every legacy declaration and range must
+match the original Scope result. Metadata-free v2 types must equal the legacy
+encoding except for the version domain; other legacy refusals stay refusals.
+
+Two final captures have identical observations for all 312 visible Scope constants.
+Legacy results remain 286 serialized and 26 metadata-refused. The separate v2
+observation serializes all 312, preserving the annotation payloads. This adds no
+scanner links, model witnesses, ownership or body-equivalence claim. Earlier
+captures before final sealing fixes are retained as superseded development.
+
+All 167 Python controls and fourteen Lean separation/refusal controls pass.
+Independent read-only finder and skeptic reviews fixed the helper-marker checked
+read and final child metadata recheck; mutation controls cover both and final
+reviews are clear. Existing code paths were not refactored or changed, so the
+new workflow's timings are observations rather than a matched old-mode comparison.
+Actual tools remain Lean 4.24.0 and Lake 5.0.0-src+797c613; fresh bounded KeySort
+prerequisites pass. Production Lean, statements, budgets and axioms are unchanged;
+two staged test-only files were added without generated-root or module-map edits.
+All 792 original obligations, full acceptance and the original +80.254966536%
+Lean STOP remain. Raw final captures, legacy refusals and manifests are retained
+under `/workspace/h62-audit-readonly-calls/metadata-observations/` on the original VM.
