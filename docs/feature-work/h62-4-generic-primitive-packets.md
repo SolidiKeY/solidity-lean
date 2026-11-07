@@ -1077,3 +1077,45 @@ selected code/input and no failed-state, StateRepr or full-session substitution.
 These focused receipts discharge the two draft control proofs, not the original
 performance comparison or broader acceptance gates. Latest measured free disk:
 13574893568 bytes.
+
+
+General native reference bridge: ReferenceBridge abstracts the former concrete
+readAt-only pattern over every existing certified memory/tuple Form and actual
+selected Composition.Program. Canonical P1LangV2 source/target languages and
+selected save/body/restore image are reused. Local retains exactly the original
+profile agreement, universal coverage, genuine success and revert entries, full
+ReturnClaim and BareRevertClaim. Source classification and target execution are
+proved using the actual selected compiler; neither execution agreement, a full
+producer nor a PassCorrect is assumed. ProducerGoal/make and producer_image bind
+the actual old producer's exact plan. The environment map remains identity and
+Unit target need is the existing canonical P1LangV2 executable resource map.
+The source quotation family is constant; this introduces no recursive session
+or alternate language/prefix family.
+
+ReferenceBridgeControls uses the actual old-graph rebinding call. The same
+program simultaneously inhabits Form, alias flags, original profile agreement
+and both physical-entry witnesses. A closed physical_certificate and nonempty
+physical inputs are constructed; this native reflexive profile is explicitly
+not evidence that an external Source Approved profile has been authenticated.
+All legal indices and arbitrary journal/returndata stay in the physical domain.
+A genuine successful physical entry refutes a complete fixed-map certificate
+for an always-revert substitute in the same target language. This is an
+intentional substitute counterexample, not assumed failure of the real source.
+
+Initial notation/type errors and importer memory stops are retained. Staged
+endpoint aliases, rewriting only the old call definition in entry-witness types,
+and proved generic admission equalities/transport avoid eager concrete heap
+conversion without increasing any budget. The joint importing consumer checks
+in 0.783 seconds. Exact-source final receipts follow; no old performance STOP or
+full production gate is cleared. Full Source/profile/session P1, G42.04, actual
+library Source H24 admission/origin, RO physical frame and whole decoder work
+retain their original obligations and ownership.
+
+Final general-bridge fresh receipts: 1.374 seconds for the generic module and
+0.783 seconds for the joint consumer; exact source/import cached revalidation
+also passes. MCP reports zero errors on both (2.594 and 0.866 seconds). All 37
+new public declaration axiom reports contain only the existing standard axioms
+or none. Read-only finder and skeptic independently found no domain narrowing,
+near-vacuous joint witness, semantic weakening or full-production overclaim.
+The original broad root/full gates and timing STOPs remain open; no unchanged
+Source.Horizon/Derived17/OpenLoops failure was rerun or relabeled a pass.
