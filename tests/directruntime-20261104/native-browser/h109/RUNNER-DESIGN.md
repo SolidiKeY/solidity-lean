@@ -13,14 +13,13 @@ RowsNine child and RevertData. Roots are regenerated from the source list;
 existing theorem statements stay unchanged. Every module is
 re-elaborated serially; cache admission or a cached root build cannot replace
 these checks. CI and lane-end/full validation keep the slow root. Ordinary
-checkpoint selection keeps its current exclusion. The authenticated H116 intake limits 600 seconds to the cumulative original
-Derived17 replay in CI (300 seconds on VM/local). It grants no general H109
-600-second allowance. The newest explicit human decision extends H116 to the entire H109 slow
-library in CI at600seconds, including the594second RowsNine member. The default/VM STOP and300second maximum
-remain. Non-slow module measurement budgets are unchanged. The slow-library CI
-deadline is not multiplied by its fifteen members. No proof heartbeat or other
-module budget changes. The earlier provisional general-600 plan is superseded.
-No unchanged stopped timing workload is authorized by this plan.
+checkpoint selection keeps its current exclusion. The delivered H116 intake
+originally limited the 600-second CI calibration to cumulative Derived17 replay.
+The later explicit H134 decision extends 600 seconds to the entire H109 slow
+library in CI, including RowsNine. VM/local/default checks retain 300 seconds
+and the existing 594-second default-path STOP. The slow-library CI deadline is
+not multiplied by its fifteen members. Non-slow budgets and proof heartbeats
+remain unchanged. No unchanged stopped timing workload is authorized here.
 
 ## Execution and trust boundary
 
@@ -161,3 +160,20 @@ old/new key mapping, axiom/signature checks, rollback refs and expected duration
 Only then apply and measure the reviewed relocation in that window. Scanner
 key coincidence and a lexical preview do not establish Lean equivalence.
 Every pin/check is retained. A runner design review grants no relocation window.
+
+## Implemented runtime rebuild helper (not the H127 runner)
+
+The reviewed readbounds/serial-build.py component authenticates its current
+Lean dependency inventory against Git and pins the explicit Lake shim, serial
+configuration, lakefile, toolchain selection and actual Lean/Lake executables.
+It handles canonical leading import headers, refuses the specified unsupported
+forms, rechecks source/execution inputs and fails target invocations beyond
+300 seconds even after a zero process exit. Four failure-control methods pass.
+
+Its 344-target changed-runtime sequence completed in 226.16 seconds under the
+existing bounded outer wrapper. Cached dependency admission is preparation,
+not slow-example re-elaboration or matched A/B measurement. This helper does
+not provide sealed snapshots, image/cache authentication, complete lifecycle
+cleanup or whole-job RSS. The controller, worker, offline verifier and original
+five-module A/B remain open. H134 retains 600 seconds for slow-library CI,
+300 seconds for VM/default checks and the default RowsNine STOP.

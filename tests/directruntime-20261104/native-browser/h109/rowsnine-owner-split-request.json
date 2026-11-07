@@ -1,0 +1,29 @@
+{
+  "ticket": "OT-H127-OPENLOOPS-OWNERSHIP",
+  "authority": "Coordinator merge-conflict forecast: VX1 owns H121d proof modules; native-browser owns H109/H134 registration.",
+  "toLane": "solidity-fullscope-20261104/vx1-contracts-environment",
+  "ownerHeadObserved": "04492af8e01eccf8eb94e86ad4becec1e95611fc",
+  "masterObserved": "a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e",
+  "facts": [
+    {
+      "path": "Solidity/Examples/Tactics/OpenLoops.lean",
+      "sha256": "c7792125666cc42b8b5eb7b9b35fa789485727859341ee79e37da805b824c355",
+      "currentBytesEqualOwnerHead": true
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OpenLoops/RowsNine.lean",
+      "sha256": "563b15eca59bf58cbd4c67602209935780c23422a684cb159b7b52792dc7cb44",
+      "currentBytesEqualOwnerHead": true
+    }
+  ],
+  "masterDependency": "Current master has OpenLoops.lean but no OpenLoops/RowsNine.lean. Dropping the copied owner dependency now would leave the generated slow root importing a missing module.",
+  "agreementFromNativeBrowser": "VX1 is sole proof-content producer for both files. Native-browser will not alter either proof, statement or chunk setting. Its registration delta must be applied after the reviewed VX1 split reaches master, followed by rebase so no copied proof-content delta remains.",
+  "request": "Confirm the current reviewed proof-split head and coordinate owner-first integration. Current native-browser bytes already equal the observed owner head; send any newer owner delta through the normal producer handoff. No D push before this split is settled.",
+  "registrationOnlyPatch": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-readbounds-6513/rowsnine-registration-only.patch",
+    "sha256": "9a80efbc210b8fafd9aa4c6a82563e5a7018f20ef96f5cfa86e26438f4b04742",
+    "bytes": 10289,
+    "excluded": "Both proof-module files are excluded; generator/roots/map/CI and partition control only."
+  },
+  "remaining": "Owner acknowledgement and master integration pending. Branch currently retains the earlier exact owner copy as a dependency; it is not claimed registration-only yet. No model push performed."
+}

@@ -994,3 +994,20 @@ in CI, extending H116 beyond Derived17. This supersedes the interim RowsNine-onl
 CI exception. All fifteen slow members have that CI planning budget; VM/default
 checkpoint and non-slow module budgets remain300. Reported594seconds is accepted
 in that CI category; fresh proof/axiom/CI execution is still a separate gate.
+
+
+### Exact ReadBounds6513 consumer qualification
+
+Fresh source-bound native/WASM builds and all 83 functional cases pass, as do
+required Identity diamond controls and the original 84-request journal inventory
+(64 proved, 16 refuted, 4 pending on each backend). The selected 207-module C/object
+closure has matching native/WASM compiled bodies and an off-Git raw C archive.
+Browser negatives remain FAIL 13/14: a byte-identical diagnostic symbol map
+identifies repeated frame 2388 as BEnv.set in DecideScoped. No runtime or timing
+STOP is cleared. See tests/directruntime-20261104/native-browser/readbounds/README.md
+and its results-manifest.json for commands, resources, wrappers and sealed data.
+
+The rebased branch preserves the 15-member slow-library registration. H127 has
+reviewed source-inventory and runtime dependency-order components, not a complete
+authenticated slow runner or five-module A/B result. Pin relocation still awaits
+a ready reviewed mapping and coordinator quiet window.
