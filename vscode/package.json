@@ -218,6 +218,13 @@
           "scope": "resource",
           "description": "Show current-version verification status beside function declarations."
         },
+        "solidityLean.compilerOutputDir": {
+          "type": "string",
+          "default": "bin",
+          "scope": "resource",
+          "restricted": true,
+          "description": "Build compiler AST artifacts under this absolute directory or path relative to the Solidity file's workspace folder. Each build uses an immutable source-named child directory. These artifacts are not proof or runtime results."
+        },
         "solidityLean.includePaths": {
           "type": "array",
           "items": {
