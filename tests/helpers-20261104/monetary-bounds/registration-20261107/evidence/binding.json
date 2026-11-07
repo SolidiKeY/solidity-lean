@@ -1,0 +1,14 @@
+{
+  "integration_base": "65e69b6426a9a4fc3fb5541f41726a4bfefda5d0",
+  "adoption_merge": "33a9ea1619101d11301cc3a840a27fcde2984304",
+  "original_helper_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "exact_owner_input": "046292ee61fc6967311bbb1ddec44505ed698481",
+  "source_byte_identity": "git diff exact_owner_input integration_base -- Monetary{,Laws}.lean is empty",
+  "sha256": {
+    "Solidity/Source/Monetary.lean": "90e92e71ca8a43c9b34f3054a0fd9263cacfda849f032cde9c52fa4b03e9a1ca",
+    "Solidity/Source/MonetaryLaws.lean": "6ebc6da755bbeb062187f37798578b89c490b220ad968940f93954264b985eda",
+    "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean": "82583b19074fbcb61f1d9e2071a67bd31bc6706b6f298d9be3bcb4de79d60dc0",
+    "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean": "ddad4a694800ac8c34b8219cb8ad2e28b8b0c74ffde07dd0f0923f58ccc23f7e",
+    "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean": "3dbff0633d2a7906fcb8a79884fad5bdc06fcb23abd9556d21f095dad1bc4434"
+  }
+}

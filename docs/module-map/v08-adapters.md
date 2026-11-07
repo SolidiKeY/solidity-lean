@@ -893,6 +893,9 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
 | `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
 | `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
+| `Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean` | Exact credit/debit round trips, checkedWord characterization and same-case algebraic consequences over the frozen monetary interface; no reachability claim. |
+| `Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean` | Kernel positive/refusal controls at zero, maximum Word, the Word limit and limit+1, including reverse-roundtrip counterexamples without Fits. |
+| `Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean` | Exact standard-axiom pins for all six helper laws and 34 controls. |
 
 ### P8 Producer merge (H57, H60)
 

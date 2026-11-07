@@ -45961,6 +45961,60 @@
   "propext"
  ],
  "Solidity/Lowering/P8/FailureProjection.lean:Solidity.Lowering.P8.SpecFailures.requestCutWitness_not_noFail": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.above_affordable": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.above_credit_refused": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.above_reverse_counterexample": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_above_checked": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_above_credit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_above_debit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_above_fits": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_above_view": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_limit_checked": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_limit_credit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_limit_debit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_limit_fits": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_limit_view": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_max_checked": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_max_credit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_max_debit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_max_fits": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_max_view": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_zero_checked": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_zero_credit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_zero_debit_zero": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_zero_fits": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.boundary_zero_view": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.checked_rejects_wrong_word": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.checkedWord_iff": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.credit_debit_roundtrip": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.credit_eq_some_iff": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.debit_credit_roundtrip": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.debit_eq_some_iff": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.limit_affordable": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.limit_credit_refused": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.max_affordable": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.max_credit_refused": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.max_forward_roundtrip": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.max_reverse_roundtrip": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.max_unaffordable": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.reverse_roundtrip_iff": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.reverse_without_fits_counterexample": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.zero_credit_max": [],
+ "Solidity/Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean:Solidity.Source.Monetary.zero_unaffordable": [],
  "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.assemble": [
   "Classical.choice",
   "Quot.sound",

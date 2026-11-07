@@ -1,0 +1,10 @@
+COMMAND: lake -f /workspace/solidity-lean/tests/helpers-20261104/monetary-bounds/registration-20261107/serial.toml build Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins
+✔ [2/10] Built Solidity.Hash.CollisionBound (6.3s)
+✔ [4/10] Fetched Solidity.Roadmap.Evm
+✔ [5/10] Built Solidity.Roadmap.Contracts (2.8s)
+✔ [6/10] Built Solidity.Source.Monetary (325ms)
+✔ [7/10] Built Solidity.Source.MonetaryLaws (282ms)
+✔ [8/10] Built Solidity.Lowering.P8.HelperPackets.MonetaryBounds.Laws (318ms)
+✔ [9/10] Built Solidity.Lowering.P8.HelperPackets.MonetaryBounds.Controls (417ms)
+✔ [10/10] Built Solidity.Lowering.P8.HelperPackets.MonetaryBounds.AxiomPins (250ms)
+Build completed successfully (10 jobs).

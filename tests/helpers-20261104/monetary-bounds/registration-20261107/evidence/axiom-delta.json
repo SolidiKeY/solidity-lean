@@ -1,0 +1,15 @@
+{
+  "own_pins": 40,
+  "own_errors": [],
+  "own_changes": [],
+  "upstream_errors": [],
+  "upstream_changes": 492,
+  "upstream_examples": [
+    "new pin SolidityBridge.RoadmapV15.P10.ByteTable.execute [Classical.choice, Quot.sound, propext]",
+    "new pin SolidityBridge.RoadmapV15.P10.ByteTable.fixture_word [Classical.choice, Quot.sound, propext]",
+    "new pin SolidityBridge.RoadmapV15.P10.ByteTable.fixture [Classical.choice, Quot.sound, propext]",
+    "new pin Solidity.Backend.AbiEntry.Consumers.UIntViews.sequenceElements []",
+    "new pin Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_sequence [Quot.sound, propext]"
+  ],
+  "conclusion": "All helper pins registered exactly; global unrecorded changes already present in adopted master; no unrelated baseline changes made."
+}
