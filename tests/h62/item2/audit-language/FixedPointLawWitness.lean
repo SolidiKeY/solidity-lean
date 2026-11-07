@@ -54,4 +54,84 @@ theorem division_branch : two.val ≠ 0 ∧ ty.inRange ((seven.val * ty.scale).t
 #print axioms range_agreement_full
 #print axioms division_agreement_full
 #print axioms division_branch
+
+/-- Signed input exercises negation away from the unsigned zero-only success. -/
+def signedTy : FxTy := ⟨true, 8, 0, by decide⟩
+def negativeSeven : Fx signedTy := ⟨-7, by decide⟩
+
+theorem add_range_full : hypotheses_of% Fx.add_agree_of_inRange := by
+  exact ⟨ty, seven, two, by decide, True.intro⟩
+#verify_hypotheses add_range_full for Solidity.Language.FixedPoint.Fx.add_agree_of_inRange
+#print axioms add_range_full
+
+theorem sub_range_full : hypotheses_of% Fx.sub_agree_of_inRange := by
+  exact ⟨ty, seven, two, by decide, True.intro⟩
+#verify_hypotheses sub_range_full for Solidity.Language.FixedPoint.Fx.sub_agree_of_inRange
+#print axioms sub_range_full
+
+theorem neg_range_full : hypotheses_of% Fx.neg_agree_of_inRange := by
+  exact ⟨signedTy, negativeSeven, by decide, True.intro⟩
+#verify_hypotheses neg_range_full for Solidity.Language.FixedPoint.Fx.neg_agree_of_inRange
+#print axioms neg_range_full
+
+theorem mul_range_full : hypotheses_of% Fx.mul_agree_of_inRange := by
+  exact ⟨ty, seven, two, by decide, True.intro⟩
+#verify_hypotheses mul_range_full for Solidity.Language.FixedPoint.Fx.mul_agree_of_inRange
+#print axioms mul_range_full
+
+theorem inc_range_full : hypotheses_of% Fx.inc_agree_of_inRange := by
+  exact ⟨ty, seven, by decide, True.intro⟩
+#verify_hypotheses inc_range_full for Solidity.Language.FixedPoint.Fx.inc_agree_of_inRange
+#print axioms inc_range_full
+
+theorem dec_range_full : hypotheses_of% Fx.dec_agree_of_inRange := by
+  exact ⟨ty, seven, by decide, True.intro⟩
+#verify_hypotheses dec_range_full for Solidity.Language.FixedPoint.Fx.dec_agree_of_inRange
+#print axioms dec_range_full
+
+theorem mod_modes_full : hypotheses_of% Fx.mod_agree' := by
+  exact ⟨ty, seven, two, True.intro⟩
+#verify_hypotheses mod_modes_full for Solidity.Language.FixedPoint.Fx.mod_agree'
+#print axioms mod_modes_full
+
+theorem add_success_full : hypotheses_of% Fx.add_agree := by
+  exact ⟨ty, seven, two, ⟨9, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses add_success_full for Solidity.Language.FixedPoint.Fx.add_agree
+#print axioms add_success_full
+
+theorem sub_success_full : hypotheses_of% Fx.sub_agree := by
+  exact ⟨ty, seven, two, ⟨5, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses sub_success_full for Solidity.Language.FixedPoint.Fx.sub_agree
+#print axioms sub_success_full
+
+theorem neg_success_full : hypotheses_of% Fx.neg_agree := by
+  exact ⟨signedTy, negativeSeven, ⟨7, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses neg_success_full for Solidity.Language.FixedPoint.Fx.neg_agree
+#print axioms neg_success_full
+
+theorem mul_success_full : hypotheses_of% Fx.mul_agree := by
+  exact ⟨ty, seven, two, ⟨14, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses mul_success_full for Solidity.Language.FixedPoint.Fx.mul_agree
+#print axioms mul_success_full
+
+theorem inc_success_full : hypotheses_of% Fx.inc_agree := by
+  exact ⟨ty, seven, ⟨8, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses inc_success_full for Solidity.Language.FixedPoint.Fx.inc_agree
+#print axioms inc_success_full
+
+theorem dec_success_full : hypotheses_of% Fx.dec_agree := by
+  exact ⟨ty, seven, ⟨6, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses dec_success_full for Solidity.Language.FixedPoint.Fx.dec_agree
+#print axioms dec_success_full
+
+theorem div_success_full : hypotheses_of% Fx.div_agree := by
+  exact ⟨ty, seven, two, ⟨3, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses div_success_full for Solidity.Language.FixedPoint.Fx.div_agree
+#print axioms div_success_full
+
+theorem mod_success_full : hypotheses_of% Fx.mod_agree := by
+  exact ⟨ty, seven, two, ⟨1, by decide⟩, rfl, True.intro⟩
+#verify_hypotheses mod_success_full for Solidity.Language.FixedPoint.Fx.mod_agree
+#print axioms mod_success_full
+
 end Solidity.H62.AuditLanguage.FixedPointLawWitness

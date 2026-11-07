@@ -626,3 +626,18 @@ Both independent read-only reviews pass. These certificates establish local
 reference-semantics feasibility, not compiler totality or solc code generation.
 Original 4.35, full affected acceptance and remaining witnesses stay open; logs,
 resource records and exact source bindings belong to the private H145 archive.
+
+The same law-witness module now adds fifteen distinct agreement-family
+certificates: six arithmetic range-premise forms, modulo mode agreement and
+eight checked-success forms. It has 21 distinct imported law associations in
+total, each with an unchanged frozen/current source signature. Signed negation
+uses -7 rather than an unsigned zero-only success; the unsigned binary examples
+use 7 and 2 with actual checked results (9, 5, 14, 3 and 1). No unchecked result
+is assumed to establish a checked-success premise.
+
+The serial bounded check passes in 1.558 seconds after KeySort, with no resource
+STOP. The seven new range/unconditional tuples have empty axiom sets; the eight
+checked-success tuples report propext, Classical.choice and Quot.sound through
+imported definitions. Both read-only reviews pass. These are local feasibility
+certificates, not complete compiler-success, statement-coverage or timing gates.
+Detailed logs, axiom output, resources and source bindings are archived privately.
