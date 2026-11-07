@@ -14,8 +14,10 @@ No H71 push permission text is available. The original explicit no-push rule
 therefore remains in force: branch committed locally, no push of any branch.
 The successor integrates the final head after the final stopped acknowledgement.
 
-Original assignment, full original work/backfill queues, and exact scope manifest
-are committed alongside this handoff. The transcript includes the complete
+Original assignment and full original work/backfill queues remain committed.
+H44 preserves exact scope JSON off-tree; scope-manifest.sha256 commits its
+absolute VM path, byte size and SHA256. Retrieve and verify it before successor
+work. The transcript includes the complete
 original user assignment content; formatting of its owner JSON is normalized.
 Its actual file hash is supplied separately; the original rendered hash is
 provenance and is not claimed to match normalized transcript bytes.
@@ -56,3 +58,8 @@ The cumulative base-to-final patch and bundle authenticate these committed scope
 files; the cumulative evidence archive carries old evidence and coordinator input
 contents, not inaccessible coordinator-local path assumptions. SHA256SUMS binds
 all exported files. Original VM/branch/evidence and prior exports are retained.
+
+H44 deterministic recovery and verification commands are recorded as comments
+in scope-manifest.sha256, using immutable arrival commit
+cf354e514bf0b0327f89fa2c60a799a5d04b776d. The original blob was byte-compared
+with the preserved off-tree file before this correction commit.

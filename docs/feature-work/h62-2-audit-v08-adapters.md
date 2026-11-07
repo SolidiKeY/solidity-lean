@@ -288,3 +288,14 @@ API supports complete|blocked only; no false substitute transition attempted.
 See retirement-handoff.md and preserved goal-pause-unavailable.json. No automatic
 implementation continuation is authorized. Final stopped/head acknowledgement
 accompanies cumulative authenticated exports; successor owns integration.
+
+## H44 packaging correction (2026-11-07)
+
+The 178990-byte scope JSON is preserved byte-for-byte off-tree at
+/workspace/h62-audit-v08-adapters-evidence/retirement/scope-manifest.json.
+The committed retirement/scope-manifest.sha256 records its absolute path, size
+and digest. Original assignment and queues remain committed. No theorem, gate,
+budget or scope-content changes. Prior exports remain preserved. Branch arrival
+head cf354e514bf0b0327f89fa2c60a799a5d04b776d already merged origin/master;
+that history is preserved. The review patch isolates this correction from it.
+Packaging only: retirement pause remains; no proof continuation or push.
