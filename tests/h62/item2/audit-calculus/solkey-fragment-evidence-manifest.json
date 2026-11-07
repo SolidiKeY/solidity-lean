@@ -1,0 +1,52 @@
+{
+  "scope": "Complete37 SolkeyFragment roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1334,
+    "pending": 3949,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-fragment-roles-v104/evidence.tar.gz",
+      "bytes": 336132,
+      "sha256": "e83032a4de8cddb020bb43babb0a74c1f47e280e2197145012e86d5b1c02b371"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-fragment-roles-v104/inputs.json",
+      "bytes": 774,
+      "sha256": "71d7454bb250f1e8cc7dec2b7743834bce312b743aa28f9d8378937c4561dc02"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-fragment-roles-v104/gates.json",
+      "bytes": 2844,
+      "sha256": "2103d575562348780e9b46eba63d016b56cee17f5439742f13d7133ef9e1c932"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-fragment-roles-v104/reviews.md",
+      "bytes": 998,
+      "sha256": "f9f5d876c91c8213d15eab7a8fe463a3146ad89d228d1e7baacd80907be0131b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-fragment-roles-v104/case-rosters.json",
+      "bytes": 3465,
+      "sha256": "0022f30b91f71e6b4712c236188601a14eeaf357020bf38b1b538824f78da132"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-fragment-roles-v104/doc-master-repair-binding.json",
+      "bytes": 211,
+      "sha256": "f32743f8f3269c5f66f2b99f1d6d9703f6d22f299dec9f35ae808685aac1b9a1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-fragment-roles-v104/external-retention.json",
+      "bytes": 331544,
+      "sha256": "79dfea318a6bdaa9624c54b6d00e7390c2d54b6f62d8e3336dcf51a04696d3d8"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/solkey-fragment-roles-v104/semantic-roles-reviewed.json",
+      "bytes": 3558281,
+      "sha256": "41c93c91f937ce295ea5010752248633570051009f6c05735fce273647611a1a"
+    }
+  ]
+}
