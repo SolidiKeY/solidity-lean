@@ -1,0 +1,38 @@
+{
+  "status": "EIGHT_ENVIRONMENT_COMPONENT_RECORDS_ONLY",
+  "master_checked": "6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f",
+  "source_bindings": {
+    "Solidity/Lowering/V08/SourceEnvironment.lean": "210f97a0054da0d9f22d94b509515528e6db00d7f109046809cca9577901a77e",
+    "tests/h62/item2/audit-v08-adapters/SourceEnvironmentJoint.lean": "280de69342df2f5fa785a7edc713eae830a8e4031cf828b46c75932b48f73aea",
+    "Solidity/Lowering/V08/SourceEnvironmentControls.lean": "bae35879e6d35efb6dbddd3d75a94856139afb9826db39578bb6729d0e1a0e8d"
+  },
+  "counts": {
+    "original_lexical_records": 8,
+    "public_candidates": 7,
+    "private_candidate": 1,
+    "historical_checked_components": 3,
+    "existing_control_references": 2,
+    "existing_transport_references": 2,
+    "private_helper_pending": 1,
+    "new_witnesses": 0,
+    "fidelity_acceptances": 0
+  },
+  "limitations": "Historical fixture gates not rerun. Explicit target projection is not physical frame/body correspondence. Zero proposition binders does not establish dependent parameter inhabitance. Private mangled name retained only as saved candidate. All full ownership/feasibility/fidelity audit remains pending; no canonical Source/H68 completion.",
+  "artifacts": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-hypotheses-20261107/accounting.json",
+      "bytes": 816651,
+      "sha256": "e5c19064a255b350cdacb46a6e19c3bbfc250e72eb4cc074d8c7b38400f8e516"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-component-index-20261107/index.json",
+      "bytes": 189094,
+      "sha256": "6e2aa10da87d820e9fd6d8e6147af68edddd1ba5fc60bf530239d38250e48dfc"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-published/tests/h62/item2/audit-v08-adapters/source-environment-joint-manifest.json",
+      "bytes": 4810,
+      "sha256": "f0d6d92c9f471f40c5c3dc196fa4ab4371c638e61c37694b34c55a78b8251604"
+    }
+  ]
+}

@@ -1015,3 +1015,31 @@ and the assigned H68 bridge therefore remain unchanged.
 Read-only finder and skeptic found no issue in the full timeout/success
 boundary, seven-law partition, bindings or historical-gate qualifications.
 Neither ran Lean or a server; review evidence remains off Git.
+
+### Eight environment records, including the private helper (2026-11-07)
+
+All eight original SourceEnvironment lexical records are indexed exactly once:
+seven public-name candidates and one private word_range candidate. Three link
+to the historical reached-read checks, two to existing Source timeout/statement
+controls, two to original projection transports, and one retains the private
+range-helper obligation. The saved private numeric name is not promoted to a
+public API or asserted canonical across snapshots; no alias is introduced.
+
+Sender transport explicitly constructs stateEnvironment from the Source world,
+request, target world, response table and typed state. Value/timestamp transport
+uses the same explicit projection while retaining their distinct context fields.
+Neither law supplies production physical-frame admission, store equality or a
+compiler-selected target body. The private helper derives u256 bounds from a
+bounded Roadmap.Word; zero explicit proof binders does not establish inhabitance
+of every dependent parameter in any indexed law.
+
+Current SourceEnvironment and fixture bytes match the historical receipt, but
+its Lean gate is not claimed rerun. No new witness, fidelity acceptance, wrapper
+theorem, current full gate or timing result is counted. Full ownership/joint
+feasibility/fidelity and residual semantic inventory remain open, alongside the
+canonical Source producers and assigned H68 bridge. Exact saved IDs/types and
+boundaries are off Git, bound by source-environment-component-index-manifest.json.
+
+Independent read-only finder and skeptic found no issue in the eight-record
+partition, private-name status, projection boundaries or historical validation
+qualifications. Neither ran Lean or a server; receipt retained off Git.
