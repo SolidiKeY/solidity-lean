@@ -1736,3 +1736,21 @@ and writes private oleans, logs and verification JSON; it does not replace
 the final gate. Current inputs, invocation and results remain unresolved.
 Independent read-only finder and skeptic reviewed these boundaries without
 Lean, server or builds. No runtime acceptance is inferred.
+
+## Mutation-oracle standalone candidates
+
+`mutation_oracle_controls.py` records 23 supplied source-hashed rows: eight
+baselines, ten candidate kill witnesses, four production-premise negative
+controls and one sound-survivor candidate. A production control expects a
+specific localized witness failure after its source link; arbitrary failure
+is not a scored kill. `LengthReevalSound` is a survivor claim, not a kill.
+The historical `CallbackTacletFailureKill` cross-mutant control
+`sendWithCallbackBox.send-flag-true-to-false.1` was witness-failed; the main
+`callback-table.failed-send-flag-true` mutant was recorded killed. Current
+outcomes and each selected manifest phase remain unverified.
+
+The schema-3 runner assembles phase-specific scratch sources and writes
+diagnostics and records; its expected outcomes depend on case and phase.
+The earlier schema-2 `cases` scan is not a complete role roster for these
+fixtures. Independent read-only finder and skeptic reviewed these boundaries
+without Lean, server or builds. No runtime acceptance is inferred.
