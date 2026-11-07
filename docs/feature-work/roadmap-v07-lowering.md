@@ -1227,12 +1227,12 @@ inhabitable alongside a model producer, and that H24 does not constrain a
 producer whose accepted Sources are empty.
 
 The P8 model witness `P8.PlanWitness.planProducer` (branch
-`cloud/move5-20261106/p8-producer`, `PlanWitness.lean` as of `6d4b705c3`,
+`cloud/move5-20261106/p8-producer`, the `P8.PlanWitness` module as of `6d4b705c3`,
 branch head `809f6d7f8`, not on master) is such a producer: `sourceOf` uses
 `P8.PlanWitness.emptyEnv`, which is `⟨[]⟩` like
 `GraphAdmissionAssembly.emptyEnv`, so `rfl` holds by unfolding. The statement
 `def planDeclarationGraphProducer := declarationGraphProducerOfEmpty planProducer (fun _ _ _ _ => rfl)`
-was elaborated in an uncommitted scratch module: that `PlanWitness.lean`,
+was elaborated in an uncommitted scratch module: that `P8.PlanWitness` source,
 importing `GraphAdmissionAssembly` at this head, with the instance appended.
 It produced no errors, and `#print axioms` gave `[propext, Classical.choice,
 Quot.sound]`. The instance belongs in the p8 lane, or here once that branch
