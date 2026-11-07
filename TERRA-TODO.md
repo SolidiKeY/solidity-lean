@@ -224,8 +224,9 @@ theorem run_refused {E : Source.Env} {Γ : Source.RCtx}
 end Solidity.Lowering.StorageOps.SourceWriteRollback
 ```
 
-Two routine adapters are specified here; the historical twelve remain preserved
-separately, for fourteen pending adapters total. Neither statement is compiled.
+These two routine adapters were originally recorded alongside twelve historical
+adapters. C157 is now compiled; C159 and the twelve historical adapters remain
+pending. Later subtotal statements below record their checkpoint history.
 
 ## C166: complete primitive-copy fuel classification
 
