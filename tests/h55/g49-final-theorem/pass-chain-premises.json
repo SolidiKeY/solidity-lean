@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "theorem": "Solidity.Roadmap.G49Final.pass_chain",
+  "source": "Solidity/Roadmap/G49Final/PassChain.lean",
+  "sourceSha256": "350daa7a780d8a694258038e494d97fc1fb314923f44e157bb3b2e0b7b9dc9bf",
+  "inventorySourceSha256": "b0156632aa339ce07ce72c2a4674fea906042c399933be4ddabeb6e437c2f94d",
+  "axioms": [
+    "propext"
+  ],
+  "bindings": [
+    {
+      "index": 0,
+      "name": "S",
+      "role": "parameter",
+      "obligation": null,
+      "typeSha256": "0c08136a5524b24d9ff5a1801ef8ca72b60759e8d3cbe9a850a27d48d4635bc7",
+      "isProp": false,
+      "readableTypeSha256": "ab51d49f39e42f2db53b83a083d6e313e9a1736cd528c4294afe3461e4ebbd63",
+      "constants": [
+        "Solidity.Roadmap.SourceSpec"
+      ]
+    },
+    {
+      "index": 1,
+      "name": "I",
+      "role": "parameter",
+      "obligation": null,
+      "typeSha256": "cac9e645ae80a88ae5852e469463c99a00ccea503f8d2e41c70322c619360469",
+      "isProp": false,
+      "readableTypeSha256": "07e5c37fccf72a3944f437245445cd5bc2779dacd7ca61cbf3c74322e1ec613f",
+      "constants": [
+        "Solidity.Roadmap.IntrinsicSpec"
+      ]
+    },
+    {
+      "index": 2,
+      "name": "Asm",
+      "role": "parameter",
+      "obligation": null,
+      "typeSha256": "35ce91732a8f27b189117cda1d9079cf3de093ea8d1eef15ae754386d43b104c",
+      "isProp": false,
+      "readableTypeSha256": "b7f0d4e21846413db7ce1374f06f63addd27808aaf8e5a3956a08bfb09a6134e",
+      "constants": [
+        "Solidity.Roadmap.Event",
+        "Solidity.Roadmap.Lang",
+        "Solidity.Roadmap.Outcome"
+      ]
+    },
+    {
+      "index": 3,
+      "name": "V",
+      "role": "parameter",
+      "obligation": null,
+      "typeSha256": "ac4a05aa10417b223a26629bcf512d79f225a57aef5022affccef85997dfad7a",
+      "isProp": false,
+      "readableTypeSha256": "e3e6e9c92670ce8e2abdcf0f7bafad707b8c9eb446e3a770892d975523bbe8ee",
+      "constants": [
+        "Solidity.Roadmap.EvmSpec"
+      ]
+    },
+    {
+      "index": 4,
+      "name": "lowering",
+      "role": "producer",
+      "obligation": "P8b",
+      "typeSha256": "f690fff92b3b5a79c5e2b2a091cb2a2a25fe8e0c40287496d5b604a4c4997bb1",
+      "isProp": false,
+      "readableTypeSha256": "2b7083fe3201861a7f80574912b318d1e98e33791edd4821eaa81f2924ba30ca",
+      "constants": [
+        "Solidity.Roadmap.Lowering"
+      ]
+    },
+    {
+      "index": 5,
+      "name": "backend",
+      "role": "producer",
+      "obligation": "G49.01",
+      "typeSha256": "f3a7b79c99235fd1ed0cf7f1650e7c6975f7284407db92394615c9f9050c2961",
+      "isProp": false,
+      "readableTypeSha256": "0781c634d9055afa2bc488c613eec6e5f7b869ea5acee508cbbfd44ed932b00f",
+      "constants": [
+        "Solidity.Roadmap.Compilation"
+      ]
+    },
+    {
+      "index": 6,
+      "name": "execution",
+      "role": "producer",
+      "obligation": "G49.02",
+      "typeSha256": "8ce2cc78b413872859427cd3dbb3547c83d29a5f74d3e61f71f3fe28b9fc0d37",
+      "isProp": false,
+      "readableTypeSha256": "a32054504638aa79d499b572e3d0fd08469968113fed6b17c9231961919c76ab",
+      "constants": [
+        "Solidity.Roadmap.Execution"
+      ]
+    },
+    {
+      "index": 7,
+      "name": "r",
+      "role": "parameter",
+      "obligation": null,
+      "typeSha256": "6f4b0ab20813472f5816dd72c8392d9c806df51682cc6279442e349033197de1",
+      "isProp": false,
+      "readableTypeSha256": "bd0ef3531856da532ecbf19f64a3323d4469797364a7cf8bc3491085051dcd48",
+      "constants": [
+        "Solidity.Roadmap.SourceSpec.Resolved"
+      ]
+    },
+    {
+      "index": 8,
+      "name": "w",
+      "role": "condition",
+      "obligation": "P8a",
+      "typeSha256": "b2abffa322f1971f0488c31ddbe43088c868b3bc897b0eb326f9da62988254ad",
+      "isProp": true,
+      "readableTypeSha256": "ee576578f73e146da5dcbdd33f6973526053f2e57649971300da53c6e0cf4ce1",
+      "constants": [
+        "Solidity.Roadmap.SourceSpec.WellFormed"
+      ]
+    },
+    {
+      "index": 9,
+      "name": "p",
+      "role": "condition",
+      "obligation": "P8a",
+      "typeSha256": "fb69911e9d5a802753516d0e4d2a570e82e853dbb4f7ee3a464f36bb8e62a35f",
+      "isProp": true,
+      "readableTypeSha256": "423e76e3a03304f585a1406991d31ca5979ea1f4fea422a1550b6ae3543b7769",
+      "constants": [
+        "Solidity.Roadmap.SourceSpec.InProfile"
+      ]
+    },
+    {
+      "index": 10,
+      "name": "art",
+      "role": "parameter",
+      "obligation": null,
+      "typeSha256": "8a94a05b576714aa4e8a3a4d645d0e6e8fa7e5e90ecd0408846f0fa9cfead701",
+      "isProp": false,
+      "readableTypeSha256": "a87b3101ac7034ba534dc020013ff1378c19e7b72fffd0746c1ef3b291844411",
+      "constants": [
+        "Solidity.Roadmap.Artifact"
+      ]
+    },
+    {
+      "index": 11,
+      "name": "artifact",
+      "role": "producer",
+      "obligation": "G49.02",
+      "typeSha256": "f61a12f3e214df635ca85074f30b032b8c4e0188410b23d7776973b95407cb8a",
+      "isProp": true,
+      "readableTypeSha256": "82d7c7485a1456af6af786695c135a1f85e2643189843e3b41f3937652bdb43b",
+      "constants": [
+        "Eq",
+        "Solidity.Roadmap.Artifact",
+        "Solidity.Roadmap.Compilation.compile",
+        "Solidity.Roadmap.Execution.assemble",
+        "Solidity.Roadmap.Lowering.lower"
+      ]
+    },
+    {
+      "index": 12,
+      "name": "e",
+      "role": "parameter",
+      "obligation": null,
+      "typeSha256": "7448f61e3e3fd78f0b6a9b1c4cb51fadf75b4c80cd7e3725d6ccf7782afb029f",
+      "isProp": false,
+      "readableTypeSha256": "8bce230d67f0a5c8ddafa7f50a193123094689c7dd53389b2af89695afe86d65",
+      "constants": [
+        "Solidity.Roadmap.Event",
+        "Solidity.Roadmap.EvmSpec.lang",
+        "Solidity.Roadmap.Lang.Env",
+        "Solidity.Roadmap.Outcome"
+      ]
+    },
+    {
+      "index": 13,
+      "name": "allowed",
+      "role": "condition",
+      "obligation": "G50.02",
+      "typeSha256": "5bef95f29daa10656882e00ea86ddd06da406bc24bcec3f2e218e5b3798b839b",
+      "isProp": true,
+      "readableTypeSha256": "0a8749dfdcaf6adca6e239b9cac0e59e004338ca9c05eb16d411fcaa5d17abaa",
+      "constants": [
+        "Solidity.Roadmap.Event",
+        "Solidity.Roadmap.EvmSpec.lang",
+        "Solidity.Roadmap.Lang.Allowed",
+        "Solidity.Roadmap.Outcome"
+      ]
+    }
+  ],
+  "countBoundary": "Explicit top-level binders only; producer packages are not recursively discharged or atomized. Caller-condition ownership is integration responsibility, not a missing producer claim. Final public theorem inventory remains pending.",
+  "theoremTypeSha256": "f7d9114a9eb57274dc8b63f895fb6780831c74accbcabd6122d33f2fb3936d7e",
+  "dependencies": [
+    "And",
+    "And.casesOn",
+    "And.intro",
+    "And.left",
+    "And.right",
+    "Eq",
+    "Eq.mp",
+    "Eq.mpr",
+    "Eq.trans",
+    "Exists",
+    "Exists.casesOn",
+    "Exists.intro",
+    "Solidity.Roadmap.Artifact",
+    "Solidity.Roadmap.Cert.back",
+    "Solidity.Roadmap.Cert.envSound",
+    "Solidity.Roadmap.Cert.need",
+    "Solidity.Roadmap.Cert.need_ok",
+    "Solidity.Roadmap.Compilation",
+    "Solidity.Roadmap.Compilation.agrees",
+    "Solidity.Roadmap.Compilation.cert",
+    "Solidity.Roadmap.Compilation.compile",
+    "Solidity.Roadmap.Compilation.dom",
+    "Solidity.Roadmap.Compilation.pass",
+    "Solidity.Roadmap.Event",
+    "Solidity.Roadmap.EvmSpec",
+    "Solidity.Roadmap.EvmSpec.lang",
+    "Solidity.Roadmap.EvmSpec.load",
+    "Solidity.Roadmap.Execution",
+    "Solidity.Roadmap.Execution.agrees",
+    "Solidity.Roadmap.Execution.assemble",
+    "Solidity.Roadmap.Execution.cert",
+    "Solidity.Roadmap.Execution.dom",
+    "Solidity.Roadmap.Execution.pass",
+    "Solidity.Roadmap.IntrinsicSpec",
+    "Solidity.Roadmap.IntrinsicSpec.World",
+    "Solidity.Roadmap.IntrinsicSpec.lang",
+    "Solidity.Roadmap.IntrinsicSpec.ofWorld",
+    "Solidity.Roadmap.Lang",
+    "Solidity.Roadmap.Lang.Admissible",
+    "Solidity.Roadmap.Lang.Allowed",
+    "Solidity.Roadmap.Lang.Env",
+    "Solidity.Roadmap.Lang.Forward",
+    "Solidity.Roadmap.Lang.Guard",
+    "Solidity.Roadmap.Lang.Prog",
+    "Solidity.Roadmap.Lang.Res",
+    "Solidity.Roadmap.Lang.sem",
+    "Solidity.Roadmap.Lowering",
+    "Solidity.Roadmap.Lowering.agrees",
+    "Solidity.Roadmap.Lowering.cert",
+    "Solidity.Roadmap.Lowering.dom",
+    "Solidity.Roadmap.Lowering.lower",
+    "Solidity.Roadmap.Lowering.pass",
+    "Solidity.Roadmap.Outcome",
+    "Solidity.Roadmap.Pass.envAbs",
+    "Solidity.Roadmap.Pass.run",
+    "Solidity.Roadmap.Prefix.Le",
+    "Solidity.Roadmap.Prefix.Le.trans",
+    "Solidity.Roadmap.RefinesUnder",
+    "Solidity.Roadmap.SourceSpec",
+    "Solidity.Roadmap.SourceSpec.InProfile",
+    "Solidity.Roadmap.SourceSpec.Resolved",
+    "Solidity.Roadmap.SourceSpec.WellFormed",
+    "Solidity.Roadmap.SourceSpec.lang",
+    "Solidity.Roadmap.SourceSpec.meaning",
+    "congrArg",
+    "id"
+  ]
+}

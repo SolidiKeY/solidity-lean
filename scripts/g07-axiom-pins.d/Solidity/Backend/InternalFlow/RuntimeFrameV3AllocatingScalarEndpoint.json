@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEndpoint.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEndpoint.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEndpoint.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.native_state": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEndpoint.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.zero_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEndpoint.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEndpoint.zero_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
