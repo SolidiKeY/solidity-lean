@@ -77,3 +77,22 @@ Backfill status follows `tests/h28-terra/drift-reports/evidence/item1-manifest.j
 ## Gates and reviews
 
 Recorded in the final lane result.
+
+## H121 P9 return checkpoint
+
+The returned checkpoint `1ebcd0df16d3c8ba15cee9dccbd171ece5fb238e` was
+merged with published master `a8f684928fa085d8976ead33e3d0db30208e7a4f`.
+The existing recognizer statements and soundness claims are unchanged.
+An independent finite-default recognizer-fuel completeness extension was
+drafted, but its dependency build hit the unchanged 300-second cumulative
+limit before reaching that extension. It is not a checked result and its
+drafts are retained off the source tree, not registered.
+
+The stopped group was compiling the published, unchanged
+`Source/StmtProgress.lean`; this is not evidence of a per-proof timeout in that
+file. No completed artifact for it was available in this worktree. Runtime
+KeySort passed. Exact failure logs, setup/source hashes and static-review
+outcomes are in the external handoff. Both draft reviews found no static
+defect; neither supplies kernel evidence. Resume checking only after a
+verified exact-input dependency-cache delivery or a demonstrated performance
+repair; do not repeat the unchanged cold group or raise budgets.
