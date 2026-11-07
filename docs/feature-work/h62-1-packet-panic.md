@@ -121,3 +121,7 @@ The base-pinned ten-row execution/composition ledger records Source, selection a
 ## UnsignedDiv Witness continuation
 
 The base-pinned eight-row witness ledger records the auxiliary machine, arbitrary saved stack, Source state retention and symbolic outcomes. Negative controls pass. Independent read-only finder and skeptic matched the declarations without Lean and noted that the general zero-remainder packet is not a separately named witness theorem. This ledger is not a deployment, native execution or target payload proof.
+
+## SignedSub Execution continuation
+
+The base-pinned seven-row signed subtraction execution ledger retains the unchecked Source frame, local-family and representation premises, arbitrary target tails and Source-only zero-horizon timeout. Negative controls pass. Independent read-only finder and skeptic matched all seven observations without Lean; no material discrepancy was found. No original producer or proof guard was edited.
