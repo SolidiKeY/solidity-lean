@@ -691,3 +691,24 @@ This checks the selected Source word-read/write premises and existing controls,
 not general Source compiler admission, physical adequacy, world rollback, or
 release of any separate v4.35 timing/trust/compatibility hold. No Source producer
 or witness statement was edited.
+
+## Populated target reuse joint witnesses
+
+C223 adds a Source-free TargetReuseWitnesses fixture. The same populated Machine
+simultaneously satisfies capacity and the selected empty-child-header premise
+for both TargetRetainedCycle.after_reuse and run_reuse. Its retained child payload
+is71 despite the zero header. Existing generic laws establish whole-Machine
+execution and repeated reuse, rather than only sampled stores. The premise-free
+run_pop_regrow_pop input is classified separately as data inhabitance.
+
+Fifteen measured axiom guards pass. Positive observations retain payload71 and
+outside99. An uncleared child actually executes but changes the Machine; a
+saturated header refuses at push, an empty initial header refuses at pop, and
+an always-reverting program differs from the successful reuse program. The
+initial-pop cycle changes header1 to0 while preserving older payload71, so it
+is not restoration of the original state. These are existing symbolic-slot
+Evm.run endpoints; the final zero is an execution index, not a gas bound. No
+Source compiler admission, physical-word bridge or world rollback follows.
+Both independent read-only reviewers found the joint premises non-circular,
+inhabited and faithful to the exact frozen hypotheses. Production interfaces,
+definitions, statements, budgets and axiom inventories remain unchanged.
