@@ -329,3 +329,44 @@ compiler success, gas/fork coverage, original 4.35 migration or full audit gates
 
 Independent read-only finder and skeptic reviews verified all six associations,
 source/header/audit hashes and packet bindings without findings or Lean/server use.
+
+
+## Live elaborated subset using the generic inspector
+
+elaborate_subset.py reuses the unchanged Lean inspection TEMPLATE from the
+bytecode-selection audit, extracted as literal text without executing that
+lane's generator. Five selected mapped modules retain their complete frozen
+source bytes: IntegerLocalFamily, DoubleAssignmentFamily, LocalFamilyControls,
+NodeRank and RankConvergence. This is a subset, not a new census boundary.
+
+The successful checked-import probe exports 64 constants. Exact source-name and
+module matching identifies all 28 source theorem rows in those five modules;
+the other 36 generated/projection/data constants are retained separately.
+Their full elaborated telescopes contain 172 binders, with 31 proof binders
+identified by Lean Meta.isProp. Raw kernel type expressions remain off Git.
+This resolves actual inherited/implicit/result binder types for this live subset,
+without proving semantic classification or simultaneous feasibility. In particular,
+IntegerLocalFamily is a proof input, rather than an inhabited data map.
+
+Finder and skeptic identified provenance gaps in the initial reader. Fixed it
+to recompute the manifest fingerprint and reconstruct the exact probe from the
+pinned generic template/module set. The execution runner checks hashes before
+and after Lake's checked-import execution under the existing writer lock and
+resource guard. The reader requires the exact command/log path, exit/process
+status zero, no resource stop, both source bindings, 12GiB/swap-zero/thread-one
+limits and at least 4GiB headroom. Eight tests cover incomplete/duplicate logs,
+wrong fingerprints/counts/modules, failed or stopped receipts, changed commands,
+source/probe/pin changes and resource-policy mutations. Initial unbound output
+is retained but is not the accepted execution record.
+
+Final bound live Lean 4.24 run passes in 52.627s; the extra builds and probe are
+not a comparative timing or full runtime gate. Master fea090bf9 was fetched,
+inspected and merged before this item. No production module, statement, budget,
+axiom set or original pending ledger changed. A small elaborated-subset.json
+pins the bulk probe, output and execution receipt outside Git. The full census,
+remaining semantic roles/witnesses, original 4.35 acceptance and full gates stay
+open. Exact artifacts are in /workspace/sol-numeric-literals-v07-elaborated-subset.
+
+Independent read-only finder and skeptic reviews passed after the binding fixes;
+the final finder recheck also accepted resource-policy enforcement. Neither
+reviewer used Lean/server or changed files.
