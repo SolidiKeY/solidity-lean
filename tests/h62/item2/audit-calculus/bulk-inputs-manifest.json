@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/call-table-plan-classification-v15/semantic-roles-reviewed.json",
-    "bytes": 567991,
-    "sha256": "3d720fda75c407d46fd52838c13ec63d847cbc7938de6f263b8dcf7fa2cda929"
+    "path": "/workspace/h62-successor-bulk/call-graph-search-leaf-classification-v16/semantic-roles-reviewed.json",
+    "bytes": 626801,
+    "sha256": "7c6378c7b9cbe090008df9b09ea2293f0ca1b163e4c3ae5a1fd0aa6d52d00da6"
   }
 }
