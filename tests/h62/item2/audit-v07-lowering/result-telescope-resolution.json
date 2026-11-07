@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "guarded_regression": "Do not omit or misclassify inferred result binders in the frozen V07 census.",
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "status": "exact signatures checked with live Lean 4.24.0; original Lean 4.35 migration validation pending",
+  "audit_module": "tests/h62/item2/audit-v07-lowering/ResultTelescopeAudit.lean",
+  "audit_module_sha256": "384a1d98042ad563f29dcf3ee641042d55f848b18125e742dc8fc92eef709b71",
+  "rows": [
+    {
+      "name": "Solidity.Lowering.V07.LocalFamilyControls.collapsed_contents_agree",
+      "path": "Solidity/Lowering/V07/LocalFamilyControls.lean",
+      "source_sha256": "d98692dfa4a1a80afbc938243e8cc2fb61e08a4823338e7a30c0dfa4860d601e",
+      "result_binders": {
+        "k": "Solidity.Lowering.V07.LocalFamilyControls.Keys (Bool \u00d7 Bool)"
+      }
+    },
+    {
+      "name": "Solidity.Lowering.V07.NodeRank.stable_by_count",
+      "path": "Solidity/Lowering/V07/NodeRank.lean",
+      "source_sha256": "271cf03d5498820bd50100acf775e9e31373c2e1ac2738c646e9de6223b5658f",
+      "result_binders": {
+        "k": "Nat",
+        "i": "Fin n"
+      }
+    },
+    {
+      "name": "Solidity.Lowering.V07.NodeRank.stable_at_nodes",
+      "path": "Solidity/Lowering/V07/NodeRank.lean",
+      "source_sha256": "271cf03d5498820bd50100acf775e9e31373c2e1ac2738c646e9de6223b5658f",
+      "result_binders": {
+        "i": "Fin n"
+      }
+    },
+    {
+      "name": "Solidity.Lowering.V07.RankConvergence.iter_stable",
+      "path": "Solidity/Lowering/V07/RankConvergence.lean",
+      "source_sha256": "e0c45fe45b2ef6867a9874562ad80a3ab896ff5ac7ab4598f62e0a49bc08869b",
+      "result_binders": {
+        "k": "Nat",
+        "i": "Fin n"
+      }
+    }
+  ],
+  "limitations": [
+    "No change to the frozen source-role ledger or its pending flags.",
+    "No inherited section-membership or remaining census resolution claimed.",
+    "These are data-input type resolutions, not simultaneous feasibility witnesses."
+  ]
+}
