@@ -47,10 +47,19 @@ def theorem_types(text):
         if match["kind"] != "theorem": continue
         end = declarations[i+1].start() if i+1 < len(declarations) else len(text)
         tail = code[match.end():end]
-        name = re.match(r"\s+(\w+)", tail)
-        if not name: raise ValueError("unsupported theorem identifier")
+        name = re.match(r"\s+([^\s({:]+)", tail)
+        if not name or not re.fullmatch(r"[\w']+(?:\.[\w']+)*", name[1]):
+            raise ValueError("unsupported theorem identifier")
+        raw_name = preserved[match.end()+name.start(1):match.end()+name.end(1)]
+        if raw_name != name[1]: raise ValueError("unsupported quoted theorem identifier")
+        if name[1] in result:
+            raise ValueError("ambiguous duplicate theorem identifier: " + name[1])
         prefix = tail[name.end():]
         cut = census.statement_end(prefix)
+        # A delimiter-only scanner cannot locate proof assignment reliably
+        # inside compound term types. Refuse known forms, never truncate them.
+        if re.search(r"\b(?:letI?|haveI?|match|do|by|show|calc)\b", prefix[:cut]):
+            raise ValueError("unsupported term-level syntax in lexical theorem type")
         start = match.end() + name.end()
         result[name[1]] = normalize_type(preserved[start:start+cut])
     return result
@@ -147,7 +156,7 @@ def main():
     pairs = compare(original_bytes.decode(), candidate_bytes.decode())
     controls = control_rows(inventory, preservation)
     result = dict(schema_version=1,status="LEXICAL_CORRESPONDENCE_PASS",
-        boundary="Selected unquoted theorem types only; kernel equivalence/proofs pending. Preservation labels require matching frozen Git blobs; modified/added sources are not accepted as preserved. Control rows cover the current inventory; removed baseline files are listed separately.",
+        boundary="Unique unquoted theorem-name tokens and simple type syntax only; known compound term forms are refused, not parsed. Kernel equivalence/proofs pending. Preservation labels require matching frozen Git blobs; modified/added sources are not accepted as preserved. Control rows cover the current inventory; removed baseline files are listed separately.",
         pairs=pairs,original_control_theorems=controls,source_preservation=preservation,
         control_rows_scope="Current inventory under a legacy field name; not a reconstruction of the frozen case inventory.",
         original_sha256=hashlib.sha256(original_bytes).hexdigest(),

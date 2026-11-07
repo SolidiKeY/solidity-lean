@@ -51,6 +51,78 @@ class CorrespondenceControls(unittest.TestCase):
     def test_dropped_instance_refused(self):
         with self.assertRaises(ValueError): compare(self.original,self.candidate.splitlines()[0])
 
+class IdentifierAndTypeRefusals(unittest.TestCase):
+    original = CorrespondenceControls.original
+    candidate = CorrespondenceControls.candidate
+    # Refuse cases which formerly produced incorrect matching-pair reports.
+    def test_duplicate_candidate_cannot_hide_changed_first_type(self):
+        candidate = self.candidate.replace(": True", ": False", 1)
+        candidate += "theorem original_byte_component : True := True.intro\n"
+        with self.assertRaisesRegex(ValueError, "ambiguous duplicate"):
+            compare(self.original, candidate)
+
+    def test_duplicate_original_cannot_be_overwritten(self):
+        original = self.original + "theorem byte_component : True := True.intro\n"
+        with self.assertRaisesRegex(ValueError, "ambiguous duplicate"):
+            compare(original, self.candidate)
+
+    def test_different_namespaces_do_not_disambiguate_simple_names(self):
+        candidate = self.candidate + "namespace Other\ntheorem original_byte_component : True := True.intro\nend Other\n"
+        with self.assertRaisesRegex(ValueError, "ambiguous duplicate"):
+            compare(self.original, candidate)
+
+    def test_qualified_names_are_not_selected_prefixes(self):
+        original = self.original.replace("byte_component :", "byte_component.nested :")
+        candidate = self.candidate.replace("original_byte_component :", "original_byte_component.nested :")
+        with self.assertRaisesRegex(ValueError, "correspondence failed"):
+            compare(original, candidate)
+
+    def test_primed_names_are_not_selected_prefixes(self):
+        original = self.original.replace("byte_component :", "byte_component' :")
+        candidate = self.candidate.replace("original_byte_component :", "original_byte_component' :")
+        with self.assertRaisesRegex(ValueError, "correspondence failed"):
+            compare(original, candidate)
+
+    def test_type_let_is_not_cut_at_its_binding(self):
+        original = self.original.replace(": True", ": let p := True; p", 1)
+        candidate = self.candidate.replace(": True", ": let p := False; p", 1)
+        with self.assertRaisesRegex(ValueError, "unsupported term-level"):
+            compare(original, candidate)
+
+    def test_type_have_is_not_cut_at_its_binding(self):
+        original = self.original.replace(": True", ": have p := True; p", 1)
+        candidate = self.candidate.replace(": True", ": have p := False; p", 1)
+        with self.assertRaisesRegex(ValueError, "unsupported term-level"):
+            compare(original, candidate)
+
+    def test_type_letI_is_not_cut_at_its_binding(self):
+        original = self.original.replace(": True", ": letI p := True; p", 1)
+        candidate = self.candidate.replace(": True", ": letI p := False; p", 1)
+        with self.assertRaisesRegex(ValueError, "unsupported term-level"):
+            compare(original, candidate)
+
+    def test_type_match_is_explicitly_unsupported(self):
+        original = self.original.replace(": True", ": match true with | true => True | false => False", 1)
+        candidate = self.candidate.replace(": True", ": match true with | true => True | false => False", 1)
+        with self.assertRaisesRegex(ValueError, "unsupported term-level"):
+            compare(original, candidate)
+
+    def test_type_by_block_is_not_a_signature_boundary(self):
+        original = self.original.replace(": True", ": by let p := True; exact p", 1)
+        candidate = self.candidate.replace(": True", ": by let p := False; exact p", 1)
+        with self.assertRaisesRegex(ValueError, "unsupported term-level"):
+            compare(original, candidate)
+
+    def test_keyword_text_inside_literals_is_not_syntax(self):
+        original = self.original.replace(": True", ': "let match do by" = "let match do by"')
+        candidate = self.candidate.replace(": True", ': "let match do by" = "let match do by"')
+        self.assertEqual(len(compare(original, candidate)), 2)
+
+    def test_keyword_text_inside_quoted_type_names_is_not_syntax(self):
+        original = self.original.replace(": True", ": «let» = «let»")
+        candidate = self.candidate.replace(": True", ": «let» = «let»")
+        self.assertEqual(len(compare(original, candidate)), 2)
+
 class GitViewsFixture:
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
