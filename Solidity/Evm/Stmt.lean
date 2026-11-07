@@ -25,6 +25,9 @@ world paid (`compile_correct`'s third case).  A panic is the outcome of an
 panics (`compile_exact`).
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm
 
 open Semantics (structDef lookupBy tyRank)

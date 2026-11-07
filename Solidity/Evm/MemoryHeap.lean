@@ -8,6 +8,9 @@ occupy disjoint intervals, including their length cells. The frame limit
 reserves every cell below it for locals; a compiler using this relation must
 bound all of its active and future frames by that limit.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 
 /-- A global primitive-array representation above the reserved local frames.

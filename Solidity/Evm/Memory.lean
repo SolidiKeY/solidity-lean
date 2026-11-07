@@ -14,6 +14,9 @@ These are the local simulation lemmas for memory compilation. The existing
 whole-program compiler fragment is extended only once its heap/local frame
 relation also preserves these representations.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 
 /-- Compute the cell of an indexed element, leaving the rest of the stack.

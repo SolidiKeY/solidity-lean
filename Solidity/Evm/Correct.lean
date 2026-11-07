@@ -23,6 +23,9 @@ some machine represents (`Sim`) the fragment never diverges either, which
 checks within `maxHeartbeats 11000` (the W1 gate, pinned below; 10000 before the `try` carried a self-call body, `docs/options.md` O8).
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm
 
 open Semantics (structDef lookupBy)
@@ -968,7 +971,9 @@ theorem stmt_sim_outside {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') (h : Stmt.e
     Sim C L b F σ m → inFrag F s = some F' → L + Stmt.pushes s ≤ Lmax →
       StmtOut C (L + Stmt.pushes s) b F' (Stmt.shrinks s) (Stmt.pays s) (Stmt.asserts s)
         (Solidity.Stmt.run σ s) (run (compileStmt b s) m) m :=
-  fun _ hw _ => Option.noConfusion ((inFrag_outside _ _ h).symm.trans hw)
+  fun _ hw _ => by
+    have impossible := (inFrag_outside _ _ h).symm.trans hw
+    cases impossible
 
 set_option maxHeartbeats 11000 in
 mutual

@@ -118,13 +118,14 @@ theorem bytes_correct (size : Nat) (word : Scalar.Word) (tail : Stack) :
       word.toNat % 2 ^ (256 - 8 * size) := by
     simp only [BitVec.toNat_and, BitVec.toNat_ofNat, Nat.mod_eq_of_lt hm,
       Nat.and_comm, Nat.and_two_pow_sub_one_eq_mod]
+  have zero_word : (0 : Scalar.Word).toNat = 0 := rfl
   have zero : ((BitVec.ofNat 256 (2 ^ (256 - 8 * size) - 1) &&& word) == 0) =
       (word.toNat % 2 ^ (256 - 8 * size) == 0) := by
     apply Bool.eq_iff_iff.mpr
     simp only [beq_iff_eq]
     constructor
     · intro equal
-      simpa only [normalized, BitVec.toNat_zero] using congrArg BitVec.toNat equal
+      simpa only [normalized, zero_word] using congrArg BitVec.toNat equal
     · intro equal
       apply BitVec.eq_of_toNat_eq
       rw [normalized, equal]

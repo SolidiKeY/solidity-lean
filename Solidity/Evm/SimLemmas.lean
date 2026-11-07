@@ -24,6 +24,9 @@ word its guard pushes (`utail_simT`, its signed half `stail_simT`, then
 `tail_simT`, `neg_simT`, `bnot_simT`, `compound_simT`, `bump_simT`).
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 namespace Evm
 

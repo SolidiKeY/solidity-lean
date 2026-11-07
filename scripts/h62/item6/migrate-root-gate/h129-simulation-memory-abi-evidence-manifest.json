@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "checkpoint": "H129-simulation-memory-abi",
+  "archive": {
+    "path": "/workspace/h62-migrate-root-gate-evidence/h129-v435-simulation-memory-abi-20261107.tar.gz",
+    "size_bytes": 2285453,
+    "sha256": "f3eaa64f5d5e39a6e5bae5af29de6fc57b29d42ae418eac694cc679bb09e64f3"
+  },
+  "payload_files": 81,
+  "payload_size_bytes": 34110118,
+  "validated_prefix_modules": 135,
+  "planned_modules": 6630,
+  "checked_declarations": 1042,
+  "outside_standard_three": [],
+  "changed_axiom_guard_expectations": [],
+  "old_new_api_and_axiom_acceptance": false,
+  "full_acceptance": false,
+  "timing_comparison": false
+}
