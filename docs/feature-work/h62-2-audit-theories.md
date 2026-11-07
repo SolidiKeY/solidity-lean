@@ -1,3 +1,8 @@
+LATEST PREMISE INVENTORY:36 original role records checked,464 remaining.
+Eight new Assignable inventories add no witnesses or H69 dispositions.
+Companion reports are regenerated/currently verified before cumulative counts.
+Evidence: /workspace/h62-audit-theories-assignable-roles-20261107-evidence.
+
 # H62 item 2: audit-theories — continuing audit
 
 LATEST REBASE/CHECKPOINT: coordinator merge e0f4251ff40ad79c37bae53795b7419afe52e8d9
@@ -1020,3 +1025,32 @@ Finder and skeptic independently passed all8 premise packs,10new proof receipts,
 136total receipts,83subset records and saved gate/ledger accounting. No residual
 findings, edits or reviewer Lean/server/build jobs. Continue independent queue
 while existing two scope questions wait; no full completion or RUNTIME_GATE_PASS.
+
+## Assignable premise-role checkpoint
+
+Fetched master before this item: remains e0f4251ff40ad79c37bae53795b7419afe52e8d9;
+no new relevant producer source or duplicate item. assignable_input_roles.py
+accounts all8 original ordered telescope/Prop roles. Frames is a relation for
+one selected state pair, universal over appropriate roots, not a global law
+for all states. Clause inclusion is universal over selected M/L, and check/
+actual-run facts are correlated. Late U/r remain explicit. committed_frames
+has no original success premise; additional real-write success is support,
+not an invented original premise or compiler-totality claim.
+
+The tool reruns both companion generators without Lean, verifies original
+hashes/full source bytes/current certificates, exact companion name sets and
+disjointness, then derives36 cumulative originals/464 remaining.35 are joint,
+1 remains ordinary impossible pending Q-STATIC-VALUE. No new witness, generated
+disposition or H69 acceptance. A finder schema finding was fixed: combined
+report now says reviewed_role_records36/new_reviewed_role_records8; standalone
+Assignable report stays8. Regenerated reports agree. Two meaningful corrupt
+census controls remove the late root or universal hML; both refuse.13 Python
+tests pass. Both read-only reviews pass source semantics/provenance/accounting;
+no residual findings or reviewer edits/Lean/server/build. Evidence includes
+all-reviewed-input-roles.json, companion hashes/commands and role-controls.json.
+
+Checkpoint handoff: same VM/branch/unfinished goal.95 joint certificates and
+1,370 original witness/classification gaps unchanged by this inventory. Original
+statement fidelity, static-value disposition, remaining464role records, broader
+compiler success and final gates remain open. Continue independent verification
+of this updated cumulative snapshot without relaxing any original obligation.
