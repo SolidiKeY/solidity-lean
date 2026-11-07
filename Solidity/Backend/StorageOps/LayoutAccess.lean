@@ -153,6 +153,35 @@ theorem resolved_word_membership {N L R : Nat} {hash : Pre → Nat}
   · intro member
     exact List.mem_map.mpr ⟨query, member, rfl⟩
 
+/-- Numeric transport preserves every occurrence of a checked access, not
+just finite-set membership. Repeated operation requests are never deduplicated. -/
+theorem resolved_word_count {N L R : Nat} {hash : Pre → Nat}
+    {ty : STy} {base : Solidity.Storage.Loc}
+    (hH : ∀ p, hash p < N) (hL : L ≤ N) (hR : R ≤ N)
+    (fits : ty.Fits L) (placed : Placed L R ty base)
+    (requests : List (List Solidity.Storage.Step × Nat)) (addresses : List Solidity.Storage.Loc)
+    (accepted : resolveMany ty base requests = some addresses)
+    (queryPath : List Solidity.Storage.Step) (queryOffset : Nat) (query : Solidity.Storage.Loc)
+    (queryAccepted : resolve ty base queryPath queryOffset = some query)
+    (regions : RegionsDisjoint N L hash (List.range R) (runPreimages N hash (addresses ++ [query]))) :
+    (addresses.map (Solidity.Storage.Loc.word N hash)).count (query.word N hash) =
+      addresses.count query := by
+  unfold List.count
+  rw [List.countP_map]
+  apply List.countP_congr
+  intro address access
+  simp only [Function.comp_apply, beq_iff_eq]
+  constructor
+  · intro equal
+    exact Solidity.Storage.Loc.word_inj hH hL hR regions address query
+      (resolveMany_bounded fits placed requests addresses accepted address access)
+      (resolve_bounded fits placed queryAccepted)
+      (fun p hp => mem_runPreimages (List.mem_append_left [query] access) hp)
+      (fun p hp => mem_runPreimages (List.mem_append_right addresses (List.mem_singleton_self query)) hp)
+      equal
+  · intro equal
+    exact congrArg (Solidity.Storage.Loc.word N hash) equal
+
 /-- A separately resolved outside query remains unchanged by a successful
 family. Its preimages are included in the same run premise automatically. -/
 theorem resolved_family_outside {n N L R : Nat} {G : TypeGraph.Schema n}
@@ -176,4 +205,6 @@ theorem resolved_family_outside {n N L R : Nat} {G : TypeGraph.Schema n}
 
 /-- info: 'Solidity.Backend.StorageOps.LayoutAccess.resolved_word_membership' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms resolved_word_membership
+/-- info: 'Solidity.Backend.StorageOps.LayoutAccess.resolved_word_count' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms resolved_word_count
 end Solidity.Backend.StorageOps.LayoutAccess

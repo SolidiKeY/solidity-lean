@@ -83,6 +83,17 @@ theorem checked_alias_and_outside :
       [(pathA, 0), (pathA, 0)] [a, a] rfl pathB 0 b rfl regions).mp member
     exact (by decide : b ∉ [a, a]) symbolic
 
+/-- Regression: repeated nested requests retain two numeric occurrences;
+a separate checked sibling has zero, rather than gaining an alias. -/
+theorem checked_alias_multiplicity :
+    ([a, a].map (Solidity.Storage.Loc.word 256 hash)).count (a.word 256 hash) = 2 ∧
+    ([a, a].map (Solidity.Storage.Loc.word 256 hash)).count (b.word 256 hash) = 0 := by
+  constructor
+  · exact (resolved_word_count hash_lt (by decide) (by decide) fits placed
+      [(pathA, 0), (pathA, 0)] [a, a] rfl pathA 0 a rfl (by decide)).trans (by decide)
+  · exact (resolved_word_count hash_lt (by decide) (by decide) fits placed
+      [(pathA, 0), (pathA, 0)] [a, a] rfl pathB 0 b rfl regions).trans (by decide)
+
 /-- Nontrivial actual partial-operation families at checked nested addresses;
 left repeats its access, and cross-family separation is checked. -/
 theorem checked_operation_families :
@@ -128,4 +139,6 @@ theorem checked_outside_query :
 
 /-- info: 'Solidity.Backend.StorageOps.LayoutControls.checked_alias_and_outside' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms checked_alias_and_outside
+/-- info: 'Solidity.Backend.StorageOps.LayoutControls.checked_alias_multiplicity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms checked_alias_multiplicity
 end Solidity.Backend.StorageOps.LayoutControls

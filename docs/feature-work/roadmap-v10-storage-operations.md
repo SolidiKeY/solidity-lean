@@ -1955,3 +1955,28 @@ or edited. Actual Source/P8 origin/admission/lifecycle, broader emitted-access
 alignment, remaining original/consolidated obligations, strict pins/docs and
 final gates remain open. Coverage stays 72/3281, 3209 uncovered. External waits
 remain library-try, Y04 physical and separate 4.35 trust/timing disposition.
+
+### C279: Backfill B exact repeated-access multiplicity
+
+LayoutAccess.resolved_word_count strengthens finite membership transport to
+exact occurrence counts for checked operation-generated path accesses. The
+proof uses pointwise query/address equality under the same original resolved
+bounds and complete per-run regions over addresses plus query preimages.
+No request is deduplicated; aliases remain allowed, with no liveness restriction,
+global hash injectivity or new cryptographic premise. Definitions and existing
+statements are unchanged. Existing shrink/regrow semantics remain untouched.
+
+The existing nested fixture now checks count two for the repeated address and
+count zero for its distinct checked sibling via the generic law. Both guards
+use the standard trio. Kernel module check passed. First control check failed
+on a cache-fetched object absent after cleanup; repository restore helper placed
+48 outputs with zero missing hashes. Corrected and final guarded controls pass:
+1.85 s, sampled peak RSS 647352320 bytes, no resource stop. This additive-law
+check is no matched performance comparison and releases no prior STOP.
+
+Independent read-only finder/skeptic confirmed exact multiplicity, unchanged
+region premises and no semantic copies or remaining findings; neither ran Lean
+or edited. Requested disk cleanup restored over 2 GB free using regenerable
+build output only. No whole-Backfill or actual Source/P8 adequacy claim. Original
+and consolidated queues, 3209 uncovered rows, strict pins/docs and full gates
+remain open. External library-try/Y04/separate 4.35 waits remain distinct.
