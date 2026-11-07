@@ -40,6 +40,18 @@ def mask_comments_and_strings(source, mask_attributes=True):
             depth = 1
             chars[i:i + 2] = "  "
             i += 2
+        elif source[i] == "!" and re.match(r'![ \t\r\n]*(?:/\-|--|(?:r#*)?")', source[i:]):
+            raise ValueError("possible interpolated string syntax is unsupported by the lexical mask")
+        elif source[i] == "r" and (i == 0 or not (source[i - 1].isalnum() or source[i - 1] in "_\'")) and (raw := re.match(r'r(#+)?"', source[i:])):
+            closing = '"' + (raw.group(1) or "")
+            end = source.find(closing, i + len(raw.group()))
+            if end < 0:
+                raise ValueError("unterminated raw string")
+            end += len(closing)
+            for j in range(i, end):
+                if source[j] != "\n":
+                    chars[j] = " "
+            i = end
         elif source[i] == "'" and (i == 0 or not (source[i - 1].isalnum() or source[i - 1] in "_'")):
             char = re.match(r"'(?:\\(?:u\{[0-9A-Fa-f]+\}|.)|[^'\\\n])'", source[i:])
             if char:
