@@ -3273,6 +3273,7 @@ import Solidity.Lowering.P8.GraphSchemaControls
 import Solidity.Lowering.P8.PlanGraphAdmission
 import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
+import Solidity.Lowering.P8.ResolvedGraphAdmissionV2
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
 import Solidity.Lowering.P8.ScalarSchema

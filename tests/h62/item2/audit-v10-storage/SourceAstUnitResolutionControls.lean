@@ -1,3 +1,4 @@
+import Solidity.Lowering.P8.ResolvedGraphAdmissionV2
 import Solidity.Lowering.P8.SourceAstDeclarationCorrespondence
 import Solidity.Source.WellFormed
 import Solidity.Lowering.P8.SourceAstResolvedGraphs
@@ -138,6 +139,11 @@ The origin string is a graph label, not a SourceOrigins or artifact certificate.
 def inspectGraphs (doc : Json) (pipeline : Solidity.Roadmap.Pipeline) : Except String (List Nat) := do
   let expected ← inspect doc pipeline
   let ast ← doc.getObjVal? "ast"
+  let certified ← Solidity.Lowering.P8.ResolvedGraphAdmissionV2.certify
+    "library-whole-unit" 128 {pipeline := pipeline} ast
+  unless certified.2.isSome && certified.1.env.decls.length == expected.env.decls.length &&
+      certified.1.pipeline == pipeline && certified.1.coder == expected.coder do
+    throw "optional v2 environment certificate or complete resolution lost"
   let mut ids := []
   for loc in [DataLoc.storage, .memory, .calldata] do
     let result ← Solidity.Lowering.P8.SourceAstResolvedGraphs.produce
@@ -181,6 +187,8 @@ theorem cycle_resolution_retained (settings : Settings) :
     {pipeline := .legacy} Solidity.Lowering.V07.GraphAdmissionBoundary.directUnit .storage
   unless cycle.2.isNone && cycle.1.env.decls.length == 1 do
     throw (IO.userError "graph component failure lost its complete resolution")
+  unless (Solidity.Lowering.P8.ResolvedGraphAdmissionV2.certifyEnv "inline-cycle" cycle.1).isNone do
+    throw (IO.userError "cyclic metadata obtained an environment certificate")
   match topChecks with
   | .ok () => pure ()
   | .error why => throw (IO.userError why)

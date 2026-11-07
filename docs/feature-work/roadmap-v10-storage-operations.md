@@ -1788,3 +1788,24 @@ and conditional certificate soundness, not a concrete P8 producer or v1 Inputs
 inhabitant. Original/consolidated proof/backfill/coverage/final gates, exact-19
 transport proofs, Y04 physical and separate 4.35 waits and unrelated STOPs remain.
 Coverage stays 72 mapped / 3281 rows, 3209 uncovered; no fixture IO witness credit.
+
+### C271: computed resolved-environment v2 contract
+
+ResolvedGraphAdmissionV2 retains the complete resolution and constructs the
+existing v2 EnvAdmission only when all three computed location views succeed.
+The joint theorem ties the contract to the converted unit and existing Resolves
+relation, retaining its empty-links premise. This is an environment contract,
+not actual Source program typing/admission, accepted-artifact binding, independent
+origin or session/lifecycle adequacy. Frozen interfaces and Source are unchanged.
+Both existing LibraryTry pipelines retain eight declarations and all three graph
+views; the reused inline cycle retains its resolution and receives None.
+Five guards report only propext, Classical.choice and Quot.sound.
+
+Initial proof syntax and a duplicated generated guard failed; both are fixed and
+failed receipts retained. The final serial bounded control check passed in 8.98 s,
+peak sampled RSS 938557440 bytes, without a resource stop. This is no matched
+performance comparison. Independent read-only finder/skeptic each identified the
+duplicate guard; neither ran Lean or edited. Original/consolidated queues, strict
+pins/docs and final gates remain open. Coverage stays 72/3281, 3209 uncovered.
+Library-try/Error support, Y04 physical adequacy and separate 4.35 disposition
+remain external waits; actual Source/P8 production remains this lane’s duty.

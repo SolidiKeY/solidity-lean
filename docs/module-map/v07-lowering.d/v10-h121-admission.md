@@ -22,3 +22,4 @@
 | `Lowering/P8/DeclarationGraphAdmissionV2.lean` | H57/H128 v2 local refusal and separately versioned H24 assembly; unchanged graph/source/artifact indices, no actual producer |
 | `Lowering/P8/ConditionalAssemblyV2.lean` | H57/H128 joint checked-receipt/program-origin/location-graph/v2-refusal binding; conditional only, frozen v1 assembly unchanged |
 | `Lowering/P8/SourceAstResolvedGraphs.lean` | Full converted-unit resolution and computed location graphs with exact environment certificates; graph failure is not Source rejection |
+| `Lowering/P8/ResolvedGraphAdmissionV2.lean` | All-location computed graph checks to the existing v2 environment contract, retaining full resolution; no Source program admission |
