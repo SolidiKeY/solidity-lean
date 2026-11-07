@@ -14,8 +14,11 @@ async function withinOperation(operation,timeoutMs,label,{now=()=>require('node:
  const deadline=now()+timeoutMs,expired=()=>Object.assign(Error('Timed out: '+label),{code:'TIMEOUT'});let timer;
  try{const timeout=new Promise((_,reject)=>{timer=setTimer(()=>reject(expired()),timeoutMs);});const value=await Promise.race([Promise.resolve().then(operation),timeout]);if(now()>=deadline)throw expired();return value;}finally{clearTimer(timer);}
 }
-function errors(o,runId,expectedOuterTimeoutMs){
+function referenceImages(executable){const directory=path.dirname(executable);return[executable,...fs.readdirSync(directory).filter(name=>/^Dafny.*\.dll$/.test(name)||name.endsWith('.runtimeconfig.json')).map(name=>path.join(directory,name))].map(file=>({file:fs.realpathSync(file),bytes:fs.statSync(file).size,sha256:digest(fs.readFileSync(file))}));}
+function errors(o,runId,expectedOuterTimeoutMs,expectedImages){
  const e=[];if(!o||o.runId!==runId||!['dafny','local'].includes(o.target)||!Array.isArray(o.cases)||o.cases.length!==3)return['missing time-limit cases'];
+ const references=expectedImages||o.referenceImages;
+ if(o.target==='dafny'&&(!Array.isArray(references)||!references.some(a=>path.basename(a.file||'')==='DafnyLanguageServer.dll')||o.referenceImages&&JSON.stringify(o.referenceImages)!==JSON.stringify(references)))e.push('missing exact pinned reference set');
  const full=section(o.target)+'.'+key(o.target),nativeDefault=o.target==='dafny'?'20':600000;
  if(Object.hasOwn(o.launch?.settings||{},full))e.push('harness override cannot evidence a native default');
  if(!Number.isSafeInteger(o.outerTimeoutMs)||o.outerTimeoutMs<1||o.launch?.suite!=='verification-time-limit'||o.outerTimeoutMs!==o.launch?.outerOperationTimeoutMs||expectedOuterTimeoutMs!==undefined&&o.outerTimeoutMs!==expectedOuterTimeoutMs)e.push('missing original outer guard');
@@ -27,12 +30,15 @@ function errors(o,runId,expectedOuterTimeoutMs){
   if(c.source?.uri!==o.uri||c.source?.textHash!==digest(o.source||'')||!c.source?.session||c.source?.closed||!c.source?.trusted||!Number.isInteger(c.source?.version))e.push('wrong source ownership');
   if(!c.process?.processSession||!/^\d+$/.test(c.process.birth||'')||!Number.isInteger(c.process.pid)||c.process.processSession===previous)e.push('missing fresh actual process identity');previous=c.process?.processSession;
   if(!Array.isArray(c.process?.artifacts)||!c.process.artifacts.length||c.process.artifacts.some(a=>!path.isAbsolute(a.file||'')||!Number.isSafeInteger(a.bytes)||a.bytes<1||!/^([a-f0-9]{64})$/.test(a.sha256||'')||a.reference&&(a.reference.sha256!==a.sha256||a.reference.bytes!==a.bytes)))e.push('missing actual server artifact identity');
+  const required=[c.process?.executable,...(c.process?.args||[]).filter(a=>typeof a==='string'&&path.isAbsolute(a))];
+  if(required.some(file=>!file||!c.process?.artifacts?.some(a=>a.file===file)))e.push('missing launched executable/script');
+  if(o.target==='dafny'&&Array.isArray(references)&&references.some(ref=>!c.process?.artifacts?.some(a=>path.basename(a.file)===path.basename(ref.file)&&a.reference?.file===ref.file&&a.reference?.sha256===ref.sha256&&a.reference?.bytes===ref.bytes&&a.sha256===ref.sha256&&a.bytes===ref.bytes)))e.push('missing pinned image/reference coverage');
   const launch=c.process?.args||[];
   if(o.target==='dafny'&&!launch.includes('--verification-time-limit:'+String(c.configuration?.effective)))e.push('missing actual Dafny launch argument');
   if(c.protocol?.some(r=>r.processSession!==c.process?.processSession||r.pid!==c.process?.pid||r.birth!==c.process?.birth))e.push('foreign protocol process identity');
   const init=c.protocol?.find(r=>r.direction==='client'&&r.message?.method==='initialize');
   if(!init||init.processSession!==c.process?.processSession||!c.protocol?.some(r=>r.processSession===init.processSession&&r.direction==='server'&&r.message?.id===init.message.id&&r.message.result))e.push('missing matching native initialization');
-  if(o.target==='local'&&init?.message?.params?.initializationOptions?.settings?.timeoutMs!==c.configuration?.effective)e.push('wrong local initialization timeout');
+  if(o.target==='local'&&(init?.message?.params?.initializationOptions?.settings?.timeoutMs!==c.configuration?.effective||init?.message?.params?.initializationOptions?.settings?.automaticVerification!=='never'))e.push('wrong local initialization timeout');
   const open=c.protocol?.find(r=>r.direction==='client'&&r.processSession===c.process?.processSession&&r.message?.method==='textDocument/didOpen'&&r.message.params?.textDocument?.uri===o.uri);
   if(open?.message.params.textDocument.version!==c.source?.version||digest(open?.message.params.textDocument.text||'')!==c.source?.textHash)e.push('missing exact current wire open');
   if(!c.query||c.query.uri!==o.uri||c.query.sourceHash!==c.source?.textHash||c.query.status!=='resolved'||!c.query.nonempty||c.query.version!==c.source?.version||!Array.isArray(c.query.value)||!c.query.value.length||!c.query.value.every(h=>hoverText(h?.contents).length>0))e.push('missing actual current language response');
@@ -50,7 +56,7 @@ function errors(o,runId,expectedOuterTimeoutMs){
 async function run({vscode,config,api,events,until}){
  const target=config.target,sec=section(target),setting=key(target),uri=vscode.Uri.file(path.join(config.workspace,'time-limit'+(target==='dafny'?'.dfy':'.sol'))),source=workload(target,1),session=randomUUID(),settingsFile=path.join(config.workspace,'.vscode/settings.json');
  const cfg=()=>vscode.workspace.getConfiguration(sec,target==='local'?uri:undefined),inspect=()=>cfg().inspect(setting),before=inspect().workspaceValue,rawBefore=fs.readFileSync(settingsFile,'utf8');
- const o={runId:config.runId,target,uri:uri.toString(),source,launch:config.verificationLimitLaunch,outerTimeoutMs:config.operationTimeoutMs,cases:[],unlimitedTested:false,proofTimeoutEstablished:false,limitations:['Different units, defaults and scope; native APIs/wire only, no rendered-settings claim.','No infinite or proof-timeout workload; local requests use native compiler services only.','Pending query may finish before change; cancellation/stale coverage reported only as observed.']};
+ const o={runId:config.runId,target,uri:uri.toString(),source,referenceImages:config.timeLimitReferenceImages,launch:config.verificationLimitLaunch,outerTimeoutMs:config.operationTimeoutMs,cases:[],unlimitedTested:false,proofTimeoutEstablished:false,limitations:['Different units, defaults and scope; native APIs/wire only, no rendered-settings claim.','No infinite or proof-timeout workload; local requests use native compiler services only.','Pending query may finish before change; cancellation/stale coverage reported only as observed.']};
  let doc;
  const binding=()=>({uri:doc.uri.toString(),version:doc.version,textHash:digest(doc.getText()),session,closed:doc.isClosed,trusted:vscode.workspace.isTrusted});
  const save=()=>fs.writeFileSync(path.join(config.dir,'verification-time-limit-observations.json'),JSON.stringify(o,null,2));
@@ -79,8 +85,8 @@ async function run({vscode,config,api,events,until}){
   try{await withinOperation(()=>cfg().update(setting,before,vscode.ConfigurationTarget.Workspace),config.operationTimeoutMs,'owned setting restoration');const actual=inspect().workspaceValue;const rawAfter=fs.readFileSync(settingsFile,'utf8');o.restoration={expected:before,actual,confirmed:JSON.stringify(actual)===JSON.stringify(before),rawBefore,rawAfter};}catch(error){o.restoration={confirmed:false,error:error.message};}
   save();
  }
- const failed=errors(o,config.runId,config.operationTimeoutMs);if(failed.length){const error=Error(failed.join('; '));error.observation=o;throw error;}
+ const failed=errors(o,config.runId,config.operationTimeoutMs,config.timeLimitReferenceImages);if(failed.length){const error=Error(failed.join('; '));error.observation=o;throw error;}
  return{...o,status:'partial'};
 }
-const safeErrors=(o,id,timeout)=>{try{return errors(o,id,timeout);}catch{return['malformed time-limit observation'];}};
-module.exports={launchSettings,errors:safeErrors,run,serverProcesses,withinOperation,snapshotHover};
+const safeErrors=(o,id,timeout,images)=>{try{return errors(o,id,timeout,images);}catch{return['malformed time-limit observation'];}};
+module.exports={launchSettings,errors:safeErrors,run,serverProcesses,withinOperation,snapshotHover,referenceImages};

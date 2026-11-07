@@ -12,6 +12,11 @@ const renderer=require('./renderer.cjs');
 const {servePhases,atomicJson}=require('./phase-capture.cjs');
 const repo=resolve(__dirname,'../..');
 
+function validationConfig(config,hostConfig){
+ if(config.suite==='verification-time-limit'&&config.target==='dafny'&&!Array.isArray(hostConfig.timeLimitReferenceImages))throw Error('Missing trusted reference image set');
+ return{...config,timeLimitReferenceImages:hostConfig.timeLimitReferenceImages};
+}
+
 function retireSampledSurvivors(sampler){
  const survivors=sampler.survivors(),refused=[],terminated=[];
  for(const owned of survivors)if(sampler.survivors().some(p=>p.pid===owned.pid&&p.start===owned.start))try{terminateTree({pid:owned.pid,processBirth:owned.start});terminated.push(owned);}catch(error){refused.push({pid:owned.pid,birth:owned.start,error:error.message});}
@@ -103,6 +108,7 @@ async function launch(config,options) {
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
   if(['compiler-output','dafny-compiler-output','dafny-command-output'].includes(options.suite)){config.foreignWorkspace=join(config.dir,'unrelated-resource');mkdirSync(join(config.foreignWorkspace,'.vscode'),{recursive:true});writeFileSync(join(config.foreignWorkspace,'.vscode/settings.json'),'{}');config.workspaceFile=join(config.dir,'output.code-workspace');writeFileSync(config.workspaceFile,JSON.stringify({folders:[{name:'Primary',path:config.workspace},{name:'Unrelated',path:config.foreignWorkspace}],...(['dafny-compiler-output','dafny-command-output'].includes(options.suite)?{settings}: {})}));}
   const hostConfig={...config,backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  if(options.suite==='verification-time-limit'&&config.target==='dafny')hostConfig.timeLimitReferenceImages=require('./verification-limit.cjs').referenceImages(resolve(options.dafny));
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
   const resource=require('./resource-state.cjs'),admission=process.platform==='linux'?resource.resourceState():null;
@@ -214,7 +220,7 @@ async function launch(config,options) {
     if(result?.metrics&&probe.observedDuringVerification&&probe.focusedEditor)result.metrics.rendererKeyRoundTripMs=probe.roundTripMs;
   }
   let rejectedResult,validationErrors;
-  if(result){const checked=require('./core.cjs').validateHostResult(result,config);if(checked.error){error=checked.error;rejectedResult=checked.rejectedResult;validationErrors=checked.validationErrors;result=undefined;}}
+  if(result){const checked=require('./core.cjs').validateHostResult(result,validationConfig(config,hostConfig));if(checked.error){error=checked.error;rejectedResult=checked.rejectedResult;validationErrors=checked.validationErrors;result=undefined;}}
   if(cleanup.refused.length)error='Owned process identity changed during cleanup; no subsequent trial admitted';
   if(resources.cleanup.remaining.length)error='Owned verifier processes survived cleanup; subsequent trials must not run';
   writeFileSync(join(config.dir,'resource-terminal.json'),JSON.stringify({resourceStop,resourceStopDetails:resourceStopDetails??null}));
@@ -300,5 +306,5 @@ async function main(args=process.argv.slice(2)) {
   return report;
   } finally {rmSync(lock,{recursive:true,force:true});}
 }
-module.exports={readKeybindingRequest,parse,main,launch,shortSummary,retireSampledSurvivors,assertRetirementComplete};
+module.exports={validationConfig,readKeybindingRequest,parse,main,launch,shortSummary,retireSampledSurvivors,assertRetirementComplete};
 if(require.main===module)main().catch(error=>{process.stderr.write(error.stack+'\n');process.exitCode=1;});
