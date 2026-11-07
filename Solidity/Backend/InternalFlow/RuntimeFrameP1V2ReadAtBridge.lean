@@ -2,7 +2,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls
 
 /-! H68 regression: a frame-free or success-only bridge must not replace the
 original selected value-call producer. This family is the actual readAt call
-selected by Composition.compileCall, at every ordinary-call quotation index.
+selected by Composition.compileCall. Its source family is constant in the
+quotation index; quantifying that index adds no coverage of other calls.
 Both canonical languages are the existing P1LangV2 languages, with the SAME
 emitted private-result plan. The source domain is the caller-supplied original
 approved judgment; the target domain is the original typed physical admission.
