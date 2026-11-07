@@ -212,10 +212,12 @@ the same pin/bounds; measure full before/after affected groups under identical
 conditions and stop above 10 percent slowdown. Obtain finder/skeptic reviews
 for each remaining checkpoint. No required pending gate may be marked pass.
 
-External final handoff, original patch, checksum manifest and evidence archive
-are under `${PACKET_EVIDENCE}/`. Their exact head
-and hashes are recorded after the final commit in `handoff.md`, `result.json`
-and `SHA256SUMS`. Large raw inventory, logs and distribution archive stay off git.
+Historical export locations are `${PACKET_EVIDENCE}/handoff.md`,
+`${PACKET_EVIDENCE}/result.json`, `${PACKET_EVIDENCE}/original.patch` and
+`${PACKET_EVIDENCE}/SHA256SUMS`, with raw inventories, logs and distribution
+archives off Git beneath the same evidence root. Resolve the root and exact
+head/hashes from the matching authenticated receipt. These locations do not
+assert that the original files are currently available or have been recovered.
 
 ## H70 routing receipt
 
@@ -313,7 +315,8 @@ launcher-created goal is identified by the frozen rendered-prompt SHA256
 `6f981f1156a761c51ec5daff85fc7683198027eaf4dd88c64057cb9de9fdf8a9`.
 A numeric goal ID is not exposed; do not create/reset a goal to obtain one.
 State is dependency-blocked, not complete. Exact committed head and fresh export
-paths are in the external `hash-overlay/result.json` after this checkpoint.
+paths were recorded in `${PACKET_EVIDENCE}/hash-overlay/result.json` for this
+historical checkpoint; current availability requires its authenticated receipt.
 Retain all original queue obligations, owner scopes, v4.35 pin and proof budgets.
 
 ## H71 MRS exact-file protocol agreed; application review pending
