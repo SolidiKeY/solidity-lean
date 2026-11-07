@@ -234,6 +234,42 @@
       "namespace": "Solidity.Yul.Compilation.H55For.Scoped",
       "adapter_kind": "selected_artifact",
       "boundary": "Instantiates shared zero-prefix Artifact from both original scoped-for source/model laws. Exact Image retains complete component artifacts, source horizons, block and code selection; actual initializer-only and taken/post effects checked. No termination, admission or native/source-session adequacy assumption."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SequenceCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Sequence",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Accepted raw sequence evidence consists of selected scoped/switch leaves and concatenation. Structural emission+selection totality instantiates shared ofTotalSelection; actual constrained selectRaw payload and exact Image preserve complete original data. selected_raw equates chosen semantic encoding to actual selected encoding. No visitor/admission/termination totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Sequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate derives both directions from unchanged sequence laws. Exact Image retains original source/profile, independent horizon, emitted block and selected code. Real ordered switch updates and mixed scoped/sequence controls retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Shared actual emission/selection preparation instantiates selected structured encode. Full raw binder/branch/sequence evidence retained; real local16 guard source completion with emission None remains preparation failure, not runtime verdict."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate and exact Image retain actual recursively changing-context source/profile/block/code evidence and owner execution/reflection laws. Genuine taken update, false identity and scope retirement controls; no native/resource/admission closure."
     }
   ]
 }

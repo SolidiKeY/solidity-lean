@@ -1,3 +1,7 @@
+import Solidity.Yul.Compilation.StructuredSequenceCompletion
+import Solidity.Yul.Compilation.StructuredSequenceCompilationControls
+import Solidity.Yul.Compilation.SequenceCompletion
+import Solidity.Yul.Compilation.SequenceCompilationControls
 import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.LetBranchCompletionControls
 import Solidity.Yul.Compilation.LetControlCompilationControls
@@ -898,3 +902,198 @@ end Controls
 #print axioms Artifact.result_source_roundtrip
 #print axioms Artifact.result_image_roundtrip
 end Solidity.Yul.Compilation.H55ControlFamilies.Expressions
+
+/-! Actual selected sequence leaves and concatenations have total selection.
+This is accepted-object totality, not visitor admission or source termination. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.Sequence
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : SequenceCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code
+    (SequenceCompilation.source_to_model a.compiled a.block a.code a.emitted a.selected)
+    (SequenceCompletion.artifact_reflected a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) := Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : SequenceCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem code_total (a : SequenceCompilation.Compiled c fuel stmt) :
+    ∃ block code, a.emit = some block ∧ WordControl.blockCode block = some code := by
+  induction a with
+  | scopeLeaf artifact => exact ⟨artifact.block, artifact.code, rfl, artifact.selected⟩
+  | switch_ artifact => exact ⟨artifact.block, artifact.code, rfl, artifact.selected⟩
+  | seq left right ihLeft ihRight =>
+    obtain ⟨a, qa, ha, sa⟩ := ihLeft
+    obtain ⟨b, qb, hb, sb⟩ := ihRight
+    refine ⟨.seq a b, qa ++ qb, ?_, ?_⟩
+    · change (do
+        let a ← left.emit
+        let b ← right.emit
+        pure (Backend.Block.seq a b)) = some (.seq a b)
+      rw [ha, hb]
+      rfl
+    · change (WordControl.blockCode a).bind (fun qa =>
+        (WordControl.blockCode b).map (fun qb => qa ++ qb)) = some (qa ++ qb)
+      rw [sa, sb]
+      rfl
+
+def selectRaw (a : SequenceCompilation.Compiled c fuel stmt) :
+    Option (SequenceCompilation.Artifact fuel stmt) :=
+  Artifact.prepareResult (P := fun _ => SequenceCompilation.Artifact fuel stmt)
+    SequenceCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => ⟨compiled, block, code, emitted, selected⟩) a
+
+theorem selectRaw_some (a : SequenceCompilation.Artifact fuel stmt) :
+    selectRaw a.compiled = some a :=
+  Artifact.prepareResult_some _ _ _ a.compiled a.block a.code a.emitted a.selected
+
+theorem selection_total (a : SequenceCompilation.Compiled c fuel stmt) :
+    ∃ payload, selectRaw a = some payload := by
+  obtain ⟨block, code, emitted, selected⟩ := code_total a
+  exact ⟨⟨a, block, code, emitted, selected⟩,
+    Artifact.prepareResult_some _ _ _ a block code emitted selected⟩
+
+noncomputable def encodeRaw (a : SequenceCompilation.Compiled c fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofTotalSelection selectRaw (fun _ payload _ => encode payload) selection_total a
+
+abbrev RawImage (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encodeRaw (fuel := fuel) (stmt := stmt))
+
+theorem raw_source_roundtrip (a : SequenceCompilation.Compiled c fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encodeRaw a) = a := Artifact.source_roundtrip encodeRaw a
+
+theorem raw_image_roundtrip (a : RawImage fuel stmt) :
+    Artifact.toImage encodeRaw (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem selected_raw (a : SequenceCompilation.Artifact fuel stmt) :
+    encodeRaw a.compiled = encode a := by
+  have total := Artifact.select_total selectRaw (fun _ payload _ => encode payload) selection_total a.compiled
+  have selected := Artifact.select_some selectRaw (fun _ payload _ => encode payload)
+    a.compiled a (selectRaw_some a)
+  exact Option.some.inj (total.symm.trans selected)
+
+theorem no_accepted_refusal (a : SequenceCompilation.Compiled c fuel stmt) : selectRaw a ≠ none := by
+  obtain ⟨payload, selected⟩ := selection_total a
+  intro refused
+  cases selected.symm.trans refused
+
+namespace Controls
+theorem raw_effectful (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encodeRaw SequenceCompilation.Controls.artifact.compiled).code
+      {m with stack := coreWord 0 :: coreWord 0 :: caller} =
+      .ok {m with stack := coreWord 0 :: coreWord 9 :: caller} 0 := by
+  rw [selected_raw]
+  exact SequenceCompilation.Controls.target_done m caller
+
+theorem selected_effectful (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode SequenceCompilation.Controls.mixedArtifact).code
+      {m with stack := coreWord 0 :: coreWord 0 :: caller} =
+      .ok {m with stack := coreWord 0 :: coreWord 9 :: caller} 0 :=
+  SequenceCompilation.Controls.mixed_target m caller
+
+#guard (SequenceCompilation.compile 0 SequenceCompilation.Controls.source).isNone
+#guard (SequenceCompilation.lower 1 SequenceCompilation.Controls.source).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_total
+#print axioms selectRaw
+#print axioms selectRaw_some
+#print axioms selection_total
+#print axioms encodeRaw
+#print axioms raw_source_roundtrip
+#print axioms raw_image_roundtrip
+#print axioms selected_raw
+#print axioms no_accepted_refusal
+#print axioms Controls.raw_effectful
+#print axioms Controls.selected_effectful
+end Solidity.Yul.Compilation.H55ControlFamilies.Sequence
+
+/-! Structured binders reuse zero-prefix certificates and actual optional
+emission; accepted guard/initializer objects may genuinely refuse emission. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : StructuredSequenceCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code a.source_to_model
+    (StructuredSequenceCompletion.artifact_reflected a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) := Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : StructuredSequenceCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+def prepare (a : StructuredSequenceCompilation.Compiled c fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.afterSelection StructuredSequenceCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+theorem prepared (a : StructuredSequenceCompilation.Artifact fuel stmt) :
+    prepare a.compiled = some (encode a) :=
+  Artifact.afterSelection_some _ _ _ a.compiled a.block a.code a.emitted a.selected
+
+namespace Controls
+theorem selected : prepare StructuredSequenceCompilation.Controls.innerArtifact.compiled =
+    some (encode StructuredSequenceCompilation.Controls.innerArtifact) := prepared _
+
+theorem effectful (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode StructuredSequenceCompilation.Controls.innerArtifact).code
+      {m with stack := coreWord 0 :: caller} = .ok {m with stack := coreWord 9 :: caller} 0 :=
+  StructuredSequenceCompilation.Controls.inner_target m caller
+
+theorem false_identity (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode StructuredSequenceCompilation.Controls.falseArtifact).code
+      {m with stack := coreWord 0 :: caller} = .ok {m with stack := coreWord 0 :: caller} 0 :=
+  StructuredSequenceCompilation.Controls.false_target m caller
+
+theorem outer_retirement (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode StructuredSequenceCompilation.Controls.artifact).code
+      {m with stack := caller} = .ok {m with stack := caller} 0 :=
+  StructuredSequenceCompilation.Controls.target_done m caller
+
+def refusedSource : Stmt [] [] ⟨false, false⟩ 17 := .if_ (.local 16) .skip
+def refused : StructuredSequenceCompilation.Compiled ⟨false, false⟩ 3 refusedSource :=
+  (StructuredSequenceCompilation.compile 3 refusedSource).get (by rfl)
+theorem refused_emission : refused.emit = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refused).artifact = none :=
+  Artifact.afterSelection_first_none StructuredSequenceCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩)
+    refused refused_emission
+
+theorem refused_original : Artifact.recoverPreparation
+    (Artifact.toPreparationImage prepare refused) = refused :=
+  Artifact.preparation_source_roundtrip prepare refused
+
+theorem source_completes : evalStmt 2 .nil True.intro refusedSource refused.profile
+    (sourceLocals (Vector.replicate 17 0)) =
+      some ⟨sourceLocals (Vector.replicate 17 0), .normal⟩ := rfl
+#guard (StructuredSequenceCompilation.compile 0 refusedSource).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms prepare
+#print axioms prepared
+#print axioms Controls.selected
+#print axioms Controls.effectful
+#print axioms Controls.false_identity
+#print axioms Controls.outer_retirement
+#print axioms Controls.refused_emission
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence
