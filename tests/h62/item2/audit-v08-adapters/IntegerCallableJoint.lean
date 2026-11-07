@@ -113,11 +113,46 @@ theorem timeout_actual (t : Source.IntTy) (p : Roadmap.Pipeline)
       (.error .timeout,(Source.L0 (env t),state)) :=
   SourceCallable.zero_horizon _ _ _ _ state
 
+/-- Both endpoints inhabit the SAME original native integer range. -/
+theorem lower_range (t : Source.IntTy) : t.lo ≤ t.lo ∧ t.lo ≤ t.hi :=
+  ⟨Int.le_refl _, Int.le_trans t.zero_mem.1 t.zero_mem.2⟩
+
+theorem upper_range (t : Source.IntTy) : t.lo ≤ t.hi ∧ t.hi ≤ t.hi :=
+  ⟨Int.le_trans t.zero_mem.1 t.zero_mem.2, Int.le_refl _⟩
+
+/-- Minimum, zero and maximum execute in one selected model, each preserving
+its complete supplied locals/state pair; these are three component calls. -/
+theorem boundary_calls (t : Source.IntTy) (p : Roadmap.Pipeline)
+    (extra : Nat) (state : Source.St (env t)) :
+    IntegerCallable.Inputs (global t p) frame (declaration t) t ∧
+    (Source.callInternal (global t p) frame (extra+12) (declaration t)
+      (.cons (.int t.lo (lower_range t)) .nil) [.int t]).run (Source.L0 (env t),state) =
+      (.ok (.val (.int t.lo (lower_range t))),(Source.L0 (env t),state)) ∧
+    (Source.callInternal (global t p) frame (extra+12) (declaration t)
+      (.cons (.int 0 t.zero_mem) .nil) [.int t]).run (Source.L0 (env t),state) =
+      (.ok (.val (.int 0 t.zero_mem)),(Source.L0 (env t),state)) ∧
+    (Source.callInternal (global t p) frame (extra+12) (declaration t)
+      (.cons (.int t.hi (upper_range t)) .nil) [.int t]).run (Source.L0 (env t),state) =
+      (.ok (.val (.int t.hi (upper_range t))),(Source.L0 (env t),state)) :=
+  ⟨inputs t p, source_actual t p extra state t.lo (lower_range t),
+    source_actual t p extra state 0 t.zero_mem,
+    source_actual t p extra state t.hi (upper_range t)⟩
+
+/-- Target observations retain the mathematical endpoints, including the
+signed lower endpoint rather than replacing it with its unsigned encoding. -/
+theorem boundary_values (t : Source.IntTy) :
+    PrimTy.num? (integerValue t t.lo (lower_range t)) = some t.lo ∧
+    PrimTy.num? (integerValue t 0 t.zero_mem) = some 0 ∧
+    PrimTy.num? (integerValue t t.hi (upper_range t)) = some t.hi :=
+  ⟨integer_observe _ _ _, integer_observe _ _ _, integer_observe _ _ _⟩
+
 #print axioms joint
 #print axioms transport_actual
 #print axioms missing_body_refused
 #print axioms wrong_value_refused
 #print axioms missing_actual
 #print axioms timeout_actual
+#print axioms boundary_calls
+#print axioms boundary_values
 
 end H62.AuditV08Adapters.IntegerCallableJoint
