@@ -187,3 +187,7 @@ The occurrence mapper now reuses the original census mask, whose function body w
 ## Expanded attributed-header follow-up
 
 The scanner now masks comments and strings and recognizes certain nested, multiple and multiline attributes, recording declaration-token positions and original-census coverage hints. The shared mask retains its former default behavior. The 48 pinned files yield zero candidates under this heuristic. Independent read-only finder and skeptic reviewed without Lean; they identified and rechecked a multiline-modifier location fix. Unsupported Lean syntax and modifiers remain possible, so the result is not full declaration or semantic coverage.
+
+## Raw-string and interpolation follow-up
+
+The shared lexical mask handles hash-delimited raw strings and conservatively fails on possible interpolation instead of silently masking embedded terms. Independent read-only finder and skeptic supplied Unicode and comment-separated counterexamples; fixes and false-positive limitations were rechecked without Lean. The rule can reject non-interpolation text and is not a full Lean lexer. Current pinned-tree panic occurrence output is unchanged.
