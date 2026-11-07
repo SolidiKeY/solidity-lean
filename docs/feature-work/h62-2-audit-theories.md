@@ -1,3 +1,11 @@
+LATEST ORIGINAL-HISTORY VALIDATION PASS: detached source tree is EXACT
+c6f550e281a7e5affa9a99bc2cdaed556dec00e4, tracked sources unchanged. All148audit
+helpers checked against ORIGINAL dependencies;25mapped files/500original names,
+103joint certificates+4H69,1,361pending. Q-FROZEN-REBASE is CLOSED by this checked
+history audit, rebased coverage separately recorded. Q-STATIC-VALUE is CLOSED as
+intentional H69/no operational refusal. No questions or scope waits remain.
+Evidence: /workspace/h62-audit-theories-decisions-20261107-evidence/original.
+
 LATEST COORDINATOR DECISIONS (2026-11-07): Q-FROZEN-REBASE option1 and
 Q-STATIC-VALUE option3 are resolved. Audit original frozen statements in original
 history; report rebased coverage separately, without auditor-created versioned
@@ -1335,3 +1343,47 @@ Checkpoint handoff: preserve same original VM/branch/unfinished goal. Both
 questions resolved, questions=[] and no scope waits; original-history validation
 and all remaining original proofs/roles/generated/compiler/final gates remain
 work. Do not infer full assignment completion or operational static refusal.
+
+## Original-history validation checkpoint: fidelity closed
+
+run_frozen_history.py prepared a detached validation worktree at
+/workspace/h62-audit-theories-frozen-c6-20261107. Exact original commitc6f550e281a7e5affa9a99bc2cdaed556dec00e4,
+treeafa96bde94b1ed2bca53dc364816892bdf6a70ff. Only the three assigned additive
+audit paths were overlaid from committed107cb28c032e3bff522ff6db0fdf0be54b2bbefd;
+Git archiveSHA422665f8ea3825e3f2441a946b3b5cf50714d13466b888bed3dd130a06493339
+and every overlaid file are recorded. No original tracked source was changed;
+git diff before/after is clean and every untracked file is within assigned
+paths. This creates no lane branch/goal or auditor versioned interface pair.
+Current assigned checkout/branch remains unchanged and preserved.
+
+Bounded serial Lean ran from the ORIGINAL worktree's scripts, whose ROOT resolves
+to that worktree. All148helpers pass original source/import/artifact/log/axiom
+checks. Original census passes25files/500explicit declarations; its lexical
+covered=0 is not a witness disposition count. Original typed/certificate ledger
+records103joint+4H69,18empty historical typed telescopes,372public+3private+
+986generated=1,361pending.44roles and ordinary Payable completeness pass; static
+is an accepted impossibility boundary with no operational refusal.26compiler
+controls also pass in original context. All history gates exit0. Full assignment
+acceptance remains false; every remaining statement/candidate is retained.
+
+This implements the explicit option1 history audit, so fidelity is CLOSED rather
+than waiting for producer versioned pairs. Rebased-tree receipts are separately
+reported under decisions evidence/current; its five source drifts remain factual
+version observations, not unresolved original-fidelity blockers or claims of
+definition equivalence. No rebased statement is substituted for the original.
+The original source/statement tree, additive witness overlay and current proof
+context are all independently identifiable and hashed.
+
+Finder and skeptic independently verified the exact commit/tree, tracked-source
+cleanliness, all50archive files, driver/archive/gate hashes, actual verifier ROOT,
+all148original dependency/certificate receipts and25/500source census,103/4/1361
+ledger and44roles. Both passed, no residual findings or reviewer edits/Lean/
+server/build. Evidence: frozen-history-audit.json,history-setup.json,history-gates.json
+and original logs; history-reviews.json in decisions evidence root. Original
+worktree/evidence are preserved; no runtime/full-goal completion claimed.
+
+Checkpoint handoff: both coordinator questions resolved, questions=[]/scopewaits=[].
+Original proofs still need1,361remaining witness/classification records and456role
+inventories, live-owner inventory, broader compiler/physicalABI/gas/fork and full
+final gates. Continue the same original VM/branch/unfinished goal; do not reset,
+replace, complete or pause it. Portable original/current handoff is next item.
