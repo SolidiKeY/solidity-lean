@@ -241,7 +241,10 @@ class GraphTests(unittest.TestCase):
 
     def test_production_pending_inventory(self):
         catalog = g.read(ROOT/'tests/h62/item5/statement-graph/pending-inputs.json')
-        ownership = {'items':[{'id':p['ownerReference'],'owner':p['owner']} for p in catalog['pendingInputs']]}
+        source = catalog['sourceSnapshot']
+        records = catalog['pendingInputs']+source['sourceInputBindings']+source['sharedPublicObligations']
+        assignments = {p['ownerReference']:p['owner'] for p in records}
+        ownership = {'items':[{'id':ref,'owner':owner} for ref,owner in assignments.items()]}
         export = dict(schema=1,source='Lean.ConstantInfo.type',declarations=[])
         graph = g.build(export,catalog,BASE,TREE,ownership)
         self.assertFalse(graph['fixture'])
@@ -255,7 +258,8 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(graph['progress']['G50']['pendingInputs'],2)
         for node in graph['nodes']:
             self.assertEqual(node['inputStatus'],'pending-input')
-            self.assertIsNone(node['declaration'])
+            self.assertEqual(node['declaration'],source['theorem'])
+            self.assertEqual(node['declarationEvidence'],'static-source-only')
             self.assertIsNone(node['exists'])
             self.assertIsNone(node['typeExpr'])
             self.assertFalse(node['dependenciesKnown'])

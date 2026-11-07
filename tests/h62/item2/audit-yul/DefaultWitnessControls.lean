@@ -1,0 +1,41 @@
+import tests.h62.item2.«audit-yul».DefaultWitnesses
+import Solidity.Yul.Words
+import Solidity.Yul.Checks.ClosedFunctions
+set_option h62.auditOutput "/workspace/h62-audit-yul-evidence/h69-default-controls.jsonl"
+-- Ordinary parameters must be supplied together, with no new hypothesis.
+audit_joint_defaults "Solidity.Yul.pow_halve" as H62.AuditYul.Controls.pow_halve_joint
+-- No closed default may manufacture an intrinsic reference to an empty context.
+-- This attempt must be reported uncovered; H69's separate refutation applies.
+audit_joint_defaults "Solidity.Yul.Checks.ClosedFunctions.no_external_reference" as H62.AuditYul.Controls.must_not_exist
+#print axioms H62.AuditYul.Controls.pow_halve_joint
+-- Includes an actual proposition-valued input, not just inhabited data types.
+audit_joint_defaults "Solidity.Yul.powBits_correct" as H62.AuditYul.Controls.powBits_joint
+example : ∃ (_b _e : Nat), True := H62.AuditYul.Controls.pow_halve_joint
+example : ∃ (k : Nat) (_b : Solidity.Yul.Word) (e : Nat) (_h : e < 2 ^ k), True :=
+  H62.AuditYul.Controls.powBits_joint
+-- Synthetic utility correctness control; never counted as interface coverage.
+universe u
+theorem H62.AuditYul.Controls.universe_control (α : Sort u) (value : α) : value = value := rfl
+audit_joint_defaults "H62.AuditYul.Controls.universe_control" as H62.AuditYul.Controls.universe_joint
+example : ∃ (α : Sort u) (_value : α), True := H62.AuditYul.Controls.universe_joint.{u}
+open Lean Elab Command in
+run_cmd do
+  if (← getEnv).contains `H62.AuditYul.Controls.must_not_exist then
+    throwError "negative joint-witness control was incorrectly accepted"
+#print axioms H62.AuditYul.Controls.powBits_joint
+#print axioms H62.AuditYul.Controls.universe_joint
+-- Aliases and lets must not hide a premise from the existential telescope.
+abbrev H62.AuditYul.Controls.HiddenFalse : Prop := let P := False; P → True
+abbrev H62.AuditYul.Controls.HiddenTrue : Prop := let P := True; P → True
+theorem H62.AuditYul.Controls.hidden_false : H62.AuditYul.Controls.HiddenFalse :=
+  fun h => False.elim h
+theorem H62.AuditYul.Controls.hidden_true : H62.AuditYul.Controls.HiddenTrue :=
+  fun _ => True.intro
+audit_joint_defaults "H62.AuditYul.Controls.hidden_false" as H62.AuditYul.Controls.hidden_must_not_exist
+audit_joint_defaults "H62.AuditYul.Controls.hidden_true" as H62.AuditYul.Controls.hidden_joint
+example : ∃ (_h : True), True := H62.AuditYul.Controls.hidden_joint
+open Lean Elab Command in
+run_cmd do
+  if (← getEnv).contains `H62.AuditYul.Controls.hidden_must_not_exist then
+    throwError "let/alias premise was omitted from joint witness"
+#print axioms H62.AuditYul.Controls.hidden_joint

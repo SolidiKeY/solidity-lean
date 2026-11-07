@@ -1,6 +1,6 @@
 # Owner-only integration fragment — NOT APPLY-READY
 
-No owner relay agreement has been received. This lane has not edited any
+Historical proposal: this lane has not edited any
 original family file, library root, central module map or axiom pin.
 
 After the responsible migration owner repairs the pinned-v4.35.0 Syntax.Raw
@@ -10,17 +10,22 @@ choose its final module registration. The generated proposal currently imports
 not registered in any Lake library; the patch is an unvalidated proof proposal,
 not a drop-in migration. `git apply --check` proves textual applicability only.
 
-Suggested owner integration (requires exact-file agreement before edits): move
-the helper to the new area module `Solidity/Backend/StructuredFlow/GenericMapped.lean`,
+Suggested integration (not yet implemented): the staged helper is
+`tests/h62/item4/generic-structuredflow/GenericMapped.lean`. Its proposed production
+module name is `Solidity.Backend.StructuredFlow.GenericMapped`; no production
+file at that proposed location is claimed to exist. Move the helper there,
 retain axiom prints in a separate test, change the proposal import to
 `Solidity.Backend.StructuredFlow.GenericMapped`, register through the repository
 coord-tools, and supply this area module-map fragment:
 
 | Module | Purpose |
 |---|---|
-| `Backend/StructuredFlow/GenericMapped.lean` | Intrinsic typed mapped Boolean fixture and universal actual-compiler execution lemma; no new Source semantics. |
+| Proposed module `Solidity.Backend.StructuredFlow.GenericMapped` | Intrinsic typed mapped Boolean fixture and universal actual-compiler execution lemma; no new Source semantics. |
 
-The exact original-file relay request is limited to these six paths:
+H82 withdraws the historical exact-file agreement wait for statement-preserving
+proof edits. Statement, dependent-definition, interface, budget, axiom-set and
+exclusion changes still require the applicable owner/versioned review. The
+historical proposal targets these six paths:
 
 - `Solidity/Backend/StructuredFlow/ForBreakCompilerControls.lean`
 - `Solidity/Backend/StructuredFlow/WhileBreakCompilerControls.lean`
