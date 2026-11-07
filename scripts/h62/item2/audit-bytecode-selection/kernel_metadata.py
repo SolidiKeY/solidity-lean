@@ -347,3 +347,65 @@ def binder_metadata(rows):
     return {"declarations": declarations,
         "head_records": [observed_type(by_name[name]) for name in sorted(referenced)],
         "boundary": "Supplied metadata join only; no source, owner, instantiated type, premise role or witness acceptance"}
+
+
+def source_candidate_graph(rows, mapping):
+    """Guard regression: one-sided name matches must not become bijective coverage.
+
+    Recompute supplied source edges by module/name/Unicode position, retain both
+    unmatched sides, and flag shared targets. No statement or witness follows.
+    """
+    validate_rows(rows)
+    if not isinstance(mapping, dict) or any(not text(m) or not isinstance(v, list) for m,v in mapping.items()):
+        raise ValueError("invalid source mapping")
+    by_name = {row["name"]: row for row in rows}
+    positions = defaultdict(list)
+    for row in rows:
+        span = row["declaration_range"]
+        if row["is_theorem"] and span is not None:
+            positions[(row["module"],row["user_name"],span["selection_line"],span.get("selection_column"))].append(row["name"])
+    sources, incoming = [], defaultdict(list)
+    ids = set()
+    for module, entries in sorted(mapping.items()):
+        for entry in entries:
+            if not isinstance(entry, dict) or not text(entry.get("name_candidate")) or not isinstance(entry.get("signature"), str):
+                raise ValueError("invalid source candidate")
+            if entry.get("kind") != "theorem":
+                raise ValueError("source candidate is not a theorem")
+            for key in ("byte_start","byte_end","name_line","name_column"):
+                if type(entry.get(key)) is not int:
+                    raise ValueError("invalid source position")
+            if not 0 <= entry["byte_start"] < entry["byte_end"] or entry["name_line"] < 1 or entry["name_column"] < 0:
+                raise ValueError("invalid source position")
+            if hashlib.sha256(entry["signature"].encode()).hexdigest() != entry.get("signature_sha256"):
+                raise ValueError("source signature fingerprint differs")
+            source_id = module + ":" + str(entry["byte_start"]) + ":" + str(entry["byte_end"])
+            if source_id in ids:
+                raise ValueError("duplicate source candidate identity")
+            ids.add(source_id)
+            names = sorted(positions[(module,entry["name_candidate"],entry["name_line"],entry["name_column"])])
+            status = "unique" if len(names)==1 else "ambiguous" if names else "unmatched"
+            if (entry.get("kernel_names") != names or type(entry.get("match_count")) is not int or
+                    entry["match_count"] != len(names) or entry.get("mapping_status") != status):
+                raise ValueError("supplied source edges differ from observed positions")
+            snapshot = json.loads(json.dumps(entry,sort_keys=True,separators=(",", ":")))
+            sources.append({"id":source_id,"module":module,"source":snapshot,"kernel_names":names})
+            for name in names:
+                incoming[name].append(source_id)
+    source_index = {s["id"]:s for s in sources}
+    for source in sources:
+        names = source["kernel_names"]
+        source["accounting_status"] = ("unmatched" if not names else
+            "one_to_one_candidate" if len(names)==1 and len(incoming[names[0]])==1 else "ambiguous_candidate")
+        source["statement_correspondence_established"] = False
+        source["joint_witness_established"] = False
+    records = []
+    for name, row in sorted(by_name.items()):
+        links = sorted(incoming[name])
+        unique = len(links)==1 and len(source_index[links[0]]["kernel_names"])==1
+        records.append({"name":name,"module":row["module"],"private":row["private"],
+            "original_theorem":row["is_theorem"],"record_sha256":observed_type(row)["record_sha256"],
+            "source_ids":links,"accounting_status":"unmatched" if not links else "one_to_one_candidate" if unique else "ambiguous_candidate",
+            "statement_correspondence_established":False,"joint_witness_established":False})
+    return {"sources":sorted(sources,key=lambda s:s["id"]),"records":records,
+        "boundary":"Supplied source-position graph only; no source authenticity, statement correspondence or witness coverage"}
