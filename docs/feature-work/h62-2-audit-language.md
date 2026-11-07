@@ -552,3 +552,21 @@ full success contract or uncompiled theorem is claimed. New source counts:
 zero `sorry`, zero `axiom` declarations, zero `native_decide`, no raised proof
 budget. Standard imported axioms are printed; telescope certificates use at
 most `propext`. No merge, push, publish, PR or deployment was performed.
+
+## H151 historical evidence gap
+
+**UNVERIFIABLE:** the original frozen ownership snapshot identified by SHA256
+`7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce`
+and the complete historical portable evidence packet could not be recovered from
+authenticated intake. The historical ownership-bound census and its full evidence
+replay remain unproven. Current registry files and other snapshots do not replace
+those bytes. H151 removes recovery of this historical packet from producer waits;
+it does not turn any historical claim into a passing gate.
+
+Fresh source and kernel checks may proceed using available Git objects and
+explicitly identified current inputs. Such checks must distinguish current
+ownership from historical ownership and must not be credited as reproduction of
+the missing packet. Preserve the original strict checksum refusal in the census
+checker. Existing checked witnesses retain only their individually recorded
+scope; full interface coverage, simultaneous witnesses and final acceptance remain
+open. Evidence belongs in the private coordination repository under H145.
