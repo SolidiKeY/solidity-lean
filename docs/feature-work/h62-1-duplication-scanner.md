@@ -1275,3 +1275,22 @@ retains both statement and body refusal. Group counts do not establish equal
 membership, intrinsic signatures, proof semantics or live ownership. Evidence
 is outside Git under
 `/workspace/h62-duplication-scanner-evidence/priority-instances/`.
+
+### Priority-instance report replay
+
+Two bounded default-mode scans with the same tree, scanner, selection,
+registry and caller-pinned previous report took 112.620 and 118.052 seconds
+and produced byte-identical reports, SHA256
+`fea9d7989a7ec05ca4ad6c14bb6e94afd164721055f49291f5e0321ee5020417`.
+Both selected 7,369 files and recognized 124,001 declarations, with no file
+errors, unmatched globs or reported aliases; all recognized owners remain
+unknown. Relative to the older caller-pinned report, 48 inputs were added,
+seven changed and none removed. The scanner and tree both changed from that
+baseline, so candidate deltas combine tool and input effects. The prior pin
+identifies bytes, not an authenticated producer.
+
+No opt-in fixture or project signature binding was invoked. Finder and skeptic
+reviewed the replay without Lean. This establishes repeatability for these
+runs, not complete census, resolved kernel names, signature equivalence or
+live ownership. Full reports and timing records are outside Git in the
+priority-instances evidence directory.
