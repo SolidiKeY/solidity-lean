@@ -255,3 +255,28 @@ waits. Independent queue work remains available; status is partial, not blocked.
 No original Lean source, axiom set, proof budget, interface or observation changed
 in this resumed checkpoint. Kernel fixture/refusal validation and matched timing
 remain open.
+
+## Repository-verifiable input pins after ac9d8db2a integration
+
+The coordinator reported the prior checkpoint integrated with passing gates and
+requested continuing from master. The original clean branch fast-forwarded to
+ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6. No prior stopped package was overwritten.
+
+Review minor addressed: the small committed source manifest is
+`scripts/h62/item4/generic-yul-views/checkpoint-manifest.json`. It records 12
+repository-relative source paths and SHA256 values, including both Lean
+candidates and the original ReadControls input. From the repository root run
+`python3 scripts/h62/item4/generic-yul-views/verify_manifest.py`; expected output
+is `SOURCE_MANIFEST_PASS files=12; source identity only`. The manifest lists
+reproduction commands. It is deliberately a source-input manifest, not a hash
+of itself or of VM-only bulk evidence. Future source edits require reviewed
+manifest regeneration; a changed file fails verification. Bulk H44 inventory
+and logs remain off git in separately checksummed exports.
+
+Three external controls pass for content mutation, escaping/absolute paths,
+and empty/duplicate inventories; six correspondence controls also pass.
+This establishes reproducibility of the selected source inputs, not semantic
+preservation of every original case, Lean validity, axiom acceptance or timings.
+The four known failing dependency files have not changed since the prior
+checkpoint; no known failing Lean gate was rerun unchanged. Roadmap, Storage
+and Language waits and all original proof/coverage/timing obligations remain.
