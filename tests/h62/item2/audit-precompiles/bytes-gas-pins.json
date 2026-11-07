@@ -1,0 +1,98 @@
+{
+  "H62.AuditPrecompiles.Successor.BytesGas.word_rounding_boundaries": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.list_loop_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.byte_list_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.byte_length_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.ofNat_nat_joint": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.subtract_nat_joint": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.words_multiple_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.words_next_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.words_last_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.words_boundary_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.words_rounding_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.address_complete_data": [
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.sha_price_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.ripemd_price_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.pairing_price_data": [
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.ecrecover_gas_data": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.sha_gas_data": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.ripemd_gas_data": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.bnadd_gas_data": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.bnmul_gas_data": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.pairing_gas_data": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "H62.AuditPrecompiles.Successor.BytesGas.point_gas_data": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}

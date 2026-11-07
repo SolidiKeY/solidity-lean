@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 """One owned check: cgroup limits, writer lock, H1 monitor, bound evidence and cleanup."""
-import argparse, fcntl, hashlib, json, os, re, signal, subprocess, time
+import argparse, fcntl, hashlib, json, os, re, shlex, signal, subprocess, time
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DOCKER = ["docker", "--host=unix:///var/run/docker.sock"]
-CONTAINER = "sol-c3-checks"
+CONTAINER = os.environ.get("SOL_C3_CONTAINER", "sol-c3-checks")
 RESERVE = 4 * 1024**3
+
+TIMING_CODE = ("import resource,subprocess,sys,time; start=time.monotonic(); "
+               "r=subprocess.run(sys.argv[1:]); "
+               "print('Elapsed seconds: '+str(time.monotonic()-start),flush=True); "
+               "print('Maximum child resident set size (kbytes): '+str(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss),flush=True); "
+               "code=r.returncode if r.returncode>=0 else 128-r.returncode; "
+               "print('Raw child return code: '+str(r.returncode),flush=True); "
+               "print('Exit status: '+str(code),flush=True); sys.exit(code)")
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
@@ -53,12 +61,14 @@ def main():
         paths |= {"tests/sol-c3-exactness/check-fixtures.mjs", "tests/sol-c3-exactness/final-checks.py", "tests/sol-c3-exactness/axiom-registration.json", "tests/sol-c3-exactness/release-owned-file-cache.py"}
         paths |= {str(p.relative_to(ROOT)) for p in (ROOT / "tests/sol-c3-exactness/fixtures").rglob("*") if p.is_file()}
         snapshot = {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in sorted(paths)}
+        extra_path = os.environ.get("SOL_C3_EXTRA_PATH", "")
         script = ("set -eu; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; "
                   "export LEAN_LSP_MAX_OPEN_FILES=1; "
                   "export PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:$PATH; "
                   "export PATH=/workspace/solidity-lean/tests/sol-c3-exactness/bin:$PATH; "
                   "export LEAN_MCP_SERVER_CMD='.venv/bin/python -m lean_lsp_mcp --lean-project-path /workspace/solidity-lean'; "
-                  'exec /usr/bin/time -v "$@"')
+                  + ('export PATH=' + shlex.quote(extra_path) + ':$PATH; ' if extra_path else '') +
+                  'exec python3 -c ' + shlex.quote(TIMING_CODE) + ' "$@"')
         cmd = DOCKER + ["exec", CONTAINER, "bash", "-c", script, "sol-c3-check"] + command
         start = time.monotonic()
         pressure, was_interrupted, error, proc = False, False, None, None
