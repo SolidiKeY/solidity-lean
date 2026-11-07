@@ -3,6 +3,9 @@
 # prefix mounted at their original absolute paths so Lake artifacts stay valid.
 set -euo pipefail
 source /emsdk/emsdk_env.sh >/dev/null 2>&1
+# The pinned image owns this config; SDK activation alone need not export it.
+export EM_CONFIG=/emsdk/.emscripten
+[[ -f "$EM_CONFIG" ]] || { echo "Missing pinned SDK config: $EM_CONFIG" >&2; exit 1; }
 export PATH="$NATIVE_LEAN_PREFIX/bin:$PATH"
 export EMCC_CORES=1 BINARYEN_CORES=1 LEAN_NUM_THREADS=1
 export EM_FROZEN_CACHE=0

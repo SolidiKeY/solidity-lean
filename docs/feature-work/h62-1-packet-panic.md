@@ -133,3 +133,27 @@ The base-pinned thirty-row controls ledger records Source, symbolic target, nume
 ## SignedDiv Controls continuation
 
 The base-pinned twenty-one-row controls ledger records checked and unchecked minimum/-1 outcomes, zero-divisor and truncation controls, and the specific numeric stack-bound witness. Negative controls pass. Independent read-only finder and skeptic matched the declarations and premises without Lean; no material discrepancy was found. No producer or axiom guard was edited.
+
+## Duplicate-input test correction
+
+Twelve per-file ledger tests now restore the removed census row at its original index before inserting one adjacent duplicate. This isolates duplicate input from row reordering. All 16 ledger tests passed. Independent read-only finder and skeptic reviews confirmed the change without Lean; duplicate input is rejected by the ordered-header check, so this does not establish that a separate duplicate-specific branch ran. The older SignedMod Source test still has no dedicated forged-line or forged-kind fixture.
+
+## Mechanically reconciled ledger totals
+
+`ledger_totals.py` checks a fresh ordered census, regenerates all sixteen ledgers and rejects overlapping, duplicate or unmatched rows. The actual totals remain 465 original, nine private, 419 described and 55 unclassified original headers. Independent read-only finder confirmed the current reconciliation; skeptic identified that an unclassified census row could be omitted or invented, so fresh-census validation and CLI negative controls were added and rechecked without Lean. Manual observation prose is not mechanically checked against theorem statements; the result is not proof or semantic closure.
+
+## Attributed-header scan follow-up
+
+The original census omits same-line attributed declarations. `attributed_header_scan.py` checks only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. The scanner deliberately does not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its synthetic controls demonstrate a block-comment false positive. This does not establish absence of attributed declarations or full coverage.
+
+## SignedSub Controls continuation
+
+The base-pinned 40-row controls ledger distinguishes same-named Seed and outer declarations by line. Its negative controls pass. Independent read-only finder and skeptic matched the statements without Lean; the checked overflow `revertOf` observation was corrected to specify `some` panic data and rechecked. No original proof or guard changed.
+
+## CheckedMul Populated continuation
+
+The base-pinned fourteen-row populated-fixture ledger accounts for the read-only heap, aliases, machine and representation statements. Negative controls pass. Independent read-only finder and skeptic matched all observations without Lean; both requested clarification of base-map indices versus addresses, which was corrected and rechecked. The G25 original was not edited.
+
+## SignedDiv Contract continuation
+
+The base-pinned checked-contract ledger records the quantified Source/target reads, StateRepr, saved finite words and all three numeric capacity premises alongside the separate Source, symbolic and numeric conclusions. Negative controls pass. Independent read-only finder and skeptic matched the declaration without Lean. All 474 currently observed lexical headers now have descriptions; broader semantic and proof obligations remain open.

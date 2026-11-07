@@ -13,9 +13,9 @@ mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings pass.
-The full normal Lean build passes. Final acceptance awaits
-110 unrecorded central G07 pin registrations (zero axiom errors), at the current
-2a43bf4f integration. The later coordinator instruction explicitly
+The prior full Lean build passed on 2a43bf4f; the current 806a972a full build
+is pending. Final acceptance also awaits 85 standard-only G07 registrations
+(zero axiom errors) and two synthetic references in another audit checker. The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
 The retirement section below is historical; no goal was created or reset.
 
@@ -24,7 +24,7 @@ The retirement section below is historical; no goal was created or reset.
 | 1. Frozen signatures, ownership, premise classification | Complete source inventory; elaborated binders now also exported. |
 | 2. Simultaneous hypotheses | 177 exact-type packages pass complete Lean diagnostics and reviews. |
 | 3. Success/totality and behavioral controls | Seven formal theorems and ten provenance-bound external programs pass; proof/runtime boundary below. |
-| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Current full build passes; final central inventory registration remains blocked. |
+| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh 806 per-file census passes; current full build and owner metadata closure remain pending. |
 
 The accounting tool explicitly reports `witness_gate_complete=true` and
 `assignment_complete=false`. All original Solidity sources, generated roots,
@@ -628,3 +628,50 @@ Independent finder and skeptic reviews accepted the H44 split. Their generator
 path-check finding was fixed and verified with three symlink rejection controls
 that create no repository outputs. Both closed the finding; no residual issue.
 No Lean/server/builds or edits by reviewers. Bulk hashes and ticket bytes match.
+
+## Coordinator 806 re-baseline (2026-11-07)
+
+Fast-forwarded the assigned branch from c388d3209661b33ddd6d0fc6301039332d5085ee
+to exact published origin/master 806a972a4f1eefc367f7fe21078e56469447ce13, after
+verifying original-base and lane-head ancestry. No conflict, reset, push or goal
+creation. All24 frozen ABI modules and their map remain byte-identical. The
+canonical input snapshot now binds7966 Lean files. Only the owned integration
+constant changed; generated serial TOML is byte-identical, with unchanged
+-j1/LEAN_NUM_THREADS1 and 16GiBhard/12GiBRSS/4GiBreserve/noSwap bounds.
+
+All nine audit files plus KeySort pass fresh bounded per-file diagnostics.
+Acceptance177witnesses/fidelity,439binders,7formal success theorems and10identical
+externalencodedfixtures passes, along with3receipt controls and4scanner tests.
+Matched timing1.626682899 to1.649552630seconds (+1.405912057%,within10%) passes.
+Finder and skeptic independently verified ancestry, source/output/resource
+bindings, signatures and acceptance without Lean/server/builds/edits; no finding.
+
+Trust passes6628sources/289sites/0findings; reachability passes6612/0orphans.
+Documentation paths fail on exactly2synthetic A/B names in the other lane's
+check_scope.py; no cross-lane repair was made. Globalpins16675/0errors/85new
+standard-only registrations remain an owner metadata wait. Off-Git ticket
+PIN-806a972a contains all85unique previous=null entries and currentcentralSHA;
+the tiny committed bulk manifest authenticates its path,size,hash. H44 bulky
+files stay offGit; archive index/receipts from2a43 remain historical. Absolute
+VM paths require retrieval before off-VM verification, not assumed shared files.
+
+The new full build remains pending because281validation inputs changed,
+including Source evaluation/horizon modules. The prior6555-job pass is not
+relabelled as current. No statement, hypothesis, exclusion, proof budget,
+axiom set or observation changed. External gas/fork observations remain archived
+fixture reuse, not formal/general compiler proofs. No new unclaimed candidate
+is assigned; finish current validation before final owner handoff.
+
+### Generated documentation ordering repair
+
+The first current ./run-lean.sh attempt exited1 before starting Lean, after
+3.288084seconds: docs/README.md had one existing P8 row out of fragment order.
+The failure log and resource receipt remain immutable. Under H82's standing
+documentation-fix authorization, generated only docs/README.md using the
+repository's pure fragment renderer. Its line multiset is identical; exactly
+one row moved. All protected Lean roots, combined module maps and the central
+axiom inventory retain their hashes. No fragment, statement, source, proof
+budget, gate command or axiom changed. fragments --check now passes.
+Independent finder and skeptic verified the line multiset/protected hashes and
+retained failure, no findings; neither Lean/server/builds/edits. Current full
+retry remains pending; fragments PASS alone is not a full-build PASS.

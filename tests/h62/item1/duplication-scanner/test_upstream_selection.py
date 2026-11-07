@@ -36,8 +36,11 @@ class UpstreamSelectionControls(unittest.TestCase):
     def test_recursive_and_finite_alias_globs_nonregular_and_escape(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);(root/'actual').mkdir();(root/'actual/A.lean').write_text('def a := 0\n');(root/'alias').symlink_to('actual',target_is_directory=True)
-            result=self.invoke(root,'**/*.lean');self.assertEqual(result.returncode,0)
-            self.assertEqual([r['path'] for r in json.loads(result.stdout)['inputs']],['actual/A.lean'])
+            result=self.invoke(root,'**/*.lean');self.assertNotEqual(result.returncode,0)
+            recursive=json.loads(result.stdout)
+            self.assertEqual([r['path'] for r in recursive['inputs']],['actual/A.lean'])
+            self.assertTrue(any('skips directory symlink' in r['reason'] for r in recursive['errors']))
+            self.assertEqual(recursive['incremental']['comparison_status'],'current-incomplete')
             finite=self.invoke(root,'alias/*.lean');self.assertEqual(finite.returncode,0)
             self.assertEqual(json.loads(finite.stdout)['input_aliases'],[{'path':'alias/A.lean','resolved_path':'actual/A.lean'}])
             (root/'alias').unlink();(root/'dangling-directory').symlink_to('gone',target_is_directory=True)

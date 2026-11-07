@@ -2725,6 +2725,7 @@ import Solidity.Frontend.ConstantDepth.Correspondence
 import Solidity.Frontend.ConstantDepth.Determinism
 import Solidity.Frontend.ConstantDepth.Lookup
 import Solidity.Frontend.ConstantDepth.Rank
+import Solidity.Frontend.CounterexampleMetadataV1
 import Solidity.Frontend.CreationTryImport
 import Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
 import Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls
@@ -3007,6 +3008,7 @@ import Solidity.Frontend.SolcJson.YulWalkPath
 import Solidity.Frontend.SolcJson.YulWords
 import Solidity.Frontend.Source
 import Solidity.Frontend.SourceUnits
+import Solidity.Frontend.SpecOriginsV1
 import Solidity.Frontend.StatementGrammarH28.AtomAsm
 import Solidity.Frontend.StatementGrammarH28.AtomCall
 import Solidity.Frontend.StatementGrammarH28.AtomConditional
@@ -3220,6 +3222,7 @@ import Solidity.Lowering.P8.CheckedSyntax
 import Solidity.Lowering.P8.ConditionalAssembly
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.P8.DeclarationGraphCheck
+import Solidity.Lowering.P8.DeclarationGraphConstraints
 import Solidity.Lowering.P8.DeclarationGraphControls
 import Solidity.Lowering.P8.DispatchCoverage
 import Solidity.Lowering.P8.DispatchCoverageControls
@@ -3508,6 +3511,7 @@ import Solidity.Lowering.V07.FixedBytesAssignment
 import Solidity.Lowering.V07.FixedBytesAssignmentControls
 import Solidity.Lowering.V07.FixedBytesComparisonControls
 import Solidity.Lowering.V07.FixedBytesComparisons
+import Solidity.Lowering.V07.GraphAdmissionAssembly
 import Solidity.Lowering.V07.GraphAdmissionBoundary
 import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls
@@ -3589,6 +3593,7 @@ import Solidity.Lowering.V07.SignedWordAddition
 import Solidity.Lowering.V07.SignedWordMultiplication
 import Solidity.Lowering.V07.SignedWordSubtraction
 import Solidity.Lowering.V07.SourceReads
+import Solidity.Lowering.V07.SourceRefusal
 import Solidity.Lowering.V07.UdvtAddressAssignment
 import Solidity.Lowering.V07.UdvtAddressAssignmentControls
 import Solidity.Lowering.V07.UdvtAssignment
