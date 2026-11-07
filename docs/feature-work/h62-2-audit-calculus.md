@@ -354,3 +354,13 @@ The ledger separates raw guarded table clauses from represented functions, retai
 
 
 Measured graph/search/operational-leaf accounting passed at 0.729631s / 74,232 KiB maximum child RSS; complete acceptance failed exit 1 at 1.374805s / 74,476 KiB; 89 controls passed at 0.239797s / 15,240 KiB. Documentation failed exit 1 at 40.857819s / 9,216 KiB on four missing references in unchanged master citing sources. Exact argv/metrics/comparisons are archived. These are static gate observations, not matched tactic-performance acceptance or a whole-gate pass.
+
+
+## Term-power/context-metric source roles (2026-11-07)
+
+After adopting master 5da4771e63a4278ed53932ac39a032e3d7aea6ed with owned history preserved and no toolchain-pin change, classified all twelve TermPower and six LeafMetrics declarations against exact frozen/current identities. Supporting Ends/ExactRun source also matches. Prior 222 rows and owners unchanged; ledger now 240 roles reviewed, 5,043 pending; 3,746 owners confirmed, 1,537 unresolved. No new audit witnesses.
+
+The ledger retains strictness/expansion/evaluation/summary premises, preserves identity iteration versus one-application power, and distinguishes ending from normal-return claims. Exact normal model-call outcome requires both singleton summary and successful term evaluation; full continuation/frames/post and all sound_call certificates remain. Formula-context bounds retain exact equalities versus maxima/inequalities, original-post peak and exclusions for program/update interiors, heap resources and kernel annotation volume. Both independent reviews pass; 89 Python controls pass; complete acceptance remains FAIL exit 1. No source/tactic/budget edit or runtime acceptance. Off-Git measured evidence is indexed by the call-term-metrics manifest; original queues/pauses, historical gaps and STOPs remain binding.
+
+
+Measured term-power/context-metric accounting passed at 0.242540s / 74,124 KiB maximum child RSS; complete acceptance failed exit 1 at 0.239374s / 74,024 KiB; 89 controls passed at 0.138177s / 15,236 KiB. Documentation now passes exit 0 at 43.541806s / 9,216 KiB on adopted master: every backticked Lean path resolves, with 132 non-strict ambiguity warnings. Exact argv/metrics are archived. This clears only that documentation check, not full classification/runtime acceptance or a matched performance gate.
