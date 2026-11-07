@@ -1,4 +1,0 @@
-trust: 54 modules: no native_decide, decide +native, sorry, admit, maxHeartbeats or skipKernelTC in code
-axioms: #solkey_obligations counts a theorem derived only with propext, Classical.choice and Quot.sound; Report.lean pins no unsound or mismatched theorem
-parity: 564 testSuiteFunctions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip
-check-testsuite: ok

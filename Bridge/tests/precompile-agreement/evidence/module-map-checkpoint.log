@@ -1,8 +1,0 @@
-CWD: /workspace/solidity-lean
-COMMAND: python3 scripts/coord-tools/module-map.py 8495f1deb0a95dd6b9301822d8649ab76b217681
-docs/module-map/bytecode-selection.md: | `Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean` | Exact byte-list conversion and natural gas arithmetic at the pinned vendor. |
-docs/module-map/bytecode-selection.md: | `Bridge/SolidityBridge/PrecompileAgreement/Controls.lean` | Inhabited inputs, malformed and gas-boundary controls. |
-docs/module-map/bytecode-selection.md: | `Bridge/SolidityBridge/PrecompileAgreement/Gas.lean` | Common algebraic prices and actual vendor remaining-gas projections. |
-docs/module-map/bytecode-selection.md: | `Bridge/SolidityBridge/PrecompileAgreement/Header.lean` | Big-endian header agreement on its actual common domain. |
-docs/module-map/bytecode-selection.md: | `Bridge/SolidityBridge/PrecompileAgreement/Identity.lean` | IDENTITY against the actual imported pinned Ξ_ID. |
-EXIT=1 SECONDS=0.071

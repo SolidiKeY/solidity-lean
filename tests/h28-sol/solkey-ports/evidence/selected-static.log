@@ -1,4 +1,0 @@
-/workspace/solidity-lean/tests/h28-sol/solkey-ports/accept.py:50: SyntaxWarning: invalid escape sequence '\['
-  m=re.search("'"+re.escape(full)+"' (depends on axioms: \[([^\]]*)\]|does not depend on any axioms)",out)
-SELECTED_STATIC_PASS
-2 exact pinned clauses; 15 universal/consequence theorems; 46 complete kernel controls; scope and local registration verified

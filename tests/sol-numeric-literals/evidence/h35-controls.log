@@ -1,9 +1,0 @@
-word table: 98 fixed words, 439 prefix proofs, 30 serial modules
-paired fixtures: 42 typed Lean rows, all spellings covered
-solc fixtures: 42 exact results, 18 accepted; 0.8.38+commit.1835d247.Emscripten.clang
-differential: 42 paired spellings, 18 exact accepted values, 5 explicit stage differences
-MOCK controls: auto-removal and concurrent exit-0 race retain failure evidence and never pass; no actual container stopped
-acceptance negative controls: 5 inventory mutations, forged completion, uncommitted input and MOCK resource-stop reporting passed
-implementation acceptance: 42 modules, 652 authored declarations, 991 kernel declarations, 32 inhabited constructors, 68 scanner controls, 42 paired fixtures
-open assignment obligations: static-gates, coordinator-registration, full-runtime-gate, immutable-handoff
-{"command": ["python3", "scripts/check-sol-numeric-literals.py", "--implementation", "--self-test"], "exit": 0, "seconds": 1.109682, "peak_child_rss_kib": 180932, "user_seconds": 0.9383769999999999, "system_seconds": 0.144212}

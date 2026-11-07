@@ -96,6 +96,7 @@ else
   # Merge pre-gates use touched mode: reject the prospective tree before builds.
   run_gate layers node scripts/check-layers.mjs
   run_gate private-paths bash scripts/check-private-paths.sh
+  run_gate evidence-files bash scripts/check-evidence-files.sh
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
