@@ -58,6 +58,30 @@ class CreditRefusals(unittest.TestCase):
                     '\n'.join(rows).replace('propext','sorryAx'),'\n'.join(rows).replace(m.PREFIX,'Foreign.')]:
             with self.subTest(bad=bad),self.assertRaises(ValueError):m.parse_axioms(bad)
 
+    def test_copy_reused_object_refusals(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);src=root/'parent.olean';dst=root/'library/Solidity/A.olean'
+            src.write_bytes(b'authenticated-object');digest=m.check.sha(src);protected={}
+            m.copy_parent_object(src,dst,digest,protected)
+            self.assertEqual(dst.read_bytes(),src.read_bytes())
+            self.assertEqual(protected[str(dst)],digest)
+            src.write_bytes(b'substituted')
+            with self.assertRaises(ValueError):m.copy_parent_object(src,dst,digest,{})
+            src.unlink()
+            with self.assertRaises(OSError):m.copy_parent_object(src,dst,digest,{})
+
+    def test_selected_suite_names_and_axioms(self):
+        credit=m.SUITES['credit'];self.assertEqual(credit['source'],m.SOURCE)
+        self.assertEqual(credit['names'],m.NAMES);self.assertEqual(credit['interfaces'],m.INTERFACES)
+        capture=m.SUITES['capture-failures']
+        self.assertEqual(len(capture['interfaces']),4)
+        self.assertEqual(len(set(capture['interfaces'])),4)
+        rows=["'"+capture['prefix']+n+"' does not depend on any axioms" for n in capture['names']]
+        self.assertEqual(len(m.parse_axioms('\n'.join(rows),capture['prefix'],capture['names'])),9)
+        for bad in ['\n'.join(rows[:-1]),'\n'.join(rows+[rows[0]]),
+                    '\n'.join(rows).replace(capture['prefix'],m.PREFIX)]:
+            with self.assertRaises(ValueError):m.parse_axioms(bad,capture['prefix'],capture['names'])
+
     def test_retained_parent_digest(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'receipt.json';path.write_bytes(b'admitted');digest=m.check.sha(path)

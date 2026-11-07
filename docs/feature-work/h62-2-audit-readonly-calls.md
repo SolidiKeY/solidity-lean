@@ -550,3 +550,55 @@ reserve,no swap; passing KeySort evidence is retained in the admitted parents.
 No original statement, definition, premise, exclusion, axiom or budget changed;
 no new sorry/native_decide. Evidence and handoff are under
 `/workspace/h62-audit-readonly-calls/credit-joints/`.
+
+
+## Joint actual capture-failure inputs (2026-11-07)
+
+Four original CaptureFailures laws now have closed simultaneous witnesses:
+target_failed, value_failed, arguments_failed and code_rejected. The conjunctions
+include the declaration signature, integer validity when required, every actual
+phase run and the rejection guard. The code-rejection witness evaluates arguments
+from before to after; encoding, lookup and rejection all use after. Its client
+preserves the local mutation while adding no callee events. The three timeout
+clients preserve timeout and their exact state. Nine supplementary theorems
+discharge four original input-feasibility obligations, with no compiler-success,
+EVM, gas/fork, constructor-reachability or physical-frame adequacy claim.
+
+The existing credit checker now selects one fixed suite; its default credit path
+is preserved. Frozen capture checking reconstructs the exact C6 import graph,
+compiles 11 missing unheld modules and copies 54 reused objects into one private
+namespace after checking authenticated source/object pins. All 58 parent objects
+are verified before and after. A first sparse-root attempt failed because Lean
+selected a partial namespace; finder and skeptic independently identified that
+issue. The corrected complete namespace retains copied object hashes. An
+explicit intrinsic Vals address type fixed an elaboration ambiguity; neither
+failure is reported as a pass. No historical held Premises workload was run.
+
+Final frozen checking passed in 21.101 seconds at 818544640 bytes peak aggregate
+RSS; separate current checking passed in 8.079 seconds at 797831168 bytes, reusing
+its authenticated 80-object parent. Default credit checking passed in 4.527
+seconds at 791777280 bytes. These are bounded gate measurements, not a matched
+before/after build comparison or a release of the +80.254966536% STOP. The nine
+capture axiom sets contain only propext, Classical.choice and Quot.sound. Actual
+tools are Lean 4.24.0 / Lake 5.0.0-src+797c613; passing KeySort prerequisite
+remains in the admitted parent evidence. All checks ran serially with -j1,
+12 GiB cap, 4 GiB reserve and no swap. Artifact reuse is not a fresh closure
+rebuild or independent SDK source certification; frozen/current model definitions
+are not asserted equal.
+
+Eight external refusal controls and five census tests pass. Independent read-only
+finder and skeptic confirmed the fixed namespace and exactly four-row coverage
+addition; neither executed Lean or wrote files. All 792 original rows remain:
+33 joint, 3 target-failure joint, 45 checked impossibility, 256 no-top-level-input,
+2 frozen-V1-refuted migration and 453 ordinary pending. The other 788 records
+retain prior evidence; three current private identities remain unmatched. The
+strict original source census separately reports 751 pending because it does
+not replay the full semantic classification. Ten raw evidence hashes are in
+`tests/h62/item1/readonly-bind/capture-joints.sha256`.
+
+Raw gates, sources, objects, failed attempts, census and handoff are under
+`/workspace/h62-audit-readonly-calls/capture-joints/`. No original statement,
+dependent definition, premise, exclusion, axiom or budget changed; no new
+sorry/native_decide. Full original/inherited acceptance and RO G42.02 execution
+plus source/callee and physical-frame correspondence remain open. No runtime
+pass, goal completion, publication or master merge is claimed.
