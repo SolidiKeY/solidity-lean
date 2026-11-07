@@ -3242,6 +3242,7 @@ import Solidity.Lowering.G19.WhileReturnControls
 import Solidity.Lowering.P8.CheckedFrontendAdmission
 import Solidity.Lowering.P8.CheckedSyntax
 import Solidity.Lowering.P8.ConditionalAssembly
+import Solidity.Lowering.P8.ConditionalAssemblyV2
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.P8.DeclarationGraphAdmissionV2
 import Solidity.Lowering.P8.DeclarationGraphCheck
