@@ -29,7 +29,8 @@ theorem mapM_lift_run {α β : Type} (xs : List α) (decode : α → R β)
 unchanged state, or one fresh typed array is installed after all elements
 have decoded. No desired run or allocation is a premise. -/
 theorem cdToMem_array_run (F : Fr) (σ : STy) (offset length : Nat)
-    (before : EMState E Γ) :
+    (before : EMState E Γ)
+    (plain : ∀ e m, σ ≠ .array .memory e (some m) := by intro _ _ h; cases h) :
     (cdToMem F (.array .memory σ none) offset length).run before =
       match (List.range length).mapM (fun j =>
         decodeWord E.layout (cdWordAt F (offset+32*j)) σ) with
@@ -51,20 +52,22 @@ retains the original halt, locals, heap, world and execution observations. -/
 theorem cdToMem_array_failure (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) (halt : Halt)
     (validation : (List.range length).mapM (fun j =>
-      decodeWord E.layout (cdWordAt F (offset+32*j)) σ) = .error halt) :
+      decodeWord E.layout (cdWordAt F (offset+32*j)) σ) = .error halt)
+    (plain : ∀ e m, σ ≠ .array .memory e (some m) := by intro _ _ h; cases h) :
     (cdToMem F (.array .memory σ none) offset length).run before =
       (.error halt,before) := by
-  rw [cdToMem_array_run,validation]
+  rw [cdToMem_array_run F σ offset length before plain,validation]
 
 /-- Every protected old cell is retained on both validation outcomes. The
 proof derives the allocated heap from the real run, without MemOK or an
 assumed preservation certificate. -/
 theorem cdToMem_array_old_cell (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) (address : Nat)
-    (old_address : address ≠ before.2.heap.next) :
+    (old_address : address ≠ before.2.heap.next)
+    (plain : ∀ e m, σ ≠ .array .memory e (some m) := by intro _ _ h; cases h) :
     ((cdToMem F (.array .memory σ none) offset length).run before).2.2.heap.get address =
       before.2.heap.get address := by
-  rw [cdToMem_array_run]
+  rw [cdToMem_array_run F σ offset length before plain]
   cases (List.range length).mapM (fun j =>
     decodeWord E.layout (cdWordAt F (offset+32*j)) σ) with
   | error halt => rfl

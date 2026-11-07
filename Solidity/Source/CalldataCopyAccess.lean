@@ -89,7 +89,8 @@ theorem cdToMem_array_read_run (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) {values : List (Val E.layout σ)}
     (validation : (List.range length).mapM (fun j =>
       decodeWord E.layout (cdWordAt F (offset+32*j)) σ) = .ok values)
-    (index : Fin length) :
+    (index : Fin length)
+    (plain : ∀ e m, σ ≠ .array .memory e (some m) := by intro _ _ h; cases h) :
     ∃ bound : index.val < values.length,
       values.length = length ∧
       decodeWord E.layout (cdWordAt F (offset+32*index.val)) σ = .ok (values.get ⟨index.val,bound⟩) ∧
@@ -106,7 +107,7 @@ theorem cdToMem_array_read_run (F : Fr) (σ : STy) (offset length : Nat)
   simp only [List.getElem_range] at position
   refine ⟨bound,size,position,?_⟩
   rw [Hoare.run_bind]
-  simp only [cdToMem_array_run,validation]
+  simp only [cdToMem_array_run F σ offset length before plain,validation]
   exact readLoc_alloc_array_run F σ values before ⟨index.val,bound⟩
 
 /-- Reading outside a successfully copied array panics on the grown heap;
@@ -129,11 +130,12 @@ original caller state, contrasting with a post-copy bounds failure. -/
 theorem cdToMem_array_read_failure (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) (index : Nat) (halt : Halt)
     (validation : (List.range length).mapM (fun j =>
-      decodeWord E.layout (cdWordAt F (offset+32*j)) σ) = .error halt) :
+      decodeWord E.layout (cdWordAt F (offset+32*j)) σ) = .error halt)
+    (plain : ∀ e m, σ ≠ .array .memory e (some m) := by intro _ _ h; cases h) :
     ((do let _ ← cdToMem F (.array .memory σ none) offset length
          readLoc F (.mem (τ := σ) before.2.heap.next index)) : EM E Γ _).run before =
       (.error halt,before) := by
-  rw [Hoare.run_bind,cdToMem_array_failure F σ offset length before halt validation]
+  rw [Hoare.run_bind,cdToMem_array_failure F σ offset length before halt validation plain]
 
 /-- The requested length, derived from actual validation, determines the
 post-copy bounds check. The copy remains installed on its original heap. -/
@@ -141,14 +143,15 @@ theorem cdToMem_array_read_out_run (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) {values : List (Val E.layout σ)}
     (validation : (List.range length).mapM (fun j =>
       decodeWord E.layout (cdWordAt F (offset+32*j)) σ) = .ok values)
-    (index : Nat) (outside : length ≤ index) :
+    (index : Nat) (outside : length ≤ index)
+    (plain : ∀ e m, σ ≠ .array .memory e (some m) := by intro _ _ h; cases h) :
     ((do let _ ← cdToMem F (.array .memory σ none) offset length
          readLoc F (.mem (τ := σ) before.2.heap.next index)) : EM E Γ _).run before =
       (.error (.revert (panicData .index)),
         ((cdToMem F (.array .memory σ none) offset length).run before).2) := by
   have size : values.length = length := cdToMem_array_length F σ offset length validation
   rw [Hoare.run_bind]
-  simp only [cdToMem_array_run,validation]
+  simp only [cdToMem_array_run F σ offset length before plain,validation]
   exact readLoc_alloc_array_out_run F σ values before index (size ▸ outside)
 
 end Solidity.Source
