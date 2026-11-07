@@ -1,0 +1,52 @@
+{
+  "scope": "Complete24 RewritePast.Merge roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1215,
+    "pending": 4068,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/shadow-merge-roles-v98/evidence.tar.gz",
+      "bytes": 314783,
+      "sha256": "a9971bdf3d378935de5259e24c21eb5e1bfa4a1259c65139c73918d7867a2ab3"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/shadow-merge-roles-v98/inputs.json",
+      "bytes": 771,
+      "sha256": "d47647e6966bdf62028db68c4be13e936254e48ba45479046266ba18d7d00bee"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/shadow-merge-roles-v98/gates.json",
+      "bytes": 2812,
+      "sha256": "1c35cb7896301298dcd63aaf702288ebe41f78bf68540ac17e132057ab59190c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/shadow-merge-roles-v98/reviews.md",
+      "bytes": 1206,
+      "sha256": "79272b5d3378e53339c47f9ef26478d40adcfe5c6dd30788beee382724ffb2dd"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/shadow-merge-roles-v98/case-rosters.json",
+      "bytes": 2207,
+      "sha256": "b691e5c8d15a4058d1e976d90e0b9465949f99bac4aa479b52b21492a684bb92"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/shadow-merge-roles-v98/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "3f5f0779620b4f8c2c12fc33b304012b3e7786210f799ab918e7a81423b939ba"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/shadow-merge-roles-v98/external-retention.json",
+      "bytes": 313515,
+      "sha256": "9cbb423f1a5c6d85118c72248787f94d929adffd499dd8b4db7834fb3d960e7b"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/shadow-merge-roles-v98/semantic-roles-reviewed.json",
+      "bytes": 3245485,
+      "sha256": "1a83ea6af06f3295a2e4cd2985df9628e0a1650cb142c8faa95f4adfcf1ecfb2"
+    }
+  ]
+}
