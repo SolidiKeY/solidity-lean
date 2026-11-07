@@ -109,3 +109,50 @@ and before/after timing confirmation on the final tree remain open. Prior
 paired timings cover the text-identical overlay; they exclude initial Hoare build
 cost. No statement, premise, definition body, proof budget or exclusion was
 intentionally changed. See the checksum manifest in the VM evidence handoff.
+
+
+## Checked source-statement replacements for the three removed private helpers
+
+The additive `private_mapping.py` pins the original792-record census and selects
+exactly CapturePhases, CaptureFailures and EnvironmentCredit's private run_bind
+statements. It preserves their complete signatures and variable contexts, then
+generates three public audit adapters proved by `Solidity.Source.Hoare.run_bind`.
+The concrete common input tuple proves parameter-domain satisfiability only;
+it is not an actual capture-phase, compiler-success or Source-adequacy witness.
+No production source, private identity, registration root or axiom pin is edited.
+
+The first absence assertion failed: the normal cached environment contained the
+old private identities for CapturePhases and CaptureFailures even though their
+current source no longer declares them. That failure is retained. The revised
+check records this cached view separately and rebuilds the exact current three
+files plus Source.Hoare in an isolated library; all three old identities are
+absent there. The cached/source disagreements are binding refusals, not evidence
+that production source restored those names. Both views export five exact types
+(three adapters, shared law, parameter-domain witness); source, query, helper,
+module objects, process logs and manifest are rechecked before sealing.
+
+The final bounded check passed in10.057s with774299648bytes peak aggregate RSS.
+Nine unit controls cover original membership, intrinsic-context mutation,
+namespace/visibility/context drift, non-restoration and missing/foreign/new axiom
+records. All five observed axiom sets are exactly propext, Classical.choice and
+Quot.sound. Compiler/version/toolchain are recorded; actual tools remain
+Lean4.24.0 and Lake5.0.0-src+797c613. No sorry, new axiom, native_decide or proof
+budget change. Existing workflow timings are observations, not matched speed
+comparisons; no historical timing STOP or full-runtime gate is cleared.
+
+Finder/skeptic review fixed two assurance gaps: the shared law is now compiled
+freshly too, and axiom output is checked rather than merely printed. Other
+project/SDK dependencies still come from the cached environment and are not
+independently source-bound here. This is a four-file controlled compilation and
+imported-law replacement check, not full current-source certification. Original
+private identities remain unavailable in that view; all792 original obligations,
+three private mappings and the full inherited queue stay pending where required.
+Exact original raw types use distinct generated private matcher names; they are
+not normalized or asserted identical to the shared theorem's raw type. Evidence
+and portable reproduction data are on the original VM under
+`/workspace/h62-audit-readonly-calls/private-bind-mapping/`.
+
+The global documentation gate currently fails on two inherited synthetic fixture
+references in another chain's tests/h62/item2/audit-evm-compiler/check_scope.py.
+That file is byte-identical to current master; it was not edited here. Whitespace
+checks pass. The documentation failure remains an outstanding global gate.
