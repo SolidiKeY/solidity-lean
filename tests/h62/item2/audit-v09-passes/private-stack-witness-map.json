@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface_path": "Solidity/Backend/Passes/Stack.lean",
+  "interface_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+  "witness_module": "tests/h62/item2/audit-v09-passes/PrivateStackPremiseWitness.lean",
+  "covered_premise_bundles": [
+    {
+      "name": "Solidity.Backend.Passes.allocation_stack",
+      "visibility": "private",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Stack.lean",
+      "line": 19,
+      "character_span": [
+        538,
+        785
+      ],
+      "signature": "private theorem allocation_stack {cost : Nat} {\u03c3 : State C \u0393}\n    {base : Nat \u2192 Fin W} {m : Machine}\n    (h : Memory.AllocationInput b frame cost \u03c3 base m) (tail : List Word) :\n    Memory.AllocationInput b frame cost \u03c3 base {m with stack := tail}",
+      "signature_sha256": "7937e63ea3efcd3e72a8433ad6ddeea2f8adb651beace989987dc0e86081230a",
+      "source_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditPrivateStack.joint",
+      "witness_status": "kernel_checked_concrete_source_signature_premise_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "identity_limit": "Resolved actual imported constant; anonymous type checks match original premise/conclusion types. No public theorem alias or original visibility change; full census remains open.",
+      "kernel_identity": "_private.Solidity.Backend.Passes.Stack.0.Solidity.Backend.Passes.allocation_stack",
+      "kernel_name_components": {
+        "module_private_prefix": "_private.Solidity.Backend.Passes.Stack",
+        "numeric_component": 0,
+        "source_namespace": "Solidity.Backend.Passes",
+        "declaration": "allocation_stack"
+      },
+      "kernel_type_check": "tests/h62/item2/audit-v09-passes/PrivateStackKernelIdentityChecks.lean",
+      "kernel_axioms": [
+        "propext",
+        "Quot.sound"
+      ],
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.object_allocation_stack",
+      "visibility": "private",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Stack.lean",
+      "line": 27,
+      "character_span": [
+        897,
+        1167
+      ],
+      "signature": "private theorem object_allocation_stack {cost : Nat} {\u03c3 : State C \u0393}\n    {base : Nat \u2192 Fin W} {m : Machine}\n    (h : Memory.Objects.AllocationInput b frame cost \u03c3 base m) (tail : List Word) :\n    Memory.Objects.AllocationInput b frame cost \u03c3 base {m with stack := tail}",
+      "signature_sha256": "a81d29dd828d99b48e248ce46b953f0fc3e85093a8999109f608a459034e0250",
+      "source_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditPrivateStack.joint",
+      "witness_status": "kernel_checked_concrete_source_signature_premise_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "identity_limit": "Resolved actual imported constant; anonymous type checks match original premise/conclusion types. No public theorem alias or original visibility change; full census remains open.",
+      "kernel_identity": "_private.Solidity.Backend.Passes.Stack.0.Solidity.Backend.Passes.object_allocation_stack",
+      "kernel_name_components": {
+        "module_private_prefix": "_private.Solidity.Backend.Passes.Stack",
+        "numeric_component": 0,
+        "source_namespace": "Solidity.Backend.Passes",
+        "declaration": "object_allocation_stack"
+      },
+      "kernel_type_check": "tests/h62/item2/audit-v09-passes/PrivateStackKernelIdentityChecks.lean",
+      "kernel_axioms": [
+        "propext",
+        "Quot.sound"
+      ],
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.object_state_stack",
+      "visibility": "private",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Stack.lean",
+      "line": 35,
+      "character_span": [
+        1279,
+        1517
+      ],
+      "signature": "private theorem object_state_stack {\u03c3 : State C \u0393}\n    {base : Nat \u2192 Fin W} {m : Machine}\n    (h : Memory.Objects.StateRepr L b frame F \u03c3 base m) (tail : List Word) :\n    Memory.Objects.StateRepr L b frame F \u03c3 base {m with stack := tail}",
+      "signature_sha256": "51c1a5bd32b4a7954db2deb223ab03cba711751f461eb0670578bd0480910135",
+      "source_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditPrivateStack.joint",
+      "witness_status": "kernel_checked_concrete_source_signature_premise_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "identity_limit": "Resolved actual imported constant; anonymous type checks match original premise/conclusion types. No public theorem alias or original visibility change; full census remains open.",
+      "kernel_identity": "_private.Solidity.Backend.Passes.Stack.0.Solidity.Backend.Passes.object_state_stack",
+      "kernel_name_components": {
+        "module_private_prefix": "_private.Solidity.Backend.Passes.Stack",
+        "numeric_component": 0,
+        "source_namespace": "Solidity.Backend.Passes",
+        "declaration": "object_state_stack"
+      },
+      "kernel_type_check": "tests/h62/item2/audit-v09-passes/PrivateStackKernelIdentityChecks.lean",
+      "kernel_axioms": [
+        "propext",
+        "Quot.sound"
+      ],
+      "original_census_membership": false
+    }
+  ],
+  "scope": "Same empty object heap/state/machine/base, cursor16/frame8/cost1/arbitrarytail premise witnesses remain independent. Three actual private kernel identities now enumerated and exact original types checked anonymously. No private original edit or public theorem alias; broader heaps/full census open.",
+  "join": "Nineteen distinct supplemental interface rows across these maps. None belongs to the original179-file/1259-row selection; all1259 selected rows remain uncovered by these fixtures. Prior subtraction counts withdrawn.",
+  "original_census_accounting": {
+    "selected_files": 179,
+    "selected_rows": 1259,
+    "covered_selected_rows_by_this_map": 0,
+    "remaining_selected_rows": 1259,
+    "classification": "supplemental interfaces, not selected census members"
+  }
+}

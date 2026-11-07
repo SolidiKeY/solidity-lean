@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "held_head": "2e1dd272c6d89d5883956791a26315bf0a67bc0b",
+  "selected_rows": 225,
+  "remaining_selected_rows": 1034,
+  "files": [
+    {
+      "repository_path": "tests/h62/item2/audit-v09-passes/SelectedHeapBoundaryWitness.lean",
+      "path": "SelectedHeapBoundaryWitness.lean",
+      "bytes": 147909,
+      "sha256": "962b015c9277bb722c654edde3a4655e0eac135c8df4d22d3405ffc893432446"
+    },
+    {
+      "repository_path": "tests/h62/item2/audit-v09-passes/selected-heap-witness-map.json",
+      "path": "selected-heap-witness-map.json",
+      "bytes": 447989,
+      "sha256": "4fb965d3d0e4cbde800ef330b7083d01df0f097b33e0249e66ea6c2682aea1e5"
+    }
+  ],
+  "unfinished_draft": {
+    "path": "SelectedHeapBoundaryWitness.joined-draft.lean",
+    "bytes": 149844,
+    "sha256": "78a141f4d65e9fdbcf71ab72fe0b3716e35dd6c3c594c5bc98fadf9ed87a719a",
+    "status": "preserved separately; not part of held checkpoint"
+  },
+  "artifact_root_environment": "VY3_AUDIT_ARTIFACTS",
+  "default_artifact_root": ".audit-artifacts/selected-heap",
+  "acceptance_command": "python3 scripts/h62/item2/audit-v09-passes/selected_heap_artifacts.py --acceptance"
+}
