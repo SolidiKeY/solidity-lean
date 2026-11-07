@@ -1,0 +1,105 @@
+{
+ "schema": 1,
+ "authorization": "H44",
+ "final_run": "final-8fad7b13",
+ "source_commit": "975212915ff7b3016248c4bbc20a68c8bb9db515",
+ "files": {
+  "tests/h28-sol/mutation-testing/manifests/h28-final.json": {
+   "bytes": 399798,
+   "sha256": "fc4727c54b5e2536295f4088e1706c2b587c4ae6796ddd068e752a554a35daa7",
+   "regenerate": "python3 tests/h28-sol/mutation-testing/tools/freeze_final.py"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-8fad7b13-checks-full.tar.gz": {
+   "bytes": 217157,
+   "sha256": "2e83c46d142ef8d59690ae7bdb386fe6dbe1e1fb8e6ce291b4bf657cf8e762c1"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-8fad7b13/checks.jsonl": {
+   "bytes": 1025048,
+   "sha256": "67794a1682dd9ac08f639c463f5781da1775675a37423003724045a97803ea68"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-aa39f4cd-checks-full.tar.gz": {
+   "bytes": 201304,
+   "sha256": "5b89aefa032feb7874dc6da076bdecd9682d18433cb4e96c397e38e34e13e582"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-aa39f4cd/acceptance.json": {
+   "bytes": 2754,
+   "sha256": "2f6239444a0a99f0ea5bb01855f5119e8072acf2968c54e28a3a4168574d384d"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-aa39f4cd/checks.jsonl": {
+   "bytes": 980309,
+   "sha256": "b90a01054e2d447ebb7056f300759a9950c4bc55d9a5ff08696035a26356a7f3"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-aa39f4cd/summary.json": {
+   "bytes": 55232,
+   "sha256": "30d5051529270a7a49cb7d7cd93e9b863df24e4fc2392e55a6fbc13396da20c2"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ae55acdb-checks-full.tar.gz": {
+   "bytes": 216301,
+   "sha256": "5395e85d1f1977d05954d3bad0e94aa940ef734792e6bbe049d05131b181ee4c"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ae55acdb/acceptance.json": {
+   "bytes": 3464,
+   "sha256": "3bdd0406b2d0d5aa8c55b8206523f32b4c1a0d3204558c31cbf59e0012b3c7c2"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ae55acdb/checks.jsonl": {
+   "bytes": 1025048,
+   "sha256": "befbec73dabaca257fd4606aeea8bf452da7461814669553294ac55c9deb5e88"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ae55acdb/seal.json": {
+   "bytes": 22971,
+   "sha256": "2de697db3df1e8ddc5429ac50c6377e2c758515aa7d2cd91d6cac848d7641efc"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ae55acdb/summary.json": {
+   "bytes": 58929,
+   "sha256": "5f4c581505b6e6f110e2c3ff8ffed2999526d63b96d6330bb446b79d8ab55ddf"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ff85b708-checks-full.tar.gz": {
+   "bytes": 208062,
+   "sha256": "26e52bed58c2a96ad909140e9fd8d95713b6f4299b0094da358974bef67727ed"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ff85b708/acceptance.json": {
+   "bytes": 2513,
+   "sha256": "cf46460faa3b89f8829e75d00d5a2d991f2386e71897dfd4dff0064513a9285b"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ff85b708/checks.jsonl": {
+   "bytes": 979493,
+   "sha256": "2bef47c7149cda08f0a5e5ef7b0ff5bad6788e14fcad48fffd9b374f956808ae"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ff85b708/seal.json": {
+   "bytes": 14330,
+   "sha256": "48babdc32cb1f877b2744ac24232409d5a966fbd25ccdbd0e9126ac4a9717bb7"
+  },
+  "tests/h28-sol/mutation-testing/runs/final-ff85b708/summary.json": {
+   "bytes": 55212,
+   "sha256": "d4cbc88e17b1e55ea95f9483c1e019e88fb73e5a63afeb6a467d32f53737977a"
+  },
+  "tests/h28-sol/mutation-testing/runs/full-20d7b77c-checks-full.tar.gz": {
+   "bytes": 132629,
+   "sha256": "91b8b50b435166811a87727b89b74a89f8919555c8d0bca52e81ec9884ecabb0"
+  },
+  "tests/h28-sol/mutation-testing/runs/full-20d7b77c/checks.jsonl": {
+   "bytes": 646225,
+   "sha256": "89f40c5a8aeb9d203ce968bdfcf70952618578a570552b9f0da6e4d7177c8c0e"
+  },
+  "tests/h28-sol/mutation-testing/runs/full-20d7b77c/dispositions.json": {
+   "bytes": 74460,
+   "sha256": "4ef6dfb47560a310fdae40a7f69be4c7d1b24d748223c96490743ac109bf98df"
+  },
+  "tests/h28-sol/mutation-testing/runs/full-20d7b77c/summary.json": {
+   "bytes": 35066,
+   "sha256": "191c48ba9472488f1f9149daddefc8d9ef4c16fca494b3a5f300f2d2d3ea7571"
+  },
+  "tests/h28-sol/mutation-testing/runs/full-91c9631d-checks-full.tar.gz": {
+   "bytes": 119286,
+   "sha256": "a58bb44bc602cb674b9e1307a2a40110af9b0f764b61ee7ea3237f09d86fc038"
+  },
+  "tests/h28-sol/mutation-testing/runs/full-91c9631d/checks.jsonl": {
+   "bytes": 645851,
+   "sha256": "5e7762779e3b8fd7b65869dbf36d8d319de612ee7e461af516ca76d505281731"
+  },
+  "tests/h28-sol/mutation-testing/runs/full-91c9631d/summary.json": {
+   "bytes": 35083,
+   "sha256": "d0424d4648d2be4cd41717216ff7a7324c4ae3c61c715cb4cbe36f475a69622d"
+  }
+ }
+}
