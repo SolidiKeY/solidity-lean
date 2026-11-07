@@ -2368,3 +2368,24 @@ none changed or removed since the preceding snapshot. Independent read-only find
 and skeptic checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/backend-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Automation migration probe observations
+
+`automation_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ContextInterface
+checks original context signatures and inhabited caller/option controls; its
+handoff reports historical old and new passes. SyntaxControls covers positive
+syntax forms and malformed argument parser refusals; its handoff reports an old
+pass and a blocked new-toolchain import. Parser compatibility does not establish
+tactic-owner proof or refusal semantics. Current invocation, inputs, effects
+and outcomes remain unresolved; this is supplied-subset evidence.
+
+At `1c0eedf852f39e24e36f5d00ebce286ba7b7e834`, the refreshed static index
+has 790 candidates, 588 with supplied current references and 202 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. The
+skeptic requested the historical toolchain asymmetry above; the regenerated
+artifact and index linkage were rechecked. Evidence hashes are in
+`tests/h55/module-times/automation-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
