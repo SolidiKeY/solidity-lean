@@ -1,0 +1,279 @@
+{
+  "guardedRegression": "H77 fixed-byte recipient inspection cannot establish newer address or whole-goal qualification",
+  "inputs": {
+    "handoff.json": {
+      "path": "/workspace/solidity-lean/.lake/native-browser-fixed-byte-handoff-14a39effa376/handoff.json",
+      "sha256": "bdb1e6be68f21b6b98f4ac54385df5d0673b0635a0b3b412354a4a7b1aa970f9"
+    },
+    "evidence.tar.gz": {
+      "path": "/workspace/solidity-lean/.lake/native-browser-fixed-byte-complete/handoff-data/evidence.tar.gz",
+      "sha256": "9ec59168adb64fe764467dbff35950b9a625dd576d5a8e31efe42db3a79c6cb9"
+    },
+    "runtime-artifacts.tar.gz": {
+      "path": "/workspace/solidity-lean/.lake/native-browser-fixed-byte-complete/handoff-data/runtime-artifacts.tar.gz",
+      "sha256": "4ab29eebeeaa5e25fa354fc62712a4957be79212898eb6b457de8873abe1c2f1"
+    },
+    "evidence-files.json": {
+      "path": "/workspace/solidity-lean/.lake/native-browser-fixed-byte-complete/handoff-data/evidence-files.json",
+      "sha256": "dbe64cffacae9b1f8c319e423fa53c0b97b5ac131af38e3e7dda95037864d5ea"
+    },
+    "runtime-files.json": {
+      "path": "/workspace/solidity-lean/.lake/native-browser-fixed-byte-complete/handoff-data/runtime-files.json",
+      "sha256": "a798598d86f5ba94876e09f6a5824005e49c7da9c0a8d34194c4ab06dc45acce"
+    }
+  },
+  "ownerHead": "14a39effa3766c898e0cc2a8e291ff1732e3e2e2",
+  "sourceBuildHead": "1b2bdb490054293c86cddb5e4b7fa15736bae25b",
+  "producerHead": "2738af99661d7ba582c92519b20d47bcba34a5a4",
+  "evidencePayloadsVerified": 875,
+  "runtimePayloadsVerified": 5,
+  "gitSourceModulesVerified": 343,
+  "producerExecutableBoundaryVerified": [
+    "Solidity.Frontend.ExecutableAst.ControlTuple.Adapter",
+    "Solidity.Frontend.ExecutableAst.Memory.Reader",
+    "Solidity.Frontend.ExecutableAst.Shared.Boundary",
+    "Solidity.Frontend.ExecutableAst.Shared.Compose",
+    "Solidity.Frontend.ExecutableAst.Shared.Intrinsic",
+    "Solidity.Frontend.ExecutableAst.Shared.Scope",
+    "Solidity.Frontend.ExecutableAst.Shared.Translate",
+    "Solidity.Tools.DirectRuntime"
+  ],
+  "completeProducerTreeCompared": false,
+  "nativeSha256": "59a565d30e7ba7d6256d0cc31389e8fad654e2a14ae45edac02f339d291aa267",
+  "wasmSha256": "428e856e9f448337e980678fd07d67e77c6cec72eab2c122d637163da34dbd67",
+  "observations": {
+    "box-controls": {
+      "requestsPerBackend": 11,
+      "savedWireAndResultParity": true,
+      "statuses": {
+        "proved": 7,
+        "refuted": 2,
+        "unsupported": 2
+      }
+    },
+    "diamond-controls": {
+      "requestsPerBackend": 11,
+      "savedWireAndResultParity": true,
+      "statuses": {
+        "proved": 7,
+        "refuted": 2,
+        "unsupported": 2
+      }
+    },
+    "A-controls": {
+      "requestsPerBackend": 9,
+      "savedWireAndResultParity": true,
+      "statuses": {
+        "proved": 7,
+        "refuted": 2
+      }
+    },
+    "B-controls-authenticated": {
+      "requestsPerBackend": 84,
+      "savedWireAndResultParity": true,
+      "statuses": {
+        "proved": 64,
+        "refuted": 16,
+        "pending": 4
+      }
+    },
+    "C-controls": {
+      "requestsPerBackend": 14,
+      "savedWireAndResultParity": true,
+      "statuses": {
+        "proved": 10,
+        "unsupported": 4
+      }
+    },
+    "functional83": {
+      "requestsPerBackend": 83,
+      "savedWireAndResultParity": true,
+      "statuses": {
+        "proved": 83
+      }
+    }
+  },
+  "savedGateReceipts": [
+    {
+      "member": "amended-source/A-controls-gate.json",
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/B-controls-authenticated-gate.json",
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/h81-memory-controls.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/B-kernel-gate.json",
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte/B-kernel-controls.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/C-controls-gate.json",
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/box-controls-gate.json",
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/browser-negatives-gate.json",
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/browser-control-completion.cjs"
+      ],
+      "exitCode": 1
+    },
+    {
+      "member": "amended-source/closure-gate.json",
+      "command": [
+        "python3",
+        ".lake/native-browser-fixed-byte-complete/closure-audit.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/diamond-controls-gate.json",
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/finite-gate.json",
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte/finite-gate.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/functional83-gate.json",
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/primitive-return/functional83.mjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/keys-gate.json",
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte/keys.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/marker-gate.json",
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte-complete/marker-gate.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/mcp-gate.json",
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte-complete/mcp.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/native-build-gate.json",
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/hardening-native-build.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/native-negatives-gate.json",
+      "command": [
+        "python3",
+        ".lake/native-browser-fixed-byte-complete/native-negatives.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/package-gate.json",
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte-complete/browser-build.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/ui-gate.json",
+      "command": [
+        "node",
+        "web/test/website.cjs",
+        "--single",
+        "--proofs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/units-gate.json",
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/hardening-validation.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "member": "amended-source/wasm-build-gate.json",
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-fixed-byte-complete/wasm-build.sh"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "mandatorySavedIdentityCases": [
+    "identity.box.ir",
+    "identity.box.non-ir",
+    "identity.diamond.ir",
+    "identity.diamond.non-ir"
+  ],
+  "selectedInventoryRecords": 206,
+  "actualSelectedObjectBytesVerified": false,
+  "retainedBrowserFailure": {
+    "name": "invariantCountsToBound",
+    "message": "Maximum call stack size exceeded",
+    "framesWithinActualWasmBodies": 10
+  },
+  "reportedCostStops": {
+    "originalNativeMedianPercent": 21.32,
+    "originalBrowserStartupPercent": 32.2,
+    "initialNativeBuildWallSeconds": 371.14980405399547,
+    "priorNativeBuildWallSeconds": 294.2579444309995,
+    "initialBuildIncreasePercent": 26.13076760652298,
+    "comparisonBoundary": "Empty native-output builds with applicable Lean invalidations; not fully cold toolchain/machine or matched-causal comparison. SliceCopy source/generatedC equal; cause unestablished. Conservative STOP retained.",
+    "amendedNativeBuild": "30.5173s incremental reused content-addressed objects/new link,not cost recovery; fresh WASM recompiles because output include path differs.",
+    "timingReruns": "No unchanged stopped benchmark rerun; matched3round final acceptance remains pending owner repairs."
+  },
+  "runtimeGatePass": false,
+  "execution": false,
+  "extraction": false,
+  "boundary": "Independent archive/index/Git-source/binary-manifest and saved request/result consistency inspection only. Saved receiver observations were not rerun. No compiler/source preservation, actual object-code verification, universal closure, address qualification, repair, performance acceptance or whole-goal completion."
+}

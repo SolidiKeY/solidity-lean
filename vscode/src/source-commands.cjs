@@ -65,6 +65,9 @@ function install(vscode,context,{settings,output,cancelVerification}){
   const uri=doc.uri.toString();documents.set(uri,doc);touch(uri);const epoch=epochs.get(uri),commandId=randomUUID();let version=doc.version,text=doc.getText(),job;
   const receipt=(phase,extra={})=>output.appendLine(JSON.stringify({schemaVersion:1,kind:'source-command',commandId,operation,phase,uri,version,sourceHash:digest(text),sourceSession:epoch,verification:'not-run',...extra}));
   try{
+   // The new epoch already invalidates the previous result. Retire that work
+   // before awaiting a prompt which may be cancelled without admitting a job.
+   await stop(uri);if(!isCurrent(doc,version,text,epoch))return;
    if(doc.isUntitled||!await doc.save())return;version=doc.version;text=doc.getText();let input={};
    if(operation==='buildCustomArgs'){
     const configured=settings(doc),value=await vscode.window.showInputBox({prompt:'Compiler import options as JSON (includePaths, remappings only)',value:JSON.stringify({includePaths:configured.includePaths||[],remappings:configured.remappings||[]})});if(value===undefined)return;input=buildArguments(JSON.parse(value));

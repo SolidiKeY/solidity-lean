@@ -1,0 +1,18 @@
+{
+  "status": "EXACT_THREE_STOPPED_CONTAINERS_REMOVED",
+  "receipt": {
+    "path": "/workspace/v08-world-lowering-evidence/h1-stopped-cache-containers-20261107/receipt.json",
+    "sha256": "319d1d720b932174e6d6e1fe9d9d48e8e5c316bf7ac7448e89cc57bf19d44033"
+  },
+  "archive_manifest": {
+    "path": "/workspace/v08-world-lowering-evidence/h1-stopped-cache-containers-20261107/SHA256SUMS",
+    "sha256": "95fbae5f2c9f05691011ca9040b0b507233e8433e53c098f3ca41a594a95e352"
+  },
+  "archive_bytes": 145093756,
+  "free_after_removal": 3405799424,
+  "reserve_required": 4294967296,
+  "reserve_admitted": false,
+  "scope_question": "Q-WORLD-INITIAL-BUILD",
+  "question_branch": "coord-q/codex/solidity-v07-v11-20261030/v08-world-lowering/20261107T052814Z",
+  "limitations": "Rootfs exports contain base-image symlinks: inspect inertly or restore only in isolation. Host sources, caches, images and volumes untouched; no Lean check claimed."
+}

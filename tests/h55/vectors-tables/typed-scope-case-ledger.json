@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "authorization": "VY1-RAW-H57-01 option A, gh#77",
+  "generic_module": "Solidity.Yul.RawTypedScope",
+  "theorem": "project_close",
+  "statement_sha256": "8c779a0a00047ad98441a6a1e0c70ff88df8e57eeb0e8813ce18053876933f22",
+  "coverage_scope": "Only the semantic control cases of typed one-binder close/project; not the entire Raw family.",
+  "indices": [
+    "arbitrary Source.Ctx",
+    "binder name",
+    "arbitrary Source.STy",
+    "full result/frame"
+  ],
+  "cases": [
+    {
+      "case": "Except.error halt",
+      "status": "universally handled",
+      "evidence": "halt is arbitrary Source.Halt; equality preserves the full reached world"
+    },
+    {
+      "case": "Except.ok Flow.normal",
+      "status": "handled",
+      "evidence": "restore_drop then Source.Out.up and Out.close"
+    },
+    {
+      "case": "Except.ok Flow.break_ proof",
+      "status": "handled",
+      "evidence": "restore_drop then Source.Out.up and Out.close; break retained"
+    },
+    {
+      "case": "Except.ok Flow.continue_ proof",
+      "status": "handled",
+      "evidence": "restore_drop then Source.Out.up and Out.close; continue retained"
+    },
+    {
+      "case": "Except.ok Flow.leave_ proof",
+      "status": "impossible",
+      "evidence": "Flow has function=false; contradictory leave proof eliminated, no inhabitant claimed"
+    }
+  ],
+  "limitations": [
+    "No representation or existing definition changed",
+    "No initializer producer or Source integration",
+    "Projection uses clean backups, not ordinary dirty readback",
+    "Existing close_correct coherence premise unchanged"
+  ],
+  "statement_encoding": "UTF-8 of project_close: followed by the stripped fully qualified goal in typed-scope-project-close-goal.txt",
+  "existing_close_correct_signature_sha256": "76570ec302b856004b9948e5415d8ab04fdbc7b520a73b35bec79d3dc8f5ccdf",
+  "existing_close_correct_reuse": "Original signature and coherence premise unchanged; proof delegates projection to project_close"
+}
