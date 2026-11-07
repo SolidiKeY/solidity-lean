@@ -1,3 +1,0 @@
-{"suite": "existing", "kinds": 57, "outcomes": {"decoded": 11, "refused": 26, "not-standalone": 20}}
-{"suite": "fresh-", "kinds": 57, "outcomes": {"decoded": 14, "refused": 23, "not-standalone": 20}}
-PASS 114 source-witness identities, eight fresh compiler-output hashes and two exact compiler binary pins; no semantic/backend proof claim.

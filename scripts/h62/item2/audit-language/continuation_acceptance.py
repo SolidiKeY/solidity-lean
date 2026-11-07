@@ -7,7 +7,7 @@ import copy
 import hashlib
 import json
 from pathlib import Path
-from overlay_review import review,reconstruct,fidelity,TRUSTED
+from overlay_review import review,reconstruct,fidelity,TRUSTED,receipt_patch_path
 from refine_remaining import replacement,lexical_namespaces,BASELINE_SHA256
 from classify import declaration_index
 from census import BASE,git
@@ -23,7 +23,7 @@ def reject(label,call):
  except ValueError as error:controls.append({"control":label,"status":"expected-rejection","reason":str(error)})
  else:raise AssertionError("negative control accepted: "+label)
 
-first=rows[0];path=TRUSTED[first["label"]]["path"];original=git("show",f"{BASE}:{path}");patch=Path(first["path"]).read_bytes()
+first=rows[0];path=TRUSTED[first["label"]]["path"];original=git("show",f"{BASE}:{path}");patch=receipt_patch_path(first).read_bytes()
 reject("wrong-original-blob",lambda:reconstruct(patch.replace(b"index b54c93a5b",b"index 000000000"),original,path))
 reject("wrong-postimage-blob",lambda:reconstruct(patch.replace(b"..092971eda",b"..000000000"),original,path))
 reject("context-drift-no-fuzz",lambda:reconstruct(patch.replace(b"   | cons a l ih =>",b"   | cons WRONG l ih =>",1),original,path))
@@ -36,9 +36,11 @@ reject("changed-frozen-premise",lambda:fidelity(path,original,changed))
 reject("changed-proof-budget",lambda:fidelity(path,original,original+b"\nset_option maxHeartbeats 999999\n"))
 forged=copy.deepcopy(first);forged["owner"]="invented-owner"
 reject("forged-owner-metadata",lambda:review(forged))
-transcription=Path('/workspace/h62-audit-language-evidence/h70-received/a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82-fixedpoint-received.patch')
+fixed_receipt=next(r for r in rows if r['label']=='fixedpoint')
+transcription=receipt_patch_path(fixed_receipt).with_name(TRUSTED['fixedpoint']['sha256']+'-fixedpoint-received.patch')
 if transcription.exists():
- wrong=copy.deepcopy(next(r for r in rows if r['label']=='fixedpoint'));wrong['path']=str(transcription)
+ wrong=copy.deepcopy(fixed_receipt);wrong['path']=str(transcription)
+ wrong['path_relative_to_evidence']=str(Path(fixed_receipt['path_relative_to_evidence']).with_name(transcription.name))
  reject("initial-local-transcription-not-authenticated",lambda:review(wrong))
 
 fixture={"Solidity/AST.lean":"namespace Solidity\ninductive PrimTy where\n  | bool\n  | uint\n  | int\nend Solidity\n", "Solidity/Semantics.lean":"namespace Solidity\ndef PrimTy.Denote : PrimTy → Type\n  | .bool => Bool\n  | .uint => {n : Int // True}\n  | .int => {n : Int // True}\nend Solidity\n", "wrong.lean":"namespace Other\ninductive PrimTy where\n  | uint\nend Other\n"}

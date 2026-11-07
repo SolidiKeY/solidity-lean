@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd /home/guilherme/projects/solidity-lean
+cd $REPO
 export PATH="/tmp/solidity-cloud-results-20261028/bin:$PATH"
 export LEAN_NUM_THREADS=1
 export LAKE_CACHE_DIR="$PWD/.lake/refactor-cache/cloud-integration-20261028"
 export SOLC_REFERENCE=/tmp/solidity-cloud-results-20261028/soljson-v0.8.38+commit.1835d247.js
 export SOURCE_UNITS_SOLJSON="$SOLC_REFERENCE"
-export SOLKEY_ROOT=/home/guilherme/projects/solkey
+export SOLKEY_ROOT=$SOLKEY_ROOT
 phase() {
  local name=$1; shift
  printf 'START %s %s\n' "$name" "$(date -Is)"

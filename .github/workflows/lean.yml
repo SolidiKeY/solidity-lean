@@ -35,6 +35,8 @@ jobs:
         run: |
           node --test scripts/check-trust.test.mjs
           bash scripts/check-trust.sh
+          bash scripts/check-private-paths.sh
+          bash scripts/check-evidence-files.sh
       # The examples site's recorder, against a stand-in language server
       # (`docs/site.md`; `pages.yml` runs it against Lean's).
       - name: Test the site exporter

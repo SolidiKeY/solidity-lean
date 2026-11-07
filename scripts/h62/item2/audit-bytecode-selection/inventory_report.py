@@ -16,7 +16,7 @@ from elaborated_census import TEMPLATE, manifest_sha256
 from census import BASE, declarations, mapped_paths
 
 
-OWNERSHIP_SHA256 = '7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce'
+OWNERSHIP_SHA256 = '49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe'
 
 
 def validate_pins(pins, mapped):

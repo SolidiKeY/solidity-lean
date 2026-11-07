@@ -1,5 +1,5 @@
 {
-  "status": "PROPOSAL_ONLY_NOT_REGISTERED",
+  "status": "REGISTERED_AND_CURRENT_PIN_GATE_PASS",
   "destination": "coordinator/G07",
   "request_id": "WORLD-G07-13",
   "head": "8a0d28f3a6fc1eefb3d6643efdfb32b130de0191",
@@ -71,5 +71,27 @@
   },
   "integration": "Coordinator registers exactly these two generated per-file fragments and regenerates the shared aggregate with its approved generator, then reruns the real gate. No registry file was edited here.",
   "evidence": "/workspace/v08-world-lowering-evidence/master-pin-layer-refresh-20261107",
-  "limits": "Standard existing axioms only; no statement, budget, exclusion or trust expansion. In-memory reconciliation is not a registered pin-gate pass."
+  "limits": "Standard existing axioms only; no statement, budget, exclusion or trust expansion. In-memory reconciliation is not a registered pin-gate pass.",
+  "historical_status": "PROPOSAL_ONLY_NOT_REGISTERED",
+  "publication_followup": {
+    "evidence": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/pin-registration.json",
+    "sha256": "d7ba34d376bd175878da917bdfae1a78d445f26e7121502825e022114c62ed50",
+    "master": "a648f27904600fffb2e1df165fb3389661277551",
+    "matching_fragments": [
+      {
+        "path": "scripts/g07-axiom-pins.d/tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.json",
+        "pins": 7,
+        "sha256": "ecd2400e3713e692205108673f93c84b36aca10bfa27c3ae1a98b93ff11894d8"
+      },
+      {
+        "path": "scripts/g07-axiom-pins.d/tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.json",
+        "pins": 6,
+        "sha256": "a0c612ecc16beb3ef87cea3a9884859a3e33ca03037df661c42dfab1b0368a50"
+      }
+    ],
+    "source_bindings_still_match": true,
+    "gate_exit": 0,
+    "historical_shared_inventory_sha256_retained": true
+  },
+  "historical_proposal_fields_note": "Original head, shared inventory hash, integration plan and in-memory validation describe the historical proposal. The publication_followup records actual matching registration and current gate success."
 }

@@ -1,0 +1,52 @@
+{
+  "scope": "Complete20 TermLaws Reads semantic roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1084,
+    "pending": 4199,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/member-read-roles-v91/evidence.tar.gz",
+      "bytes": 304208,
+      "sha256": "e30868b76c5d27f57e776767d82402e86594b5e644236dedcefebd162a118082"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/member-read-roles-v91/inputs.json",
+      "bytes": 1000,
+      "sha256": "1b067cdbc5f5494f702630d800867e9efebcd8ff3fa6c8baa4fc2ff673c47977"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/member-read-roles-v91/gates.json",
+      "bytes": 2833,
+      "sha256": "05ea3aebd596b9df52ef7bbbfcf7726397d2925297151ef2ced76fac3720d183"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/member-read-roles-v91/reviews.md",
+      "bytes": 549,
+      "sha256": "083d72e378dcfd384028437735e77312f6efe0773111548af3093f2f13f19a60"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/member-read-roles-v91/case-rosters.json",
+      "bytes": 1557,
+      "sha256": "a0e32d7256219d158d8e890ae1cd8613fa84792c26e5ad0f61e1d6ac5fea988b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/member-read-roles-v91/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "172330ccf963a6d392733bc6d06270ecefe668cfd8db6246fec078462beddabd"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/member-read-roles-v91/external-retention.json",
+      "bytes": 290347,
+      "sha256": "0f9ac2272abd6723665ba39f865569df9dee4dafd10e9b400152be011c5ba98a"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/member-read-roles-v91/semantic-roles-reviewed.json",
+      "bytes": 2902792,
+      "sha256": "529e5bac6e5f6f11666674f339ee04608647b1e3537805ac9c88d8463bf60b47"
+    }
+  ]
+}

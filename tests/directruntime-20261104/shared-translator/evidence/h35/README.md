@@ -1,1 +1,0 @@
-H35 evidence copies trim trailing whitespace; original raw logs/pack remain under artifacts/h35. Cache receipt is explicitly local verification, not delivery. Exact-base source copy remains ignored under artifacts/h35 and is not a production translator.

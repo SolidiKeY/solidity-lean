@@ -98,13 +98,13 @@ the repair or clear publication.
 ## Authority and retained failures
 
 The direct human answer recorded in
-`/home/guilherme/.local/state/codex-solidity-feature-monitor/decisions/20261101-approved-pure-external-try/human-decision.json`
+`$XDG_STATE_HOME/codex-solidity-feature-monitor/decisions/20261101-approved-pure-external-try/human-decision.json`
 authorizes the model correction with proofs and checks. Its SHA-256 is
 `5521ea1290fbcfa2623a1926466f97804ad806a1a3be8f2567c6e459e5368afa`.
 No further approval of that same correction is requested here.
 
 The retained complete
-`/home/guilherme/.local/state/codex-solidity-feature-monitor/integration/entrypoints/c5fbd7b83db64414b73883b6c6045e8a70a35390/attempt-5/gate-23.log`
+`$XDG_STATE_HOME/codex-solidity-feature-monitor/integration/entrypoints/c5fbd7b83db64414b73883b6c6045e8a70a35390/attempt-5/gate-23.log`
 reports 68 tests, 57 passes and
 11 failures. Its assertions include `indexOutOfRange`, `tryScopeExit` and
 `tryArgumentSideEffect`; it predates the focused repairs. The applied
@@ -150,7 +150,7 @@ from its storage-write restriction.
 ## Bounded interface and ownership decision
 
 The retained O1 producer audit at
-`/home/guilherme/.codex/visualizations/2026/10/31/01a19286-57ee-7b20-b170-64ffbc37119a/reinspection-20261031/readonly-external-targeted.json`
+`~/.codex/visualizations/2026/10/31/01a19286-57ee-7b20-b170-64ffbc37119a/reinspection-20261031/readonly-external-targeted.json`
 assigns typed call modes and static callback/frame
 laws to that producer. It records the assignment as incomplete and explicitly
 excludes new Source/world/compiler refinement. That audit is historical ownership

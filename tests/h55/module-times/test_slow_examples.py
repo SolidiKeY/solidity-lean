@@ -89,6 +89,7 @@ class SlowExamples(unittest.TestCase):
             gate.parent.mkdir(parents=True)
             gate.write_bytes((ROOT / "scripts/coord-tools/gate.sh").read_bytes())
             for name in ("scripts/check-trust.sh", "scripts/check-doc-paths.sh",
+                         "scripts/check-private-paths.sh", "scripts/check-evidence-files.sh",
                          "scripts/coord-tools/register.sh", "scripts/coord-tools/fragments.sh"):
                 file = root / name
                 file.parent.mkdir(parents=True, exist_ok=True)

@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import fnmatch
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -125,8 +126,9 @@ def scan(path, data, areas):
     return records
 
 def ownership_claims(paths):
-    snapshot = Path("/workspace/h62-coordinator-inputs/ownership.json").read_bytes()
-    if sha(snapshot) != "7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce":
+    inputs = Path(os.environ.get("H62_COORDINATOR_INPUTS", Path(__file__).resolve().parents[5] / "h62-coordinator-inputs"))
+    snapshot = (inputs / "ownership.json").read_bytes()
+    if sha(snapshot) != "49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe":
         raise ValueError("ownership snapshot differs from coordinator checksum")
     items = json.loads(snapshot)["items"]
     claims = {}
