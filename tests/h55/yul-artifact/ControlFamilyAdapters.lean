@@ -3,6 +3,8 @@ import Solidity.Yul.Compilation.LetBranchCompletionControls
 import Solidity.Yul.Compilation.LetControlCompilationControls
 import Solidity.Yul.Compilation.LetSequenceCompletion
 import Solidity.Yul.Compilation.MultiSwitchCompletion
+import Solidity.Yul.Compilation.OpenStatements
+import Solidity.Yul.Compilation.OpenExpressionControls
 import Solidity.Yul.Compilation.InitializedSequenceCompilationControls
 import Solidity.Yul.Compilation.LetControlCompletion
 import Solidity.Yul.Compilation.LetScopeCompletion
@@ -689,3 +691,104 @@ end Controls
 #print axioms Controls.refused_original
 #print axioms Controls.source_completes
 end Solidity.Yul.Compilation.H55ControlFamilies.Statements
+
+/-! Open producers retain their actual existing WordAdapter program as the
+common closed-source payload. Original open evaluation and projected state
+are related explicitly below; no new packing or post-state encoding law. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.OpenStatement
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {X : List ExternalType} {c : Control} {n fuel depth : Nat}
+    {stmt : Stmt [] X c n} {policy : Policy.StmtP .A stmt}
+
+def prepare (depth : Nat) (a : OpenStatements.Compiled fuel stmt policy) :
+    Option (Artifact depth (WordAdapter.program stmt policy).code) :=
+  Statements.prepare depth a.packed
+
+abbrev Preparation (fuel depth : Nat) (stmt : Stmt [] X c n) (policy : Policy.StmtP .A stmt) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt) (policy := policy) depth)
+
+theorem prepared (a : OpenStatements.Compiled fuel stmt policy) (program : Backend.Program)
+    (code : List Evm.Instr) (emitted : a.packed.lowered.code depth = some program)
+    (selected : WordMachine.selectCode program = some code) :
+    prepare depth a = some (Statements.certify a.packed depth program code emitted selected) :=
+  Statements.prepared a.packed program code emitted selected
+
+/-- The original source result is projected with the original unpacker.
+The target observation is the exact packed update, not an unproved equality
+between repacking that projection and every raw target word. -/
+theorem actual_source_model (a : OpenStatements.Compiled fuel stmt policy)
+    (program : Backend.Program) (code : List Evm.Instr)
+    (emitted : a.packed.lowered.code depth = some program)
+    (selected : WordMachine.selectCode program = some code)
+    (state : WordState X n) (newer : Vector Scalar.Word depth)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    DirectBindings.eval fuel a.support policy state = some ⟨OpenStatements.updated a state, .normal⟩ ∧
+    Evm.run code {m with stack := (newer.toList ++ (OpenExpressions.encoded state).toList).map coreWord ++ caller} =
+      .ok {m with stack := (newer.toList ++
+        (a.packed.update (OpenExpressions.encoded state)).toList).map coreWord ++ caller} 0 :=
+  ⟨OpenStatements.source a state,
+    WordExecution.loweredStmt_machine a.packed.lowered depth program code emitted selected
+      (OpenExpressions.encoded state) newer m caller⟩
+
+theorem actual_model_source (a : OpenStatements.Compiled fuel stmt policy)
+    (program : Backend.Program) (code : List Evm.Instr)
+    (emitted : a.packed.lowered.code depth = some program)
+    (selected : WordMachine.selectCode program = some code)
+    (state : WordState X n) (newer : Vector Scalar.Word depth)
+    (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)
+    (ran : Evm.run code
+      {m with stack := (newer.toList ++ (OpenExpressions.encoded state).toList).map coreWord ++ caller} =
+      .ok final skip) :
+    DirectBindings.eval fuel a.support policy state = some ⟨OpenStatements.updated a state, .normal⟩ ∧
+      skip = 0 ∧ final = {m with stack := (newer.toList ++
+        (a.packed.update (OpenExpressions.encoded state)).toList).map coreWord ++ caller} := by
+  obtain ⟨source, model⟩ := actual_source_model a program code emitted selected state newer m caller
+  have same := Evm.Out.ok.inj (model.symm.trans ran)
+  exact ⟨source, same.2.symm, same.1.symm⟩
+
+namespace Controls
+open OpenExpressions.Controls (types flag state)
+def source : Stmt [] types SourceLoop.Controls.root 1 :=
+  .assign (fun _ : Fin 1 => .external flag.writeRef) (.local 0)
+def sourcePolicy : Policy.StmtP .A source := by apply (Policy.stmt_iff .A _).mp; rfl
+def producer : OpenStatements.Compiled 2 source sourcePolicy := (OpenStatements.compile 2 source sourcePolicy).get (by rfl)
+def program := (producer.packed.lowered.code 0).get (by rfl)
+def code := (WordMachine.selectCode program).get (by rfl)
+
+theorem selected : prepare 0 producer = some (Statements.certify producer.packed 0 program code rfl rfl) :=
+  prepared _ _ _ rfl rfl
+
+theorem source_effect : (OpenStatements.updated producer state).cells flag = word 7 := by decide
+
+theorem machine_source (input : WordState types 1) (m : Evm.Machine) (caller : List Evm.Word) :
+    DirectBindings.eval 2 producer.support sourcePolicy input = some ⟨OpenStatements.updated producer input, .normal⟩ ∧
+    Evm.run code {m with stack := (OpenExpressions.encoded input).toList.map coreWord ++ caller} =
+      .ok {m with stack := (producer.packed.update (OpenExpressions.encoded input)).toList.map coreWord ++ caller} 0 := by
+  simpa only [Vector.toList_empty, List.nil_append] using
+    actual_source_model producer program code rfl rfl input #v[] m caller
+
+theorem refused_emission : producer.packed.lowered.code 16 = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage (prepare 16) producer).artifact = none :=
+  Statements.emission_none producer.packed refused_emission
+theorem refused_original : Artifact.recoverPreparation
+    (Artifact.toPreparationImage (prepare 16) producer) = producer :=
+  Artifact.preparation_source_roundtrip (prepare 16) producer
+
+theorem source_completes (input : WordState types 1) :
+    DirectBindings.eval 2 producer.support sourcePolicy input = some ⟨OpenStatements.updated producer input, .normal⟩ :=
+  OpenStatements.source producer input
+#guard (OpenStatements.compile 0 source sourcePolicy).isNone
+end Controls
+
+#print axioms prepare
+#print axioms prepared
+#print axioms actual_source_model
+#print axioms actual_model_source
+#print axioms Controls.selected
+#print axioms Controls.source_effect
+#print axioms Controls.machine_source
+#print axioms Controls.refused_emission
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.OpenStatement

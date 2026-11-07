@@ -189,6 +189,15 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Statements",
       "adapter_kind": "preselection_provenance",
       "boundary": "Instantiates generic actual-total-update certificate and two-stage preparation from unchanged source/update/lowered machine proofs. Raw producer, exact emitted program and selected code context retained; source-completing depth16 refusal remains preparation None, not runtime failure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/OpenStatements.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.OpenStatement",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Contextual preparation of the original WordAdapter packed closed program, retaining the entire open producer and policy/support evidence through exact PreparationImage. Actual open evaluation/projected state and exact packed machine update are proved in both directions. No repack-after-projection identity or direct semantic Artifact for the open AST is claimed; depth16 refusal remains preparation None while source completes."
     }
   ]
 }
