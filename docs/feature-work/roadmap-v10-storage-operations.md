@@ -411,3 +411,37 @@ per-run premise. Generic recursive emitted selection, ordinary Source aggregate
 lifecycle and physical/P8/caller-world composition remain producer obligations.
 Existing intrinsic leaves and the 52-row audit reference ledger do not close
 G27-G30, the backfills or any consolidated proof/acceptance queue.
+
+
+### Checkpoints 225–226: interrupted diagnostic and rejected false-loop backfill
+
+C225 tested source head `139f09acbb231b26237fafd55a937ef79f9cc8f5`.
+The host monitor was lost across session restart while the capped runtime build
+continued. The verified task-owned runtime was stopped under the existing
+interruption policy. Build exit and complete resource measurements are unknown;
+this is not a passing full gate. Cache seeding had failed extraction with ENOSPC
+and installed no pack. Raw logs and interruption receipts remain off Git.
+
+Before C226, the existing lane fast-forwarded to published master
+`2a917f7329f06c3fa4b15ebea1608b4c2caa3826`. GitHub #71 authorized a shared
+false-loop success lemma and proof-only rewrites in the two allocation controls,
+conditional on checking being no slower. No existing statement or definition was
+changed. The candidate affected build passed; the baseline warm-up passed 222
+jobs. An initial timing prerequisite failed on an unmaterialized cache object;
+the repository restore helper corrected it before a fresh fixed measurement set.
+
+Three serial warm samples per file used identical H111 stack and H113 resource
+settings. Median seconds before/after were SimLemmas 7.89/7.94, mixed allocation
+2.42/2.43, and recursive allocation 3.02/3.01. The predefined per-file and summed
+median rule rejected the change. Every sample is retained; no sample was selected
+away. All three source files were restored byte-for-byte to the committed master
+version. This is a rejected bounded backfill attempt, not a completed production
+extraction or a general performance result. No unchanged retry is authorized.
+The rejected candidate was not accepted into the axiom inventory.
+
+Evidence: `/workspace/v10-storage-operations-evidence/checkpoint225-interruption.json`,
+`checkpoint225-interruption-last20.log`, `checkpoint226-plan.json`,
+`checkpoint226-timing.json`, `checkpoint226-restoration.json`, and
+`checkpoint226-rejected.patch` in the same directory. Original producer, physical
+adequacy, audit coverage, full validation and trust/documentation gate obligations
+remain open. Independent reviews are recorded in the checkpoint handoff.
