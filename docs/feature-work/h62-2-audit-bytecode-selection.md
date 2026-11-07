@@ -2459,3 +2459,36 @@ the code branch under /workspace/parallel-20261103/executable-bytecode/
 frame-field-domains/ and archived separately under H145. No global witness
 ledger, full census, inherited instantiation or original 703-source closure
 acceptance is inferred; all original producer waits and STOPs remain.
+
+### Literal and legacy-frame field domains
+
+The generic fixture is now selection-field-witnesses.json. It retains the
+three V2 frame domains and adds four exact frozen field domains: literal
+InstructionCertificate.success/refusal and legacy FrameCertificate.frame/
+prefixes. The instruction witnesses use the existing literalCertificate with
+an explicitly bounded finite word seven and a matching nonempty input stack.
+The refusal-domain witness establishes the equivalence's hypotheses; it does
+not claim that PUSH actually faults. The legacy witnesses adapt the genuine
+DUP frame and call the existing Scalar.prefix_capacity theorem. Their prefix
+case supplies an actual stackBound premise, split and reached-prefix equation.
+This does not repair V1's known conditional physical-capacity limitation.
+
+All seven distinct domains pass native checking in 5.538 seconds; four are new
+and three rechecked, not seven additional domains. Only standard axioms occur
+in the positive proofs; the shared impossible-certificate refutation remains
+axiom-free. All 36 import products were already verified, including the prior
+FrameCapacityV2 kernel build. No new prerequisite or timing-STOP retry ran.
+The first isolated check lacked the read-only parent-product mount, now fixed
+with an in-container product-hash preflight. Failed finite-word numeral
+elaboration was repaired with an explicit Fin constructor and decide bound.
+Both failures remain recorded. MCP diagnostics were unavailable because the
+checkout socket lock is read-only; the guarded native fallback was used.
+
+The 122-test suite passes, and independent read-only finder/skeptic source and
+provenance reviews pass. Replay pins intended source, complete command, output,
+standard axiom reports, prior seal and all 36 products. Evidence is sealed at
+/workspace/parallel-20261103/executable-bytecode/selection-field-domains/ and
+archived separately under H145. Earlier frame-field evidence must be replayed
+from its recorded historical commit because its checker-read fixture was
+renamed and extended. No inherited instantiation, global ledger, full census,
+Source/runtime adequacy or original closure acceptance is claimed.

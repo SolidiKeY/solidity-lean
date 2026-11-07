@@ -39,12 +39,15 @@ class FieldDomainTests(unittest.TestCase):
         with self.assertRaises(ValueError):renderer.projection_domain_source(ROOT,[row],{'one':w['joint'],'two':w['joint']})
         bad=copy.deepcopy(w);bad['joint']['target']=[]
         with self.assertRaises(ValueError):renderer.projection_domain_source(ROOT,[row],bad)
-    def test_real_fixture_is_three_explicit_nonempty_frame_domains(self):
-        w=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/frame-field-witnesses.json').read_text())
+    def test_real_fixture_retains_v2_and_adds_selection_domains(self):
+        w=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json').read_text())
         prefix='Solidity.Backend.Selection.V2.FrameCertificate.'
-        self.assertEqual({p['target'] for p in w.values()},{prefix+x for x in ['inputRoom','frame','capacity']})
-        self.assertTrue(all('duplicateHead 7' in p['proof'] for p in w.values()))
+        self.assertEqual({p['target'] for p in w.values() if p['target'].startswith(prefix)},{prefix+x for x in ['inputRoom','frame','capacity']})
+        self.assertTrue(all('duplicateHead 7' in p['proof'] for p in w.values() if 'FrameCertificate.' in p['target']))
         self.assertIn('[11,99]',w['frame_capacity_joint_domain']['proof'])
         self.assertIn('by decide',w['frame_capacity_joint_domain']['proof'])
+        self.assertEqual(len(w),7)
+        self.assertIn('rfl, rfl, True.intro',w['legacy_prefixes_joint_domain']['proof'])
+        self.assertTrue(all('literalCertificate value' in w[k]['proof'] for k in ['instruction_success_joint_domain','instruction_refusal_joint_domain']))
 
 if __name__=='__main__':unittest.main()
