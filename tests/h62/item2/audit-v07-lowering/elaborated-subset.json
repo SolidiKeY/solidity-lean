@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "boundary": "Successful live subset inspection; not original migration fidelity, whole census or feasibility acceptance.",
+  "external_directory": "/workspace/sol-numeric-literals-v07-elaborated-subset",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "selected_modules": [
+    "Solidity.Lowering.V07.DoubleAssignmentFamily",
+    "Solidity.Lowering.V07.IntegerLocalFamily",
+    "Solidity.Lowering.V07.LocalFamilyControls",
+    "Solidity.Lowering.V07.NodeRank",
+    "Solidity.Lowering.V07.RankConvergence"
+  ],
+  "source_sha256": {
+    "Solidity/Lowering/V07/DoubleAssignmentFamily.lean": "b4d40fbb9c7b931df2d0e35a35e03425d795b83da494d9e83c83e89975fd5e14",
+    "Solidity/Lowering/V07/IntegerLocalFamily.lean": "88f7cada64382a446bb910049a6c1d2ce53fa4ee9277a8c28a991fc6b13a258c",
+    "Solidity/Lowering/V07/LocalFamilyControls.lean": "d98692dfa4a1a80afbc938243e8cc2fb61e08a4823338e7a30c0dfa4860d601e",
+    "Solidity/Lowering/V07/NodeRank.lean": "271cf03d5498820bd50100acf775e9e31373c2e1ac2738c646e9de6223b5658f",
+    "Solidity/Lowering/V07/RankConvergence.lean": "e0c45fe45b2ef6867a9874562ad80a3ab896ff5ac7ab4598f62e0a49bc08869b"
+  },
+  "total_exported_constants": 64,
+  "matched_source_theorems": 28,
+  "other_constants": 36,
+  "binder_count": 172,
+  "proof_binder_count": 31,
+  "artifacts": {
+    "pins.json": "13fcb74c37c2a7236cb02f03dd9a9f9e6e99101d16ba8e7c55239d000945a768",
+    "Probe.lean": "f89ba9b0d88f864edf80387ec0c951f9efcfaeb7fb16646fa43e427d7d763d89",
+    "telescopes-policy-checked.json": "c95305f1c6c0d4354d11a7e0d769dbd69911e46fd5c7a2f746be4c7e03de92cd",
+    "v07-elaborated-subset-bound.json": "2dc18e49436866b929478281781876177bfc8e647fa5a2cea8eefd5039eb3405",
+    "v07-elaborated-subset-bound.log": "5d55d11585f861cbf5768647ee30c1c67623a5a8e102b89359396e30c983a443"
+  },
+  "tool_sha256": {
+    "elaborate_subset.py": "2cd926b291ac8c977cec27e208a5cf23c76310d9219f1239553dbd7401df474a",
+    "run_elaborated_subset.py": "f9bfa3cbd3bad5af6aa941730d2a8a27029a7806a9217e12dca627faa51194b4",
+    "read_elaborated_subset.py": "e6bd7815e43400dd58f53f7925b04236fced88d031c790409acd71d3691806f6",
+    "test_elaborated_subset.py": "668bb27dd44b941c644b31c99c2a960816f3884dd5cb13576f34b691bb621865"
+  },
+  "template_provider": "scripts/h62/item2/audit-bytecode-selection/elaborated_census.py",
+  "template_provider_sha256": "17adb46148c19e331cb0c3ac597064e3909f546bd128355f4b3e856fc4f8f952",
+  "limitations": [
+    "The original full968-row pending ledger is unchanged.",
+    "Proof/data binder sorts are elaborated; semantic premise roles and simultaneous feasibility are not certified.",
+    "Live4.24 subset validation does not establish original4.35 migration acceptance or full affected gates."
+  ]
+}
