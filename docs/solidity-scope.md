@@ -364,6 +364,28 @@ updates; the checker never assigns newly discovered syntax a default scope.
 The normal CI check verifies generated-file consistency without downloading
 upstream sources.
 
+
+## Inline assembly decisions (2026-10-31)
+
+The human answered “Approve these choices for all five lanes” to the
+coordinator's YQ1–YQ7 question. These decisions authorize implementation;
+they do not establish admission or discharge dependency gates.
+
+- YQ1: tiers A–C through lanes VY1–VY5 are authorized.
+- YQ2: refuse gas/msize/pc and own-code codesize/codecopy at admission.
+- YQ3: allow nondeterministic allocation addresses satisfying documented
+  layout; prove refinement and explicitly amend the G01 allocation contract.
+- YQ4: preserve dirty high bits as solc does in each pipeline; record differences.
+- YQ5: Yul calculus rules are Lean-only, marked in the rule map.
+- YQ6: expose both Yul logs and Solidity emit as observations; amend G01.
+- YQ7: refuse non-memory-safe blocks; preserve the pre-existing canonical
+  whole-buffer rethrow exception.
+
+VY2 preparation is recorded in
+[inline-assembly-vy2.md](feature-work/inline-assembly-vy2.md).
+The current manifest reports actual admission. Reopening a row requires
+reviewed implementation and evidence; compiler-dependent observations and
+fork exclusions remain in force.
 ## Inline assembly decisions (2026-10-31)
 
 The human requested one CloudVM per lane VY1–VY5 to solve the inline assembly

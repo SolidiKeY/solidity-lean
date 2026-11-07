@@ -222,6 +222,13 @@ Handoff files are in `scripts/h62/item4/generic-yul-views/handoff/`: original as
 
 The exposed goal API cannot set PAUSED: its only outcomes are complete/blocked. No substitute completion or new goal was requested. No push was performed because H71 permission is not present in available inputs. Final cumulative patch, bundle, head and SHA256 manifest are recorded in the export handoff.
 
+## H82b successor intake and literal correspondence repair
+
+The successor verified all 557 H82b checksum entries and the exact final Git heads, then integrated the three stopped members on its existing branch. The authenticated assignment now includes the omitted owner-key paragraph and exclusive scope. The historical transcription gap above is resolved by the H82b metadata package; this does not validate retired proof or gate claims.
+
+The external correspondence checker now uses masked text only for declaration/proof boundaries and retains ordinary string and quoted-identifier contents for equality. Whitespace inside literals is significant. Unsupported Lean character literals and raw strings fail closed (including conservative false refusals when their spelling occurs in comments). Nine regression controls pass, including changed literals, escaped whitespace and raw-string refusal. The two real ReadControls/Fixtures type pairs still match. Seven scanner tests and the process-cleanup control also pass. The initial sandbox-only scanner/cleanup attempts failed to create temporary directories; reruns with authorized filesystem access passed. No Lean statements, definitions, axioms or budgets changed; kernel correspondence, complete census/refusal coverage and matched production timings remain pending.
+
+Read-only finder review caught an escaped-character regex defect in the first draft; it was corrected and the finder confirmed the repair. Skeptic review caught raw-string false acceptance; explicit refusal and a mutation regression address it. A further character-literal whitespace finding is likewise handled by explicit refusal and a regression. Neither reviewer ran tests, Lean or a server. Evidence: `/workspace/vy2-evidence/h82b-intake/correspondence-tests.log`.
 ## Explicit coordinator resume after integration
 
 The later coordinator instruction explicitly resumed this lane and authorized
@@ -354,3 +361,115 @@ former Storage owner-relay request is superseded by this passing proof-only
 repair, with affected validation still pending. Generic fixture proofs, full
 negative/refusal coverage, semantic inventory and actual matched timings remain
 unfinished.
+
+### Frozen-source provenance for correspondence labels
+
+The lexical correspondence report now authenticates the existing frozen base from acceptance.py, compares complete current file Git blobs to that base and binds the result to census SHA256 hashes. Only matching files receive a preserved-original label. Modified and added files are explicitly unverified, baseline removals are listed separately, and source/content-universe changes after scanning fail closed. The scanner alone reports preservation as unchecked. Selected correspondence is tied to the exact ReadControls source path, so a same-basename file cannot inherit that evidence. No acceptance policy, frozen Lean declaration, proof budget or trust inventory is changed.
+
+The external refusal suite covers matching-but-changed pairs, proof-only file changes, new and removed files, missing/empty baselines, missing provenance, stale source contents and stale file universes. All 25 correspondence controls, seven census controls and the bounded-process control pass. Real-corpus reproduction retains both selected pairs and all 2,990 current control rows: 832 files match frozen blobs, 36 are modified and ten are additions; no frozen files are removed. This current inventory does not replace the historical 3,026-case inventory, whose semantic/migration reconciliation remains unfinished. Modified sources still require separate exact-statement and meaning checks. Even matching source bytes do not establish transitive dependency identity or elaborated type/meaning preservation; lexical PASS is not kernel correspondence.
+
+Independent read-only finder/skeptic found no confirmed defects. Evidence and matched external-CLI timings are retained at `/workspace/vy2-evidence/views-preservation/`. All four original checkpoints remain partial; generic Lean proof/refusal validation, complete case accounting, full-scope matched build timings and final/runtime acceptance remain open.
+
+The final matched correspondence-entrypoint samples, sharing the current census helper, give median 2.195→2.215 seconds (+1.0%, below the 10% stop). These are external CLI measurements, not historical full-toolchain or Lean build acceptance.
+
+### Reconcile the complete frozen Controls theorem inventory
+
+`reconcile_frozen.py` reads all frozen Views blobs at the existing acceptance base through authenticated Git object hashes, rescans that immutable snapshot with the shared census parser, and retains one report row for each of its 3,026 Controls theorems. It searches every current Views theorem file, so moving a theorem to a file without Controls in its name does not drop the original case. All matches are lexical candidates, including same-file matches: namespace identity, transitive meaning, kernel correspondence and accepted migrations remain unproved.
+
+Three real-corpus reports are byte-identical. The partition is 2,973 same-file command-text candidates, 38 other-file command-text candidates, 14 ambiguous command-text candidates and one unmatched case. Every original case is retained once; the current inventory still has 2,990 Controls-file theorems and 6,277 theorem declarations overall. The unmatched sb_not_stored_external statement adds Monetary.wordView under the documented H19 natural-balance migration in vy5-natural-account.md; that context is recorded without accepting it as frozen-statement equivalence or claiming a weakening/vacuity defect.
+
+Ten new refusal/accounting controls cover frozen-versus-worktree bytes, moves to non-Controls files, deletions, proof changes, duplicate candidates, additions, duplicate/empty original inventories and corrupted frozen objects. They reuse the existing temporary-Git fixture rather than copying its implementation. The prior25 correspondence controls still pass, and the shared frozen-blob helper extraction leaves existing correspondence output byte-identical. Independent read-only finder/skeptic found no confirmed defects. Evidence is at `/workspace/vy2-evidence/views-frozen-cases/`. Standalone report timings are not comparable historical/full-build measurements. All four original checkpoints remain partial; semantic case reconciliation, generic proofs/refusals and final/runtime acceptance remain open.
+
+### Source-name hints for ambiguous text matches
+
+The frozen reconciliation report now reuses the existing audit-yul lexical census for source-name/visibility hints, rather than adding a second namespace parser. It reads hash-bound immutable copies for only the ambiguous cases and records that parser version and every consulted source hash. Missing or unsupported extraction stays explicit; stale source bytes fail closed. Private source names are not treated as elaborated mangled names, and generated/namespace/type/semantic resolution is not inferred.
+
+Each of the fourteen real command-text ambiguities has one matching lexical source-name hint. The original ambiguous status and every candidate remain intact: this is review guidance, not fourteen accepted migrations. All 3,026 original rows, their prior classifications and the single unmatched H19 case remain unchanged. Seven additional controls cover distinct/changed source namespaces, private-name ambiguity, missing/partial/unsupported extraction and stale source bytes; seventeen reconciliation controls pass. Independent read-only finder/skeptic reviews and matched external-entrypoint measurements are retained with raw failures at `/workspace/vy2-evidence/views-namespace-hints/`. Full semantic case reconciliation, generic Lean correspondence and final/runtime acceptance remain open.
+
+Three alternating matched report-entrypoint samples give median 4.500→4.468 seconds (−0.7%), below the performance stop. These targeted external measurements do not establish full-build or kernel timing acceptance.
+
+### Refuse ambiguous identifiers and truncated compound types
+
+The selected-pair lexical checker previously overwrote repeated theorem names, accepted qualified/primed identifier prefixes as the selected simple names, and cut a type-level let at its binding assignment. Concrete false-pass inputs are retained at `/workspace/vy2-evidence/views-type-refusals/prior-false-passes.json`. It now consumes the complete unquoted name token, refuses duplicates instead of selecting the last declaration, and explicitly refuses known compound term-type forms before delimiter-only extraction can truncate them. This remains a restricted lexical check, not a general Lean parser or semantic proof; unsupported syntax needs separate parser/kernel validation. Keyword text in string literals and quoted type names remains supported.
+
+Twelve added controls cover duplicated/namespace-colliding names, qualified and primed prefixes, type-level let/have/letI/match/by forms and literal/quoted keyword handling. All37 correspondence controls pass. On the real corpus, both selected pairs and all2,990 current control rows are unchanged; all three recorded false passes are refused. Three alternating matched external CLI samples give median2.219→2.245 seconds (+1.2%, below the stop threshold), not full-build/kernel timing acceptance. Independent read-only finder/skeptic review and raw regression/reproduction evidence are retained with the same packet. No Lean production statement, shared interface, acceptance policy, budget, axiom or exclusion was changed; all original semantic/kernel/full-scope gates remain open.
+
+
+### Live pinned byte-object proof validation
+
+The inherited GenericByteObjects and Fixtures audit modules now pass serial kernel checking on Lean 4.24.0 (797c613), after refreshing their direct ByteObjects and ReadControls dependencies. The generic theorem proves all seven semantic fields for arbitrary layout, byte list, residual view and base; all seven existing fixture rows instantiate that theorem. No production statement or proof was changed. The two selected fixture theorem types were compared structurally with the original ReadControls declaration types in the Lean environment and both are exactly equal. All four audit declarations report only propext and Quot.sound.
+
+The bounded checks used LEAN_NUM_THREADS=1 and -j1 with the existing stack and 300-second limits. GenericByteObjects checked in 0.27 seconds at 431,148 KiB VmHWM, Fixtures in 0.34 seconds at 429,736 KiB, and the corrected type/axiom audit in 0.93 seconds at 1,188,040 KiB. The first audit script used a reserved identifier and failed; its raw output is retained alongside the corrected passing run at /workspace/vy2-evidence/views-byte-proof-check/. KeySort passed before these checks. There is no implementation timing delta because these modules were not edited.
+
+This closes the previously missing live 4.24 targeted checks only. It does not establish isolated 4.35 migration acceptance, kernel correspondence for the other frozen cases, complete refusal coverage, full affected-build timing or runtime acceptance. All four original checkpoints remain partial; the Source/Horizon and production-import performance STOPs remain in force.
+
+
+### Generic byte-image injectivity and same-base refusal
+
+The existing generic audit module now derives byte-list injectivity from its decoder law: fixtures with the same base and byte view have equal byte lists, regardless of residual view or alignment. The existing short and long unaligned table rows instantiate this law to prove their images differ. No fixture, production declaration, interface, representation, budget or exclusion was changed; no per-case module was added. The new control guards against collapsing distinct payloads into one image, not against a reject-all compiler or an invalid allocation strategy.
+
+Both additions pass bounded serial Lean 4.24 checks and report only propext and Quot.sound. The four previous audit type/axiom exports remain byte-identical, and both selected original-instance types still compare structurally equal. Three matched samples give median GenericByteObjects 0.27→0.29 seconds (+7.4%) and Fixtures 0.36→0.39 seconds (+8.3%), below the existing 10% stop; these tiny targeted measurements are not full-build timing acceptance. Failed proof attempts are retained with the final checks at /workspace/vy2-evidence/views-byte-injectivity/. All original migration, semantic census, physical/compiler adequacy and final gates remain open.
+
+
+### Refuse ambiguous serial timing metadata
+
+The recorded-timing validator previously accepted conflicting -j1/-j8 arguments and Boolean thread counts as serial. It now requires integer counts of one and exactly one -j1 option, rejecting other -j and --threads forms so a later option cannot override the declared serial setting. Non-thread arguments remain supported. This validates recorded metadata only; it does not authenticate a process, cache or resource policy.
+
+Eight timing controls pass, including conflicting/split/duplicate options, malformed argument containers and Boolean/float/string counts. All existing external correspondence, census, reconciliation, bounded-process and manifest suites also pass. Valid CLI output is byte-identical. Three matched batches of ten CLI invocations give median 0.03762→0.03939 seconds (+4.7%), below the timing stop. Raw samples are retained at /workspace/vy2-evidence/views-timing-serial/. No Lean statement, proof, budget, pin or acceptance boundary changed; full assignment gates remain open.
+
+
+### Joint live-byte premise witness
+
+The existing fixture module now constructs one closed witness for the entire bytesObject_payload telescope: a nonempty byte list, its word-length bound, residual view, base, index and in-range proof together. An off-Git Lean audit reconstructs the existential telescope from the imported theorem and checks definitional equality, including universe parameters. The source signature is text-identical to the frozen c6f550e281a7e5affa9a99bc2cdaed556dec00e4 version. This is one ordinary statement's joint inhabitance, not independent assumptions, per-input feasibility, compiler totality or complete corpus accounting.
+
+The witness and telescope audit pass serial pinned Lean 4.24 checks; byte_payload_joint has no axioms. Three matched fixture-module samples give median 0.45→0.41 seconds (−8.9%), with raw timings and signature provenance at /workspace/vy2-evidence/views-payload-witness/. Existing statements, fixtures and production definitions remain unchanged. The full audit census, production reached-state/physical bridge, migration and final gates remain open.
+
+
+### Coupled unchanged-view premise witness
+
+The existing fixture module now jointly inhabits the complete bytesObject_unchanged telescope. One existing nonempty unaligned fixture supplies the byte list, length bound, residual byte view and base; the generic semantic packet proves both the header equality and every live payload equality for that same view. The off-Git kernel audit checks all parameters and both coupled hypotheses together, with exact universe/telescope fidelity. The source signature remains text-identical to frozen c6f550e281a7e5affa9a99bc2cdaed556dec00e4. No new fixture or per-case module was added.
+
+Serial Lean 4.24 checks pass, with propext and Quot.sound as the witness axioms. Three matched fixture-module samples give median 0.44→0.46 seconds (+4.5%), below the stop. Evidence is at /workspace/vy2-evidence/views-unchanged-witness/. This is one statement's simultaneous premise inhabitance, not per-input feasibility, compiler success, physical execution adequacy or complete witness accounting. No corpus count is promoted while the authenticated bulk census is absent; all original final/migration/producer gates and prior STOPs remain open.
+
+
+### Complete the nine explicit ByteObjects premise telescopes
+
+Four additional reusable witnesses in the existing fixture module cover the seven remaining ByteObjects theorems. One proof serves header/payload-list/idempotence, another serves both decoders, and the residual and typed-source-read laws retain their coupled premises. The source-read witness uses ObjectByte.bytes at an actual live index with the corresponding offset and byte value. Together with the two previous proofs, six proof declarations witness all nine explicit theorem telescopes in this module. The small byte-witnesses.json records the exact source/proof map and frozen signature hashes; every signature matches the original c6f550e281a7e5affa9a99bc2cdaed556dec00e4 source.
+
+The batch kernel audit checks all nine full existential telescopes, universe parameters and allowed axiom sets. New object/decoder/residual witnesses use no axioms; the typed source-read witness uses only propext. Three matched serial Lean 4.24 fixture samples give median 0.51→0.52 seconds (+2.0%), below the stop. Bulk proof logs, negative missing-premise check and exact generated audit source remain at /workspace/vy2-evidence/views-byte-family-witnesses/. This is a local nine-statement result, not authenticated global corpus accounting, per-input feasibility or compiler/physical adequacy. No original interface, fixture table, proof budget, acceptance criterion or exclusion changes; all wider obligations and prior STOPs remain open.
+
+
+### Share raw calldata-copy laws with actual frame-copy proofs
+
+Inputs now provides generic live-byte, outside-destination, empty-copy and zero-padding laws by instantiating the existing copyBytes and calldata-zero laws. Three existing FrameCalldata proofs consume these shared laws directly. Their headers, all definitions, mathematical source advancement and the deliberate absence of an MCOPY-style source-end premise remain unchanged; there is no new fixture family or state carrier.
+
+All eleven existing FrameCalldata declarations have byte-identical elaborated type, universe and axiom exports before and after the proof refactor. Existing Controls and FrameCalldataControls pass, retaining maximal-source padding, no-source-end, whole-map, canonical writeback and reserved-area checks. New raw laws use propext, with Quot.sound additionally inherited by the empty-copy functional equality. Matched serial Lean4.24 medians are Inputs0.44→0.45 seconds (+2.3%) and FrameCalldata0.28→0.26 seconds (−7.1%), below the stop. The initial emitted Inputs run was slower and is retained; the reported medians use identical no-emission conditions. Evidence is at /workspace/vy2-evidence/calldata-shared-laws/.
+
+These are mathematical byte-view and existing logical-frame proofs. Successful native destination-range/allocation, selected program/emission provenance, actual compiler dispatch and physical reached-state adequacy remain separate obligations. No frontend row, fork exclusion, source definition, proof budget, existing axiom set or acceptance criterion was changed. Global case accounting, full-scope timings/final gates and previous STOPs remain open.
+
+
+### Copied calldata agrees with the actual ABI slice reader
+
+The shared raw layer now proves equality of the entire copied byte window with the source's zero-extended window. FrameCalldata_readBytes is an exact instance, replacing its local list proof. AbiCalldataAgreement derives equality with the owner's actual Source.fitBytes and proves that loading a copied word agrees with abiInputWord on the explicitly selected input slice. The base parameter is retained: no selector or other prefix is silently discarded, and destination alignment remains unrestricted in the mathematical view.
+
+All eleven original frame declaration type, universe and axiom exports remain byte-identical, and every original definition is unchanged. Existing frame and ABI boundary controls pass. The existing selector fixture verifies the copied argument at base4 and retains the wrong-base0 refusal through the new word law; no duplicate fixture table was added. All three new laws use propext and Quot.sound, inherited from the existing extensional list/read agreements. Matched serial Lean4.24 medians are Inputs0.43→0.44 seconds (+2.3%), FrameCalldata0.27→0.27 seconds and AbiCalldataAgreement0.34→0.34 seconds. Evidence is at /workspace/vy2-evidence/calldata-abi-copy/.
+
+This connects mathematical copied bytes and the actual Source ABI reader, not decoder/program admission, native destination-range/allocation, selected emission, compiler dispatch or physical reached-state adequacy. No original statement, source definition, observation, budget, existing axiom set, fork exclusion or acceptance criterion changed. Full corpus, timing and final gates plus prior producer/STOP obligations remain open.
+
+
+### Preserve actual typed ABI decoder results for copied words
+
+One generic theorem lifts the copied slice-word equality through the existing Source.decodeWord for every layout and source type. It preserves the exact typed result, including success, revert and unsupported/stuck outcomes; no per-type decoder, canonical-memory cleanup or admission premise is introduced. The explicit input-slice base remains. Existing ABI fixtures verify uint success and the dirty-bool empty revert through the new agreement, reusing the original data rather than adding cases or state carriers.
+
+The first word-level congruence attempt hit the unchanged default heartbeat limit; explicitly transporting numeric word equality avoids that unfolding and compiles normally. A two-law proposal including a redundant tuple-result wrapper hit the timing stop (median0.31→0.36 seconds, +16.1%); that wrapper was removed. More explicit intermediate/congruence variants and a candidate arithmetic proof optimization also exceeded the timing limit; the original arithmetic proof was restored exactly. The retained word-only proof infers the elementary numeric equality before applying the decoder, with an explicit maintenance comment explaining that elaboration choice. Its final matched median is0.31→0.33 seconds (+6.5%), below the stop. Failed attempts and exact code are retained at /workspace/vy2-evidence/calldata-decode-agreement/. No budget was raised; budget and timing failures were optimized before rechecking.
+
+The axiom audit matches the existing Source.decodeWord and abi_decode_uint_word boundary exactly: propext, Classical.choice and Quot.sound. Existing ABI boundary controls pass; all original code outside the additive lemma is byte-identical. This is static word-result agreement, not dynamic argument/program admission, native range/allocation, selected emission, compiler dispatch or physical reached-state adequacy. Full corpus/pin/final gates and original producer/STOP obligations remain open.
+
+
+### Verify input-manifest identities without phantom file counts
+
+The static acceptance input stage previously accepted an empty digest map and paths outside the input directory, then reported five verified files unconditionally. The original stage-only reproduction is retained at /workspace/vy2-evidence/views-input-manifest/. It is not evidence of a full current static/Lean/runtime false pass: the later frozen-source checks were not run in that reproduction.
+
+The stage now converts JSON object pairs into the existing shared manifest verifier's input schema. Preserving pairs lets that verifier reject duplicate object keys along with empty manifests, noncanonical/traversing paths, escaping symlinks and stale hashes. The receipt uses the returned verified count. A valid five-file receipt remains byte-identical; smaller local manifests report their actual count, without inferring a complete coordinator packet or inventing a filename whitelist. Digest matches establish local identity only, not coordinator origin or semantic coverage.
+
+Eight input-stage controls and all six existing external audit suites pass. Three alternating matched batches of ten input-stage CLI harness invocations give median0.03048→0.03069 seconds (+0.7%), below the stop. This is targeted external tooling timing, not full acceptance/build timing. Every acceptance stage after input verification, including the frozen base/file-universe/blob checks, proof-shortcut/budget scan and output boundary, remains byte-identical. Historical manifests and acceptance/runtime criteria are not repinned or waived; all original proof, corpus, producer and final obligations remain open.
