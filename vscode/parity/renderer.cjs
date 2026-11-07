@@ -79,7 +79,7 @@ async function contextSubmenu(client,directory,{label='Solidity Lean',expected='
     let visible;
     while(Date.now()<deadline){visible=(await labels()).result.value;if(visible.some(label=>label.includes(expected)))break;await new Promise(r=>setTimeout(r,20));}
     if(!visible?.some(label=>label.includes(expected)))throw Error('Custom compiler action is not rendered in the submenu');
-    const state=await client.request('Runtime.evaluate',{expression:menuNodes+'.filter(e=>e.getClientRects().length).map(e=>{const item=e.closest("[role=menuitem]");return{label:e.textContent,ariaDisabled:item?.getAttribute("aria-disabled")??null,className:item?.className??null};})',returnByValue:true});const rendered=await capture(client,directory,true);return{labels:visible,items:state.result.value,rendered,scope:'Actual Linux context submenu and raw enabled-state attributes; action execution, pairing and macOS remain separate observations.'};
+    const state=await client.request('Runtime.evaluate',{expression:menuNodes+'.filter(e=>e.getClientRects().length).map(e=>{const item=e.closest("[role=menuitem]");const r=e.getBoundingClientRect();return{label:e.textContent,ariaDisabled:item?.getAttribute("aria-disabled")??null,className:item?.className??null,bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom},withinViewport:r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight};})',returnByValue:true});const rendered=await capture(client,directory,true);return{labels:visible,items:state.result.value,rendered,scope:'Actual Linux context submenu and raw enabled-state attributes; action execution, pairing and macOS remain separate observations.'};
   } catch(error){try{writeFileSync(join(directory,'attempt-labels.json'),JSON.stringify((await labels()).result.value));await capture(client,directory,true);}catch{}throw error;} finally {for(let i=0;i<2;i++)for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27});}
 }
 async function captureTrace(client,directory,metadata){
@@ -89,7 +89,7 @@ async function captureTrace(client,directory,metadata){
  const menuDir=join(directory,'menu');require('node:fs').mkdirSync(menuDir,{recursive:true});observed.menu=await contextSubmenu(client,menuDir,{label:'Dafny',expected:'Build with Custom Arguments'});
  const rendered=await capture(client,directory,true);if(metadata.observeOnly){if(observed.activeUri!==metadata.binding.uri)throw Error('Native observation active URI mismatch');}else require('./trace-presentation.cjs').assertPresentation(observed,metadata);return{...rendered,tracePresentation:{...observed,binding:metadata.binding,asserted:!metadata.observeOnly,scope:metadata.observeOnly?'Native upstream state recorded without a lifecycle-success claim':'Exact content/style/disappearance/menu asserted'}};
 }
-async function buildKeybinding(client,{custom=false,input,directory}={}) {
+async function buildKeybinding(client,{custom=false,input,cancel=false,directory}={}) {
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
   if(!focused.result.value)throw Error('No focused source editor for build keybinding');
   const started=Date.now();
@@ -104,7 +104,9 @@ async function buildKeybinding(client,{custom=false,input,directory}={}) {
     if(input!==undefined){for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});await client.request('Input.insertText',{text:input});}
     const submitted=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!submitted?.focused||input!==undefined&&submitted.value!==input)throw Error('F6 prompt contents did not match requested input');
     const rendered=await capture(client,directory,true);prompt={before,submitted,rendered};
-    for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+    const key=cancel?'Escape':'Enter',code=key,windowsVirtualKeyCode=cancel?27:13;
+    for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode});
+    if(cancel){let visible;do{visible=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!visible)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);if(visible)throw Error('Cancelled F6 prompt remains visible');const hidden=join(directory,'cancelled');require('node:fs').mkdirSync(hidden,{recursive:true});prompt.cancelled={visible:false,rendered:await capture(client,hidden,true)};}
   }
   return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
 }
