@@ -169,3 +169,101 @@ theorem word_certificate_selected_domain :
 
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms word_certificate_selected_domain
+
+private def fullInput : Solidity.AbiEntry.Input := {data := List.replicate 36 (0 : UInt8), free := 0}
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.admitted; only the conclusion becomes True. -/
+theorem single_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.admitted := by
+  exact ⟨sampleContract, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_admitted_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.selected; only the conclusion becomes True. -/
+theorem single_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.selected := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_selected_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.run_program; only the conclusion becomes True. -/
+theorem single_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.run_program := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_run_program_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.executed; only the conclusion becomes True. -/
+theorem single_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.executed := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_executed_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.entry_form; only the conclusion becomes True. -/
+theorem single_entry_form_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.entry_form := by
+  exact ⟨sampleInput, 0, .bool, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_entry_form_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms single_entry_form_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.entry_rejection; only the conclusion becomes True. -/
+theorem single_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.entry_rejection := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_entry_rejection_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.entry_success; only the conclusion becomes True. -/
+theorem single_entry_success_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.entry_success := by
+  exact ⟨fullInput, 0, .bool, by decide, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_entry_success_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms single_entry_success_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.short_before_word; only the conclusion becomes True. -/
+theorem single_short_before_word_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.short_before_word := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, sampleMachine, sampleWord, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_short_before_word_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_short_before_word_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.insufficient_fuel; only the conclusion becomes True. -/
+theorem single_insufficient_fuel_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.insufficient_fuel := by
+  exact ⟨fullInput, .bool, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_insufficient_fuel_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms single_insufficient_fuel_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.selected; only the conclusion becomes True. -/
+theorem single_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.selected := by
+  exact ⟨SingleWordGate.program, SingleWordGate.certificate, sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_certificate_selected_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.executed; only the conclusion becomes True. -/
+theorem single_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.executed := by
+  exact ⟨SingleWordGate.program, SingleWordGate.certificate, sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_certificate_executed_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.entry_rejection; only the conclusion becomes True. -/
+theorem single_certificate_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.entry_rejection := by
+  exact ⟨SingleWordGate.program, SingleWordGate.certificate, sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_certificate_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_certificate_entry_rejection_domain

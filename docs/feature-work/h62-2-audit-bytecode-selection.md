@@ -1128,3 +1128,47 @@ All72 audit-tool tests, trust/reachability, roots/fragments, whitespace and
 documentation paths pass for this checkpoint. Exact native proofs still require
 the explicit generated-program check; package, ledger and performance acceptance
 remain pending. The active goal and all prior failed/sealed evidence are unchanged.
+
+
+## Twenty-eight public gate-contract hypothesis domains
+
+Master254c60df was fetched/inspected and already adopted at c519675a; no new
+producer work was duplicated. The existing renderer/one fixture now includes
+SingleWordGate nine public methods and three certificate fields: twelve new
+exact domains, twenty-eight total across three families/six producer files.
+The frozen c6f550 leaf-byte checks and pinned shared elaborator remain in force.
+The lexical exactly-once regression covers this explicit subset, not general
+theorem discovery, private helpers, definitions or whole-census completeness.
+
+New domains retain all program/self, selection/result, shared raw-input/word/
+size/frame/representation binders, with full/valid/fuel hypotheses where stated.
+A36zero-byte typed input inhabits entry_success/insufficient_fuel domains; the
+empty short input is used for different rejection/short-frame domains. Only
+original conclusions become True; data-only entry_form hypotheses are not a
+success proof. Existing actual success/refusal controls remain separate.
+
+The complete generated program passes on the first direct attempt11.638s,
+empty diagnostics,28axiom guards (three noaxioms,ten propext-only,fifteen standard
+trio) and two expected classifier refusals. Both resource monitors pass. No
+module here exceeds60s; historical61.994s head-check stays retained. Same active
+generic epoch/deadline01:11:01.069665→05:11:01.069665UTC, no reset/prerequisite
+build/PowerBounds retry or heartbeat/trust/statement/premise/exclusion change.
+No new compiler family, library module or original macro implementation.
+
+The fixture remains trusted reviewed Lean, not regex-sandboxed. Generated source,
+manifest and kernel receipt are hash-bound and offGit; explicit kernel checking
+is required beyond72Python tests or the six-file verifier roster. Local premise
+feasibility does not accept original results, owner attribution, source/kernel
+metadata joins or the global ledger. Full703source/190core/37Bridge, private/
+inherited/type joins, Source/native/gas/fork, Bridge/package/performance and
+existing producer waits remain open; no inventory counts or whole-goal status
+are promoted. No RUNTIME_GATE_PASS is asserted.
+Evidence: /workspace/parallel-20261103/executable-bytecode/exact-single-word-domains/.
+
+Final finder and skeptic reviews pass with no findings. Selected import
+receipt rechecking now covers236 frozen source/product bindings; saved terminal
+RED and all non-attestation/non-census flags remain unchanged. All72 tests,
+trust/reachability, roots/fragments, documentation paths and whitespace checks
+pass. Existing28unrecorded scoped global pins remain for coordinator integration;
+this checkpoint changed no tracked Lean/inventory/layer inputs. Layer policy
+is the published107allowance version, not a new semantic theorem.
