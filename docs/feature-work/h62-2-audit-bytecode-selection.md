@@ -2421,3 +2421,41 @@ eight tests. Finder and skeptic confirmed a test entry-point omission, now
 fixed by placing unittest.main after both classes and avoiding inherited test
 duplication. Both final reviews pass. Original source closure, all remaining
 190-core/37-Bridge obligations, producer waits and PowerBounds STOP persist.
+
+### Exact V2 frame-field hypothesis witnesses
+
+The existing pinned binder extractor now supports actual registered,
+monomorphic proposition-valued projections, rechecking their exact raw kernel
+types before extracting domains. It retains all input/output/self, tail and
+capacity-room binders. Data projections, nonprojections, unsupported universes,
+stale type snapshots and duplicate field targets are refused. The generic
+extractor is reused; no frozen field signature or original conclusion changes.
+
+Three named positive domains cover FrameCertificate.inputRoom, frame and
+capacity in the frozen Selection V2 interface. They use duplicateHead 7 over
+input [7], output [7,7], and tail [11,99] for the frame/capacity cases. The
+capacity witness includes its actual room proof. The original certificate
+supplies self; it is never silently assumed inhabited. A synthetic certificate
+with a False field has a refuted domain, retained as an intentional negative
+control rather than positive coverage. These are hypothesis-feasibility proofs,
+not the original field conclusions or whole-source/runtime adequacy.
+
+The three proofs pass native checking in 3.326 seconds. Their only axioms are
+propext, Classical.choice and Quot.sound; the empty-domain refutation uses none.
+The sole missing support module, the unchanged frozen FrameCapacityV2, was
+kernel-built in 8.066 seconds under the single 180-second prerequisite
+allowance. Including the failed receipt-wrapper group, its guarded total is
+12.791 seconds. No checked file exceeds 60 seconds. Original prefix products
+and the new module are SHA256-bound under unchanged module names; no cache key
+or artifact bytes are reconstructed. Initial missing-import, receipt-path and
+package-search-path failures remain recorded. No timing STOP was retried.
+
+The fixture frame-field-witnesses.json is checker-read proof source, not a
+receipt. The 122-test suite passes. Finder and skeptic confirmed a native
+receipt-path verification gap: the replay now pins complete stage-specific
+Lean commands, source/output paths and the reconstructed generated-source hash.
+Both final reviews pass. Proofs, native output and guards are sealed outside
+the code branch under /workspace/parallel-20261103/executable-bytecode/
+frame-field-domains/ and archived separately under H145. No global witness
+ledger, full census, inherited instantiation or original 703-source closure
+acceptance is inferred; all original producer waits and STOPs remain.

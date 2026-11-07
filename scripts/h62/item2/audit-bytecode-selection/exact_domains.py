@@ -667,3 +667,99 @@ def data_render(repo, rows, source_candidate_names, expectations=None, *, decide
         "producer_source_sha256":producer_sources,"generated_lean_sha256":sha(program.encode()),
         "expected_results":expectations,"kernel_accepted":False,"witness_ledger_linked":False,
         "boundary":"Default attempts only; unsupported is not uninhabited; no proof premises, original conclusions, Source or compiler coverage assumed"}
+
+
+PROJECTION_DOMAIN_CHECKER = r'''
+private def projectionDomain (name : Lean.Name) : TermElabM Expr := do
+  let env ← getEnv
+  unless (env.getProjectionFnInfo? name).isSome do
+    throwError "field hypothesis audit: target is not a registered projection"
+  let info ← getConstInfo name
+  unless info.levelParams.isEmpty do
+    throwError "field hypothesis audit: universe parameters require review"
+  unless ← isProp info.type do
+    throwError "field hypothesis audit: projection is not proposition-valued"
+  explicitDomain info.type
+
+elab "field_hypotheses_of% " id:ident : term => do
+  projectionDomain (← realizeGlobalConstNoOverloadWithInfo id)
+
+elab "field_hypotheses_named% " target:str " against% " expected:str : term => do
+  let foundFields := (← getEnv).constants.toList.filter fun pair => pair.1.toString == target.getString
+  unless foundFields.length == 1 do
+    throwError "field hypothesis audit: missing or ambiguous kernel name"
+  let name := foundFields.head!.1
+  unless reprStr (← getConstInfo name).type == expected.getString do
+    throwError "field hypothesis audit: recorded type differs"
+  projectionDomain name
+
+structure FieldToy : Prop where good : True
+structure DataFieldToy where value : Nat
+universe u
+structure PolyFieldToy (α : Type u) : Prop where good : True
+structure EmptyFieldToy : Prop where bad : False
+example : field_hypotheses_of% FieldToy.good := ⟨⟨True.intro⟩, True.intro⟩
+/-- error: field hypothesis audit: target is not a registered projection -/
+#guard_msgs in
+#check field_hypotheses_of% True.intro
+/-- error: field hypothesis audit: projection is not proposition-valued -/
+#guard_msgs in
+#check field_hypotheses_of% DataFieldToy.value
+/-- error: field hypothesis audit: universe parameters require review -/
+#guard_msgs in
+#check field_hypotheses_of% PolyFieldToy.good
+/-- error: field hypothesis audit: recorded type differs -/
+#guard_msgs in
+#check field_hypotheses_named% "Solidity.H62.BytecodeSelection.HypothesisAudit.FieldToy.good" against% "stale"
+theorem empty_field_domain_refuted : ¬ (field_hypotheses_of% EmptyFieldToy.bad) := by
+  rintro ⟨certificate, _⟩
+  exact certificate.bad
+#print axioms empty_field_domain_refuted
+'''
+
+def projection_domain_source(repo, rows, witnesses, *, support_modules=()):
+    """Reuse the pinned binder extractor for actual proof-field joint domains.
+
+    Guards regression: a self certificate or capacity premise may not disappear
+    when auditing a projection. No original conclusion is claimed by this audit.
+    """
+    import kernel_metadata as metadata
+    metadata.validate_rows(rows)
+    by_name = {row['name']: row for row in rows}
+    if not isinstance(witnesses, dict) or not witnesses:
+        raise ValueError('missing field witnesses')
+    selected = {}
+    for helper, packet in witnesses.items():
+        if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', helper):
+            raise ValueError('invalid field helper')
+        if not isinstance(packet,dict) or set(packet) != {'target','proof'}:
+            raise ValueError('invalid field witness packet')
+        if not isinstance(packet['target'], str) or not packet['target']:
+            raise ValueError('invalid field target')
+        if any(p['target'] == packet['target'] for p in selected.values()):
+            raise ValueError('duplicate field target')
+        row = by_name.get(packet['target'])
+        if row is None or not row['is_projection'] or not row['proof_type'] or row['level_params']:
+            raise ValueError('field domain requires a monomorphic proposition projection')
+        if not isinstance(packet['proof'], str) or not packet['proof'].strip():
+            raise ValueError('missing direct field proof')
+        if re.search(r'\b(?:sorry|admit|axiom|native_decide|unsafe|implemented_by)\b',mask(packet['proof'])):
+            raise ValueError('forbidden field witness mechanism')
+        selected[helper] = dict(packet, observed_type=metadata.observed_type(row))
+    modules = sorted({by_name[p['target']]['module'] for p in selected.values()})
+    if not isinstance(support_modules, (list, tuple)) or any(not isinstance(m,str) for m in support_modules):
+        raise ValueError('invalid field support imports')
+    modules = sorted(set(modules + list(support_modules)))
+    frozen_map, scope = _frozen_scope(repo, modules)
+    fragment = macro_fragment((repo / MACRO_PATH).read_text())
+    source = 'import Lean\n' + ''.join('import '+name+'\n' for name in modules)
+    source += '\n/-! Guard omission of certificate self, tail and capacity premises in field-domain witnesses. Original conclusions, source adequacy and global census remain unproved. -/\n'
+    source += fragment + '\n' + PROJECTION_DOMAIN_CHECKER + '\n'
+    for helper,packet in selected.items():
+        source += 'theorem '+helper+' : field_hypotheses_named% '+json.dumps(packet['target'])+' against% '+json.dumps(packet['observed_type']['type_expr'],ensure_ascii=False)+' := '+packet['proof']+'\n#print axioms '+helper+'\n'
+    source += 'end '+NAMESPACE+'\n'
+    pins={'base':BASE,'source_sha256':scope,'scope_map_sha256':sha(frozen_map),'targets':selected,
+          'macro_fragment_sha256':MACRO_SHA256,'checker_sha256':sha(PROJECTION_DOMAIN_CHECKER.encode()),
+          'generated_lean_sha256':sha(source.encode()),'original_conclusions_proved':False,
+          'source_correspondence_established':False,'global_witness_ledger_linked':False}
+    return source,pins

@@ -1,0 +1,14 @@
+{
+  "frame_inputRoom_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.inputRoom",
+    "proof": "⟨[7], [7,7], Solidity.Backend.Selection.V2.duplicateHead 7, True.intro⟩"
+  },
+  "frame_frame_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.frame",
+    "proof": "⟨[7], [7,7], Solidity.Backend.Selection.V2.duplicateHead 7, [11,99], True.intro⟩"
+  },
+  "frame_capacity_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.capacity",
+    "proof": "⟨[7], [7,7], Solidity.Backend.Selection.V2.duplicateHead 7, [11,99], by decide, True.intro⟩"
+  }
+}
