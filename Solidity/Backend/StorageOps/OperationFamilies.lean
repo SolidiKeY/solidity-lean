@@ -167,6 +167,32 @@ theorem modifyMany_commute {K : Type} [DecidableEq K] {n : Nat} {G : Schema n}
           (modifySlot_many_commute slots head (f head) right g outside)
       _ = _ := Option.bind_assoc _ _ _
 
+/-- A disjoint preceding family cannot turn an existing family failure into
+success. The preceding family may itself fail; no result is manufactured. -/
+theorem modifyMany_failure_commutes {K : Type} [DecidableEq K]
+    {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
+    (slots : K → Slot G E) (left right : List K)
+    (f g : K → Value G E → Option (Value G E))
+    (separate : ∀ a ∈ left, ∀ b ∈ right, a ≠ b)
+    (failed : modifyMany f left slots = none) :
+    (modifyMany g right slots).bind (modifyMany f left) = none := by
+  rw [← modifyMany_commute slots left right f g separate, failed]
+  rfl
+
+/-- If the disjoint preceding family succeeds, the original failed family
+still fails at its actual resulting slots. Internal repeated keys are retained. -/
+theorem modifyMany_failure_after_disjoint {K : Type} [DecidableEq K]
+    {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}
+    (slots after : K → Slot G E) (left right : List K)
+    (f g : K → Value G E → Option (Value G E))
+    (separate : ∀ a ∈ left, ∀ b ∈ right, a ≠ b)
+    (failed : modifyMany f left slots = none)
+    (performed : modifyMany g right slots = some after) :
+    modifyMany f left after = none := by
+  have unchanged := modifyMany_failure_commutes slots left right f g separate failed
+  rw [performed] at unchanged
+  exact unchanged
+
 /-- The generated key list is a finite footprint even when it contains repeated
 accesses. A successful family leaves every key outside it exactly unchanged. -/
 theorem modifyMany_outside {K : Type} [DecidableEq K] {n : Nat} {G : Schema n}
@@ -187,4 +213,8 @@ theorem modifyMany_outside {K : Type} [DecidableEq K] {n : Nat} {G : Schema n}
       exact (ih (Slots.write slots head value) rest performed).trans
         (Slots.write_other slots head key different value)
 
+/-- info: 'Solidity.Backend.StorageOps.modifyMany_failure_commutes' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms modifyMany_failure_commutes
+/-- info: 'Solidity.Backend.StorageOps.modifyMany_failure_after_disjoint' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms modifyMany_failure_after_disjoint
 end Solidity.Backend.StorageOps

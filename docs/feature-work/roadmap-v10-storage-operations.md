@@ -2042,3 +2042,22 @@ H145; the evidence and timing figures are kept out of this code-branch summary.
 Actual emitted-access alignment, H121b Source/P8 admission/origin/lifecycle,
 original/consolidated queues and final gates remain open. C281 and prior STOPs
 are not released by these separate transport laws.
+
+### C284: disjoint partial-family failure stability
+
+modifyMany_failure_commutes extracts the original partial commutation law for
+an already failing family: a disjoint preceding family cannot make the combined
+result succeed, even if the preceding family itself fails.
+modifyMany_failure_after_disjoint specializes this to its actual successful
+poststate. Internal repeated keys remain allowed; captured effects and existing
+cross-family separation are unchanged. No transaction rollback, journal or
+Source runtime outcome is asserted.
+
+The existing recursive populated fixture now checks repeated-pop failure at
+the exact successful disjoint-clear poststate. Original forward/reverse
+failure, success and alias-control proofs are untouched, preserving their axiom
+sets. No new evaluator, state representation, fixture copy, budget or interface
+change. Validation, measured axiom guards, timings and independent reviews are
+archived privately under H145. Original/consolidated queues, strict/full gates,
+actual H121b Source/P8 production and all external waits remain open. C281 and
+prior STOPs are unaffected; no whole-Backfill or coverage completion is claimed.
