@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "purpose": "External input-verification regression evidence; no generated fixtures or logs tracked",
+  "directory": "/workspace/vy2-evidence/views-input-manifest",
+  "total_bytes": 415422,
+  "files": [
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/before/acceptance.py",
+      "bytes": 3672,
+      "sha256": "851aae2d54b82072990dcaf5a553b2fc73ce11bf6e850796bb45385283f13053"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/before/census.py",
+      "bytes": 7731,
+      "sha256": "1ff4798023c942e275994f6d8bf187560f9c65688d8f6f7f080bd97f6fc2876c"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/checkpoint.bundle",
+      "bytes": 115741,
+      "sha256": "1913e82d3239e672631dcdd5c8e9ee3bec11bb0b53f1d3b1e35d04b47fe0321f"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/checks.json",
+      "bytes": 499,
+      "sha256": "1f2e8bbcdca8864af6d93c48c1f9d2307c0b7eb17cc582221345b922afffe995"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/doc-paths.log",
+      "bytes": 14480,
+      "sha256": "b7e959e0e30cc8cccceeabb26db481b26ef8ff1192c6079884a31954d924ef07"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/fragments.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/input-stage-cli.py",
+      "bytes": 432,
+      "sha256": "f0ca435d0ff278b2f4a3992b026cd6f63eb62bf8a0211339fc838e199989e85b"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/original-input-stage.py",
+      "bytes": 329,
+      "sha256": "223e39ec5d8812b1e55e4bada79e79ebaaa08b51d5a0363e856abb6d5dbb2c0a"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/original-stage-results.json",
+      "bytes": 317,
+      "sha256": "7b440804d67e3dafbdb910c452f0fe51d66d9f7a7bc996d1439a1a60a81a4368"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/original.patch",
+      "bytes": 270328,
+      "sha256": "0516bc990de4ad9eac588c361c9044cde39963071bba8b1758ae7bd13e07cd28"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/policy-preservation.json",
+      "bytes": 174,
+      "sha256": "421bb66d280f2625009a890b13ee595120ee4212695d262c974313dd0f9db2c3"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/register.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/syntax.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/test_acceptance.py.log",
+      "bytes": 106,
+      "sha256": "60bb849356ffbc091f601e17fc6ae0b2eb5e26d734d433da020c6e775efbf97f"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/test_bounded.py.log",
+      "bytes": 98,
+      "sha256": "83b2d543572b6623047203556fbc25377120b20e1130302b5956aa7ba899c89d"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/test_census.py.log",
+      "bytes": 105,
+      "sha256": "21c7e48d0b1ec908feef784bbce1fa55f2c9a7acf76382fa7578754a78bd1ed8"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/test_correspondence.py.log",
+      "bytes": 136,
+      "sha256": "f4208c793163ae759f2205b7ba669ca6ff8e93d3244d34f963233e04ef38c8b2"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/test_manifest.py.log",
+      "bytes": 101,
+      "sha256": "921b60a7fd52e978fbb551cacd29df2d6708879400278e1fcc70fceeb0c6f8e0"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/test_reconcile_frozen.py.log",
+      "bytes": 116,
+      "sha256": "fdca35adbc6bdd3a5eea58b98ea709ad61281db73f15253970c502ea2c278439"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/test_timings.py.log",
+      "bytes": 106,
+      "sha256": "698d16d7b93c4bd9707d3cfacda6fb1e0fea99ed0cda6e69bedc42772940540a"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/timings.json",
+      "bytes": 486,
+      "sha256": "9852f186e3bae0ea92af5d22456ac377db550dd4259e31815814d1dc4a3f855d"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/valid-inputs/input-0.json",
+      "bytes": 9,
+      "sha256": "1113f0a94f45c4b068876e9175f687b08b2229c50182a579027424158ff392f9"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/valid-inputs/input-1.json",
+      "bytes": 9,
+      "sha256": "2ae2f0decb81fc1ec7b1dcbc19912b19605e312b725268f01de9d6614d2d8926"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/valid-inputs/input-2.json",
+      "bytes": 9,
+      "sha256": "b743cbe1bb107033458694774ad7146dec3f339346803159e2c58f55e2ac67dc"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/valid-inputs/input-3.json",
+      "bytes": 9,
+      "sha256": "c509a1e728f019899e4a40503ac62872d9373c6a7719c48054941a7e8c298815"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/valid-inputs/input-4.json",
+      "bytes": 9,
+      "sha256": "902354f92110cc4d52066b7208477aad5369253428307d41dec25e00786ee52d"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/valid-inputs/sha256.json",
+      "bytes": 420,
+      "sha256": "927353b9cb932361c49690e2b1c5bcc76d60dea9167408dbcef84f77effd3e5a"
+    },
+    {
+      "path": "/workspace/vy2-evidence/views-input-manifest/whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

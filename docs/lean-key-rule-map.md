@@ -949,6 +949,235 @@ also capped. Non-ground conditions use the existing `Seq.refuteS` clauses.
 A rigid refusal or failed check conservatively walks both branches, even if
 contradictory unused premises could have closed one in the previous path.
 
+
+### VY2 physical equational preparation (Lean-only)
+
+Decision YQ5 (2026-10-31) authorizes Lean-only Yul rules. The following are
+kernel-checked **equational preparation laws**, with no SolKey taclet.
+They are not Y09.02 statement rules: VY1 terms/statements, `dl{ … }` / `tm{ … }`
+notation, printers and source-step soundness remain open. No admission row
+is reopened by this table.
+
+| Preparation law (no SolKey taclet) | Lean theorem | Premises |
+| --- | --- | --- |
+| Packed read after update | `Yul.Views.Field.find_save` | Bounded field value; field fits one slot |
+| Packed unchanged update | `Yul.Views.Field.save_unchanged` | Actual extracted field value |
+| Packed update frames | `Yul.Views.Field.save_low`, `Yul.Views.Field.save_high`, `Yul.Views.Field.find_save_disjoint` | Bounded field value; other-field law requires disjoint byte intervals |
+| Slot read after update | `Yul.Views.find_saveSlot`, `Yul.Views.find_saveSlot_other` | Other-slot law requires unequal slots |
+| Byte read after update | `Yul.Views.find_saveByte`, `Yul.Views.find_saveByte_other` | Other-byte law requires unequal addresses |
+| Snapshot copy read/frame | `Yul.Views.find_copyBytes`, `Yul.Views.copyBytes_outside` | In-range index / outside destination interval |
+| Word decode/encode | `Yul.Views.mload_mstore`, `Yul.Views.mstore_mload` | Any byte view and word; successful EVM integration additionally requires valid ranges/resources |
+| Typed region decode/encode | `Yul.Views.Regions.decode_encode` | Actual typed codec identity; inverse region ownership |
+| Region unchanged reconstruction | `Yul.Views.Regions.unchanged` | Canonical owned bytes; retains every residual byte |
+| Byte/string object decode and unchanged view | `Yul.Views.decode_bytesObjectView`, `Yul.Views.decode_stringObjectView`, `Yul.Views.bytesObject_unchanged` | Word-sized source length; unchanged view requires matching header/live payload; all residual/padding retained |
+| Calldata tail padding | `Yul.Views.calldata_zero`, `Yul.Views.calldataload_zero` | Offset at or after raw input length |
+| Fixed hash congruence | `Yul.Views.keccak256_congr` | Equal input byte lists; no collision premise |
+
+See [VY2 lane record](feature-work/inline-assembly-vy2.md) for integration
+limits, controls and reviews.
+
+
+VY2 further Lean-only equational preparation (YQ5, no SolKey taclet):
+`PackedMembers.decode_encode`/`slot_roundtrip` construct typed flat aggregate
+roundtrips under successful encoding and nonwrapping extent; `encode_residual`/
+`slot_residual_byte` preserve unowned bytes; `encode_unchanged` requires matching
+canonical owned bytes, supplied constructively by `encode_matches` after encoding.
+These are component laws, not Y09.02 statement/calculus rules or source admission.
+
+
+Further VY2 Lean-only preparation (YQ5): `component_owned_reads_preserved`,
+`component_decode_preserved`, `composed_roundtrip`/`composed_residual`, and their
+physical corollaries use actual outputs/disjointness and real bounds. Nested
+`structArray_physical_roundtrip`/`arrayStruct_physical_roundtrip` and encoded
+residual/unchanged laws construct actual source contents with declared indices.
+These have no SolKey taclet and do not discharge Y09.02 statement soundness,
+notation/printers, source admission or whole-state/compiler closure.
+
+VY2 canonical preparation (Lean-only, YQ5): `canonicalPathWriteback_unchanged`,
+`canonicalPathWriteback_cell_other`, `preserveScalarWrite_commute` and
+`patchScalarSlot_unowned_byte` operate on actual Source.Storage with canonical
+codec, typed path and real separation/bounds. `accountWrite_actual_storage` and
+`transientWrite_actual_storage` construct actual source operations. These are
+preparation laws without SolKey taclets, not Y09.02 statement soundness/rules.
+
+VY2 residual preparation (Lean-only, YQ5): `residualUndoN_run`,
+`residualRollback_run`, `companionRollback_run`, `companionRollback_inner`,
+`companionRollback_outer_commit` and `companionEndTx_transient` combine a concrete
+fixed-ownership residual journal with actual Source frames. No SolKey taclets or
+Y09.02 statement/calculus/printing claim; ownership completeness and actual Yul
+execution/physical-view agreement remain integration obligations.
+
+VY2 finite preparation (Lean-only, YQ5): `finiteEncode_view`,
+`finiteWriteback_result_view`, `finiteWriteback_encode`,
+`finiteEncode_after_writeback`, `finiteWriteback_perm`, `finiteEncode_residual`
+and `finiteEncode_registered_residual` use actual path-indexed codecs, real
+separation/successful outputs/default availability as applicable. The finite
+agreement instance is constructed; supplied scalar codecs retain individual
+inverse laws. These have no SolKey taclets and are not Y09.02 statement rules,
+notation/printers, source admission or whole-store/compiler closure.
+
+VY2 heap preparation (Lean-only, YQ5): `heapByteWriteback_encode`,
+`heapByteWriteback_unchanged`, `heapByteWriteback_types_next`,
+`heapByteResult_choices`, `bytesObject_other_object`, `bytesObject_reserved`,
+`heapByteStateWriteback_MemOK` and `heapByteStateStep_preserves` use actual typed
+Heap/EMState and owner MemOK. Real allocated-object/type/Placement/header/size
+and nonoverlap premises remain explicit. No SolKey taclet, all-assembly rule,
+Y09.02 notation/printing, full heap realization or compiler closure is claimed.
+
+VY2 bounded resize preparation (Lean-only, YQ5): `heapByteResize_fixed_compat`,
+`heapByteResize_encode`, `heapByteResize_live_view`, `heapByteResize_result_choices`,
+`bytesObject_shrink_tail`, `bytesObject_resize_other_object` and
+`heapByteResizeState_preserves` derive actual typed output/read/placement/MemOK
+laws with real input footprint and separation facts. No SolKey taclet, all-block
+semantics, Y09.02 notation/printing, full realization or compiler closure claim.
+
+
+VY2 retained-allocation preparation (Lean-only, YQ5): `retainedByte_encode`,
+`retainedByte_result_history`, `retainedByte_live_view`,
+`retainedByteState_MemOK` and `bytesObject_disjoint_commute` prove selected typed
+write/read/history/MemOK and exact disjoint physical-update laws. Premises include
+actual origin/current placements, constructive typed-write lineage, explicit
+footprint/separation and initial owner MemOK. Initial allocation provenance and
+full source/compiler/assembly closure remain obligations. No SolKey taclet or
+Y09.02 notation/printing/composition claim.
+
+
+VY2 byte-heap view preparation (Lean-only, YQ5): `encodeByteHeap_reads`,
+`encodeByteHeap_residual`, `encodeByteHeap_unchanged`,
+`encodeByteHeap_source_word` and `encodeByteHeap_source_byte` prove concrete
+supported ordinary-byte/string view/update/read laws. Actual typed Heap.get
+witnesses, valid Placement and distinct finite coverage are explicit premises.
+No SolKey taclet, full-memory or Y09.02 calculus/printing/composition claim.
+
+
+VY2 mixed ordinary view preparation (Lean-only, YQ5): wordList_read/unchanged,
+MemoryObjectWords.read/fits, MemoryImage.source_word/source_byte and
+encodeMixedHeap_reads/residual/unchanged/source_word/source_byte are concrete
+scalar/owned-pointer/struct/static-array/dynamic-array/bytes/string layout laws.
+Actual typed constructors, real child ownership and valid placement/distinct
+supported coverage are explicit; no SolKey taclet, dirty cleanup, universal
+writeback, Y09.02 notation/printing or full source/compiler/calculus closure.
+
+
+VY2 selected word writeback (Lean-only, YQ5): decodeStaticUint_encode/reencode,
+staticUintWriteback_unchanged, staticUintState_MemOK/unchanged,
+decodeMemoryPointer_encode/read, structPointerWriteback_MemOK and
+mstore_disjoint_commute are kernel laws for concrete supported components.
+Actual typed found objects/declared indices/Placement/real candidate ownership
+and explicit coverage for pointer completeness remain premises. No SolKey taclet,
+generic raw struct/whole-memory or dirty/shared-zero semantics, Y09.02 notation/
+printing or full source/compiler/calculus coverage claim.
+
+
+VY2 dynamic full-width array preparation (Lean-only, YQ5):
+`decodeDynamicUint_encode/reencode`, `dynamicUintWriteback_unchanged`,
+`dynamicUintState_MemOK`, `retainedDynamicUint_result_history`,
+`retainedDynamicUintState_MemOK` and `dynamicUint_disjoint_commute` are kernel
+preparation laws, not installed Yul calculus rules/taclets. Their real found-data,
+Placement/retained-origin/capacity and initial-MemOK premises are retained.
+Concrete Y09.02 rule/notation/printer/source composition stays open; see
+[VY2](feature-work/inline-assembly-vy2.md#dynamic-full-width-array-writeback-2026-10-31).
+
+
+VY2 simultaneous struct preparation (Lean-only, YQ5):
+`decodeMemoryMember_encode`, `decodeMemoryFields_encode/representation`,
+`structHeapWriteback_unchanged`, `structStateWriteback_unchanged/MemOK`,
+`decodedStruct_raw_reencode/source_word`, `structFields_other_region/reserved`
+are preparation theorems with real typed found-data/Placement/canonical member/
+owned candidate coverage/initial-H premises. No taclet or concrete Yul calculus
+rule/notation/printer/source adequacy is claimed; original Y09.02 remains open.
+See [VY2](feature-work/inline-assembly-vy2.md#simultaneous-heterogeneous-struct-writeback-2026-10-31).
+
+
+VY2 canonical array families (Lean-only preparation, YQ5):
+`decodeArrayMembers_sound/reads/encode`, `memberArrayHeap_encode/unchanged`,
+`memberArrayState_MemOK/unchanged`, `memberArrayResultPlacement`,
+`memberArrayView_reencode`, `memberArray_other_region` derive component laws
+from actual typed source data, canonical member/coverage/Placement and initial-H
+premises. No concrete Yul rule/notation/printer/source soundness is installed;
+Y09.02 remains open. [VY2](feature-work/inline-assembly-vy2.md#canonical-array-element-families-2026-10-31).
+
+
+VY2 retained array-family preparation (Lean-only/YQ5):
+`retainedMemberArray_encode/unchanged/result/history/preservation/MemOK`,
+`retainedMemberArrayState_unchanged/other_region/raw_reencode` are derived
+component theorems with actual original/current Placement+typed history,
+canonical owned-member decoding/coverage and original-H premises. No concrete
+Yul rule/taclet/notation/printer or source/compiler composition claimed;
+[Y09.02 remains open](feature-work/inline-assembly-vy2.md#retained-array-element-family-resizing-2026-10-31).
+
+
+VY2 canonical scalar-memory extension (Lean-only preparation/YQ5):
+`decodeCanonicalScalar_encode/word/refOK`, `decodeExtendedMemoryMember_sound/encode`,
+`decodeCanonicalArray_sound/reads`, `decodeCanonicalFields_representation/reads`,
+`canonicalArrayState_MemOK`, `canonicalStructState_MemOK`, `canonicalRetainedState_MemOK`
+are concrete component laws, with actual typed/canonical/layout/ownership and
+original-H premises. No installed Yul rule/notation/printer/calculus/source
+composition claimed. [VY2](feature-work/inline-assembly-vy2.md#canonical-scalar-memory-extension-2026-10-31).
+
+
+VY2 exact canonical compatibility (Lean-only/YQ5 preparation):
+`decodeExtendedMemoryMember_legacy`, `decodeCanonicalArray_legacy`,
+`decodeCanonicalFields_legacy`, `canonicalArrayState_legacy`,
+`canonicalStructState_legacy`, `canonicalRetainedState_legacy` (and heap variants)
+prove complete result equality with real old-domain type premises. No installed
+Yul calculus rule/source adequacy or renamed full-coverage predicate follows;
+[original Y09.02 remains open](feature-work/inline-assembly-vy2.md#canonical-compatibility-and-genuine-aliases-2026-10-31).
+
+
+VY2 joint ordinary-memory PREPARATION laws (YQ5 Lean-only; no SolKey taclet,
+no concrete Y09.02 rule/notation/printer registration or completeness claim):
+`decodeExtended_refresh`, `canonicalJoint_order`, `canonicalJoint_MemOK`,
+`canonicalJoint_geometry`, `canonicalJoint_sequential`,
+`canonicalJointRetained_geometry`, `canonicalJoint_raw_reencode` in
+`Solidity/Yul/Views/MemoryTransport.lean`, `Solidity/Yul/Views/JointMemory.lean`,
+`Solidity/Yul/Views/JointPlacement.lean`, `Solidity/Yul/Views/JointSequential.lean`, `Solidity/Yul/Views/JointRetained.lean`, `Solidity/Yul/Views/JointRaw.lean`.
+Premises/scope and evidence: [VY2 checkpoint](feature-work/inline-assembly-vy2.md#joint-ordinary-memory-writeback-2026-10-31).
+
+
+VY2 finite ordinary inventory PREPARATION laws (YQ5 Lean-only, no SolKey taclet,
+no actual Y09.02 calculus/notation/printer completeness claim):
+`inventoryStateWriteback_MemOK`, `inventoryStateWriteback_realization`,
+`inventoryStateWriteback_sequential`, `inventoryStateWriteback_unchanged`,
+`inventoryStateWriteback_view`, `inventoryStateWriteback_reads`,
+`runInventoryUpdates_perm`, `runInventoryUpdates_repeat`. Modules:
+`Solidity/Yul/Views/OwnedInventory.lean`,
+`Solidity/Yul/Views/InventoryRealization.lean`,
+`Solidity/Yul/Views/InventorySequential.lean`,
+`Solidity/Yul/Views/InventoryUnchanged.lean`,
+`Solidity/Yul/Views/InventoryView.lean`,
+`Solidity/Yul/Views/InventoryOrder.lean`.
+Premises/boundaries: [VY2 checkpoint](feature-work/inline-assembly-vy2.md#finite-owned-memory-inventory-2026-11-01).
+
+
+VY2 computed-inventory preparation (Lean-only, no SolKey taclet, no new Yul admission):
+`ownerMemOK_prepares_inventory`, `prepareHeapInventory_ok`, `prepareHeapInventory_error`,
+`generatedHeapEntries_nodup`, `ownerMemory_unchanged`,
+`enumeratedMemoryWriteback_MemOK`, `enumeratedMemoryWriteback_view`,
+`enumeratedMemoryWriteback_reads`, `enumeratedMemoryWriteback_reserved`,
+`enumeratedMemoryWriteback_sequential`. Modules:
+`Solidity/Yul/Views/HeapPreparationMemOK.lean`,
+`Solidity/Yul/Views/HeapEnumerationLaws.lean`,
+`Solidity/Yul/Views/EnumeratedMemory.lean`.
+These are constructive canonical preparation/source component theorems with real
+Placement/declared-family/retained-ownership premises, not concrete Y09.02 rules.
+
+
+VY2 packed-slot complement preparation (Lean-only; no SolKey taclet or new Yul admission):
+`finiteEncode_fromComplement`, `packedStoreWriteback_reencode`,
+`packedPersistent_reencode`, `packedTransient_reencode`,
+`packed_frame_child_rollback`, `packed_frame_outer_commit`,
+`packedSourceStep_static`, `packedSourceStep_MemOK`,
+`packedFrameWrite_persistent_reencode`, `packedFrameWrite_transient_reencode`,
+`packedStateWriteback_identity`, `packedStateWriteback_persistent_reencode`.
+Modules: `Solidity/Yul/Views/PackedResidualCodec.lean`,
+`Solidity/Yul/Views/PackedResidualWorld.lean`,
+`Solidity/Yul/Views/PackedResidualSource.lean`,
+`Solidity/Yul/Views/PackedResidualFrame.lean`,
+`Solidity/Yul/Views/PackedResidualWritebackSound.lean`.
+These are concrete canonical source/physical components with real finite layout,
+non-static/current-frame/default/representation premises as stated; concrete
+Y09.02 rules/notation/printers and full assembly composition remain open.
 ### VA2 AU04 explicit consumer
 
 `sol_share_calls` and `sol_close_call_shared` are Lean-only leaf transformations, not new SolKey-shaped calculus constructors. Their soundness uses `CallFunctionTransform.valid_iff` and `CallFunctionAffine.holds_shared_affine_cases`; actual source-call transport remains the existing certified summary bridge. The affine profile is certified internally with immediate kernel validation. Unsupported profiles keep ordinary handling; no validity premise, observation or SolKey rule name changes.

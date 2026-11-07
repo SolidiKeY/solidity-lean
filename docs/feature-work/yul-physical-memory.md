@@ -1340,3 +1340,39 @@ owned and reserved agreement is proved from real image bounds. Length `65`
 executes a physical store but exceeds the original string allocation and gives
 preparation `None`. No sequential combination, language length syntax, dirty
 cleaning policy or target allocator/compiler adequacy is inferred.
+
+
+## H73 control-module memory split
+
+The member-dynamic fixture, ownership sequence and dynamic journal controls
+are split into dependency-ordered modules. Original declaration names,
+statements, proof bodies and irreducibility attributes are preserved; the
+original import paths still expose the complete APIs. Each piece explicitly
+serializes elaboration. No heartbeat, recursion or trust budget changes.
+
+Matched Lean v4.24.0 checks used LEAN_NUM_THREADS=1, -j1 and --tstack=131072.
+Peak process VmHWM was sampled from /proc at 10 ms intervals (KiB):
+
+| Original module | Before | After |
+|---|---:|---:|
+| `Yul/Views/MemberDynamicControls.lean` | 1743264 | 474008 |
+| `Yul/Views/MemberDynamicSequence.lean` | 1767224 | 484600 |
+| `Yul/Views/DynamicJournalControls.lean` | 1782592 | 1751728 |
+
+All 12 split-module checks and the three transitive consumer checks passed.
+The largest new piece measured 1771396 KiB; the largest affected consumer
+measured 1817308 KiB. Both are below 4 GiB. The original declaration streams reconstruct byte-for-byte.
+All 134 original axiom sets match; 133 types match structurally, and the one
+generated record-update binder rename was checked definitionally equal.
+The scheduling-only experiment did not materially reduce memory and is not
+counted as the split's improvement.
+
+The coordinator's reported 6.3–8.0 GB host peaks were not reproduced on this
+VM. These local measurements do not claim a passing host integration rebuild,
+whole-lane completion or migration validation.
+
+### H86 original-branch reconciliation
+
+Merged published master into original `278633cfeedc`, retaining current calldata constructors, exact inventory helper extraction and additive published theorems. H86 authorized published layer/trust records, both historical documentation sections and generated-root/fragment regeneration. The preserved successor branch is now integrated into the original branch, including the OOM split and three authenticated final member heads. No owner Source edits, statement weakening, budget or trust-policy changes were introduced by resolution.
+
+All 13 conflicted Views files and the three priority OOM entry modules pass serial pinned-v4.24 Lean checks. Post-merge VmHWM KiB: MemberDynamicControls 473224; MemberDynamicSequence 484888; DynamicJournalControls 1751564. All 12 split module bodies are byte-identical to the reviewed `[oom-fix]` commit; earlier per-piece measurements and 134-declaration type/axiom comparisons remain applicable. The host 6–8 GB symptom was not reproduced on this VM; no host full-gate or v4.35 claim follows. KeySort, trust (6455 sources/289 sites/zero findings), layer checks and document paths pass. Register/fragments were regenerated and checked. Initial direct trust-script invocation lacked its required stdin; the repository wrapper passed. The large staged upstream delta includes inherited whitespace warnings; resolution-only working diff is clean. Finder and skeptic read-only reviews found no merge-preservation defect and ran no builds or servers. Full rebuild, inherited H55 drafts and whole-lane obligations remain pending. Exact measurements: `/workspace/vy2-evidence/h86-merge/report.json`.
