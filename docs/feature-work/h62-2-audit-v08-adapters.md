@@ -1192,3 +1192,31 @@ actual delegated-frame duty or complete session/origin/physical transport.
 No H124 redesign or frozen-v1 substitution is requested. The earlier generic-v08
 citation correction remains recorded at 361ab3e4ac8b2b247d157d600d9f4d18b4a7b436;
 it is a documentation fix, not execution acceptance.
+
+### Actual hash-then-reason Source composition (2026-11-07)
+
+SourceReasonJoint composes the published evalE hash and reason expressions using
+ordinary EM bind. General proofs retain arbitrary typed environments/contexts,
+global/frame, locals/state, two byte lists and the original sufficient horizons.
+The reason revert carries exact Error(string) bytes and the already allocated
+head state. A tail timeout retains that allocation too; a head timeout stops
+before allocation. No evaluator, allocator or payload emitter is introduced.
+
+In the existing populated model, full-result inequalities reject pairing either
+the exact reason revert or the tail timeout with the input prestate: heap.next
+is 2 rather than 1. These local actual steps establish neither compiled/session
+execution nor canonical Source admission, catch selection or production
+body/frame/world/H68 transport. Two SourceFailures applications are linked;
+four other original targets and all full19-target/101-residual audit obligations
+remain pending. No new deployed body fixture or fidelity acceptance is counted.
+
+The first check failed on reserved binder spelling prefix; the corrected binder
+hashInput preserves the statement meaning and limits. The failed receipt remains
+retained. Final serial check passed in 1.502 seconds, one Lean, peak sampled RSS
+747,864,064 bytes, no STOP. All five declarations use only existing standard
+axioms; registration passed. No full-root/matched timing acceptance or prior STOP
+release. Exact bindings: source-reason-joint-manifest.json; logs remain off Git.
+
+Read-only finder and skeptic found no issue in the actual EM composition,
+retained generic domains, full-result negatives or failure/acceptance receipts.
+Neither ran Lean or a server; review evidence remains off Git.
