@@ -212,6 +212,47 @@ theorem prefix_failure_not_rollback (pipeline : Roadmap.Pipeline) (static : Bool
   have localSame := congrArg (fun result => result.2.1.get .here) same
   cases localSame
 
+/-- Literal ABI execution and both timeout boundaries share an actual populated
+state. Raw literals allocate only the result, unlike the mixed hash fixture. -/
+theorem literal_boundaries (pipeline : Roadmap.Pipeline) (static packed : Bool)
+    (extra : Nat) (bytes : Roadmap.Bytes) :
+    (Source.evalE (global pipeline) {frame with static:=static} (extra+4)
+      (SourceAbi.literal packed bytes)).run (locals,populated) =
+      (.ok (.val (.memRef rfl 1)),(locals,SourceKeccak.afterLiteral populated
+        (if packed then bytes else Source.abiLayout [(true,bytes)]))) ∧
+    (Source.evalE (global pipeline) {frame with static:=static} 0
+      (SourceAbi.literal packed bytes)).run (locals,populated) =
+      (.error .timeout,(locals,populated)) ∧
+    (Source.evalE (global pipeline) {frame with static:=static} 1
+      (SourceAbi.literal packed bytes)).run (locals,populated) =
+      (.error .timeout,(locals,populated)) :=
+  ⟨SourceAbi.literal_execution (global pipeline) {frame with static:=static}
+      extra packed bytes locals populated,
+    SourceAbi.zero_horizon (global pipeline) {frame with static:=static} packed bytes locals populated,
+    SourceAbi.argument_horizon_zero (global pipeline) {frame with static:=static}
+      packed bytes locals populated⟩
+
+/-- Arbitrary selector/signature literal bytes retain exact normalization and
+allocator pointer. They are not callable declarations or admission filters. -/
+theorem prefixed_literal_boundaries (pipeline : Roadmap.Pipeline) (static : Bool)
+    (extra : Nat) (selector signature bytes : Roadmap.Bytes) :
+    (Source.evalE (global pipeline) {frame with static:=static} (extra+5)
+      (SourceAbi.selectorLiteral selector bytes)).run (locals,populated) =
+      (.ok (.val (.memRef rfl 1)),(locals,SourceKeccak.afterLiteral populated
+        (Source.fitBytes 4 selector ++ Source.abiLayout [(true,bytes)]))) ∧
+    (Source.evalE (global pipeline) {frame with static:=static} (extra+5)
+      (SourceAbi.signatureLiteral signature bytes)).run (locals,populated) =
+      (.ok (.val (.memRef rfl 1)),(locals,SourceKeccak.afterLiteral populated
+        ((Source.wordBytes ((global pipeline).fixed.hash signature)).take 4 ++
+          Source.abiLayout [(true,bytes)]))) :=
+  ⟨SourceAbi.selector_literal_execution (global pipeline) {frame with static:=static}
+      extra selector bytes locals populated,
+    SourceAbi.signature_literal_execution (global pipeline) {frame with static:=static}
+      extra signature bytes locals populated⟩
+
+#print axioms literal_boundaries
+#print axioms prefixed_literal_boundaries
+
 #print axioms selector_joint
 #print axioms actual_selector
 #print axioms signature_joint

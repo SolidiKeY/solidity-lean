@@ -715,3 +715,9 @@ The final serial check passed in 2.435 seconds, one Lean, peak sampled aggregate
 ### WORLD-G07-13 registration verified
 
 Adopted master a648f2790 publishes both requested fragments. Their exact thirteen key/axiom sets match the retained proposal, and both source bindings still match. The actual current pin gate passes: 17,092 pinned theorems, zero errors, zero unrecorded changes, zero baselined changes. No shared inventory was edited here. The registration/pin wait is resolved; prior failing receipts remain historical, and Source/body/frame producers plus the full H68 bridge and root gates remain open. Publication evidence is in the prefix manifest and the updated request follow-up.
+
+### Seventeen-law ABI component accounting
+
+Added literal execution boundaries to the existing ABI family for arbitrary raw byte lists, pipelines/static/packing flags and extra sufficient horizons. Successful raw literals allocate the result at pointer1; their horizon0/1 boundaries retain the full prestate. Selector/signature literal laws retain exact normalization/prefix bytes, not callable metadata. Existing mixed paths still retain their different reached pointer2.
+
+All17 public SourceAbi laws now have unique frozen-ID/type-hash component links: twelve operational/typed applications and five direct total-observation references. The latter remain original identities, not new execution cases or an aggregate emitter/admission result. Existing populated Source data and typed byte/word/Nat domains supply concrete inputs; no proof-binder absence is used to infer global program feasibility. Full fidelity remains pending. The serial check passed in 2.985 seconds, one Lean, peak sampled aggregate RSS 750,346,240 bytes, no STOP; trust and registration passed. No new family/fixture/encoder, canonical producer or H68/matched timing acceptance. Exact table/evidence: `tests/h62/item2/audit-v08-adapters/source-abi-module-coverage-manifest.json`.

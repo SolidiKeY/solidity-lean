@@ -109,5 +109,6 @@
     "Solidity.Lowering.V08.SourceAbi.encode_fixed_bytes32"
   ],
   "revalidation_note": "Current gate checked the whole test file, retaining earlier mixed and typed-word declarations; these targets add no new counts in this checkpoint.",
-  "reviews": "Independent read-only finder/skeptic verified coherent prefix phases, generic failure boundary, exact evidence and centrally matching pins/current gate pass; no findings, no reviewer scripts/tests/Lean/server."
+  "reviews": "Independent read-only finder/skeptic verified coherent prefix phases, generic failure boundary, exact evidence and centrally matching pins/current gate pass; no findings, no reviewer scripts/tests/Lean/server.",
+  "source_binding_status": "Historical prefix-extension test snapshot. Later literal coverage and latest full-file source hashes/check are in source-abi-module-coverage-manifest.json; prior proof and pin-gate evidence retained unchanged."
 }
