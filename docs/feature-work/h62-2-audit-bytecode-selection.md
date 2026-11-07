@@ -1833,3 +1833,70 @@ Final checkpoint82tests, trust/orphans, roots/fragments, doc paths and
 whitespacePASS. Explicit native/replay/tactic receipts remain separate; no
 original Source/correspondence/native/full-gate obligation or global28pin
 registration is waived by these checks.
+
+
+## Scope preflight and mapped offset domains
+
+Rebased the single newer length checkpoint onto published7265ee136 at
+6d7f46cd; owned audit tree remained source-identical to6107d1bb,82tests and
+registriesPASS. An attempted WordValidation support extension checked natively
+but its nine targets are memory-operations, outside the frozen bytecode-selection
+roster. Metadata linker correctly refused them. All three edits/proofs saved
+in sealed word-validation-domains proposal, then tracked files restored before
+further work; those nine are NOT committed/countedasassignedcoverage. Scope
+questionQ-WV-SCOPE-01 sent withcoord-ask(ref20261107T071956Z), pending support-
+only versus explicit supplemental scope decision. Original census unchanged.
+
+Factored existing frozen-map reference normalization without changing valid
+roster/dedup/reference-count behavior. Renderer now reads BASE's map, pins its
+hash and refuses unmapped EXPLICIT producer leaves before proof. Regression
+injects WordValidation expecting refusal. This preflight is not a scope sandbox:
+transitive target origins still require actual metadata validation; all95current
+targets pass that check. Imported dependencies remain usable without becoming
+assigned census targets. Frozen mapped_paths still rejects altered live maps.
+
+Continued independent mappedOffsetChecks: four certificate fields plus six
+public methods yield95exactdomains, not the parked proposal's94. Sharedactual
+certificate covers BOTH tail/region code, numeric operands, protected suffix
+258,513 and real room premises. Joint witness preserves opposite boundary
+flags, signed-negative relative offset acceptance despite larger unsigned value,
+wrapped-product acceptance, exact V2frames output[1]/peak1, and actual height
+checks:tail1024false,region1024true. No unsigned/canonicality precondition is
+invented, and a true local predicate is not full-reference/entry admission.
+Reuses existing producer controls instead of reproving arithmetic semantics.
+
+Two initial probes rejected with defaultrecursion limit in dependent-frame
+output normalization; rejected recovery sorryAx remains only diagnostics.
+Provided bounded try-tactics goalfile finds decidePASS; other candidatesFAIL.
+Flag equalities derived from existing correct-run/control agreement, then a
+general equality-elimination lemma transports the original frame witness to
+EXACToutput[1], preserving code/peak. No statement weakened, output relaxed,
+maxRecDepth/maxHeartbeats raised or linter disabled. Successful repairedprobe
+PASS49.551s; finalstrictPASS27.643s emptylog, bothmonitorsPASS.
+
+103guards=95domains+8transport/joint/refusal lemmas,22none/25propext/2pair/
+54standardtrio,2classifierrefusals; four private supportlemmas transitively
+audited.25explicitproducerleaves in frozenmap/251importproducts matched.
+Verifier reconstructs accepted source/manifest with scopehash, binds native
+probe/strict outputs/logs/monitors, tacticreceipt, actualguardcounts and all
+95targets to sealed150module observations. Global source/witness flagsFalse.
+Probe/strict timings not pairedperformance; no new module>60s here. Same
+05:20→09:20aggregate window,12GiB/noSwap/CPU1/4GiBreserve/300sgroup bounds
+retained; no new epoch, deadlineextension, prerequisite or PowerBoundsretry.
+
+Independent readonly finder/skepticPASS, no findings; preflight limitation,
+parked/uncredited proposal, mappedtargetsource, signed/wrapped semantics, exact
+frame transport, failures and all partial boundaries reviewed. No reviewer
+edits/builds/Lean/server. No production/interface/statement/definition/premise/
+exclusion/axiom/trust changes. Generated evidence offGit, explicitnativecheck
+needed beyond82tests/seven-file verifier. All original703/40core+37Bridge,
+owner/private/type/source/correspondence/global-input-inherited classification,
+remainingjointwitness/ledger, Source/native/gas/fork, P10production, Bridge/
+package/performance and producer waits remain; no RUNTIME_GATE_PASS.
+Evidence: /workspace/parallel-20261103/executable-bytecode/offset-check-domains/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, documentation and
+whitespacePASS. Strict native/replay/tactic evidence remains separately required.
+PendingQ-WV-SCOPE-01 is not a blocker to original mapped work; no answer is
+interpreted as supplemental-scope approval. Global28pins/fullsource/runtime
+validation and original obligations remain unwaived.
