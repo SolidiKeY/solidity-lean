@@ -227,7 +227,7 @@ async function launch(config,options) {
 }
 async function main(args=process.argv.slice(2)) {
   const options=parse(args);
-  if(options.help) {process.stdout.write('node vscode/parity/run.cjs --code PATH --dafny PATH --dafny-extension DIR --dotnet PATH [--output DIR] [--trials 5] [--warmups 1] [--workers 1,2,4] [--cache none,basic] [--targets dafny,local] [--suite full|commands|custom-commands|custom-default-commands|custom-import-actions|visual|proof-help|proof-hover]\n');return;}
+  if(options.help) {process.stdout.write('node vscode/parity/run.cjs --code PATH --dafny PATH --dafny-extension DIR --dotnet PATH [--output DIR] [--trials 5] [--warmups 1] [--workers 1,2,4] [--cache none,basic] [--targets dafny,local] [--suite full|commands|custom-commands|custom-default-commands|custom-import-actions|compiler-output|visual|proof-help|proof-hover]\n');return;}
   for(const key of ['code',...(options.targets.includes('dafny')?['dafny','dafnyExtension','dotnet']:[])])if(!options[key]||!existsSync(options[key]))throw new Error('Missing executable/source --'+key);
   const output=resolve(options.output||join(repo,'.cache/editor-parity',new Date().toISOString().replaceAll(':','-')));
   if(existsSync(join(output,'report.json')))throw new Error('Output already contains a report; choose a new directory');
