@@ -2,6 +2,9 @@ import Solidity.Evm.MemoryObjectValues
 import Solidity.Evm.MemoryObjectFieldFrame
 
 /-! Generic typed element stores and alias binding, with full allocator framing. -/
+-- Retain the existing typed element-store proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 open Semantics
 variable {C : Contract}

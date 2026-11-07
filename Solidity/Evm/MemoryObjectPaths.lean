@@ -2,6 +2,9 @@ import Solidity.Evm.MemoryObjectAllocator
 
 /-! Fallible reference paths over both memory array kinds. Endpoints retain
 their intrinsic reference type; fixed indexing uses the headerless layout. -/
+-- Retain the existing typed fallible-path proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 open Semantics
 variable {C : Contract}

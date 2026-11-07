@@ -3,6 +3,9 @@ import Solidity.Evm.MemoryStructSource
 
 /-! Primitive struct field writes frame every represented array kind and
 reference element, including parents pointing at the updated struct. -/
+-- Retain the existing typed field-frame proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 open Semantics
 

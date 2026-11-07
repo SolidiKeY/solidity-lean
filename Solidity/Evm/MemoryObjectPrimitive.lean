@@ -3,6 +3,9 @@ import Solidity.Evm.MemoryObjectConstructionSource
 /-! Existing primitive array allocation under complete object ownership, so a
 reference-array program may allocate its primitive children without losing old
 reference or fixed-array reservations. -/
+-- Retain the existing typed primitive-object proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 
 theorem AllocatorRepr.allocatePrimitive {H : HTy} {hp : Heap H} {base : Nat → Fin W}
@@ -29,7 +32,7 @@ theorem AllocatorRepr.allocatePrimitive {H : HTy} {hp : Heap H} {base : Nat → 
     · intro hh
       simpa only [Heap.alloc, HRef.id, upd_same] using hold.length
     · intro i v hv
-      simpa only [Heap.alloc, HRef.id, upd_same] using hold.elements i v hv
+      simpa only [ValueRepr, header, Heap.alloc, HRef.id, upd_same] using hold.elements i v hv
   refine ⟨(h.headerOutside size).adoptArray .dyn o cursor h.free.above hf
     (fun r => .inl (h.live r)), h.free.allocate size hs, ?_⟩
   intro R r
@@ -85,7 +88,7 @@ theorem primitiveDeclare_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
       run_append_ok (allocateArray_run m cursor size ha.free.cell)]
     rfl
   · have hid : (σ.alloc (defaultArray p size)).2.id = σ.H.length := rfl
-    simpa only [hid, upd_same] using
+    simpa only [State.allocPush, hid, upd_same] using
       (h.allocatePrimitive ha hb p size hspace).consMem (σ.alloc (defaultArray p size)).2 hcap
   · exact (ha.allocatePrimitive p size hspace).localWrite (b + Γ.length)
       (by omega) (by omega) (.val cursor)
