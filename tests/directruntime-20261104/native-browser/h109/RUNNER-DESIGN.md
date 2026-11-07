@@ -328,3 +328,21 @@ Docker ownership and durable cleanup remain separate missing verification
 layers. Neither this inspector nor the cgroup diagnostic clears the existing
 reservation. The full sealed-input controller/worker, recovery/acceptance
 verifier and five-module A/B remain unfinished.
+
+## Worker input mount observation
+
+`readonly-inputs.py` observes a dedicated non-root input directory through a
+retained nofollow FD. It requires the FD mount ID and filesystem device to match
+an exact mount point in the kernel mount table, both per-mount `ro` and kernel
+`ST_RDONLY`, no nested/stacked mounts, and an unchanged mount table/namespace
+through capture. A read-only bind mount may legitimately have a writable
+superblock; the per-mount and kernel flags are required independently.
+
+The component creates no mounts and runs no commands. It cannot establish that
+another namespace lacks writable aliases, exclude later remounts, bind package
+or source contents, authenticate the controller namespace or authorize worker
+execution. Those output flags remain false. Synthetic positive controls and a
+real writable-directory refusal are not production mount/sealing acceptance.
+The controller must still bind the exact input pins and namespace ownership,
+enforce isolation over the full invocation, and independently verify measured
+resource, cleanup and output evidence. The old probe barrier is unchanged.
