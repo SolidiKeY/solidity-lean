@@ -106,7 +106,7 @@ open Lean in
 /-- Literal-bound syntax, retaining its original source span for a notice. -/
 partial def literalBoundSyntax? (e : Syntax) : Option String :=
   let subject (x : Syntax) : String :=
-    (boundNameSyntax? x).getD ((x.reprint.getD "expression").trim)
+    (boundNameSyntax? x).getD ((x.reprint.getD "expression").trimAscii.copy)
   let compare (op : String) (a b : Syntax) : Option String :=
     match boundLiteralSyntax? a, boundLiteralSyntax? b with
     | none, some n => some s!"{subject a} {op} {n}"

@@ -126,7 +126,7 @@ theorem ofLiteral?_eq_some_iff {num : Int} {den : Nat} (hd : den ≠ 0) {a : Fx 
         rw [← h]; exact Int.mul_ediv_cancel a.1 hd'
       have hr : t.inRange (num * t.scale / den) = true := by rw [he]; exact a.2
       rw [show ofInt? t (num * t.scale / den) =
-        some (⟨num * t.scale / den, hr⟩ : Fx t) from dif_pos hr]
+        some (⟨num * t.scale / den, hr⟩ : Fx t) from dite_eq_left hr]
       exact congrArg some (Subtype.ext he)
   · simp only [hm, ite_false]
     constructor
@@ -214,7 +214,7 @@ theorem explicitConst?_eq_some_iff {num : Int} {den : Nat} (hd : den ≠ 0) {a :
   · intro h
     have hr : t.inRange (literalTrunc t num den) = true := by rw [← h]; exact a.2
     rw [show ofInt? t (literalTrunc t num den) =
-      some (⟨literalTrunc t num den, hr⟩ : Fx t) from dif_pos hr]
+      some (⟨literalTrunc t num den, hr⟩ : Fx t) from dite_eq_left hr]
     exact congrArg some (Subtype.ext h.symm)
 
 /-- An explicit conversion of a constant is a compile error exactly when

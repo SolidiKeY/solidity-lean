@@ -73,14 +73,14 @@ theorem tdiv_tdiv (x : Int) {a : Int} (b : Int) (ha : 0 < a) :
   by_cases hx : 0 ≤ x
   · have h1 : 0 ≤ x / a := Int.ediv_nonneg hx hab
     rw [Int.tdiv_eq_ediv_of_nonneg hx, Int.tdiv_eq_ediv_of_nonneg h1,
-      Int.tdiv_eq_ediv_of_nonneg hx, Int.ediv_ediv hab]
+      Int.tdiv_eq_ediv_of_nonneg hx, Int.ediv_ediv_of_nonneg hab]
   · have hx' : 0 ≤ -x := by omega
     have h1 : 0 ≤ (-x) / a := Int.ediv_nonneg hx' hab
     have e1 : x.tdiv a = -((-x) / a) := by
       rw [← Int.neg_neg x, Int.neg_tdiv, Int.neg_neg, Int.tdiv_eq_ediv_of_nonneg hx']
     have e2 : x.tdiv (a * b) = -((-x) / (a * b)) := by
       rw [← Int.neg_neg x, Int.neg_tdiv, Int.neg_neg, Int.tdiv_eq_ediv_of_nonneg hx']
-    rw [e1, e2, Int.neg_tdiv, Int.tdiv_eq_ediv_of_nonneg h1, Int.ediv_ediv hab]
+    rw [e1, e2, Int.neg_tdiv, Int.tdiv_eq_ediv_of_nonneg h1, Int.ediv_ediv_of_nonneg hab]
 
 namespace Fx
 
@@ -128,15 +128,15 @@ theorem div_agree_of_inRange {a b : Fx t}
     (h : b.1 ≠ 0 → t.inRange ((a.1 * t.scale).tdiv b.1) = true) :
     div .checked a b = div .unchecked a b := by
   by_cases hb : b.1 = 0
-  · simp only [div, hb, if_true]
-  · simp only [div, hb, if_false]
+  · simp only [div, hb, ite_true]
+  · simp only [div, hb, ite_false]
     exact result_agree (h hb)
 
 /-- `%` never overflows, so the two modes always agree. -/
 theorem mod_agree' (a b : Fx t) : mod .checked a b = mod .unchecked a b := by
   by_cases hb : b.1 = 0
-  · simp only [mod, hb, if_true]
-  · simp only [mod, hb, if_false]
+  · simp only [mod, hb, ite_true]
+  · simp only [mod, hb, ite_false]
     exact result_agree (mod_inRange a b)
 
 /-! The same agreement read from a checked success. -/
@@ -164,7 +164,7 @@ theorem div_agree {a b : Fx t} {r : Fx t} (h : div .checked a b = .ok r) :
   rw [← div_agree_of_inRange (a := a) (b := b) ?_]
   · exact h
   · intro hb
-    simp only [div, hb, if_false] at h
+    simp only [div, hb, ite_false] at h
     by_cases hv : t.inRange ((a.1 * t.scale).tdiv b.1) = true
     · exact hv
     · simp only [result, hv, Bool.false_eq_true, dite_false] at h
@@ -205,19 +205,19 @@ is `0`; unchecked it wraps (`neg_agree`, `result_val`). -/
 theorem neg_unsigned (hs : t.signed = false) (a : Fx t) :
     neg .checked a = if a.1 = 0 then .ok a else .error .overflow := by
   have ha : t.inRange a.1 = true := a.2
-  simp only [FxTy.inRange, FxTy.lo, hs, Bool.false_eq_true, if_false, Bool.and_eq_true,
+  simp only [FxTy.inRange, FxTy.lo, hs, Bool.false_eq_true, ite_false, Bool.and_eq_true,
     decide_eq_true_eq] at ha
   by_cases h0 : a.1 = 0
   · have hv : t.inRange (-a.1) = true := by rw [h0, Int.neg_zero, ← h0]; exact a.2
-    rw [if_pos h0]
+    rw [ite_eq_left h0]
     show result .checked t (-a.1) = .ok a
     rw [result_of_inRange .checked hv]
     exact congrArg Except.ok (Subtype.ext (by simp only [h0, Int.neg_zero]))
   · have hv : t.inRange (-a.1) = false := by
-      simp only [FxTy.inRange, FxTy.lo, hs, Bool.false_eq_true, if_false, Bool.and_eq_false_iff,
+      simp only [FxTy.inRange, FxTy.lo, hs, Bool.false_eq_true, ite_false, Bool.and_eq_false_iff,
         decide_eq_false_iff_not]
       omega
-    simp only [h0, if_false, neg]
+    simp only [h0, ite_false, neg]
     exact result_checked_overflow hv
 
 /-! ### `*` and `/`: exact, then truncated toward zero -/
@@ -249,9 +249,9 @@ theorem div_trunc {a b r : Fx t} (h : div .checked a b = .ok r) :
     b.1 ≠ 0 ∧ ∃ e : Int, a.1 * t.scale = r.1 * b.1 + e ∧ e.natAbs < b.1.natAbs ∧
       (0 ≤ a.1 → 0 ≤ e) ∧ (a.1 < 0 → e ≤ 0) := by
   by_cases hb : b.1 = 0
-  · simp only [div, hb, if_true] at h
+  · simp only [div, hb, ite_true] at h
     exact nomatch h
-  · simp only [div, hb, if_false] at h
+  · simp only [div, hb, ite_false] at h
     have hr : r.1 = (a.1 * t.scale).tdiv b.1 := result_checked_val h
     have hs : 0 < t.scale := t.scale_pos
     have hq : a.1 * t.scale = (a.1 * t.scale).tdiv b.1 * b.1 + (a.1 * t.scale).tmod b.1 ∧
@@ -268,9 +268,9 @@ theorem div_trunc {a b r : Fx t} (h : div .checked a b = .ok r) :
 theorem div_exact {a b r : Fx t} (h : div .checked a b = .ok r)
     (hd : b.1 ∣ a.1 * t.scale) : r.1 * b.1 = a.1 * t.scale := by
   by_cases hb : b.1 = 0
-  · simp only [div, hb, if_true] at h
+  · simp only [div, hb, ite_true] at h
     exact nomatch h
-  · simp only [div, hb, if_false] at h
+  · simp only [div, hb, ite_false] at h
     have hr : r.1 = (a.1 * t.scale).tdiv b.1 := result_checked_val h
     rw [hr]
     exact Int.tdiv_mul_cancel hd
@@ -293,7 +293,7 @@ theorem rescale_down_trunc (n n' : Nat) (h : n' < n) (v : Int) :
     (v < 0 → rescale n n' v * 10 ^ (n - n') - 10 ^ (n - n') < v ∧
       v ≤ rescale n n' v * 10 ^ (n - n') ∧ rescale n n' v * 10 ^ (n - n') ≤ 0) := by
   have hn : ¬ n ≤ n' := Nat.not_le.mpr h
-  simp only [rescale, hn, if_false]
+  simp only [rescale, hn, ite_false]
   exact tdiv_trunc v _ (Int.pow_pos (by decide))
 
 /-- Dropping digits that are zero is exact: rescaling back gives `v`. -/
@@ -303,12 +303,12 @@ theorem rescale_down_exact (n n' : Nat) (v : Int) (hd : n' < n → 10 ^ (n - n')
   · by_cases he : n' ≤ n
     · have hnn : n = n' := Nat.le_antisymm hle he
       subst hnn
-      simp only [rescale, Nat.le_refl, if_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
-    · simp only [rescale, hle, if_true, he, if_false]
+      simp only [rescale, Nat.le_refl, ite_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
+    · simp only [rescale, hle, ite_true, he, ite_false]
       exact Int.mul_tdiv_cancel v (pow_ten_ne _)
   · have hlt : n' < n := Nat.lt_of_not_le hle
     have hle' : n' ≤ n := Nat.le_of_lt hlt
-    simp only [rescale, hle, if_false, hle', if_true]
+    simp only [rescale, hle, ite_false, hle', ite_true]
     exact Int.tdiv_mul_cancel (hd hlt)
 
 /-- Dropping digits in two steps is dropping them at once. -/
@@ -318,13 +318,13 @@ theorem rescale_rescale_down (n m k : Nat) (h1 : k ≤ m) (h2 : m ≤ n) (v : In
   by_cases hmn : n ≤ m
   · have he : n = m := Nat.le_antisymm hmn h2
     subst he
-    simp only [rescale, Nat.le_refl, if_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
+    simp only [rescale, Nat.le_refl, ite_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
   · by_cases hkm : m ≤ k
     · have he : k = m := Nat.le_antisymm h1 hkm
       subst he
-      simp only [rescale, Nat.le_refl, if_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
+      simp only [rescale, Nat.le_refl, ite_true, Nat.sub_self, Int.pow_zero, Int.mul_one]
     · have hnk : ¬ n ≤ k := by omega
-      simp only [rescale, hmn, hkm, hnk, if_false]
+      simp only [rescale, hmn, hkm, hnk, ite_false]
       rw [tdiv_tdiv v _ (hp _), ← Int.pow_add]
       have he : n - m + (m - k) = n - k := by omega
       rw [he]
@@ -352,12 +352,12 @@ theorem explicit_sameValue (a : Fx t)
     SameValue a (explicit t' a) := by
   simp only [SameValue, explicit, wrap, wrapInt_of_inRange hr, FxTy.scale]
   by_cases hle : t.digits ≤ t'.digits
-  · simp only [rescale, hle, if_true]
+  · simp only [rescale, hle, ite_true]
     have hp : (10 : Int) ^ t'.digits = 10 ^ (t'.digits - t.digits) * 10 ^ t.digits := by
       rw [← Int.pow_add, Nat.sub_add_cancel hle]
     rw [hp, Int.mul_assoc]
   · have hlt : t'.digits < t.digits := Nat.lt_of_not_le hle
-    simp only [rescale, hle, if_false]
+    simp only [rescale, hle, ite_false]
     have hp : (10 : Int) ^ t.digits = 10 ^ (t.digits - t'.digits) * 10 ^ t'.digits := by
       rw [← Int.pow_add, Nat.sub_add_cancel (Nat.le_of_lt hlt)]
     have hc : a.1.tdiv (10 ^ (t.digits - t'.digits)) * 10 ^ (t.digits - t'.digits) = a.1 :=
@@ -383,7 +383,7 @@ theorem explicit_implicit (h : t.subsumes t' = true) (a : Fx t) :
     simp only [FxTy.subsumes, Bool.and_eq_true, decide_eq_true_eq] at h
     exact h.1.1
   have hr : t'.inRange (rescale t.digits t'.digits a.1) = true := by
-    simp only [rescale, hd, if_true]
+    simp only [rescale, hd, ite_true]
     exact inRange_mul_of_subsumes h a
   exact explicit_explicit a (fun hlt => absurd hd (Nat.not_le.mpr hlt)) hr
 
@@ -511,7 +511,7 @@ theorem solcImplicit_of_subsumes {t t' : FxTy} (h : t.subsumes t' = true) :
     revert hlo1 hhi
     simp only [lo, hi]
     cases t.signed <;> cases t'.signed <;>
-      simp only [Bool.false_eq_true, if_false, if_true] <;> intro hlo1 hhi
+      simp only [Bool.false_eq_true, ite_false, ite_true] <;> intro hlo1 hhi
     · exact pow_two_le (by omega)
     · have hb1 : t.bits ≤ t'.bits - 1 := pow_two_le (by omega)
       omega
@@ -606,14 +606,14 @@ theorem common?_subsumes {t t' u : FxTy} (h : common? t t' = some u) :
     t.subsumes u = true ∧ t'.subsumes u = true := by
   unfold common? at h
   by_cases h1 : implicitOK t' t = true
-  · simp only [h1, if_true, Option.some.injEq] at h
+  · simp only [h1, ite_true, Option.some.injEq] at h
     subst h
     exact ⟨subsumes_refl t, implicitOK_iff.mp h1⟩
   · by_cases h2 : implicitOK t t' = true
-    · simp only [h1, Bool.false_eq_true, if_false, h2, if_true, Option.some.injEq] at h
+    · simp only [h1, Bool.false_eq_true, ite_false, h2, ite_true, Option.some.injEq] at h
       subst h
       exact ⟨implicitOK_iff.mp h2, subsumes_refl t'⟩
-    · simp only [h1, h2, Bool.false_eq_true, if_false] at h
+    · simp only [h1, h2, Bool.false_eq_true, ite_false] at h
       exact nomatch h
 
 end FxTy

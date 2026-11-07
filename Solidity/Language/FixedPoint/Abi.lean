@@ -123,18 +123,18 @@ variable {t : FxTy}
 
 theorem ofInt?_val {v : Int} {a : Fx t} (h : ofInt? t v = some a) : a.1 = v := by
   by_cases hv : t.inRange v = true
-  · have he : ofInt? t v = some (⟨v, hv⟩ : Fx t) := dif_pos hv
+  · have he : ofInt? t v = some (⟨v, hv⟩ : Fx t) := dite_eq_left hv
     have ha : (⟨v, hv⟩ : Fx t) = a := Option.some.inj (he.symm.trans h)
     exact (congrArg Subtype.val ha).symm
-  · have he : ofInt? t v = none := dif_neg hv
+  · have he : ofInt? t v = none := dite_eq_right hv
     rw [he] at h
     exact nomatch h
 
 theorem ofInt?_isSome (t : FxTy) (v : Int) : (ofInt? t v).isSome = t.inRange v := by
   by_cases h : t.inRange v = true
-  · rw [show ofInt? t v = some (⟨v, h⟩ : Fx t) from dif_pos h]
+  · rw [show ofInt? t v = some (⟨v, h⟩ : Fx t) from dite_eq_left h]
     exact h.symm
-  · rw [show ofInt? t v = none from dif_neg h]
+  · rw [show ofInt? t v = none from dite_eq_right h]
     exact (Bool.eq_false_iff.mpr h).symm
 
 /-! ### Words -/

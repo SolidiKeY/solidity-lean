@@ -50,8 +50,8 @@ theorem length_upd (dom : List α) (t : List Nat) (x : α) (b : Nat) :
     | nil => rfl
     | cons a t =>
       by_cases h : x = y
-      · simp only [upd, if_pos h, List.length_cons]
-      · simp only [upd, if_neg h, List.length_cons, ih]
+      · simp only [upd, ite_eq_left h, List.length_cons]
+      · simp only [upd, ite_eq_right h, List.length_cons, ih]
 
 theorem mem_upd {dom : List α} {t : List Nat} {x : α} {b c : Nat}
     (h : c ∈ upd dom t x b) : c = b ∨ c ∈ t := by
@@ -62,11 +62,11 @@ theorem mem_upd {dom : List α} {t : List Nat} {x : α} {b c : Nat}
     | nil => exact Or.inr h
     | cons a t =>
       by_cases hx : x = y
-      · simp only [upd, if_pos hx, List.mem_cons] at h
+      · simp only [upd, ite_eq_left hx, List.mem_cons] at h
         rcases h with e | e
         · exact Or.inl e
         · exact Or.inr (List.mem_cons_of_mem a e)
-      · simp only [upd, if_neg hx, List.mem_cons] at h
+      · simp only [upd, ite_eq_right hx, List.mem_cons] at h
         rcases h with e | e
         · exact Or.inr (e ▸ List.mem_cons_self ..)
         · rcases ih e with e' | e'
@@ -83,8 +83,8 @@ theorem oracleOf_upd_ne {dom : List α} {t : List Nat} {x y : α} {b : Nat} (hy 
     | cons a t =>
       by_cases hx : x = z
       · have hyz : y ≠ z := hx ▸ hy
-        simp only [upd, if_pos hx, oracleOf, if_neg hyz]
-      · simp only [upd, if_neg hx, oracleOf, ih]
+        simp only [upd, ite_eq_left hx, oracleOf, ite_eq_right hyz]
+      · simp only [upd, ite_eq_right hx, oracleOf, ih]
 
 theorem oracleOf_upd_self {dom : List α} {t : List Nat} {x : α} {b : Nat} (hx : x ∈ dom)
     (hl : t.length = dom.length) : oracleOf dom (upd dom t x b) x = b := by
@@ -96,9 +96,9 @@ theorem oracleOf_upd_self {dom : List α} {t : List Nat} {x : α} {b : Nat} (hx 
     | cons a t =>
       simp only [List.length_cons, Nat.add_right_cancel_iff] at hl
       by_cases h : x = z
-      · simp only [upd, if_pos h, oracleOf]
+      · simp only [upd, ite_eq_left h, oracleOf]
       · have hx' : x ∈ zs := (List.mem_cons.mp hx).resolve_left h
-        simp only [upd, if_neg h, oracleOf, ih hx' hl]
+        simp only [upd, ite_eq_right h, oracleOf, ih hx' hl]
 
 theorem oracleOf_mem {dom : List α} {t : List Nat} {x : α} (hx : x ∈ dom)
     (hl : t.length = dom.length) : oracleOf dom t x ∈ t := by
@@ -110,9 +110,9 @@ theorem oracleOf_mem {dom : List α} {t : List Nat} {x : α} (hx : x ∈ dom)
     | cons a t =>
       simp only [List.length_cons, Nat.add_right_cancel_iff] at hl
       by_cases h : x = z
-      · simp only [oracleOf, if_pos h]; exact List.mem_cons_self ..
+      · simp only [oracleOf, ite_eq_left h]; exact List.mem_cons_self ..
       · have hx' : x ∈ zs := (List.mem_cons.mp hx).resolve_left h
-        simp only [oracleOf, if_neg h]
+        simp only [oracleOf, ite_eq_right h]
         exact List.mem_cons_of_mem a (ih hx' hl)
 
 theorem upd_upd (dom : List α) (t : List Nat) (x : α) (b c : Nat) :
@@ -124,8 +124,8 @@ theorem upd_upd (dom : List α) (t : List Nat) (x : α) (b c : Nat) :
     | nil => rfl
     | cons a t =>
       by_cases h : x = z
-      · simp only [upd, if_pos h]
-      · simp only [upd, if_neg h, ih]
+      · simp only [upd, ite_eq_left h]
+      · simp only [upd, ite_eq_right h, ih]
 
 theorem upd_oracleOf (dom : List α) (t : List Nat) (x : α) :
     upd dom t x (oracleOf dom t x) = t := by
@@ -136,8 +136,8 @@ theorem upd_oracleOf (dom : List α) (t : List Nat) (x : α) :
     | nil => rfl
     | cons a t =>
       by_cases h : x = z
-      · simp only [upd, oracleOf, if_pos h]
-      · simp only [upd, oracleOf, if_neg h, ih]
+      · simp only [upd, oracleOf, ite_eq_left h]
+      · simp only [upd, oracleOf, ite_eq_right h, ih]
 
 end Upd
 

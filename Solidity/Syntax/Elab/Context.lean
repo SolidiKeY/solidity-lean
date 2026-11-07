@@ -92,7 +92,7 @@ path below it: `small[]` is `[]` under `small` (`Contract.widths`,
 def shapeUnder (tb : List (String × Nat)) (k : String) : List (String × Nat) :=
   tb.filterMap fun (k', n) =>
     if k'.startsWith (k ++ "[") || k'.startsWith (k ++ "{") || k'.startsWith (k ++ "#") then
-      some (k'.drop k.length, n)
+      some ((k'.drop k.length).copy, n)
     else none
 
 /-- Two shapes name the same narrow positions at the same widths. -/

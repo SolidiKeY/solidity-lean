@@ -524,7 +524,7 @@ def pushCompoundParts? (s : Syntax) : MacroM (Option (BinOp × TSyntax `sol_expr
     | ``solPushModAssign => some BinOp.mod | _ => none
   if let some op := fixed then return some (op, ⟨s[0]⟩, ⟨s[3]⟩)
   if s.getNumArgs == 3 && s[1].isAtom && s[1].getAtomVal.endsWith "=" then
-    if let some op := BinOp.ofSym? (s[1].getAtomVal.dropRight 1) then
+    if let some op := BinOp.ofSym? ((s[1].getAtomVal.dropEnd 1).copy) then
       if let some b ← pushLvalueBase? ⟨s[0]⟩ then return some (op, b, ⟨s[2]⟩)
   return none
 
@@ -614,7 +614,7 @@ partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
     let sym := r[2].getAtomVal
     if sym == "=" then
       return ← `(RawExpr.assign $(← expandExpr ⟨r[1]⟩) $(← expandExpr ⟨r[3]⟩))
-    if let some op := BinOp.ofSym? (sym.dropRight 1) then
+    if let some op := BinOp.ofSym? ((sym.dropEnd 1).copy) then
       return ← `(RawExpr.opAssign $(ctorIdent ``BinOp op) $(← expandExpr ⟨r[1]⟩)
         $(← expandExpr ⟨r[3]⟩))
   -- the operators, by their table: one arm for all of them
@@ -703,7 +703,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   if let some (op, l) := incDecParts? r then
     return ← `(RawStmt.incDec $(ctorIdent ``IncDec op) $(← expandExpr ⟨l⟩))
   if r.getNumArgs == 3 && r[1].isAtom && r[1].getAtomVal.endsWith "=" then
-    if let some op := BinOp.ofSym? (r[1].getAtomVal.dropRight 1) then
+    if let some op := BinOp.ofSym? ((r[1].getAtomVal.dropEnd 1).copy) then
       return ← `(RawStmt.opAssign $(ctorIdent ``BinOp op) $(← expandExpr ⟨r[0]⟩)
         $(← expandExpr ⟨r[2]⟩))
   -- the four keyword statements, by their node kind: a quotation pattern

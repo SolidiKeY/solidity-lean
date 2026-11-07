@@ -392,5 +392,25 @@ def preFixTacletReadAnns : List TacletReadAnn :=
 #guard (tacletReadAnns.map (·.keyName)).Nodup
 #guard tacletReadAnns.length = 131
 
+
+/-! Lean 4.24 compatibility for the frozen enum-tag API. -/
+/-- Retain the Lean 4.24 constructor-index API for Solidity storage, memory and net read domains. -/
+@[deprecated ReadDomain.ctorIdx (since := "2025-08-25")]
+protected abbrev ReadDomain.toCtorIdx : type_of% ReadDomain.ctorIdx := ReadDomain.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index API for Solidity value, length, net and default read sites. -/
+@[deprecated ReadSite.ctorIdx (since := "2025-08-25")]
+protected abbrev ReadSite.toCtorIdx : type_of% ReadSite.ctorIdx := ReadSite.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index API for Solidity sort-variable conditions. -/
+@[deprecated SortVarcond.ctorIdx (since := "2025-08-25")]
+protected abbrev SortVarcond.toCtorIdx : type_of% SortVarcond.ctorIdx := SortVarcond.ctorIdx
+
+-- The old generated aliases were hidden from completion as well.
+run_cmd Lean.modifyEnv fun env =>
+  [``Solidity.TacletAnnotations.ReadDomain.toCtorIdx,
+    ``Solidity.TacletAnnotations.ReadSite.toCtorIdx,
+    ``Solidity.TacletAnnotations.SortVarcond.toCtorIdx].foldl Lean.Meta.addToCompletionBlackList env
+
 end TacletAnnotations
 end Solidity

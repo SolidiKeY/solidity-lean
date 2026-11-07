@@ -123,7 +123,7 @@ def fnTag (g : String) : Except String (Option Nat) := do
 (its marker row, `valueRows?`). -/
 def fnRow? (ws : List (String × Nat)) (k : String) : Option String :=
   ws.findSome? fun (k', _) =>
-    if k'.startsWith (k ++ "#function(") then some (k'.drop (k.length + 1)) else none
+    if k'.startsWith (k ++ "#function(") then some ((k'.drop (k.length + 1)).copy) else none
 
 /-- The function-type marker of the nearest binding of `x`. -/
 def localFn? (Γ : ECtx) (x : Name) : Option String := do
@@ -150,7 +150,7 @@ spells differently). -/
 def fnRefElem? (c : String) : Option (String × Bool) := do
   let (loc, storage) ← if c.endsWith "[]memory" then some ("[]memory", false)
     else if c.endsWith "[]storage" then some ("[]storage", true) else none
-  let e := c.dropRight loc.length
+  let e := (c.dropEnd loc.length).copy
   guard (!fnTy? e && (lookupBy e C.enums).isNone)
   guard ((PrimTy.ofName? e).isSome || (narrowTy? e).isSome || (bytesTy? e).any (· != 1))
   pure (e, storage)
@@ -185,7 +185,7 @@ mappings; whether it is a storage reference. -/
 def fnRefStruct? (c : String) : Option (String × Bool) := do
   let (loc, storage) ← if c.endsWith "storage" then some ("storage", true)
     else if c.endsWith "memory" then some ("memory", false) else none
-  let s := c.dropRight loc.length
+  let s := (c.dropEnd loc.length).copy
   guard (!s.isEmpty && !s.endsWith "]" && !fnTy? s)
   -- the struct the written name names in `C` (`Contract.structName?`), by
   -- its table name, which spells its written name before its members
@@ -520,16 +520,16 @@ def checkStorageCopy (Γ : NCtx) (R : RefTy) (e : RawExpr) : Except String (Src 
         match hm : E.mapFree with
         | false => throw "a storage copy of a type that holds a mapping"
         | true =>
-          match R with
+          match hr : R with
           | .array E' =>
             if he : E = E' then
               if hb : n < 2 ^ 256 then
-                pure (he ▸ Src.fixedCopy p (.dynamic hb) hm)
+                pure (hr.symm ▸ (show Src C Γ.ctx (.ref (.array E')) from he ▸ Src.fixedCopy p (.dynamic hb) hm))
               else throw "a fixed-array length exceeds the dynamic-array bound"
             else throw "an array copy changes its element type"
           | .fixed E' m =>
             if he : E = E' then
-              if hf : n ≤ m then pure (he ▸ Src.fixedCopy p (.fixed m hf) hm)
+              if hf : n ≤ m then pure (hr.symm ▸ (show Src C Γ.ctx (.ref (.fixed E' m)) from he ▸ Src.fixedCopy p (.fixed m hf) hm))
               else throw "a fixed-array copy would truncate source elements"
             else throw "an array copy changes its element type"
           | _ => throw s!"{e.toStr}: incompatible storage-copy shapes {T} and {Ty.ref R}"
@@ -538,15 +538,15 @@ def checkStorageCopy (Γ : NCtx) (R : RefTy) (e : RawExpr) : Except String (Src 
     if ht : T = .ref R then pure (.copyMem (ht ▸ p))
     else match T, p with
       | .ref (.fixed E n), p =>
-        match R with
+        match hr : R with
         | .array E' =>
           if he : E = E' then
-            if hb : n < 2 ^ 256 then pure (he ▸ Src.fixedCopyMem p (.dynamic hb))
+            if hb : n < 2 ^ 256 then pure (hr.symm ▸ (show Src C Γ.ctx (.ref (.array E')) from he ▸ Src.fixedCopyMem p (.dynamic hb)))
             else throw "a fixed-array length exceeds the dynamic-array bound"
           else throw "an array copy changes its element type"
         | .fixed E' m =>
           if he : E = E' then
-            if hf : n ≤ m then pure (he ▸ Src.fixedCopyMem p (.fixed m hf))
+            if hf : n ≤ m then pure (hr.symm ▸ (show Src C Γ.ctx (.ref (.fixed E' m)) from he ▸ Src.fixedCopyMem p (.fixed m hf)))
             else throw "a fixed-array copy would truncate source elements"
           else throw "an array copy changes its element type"
         | _ => throw s!"{e.toStr}: incompatible memory-to-storage copy shapes {T} and {Ty.ref R}"
@@ -805,7 +805,7 @@ def elabIncTarget (l : RawExpr) :
   match hs : t.recvSimple with
   | true => pure (pre, ⟨Γ, p, t, hs⟩)
   | false =>
-    match t with
+    match ht : t with
     | @OpLoc.field _ _ s _ b f h =>
       let x ← captureAs C "sp" (.alias (.struct s))
       let ⟨Γ', _, ix⟩ ← afterCapture Γ x (.alias (.struct s))
@@ -825,7 +825,8 @@ def elabIncTarget (l : RawExpr) :
       let ⟨Γ', th, ix⟩ ← afterCapture Γ x (.mem R)
       pure (pre ++ [.of Γ (.declMem _ x (some (.alias b)) rfl b.mapFree)],
         ⟨Γ', p, .mindex a (.var ix b.mapFree) (i.wk th), rfl⟩)
-    | .local _ | .root .. => nomatch hs
+    | .local _ => False.elim (Bool.noConfusion ((congrArg OpLoc.recvSimple ht).symm.trans hs))
+    | .root .. => False.elim (Bool.noConfusion ((congrArg OpLoc.recvSimple ht).symm.trans hs))
 
 /-- Width and ABI metadata of the nearest binding of `x`. -/
 def localShape (Γ : ECtx) (x : Name) : List (String × Nat) :=
@@ -945,7 +946,7 @@ def abiEnumBelow? : RawExpr → Option (RawExpr × List (String × Nat))
       | [] => some []
       | k :: .num n :: more => do
         let bs ← k.bytesLit?
-        pure ((String.mk (bs.map Char.ofNat), n) :: (← pairs more))
+        pure ((String.ofList (bs.map Char.ofNat), n) :: (← pairs more))
       | _ => none
     pure (t, ← pairs rest)
   | _ => none
@@ -953,7 +954,7 @@ def abiEnumBelow? : RawExpr → Option (RawExpr × List (String × Nat))
 /-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
 partial def abiTyExpr? : RawExpr → Option RawTy
   | .name t =>
-    if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array else some (.named t)
+    if t.endsWith "[]" then (abiTyExpr? (.name ((t.dropEnd 2).copy))).map .array else some (.named t)
   | .index t (.num m) => (abiTyExpr? t).map (.fixed · m)
   | .call "#abiArrayType" [t] => (abiTyExpr? t).map .array
   | e@(.call ..) => (abiEnumBelow? e).bind fun (t, _) => abiTyExpr? t
@@ -1458,7 +1459,7 @@ partial def abiFnType (T : String) : String :=
   | some (ps, rs, ext) => fnTyStr (ps.map abiFnType) (rs.map abiFnType) ext
   | none =>
     if T.startsWith "(" && T.endsWith ")" then
-      "(" ++ ",".intercalate ((splitTopCommas ((T.drop 1).dropRight 1)).map abiFnType) ++ ")"
+      "(" ++ ",".intercalate ((splitTopCommas (((T.drop 1).dropEnd 1).copy)).map abiFnType) ++ ")"
     else match T.splitOn "[" with
     | base :: rest@(_ :: _) => abiFnType base ++ "[" ++ "[".intercalate rest
     | _ => if T == "uint" then "uint256" else if T == "int" then "int256" else T

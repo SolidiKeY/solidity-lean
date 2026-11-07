@@ -1453,7 +1453,7 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   if let some (d, ts) := decode? then
     if (← read).funs.all (·.1 != "abi.decode") then
       let x := toString (← freshCapture "mv")
-      let (n, one) := abiDecodeHeads C x ts (if d.isSliceView then d else .name x)
+      let (_n, one) := abiDecodeHeads C x ts (if d.isSliceView then d else .name x)
       let rest : List RawStmt ← match s with
         | .tupleDecl vs _ => do
           unless vs.length == ts.length do
@@ -1880,14 +1880,14 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       | true => pure [.of Γ (.push b none (by simp only [Option.isSome_none, hd, Bool.or_true]))]
       | false => throw "push() of an element whose default is not well-formed"
     | [a] =>
-      match E with
+      match hE : E with
       | .prim p =>
         -- a narrow element: the value converts to it implicitly, so it fits
         ElabM.lift (fitCheck C (← ctx) p (widthIn C (← ctx) (.index e (.num 0))) a)
-        pure [.of Γ (.push b (some (.val (← checkIn C Γ p a))) rfl)]
+        pure [.of Γ (.push b (some (hE.symm ▸ Src.val (← checkIn C Γ p a))) rfl)]
       | .ref R =>
         ElabM.lift (storageCopyShape C (← ctx) (placeShape C (← ctx) (.index e (.num 0))) a)
-        pure [.of Γ (.push b (some (← ElabM.lift (checkStorageCopy C Γ R a))) rfl)]
+        pure [.of Γ (.push b (some (hE.symm ▸ (← ElabM.lift (checkStorageCopy C Γ R a)))) rfl)]
     | _ => throw "push takes at most one argument"
   | .call (.field e "pop") [] => do
     let ⟨Γ, t⟩ ← synthM C e
