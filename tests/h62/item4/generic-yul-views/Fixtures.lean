@@ -66,6 +66,18 @@ theorem byte_payload_joint :
       (_base i : Nat) (_hi : i < bs.length), True :=
   ⟨[0], by decide, zero, 0, 0, by decide, True.intro⟩
 
+/-- Joint inhabitance of bytesObject_unchanged, including its coupled header
+and universally quantified payload agreement in one memory view. This audits
+premises, not writeback for every input or compiler success. -/
+theorem byte_unchanged_joint :
+    ∃ (bs : List UInt8) (hl : bs.length < 2 ^ 256) (m : ByteView) (base : Nat)
+      (_header : mload m base = ⟨bs.length, hl⟩)
+      (_payload : ∀ i (hi : i < bs.length), bs[i] = m (base + 32 + i)), True :=
+  ⟨unaligned.bytes, unaligned.length_bound, unaligned.view, unaligned.base,
+    (byteObjectFacts unaligned).header,
+    (fun i hi => ((byteObjectFacts unaligned).payload i hi).symm), True.intro⟩
+
+#print axioms byte_unchanged_joint
 #print axioms byte_payload_joint
 #print axioms unaligned_images_distinct
 #print axioms all_fixtures
