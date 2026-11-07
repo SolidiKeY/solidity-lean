@@ -1312,3 +1312,25 @@ Independent read-only finder and skeptic reviews checked these distinctions.
 The roadmap reviewer identified and verified the correction to the mixed
 contradiction/toy role. These are static observations, not execution recipes,
 proofs or exclusions; no Lean server or build was used.
+
+## Root and Bridge special controls
+
+`root_controls.py` classifies four supplied census rows against their source
+hashes; subsets remain permitted and coverage is not established. The
+checksum-bound artifacts record static references, not current execution.
+
+`MemoryObserve` is a native Bridge observation whose driver generates C and
+a shared library under `Bridge/.lake/build`; it requires the caller's writer
+lock and resource enforcement, and does not prove `PaddingCorrect`.
+`AxiomAudit` checks the three imported roots, including the slow examples,
+but does not cover corpus or testsuite modules. `ParseCorpus` runs at
+elaboration, reads a manifest and the paths it names, and overwrites its
+results; the report's `--write` also changes the baseline. The scalar
+exporter prints vectors during elaboration and includes an intentional
+negative vector. Its kernel controls and the separate EthereumJS comparison
+must not be conflated. Current inputs, invocation and outcomes remain
+unverified.
+
+Independent read-only finder and skeptic reviewed all four contexts without
+Lean, a server or a build. Their review added the native lock requirement and
+negative-vector distinction. No H56 acceptance or exclusion follows.
