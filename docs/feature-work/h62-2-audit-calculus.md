@@ -312,3 +312,15 @@ Frame roles retain success, exact mutability guards, grown-heap object preservat
 Measured static accounting passed at 0.252641s / 71,868 KiB maximum child RSS; incomplete acceptance failed exit 1 at 0.279507s / 71,860 KiB; 89 controls passed at 0.123511s / 15,240 KiB. The documentation gate failed exit 1 at 41.916230s / 9,216 KiB on the same five missing references in unchanged citing sources. These are individual gate measurements, not matched performance acceptance. Exact receipts are archived.
 
 Read-only continuation analysis also confirmed the prior runtime-v1 RuleShapes resource stop was a compilation command, not census export: exit 88, RESOURCE_RESERVE below 4 GiB, 8 GiB enclosing cgroup, observed process-group RSS 3,358,760,960 bytes. The exact old record and source-ledger hash are retained in prior-resource-stop.json. This is an available own-run receipt, not recovered retired raw evidence. No rerun or gate/resource change occurred; serializer changes alone would not address that stopped compilation.
+
+
+## Call-result capture/restoration source roles (2026-11-07)
+
+Fresh master inspection at 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0 found the clean owned checkout already merged at 595c7885c712be3de367dd9b143ae62d696c00b8, preserving both the previous checkpoint and master ancestors. Classified all ten CallResultCapture and eleven CallResultRestore declarations against exact frozen/current sources; prior 149 rows and owners unchanged. Ledger: 170 roles reviewed, 5,113 pending; 3,746 owners confirmed, 1,537 unresolved. No new witnesses.
+
+The ledger retains exact evaluation and local satisfaction premises, both-modality/nonreturn/exhaustion behavior, positional freshness and generic source-index behavior. Supplied-state restoration is not a successful actual call; structural +5/2 counts are not expanded-family, metadata, proof-time or gas bounds. Both read-only reviews pass; all 89 Python controls pass; complete acceptance remains FAIL exit 1. No Lean source changed.
+
+Read-only cache inspection found a RuleShapes artifact/trace and equal 60-file current/frozen repository source closures. No source-to-artifact provenance, native/import equivalence, replay or cache admission follows; the compilation STOP remains unchanged. Exact source-role and cache observations, measured gates and reviews remain off Git in call-result-classification-v13 and its small manifest. Original queues, H28 pause, historical gaps and STOPs remain binding.
+
+
+Measured call-result accounting passed at 0.275562s / 73,480 KiB maximum child RSS; complete acceptance failed exit 1 at 0.364618s / 73,484 KiB; 89 controls passed at 0.131811s / 15,240 KiB. Documentation gate failed exit 1 at 40.060537s / 9,216 KiB on four missing references in unchanged master citing sources (one former failure was repaired upstream). No whole gate pass. The cache-source comparison was separately reproduced with all 60 source files checked against exact frozen Git blobs; compiled provenance/replay remains unvalidated.

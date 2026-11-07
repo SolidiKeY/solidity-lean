@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/callback-frame-refute-classification-v12/semantic-roles-reviewed.json",
-    "bytes": 452865,
-    "sha256": "2e9ca7540643cc579bca9b1acec006f7d55b568295e77bac0acf8c50df1dbbfa"
+    "path": "/workspace/h62-successor-bulk/call-result-classification-v13/semantic-roles-reviewed.json",
+    "bytes": 501484,
+    "sha256": "635f2eb29bbd46e1be790cb0e25c446dc3a88388ab02a79cf5955efec3ab8105"
   }
 }
