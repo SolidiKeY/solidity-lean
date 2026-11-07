@@ -14,7 +14,8 @@ proposition premises, 53 have data/type/instance binders only, and 70 have no in
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings pass.
 The last worker full Lean build passed on 902e8776, including mandatory
-slow examples. That snapshot recorded 247 missing standard-only G07 registrations
+slow examples. G07 is blocked (open; count from 902e). That snapshot recorded 247 missing
+standard-only registrations
 (zero axiom errors) and one stale P20 citation. The P20 wait is resolved on master
 a282a282003a992eb334acefd1ef8f5490e0fe71: the fixture exists and c9cf710a8 rewrote
 the docstring. It is no longer an active wait. The 902e inventory count and proof
@@ -383,8 +384,8 @@ frozen statement, axiom, exclusion or proof budget changed.
 Actual tools remain Lean 4.24.0 Release 797c613eb9b6d4ec95db23e3e00af9ac6657f24b
 and Lake 5.0.0-src+797c613. Existing 16 GiB hard VM/12 GiB task RSS/4 GiB reserve/no active swap/
 one heavy job/-j1 resource policy is unchanged. Under identical documented cache
-conditioning, the seven-sample warm before/after medians are 1.527788517s and
-1.541366676s (+0.888746%, within 10%). This comparison uses the new integration
+conditioning, the seven-sample warm before/after medians are 1.527788517 s and
+1.541366676 s (+0.888746%, within 10%). This comparison uses the new integration
 identity and is not compared to the earlier frozen-tree baseline.
 
 Both independent reviewers found and had fixed before-only imported-source
@@ -402,21 +403,21 @@ full assignment completion is claimed at this checkpoint.
 
 ### Full-gate resource recovery on the integration tree
 
-First current full attempt stopped at 375/6053 after 335.149s when its strict
+First current full attempt stopped at 375/6053 after 335.149 s when its strict
 4 GiB reserve was crossed (minimum 4273532928 bytes); no Lean errors, cleanup true,
-no active swap, one heavy job. PowerBounds passed170s. Generated-build advice reclaimed
-only 90MB; retry stopped at the same dependency after 21.358s, not a passing gate.
+no active swap, one heavy job. PowerBounds passed 170 s. Generated-build advice reclaimed
+only 90 MB; retry stopped at the same dependency after 21.358 s, not a passing gate.
 
 The installed Lake uses /home/agent/.cache/lake/artifacts, a separate local
 cache (not a downloaded per-master cache). It held 16010 regular artifacts,
-5.308GB. A new additive cache_artifact_advice.py uses the same writer lock,
+5.308 GB. A new additive cache_artifact_advice.py uses the same writer lock,
 rejects live Lean/Lake and symlinked roots, anchors traversal with directory FDs,
 opens nofollow/nonblocking/read-only, and advises current-UID regular files only.
 It writes/removes no artifacts, changes no budget or reserve accounting, and
 uses no network/global cache drop. Both independent reviewers accepted it after
 requiring the nonblocking-open safeguard. No source/proof edits were made.
 
-Its first run advised 5.308GB with zero errors/skips and observed cgroup current
+Its first run advised 5.308 GB with zero errors/skips and observed cgroup current
 fall from 5991899136 to 500625408 bytes. Advice is not guaranteed eviction. The
 previous timing pair remains valid only for its documented generated-build-cache
 conditioning; this artifact advice is separate full-gate memory housekeeping.
@@ -435,7 +436,7 @@ remain byte-identical. No own Lean statement/proof/budget change was made.
 Old d96 receipts and failed full attempts are preserved separately. New input
 pinning covers 7713 Lean files at 706. All 9 local modules+KeySort pass fresh full
 MCP checks; acceptance 177/439/7/10, three adversarial/valid controls pass. New
-matched medians 1.581863012→1.548157993s (−2.130717%, within 10%) under identical
+matched medians 1.581863012→1.548157993 s (−2.130717%, within 10%) under identical
 recorded generated+artifact-cache conditioning. This replaces neither earlier
 comparison nor the outstanding full gate.
 
@@ -455,13 +456,13 @@ the integration Git object, never an editable replacement authority. Both
 reviewers accepted this design and current accounting. No scope questions.
 
 The d96 full run reached all library/examples and TestSuite.Derived20 before a
-reserve stop at 2088.577s, peak task RSS 9174859776 bytes, no Lean errors, no active swap,
+reserve stop at 2088.577 s, peak task RSS 9174859776 bytes, no Lean errors, no active swap,
 one heavy job, cleanup true. OpenLoops passed unchanged. The new 706 full gate remains
 to run with retained artifacts; no failed attempt is counted as a pass.
 
 ## Final validated handoff: G07 metadata blocker
 
-All original ABI audit implementation/proofs are complete:24 frozen modules,
+All original ABI audit implementation/proofs are complete: 24 frozen modules,
 177 exactly-once statements, 177 simultaneous witnesses/fidelity comparisons,
 439 binders, seven success theorems and 10 external fixtures with exact current
 encoded-byte identity. Four map-drift files remain explicitly outside the frozen
@@ -469,16 +470,16 @@ map, not silently counted. No original statement, definition, premise, exclusion
 proof budget, axiom set or Source module was changed by this lane's continuation.
 
 The actual current ./run-lean.sh command passed at 706 input identity, 6546 jobs,
-exit 0 in 274.931973s. Resource receipt: peak task RSS 5904257024 bytes, minimum
+exit 0 in 274.931973 s. Resource receipt: peak task RSS 5904257024 bytes, minimum
 available 9599537152 bytes, maximum one heavy Lean job, no active swap, verified cleanup. Earlier
-full 5 reached6517/6542 before a reserve stop at 6563.727s; that failure is retained.
+full 5 reached 6517/6542 before a reserve stop at 6563.727 s; that failure is retained.
 Cold-cache recovery changed residency only, not proof/source/budgets. Current
 Lean 4.24.0 Release 797c613 and Lake 5.0.0-src+797c613 plus fresh passing KeySort are
 recorded; no theorem truth is inferred from runtime labels. Current run-lean
 policy does not run solkeycheck; that CLI is not silently reported as passed.
 
-Trust passes:6553 sources, 289 inventoried implementation/recovery sites, 0 findings.
-Reachability passes:6537 reachable, 0 orphaned, 0 not allowed. Documentation paths now
+Trust passes: 6553 sources, 289 inventoried implementation/recovery sites, 0 findings.
+Reachability passes: 6537 reachable, 0 orphaned, 0 not allowed. Documentation paths now
 pass (128 ambiguous but resolving references are nonfatal). The five initial
 missing references were synthetic/unapplied/external paths. H82-authorized
 documentation-only fixes retain the intended proposed filenames/purpose and
@@ -486,7 +487,7 @@ failed-experiment exclusion; the duplicate-map fixture now cites an existing
 module and its four tests still pass. No other proving-lane Source was edited.
 
 One required global metadata gate remains failed: check-axiom-pins reports
-16118pinned theorems, 0nonstandard/growth/removal errors, 99 unrecorded changes.
+16118 pinned theorems, 0 nonstandard/growth/removal errors, 99 unrecorded changes.
 Every change is a new registration using only existing standard axioms; none
 is a new axiom or pin growth. All pin sources and central inventory are unchanged
 from 706. The original assignment explicitly prohibits this worker editing
@@ -509,7 +510,7 @@ validation. No unsupported premise/exclusion is offered as a repair.
 The coordinator reported a37430cd merged at 2a43bf4fc and requested another
 re-baseline/continuation. The assigned branch merged origin/master
 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0 while preserving the later b08fa0ea
-full-build/handoff checkpoint. Merge headfcd012d856e25c33ce0bf8760744622b29fb2a21
+full-build/handoff checkpoint. Merge head fcd012d856e25c33ce0bf8760744622b29fb2a21
 has both parents. The only conflict was the duplicate-row fixture using two
 different existing paths; upstream ABIEntry/Interface was retained, preserving
 the same assertion and four passing tests. No Lean conflict or proof edit.
@@ -518,7 +519,7 @@ All 24 frozen ABI files/map remain byte-identical. Current input pin covers 7722
 Lean files; all 9 audit files+KeySort pass fresh source/output/resource-bound
 diagnostics. Acceptance remains 177/439/7/10. Three controls pass using an
 explicit H62_AUDIT_TEST_EVIDENCE location. Current same-identity matched timing
-1.611498644→1.609982393s (−0.094089499%, within 10%) passes. Both independent
+1.611498644→1.609982393 s (−0.094089499%, within 10%) passes. Both independent
 read-only reviewers accepted ancestry, conflict choice, protected inputs, fresh
 receipts, ticket and timing; neither used Lean/server/builds or edited.
 
@@ -638,7 +639,7 @@ Fast-forwarded the assigned branch from c388d3209661b33ddd6d0fc6301039332d5085ee
 to exact published origin/master 806a972a4f1eefc367f7fe21078e56469447ce13, after
 verifying original-base and lane-head ancestry. No conflict, reset, push or goal
 creation. All 24 frozen ABI modules and their map remain byte-identical. The
-canonical input snapshot now binds7966 Lean files. Only the owned integration
+canonical input snapshot now binds 7966 Lean files. Only the owned integration
 constant changed; generated serial TOML is byte-identical, with unchanged
 -j1/LEAN_NUM_THREADS=1 and 16 GiB hard/12 GiB RSS/4 GiB reserve/no active swap bounds.
 
@@ -650,7 +651,7 @@ Finder and skeptic independently verified ancestry, source/output/resource
 bindings, signatures and acceptance without Lean/server/builds/edits; no finding.
 
 Trust passes 6628 sources/289 sites/0 findings; reachability passes 6612/0 orphans.
-Documentation paths fail on exactly 2synthetic A/B names in the other lane's
+Documentation paths fail on exactly 2 synthetic A/B names in the other lane's
 check_scope.py; no cross-lane repair was made. Global pins 16675/0 errors/85 new
 standard-only registrations remain an owner metadata wait. Off-Git ticket
 PIN-806a972a contains all 85 unique previous=null entries and current central SHA;
@@ -658,7 +659,7 @@ the tiny committed bulk manifest authenticates its path, size, hash. H44 bulky
 files stay off Git; archive index/receipts from 2a43 remain historical. Absolute
 VM paths require retrieval before off-VM verification, not assumed shared files.
 
-The new full build remains pending because281 validation inputs changed,
+The new full build remains pending because 281 validation inputs changed,
 including Source evaluation/horizon modules. The prior 6555-job pass is not
 relabelled as current. No statement, hypothesis, exclusion, proof budget,
 axiom set or observation changed. External gas/fork observations remain archived
@@ -667,7 +668,7 @@ is assigned; finish current validation before final owner handoff.
 
 ### Generated documentation ordering repair
 
-The first current ./run-lean.sh attempt exited1 before starting Lean, after
+The first current ./run-lean.sh attempt exited 1 before starting Lean, after
 3.288084 seconds: docs/README.md had one existing P8 row out of fragment order.
 The failure log and resource receipt remain immutable. Under H82's standing
 documentation-fix authorization, generated only docs/README.md using the
@@ -685,7 +686,7 @@ Coordinator requested e0f4251ff before further work while the 806 full retry was
 running. Sent SIGTERM via pidfd only to the exact owned bounded guard, after
 command identity validation. Its receipt records cancellation, exit-15, cleanup
 complete and 4801.177983 seconds; partial progress 4665, no Lean errors. This is
-not a pass. The original 3.288second pre-Lean failure and all partial logs remain.
+not a pass. The original 3.288 second pre-Lean failure and all partial logs remain.
 After cleanup released the writer lock, fast-forwarded c460c0ce to exact remote
 e0f4251ff40ad79c37bae53795b7419afe52e8d9, verifying original-base and lane-head
 ancestry. Same VM/branch; no reset, competing goal, push or pre-gate.
@@ -726,22 +727,22 @@ it after 5841.628917 seconds (peak RSS 5366816768, minimum available 4294782976,
 cleanup true, one heavy job, no active swap, no Lean errors). Only after cleanup released the
 lock, fast-forwarded 09073bac to requested 8863c41276f9340d3d1960df9e4808294614189b.
 Observed remote a10b60f contains this exact published pin; no unrequested newer
-master was chased. The 47changed validation inputs include PanicBytes; frozen
-24ABI files/map remain exact original bytes. No source/statement edits by this
+master was chased. The 47 changed validation inputs include PanicBytes; frozen
+24 ABI files/map remain exact original bytes. No source/statement edits by this
 continuation, no reset, new goal, push or pre-gate.
 
-Fresh nine audit modules plus KeySort pass with 8028canonical upstream inputs
+Fresh nine audit modules plus KeySort pass with 8028 canonical upstream inputs
 bound before/after. Acceptance 177/439/7/10, three tampering controls and four
 scanner tests pass. Timing 1.696835053 to 1.665341429 seconds (-1.856021535%, within
-10%) passes. All static gates pass except axiom metadata:16774 theorems, zero errors,
+10%) passes. All static gates pass except axiom metadata: 16774 theorems, zero errors,
 184 new standard-only registrations. PIN-8863c412 has 184 unique previous=null keys
 and current central SHA. No central pin/fragment edit was performed.
 
-The first 8863 full run also stopped at the same 4 GiB reserve: OpenLoops, 426.697951s,
+The first 8863 full run also stopped at the same 4 GiB reserve: OpenLoops, 426.697951 s,
 peak RSS 5970518016, minimum available 4292747264, cleanup true, no active swap, no Lean errors.
 Preserved both failures. After read-only clean-page advice, built only the
-expensive OpenLoops module under identical bounds: 278 jobs, 342.390517s,
-peakRSS9124495360, minavailable5720244224, exit 0/cleanup true/one heavy job/no active swap.
+expensive OpenLoops module under identical bounds: 278 jobs, 342.390517 s,
+peak RSS 9124495360, minimum available 5720244224, exit 0/cleanup true/one heavy job/no active swap.
 This was a prerequisite, not a replacement gate. Repeated the unchanged full
 ./run-lean.sh including SoliditySlowExamples and SolkeyTestSuite: PASS 6640 jobs,
 exit 0,106.036377 seconds. Resource receipt binds stdout SHA
@@ -760,13 +761,13 @@ are complete; zero original mapped statements are uncovered. Four map-drift
 modules remain outside the original frozen map, not silently counted. Final
 assignment acceptance remains blocked only on coordinator/G07 registration of
 the 184 already existing standard-only pins. No unclaimed audit candidate is
-assigned. Keep the original goal unfinished; no new/reset/complete goal.
+assigned. Keep the original goal unfinished; no new, reset or completed goal.
 
 Gas/fork observations are archived external isolated-frame tests reused only
 for identical current encoded bytes, not fresh EVM execution, formal gas/world
 proofs or general Source/compiler adequacy. H44 bulk stays off Git; the small
 manifest authenticates current external ticket/archive/member-manifest files.
-Original prompt/workqueue/scope remain committed and included in exports.
+Original prompt/work queue/scope remain committed and included in exports.
 
 Final finder and skeptic verified the complete 6640-job gate, recovery receipts
 and source/output/resource identity without Lean/server/builds/edits. They
@@ -783,14 +784,14 @@ Verified reported merge db62b437fac3407b9b028a67d7f796d5ec372baf and prior
 8a710f9d44df144d4c9855aeccca56585a422122. Rebase fast-forwarded cleanly on
 the assigned branch; no history discarded, reset, push or new goal. The
 coordinator-local receipt path is provenance only, not presumed VM-accessible.
-There are 25 new validation inputs; frozen 24ABI files/map remain exact original.
+There are 25 new validation inputs; frozen 24 ABI files/map remain exact original.
 
 All nine audit modules plus KeySort pass fresh bounded diagnostics, binding
 8047 upstream Lean paths/bytes before/after. Initial invocation used an absolute
 driver path, so strict receipt acceptance correctly rejected its command
 identity. Preserved that attempt under attempt-absolute-driver, then reran the
 exact required repository-relative command; no validator change. Acceptance
-177/439/7/10 and three tampering controls pass. Timing 1.641550907 to 1.646562778s
+177/439/7/10 and three tampering controls pass. Timing 1.641550907 to 1.646562778 s
 (+0.305313164%, within 10%) passes. Trust 6655 sources/289 sites/0 findings,
 reachability 6638/0 orphans, documentation/root/fragment checks pass.
 
@@ -814,8 +815,8 @@ Keep existing goal unfinished pending owner metadata; no replacement goal.
 
 Final finder and skeptic verified the current 6649-job full gate, strict receipt
 identity and preserved rejected attempt without Lean/server/builds/edits.
-Packaging note closed after refreshing current 214ticket/archive/index pointers:
-all 2047members and hashes/sizes verify, four integrity controls pass; tiny
+Packaging note closed after refreshing current 214 ticket/archive/index pointers:
+all 2047 members and hashes/sizes verify, four integrity controls pass; tiny
 manifest 23 lines/1890 bytes, no bulk data re-added to Git. No residual finding.
 
 ## Historical consumed-master validation on 902e (2026-11-07)
@@ -825,7 +826,7 @@ master 902e87762e5c3fb863bc3a592892f2dc09dfa979; rebase fast-forwarded cleanly.
 The 29 changed inputs were checked on this integration. All 24 frozen ABI files/map
 remain exact original; fresh 9 audit files+KeySort bind 8070 upstream paths/bytes.
 Strict acceptance 177/439/7/10, 3 tampering controls and 4 scanner tests pass.
-Matched timing 1.653921793 to 1.664435730s (+0.635697349%, within 10%) passes.
+Matched timing 1.653921793 to 1.664435730 s (+0.635697349%, within 10%) passes.
 
 Full ./run-lean.sh PASS 6654 jobs/exit 0/22.511155 seconds, including required
 SlowExamples and TestSuite; cold OpenLoops prerequisite replay 278 passed.
@@ -849,7 +850,7 @@ Independent read-only finder and skeptic reviews: PASS, no substantive findings.
 Both verified the fresh 8070-source receipts, 177/439/7/10 acceptance, exact
 frozen 24 files/map, full 6654-job stdout hash/receipt/resources, post-build
 source identity and +0.635697349% timing. The skeptic independently checked all
-247 unique standard-only ticket entries against the current central hash.
+247 unique standard-only ticket entries against the 902e central hash.
 Both confirmed the 902e P20 missing-path error and its two historical owner waits,
 unfinished goal and proof versus archived external-test boundaries. Neither
 used Lean, a server, builds or edits. Packaging pointers were excluded while
@@ -891,3 +892,22 @@ separators) were fixed; both closed them. The reviewers confirmed historical
 902e scope, resolved P20 status, accurate ticket authentication and no new Lean,
 inventory or timing claim. Only the four owned documents changed. Neither
 reviewer used Lean, servers, builds or edits. No remaining review finding.
+
+## Coordinator wording follow-up on c977 (2026-11-07)
+
+Verified original-base and 2b94cfda5312 ancestry, then fast-forwarded the assigned
+branch to c97738bd5edac625ff696e3ce4480406810477ba. G07 remains blocked
+(open; count from 902e). Its 247-entry count and recorded central-file SHA belong
+to the 902e snapshot; no current inventory pass or closure is claimed. The
+historical review wording now says "902e central hash". Remaining merged words
+and unit spacing in the prose were corrected while preserving inline code,
+paths, numeric values and receipt fields. No Lean or executable input changed;
+no new Lean build, timing comparison or inventory result is claimed here.
+
+Independent read-only finder and skeptic reviews accepted the c977 wording
+checkpoint. Both verified the explicit G07 status "blocked (open; count from
+902e)", the 902e central-hash wording, preserved receipt fields and four-document
+scope. The finder identified two remaining "24ABI" typos; both were fixed and
+the finder closed the findings. Inline code, path notation and thousands
+separators remain intact. No residual findings. Neither reviewer used Lean,
+servers, builds or edits. No fresh Lean, inventory or timing result is claimed.
