@@ -1055,3 +1055,27 @@ binding, H24 admission or lifecycle adequacy. No independent compiler rerun is
 claimed. Both read-only finder and skeptic found no findings, without Lean or
 its server. All original program, admission, resource, physical, audit coverage
 and final-gate obligations remain open, as do prior STOPs and shared pin drift.
+
+### C244 — recursive compound type syntax
+
+SourceAstCompoundTypes preserves recursive array bounds, optional mapping names
+and function-type signatures using existing Source constructors. Recursive
+parameter conversion shares its structure through parameterWith; its exact
+leaf instantiation equals the unchanged original parameter converter by rfl.
+Arrays reuse SourceAstExpressions for fixed bounds; mappings reuse MapKey and
+its existing non-payable key grammar restriction. Function parameter/result
+lists retain names, locations, visibility and mutability. Conversion fuel is
+not an execution resource, accepted-source premise or new Source exclusion.
+All three measured guards use propext only; no axiom declaration or budget was
+added. The initial optional-bound monadic typing failure and rejected recovery
+diagnostic are retained; typed Option syntax mapping fixes the implementation.
+
+Structural runtime controls pass for named mapping/fixed bounds and a nested
+function parameter, with depth, payable-key and malformed-bound refusals.
+These synthetic conversion controls are not compiler tests or Source acceptance
+proofs. Existing LibraryTry leaves remain supported without modifying their
+reader. Independent read-only finder and skeptic found no findings, without
+Lean or its server. Actual Source unit/declarations/statements, resolution,
+elaboration, artifact origin, H24 admission, lifecycle/resource and consumer
+correspondence remain unfinished local work. General mapping-bearing H24,
+physical Y04 and separate 4.35 trust/timing waits and every prior STOP remain.

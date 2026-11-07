@@ -148,3 +148,4 @@
 | `Lowering/P8/SourceAstTypes.lean` | Incomplete compiler-AST leaf type/parameter conversion into existing Source syntax; no admission or program claim |
 | `Lowering/P8/SourceAstParameters.lean` | Ordered parameter/result containers in Source syntax, with exact list/error preservation; no function or admission claim |
 | `Lowering/P8/SourceAstExpressions.lean` | Partial compiler-expression reader preserving intrinsic receivers, tuples and literal bytes; no resolution or admission claim |
+| `Lowering/P8/SourceAstCompoundTypes.lean` | Recursive compiler type syntax using existing leaves/expressions; no resolution or admission claim |
