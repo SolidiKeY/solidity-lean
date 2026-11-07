@@ -883,3 +883,22 @@ Nine owned modules build; all28affected files pass after exact-overload Selectio
 The d43c81b85561 archive verifies214639bytes,9pinned members plus the delivery receipt.3939unique contiguous symbol entries cover17imports+3922defined functions in the previously delivered exact6aeWASM. All10recorded frame occurrences map to sixindices:3207emscripten_builtin_malloc,2203LTm.fitsM,2205its boxedcontinuation,3126lean_apply_1,2208LFml.fitsM and2210its boxedcontinuation. The supplied ReadBounds source equals exactGit0140bytes and currentSource.
 
 The authenticated producer relink/postprocessing receipt reports a bit-identical diagnosticWASM and successful recovery after its map-filename error. That relinked binary is not separately supplied; no local relink or independent repeated byte comparison was performed. This is engineering attribution of the recorded historical frames, not a rootcause theorem, algorithmrepair or fresh957e/fixed-byte qualification. Three external integrity controls pass; finder/skeptic no confirmed blocker. No ReadBounds definition/statement/budget was edited. Route its named frames to the current owner for diagnosis before any definition repair, preserving current caps and compiled-link theorems. OT-STACK-SYMBOLS artifact wait is cleared; do not resend the accepted request or rerun unchanged timingSTOPs.
+
+### Delivered sourceBuild1e8 intake (2026-11-07)
+
+`verify-sourcebuild-intake.py` pins the three H77 input hashes, verifies all 505
+evidence files plus their embedded manifest, checks the exact five runtime archive
+members, and matches the native/WASM/JS bytes to their recorded build manifests.
+The native and WASM source arrays agree on 343 distinct module names.
+`sourcebuild-1e8-intake.json` records these limited observations; the archives stay
+outside Git in the coordinator input directory named there. No delivered code was
+extracted or executed. Git source identity, current-reader freshness, closure,
+performance acceptance and source/compiler preservation remain unverified.
+
+The verifier and its three external negative controls pass. Independent read-only
+finder and skeptic reviews used no Lean/server/builds: finder found no blocker;
+skeptic requested a unique-module assertion, now added. These external checks are
+not Lean proofs; this increment changes no Lean statement, proof, budget or axiom.
+The separate address-local draft remains uncommitted and incomplete: source MCP
+checks pass, but its end-to-end sender control fails with `unknown name msg`.
+Neither that control nor address parity is claimed passing by this intake.
