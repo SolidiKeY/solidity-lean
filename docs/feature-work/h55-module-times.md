@@ -2656,3 +2656,24 @@ since the preceding snapshot. Independent read-only finder and skeptic checked
 roles, hashes and history preservation without Lean or a server. Evidence hashes
 are in `tests/h55/module-times/readonly-bind-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Yul audit follow-up observations
+
+`yul_audit_followup.py` records two previously unreferenced audit sources with
+hashes and the audit document hash. AllocationWitnesses distinguishes nine
+ordinary joint witnesses from three H69 separation certificates;
+ReservedRefutation records SLOTNUM reservation-table nonmembership as an H69
+refutation, not a success contract or new exclusion. Current invocation, inputs,
+effects and outcomes remain unresolved; no runtime memory, executable builtin,
+fork or gas adequacy follows.
+
+At `4047430d40c5c4c6e1892535e4d167eb7cbb3d5b`, the refreshed static index has
+834 candidates, 638 with supplied current references and 196 without; thirteen
+retain historical references for review. Eleven candidates were added and four
+changed since the preceding snapshot. Three changed candidates had current
+references, which were demoted to versioned historical records using hashes from
+their committed manifests; the fourth already lacked a current reference.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/yul-followup-evidence.sha256`. This non-atomic observation
+does not establish current runtime acceptance.
