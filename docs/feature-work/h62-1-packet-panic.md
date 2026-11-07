@@ -161,3 +161,7 @@ The base-pinned checked-contract ledger records the quantified Source/target rea
 ## Source-window evidence continuation
 
 `source_windows.py` generates base-pinned source windows and hashes next to all 474 manual observations, with source fidelity and negative controls. Independent read-only finder and skeptic verified all current windows and hashes without Lean. Windows have lexical boundaries, may omit preceding docstrings or attributes and include neighboring material, and do not prove observation prose or Lean statements. The bulk JSON stays off Git.
+
+## Panic occurrence navigation continuation
+
+The deterministic current-tree occurrence/window map records 42 raw panicData regex hits and zero unmapped among regenerated source windows. Synthetic controls cover multiple matches, unmapped and overlapping windows, source hash mismatch and the deliberate apostrophe-suffix false positive. Independent read-only finder and skeptic verified the mapping without Lean; the output now states that files beyond the base-pinned window set are not base-verified. Window membership is a navigation hint, not semantic attribution.
