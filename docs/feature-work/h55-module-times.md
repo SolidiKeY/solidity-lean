@@ -1819,3 +1819,20 @@ runner's virtual-memory limit is not an RSS cap or H55 attestation. Current
 inputs, invocation and outcomes remain unresolved. Independent read-only
 finder and skeptic reviewed these distinctions without Lean, server or
 builds. No runtime acceptance is inferred.
+
+## Additional snapshot reference enrollment
+
+The existing `reference_index_extend.py` joins the seven EVM-compiler and
+three generic-frontend classification artifacts to the previously recorded
+`9cf44aa56e9c8c5bbf0fd18a511edaa21dfe4c02` snapshot index. All ten paths
+match source hashes and mapping fields without overlap, giving 476 supplied
+static references and 164 without supplied references among 640 rows. The
+prior 63 overlaps remain. The six later EVM-compiler files are outside this
+snapshot and are not counted here.
+
+The report and verified inputs are checksum-bound by
+`tests/h55/module-times/reference-enrollment-146-evidence.sha256`. The join
+checks supplied candidate consistency, not current-tree coverage, artifact
+authority, complete invocation, proof or runtime acceptance. Unreferenced
+rows are not excluded. Independent read-only finder and skeptic reviewed
+the counts without Lean, server or builds.
