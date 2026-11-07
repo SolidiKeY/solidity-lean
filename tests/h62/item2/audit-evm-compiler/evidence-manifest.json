@@ -2,14 +2,14 @@
   "schema_version": 2,
   "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "full_manifest": {
-    "path": "/workspace/audit-evm-compiler-evidence/h44-split/full-evidence-manifest.json",
-    "size_bytes": 45902,
-    "sha256": "5bbc88f2a644b7e6acf11256e88eabdb31a5f75c83474a5d7e595146ca894be8",
+    "path": "/workspace/audit-evm-compiler-evidence/continuation-4-manifest.json",
+    "size_bytes": 57658,
+    "sha256": "fb7a348ebd452af582e095be87eedf72336bba2fb07321e6d3ecd623b0ef7078",
     "archive_member": "continuation-2/evidence-manifest.json"
   },
   "archive": {
-    "path": "/workspace/audit-evm-compiler-h44-bulk-evidence.tar.gz",
-    "size_bytes": 5512541,
-    "sha256": "320a4ef362dac40fdc031951bd90f77155d39b5e2fd72da73e86ca72094a099e"
+    "path": "/workspace/audit-evm-compiler-continuation-4-bulk.tar.gz",
+    "size_bytes": 7472296,
+    "sha256": "735895e7d3e7ea255e3d6eec9f39a3818b119d078a089c6b3db15b0790ee5ed4"
   }
 }

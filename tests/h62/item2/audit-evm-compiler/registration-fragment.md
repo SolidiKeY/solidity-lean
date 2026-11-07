@@ -13,6 +13,12 @@ remain under the authorized tests prefix until area-owner-approved registration:
 | IntentionalAudit | JointImpossible and frozen EVM modules | Eighteen H69 intentional joint-impossibility audits |
 | OpcodeAudit | Solidity.Backend.Opcode | Sixteen joint input packages, two closed statements, total encoding and failure controls |
 | HeadlineAudit | Solidity.Evm.Correct, SuccessAudit | Joint witnesses for five unchanged headlines and conditional generic success transfer |
+| JointRefutation | JointImpossible | Definition-hidden Not inputs, full H69 joint refutation and checked guards |
+| RefutationAudit | JointRefutation and frozen memory examples | Twenty-nine intentional refutations/separations with source reasons |
+| JointFromCertificate | JointWitness | Complete joint tuple inferred from a closed existing certificate; unresolved-input rejection guards |
+| EntryAudit | JointFromCertificate, Solidity.Evm.MemoryCallExamples | Ordinary Compilation.correct joint witness for nonempty allocation/internal-call program |
+| InputFixture | Solidity.Evm.Compiler, Lean | Safe correlated audit fixtures from exact closed public Input certificates, with rejection guards |
+| SelectorAudit | InputFixture, JointWitness, five frozen memory example modules | Five ordinary compiler selector-equivalence joint input packages |
 
 The metadata inspector imports Lean only as an external tool. It is not part
 of the dependency-free intrinsic core.

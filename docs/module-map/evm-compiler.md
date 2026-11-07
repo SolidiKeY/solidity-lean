@@ -139,6 +139,9 @@
 | `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Payments/EntrySuccess.lean` | Actual checked-entry acceptance and successful execution on every supported core input; reuses payment-exact success, with pinned standard axioms. |
+| `Evm/MachineV2.lean` | Versioned pair (H57) of the frozen machine: `OutV2` with `revert data`/`ret m data`, `MachineV2` with return buffer, callee reply oracle and call journal, `InstrV2` (`REVERT`/`RETURN` with data, `RETURNDATASIZE`, `RETURNDATACOPY`, `CALLIN` with input bytes); migration to the frozen run (`forget_run_lift`, `callIn_forget`, `callIn_step`) and the return-buffer law `callIn_returndata`. |
+| `Evm/MachineV2Controls.lean` | Kernel-checked joint witness (call, buffer, copy, revert with data), `RETURN` with data, and negative controls (reply-dependent revert data, blind frozen projection, input window read, slot window, copy past buffer, unentered, refused and self calls, partial cell write). |
 | `Backend/Payments/CoreExact.lean` | G43: the core compiler with no refused-payment outcome (`compile_paid`, `compile_success`, `compile_revert`, `compile_storage_paid`); `Sim` carries the joint world/payment relation. |
 | `Backend/Payments/CompilerExact.lean` | G43: `AgreesExact`, `correct_exact` and the compiler-success theorem `compile_success` over every `Compilation` result. |
 | `Backend/Payments/Versioned.lean` | G43 V2 (H57/H98): `Compilation.AgreesV2`/`correct_v2`, `compile_correct_v2`, `_of_v2` migration lemmas to the frozen statements, empty payment branches. |

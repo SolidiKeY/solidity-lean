@@ -79,6 +79,32 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(scanner.mask(source), source)
             self.assertEqual(len(scanner.hide_strings(source)), len(source))
 
+    def test_multiline_and_stacked_attribute_declarations_are_inventoried(self):
+        root = Path("/virtual")
+        source = ("@[simp,\n  inline] def target : Nat := 1\n"
+                  "@[foo [bar],\n  baz]\n@[other] theorem next : True := by trivial\n"
+                  "def visible : String := \"@[fake] def hidden\"\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["name"], r["line"]) for r in rows],
+                         [("target", 2), ("next", 5), ("visible", 6)])
+        self.assertEqual([r["reject_reason"] for r in rows], [None, None, None])
+        with_comment = "@[simp, /- nested [ comment ] -/\n  inline] def x : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, with_comment.encode())[0]["name"], "x")
+        nested = "@[foo [[bar]]] def target : Nat := 1\ndef visible : Nat := 2\n"
+        self.assertEqual([r["name"] for r in scanner.scan(root / "C.lean", root, nested.encode())], ["target", "visible"])
+        rows = scanner.scan(root / "D.lean", root, b"@[unsafe] def a : Nat := 0\nunsafe def b : Nat := 0\n")
+        self.assertEqual(rows[0]["qualifiers"], [])
+        self.assertEqual(rows[1]["qualifiers"], ["unsafe"])
+        aligned = scanner.scan(root / "F.lean", root, b"@[simp] def first : Nat := 0\n  def inner : Nat := 1\n")
+        self.assertEqual(aligned[0]["body_reject_reason"], "nested-declaration-boundary")
+        following = ("def a : Nat := 1\n@[foo,\n bar] def b : Nat := 2\n"
+                     "def c : Nat := 1\n@[other,\n baz] def d : Nat := 3\n")
+        rows = scanner.scan(root / "G.lean", root, following.encode())
+        self.assertEqual(rows[0]["body"], rows[2]["body"])
+        self.assertEqual(rows[0]["body"], ["1"])
+        with self.assertRaisesRegex(ValueError, "unterminated attribute"):
+            scanner.scan(root / "E.lean", root, b"@[foo [bar]\ndef hidden := 0\n")
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))
@@ -279,6 +305,61 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(data["candidates"], [])
             self.assertIn("different-or-unsupported-statements", data["body_candidates"][0]["reject_reasons"])
 
+    def test_multiline_context_and_literal_boundaries(self):
+        root = Path("/virtual")
+        def row(source):
+            return scanner.scan(root / "A.lean", root, source.encode())[0]
+        prefix = "namespace N\nvariable\n  (T : "
+        suffix = ")\ntheorem same (x : T) : x = x := by rfl\nend N\n"
+        a, b = row(prefix + "Type" + suffix), row(prefix + "Type 1" + suffix)
+        self.assertEqual(a["statement"], b["statement"])
+        self.assertNotEqual(a["context_hash"], b["context_hash"])
+        self.assertEqual(a["context_hash"], row(prefix + "Type" + suffix)["context_hash"])
+        open_a = 'open scoped\n  A\nvariable (T : Type)\ntheorem same (x : T) : x = x := by rfl\n'
+        open_b = open_a.replace("  A\n", "  B\n")
+        self.assertNotEqual(row(open_a)["context_hash"], row(open_b)["context_hash"])
+        literal_a = 'variable (s : String := "x\nnamespace Fake\ny")\ntheorem same : True := by trivial\n'
+        literal_b = literal_a.replace('namespace Fake', 'namespace Other')
+        self.assertNotEqual(row(literal_a)["context_hash"], row(literal_b)["context_hash"])
+        comment = '/- variable\nnamespace Fake -/\n'
+        self.assertEqual(row(comment + prefix + "Type" + suffix)["context_hash"], a["context_hash"])
+
+    def test_notation_after_declaration_contributes_to_context(self):
+        root = Path("/virtual")
+        template = ('namespace N\ndef marker : Nat := 0\n'
+                    'local notation \"MyT\" => {typ}\n'
+                    'theorem same ({binder} : MyT) : {binder} = {binder} := by rfl\nend N\n')
+        def theorem(typ, binder):
+            source = template.format(typ=typ, binder=binder).encode()
+            return scanner.scan(root / "A.lean", root, source)[1]
+        nat, integer, renamed = theorem("Nat", "x"), theorem("Int", "x"), theorem("Nat", "y")
+        self.assertEqual(nat["statement"], integer["statement"])
+        self.assertNotEqual(nat["context_hash"], integer["context_hash"])
+        self.assertEqual(nat["context_hash"], renamed["context_hash"])
+        self.assertEqual(nat["statement"], renamed["statement"])
+        full = scanner.scan(root / "A.lean", root, template.format(typ="Nat", binder="x").encode())
+        self.assertEqual(full[0]["body"], ["0"])
+        indented = ('def outer : Nat := by\n  local notation \"x\" => Nat\n'
+                    '  exact 0\ndef next : Nat := 1\n')
+        rows = scanner.scan(root / "C.lean", root, indented.encode())
+        self.assertEqual(rows[0]["body_reject_reason"], "indented-command-boundary")
+        for keyword in ("notation", "infixl", "infixr", "infix", "prefix", "postfix"):
+            source = f'def marker : Nat := 0\nscoped {keyword}:50 \"##\" => Nat\ntheorem same : True := by trivial\n'
+            changed = source.replace('=> Nat', '=> Int')
+            a = scanner.scan(root / "A.lean", root, source.encode())[1]
+            b = scanner.scan(root / "B.lean", root, changed.encode())[1]
+            self.assertNotEqual(a["context_hash"], b["context_hash"], keyword)
+
+    def test_equal_context_does_not_prove_local_definition_equivalence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, typ in (("A.lean", "Nat"), ("B.lean", "Int")):
+                (root / name).write_text("namespace N\ndef T := " + typ + "\ntheorem same (x : T) : x = x := by rfl\nend N\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            group = next(g for g in data["candidates"] if {m["path"] for m in g["members"]} == {"A.lean", "B.lean"} and all(m["name"] == "same" for m in g["members"]))
+            self.assertIn("intrinsic-signature-unresolved", group["reject_reasons"])
+            self.assertIn("ownership-requires-live-verification", group["reject_reasons"])
+
     def test_namespace_context_is_not_conflated(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -329,58 +410,140 @@ class ScannerControls(unittest.TestCase):
             self.assertIn("previous candidate comparison", errors.getvalue())
             self.assertNotIn("Traceback", errors.getvalue())
 
-    def test_selected_symlinks_fail_without_incremental_removals(self):
+    def test_internal_aliases_keep_paths_owners_and_shared_source_warning(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "A.lean").write_text("def a : Nat := 1\n")
-            (root / "B.lean").write_text("def b : Nat := 2\n")
-            command = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]
-            baseline_bytes = subprocess.check_output(command)
-            baseline = root / "baseline.json"
-            baseline.write_bytes(baseline_bytes)
-            (root / "B.lean").unlink()
-            (root / "B.lean").symlink_to("A.lean")
-            (root / "Missing.lean").symlink_to("does-not-exist.lean")
-            result = subprocess.run(command + pinned(baseline), capture_output=True, text=True)
-            self.assertNotEqual(result.returncode, 0)
-            report = json.loads(result.stdout)
-            self.assertEqual([Path(e["path"]).name for e in report["errors"]], ["B.lean", "Missing.lean"])
-            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
-            self.assertIsNone(report["incremental"]["removed"])
-            self.assertEqual([p["path"] for p in report["inputs"]], ["A.lean"])
-            (root / "dir").mkdir()
-            (root / "dir" / "C.lean").write_text("def c : Nat := 3\n")
-            (root / "alias").symlink_to("dir", target_is_directory=True)
-            result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"], capture_output=True, text=True)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("symlink", json.loads(result.stdout)["errors"][0]["reason"])
+            (root / "Target.lean").write_text("theorem same : True := by trivial\n")
+            for name in ("A.lean", "B.lean"):
+                (root / name).symlink_to("Target.lean")
+            owners = {name: name for name in ("A.lean", "B.lean", "Target.lean")}
+            config = root / "owners.json"
+            config.write_text(json.dumps(owners))
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean", "A.*", "--owners", str(config)]
+            report = json.loads(subprocess.check_output(cmd))
+            self.assertEqual([x["path"] for x in report["inputs"]], sorted(owners))
+            self.assertEqual({row["path"]: row["owner"] for row in report["inventory"]}, owners)
+            self.assertEqual(report["input_aliases"], [{"path": name, "resolved_path": "Target.lean"} for name in ("A.lean", "B.lean")])
+            self.assertIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
+            self.assertIn("shared-resolved-source", report["body_candidates"][0]["reject_reasons"])
+            self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
 
-    def test_recursive_symlinks_and_nonregular_files_are_incomplete(self):
+    def test_alias_selection_uses_alias_extension(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "actual").mkdir()
-            (root / "actual" / "A.lean").write_text("def a : Nat := 0\n")
-            (root / "alias").symlink_to("actual", target_is_directory=True)
-            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"]
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            (root / "Backing.txt").write_text("theorem actual : True := by trivial\n")
+            (root / "Selected.lean").symlink_to("Backing.txt")
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            self.assertEqual([row["path"] for row in report["inventory"]], ["Selected.lean"])
+            self.assertEqual(report["input_aliases"], [{"path": "Selected.lean", "resolved_path": "Backing.txt"}])
+
+    def test_bad_selected_links_are_errors_not_silent_omissions(self):
+        for kind in ("broken", "outside", "loop", "directory"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
+                parent = Path(directory)
+                root = parent / "root"
+                root.mkdir()
+                (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+                (parent / "Outside.lean").write_text("theorem outside : True := by trivial\n")
+                bad = root / "Bad.lean"
+                if kind == "directory":
+                    bad.mkdir()
+                else:
+                    target = {"broken": "Missing.lean", "outside": "../Outside.lean", "loop": "Bad.lean"}[kind]
+                    bad.symlink_to(target)
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"], capture_output=True)
+                self.assertNotEqual(result.returncode, 0)
+                report = json.loads(result.stdout)
+                self.assertEqual([row["path"] for row in report["inventory"]], ["Good.lean"])
+                self.assertEqual([row["path"] for row in report["errors"]], [str(bad)])
+                self.assertEqual(report["unmatched_patterns"], [])
+                self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+                self.assertIsNone(report["incremental"]["added"])
+
+    def test_explicit_directory_alias_keeps_selected_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "real").mkdir()
+            (root / "real" / "A.lean").write_text("theorem a : True := by trivial\n")
+            (root / "alias").symlink_to("real", target_is_directory=True)
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"]))
+            self.assertEqual([row["path"] for row in report["inputs"]], ["alias/A.lean"])
+            self.assertEqual(report["input_aliases"], [{"path": "alias/A.lean", "resolved_path": "real/A.lean"}])
+
+    def test_unreadable_selected_subtree_is_explicit_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+            locked = root / "locked"
+            locked.mkdir()
+            (locked / "Hidden.lean").write_text("theorem hidden : True := by trivial\n")
+            locked.chmod(0)
+            try:
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"], capture_output=True)
+            finally:
+                locked.chmod(0o700)
             self.assertNotEqual(result.returncode, 0)
             report = json.loads(result.stdout)
-            self.assertTrue(any("symlink directory" in e["reason"] for e in report["errors"]))
+            self.assertTrue(report["errors"])
+            self.assertEqual({row["path"] for row in report["errors"]}, {str(locked)})
             self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
-            (root / "alias").unlink()
-            (root / "dangling-directory").symlink_to("gone", target_is_directory=True)
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertTrue(any("symlink" in e["reason"] for e in json.loads(result.stdout)["errors"]))
-            (root / "dangling-directory").unlink()
-            import os
-            os.mkfifo(root / "Pipe.lean")
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertTrue(any("not a regular file" in e["reason"] for e in json.loads(result.stdout)["errors"]))
-            result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "../*.lean"], capture_output=True, text=True)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("patterns must stay within the root", result.stderr)
+            self.assertIsNone(report["incremental"]["candidate_groups"])
+            self.assertEqual([row["path"] for row in report["inventory"]], ["Good.lean"])
+
+    def test_selector_matches_supported_path_globs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("A.lean", ".Hidden.lean", "sub/B.lean", "sub/deep/C.lean", "sub/Other.txt"):
+                path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text("theorem ok : True := by trivial\n")
+            (root / "alias").symlink_to("sub", target_is_directory=True)
+            for pattern in ("*.lean", "**/*.lean", "sub/**/*.lean", "*/B.lean", "alias/*.lean", "[A-Z].lean", "missing/*.lean", "sub/**/C.lean"):
+                with self.subTest(pattern=pattern):
+                    errors=[]
+                    actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
+                    expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
+                    self.assertEqual(actual,expected)
+                    self.assertEqual(errors,[])
+
+    def test_nonrecursive_selection_does_not_read_unselected_subtree(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+            locked=root/"locked";locked.mkdir();locked.chmod(0)
+            try:
+                report=json.loads(subprocess.check_output([sys.executable,"-B",str(SCRIPT),str(root),"*.lean"]))
+            finally:
+                locked.chmod(0o700)
+            self.assertEqual(report["errors"],[])
+            self.assertEqual([row["path"] for row in report["inputs"]],["Good.lean"])
+
+    def test_trailing_separator_is_directory_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root / "File.lean").write_text("theorem file : True := by trivial\n")
+            (root / "Dir.lean").mkdir()
+            for pattern in ("*.lean/", "File.lean/", "Dir.lean/", "**/*.lean/"):
+                with self.subTest(pattern=pattern):
+                    errors=[]
+                    actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
+                    expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
+                    self.assertEqual(actual,expected)
+                    self.assertEqual(errors,[])
+
+    def test_exact_path_needs_execute_permission_not_directory_listing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            locked=root/"execute-only";locked.mkdir()
+            source=locked/"A.lean";source.write_text("theorem a : True := by trivial\n")
+            locked.chmod(0o100)
+            try:
+                report=json.loads(subprocess.check_output([sys.executable,"-B",str(SCRIPT),str(root),"execute-only/A.lean"]))
+                wildcard=subprocess.run([sys.executable,"-B",str(SCRIPT),str(root),"execute-only/*.lean"],capture_output=True)
+            finally:
+                locked.chmod(0o700)
+            self.assertEqual(report["errors"],[])
+            self.assertEqual([row["path"] for row in report["inputs"]],["execute-only/A.lean"])
+            self.assertNotEqual(wildcard.returncode,0)
+            self.assertEqual(json.loads(wildcard.stdout)["incremental"]["comparison_status"],"current-incomplete")
 
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:

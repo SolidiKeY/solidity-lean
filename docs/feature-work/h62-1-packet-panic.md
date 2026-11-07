@@ -97,3 +97,27 @@ The base-byte-pinned `signed_mod_source_ledger.py` adds 12 manually reviewed Sou
 ## SignedDiv Selected continuation
 
 `signed_div_selected_ledger.py` records twelve base-pinned selection declarations. Tests reject missing, duplicate, forged and changed-source inputs. Independent read-only finder and skeptic reviews matched the selection, intrinsic and symbolic observations to the originals without Lean, and found no material discrepancy. Source-only and target observations remain distinct; the textual ledger is not full semantic closure.
+
+## SignedDiv Execution continuation
+
+`signed_div_execution_ledger.py` records the six base-pinned execution declarations with original Source and target observation boundaries. Tests reject missing, duplicate and forged census headers and modified bytes. Independent read-only finder and skeptic reviews matched the statements without Lean; the checked-flag coverage was clarified and rechecked. This does not prove Lean statements or full semantic closure.
+
+## UnsignedDiv Data and SourceOrigin continuation
+
+`unsigned_div_origin_ledger.py` adds eleven base-pinned literal observations across the two files. Negative controls reject missing, duplicate or forged census headers and modified bytes in either file with refreshed hashes. Independent read-only finder and skeptic reviewed the statements without Lean; the skeptic requested and rechecked the second-file drift control. The first test run failed on a temporary directory creation collision; after correcting fixture setup, the test passed. Private `lift_result` is outside the existing literal census, so no complete declaration or dependency account is claimed.
+
+## Private header census follow-up
+
+`private_header_ledger.py` identifies and describes nine literal private theorems omitted by the original 465-header scanner, within the same 48 base-pinned files. It pins the exact file set independently and rejects missing/substituted files and changed source even with refreshed hashes. Independent read-only finder and skeptic reviews matched all nine observations and identified an equal-count substituted-file weakness; the file-set pin and negative control were added and rechecked without Lean. This lexical scan is not Lean parsing, proof validation, or full semantic coverage.
+
+## UnsignedDiv Selection and Numeric continuation
+
+The base-pinned eleven-row selection/numeric ledger includes scalar-guard payload equality separately from symbolic target revert. Both-file byte-drift and forged-census negative controls pass. Independent read-only finder and skeptic reviewed without Lean; the returned numeric value and Source witness descriptions were clarified to state their `.val` equalities, then rechecked. This is textual accounting only.
+
+## UnsignedDiv Execution and Composition continuation
+
+The base-pinned ten-row execution/composition ledger records Source, selection and symbolic target cases. Both-file modified-byte and forged-census negative controls pass. Independent read-only finder and skeptic matched all observations and premises without Lean; no material discrepancy was found. This is not full semantic closure or target payload proof.
+
+## UnsignedDiv Witness continuation
+
+The base-pinned eight-row witness ledger records the auxiliary machine, arbitrary saved stack, Source state retention and symbolic outcomes. Negative controls pass. Independent read-only finder and skeptic matched the declarations without Lean and noted that the general zero-remainder packet is not a separately named witness theorem. This ledger is not a deployment, native execution or target payload proof.

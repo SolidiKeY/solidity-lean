@@ -253,12 +253,12 @@ def compare_results(root):
 
 
 def manifest(root):
-    paths = sorted(p for directory in ("generated", "compiled", "typed-compiled", "lean-build", "pre-merge", "evidence")
+    paths = sorted(p for directory in ("generated", "compiled", "typed-compiled", "boundary-compiled", "lean-build", "pre-merge", "evidence")
                    for p in (root/directory).rglob("*") if p.is_file() and p.name != "sha256.json")
     paths += [root/name for name in ("upstream/solc", "upstream/solc-list.json",
               "upstream/fixtures_develop-v5.3.0.tar.gz",
               "reference/package.json", "reference/package-lock.json")]
-    for optional in ("eest-inputs.jsonl.gz", "upstream/reference-before-kzg-package-lock.json", "upstream/fixtures_stable-v5.3.0.tar.gz", "toolchain/lean-4.24.0-linux.tar.zst"):
+    for optional in ("blockchain-inputs.jsonl.gz", "archive-inventory.jsonl.gz", "eest-inputs.jsonl.gz", "upstream/reference-before-kzg-package-lock.json", "upstream/reference-before-blockchain-package-lock.json", "upstream/eip7934-v5.3.0-spec.py", "upstream/fixtures_stable-v5.3.0.tar.gz", "toolchain/lean-4.24.0-linux.tar.zst"):
         if (root/optional).is_file(): paths.append(root/optional)
     obj = {str(p.relative_to(root)): file_sha(p) for p in paths}
     write(root/"sha256.json", obj)

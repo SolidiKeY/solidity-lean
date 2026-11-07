@@ -1,0 +1,25 @@
+{
+ "tests/v14-constructor/LinkIdentityAxioms.lean:Solidity.Backend.Executable.CreationLinkIdentity.Controls.wrong_link_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/LinkIdentityAxioms.lean:Solidity.Backend.Executable.CreationLinkIdentity.returned_address": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/LinkIdentityAxioms.lean:Solidity.Backend.Executable.CreationLinkIdentity.runtime_address": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/LinkIdentityAxioms.lean:Solidity.Backend.Executable.CreationLinkIdentity.same_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/LinkIdentityAxioms.lean:Solidity.Backend.Executable.CreationLinkIdentity.sites_read": [
+  "Quot.sound",
+  "propext"
+ ]
+}

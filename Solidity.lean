@@ -365,9 +365,16 @@ import Solidity.Backend.InternalFlow.RuntimeFrameFootprint
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3
+import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4
 import Solidity.Backend.InternalFlow.RuntimeFrameMutation
 import Solidity.Backend.InternalFlow.RuntimeFrameNested
 import Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer
+import Solidity.Backend.InternalFlow.RuntimeFrameP1Bridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1BridgeV2
+import Solidity.Backend.InternalFlow.RuntimeFrameP1BridgeV2Controls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1Lang
+import Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2
+import Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2Migration
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
 import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore
@@ -503,6 +510,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoopControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarUnwind
+import Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundary
+import Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundaryControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedCaller
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedRecursion
@@ -622,6 +631,9 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3SecondAllocatingEntry
 import Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionalityControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV4Migration
+import Solidity.Backend.InternalFlow.RuntimeFrameV4MigrationControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
@@ -1428,8 +1440,13 @@ import Solidity.Backend.Passes.SourceAdditionValue
 import Solidity.Backend.Passes.SourceAdditionValueControls
 import Solidity.Backend.Passes.SourceAdditionValuePins
 import Solidity.Backend.Passes.SourceCallBoundary
+import Solidity.Backend.Passes.SourceCallBytes
 import Solidity.Backend.Passes.SourceCallControls
 import Solidity.Backend.Passes.SourceCallFrame
+import Solidity.Backend.Passes.SourceCallProducer
+import Solidity.Backend.Passes.SourceCallProducerControls
+import Solidity.Backend.Passes.SourceCallProducerV2
+import Solidity.Backend.Passes.SourceCallProducerV2Controls
 import Solidity.Backend.Passes.SourceNarrowingValue
 import Solidity.Backend.Passes.SourceNarrowingValueControls
 import Solidity.Backend.Passes.SourceNarrowingValuePins
@@ -1482,6 +1499,7 @@ import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
 import Solidity.Backend.Payments.CompilerExact
 import Solidity.Backend.Payments.CoreExact
+import Solidity.Backend.Payments.EntrySuccess
 import Solidity.Backend.Payments.Headlines
 import Solidity.Backend.Payments.Versioned
 import Solidity.Backend.Payments.VersionedControls
@@ -2371,6 +2389,8 @@ import Solidity.Evm.Expr
 import Solidity.Evm.Interpreter
 import Solidity.Evm.Layout
 import Solidity.Evm.Machine
+import Solidity.Evm.MachineV2
+import Solidity.Evm.MachineV2Controls
 import Solidity.Evm.Memory
 import Solidity.Evm.MemoryAlloc
 import Solidity.Evm.MemoryAllocExamples
@@ -3211,6 +3231,7 @@ import Solidity.Lowering.P8.FieldAdmission
 import Solidity.Lowering.P8.FrozenInterface
 import Solidity.Lowering.P8.GraphSchema
 import Solidity.Lowering.P8.GraphSchemaControls
+import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
@@ -3235,6 +3256,8 @@ import Solidity.Lowering.P8.SourceSize
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen
+import Solidity.Lowering.P8b.Merged
+import Solidity.Lowering.P8b.MergedControls
 import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Lowering.P9.AdmissionControls
 import Solidity.Lowering.P9.CallControls
@@ -3303,6 +3326,7 @@ import Solidity.Lowering.Readonly.ResumeControls
 import Solidity.Lowering.Readonly.RootControls
 import Solidity.Lowering.Readonly.SourceAggregateReadEffects
 import Solidity.Lowering.Readonly.SourceAllHistories
+import Solidity.Lowering.Readonly.SourceAllHistoriesV2
 import Solidity.Lowering.Readonly.SourceBodyControls
 import Solidity.Lowering.Readonly.SourceBodyEffects
 import Solidity.Lowering.Readonly.SourceBuiltinEffects
@@ -3311,6 +3335,8 @@ import Solidity.Lowering.Readonly.SourceCallPrefix
 import Solidity.Lowering.Readonly.SourceCallUnknown
 import Solidity.Lowering.Readonly.SourceDispatchControls
 import Solidity.Lowering.Readonly.SourceDispatchEffects
+import Solidity.Lowering.Readonly.SourceDispatchInterfaceV2
+import Solidity.Lowering.Readonly.SourceDispatchInterfaceV2Controls
 import Solidity.Lowering.Readonly.SourceEnvironmentControls
 import Solidity.Lowering.Readonly.SourceEnvironmentEffects
 import Solidity.Lowering.Readonly.SourceExpressionEffects
@@ -4520,6 +4546,7 @@ import Solidity.Yul.Checks.DirectBindings
 import Solidity.Yul.Checks.DirectControl
 import Solidity.Yul.Checks.DirectUpdates
 import Solidity.Yul.Checks.DirectWords
+import Solidity.Yul.Checks.DirtyReadbackControls
 import Solidity.Yul.Checks.EvmArithmetic
 import Solidity.Yul.Checks.EvmBitwise
 import Solidity.Yul.Checks.EvmSigned
@@ -5005,6 +5032,7 @@ import Solidity.Yul.DirectBindings
 import Solidity.Yul.DirectControl
 import Solidity.Yul.DirectUpdates
 import Solidity.Yul.DirectWords
+import Solidity.Yul.DirtyReadback
 import Solidity.Yul.EvmArithmetic
 import Solidity.Yul.EvmBitwise
 import Solidity.Yul.EvmSigned
