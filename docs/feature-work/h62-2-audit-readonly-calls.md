@@ -947,3 +947,368 @@ exclusion, axiom, sorry/native_decide or proof budget changed. Full original and
 inherited acceptance, joint witnesses, H121 Source/world/native-frame adequacy,
 compiler success and runtime gates remain open; historical Premises
 +80.254966536% STOP remains. No runtime pass, goal completion or publication.
+
+
+## Ten frozen/current EffectRules joint witnesses (2026-11-07)
+
+The same additive EffectRuleWitnesses client now proves joint inputs and applies
+all ten original EffectRules statements: of_same_ex, bind, sub, attempt, parent,
+pure, halt, st, locals and setLocals. The concrete Env, typed Bool locals and
+Source state are inhabited terms. Effect premises are proved for ALL locals and
+states; bind supplies the entire universally quantified Unit continuation, using
+the same first/next computations as the final application. This establishes
+premise satisfiability with original theorem applications, not compiler adequacy.
+
+The computations are actual Source EM primitives: emitting two ordered events,
+emitting then reverting with exact bytes, catching that failure while retaining
+the reached event, and changing locals. Four observation theorems distinguish
+events/locals from the journaled world tracked by Effect. EM.sub returns its
+inner locals alongside the value; the observation records that pair. This is
+not a deployed callback, ABI/body compiler bridge, general P1/G42.02 contract,
+gas/fork proof or compiler-success theorem. No supported-program exclusion or
+new premise is introduced. The module remains an unregistered additive audit
+fixture under tests; no production root or module map changed.
+
+Separate fresh isolated builds validate the exact c6f550e original dependency
+closure (24 project modules) and the current closure (29). The identical witness
+source compiles in BOTH; all ten original kernel type hashes match the original
+reviewed census in both, and all sixteen helper theorem axiom sets use only
+propext, Classical.choice and Quot.sound. These are two independent witnesses
+under their respective definitions, not a proof that changed model definitions
+are equivalent. Source snapshots, objects, queries, outputs and tools are sealed;
+no shared project-cache fallback or held Premises import is permitted.
+
+The final frozen gate passed in 263.208 seconds at 1686777856 bytes peak aggregate
+RSS; current passed in 242.363 seconds at 1626148864 bytes. Actual Lean 4.24.0 /
+Lake 5.0.0-src+797c613, explicit -j1 --tstack=131072, LEAN_NUM_THREADS=1,
+12 GiB virtual cap, 4 GiB reserve and no swap. Frozen/current elapsed times are
+not a before/after performance comparison. Bounded current KeySort separately
+passed, exit 0 and empty diagnostics, in 1.516 seconds. Historical Premises
++80.254966536% STOP remains; no unchanged stopped workload rerun or runtime pass.
+
+The checkout was adopted to coordinator master
+a8f684928fa085d8976ead33e3d0db30208e7a4f AFTER the stable proof runs; every
+current source/tool/log/object pin and the complete current dependency graph
+still matched. The receipt source head records the actual checking revision.
+The first frozen attempt reached the witness but failed its EM.sub observation
+(Unit instead of the actual value/inner-locals pair); the corrected per-file
+check and diagnostic passed before the two fresh final gates. That failure is
+preserved and is not a passing gate.
+
+Independent read-only finder and skeptic confirmed logical premise coverage.
+Finder identified toolchain digest resampling; skeptic independently found that
+and selection from a second live source read. The fixes retain the compared authenticated toolchain digest and
+select interfaces from the exact captured, hash-checked byte buffer. Both
+confirmed the fixes and exact accounting. Eleven external refusal/accounting
+controls pass, including snapshots, held imports, incomplete/duplicate/changed
+types, axiom records, mode/client substitution and collateral-entry changes.
+Neither reviewer ran Lean/server/tests or wrote files. Their reviews and the
+kernel evidence are separate artifacts.
+
+Coverage uses ONLY the two exact executed receipt hashes, re-parses their sealed
+probe logs, checks the same client bytes and exact original types, then updates
+ten pending originals. The generator reads its immutable Git baseline so it
+remains reproducible after the audit coverage file changes. A second invocation
+after the root update generated all four accounting outputs byte-identically. All other 782
+original rows and all 43 existing coverage entries are preserved. All 792
+identities remain: 45 joint witnesses (previously 35), three target-failure joint,
+45 intentional impossibility, 256 no-top-level-input, two V1 refutation/migration
+and 441 ordinary pending (previously 451). Three private-identity gaps and all
+nineteen signature-transport waits remain. No original statement, definition,
+axiom, exclusion, premise or proof budget was changed; no sorry/native_decide.
+Full original/inherited acceptance and H121 Source/world/native-frame adequacy
+remain open, as does owner compiler success/G42.04.
+
+P20's previously missing documentation reference is now actually resolved: its
+in-tree target matches the owner's exact published SHA256 and repair commit
+c9cf710a8459581006150a462b69ae8c4f0d13e0 is an ancestor. No P20 proof rerun is
+claimed. The initial pre-adoption docs check instead reported a V09 handoff reference
+to an absent external selected-heap witness. After adoption of a8f6849, the owner
+documentation explicitly names its external H44 source; the final GLOBAL DOCS
+GATE PASSES. That target was not materialized or proof-checked here. Both doc-only
+tickets are closed, with no cross-chain edit, waiver or proof inference.
+
+Raw paired proofs, accepted coverage delta, reviews and owner requests are under
+/workspace/h62-audit-readonly-calls/effect-rules/; pins are in
+`tests/h62/item2/audit-readonly-calls/effect-rules.sha256`. The committed checkers
+and coverage generator reproduce the evidence with the admitted artifacts.
+Receipt paths remain VM-specific; content verification is not independent SDK
+source certification. Next: continue remaining joint witnesses/refutations and
+live owner/type/source binding without treating these ten effect-algebra inputs
+as full compiler totality or the full H121 producer. No goal completion or push.
+
+
+### Primitive value and nonempty local transport inputs (2026-11-07)
+
+Rebased the prior checkpoint onto master 65e69b6426a9a4fc3fb5541f41726a4bfefda5d0;
+the proof-run head is e6a0ec767f081273fab6ebce82a53f8775414bb0. The two original
+primitive interface files remain byte-identical to C6. The additive
+`tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean` supplies
+inhabited inputs for all four PrimitiveValues statements and all four
+PrimitiveLocals statements. Its bool/uint/int/bool locals contain true/9/-3/false;
+the last index really reads false while the first reads true. Both local round
+trips and both variable-read correspondences use these same inputs. The primitive
+round trips use actual nondefault numeric values; default transport is applied to
+Bool. Injectivity includes the concrete true/true image-equality premise jointly
+with the original theorem application. A separate checked refutation rejects a
+constant Bool translator. Eleven new audit theorems and eight input definitions;
+no original declaration, definition, premise, exclusion, axiom or budget changed.
+
+The SAME final client passed fresh isolated exact-C6 and current dependency
+closures: 43/47 project modules, eight exact original raw kernel type hashes,
+and eleven helper axiom sets containing only propext/Classical.choice/Quot.sound
+(or no axioms). Frozen:315.859 seconds,1688174592 bytes peak aggregate RSS;
+current:309.074 seconds,1623326720 bytes. Explicit -j1,LEAN_NUM_THREADS=1,
+12GiB address cap,16GiB VM,no swap,4GiB reserve; Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613. Both include a passing bounded KeySort step. These are
+independent model checks, NOT a timing comparison or release of the historical
+Premises +80.254966536% STOP. No held import, cache fallback, full runtime pass,
+SDK-library certification or whole-model definition equivalence is claimed.
+
+The initial frozen run passed before the injectivity inputs were strengthened;
+it is historical only. The strengthened per-file check passed in1.010 seconds.
+Final frozen/current receipts are admitted by exact SHA256 before parsing, and
+sources, toolchain, objects and actual query logs are rechecked. Eight external
+controls pass for captured-interface substitution, imports/inventory, trust,
+missing/duplicate/changed types, mode/client substitution, lost originals and
+collateral baseline drift. A self-found copied receipt field still said ten;
+it was corrected to derive the actual change count, with pre-fix metadata kept.
+The accepted receipt and delta both report eight. Synthetic controls are not
+Lean proofs. Independent read-only finder and skeptic confirmed the strengthened
+logical inputs and negative control, with final accounting review recorded in
+the exported handoff; neither ran Lean/server/tests or wrote files.
+
+Coverage changes EXACTLY eight pending original statements, preserving every
+other784 row and all53 prior entries: joint45→53 and pending441→433. All792
+identities remain, including three private-identity gaps and all nineteen
+H19/H60 statement-transport waits. Credit means inhabited inputs and original
+applications, not ABI decoding, callee selection, compiler totality or Source/
+world/native-frame adequacy. The full H121 producer and inherited queue remain
+unfinished. Stage3 still waits on memory-reference-structs; H19/H60 transport
+still waits on v10-storage-operations; historical proof-cleanup fb0defdc remains
+UNVERIFIABLE. No new owner ticket or scope question, no push or goal completion.
+
+Evidence: /workspace/h62-audit-readonly-calls/primitive-transport/; committed
+pins: `tests/h62/item2/audit-readonly-calls/primitive-transport.sha256`.
+`check_primitive_transport.py` regenerates proofs in fresh output directories;
+`primitive_coverage.py` reproduces accounting from its immutable Git baseline and
+admitted raw receipts. It requires the exported canonical prior ledger and raw
+VM artifact paths; no off-VM independent acceptance is implied. Next independent
+work: remaining433 original joint witnesses/refutations and precise input/type/
+source/owner binding under all existing holds.
+
+
+### Primitive initialization and authenticated dependency reuse (2026-11-07)
+
+Fetched master f5038bc02bc52ea08f5a3cec7de292aef424e7c8 and rebased prior audit
+checkpoints; proof-run head is f994997c163fa341adab6bb872f24dde7857c42c.
+`tests/h62/item2/audit-readonly-calls/InitializationWitnesses.lean` imports
+unchanged PrimitiveInitialization and instantiates zero_value,zero_values,
+exhausted_nonempty,exhausted_empty. Explicit Env, Bool locals and Source state
+observe horizon-one success, nonempty horizon-zero timeout, and empty horizon-zero
+success. Mixed bool/uint/int returns use the same input/seed in every run. A
+general pure-versus-timeout lemma and two concrete always-timeout refutations
+guard successful initialization. Ten new helper theorems, five input definitions;
+no original statement, definition, premise, exclusion, axiom or budget changed.
+
+Both final modes passed:four exact original raw kernel types,ten permitted
+helper axiom sets. Frozen:45 project nodes,43 reused and2 newly compiled modules,
+39.504 seconds,793149440 bytes peak aggregate RSS. Current:50 nodes,47 reused
+and3 newly compiled modules,34.237 seconds,792784896 bytes. The final client and
+query compile separately in both modes. These are CHECKED DEPENDENCY REUSE gates,
+not fresh full-closure rebuilds or timing comparisons. New dependencies compile
+in isolated libraries; no arbitrary cache fallback or old-library LEAN_PATH.
+The prior executed primitive pair is admitted by exact hashes; source/import/
+object/compiler/log pins are verified before/after and copied objects/staged
+sources checked. Historical Python tools changed by master are recovered ONLY
+as exact hash-matched Git bytes at the admitted receipt's head. Current tools
+stay untouched; missing/wrong objects or corrupted saved snapshots refuse
+recovery. Read-only replay refuses absent snapshots. This authenticates saved
+provenance, not execution of old tooling or SDK-library certification.
+
+The initial check refused changed scan.py before compilation. Exact Git recovery
+resolved that provenance mismatch. The next check compiled dependencies but
+found an ambiguous Heap.empty in the new fixture; qualifying the Source heap
+fixed it. The corrected per-file check passed in1.516 seconds. Those two failed
+attempts remain saved, with no passing credit. Final frozen/current receipts are
+separate and immutable. External controls cover actual temporary-Git recovery,
+bad Git digests, absent/corrupt snapshots, forbidden artifact recovery, source/
+object/destination substitution, unadmitted receipt bytes, held imports, changed/
+missing/duplicate types, mode/client substitution and original-row loss. Intake
+controls also keep lexical refusals separate from semantic credit. These are
+external tooling checks, not Lean proofs. Independent read-only finder and
+skeptic confirmed source logic, cache recovery and final accounting; neither
+ran Lean/server/tests or wrote files.
+
+Accounting changes exactly four original pending rows:joint53→57,pending433→429.
+Every other788 original row and all61 prior coverage entries are retained. All792
+identities, three private run_bind gaps and nineteen H19/H60 statement-transport
+waits remain. Horizons are NOT gas/depth/fork resources; initializer refutations
+are not negative controls for the public compiler. The historical Premises
++80.254966536% STOP remains; no unchanged held-workload run, before/after
+rebaseline, runtime-pass label or full assignment completion.
+
+Master now contains PublicCompilerTotal and its owner controls. Source-only
+intake binds exact Git blobs and nine requested header spans. The lexical census
+refused PublicCompilerTotal at an unmatched end; that file remains unbound,
+and candidate headers do not establish namespace or kernel signatures. Frozen
+census owner/kernel/witness defaults are removed from new producer rows; live
+ownership and kernel binding remain explicitly unverified. This
+refusal is recorded rather than hidden. Compiler-success source publication is
+available; consumer kernel validation and complete negative controls remain
+pending. Its stated ProgOk/Matches domain excludes external/self/library calls;
+G42.04 library body/binding adequacy remains open. Owner P1 documentation says
+gas/depth are not resources. Thus intake closes neither checkpoint3 nor our full
+H121 Source/callee/native-frame producer; no original792 credit comes from text.
+
+Artifacts: /workspace/h62-audit-readonly-calls/initialization/.
+Committed pins: `tests/h62/item2/audit-readonly-calls/initialization.sha256`.
+`initialization_coverage.py` reproduces its exact four-row delta from the immutable
+Git baseline and admitted proof/cache chain. Raw ledgers and exact absolute VM
+paths are required for replay; they are not independent off-VM acceptance.
+Next:remaining429 original joint inputs/refutations and exact source/type/owner
+binding, plus consumer validation of published compiler success under all holds.
+No new scope question, owner ticket, push, goal reset or goal completion.
+
+
+Final initialization acceptance:thirteen external controls pass; four accounting
+outputs and the source-only compiler intake reproduce byte-for-byte. Skeptic's
+unsupported inherited-owner finding is fixed by stripping all frozen owner,
+kernel-name and witness/premise defaults from new producer rows. Both reviewers
+confirm the fix. Actual bounded current KeySort passes (2.020 seconds), using
+Lean4.24.0/Lake5.0.0-src+797c613, without a runtime-pass claim. No full repository
+or producer compiler kernel gate is substituted by this prerequisite.
+
+
+### SDK command surfaces for the published compiler producer (2026-11-07)
+
+Fetched master f5038bc02bc52ea08f5a3cec7de292aef424e7c8; it is already an
+ancestor of this branch. The legacy census remains unchanged. Its producer
+refusal arose from mutual-block ends; equation-style theorem bodies also lack
+its assumed := delimiter. No frozen792 headers, signatures, statuses or old
+refusals are rewritten to make the new producer pass.
+
+`tests/h62/item2/audit-readonly-calls/CommandSurface.lean` uses SDK syntax parsing
+in a safe helper command with an initialized Lean environment. It never imports,
+elaborates or executes inventoried project commands. It traverses declaration
+nodes and mutual command children, not proof/quotation subtrees, and separates
+parser declSig ranges from ordinary/equation bodies. Namespace/section variables,
+UTF-8 byte ranges, early exit, parser errors and mismatched scopes remain explicit.
+No unsafe initializer API, new theorem, axiom, sorry or budget change is used in
+the final source; no production module or generated root imports this tool.
+
+The live capture parsed four exact Git files at d38e44f7816bf01c23ec023d178488e07ebcb21b:
+PublicCompilerTotal28 theorem surfaces, its Controls19, P1RevertBridge6 and
+Evm.Compiler16, total69. All nine requested source headers are unique parser
+candidates. These are surface names/ranges/context, NOT elaborated signatures,
+private kernel identities, live ownership, compiler correctness or Source/native
+adequacy. Legacy lexical refusal is retained as historical evidence; SDK parsing
+refines only the surface facet. No original witness credit comes from parsing.
+
+Seven live controls cover mutual/equation headers and scoped variables; an
+available-Lean import with a run_cmd file marker that must never execute; a
+separate nonexistent project import that must not load; proof-command quotations;
+an unexecuted custom macro producing a parser refusal; early #exit preserving an
+unscanned-tail refusal; and mismatched namespace closure. The marker/import
+fixtures are separate so a missing import cannot mask an execution regression.
+Five external unit controls cover polluted SDK variables, precompile helper
+mutation/staging failure, UTF-8 and invalid ranges, partial/elaboration-claim
+refusal and explicit guards. Live guards also pass under Python optimization.
+
+Finder and skeptic found SDK override, transitive-tool sealing and helper-reread
+gaps. Fixes remove all dynamic Python project imports, strip Lean/Elan overrides,
+set private library/canonical SDK roots, check actual prefix before/after and
+stage one authenticated helper buffer with pre-child seals. Both reviewers
+confirm fixes and final saved evidence without executing Lean/server/tests or
+writing files. SDK/stdlib contents remain external tool inputs, not certified
+source. Initial unsupported-notation/prototype/kernel-refusal and fixture traces
+are saved separately; none is promoted to final acceptance.
+
+Final normal and optimized captures passed in3.525/3.527 seconds with
+658362368/656969728 bytes peak aggregate RSS. These are two live reproducibility
+checks, not a before/after speed baseline. Producer surfaces, nine requested
+candidates and original-ledger preservation reproduce byte-identically; fixture
+marker paths/ranges are deliberately run-specific. All792 original identities
+and root coverage remain byte-bound and unchanged:57joint,3target-failure joint,
+45intentional impossibility,256no-top-level-input,2V1refutation/migration and
+429ordinary pending, including three private gaps. Nineteen transports, full
+H121 producer, compiler consumer kernel validation, inherited queues and full
+acceptance remain open. Historical Premises +80.254966536% STOP is unchanged;
+no held producer proof was loaded/rerun and no RUNTIME_GATE_PASS is claimed.
+
+Artifacts: /workspace/h62-audit-readonly-calls/command-surface/; committed pins
+`tests/h62/item2/audit-readonly-calls/command-surface.sha256`. The deterministic
+`command_surface.py` runs only live parser capture, not saved-receipt promotion.
+Next independent work: actual compiler consumer kernel/type binding and remaining
+original inputs under the holds. No scope question, owner ticket, push or goal
+reset/completion.
+
+
+### Public compiler consumer kernel/type and outcome checks (2026-11-07)
+
+Fetched master5414256fdf7b78e8debe5e571c7af06ee55a5563 and rebased prior audit
+work; checked tree2652005dc61266e7386b6e696d3a72f19e6bac5a. The producer's187-module
+current closure including Controls excludes WorldCalls.Premises. An attempted
+standard cache seed was stopped by the memory-reserve guard: its default tmpdir
+was RAM-backed. The task-owned partial extraction and unused downloaded archive
+were removed after recording checksum/failure evidence. No cache provisioning
+pass is claimed. Existing cache plus necessary current-source rebuilds were used.
+
+`tests/h62/item2/audit-readonly-calls/CompilerOutcomeWitnesses.lean` instantiates
+PublicCompilerTotal on a nonempty Boolean-declaration program and a supported
+bare-revert program. Both have actual intrinsic-source outcomes and share the
+same explicit fresh typed state, machine, simulation and word bound. The Boolean
+source local is true. joint_agreement retains those inputs with the FULL fixed
+Compilation.Agrees relation. General lemmas derive target success from actual
+source success and no payment, and target revert from actual source revert.
+The no-payment fact follows the existing domain's quiet theorem. The public
+compiler thus actually accepts and executes successfully at this supported
+input; reject-all and always-revert behavior are refuted there. A second actual
+compiled run reverts. No target-outcome/OracleAgrees premise is assumed.
+Fourteen new audit theorems,five fixture definitions,no original statement,
+definition,premise,exclusion,axiom or budget changed; no sorry/native_decide.
+
+The repository per-file dependency check built the producer closure; its first
+whole gate failed only because new generic helper applications left L/frame/
+base/state implicit. Making those exact inputs explicit fixed the leaf. Final
+per-file PASS1.514s. The final metadata/consumer kernel probe PASS18.608s with
+1023172608 bytes peak aggregate RSS. It checks the same client source, nine
+imported producer names/modules/closed types and exact direct source selections
+against the prior SDK ranges. All14consumer and9producer axiom sets are within
+propext/Classical.choice/Quot.sound(or subsets). The published totality theorem
+and its inhabited owner controls therefore have current consumer kernel/type
+validation under ordinary Lake cached-dependency assumptions. Nine of the69
+producer surfaces have these explicit links; the other60 are not individually
+type/location-inventoried by this probe. No private fallback or ownership claim.
+
+The driver seals the transitive H62 Python tool tree, source/export/config
+buffers, SDK/toolchain, complete187-source import graph and actual query log.
+Original coverage is pinned before/after. Lake traces and374object-path snapshots
+are post-query observations, NOT source-to-object fidelity or loader-byte
+attestation. This is current-tree cached-import checking, not an independently
+fresh dependency proof or SDK-library certification. Five external controls
+refuse missing/duplicate identities, wrong modules/names/types, mismatched direct
+locations, UTF-8 position errors and unexpected/missing/duplicate axioms. They
+are tooling controls, distinct from kernel proofs. Read-only finder/skeptic
+reviews confirm the final source/evidence with no findings; neither runs
+Lean/server/tests or writes files.
+
+This advances checkpoint3 only on the owner-stated intrinsic ProgOk/Matches
+compiler domain. Agrees supplies its existing typed state/stack relation; these
+outcome controls do not separately expose a target Boolean memory cell. Failure
+is the basic machine's data-free revert, not returndata bytes. The word bound
+is not gas/depth/fork; the basic machine does not supply those resources. This
+is NOT resolved Solidity.Source/callee body adequacy, physical P1/native frames,
+external/self/library call coverage or G42.04 body binding. Our full H121 producer
+remains unfinished. No existing exclusion or observation is weakened to claim
+those properties.
+
+All792 original identities,429ordinary pending,three private gaps and nineteen
+transports remain unchanged,with zero original witness credit from these new
+post-base compiler consumers. Other checkpoints and inherited queues/full
+acceptance remain open. Historical Premises +80.254966536% STOP is retained;
+no unchanged held proof was rerun,no before/after rebaseline or RUNTIME_GATE_PASS.
+Evidence: /workspace/h62-audit-readonly-calls/compiler-consumer/; committed pins
+`tests/h62/item2/audit-readonly-calls/compiler-consumer.sha256`. Next:remaining
+original joint inputs and full RO Source/callee/native-frame producer under all
+holds. No new scope question, owner ticket, push or goal reset/completion.
