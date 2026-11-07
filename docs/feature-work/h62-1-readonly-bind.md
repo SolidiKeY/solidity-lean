@@ -211,3 +211,44 @@ after fake compilation and verifies refusal. Both final reviewers report no
 remaining confirmed finding within this checkpoint's stated boundary.
 The documentation gate still fails only on the two inherited references already
 routed to v17-validation-release; this checkpoint did not edit that other chain.
+
+
+## Complete three-file source declaration and case ledger (2026-11-07)
+
+`scripts/h62/item1/readonly-bind/case_ledger.py` accounts for every original
+named declaration in the three pinned migration files:25 rows, consisting of
+ten public laws, eleven retained private helper theorems, one retained definition
+and three removed private run_bind source identities. Original file hashes are
+pinned; current files must equal the exact authorized import/helper/proof-reference
+transformation byte for byte. Definition and statement changes are refused.
+The original792 artifact is authenticated by SHA256; all24 theorem rows in this
+subset keep their original signature digest, context, source name and visibility.
+The definition recorded is additional source accounting, not a new original792 row.
+
+Every public law has one explicitly described branch and a source fixture
+reference. Each removed helper has both Except constructor cases mapped to
+synthetic bind controls. There are16 mapping records but only12 distinct source
+theorem references: the same two synthetic controls are reused for each removed
+helper. These counts do not represent16 independent proofs. Every fixture status
+is source-reference-only-not-current-kernel-acceptance; no cached fixture, broad
+feasibility, gas/fork variant, original private identity or source adequacy is
+promoted. Existing separately checked encoding evidence remains separate.
+The ledger always reports full_goal_acceptance=false.
+
+The generic census now exposes declarations_text so both file-based and supplied
+source parsing use the same namespace/section stack. Review found that merely
+finding a namespace could misattribute a theorem after its closing end; this was
+fixed by scoped parsing. Six refusal controls cover original membership and
+bytes, definition/statement/helper drift, missing/commented/duplicate/foreign
+fixtures and the moved-outside-namespace regression. Five existing census tests
+pass; old and new lexical parser outputs match across all129 current original
+module-map files, including two without an original theorem row. Exact overlay
+and ten-consumer checks also pass. These are external scanner checks, not Lean
+proofs or renewed frozen/current statement certification of the whole repository.
+
+Independent read-only finder and skeptic confirmed the final attribution fix
+and source-only boundaries; neither executed Lean or wrote files. No Lean source,
+frozen statement, premise, budget, axiom or exclusion changed. No held Lean job
+was rerun; historical +80.254966536% STOP and full acceptance obligations remain.
+Evidence and reproduction ledger are under
+`/workspace/h62-audit-readonly-calls/bind-case-ledger/`.
