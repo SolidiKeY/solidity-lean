@@ -60,9 +60,12 @@ Producer ownership: Source stays VY5; other frontend producers retain owners; ge
   outcome, missing record, missing anchor) are rejected; `adapter.py` refuses
   to run under `python -O`.
 - **Report:** withdrawn rows show "open, unsupported diagnostic until admitted".
-- **Staging:** `--stage DIR` renders the 30-row transition (`staged/`, ignored;
-  hashes in `staged.SHA256SUMS`, H44) and `Check.lean`, which kernel-checks
-  (MCP diagnostics, no errors).
+- **Staging:** `--stage DIR` renders the 30-row transition and `Check.lean` in
+  an ignored local output directory. Historical staging checksums and validation
+  records are archived privately under
+  `evidence/solidity-fullscope-20261104/vx1-contracts-environment/`, including the
+  former `tests/fullscope-20261104/vx1/manifest-rescope/staged.SHA256SUMS`.
+  Those historical records do not establish current kernel or activation status.
 
 The staged outputs are evidence, not activatable: with the patch alone the
 generated `Feature.inProfile`/`WithinProfile`/`ProfileSyntax` still test scope
