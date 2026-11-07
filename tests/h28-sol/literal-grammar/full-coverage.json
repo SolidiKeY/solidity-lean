@@ -1128,6 +1128,186 @@
     "expected": "some (.tok (.unicodeStr [226, 128, 174]))"
   },
   {
+    "id": "plain-raw-TAB",
+    "mode": ".sol",
+    "raw": [
+      34,
+      65,
+      9,
+      66,
+      34
+    ],
+    "expected": "none"
+  },
+  {
+    "id": "plain-raw-NUL",
+    "mode": ".sol",
+    "raw": [
+      34,
+      0,
+      34
+    ],
+    "expected": "none"
+  },
+  {
+    "id": "plain-raw-DEL",
+    "mode": ".sol",
+    "raw": [
+      34,
+      127,
+      34
+    ],
+    "expected": "none"
+  },
+  {
+    "id": "unicode-raw-TAB",
+    "mode": ".sol",
+    "raw": [
+      117,
+      110,
+      105,
+      99,
+      111,
+      100,
+      101,
+      34,
+      65,
+      9,
+      66,
+      34
+    ],
+    "expected": "some (.tok (.unicodeStr [65, 9, 66]))"
+  },
+  {
+    "id": "unicode-raw-NUL",
+    "mode": ".sol",
+    "raw": [
+      117,
+      110,
+      105,
+      99,
+      111,
+      100,
+      101,
+      34,
+      0,
+      34
+    ],
+    "expected": "some (.tok (.unicodeStr [0]))"
+  },
+  {
+    "id": "unicode-raw-DEL",
+    "mode": ".sol",
+    "raw": [
+      117,
+      110,
+      105,
+      99,
+      111,
+      100,
+      101,
+      34,
+      127,
+      34
+    ],
+    "expected": "some (.tok (.unicodeStr [127]))"
+  },
+  {
+    "id": "unicode-raw-CR",
+    "mode": ".sol",
+    "raw": [
+      117,
+      110,
+      105,
+      99,
+      111,
+      100,
+      101,
+      34,
+      65,
+      13,
+      66,
+      34
+    ],
+    "expected": "none"
+  },
+  {
+    "id": "yul-raw-TAB",
+    "mode": ".yul 7",
+    "raw": [
+      34,
+      65,
+      9,
+      66,
+      34
+    ],
+    "expected": "none"
+  },
+  {
+    "id": "plain-double-other-quote",
+    "mode": ".sol",
+    "raw": [
+      34,
+      39,
+      34
+    ],
+    "expected": "some (.tok (.str [39]))"
+  },
+  {
+    "id": "plain-single-other-quote",
+    "mode": ".sol",
+    "raw": [
+      39,
+      34,
+      39
+    ],
+    "expected": "some (.tok (.str [34]))"
+  },
+  {
+    "id": "unicode-double-other-quote",
+    "mode": ".sol",
+    "raw": [
+      117,
+      110,
+      105,
+      99,
+      111,
+      100,
+      101,
+      34,
+      39,
+      34
+    ],
+    "expected": "some (.tok (.unicodeStr [39]))"
+  },
+  {
+    "id": "unicode-single-other-quote",
+    "mode": ".sol",
+    "raw": [
+      117,
+      110,
+      105,
+      99,
+      111,
+      100,
+      101,
+      39,
+      34,
+      39
+    ],
+    "expected": "some (.tok (.unicodeStr [34]))"
+  },
+  {
+    "id": "yul-single-other-quote",
+    "mode": ".yul 7",
+    "raw": [
+      39,
+      34,
+      39
+    ],
+    "expected": "some (.tok (.str [34]))"
+  },
+  {
     "id": "raw-invalid-UTF8-ff",
     "mode": ".sol",
     "raw": [
