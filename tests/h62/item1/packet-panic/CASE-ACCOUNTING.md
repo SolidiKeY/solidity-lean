@@ -75,3 +75,7 @@ The base-byte-pinned `signed_div_selected_ledger.py` adds twelve literal declara
 ## SignedDiv Execution
 
 `signed_div_execution_ledger.py` records six base-pinned intrinsic and joint Source/selected symbolic execution declarations. Ordinary and zero-divisor cases retain both checked modes; the minimum/-1 case separately records checked arithmetic panic/coarse revert and unchecked minimum success. Original Source/target local reads, physical StateRepr and arbitrary EVM-word tail remain binding. This is textual accounting, not Lean validation or a target panic-payload assertion. The ledgers now account for 312 of 465 literal headers; 153 remain unclassified.
+
+## UnsignedDiv Data and SourceOrigin
+
+`unsigned_div_origin_ledger.py` records eleven base-pinned literal declarations across Data and SourceOrigin. These include operand contexts, local-tail ordering, Source and intrinsic div/mod expressions, and Source local div/mod outcomes at n+3 across both pipelines with the complete local/state pair retained. A private helper `SourceOrigin.lift_result` lies outside the 465 literal-header census and is a dependency of both origins. The ledgers now account for 323 of those 465 headers; 142 remain unclassified, and the 465 count does not include private headers. This is textual accounting, not Lean validation or complete dependency coverage.
