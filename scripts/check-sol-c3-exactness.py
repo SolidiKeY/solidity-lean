@@ -410,6 +410,7 @@ def final_errors(m):
         errors.append("open obligations remain: " + "; ".join(m["open_obligations"]))
     required = {
         "run-lean-final": ["bash", "run-lean.sh"],
+        "keysort-final": ["bash", "scripts/check-solkey.sh", "--key", "/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"],
         "final-source-gates": [".venv/bin/python", "tests/sol-c3-exactness/final-checks.py"],
         "corpus-final": ["bash", "scripts/check-corpus.sh", "--solkey", "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"],
     }
@@ -423,7 +424,7 @@ def final_errors(m):
         r = json.loads(r.read_text())
         if r.get("command") != cmd or r.get("exit") != 0 or r.get("interrupted") or r.get("pressure_stop"):
             errors.append("final gate not passed: " + name)
-        decisive = {"run-lean-final":["Build completed successfully"], "corpus-final":["check-corpus: ok"]}
+        decisive = {"run-lean-final":["Build completed successfully", "solkeycheck: OK"], "keysort-final":["parsed 377 taclets, 131 read-bearing, table covers 131", "solkeycheck: OK"], "corpus-final":["check-corpus: ok"]}
         if any(t not in p.read_text() for t in decisive.get(name, [])):
             errors.append("missing decisive final output: " + name)
         if r.get("input_hashes") != snapshot or r.get("log_sha256") != sha(p.read_bytes()):

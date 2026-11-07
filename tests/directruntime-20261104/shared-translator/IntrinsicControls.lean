@@ -46,7 +46,7 @@ private def referenceC : Contract := exampleContract
 private def returnC : Contract := exampleContract
   { emptyDecl with rets := [("result", .prim .uint)] }
 #guard match assertionObligation failedLowering markerPre returnC "f" true with
-  | .error "plain return obligation" => true | _ => false
+  | .error "lowering sentinel" => true | _ => false
 
 -- The specified branch calls the existing spec builder and never plain lowering.
 #guard match obligation failedLowering markerPre emptyC "f" true false with
