@@ -83,3 +83,15 @@ The base-byte-pinned `signed_div_selected_ledger.py` adds twelve literal declara
 ## Additional private and protected headers
 
 The original census matches only unmodified line-start headers and omitted private or protected declarations. `private_header_ledger.py` scans the same independently enumerated 48 pinned files and finds nine additional literal `private theorem` headers. Their manual observations cover fixture heap references, representation uniqueness, unsigned success/refusal observations, numeric conversion, Source result lifting, and local-word representation. With these separately counted rows, 332 of 474 observed literal headers have manual observations; 142 of the original 465 remain unclassified. Neither scanner is a Lean parser: modifier combinations, alternate formatting, comments and declarations beyond the fixed files may be missed or misidentified. These counts are not full declaration, semantic or dependency coverage.
+
+## UnsignedDiv Selection and Numeric
+
+`unsigned_div_selection_numeric_ledger.py` records eleven base-pinned literal declarations for public selection, two operand loads and binTail, nonzero operator results and Source transport. The scalar divisionFailure equality concerns Source panic bytes; symbolic EVM revert does not expose a payload. These textual observations are not Lean validation or complete dependency accounting. The ledgers now describe 343 of 474 observed literal headers; 131 of the original subtotal remain.
+
+## UnsignedDiv Execution and Composition
+
+`unsigned_div_execution_composition_ledger.py` adds ten base-pinned literal headers for intrinsic evaluation, selected execution and joint Source/target local cases. The original StateRepr and divisor premises, Source fuel n+3 and retained local/state pair remain binding; zero cases assert exact Source divZero panic data and coarse symbolic target revert. These are textual observations, not whole-state agreement, gas, ABI or target payload proofs. The ledgers now describe 353 of 474 observed literal headers; 121 of the original subtotal remain.
+
+## UnsignedDiv Witness
+
+`unsigned_div_witness_ledger.py` records eight base-pinned literal headers for the auxiliary initialized machine and StateRepr, arbitrary saved stack, nonzero Source div/mod success and zero-divisor Source divZero panic with coarse selected symbolic revert. Source local tails and state are retained as stated. There is no separately named witnessed zero-remainder theorem in this file; the general remainder-zero packet is a separate declaration in Composition. This is a textual auxiliary witness account, not deployment, native execution or target panic-payload proof. The ledgers now describe 361 of 474 observed literal headers; 113 of the original subtotal remain unclassified.

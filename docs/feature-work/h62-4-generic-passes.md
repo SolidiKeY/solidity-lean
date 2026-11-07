@@ -55,9 +55,10 @@ Read-only finder `/root/finder` and skeptic `/root/skeptic` used no Lean server/
 Use the supplied official archive/pin and this same branch/VM. Do not create or reset the persistent goal. New logs require a fresh run ID:
 
 ```sh
+export H62_GENERIC_PASSES_EVIDENCE="$(pwd)/../h62-generic-passes-evidence"
 python3 scripts/h62/item4/generic-passes/accept.py --run-id resumed-1
 # Only after successful full additive closure and unchanged source/artifacts:
-python3 scripts/h62/item4/generic-passes/measure.py --run-id paired-1 --acceptance /workspace/h62-generic-passes-evidence/resumed-1-acceptance.json
+python3 scripts/h62/item4/generic-passes/measure.py --run-id paired-1 --acceptance "$H62_GENERIC_PASSES_EVIDENCE/resumed-1-acceptance.json"
 ```
 
 The scripts derive the checkout root, use a fresh v4.35 artifact tree and preserve older logs. The generated census can be reproduced using `census.py --output PATH` and compared with its manifest. Full external evidence, original patch, committed head/base, hashes and unfinished obligations accompany the final external `HANDOFF.md` and `SHA256SUMS`. This checkpoint is not completion of the four-checkpoint queue.
@@ -92,3 +93,13 @@ The coordinator explicitly requested merging origin/master and continuing. The c
 Completed independent reproduction backfill: accept.py now blanks inactive comments/strings, requires exactly one declaration for each expected control alias, and checks the complete type/body reference. Ten isolated CLI regressions accept the original and refuse changed execution signatures, omitted negatives, substituted alias types/bodies, exact/mixed duplicates, commented declarations, comment-masked substitutions and multiline body suffixes. Independent finder/skeptic reviewed the changes without Lean/server or writes; their initial gaps were fixed. This is source-only coverage and does not establish semantic correspondence or axiom sets.
 
 Fresh adversarial, lexical and complete pinned-census checks passed; evidence: /workspace/h62-generic-passes-evidence/resumed-20e492ee9/. Original inventory still matches every frozen file. Solidity/Syntax/Raw.lean is unchanged and no approved syntax-migration input is delivered locally; the known failed v4.35 import gate was not rerun unchanged. Checkpoints2–4 and negative/isolated-fixture proof validation remain pending that dependency. No new Lean source, frozen statement, definition body, axiom declaration, proof budget or timing claim changed. The assigned scanner/census/reproduction backfill is saved; semantic fixture/negative work, acceptance and measurement require the absent prerequisite.
+
+## Scheduled integration and portable task locations (2026-11-07)
+
+The clean assigned lane at 2a58d70d23d7587b1bbf57a1b94442110ecddcde fast-forwarded to verified origin/master 4f0a2d6abe3a920d8c5a20c8c06d373a1014824d. Coordinator-reported touched/review gates are attributed, not new local Lean evidence. No history rewrite or push.
+
+The executable task scripts now share runtime_paths.py. Defaults derive from the checkout parent: h62-generic-passes-evidence and h62-coordinator-inputs. Set H62_GENERIC_PASSES_EVIDENCE and H62_GENERIC_PASSES_INPUTS for another layout; nonempty paths with spaces are supported and empty overrides refused. Overrides select locations only: archive SHA256, exact pin, serial/resource guards and acceptance provenance checks remain in force. Historical absolute artifact locators in earlier records remain unchanged for traceability. The reproduction example above runs from the checkout root.
+
+All15 isolated source-only tests pass (ten acceptance adversaries plus relocated defaults, spaces, empty overrides, stable relative paths across working directories and changed-pin refusal), as do lexical identity, full frozen census and dependency-plan checks. No executable task script contains a /workspace literal. Evidence is in the default evidence directory under resumed-4f0a2d6ab/. Independent finder/skeptic reviews cover these changes without Lean/server or writes. No Lean source/statement/definition/budget/axiom change; no timing delta or runtime-pass claim. Raw.lean remains unchanged; no approved syntax-migration delivery is available locally. The known failing4.35 prerequisite was not rerun unchanged. Semantic generic/fixture/negative checks, axiom audits, application/registration, final gates and paired timings remain pending that wait; independent source-only reproduction backfill is preserved.
+
+Review fixes: relative overrides resolve against the checkout root, so accept/measure and bounded children select the same locations even when their working directories differ. load_pin() validates all four fields against the exact mandatory official4.35 release; a different directory cannot silently choose a different release. Tests accept the canonical pin and reject each altered field. Existing acceptance manifests contain absolute artifact paths: moving evidence requires fresh acceptance; those paths are not silently rewritten. Both source and artifact hashes must still match before timing can run.

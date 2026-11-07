@@ -571,3 +571,88 @@ All full-goal obligations stay open. Waits remain V17/G49 arbitrary-contract/EES
 source binding and claudecloud/move6-20261106/g49-final's full composed producer;
 independent reference-provider work remains actionable. No source mismatch ticket
 or complete-goal result is fabricated from input preparation.
+
+
+## Checkpoint: validated Osaka blockchain reference provider
+
+The checkout was already at fetched origin/master
+ba3c0f1539c8b64ac0c6c89e729481d3d398ee83. Strict ancestry checks confirm both
+053803649a3ed7809c6eed957361e07d68399ec0 and the original c6f550e base are
+ancestors; no reset, discard or additional merge was needed. Evidence:
+block-provider-baseline.json. Original branch, goal and ownership remain intact.
+
+The optional reference integration now pins @ethereumjs/blockchain@10.1.3 in the
+existing test package lock. The dependency-free Lean core has no new dependency.
+The real provider validates fixture genesis/history and supplied block headers;
+runBlock uses generate:false, skipBlockValidation:false,
+skipHeaderValidation:false and validateBlockSize:true. Fixture genesis activates
+Osaka from block zero rather than Mainnet historical heights. The adapter checks
+genesis pre-state, block commitments (state/receipt roots, bloom, requests and
+gas), tip hash and declared post-state account/code/full storage tries. It refuses
+wrong domains, expected-invalid blocks, nonlinear histories and partial post-state
+shapes rather than converting these into matches.
+
+Review exposed a missing block-size-validation option in the initial run; those
+7,581 provisional rows were stopped and excluded from acceptance. The real
+oversize-block control then failed because the pinned Common defaults omit Osaka
+EIP7934 activation. The corrected configuration explicitly enables EIP7934 with
+8,388,608 bytes, taken from the immutable EEST v5.3.0 spec at commit6824474
+(SHA256 21b08f2757e5f9f6d3be31eb98acfa26f07c8e7694a0456156481b596bad88fc).
+The pinned source, failed-control history, excluded-run receipt and final passing
+control are preserved off Git. No installed reference implementation was edited.
+The negative controls exercise the actual provider's timestamp rejection and
+actual block-size validation; temporary test serialization is restored in finally.
+
+Corrected exhaustive command (raw exit2 means intentionally incomplete):
+
+```sh
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 21105 block-size-bounded all none blockchain_test
+```
+
+All21,105 unique, contiguous inputs were accounted for:19,479 reference fixture
+matches and1,626 unsupported expected-block-rejection cases; zero errors,
+mismatches or resource stops. Every source-semantic result remains unsupported.
+Both reference_complete and differential_complete are false. Result SHA256:
+d138d806f1cd893a1d3edfb2c9ee37947f77a8151c51da3badeedecdc84ea20e.
+The full corrected run took687.619s, peak aggregate RSS1,308,512,256 bytes,
+under unchanged serial time/memory/step bounds. This is a new workload, not a
+before/after checking-speed measurement. Evidence: block-provider-acceptance.json,
+eest-reference-block-size-bounded-summary.json and matching JSONL/run log.
+
+NoProof scope means execution/header checks only: no beacon consensus, signatures
+or fork-choice proof is claimed even though the provider validation option is
+true. Per-transaction return/revert bytes and raw logs are not yet retained and
+compared by this block adapter; receipt commitments alone do not close that
+original observation obligation. The native-solc source corpus and source/EEST
+binding also remain separate from these reference fixture matches.
+
+Commands recorded in block-provider-acceptance.json and control-0..3.log:
+
+```sh
+node --test tests/h62/item3/g52-differential/blockchain_adapter.test.mjs
+G52_BULK="$BULK" node --test tests/h62/item3/g52-differential/blockchain_header_integration.test.mjs
+G52_BULK="$BULK" node --max-old-space-size=4096 --test tests/h62/item3/g52-differential/blockchain_size_integration.test.mjs
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 1 state-provider-compat
+```
+
+The first three commands exit0 (four tests, no skips). The default-state
+compatibility probe returns one reference match with expected incomplete exit2;
+it does not repeat or add to the completed19,093-state-case accounting. Finder
+and skeptic independently inspect source, exact hashes, exhaustive result counts,
+NoProof/source boundaries and controls without Lean/server or heavy execution.
+Their final findings and fixes are recorded in block-provider-reviews.json.
+
+Checkpoint Lean delta:+0files,+0lines,+0declarations/helpers; frozen statements
+untouched, axioms/sorry/trust additions0, proof budgets unchanged. No Lean or full
+build was rerun, and no RUNTIME_GATE_PASS is claimed. Prior actual Lean4.24.0 /
+Lake5.0.0-src+797c613 and bounded KeySort success remain historical evidence;
+H112's1.21Mlines/7,449files/~24min baseline is not a new measurement.
+
+Next independent work: retain transaction return/revert/log/gas observations and
+classify expected-invalid block rejections without weakening incomplete status;
+nonlinear histories and other census formats remain explicit pending coverage.
+Waits: V17/G49 arbitrary-contract/EEST source binding and
+claudecloud/move6-20261106/g49-final full composed source/runtime producer.
+No source mismatch or owner ticket is fabricated from this reference-only run.
+Original persistent full goal remains active and unfinished; this is a committed
+handoff checkpoint for the coordinator, with no push or publication.

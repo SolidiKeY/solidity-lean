@@ -193,6 +193,10 @@ if not (audit.DATA/"evidence").is_dir():
     sys.exit(0)
 
 
+# A positive external baseline must pass before any corruption is credited.
+with patch.object(sys, "argv", ["audit", "--proof", "--external-evidence"]):
+    assert audit.main() == 0, "external baseline failed"
+
 def reject_external(name, value):
     def changed(item):
         return value if item == name else read(item)

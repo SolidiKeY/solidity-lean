@@ -1,0 +1,153 @@
+{
+  "axiom_guards": [
+    "H62.AuditV08Adapters.FailureResourceWitnesses.trans_joint",
+    "H62.AuditV08Adapters.FailureResourceWitnesses.replacement_joint",
+    "H62.AuditV08Adapters.FailureResourceWitnesses.refusal_joint",
+    "H62.AuditV08Adapters.FailureResourceWitnesses.schedule_change_joint",
+    "H62.AuditV08Adapters.FailureResourceWitnesses.exact_refusals",
+    "H62.AuditV08Adapters.FailureResourceWitnesses.no_retraction_joint_impossible",
+    "H62.AuditV08Adapters.FailureResourceWitnesses.nofail_predicate_witness"
+  ],
+  "defining_module": "Solidity.Source.FailureResources",
+  "fixture": "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean",
+  "generated_equations": [
+    {
+      "classification": "generated_equation",
+      "name": "Solidity.Source.FailureResources.noFailures.eq_1",
+      "reason": "Equation compiler theorem for the unchanged noFailures definition; not a distinct source interface declaration.",
+      "type_sha256": "c5034db3a2ee0b64393a1d75cd136f4075e6cbdf244e4a74a4e0171fce6b5cae"
+    }
+  ],
+  "predicate_witnesses": [
+    {
+      "classification": "inhabited_premise_predicate",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.nofail_predicate_witness",
+      "scope": "resource model only; not a SourceSpec producer",
+      "target": "Solidity.Source.FailureResources.NoFail"
+    }
+  ],
+  "rows": [
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:25:Bound.le_trans",
+      "classification": "joint_witness",
+      "kernel_type_sha256": "ad06c88215f3246295d4a892dfb1da9e46a5bc3b6adde12427d6fb3642add25e",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.trans_joint",
+      "signature_sha256": "f094c0ba4a71c3c2c529c39ebe9407d4cbc5f62f83368ec00aebf65fb49d9b54",
+      "signature_source": "theorem Bound.le_trans {a b c : Bound} (hab : a \u2264 b) (hbc : b \u2264 c) : a \u2264 c ",
+      "target": "Solidity.Source.FailureResources.Bound.le_trans"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:38:Bound.withFailures_mono",
+      "classification": "joint_witness",
+      "kernel_type_sha256": "a39e5b70ca2753f361ba6486c42a7f185aa94623d17a09aafa1eb6a32c3368f7",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.replacement_joint",
+      "signature_sha256": "2e63c640a01291f6b8723bc9a3e0845f32f6009e9fcba8b72418ecd89eef4390",
+      "signature_source": "theorem Bound.withFailures_mono {r s : Bound} (h : r \u2264 s) (p : FailurePoints) :\n    r.withFailures p \u2264 s.withFailures p ",
+      "target": "Solidity.Source.FailureResources.Bound.withFailures_mono"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:75:dropped_not_noFail",
+      "classification": "joint_witness",
+      "kernel_type_sha256": "a0ff269c660a9cd5ff9cf25eecdf6c0936eec3a242b0e1cbd8f9f2da9665bead",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.refusal_joint",
+      "signature_sha256": "9053774042a93569d17ccaf2c25e48b453a3f009d14c2d7f0987357513e3c233",
+      "signature_source": "theorem dropped_not_noFail {p : FailurePoints} {i : Nat} (h : p.tx i = .dropped) :\n    \u00ac NoFail p ",
+      "target": "Solidity.Source.FailureResources.dropped_not_noFail"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:83:frame_not_noFail",
+      "classification": "joint_witness",
+      "kernel_type_sha256": "b18290e7a099f8bc356f20ae3e4a7ecb1722ba57f691f97f95ef28a2572c7a44",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.refusal_joint",
+      "signature_sha256": "169bac352a022a1102791177ff5dcf920c2135f6fbedb5f958cf8b19a4d3fe6d",
+      "signature_source": "theorem frame_not_noFail {p : FailurePoints} {k cut : Nat} (h : p.frame k = some cut) :\n    \u00ac NoFail p ",
+      "target": "Solidity.Source.FailureResources.frame_not_noFail"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:91:Bound.not_le_of_points_ne",
+      "classification": "joint_witness",
+      "kernel_type_sha256": "594d70340bcbacd5ad05189ad610a43e80b9416971b6ce7664be32c639252502",
+      "owner": "VY5 (H16 sole resource producer; relay confirmation pending)",
+      "premise_kind": "per-input resource feasibility; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.schedule_change_joint",
+      "signature_sha256": "751495d507143efc9ac5165d0b9ccc70525b2a66372c1fc108782d60086579d9",
+      "signature_source": "theorem Bound.not_le_of_points_ne {r s : Bound} (h : r.points \u2260 s.points) : \u00ac r \u2264 s ",
+      "target": "Solidity.Source.FailureResources.Bound.not_le_of_points_ne"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:24:Bound.le_refl",
+      "classification": "no_propositional_premises",
+      "kernel_type_sha256": "838176674cef0848bec1a52a72e1c99a40474cee2a360973d6b7fe978b4e151d",
+      "owner": "VY5 resource single writer (H16); original remains read only",
+      "premise_kind": "per-input resource interface; no global Producer structure",
+      "reason": "Exact elaborated telescope has no propositional premise binder; data inputs are the inhabited resource/schedule types constructed in the fixture.",
+      "signature_sha256": "feaff6342eb8b03b7888c3766fa6de79a94875c9dcd605167808e25841e9da30",
+      "signature_source": "theorem Bound.le_refl (a : Bound) : a \u2264 a ",
+      "target": "Solidity.Source.FailureResources.Bound.le_refl"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:31:Bound.failures_with",
+      "classification": "no_propositional_premises",
+      "kernel_type_sha256": "95286b5e882b24554e559db982dc56f6a38f9ddafadac68130a09402bb4108eb",
+      "owner": "VY5 resource single writer (H16); original remains read only",
+      "premise_kind": "per-input resource interface; no global Producer structure",
+      "reason": "Exact elaborated telescope has no propositional premise binder; data inputs are the inhabited resource/schedule types constructed in the fixture.",
+      "signature_sha256": "0076fa7a9b06702abcc3511b09582cead162bcf51d99db32f25b694be6fea3ac",
+      "signature_source": "theorem Bound.failures_with (r : Bound) (p : FailurePoints) :\n    (r.withFailures p).points = p ",
+      "target": "Solidity.Source.FailureResources.Bound.failures_with"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:34:Bound.horizon_with",
+      "classification": "no_propositional_premises",
+      "kernel_type_sha256": "cb340d0eb024344049d9f28a9e2a563a0f55cf88d67115cb3b3d5d0c457613f9",
+      "owner": "VY5 resource single writer (H16); original remains read only",
+      "premise_kind": "per-input resource interface; no global Producer structure",
+      "reason": "Exact elaborated telescope has no propositional premise binder; data inputs are the inhabited resource/schedule types constructed in the fixture.",
+      "signature_sha256": "388b4ba7a7e8a68bd2ef6bb35ee4062068accbbd01aeb080051cd06e38393736",
+      "signature_source": "theorem Bound.horizon_with (r : Bound) (p : FailurePoints) :\n    (r.withFailures p).horizon = r.horizon ",
+      "target": "Solidity.Source.FailureResources.Bound.horizon_with"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:52:noFailures_noFail",
+      "classification": "no_propositional_premises",
+      "kernel_type_sha256": "41b3ab6af1de0fcdeb63f2e3f8a41257e226ebe3d5192fae6bc4bbbd90f863c2",
+      "owner": "VY5 resource single writer (H16); original remains read only",
+      "premise_kind": "per-input resource interface; no global Producer structure",
+      "reason": "Exact elaborated telescope has no propositional premise binder; data inputs are the inhabited resource/schedule types constructed in the fixture.",
+      "signature_sha256": "3d4b6688733ea01bcd2b74f7235da8cbd7e2292abcba9dd664d90ed89c070d15",
+      "signature_source": "theorem noFailures_noFail (balances : Nat \u2192 Nat) : NoFail (noFailures balances) ",
+      "target": "Solidity.Source.FailureResources.noFailures_noFail"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:57:noFail_iff",
+      "classification": "no_propositional_premises",
+      "kernel_type_sha256": "0ee5919a4c008ea9d4f1e9f4bcdeeb900b8fe8cd6061ba71d88b47dd5e164029",
+      "owner": "VY5 resource single writer (H16); original remains read only",
+      "premise_kind": "per-input resource interface; no global Producer structure",
+      "reason": "Exact elaborated telescope has no propositional premise binder; data inputs are the inhabited resource/schedule types constructed in the fixture.",
+      "signature_sha256": "27092d632bedb27616e146dc19c1013158da063aca957e3bbcf2d5cf166280f3",
+      "signature_source": "theorem noFail_iff (p : FailurePoints) :\n    NoFail p \u2194 \u2203 balances, p = noFailures balances ",
+      "target": "Solidity.Source.FailureResources.noFail_iff"
+    },
+    {
+      "census_id": "Solidity/Source/FailureResources.lean:98:no_horizon_retraction",
+      "classification": "intentional_impossibility",
+      "kernel_type_sha256": "2be0a2b29c83c9bf58946a4f5baee7c6249a685c14c7b8761ab14089f4942cbb",
+      "owner": "VY5 resource single writer (H16); original remains read only",
+      "premise_kind": "per-input resource interface; no global Producer structure",
+      "proof": "H62.AuditV08Adapters.FailureResourceWitnesses.no_retraction_joint_impossible",
+      "signature_sha256": "afef3e10fa2633fcf9dabc0eb737675f5111efa7618e751a50363758e0a614b4",
+      "signature_source": "theorem no_horizon_retraction (extract : Nat \u2192 FailurePoints)\n    (replace : Nat \u2192 FailurePoints \u2192 Nat)\n    (rightInverse : \u2200 n p, extract (replace n p) = p) : False ",
+      "target": "Solidity.Source.FailureResources.no_horizon_retraction",
+      "why_intentional": "The original docstring and diagonal proof deliberately refute a bare-horizon retraction of all failure plans; H69 authorizes impossibility as its audit result."
+    }
+  ]
+}
