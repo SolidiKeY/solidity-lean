@@ -2254,3 +2254,23 @@ changed or removed since the preceding snapshot. Independent read-only finder an
 skeptic checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/theory-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Yul migration inspection observations
+
+`yul_migration_controls.py` records five previously unreferenced migration
+helpers with source hashes and the migration document hash. They cover instance
+metadata fixtures, single and batch compiler IR/visibility inspection, selected
+old-toolchain declaration metadata and private declaration snapshots. Four export
+CLIs open caller-supplied output paths for writing/truncation; the batch exporter
+also reads a caller-supplied jobs file. Exact current invocation and inputs remain
+unresolved. These observations do not establish semantic equivalence or public
+API acceptance; this is supplied-subset evidence.
+
+At `0ae61fcfbd9d133f8a6660dd08618e3789aa9423`, the refreshed static index
+has 772 candidates, 557 with supplied current references and 215 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. The
+finder identified the exporter file effects above; they were added and rechecked.
+Evidence hashes are in `tests/h55/module-times/yul-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
