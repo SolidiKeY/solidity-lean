@@ -72,5 +72,8 @@ milestone's documentation.
 | Examples site | [site.md](docs/site.md); register examples in `site/examples.json` |
 | Audits and prior-art studies (read before freezing an interface) | [docs/audits/](docs/audits/): 2026-11-06 proof-coverage, architecture, build-speed, coordination audits; `prior-art-*.md` |
 
-Keep detailed guidance in `docs/` and link it here. Module docstrings explain
-conventions and rationale; avoid duplicating declarations or the rule map.
+Keep detailed guidance in `docs/` and link it from the
+[documentation guide](docs/README.md) or another document reachable from it.
+Agent guidance must be reachable from this file through document links; follow
+the relevant topic links recursively. Module docstrings explain conventions
+and rationale; avoid duplicating declarations or the rule map.
