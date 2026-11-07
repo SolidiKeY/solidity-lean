@@ -616,3 +616,19 @@ counts were 4,476 in both and body-group counts were 5,510 and 5,511;
 counts do not prove equal group membership or semantic equivalence. Full
 reports, controls and timing are outside Git under
 `/workspace/h62-duplication-scanner-evidence/notation-context/`.
+
+### Notation-context report replay
+
+Two bounded scans with the same tree, scanner, selection, registry and
+caller-pinned prior report took 112.714 and 114.373 seconds and produced
+byte-identical reports, SHA256
+`e60eda341e2c219f2ec92e3ac8a3f2dbacc9cdbbecd3708631225f59f04dcc22`.
+Both selected 7,247 files and recognized 122,786 declarations, with no file
+errors or unmatched patterns; all recognized owners remain unknown. Relative
+to the older caller-pinned report, 104 inputs were added, 23 changed and none
+removed. The scanner also changed, so candidate deltas combine tree and tool
+effects. The prior pin identifies bytes, not an authenticated producer.
+Independent finder and skeptic reviewed the replay without Lean. This checks
+repeatability for these runs, not complete coverage, signature equivalence or
+live ownership. Reports and timing records are outside Git in the
+notation-context evidence directory.
