@@ -218,195 +218,170 @@ theorem MxRel.look (hr : MxRel θ τ ρ) {s : Srt} (t : Tm C Γ s) {r : Tm C Δ 
   subst hs ht hr'
   exact hr.tbl _ hm
 
+/-- The `orLook` step of `Tm.mx_eval`: a looked-up term reads as its source
+(`MxRel.look`); otherwise the fallback `r` must. -/
+private theorem MxRel.orLook_eval (hr : MxRel θ τ ρ) {s : Srt} {t : Tm C Γ s}
+    {r : Option (Tm C Δ s)}
+    (k : ∀ {t' : Tm C Δ s}, r = some t' → t'.eval ρ = Srt.trO s (t.eval τ)) :
+    ∀ {t' : Tm C Δ s}, θ.orLook t r = some t' → t'.eval ρ = Srt.trO s (t.eval τ) :=
+  fun e => (MxMap.orLook_cases θ t e).elim (fun e => (hr.look t e).1) k
+
+/-- The `orLook` step of `Tm.mx_denote`. -/
+private theorem MxRel.orLook_denote (hr : MxRel θ τ ρ) {s : Srt} {t : Tm C Γ s}
+    {r : Option (Tm C Δ s)} (k : ∀ {t' : Tm C Δ s}, r = some t' → t'.denote ρ = t.denote τ) :
+    ∀ {t' : Tm C Δ s}, θ.orLook t r = some t' → t'.denote ρ = t.denote τ :=
+  fun e => (MxMap.orLook_cases θ t e).elim (fun e => (hr.look t e).2) k
+
 /-- **A cut term reads as the term.** -/
 theorem _root_.Solidity.Tm.mx_eval (hr : MxRel θ τ ρ) {s : Srt} (t : Tm C Γ s) :
     {t' : Tm C Δ s} → t.mx θ = some t' → t'.eval ρ = Srt.trO s (t.eval τ) := by
   induction t with
   | pvV i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      exact congrArg some (hr.loc _ _ hj)
+    refine hr.orLook_eval fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact congrArg some (hr.loc _ _ hj)
   | pvP i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      exact hr.loc _ _ hj
+    refine hr.orLook_eval fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact hr.loc _ _ hj
   | pvS i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      exact congrArg some (hr.loc _ _ hj)
+    refine hr.orLook_eval fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact congrArg some (hr.loc _ _ hj)
   | pvI i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · cases e
+    refine hr.orLook_eval fun e => ?_
+    cases e
   | pvZ i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      exact congrArg some (hr.loc _ _ hj)
+    refine hr.orLook_eval fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact congrArg some (hr.loc _ _ hj)
   | netOf i a ih =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · obtain ⟨j, hj, e⟩ := Option.bind_eq_some_iff.1 e
-      obtain ⟨a', ha, e⟩ := Option.bind_eq_some_iff.1 e
-      cases e
-      have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
-      show (a'.eval ρ).bind (Tm.netOfT (TEnv.get j ρ.env)) = (a.eval τ).bind (Tm.netOfT (TEnv.get i τ.env))
-      rw [ih ha, hl]
-      rfl
+    refine hr.orLook_eval fun e => ?_
+    obtain ⟨j, hj, e⟩ := Option.bind_eq_some_iff.1 e
+    obtain ⟨a', ha, e⟩ := Option.bind_eq_some_iff.1 e
+    cases e
+    have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
+    show (a'.eval ρ).bind (Tm.netOfT (TEnv.get j ρ.env)) =
+      (a.eval τ).bind (Tm.netOfT (TEnv.get i τ.env))
+    rw [ih ha, hl]
+    rfl
   | app0 o =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · split at e
-      · cases e
-      · rename_i hs
-        cases e
-        exact Op0.eval_trO o (Bool.eq_false_iff.2 hs) hr.glob
+    refine hr.orLook_eval fun e => ?_
+    split at e
+    · cases e
+    · rename_i hs
+      cases e
+      exact Op0.eval_trO o (Bool.eq_false_iff.2 hs) hr.glob
   | app1 o x ih =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · split at e
-      · cases e
-      · rename_i hm
-        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
-        obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 e
-        show o.eval ρ.glob (x'.eval ρ) = _
-        rw [ih hx]
-        exact Op1.eval_trO o hm.1 hm.2 hr.glob _
+    refine hr.orLook_eval fun e => ?_
+    split at e
+    · cases e
+    · rename_i hm
+      simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
+      obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 e
+      show o.eval ρ.glob (x'.eval ρ) = _
+      rw [ih hx]
+      exact Op1.eval_trO o hm.1 hm.2 hr.glob _
   | app2 o x y ihx ihy =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · split at e
-      · cases e
-      · rename_i hm
-        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
-        obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
-        obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
-        show o.eval ρ.glob (x'.eval ρ) (y'.eval ρ) = _
-        rw [ihx hx, ihy hy]
-        exact Op2.eval_trO o hm.1.1 hm.1.2 hr.glob _ _
+    refine hr.orLook_eval fun e => ?_
+    split at e
+    · cases e
+    · rename_i hm
+      simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
+      obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
+      obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
+      show o.eval ρ.glob (x'.eval ρ) (y'.eval ρ) = _
+      rw [ihx hx, ihy hy]
+      exact Op2.eval_trO o hm.1.1 hm.1.2 hr.glob _ _
   | app3 o x y z ihx ihy ihz =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).1
-    · split at e
-      · cases e
-      · rename_i hm
-        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
-        obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
-        obtain ⟨y', hy, e⟩ := Option.bind_eq_some_iff.1 e
-        obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 e
-        show o.eval ρ.glob (x'.eval ρ) (y'.eval ρ) (z'.eval ρ) = _
-        rw [ihx hx, ihy hy, ihz hz]
-        exact Op3.eval_trO (g := τ.glob) o hm.1.1.1 _ _ _
+    refine hr.orLook_eval fun e => ?_
+    split at e
+    · cases e
+    · rename_i hm
+      simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
+      obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
+      obtain ⟨y', hy, e⟩ := Option.bind_eq_some_iff.1 e
+      obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 e
+      show o.eval ρ.glob (x'.eval ρ) (y'.eval ρ) (z'.eval ρ) = _
+      rw [ihx hx, ihy hy, ihz hz]
+      exact Op3.eval_trO (g := τ.glob) o hm.1.1.1 _ _ _
 
 /-- **A cut term denotes as the term.** -/
 theorem _root_.Solidity.Tm.mx_denote (hr : MxRel θ τ ρ) {s : Srt} (t : Tm C Γ s) :
     {t' : Tm C Δ s} → t.mx θ = some t' → t'.denote ρ = t.denote τ := by
   induction t with
   | pvV i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      exact congrArg some (hr.loc _ _ hj)
+    refine hr.orLook_denote fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact congrArg some (hr.loc _ _ hj)
   | pvP i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
-      simp only [Tm.denote]
-      revert hl
-      generalize TEnv.get j ρ.env = a
-      generalize TEnv.get i τ.env = b
-      intro hl
-      subst hl
-      cases a <;> rfl
+    refine hr.orLook_denote fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
+    simp only [Tm.denote]
+    revert hl
+    generalize TEnv.get j ρ.env = a
+    generalize TEnv.get i τ.env = b
+    intro hl
+    subst hl
+    cases a <;> rfl
   | pvS i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
-      show Storage.obs _ = Storage.obs _
-      rw [hl]
+    refine hr.orLook_denote fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
+    show Storage.obs _ = Storage.obs _
+    rw [hl]
   | pvI i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · cases e
+    refine hr.orLook_denote fun e => ?_
+    cases e
   | pvZ i =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
-      exact congrArg some (hr.loc _ _ hj)
+    refine hr.orLook_denote fun e => ?_
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact congrArg some (hr.loc _ _ hj)
   | netOf i a ih =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · obtain ⟨j, hj, e⟩ := Option.bind_eq_some_iff.1 e
-      obtain ⟨a', ha, e⟩ := Option.bind_eq_some_iff.1 e
-      cases e
-      have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
-      show (a'.denote ρ).map _ = (a.denote τ).map _
-      rw [ih ha, hl]
+    refine hr.orLook_denote fun e => ?_
+    obtain ⟨j, hj, e⟩ := Option.bind_eq_some_iff.1 e
+    obtain ⟨a', ha, e⟩ := Option.bind_eq_some_iff.1 e
+    cases e
+    have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
+    show (a'.denote ρ).map _ = (a.denote τ).map _
+    rw [ih ha, hl]
   | app0 o =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · split at e
-      · cases e
-      · cases e
-        exact Op0.denote_agree o hr.glob
+    refine hr.orLook_denote fun e => ?_
+    split at e
+    · cases e
+    · cases e
+      exact Op0.denote_agree o hr.glob
   | app1 o x ih =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · split at e
-      · cases e
-      · obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 e
-        show o.denote ρ.glob (x'.denote ρ) = o.denote τ.glob (x.denote τ)
-        rw [ih hx]
-        exact Op1.denote_agree o hr.glob _
+    refine hr.orLook_denote fun e => ?_
+    split at e
+    · cases e
+    · obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 e
+      show o.denote ρ.glob (x'.denote ρ) = o.denote τ.glob (x.denote τ)
+      rw [ih hx]
+      exact Op1.denote_agree o hr.glob _
   | app2 o x y ihx ihy =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · split at e
-      · cases e
-      · rename_i hm
-        simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
-        obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
-        obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
-        show o.denote ρ.glob (x'.eval ρ) (y'.eval ρ) (x'.denote ρ) (y'.denote ρ) =
-          o.denote τ.glob (x.eval τ) (y.eval τ) (x.denote τ) (y.denote τ)
-        rw [ihx hx, ihy hy]
-        exact Op2.denote_agree o hm.1.1 _ _ _ _ (Tm.mx_eval hr x hx) (Tm.mx_eval hr y hy) _ _
+    refine hr.orLook_denote fun e => ?_
+    split at e
+    · cases e
+    · rename_i hm
+      simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hm
+      obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
+      obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
+      show o.denote ρ.glob (x'.eval ρ) (y'.eval ρ) (x'.denote ρ) (y'.denote ρ) =
+        o.denote τ.glob (x.eval τ) (y.eval τ) (x.denote τ) (y.denote τ)
+      rw [ihx hx, ihy hy]
+      exact Op2.denote_agree o hm.1.1 _ _ _ _ (Tm.mx_eval hr x hx) (Tm.mx_eval hr y hy) _ _
   | app3 o x y z ihx ihy ihz =>
-    intro t' e
-    rcases MxMap.orLook_cases θ _ e with e | e
-    · exact (hr.look _ e).2
-    · split at e
-      · cases e
-      · obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
-        obtain ⟨y', hy, e⟩ := Option.bind_eq_some_iff.1 e
-        obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 e
-        show o.denote (x'.denote ρ) (y'.denote ρ) (z'.denote ρ) =
-          o.denote (x.denote τ) (y.denote τ) (z.denote τ)
-        rw [ihx hx, ihy hy, ihz hz]
+    refine hr.orLook_denote fun e => ?_
+    split at e
+    · cases e
+    · obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
+      obtain ⟨y', hy, e⟩ := Option.bind_eq_some_iff.1 e
+      obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 e
+      show o.denote (x'.denote ρ) (y'.denote ρ) (z'.denote ρ) =
+        o.denote (x.denote τ) (y.denote τ) (z.denote τ)
+      rw [ihx hx, ihy hy, ihz hz]
 
 end Terms
 
