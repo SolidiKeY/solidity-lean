@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/sequent-tree-classification-v23/semantic-roles-reviewed.json",
-    "bytes": 763960,
-    "sha256": "2a44aa57f10aaba5b4c6611f21934eb5323bab390c26c8daa3a77b5c6876d0ee"
+    "path": "/workspace/h62-successor-bulk/chain-names-classification-v24/semantic-roles-reviewed.json",
+    "bytes": 773527,
+    "sha256": "daed990441723f46503f08010ac189ac39dcbec4d8c3a8e1f5f515881fdbfc62"
   }
 }
