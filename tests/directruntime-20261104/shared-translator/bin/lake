@@ -2,7 +2,13 @@
 set -euo pipefail
 real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
 config=tests/directruntime-20261104/shared-translator/bounded-lakefile.toml
-if [[ ${1:-} == env && ${2:-} == lean ]]; then
+# Lake lean supplies the current artifact setup map; env lean alone can miss
+# cached imports in a clean worktree (H90 matched-source regression).
+if [[ ${1:-} == --version ]]; then
+  exec "$real" --version
+elif [[ $# == 4 && "$1" == env && "$2" == lean && "$3" == --tstack=131072 && "$4" == *.lean ]]; then
+  exec "$real" -f "$config" --no-build lean "$4" -- --tstack=131072 -j1
+elif [[ ${1:-} == env && ${2:-} == lean ]]; then
   shift 2
   exec "$real" -f "$config" env lean -j1 "$@"
 elif [[ ${1:-} == serve ]]; then
