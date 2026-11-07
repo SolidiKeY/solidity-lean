@@ -1000,3 +1000,20 @@ Static checker/Meta rosters add no fresh successful solver, joint witness, kerne
 Whole assignment/four audit checkpoints remain incomplete. No Lean/axiom/kernel/runtime/cache acceptance or compiler/source/physical/world/gas/fork adequacy. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and timing/reserve STOPs remain. No statement/dependent-definition/budget/axiom/exclusion/toolchain changes. Historical unavailable bytes remain UNVERIFIABLE; evicted duplicate outputs remain exactly recoverable through their sealed archive receipts.
 
 Documentation gate PASS exit0 after adopted master repaired the other-lane synthetic fixture references; exact current fixture bytes/master identity archived. No local fixture/scanner edit; historical sealed failures retained. Accounting and93controls pass; complete acceptance remains FAIL exit1.
+
+
+## Nonlinear integer fact and sign-premise roles (2026-11-07)
+
+Guarded regression: bounded arithmetic fact selection must not become automatic goal closure, and unbounded Int laws must retain comparisons/sign direction rather than imply fixedwidth overflow safety.
+
+Fetched/adopted master 80c156bf13d1900acf9cdae1556496ee3473e0cd, preserving prior head at refs/archive/h28-before-rebase-109c8d33. Complete frozen-selected CloseNonlin source and all4 named signatures match frozen/current bytes. Prior627 records and all owners unchanged. All5283 candidates accounted:631 reviewed/4652 pending,owners3746 confirmed/1537 unresolved; generated declarations separate.
+
+The interval-product inequality retains BOTH c<=d and a<=b over the same unbounded Int endpoints; no sign restriction is added. The strict-order theorem gives exact a+1<=b from a<b. Square nonnegativity applies to every supplied Int, including negative values. Multiplication monotonicity retains a<=b and keeps the factor-sign conditional inside its conclusion: order preserved for nonnegative factors, reversed otherwise. No theorem asserts bounded-word/Solidity overflow safety or a successful arithmetic solver.
+
+The complete Meta layer was inspected only as support. It prefers relevant goal products, selects tight literal/symbolic bounds, forms checked theorem instances, adds bounded facts and emits replay suggestions. It does not itself close the goal. Existing expression/declaration/factor/comparison/fact/heartbeat limits and rollback/refusal paths remain unchanged; no performance experiment, trust expansion or replay acceptance follows from this source review.
+
+Four superseded working report copies were reclaimed after exact byte comparison with hash-bound sealed archives. Receipt preserves every original path, data hash and archive member/hash for restoration. All unique bytes, datasets, source, logs and archives remain. Free space increased from2150436864 to2180812800 bytes before this checkpoint; historical bytes missing elsewhere remain UNVERIFIABLE.
+
+Bulk source identity, theorem/Meta rosters, recovery receipt, reviews and measured gates remain off Git at /workspace/h62-successor-evidence/nonlinear-integer-roles-v56 and /workspace/h62-successor-bulk/nonlinear-integer-roles-v56, with small path/size/hash manifest. Nonwriting acceptance checks still authenticate/classify the whole frozen census. Zero fresh joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance or compiler/source/physical/world/gas/fork adequacy. Whole assignment/four audit checkpoints remain incomplete. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and timing/reserve STOPs remain. No statement/dependent-definition/budget/axiom/exclusion/toolchain changes.
+
+Documentation gate PASS exit0 after adopted master repaired the other-lane synthetic fixture references; exact current fixture bytes/master identity archived. No local fixture/scanner edit; historical sealed failures retained. Accounting and93controls pass; complete acceptance remains FAIL exit1.
