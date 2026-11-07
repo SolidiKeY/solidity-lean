@@ -900,3 +900,37 @@ axiom sets contain only existing standard axioms (the saved-tail law only
 propext). Layer/trust/roots/fragments checks pass; no full checkpoint or Bridge
 acceptance, frozen-original fidelity restoration or timing STOP clearance is
 claimed. No module in these focused kernel checks exceeded 60 seconds.
+
+### H121 primitive value-return agreement
+
+Master 7683091e7 is adopted before this increment. RuntimeFrameP1V2ValueAgreement
+executes the existing private-result/capture/restore/export plan on MachineV2.
+Its successful-run theorem retains all original physical return facts: exact
+source output StateRepr, saved stack, BaseExtends, allocator growth, cursor and
+older-word footprint, as well as every preexisting V2 field via withBase.
+Both outcomes use that same value-result plan. A weaker checked-body Entry is
+used only to derive actual source outcome classification; it never substitutes
+a simpler target image. Exact canonical prefix agreement assumes neither source
+success nor no-failure and introduces no Approved filter or second language.
+
+The importing consumer uses the actual Composition.compileCall readAt selector.
+Index zero exports seven after restoration; index two bare-reverts, on the same
+selected call family. Its populated caller has a nonempty saved stack and a
+matching capture cursor; V2 journal/buffer remain arbitrary. An insufficient
+capture arena is refused even with represented input and matching cursor.
+This does not claim full approved-profile coverage, H68 producer packaging or
+G42.04 library/session adequacy; the original queues and STOPs remain open.
+
+Fresh kernel times: general 0.861s and controls0.815s, sampled workload peaks
+753396/751992 KiB. Final per-file MCP diagnostics pass in 2.593/3.791s.
+The first kernel/MCP check exposed an opaque plan projection in the smaller
+workspace bound. Unfolding that projection before the checked arithmetic step
+fixed only the proof; original statements and budgets stay unchanged. The
+actual failed goal, tactic attempts and passing candidates are preserved.
+Independent read-only finder/skeptic found no defect without Lean/build/server.
+Only this checkout's regenerable Lake IR cache was removed to restore the 2 GiB
+disk reserve; sources, sealed evidence and the shared Lake cache were retained.
+
+All nine new axiom reports contain only the existing standard axioms. Static
+layer/trust/roots/fragments checks pass; no focused module exceeded 60 seconds.
+Full checkpoint/Bridge acceptance and all original fidelity/timing debts remain.
