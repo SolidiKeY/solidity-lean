@@ -8,6 +8,14 @@ import argparse,collections,hashlib,json,re
 from dag_codec import name_ok
 from pathlib import Path
 
+def artifact_location(value,root,recorded_root=None):
+    root=Path(root).resolve();path=Path(value)
+    if path.is_absolute():path=path.relative_to(Path(recorded_root or root))
+    if '..' in path.parts:raise ValueError('ARTIFACT_PATH_ESCAPES_ROOT')
+    resolved=(root/path).resolve()
+    if not resolved.is_relative_to(root):raise ValueError('ARTIFACT_PATH_ESCAPES_ROOT')
+    return resolved
+
 def name_flags(parts):
     private=False;internal=False
     while parts!=['anonymous']:
@@ -63,13 +71,14 @@ def report(census,interfaces,manifest,lines,lean_exit):
     return canonical,summary
 
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--census',type=Path,required=True);ap.add_argument('--interfaces',type=Path,required=True);ap.add_argument('--manifest',type=Path,required=True);ap.add_argument('--log',type=Path,required=True);ap.add_argument('--lean-exit',type=int,required=True);ap.add_argument('--out',type=Path,required=True);ap.add_argument('--compiler-summary',type=Path,required=True);ap.add_argument('--dag-log',type=Path,required=True);a=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--census',type=Path,required=True);ap.add_argument('--interfaces',type=Path,required=True);ap.add_argument('--manifest',type=Path,required=True);ap.add_argument('--log',type=Path,required=True);ap.add_argument('--lean-exit',type=int,required=True);ap.add_argument('--out',type=Path,required=True);ap.add_argument('--compiler-summary',type=Path,required=True);ap.add_argument('--dag-log',type=Path,required=True);ap.add_argument('--artifact-root',type=Path,required=True);ap.add_argument('--recorded-root',type=Path);a=ap.parse_args()
     compiler=json.loads(a.compiler_summary.read_text())
-    if compiler.get('status')!='pass' or compiler.get('exit')!=0 or compiler.get('stop') is not None or a.lean_exit!=0 or Path(compiler['log']).resolve()!=a.log.resolve(): raise ValueError('UNVERIFIED_INVENTORY_COMPILATION')
+    if compiler.get('status')!='pass' or compiler.get('exit')!=0 or compiler.get('stop') is not None or a.lean_exit!=0 or artifact_location(compiler['log'],a.artifact_root,a.recorded_root)!=a.log.resolve(): raise ValueError('UNVERIFIED_INVENTORY_COMPILATION')
     versions=compiler.get('versions',{})
     if versions.get('lean')!='Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)' or versions.get('lake')!='Lake version 5.0.0-src+797c613 (Lean version 4.24.0)': raise ValueError('WRONG_OLD_TOOLCHAIN')
-    if hashlib.sha256(Path(compiler['command'][-1]).read_bytes()).hexdigest()!=compiler['fixture_sha256']: raise ValueError('INVENTORY_FIXTURE_CHANGED')
+    if hashlib.sha256(artifact_location(compiler['command'][-1],a.artifact_root,a.recorded_root).read_bytes()).hexdigest()!=compiler['fixture_sha256']: raise ValueError('INVENTORY_FIXTURE_CHANGED')
     with a.log.open() as stream: canonical,summary=report(json.loads(a.census.read_text()),a.interfaces.read_text(),json.loads(a.manifest.read_text()),stream,a.lean_exit)
-    summary['provenance']={label:{'path':str(path.resolve()),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for label,path in [('census',a.census),('old_signatures',a.interfaces),('old_signature_manifest',a.manifest),('inventory_log',a.log),('compiler_summary',a.compiler_summary),('old_signature_dag_stream',a.dag_log)]}
+    summary['provenance']={label:{'path':path.resolve().relative_to(a.artifact_root.resolve()).as_posix(),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for label,path in [('census',a.census),('old_signatures',a.interfaces),('old_signature_manifest',a.manifest),('inventory_log',a.log),('compiler_summary',a.compiler_summary),('old_signature_dag_stream',a.dag_log)]}
+    summary['artifact_root']='.'
     summary['versions']=versions
     a.out.mkdir(parents=True,exist_ok=False);(a.out/'inventory.jsonl').write_text(canonical);(a.out/'summary.json').write_text(json.dumps(summary,indent=2));print(json.dumps(summary))
