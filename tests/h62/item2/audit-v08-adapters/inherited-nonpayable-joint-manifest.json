@@ -1,0 +1,83 @@
+{
+  "status": "PROVED_COMPONENT_JOINT_MODEL",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/InheritedNonpayableJoint.lean": "bfa5f79ac183713f5d601db33f0baafed390ca815222640ce0b580174a7b2264",
+    "Solidity/Lowering/V08/InheritedMetadata.lean": "9f4fe12b321a6a48837e312e382a8fafc7436ec427b6157b6ac2a270af236dc6",
+    "Solidity/Lowering/V08/InheritedControls.lean": "47e75399d795283d0d2a531b990ad3547cec699c6f90f246c2203067123f6042"
+  },
+  "original_target": "Solidity.Lowering.V08.InheritedMetadata.override_nonzero_rejected",
+  "joint_premises": [
+    "full ten-field FnOverrideOK",
+    "member of actual singleton baseFns list",
+    "same base nonpayable",
+    "actual Controls.paidCtx nonzero payment"
+  ],
+  "model": "Separate abstract A/B inheritance unit: nonpayable base, view derived. Existing payable fixture unchanged.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/InheritedNonpayableJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.152,
+    "peak_sampled_aggregate_rss": 733720576,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "new_joint_model_families": 1,
+  "full_statement_fidelity_acceptances": 0,
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "first_failure": "Unqualified Address elaborated to wrong namespace. Explicit ContractWorld.Address fixed; failed source/log retained. No proof budget change.",
+  "limitations": [
+    "Only target entry payment guard rejection, not Source execution or body lowering.",
+    "No admission, physical frame, session or H68 full certificate.",
+    "old_payable_refused is a direct tag mismatch control, not new execution evidence.",
+    "Single component model; full original audit and family timings remain unfinished."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/inherited-nonpayable-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "ea007b2ceb1e1522a9ca80042eccc456980617d5d668329fc627681420bd8078"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/inherited-nonpayable-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/inherited-nonpayable-joint-20261107-final/results.json",
+      "bytes": 404,
+      "sha256": "5ab3fd9bd221f601574104d8633b66f1fc5bec537efa36f6f699b03f77496cc9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/inherited-nonpayable-joint-20261107-final/gates/1.log",
+      "bytes": 12185,
+      "sha256": "6d20655a0bc48a152b59e43620762f315de9d621898cfd73bc7233700817e410"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/inherited-nonpayable-joint-20261107-first/results.json",
+      "bytes": 405,
+      "sha256": "ad235a8c513ed6f1ead666543be8e3e7c6512fbf9d422a15850cf6b204d6e6b1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/inherited-nonpayable-joint-20261107-first/gates/1.log",
+      "bytes": 13169,
+      "sha256": "b84ca274c48c9f160b135e10a87167f347d9a63878f53247071651118c7f3b21"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/inherited-nonpayable-joint-20261107-first/failed-source.lean",
+      "bytes": 4358,
+      "sha256": "db18cf3067c9f6cb6e67fecd7f91e18c1a53b520c32c6913e9e2b8594b3999e8"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic: no findings; full ten-field record and actual member/nonpayable/context coexist. Abstract-body/empty-path implications retain their original vacuous cases; no Source admission or execution follows. No reviewer Lean/server/tests."
+}

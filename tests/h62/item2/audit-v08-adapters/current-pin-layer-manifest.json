@@ -1,0 +1,59 @@
+{
+  "status": "CURRENT_PIN_GATE_FAIL_LAYER_PASS",
+  "checked_head": "3adf13b6efc0b47616361be9d38c7a7e0af3434c",
+  "gate_results": [
+    {
+      "command": [
+        "node",
+        "scripts/check-axiom-pins.mjs"
+      ],
+      "exit": 1,
+      "log": "/workspace/v08-world-lowering-evidence/current-pin-layer-20261107/pins.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exit": 0,
+      "log": "/workspace/v08-world-lowering-evidence/current-pin-layer-20261107/layers.log"
+    }
+  ],
+  "pins": {
+    "exit": 1,
+    "axiom_errors": 0,
+    "unrecorded_changes": 435,
+    "world_g07_13_entries_still_new": 13
+  },
+  "layers": {
+    "exit": 0,
+    "core_modules": 903,
+    "new_forbidden_edges": 0,
+    "pinned_allowances": 107
+  },
+  "proposal": "WORLD-G07-13",
+  "proposal_source_bindings": "Both existing source hashes still match the pending request; no shared inventory or pins changed.",
+  "limitations": [
+    "Zero axiom errors is not a passing pin gate.",
+    "Layer pass is a separate static check, not Source/session adequacy or full build.",
+    "No new producer witness, proof or timing acceptance."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/current-pin-layer-20261107/layers.log",
+      "bytes": 167,
+      "sha256": "4c8af13e5b802b6f5920340e3c25c19d18ed392b69a43f261e474b8746e7369d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/current-pin-layer-20261107/pins.log",
+      "bytes": 47968,
+      "sha256": "6a7b97de25fe0085789fe044c755451c0ca3b4827b39b7d2b343d7d3d26ba264"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/current-pin-layer-20261107/results.json",
+      "bytes": 480,
+      "sha256": "d67c1ec6806eff1c9fc836bce5c5044b86d852fbd471457258a9b59f4bde5947"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic: raw gate exits/summaries and evidence hashes verified, no findings. No reviewer tests/Lean/server."
+}
