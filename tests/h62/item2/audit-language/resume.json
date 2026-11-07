@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-2-20261106",
+  "slug": "audit-language",
+  "status": "partial",
+  "execution_state": "RESUMED_BY_USER_20261107",
+  "accepted_baseline": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+  "original_frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "authorization": "Latest user scheduled-merge instruction explicitly re-baselines and continues original queue; H82 standing statement-preserving agreement applies. Retirement records retained as history, not current prohibition.",
+  "original_environment": "ccarenv_b64_Y2NhcmVudl9hNTQ3YjYwNzYwNjA4MTkxOGJhYmM3MGZiMTJjYzk0Mw",
+  "goal": "Original launcher goal retained and incomplete; no get_goal or resume API exposed; no API transition claimed and no goal created/reset/completed.",
+  "handoff_to": "coordinator: fresh thread on same original VM/branch/goal after five work items; no self-launched replacement",
+  "prior_handoff_to": "solidity-sol2-20261104/numeric-literals",
+  "completed_work_items": [
+    "Fast-forward original lane to exact accepted master; ancestry verified, no reset/rewrite/new merge",
+    "Apply and check exact2authenticated statement-preserving prerequisite proof patches",
+    "Complete remaining3catalog hypothesis certificates",
+    "Prove36FixedPoint full-leading-telescope certificates with realjoint intrinsic/range/overflow/nonzero cases",
+    "Reconcile51certificates and negative association control; preserve4146census byteforbyte with portableownershipinput; staticgates and independentreviews"
+  ],
+  "counts": {
+    "frozen_files": 389,
+    "frozen_candidates": 4146,
+    "checked_full_telescope_certificates": 51,
+    "new_certificates": 39,
+    "uncertified_conservative_candidates": 4095,
+    "source_classification_resolved_rows": 3664,
+    "source_classification_unresolved_rows": 482,
+    "new_intrinsic_fixture_definitions": 4,
+    "frozen_theorem_headers_preserved_in_patches": 102
+  },
+  "fixedpoint_coverage": "All36named statements with leading arguments in FixedPoint core. Closed Fx.solc_lossy has no leading hypotheses; retained as uncovered conservative candidate, never silently excluded. Satellites remain pending.",
+  "proof_files": [
+    "Solidity/Hash/CollisionBound.lean",
+    "Solidity/Language/FixedPoint.lean"
+  ],
+  "frozen_statements_touched": [],
+  "new_axioms": 0,
+  "new_sorry": 0,
+  "new_native_decide": 0,
+  "maxHeartbeats_changes": 0,
+  "module_registration": "Only proposed optional registration fragment updated; no generated root/central map/axiom pin/toolchain edit",
+  "evidence_directory": "/workspace/h62-audit-language-evidence/resume-20261107",
+  "versions_evidence": "resume-20261107/versions.json",
+  "validation_evidence": [
+    "resume-20261107/prerequisites/checks.json",
+    "resume-20261107/witness-check/checks.json",
+    "resume-20261107/acceptance-gates.json",
+    "resume-20261107/static-gates.json"
+  ],
+  "review_evidence": "resume-20261107/reviews.json",
+  "timing_delta": null,
+  "timing_boundary": "No comparable passing pre-repair official4.35 baseline; prior originals failed migration. Additive39proofs are new work, not a timing refactor. No unchanged timing STOP rerun and no full-build performance claim.",
+  "runtime_gate_pass": false,
+  "open_queue": [
+    "Complete actual elaborated interface membership, 482remaining source domains and global-vs-per-input classification; authoritative producer routing still262files from pinned old snapshot",
+    "Prove remaining original interface joint witnesses;4095uncertified conservative candidates include private/non-interface/closed statements pending classification",
+    "Meaningful supported-program/compiler totality and success with reject-all/always-revert compiler controls, observable failures, gas/fork boundaries; ABI/reference controls do not close this",
+    "Full statement-fidelity and uncovered-owner reconciliation, complete affected/full/external gates and independent reviews"
+  ],
+  "open_backfill": [
+    "Additional within-scope witnesses and boundary cases, including FixedPoint satellite interfaces after per-file checks",
+    "Remaining lexical/telescope classification and deterministic negative controls",
+    "Portable reproduction/timing tooling without changing frozen formulas or budgets",
+    "Only coordinator-assigned newly unclaimed candidates; no scope takeover"
+  ],
+  "waits": [
+    {
+      "lane": "coordinator",
+      "item": "Frozen Source.Machine.St definition differs at accepted master: new resource cursor field/import. Original-compatible interface version or approved version/fidelity evidence needed before frozen Source.Hoare witnesses; guard failure is not a Lean theorem failure."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Syntax.Raw validation remains owner-reported pending; not reached by new source attempt."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Exact local core prerequisites now PASS. Full affected migration/satellite gates remain pending; local success is not full migration acceptance."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Authoritative producer routing for262exact files/2876declarations from original frozen inventory remains unresolved."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Repository lean-toolchain/run-lean launcher stillselectv4.24 while mandatoryarchivepin is4.35. Full ./run-lean.sh, Bridge, Solkey and runtime gates pending; no old cache reuse or toolchain cut-over authorized."
+    }
+  ],
+  "questions": [],
+  "original_scope_inputs": "tests/h62/item2/audit-language/retirement/: complete original rendered prompt, originalqueue and small H44scopepointer; full245627byte inventory remains offGit and in portable archive"
+}
