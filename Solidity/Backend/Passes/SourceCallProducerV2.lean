@@ -6,9 +6,9 @@ the frozen `Evm.Machine`).
 
 The emission stores the invocation's captured input bytes in memory from cell
 `o`, then `CALLIN(value, receiver, o, length)` and `POP`. On every machine it
-returns with the caller's stack and storage, the journal records exactly the
-captured input (`call_run`), and the return buffer is the callee oracle's
-reply for that input.
+returns with the caller's stack and storage. An entered call journals exactly
+the captured input (`call_run`) and leaves the callee oracle's reply in the
+return buffer. An unentered call preserves the journal and empties the buffer.
 
 `Returndata` is a fixed relation, not a supplier-chosen `Prop`: whenever the
 source outcome has a payload `d` and the machine's reply oracle answers `d`
