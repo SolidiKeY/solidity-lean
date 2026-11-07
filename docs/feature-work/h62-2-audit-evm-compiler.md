@@ -12,12 +12,12 @@ Original base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-evm-compiler`.
 Repository: `/workspace/audit-evm-compiler`; old clean checkout
 `/workspace/solidity-lean` preserved.
-Authorized origin/master fast-forward: `3c2734000413fb142b186e93387306bbb01fd181`,
-containing the saved checkpoint `3dc9a596acb5843f17272e0676ab472b902d2071`.
+Authorized origin/master fast-forward: `d7a1cbdf597826add5af3533fdaf6b8d91e28f66`,
+containing the saved checkpoint `17ba931f5e6edb86955b7bd1cc6514631a695a02`.
 The original branch, VM and history are preserved. The original 160 source files
 and 321-file dependency closure remain unchanged since the preceding integration.
-Original/live type captures stay separate, with the same three pending raw-type
-differences from the original base. No original source definition was edited.
+Original/live captures remain separate, with three pending raw-type differences
+from the original base. No original source definition was edited.
 
 H82 permits statement-preserving edits without exact-file agreement; changing
 existing statements, dependent definitions, signatures, budgets, axiom sets or
@@ -506,3 +506,50 @@ Current layer, fragment and documentation-path checks pass; the latter reports
 140 ambiguity warnings. Strict whole-map identity remains failed after eight
 coordinator additions. The original-scope rescan and all seventeen per-file
 checks pass. Full root/library gates and type-owner tickets remain unfinished.
+
+## General supported-core success contract
+
+[CoreContractAudit](../../tests/h62/item2/audit-evm-compiler/CoreContractAudit.lean)
+defines a contract over arbitrary code-producing candidates with the existing
+checked compiler's input shape. Admits requires code for every original inFragP
+certificate, independently of source execution outcome. Succeeds retains exactly
+the existing fragment, Sim, resource-room and successful source-run premises;
+it requires actual admission, normal execution with zero pending jumps, stack
+equality and the original final Sim relation. Their conjunction is the contract.
+No new support predicate, success oracle or restriction is introduced.
+
+The actual Compiler.compile entry, mapped to its code, satisfies both parts for
+all supported core programs. The proof reuses the owner's read-only
+compile_core_some and compile_core_success results without changing their
+statements or premises. This covers the intrinsic core fragment; it does not
+establish Source adequacy, general memory-backend totality or gas/fork behavior.
+
+Four candidate compilers fail this general contract: rejection, unconditional
+revert, empty code and actual code followed by an unresolved jump. The existing
+joint source_success_joint fixture supplies every success premise together.
+The empty-code control uses a typed live storage path and two representation
+lemmas to force the source's observed write to equal unchanged storage, giving
+0 = 10. The jump control forces one pending jump where the contract requires
+zero. Thus normal termination alone cannot satisfy the contract, and the
+negative controls do not rely on an empty premise domain.
+
+The increment adds five public contract theorems and two private representation
+helpers, all checked with standard axioms. Ten definitions/abbreviations describe
+the contract, candidates and typed reference. Eighteen audit modules check 155
+printed theorem declarations. Original census accounting stays 345 with 1,485
+pending; all earlier enrollment bytes, signatures, statuses and proof links are
+unchanged. The three type-drift tickets and 1,793 unknown producer owners remain
+open. All four original checkpoints remain partial.
+
+The current export directory is continuation-8-handoff under the evidence root.
+It preserves the complete original assignment, full work/backfill queue, exact
+scope manifest, cumulative owned patch and named branch bundle. Bulk evidence
+remains outside Git with an authenticated compact index. No original statement,
+axiom, budget, exclusion or observation changed. The original goal remains
+unfinished and unchanged; no push, reset, replacement, pause or completion is
+performed.
+
+Current layers, fragments and documentation paths pass; documentation reports
+140 ambiguity warnings. Strict whole-map identity remains failed after eight
+coordinator additions. The original-scope rescan and all eighteen proof checks
+pass. Full root/library checks and the three owner type tickets remain pending.
