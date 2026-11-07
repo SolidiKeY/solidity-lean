@@ -1847,3 +1847,22 @@ neither ran Lean/server/builds or edited. Cleanup removed regenerable build
 output and restored over 2 GB free, preserving sealed evidence. Original and
 consolidated queues, 3209 uncovered rows, strict pin/docs and final gates remain
 open. External library-try, Y04 physical and separate 4.35 waits remain distinct.
+
+### C274: expression conversion failure order
+
+Three additive SourceAstExpressionCorrespondence laws preserve exact existing
+failure boundaries: receiver failure precedes member-name lookup, assignment
+left failure precedes right-field lookup, and named-call refusal precedes target
+or argument conversion. No later-field validity is assumed. Existing reader
+bodies, statements, imports, Source interfaces and exclusions are unchanged.
+These are conversion diagnostics, not Source execution failures or admission.
+
+Initial and final bounded serial module checks passed. Final: 2.92 s, sampled
+peak RSS 354230272 bytes, no resource stop. Exact guards use propext/Quot.sound
+for receiver failure and the standard trio for the other two laws. No matched
+speed comparison or new coverage credit is claimed. Read-only finder/skeptic
+reviews found no defect; neither ran Lean/server/builds or edited. Requested
+cleanup removed regenerable build output and restored over 2 GB free while
+preserving seals. Original/consolidated queues, actual H121b production, 3209
+uncovered rows, strict pins/docs and full gates remain open. Library-try, Y04
+physical and separate 4.35 producer waits and all STOPs remain distinct.

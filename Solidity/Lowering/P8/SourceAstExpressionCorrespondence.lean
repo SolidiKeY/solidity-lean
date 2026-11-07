@@ -119,6 +119,39 @@ theorem call_ok_iff (fuel : Nat) (node target : Json) (args : Array Json)
       exact (build_ok_iff_each (SourceAstExpressions.expression fuel)
         (fun (values : List (Syn .expr)) => (Syn.call value (.positional (syntaxList values)) : Syn .expr)) args.toList out).mpr values
 
+/-- Receiver failure wins before member-name lookup, preserving its exact diagnostic. -/
+theorem member_receiver_failure (fuel : Nat) (node receiver : Json) (message : String)
+    (kind : node.getObjValAs? String "nodeType" = .ok "MemberAccess")
+    (base : node.getObjVal? "expression" = .ok receiver)
+    (failed : SourceAstExpressions.expression fuel receiver = .error message) :
+    SourceAstExpressions.expression (fuel + 1) node = .error message := by
+  rw [SourceAstExpressions.expression]
+  simp only [kind, base, failed, ok_bind]
+  rfl
+
+/-- Left conversion failure wins before right-field lookup; operand errors are not reordered. -/
+theorem assignment_left_failure (fuel : Nat) (node left : Json) (message : String)
+    (kind : node.getObjValAs? String "nodeType" = .ok "Assignment")
+    (op : node.getObjValAs? String "operator" = .ok "=")
+    (lhs : node.getObjVal? "leftHandSide" = .ok left)
+    (failed : SourceAstExpressions.expression fuel left = .error message) :
+    SourceAstExpressions.expression (fuel + 1) node = .error message := by
+  rw [SourceAstExpressions.expression]
+  simp only [kind, op, lhs, failed, ok_bind, beq_self_eq_true]
+  rfl
+
+/-- Named calls retain their existing refusal before target or argument conversion. -/
+theorem named_call_refused (fuel : Nat) (node : Json) (names : Array String)
+    (kind : node.getObjValAs? String "nodeType" = .ok "FunctionCall")
+    (callKind : node.getObjValAs? String "kind" = .ok "functionCall")
+    (namesField : node.getObjValAs? (Array String) "names" = .ok names)
+    (nonempty : names.isEmpty = false) :
+    SourceAstExpressions.expression (fuel + 1) node =
+      .error "named call conversion not implemented" := by
+  rw [SourceAstExpressions.expression]
+  simp only [kind, callKind, namesField, nonempty, ok_bind, beq_self_eq_true]
+  rfl
+
 /-- info: 'Solidity.Lowering.P8.SourceAstExpressionCorrespondence.ok_bind' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms ok_bind
 /-- info: 'Solidity.Lowering.P8.SourceAstExpressionCorrespondence.identifier_exact' depends on axioms: [propext, Quot.sound] -/
@@ -129,4 +162,10 @@ theorem call_ok_iff (fuel : Nat) (node target : Json) (args : Array Json)
 #guard_msgs (whitespace := lax) in #print axioms assignment_ok_iff
 /-- info: 'Solidity.Lowering.P8.SourceAstExpressionCorrespondence.call_ok_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms call_ok_iff
+/-- info: 'Solidity.Lowering.P8.SourceAstExpressionCorrespondence.member_receiver_failure' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms member_receiver_failure
+/-- info: 'Solidity.Lowering.P8.SourceAstExpressionCorrespondence.assignment_left_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms assignment_left_failure
+/-- info: 'Solidity.Lowering.P8.SourceAstExpressionCorrespondence.named_call_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms named_call_refused
 end Solidity.Lowering.P8.SourceAstExpressionCorrespondence
