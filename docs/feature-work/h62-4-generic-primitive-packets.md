@@ -638,3 +638,21 @@ fixing that text left statements and budgets unchanged. Read-only finder and
 skeptic found no semantic defect and used no Lean/server/build/edit. This remains
 primitive content correspondence, not a whole-world/session/gas or fetched-EVM
 adequacy theorem; full C4/H68 gates, fidelity drift and timing STOPs remain open.
+
+### Unsigned complement correspondence
+
+`BitNotCorrespondence.lean` adds five laws covering all legal byte widths and
+bounded operands: narrow result range, arithmetic involution, actual Source and
+public-selected target execution, reject-all refusal and fuel-zero timeout.
+Source globals/frame/state/local tails remain general; populated caller memory,
+the second fixture local and every saved target stack are retained. The numeric
+wrapping equation ties the returned word to declared-width cleaning. Existing
+mask/index/wrong-value/protected-frame controls remain unchanged, and these new
+laws are not a migration of the original case census. No arbitrary heap/world,
+session/gas or fetched-EVM adequacy follows.
+
+The kernel check passes in 1.476 seconds (incremental closure 24.891 seconds),
+sampled workload peak 811316 KiB. Arithmetic uses propext/Quot.sound; bridge laws
+also use existing Classical.choice. No axiom or proof budget was added. Independent
+read-only finder/skeptic found no defect and used no Lean/server/build/edit.
+Full C4/H68, original fidelity and historical timing STOPs remain open.
