@@ -2,7 +2,7 @@
 'use strict';
 const {EventEmitter}=require('node:events'),{createHash}=require('node:crypto'),{mock}=require('./mock.cjs'),{createExtension}=require('../src/extension.cjs');
 const noop=()=>({dispose(){}});
-function fixture(backend){
+function fixture(backend,configure){
   const e=mock();e.calls={opens:[],restarts:0,cancels:0};
   const b={...e.doc,uri:{...e.doc.uri,fsPath:'/tmp/other.sol'}};e.documents=[e.doc,b];
   e.editors=e.documents.map(document=>({document,decorations:new Map(),setDecorations(type,rows){this.decorations.set(type.kind,rows);}}));
@@ -13,6 +13,7 @@ function fixture(backend){
     onDidChangeActiveTextEditor:fn=>e.subscribe('activeEditor',fn),onDidChangeVisibleTextEditors:fn=>e.subscribe('visibleEditors',fn),showQuickPick:async()=>undefined});
   Object.assign(e.vscode.workspace,{textDocuments:e.documents,onDidOpenTextDocument:fn=>e.subscribe('open',fn),createFileSystemWatcher:()=>({dispose(){},onDidChange:noop,onDidCreate:noop,onDidDelete:noop})});
   e.service=Object.assign(new EventEmitter(),{open:async doc=>e.calls.opens.push(doc),cancel:()=>e.calls.cancels++,save(){},close(){},restart:async()=>e.calls.restarts++,dispose:async()=>{}});
+  configure?.(e);
   e.api=createExtension(e.vscode,e.context,backend|| (async args=>({results:[row(args.document)],errors:[]})),e.service);
   e.status=(doc,state='complete',version=doc.version)=>e.service.emit('status',{uri:doc.uri.toString(),version,state,functions:[{range:{start:{line:0,character:0},end:{line:0,character:1}},status:state==='complete'?'proved':'running'}]});
   e.changeConfig=(name,uri)=>e.events.configuration({affectsConfiguration:(key,scope)=>key===name&&(!uri||scope?.toString()===uri.toString())});
