@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.SwitchSequence
 import Solidity.Yul.Compilation.MultiSwitchCompletion
 /-! Reverse normal-success transport for two actual finite switch artifacts.
@@ -45,19 +46,12 @@ theorem completion_iff {c n f g} {a b : Stmt [] [] c n}
    some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- constructor
- · rintro ⟨horizon,source⟩
-   exact artifact.normal_to_model horizon locals out source m caller
- · intro ran
-   obtain ⟨ha,hb,mid,actual,_,_,_,source,_,frame⟩ := model_to_source artifact locals m
-     {m with stack := out.toList.map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : out.toList.map coreWord = actual.toList.map coreWord := List.append_cancel_right stacks
-   have lists : out.toList = actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp lists
-   cases equal
-   exact ⟨max ha hb+1,source⟩
+ apply CompletionControls.completion_iff_zero (.seq a b) artifact.profile artifact.code
+   artifact.normal_to_model ?_ locals out m caller
+ intro locals m final caller skip ran
+ obtain ⟨ha,hb,mid,actual,_,_,_,source,done,frame⟩ := model_to_source artifact locals m
+   final caller skip ran
+ exact ⟨max ha hb+1,actual,source,done,frame⟩
 
 /-- info: 'Solidity.Yul.Compilation.SwitchSequenceCompletion.model_to_source' depends on axioms: [propext,
  Classical.choice,

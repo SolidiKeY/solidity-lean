@@ -492,3 +492,9 @@ The same existing shared lemma also replaces duplicated equivalence proofs in Ze
 These three existing completion equivalences now use the shared zero-prefix lemma. ZeroScope specializes its existing full-result transport locally; lowering/selection equations, original definitions, source horizons and full machine/caller observations remain unchanged. Exact elaborated types and axiom exports match before/after. Independent read-only finder and skeptic found no defects.
 
 Three serial samples per file give median seconds: MultiSwitch 1.11→1.00 (−9.9%), ScopedFor 0.90→0.91 (+1.1%), ZeroScope 0.85→0.83 (−2.4%). No 10% stop is triggered. Targeted evidence is at `/workspace/vy2-evidence/h55-family-switch-scope/`. Fifteen of 57 files have partial proof reuse; zero fully migrated families. Full-scope timings, final/runtime validation and original physical/source integrations remain open.
+
+### Two-phase switch sequence proof reuse
+
+SwitchSequenceCompletion now uses the shared normal-success equivalence with a local projection of its existing stronger reflection theorem. That theorem remains unchanged, including independent phase horizons, intermediate Source/target observations and the exact composed horizon `max ha hb + 1`. All original definitions, statements, skip and full machine/caller observations remain unchanged. Exact elaborated type and axiom exports match; independent read-only finder and skeptic found no defects.
+
+Three matched serial samples give median 0.85→0.78 seconds (−8.2%); no 10% stop occurs. Evidence is at `/workspace/vy2-evidence/h55-family-switch-sequence/`. Sixteen of 57 files have partial proof reuse; zero fully migrated families. Full-scope timing, final/runtime validation and physical/source integrations remain open.
