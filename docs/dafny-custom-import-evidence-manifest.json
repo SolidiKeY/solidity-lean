@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "93c4864eb4776537f2579578a145d9c24d2ae869",
+  "status": "partial",
+  "obligation": "submenus:dafny.context",
+  "fileCount": 501,
+  "uncompressedBytes": 30198374,
+  "archive": {
+    "path": "/workspace/dafny-parity-custom-import-20261107/evidence-corrected/bulk.tar.gz",
+    "bytes": 6050485,
+    "sha256": "bb45d493f89e5794ef80b378359cbe295336b085e8b6d19bd1c83828b0664175"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-custom-import-20261107/evidence-corrected/files.json",
+    "bytes": 117785,
+    "sha256": "5160dc8721fbfedb77f79893ea7906cfb426c91b70c216ecefe02db3a98b65ce"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-custom-import-evidence-manifest.json --restore",
+  "boundaries": [
+    "Original annotated native failure retained; exact CRLF guard diagnosis, no bypass/fixture replacement.",
+    "Separate actual F6 compiler-only imports, scoped defaults, cancellation and source-bound AST; paired native Dafny default compiler action and unclipped menus.",
+    "Source command supersession child leak reproduced/repaired; broader concurrent closure failure remains unresolved.",
+    "No positioned trace actions/data fabricated; canonical span and timed-strict questions remain pending.",
+    "Working-tree native attempts remain partial pending exact committed replay; no completed row or paired judgment.",
+    "Original workload equality verifier checks8 combinations; initial literal16 counter label is corrected in COUNT-CORRECTION.json without overwriting the old log."
+  ]
+}
