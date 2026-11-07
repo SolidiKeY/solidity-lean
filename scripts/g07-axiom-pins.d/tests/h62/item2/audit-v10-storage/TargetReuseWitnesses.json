@@ -1,0 +1,51 @@
+{
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.after_actual": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.after_joint": [],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.cycle_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.cycle_inputs": [],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.cycle_observations": [],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.empty_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.negative_axes": [],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.observations": [],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.reject_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.repeated_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.run_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.run_joint": [],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.saturated_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.uncleared_changed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean:H62.StorageAudit.TargetReuseWitnesses.uncleared_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

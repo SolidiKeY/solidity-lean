@@ -74,6 +74,7 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.forall_bounded_pair": [],
  "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_case_ordered": [
   "Classical.choice",
   "Quot.sound",

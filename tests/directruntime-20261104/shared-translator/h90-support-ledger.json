@@ -1,0 +1,19 @@
+{
+  "authority": "H90 OT-CR-READER",
+  "owner": "solidity-directruntime-20261104/shared-translator",
+  "admission": "Canonical narrow integer and bytes1..32 primitive locals; tuple scalar leaves retain RawTy spellings. Parameters/state/reference callbacks retain previous refusal boundaries. Explicit nonpayable address locals now retain their marker; authenticated-looking magic-message metadata routes msg.sender to the existing environment node; this is not source authentication.",
+  "proofClosure": "General localTypeName_of_narrow/localTypeName_of_fixedBytes kernel decoder equations, standardaxioms[propext,Classical.choice,Quot.sound]. Finite/trustedchecker controls are not source-equivalence proofs. General localValueTypeName_of_address decoder equation is closed under the same standard axioms. environmentMember? is an axiom-free executable decoder; no new theorem or source-transport proof is claimed. General environmentMember?_guard now proves existing-map origin and negative-reference guard for every successful decode; axioms[propext,Quot.sound]. Executable definitions remain byte-identical; no source/world adequacy claim.",
+  "semanticSupport": "Existing intrinsic width and byte markers; tested copy/complement/tuple/widening/indexing in bothmodalities. Positive.length checker range-literal refusal remains; false.length refutes. Narrow overflow model/source payload gap unchanged. Address marker, default/copy/tuple/shadowing and guarded sender model controls pass in box/diamond; source/environment adequacy is unproved. Guarded msg.value/block.timestamp now reuse the existing EnvKey map;16source-ID-bound model requests8proved/4refuted/4unsupported pass. Metadata is not authentication; source/world adequacy remains unproved.",
+  "backendGap": "OtherH90contexts/forms, existing-importer parity/migration, latest-source native/WASM validation, ReadBounds stack/cost diagnosis and final transport proofs remain open. Primitive-return source repair exists;957aggregategatecorrected26/27, current28pass afterrepair. H77 fixed-byte sourceBuild1b2b packet inspected:343build-source pins and8producer boundary modules match; saved projected parity is not new execution, address freshness or universal closure.",
+  "evidence": [
+    "h90-census-manifest.json",
+    "h90-reader-profile-manifest.json",
+    "h90-occurrence-manifest.json",
+    "fixed-byte-manifest.json",
+    "address-manifest.json",
+    "fixed-byte-intake.json",
+    "environment-manifest.json",
+    "environment-proof-manifest.json"
+  ],
+  "regression": "H90 narrow/fixed-byte/address local admission and retained refusals"
+}

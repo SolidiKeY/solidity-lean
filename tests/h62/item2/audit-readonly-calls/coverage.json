@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "source_name": "Solidity.Backend.WorldCalls.Callbacks.returned",
+      "signature_sha256": "799e18d0ae4f845ab6aba02351da1850bfde6bf050ab261c424addcf36a16474",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.SupportedCalls.returned_joint",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-supported.log"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ExternalCalls.fetched",
+      "signature_sha256": "5339d979bf6ea66d1decf8c55b1dc06bc4fb1b6579b2c4bb1adce3c4220c8a93",
+      "status": "joint-witness-target-failure",
+      "proof": "Solidity.H62.ReadonlyAudit.AlwaysRevert.accepted_fetched",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-always-revert-controls.log"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ExternalCalls.declared_return",
+      "signature_sha256": "1f70110e5988db81fd0883c1e745fb118f61aeb1f28001c03586748350d60701",
+      "status": "joint-witness-target-failure",
+      "proof": "Solidity.H62.ReadonlyAudit.AlwaysRevert.accepted_declared_return",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-always-revert-controls.log"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ExternalCalls.decoded",
+      "signature_sha256": "0a32fef24ce90d6411b0c3738b18da3860749425e189632f7d63dc200430688f",
+      "status": "joint-witness-target-failure",
+      "proof": "Solidity.H62.ReadonlyAudit.AlwaysRevert.accepted_decoded",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-always-revert-controls.log"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.dispatch_getter_empty_succ",
+      "signature_sha256": "f97a0e65679c104e5ed64dd546ae0d1a0b3f07cd61944cdb022f3baf12ada740",
+      "status": "pending-ro-v2",
+      "proof": "Solidity.H62.ReadonlyAudit.ImpossibleDispatch.getter_empty_infeasible",
+      "global_premises": "At G n is a global bounded history structure; its inhabitance cannot repair the contradictory per-input equalities",
+      "per_input": "Empty input contradicts selected getter/function selector; refutation needs only a subset of exact hypotheses",
+      "evidence": "proof-impossible-final.log",
+      "display_status": "pending RO v2",
+      "frozen_hypothesis_status": "joint-premises-refuted",
+      "decision": "H69: RO publishes reachable versioned interface and explicit migration; consumers re-prove.",
+      "audit_result": "Checked joint-impossibility proof retained as H69 audit result; RO v2 migration remains pending."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.dispatch_special_empty_succ",
+      "signature_sha256": "216a881f37ac2fa742d861583d581a1806d8721ae2a7b4728d68b1e8e668b2d9",
+      "status": "pending-ro-v2",
+      "proof": "Solidity.H62.ReadonlyAudit.ImpossibleDispatch.function_empty_infeasible",
+      "global_premises": "At G n is a global bounded history structure; its inhabitance cannot repair the contradictory per-input equalities",
+      "per_input": "Empty input contradicts selected getter/function selector; refutation needs only a subset of exact hypotheses",
+      "evidence": "proof-impossible-final.log",
+      "display_status": "pending RO v2",
+      "frozen_hypothesis_status": "joint-premises-refuted",
+      "decision": "H69: RO publishes reachable versioned interface and explicit migration; consumers re-prove.",
+      "audit_result": "Checked joint-impossibility proof retained as H69 audit result; RO v2 migration remains pending."
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.Callbacks.restore",
+      "signature_sha256": "3c45c8989ac33021328ebb2dd7c29c77cb2d0baeae3e2d1e8854e3f27080129e",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.restore_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.Callbacks.suffix",
+      "signature_sha256": "37bffe8bb96cb9dac3ddbe5f84b1e0976c0295d68be1a475b87f3e4f6731a7d5",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.suffix_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.Callbacks.deterministic",
+      "signature_sha256": "1efb570a3401a7e95fd5de38523064cf3f5170889acbfc3306342345ff73f78c",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.deterministic_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.Callbacks.target_unique",
+      "signature_sha256": "09f461fdcf9315b5e28c755f8d32a454e2a60465d7230fe005ec6c6dcec996a7",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.target_unique_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceBridge.captured",
+      "signature_sha256": "dd674b11ee6042543202ea1c0ee33e8c0a43e504b4f19a1745bfa91cd6d23484",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.captured_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceBridge.static_storage",
+      "signature_sha256": "1c5ca583eebe68bda3b260d13244ba32a044fe97a1a049df6ab36a0de1417e6d",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.bridge_storage_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.InvocationFrame.Invocation.storage",
+      "signature_sha256": "4c733d6617ea898b4aca2821ffa8a3782c9d2b7f277f1975f08a628173aa5708",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.storage_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.InvocationFrame.typed_storage",
+      "signature_sha256": "3edae3565199a32cb56376d2295a3bb57fa29aee566cb9945f9c5843a77b4bc3",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.typed_storage_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.InvocationFrame.typed_resume",
+      "signature_sha256": "1902789e14b00fbe4b925d55ece8cde3da6fa5f5bb822d2f3cc08d21040e6d30",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.typed_resume_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.InvocationFrame.Invocation.raw_unique",
+      "signature_sha256": "175239549cf839723c1d7101b41ee7e0487f3c1c0b2a27b8a43dd8048e5ae726",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.raw_unique_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.Passes.SourceCallBoundary.call_depth",
+      "signature_sha256": "faf619f6318764ec639c5ddb4db779dea862b9c7869ee2de0d76b9f6d2e8a9fc",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.depth_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.Passes.SourceCallBoundary.call_static_value",
+      "signature_sha256": "ddcbc534bc81f0f910b4da636edde5c1583cca0121c39656ff4944fca7e167e7",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JointClients.static_value_client",
+      "global_premises": "Concrete existing paired/source constructors; same invocation/environment/storage relation, never global inhabitance alone",
+      "per_input": "Exact original theorem application supplies every actual Step, RawAt, phase run, representation, frame or refusal hypothesis together",
+      "evidence": "continuation-h69/evidence/joint-clients.log",
+      "witness_rule": "H70: ordinary interface joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.LocationControls.byte_effect",
+      "signature_sha256": "3881d12e327f703d52c817d1b62ad736fa59c2e121fb3d7db779d08f47053052",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.byte_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceDispatchControls.selected_at_zero",
+      "signature_sha256": "aec8b20258c5af54e2c81badd023ac87a0a8da65a5c61604ce7a2024aa95bff0",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.dispatch_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceEnvironmentControls.actual_answer_client",
+      "signature_sha256": "478af5b7eb54d3d357200ee405f3f6dd53ee14b8bc00ecffdc470409c6bb62ad",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.answer_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceStatementControls.actual_skip_client",
+      "signature_sha256": "981142d094bd821a842929e4caf20614dec5cc16bf282f7983c8ba69f70e388b",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.skip_effect_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_storage",
+      "signature_sha256": "fb76634caa7749a0f858f07e5c5431f4f3e85805bfb401c8f63e2199d1963c6d",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.closed_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_reentrant_storage",
+      "signature_sha256": "fa25ce228e54915ab9b264abd5fd2e4f9d6fcf04db80303959244bd629ce5448",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.reentrant_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.actual_unknown_client",
+      "signature_sha256": "51df4a164efd4fde01be1922c751a44b9b0ee811e2bf2cc949509571d0062c93",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.actual_unknown_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.UnknownSourceControls.storage",
+      "signature_sha256": "81827a71627cc3da30609b4dca5931c40ff6d5a950d0f20f2b28d5b26adf04c5",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.unknown_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentHistoryControls.static_credit_storage",
+      "signature_sha256": "9d332a6c1eb1d067e60329bd7bf9ca4320c713ffbde4d9918cc12743ee916a0b",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.credit_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentHistoryControls.exhausted_callback_keeps_storage",
+      "signature_sha256": "16eb1c016aa6d6bca96e642de5c04da8dd414c5e3a58a5c070a66c9e4da2b514",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.exhausted_storage_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ReceiverCapture.faithful",
+      "signature_sha256": "4aed00dac7000f9401116ed7aa4c006998eff2f7901a9648e1ba556c77fc2e72",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.injective_client",
+      "global_premises": "Existing named-predicate certificate; never substituted for per-input data/feasibility",
+      "per_input": "All reducing telescope inputs supplied together, with populated source states/actual caller address or equal captured addresses",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "witness_rule": "H69 ordinary joint witness"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks",
+      "signature_sha256": "ad533aeb84204dbd9a83c845c87897dd4ab518495ac70580bc29a1a323f46f8f",
+      "status": "checked-joint-impossibility",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.closed_children_joint_impossible",
+      "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
+      "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "witness_rule": "H69: RO confirms intentional no-callback specialization; checked callback-choice impossibility is the audit result, never a positive callback witness",
+      "owner_resolution": "Q-CALLBACK-INTENT resolved by coordinator relaying RO decision"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
+      "signature_sha256": "348dfdc87a989adccee3e85cab8a764781a59034fbf98ec210688f45bdcc3740",
+      "status": "checked-joint-impossibility",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.unknown_children_joint_impossible",
+      "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
+      "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "witness_rule": "H69: RO confirms intentional no-callback specialization; checked callback-choice impossibility is the audit result, never a positive callback witness",
+      "owner_resolution": "Q-CALLBACK-INTENT resolved by coordinator relaying RO decision"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.UnknownRevertControls.children",
+      "signature_sha256": "9eea72ce66994da99e2c4127baba726f4b88ea7d04b9c26868f713da3605f7d2",
+      "status": "checked-joint-impossibility",
+      "proof": "Solidity.H62.ReadonlyAudit.HiddenClients.revert_children_joint_impossible",
+      "global_premises": "Global CallbackHistories record is inhabited but does not provide a feasible admitted callback",
+      "per_input": "Fixed answer-only or credit/answer strategy cannot satisfy callback-choice equality; subset refutation proves joint impossibility",
+      "evidence": "continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "witness_rule": "H69: RO confirms intentional no-callback specialization; checked callback-choice impossibility is the audit result, never a positive callback witness",
+      "owner_resolution": "Q-CALLBACK-INTENT resolved by coordinator relaying RO decision"
+    }
+  ]
+}

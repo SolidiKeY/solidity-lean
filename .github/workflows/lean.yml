@@ -44,6 +44,7 @@ jobs:
       - name: Check documentation and axiom-pin drift
         run: |
           node --test scripts/check-axiom-pins.test.mjs tests/h62/item5/statement-graph/h112-tooling.test.mjs
+          python3 -B tests/h62/item5/statement-graph/test_w0_tooling.py -v
           bash scripts/check-doc-paths.sh
           node scripts/check-axiom-pins.mjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
@@ -58,6 +59,8 @@ jobs:
       # inventory are generated from per-lane fragments (P5).
       - name: Check generated bookkeeping files
         run: bash scripts/coord-tools/fragments.sh --check
+      - name: Check slow example partition
+        run: python3 tests/h55/module-times/test_slow_examples.py
       - name: Check pinned Solidity feature inventory
         run: python3 scripts/solidity-feature-audit.py --check
 
@@ -99,7 +102,7 @@ jobs:
       - name: Seed Lake cache from master
         run: bash scripts/ci/fetch-lake-cache.sh
       - name: Build
-        run: lake build Solidity SolidityExamples
+        run: lake build Solidity SolidityExamples SoliditySlowExamples
       # Fetched modules stay in Lake's cache; tools that run Lean themselves
       # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
       - name: Restore fetched artifacts

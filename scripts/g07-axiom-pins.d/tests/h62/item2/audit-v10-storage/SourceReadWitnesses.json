@@ -1,0 +1,34 @@
+{
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.complete_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.complete_reused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.missing_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.readonly_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.total_joint": [],
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.transient_is_not_ordinary": [],
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.wrong_slot_coherence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean:H62.StorageAudit.SourceReadWitnesses.wrong_slot_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -79,7 +79,7 @@ async function contextSubmenu(client,directory,{label='Solidity Lean',expected='
     let visible;
     while(Date.now()<deadline){visible=(await labels()).result.value;if(visible.some(label=>label.includes(expected)))break;await new Promise(r=>setTimeout(r,20));}
     if(!visible?.some(label=>label.includes(expected)))throw Error('Custom compiler action is not rendered in the submenu');
-    const state=await client.request('Runtime.evaluate',{expression:menuNodes+'.filter(e=>e.getClientRects().length).map(e=>{const item=e.closest("[role=menuitem]");return{label:e.textContent,ariaDisabled:item?.getAttribute("aria-disabled")??null,className:item?.className??null};})',returnByValue:true});const rendered=await capture(client,directory,true);return{labels:visible,items:state.result.value,rendered,scope:'Actual Linux context submenu and raw enabled-state attributes; action execution, pairing and macOS remain separate observations.'};
+    const state=await client.request('Runtime.evaluate',{expression:menuNodes+'.filter(e=>e.getClientRects().length).map(e=>{const item=e.closest("[role=menuitem]");const r=e.getBoundingClientRect();return{label:e.textContent,ariaDisabled:item?.getAttribute("aria-disabled")??null,className:item?.className??null,bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom},withinViewport:r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight};})',returnByValue:true});const rendered=await capture(client,directory,true);return{labels:visible,items:state.result.value,rendered,scope:'Actual Linux context submenu and raw enabled-state attributes; action execution, pairing and macOS remain separate observations.'};
   } catch(error){try{writeFileSync(join(directory,'attempt-labels.json'),JSON.stringify((await labels()).result.value));await capture(client,directory,true);}catch{}throw error;} finally {for(let i=0;i<2;i++)for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27});}
 }
 async function captureTrace(client,directory,metadata){
@@ -89,7 +89,7 @@ async function captureTrace(client,directory,metadata){
  const menuDir=join(directory,'menu');require('node:fs').mkdirSync(menuDir,{recursive:true});observed.menu=await contextSubmenu(client,menuDir,{label:'Dafny',expected:'Build with Custom Arguments'});
  const rendered=await capture(client,directory,true);if(metadata.observeOnly){if(observed.activeUri!==metadata.binding.uri)throw Error('Native observation active URI mismatch');}else require('./trace-presentation.cjs').assertPresentation(observed,metadata);return{...rendered,tracePresentation:{...observed,binding:metadata.binding,asserted:!metadata.observeOnly,scope:metadata.observeOnly?'Native upstream state recorded without a lifecycle-success claim':'Exact content/style/disappearance/menu asserted'}};
 }
-async function buildKeybinding(client,{custom=false,input,directory}={}) {
+async function buildKeybinding(client,{custom=false,input,cancel=false,directory}={}) {
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
   if(!focused.result.value)throw Error('No focused source editor for build keybinding');
   const started=Date.now();
@@ -104,11 +104,29 @@ async function buildKeybinding(client,{custom=false,input,directory}={}) {
     if(input!==undefined){for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});await client.request('Input.insertText',{text:input});}
     const submitted=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!submitted?.focused||input!==undefined&&submitted.value!==input)throw Error('F6 prompt contents did not match requested input');
     const rendered=await capture(client,directory,true);prompt={before,submitted,rendered};
-    for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+    const key=cancel?'Escape':'Enter',code=key,windowsVirtualKeyCode=cancel?27:13;
+    for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode});
+    if(cancel){let visible;do{visible=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!visible)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);if(visible)throw Error('Cancelled F6 prompt remains visible');const hidden=join(directory,'cancelled');require('node:fs').mkdirSync(hidden,{recursive:true});prompt.cancelled={visible:false,rendered:await capture(client,hidden,true)};}
   }
   return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
 }
+async function captureProofHover(client,directory,metadata){
+ const checks=require('./proof-help.cjs');checks.popupExpected(metadata);
+ const expression=`(()=>{const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none'&&Number(s.opacity)>0;},active=[...document.querySelectorAll('.monaco-editor[data-uri]')].find(e=>visible(e)&&e.closest('.editor-group-container.active'));return {at:Date.now(),activeUri:active?.getAttribute('data-uri')??null,widgets:[...document.querySelectorAll('.monaco-hover')].filter(visible).map(e=>{const r=e.getBoundingClientRect();return {fullyVisible:r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight,rows:[...e.querySelectorAll('.hover-row')].map(row=>[...row.querySelectorAll('.rendered-markdown')].flatMap(md=>[...md.children].map(block=>({kind:block.querySelector('.monaco-tokenized-source')?'code':block.tagName==='P'?'paragraph':'unknown',text:block.innerText}))))};})};})()`;
+ const inspect=async()=>{const value=(await client.request('Runtime.evaluate',{expression,returnByValue:true})).result.value;return value;};let shown,hidden;
+ try{
+  const deadline=Date.now()+3000;
+  do{shown=await inspect();if(shown?.widgets?.length&&shown.widgets.every(w=>w.fullyVisible))break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);
+  checks.popupObservation(shown,metadata);writeFileSync(join(directory,'hover-rendered.json'),JSON.stringify(shown,null,2));const rendered=await capture(client,directory,true);const shownAfterCapture=await inspect();checks.popupObservation(shownAfterCapture,metadata);writeFileSync(join(directory,'hover-after-capture.json'),JSON.stringify(shownAfterCapture,null,2));
+  for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  do{hidden=await inspect();if(hidden?.widgets?.length===0)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);
+  checks.popupObservation(hidden,metadata,true);if(hidden.at<shown.at)throw Error('Renderer observation clock moved backwards');writeFileSync(join(directory,'hover-hidden.json'),JSON.stringify(hidden,null,2));
+  const dismissed=join(directory,'dismissed');require('node:fs').mkdirSync(dismissed,{recursive:true});await capture(client,dismissed,true);
+  return {...rendered,hoverPopup:{shown,shownAfterCapture,hidden,binding:metadata.binding,scope:'Actual current Linux popup contents and Escape disappearance; no paired Dafny/macOS or inferred per-function proof progress.'}};
+ }catch(error){try{writeFileSync(join(directory,'hover-attempt.json'),JSON.stringify({shown,hidden,error:String(error)},null,2));await capture(client,directory,true);}catch{}throw error;}
+}
 async function captureProofHelp(client,directory,metadata){
+ if(metadata.action==='hover')return captureProofHover(client,directory,metadata);
  const inspect=()=>client.request('Runtime.evaluate',{expression:`(()=>{const editors=[...document.querySelectorAll('.monaco-editor[data-uri]')].filter(e=>e.getClientRects().length),active=editors.find(e=>e.closest('.editor-group-container.active')),input=[...document.querySelectorAll('.quick-input-widget input')].find(e=>e.getClientRects().length),items=[...document.querySelectorAll('.quick-input-list .monaco-list-row')].filter(e=>e.getClientRects().length).map(e=>({label:e.querySelector('.label-name')?.textContent??e.innerText.split('\\n')[0],text:e.innerText}));return {activeUri:active?.getAttribute('data-uri')??null,inputFocused:!!input&&input===document.activeElement,inputValue:input?.value??null,items};})()`,returnByValue:true});
  let observed;
  try{
@@ -128,4 +146,4 @@ async function captureProofHelp(client,directory,metadata){
   if(observed.activeUri!==metadata.destination.uri)throw Error('Native documentation editor URI mismatch');writeFileSync(join(directory,'proof-help-rendered.json'),JSON.stringify(observed,null,2));return {...await capture(client,directory,true),proofHelp:observed};
  }catch(error){try{writeFileSync(join(directory,'proof-help-attempt.json'),JSON.stringify(observed??null));await capture(client,directory,true);}catch{}throw error;}
 }
-module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp};
+module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover};

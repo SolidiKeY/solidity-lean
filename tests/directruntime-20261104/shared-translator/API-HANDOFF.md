@@ -181,3 +181,35 @@ H68 compatibility packet: `compatibility-fixtures.mjs` regenerates all five owne
 The held a073878c data is preserved locally and removed from the source increment. `bulk-manifest.json` records its absolute VM archive path, size, SHA-256 and repository-relative destination. Copy the archive to `archiveRelative`, create `tests/directruntime-20261104/shared-translator/artifacts/h68-bulk`, and extract there with `tar --zstd -xf ARCHIVE -C PACKET_ROOT`. Run `python3 tests/directruntime-20261104/shared-translator/verify-bulk.py` before the controls. Missing or changed data fails closed; no historical-fixture fallback is provided.
 
 Current H68 receipts are under `artifacts/h68-bulk/evidence/h68`; the source packet's earlier evidence/h68 references are historical. Tracked4095 fixture/census/coverage/matrix data is restored unchanged. Current migrated fixture hashes and806 selected-field observations are in the retained packet, not those historical ledgers. The original57-kind suites keep their exact frozen baseline inputs.
+
+## H90 narrow-local increment
+
+New `Shared.localTypeName : Json → Except String (Ty × RawTy)` preserves canonical narrow local spelling; `Shared.localPrim : Json → Except String Ty` is only a tuple scalar shape gate. `localTypeName_of_narrow` proves the exact result under node/name/narrowTy hypotheses, with[propext, Classical.choice, Quot.sound]. The Reader record and state/parameter/typeName APIs are unchanged. Local statement callbacks use the new reader, and ControlTuple.scalar uses localPrim; no failure is retried through another translator.
+
+Pinned78-file comparison:236→245 canonical admissions,9gains/12refined refusals/no losses,1655functions/1486printed bodies. CR's exact six-function probe now admits narrowLocal while narrowParam stays refused. Do not migrate the existing importer yet: other narrow/contextual types and many expression/statement forms remain open. H68 fixture/pin migration remains CR-owned. See the three H90 manifests for authentic source/data boundaries; ordinary native/WASM closure on this head is not claimed.
+
+Primitive-return repair: `Shared.primitiveReturnObligation : BodyLoopLowerer → PlainEntryPre → Contract → FunDecl → Bool → Except String (Fml C [])` is called by the existing assertion boundary for returning functions. Only primitive/empty-width declarations enter it; reference/width-bearing return refusals stay. Fresh slots plus existing lowerers preserve evaluation/early-exit handling in the checked model. No-return branch is exact under the pinned audit; Reader/callback signatures unchanged. See committed primitive-return-manifest.json for source hashes, compiler receipts, finite/trusted-checker evidence and limits. Native/WASM revalidation remains consumer work.
+
+Fixed-byte locals: existing localTypeName/localPrim now admit canonicalbytes1..32 only in primitive-local/tuple contexts while retaining raw spelling for existing byte markers. New general decoder theorem localTypeName_of_fixedBytes; no Reader signature change. Parameters/state/reference refusals remain.20box/diamond requests give12proved/4refuted/4unsupported; positive.length proof/backendgap explicit.78-file function admission remains245 with3refinedrefusals. See fixed-byte-manifest.json for exact baseline/source/data hashes and limits.
+
+H90 address increment: `Shared.localValueTypeName : Json → Except String (Ty × RawTy)`
+is the shape-dispatched local callback used by both statement paths. Explicit
+nonpayable addresses retain `.named "address"`; original `localTypeName` and
+Reader signatures remain intact. The guarded `msg.sender` bridge uses `.env
+.msgSender`; malformed/user identities keep field decoding and error order.
+See address-manifest.json for exact source hashes,30passing file gates and
+245/1486matched census boundary. This is not full address or importer parity.
+
+Existing environment-member increment: `Shared.environmentMember? : Json → String
+→ String → Option EnvKey` is the metadata-shape gate used by shared expressionStep.
+It reuses existing EnvKey.ofParts and adds value/time routing beside sender.
+Reader signatures/imports and entry premises are unchanged. See environment-manifest.json
+for 31-file gates, exact source-ID controls and unchanged census/outcome limits.
+This does not qualify source/world semantics or the latest native/WASM binaries.
+
+Proof-only addition: `environmentMember?_guard` establishes that every successful
+helper result belongs to `EnvKey.ofParts` and satisfies the negative-reference
+guard. It does not authenticate compiler identity or prove source/world adequacy.
+All pre-existing Translate definitions remain byte-identical to prework f83a7016.
+See environment-proof-manifest.json for the exact signature, axiom set and gates.
+Existing H71 runtime packets remain on their original route; no duplicate relay.

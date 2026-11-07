@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "fa6a2e0e585bb7e8005bd68c87bbb45f4f6c10f5b08eb7b50a42e3dbeecf6408",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayWrite.lean:14:run_current",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayWrite.run_current",
+      "signature": "theorem run_current (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)\n    (i : Nat) (fits : i < Evm.W) (value : Fin Evm.W) :\n    Evm.run code { machine with stack := .val \u27e8i,fits\u27e9 :: .slot slot :: .val value :: tail } =\n      if i < machine.store slot then .ok { machine with stack := tail, store := Evm.WordStore.write machine.store (.data slot i) value.val } 0 else .revert",
+      "signature_sha256": "d223d322b25bd6ac31f5b2ccccfc179c0c4f05b40bcf4fe4aa2c8579a7dc1713",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.write_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayWrite.lean:29:success",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayWrite.success",
+      "signature": "theorem success {n : Nat} {G : Schema n} {p : PrimTy}\n    (old result : Value G (.array (.prim p))) (i : Index) (value : p.Denote)\n    (performed : writeAt old i value = some result) :\n    i.val < old.length.val \u2227 old.save (TargetArrayRead.path (G := G) (p := p) i) (.prim value) = some result",
+      "signature_sha256": "8c61a9f681e484952fd5333c9f705bbe9388bf032ffda2d2bb78cc82edcba005",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.success_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayWrite.lean:64:failure_matches",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayWrite.failure_matches",
+      "signature": "theorem failure_matches {n : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) (value : p.Denote)\n    (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)\n    (header : machine.store slot = old.length.val) :\n    Evm.run code { machine with stack := .val \u27e8i.val,i.isLt\u27e9 :: .slot slot :: .val (TargetOperations.encodeWord (PrimTy.toWord value)) :: tail } = .revert \u2194 writeAt old i value = none",
+      "signature_sha256": "50b48156fc768deb528b967b489e3f6baf4a354d6f008300483b882ef67adc45",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.write_failure_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayWrite.lean:85:header_frame",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayWrite.header_frame",
+      "signature": "theorem header_frame {n : Nat} {G : Schema n} {p : PrimTy}\n    (old result : Value G (.array (.prim p))) (i : Index) (value : p.Denote)\n    (performed : writeAt old i value = some result) (base : Solidity.Storage.Loc) (store : Store)\n    (before : Represented old [.length .nil] base store) :\n    Represented result [.length .nil] base (Representation.write store (pathLoc (TargetArrayRead.path (G := G) (p := p) i) base) (PrimTy.toWord value))",
+      "signature_sha256": "25b296fe5b4c402d6002e9fa7481bc8655d7b83b922381a3e06a0dac34a2aa45",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.header_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayWrite.lean:102:complete_numeric",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayWrite.complete_numeric",
+      "signature": "theorem complete_numeric {n N L R : Nat} {G : Schema n} {p : PrimTy}\n    {hash : Solidity.Storage.Pre \u2192 Nat} {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}\n    (run : FiniteRun N L R hash P locations)\n    (old result : Value G (.array (.prim p))) (i : Index) (value : p.Denote)\n    (performed : writeAt old i value = some result)\n    (queries : List (Query G (.array (.prim p)))) (base : Solidity.Storage.Loc)\n    (baseFits : TargetOperations.KeysFit base) (store : Store) (numeric : WordStore)\n    (machine : Evm.Machine) (tail : List Evm.Word)\n    (beforeHeader : Represented old [.length .nil] base store)\n    (before : Represented old queries base store)\n    (supported : PathSupported (TargetArrayRead.path (G := G) (p := p) i))\n    (apart : \u2200 q \u2208 queries, q.apart (TargetArrayRead.path (G := G) (p := p) i))\n    (nonalias : \u2200 q \u2208 queries, q.location base \u2260 pathLoc (TargetArrayRead.path (G := G) (p := p) i) base)\n    (initial : Transport N hash locations store numeric)\n    (headerCovered : base \u2208 locations) (childCovered : pathLoc (TargetArrayRead.path (G := G) (p := p) i) base \u2208 locations)\n    (fitting : \u2200 l \u2208 locations, TargetOperations.KeysFit l)\n    (targetInitial : \u2200 l (member : l \u2208 locations), machine.store.cells (TargetOperations.toSlot l (fitting l member)) = TargetOperations.encodeWord (store l)) :\n    let dst := TargetArrayRead.path (G := G) (p := p) i\n    let word := PrimTy.toWord value\n    let child := pathLoc dst base\n    let afterStore := Representation.write store child word\n    let afterNumeric := writeWord numeric (child.word N hash) word\n    let afterTarget := { machine with stack := tail, store := Evm.WordStore.write machine.store (TargetOperations.toSlot child (TargetOperations.path_keysFit dst base baseFits)) (TargetOperations.encodeWord word).val }\n    Evm.run code { machine with stack := .val \u27e8i.val,i.isLt\u27e9 :: .slot (TargetOperations.toSlot base baseFits) :: .val (TargetOperations.encodeWord word) :: tail } = .ok afterTarget 0 \u2227\n      Represented result (.length .nil :: .word dst :: queries) base afterStore \u2227\n      Transport N hash locations afterStore afterNumeric \u2227\n      (\u2200 l (member : l \u2208 locations), afterTarget.store.cells (TargetOperations.toSlot l (fitting l member)) = TargetOperations.encodeWord (afterStore l))",
+      "signature_sha256": "e7b6272033fb580fd3e8f9914e8df44f5f46c61b1b0d1c1f8f137a10db4d98b9",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.numeric_write_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}

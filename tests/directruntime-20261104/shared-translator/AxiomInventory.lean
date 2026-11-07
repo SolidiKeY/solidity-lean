@@ -55,3 +55,18 @@ with the pinned base runtime entrypoint separately. -/
 #print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.bodySeed
 #print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.reserved_lt_bodySeed
 #print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.validateScopes
+
+-- H90 canonical narrow-local decoding; no source adequacy theorem.
+#print axioms Solidity.Frontend.ExecutableAst.Shared.localPrim
+#print axioms Solidity.Frontend.ExecutableAst.Shared.localTypeName
+#print axioms Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_narrow
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.primitiveReturnObligation
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_fixedBytes
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.localValueTypeName_of_address
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.environmentMember?
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.environmentMember?_guard

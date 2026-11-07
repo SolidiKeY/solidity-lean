@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Recheck the existing SolCases producer serially, without touching its sources/cache.
+Guarded regression: boundary witnesses must come from the actual unchanged producer
+and a successful bounded execution, never a fabricated host arithmetic oracle.
 Run under the repository writer lock. Private fresh artifacts, Lean -j1, no server.
 """
 import argparse
@@ -57,6 +59,7 @@ def run(command, repo, env, log, timeout=300):
 
 def main():
     p = argparse.ArgumentParser(__doc__)
+    p.add_argument("--boundary-only", action="store_true", help="emit the additive boundary corpus using an existing verified producer build")
     p.add_argument("--repo", type=Path, required=True)
     p.add_argument("--bulk", type=Path, required=True)
     p.add_argument("--lean-bin", type=Path, required=True)
@@ -72,6 +75,28 @@ def main():
                 for name in ("lean", "lake")}
     if "version 4.24.0" not in versions["lean"]: raise RuntimeError("wrong repository toolchain")
     print(json.dumps(versions), flush=True)
+    if a.boundary_only:
+        build = json.loads((logs/"results.json").read_text())
+        if not build["complete"] or any(row["exit"] != 0 or row["stopped"] for row in build["modules"]):
+            raise RuntimeError("producer build incomplete")
+        source_pins = json.loads((bulk/"evidence/producer-sources.json").read_text())["source_sha256"]
+        for name, digest in source_pins.items():
+            if hashlib.sha256((repo/name).read_bytes()).hexdigest() != digest:
+                raise RuntimeError("producer source changed: " + name)
+        driver = repo/"tests/h62/item3/g52-differential/BoundaryWitness.lean"
+        output = bulk/"evidence/boundary-cases.jsonl"
+        result = run([str(a.lean_bin/"lean"), "-j1", "--tstack=131072", "--run", str(driver)], repo, env, output)
+        if result["exit"] != 0 or result["stopped"] is not None: raise SystemExit(result["exit"] or 1)
+        records = [json.loads(line) for line in output.read_text().splitlines()]
+        original = [json.loads(line) for line in (bulk/"evidence/typed-cases.jsonl").read_text().splitlines()]
+        if len(records) != 480 or [row["index"] for row in records] != list(range(480)) or len({row["source"] for row in records}) != 480:
+            raise RuntimeError("incomplete or duplicate boundary enumeration")
+        if {row["source"] for row in records} & {row["source"] for row in original}:
+            raise RuntimeError("boundary corpus pads original cases")
+        binding = dict(driver=str(driver.relative_to(repo)), driver_sha256=hashlib.sha256(driver.read_bytes()).hexdigest(),
+                       output_sha256=hashlib.sha256(output.read_bytes()).hexdigest(), case_count=480, original_overlap=0, bounded_run=result)
+        (bulk/"evidence/boundary-generator.json").write_text(json.dumps(binding, indent=2)+"\n")
+        raise SystemExit(0)
     seen = set(); order = []
     def visit(name):
         source = repo/(name.replace(".", "/")+".lean")
