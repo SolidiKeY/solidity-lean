@@ -1043,3 +1043,31 @@ boundaries are off Git, bound by source-environment-component-index-manifest.jso
 Independent read-only finder and skeptic found no issue in the eight-record
 partition, private-name status, projection boundaries or historical validation
 qualifications. Neither ran Lean or a server; receipt retained off Git.
+
+### Source-effect residual source-name accounting (2026-11-07)
+
+All 349 kernel-only records from the four-module Source-effect capture now have
+an explicit worklist classification: eight written-definition name candidates,
+317 equation-name shapes, three proof-helper-name shapes and 21 splitter-name
+shapes. The eight names match explicit def lines in the guarded unchanged Source
+files: frameRequest, sourceWord, literal, afterLiteral, logged, eraseLogs,
+allocated and fromExpression, qualified by their original modules. No dependent
+definition body is edited or replaced.
+
+These are name/source candidates, not proof of generated-declaration provenance,
+semantic role or ownership. Dependency-namespaced helpers and captured module
+fields are retained as recorded; neither is used to assign a producer. Private
+mangling remains unresolved. Every residual retains its exact saved type and
+pending provenance, owner, joint-feasibility and fidelity status. The table adds
+zero witnesses or acceptance counts and does not omit helper records from the
+original audit obligation.
+
+All four source hashes still match the guarded capture; all residual type hashes
+validate. This metadata-only item runs no Lean or timing gate. The bulk table
+stays off Git, bound by source-effects-residuals-manifest.json. Full semantic
+census, canonical Source/production frame producers, final gates and assigned
+H68 bridge remain open; no held timing or trust requirement is relaxed.
+
+Independent read-only finder and skeptic found no issue in the full residual
+partition, source-line/type/hash bindings or unresolved-provenance boundaries.
+Neither ran Lean or a server; the review receipt remains off Git.
