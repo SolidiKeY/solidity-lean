@@ -2199,3 +2199,21 @@ changed or removed since the preceding snapshot. Independent read-only finder an
 skeptic checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/solkey-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Stipend migration probe observations
+
+`stipend_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover isolated
+acceptance/rejection and gas-boundary controls, explicitly named interface types,
+and a read-only public inventory including generated names. The controls do not
+prove Fitted or Enforced compiler obligations or cross-version equivalence.
+Current invocation, inputs, effects and outcomes remain unresolved; this is
+supplied-subset evidence.
+
+At `98248c5ef593c80baf38d7a61fcd6d3a943736c3`, the refreshed static index
+has 771 candidates, 546 with supplied current references and 225 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/stipend-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
