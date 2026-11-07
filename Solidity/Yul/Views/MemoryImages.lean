@@ -107,7 +107,6 @@ theorem MemoryImage.unchanged {D : Source.Layout} {h : Source.Heap D} {p : Place
     · exact Fin.ext reads.1
     · intro i hi
       have eq := congrArg (fun xs => xs[i]?) reads.2
-      dsimp only at eq
       rw [List.getElem?_eq_getElem (by simp only [readBytes, List.length_map, List.length_range]; exact hi),
         List.getElem?_eq_getElem hi] at eq
       have value := Option.some.inj eq
@@ -117,7 +116,6 @@ theorem MemoryImage.unchanged {D : Source.Layout} {h : Source.Heap D} {p : Place
     · exact Fin.ext reads.1
     · intro i hi
       have eq := congrArg (fun xs => xs[i]?) reads.2
-      dsimp only at eq
       rw [List.getElem?_eq_getElem (by simp only [readBytes, List.length_map, List.length_range]; exact hi),
         List.getElem?_eq_getElem hi] at eq
       have value := Option.some.inj eq
@@ -139,7 +137,6 @@ theorem MemoryImage.source_word {D : Source.Layout} {h : Source.Heap D} {p : Pla
 theorem readBytes_element (m : ByteView) (base : Nat) (bs : List UInt8)
     (read : readBytes m base bs.length = bs) (i : Fin bs.length) : m (base + i.val) = bs[i.val] := by
   have eq := congrArg (fun xs => xs[i.val]?) read
-  dsimp only at eq
   rw [List.getElem?_eq_getElem (by simp only [readBytes, List.length_map, List.length_range]; exact i.isLt),
     List.getElem?_eq_getElem i.isLt] at eq
   have value := Option.some.inj eq

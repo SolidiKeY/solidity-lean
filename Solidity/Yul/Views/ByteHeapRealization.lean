@@ -78,7 +78,6 @@ theorem encodeByteHeap_unchanged {D : Source.Layout} {h : Source.Heap D} (p : Pl
       have get := congrArg (fun xs => xs[i]?) payload
       have hi' : i < (readBytes m (p.address e.id + 32) e.bytes.length).length := by
         simp only [readBytes, List.length_map, List.length_range]; exact hi
-      dsimp only at get
       rw [List.getElem?_eq_getElem hi', List.getElem?_eq_getElem hi] at get
       have value := Option.some.inj get
       simpa only [readBytes, List.getElem_map, List.getElem_range] using value.symm
@@ -111,7 +110,6 @@ theorem HeapByteEntry.source_byte {D : Source.Layout} {h : Source.Heap D} (p : P
     m (p.address e.id + off) = v := by
   have payload (i : Fin e.bytes.length) : m (p.address e.id + 32 + i.val) = e.bytes[i.val] := by
     have get := congrArg (fun xs => xs[i.val]?) reads.2
-    dsimp only at get
     have hi : i.val < (readBytes m (p.address e.id + 32) e.bytes.length).length := by
       simp only [readBytes, List.length_map, List.length_range]; exact i.isLt
     rw [List.getElem?_eq_getElem hi, List.getElem?_eq_getElem i.isLt] at get

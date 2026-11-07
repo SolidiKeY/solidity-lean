@@ -64,6 +64,9 @@ depth 1024 a call fails with empty revert data (G01 follow-up
 "nested-frame failures").  Writes in a static frame revert.
 -/
 
+-- Preserve dependent result refinements of the existing evaluator do blocks.
+set_option backward.do.legacy true
+
 namespace Solidity.Source
 
 open Solidity.Roadmap (Address Word Bytes Event Outcome Pipeline Strategy Fixed Move)

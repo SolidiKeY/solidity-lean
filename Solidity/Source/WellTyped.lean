@@ -1481,7 +1481,7 @@ theorem applyOp_mem {H : HeapTy} (F : Fr) (o : Op E.layout E.lay E.lay) :
       have e := hf y.2
       exact ⟨⟨⟨e ▸ h.1.1.heap, e ▸ h.1.1.le⟩, e ▸ h.1.2⟩, e ▸ h.2⟩
   exact Hoare.ite' (fun _ => Hoare.bind (Hoare.halt' fun _ h => h) fun _ => hm _ fun _ => rfl)
-    (fun _ => Hoare.bind (Hoare.pure' fun _ h => h) fun _ => hm _ fun _ => rfl)
+    (fun _ => hm _ fun _ => rfl)
 
 theorem setCell_mem {H : HeapTy} (F : Fr) (p : SPath) (o : Option (Val E.layout (E.cellTy p))) :
     Hoare (MemOK E H) (setCell F p o : EM E Γ Unit) (fun _ y => MemOK E H y) (fun _ y => MemOK E H y) := by

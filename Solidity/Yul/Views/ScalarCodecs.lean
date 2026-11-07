@@ -9,6 +9,9 @@ Signed integers retain the low-width two's-complement payload. These codecs
 are canonical logical-value components, not a dirty-bit writeback policy or
 an instance of the whole G27 source layout.
 -/
+-- Retain typed codec proof reductions across the 4.35 generated eliminators.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Yul.Views
 
 /-- An arbitrary valid offset for an integer's documented byte width. -/
@@ -69,7 +72,7 @@ def intCodec (D : Source.Layout) (t : Source.IntTy) (off : Nat)
     if h : t.lo ≤ v ∧ v ≤ t.hi then some (.int v h) else none
   decode_encode v := by
     cases v with
-    | int n h => simp only [read_intPayload t n h, dif_pos h]
+    | int n h => simp only [Source.STy.int.noConfusion, Source.STy.noConfusion, id, read_intPayload t n h, dif_pos h]
     | memRef h _ | storRef h _ | cdRef h _ => cases h
 
 /-- Address and contract payloads use the same 20-byte representation. -/
@@ -110,7 +113,7 @@ def enumCodec (D : Source.Layout) (d : Source.DeclName) (off : Nat) (fits : off 
   decode n := if h : n.val < D.enumSize d then some (.enum ⟨n.val, h⟩) else none
   decode_encode v := by
     cases v with
-    | enum i => simp only [dif_pos i.isLt]
+    | enum i => simp only [Source.STy.enum.noConfusion, Source.STy.noConfusion, id, dif_pos i.isLt]
     | memRef h _ | storRef h _ | cdRef h _ => cases h
 
 /-- UDVTs reuse a codec for their actual declared underlying source type. -/
@@ -123,7 +126,7 @@ def udvtCodec (D : Source.Layout) (d : Source.DeclName) (f : Field)
   decode n := (c.decode n).map Source.Val.udvt
   decode_encode v := by
     cases v with
-    | udvt x => simp only [c.decode_encode, Option.map_some]
+    | udvt x => simp only [Source.STy.udvt.noConfusion, Source.STy.noConfusion, id, c.decode_encode, Option.map_some]
     | memRef h _ | storRef h _ | cdRef h _ => cases h
 
 /-- Fixed point stores its scaled integer, using the declared signedness/width. -/
@@ -141,7 +144,7 @@ def fixedCodec (D : Source.Layout) (f : Source.FixTy) (off : Nat)
     if h : f.lo ≤ v ∧ v ≤ f.hi then some (.fixed v h) else none
   decode_encode v := by
     cases v with
-    | fixed n h => simp only [read_intPayload (fixedIntTy f) n h, dif_pos h]
+    | fixed n h => simp only [Source.STy.fixed.noConfusion, Source.STy.noConfusion, id, read_intPayload (fixedIntTy f) n h, dif_pos h]
     | memRef h _ | storRef h _ | cdRef h _ => cases h
 
 theorem scalar_beValue_bound (bs : List UInt8) : Source.beValue bs < 256 ^ bs.length := by
@@ -185,7 +188,7 @@ def fixedBytesCodec (D : Source.Layout) (n : Nat) (h : 1 ≤ n ∧ n ≤ 32) (of
   decode v := some (.fixedBytes (Source.beBytes n v.val) (Source.beBytes_length n v.val))
   decode_encode v := by
     cases v with
-    | fixedBytes bs hl => simp only [← hl, scalar_beBytes_value]
+    | fixedBytes bs hl => simp only [Source.STy.fixedBytes.noConfusion, Source.STy.noConfusion, id, ← hl, scalar_beBytes_value]
     | memRef h _ | storRef h _ | cdRef h _ => cases h
 
 /-- Changing only a field offset preserves the intrinsic codec value domain. -/
