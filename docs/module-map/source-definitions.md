@@ -148,6 +148,9 @@
 | `Frontend/Checked/UnitExamples/Parsed.lean` | Per-program kernel certificates of `ctorsOf` for the declaration, unit and expression corpora (`parsedCtors_*`). |
 | `Frontend/Checked/UnitExamples/ProfileParsed.lean` | Per-program kernel certificates of the in-profile constructors for the declaration and unit corpora (`parsedCtors_profileDecl*`, `parsedCtors_profileUnit*`). |
 | `Frontend/Checked/UnitExamples/ProfileExprParsed.lean` | Per-program kernel certificates of the in-profile constructors for the expression corpus, and of the Yul program (`parsedCtors_profileExpr*`, `parsedCtors_yul0`). |
+# H125 additive Source typing pair
+
+| `Source/TypingV2.lean` | H57 additive environment-aware local declaration judgment over frozen v1 derivations; generic policy fold, compatibility bridge and positive H24 admission, with no Lowering import. |
 | `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
 | `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
 | `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly; its typed-source reachability is in `CalldataNestedCopyControls`. |
