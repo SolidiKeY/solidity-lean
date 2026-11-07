@@ -397,3 +397,41 @@ The transferred producer model and input-byte controls also build successfully
 objects. This checks their stated model laws only: the source outcome remains
 unused by returndata_any and no source-world oracle link is inferred. No new
 Premises timing comparison or runtime-pass claim was made.
+
+
+## Coordinator review follow-up and new master (2026-11-07)
+
+Rebased the current fixture-validation checkpoint onto coordinator master
+`d93f6839c613468610ea488356b174cd183e3772`. Every one of its80 compiled source
+inputs and all driver/tool pins remained byte-identical after the rebase;
+`capture-current-closure/evidence/rebase-and-case-join.json` records that check.
+The byte/source-name join links the prior25-declaration ledger's16 mappings
+(12 distinct fixture names) to the actual current38-declaration axiom probe.
+This does not restore the three removed private identities, certify historical
+raw type equivalence or promote all792 audit obligations to acceptance.
+
+StaticCallWitness's module comment now explicitly states that its existential
+establishes only the static-mode flag equation, with requested=true. The separate
+client applies the existing storage law. All code from its namespace onward is
+byte-identical; no theorem statement or proof changed. The consumer checker
+rejects an empty MIGRATED list before parsing arguments, writing output or
+invoking Lean; its new refusal control passed with the four existing tests.
+The paired timing checker itself was not executed.
+
+`tests/h62/item2/audit-readonly-calls/ro-v2-intake.sha256` commits the exact SHA256
+of the off-Git current-consumer receipt and its raw log. Both original coverage
+rows now cite this manifest; their statuses and original V1 refutations remain
+unchanged. The manifest pins old evidence, not a new proof or a portable runtime
+gate. Both files verified; the raw receipt SHA256 is
+93a0617fe8a68cb6516003687abcc96f9f6761d6aaeba75e2a1ab2b65ec74f52.
+The wording typo All28 was corrected. Five consumer controls and five existing
+V2 audit controls passed. Independent read-only finder and skeptic found no
+remaining issue in these review fixes; neither executed Lean or wrote files.
+The documentation gate now passes on the new master: all references resolve,
+with139 pre-existing ambiguities. The prior two-reference v17 wait is resolved.
+
+The historical Premises +80.254966536% STOP and full original acceptance remain
+open. H121 compiler-success/G42.04 adequacy still belongs to
+solidity-compiler10-20261028/memory-reference-structs; our full RO source/callee
+outcome and physical-frame producer remains unfinished. The historical exact
+proof-cleanup object remains UNVERIFIABLE without original recovered bytes.
