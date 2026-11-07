@@ -1,5 +1,13 @@
 # H62 item 2: audit-theories — continuing audit
 
+LATEST CHECKPOINT: Payable6 joint packets,1 ordinary impossible-input blocker
+and3 successful model API controls. All126 helper proof receipts now match
+current dependencies;87 joint certificate names,75 full unchanged-file subset
+records and6 additional Payable packets are separately checked. Original
+witness/classification remainder1,378:389public+3private+986generated.
+Q-STATIC-VALUE and Q-FROZEN-REBASE remain pending. No full acceptance/runtime PASS.
+Evidence: /workspace/h62-audit-theories-payable-20261107-evidence.
+
 LATEST REBASE (coordinator2026-11-07): assigned branch safely rebased to
 7683091e7c35d265b3b76fdf2a93d0197ce9f556 after verifying all previous heads
 are ancestors. Frozen assignment reference remainsc6f550e281a7. Latest
@@ -854,3 +862,59 @@ helper receipts are refreshed. Original witness/classification remainder:
 final-gate obligations. Continue original queue and independent backfill,
 fetching/logging/inspecting master before the next item. No new/reset goal,
 full-completion transition, push or master merge.
+
+## Payable checkpoint: six feasible packets and one empty ordinary interface
+
+Before this item, fetched origin/master and inspected its log and Payable,
+ContractWorld/Lifetime definitions: no duplicate witness item or prerequisite
+change landed. The original seven Payable declarations and ContractWorld source
+remain byte-identical to c6f550e281a7. PayableWitnesses adds six full joint input
+packets including the call-frame DecidableEq instance. Positive-value transactions,
+constructor flags, actual System/Prog inputs, nonempty transient read layout,
+matching installed code and funded worlds are concrete. System/deploy/transact/
+enter refusal packets also include the actual refusal result. Three separate
+positive controls prove System.run, World.enter and external World.callFrame
+success, including the sender!=self execution and settlement case. These are
+model API controls, not a proof of physical EVM compilation/ABI/gas/fork totality.
+
+ESCALATE: Solidity.Theory.Mutability.ContractWorld.World.enter_static is an ordinary interface with impossible joint hypotheses: frozen Context.Mode ordinary makes isStatic=false, readOnly makes value=0; payable_static_inputs_impossible checks the complete input telescope. Q-STATIC-VALUE options: retain ordinary witness blocker; owner-approved H57 versioned statement/model repair; explicit human disposition as an intentional H69 separation boundary (not operational refusal coverage).
+
+The checked refutation is stored in pending_impossibility.py, absent from both
+accepted joint and H69 registries. The whole original ledger retains this entry
+as public-witness-pending with its certificate/question; it reduces no gap count.
+No original statement, premise, definition, exclusion or axiom changed. No answer
+to Q-STATIC-VALUE has been received. Static input emptiness is already present
+at the frozen original base, independently of Q-FROZEN-REBASE.
+
+The final f6bfcdc998b6 Payable receipt passes exit0,1.608s,679,542,784 sampled
+peak RSS, no diagnostics or sorryAx and standard axioms only. Ten new proof
+helpers and eight fixtures; the initial address-evaluation recursion limit was
+resolved symbolically using explicit bounds and stepwise simplification, without
+raising recursion/heartbeat limits or weakening the external call control.
+Historical failed elaboration logs are retained but are not accepted receipts.
+Both changed Source helper dependency closures were serially refreshed; all126
+helper proofs/29fixture definitions/7private abbreviations now verify with
+current source/import/artifact/log hashes. Lean4.24.0(797c613), Lake5.0.0-src+
+797c613; one heavy process, explicit -j1/LEAN_NUM_THREADS=1,12GiB address-space
+cap,4GiB reserve,no host swap; KeySort prerequisite passed. No timing comparison
+is inferred from dependency rebuild durations; previous matched tool pair was
++2.073826%, within10%. No budget or runtime policy changed.
+
+payable-gates.json records commands/exits/decisive outputs: seven interfaces
+accounted as six joint +one pending refutation; strict --require-joint-all exit1
+PAYABLE_JOINT_BLOCKED; generic full-Payable subset exit1 for one missing joint.
+Those expected failures preserve the acceptance boundary. The positive75-record
+unchanged-file subset and four negative controls,13 Python tests,layers(107
+upstream pinned allowances),register/fragments checks all pass. Original500
+records remain exact once:87 joint certificates,3 accepted H69 certificates,
+18 explicitly historical empty telescopes,389 public and3 private pending;
+all986 original generated candidates remain pending. remaining-original-records
+contains1,378 unique names/owners. That remainder excludes separate pending
+frozen-version fidelity, broader compiler contracts and final runtime gates.
+
+Checkpoint handoff: preserve same VM/branch/unfinished goal and all prior
+artifacts. Continue independent original queue/backfill while two scope decisions
+wait; no automatic H69 classification, interface repair, root registration,
+push/master merge or RUNTIME_GATE_PASS. Finder/skeptic independently passed all126 receipts,500 exact original records,
+1,378 unique pending names and all recorded gate exits; no residual findings,
+edits, Lean/server/build jobs. Final reviews are in reviews.json off Git.

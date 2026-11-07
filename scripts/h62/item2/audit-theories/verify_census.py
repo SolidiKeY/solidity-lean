@@ -124,6 +124,14 @@ WITNESSES.update({
  'Solidity.Theory.Mutability.Transient.holds_readOnly': ('CloserWitnesses', 'closer_transient_modal_joint_witness'),
  'Solidity.Theory.Mutability.Transient.holds_frame': ('CloserWitnesses', 'closer_transient_frame_joint_witness'),
 })
+WITNESSES.update({
+ 'Solidity.Theory.Mutability.refuses': ('PayableWitnesses', 'payable_refuses_joint_witness'),
+ 'Solidity.Theory.Mutability.System.run_nonpayable': ('PayableWitnesses', 'payable_system_joint_witness'),
+ 'Solidity.Theory.Mutability.deployT_nonpayable': ('PayableWitnesses', 'payable_deploy_joint_witness'),
+ 'Solidity.Theory.Mutability.transact_nonpayable': ('PayableWitnesses', 'payable_transact_joint_witness'),
+ 'Solidity.Theory.Mutability.ContractWorld.World.enter_nonpayable': ('PayableWitnesses', 'payable_enter_joint_witness'),
+ 'Solidity.Theory.Mutability.ContractWorld.World.callFrame_nonpayable': ('PayableWitnesses', 'payable_call_joint_witness'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
