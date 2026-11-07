@@ -241,6 +241,68 @@ def return_frontier(conclusion):
     return "other-source-result; no-hypothesis-absence-inference"
 
 
+
+def return_inputs(conclusion):
+    """Expose only recognized outer forall/arrow source prefixes.
+
+    Arrow domains may be data types, not proof premises. Unreduced lets,
+    existentials, macros and lower-precedence iff forms remain barriers; no
+    conclusion about implicit inputs or simultaneous feasibility follows.
+    """
+    clean = masked(conclusion)
+    begin, end = 0, len(clean)
+    inputs = []
+    status = "unresolved-remainder; no-hypothesis-absence-inference"
+    while True:
+        while begin < end and clean[begin].isspace(): begin += 1
+        while end > begin and clean[end-1].isspace(): end -= 1
+        text = clean[begin:end]
+        if not text: status = "empty-remainder; review-required"; break
+        if "«" in text or "»" in text:
+            status = "quoted-identifier; syntax-review-required"; break
+        if text.startswith("(") and group_end(text, 0) == len(text):
+            begin += 1; end -= 1; continue
+        if text.startswith(("∃", "let ", "fun ", "match ", "if ", "by ", "type_of%")):
+            status = "output-or-unreduced-form; review-required"; break
+        events = []
+        stack = []
+        for pos in range(begin, end):
+            ch = clean[pos]
+            if ch in "([{⟨": stack.append(ch)
+            elif ch in ")]}⟩":
+                if not stack or {')': '(', ']': '[', '}': '{', '⟩': '⟨'}[ch] != stack.pop():
+                    raise ValueError("unbalanced return source")
+            elif not stack:
+                if ch in "∀∃,↔→": events.append((pos, ch))
+                elif clean.startswith("->", pos): events.append((pos, "->"))
+        if stack: raise ValueError("unbalanced return source")
+        quantified = text.startswith("∀") or text.startswith("forall ")
+        if quantified:
+            comma = next((pos for pos, token in events if token == ","), None)
+            if comma is None: status = "forall-without-comma; review-required"; break
+            finish = comma + 1
+            inputs.append({"kind": "forall-binder-prefix; inclusion-and-type-pending",
+                           "source": conclusion[begin:finish], "span": [begin, finish]})
+            begin = finish; continue
+        # A top-level quantifier can bind an apparent arrow within an output;
+        # iff has lower precedence than arrow. Do not misclassify either case.
+        if any(token in {"∀", "∃", "↔", ","} for _, token in events) or re.search(r"\b(?:forall|let|fun|match|if|by)\b", text):
+            status = "compound-scope; review-required"; break
+        arrow = next(((pos, token) for pos, token in events if token in {"→", "->"}), None)
+        if arrow is None: break
+        pos, token = arrow
+        stop = pos
+        while stop > begin and clean[stop-1].isspace(): stop -= 1
+        if stop == begin: status = "empty-arrow-domain; review-required"; break
+        domain = conclusion[begin:stop]
+        inputs.append({"kind": "arrow-domain; Prop-or-data-pending", "source": domain,
+                       "span": [begin, stop], "source_role": classify(domain)[0]})
+        begin = pos + len(token)
+    return {"inputs": inputs, "remainder": conclusion[begin:end],
+            "remainder_span": [begin, end], "status": status,
+            "implicit_inclusion": "pending Lean", "simultaneous_witness": None}
+
+
 def macro_heads(conclusion):
     result = []
     for match in re.finditer(r"type_of%\s*\(*\s*([\w.']+)", masked(conclusion)):
@@ -299,6 +361,7 @@ def main():
             "signature_start": signature_start,
             "return_type": conclusion, "source_roles_present": kinds,
             "return_frontier": return_frontier(conclusion),
+            "return_input_accounting": return_inputs(conclusion),
             "macro_callee_tokens": macro_heads(conclusion),
             "return_type_kind": "type_of-macro; expansion-required" if "type_of%" in conclusion else "source-syntax; elaboration-required",
             "return_type_logical_inputs": "pending source review and Lean; return type retained verbatim (including all forall/arrows)",
@@ -310,7 +373,7 @@ def main():
         "inventory_join": "(path,name,signature_sha256,source_sha256); one row per frozen declaration",
         "boundary": "Source role candidates only. No Prop/data inference, resolved elaborated names, implicit-inclusion, satisfiability or proof claim. No exclusions.",
         "simultaneous_requirement": "Choose one common assignment for all theorem parameters and every premise together, including Lean-included context; individual inhabited binders do not suffice.",
-        "migration_dependency": {"path": "Solidity/Syntax/Raw.lean", "owner": "solidity-h62-6-20261106/migrate-syntax", "routing": "Coordinator H70 reports relay delivery acceptance; owner agreement/validation not established. Wait before value_success_tail proof imports/controls/gates."},
+        "migration_dependency": {"path": "Solidity/Syntax/Raw.lean", "owner": "solidity-h62-6-20261106/migrate-root-gate", "routing": "Current H70 successor routing; Raw compatibility and reported axiom-growth review remain pending. No overlay acceptance inferred; wait before value_success_tail proof imports/controls/gates."},
         "definition_family_references": definitions, "declarations": rows,
         "summary": {"rows": len(rows), "source_binder_groups": len(explicit),
                     "available_section_groups_across_rows": sum(len(r["available_section_variables"]) for r in rows),
@@ -319,6 +382,8 @@ def main():
                     "rows_with_per_input_role": sum(any(b["source_role"].startswith("per-input-") for b in r["source_binders"]) for r in rows),
                     "return_frontiers": dict(sorted(Counter(r["return_frontier"] for r in rows).items())),
                     "residual_constraint_forms": dict(sorted(Counter(b["source_constraint_form"] for b in explicit if "source_constraint_form" in b).items())),
+                    "return_source_input_prefixes": sum(len(r["return_input_accounting"]["inputs"]) for r in rows),
+                    "rows_with_return_source_inputs": sum(bool(r["return_input_accounting"]["inputs"]) for r in rows),
                     "macro_callee_token_count": sum(len(r["macro_callee_tokens"]) for r in rows),
                     "type_of_macro_return_rows": sum("type_of%" in r["return_type"] for r in rows),
                     "leading_forall_return_rows": sum(r["return_type"].startswith(("∀", "forall ")) for r in rows),
