@@ -114,7 +114,7 @@ The original census matches only unmodified line-start headers and omitted priva
 
 ## Same-line attribute candidate scan
 
-The earlier version of `attributed_header_scan.py` examined the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
+The earlier version of `attributed_header_scan.py` examined the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. At that earlier checkpoint, the raw textual scan found zero candidates for that narrow pattern. That earlier scanner did not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates did not show that attributed declarations were absent. Its then-current synthetic fixture included both matching examples and a deliberate block-comment false positive. The later expanded scanner is described below. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
 
 ## SignedSub Controls
 
