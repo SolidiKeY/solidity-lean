@@ -38,6 +38,14 @@ class CoverageControls(unittest.TestCase):
     def test_corrupt_artifact_controls(self):
         # Only negative tests use this temporary copy. Large pinned inputs are
         # linked read-only; original sealed results and receipts are never edited.
+        def other_allocation(summary, command, rows):
+            entries = json.loads((BULK/'engine-x-allocations-index.json').read_text())
+            current = rows[0]['allocation_binding']['pre_hash']
+            key = next(key for key in entries if key != current)
+            entry = entries[key]
+            rows[0]['allocation_binding'].update(pre_hash=key, allocation_path=entry['path'],
+                                                 allocation_source_sha256=entry['source_sha256'],
+                                                 allocation_record_sha256=entry['record_sha256'])
         mutations = [
             ('missing-stop', lambda s, c, r: c.pop('stopped'), 'stopped/incomplete'),
             ('stopped-job', lambda s, c, r: c.update(stopped='resource guard'), 'stopped/incomplete'),
@@ -49,13 +57,25 @@ class CoverageControls(unittest.TestCase):
             ('bind-row', lambda s, c, r: r[0].update(status='allocation_bound_input'), 'non-native result'),
             ('wrong-index', lambda s, c, r: r[0].update(index=1), 'range identity'),
             ('account-map', lambda s, c, r: r[0]['allocation_binding'].update(final_account_map_present=True), 'allocation mismatch'),
+            ('other-valid-allocation', other_allocation, 'pinned input'),
+            ('wrong-input-tx-hash', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(hash='0x'+'00'*32), 'pinned input'),
+            ('wrong-input-tx-type', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(type=99), 'pinned input'),
+            ('wrong-input-tx-limit', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(gas_limit='1'), 'pinned input'),
+            ('negative-tx-spent', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(total_gas_spent='-1'), 'pinned input limit'),
+            ('overspent-tx', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(total_gas_spent=str(int(r[0]['blocks'][0]['transactions'][0]['gas_limit'])+1)), 'pinned input limit'),
+            ('empty-payload-evidence', lambda s, c, r: (r[0].update(blocks=[]), r[0]['binding'].update(payload_block_hashes=[])), 'pinned input'),
+            ('wrong-input-payload-hash', lambda s, c, r: (r[0]['blocks'][0].update(hash='0x'+'00'*32), r[0]['binding'].update(payload_block_hashes=['0x'+'00'*32])), 'pinned input'),
+            ('duplicated-input-block', lambda s, c, r: (r[0]['blocks'].append(r[0]['blocks'][0]), r[0]['binding']['payload_block_hashes'].append(r[0]['binding']['payload_block_hashes'][0])), 'pinned input'),
+            ('empty-tx-zero-gas', lambda s, c, r: r[0]['blocks'][0].update(transactions=[], gas_used='0'), 'pinned input'),
+            ('wrong-input-state-root', lambda s, c, r: r[0]['blocks'][0].update(state_root='0x'+'00'*32), 'pinned input'),
+            ('wrong-input-block-number', lambda s, c, r: r[0]['blocks'][0].update(number='999999'), 'pinned input'),
         ]
         for name, mutate, error in mutations:
             with self.subTest(name=name), tempfile.TemporaryDirectory(prefix='range-control-', dir=BULK) as temporary:
                 root = Path(temporary)
                 (root/'evidence').mkdir()
                 (root/'reference').mkdir()
-                for p in ['engine-x-inputs.jsonl.gz', 'archive-inventory.jsonl.gz', 'engine-x-allocations.jsonl', 'engine-x-allocations-index.json', 'reference/package-lock.json']:
+                for p in ['engine-x-inputs.jsonl.gz', 'archive-inventory.jsonl.gz', 'engine-x-allocations.jsonl', 'engine-x-allocations-index.json', 'reference/package-lock.json', 'reference/package.json', 'reference/node_modules']:
                     (root/p).symlink_to(BULK/p)
                 for p in ['engine-x-export.json', 'archive-census.json']:
                     shutil.copyfile(BULK/'evidence'/p, root/'evidence'/p)

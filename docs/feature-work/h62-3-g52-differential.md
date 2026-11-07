@@ -1365,3 +1365,113 @@ then real sync/negativeRPC support and canonical owned producer/P10 work as inpu
 permit. This committed checkpoint/handoff does not complete the original queue.
 Original persistent goal is neither created/reset/stopped/completed; H110same-thread
 continuation applies when fresh-thread handoff machinery is unavailable.
+
+
+## Coordinator audit fix: bind execution evidence to pinned inputs
+
+The coordinator blocked59725f4761335b6f041c70b3bbfffa18bb70c168 after finding that
+emptying both a matched row's blocks and binding.payload_block_hashes, then
+recomputing its result hash, still counted a payload match. That finding was
+correct. The previous checker integrity gate is superseded by this fix and its
+fresh receipts; historical native executions and files are retained unchanged.
+Six new input-evidence mutations failed before the fix (actual exit1), including
+the exact empty-both-lists reproducer, confirming the defect rather than assuming
+it from source inspection. This is a checker trust-boundary defect, not a newly
+found source/compiler or reference-EVM mismatch.
+
+Before editing, origin/master was fetched and its code/log inspected. No existing
+fix was present; current8a4bc25b3eb0f8c4c364471666a8d3fb253de053 was merged cleanly,
+preserving the assigned branch, original base and all unmerged owned checkpoints.
+No reset/discard/push or default-branch publication. Review requested a concrete
+fix and commit; neither routing nor successful local checks certify integration.
+
+Coverage now reads the actual pinned Engine-X input stream and verifies each
+original index/path/case/profile. Each claimed match must have the exact nonempty
+input payload count, ordered block hashes, genesis/first-parent identity, state
+roots, block numbers, gas-used values and transaction counts. Expected values are
+derived from source inputs, not mutually agreeing result lists. All21124pinned
+inputs contain at least one payload; no empty original input is filtered away.
+Unsupported profiles cannot be relabeled as matching payload execution.
+
+Fresh independent review identified two adjacent holes: another valid allocation
+entry could substitute for the selected input's allocation, and reported transaction
+identities were not tied to the input transaction bytes. Both are fixed. The
+checker validates canonical allocation bytes/offsets/lengths/hashes/source/group
+membership/genesis, requires each input's preHash and allocation_ref to select
+that exact group, then requires the result binding to match that input reference.
+The new engine_input_transactions.mjs uses the installed pinned native transaction
+constructor and the same Osaka/KZG/trusted setup as the reference worker. It
+requires a canonical serialization roundtrip and derives transaction hash/type/
+gas-limit from the exact input bytes. This decodes/hashes only: no EVM execution,
+fixture pass or source agreement is added. Gas spending is bounded between zero
+and the pinned transaction gas limit before cumulative accounting, making that
+accumulation monotone. Existing native workers/validators/reference packages,
+profiles, per-case limits and proof interfaces are byte-unchanged.
+
+Three Python test methods pass with ResourceWarnings treated as errors. The
+controls include25negative scenarios: three real duplicate/overlap/bind-only
+refusals and22corrupted-artifact mutations. New controls cover empty payload
+proof, consistent wrong hashes, duplicated blocks, zeroed transaction/gas evidence,
+wrong state-root/number, a different valid allocation, transaction identity/type/
+gas-limit substitutions, negative and excessive gas. Row hashes are recomputed
+to exercise the substantive input guards. Mutated temporary records add zero
+fixture coverage. The initial decoder probe failed closed because KZG was missing,
+and the initial temporary tests lacked native module links; both setup failures
+are preserved separately and are not passing gates. No compiler/npm/dependency
+installation or reference implementation patch was used.
+
+Actual final controls: exit0,90.979s,peak346722304bytes,no stop. Corrected complete
+coverage revalidation and replay: exit2/incomplete,8.044/8.050s,peaks339513344/
+338997248bytes,no stops, byte-identical SHA256
+25d2993ed166440606d6d0a40a3de98aa8c7152aaf42ed269437f996b07af1dd.
+The accepted real union is now[0,520):520payload matches/blocks/transactions,0logs,
+0mismatches/unsupported;20604cases remain UNPROCESSED in[520,21124). The requested
+new legacy[500,520) run completed113.138s,peak1190178816bytes,actualexit2/no stop.
+No old native case was re-executed to repair artifact accounting. This replay is
+checker/artifact revalidation, not a full520case native replay.
+
+The prior[0,500) native records remain real captured observations; the formerly
+unsafe checker alone was insufficient evidence for their artifact integrity.
+Fresh input-bound revalidation supersedes that claim. The checker still trusts
+captured native execution observations: it does not independently recompute
+return/revert bytes, logs or per-transaction execution gas. It checks available
+input commitments/identities and observation consistency, not runtime attestation,
+Source execution, final account-map comparison, RPC/forkchoice or a Lean theorem.
+All source/full-conformance flags remain false; full_payload_match remains false.
+Six existing reference failures remain FAIL under fresh strict block-acceptance,
+actualexit1/no stop. No new owner ticket or source/compiler mismatch fabricated.
+
+The cache experiment was isolated before this fix: its source and failed probes
+are preserved with hashes under$BULK/experimental-cache-20261107/, outside the
+accepted evidence manifest. Zero cached cases were accepted. The committed
+runner was restored from its exact own59725f476bytes after preserving every
+experimental edit; the cache code is not part of this review-fix commit. This
+preserves work without mixing unverified optimization into the requested fix.
+
+Actual command arrays/outcomes/resources and control/revalidation receipts live
+under$BULK/evidence/engine-input-*. The final accepted ones are
+engine-input-bound-controls-command.json,engine-input-bound-coverage-520-command.json,
+its replay,engine-input-bound-accounting.json and the preserved-block-fail receipt.
+The earlier audit-only probes are historical, not the final binding gate.
+New transaction parser SHA256:
+56bd73044a30dc8452f4108937cd2521b6ad95a286b24d82f16ffe5d01b842b0.
+All3326previous sealed evidence entries were rehashed unchanged before augmentation.
+Native[500,520) used the existing serial runner and unchanged300s external job,
+60s/5Mstep worker,12GiBaggregateRSS/per-processAS,4GiBreserve,no swap bounds.
+The added artifact-input validation has a different workload from the old unsafe
+checker; no equivalent-check or Lean-refactor performance claim is made.
+
+Independent finder/skeptic reviews cover the audit reproducer, input-derived
+payload/allocation/transaction guards, gas bounds, final control results and
+520case revalidation/docs without native/Lean/server reruns. Actual version
+inspection: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0; no proof/build or freshKeySort run here.
+HistoricalKeySort pass remains historical; RUNTIME_GATE_PASS is false. OwnLean
+delta0; frozen statements/dependent definitions/interfaces, axioms, budgets and
+exclusions unchanged; no sorry/newaxiom/native_decide/trust shortcut.
+
+Full H121b/H121c/canonical producer/source-runtime binding, fullApproved_i and all
+15public obligations remain OWNED unfinished work with the same typed external
+prerequisites. No complete producer implementation file/head is available. Next
+native interval is[520,540), not an accepted gate. The original persistent goal
+is neither created/reset/stopped/completed; this audit-fix handoff is partial.
