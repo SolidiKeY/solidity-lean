@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/grown-frame-roles-v93/semantic-roles-reviewed.json",
-    "bytes": 3035981,
-    "sha256": "ce52e623c47be6e17e507c279ceb32b0578bec8dc6f78a79abd3fbcdda41d72e"
+    "path": "/workspace/h62-successor-bulk/storage-soundness-roles-v95/semantic-roles-reviewed.json",
+    "bytes": 3111814,
+    "sha256": "cde3b7e9665b46c030f228f4f995ffa1b29d738453a6a7ac9838cf2cc2be0534"
   }
 }
