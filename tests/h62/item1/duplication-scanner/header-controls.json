@@ -1,0 +1,114 @@
+{
+  "guarded_regression": "Header regex guesses or accidental module/body execution",
+  "cases": [
+    {
+      "id": "comments-and-body-string",
+      "source": "/- outer import Fake /- nested -/ -/\nimport Lean\ndef text := \"import Hidden\"\n",
+      "status": "parsed-header",
+      "modules": [
+        [
+          "Init"
+        ],
+        [
+          "Lean"
+        ]
+      ]
+    },
+    {
+      "id": "module-flags",
+      "source": "module\nprelude\npublic import Lean\nmeta import Std\nimport all Init\n",
+      "status": "parsed-header",
+      "modules": [
+        [
+          "Lean"
+        ],
+        [
+          "Std"
+        ],
+        [
+          "Init"
+        ]
+      ],
+      "flags": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "id": "bad-public-all",
+      "source": "module\npublic import all Lean\n",
+      "status": "header-error",
+      "modules": []
+    },
+    {
+      "id": "no-module-lookup",
+      "source": "import H62.Nonexistent.Module\n",
+      "status": "parsed-header",
+      "modules": [
+        [
+          "Init"
+        ],
+        [
+          "H62",
+          "Nonexistent",
+          "Module"
+        ]
+      ]
+    },
+    {
+      "id": "quoted-component",
+      "source": "import Foo.«A.B»\n",
+      "status": "parsed-header",
+      "modules": [
+        [
+          "Init"
+        ],
+        [
+          "Foo",
+          "A.B"
+        ]
+      ]
+    },
+    {
+      "id": "inert-body",
+      "source": "import Lean\n#eval IO.FS.writeFile __MARKER__ \"EXECUTED\"\n",
+      "status": "parsed-header",
+      "modules": [
+        [
+          "Init"
+        ],
+        [
+          "Lean"
+        ]
+      ]
+    },
+    {
+      "id": "prelude-only",
+      "source": "prelude\n",
+      "status": "parsed-header",
+      "modules": []
+    },
+    {
+      "id": "broken-comment",
+      "source": "/- unterminated",
+      "status": "header-error",
+      "modules": []
+    }
+  ]
+}

@@ -8,7 +8,8 @@ import hashlib, importlib.util, json, os, subprocess, sys
 sys.dont_write_bytecode=True
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[4]; HERE=Path(__file__).parent
-E=Path('/workspace/h62-generic-passes-evidence'); OUT=E/'build-v4.35.0'
+from runtime_paths import EVIDENCE as E, load_pin
+OUT=E/'build-v4.35.0'
 spec=importlib.util.spec_from_file_location('census',HERE/'census.py'); census=importlib.util.module_from_spec(spec); spec.loader.exec_module(census)
 
 def check_lexing():
@@ -63,7 +64,7 @@ if len(sys.argv)!=3 or sys.argv[1]!='--run-id' or not __import__('re').fullmatch
     raise SystemExit('usage: accept.py --run-id UNIQUE-ID (or --lexical-only)')
 run_id=sys.argv[2]
 subprocess.run([sys.executable,str(HERE/'census.py'),'--check',str(E/'original-census.json')],cwd=ROOT,check=True)
-pin=json.loads(Path('/workspace/h62-coordinator-inputs/toolchain-pin.json').read_text())
+pin=load_pin()
 with (E/pin['asset']).open('rb') as source:
     assert hashlib.file_digest(source,'sha256').hexdigest()==pin['sha256']
 seen=set(); order=[]

@@ -373,7 +373,9 @@ theorem STy.locate_bounded {L R : Nat} :
     have hfit : v.size ≤ L := hf.1
     simp only [Loc.add, Loc.Bounded]
     exact ⟨hl, by omega⟩
-  | .word, _, _ :: _, _, _, _, _, h => by cases h
+  | .word, _, _ :: _, _, _, _, _, h => by
+    simp only [STy.locate] at h
+    cases h
   | .strct _, _, .index _ :: _, _, _, _, _, h => by cases h
   | .strct _, _, .key _ :: _, _, _, _, _, h => by cases h
   | .sarr _ _, _, .field _ :: _, _, _, _, _, h => by cases h
