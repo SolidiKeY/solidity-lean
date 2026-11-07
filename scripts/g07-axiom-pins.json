@@ -49367,6 +49367,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCapture.lean:Solidity.Lowering.StorageOps.SourceNestedByteCapture.copy_timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceNestedByteCapture.lean:Solidity.Lowering.StorageOps.SourceNestedByteCapture.empty_capture": [
   "Classical.choice",
   "Quot.sound",
@@ -50450,6 +50455,11 @@
   "propext"
  ],
  "Solidity/Lowering/StorageOps/SourceWriteRollback.lean:Solidity.Lowering.StorageOps.SourceWriteRollback.rollback_once": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollback.lean:Solidity.Lowering.StorageOps.SourceWriteRollback.run_refused": [
   "Classical.choice",
   "Quot.sound",
   "propext"
