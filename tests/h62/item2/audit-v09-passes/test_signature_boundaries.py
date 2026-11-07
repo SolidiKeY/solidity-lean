@@ -106,7 +106,7 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertNotIn(key,seen)
                 self.assertNotIn(key,keys)
                 self.assertEqual(row['signature_sha256'],selected[key]['legacy_signature_sha256'])
-                self.assertEqual(row['simultaneous_witness'],'Solidity.Backend.Passes.'+namespace+'.joint')
+                self.assertEqual(row['simultaneous_witness'],'Solidity.Backend.Passes.'+namespace+('.joint_admission' if namespace=='AuditJoinedAllocation' else '.joint'))
                 self.assertEqual(row['witness_status'],'checked-original-proof-reuse')
                 self.assertEqual(row['exercised_witness'],'Solidity.Backend.Passes.'+namespace+'.'+row['name'].rsplit('.',1)[-1])
                 keys.add(key)
@@ -115,7 +115,8 @@ class HeaderBoundaries(unittest.TestCase):
         private = mapping['checked_private_rows']
         self.assertEqual(private['kernel_prefix'],'_private.Solidity.Backend.Passes.MemoryJoinedAllocationControls.0.')
         self.assertEqual(private['witness_status'],'checked-original-private-signature-and-axioms')
-        self.assertEqual(private['simultaneous_witness'],'Solidity.Backend.Passes.AuditJoinedAllocation.joint')
+        self.assertEqual(private['simultaneous_witness'],'Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission')
+        self.assertEqual(mapping['joint_contract'],'actual-public-whole-selection-full-input-cost-and-source-success')
         self.assertEqual(private['axioms'],['propext','Quot.sound','Classical.choice'])
         self.assertEqual({r['name'].rsplit('.',1)[-1] for r in private['rows']},{'cell'+str(i) for i in range(16)})
         for row in private['rows']:
@@ -150,12 +151,15 @@ class HeaderBoundaries(unittest.TestCase):
                     ('memory-call',14,4,'Solidity.Backend.Passes.AuditMemoryCall.joint'),
                     ('memory-call-scope',9,1,'Solidity.Backend.Passes.AuditMemoryCall.Scope.joint'),
                     ('returned-memory-capture',6,0,'Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.joint'),
-                    ('allocated-reference-read',21,16,'Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.joint')]
+                    ('allocated-reference-read',21,16,'Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.joint'),
+                    ('positive-allocation-failure',10,0,'Solidity.Backend.Passes.AuditPositiveAllocationFailure.joint'),
+                    ('preserved-allocator',10,1,'Solidity.Backend.Passes.AuditPreservedAllocator.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
             self.assertEqual(hashlib.sha256(source).hexdigest(),mapping['interface_sha256'])
             self.assertEqual(mapping['joint_witness'],joint)
+            visibility = {r['name']:r['visibility'] for r in sb.declarations(mapping['interface'],source.decode())}
             keys = set()
             for row in mapping['rows']:
                 key = (mapping['interface'],row['name'])
@@ -163,7 +167,7 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertNotIn(key,seen)
                 self.assertNotIn(key,keys)
                 self.assertEqual(row['signature_sha256'],selected[key]['legacy_signature_sha256'])
-                self.assertEqual(row['kind'],'private-exact-kernel-signature' if (row['name'].rsplit('.',1)[-1].startswith('cell') or row['name'].rsplit('.',1)[-1] in mapping.get('checked_private_names',[])) else 'public-original-proof-reuse')
+                self.assertEqual(row['kind'],'private-exact-kernel-signature' if visibility[row['name']]=='private' else 'public-original-proof-reuse')
                 keys.add(key)
             uncovered = {(mapping['interface'],name) for name in mapping.get('uncovered_private_names',[])}
             self.assertFalse(keys & uncovered)
@@ -201,12 +205,16 @@ class HeaderBoundaries(unittest.TestCase):
             if stem == 'allocated-reference-read':
                 self.assertEqual({r['name'].rsplit('.',1)[-1] for r in mapping['rows'] if r['kind']=='private-exact-kernel-signature'},{'cell'+str(i) for i in range(16)})
                 self.assertEqual(mapping['private_axioms'],['propext','Quot.sound','Classical.choice'])
+            if stem == 'preserved-allocator':
+                self.assertEqual(mapping['joint_contract'],'actual-initial-input-source-success-and-mapped-prefix-output')
+                self.assertEqual(mapping['checked_private_names'],['suffix_some'])
+                self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
             self.assertEqual(len(keys),total)
             self.assertEqual(sum(r['kind']=='private-exact-kernel-signature' for r in mapping['rows']),private_count)
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(361,898))
+        self.assertEqual((len(seen),1259-len(seen)),(381,878))
 
 
 
