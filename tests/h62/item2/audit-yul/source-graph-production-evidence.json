@@ -239,5 +239,6 @@
       "bytes": 1424,
       "sha256": "0ee3775e14ef202c8d39f8a88ad3c8d81afd5e59e2f9ebf84d2043ab6b1ffe93"
     }
-  ]
+  ],
+  "artifact_location_policy": "H44 external VM artifacts, intentionally outside Git. Absolute paths identify the originating VM, not repository files. Retrieve and verify listed bytes and SHA256 before reuse; absence is an evidence wait."
 }
