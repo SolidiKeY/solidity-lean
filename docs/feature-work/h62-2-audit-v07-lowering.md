@@ -439,3 +439,38 @@ a small source-header-drift.json pins them. Independent read-only finder and
 skeptic reviews passed without Lean/server use. No producer, frozen baseline,
 budget, axiom, exclusion or existing pending status was changed. No new Lean
 execution or full acceptance is claimed.
+
+
+## H121 canonical transport ownership and Horizon recheck
+
+H121 transfers the19-header review to this frontend-language successor. The
+previous route to frozen Claude V07 is withdrawn; no ticket is sent there.
+CanonicalConversionReview.lean reuses the checked complete implicitV0 and
+transcribes the complete old explicit body with only its name/dependency
+references changed. A five-constructor scalar family proves both operator
+agreements for arbitrary base/mapFree functions; a struct-copy counterexample
+preserves the failure of unrestricted equivalence. All four printed axiom sets
+are empty. The existing old-implicit source checker and its three mutations
+still pass while retaining strict original-inventory failure.
+
+CanonicalHeaderPairs.lean provides19 V0/V1 pairs retaining every original
+width, range, nominal and environment parameter. Four referenced ty/signed
+helper definitions match frozen bytes. autoImplicit is disabled; an initial
+missing-open-context error is retained, followed by the successful check after
+restoring the original helper namespace contexts. All38 statements check in
+2.062s, with only propext where inherited from the production proof; the scalar
+review passes in3.589s. Neither production interfaces nor frozen pins change.
+Both read-only finder and skeptic reviews pass. Exact bindings, deterministic
+reproduction, failed/final logs and source hashes are in
+/workspace/sol-numeric-literals-h121-review. Strict source fidelity remains
+failed; these are versioned conversion predicates, not compiler-success proofs.
+
+Master254c60df6 was fetched and merged. DirtyReadback is present but outside the
+Source/Horizon import closure. Compared with stopped head b85b8382f, six closure
+sources changed, including the split HorizonFuel/Grow/Const modules. A fresh
+bounded check of that changed prerequisite passes in681.794s with the existing
+12GiB/no-swap/single-thread/4GiB-reserve guard (minimum headroom5,315,629,056
+bytes). The old STOP remains historical, not converted into a pass. Source/Horizon
+is therefore removed as an external producer wait. Full affected checkpoint,
+run-lean, original4.35 and final acceptance remain unverified. The exact frozen
+audit-language ownership file and portable evidence are still missing.

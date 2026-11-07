@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "decision": "H121",
+  "to_lane": "solidity-sol2-20261104/numeric-literals",
+  "prior_route": "claudecloud/moved3-20261105/v07-lowering",
+  "prior_route_disposition": "withdrawn: frozen Claude lane under H118",
+  "strict_original_fidelity_pass": false,
+  "frozen_interfaces_changed": false,
+  "source_reviewed_headers": 19,
+  "formal_versioned_transport": "19 V0/V1 pairs kernel checked",
+  "source_findings": [
+    "All19headers match addition of E.mapFree modulo whitespace.",
+    "Inputs use int/address/enum/udvt/rational scalar shapes.",
+    "Global conversion equivalence is false: existing H57 struct_copy_differs counterexample is retained.",
+    "Canonical proof must use scoped old/new transport and retain all original width/range/nominal premises."
+  ],
+  "header_comparison_sha256": "0a87f9518c4a8216a71fa2023c24962364a9e174ab713f37809429227d0baed3",
+  "scalar_transport": "implicit/explicit scalar equalities and global struct counterexample kernel checked",
+  "full_affected_acceptance": "pending",
+  "module_sha256": {
+    "tests/h62/item2/audit-v07-lowering/CanonicalConversionReview.lean": "2544f9d64c81daaa8daf866a7f516be897f0883a025647f510a9c0815066ca64",
+    "tests/h62/item2/audit-v07-lowering/CanonicalHeaderPairs.lean": "17bceda9ee676a2556d7abf030a38137251cec0b33019ca2aafa6b7d7b8ca21a"
+  },
+  "gate_sha256": {
+    "scalar": "9680f632bc6107caa7eae67af37910ec685bddc624e6fc788835628e9472b1cd",
+    "pairs": "0c2e495c5237bcb87c620d07ca647cc4fdc2e75ddb11428779da99c1078139cc"
+  },
+  "bindings_sha256": "d1cf5dcefc4d201afb3e51ea8dc6eae017d68579d5e3fde1158814eff0966973",
+  "explicit_source_binding_sha256": "1c5d8be998005ad9d047d71617c246f9156cb2d8270cca0ed16a686ab7d3ec68",
+  "helpers_sha256": "1c4bd2e23adacfc8f0ceda8573be06c12a82db1b8695f7934a9965a0be508dd3"
+}
