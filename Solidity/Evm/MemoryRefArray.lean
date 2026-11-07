@@ -7,6 +7,9 @@ This relation supplements primitive-array and struct ownership: every element
 is the address of its actual typed child, never a default zero word. These
 local simulations deliberately retain the existing checked address code.
 -/
+-- Retain the existing typed reference-payload proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 

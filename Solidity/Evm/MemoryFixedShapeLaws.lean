@@ -1,6 +1,9 @@
 import Solidity.Evm.MemoryFixedShapeCode
 
 /-! Snapshot, padding, cleanup and frame laws for primitive fixed sources. -/
+-- Retain the existing typed payload proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 
@@ -56,7 +59,10 @@ theorem primitiveFixed_dynamic_repr {H : HTy} {p : PrimTy} {n : Nat} {hp : Heap 
       (old.overlay ((FixedCopy.dynamic hn).apply (MVal.copyMToSt hp r))) := by
   cases old with
   | array oe osh oh =>
-    rw [primitiveFixed_snapshot, FixedCopy.apply, primStrip, SVal.overlay_array, primOverlay]
+    rw [primitiveFixed_snapshot]
+    change ReprAt _ _ _ _ ((SVal.array oe osh oh).overlay
+      (.array (SVec.ofLen SVal.prim n (hp.get r).val (hp.get r).property).strip .nil hn))
+    rw [primStrip, SVal.overlay_array, primOverlay]
     refine .array ?_ hL ?_
     · rw [arrayCopyStore_length _ _ _ _ hn]
     · intro i x hx
@@ -76,7 +82,11 @@ theorem primitiveFixed_pad_repr {H : HTy} {p : PrimTy} {n k : Nat} {hp : Heap H}
     ReprAt (fixedPadStore st dst n k (fun i => payloadWord (m.mem (base.val + i))))
       L (.ref (.fixed (.prim p) k)) dst
       ((FixedCopy.fixed k hfit).apply (MVal.copyMToSt hp r)) := by
-  rw [primitiveFixed_snapshot, FixedCopy.apply, primStrip]
+  rw [primitiveFixed_snapshot]
+  change ReprAt _ _ _ _ (.fixed
+    ((SVec.ofLen SVal.prim n (hp.get r).val (hp.get r).property).strip.padRight
+      (SVal.dflt (.prim p)).strip k))
+  rw [primStrip]
   refine .fixed ?_
   intro i x hx
   rw [SVec.getElem?_padRight] at hx

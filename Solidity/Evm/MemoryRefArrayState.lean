@@ -3,6 +3,9 @@ import Solidity.Evm.MemoryLocals
 
 /-! Reference-array ownership supplements the existing state relation without
 changing its representation or admitting unconstrained pointer words. -/
+-- Retain the existing typed heap-update proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}

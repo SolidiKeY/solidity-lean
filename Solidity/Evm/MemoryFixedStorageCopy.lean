@@ -7,6 +7,9 @@ Fixed arrays have no length header. This additive payload relation leaves the
 legacy `StateRepr` and all its existing input claims unchanged. The code uses
 the already-proved finite word loop, starting at the inline destination slot.
 -/
+-- Retain the existing typed payload proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 
