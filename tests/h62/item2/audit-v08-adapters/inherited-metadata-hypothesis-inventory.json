@@ -63,5 +63,6 @@
     "Static source audit, not kernel revalidation or complete mapped-interface census.",
     "FnOverrideOK contains ten fields; mutOK acceptance alone does not inhabit it.",
     "Declaration membership alone does not prove Source provenance, dispatch/body correctness, admission or H68 adequacy."
-  ]
+  ],
+  "followup": "The static gap is subsequently addressed by InheritedNonpayableJoint.lean; see inherited-nonpayable-joint-manifest.json for the separate checked model. This original inventory itself remains static and adds zero witnesses."
 }
