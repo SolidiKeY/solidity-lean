@@ -1,0 +1,52 @@
+{
+  "scope": "Complete20 Closer.Normal roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1354,
+    "pending": 3929,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/closer-normal-roles-v105/evidence.tar.gz",
+      "bytes": 333709,
+      "sha256": "65feee97199aba9bf1f296d0f3bacb9fade74e89023795b1a34ee801d8d09500"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/closer-normal-roles-v105/inputs.json",
+      "bytes": 774,
+      "sha256": "3ddafe5761552296fbf9b6cc2a50cf4f06c6bc851efa1c2b6b36659cc7ede659"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/closer-normal-roles-v105/gates.json",
+      "bytes": 2839,
+      "sha256": "71bbd2691b036430dcf544a3432c7664321871599331792b34c9950eef11f5c4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/closer-normal-roles-v105/reviews.md",
+      "bytes": 867,
+      "sha256": "17795572e69a78cbb6dfd0e2e498b08910c2889bee724d8e6252a0b0e556d5db"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/closer-normal-roles-v105/case-rosters.json",
+      "bytes": 1991,
+      "sha256": "904a0db1f2819a8f856d02cd9675ff258b559fdd4682370e296e0f081b1d2ac1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/closer-normal-roles-v105/doc-master-repair-binding.json",
+      "bytes": 211,
+      "sha256": "f32743f8f3269c5f66f2b99f1d6d9703f6d22f299dec9f35ae808685aac1b9a1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/closer-normal-roles-v105/external-retention.json",
+      "bytes": 335086,
+      "sha256": "75269683977992da35958ae3ec2e38a5109e44faf86280fde53021f4daf46a68"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/closer-normal-roles-v105/semantic-roles-reviewed.json",
+      "bytes": 3612964,
+      "sha256": "23053db109e7488a2ceace47c38471b75ea7100598faf5f5b12a2757d6126264"
+    }
+  ]
+}
