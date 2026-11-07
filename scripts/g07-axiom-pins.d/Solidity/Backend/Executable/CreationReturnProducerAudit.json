@@ -1,0 +1,23 @@
+{
+ "Solidity/Backend/Executable/CreationReturnProducerAudit.lean:Solidity.Backend.Executable.CreationReturnProducer.Controls.referenced_difference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Executable/CreationReturnProducerAudit.lean:Solidity.Backend.Executable.CreationReturnProducer.Controls.unused_same_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Executable/CreationReturnProducerAudit.lean:Solidity.Backend.Executable.CreationReturnProducer.link_congr": [],
+ "Solidity/Backend/Executable/CreationReturnProducerAudit.lean:Solidity.Backend.Executable.CreationReturnProducer.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Executable/CreationReturnProducerAudit.lean:Solidity.Backend.Executable.CreationReturnProducer.returned_equal_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

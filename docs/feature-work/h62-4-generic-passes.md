@@ -84,3 +84,11 @@ The census check also confirmed every inventoried original source unchanged.
 These are lexical checks, not elaborated type, axiom, witness or generic-proof
 validation. Raw migration, additive Lean checks, affected/final gates and
 paired proof timings remain open; the failed baseline was not rerun unchanged.
+
+## Explicit resumption after coordinator integration
+
+The coordinator explicitly requested merging origin/master and continuing. The clean lane at e7eccfe0bd31f000b65584c4d8e66e59ac9b7d6c fast-forwarded to 20e492ee99a3fa8679aa526de0b6e731d85e4134. Earlier stopped/retirement records remain historical; this explicit resumption creates no replacement goal. Coordinator-reported touched/Bridge gates and reviews were not rerun or represented as local proof evidence. No push performed.
+
+Completed independent reproduction backfill: accept.py now blanks inactive comments/strings, requires exactly one declaration for each expected control alias, and checks the complete type/body reference. Ten isolated CLI regressions accept the original and refuse changed execution signatures, omitted negatives, substituted alias types/bodies, exact/mixed duplicates, commented declarations, comment-masked substitutions and multiline body suffixes. Independent finder/skeptic reviewed the changes without Lean/server or writes; their initial gaps were fixed. This is source-only coverage and does not establish semantic correspondence or axiom sets.
+
+Fresh adversarial, lexical and complete pinned-census checks passed; evidence: /workspace/h62-generic-passes-evidence/resumed-20e492ee9/. Original inventory still matches every frozen file. Solidity/Syntax/Raw.lean is unchanged and no approved syntax-migration input is delivered locally; the known failed v4.35 import gate was not rerun unchanged. Checkpoints2–4 and negative/isolated-fixture proof validation remain pending that dependency. No new Lean source, frozen statement, definition body, axiom declaration, proof budget or timing claim changed. The assigned scanner/census/reproduction backfill is saved; semantic fixture/negative work, acceptance and measurement require the absent prerequisite.

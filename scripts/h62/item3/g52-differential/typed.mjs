@@ -7,6 +7,9 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 const bulk = resolve(process.argv[2] ?? '');
+const corpus = process.argv[3] ?? 'typed';
+if (!['typed', 'boundary'].includes(corpus)) throw new Error('unknown admitted corpus');
+const caseCount = corpus === 'typed' ? 160 : 480;
 if (!process.argv[2]) throw new Error('usage: node typed.mjs H44_BULK');
 const require = createRequire(resolve(bulk, 'reference/package.json'));
 const load = async name => import(pathToFileURL(require.resolve(name)).href);
@@ -28,8 +31,13 @@ const repo = resolve(fileURLToPath(new URL('../../../../', import.meta.url)));
 for (const [name, expected] of Object.entries(json('evidence/producer-sources.json').source_sha256)) {
   if (hash(readFileSync(resolve(repo, name))) !== expected) throw new Error('producer source changed ' + name);
 }
-const records = read('evidence/typed-cases.jsonl').toString().trim().split('\n').map(JSON.parse);
-if (records.length !== 160 || records.some((r, i) => r.schema !== 1 || r.index !== i || r.seed !== 0) || new Set(records.map(r => r.source)).size !== 160) throw new Error('incomplete/duplicate typed enumeration');
+if (corpus === 'boundary') {
+ const binding=json('evidence/boundary-generator.json');
+ if(binding.driver !== 'tests/h62/item3/g52-differential/BoundaryWitness.lean' || binding.case_count !== 480 || binding.original_overlap !== 0 || binding.bounded_run.exit !== 0 || binding.bounded_run.stopped !== null) throw new Error('incomplete boundary producer receipt');
+ if(hash(readFileSync(resolve(repo,binding.driver)))!==binding.driver_sha256 || hash(read('evidence/boundary-cases.jsonl'))!==binding.output_sha256) throw new Error('boundary generator binding mismatch');
+}
+const records = read(`evidence/${corpus}-cases.jsonl`).toString().trim().split('\n').map(JSON.parse);
+if (records.length !== caseCount || records.some((r, i) => r.schema !== 1 || r.index !== i || r.seed !== 0) || new Set(records.map(r => r.source)).size !== caseCount) throw new Error('incomplete/duplicate typed enumeration');
 const address = createAddressFromString('0x00000000000000000000000000000000000000c0');
 const caller = createAddressFromString('0x00000000000000000000000000000000000000ee');
 const wordHex = n => '0x' + BigInt(n).toString(16).padStart(64, '0');
@@ -69,9 +77,9 @@ for (const record of records) {
     const output = JSON.parse(execFileSync(solc, ['--standard-json'], { input: JSON.stringify(request), encoding: 'utf8', timeout: 60000, maxBuffer: 16 * 1024 * 1024 }));
     if ((output.errors ?? []).some(e => e.severity === 'error')) throw new Error('solc rejected typed record ' + record.index);
     const artifact = output.contracts['typed.sol'].Generated;
-    const dir = resolve(bulk, 'typed-compiled'); mkdirSync(dir, { recursive: true });
-    write(`typed-compiled/${record.index}-${mode}.input.json`, request);
-    write(`typed-compiled/${record.index}-${mode}.json`, output);
+    const dir = resolve(bulk, `${corpus}-compiled`); mkdirSync(dir, { recursive: true });
+    write(`${corpus}-compiled/${record.index}-${mode}.input.json`, request);
+    write(`${corpus}-compiled/${record.index}-${mode}.json`, output);
     const vm = await createVM({ common: new Common({ chain: Mainnet, hardfork: Hardfork.Osaka }) });
     await vm.stateManager.putAccount(address, new Account());
     await vm.stateManager.putAccount(caller, new Account(0n, 10n ** 20n));
@@ -107,10 +115,10 @@ const minimized = results.filter(r => r.status === 'mismatch').map(row => {
   return { original_index: row.index, candidate_index: candidates[0].index, mode: row.mode, fields: row.fields,
     scope: 'finite real-producer boundary pool; same family/pipeline/field signature; root cause unclassified', status: 'needs-owner-classification' };
 });
-const report = { schema: 1, scope: 'existing SolCases primitive-root fragment, seed 0', source_producer: 'Solidity.Tools.SolCases.emit -> Prog.run withPanics',
-  producer_input_sha256: hash(read('evidence/typed-cases.jsonl')), build_receipt_sha256: hash(read('evidence/lean/results.json')), producer_sources_sha256: hash(read('evidence/producer-sources.json')),
+const report = { schema: 1, scope: corpus + ': existing SolCases primitive-root fragment, seed 0', source_producer: 'Solidity.Tools.SolCases.emit -> Prog.run withPanics',
+  producer_input_sha256: hash(read(`evidence/${corpus}-cases.jsonl`)), build_receipt_sha256: hash(read('evidence/lean/results.json')), producer_sources_sha256: hash(read('evidence/producer-sources.json')),
   native_solc_sha256: hash(read('upstream/solc')), reference_lock_sha256: hash(read('reference/package-lock.json')),
-  fork: 'Osaka', counts, expected: 320, full_g52_complete: false, results, minimized,
+  fork: 'Osaka', counts, expected: caseCount * 2, full_g52_complete: false, results, minimized,
   limitations: ['gas-free source semantics: reference gas retained only', 'runtime bytecode only; no deployment/world or EEST execution', 'no source event constructs in admitted printer fragment', 'finite minimization does not classify root causes'] };
-write('evidence/typed-differential.json', report);
-console.log(JSON.stringify({ scope: report.scope, counts, expected: 320, full_g52_complete: false }));
+write(`evidence/${corpus}-differential.json`, report);
+console.log(JSON.stringify({ scope: report.scope, counts, expected: caseCount * 2, full_g52_complete: false }));
