@@ -815,3 +815,42 @@ justified origins for the same library-containing Source program/environment
 and the same pipeline/fixed parameters. MRS retains G42.04 body/result
 implementation. Actual P8 producer/origin and VY5 lifecycle work remain locally
 owned unfinished duties; Y04 and separate 4.35 timing/trust remain external.
+
+The exact committed packet head 117f003291195801d295a93dca9d31927cb60d04 also
+passes fresh per-file checks: SourceRefusal 3.04 seconds / 835960832 peak aggregate
+RSS, GraphAdmissionAssembly 4.88 seconds / 821784576 bytes. All 29 guards pass.
+Trust reports 6630 sources and zero findings; registration/layers pass with
+6614 reachable modules. Strict pins remain FAIL with 16707 pinned theorems,
+zero errors, 117 unrecorded and zero baselined changes. Raw strict docs retain
+3 missing / 137 ambiguous references; the same checker on exact published
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has identical findings, zero new/removed.
+The frozen comparison remains FAIL with 137 new and 9 removed findings.
+
+## Checkpoint 236: exact-origin H24 necessary constraint
+
+DeclarationGraphConstraints reuses the integrated refusal characterization.
+accepted_mapping_free retains input, resolved result, frontend derivation and
+artifact; program_mapping_free carries equality of the whole dependent Source
+program, preserving environment, pipeline and fixed parameters. The third law
+refutes only an accepted origin whose same environment has the supplied nameable
+mapping-bearing struct. It is a conditional contradiction, not a simultaneous
+positive witness, actual producer or claim that every library input is impossible.
+No Nat-resource premise, new failure assumption or per-case copy is introduced.
+
+The three measured guards use only propext, Classical.choice and Quot.sound.
+An affected-import build passes 139 jobs. Fresh per-file validation at committed
+source head a1d573b61303417756e44df307c35b6feeacbf4f passes in 1.85 seconds,
+aggregate RSS peak 579579904 bytes, no resource stop. Finder and skeptic reviewed
+the generic statements and proofs without Lean/server and found no findings.
+The audit ledger remains 69 mapped / 3212 uncovered; these new P8 constraints
+are not counted as new witnesses of frozen audit rows.
+
+Question V10-H121-H24-REFUSAL was sent through coord-ask at
+coord-q/codex/solidity-v07-v11-20261030/v10-storage-operations/20261107T055502Z.
+It requests the controlled H16/H57 route for the environment-aware Source typing
+repair, or exact consumer program/environment evidence for a supported local
+case; it never authorizes narrowing the original profile. The earlier V07
+packet integration question is resolved. Source/Typing remains untouched.
+Actual Source resource/session realization, canonical origins, general graph
+admission, Source/lifecycle correspondence and original proof/final gates remain
+locally open. Separate Y04 and 4.35 producer waits are unchanged.
