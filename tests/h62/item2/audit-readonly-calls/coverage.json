@@ -48,13 +48,14 @@
       "display_status": "V1 refuted; H69/H121 V2 partition and four consumers checked",
       "frozen_hypothesis_status": "joint-premises-refuted",
       "decision": "H69: RO publishes reachable versioned interface and explicit migration; consumers re-prove.",
-      "audit_result": "Original V1 joint premises remain refuted, never positive witnesses. Three reachable V2 branch conjunctions and nine exact interface types checked. All28 migrated headers retained and all four current-tree consumers built under gh#78. Historical timing STOP and full original fidelity/acceptance remain open.",
+      "audit_result": "Original V1 joint premises remain refuted, never positive witnesses. Three reachable V2 branch conjunctions and nine exact interface types checked. All 28 migrated headers retained and all four current-tree consumers built under gh#78. Historical timing STOP and full original fidelity/acceptance remain open.",
       "current_owner": "audit-readonly-calls (H121)",
       "versioned_interfaces": [
         "Solidity.Lowering.Readonly.SourceDispatchV2.dispatch_succ",
         "Solidity.Lowering.Readonly.SourceDispatchV2.all_at"
       ],
-      "migration_evidence": "ro-v2-intake/evidence/migrated-consumers-current.json"
+      "migration_evidence": "ro-v2-intake/evidence/migrated-consumers-current.json",
+      "migration_evidence_manifest": "tests/h62/item2/audit-readonly-calls/ro-v2-intake.sha256"
     },
     {
       "source_name": "Solidity.Lowering.Readonly.SourceHistory.dispatch_special_empty_succ",
@@ -67,13 +68,14 @@
       "display_status": "V1 refuted; H69/H121 V2 partition and four consumers checked",
       "frozen_hypothesis_status": "joint-premises-refuted",
       "decision": "H69: RO publishes reachable versioned interface and explicit migration; consumers re-prove.",
-      "audit_result": "Original V1 joint premises remain refuted, never positive witnesses. Three reachable V2 branch conjunctions and nine exact interface types checked. All28 migrated headers retained and all four current-tree consumers built under gh#78. Historical timing STOP and full original fidelity/acceptance remain open.",
+      "audit_result": "Original V1 joint premises remain refuted, never positive witnesses. Three reachable V2 branch conjunctions and nine exact interface types checked. All 28 migrated headers retained and all four current-tree consumers built under gh#78. Historical timing STOP and full original fidelity/acceptance remain open.",
       "current_owner": "audit-readonly-calls (H121)",
       "versioned_interfaces": [
         "Solidity.Lowering.Readonly.SourceDispatchV2.dispatch_succ",
         "Solidity.Lowering.Readonly.SourceDispatchV2.all_at"
       ],
-      "migration_evidence": "ro-v2-intake/evidence/migrated-consumers-current.json"
+      "migration_evidence": "ro-v2-intake/evidence/migrated-consumers-current.json",
+      "migration_evidence_manifest": "tests/h62/item2/audit-readonly-calls/ro-v2-intake.sha256"
     },
     {
       "source_name": "Solidity.Backend.WorldCalls.Callbacks.restore",
