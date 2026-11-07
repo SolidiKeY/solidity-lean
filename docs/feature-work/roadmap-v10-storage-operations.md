@@ -648,3 +648,61 @@ handoffs use a bounded checkpoint history summary while retaining the full
 original-base patch and bundle. Original scope and goal identity are unchanged.
 Read-only finder/skeptic reviews and raw strict/frozen documentation comparisons
 accompany the sealed packet. All broader producer and final-gate work remains.
+
+
+### Checkpoint 232: H121 producer ownership and checked dependency intake
+
+H121 transfers the staged VY5 Source-origin/lifecycle and P8 aggregate-lifecycle
+items to this lane. They are local open work, not waits on the frozen Claude
+lanes. Original goal identity, observations and remaining obligations are
+unchanged. No frozen interface or new per-case source implementation is added.
+
+Fresh master was adopted first, then the exact P8 head
+809f6d7f8efd8067d76402f5207e0fb04ecd0bc7 was merged. Its PlanWitness, Merged and
+MergedControls focused build passes 142 jobs in 44.21 seconds, peak aggregate
+RSS 795566080 bytes, without a resource stop. This producer is an inhabited
+MODEL reference over empty Source programs; Merged is a pair of frozen halves.
+It is not actual Source.sessionAt or aggregate-lifecycle adequacy. Six frozen
+P8/P8b interface files retain their exact bytes.
+
+The VY5 composition and dirty-readback commits e8247d927 and a0cdc0bec are already
+on master. CorrectnessPublic and DirtyReadbackControls pass a 124-job focused
+build in 89.76 seconds, peak aggregate RSS 2235285504 bytes, no resource stop.
+Composition retains its explicit producer inputs; dirty readback declares a
+local cleanup boundary and supplies no Source semantics call. Presence and
+focused checking do not finish the locally owned Source-origin producer.
+
+The existing V07 head 8ab717749c4dcf4cd5932e7fea800af1ddca5a87 already has the
+shared GraphAdmissionAssembly.declarationGraphProducerOfEmpty helper. Only
+SourceRefusal and GraphAdmissionAssembly are missing from master. H112 forbids
+a duplicate per-case proof, so question V10-H121-V07 asks whether to publish the
+existing packet or extend H121 to integrate those two unchanged files here.
+No live V07 source file is edited or integrated while that route is pending.
+
+A minimal P8 consumer proposal reuses that helper. The exact fetched V07 files
+and the proposal passed isolated kernel checks; the proposal's three measured
+standard-three axiom guards also pass. This is a checked UNAPPLIED proposal,
+not a live producer instance or master evidence. The first isolated attempt
+failed before elaboration on prerequisite object lookup; the published imports
+were built and a read-only object view prepared before successful checks. No
+failed artifact is accepted. Exact input hashes and receipts accompany the
+portable packet; compiled object views are not shipped as evidence of source.
+
+After these checks, this lane re-baselined on published master
+806a972a4f1eefc367f7fe21078e56469447ce13. Selected API bytes are unchanged, but
+focused receipts retain their actual pre-rebaseline source head
+79e400cb9cf07b5e6a23efa4adfcfd2a291a7134; this is no fresh whole-build claim.
+The original V10 and consolidated queues, real Source adequacy, physical Y04 and
+separate 4.35 validation remain open. Checkpoint 231's bounded handoff and the
+compact checkpoint-230 relay remain separate sealed/historical receipts.
+
+
+Checkpoint-232 static checks at the latest baseline: trust passes 6628 sources
+and 289 inventoried sites with zero findings; registration reports 6612 reachable,
+zero orphaned and zero disallowed modules. Strict pins remain FAIL: 16675 pinned,
+zero errors, 85 unrecorded and zero baselined changes. The isolated consumer's
+three axiom guards use only propext, Classical.choice and Quot.sound. No shared
+inventory is written. Kernel/source-head receipts and portable relative artifact
+references distinguish prior focused validation from the later baseline merge.
+The V07 integration question remains pending; neither isolated compatibility nor
+a locally checked model proposal authorizes live integration or Source adequacy.
