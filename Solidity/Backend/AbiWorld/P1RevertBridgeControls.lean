@@ -74,6 +74,17 @@ theorem guardEq_target_success :
   | ok _ => intro _; rfl
   | error e => intro h; cases h
 
+/-- Independent kernel runs of the frozen compiled code at the same machine. -/
+theorem guardNe_run_revert :
+    (match run (code 0 (Frag.init Γ₀) guardNe) fresh.machine.base with
+      | .revert => true | _ => false) = true := by
+  decide +kernel
+
+theorem guardEq_run_ok :
+    (match run (code 0 (Frag.init Γ₀) guardEq) fresh.machine.base with
+      | .ok _ 0 => true | _ => false) = true := by
+  decide +kernel
+
 /-! ## Why `assert` is excluded -/
 
 /-- `assert(false);` -/

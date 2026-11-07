@@ -184,7 +184,13 @@ not consulted); gas and depth are not resources; data windows play no part
 (the core code reverts without data). **`assert` is excluded:** the source
 observes a failing `assert` as `revert(Panic(0x01))` while the core compiler
 emits a data-free revert (`assertFalse_source`, `assertFalse_target_bare`) —
-a compiler gap in panic data, recorded. The bridge is not an instance of an
+a compiler gap in panic data, recorded. Source and target also agree, but
+both differ from solc, on reverts the source keeps data-free where solc
+returns data (checked-arithmetic `Panic(0x11)`, index `Panic` codes,
+message-carrying `require`/`revert`, `docs/solc-alignment.md`); `P1LangV2`
+calls itself canonical only when reverts carry their data in the source, so
+this bridge is a source-to-compiled-code refinement, not a solc-data claim.
+The bridge is not an instance of an
 InterfaceV1 `PendingBareRevertProducer` (no such producer instance exists);
 it delivers that producer's failure-only conclusion for compiled code
 directly.
