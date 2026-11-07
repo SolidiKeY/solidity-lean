@@ -1,0 +1,52 @@
+{
+  "scope": "Complete27 RunFrameMem semantic roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1134,
+    "pending": 4149,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/grown-frame-roles-v93/evidence.tar.gz",
+      "bytes": 294321,
+      "sha256": "5fd84078a576d589e303ebe0501ddc758846c1701f9db6f6b54b7498c6ae4903"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/grown-frame-roles-v93/inputs.json",
+      "bytes": 766,
+      "sha256": "a8e27a2edd8d30b9e7b82c4e12a4fdc8e1bf78be6ced3dd6004dc966f3bc55e0"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/grown-frame-roles-v93/gates.json",
+      "bytes": 2806,
+      "sha256": "cce4a3967e02aa61f8325004f406747caf2dd7002d31a362a65acd24cab80c65"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/grown-frame-roles-v93/reviews.md",
+      "bytes": 503,
+      "sha256": "57a33bea3c6c1f8a0da88551295fdc48e9d8f9be7f0f3cb1cd664bc4b29289a8"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/grown-frame-roles-v93/case-rosters.json",
+      "bytes": 1919,
+      "sha256": "a2d552ce6ccc15c004551efa479d509e227db845a9bbad88d9f42a9e8d829433"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/grown-frame-roles-v93/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "172330ccf963a6d392733bc6d06270ecefe668cfd8db6246fec078462beddabd"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/grown-frame-roles-v93/external-retention.json",
+      "bytes": 297324,
+      "sha256": "a4cab60cf5e3b578b02cdba582b63b512122cdf778ceb90232894039699c7575"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/grown-frame-roles-v93/semantic-roles-reviewed.json",
+      "bytes": 3035981,
+      "sha256": "ce52e623c47be6e17e507c279ceb32b0578bec8dc6f78a79abd3fbcdda41d72e"
+    }
+  ]
+}

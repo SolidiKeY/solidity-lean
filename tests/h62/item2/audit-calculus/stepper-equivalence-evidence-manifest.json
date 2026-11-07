@@ -1,0 +1,52 @@
+{
+  "scope": "Complete Step implementation equality role; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 918,
+    "pending": 4365,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/step-equivalence-roles-v78/evidence.tar.gz",
+      "bytes": 241107,
+      "sha256": "47d3b3738473dc6221badb2cca643aca9ded22bd4898f696cb34459c606bf5ce"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/step-equivalence-roles-v78/inputs.json",
+      "bytes": 760,
+      "sha256": "5aac110b2ed6e4732d1ec44d079549abf546d9328d81126beb9f01a40edafcf0"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/step-equivalence-roles-v78/gates.json",
+      "bytes": 2833,
+      "sha256": "dea1cc3e94844a0f1966ef7077b8bcbbb1120276c00bccc993272e1e90e12846"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/step-equivalence-roles-v78/reviews.md",
+      "bytes": 437,
+      "sha256": "55bd648d29e949f82f485ffe1940dc028df03b01f840bd3a27ad0a3678f3d6f5"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/step-equivalence-roles-v78/case-rosters.json",
+      "bytes": 610,
+      "sha256": "d5c6220763077e8b95b9b7462fc0b8eb1c7c08f4179f1a08f65c1061ef087397"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/step-equivalence-roles-v78/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "f44f0648a1d2a91ab3423a0e408ee497b145c71839eb51ec8f45a258bd053619"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/step-equivalence-roles-v78/external-retention.json",
+      "bytes": 245910,
+      "sha256": "13d73108b7c95a8a91e92746936dbc0d5a262df73f57cddbdfdc041a9ef461e1"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/step-equivalence-roles-v78/semantic-roles-reviewed.json",
+      "bytes": 2474398,
+      "sha256": "f0317a6b826e3304165a6cafbf25a9310bb3f7c574a9339b72414f0f3c8afc95"
+    }
+  ]
+}
