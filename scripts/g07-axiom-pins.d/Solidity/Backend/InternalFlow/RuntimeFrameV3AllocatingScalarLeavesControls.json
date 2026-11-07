@@ -1,0 +1,48 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.actual_root": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.actual_tail": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.extra_tail": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.guard_checked": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.increment_checked": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_alternative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_destination": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_guard_literal": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_guard_operator": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_guard_slot": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_increment_operator": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_increment_value": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.wrong_zero_value": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.Controls.zero_checked": [
+  "propext"
+ ]
+}

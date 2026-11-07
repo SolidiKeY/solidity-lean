@@ -1,0 +1,39 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.condition_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.condition_in": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.run_route": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.write_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorRoutes.lean:Solidity.Backend.AbiEntry.SelectorRoutes.write_core": [
+  "propext"
+ ]
+}

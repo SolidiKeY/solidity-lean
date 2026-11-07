@@ -1,0 +1,26 @@
+{
+ "Solidity/Yul/Compilation/MultiSwitchCompilation.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilation.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Artifact.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilation.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilation.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.lower": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilation.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.source_chosen": [
+  "Quot.sound",
+  "propext"
+ ]
+}

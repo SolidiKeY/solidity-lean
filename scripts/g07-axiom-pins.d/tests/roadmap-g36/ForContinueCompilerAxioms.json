@@ -1,0 +1,50 @@
+{
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.Controls.body_before_post": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.Controls.emitted_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.Controls.post_omission_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.Controls.wrong_entry_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.Controls.wrong_guard_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ForContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ForContinueCompiler.emit_split": [
+  "Quot.sound",
+  "propext"
+ ]
+}

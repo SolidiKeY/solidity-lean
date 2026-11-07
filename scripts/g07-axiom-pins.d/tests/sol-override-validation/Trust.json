@@ -1,0 +1,424 @@
+{
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.accepted_collected_member": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.accepted_no_self_base": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.accepted_owner_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.accepted_slot_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.activeB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.adjacentB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.all_nodes_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.ambiguityB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.any_fin_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.any_nodes_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.attributesOKB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.avoidingB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.baseEdgeB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.bitTable_get": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.bitTable_get_fun": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.bytesSignatureB_iff": [],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.certify_isSome_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.certify_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.choose_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.chosen_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.chosen_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.collected_member_position": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.compatibleB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.complete_collected_member": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.concrete_implemented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.crossFamilyB_iff": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.cutVertexB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.declaration_equality_reflect": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.declarationOverridesB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.descriptorB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.dispatch_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.dispatch_original": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.distinct_decl_distinct_node": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.edgeTable_get": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.erase_length_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.exposesB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.extractionB_iff": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.fallbackShapeB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.fastAmbiguityB_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.fastValidateB_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.fastValidateB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.frontierB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.getterReturnsB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.graphValidB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.hasBaseB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.hasOverrideBaseB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.hasOwnB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.implementationB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.inheritedFamiliesB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.listedB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.mem_inherited_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.mem_nodes": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.mem_survivors_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.memberNamesB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.memoRetainedTable_get": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.multipleB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.mutabilityAllowedB_iff": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.namedListB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.namespaceConflictB_iff": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.noCrossFamilyB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.node_lookup": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.overrideEdgeB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.overrideFrontierB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.overrideListsB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.overrideOwnB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.overrideStepB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.ownB_iff": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.ownMatchingB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.pairTypesB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.paramsB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.pathsDistinctB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.position_identity": [],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.refersB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.retainedB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.route_rel_iff": [],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.routeB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.routeB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.routeB_rel_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.routeB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.same_node_same_decl": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.sameSlotB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.scopeChoice_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.scopeChoice_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.scopeKnownB_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.selected_in_env": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.selected_lookup": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.shadowStepB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.signatureConditionB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.singleInterfaceB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.syntax_equality_reflect": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.valid_no_self_base": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.valid_owner_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.validateB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.virtualB_iff": [
+  "propext"
+ ],
+ "tests/sol-override-validation/Trust.lean:Solidity.Frontend.OverrideValidation.visibilityAllowedB_iff": [
+  "propext"
+ ]
+}

@@ -66,8 +66,8 @@ theorem source_deployment (p : Roadmap.Pipeline) (extra : Nat) :
   cases p <;> rfl
 
 theorem source_complete_vector :
-    (installed.ex.world.accounts sender).balance.val = 93 ∧
-    (installed.ex.world.accounts self).balance.val = 12 ∧
+    (installed.ex.world.accounts sender).balance = 93 ∧
+    (installed.ex.world.accounts self).balance = 12 ∧
     (installed.ex.world.accounts self).nonce = 1 ∧
     (installed.ex.world.accounts self).code = some 0 ∧
     (installed.ex.world.accounts self).storage.read savedDecl.path = some (.bool true) ∧
@@ -93,7 +93,7 @@ def sourceObservation (p : Roadmap.Pipeline) : Option (Nat × Bool × Bool) := d
   match result.1 with
   | .ok (.success _) =>
     let .bool saved ← (result.2.2.ex.world.accounts self).storage.read savedDecl.path
-    pure ((result.2.2.ex.world.accounts self).balance.val,saved,
+    pure ((result.2.2.ex.world.accounts self).balance,saved,
       (result.2.2.ex.world.accounts self).code == some 0)
   | _ => none
 

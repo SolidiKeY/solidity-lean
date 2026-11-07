@@ -70,7 +70,7 @@ def Syn.binOpName : Syn .expr → BinOp
   | _ => .add
 
 /-- A conversion where two operand types meet: implicit, or none. -/
-def Conv (B : DeclName → DeclName → Bool) (σ τ : STy) : Prop := σ.implicit B τ = true ∨ σ = τ
+def Conv (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (σ τ : STy) : Prop := σ.implicit B M τ = true ∨ σ = τ
 
 /-- A constant's mobile integer type holds it. -/
 theorem Q.mobileInt?_fits {q : Q} {t : IntTy} (h : q.mobileInt? = some t) : q.FitsInt t := by
@@ -89,7 +89,7 @@ theorem Q.mobileInt?_fits {q : Q} {t : IntTy} (h : q.mobileInt? = some t) : q.Fi
   · cases h
 
 /-- A type converts to its mobile type. -/
-theorem mobile_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ τ.mobile := by
+theorem mobile_conv {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {τ : STy} : Conv B M τ τ.mobile := by
   cases τ with
   | rational q =>
     simp only [Conv, STy.mobile]
@@ -106,8 +106,8 @@ theorem mobile_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ 
   | stringLit bs => exact .inl rfl
   | _ => exact .inr rfl
 
-theorem common?_left {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
-    Conv B a c := by
+theorem common?_left {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {a b c : STy} (h : STy.common? B M a b = some c) :
+    Conv B M a c := by
   simp only [STy.common?] at h
   split at h
   · cases h
@@ -117,8 +117,8 @@ theorem common?_left {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy
       · cases h; exact .inl (by assumption)
       · cases h
 
-theorem common?_right {B : DeclName → DeclName → Bool} {a b c : STy} (h : STy.common? B a b = some c) :
-    Conv B b c := by
+theorem common?_right {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {a b c : STy} (h : STy.common? B M a b = some c) :
+    Conv B M b c := by
   simp only [STy.common?] at h
   split at h
   · cases h
@@ -129,7 +129,7 @@ theorem common?_right {B : DeclName → DeclName → Bool} {a b c : STy} (h : ST
       · cases h
 
 /-- A shift's or power's left operand converts to its operand type. -/
-theorem shiftTy_conv {B : DeclName → DeclName → Bool} {τ : STy} : Conv B τ τ.shiftTy := by
+theorem shiftTy_conv {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {τ : STy} : Conv B M τ τ.shiftTy := by
   cases τ with
   | rational q =>
     simp only [Conv, STy.shiftTy]
@@ -160,8 +160,8 @@ theorem Env.fieldTy?_of_fieldAt {E : Env} {dn : DeclName} {l : DataLoc} {x : Str
   rfl
 
 /-- The constant `0` converts to `uint256` (an external call's default value). -/
-theorem zero_u256 (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.rational (Q.ofInt 0)) (.int IntTy.u256) = true :=
+theorem zero_u256 (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.rational (Q.ofInt 0)) (.int IntTy.u256) = true :=
   decide_eq_true (p := (Q.ofInt 0).FitsInt IntTy.u256) (by decide)
 
 /-- The constant `0` is an index (an absent slice bound). -/
@@ -183,8 +183,8 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | this (c : String) : RExpr E Γ (.contract ⟨none, c⟩)
   | tuple {τs : List STy} (es : RArgs E Γ τs) : RExpr E Γ (.tuple τs)
   /-- An implicit conversion (or the identity where operands already meet). -/
-  | conv {σ τ : STy} (e : RExpr E Γ σ) (h : Conv E.isBase σ τ) : RExpr E Γ τ
-  | convExplicit {σ τ : STy} (e : RExpr E Γ σ) (h : σ.explicit E.isBase τ = true) : RExpr E Γ τ
+  | conv {σ τ : STy} (e : RExpr E Γ σ) (h : Conv E.isBase E.mapFree σ τ) : RExpr E Γ τ
+  | convExplicit {σ τ : STy} (e : RExpr E Γ σ) (h : σ.explicit E.isBase E.mapFree τ = true) : RExpr E Γ τ
   | unary {τ : STy} (op : PrefixOp) (e : RExpr E Γ τ) : RExpr E Γ τ
   | incDec {τ : STy} (inc pre : Bool) (l : RLVal E Γ τ) : RExpr E Γ τ
   | delete {τ : STy} (l : RLVal E Γ τ) : RExpr E Γ (.tuple [])
@@ -201,7 +201,7 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | cond {τ : STy} (c : RExpr E Γ .bool) (a b : RExpr E Γ τ) : RExpr E Γ τ
   | assign {τ : STy} (l : RLVal E Γ τ) (e : RExpr E Γ τ) : RExpr E Γ τ
   | compound {τ σ : STy} (op : AssignOp) (l : RLVal E Γ τ) (e : RExpr E Γ σ)
-      (h : op.fits E.isBase σ τ = true) : RExpr E Γ τ
+      (h : op.fits E.isBase E.mapFree σ τ = true) : RExpr E Γ τ
   | indexArray {l : DataLoc} {τ σ : STy} {n : Option Nat} (a : RExpr E Γ (.array l τ n))
       (i : RExpr E Γ σ) (h : σ.isIndex = true) : RExpr E Γ τ
   | indexMapping {τk τv : STy} (a : RExpr E Γ (.mapping τk τv)) (k : RExpr E Γ τk) : RExpr E Γ τv
@@ -216,7 +216,7 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | magic {τ : STy} (b : Builtin) (m : String) (h : b.memberTy m = some τ) : RExpr E Γ τ
   | balance {p : Bool} (a : RExpr E Γ (.address p)) : RExpr E Γ (.int IntTy.u256)
   | builtin {σs : List STy} {τ : STy} (b : Builtin) (args : RArgs E Γ σs)
-      (h : b.callTy E.isBase σs = some τ) : RExpr E Γ τ
+      (h : b.callTy E.isBase E.mapFree σs = some τ) : RExpr E Γ τ
   /-- The `i`-th member of a struct. -/
   | member {l : DataLoc} {dn : DeclName} {τ : STy} (a : RExpr E Γ (.struct l dn)) (i : Nat)
       (h : E.fieldTy? dn l i = some τ) : RExpr E Γ τ
@@ -255,7 +255,7 @@ inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
 /-- Arguments converted to parameter types. -/
 inductive RConvArgs (E : Env) (Γ : RCtx) : List STy → Type where
   | nil : RConvArgs E Γ []
-  | cons {σ τ : STy} {τs : List STy} : RExpr E Γ σ → σ.implicit E.isBase τ = true → RConvArgs E Γ τs →
+  | cons {σ τ : STy} {τs : List STy} : RExpr E Γ σ → σ.implicit E.isBase E.mapFree τ = true → RConvArgs E Γ τs →
       RConvArgs E Γ (τ :: τs)
 
 /-- Resolved lvalues. -/
@@ -274,7 +274,7 @@ end
 
 /-- Converted arguments from typed arguments that fit. -/
 def RArgs.convert {E : Env} {Γ : RCtx} :
-    {σs : List STy} → (ps : List STy) → RArgs E Γ σs → argsFit E.isBase σs ps = true → RConvArgs E Γ ps
+    {σs : List STy} → (ps : List STy) → RArgs E Γ σs → argsFit E.isBase E.mapFree σs ps = true → RConvArgs E Γ ps
   | [], [], .nil, _ => .nil
   | _ :: _, p :: ps, .cons e es, h => by
     simp only [argsFit, List.length_cons, List.zip_cons_cons, List.all_cons, Bool.and_eq_true,
@@ -291,8 +291,8 @@ theorem mem_of_filter_eq {α : Type} {p : α → Bool} {l : List α} {d : α} (h
 
 /-- A matching declaration's parameters, from a singleton filter over
 `paramTys` (events, errors). -/
-def paramsOf (E : Env) (B : DeclName → DeclName → Bool) (σs : List STy) (d : Decl)
-    (h : d.fitsParams E B σs = true) : Σ' ps, d.paramTys E = some ps ∧ argsFit B σs ps = true :=
+def paramsOf (E : Env) (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (σs : List STy) (d : Decl)
+    (h : d.fitsParams E B M σs = true) : Σ' ps, d.paramTys E = some ps ∧ argsFit B M σs ps = true :=
   match hp : d.paramTys E with
   | some ps => ⟨ps, rfl, by simp only [Decl.fitsParams, hp] at h; exact h⟩
   | none => by simp only [Decl.fitsParams, hp] at h; exact absurd h Bool.false_ne_true
@@ -349,7 +349,7 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .member (i := i) da h => .member da.toR i (Env.fieldTy?_of_fieldAt h)
   | .structNew _ hf da h => .structNew (by simp only [hf, Option.map_some]) (RArgs.convert _ da.toR h)
   | .extCall (d := d) (ps := ps) dc da hf hs =>
-    .extCall dc.toR d hs (.conv (.const (Q.ofInt 0)) (.inl (zero_u256 _))) (RArgs.convert ps da.toR (by
+    .extCall dc.toR d hs (.conv (.const (Q.ofInt 0)) (.inl (zero_u256 _ _))) (RArgs.convert ps da.toR (by
       have hp := mem_of_filter_eq hf
       simp only [hs] at hp
       exact hp))
@@ -422,7 +422,7 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
   | placeholder {k : SCtx} {Γ : RCtx} (h : M = true) : RStmt E R M k Γ Γ
   /-- A declaration with the type's default value. -/
   | declVar {k : SCtx} {Γ : RCtx} (τ : STy) : RStmt E R M k Γ (τ :: Γ)
-  | declInit {k : SCtx} {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : σ.implicit E.isBase τ = true) :
+  | declInit {k : SCtx} {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : σ.implicit E.isBase E.mapFree τ = true) :
       RStmt E R M k Γ (τ :: Γ)
   | block {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') : RStmt E R M k Γ Γ
   | ifThen {k : SCtx} {Γ Γ₁ : RCtx} (c : RExpr E Γ .bool) (s : RStmt E R M k Γ Γ₁) : RStmt E R M k Γ Γ
@@ -439,7 +439,7 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
   | cont {u : Bool} {Γ : RCtx} : RStmt E R M ⟨true, u⟩ Γ Γ
   | ret {k : SCtx} {Γ : RCtx} (h : R = []) : RStmt E R M k Γ Γ
   | retVal {k : SCtx} {Γ : RCtx} {σ τ : STy} (hR : R = [τ]) (e : RExpr E Γ σ)
-      (h : σ.implicit E.isBase τ = true) : RStmt E R M k Γ Γ
+      (h : σ.implicit E.isBase E.mapFree τ = true) : RStmt E R M k Γ Γ
   | retTuple {k : SCtx} {Γ : RCtx} (es : RConvArgs E Γ R) : RStmt E R M k Γ Γ
   | emit {k : SCtx} {Γ : RCtx} {ps : List STy} (ev : Decl) (h : ev.paramTys E = some ps)
       (args : RConvArgs E Γ ps) : RStmt E R M k Γ Γ
@@ -450,7 +450,7 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
   /-- A tuple declaration (lane FU2-B): the tuple's components converted to
   the declared slots' types and pushed, holes discarded. -/
   | declTuple {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs))
-      (h : slotsFit E.isBase slots σs = true) : RStmt E R M k Γ (pushTys slots Γ)
+      (h : slotsFit E.isBase E.mapFree slots σs = true) : RStmt E R M k Γ (pushTys slots Γ)
   /-- `try` (lane FU2-B): an external call without value; on success its
   returns are pushed and `ok` runs, on a revert `cat` runs (the revert data
   pushed as `bytes memory` when `cbind`). -/
@@ -520,10 +520,10 @@ def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt
   | .retVal hR d h => .retVal hR d.toR h
   | .retTuple d ds _ h => .retTuple (RArgs.convert C.rets (.cons d.toR (TypedArgs.ofSlots ds)) h)
   | .emit (d := d) da hf =>
-    let p := paramsOf C.env C.isBase _ d (mem_of_filter_eq hf)
+    let p := paramsOf C.env C.isBase C.mapFree _ d (mem_of_filter_eq hf)
     .emit d p.2.1 (RArgs.convert p.1 da.toR p.2.2)
   | .revertError (d := d) da hf =>
-    let p := paramsOf C.env C.isBase _ d (mem_of_filter_eq hf)
+    let p := paramsOf C.env C.isBase C.mapFree _ d (mem_of_filter_eq hf)
     .revertError d p.2.1 (RArgs.convert p.1 da.toR p.2.2)
   | .rethrow (i := i) _ _ h _ => .rethrow (Idx.ofGet? _ i h)
 

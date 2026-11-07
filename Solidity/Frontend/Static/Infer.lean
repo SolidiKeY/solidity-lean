@@ -214,14 +214,14 @@ def suffixOne (op : SuffixOp) {x : Syn .expr} : Res Γ .expr x → List (Res Γ 
 def binPair (e a b : Syn .expr) : (k : BinKind) → e.binOp? = Option.some (k, a, b) →
     (τa : STy) → Typed Γ a τa → (τb : STy) → Typed Γ b τb → List (Res Γ .expr e)
   | .arith, hk, τa, da, τb, db =>
-    match hc : STy.common? Γ.isBase τa τb with
+    match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
     | Option.some τ =>
       if hn : τ.isNumeric = true then
         if hz : (e.isDivMod && τb.isZeroConst) = false then [.expr (.arith hk da db hc hn hz)] else []
       else []
     | Option.none => []
   | .bit, hk, τa, da, τb, db =>
-    match hc : STy.common? Γ.isBase τa τb with
+    match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
     | Option.some τ => if hn : τ.isBits = true then [.expr (.bit hk da db hc hn)] else []
     | Option.none => []
   | .shift, hk, τa, da, τb, db =>
@@ -239,11 +239,11 @@ def binPair (e a b : Syn .expr) : (k : BinKind) → e.binOp? = Option.some (k, a
       else []
     else []
   | .order, hk, τa, da, τb, db =>
-    match hc : STy.common? Γ.isBase τa τb with
+    match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
     | Option.some τ => if hn : τ.isOrdered = true then [.expr (.order hk da db hc hn)] else []
     | Option.none => []
   | .eq, hk, τa, da, τb, db =>
-    match hc : STy.common? Γ.isBase τa τb with
+    match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
     | Option.some τ => if hn : τ.hasEq = true then [.expr (.eq hk da db hc hn)] else []
     | Option.none => []
   | .logic, hk, τa, da, τb, db =>
@@ -277,7 +277,7 @@ def condRes {c a b : Syn .expr} (rc : List (Res Γ .expr c)) (ra : List (Res Γ 
     match pc with
     | ⟨.bool, dc⟩ =>
       (tysOf Γ ra).flatMap fun pa => (tysOf Γ rb).flatMap fun pb =>
-        match hc : STy.common? Γ.isBase pa.1.mobile pb.1.mobile with
+        match hc : STy.common? Γ.isBase Γ.mapFree pa.1.mobile pb.1.mobile with
         | Option.some _ => [.expr (.cond dc pa.2 pb.2 hc)]
         | Option.none => []
     | _ => []
@@ -288,7 +288,7 @@ def assignRes (op : AssignOp) {a b : Syn .expr} (ra : List (Res Γ .expr a)) (rb
   (lvsOf Γ ra).flatMap fun pa => (tysOf Γ rb).flatMap fun pb =>
     (match op with
      | .assign =>
-       if h1 : pb.1.implicit Γ.isBase pa.1 = true then
+       if h1 : pb.1.implicit Γ.isBase Γ.mapFree pa.1 = true then
          if h2 : Γ.assignRefused pa.1 a = false then [.expr (.assign pa.2 pb.2 h1 h2)] else []
        else []
      | _ => []) ++
@@ -298,7 +298,7 @@ def assignRes (op : AssignOp) {a b : Syn .expr} (ra : List (Res Γ .expr a)) (rb
          if hl : Γ.namesLocal a = false then [.expr (.assignCopy pa.2 pb.2 h hl)] else []
        else []
      | _ => []) ++
-    (if h : op.fits Γ.isBase pb.1 pa.1 = true then [.expr (.compound pa.2 pb.2 h)] else [])
+    (if h : op.fits Γ.isBase Γ.mapFree pb.1 pa.1 = true then [.expr (.compound pa.2 pb.2 h)] else [])
 
 /-- `a[i]` for one derivation of `a` and of `i`. -/
 def indexPair {a i : Syn .expr} : (τ : STy) → Typed Γ a τ → (σ : STy) → Typed Γ i σ →
@@ -313,7 +313,7 @@ def indexPair {a i : Syn .expr} : (τ : STy) → Typed Γ a τ → (σ : STy) �
          else []
        else []
      | .mapping τk τv, da =>
-       if h : σ.implicit Γ.isBase τk = true then [.expr (.indexMapping da di h), .lval (.indexMapping da di h)]
+       if h : σ.implicit Γ.isBase Γ.mapFree τk = true then [.expr (.indexMapping da di h), .lval (.indexMapping da di h)]
        else []
      | _, _ => []) ++
     (if hm : bytesLike τ = true then
@@ -403,11 +403,11 @@ def callIdentRes (f : String) {es : Syn (.list .expr)} (σs : List STy) (ds : Ty
   (match es, σs, ds with
    | .cons _ .nil, [σ], .cons dx .nil =>
      match ht : Γ.convTarget f with
-     | Option.some τ => if h : σ.explicit Γ.isBase τ = true then [.expr (.convUser ht dx h)] else []
+     | Option.some τ => if h : σ.explicit Γ.isBase Γ.mapFree τ = true then [.expr (.convUser ht dx h)] else []
      | Option.none => []
    | _, _, _ => []) ++
   (match hf : (Γ.functions f).filter (fun d' => match d'.fnSig Γ.env with
-      | Option.some (ps', _) => argsFit Γ.isBase σs ps'
+      | Option.some (ps', _) => argsFit Γ.isBase Γ.mapFree σs ps'
       | Option.none => false) with
    | [d] =>
      match hs : d.fnSig Γ.env with
@@ -418,7 +418,7 @@ def callIdentRes (f : String) {es : Syn (.list .expr)} (σs : List STy) (ds : Ty
    | Option.some (.builtin b) =>
      match hst : b.status with
      | .admitted _ =>
-       match hc : b.callTy Γ.isBase σs with
+       match hc : b.callTy Γ.isBase Γ.mapFree σs with
        | Option.some _ => [.expr (.builtinCall hr hst ds hc)]
        | Option.none => []
      | _ => []
@@ -427,7 +427,7 @@ def callIdentRes (f : String) {es : Syn (.list .expr)} (σs : List STy) (ds : Ty
    | Option.some dn =>
      match hf : Γ.env.structFields dn .memory with
      | Option.some fs =>
-       if ha : argsFit Γ.isBase σs (fs.map Prod.snd) = true then [.expr (.structNew hs hf ds ha)] else []
+       if ha : argsFit Γ.isBase Γ.mapFree σs (fs.map Prod.snd) = true then [.expr (.structNew hs hf ds ha)] else []
      | Option.none => []
    | Option.none => [])
 
@@ -438,7 +438,7 @@ def abiRes : (c : Syn .expr) → (m : String) → {es : Syn (.list .expr)} → (
     match hr : Γ.resolve g with
     | Option.some (.builtin .abi) =>
       match hk : AbiKind.ofMember m with
-      | Option.some k => if h : k.argsOK Γ.isBase σs = true then [.expr (.abiEncode hr hk ds h)] else []
+      | Option.some k => if h : k.argsOK Γ.isBase Γ.mapFree σs = true then [.expr (.abiEncode hr hk ds h)] else []
       | Option.none => []
     | _ => []
   | _, _, _, _, _ => []
@@ -502,9 +502,9 @@ def sliceRes {a : Syn .expr} {o o' : Syn (.opt .expr)} (ra : List (Res Γ .expr 
 word, every element converting to it. -/
 def inlineOne {x : Syn .expr} {xs : Syn (.list .expr)} (τ : STy) (d : Typed Γ x τ) (τs : List STy)
     (ds : TypedArgs Γ xs τs) : List (Res Γ .expr (.inlineArray x xs)) :=
-  match hc : STy.commonOf Γ.isBase τ τs with
+  match hc : STy.commonOf Γ.isBase Γ.mapFree τ τs with
   | Option.some σ =>
-    if h : σ.oneWord = true ∧ argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
+    if h : σ.oneWord = true ∧ argsFit Γ.isBase Γ.mapFree (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
       [.expr (.inlineArray d ds hc h.1 h.2)] else []
   | Option.none => []
 
@@ -517,9 +517,9 @@ def inlineRes {x : Syn .expr} {xs : Syn (.list .expr)} (rx : List (Res Γ .expr 
 def payOne : (m : String) → {a v : Syn .expr} → Typed Γ a (.address true) → (σ : STy) → Typed Γ v σ →
     List (Res Γ .expr (.call (.member a m) (.positional (.cons v .nil))))
   | "transfer", _, _, da, σ, dv =>
-    if h : σ.implicit Γ.isBase (.int IntTy.u256) = true then [.expr (.transfer da dv h)] else []
+    if h : σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true then [.expr (.transfer da dv h)] else []
   | "send", _, _, da, σ, dv =>
-    if h : σ.implicit Γ.isBase (.int IntTy.u256) = true then [.expr (.send da dv h)] else []
+    if h : σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true then [.expr (.send da dv h)] else []
   | _, _, _, _, _, _ => []
 
 /-- `a.transfer(v)`, `a.send(v)` on an `address payable`. -/
@@ -535,7 +535,7 @@ def memberCallOne {c : Syn .expr} {m : String} {es : Syn (.list .expr)} (σs : L
   | .recv (τ := τ) dc =>
     match τ, dc with
     | .contract dn, dc =>
-      match hx : extOverloads Γ.env Γ.isBase dn m σs with
+      match hx : extOverloads Γ.env Γ.isBase Γ.mapFree dn m σs with
       | [d] =>
         match hs : d.fnSig Γ.env with
         | Option.some _ => [.expr (.extCall dc ds hx hs)]
@@ -552,8 +552,8 @@ def valueCallOne {c v : Syn .expr} {m : String} {es : Syn (.list .expr)} (σs : 
   | .withValue (τ := τ) (σ := σ) dc dv =>
     match τ, dc with
     | .contract dn, dc =>
-      if hv : σ.implicit Γ.isBase (.int IntTy.u256) = true then
-        match hx : extOverloads Γ.env Γ.isBase dn m σs with
+      if hv : σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true then
+        match hx : extOverloads Γ.env Γ.isBase Γ.mapFree dn m σs with
         | [d] =>
           match hs : d.fnSig Γ.env with
           | Option.some _ =>
@@ -569,7 +569,7 @@ def convElemRes (el : Elem) (h : el ≠ .addressPayable) {es : Syn (.list .expr)
     (ds : TypedArgs Γ es σs) : List (Res Γ .expr (.call (.elemType el h) (.positional es))) :=
   match es, σs, ds with
   | .cons _ .nil, [σ], .cons dx .nil =>
-    if hx : σ.explicit Γ.isBase (el.ty (convLoc σ)) = true
+    if hx : σ.explicit Γ.isBase Γ.mapFree (el.ty (convLoc σ)) = true
     then [.expr (.convElem dx rfl hx)] else []
   | _, _, _ => []
 

@@ -1,9 +1,4 @@
 {
- "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nestedStorageLive": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nested_storage_live_bound": [
   "propext"
  ],
@@ -19,6 +14,11 @@
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nested_storage_live_rows": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLive.lean:Solidity.Backend.MemoryCopies.nestedStorageLive": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ]
 }
