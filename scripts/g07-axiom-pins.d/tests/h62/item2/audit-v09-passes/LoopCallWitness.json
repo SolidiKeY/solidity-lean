@@ -1,0 +1,50 @@
+{
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.expanded_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.free": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.public_recognizer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.receiving": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.whole_recognizer_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

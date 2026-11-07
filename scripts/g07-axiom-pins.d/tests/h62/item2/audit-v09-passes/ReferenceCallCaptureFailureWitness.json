@@ -1,0 +1,37 @@
+{
+ "tests/h62/item2/audit-v09-passes/ReferenceCallCaptureFailureWitness.lean:Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallCaptureFailureWitness.lean:Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.joined_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallCaptureFailureWitness.lean:Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallCaptureFailureWitness.lean:Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallCaptureFailureWitness.lean:Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.returned_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallCaptureFailureWitness.lean:Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallCaptureFailureWitness.lean:Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.wrong_zero_capture_cell": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

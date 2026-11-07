@@ -1,0 +1,63 @@
+{
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.bounded_slot_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.capacity_without_operand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.exchange_at_end": [],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.exchange_prefix": [],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.full_stack_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.read_writeSlot_bound_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.read_writeSlot_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.read_writeSlot_prefix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.read_writeSlot_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.readSlot_at_end": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.readSlot_bound_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.readSlot_prefix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.stack_slot_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.writeSlot_at_end": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean:Solidity.Yul.Compilation.writeSlot_prefix": [
+  "Quot.sound",
+  "propext"
+ ]
+}
