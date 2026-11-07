@@ -8,10 +8,15 @@ Supplemental proof validity and resolved private identities are retained.
 
 ## External selected-heap fixture availability
 
-`SelectedHeapBoundaryWitness.lean` is an H44 bulk artifact, deliberately absent
+[SelectedHeapBoundaryWitness.lean](../../tests/h62/item2/audit-v09-passes/selected-heap-artifacts.json)
+is an H44 bulk artifact, deliberately absent
 from a clean checkout. Historical references below name this external fixture,
 not a published in-tree Lean module. Its intended materialization target is
-`tests/h62/item2/audit-v09-passes/SelectedHeapBoundaryWitness.lean`.
+
+```text
+tests/h62/item2/audit-v09-passes/SelectedHeapBoundaryWitness.lean
+```
+
 The tracked [artifact manifest](../../tests/h62/item2/audit-v09-passes/selected-heap-artifacts.json)
 records its exact bytes/hash and those of the companion ledger. The
 [verification/materialization tool](../../scripts/h62/item2/audit-v09-passes/selected_heap_artifacts.py)
@@ -519,7 +524,7 @@ This result is source accounting only, not an elaborated census or proof.
 
 ## First selected-census HeapBoundary instance
 
-The external `SelectedHeapBoundaryWitness.lean` fixture (see availability above)
+The external SelectedHeapBoundaryWitness.lean fixture (see availability above)
 witnesses the selected frozen
 `Solidity.Backend.Passes.objects_memory_link` declaration. Membership is checked
 against the actual179-file/1259-row selection before counting it. Checked
