@@ -11,7 +11,7 @@ import re
 import stat
 from pathlib import Path
 
-DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
+DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
 ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
 ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
 IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
@@ -122,6 +122,34 @@ def hide_strings(text):
         i += 1
     return "".join(out)
 
+ATTRIBUTE_START = re.compile(r"(?m)^[ \t]*@\[")
+
+def hide_attributes(skeleton):
+    """Mask line-initial balanced attribute prefixes without moving lines."""
+    out = list(skeleton)
+    spans = []
+    pos = 0
+    while match := ATTRIBUTE_START.search(skeleton, pos):
+        prefix_start = match.start()
+        start = skeleton.find("@[", match.start(), match.end())
+        while True:
+            depth = 1
+            end = start + 2
+            while end < len(skeleton) and depth:
+                if skeleton[end] == "[": depth += 1
+                elif skeleton[end] == "]": depth -= 1
+                end += 1
+            if depth: raise ValueError("unterminated attribute prefix")
+            for i in range(start, end):
+                if skeleton[i] != "\n": out[i] = " "
+            next_pos = end
+            while next_pos < len(skeleton) and skeleton[next_pos].isspace(): next_pos += 1
+            if not skeleton.startswith("@[", next_pos): break
+            start = next_pos
+        spans.append((prefix_start, end))
+        pos = end
+    return "".join(out), spans
+
 def tokenize(s):
     return [match.group(0) for match in TOKEN.finditer(s)]
 
@@ -192,12 +220,23 @@ def split_declaration(content, allow_equations=True, skeleton=None):
 def scan(path, root, source=None):
     if source is None: source = path.read_bytes()
     text = mask(source.decode("utf-8"))
-    skeleton = hide_strings(text)
+    skeleton, attribute_spans = hide_attributes(hide_strings(text))
     matches = list(DECL.finditer(skeleton))
-    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:import|namespace|section|end|open|variable|universe)\b[^\n]*", skeleton))
+    attribute_ends = [end for _, end in attribute_spans]
+    declaration_starts = []
+    for match in matches:
+        start = match.start()
+        index = bisect.bisect_right(attribute_ends, match.start(1)) - 1
+        if index >= 0:
+            prefix_start, prefix_end = attribute_spans[index]
+            between = skeleton[prefix_end:match.start(1)]
+            if re.fullmatch(r"\s*(?:(?:private|protected|noncomputable|local|partial|unsafe)\s+)*", between):
+                start = min(start, prefix_start)
+        declaration_starts.append(start)
+    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
     # Preserve literal bytes and continuation lines until the next recognized
     # boundary. This remains a lexical approximation of the Lean environment.
-    boundaries = sorted([m.start() for m in context_commands] + [m.start() for m in matches])
+    boundaries = sorted([m.start() for m in context_commands] + declaration_starts)
     context_spans = []
     for command in context_commands:
         index = bisect.bisect_right(boundaries, command.start())
@@ -206,13 +245,14 @@ def scan(path, root, source=None):
     rows = []
     relative_path = path.relative_to(root).as_posix()
     def indent(m):
-        prefix = re.match(r"[ \t]*", skeleton[m.start():m.start(1)]).group()
+        line_start = text.rfind("\n", 0, m.start(1)) + 1
+        prefix = re.match(r"[ \t]*", text[line_start:m.start(1)]).group()
         return len(prefix.expandtabs(8))
     for i, match in enumerate(matches):
-        end = matches[i+1].start() if i+1 < len(matches) else len(text)
+        end = declaration_starts[i+1] if i+1 < len(matches) else len(text)
         content = text[match.end():end]
         content_skeleton = skeleton[match.end():end]
-        command = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", content_skeleton)
+        command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
         command_inside = False
         if command:
             prefix = re.match(r"[ \t]*", command.group()).group()
@@ -232,7 +272,7 @@ def scan(path, root, source=None):
                 parts, reason = None, "unsupported-equation-declaration"
         if parts is None:
             rows.append(dict(path=relative_path,
-                             line=text.count("\n", 0, match.start())+1,
+                             line=text.count("\n", 0, match.start(1))+1,
                              kind=match.group(1), name=match.group(2) or "<anonymous>",
                              statement=None, body=[], body_form=None, body_reject_reason=reason,
                              owner="unknown", context_hash=context, qualifiers=qualifiers,
@@ -246,7 +286,7 @@ def scan(path, root, source=None):
         body_skeleton = content_skeleton[len(header) + (2 if body_form == "assignment" else 0):]
         if re.search(r"\bwhere\b", body_skeleton):
             body_reject_reason = "body-may-have-local-helpers"
-        boundary = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", body_skeleton)
+        boundary = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", body_skeleton)
         if boundary:
             prefix = re.match(r"[ \t]*", boundary.group()).group()
             if len(prefix.expandtabs(8)) > indent(match):
@@ -254,7 +294,7 @@ def scan(path, root, source=None):
             body = body[:boundary.start()]
         normalized = normalize(header.strip())
         rows.append(dict(path=relative_path,
-                         line=text.count("\n", 0, match.start())+1,
+                         line=text.count("\n", 0, match.start(1))+1,
                          kind=match.group(1), name=match.group(2) or "<anonymous>",
                          statement=normalized, body=tokenize(body), body_form=body_form,
                          body_reject_reason=body_reject_reason, owner="unknown", context_hash=context, qualifiers=qualifiers,
