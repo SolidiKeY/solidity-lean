@@ -2639,3 +2639,20 @@ finder and skeptic checked roles, file effects, hashes and history preservation
 without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/memory-audit-evidence.sha256`. This non-atomic observation
 does not establish current runtime acceptance.
+
+## Readonly binding phase observations
+
+`readonly_bind_controls.py` records five previously unreferenced source-model
+controls with hashes and the feature document hash. They distinguish callback
+depth/static refusals from credit failure and continuation, and preserve the
+order of receiver, value, argument and encoding-failure phases. Joint capture
+and credit inputs remain model witnesses, not compiler, EVM, gas, fork or frame
+adequacy. Current invocation, inputs, effects and outcomes remain unresolved.
+
+At `a15daa6f6c7390eb0dadeb0c69d25691623c0633`, the refreshed static index has
+823 candidates, 639 with supplied current references and 184 without; ten retain
+historical references for review. No candidates were added, changed or removed
+since the preceding snapshot. Independent read-only finder and skeptic checked
+roles, hashes and history preservation without Lean or a server. Evidence hashes
+are in `tests/h55/module-times/readonly-bind-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
