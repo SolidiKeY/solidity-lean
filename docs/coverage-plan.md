@@ -9,6 +9,12 @@ endpoint. This roadmap replaces the former 19-step feature-coverage plan.
 Existing integrated work is reused after checking its exact theorem and input
 coverage; the groups below are remaining obligations, not claims of missing code.
 
+The finished repository must also be **trustworthy despite its size** (a
+small readable trusted surface, an independent kernel re-check, continuous
+validation against solc and a reference EVM) and **usable on real contracts**
+(measured per-function budgets, a fast mode and a certified mode):
+[trust-usability.md](feature-work/trust-usability.md), 2026-11-07.
+
 Audit: [proof-coverage audit](audits/proof-coverage.md) (2026-11-06) traces each claimed row to its backing theorem and lists the open end-to-end links.
 
 ## Scope contract
@@ -97,6 +103,16 @@ correctness true merely by running the compiler to define source semantics.
    optimizer step, the Yul-to-bytecode transform and the legacy pipeline
    (T01–T08). This certifies solc's output contract by contract, not solc's
    source code.
+
+9. **Trusted surface:** one statements page whose definition closure is
+   measured and guarded in CI, an independent kernel re-check of the public
+   closure, every `implemented_by` linked to its proved definition, and a
+   published trust report (A01–A06 of
+   [trust-usability.md](feature-work/trust-usability.md)).
+10. **Usability:** end-to-end per-function time and memory budgets on real
+    contracts, approved by the user and enforced in CI, in fast mode (compiled
+    ⊢ with proved rules, a verdict and not a theorem) and certified mode
+    (kernel-checked), with the two modes agreeing (U01–U08).
 
 An optional external EVM integration stays in `Bridge/`; the core stays
 dependency-free.
@@ -598,6 +614,18 @@ over four parallel waves: VX1, VO1 and VT1 start now, independent of the main
 chain; the rest follow their integrated prerequisites. G48–G55 (V16, V17)
 close only with X, O and T included.
 
+### Authorized extension: trust and usability (2026-11-07)
+
+The user asked that the finished repository be trustworthy although it is
+large, and usable on real contracts.
+[trust-usability.md](feature-work/trust-usability.md) plans groups A01–A06
+(assurance) and U01–U08 (usability) in seven lanes (VA1–VA3, VU1–VU4) over
+three waves. VA1, VA3 and VU1 start now, in parallel with VX1, VO1 and VT1 and
+with independent writes. It also sets a **priority**: A02, U01 and A05 first,
+then the T lanes (solc validation, the result users deploy) and the U lanes
+ahead of backfill. Scope is unchanged. G54/G55 close only with obligations 9
+and 10 met.
+
 ### Backfill queue
 
 These items are ready now, are independent of the lane order, and are owned
@@ -660,6 +688,9 @@ Completion requires **all** of the following on one integrated revision:
   is never a theorem.
 - The optimizer (O01–O05) is inside the public theorem, and `solc_validated`
   (T07) is kernel-checked with the T08 corpus run published.
+- The trusted surface (A01) is published with its size and re-checked by an
+  independent kernel (A04); U01's per-function budgets hold in both modes, and
+  the modes agree; `docs/trust.md` is published.
 - All child groups, review findings and scope questions are closed, with the
   revision, commands, theorem names, assumptions and measured resource costs
   published. A timeout or an unfinished proof keeps the roadmap open.
