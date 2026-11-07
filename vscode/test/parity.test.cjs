@@ -290,3 +290,17 @@ test('native request polling records partial/malformed identity and recovers for
  const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{readKeybindingRequest}=require('../parity/run.cjs'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'native-key-request-')),file=path.join(dir,'request.json');
  try{assert.ok(readKeybindingRequest(file).error);for(const partial of ['', '{', '{}']){fs.writeFileSync(file,partial);assert.ok(readKeybindingRequest(file).error);}const request={runId:'native',requestId:'second'};fs.writeFileSync(file,JSON.stringify(request));assert.deepEqual(readKeybindingRequest(file),{request});const seen=new Set();assert.deepEqual(readKeybindingRequest(file,seen),{request});assert.deepEqual(readKeybindingRequest(file,seen),{ignored:true});const next={runId:'native',requestId:'third'};require('../parity/phase-capture.cjs').atomicJson(file,next);assert.equal(fs.existsSync(file+'.tmp'),false);assert.deepEqual(readKeybindingRequest(file,seen),{request:next});fs.writeFileSync(file,JSON.stringify(request));assert.deepEqual(readKeybindingRequest(file,seen),{ignored:true});}finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+// Guard regression: malformed status evidence must not crash analysis or certify timing.
+test('malformed symbol status recordings are broken evidence rather than observer exceptions',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'parity-symbol-malformed-')),file=join(dir,'lsp.jsonl'),range={start:{line:0,character:0},end:{line:0,character:1}},valid={uri:'file:///a.dfy',namedVerifiables:[{nameRange:range,status:1}]};
+ try{for(const params of [null,{}, {...valid,namedVerifiables:null},{...valid,namedVerifiables:[null]},{...valid,namedVerifiables:[{nameRange:range,status:3}]},{...valid,namedVerifiables:[{nameRange:{start:{line:2,character:0},end:{line:1,character:0}},status:1}]}]){writeFileSync(file,JSON.stringify({direction:'server',time:1,message:{method:'dafny/textDocument/symbolStatus',params}}));const result=protocol(file);assert.equal(result.status,'broken');assert.ok(result.errors.length);assert.equal(result.queueMs.n,0);}
+ writeFileSync(file,[1,2,5].map((status,i)=>JSON.stringify({direction:'server',time:i+1,message:{method:'dafny/textDocument/symbolStatus',params:{...valid,namedVerifiables:[{nameRange:range,status}]}}})).join('\n'));const result=protocol(file);assert.equal(result.status,'partial');assert.equal(result.queueMs.median,1);assert.equal(result.symbolExecutionMs.median,1);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+// Guard regression: transport direction and monotonic observations are prerequisites for latency evidence.
+test('wrong-direction and backwards status clocks cannot certify symbol latency',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'parity-symbol-clock-')),file=join(dir,'lsp.jsonl'),params=status=>({uri:'file:///clock.dfy',version:7,namedVerifiables:[{status,nameRange:{start:{line:0,character:0},end:{line:0,character:1}}}]}),packet=(status,time,direction='server')=>({direction,time,message:{method:'dafny/textDocument/symbolStatus',params:params(status)}});
+ try{for(const rows of [[packet(1,1,'client')],[packet(1,2),packet(2,1)],[packet(2,2),packet(5,1)]]){writeFileSync(file,rows.map(r=>JSON.stringify(r)).join('\n'));const result=protocol(file);assert.equal(result.status,'broken');assert.ok(result.errors.length);assert.equal(result.queueMs.n,0);assert.equal(result.symbolExecutionMs.n,0);}}finally{rmSync(dir,{recursive:true,force:true});}
+});

@@ -164,23 +164,30 @@ function protocol(tracePath) {
   let records;try{records=readFileSync(tracePath,'utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l));}
   catch(error){return {status:'unexamined',reason:error.message};}
   const methods={},errors=[],states=new Map(),queueMs=[],executionMs=[];
-  let messages=0,framingErrors=0;const finalized=new Set();
-  for(const record of records) {
+  let messages=0,framingErrors=0,statusErrors=0;const finalized=new Set();
+  for(const [recordIndex,record] of records.entries()) {
     if(record.framingFinalized)finalized.add(record.direction);
     if(record.error){errors.push(record.error);framingErrors++;continue;}
     const message=record.message,method=message?.method;
     if(message)messages++;
     if(method)methods[record.direction+':'+method]=(methods[record.direction+':'+method]||0)+1;
     if(message?.error)errors.push(message.error);
+    if(method==='dafny/textDocument/symbolStatus') {
+      const params=message.params,position=p=>p&&Number.isInteger(p.line)&&p.line>=0&&Number.isInteger(p.character)&&p.character>=0;
+      const range=r=>position(r?.start)&&position(r?.end)&&(r.start.line<r.end.line||r.start.line===r.end.line&&r.start.character<=r.end.character);
+      const valid=record.direction==='server'&&params&&typeof params.uri==='string'&&(params.version===undefined||Number.isInteger(params.version))&&Array.isArray(params.namedVerifiables)&&Number.isFinite(record.time)&&params.namedVerifiables.every(symbol=>symbol&&[0,1,2,4,5].includes(symbol.status)&&range(symbol.nameRange));
+      if(!valid){errors.push({kind:'malformed-symbol-status',recordIndex});statusErrors++;continue;}
+      if(params.namedVerifiables.some(symbol=>{const previous=states.get(JSON.stringify([params.uri,params.version,symbol.nameRange]));return previous?.last!==undefined&&record.time<previous.last;})){errors.push({kind:'nonmonotonic-symbol-status',recordIndex});statusErrors++;continue;}
+    }
     if(method==='dafny/textDocument/symbolStatus')for(const symbol of message.params.namedVerifiables) {
       const key=JSON.stringify([message.params.uri,message.params.version,symbol.nameRange]),previous=states.get(key)||{};
       if(symbol.status===1&&previous.queued===undefined)previous.queued=record.time;
       if(symbol.status===2&&previous.running===undefined){previous.running=record.time;if(previous.queued!==undefined)queueMs.push(record.time-previous.queued);}
       if(symbol.status>=4&&!previous.done){previous.done=true;if(previous.running!==undefined)executionMs.push(record.time-previous.running);}
-      states.set(key,previous);
+      previous.last=record.time;states.set(key,previous);
     }
   }
-  return {status:framingErrors?'broken':!messages?'unexamined':finalized.size===2?'observed':'partial',messageCount:messages,methods,errors,queueMs:statistics(queueMs),symbolExecutionMs:statistics(executionMs),
+  return {status:framingErrors||statusErrors?'broken':!messages?'unexamined':finalized.size===2?'observed':'partial',messageCount:messages,methods,errors,queueMs:statistics(queueMs),symbolExecutionMs:statistics(executionMs),
     framingFinalized:[...finalized],
     scope:'Native status notification intervals include transport and notification throttling; they do not isolate pure solver or VC time.'};
 }
