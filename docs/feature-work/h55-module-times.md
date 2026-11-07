@@ -2332,3 +2332,22 @@ checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in
 `tests/h55/module-times/primitive-correspondence-evidence.sha256`. This
 non-atomic observation does not establish current runtime acceptance.
+
+## Additional primitive correspondence observations
+
+`primitive_correspondence_extra.py` records ten previously unreferenced
+primitive correspondence sources with hashes and the primitive-packets document
+hash. Their stated scopes include bitwise operations, comparisons, literals,
+unchecked shifts, signed and unsigned casts, signed division/remainder and
+unchecked unsigned multiplication. Out-of-range and zero-divisor refusals remain
+refusals; the unsigned cast remains restricted to smaller widths. Current
+invocation, inputs, effects, outcomes and verification remain unresolved. These
+statements do not establish full world, session, gas or fetched-EVM adequacy.
+
+At `bfe7194366fb3068956b00f6f9a6a725372982e8`, the refreshed static index
+has 779 candidates, 584 with supplied current references and 195 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/primitive-extra-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
