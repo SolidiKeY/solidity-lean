@@ -63,6 +63,9 @@ export function observeStorageWrites(vm) {
 export function assertFixtureRun(run) {
   requireMatch(run.status==='working','nonworking fixture');
   requireMatch(run.deployment?.failed===false,'missing or failed deployment');
+  // Equal missing/malformed fields are not evidence of deployed-code identity.
+  for(const hash of [run.deployment.runtimeCodeSha256,run.runtimeSha256])
+    requireMatch(typeof hash==='string'&&hash.length===64&&/^[0-9a-f]{64}$/.test(hash),'invalid runtime SHA256');
   requireMatch(run.deployment.runtimeCodeSha256===run.runtimeSha256,'wrong deployed code');
   requireMatch(run.deployment.storageWriteCount===0&&run.storageWrites.length===0,'unexpected deployment/storage writes');
   assertTranscript(run.plan,run.observed);
