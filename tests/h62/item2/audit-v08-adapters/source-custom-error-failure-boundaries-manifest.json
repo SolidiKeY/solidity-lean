@@ -1,0 +1,229 @@
+{
+  "status": "SIX_LOCAL_FAILURE_COMPONENT_LINKS_ONLY",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceCustomErrorFailureJoint.lean": "d8983b7a90bed6e71768fc9b5f15dcee9a0cc8400df086fa5265e72c444d568d",
+    "Solidity/Lowering/V08/SourceCustomErrorFailures.lean": "4c578a01c4634f2516f3360771b30e06366f77092233a9cc8a136c23f1eafa1f",
+    "Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean": "15f56dcaf60fa7fe5c3515b909c8443cde16b585fb9ff5c87c25644f49712ed3",
+    "Solidity/Lowering/V08/SourceCustomErrorControls.lean": "9dd4c65999c53ed2609f8db7f0b703933f004e83ef5fe05f81495572e53bf297",
+    "Solidity/Lowering/V08/SourceKeccak.lean": "da457d92de90b7c81a3dd7ca29a4be6f0b365530a212e331b4cf5ffd8254d507"
+  },
+  "target_links": [
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:9:arguments_failure",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.arguments_failure",
+      "component": "actual",
+      "joint_full_domain": "PENDING",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:22:encoding_failure",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.encoding_failure",
+      "component": "encoding_actual",
+      "joint_full_domain": "PENDING",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:40:converted_tail_failure",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.converted_tail_failure",
+      "component": "prefix_failure",
+      "joint_full_domain": "PENDING",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:65:attempt_failure",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.attempt_failure",
+      "component": "observed",
+      "joint_full_domain": "PENDING",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:76:rethrow_bytes",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.rethrow_bytes",
+      "component": "rethrow_actual",
+      "joint_full_domain": "PENDING",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:89:rethrow_zero_horizon",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.rethrow_zero_horizon",
+      "component": "rethrow_timeout",
+      "joint_full_domain": "PENDING",
+      "statement_fidelity": "PENDING"
+    }
+  ],
+  "new_body_fixtures": 0,
+  "fidelity_acceptances": 0,
+  "models": [
+    "Existing record-member control actually allocates hash input and a record, changes local, then fails encoding with exact Source.stuck not ABI-encodable. No dangling reference fabricated or canonical admission asserted.",
+    "Existing populated E supplies rethrow local reference and same allocated bytes lookup, for arbitrary bytes/pipeline/static and positive horizons; zero horizon retains exact timeout."
+  ],
+  "negative": "Full unsupported-encoding run differs from empty revert; full zero/positive rethrow runs differ even for empty bytes. No failure reclassification.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceCustomErrorFailureJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 2.379,
+    "peak_sampled_aggregate_rss": 735293440,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "retained_failure": {
+    "gate": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/SourceCustomErrorFailureJoint.lean"
+      ],
+      "exit": 1,
+      "stop": null,
+      "seconds": 2.478,
+      "peak_sampled_aggregate_rss": 745029632,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    "reason": "Referenced allocation lemma outside imports; replaced with already imported SourceKeccak.allocated. Error-recovery axiom output belongs only to failed receipt and is not acceptance evidence."
+  },
+  "axioms": {
+    "joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "prefix_failure": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "actual": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "observed": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "observation_not_recovery": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "encoding_joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "encoding_actual": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "encoding_stuck_not_revert": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "rethrow_joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "rethrow_actual": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "rethrow_timeout": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "rethrow_timeout_not_revert": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "limitations": [
+    "All six original local failure targets now have component applications, not whole-domain feasibility or frozen fidelity/owner acceptance. Full19target audit and101residual records remain open.",
+    "Existing models/producers reused; no new deployed body fixture, evaluator,encoder,catch handler or canonical Source admission.",
+    "No actual Source origin/lifecycle or complete production delegated body/frame/session/world/H68 transport. H124 remains closed.",
+    "No full-root or matched timing acceptance/STOP release; original proof/resource limits unchanged."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/check/console.log",
+      "bytes": 188,
+      "sha256": "304981a722a56b85c1e52608a9d3b836ab4a2878f6a14e6a32e87bc56adf913d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/check/gates/1.log",
+      "bytes": 33102,
+      "sha256": "c76346a8c9b81a8d2d97da0b126b014019f10e5a455d2e8b352b8e23bafb3f87"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "6e26116829fce7ede0967068b080ee680379fbb8b1c4b558a4b294f1fbc4f4b7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/check/gates/gates.tsv",
+      "bytes": 287,
+      "sha256": "63b93f474ae994d4d7e387f591c9f72294978dfff8a79fda734a640a94089c81"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/check/results.json",
+      "bytes": 409,
+      "sha256": "02737cbd1c5236d72f7d45b26fb88641d867aef4310765fda065714707c65d36"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/final-check/console.log",
+      "bytes": 194,
+      "sha256": "975765076f1d5dca76d7fadafbe392ba1849979b80d3abf7c6ced094e141b7bc"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/final-check/gates/1.log",
+      "bytes": 32872,
+      "sha256": "4b0072b34908b09df5f8c7f8cf9c2fda0e064721e798695190ba3a365c8a75b8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/final-check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "6e26116829fce7ede0967068b080ee680379fbb8b1c4b558a4b294f1fbc4f4b7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/final-check/gates/gates.tsv",
+      "bytes": 293,
+      "sha256": "e7b1a9afac60dfaf7eab8f3d6fc7a4f05b0a1b43972ac4c2a5dd6e9ee28060e6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/final-check/results.json",
+      "bytes": 409,
+      "sha256": "9a55d42a4c26077fce1cf20c789dd14cdab47a8907648e5f42ebc70634f41ac9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/index.json",
+      "bytes": 1968,
+      "sha256": "20d5b4f3d91fb0fab7fd242590dbfa073aed6468db33396781434dafeeb493ed"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-boundaries-20261107/trust.json",
+      "bytes": 1010,
+      "sha256": "a2cadda617aeaac5ac1cc661e7e343f87029024b3f1eec14332c34e859f2dd7b"
+    }
+  ]
+}

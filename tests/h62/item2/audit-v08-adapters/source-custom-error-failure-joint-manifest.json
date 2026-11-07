@@ -114,5 +114,6 @@
       "bytes": 405,
       "sha256": "d78438eb0d6811efcf5a61a53a8d2f7b3a55442413bf5d6a365f1b7f098c2070"
     }
-  ]
+  ],
+  "receipt_status": "HISTORICAL: source binding and three-target scope at recorded checkpoint. Current source and six-target component scope superseded by source-custom-error-failure-boundaries-manifest.json; old hashes retained."
 }

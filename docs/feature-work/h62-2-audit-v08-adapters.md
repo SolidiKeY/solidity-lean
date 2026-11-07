@@ -1220,3 +1220,38 @@ release. Exact bindings: source-reason-joint-manifest.json; logs remain off Git.
 Read-only finder and skeptic found no issue in the actual EM composition,
 retained generic domains, full-result negatives or failure/acceptance receipts.
 Neither ran Lean or a server; review evidence remains off Git.
+
+### Six local custom-error failure component links (2026-11-07)
+
+The existing SourceCustomErrorFailureJoint audit now supplies the remaining
+encoding and rethrow premises. Encoding uses the existing real record allocation:
+arguments allocate hash input and a record and change a local, then encoding
+returns exactly stuck "not ABI-encodable". This is neither a dangling pointer
+nor a proof of canonical Source admission. Its full-result negative refuses
+reclassifying that stuck result as an empty revert.
+
+The rethrow local selects the same newly allocated bytes object. Its reference
+and heap premises are proved together for arbitrary bytes, then the original
+positive-horizon law and zero-horizon law are consumed. Full timeout and rethrow
+runs differ even for empty bytes. All six original local failure targets now
+link to checked component applications; full-domain feasibility, ownership and
+frozen fidelity remain pending, as do the whole19-target/101-residual audit.
+No existing model is counted as a new deployed body fixture or producer.
+
+The first extension check failed on a lemma outside its imports; the proof now
+uses the already imported generic SourceKeccak.allocated law. The failed receipt,
+including its error-recovery output, is retained and supplies no proof credit.
+Final serial check passed in 2.379 seconds, one Lean, peak sampled aggregate RSS
+735,293,440 bytes and no STOP. All twelve audit declarations retain only existing
+standard axioms, with no error-recovery axiom in the passing output; registration
+passed. Old source/hash/three-target receipt is explicitly historical; current
+bindings are in source-custom-error-failure-boundaries-manifest.json.
+
+No Source origin/lifecycle, compiler/catch selection, complete delegated
+body/frame/session/world/H68 certificate, full-root/matched timing acceptance or
+prior STOP release. H124 remains closed; all original budgets and exclusions stay
+unchanged. Bulk index/logs remain off Git.
+
+Read-only finder and skeptic found no issue in the allocated-record encoding
+premises, reference/heap joint, full failure distinctions or historical/final
+receipt boundaries. Neither ran Lean or a server; review evidence remains off Git.
