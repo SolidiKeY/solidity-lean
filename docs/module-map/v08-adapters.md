@@ -957,11 +957,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean` | Concrete scoped-return instances, restored result/counter/older-frame observations, frame refusal and zero-cost return without allocator ownership. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransport.lean` | Actual scoped-checker success yields frozen success/bare-revert claims for every original Entry, caller, frame and runtime cursor at fixed C/A; no approved-profile or selector claim. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransportControls.lean` | Checked scoped-call argument-underflow transport preserves complete ordered bare-revert/non-success/panic/exhaustion distinctions without failed-State/world claims. |
-| `Backend/Executable/ConstructorArgumentControls.lean` | Inhabited argument-preparation controls, not constructor/runtime closure. |
-| `Backend/Executable/ConstructorArgumentFailure.lean` | Effectful local-argument failure at the native constructor boundary. |
-| `Backend/Executable/ConstructorBaseArgumentControls.lean` | Native inherited-argument clients with declaration-derived constructor contexts. |
-| `Backend/Executable/ConstructorBaseArguments.lean` | Actual inherited-constructor argument binding. |
-| `Backend/Executable/ConstructorStorageFailure.lean` | Storage-effect argument failure at the native constructor boundary. |
 | `Backend/InternalFlow/RuntimeFrameV3GeneralBoundary.lean` | General P1 boundary: `callRec_run` and generic recursive `callRec` transport `of_unrolled`/`unrolled_returns` into the frozen V3 recursive structure; dual-outcome V3 structures are empty for sources that never bare-revert, so the unrestricted closure is false (`no_unrestricted_closure`). |
 | `Backend/InternalFlow/RuntimeFrameV3GeneralBoundaryControls.lean` | Controls: `of_unrolled` rebuilds the scoped scalar-family V3 producer with the same plan; the trivial uniform family succeeds at index one, exhausts at zero and has no V3 producer. |
 | `Backend/InternalFlow/RuntimeFrameInterfaceV4.lean` | Frozen P1 interface V4: success-only companion of V3 (H57 pair); every V3 field but the reverting witness. Signatures only. |
@@ -970,5 +965,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV4MigrationControls.lean` | Migration control: the scoped scalar-family V3 producer moves to V4 and back to V3 with its own reverting entry, same plan. |
 | `Backend/InternalFlow/RuntimeFrameP1Lang.lean` | Coarse G01 `Lang Event Outcome` pair for one P1 context: source over quotation depth, target over the emitted image, same admitted inputs; frame-boundary outcome classes only (no events or revert data). |
 | `Backend/InternalFlow/RuntimeFrameP1Bridge.lean` | H68 family 3 `p1_frame_bridge` shape check (G49 `BridgeGoal`, `beta := id`) for the degenerate V4 trivial family over the producer's admitted domain, `Local` the actual V4 producer; controls. |
+| `Backend/Executable/ConstructorArgumentControls.lean` | Inhabited argument-preparation controls, not constructor/runtime closure. |
+| `Backend/Executable/ConstructorArgumentFailure.lean` | Effectful local-argument failure at the native constructor boundary. |
+| `Backend/Executable/ConstructorBaseArgumentControls.lean` | Native inherited-argument clients with declaration-derived constructor contexts. |
+| `Backend/Executable/ConstructorBaseArguments.lean` | Actual inherited-constructor argument binding. |
+| `Backend/Executable/ConstructorStorageFailure.lean` | Storage-effect argument failure at the native constructor boundary. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
