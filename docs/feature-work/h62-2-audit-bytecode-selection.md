@@ -957,3 +957,56 @@ references); prior missing-citation failures remain historical receipts. The
 current lightweight layer check still reports12 external core-to-non-core
 edges. Global pins report0errors,196unrecorded and99baselined changes;24scoped
 records remain proposals. These red/pending gates are not waived.
+
+
+## Primitive word-guard domains and cval hypotheses
+
+Published master d3597eca was adopted at92a2ab64 before work; previous owned
+proofs and seals remain preserved. Four additive audit lemmas instantiate the
+existing generic WordGate family, without copying a compiler or changing its
+interface. word_gate_actual_success_iff characterizes actual selected-code
+success with joint global certificate and represented frame exactly by the
+modeled word-validity predicate. Forward consumes the stated success fact and
+derives validity; reverse constructs the frame and proves success, with no
+additional execution oracle. A Boolean word supplies a full positive witness.
+The modeled enumBelow0 control combines the global certificate with actual
+refusal of every represented word. This intentional empty-domain control does
+not assert Source enum admission or a producer defect.
+
+word_gate_cval_jointWitness constructs the loaded FinW word from the SAME
+abstract input at any offset, with actual selection, seeded memory, load-value
+identity and the existing cval(fuel+1) rejection equivalence. It proves no span
+check, native calldata provenance or successful cval/whole-entry decoding.
+The abstract load retains zero padding beyond EOF. The exact original primitive
+comparison keeps its offset, length and fuel parameters; no exclusion is added.
+
+The first direct check failed because Boolean case analysis had reduced its
+true-branch goal to true=true. The saved error-recovery sorryAx output was
+rejected, no source sorry or accepted output; raw failed source and log retained.
+Repository try-tactics confirmed reflexivity. The corrected source passes in
+14.508s with empty diagnostics,28standard-only axiom guards and both runtime
+monitors passing. No module in this checkpoint exceeds60s; the preceding head
+checkpoint61.994s receipt stays retained. No performance PASS is inferred.
+Both attempts reuse the original generic epoch/deadline
+01:11:01.069665→05:11:01.069665UTC unchanged, without prerequisite build,
+PowerBounds retry or proof-window reset. Relevant WordGate and ABI semantics
+sources match the frozen c6f550 base. No original producer, theorem, dependent
+definition, budget, axiom set, refusal or exclusion changed.
+
+Twenty-eight scoped pins remain a coordinator proposal. No new Lean module or
+root registration. Expanded703/190core/37Bridge census, kernel/source/type/
+private/inherited joins, simultaneous-witness ledger, native/Source/selectors,
+charged gas/fork, fullpackage/Bridge and matchedperformance remain open. These
+standalone helper proofs do not decrement uncovered inventory counts.
+Evidence: /workspace/parallel-20261103/executable-bytecode/primitive-word-domain/.
+
+Independent read-only finder and skeptic preflight/postcheck reviews pass.
+Both confirm the corrected reflexive case, actual hash-bound validation and
+all28proposal entries, with no remaining findings. Failed source/receipt stays
+rejected and separate; full validation/linkage and producer waits remain open.
+
+Checkpoint tests63, trust/reachability, roots/fragments, whitespace and
+documentation paths pass (133 ambiguous but resolving citations). Current
+layer gate remains RED with12 external edges. Global pins have0errors,
+268unrecorded and99baselined changes;28scoped records remain proposals.
+No full-gate or performance acceptance follows.

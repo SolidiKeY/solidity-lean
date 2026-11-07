@@ -507,4 +507,94 @@ theorem head_gate_oversized_jointWitness (C : Solidity.Contract) (base : Nat)
 /-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_oversized_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms head_gate_oversized_jointWitness
 
+/-- Bare primitive-guard success is feasible on exactly its validated-word
+input domain, with actual selection, global certificate and one common frame. -/
+theorem word_gate_actual_success_iff (C : Solidity.Contract) (base : Nat)
+    (kind : Solidity.AbiEntry.Kind) (label word : Fin W) (machine : Machine) :
+    (∃ (_certificate : WordGateCertificate WordGate.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx)
+        (WordGate.program C kind label)) (prepared : Machine),
+      Compiler.compile base (Frag.init RouteCtx) (WordGate.program C kind label) = some result ∧
+      prepared = seeded base word (wmod 0) machine ∧ prepared.mem base = .val word ∧
+      run result.code prepared =
+        .ok {prepared with mem := upd prepared.mem (base + 1) (.val label)} 0) ↔
+      kind.valid word.val = true := by
+  constructor
+  · rintro ⟨certificate, result, prepared, selected, initialFrame, initialWord, executed⟩
+    cases validity : kind.valid word.val with
+    | false =>
+      have rejected : run result.code prepared = .revert :=
+        (WordGate.rejected_iff C base kind label result selected prepared word initialWord).2 validity
+      rw [rejected] at executed
+      cases executed
+    | true => rfl
+  · intro valid
+    let prepared : Machine := seeded base word (wmod 0) machine
+    refine ⟨WordGate.certificate, WordGate.compiled C base kind label, prepared,
+      WordGate.selected C base kind label, rfl, seeded_word base word (wmod 0) machine, ?_⟩
+    rw [WordGate.executed C base kind label _ (WordGate.selected C base kind label)
+      prepared word (seeded_word base word (wmod 0) machine)]
+    simp only [wordGateOutcome, if_pos valid]
+
+/-- The generic certificate coexists with a modeled empty success domain.
+Every represented word is actually rejected; this asserts no Source enum admission. -/
+theorem word_gate_empty_enum_jointWitness (C : Solidity.Contract) (base : Nat)
+    (label : Fin W) (machine : Machine) :
+    ∃ _certificate : WordGateCertificate WordGate.program,
+      ∀ word : Fin W,
+        run (WordGate.compiled C base (.enumBelow 0) label).code
+          (seeded base word (wmod 0) machine) = .revert := by
+  refine ⟨WordGate.certificate, ?_⟩
+  intro word
+  have invalid : (Solidity.AbiEntry.Kind.enumBelow 0).valid word.val = false := by
+    cases validity : (Solidity.AbiEntry.Kind.enumBelow 0).valid word.val with
+    | false => exact validity
+    | true => exact False.elim (empty_enum_has_no_valid_word ⟨word, validity⟩)
+  exact (WordGate.rejected_iff C base (.enumBelow 0) label _
+    (WordGate.selected C base (.enumBelow 0) label)
+    (seeded base word (wmod 0) machine) word (seeded_word base word (wmod 0) machine)).2 invalid
+
+/-- A valid Boolean word inhabits the full bare-guard success domain. -/
+theorem word_gate_positive_jointWitness :
+    ∃ (_certificate : WordGateCertificate WordGate.program)
+      (result : Compiler.Compilation 7 (Frag.init RouteCtx)
+        (WordGate.program {vars := []} .bool (wmod 13))) (prepared : Machine),
+      Compiler.compile 7 (Frag.init RouteCtx)
+        (WordGate.program {vars := []} .bool (wmod 13)) = some result ∧
+      prepared = seeded 7 (wmod 1) (wmod 0) Machine.init ∧ prepared.mem 7 = .val (wmod 1) ∧
+      run result.code prepared =
+        .ok {prepared with mem := upd prepared.mem 8 (.val (wmod 13))} 0 := by
+  exact (word_gate_actual_success_iff {vars := []} 7 .bool (wmod 13)
+    (wmod 1) Machine.init).2 (by decide)
+
+/-- The primitive cval comparison's loaded-word, frame and selection hypotheses
+coexist at every offset. Zero-padded abstract loads are not native provenance
+and this does not assert an ABI entry-span check or successful decoding. -/
+theorem word_gate_cval_jointWitness (C : Solidity.Contract) (base : Nat)
+    (kind : Solidity.AbiEntry.Kind) (label : Fin W) (input : Solidity.AbiEntry.Input)
+    (offset fuel len : Nat) (machine : Machine) :
+    ∃ (_certificate : WordGateCertificate WordGate.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx)
+        (WordGate.program C kind label)) (prepared : Machine) (word : Fin W),
+      Compiler.compile base (Frag.init RouteCtx) (WordGate.program C kind label) = some result ∧
+      word.val = Solidity.AbiEntry.load input.data offset ∧
+      prepared = seeded base word (wmod 0) machine ∧ prepared.mem base = .val word ∧
+      (run result.code prepared = .revert ↔
+        Solidity.AbiEntry.cval input (fuel + 1) (.word kind) offset len = .error .revert) := by
+  let word : Fin W := ⟨Solidity.AbiEntry.load input.data offset, Solidity.AbiEntry.load_lt _ _⟩
+  let prepared : Machine := seeded base word (wmod 0) machine
+  exact ⟨WordGate.certificate, WordGate.compiled C base kind label, prepared, word,
+    WordGate.selected C base kind label, rfl, rfl, seeded_word base word (wmod 0) machine,
+    WordGate.correspondence C base kind label _ (WordGate.selected C base kind label)
+      prepared word (seeded_word base word (wmod 0) machine) input offset fuel len rfl⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.word_gate_actual_success_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_gate_actual_success_iff
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.word_gate_empty_enum_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_gate_empty_enum_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.word_gate_positive_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_gate_positive_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.word_gate_cval_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_gate_cval_jointWitness
+
 end Solidity.H62.BytecodeSelection.BoolBindingFixture
