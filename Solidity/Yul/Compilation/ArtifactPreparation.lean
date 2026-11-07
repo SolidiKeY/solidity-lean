@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.WordMachine
 import Solidity.Yul.Compilation.Artifact
 
 /-! Exact provenance for a producer stage before successful code selection.
@@ -190,4 +191,48 @@ theorem result_image_roundtrip {E : Type} {P : E → Type}
   rcases image with ⟨original, payload, agrees⟩
   cases agrees
   rfl
+/-- Actual instruction selection preserves concatenation of selected programs.
+This is target preparation, with no execution, gas or capacity assertion. -/
+theorem selectCode_append {first second : Backend.Program} {a b : List Evm.Instr}
+    (left : WordMachine.selectCode first = some a) (right : WordMachine.selectCode second = some b) :
+    WordMachine.selectCode (first ++ second) = some (a ++ b) := by
+  induction first generalizing a with
+  | nil =>
+    have same : a = [] := (Option.some.inj left).symm
+    subst a
+    exact right
+  | cons i first ih =>
+    change (WordMachine.selectInstr i).bind (fun j =>
+      (WordMachine.selectCode first).map (fun rest => j :: rest)) = some a at left
+    obtain ⟨j, selected, rest⟩ := Option.bind_eq_some_iff.mp left
+    obtain ⟨tail, selectedTail, same⟩ := Option.map_eq_some_iff.mp rest
+    subst a
+    change (WordMachine.selectInstr i).bind (fun j =>
+      (WordMachine.selectCode (first ++ second)).map (fun rest => j :: rest)) = _
+    rw [selected, ih selectedTail]
+    rfl
+
+/-- Every existing typed prefix push selects actual code. Word order is the
+original pushPrefix order; no bounded-depth or native-capacity claim follows. -/
+theorem pushPrefix_selection_total (words : List Backend.Scalar.Word) :
+    ∃ code, WordMachine.selectCode (pushPrefix words) = some code := by
+  induction words with
+  | nil => exact ⟨[], rfl⟩
+  | cons word words ih =>
+    obtain ⟨code, selected⟩ := ih
+    have singleton : WordMachine.selectCode [Backend.Scalar.pushWord word] =
+        some [Evm.Instr.push (MachineAdapter.coreWord word)] := by
+      rw [WordMachine.selectCode, WordMachine.select_pushWord]
+      rfl
+    exact ⟨code ++ [Evm.Instr.push (MachineAdapter.coreWord word)], selectCode_append selected singleton⟩
+
+/-- Prefix retirement selection is total independently of execution operands. -/
+theorem popPrefix_selected (fresh : Nat) :
+    WordMachine.selectCode (popPrefix fresh) = some (List.replicate fresh Evm.Instr.pop) := by
+  induction fresh with
+  | zero => rfl
+  | succ fresh ih =>
+    change (WordMachine.selectCode (popPrefix fresh)).map (fun code => Evm.Instr.pop :: code) = _
+    rw [ih]
+    rfl
 end Solidity.Yul.Compilation.Artifact

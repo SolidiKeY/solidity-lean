@@ -1,3 +1,7 @@
+import Solidity.Yul.Compilation.ZeroSequenceCompilationControls
+import Solidity.Yul.Compilation.ZeroScopeCompilationControls
+import Solidity.Yul.Compilation.ZeroControlCompletion
+import Solidity.Yul.Compilation.ZeroControlCompilationControls
 import Solidity.Yul.Compilation.SwitchSequenceCompletion
 import Solidity.Yul.Compilation.SwitchCompletion
 import Solidity.Yul.Compilation.SwitchCompilationControls
@@ -1253,3 +1257,216 @@ end Controls
 #print axioms phase_reflection
 #print axioms Controls.ordered
 end Solidity.Yul.Compilation.H55ControlFamilies.SwitchSequence
+
+/-! Zero/control accepted body evidence is already selected. Only the actual
+prefix entry/retirement selector remains, and the shared laws prove it total. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.ZeroControl
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : ZeroControlCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code a.source_to_model (ZeroControlCompletion.model_to_source a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) := Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : ZeroControlCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem code_total (a : ZeroControlCompilation.Compiled fuel stmt) : ∃ code, a.code = some code := by
+  cases a with
+  | @scope fresh bodyStmt body =>
+    obtain ⟨begin, entering⟩ := Artifact.pushPrefix_selection_total
+      (Vector.replicate fresh (0 : Scalar.Word)).toList
+    change WordMachine.selectCode (ZeroLoopScope.entry fresh) = some begin at entering
+    have exiting := Artifact.popPrefix_selected fresh
+    refine ⟨begin ++ body.code ++ List.replicate fresh Evm.Instr.pop, ?_⟩
+    change (do
+      let begin ← WordMachine.selectCode (ZeroLoopScope.entry fresh)
+      let finish ← WordMachine.selectCode (popPrefix fresh)
+      pure (begin ++ body.code ++ finish)) = _
+    rw [entering, exiting]
+    rfl
+
+noncomputable def encodeRaw (a : ZeroControlCompilation.Compiled fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofTotalSelection ZeroControlCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) code_total a
+
+abbrev RawImage (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encodeRaw (fuel := fuel) (stmt := stmt))
+
+theorem raw_source_roundtrip (a : ZeroControlCompilation.Compiled fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encodeRaw a) = a := Artifact.source_roundtrip encodeRaw a
+
+theorem raw_image_roundtrip (a : RawImage fuel stmt) :
+    Artifact.toImage encodeRaw (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem selected_raw (a : ZeroControlCompilation.Artifact fuel stmt) : encodeRaw a.compiled = encode a := by
+  have total := Artifact.select_total ZeroControlCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) code_total a.compiled
+  have selected := Artifact.select_some ZeroControlCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) a.compiled a.code a.lowered
+  exact Option.some.inj (total.symm.trans selected)
+
+theorem no_accepted_refusal (a : ZeroControlCompilation.Compiled fuel stmt) : a.code ≠ none := by
+  obtain ⟨code, selected⟩ := code_total a
+  intro refused
+  cases selected.symm.trans refused
+
+namespace Controls
+theorem effectful (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encodeRaw ZeroControlCompilation.Controls.artifact.compiled).code
+      {m with stack := coreWord b :: caller} =
+      .ok {m with stack := coreWord (ZeroControlCompilation.Controls.update b) :: caller} 0 := by
+  rw [selected_raw]
+  exact ZeroControlCompilation.Controls.target_done b m caller
+#guard (ZeroControlCompilation.lower 0 ZeroControlCompilation.Controls.source).isNone
+#guard (ZeroControlCompilation.lower 9 ZeroControlCompilation.Controls.beyondSource).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_total
+#print axioms encodeRaw
+#print axioms raw_source_roundtrip
+#print axioms raw_image_roundtrip
+#print axioms selected_raw
+#print axioms no_accepted_refusal
+#print axioms Controls.effectful
+#print axioms Artifact.selectCode_append
+#print axioms Artifact.pushPrefix_selection_total
+#print axioms Artifact.popPrefix_selected
+end Solidity.Yul.Compilation.H55ControlFamilies.ZeroControl
+
+/-! The other accepted zero-body family reuses the same prefix totality. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.ZeroScope
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : ZeroScopeCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code (by
+    rcases a with ⟨compiled, code, lowered⟩
+    cases compiled with
+    | scope body => exact ZeroLoopScope.source_to_model body code lowered) a.reflected
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) := Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : ZeroScopeCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem code_total (a : ZeroScopeCompilation.Compiled fuel stmt) : ∃ code, a.code = some code := by
+  cases a with
+  | @scope fresh bodyStmt body =>
+    obtain ⟨begin, entering⟩ := Artifact.pushPrefix_selection_total
+      (Vector.replicate fresh (0 : Scalar.Word)).toList
+    change WordMachine.selectCode (ZeroLoopScope.entry fresh) = some begin at entering
+    have exiting := Artifact.popPrefix_selected fresh
+    refine ⟨begin ++ body.code ++ List.replicate fresh Evm.Instr.pop, ?_⟩
+    change (do
+      let begin ← WordMachine.selectCode (ZeroLoopScope.entry fresh)
+      let finish ← WordMachine.selectCode (popPrefix fresh)
+      pure (begin ++ body.code ++ finish)) = _
+    rw [entering, exiting]
+    rfl
+
+noncomputable def encodeRaw (a : ZeroScopeCompilation.Compiled fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofTotalSelection ZeroScopeCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) code_total a
+
+abbrev RawImage (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encodeRaw (fuel := fuel) (stmt := stmt))
+
+theorem raw_source_roundtrip (a : ZeroScopeCompilation.Compiled fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encodeRaw a) = a := Artifact.source_roundtrip encodeRaw a
+
+theorem raw_image_roundtrip (a : RawImage fuel stmt) :
+    Artifact.toImage encodeRaw (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem selected_raw (a : ZeroScopeCompilation.Artifact fuel stmt) : encodeRaw a.compiled = encode a := by
+  have total := Artifact.select_total ZeroScopeCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) code_total a.compiled
+  have selected := Artifact.select_some ZeroScopeCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) a.compiled a.code a.lowered
+  exact Option.some.inj (total.symm.trans selected)
+
+theorem no_accepted_refusal (a : ZeroScopeCompilation.Compiled fuel stmt) : a.code ≠ none := by
+  obtain ⟨code, selected⟩ := code_total a
+  intro refused
+  cases selected.symm.trans refused
+
+namespace Controls
+theorem effectful (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encodeRaw ZeroScopeCompilation.Controls.artifact.compiled).code
+      {m with stack := coreWord b :: caller} =
+      .ok {m with stack := coreWord ((~~~(~~~b+3)+3)+3) :: caller} 0 := by
+  rw [selected_raw]
+  exact ZeroScopeCompilation.Controls.target b m caller
+#guard (ZeroScopeCompilation.lower 0 ZeroScopeCompletion.Controls.retiringSource).isNone
+#guard (ZeroScopeCompilation.lower 10 ZeroScopeCompilation.Controls.nestedSource).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_total
+#print axioms encodeRaw
+#print axioms raw_source_roundtrip
+#print axioms raw_image_roundtrip
+#print axioms selected_raw
+#print axioms no_accepted_refusal
+#print axioms Controls.effectful
+end Solidity.Yul.Compilation.H55ControlFamilies.ZeroScope
+
+/-! Zero scopes around sequence bodies retain actual entry/body/exit evidence
+through the generic certificate and exact original image. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.ZeroSequence
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fresh fuel : Nat} {body : Stmt [] [] c (fresh+n)}
+
+def encode (a : ZeroSequenceCompilation.Artifact fresh fuel body) : Artifact 0 (.zero fresh body) :=
+  Artifact.ofZero a.profile a.code a.source_to_model a.model_to_source
+
+abbrev Image (fresh fuel : Nat) (body : Stmt [] [] c (fresh+n)) :=
+  Artifact.Image (encode (fresh := fresh) (fuel := fuel) (body := body))
+
+theorem source_roundtrip (a : ZeroSequenceCompilation.Artifact fresh fuel body) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fresh fuel body) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem code_preserved (a : ZeroSequenceCompilation.Artifact fresh fuel body) : (encode a).code = a.code := rfl
+
+theorem components_preserved (a : ZeroSequenceCompilation.Artifact fresh fuel body) :
+    (Artifact.fromImage (Artifact.toImage encode a)).compiledBody = a.compiledBody ∧
+    (Artifact.fromImage (Artifact.toImage encode a)).beginCode = a.beginCode ∧
+    (Artifact.fromImage (Artifact.toImage encode a)).finishCode = a.finishCode := ⟨rfl, rfl, rfl⟩
+
+namespace Controls
+theorem outer_update (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode ZeroSequenceCompilation.Controls.one).code
+      {m with stack := coreWord 0 :: caller} = .ok {m with stack := coreWord 9 :: caller} 0 :=
+  ZeroSequenceCompilation.Controls.one_target m caller
+
+theorem full_retirement (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode ZeroSequenceCompilation.Controls.two).code
+      {m with stack := caller} = .ok {m with stack := caller} 0 :=
+  ZeroSequenceCompilation.Controls.two_target m caller
+
+#guard (ZeroSequenceCompilation.lower (n := 1) 1 0 ZeroSequenceCompilation.Controls.body).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_preserved
+#print axioms components_preserved
+#print axioms Controls.outer_update
+#print axioms Controls.full_retirement
+end Solidity.Yul.Compilation.H55ControlFamilies.ZeroSequence

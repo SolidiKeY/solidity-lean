@@ -297,6 +297,51 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.SwitchSequence",
       "adapter_kind": "selected_artifact",
       "boundary": "Shared zero-prefix joined-sequence Artifact retains both original components and independent compiler fuels through exact Image. Explicit phase_reflection preserves both independent source horizons, intermediate raw source locals and actual intermediate machine boundary, beyond joined completion. Actual ordered 0-to-3-to-6 dispatch retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroControl",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Shared actual prefix-selection laws prove accepted raw code totality around an already-selected body. Generic ofTotalSelection is constrained by actual code equations; selected_raw ties chosen payload to exact original selected encoding, and exact Image retains complete raw body evidence. No visitor acceptance, termination or capacity totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroControl",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate derives both semantic directions from actual original owner laws. Exact Image preserves original scope/profile/code/selection and full caller/nonstack frame; genuine dirty fresh-word retirement and outer updates retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroScopeCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroScope",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Shared actual prefix-selection laws prove accepted raw code totality around an already-selected body. Generic ofTotalSelection is constrained by actual code equations; selected_raw ties chosen payload to exact original selected encoding, and exact Image retains complete raw body evidence. No visitor acceptance, termination or capacity totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroScopeCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroScope",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate derives both semantic directions from actual original owner laws. Exact Image preserves original scope/profile/code/selection and full caller/nonstack frame; genuine dirty fresh-word retirement and outer updates retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate reuses both actual source/model laws for original zero scope around sequence bodies. Exact Image retains compiledBody, entry/exit code and selection evidence, fresh count and compiler fuel. Genuine outer-update and full-fresh-prefix retirement controls retain complete caller/machine frame; native capacity excluded."
     }
   ]
 }
