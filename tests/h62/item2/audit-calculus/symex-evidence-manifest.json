@@ -1,0 +1,52 @@
+{
+  "scope": "Complete10 Symex semantic roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 963,
+    "pending": 4320,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/symex-roles-v82/evidence.tar.gz",
+      "bytes": 255031,
+      "sha256": "e36f1c03f9ba587caa6a13a8904560b0eb9ec6737c71764feed8a20b240884ad"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/symex-roles-v82/inputs.json",
+      "bytes": 751,
+      "sha256": "48db8130a94a61d65309a8e1281b1f9165dc93526739f838fd66930f2454aaf1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/symex-roles-v82/gates.json",
+      "bytes": 2778,
+      "sha256": "bf2eda9f0c23a270deb4d88c55269e71c420c6dd0d8fa7aec9f0d08cbadf174c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/symex-roles-v82/reviews.md",
+      "bytes": 493,
+      "sha256": "05bda131816dc66de1089d3f2b65c5dec1baf32dd3b8999c54be189dba26d45e"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/symex-roles-v82/case-rosters.json",
+      "bytes": 1185,
+      "sha256": "977c55ac96ee0290591040d0595003f1c8897cb8bf0ef5570fb0860a5075bd5b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/symex-roles-v82/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "f44f0648a1d2a91ab3423a0e408ee497b145c71839eb51ec8f45a258bd053619"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/symex-roles-v82/external-retention.json",
+      "bytes": 259892,
+      "sha256": "28cb08eef54b4f1f849baf9c3a7697610e98e8695d2fadb3a656258f10b05be0"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/symex-roles-v82/semantic-roles-reviewed.json",
+      "bytes": 2583141,
+      "sha256": "9369e0eb43c44901c6655710a2fd5cd173e68d430856cfbc9e198ad1eb1e95f6"
+    }
+  ]
+}
