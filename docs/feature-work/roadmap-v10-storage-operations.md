@@ -1362,3 +1362,30 @@ outside automated gates and is not replaced by structural laws. H16 exact librar
 try support, separate mapping-bearing H24, Y04 physical,4.35 trust/timing waits
 and all STOPs remain. Original/consolidated proofs, backfill, coverage and full
 final gates remain unfinished; no whole-lane completion is claimed.
+
+### C256 — conditional and catch correspondence
+
+SourceAstBranchCorrespondence proves condition/branch preservation with absent
+or present else, plain catch preservation, and complete named/unnamed catch
+signature and body preservation. Exact fields and child-results expose syntax;
+these laws do not supply Source typing, admission, artifact provenance or
+execution. Both conditional guards use propext and Quot.sound; both catch guards
+use the standard trio. All four measured guards pass. No reader, protected
+Source, frozen statement/interface/premise/budget/exclusion, axiom declaration
+or trust policy changed. An initial else proof failed before bind normalization;
+normalizing successful binds fixes it without changing its statement. Failed
+and rejected recovery diagnostics remain retained, never accepted or pinned.
+
+Existing statement controls keep all four actual bodies per pipeline and prior
+checks. Added generic absent-else, plain catch and unnamed bytes-memory catch
+boundaries retain absence, signature and empty body syntax. They are not valid
+Source-program witnesses. No Source case copies or phase folders. C256 lane
+history records read-only finder/skeptic reviews with no findings; neither used
+Lean, its server or build commands.
+
+Actual Source origin/H24/lifecycle/S03-PANIC41 and artifact binding remain local
+H121b duties, undelivered here. C246 remains historical manual failure evidence
+outside automated gates, not replaced by these structural laws. H16 exact try
+support, separate mapping-bearing H24, Y04 physical and 4.35 trust/timing waits
+and every STOP remain. Original/consolidated proof/backfill/coverage and full
+final gates remain open; no semantic producer or whole-lane completion claimed.
