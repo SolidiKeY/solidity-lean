@@ -1494,6 +1494,7 @@ import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
 import Solidity.Backend.Payments.CompilerExact
 import Solidity.Backend.Payments.CoreExact
+import Solidity.Backend.Payments.EntrySuccess
 import Solidity.Backend.Payments.Headlines
 import Solidity.Backend.Payments.Versioned
 import Solidity.Backend.Payments.VersionedControls
