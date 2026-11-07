@@ -1,0 +1,65 @@
+{
+  "guardedRegression": "C primitive-return support must match reviewed9proved/4specificrefusals,not admission only.",
+  "source": "tests/directruntime-20261104/control-tuples/Controls.sol",
+  "sourceSha256": "11c44271ac2572801215483a7922e984e58b1cd554c289f0bd7bdc679a883ab7",
+  "contract": "ControlTuples",
+  "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+  "expected": [
+    {
+      "name": "executeFirst",
+      "status": "proved"
+    },
+    {
+      "name": "whileZero",
+      "status": "proved"
+    },
+    {
+      "name": "continueTest",
+      "status": "proved"
+    },
+    {
+      "name": "breakTest",
+      "status": "proved"
+    },
+    {
+      "name": "earlyReturn",
+      "status": "proved"
+    },
+    {
+      "name": "swap",
+      "status": "proved"
+    },
+    {
+      "name": "declaration",
+      "status": "proved"
+    },
+    {
+      "name": "skipped",
+      "status": "proved"
+    },
+    {
+      "name": "repeated",
+      "status": "proved"
+    },
+    {
+      "name": "aliased",
+      "status": "unsupported",
+      "reason": "a tuple assignment to two targets that are not stack locals"
+    },
+    {
+      "name": "sideEffect",
+      "status": "unsupported",
+      "reason": "unary operator"
+    },
+    {
+      "name": "inlineArray",
+      "status": "unsupported",
+      "reason": "compact verifier: unsupported type uint8"
+    },
+    {
+      "name": "callTuple",
+      "status": "unsupported",
+      "reason": "expected explicit tuple"
+    }
+  ]
+}
