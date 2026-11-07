@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "DRAFT_H16_TIMING_HOLD_DO_NOT_MERGE",
+  "status": "SOURCE_CHECKPOINT_TIMING_RELEASED_CONSUMER_MIGRATIONS_PENDING",
   "source_base": "fc060cb4b9ee49b744c6805e31638971a172facc",
   "module": "Solidity/Source/TypingV2.lean",
   "module_sha256": "ccfaee52e9891284f5e4bd71687fd9c09f8db9fd7af00df72bd0bd6c5f4b1de2",
@@ -13,14 +13,14 @@
     "retirement": "None. V1 retirement requires all consumer migrations and coordinator approval."
   },
   "timing_hold": {
-    "status": "H16_STOP",
+    "status": "HISTORICAL_H16_STOP_RELEASED_BY_USER",
     "reason": "H125 requires stopping/reporting noticeably slower Source checking. Observed aggregate median increase is 9.2046%, including the new v2 module. The mechanical 10% threshold was not exceeded; that result is not qualitative H16 acceptance.",
     "before_seconds": 42.19636442301271,
     "after_seconds": 46.08038527399185,
     "ratio": 1.092046338685541,
     "new_module_seconds": 1.282541256994591,
     "old_source_files": "All five frozen Source baseline files byte-identical; timing data alone does not establish causation.",
-    "action": "No further Source edits, Lean checks or unchanged timing reruns; preserve reviewable draft. Library try/Error checkpoint held pending H16 disposition."
+    "action": "Historical stop and raw logs retained. Newest user decision accepts the recorded +9% for H128 v2 and H125 library try/Error. Further noticeable slowdown still stops and reports."
   },
   "consumer_notes": [
     {
@@ -61,5 +61,15 @@
     }
   ],
   "inventory_limit": "These are direct H24 refusal/assembly consumers identified in the current tree, not a claimed census of every v1 typing user.",
-  "pending": "Library try/Error(string memory) remains a separate unimplemented Source checkpoint; no Source work continues across H16 hold."
+  "pending": "Consumer migrations require versioned predicates and reproof, V10 first. Library try/Error(string memory) is a separate Source checkpoint; this checkpoint supplies no library support.",
+  "timing_release": {
+    "authority": "Newest coordinator-relayed user decision, 2026-11-07",
+    "accepted_before_seconds": 42.19636442301271,
+    "accepted_after_seconds": 46.08038527399185,
+    "scope": [
+      "H128 environment-aware typing v2",
+      "H125 library try/Error(string memory)"
+    ],
+    "remaining_stop": "Any further noticeable Source checking slowdown stops and reports; no budget change."
+  }
 }

@@ -534,7 +534,7 @@ entries were corrected and reauthenticated, and both final reviews passed.
 No Lean source changed. Prior source gate provenance is recorded separately
 from consumer acceptance; the handoff does not close VY2's whole waiting item.
 
-## H125/H57 environment-aware typing pair — draft under H16 timing hold
+## H125/H57 environment-aware typing pair — H128 checkpoint
 
 Source/TypingV2.lean adds Source.envLocOK and a v2 statement/block judgment
 alongside byte-identical v1. A generic fold over actual v1 derivations checks
@@ -564,12 +564,16 @@ before and 46.0804 seconds after, including 1.2825 seconds for the new v2 module
 not establish causation. The mechanical 10% threshold was not exceeded, but
 H125's qualitative instruction to stop on noticeably slower checking applies:
 Source work stopped, no unchanged timing rerun or library implementation followed.
-This is a reviewable draft, not an accepted/passing Source checkpoint or merge
-request. Raw timing logs and the explicit H16-HOLD report are retained off Git.
+That historical stop was released by the newest user decision on 2026-11-07:
+the recorded +9% is accepted for H128 v2 and H125 library try/Error. Raw timing
+logs and the original H16-HOLD report remain unchanged off Git. This Source-owner
+checkpoint is ready for integration after its focused gates; consumer migration
+and v1 retirement are not implied. Any further noticeable checking slowdown
+still stops and reports; no budget or axiom change is authorized.
 
 typing-v2-consumer-migration.json gives separate notes for V10 H24 first and the
 direct H24/P8 refusal consumers. Consumers must version/reprove their predicates;
 the positive v2 theorem must never be supplied to the false v1 predicate. Global
 frontend/physical/compiler adequacy, automatic migration and library try/Error
 support are not claimed. Coordinator approval is still required before any v1
-retirement. Do not merge this draft across the H16 hold.
+retirement. Library support will be published as its own checkpoint/head.
