@@ -73109,6 +73109,21 @@
  "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean:H62.StorageAudit.GeneratedFamilyWitnesses.write_joint": [
   "propext"
  ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.execution_ranges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.lossless_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.observed_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item2/audit-v10-storage/H24V2Controls.lean:H128.H24V2ConsumptionControls.mixed_admitted": [
   "Classical.choice",
   "Quot.sound",
