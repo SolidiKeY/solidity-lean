@@ -166,7 +166,7 @@ The base-pinned checked-contract ledger records the quantified Source/target rea
 
 ## Panic occurrence navigation continuation
 
-The deterministic current-tree occurrence/window map records 42 raw panicData regex hits and zero unmapped among regenerated source windows. Synthetic controls cover multiple matches, unmapped and overlapping windows, source hash mismatch and the deliberate apostrophe-suffix false positive. Independent read-only finder and skeptic verified the mapping without Lean; the output now states that files beyond the base-pinned window set are not base-verified. Window membership is a navigation hint, not semantic attribution.
+At the earlier pre-registration snapshot, the occurrence/window map recorded 42 raw panicData regex hits and zero unmapped among regenerated source windows. Synthetic controls cover multiple matches, unmapped and overlapping windows, source hash mismatch and the deliberate apostrophe-suffix false positive. Independent read-only finder and skeptic verified the mapping without Lean; the output now states that files beyond the base-pinned window set are not base-verified. Window membership is a navigation hint, not semantic attribution.
 
 ## Proposal textual-check continuation
 
@@ -175,3 +175,7 @@ Mul/Sub review-only proposal tests now reject several malformed cross-declaratio
 ## Registered helper rebase reconciliation
 
 Upstream `3c2734000413fb142b186e93387306bbb01fd181` provides the canonical `Solidity/Backend/PrimitivePackets/PanicBytes.lean` module; earlier unregistered-module notes are historical. The rebased Mul/Sub tests retain restricted textual boundary controls and pin the canonical helper bytes. This does not independently establish Lean proofs, equivalence, axiom inventories, affected/full gates or timing.
+
+## Fail-closed panic occurrence follow-up
+
+The scanner now emits JSON and fails on zero or unmapped raw hits. The registered canonical helper is separately pinned to its upstream registration commit and contributes three supplemental navigation windows; the current tree has 45 raw matches and zero unmapped, while the original 474-header denominator is unchanged. Independent read-only finder and skeptic verified the locations and tests without Lean. Raw comments, strings, identifier suffixes and interval containment still prevent semantic attribution or proof claims.
