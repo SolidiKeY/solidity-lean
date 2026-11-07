@@ -346,3 +346,31 @@ real writable-directory refusal are not production mount/sealing acceptance.
 The controller must still bind the exact input pins and namespace ownership,
 enforce isolation over the full invocation, and independently verify measured
 resource, cleanup and output evidence. The old probe barrier is unchanged.
+
+## Full-inventory input copy preparation
+
+`input-copy.py` exposes a preparation API for toolchain/package/cache input
+copies under the controllers exclusive writer lease and resource/deadline
+supervision. It has no CLI or worker-launch interface. It requires a separately
+pinned complete `input-inventory.py` receipt, checks the entire observed source,
+and creates an exclusive new destination through nofollow descriptors. Source
+and destination ancestors must also be disjoint by device/inode identities,
+so an apparent external path through a bind alias cannot modify the source.
+
+Regular file bytes are streamed and hashed; hard links are flattened. Modes,
+ownership, nanosecond mtimes, xattrs and safe internal symlinks are preserved and
+compared by complete destination inventory, with another full source comparison.
+Insufficient privilege to preserve metadata fails rather than dropping fields.
+An error leaves a partial destination that is never reused or silently deleted.
+The copy keeps its final read-only modes until after xattr restoration. Failure
+controls cover source drift, receipt substitution, special files, existing or
+aliased destinations, resource stops and descriptor cleanup.
+
+Disk/inode checks before creation and during copying are samples, not a
+reservation or continuous capacity guarantee. The two-gigabyte preparation
+reserve does not replace the workers four-GiB outer memory reserve. Passing
+small filesystem fixtures supplies no production package/toolchain/cache pin,
+immutable mount, hostile-host authentication, lifetime sealing or worker
+execution authorization. Those output fields remain false. Integration into
+the authenticated controller/worker and offline resource/measurement/recovery
+verifier, production qualification and five-module A/B remain unfinished.
