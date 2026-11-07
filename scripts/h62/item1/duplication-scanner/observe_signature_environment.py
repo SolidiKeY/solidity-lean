@@ -38,11 +38,31 @@ def json_load(raw):
     return json.loads(raw.decode("utf-8"), object_pairs_hook=unique_object,
                       parse_constant=reject_number, parse_float=reject_number)
 
-def read_log(path):
+def read_log_bytes(path, expected_sha256=None, max_bytes=None):
+    """Guard parsed output detached from the successful process's exact bytes.
+
+    An omitted hash is an explicitly unbound offline observation. Live producers
+    supply the hash from their in-memory completed step, never a saved packet.
+    """
+    limit = MAX_LOG if max_bytes is None else max_bytes
+    if type(limit) is not int or limit < 1:
+        raise ValueError("invalid observation byte limit")
+    if expected_sha256 is not None and not stat.S_ISREG(path.lstat().st_mode):
+        raise ValueError("nonregular observation log")
+    if expected_sha256 is not None and (not isinstance(expected_sha256,str) or
+            len(expected_sha256)!=64 or any(c not in "0123456789abcdef" for c in expected_sha256)):
+        raise ValueError("invalid expected log SHA256")
     with path.open("rb") as stream:
-        raw = stream.read(MAX_LOG + 1)
-    if len(raw) > MAX_LOG:
+        raw = stream.read(limit + 1)
+    if len(raw) > limit:
         raise ValueError("observation log exceeds byte limit")
+    if expected_sha256 is not None and hashlib.sha256(raw).hexdigest()!=expected_sha256:
+        raise ValueError("observation log differs from checked process output")
+    return raw
+
+
+def read_log(path, expected_sha256=None):
+    raw = read_log_bytes(path, expected_sha256)
     lines = raw.decode("utf-8").splitlines()
     env_lines = [line for line in lines if line.startswith(PREFIX)]
     signature_lines = [line for line in lines if line.startswith(SIG_PREFIX)]
