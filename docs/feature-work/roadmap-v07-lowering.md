@@ -1215,8 +1215,8 @@ resources; CP77 corrects the earlier wording).
 ### CP77: master merge and the H24 instance at the P8 model producer
 
 (Kept as history. CP78 supersedes its off-master and scratch-module wording:
-the p8-producer branch merged into master by `2102e024a`, and the instance is
-`PlanGraphAdmission`.)
+the p8-producer commits are on master (`dfdfeb152`..`590c192c9`), merged here
+through `806a972a4`, and the instance is `PlanGraphAdmission`.)
 
 Merged master `fea090bf9` (V14 and VY5 `Env.mapFree`). VY5 changes implicit
 conversion only, not `Source.locOK`, so the CP75 refusal witnesses still
@@ -1274,9 +1274,11 @@ docstring, module-map row and an `empty_produces` docstring missing.
 
 ### CP78: latest master and the H24 instance at `planProducer`
 
-Merged master `2102e024a`. It fixes the layers failure inherited from
-`fea090bf9` (12 new core edges, none in V07) and contains the p8-producer
-merge. `Lowering/V07/PlanGraphAdmission.lean` now holds the real instance:
+Merged master `806a972a4` (it contains `2102e024a`). It baselines the 12 new
+core import edges inherited from `fea090bf9` in
+`scripts/core-import-additions-allowlist.json` (`e8746b88a`; none in V07), so
+`check-layers.mjs` passes. It also contains the p8-producer commits
+(`dfdfeb152`..`590c192c9`, landed linearly). `Lowering/V07/PlanGraphAdmission.lean` now holds the real instance:
 `accepted_empty` (`rfl`), `planAdmission : Admission planProducer`,
 `planDeclarationGraphProducer`, and `plan_record_producer`. The CP77 scratch
 check is superseded by this module. The record is degenerate as described in
@@ -1300,3 +1302,8 @@ prerequisite, no inhabitant" and "needs an inhabited `P8a.Producer`"
 wording, the CP77 citation, the CP77 history note, the deferred `emptyEnv`
 deduplication, this gates paragraph, and the module-map row now naming
 `Admission`.
+A read-only skeptic confirmed `accepted_empty` (`rfl`), the record type and
+the degenerate-record wording. Fixed: the merge parent (`806a972a4`, not
+`2102e024a`), "p8-producer merge" (the commits landed linearly), "fixes the
+layers failure" (the edges were baselined), and the module docstring (it is
+`accepted_empty` that holds by `rfl`).

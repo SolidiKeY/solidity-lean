@@ -6,8 +6,8 @@ import Solidity.Lowering.P8.PlanWitness
 
 `P8.PlanWitness.planProducer` inhabits the frozen `P8a.Producer`. Its origins
 map every admitted input to `sourceOf`, whose environment is
-`P8.PlanWitness.emptyEnv = ⟨[]⟩`, so `GraphAdmissionAssembly.admissionOfEmpty`
-applies by `rfl`. The record is degenerate (zero-node certificates, no struct
+`P8.PlanWitness.emptyEnv = ⟨[]⟩`, so the hypothesis of
+`GraphAdmissionAssembly.admissionOfEmpty` (`accepted_empty`) holds by `rfl`. The record is degenerate (zero-node certificates, no struct
 to refuse; see `GraphAdmissionAssembly.empty_admitted`): it shows that the
 additive `DeclarationGraphAdmission.Producer` is inhabited, not that H24 holds
 for real accepted Source.
