@@ -802,3 +802,42 @@ absence is from the new extraConstNames enumeration,not a failed direct new IR
 lookup for the old-only names. Owner records now label that boundary explicitly.
 No additional probe was run; performance STOP remains. Full60 Python tests pass
 in25.161s. Finder reports no findings; skeptic's wording finding is resolved.
+
+
+## Nov7 7683091e rebaseline and old-only compiler inventory supervisor
+
+Fetched and fast-forwarded the clean assigned branch to coordinator-approved
+7683091e7c35d265b3b76fdf2a93d0197ce9f556. Prior ebec6cb45 is verified ancestral.
+Original c6 source view/cache and historical source-bound inspectors are intact.
+No new-toolchain IR run,default merge,push,goal reset or completion.
+
+Additive ExportCompilerSignaturesBatch.lean preserves the frozen single-module
+inspector; only namespace/entry point differs. Supervisor deliberately uses
+ONE module per bounded process. Contemporaneous original4.24 Allocation control:
+single2.267930335s/885678080bytes RSS; one-job batch1.764923368s/882434048bytes.
+All20 output records are byte-identical. This is old-inspector transport only,
+not a multi-module memory result,new-toolchain acceptance or clean-build speed
+claim. Existing4.35IR wall/RSS STOP remains unchanged; this exporter rejects
+other tool versions and does not retry that affected lane.
+
+compiler-signatures-batch.py validates bound helper/job files, exact output
+coverage,fresh output hashes/sizes and record protocol before sealing. New
+export-old-compiler-signatures.py ties original1774-module order and all32734
+names to completed old kernel-inventory summaries. It will run1356 nonempty
+modules serially. The418 empty headers derive from verified original summaries
+with explicit ir_query_performed=false; no fabricated Lean query or name waiver.
+Null missing IR remains visible; compiler public flags are observations only.
+Full old IR extraction is pending at this checkpoint, not already accepted.
+
+Both reviewers found a preflight gap before launch: redundant zero counts could
+skip a nonempty header. Fixed by deriving/checking counts against verified
+header counts/exact lists, binding each summary path/hash to its kernel-inventory
+row and checking original order/totals. Four negative/plan controls include a
+contradictoryzero+totalzero case and identical-byte wrong-summary substitution.
+Finder/skeptic read-only revalidation confirms1774 modules,32734 names,418 truly
+empty headers; no remaining prelaunch findings. Neither ran Lean or wrote files.
+Completion additionally rechecks all headers,inputs,original HEAD/source hashes
+and exact total before status=pass; interrupted/failed exports retain sealed
+prefixes and remain fail. No proof budget,statement,definition body,axiom,
+interface signature or exclusion changes. Bulk outputs stay off Git; deterministic
+inspectors/validators/supervisor and controls are committed in this lane.
