@@ -1683,3 +1683,23 @@ or rerun unchanged. Current inputs, per-file invocation and outcomes remain
 unresolved. Independent read-only finder and skeptic reviewed these boundaries
 without Lean, server or builds. No production timing or runtime acceptance is
 inferred.
+
+## Updated standalone static-reference index
+
+`reference_index_update.py` joins the `9cf44aa56e9c8c5bbf0fd18a511edaa21dfe4c02`
+drift observation with four later source-hash-matching classification artifacts.
+At that recorded snapshot it reports 640 candidates: 431 have supplied static
+references and 209 do not. The later artifacts contribute 27 distinct rows;
+the two changed candidates have new references matched to their changed bytes.
+References for changed bytes are retained separately as historical unless a
+new matching reference is supplied. Overlapping references are not double
+counted. The report and verified input manifests are checksum-bound in
+`tests/h55/module-times/reference-index-update-evidence.sha256`.
+
+This is a snapshot-relative index of supplied references, not current-tree
+coverage, resolved invocation, proof or execution acceptance. Ignored and
+generated paths remain outside its observed inventory; unreferenced rows are
+not excluded. Independent read-only finder and skeptic reviewed the counts
+and source-hash boundaries without Lean, server or builds. The skeptic
+identified stale same-byte context mappings in the initial join; they are now
+rejected and covered by a synthetic control.
