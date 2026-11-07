@@ -429,6 +429,30 @@ theorem default_transport_actual : Transport 16 hash writeLocations defaultStore
   rcases default_transport_joint with ⟨run, initial, covered⟩
   exact CopyDefaults.numeric_transport graph (.array (.prim .bool)) run (.root 0) readStore numeric initial covered
 
+/-- Reuse the populated default-initialization fixture to witness the base
+key premise; this is symbolic-slot coverage, not physical layout adequacy. -/
+theorem default_fit_base_joint : TargetOperations.KeysFit (.root 0) := True.intro
+
+/-- Every generated update fits simultaneously, with a nonempty update list. -/
+theorem default_updates_joint :
+    ∀ op ∈ CopyDefaults.updates graph (.array (.prim .bool)) (.root 0),
+      TargetOperations.KeysFit op.1 :=
+  TargetDefaultInit.updates_fit graph (.array (.prim .bool)) (.root 0) default_fit_base_joint
+
+/-- Generated defaults really write the existing header; a reject-all or
+empty-update replacement cannot satisfy this fixture. -/
+theorem default_updates_nonempty :
+    CopyDefaults.updates graph (.array (.prim .bool)) (.root 0) ≠ [] := by
+  intro impossible
+  cases impossible
+
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_fit_base_joint' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms default_fit_base_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_updates_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_updates_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_updates_nonempty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_updates_nonempty
+
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.read_joint' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms read_joint
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_joint' does not depend on any axioms -/
