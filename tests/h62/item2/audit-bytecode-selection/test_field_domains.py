@@ -86,4 +86,29 @@ class FieldDomainTests(unittest.TestCase):
         self.assertIn('decoder_jumpdest_reject_all_refused',support)
         self.assertIn('⟨1,[11]⟩',w['decoder_closed_joint_domain']['proof'])
 
+
+    def test_theorem_domains_and_refutations_are_separate(self):
+        row,w=self.fixture()
+        row.update(is_projection=False,is_theorem=True,original_kind='Lean.ConstantKind.thm',kind='theorem',body_expr=None,body_status='proof body intentionally omitted')
+        source,pins=renderer.declaration_domain_source(ROOT,[row],w,declaration_kind='theorem',refuted_targets=[row['name']])
+        self.assertIn(' : ¬ (theorem_hypotheses_named%',source)
+        self.assertIn('wasOriginallyTheorem',source)
+        self.assertIn('recorded type differs',source)
+        self.assertEqual(pins['refuted_targets'],[row['name']])
+        self.assertEqual(pins['declaration_kind'],'theorem')
+        with self.assertRaises(ValueError):renderer.projection_domain_source(ROOT,[row],w)
+        for kind in ['unknown',[]]:
+            with self.assertRaises(ValueError):renderer.declaration_domain_source(ROOT,[row],w,declaration_kind=kind)
+        for names in [[row['name'],row['name']],['absent']]:
+            with self.assertRaises(ValueError):renderer.declaration_domain_source(ROOT,[row],w,declaration_kind='theorem',refuted_targets=names)
+    def test_controls_roster_separates_positive_refuted_and_open(self):
+        f=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json').read_text())
+        targets={p['target'] for p in f['witnesses'].values()}
+        self.assertEqual(len(targets),12)
+        self.assertEqual(len(f['refuted_targets']),4)
+        self.assertTrue(set(f['refuted_targets'])<=targets)
+        self.assertEqual(set(f['open_targets'])&targets,set())
+        self.assertEqual(f['open_targets'],['Solidity.Backend.Selection.V2.Controls.reject_false_runtime'])
+        self.assertIn('Scalar.run_capacity',f['witnesses']['legacy_capacity_aux_domain_refuted']['proof'])
+
 if __name__=='__main__':unittest.main()
