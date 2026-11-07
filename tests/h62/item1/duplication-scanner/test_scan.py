@@ -587,6 +587,33 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(value["incremental"]["comparison_status"], "current-incomplete")
             self.assertIsNone(value["incremental"]["removed"])
 
+    def test_include_omit_context_and_body_boundaries(self):
+        root = Path("/virtual")
+        template = ("variable (x : Nat)\ndef marker : Nat := 0\n{cmd}\n"
+                    "theorem target : True := by trivial\n")
+        def rows(command):
+            return scanner.scan(root / "A.lean", root, template.format(cmd=command).encode())
+        included, omitted, plain = rows("include x"), rows("omit x"), rows("")
+        self.assertEqual(included[0]["body"], ["0"])
+        self.assertEqual(omitted[0]["body"], ["0"])
+        self.assertNotEqual(included[1]["context_hash"], omitted[1]["context_hash"])
+        self.assertNotEqual(included[1]["context_hash"], plain[1]["context_hash"])
+        for command in ("include x", "omit x"):
+            inline = f"{command} in theorem hidden : True := by trivial\ndef visible : Nat := 0\n"
+            with self.subTest(command=command), self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                scanner.scan(root / "B.lean", root, inline.encode())
+            following = f"{command} in\ntheorem visible : True := by trivial\n"
+            self.assertEqual(scanner.scan(root / "C.lean", root, following.encode())[0]["name"], "visible")
+        nested = b"def outer : Nat := by\n  include x\n  exact 0\ndef next : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "D.lean", root, nested)[0]["body_reject_reason"], "indented-command-boundary")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("include x in theorem hidden : True := by trivial\n")
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
     def test_equal_context_does_not_prove_local_definition_equivalence(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

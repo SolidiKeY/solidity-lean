@@ -1377,3 +1377,28 @@ continuous or identical operating-system conditions. These runs demonstrate
 repeatability for this snapshot, not complete census, Lean semantics or live
 ownership. Full reports and timings are outside Git in the
 initializer-inventory evidence directory.
+
+## Include and omit context boundaries
+
+Line-initial `include` and `omit` commands now contribute lexical context
+spans and terminate preceding bodies. Indented command boundaries reject the
+body fingerprint, and inline scoped declaration prefixes make a file
+incomplete. This addresses the reported body contamination and context-hash
+collision. Scope lifetime and implicit dependencies remain lexical
+approximations; signature and ownership rejection reasons remain mandatory.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 203 tests, including differing include/omit
+contexts, prior-body boundaries, nested commands and incomplete inline scopes.
+A bounded same-tree scan took 123.081 seconds before and 123.593 seconds after
+(+0.42%). Both used the same 7,491 inputs, recognized 125,638 declarations
+and reported no errors or unmatched globs. Statement-group counts were 4,511
+in both; body-group counts changed from 5,664 to 5,666. Counts do not prove
+equal memberships or semantic equivalence. Both scans used an 8 GiB address
+space cap and sampled cgroup reserve monitor without a resource stop; cache
+advice does not prove identical operating-system cache state. Evidence is
+outside Git under
+`/workspace/h62-duplication-scanner-evidence/include-omit/`.
+
+A separate bare-binder example can still be recorded with a fictitious name;
+that declaration-accounting case remains open.
