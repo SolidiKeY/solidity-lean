@@ -1607,3 +1607,18 @@ resolution, import/namespace context, ownership, multiplicity preservation
 or safe deduplication. Every occurrence remains unresolved; no pin, checker
 inventory or source was changed. Independent read-only finder and skeptic
 reviewed the collision analysis without Lean, server or builds.
+
+## Historical collision blob verification
+
+`pin_collision_blob_check.py` binds all 68 supplied collision occurrences
+to exact regular source blobs at `33eb46304cdb536e6c8b686223c6d8e456b703ae`.
+It checks the full source SHA-256, byte bounds, exact observed block and block
+hash, and verifies that the collision report matches the proposal. The
+occurrences span 15 source files. Both reports are checksum-bound in
+`tests/h55/module-times/pin-collision-blob-evidence.sha256`.
+
+Independent read-only finder and skeptic verified the same 68 bytes and
+spans. This establishes only those historical blob contents: parser
+completeness, Lean resolution, source context, ownership, safe movement and
+multiplicity preservation remain unproved. No pins moved and no Lean, server
+or build ran.
