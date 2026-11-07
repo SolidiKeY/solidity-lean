@@ -157,3 +157,37 @@ registration deltas. Library gate was interrupted by this worker after
 116 s while awaiting the E4-Q1 decision; it is NOT a pass. Coordinator then
 answered A; the full library gate must be rerun. Registration fragment
 completion, checkpoint 3–4, lane-end gates and handoff remain pending. No new axioms, sorry, trust shortcuts or frozen statements.
+
+## Checkpoint 3: implemented probability bridge
+
+`Solidity/Hash/CollisionBridge.lean` adds `eagerPremiseFails`,
+`combined_count_le`, `two_mul_combined_le`, `pow_two_combined_le`,
+`keccak_combined_le`, `stopped_collision_le`, `oracleFixed`,
+`oracleFixed_hash_val`, `oracleFixed_premise_iff`, `premise_of_transcript`,
+`runPremiseFails`, and `run_premise_le`.
+The numerator is exactly
+`q*(q-1) + (q*(q-1)*(2*L-1) + 2*q*R*L)`.
+The denominator reading is `2^(256+1)` times the count versus the numerator
+times `(2^256)^dom.length`.
+
+`oracleFixed` changes only evm.keccak and its range proof; the total family
+uses reduction modulo the word size on arbitrary tuples. On every sampled
+tuple, `oracleFixed_hash_val` proves equality with oracleOf on ALL bytes,
+including the default-zero points outside dom. Thus no sampled distribution
+is changed. Both actual query lists must be contained in the full strategy
+transcript for every sampled oracle. They may repeat or stop early. No
+unproved EVM strategy-adequacy fact is inferred from EvmSpec.
+
+Coordinator-approved controls: `zero_queries`, `one_query_collision`, and
+`one_query_root_hit`. The last is kernel `decide` only on the tiny N=2,
+one-point, one-query model: exactly one of two oracles fails. No native
+computation shortcut is used.
+
+MCP diagnostics: 0 errors. Single-threaded lake lean: exit 0, no warnings.
+Measured headline axioms (`two_mul_combined_le`, `run_premise_le`,
+`stopped_collision_le`): `[propext, Classical.choice, Quot.sound]`.
+Each has a #guard_msgs pin. Independent checkpoint 3 finder and skeptic found no proof defect and no
+weakened premise. They requested checked axiom pins (now present) and a
+direct region-only positive control; `one_query_region_hit` now states
+exactly one failing region oracle in the same tiny model. Full gates and
+measured module timing remain pending.
