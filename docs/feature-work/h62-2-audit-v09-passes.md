@@ -1676,3 +1676,16 @@ are under
 This is byte-emission/scanner backfill only, with no jump-execution, native,
 Source/G24 or full validation claim, and no selected-row credit. Prior timing,
 trust, census/documentation failures and missing-history waits remain open.
+
+
+`tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean` composes the
+existing scope execution contracts with generic prefix/suffix capacity laws.
+It retains actual entry, repeated updates and caller-preserving exit, while
+distinguishing empty writes from the extra word required by nonempty writes.
+The full-capacity negative control keeps successful model execution separate
+from the rejected intermediate peak. All ten declarations have checked axiom
+reports; production statements and definitions are unchanged. This backfill
+adds no selected-row credit or native/Source/full acceptance claim. Private
+H145 records are under
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-scope-capacity-publish-20261107/`.
+Prior timing, trust, census/documentation holds and missing-history waits remain.
