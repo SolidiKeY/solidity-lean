@@ -1318,3 +1318,35 @@ The earlier five-declaration receipt remains historical and unchanged.
 Independent read-only finder and skeptic accepted the full-state comparison,
 retained parameters, source/type/evidence bindings and limited component scope.
 Neither ran Lean or a server; review receipts are private under this checkpoint.
+
+### Actual reason statement scope after hashing (2026-11-07)
+
+SourceReasonJoint now composes the existing hash expression with actual execS
+reason-statement execution through ordinary EM.sub. The original exec_reason
+law supplies the statement result; a separate low-horizon lemma derives the
+statement's horizon3 timeout from the original expression horizon2 timeout.
+Both statement paths preserve the hash's reached machine while returning the
+outer typed locals. No new inner-local mutation fixture, evaluator, encoder or
+body producer is introduced.
+
+General proofs retain arbitrary typed environments/contexts, global/frame,
+locals/state, byte inputs and the original horizon parameters. A concrete
+full-result negative with the exact reason payload refuses rolling the machine
+back to the pre-hash heap. This is Source monadic/statement composition, not
+canonical Source admission, a compiler-selected body, physical frame or session
+correspondence. Six original reason targets are indexed: three checked component
+applications and three existing local-law references. Explicit target-constructor
+execution and its independent Source/target conjunction remain references, not
+compiler adequacy. Full19-target/101-residual audits and assigned H68/final gates
+remain open; no new fixture or fidelity acceptance is counted.
+
+The serial per-file check passed in 2.159 seconds, one Lean, peak sampled RSS
+760,795,136 bytes and no STOP. All nine printed declarations retain only the
+existing standard axioms; registration/evidence checks passed. No full-root or
+matched timing acceptance or earlier STOP release. H145 private receipts/index:
+`4617252ee466882535b24eb1a81b6cb886385529 evidence/solidity-v07-v11-20261030/v08-world-lowering/source-reason-statement-joint-20261107/`.
+Earlier five-declaration receipts remain historical and unchanged.
+
+Independent read-only finder and skeptic accepted the actual statement-scope
+composition, horizon derivation, full-result negative and source/type/evidence
+bindings. Neither ran Lean or a server; final review receipts remain private.
