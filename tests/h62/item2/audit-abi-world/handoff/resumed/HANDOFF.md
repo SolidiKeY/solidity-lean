@@ -1,117 +1,71 @@
-# Current resumed ABI-world audit handoff
+# Current ABI-world audit handoff
 
-Repository: /workspace/solidity-lean. Assigned branch:
-codex/solidity-h62-2-20261106/audit-abi-world. Original base:
-c6f550e281a7e5affa9a99bc2cdaed556dec00e4. Current integration:
-2a43bf4fcdaf24750265afc8f8be5b420d1d22b0, merged while preserving the later
-b08fa0ea checkpoint (merge fcd012d8). Full gate ran at bf1fe8c9; later edits
-are documentation/manifests/handoff only. External export records final full
-head and clean status after commit, without a self-referential commit hash.
-No push, PR, default-branch change or new/reset goal. Coordinator reactivation
-superseded historical retirement. Preserve the same VM, branch and evidence.
+Repository /workspace/solidity-lean; branch
+codex/solidity-h62-2-20261106/audit-abi-world; original base
+c6f550e281a7e5affa9a99bc2cdaed556dec00e4. Current integration
+8863c41276f9340d3d1960df9e4808294614189b was fast-forwarded after verified
+ancestry and prior build cleanup. Observed newer remotea10b60f was not chased.
+Final committed head/clean status are recorded by the external export after
+this commit; no self-referential SHA. No push, PR, default-branch merge, reset
+or new/completed goal. Existing goal remains unfinished.
 
-All original audit implementation is complete: 24 mapped modules, 177 exactly
-once declarations, 177 joint hypothesis packages and independent exact-type
-comparisons, 439 binders (113 propositions), seven formal success/negative
-control theorems, ten encoded fixtures. Four map-drift modules remain outside
-the frozen map. No frozen statement/definition/premise/exclusion/budget change,
-new axiom, sorry or native trust shortcut. Own Lean source is unchanged by
-this continuation. Original new theorem declarations: 177 witnesses plus four
-schema fixtures/controls plus seven success theorems.
+All original audit implementation is complete:24mappedfiles,177exactly-once
+declarations/jointpackages/independentfidelitycomparisons,439binders (113Prop),
+seven formal success/control theorems and ten encoded fixtures. New original
+Lean declarations:177witnesses+4schema fixtures/controls+7success/control.
+Four map-drift modules remain outside the original frozen map. No frozen
+statement/premise/exclusion/proofbudget change, newaxiom/sorry/native shortcut.
+Current continuation changed only audit configuration/provenance/docs.
 
-Fresh nine-module and KeySort receipts bind all 7722 upstream Lean paths/bytes
-and support/local/resource/output identities. Acceptance is 177/439/7/10.
-Three receipt controls and four scanner tests pass on this integration; four
-portable-integrity controls pass. Historical control/reference suites retain
-their actual provenance. Same-identity matched timing 1.611498644 to
-1.609982393 seconds (-0.094089499%, within 10%).
+Fresh9auditfiles+KeySort receipts bind8028upstream paths/bytes and current
+local/support/output/resource identities. Frozen24ABI+map exactoriginalbytes.
+Acceptance177/439/7/10,3receiptcontrols,4scanner tests pass. Same-identity timing
+1.696835053 to1.665341429seconds (-1.856021535%,within10%). All staticgates pass
+except metadata pins; exact commands/output are in external static-gates.json.
 
-The actual ./run-lean.sh PASSES: 6555 jobs, exit 0, 6935.474578 seconds.
-Peak task RSS 8629575680 bytes, min available 5710798848 bytes, one heavy Lean
-job, no swap, verified cleanup. Unchanged caps: 16 GiB hard/12 GiB RSS/4 GiB
-reserve, explicit -j1 and LEAN_NUM_THREADS=1. No systemd-run or address-space
-cap. Actual Lean 4.24.0 Release 797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
-Lake 5.0.0-src+797c613. KeySort passes separately; current upstream normal
-gate does not run solkeycheck. Trust passes 6562 sources/289 sites/zero findings;
-reachability passes 6546 reachable/zero orphans; documentation paths pass.
+The complete current ./run-lean.sh PASS includes defaults,SolkeyTestSuite and
+mandatorySoliditySlowExamples:6640jobs,exit0,106.036377s; peakRSS5963968512,
+minavailable8508100608,oneheavyLeanjob,noSwap,cleanuptrue. Earlier resource
+stops are retained, not passes. Cold-cache bounded OpenLoops prerequisite
+passed278jobs/342.390517s/peakRSS9124495360/minavailable5720244224 with unchanged
+limits. Read-only clean-page advice changed residency, not contents or proof
+budgets. No systemd-run, virtual-address cap or memory/budget increase.
+Actual Lean4.24.0 Release797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake5.0.0-src+797c613. Explicit-j1/threads1/stack131072,16GiBhard/12GiBRSS/
+4GiBreserve preserved. KeySort passes; no solkeycheck CLI gate claimed.
 
-BLOCKER PIN-2a43bf4f: global metadata check fails on 110 unrecorded standard-only
-registrations, with 16151 pins and zero nonstandard/growth/removal errors.
-Original assignment forbids central axiom-pin edits. The exact hash-bound
-110-key owner ticket is axiom-pin-owner-ticket.json. Coordinator/G07 fragment
-owners register these already existing pins and regenerate/check inventory,
-or retain the final blocker pending review. No source/premise/exclusion repair
-is proposed. All independent original work and backfill are complete, no new
-unclaimed candidate is assigned. Final acceptance and goal remain unfinished.
+BLOCKER PIN-8863c412:16774theorems/zeroerrors/184newstandard-only registrations.
+Off-Git ticket in resume-8863-20261107 has184unique previous=null keys and
+currentcentralSHA; tiny bulk-artifacts.sha256 authenticates absolute path,
+size and SHA. Original explicit central-pin edit prohibition remains.
+Coordinator/G07 owners review/register existing pins and regenerate/check
+inventory, or retain this blocker. No theorem/premise/exclusion/axiom repair
+is proposed. All independent original/backfill work is done, no new unclaimed
+candidate assigned. Final assignment remains unfinished pending metadata.
 
-Formal Slice success omits gas/world; external gas/fork/failure observations
-are reused for byte-identical current fixtures, not a fresh reference execution
-or a Lean gas/world/general-compiler proof. Do not broaden that boundary.
+Formal Slice contracts omit gas/world. External gas/fork/failure observations
+are archived isolated-frame tests reused for exact current-byte fixtures; no
+fresh EVM run or formal gas/world/general Source/compiler adequacy claim.
+No scope takeover or other-lane proof implementation.
 
-Portable index/manifest commit archive hashes and relative paths. The off-Git
-archive can be verified without extraction, Lean, or original VM paths. Bulk
-H44 evidence remains off Git. Cumulative patch/bundle include the complete
-original-frozen-rendered-prompt.txt, original-work-and-backfill-queue.md and
-scope-manifest.json in the parent handoff directory. The original thread-copy
-SHA e270551e688138623f77863ab6253c6f770f357df01d42b98f846983b5bd5f9c is
-distinct from the unavailable historical launcher rendering SHA 22740ba5;
-no historical bytes or receipts were invented/relabelled.
+H44: detailed tickets/member manifests/logs remain offGit. Small committed
+bulk-artifacts.sha256 and portable-evidence-index.json bind current external
+archive and manifest. Transfer bytes from VM before off-VM verification; paths
+inside raw receipts are provenance, not remotely accessible endpoints.
+Portable verifier checks every relative archive member without extraction,
+Lean or originalVM paths. Original evidence and failed attempts stay immutable.
 
-External export records exact final head/base/branch, cumulative original-base
-patch and bundle, integration-only patch, artifact/checksum paths, gates,
-read-only finder/skeptic review results and the metadata wait. Keep the existing
-goal unfinished and blocked on this owner action; do not create a continuation.
+Complete original-frozen-rendered-prompt.txt, original-work-and-backfill-queue.md
+and scope-manifest.json remain committed in the parent handoff directory and
+in cumulative patch/bundle. Available complete thread-copy SHA e270551e is
+distinct from historical launcher rendering SHA22740ba5 whose bytes are not
+available; no original rendering bytes or old passing receipts invented.
+External export contains exact final head/base/branch, cumulative patch/bundle,
+integration-only patch, full gate/resource/review evidence and SHA256SUMS.
+Continue only this existing goal/VM/branch; fresh-thread handoff after the
+standing work-item boundary goes to coordinator, never self-launch replacement.
 
-## Superseding coordinator cleanup
-
-Coordinator requested withdrawal of our edits to the three other-lane files
-listed in the feature-work cleanup section. All three now equal shared base
-2a43bf4f exactly, leaving zero lane delta and allowing master-side owner edits
-to merge. No Lean/config input changed; previous full6555/KeySort/audit receipts
-remain source-valid and were not rerun. The local documentation-path gate now
-fails on four references in the restored other-lane files; earlier PASS refers
-to the pre-cleanup tree. Retain the central110-pin owner wait and this explicit
-documentation limitation until coordinator integration. No master merge/push.
-Latest head/artifact hashes are in the separate conflict-cleanup export.
-
-## H44 reviewability split (2026-11-07)
-
-At coordinator request, the detailed 110-key owner ticket and the 1524-member
-portable checksum dump were removed from the Git tree without changing their
-bytes. They are preserved under
-/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/.
-The small committed bulk-artifacts.sha256 records each absolute path, byte size
-and SHA256, plus the preserved proof archive. The existing portable index points
-to these external files; its archive and member-manifest hashes are unchanged.
-The portable verifier still checks every archive member with identical logic.
-The ticket generator now requires --output EXTERNAL_PATH in an existing external
-parent, rejects repository-resolving parents and never follows the final output
-symlink. The packer requires
-its per-member manifest outside Git, preventing bulk regeneration into the tree.
-No Lean statement/source, verification gate, proof budget, resource bound or
-central axiom inventory changed. Historical paths above describe prior exports.
-The previous proof/test boundaries and owner waits remain unchanged.
-
-## Superseding 806 re-baseline
-
-Current integration806a972a4f1eefc367f7fe21078e56469447ce13 was fast-forwarded
-after exactremote/ancestry verification. Fresh9+KeySort receipts bind7966paths;
-acceptance177/439/7/10 and3controls pass; timing+1.405912057%within10. Current
-fullbuildpending281changedinputs. Prior6555pass/archiveindex remain historical.
-Currentwaits: PIN-806a972a85standard-only registrations, and2foreignsynthetic
-A/B docreferences. Ticket is offGit in resume-806-20261107 and authenticated by
-the small bulk manifest. No statement/budget/pin edits, newgoal or push.
-
-## Superseding e0 checkpoint
-
-Exact current integratione0f4251ff40ad79c37bae53795b7419afe52e8d9 was fast-forwarded
-only after safe owned-guard cancellation/cleanup of806full2 at coordinator
-request. That4801.177983second partial4665 build is not a pass. Current full
-policy requires SoliditySlowExamples as well as defaults and SolkeyTestSuite.
-Owned serial config preserves all targets with -j1/stack131072; no budget change.
-Fresh9+KeySort,7986boundinputs,177/439/7/10 acceptance+3controls pass. Timing
-+1.234531929%within10. All static gates except pin metadata pass. Current sole
-ownerwait is149standard-only registrations (PIN-e0f4251f offGit, hash-bound by
-smallmanifest); the former foreign docreference wait is resolved upstream.
-Full expanded gate remains pending. No historical pass is relabelled, no goal
-created/reset/completed or push. Required originalprompt/queue/scope preserved.
+Final independent finder/skeptic reviews: no residual findings after correcting
+the trustcount to6646 and refreshing current H44 pointers/index. All1898archive
+members and four integrity controls verify. Tinymanifest17lines/1385bytes.
+Neither reviewer used Lean/server/builds or edited files.
