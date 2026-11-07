@@ -722,3 +722,35 @@ absolute paths,per-file indexes and SHA256 in the manifest. Cache delivery is
 coordinator-pending;no ship-cache or H88cross-cache coherence is inferred.
 Independent final finder/skeptic review remains scoped to these receipts and
 limits;this increment does not complete the original assigned queue.
+
+
+### Published owner merge and refreshed current evidence
+
+Published master4f0a2d6abe3a920d8c5a20c8c06d373a1014824d contains reviewed
+owner09bb5b5e. After saving the qualification checkpoint,the clean ort merge
+0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d retained both exact owner files and
+the H100explicit EM_CONFIG fix. The coordinator merge wait is fulfilled.
+[Post-merge manifest](../../tests/directruntime-20261104/native-browser/address/post-merge-manifest.json)
+records refreshed builds and all controls;prior4234receipts remain frozen.
+
+All343currentruntime sourcefiles match published4f0. Compared with09bb,the only
+delta is the published additive SourceCounterexample companion. A complete
+206-module/object/current-binary inventory binds native and WASM parity and
+excludes the four new optional kernel-candidate helper families from selected
+functions/native symbols. This limited exclusion is not universal purity or
+source/ABI preservation. Reviewers required and confirmed nonempty complete
+module coverage,current object hashes,companion-summary/binary/source bindings,
+actual HEAD/provenance hashes and non-overwriting receipts before execution.
+
+Fresh postmerge native25.49s and WASM272.51s builds pass under the same bounded
+policy. Nine per-file diagnostics report0errors;actual toolchain,KeySort,axioms
+and model controls pass. Address16plus2guards and the extra state gap,retained
+fixed-byte20,C13,A8,B84 and83functions pass unchanged native/browser observation
+checks. Identitydiamond succeeds in both compiler modes. Native negatives and
+edited-source/offline UI pass;browser negatives remain13/14 with invariant stack
+overflow. Four storage-diamond cases and all timing/build-cost STOPs remain.
+No stopped timing benchmark was rerun;RUNTIME_GATE_PASS remains pending.
+
+The new exclusion script is committed byte-identical to its tested private
+copy. Current archives and32incremental cache artifacts stay off Git with
+per-file indexes and SHA256;cache delivery remains coordinator-pending.
