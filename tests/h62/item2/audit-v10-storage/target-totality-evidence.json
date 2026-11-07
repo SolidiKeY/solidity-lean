@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "component_module": "Solidity/Backend/StorageOps/TargetOperations.lean",
+  "frozen_module_sha256": "ff5594d1dc41a90777a5fbef081dd62be4ca07723848c68a1372102fdf59e2ce",
+  "source": "tests/h62/item2/audit-v10-storage/TargetTotality.lean",
+  "source_sha256": "2c56748746e1dbbf81f8e85c578e118af27e2598d793d5624f649a32d254884c",
+  "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint211-focused-a3f2198ae6c0.log",
+  "theorems": [
+    "read_totality",
+    "write_totality",
+    "copy_totality",
+    "reject_mismatch",
+    "noop_mismatch",
+    "reject_not_public",
+    "noop_not_public",
+    "revert_skips_write",
+    "write_actual",
+    "copy_actual",
+    "copy_observations",
+    "noop_write_diff"
+  ],
+  "boundary": "Actual symbolic-slot Evm.run totality and negative generators only. Not Source compiler admission, physical execution, gas/fork adequacy or world rollback. Does not increase frozen premise-witness row coverage.",
+  "reviews": "Independent read-only finder/skeptic found no issue."
+}
