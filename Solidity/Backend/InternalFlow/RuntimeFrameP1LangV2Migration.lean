@@ -28,8 +28,8 @@ theorem source_coarse {C : Contract} {Δ : Ctx} {H : HTy} (r : TRes (Solidity.Ou
   · rfl
 
 /-- The target observation coarsens to V12's on the frozen projection. -/
-theorem target_coarse (k : Nat) (o : OutV2) :
-    coarse (targetPrefix k o) = P1Lang.targetPrefix o.forget := by
+theorem target_coarse (self : Fin W) (k : Nat) (o : OutV2) :
+    coarse (targetPrefix self k o) = P1Lang.targetPrefix o.forget := by
   cases o with
   | ok m s => cases s <;> rfl
   | ret m d => rfl
@@ -38,8 +38,8 @@ theorem target_coarse (k : Nat) (o : OutV2) :
 
 /-- Lifted frozen code: the version-2 observation coarsens to V12's
 observation of the frozen run. -/
-theorem lift_coarse (k : Nat) (c : List Instr) (m : MachineV2) :
-    coarse (targetPrefix k (runV2 (lift c) m)) = P1Lang.targetPrefix (run c m.base) := by
+theorem lift_coarse (self : Fin W) (k : Nat) (c : List Instr) (m : MachineV2) :
+    coarse (targetPrefix self k (runV2 (lift c) m)) = P1Lang.targetPrefix (run c m.base) := by
   rw [target_coarse, forget_run_lift]
 
 /-- A version-2 input as a V12 input: the frozen machine. -/
@@ -57,7 +57,7 @@ def Input.ofV1 {C : Contract} {Γ : Ctx} (e : P1Lang.Input C Γ) : Input C Γ :=
 V12's target observation of the same input. -/
 theorem lift_coarse_ofV1 {C : Contract} {Γ : Ctx} (c : List Instr) (e : P1Lang.Input C Γ) :
     coarse (targetSem (lift c) (Input.ofV1 e)) = P1Lang.targetPrefix (run c e.machine) :=
-  lift_coarse _ c _
+  lift_coarse _ _ c _
 
 /-- Coarsening loses data: the payload-carrying and bare reverts agree. -/
 theorem coarse_forgets_data (d : List UInt8) :

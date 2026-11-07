@@ -11,14 +11,19 @@ are in `Solidity/Backend/InternalFlow/`.
 |---|---|
 | `Input C Γ` | `L frame caller base machine start`, with `machine : MachineV2`. |
 | `Admission C Γ` | A predicate over `Input C Γ`. |
-| `sourcePrefix` | Source `Stmt.run` observation: `ok` → `success []`; `revertWith d` → `revert d`; bare `revert` and code-less `panic` → `revert []`; `exhausted`/`diverge` unfinished; no events. |
-| `targetPrefix k` | Version-2 run observation: calls journaled after the first `k` become `Event.call callee value input false` + `Event.answer outcome none`; `ok _ 0` → `success []`, `ret _ d` → `success d`, `revert cs d` → `revert d` (events kept); pending jump / fault unfinished. |
+| `sourcePrefix` | Source `Stmt.run` observation: `ok` → `success []`; `revertWith d` → `revert d`; bare `revert` → `revert []`; code-less `panic` (failing `assert`) → `revert (encodePanic 1)`, solc's `Panic(0x01)` and the source's own reading (`TRun.catchBytes`, `selfPanicCode` default); `exhausted`/`diverge` unfinished; no events. |
+| `targetPrefix self k` | Version-2 run observation: calls journaled after the first `k`, except calls of `self` (internal to the system, per `Event`), become `Event.call callee value input false` + `Event.answer outcome none`; `ok _ 0` → `success []`, `ret _ d` → `success d`, `revert cs d` → `revert d` (events kept); pending jump / fault unfinished. |
 | `SourceClass`, `sourceClass`, `TargetClass`, `targetClass` | Frame-boundary classes that `Outcome` merges (bare revert / panic / revert with data; stop / return; pending / fault). `sourcePrefix_final`, `targetPrefix_final`: the final outcome is a function of the class. |
 | `sourceLang`, `targetLang`, `targetSem` | The canonical `Lang Event Outcome` pair; source resource is the depth `n`, target resource `Unit`; same environment, so `beta = id`. |
 
 Source events are `[]` (`sourcePrefix_events`): the typed source run has no
-journal of external calls, so the source language is canonical only for
-families without external calls or payments, as V12's was.
+journal of external calls. A successful source frame shows no data (its
+typed results are not bytes), and outside self-calls the source keeps some
+data-less reverts that solc gives data (`require(c, "m")`,
+[solc-alignment.md](../solc-alignment.md)). So the source language is
+canonical only for families without external calls or payments, without
+return data, and whose reverts carry their data in the source. A target
+fault carries no journal, so its events are dropped.
 
 ## Migration to V12's coarse languages (`RuntimeFrameP1LangV2Migration`)
 
@@ -52,11 +57,13 @@ cell`: `cell < W` and the cell represents the flag (`ReprV .bool`).
 
 Controls (`RuntimeFrameP1BridgeV2Controls`), for every contract `C`:
 `admitted_true`/`admitted_false` (both classes inhabited by admitted inputs,
-cell 3), `revert_witness`, `success_witness`, `not_bare` (the payload is
+cell 3), `revert_witness`, `success_witness`, `success_witness`, `not_bare` (the payload is
 observed, not `revert []`), `source_distinguishes`, `refused_mismatch`,
 `other_payload_disagrees` (an image with payload `0xdeadbeef` breaks the
 agreement on an admitted input), `events_observed` (a journaled `CALLIN`
-before a revert shows `call` and `answer` events), `satisfiable`. The axioms
+before a revert shows `call` and `answer` events), `offset_drops_old` (a
+call journaled before the run is not an event), `self_call_internal` (a call
+of the contract itself is no event), `panic_data`, `satisfiable`. The axioms
 of `p1_frame_bridge` are pinned.
 
 ## Limits
@@ -67,5 +74,26 @@ of `p1_frame_bridge` are pinned.
   addressed.
 - The family makes no external call, so its events are `[]` on both sides;
   target events are exercised only by `events_observed`.
+- The domain fixes one absolute cell per context; `L`, `frame`, `base` and
+  `start` do not occur in it, and for `cell ≥ W` it is empty (the bridge is
+  then vacuous; the controls use cell 3). The depth is unused, the success
+  payload is `[]` and `need` is `()`, so the bound `nu` carries no content.
+- The migration is at the observation level: no `Lang`, admission or
+  `BridgeGoal` is migrated, and this family's image (it uses `REVERT` with
+  data) is not lifted frozen code.
 - The environment `Input` is the P1 one, so the bridge folds only as a
   singleton (as V12's).
+
+## Reviews (item 3)
+
+Read-only finder and skeptic reviews (no Lean server). Confirmed: no frozen
+statement changed by the V12 merge or this commit; the admission is a
+representation premise, not the conclusion; `agree` is exact equality and
+the outcome and payload vary over admitted inputs. Fixed findings: a source
+`panic` was observed as a bare revert, against solc and the source's own
+`catchBytes` → `revert (encodePanic 1)` (`panic_data`); calls of the contract
+itself were events → filtered by `self` (`self_call_internal`); the journal
+offset was untested → `offset_drops_old`; the bridge docstring claimed
+inhabitation inside `Local` → corrected; dropped fault events, absolute
+cell, vacuous `cell ≥ W`, trivial resources, return-data exclusion and
+observation-level migration → listed under Limits.

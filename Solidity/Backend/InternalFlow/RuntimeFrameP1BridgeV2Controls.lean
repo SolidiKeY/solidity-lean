@@ -85,17 +85,57 @@ theorem other_payload_disagrees (C : Contract) :
   have h : (runV2 (otherImage 3) (machine false)).revertView = some ([], [0xde, 0xad, 0xbe, 0xef]) := by
     decide +kernel
   have hr := OutV2.eq_revertView h
-  simp only [targetSem, input, hr, targetPrefix]
   intro e
-  cases e
+  have hf := congrArg Prefix.final e
+  simp only [targetSem, input, hr, targetPrefix, Option.some.injEq, Outcome.revert.injEq] at hf
+  exact absurd hf (by decide)
+
+/-- The contract's own address in the fixtures. -/
+def self0 : Fin W := ⟨0, W_pos⟩
 
 /-- Call events are observed, and kept across the revert that follows. -/
 theorem events_observed :
-    targetPrefix 0 (runV2 MachineV2Controls.callThenRevert (MachineV2Controls.machineWith [1, 2, 3, 4])) =
+    targetPrefix self0 0
+        (runV2 MachineV2Controls.callThenRevert (MachineV2Controls.machineWith [1, 2, 3, 4])) =
       ⟨callEvents (MachineV2Controls.entry [1, 2, 3, 4]), some (.revert [1, 2, 3, 4])⟩ := by
   rw [MachineV2Controls.joint_witness]
-  simp only [targetPrefix, eventsAfter, List.drop_zero, List.map_cons, List.map_nil,
-    List.flatten_cons, List.flatten_nil, List.append_nil]
+  rfl
+
+/-- **Journal offset**: from a machine that already journaled one call, only
+the call made by this run is an event. -/
+theorem offset_drops_old :
+    targetPrefix self0 1 (runV2 MachineV2Controls.callThenRevert
+        { MachineV2Controls.machineWith [1, 2, 3, 4] with
+          calls := [MachineV2Controls.entry [9]] }) =
+      ⟨callEvents (MachineV2Controls.entry [1, 2, 3, 4]), some (.revert [1, 2, 3, 4])⟩ := by
+  have h : (runV2 MachineV2Controls.callThenRevert
+      { MachineV2Controls.machineWith [1, 2, 3, 4] with
+        calls := [MachineV2Controls.entry [9]] }).revertView =
+      some ([MachineV2Controls.entry [9], MachineV2Controls.entry [1, 2, 3, 4]], [1, 2, 3, 4]) := by
+    decide +kernel
+  rw [OutV2.eq_revertView h]
+  rfl
+
+/-- **A self-call is no event**: the same run, observed as the contract at
+the callee's address `7`, shows none. -/
+theorem self_call_internal :
+    (targetPrefix ⟨7, by unfold W; decide⟩ 0
+        (runV2 MachineV2Controls.callThenRevert (MachineV2Controls.machineWith [1, 2, 3, 4]))).events =
+      [] := by
+  rw [MachineV2Controls.joint_witness]
+  rfl
+
+/-- A source panic shows `Panic(0x01)`'s data, not a bare revert. -/
+theorem panic_data {C : Contract} {Δ : Ctx} {H : HTy} :
+    sourcePrefix (.error .panic : TRes (Solidity.Out C H Δ)) =
+      ⟨[], some (.revert (Semantics.encodePanic 1))⟩ ∧
+    sourcePrefix (.error .panic : TRes (Solidity.Out C H Δ)) ≠
+      sourcePrefix (.error .revert : TRes (Solidity.Out C H Δ)) := by
+  refine ⟨rfl, ?_⟩
+  intro h
+  simp only [sourcePrefix, Prefix.mk.injEq, Option.some.injEq, Outcome.revert.injEq,
+    true_and] at h
+  cases h
 
 /-- Joint satisfiability of the bridge with its `Local` for every contract. -/
 theorem satisfiable (C : Contract) :

@@ -19,19 +19,26 @@ identity.
 * **Source.** Resource: the quotation depth `n`. Observation of
   `Stmt.run` of `source n` from the caller (`sourcePrefix`): success is
   `Outcome.success []` (an internal frame returns typed values, not bytes);
-  `revertWith d` is `Outcome.revert d`; a bare `revert` and the code-less
-  `panic` are `Outcome.revert []` (the compiler's panic without data is a
-  bare `REVERT`; panics with codes are `revertWith (encodePanic c)` in the
-  source already); exhaustion and divergence are unfinished. No events: the
-  source run has no journal of external calls, so this language is
-  canonical only for families whose bodies make no external call or
-  payment (as V12's).
+  `revertWith d` is `Outcome.revert d`; a bare `revert` is
+  `Outcome.revert []`; the code-less `panic` (a failing `assert`) is
+  `Outcome.revert (encodePanic 1)`, solc's `Panic(0x01)`, the data the
+  source itself gives it when a caller reads it (`TRun.catchBytes`,
+  `selfPanicCode`'s default); exhaustion and divergence are unfinished. No
+  events: the source run has no journal of external calls. Outside a
+  self-call the source keeps some data-less reverts that solc gives data
+  (`require(c, "m")`, `docs/solc-alignment.md`), and a successful frame's
+  typed results are not bytes. So this language is canonical only for
+  families whose bodies make no external call or payment, return no data,
+  and whose reverts carry their data in the source (as `revertData` does).
 * **Target.** Resource `Unit`. Observation of `runV2 code machine`
-  (`targetPrefix`): the calls journaled during the run are events
-  (`Event.call callee value input false`, then `Event.answer` with the
-  callee's outcome and data); `ok _ 0` is success with no data, `ret _ d`
-  success with `d`, `revert _ d` revert with `d`; a pending jump or a fault
-  is unfinished. A revert keeps its events (the calls happened).
+  (`targetPrefix`): the calls journaled during the run to an account other
+  than the machine's own are events (`Event.call callee value input false`,
+  then `Event.answer` with the callee's outcome and data); a call of the
+  contract itself is internal to the system and is no event. `ok _ 0` is
+  success with no data, `ret _ d` success with `d`, `revert _ d` revert
+  with `d`; a pending jump or a fault is unfinished. A revert keeps its
+  events (the calls happened); a fault carries no journal, so its events
+  are dropped (`⟨[], none⟩`).
 * **Frame classes** (`SourceClass`, `TargetClass`) keep what the shared
   `Outcome` merges (bare revert vs. panic vs. revert with data; return vs.
   end of code; fault vs. pending jump) for a bridge's `Local` conclusion.
@@ -67,9 +74,10 @@ def callEvents (r : CallRec) : List Event :=
   [.call (toAddress r.callee) (toWord r.value) r.input false,
    .answer (if r.success then .success r.output else .revert r.output) none]
 
-/-- The events of the calls journaled after the first `k`. -/
-def eventsAfter (k : Nat) (calls : List CallRec) : List Event :=
-  ((calls.drop k).map callEvents).flatten
+/-- The events of the calls journaled after the first `k`, other than
+calls of the contract `self` itself. -/
+def eventsAfter (self : Fin W) (k : Nat) (calls : List CallRec) : List Event :=
+  (((calls.drop k).filter fun r => r.callee != self).map callEvents).flatten
 
 /-- Frame-boundary observation of a source run. -/
 def sourcePrefix {C : Contract} {Δ : Ctx} {H : HTy}
@@ -77,17 +85,18 @@ def sourcePrefix {C : Contract} {Δ : Ctx} {H : HTy}
   match r with
   | .ok _ => ⟨[], some (.success [])⟩
   | .error (.revertWith d) => ⟨[], some (.revert d)⟩
-  | .error .revert | .error .panic => ⟨[], some (.revert [])⟩
+  | .error .revert => ⟨[], some (.revert [])⟩
+  | .error .panic => ⟨[], some (.revert (Semantics.encodePanic 1))⟩
   | .error .exhausted | .error .diverge => ⟨[], none⟩
 
-/-- Frame-boundary observation of a version-2 target run from a machine
-whose journal already holds `k` calls. -/
-def targetPrefix (k : Nat) (r : OutV2) : Prefix Event Outcome :=
+/-- Frame-boundary observation of a version-2 target run of the contract
+`self` from a machine whose journal already holds `k` calls. -/
+def targetPrefix (self : Fin W) (k : Nat) (r : OutV2) : Prefix Event Outcome :=
   match r with
-  | .ok m 0 => ⟨eventsAfter k m.calls, some (.success [])⟩
-  | .ok m (_ + 1) => ⟨eventsAfter k m.calls, none⟩
-  | .ret m d => ⟨eventsAfter k m.calls, some (.success d)⟩
-  | .revert cs d => ⟨eventsAfter k cs, some (.revert d)⟩
+  | .ok m 0 => ⟨eventsAfter self k m.calls, some (.success [])⟩
+  | .ok m (_ + 1) => ⟨eventsAfter self k m.calls, none⟩
+  | .ret m d => ⟨eventsAfter self k m.calls, some (.success d)⟩
+  | .revert cs d => ⟨eventsAfter self k cs, some (.revert d)⟩
   | .fault => ⟨[], none⟩
 
 /-! ## Frame classes -/
@@ -135,8 +144,8 @@ def TargetClass.final : TargetClass → Option Outcome
   | .revert d => some (.revert d)
   | .pending | .fault => none
 
-theorem targetPrefix_final (k : Nat) (r : OutV2) :
-    (targetPrefix k r).final = (targetClass r).final := by
+theorem targetPrefix_final (self : Fin W) (k : Nat) (r : OutV2) :
+    (targetPrefix self k r).final = (targetClass r).final := by
   cases r with
   | ok m s => cases s <;> rfl
   | ret m d => rfl
@@ -146,7 +155,8 @@ theorem targetPrefix_final (k : Nat) (r : OutV2) :
 /-- The source observation's final outcome is a function of its class. -/
 def SourceClass.final : SourceClass → Option Outcome
   | .success => some (.success [])
-  | .bareRevert | .panic => some (.revert [])
+  | .bareRevert => some (.revert [])
+  | .panic => some (.revert (Semantics.encodePanic 1))
   | .revertWith d => some (.revert d)
   | .exhausted | .diverge => none
 
@@ -186,7 +196,7 @@ def sourceLang {C : Contract} {Γ Δ : Ctx} (source : Nat → Stmt C Γ Δ)
 
 /-- The target observation of one emitted image. -/
 noncomputable def targetSem {C : Contract} {Γ : Ctx} (code : List InstrV2) (e : Input C Γ) : Prefix Event Outcome :=
-  targetPrefix e.machine.calls.length (runV2 code e.machine)
+  targetPrefix e.machine.base.self e.machine.calls.length (runV2 code e.machine)
 
 /-- The canonical version-2 target language of one emitted image. -/
 noncomputable def targetLang {C : Contract} {Γ : Ctx} (code : List InstrV2)

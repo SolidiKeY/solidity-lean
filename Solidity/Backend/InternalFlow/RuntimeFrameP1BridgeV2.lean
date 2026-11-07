@@ -19,10 +19,13 @@ outcome depends on the caller and one of its outcomes carries revert data.
   Nothing else about the caller, machine or start is restricted; the
   environment map is the identity.
 
-`Local` is the entire per-input frame conclusion: for every admitted input,
-the source class is `success` or `revertWith data` exactly as the target
-class is `stop` or `revert data`, no call is journaled, and both classes are
-inhabited by admitted inputs. -/
+`Local` is the per-input frame conclusion: for every admitted input, either
+the flag is set, the source class is `success` and the target stops with the
+journal unchanged, or it is clear, the source class is `revertWith data` and
+the target run is exactly `.revert calls data`. That both classes are
+inhabited by admitted inputs is shown separately (`Controls.admitted_true`,
+`Controls.admitted_false`, cell `3`). The domain fixes one absolute cell per
+context; `L`, `frame`, `base` and `start` do not occur in it. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.P1BridgeV2
 open Evm P1LangV2
 open Solidity.Roadmap (Event Outcome Prefix Lang Prefixes)
@@ -121,14 +124,14 @@ theorem target_true {C : Contract} {cell : Nat} (e : Input C Γ) (h : admitted C
   have hm : e.machine.base.mem cell = .val (bword true) := by
     have := h.2; simp only [ReprV] at this; rw [this]; simp only [flag] at hf; rw [hf]
   obtain ⟨m', run, calls⟩ := image_true cell e.machine hm
-  simp only [targetSem, run, targetPrefix, eventsAfter, calls, List.drop_length, List.map_nil,
+  simp only [targetSem, run, targetPrefix, eventsAfter, calls, List.drop_length, List.filter_nil, List.map_nil,
     List.flatten_nil]
 
 theorem target_false {C : Contract} {cell : Nat} (e : Input C Γ) (h : admitted C cell e)
     (hf : flag e.caller = false) : targetSem (image cell) e = ⟨[], some (.revert data)⟩ := by
   have hm : e.machine.base.mem cell = .val (bword false) := by
     have := h.2; simp only [ReprV] at this; rw [this]; simp only [flag] at hf; rw [hf]
-  simp only [targetSem, image_false cell h.1 e.machine hm, targetPrefix, eventsAfter,
+  simp only [targetSem, image_false cell h.1 e.machine hm, targetPrefix, eventsAfter, List.filter_nil,
     List.drop_length, List.map_nil, List.flatten_nil]
 
 /-- **Frame agreement**: on every admitted input both sides show the same
