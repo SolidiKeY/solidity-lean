@@ -4384,3 +4384,25 @@ requested explicit length and newline controls, which were added. The existing
 eight positive variants and 153 negative controls pass, including actual SSTORE
 observation. This validates report checking only, not physical completeness.
 Evidence stays outside Git at `/workspace/vy2-evidence/runtime-hash-validation`.
+
+
+### Isolated ordinary Source graph slot endpoints (H126)
+
+`Solidity/Yul/Views/SourceGraphEndpoints.lean` now owns the existing generic
+recursive uint256-key graph adapter and `NestedWordMappingRoot.graph_path_endpoint`.
+The audit imports it and retains both its joint Source declaration witness and
+wrong-root refusal exactly. All moved declaration bodies and audit statements
+are byte-identical. No producer interface or original layout module changes.
+The endpoint derives slot identity at the existing root0 placement; it supplies
+no Source liveness/value adequacy, compiler selection, reached execution or
+physical closure. V10 must retain those remaining premises.
+
+Pinned serial kernel checks pass. The explicit bridge import has median 0.54 s
+and peak 1,050,020 KiB, compared with layout-only import median 0.18 s; this is
+an opt-in 0.36 s dependency cost, not a passing speed-neutral replacement.
+The unchanged layout checks remain 0.40 s median (pre-check 0.43 s), and the
+existing layout import-expansion STOP remains. Axiom exports retain inherited
+propext/Classical.choice/Quot.sound; no axiom or policy was added. Detailed
+measurements and preservation checks stay outside Git at
+`/workspace/vy2-evidence/source-graph-production/`. Full validation and Y04
+physical adequacy/reached-state work remain open.
