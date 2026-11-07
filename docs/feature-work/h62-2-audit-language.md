@@ -21,10 +21,17 @@ the historical absolute path. Absolute relative-members, parent traversal and
 symlinks escaping the selected root are rejected. Identity, SHA256, reconstruction,
 fidelity, source, axiom and witness predicates are unchanged.
 
+The subsequent coordinator review found that gate-repair patches still used a
+separate path join. `approved_revisions` now routes those reads through the same
+containment resolver. Valid-byte file and directory symlink escapes are rejected
+before opening outside patch contents; normal authentication still succeeds.
+The regression demonstrates the old held implementation attempting that read,
+then checks rejection through the actual gate-repair entry point.
+
 The regression reproduces both reported failures using the held scripts, then
 accepts both repaired flows while all legacy-root file reads are forbidden.
 It also runs from relocated input data with setup-time legacy reads forbidden.
-All 13 controls pass, including corruption/missing receipts, no fallback, default
+All 20 controls pass, including gate-repair escapes, corruption/missing receipts, no fallback, default
 path behavior, containment and the five contiguous registration rows. This is
 saved acceptance replay using source bytes matching actual recorded check hashes;
 it invokes no Lean and establishes no new proof or full runtime gate.

@@ -53,7 +53,8 @@
     "gate-repair-20261107/timing.json",
     "merge-fixedpoint-20261107/check/checks.json",
     "receipt-relocation-20261107/results.json",
-    "receipt-relocation-20261107/relocated-input-check.json"
+    "receipt-relocation-20261107/relocated-input-check.json",
+    "gate-containment-20261107/results.json"
   ],
   "review_evidence": "gate-repair-20261107/reviews.json",
   "timing_delta": {
@@ -99,9 +100,9 @@
   ],
   "questions": [],
   "original_scope_inputs": "tests/h62/item2/audit-language/retirement/: complete original rendered prompt, originalqueue and small H44scopepointer; full245627byte inventory remains offGit and in portable archive",
-  "increment_base": "60f3df88d6dcb7b9dd1a31e9e8358e8348a01484",
+  "increment_base": "6cd0a8f1c7d5311d651278e47247f03c91a6e769",
   "gate_repair_manifest": "tests/h62/item2/audit-language/gate-repair-manifest.json",
-  "current_action": "Fix coordinator finder receipt-relocation and Markdown-table findings; no statement/gate/budget changes",
+  "current_action": "Fix coordinator-blocked gate-repair symlink escape using shared resolver; no statement or proof-budget changes",
   "gate_repair_evidence": "gate-repair-20261107/",
   "coordinator_gate_rerun": "pending after merge resolution; no full-gate claim",
   "merge_parent": "bdc5942ac81e4e6b733fc2a7ae7711df97a6c71e",
@@ -110,5 +111,6 @@
   "lane_push_authorized": true,
   "push_scope": "Latest user explicitly requests push of this original lane branch only; no default-branch publication",
   "portability_evidence": "receipt-relocation-20261107/",
-  "portability_regression": "13controls, including both original failures, repaired verify/exportauth flows, corruption/missing/no-fallback, containment and table structure; saved checked-byte fixture, no new Lean proofs"
+  "portability_regression": "20controls including actualgate-repair oldoutside-read reproduction, file/directorysymlink rejectionbeforeopen,normalpositive,missing/invalidmembers; savedacceptancereplay,noLeanproofclaim",
+  "gate_containment_evidence": "gate-containment-20261107/"
 }

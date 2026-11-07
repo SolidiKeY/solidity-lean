@@ -16,6 +16,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[4]
 SCRIPTS = ROOT / "scripts/h62/item2/audit-language"
 BEFORE = "60f3df88d6dcb7b9dd1a31e9e8358e8348a01484"
+BEFORE_GATE_REPAIR = "ad812a3d91e9368b915e92bf170cac09c2c9faf1"
 
 HARNESS = r"""
 import json, os, runpy, sys
@@ -23,10 +24,13 @@ from pathlib import Path
 from unittest.mock import patch
 legacy = Path(os.environ["H62_TEST_LEGACY_ROOT"]).resolve()
 fixture = Path(os.environ["H62_TEST_FIXTURE"])
+outside_patch = os.environ.get("H62_TEST_FORBIDDEN_PATCH")
 old_open = Path.open
 def guarded_open(path, *args, **kwargs):
     if path.resolve().is_relative_to(legacy):
         raise AssertionError("legacy evidence read forbidden: " + str(path))
+    if outside_patch and path.resolve() == Path(outside_patch).resolve():
+        raise AssertionError("outside gate patch read forbidden")
     return old_open(path, *args, **kwargs)
 with patch.object(Path, "open", guarded_open):
     repair = fixture / "tests/h62/item2/audit-language/gate-repair-manifest.json"
@@ -38,6 +42,10 @@ with patch.object(Path, "open", guarded_open):
                     "--gate-repair-manifest", str(repair),
                     "--output", str(evidence / "verified")]
         runpy.run_path(sys.argv[0], run_name="__main__")
+    elif os.environ["H62_TEST_MODE"] == "gate-repair":
+        from gate_repair import approved_revisions
+        approved_revisions(repair)
+        print("PASS-gate-repair-authentication")
     else:
         from retire_export import authenticate_resume_proofs
         receipts = json.loads((fixture / "tests/h62/item2/audit-language/received-overlays.json").read_text())
@@ -109,6 +117,8 @@ def main():
                 assert result.returncode != 0 and expected in result.stderr, result.stdout + result.stderr
                 if expected != "legacy evidence read forbidden":
                     assert "legacy evidence read forbidden" not in result.stderr, "fallback attempted"
+                if expected != "outside gate patch read forbidden":
+                    assert "outside gate patch read forbidden" not in result.stderr, "outside file opened"
             results.append({"control": label, "exit": result.returncode,
                             "outcome": "pass" if expected is None else "expected-rejection"})
         # The same fixture reproduces both reported failures at the held head.
@@ -121,6 +131,40 @@ def main():
             put(fixture, "scripts/h62/item2/audit-language/" + name, (SCRIPTS / name).read_bytes())
         for mode in ["verify", "export"]:
             run(mode, "relocated-" + mode)
+        run("gate-repair", "normal-gate-repair")
+        gate_victim = evidence / repair["revisions"][0]["patch_relative_to_evidence"]
+        gate_bytes = gate_victim.read_bytes()
+        outside = put(Path(temporary), "outside-gate.patch", gate_bytes)
+        gate_victim.unlink()
+        gate_victim.symlink_to(outside)
+        env["H62_TEST_FORBIDDEN_PATCH"] = str(outside)
+        # Valid patch bytes ensure this tests containment, not checksum failure.
+        put(fixture, "scripts/h62/item2/audit-language/gate_repair.py",
+            git("show", BEFORE_GATE_REPAIR + ":scripts/h62/item2/audit-language/gate_repair.py"))
+        run("gate-repair", "before-gate-repair-symlink-open", "outside gate patch read forbidden")
+        put(fixture, "scripts/h62/item2/audit-language/gate_repair.py", (SCRIPTS / "gate_repair.py").read_bytes())
+        run("gate-repair", "gate-repair-file-symlink-escape", "receipt path escapes evidence root")
+        gate_victim.unlink()
+        gate_victim.write_bytes(gate_bytes)
+        gate_dir = gate_victim.parent
+        outside_dir = Path(temporary) / "outside-gate-directory"
+        gate_dir.rename(outside_dir)
+        gate_dir.symlink_to(outside_dir, target_is_directory=True)
+        env["H62_TEST_FORBIDDEN_PATCH"] = str(outside_dir / gate_victim.name)
+        run("gate-repair", "gate-repair-directory-symlink-escape", "receipt path escapes evidence root")
+        gate_dir.unlink()
+        outside_dir.rename(gate_dir)
+        gate_victim.unlink()
+        run("gate-repair", "missing-gate-repair-no-fallback", "FileNotFoundError")
+        gate_victim.write_bytes(gate_bytes)
+        del env["H62_TEST_FORBIDDEN_PATCH"]
+        repair_path = fixture / owned / "gate-repair-manifest.json"
+        for label, member in [("absolute", str(outside)), ("parent", "../outside-gate.patch")]:
+            altered = json.loads(json.dumps(repair))
+            altered["revisions"][0]["patch_relative_to_evidence"] = member
+            repair_path.write_text(json.dumps(altered))
+            run("gate-repair", "gate-repair-" + label + "-member", "receipt path must be relative to evidence")
+        repair_path.write_text(json.dumps(repair))
         victim = evidence / receipts[1]["path_relative_to_evidence"]
         original = victim.read_bytes()
         victim.write_bytes(original + b"corrupt")
