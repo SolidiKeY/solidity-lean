@@ -943,6 +943,60 @@ private def readErrorMembers (errors : List Json) (types : Structs) : List Strin
         ((J.get param "typeName").toOption.bind fun ty => (tyText types ty).toOption)
     pure s!"error {identText name}({", ".intercalate params});"
 
+/-- Shared function-clause normalization result. The legacy reader consumes
+only these original resolved clauses/results; ordinal metadata is opt-in. -/
+structure FunctionSpecNormalizationV1 where
+  resolvedSpec : List KeyClause
+  results : List (Except String KeyClause)
+
+/-- One computation for constant/enum resolution followed by the original
+parameter/return rewrite. Source admission, clause parsing and scope bindings
+remain with the caller; no normalization algorithm is copied by consumers. -/
+def normalizeFunctionSpecV1 (rawSpec : List KeyClause) (st : PState)
+    (params rets : List (String × String))
+    (rewriteSpec : String → List (String × String) → List (String × String) →
+      String → Except String String) : FunctionSpecNormalizationV1 :=
+  let resolvedSpec := rawSpec.map fun c =>
+    let text := resolveSpecConstants st.specConstants st.specConstBlocked c.text
+    { c with text := resolveSpecEnums st.specEnums st.specBlocked text }
+  let results := resolvedSpec.map fun c => do
+    let text ← rewriteSpec c.kind params rets c.text
+    pure { c with text }
+  ⟨resolvedSpec, results⟩
+
+/-- Exact legacy resolved-clause expression; no default or binding changes. -/
+theorem normalizeFunctionSpecV1_resolved (rawSpec : List KeyClause) (st : PState)
+    (params rets : List (String × String)) (rewriteSpec) :
+    (normalizeFunctionSpecV1 rawSpec st params rets rewriteSpec).resolvedSpec =
+      rawSpec.map (fun c =>
+        let text := resolveSpecConstants st.specConstants st.specConstBlocked c.text
+        { c with text := resolveSpecEnums st.specEnums st.specBlocked text }) := rfl
+
+/-- Exact legacy result expression, including every per-clause error. -/
+theorem normalizeFunctionSpecV1_results (rawSpec : List KeyClause) (st : PState)
+    (params rets : List (String × String)) (rewriteSpec) :
+    (normalizeFunctionSpecV1 rawSpec st params rets rewriteSpec).results =
+      ((rawSpec.map fun c =>
+        let text := resolveSpecConstants st.specConstants st.specConstBlocked c.text
+        { c with text := resolveSpecEnums st.specEnums st.specBlocked text }).map fun c => do
+          let text ← rewriteSpec c.kind params rets c.text
+          pure { c with text }) := rfl
+
+/-- Ordinals count every original clause, before kind filtering. Failed clauses
+retain their exact error at the same ordinal; no text matching or second rewrite. -/
+def FunctionSpecNormalizationV1.indexed (normalization : FunctionSpecNormalizationV1) :
+    List (Except String KeyClause × Nat) := normalization.results.zipIdx
+
+theorem FunctionSpecNormalizationV1.indexed_forget
+    (normalization : FunctionSpecNormalizationV1) :
+    normalization.indexed.map Prod.fst = normalization.results :=
+  List.zipIdx_map_fst 0 normalization.results
+
+theorem normalizeFunctionSpecV1_length (rawSpec : List KeyClause) (st : PState)
+    (params rets : List (String × String)) (rewriteSpec) :
+    (normalizeFunctionSpecV1 rawSpec st params rets rewriteSpec).results.length = rawSpec.length := by
+  simp only [normalizeFunctionSpecV1, List.length_map]
+
 def readContract (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false)
     (rewriteSpec : String → List (String × String) → List (String × String) → String → Except String String :=
       fun _ params rets text => if params.isEmpty && rets.isEmpty then .ok text
@@ -1547,9 +1601,6 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let fname := internalName f
     let st := specState f (renames stateVars f ++ funRenames)
     let rawSpec := (keyClauses (docText f)).toOption.getD []
-    let resolvedSpec := rawSpec.map fun c =>
-      let text := resolveSpecConstants st.specConstants st.specConstBlocked c.text
-      { c with text := resolveSpecEnums st.specEnums st.specBlocked text }
     -- Only parameters and named returns are in a function clause's scope.
     -- Renamed body locals cannot change the meaning of a pre/postcondition.
     let bindingsOf (key : String) :=
@@ -1560,10 +1611,10 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       let original ← J.str? p "name"
       let renamed ← lookupBy id (renames stateVars f)
       pure (original, renamed)
-    let fspecResults : List (Except String KeyClause) := resolvedSpec.map fun c => do
-      let text ← rewriteSpec c.kind (specRenamesOf parameters)
-        (specRenamesOf (bindingsOf "returnParameters")) c.text
-      pure { c with text }
+    let normalization := normalizeFunctionSpecV1 rawSpec st (specRenamesOf parameters)
+      (specRenamesOf (bindingsOf "returnParameters")) rewriteSpec
+    let resolvedSpec := normalization.resolvedSpec
+    let fspecResults := normalization.results
     let fspecResult := fspecResults.mapM id
     let fspec := fspecResult.toOption.getD []
     -- what would change the function's meaning, or its constant's name
