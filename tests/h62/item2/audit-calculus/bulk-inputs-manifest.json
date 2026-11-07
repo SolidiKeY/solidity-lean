@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/model-reflexivity-classification-v28/semantic-roles-reviewed.json",
-    "bytes": 826731,
-    "sha256": "d516411f9793e41cb6316ebf47c6a195cc2e5e3fc0300bd5217014b5bfb96229"
+    "path": "/workspace/h62-successor-bulk/model-runs-classification-v29/semantic-roles-reviewed.json",
+    "bytes": 857861,
+    "sha256": "ad83fe728a34733453bb68494e7051b9fe942fc9856c160a6721bf0828739049"
   }
 }
