@@ -61,7 +61,7 @@ Before this change, `source-progress-checked.md` ("Bound-body catalogues with
 elaboration-derived frames") recorded that body/default admission and actual
 selected-body identity were explicit proof obligations, not automatic recognition.
 `Lowering/P9/BoundRecognizer.lean` replaces it, for `BoundParentItems`
-bodies only, with a sound (not complete) Boolean check, `catalogueB`, with
+bodies only, with a sound Boolean check, `catalogueB`, with
 explicit default fuel. Concrete units still need proved dispatch and body-lookup
 evaluation equations. See
 [source-progress-checked.md](source-progress-checked.md#executable-bound-body-catalogue-recognition).
@@ -114,3 +114,22 @@ the adapter pair was moved out of Source under the coordinator's ownership
 instruction. All 34 guarded axiom reports are standard only. Whole-program
 catalogue completeness, canonical endpoint production and the original
 producer waits are not closed by finite-default fuel completeness.
+
+
+## Relative catalogue-completeness checkpoint
+
+Three additive `Lowering/P9` modules now prove body-certificate completeness,
+entry/catalogue fuel monotonicity, and
+`BoundMemoryCatalogue ↔ ∃ fuel, catalogueB = true` under the original
+elaboration/program/check premises for the converse. No Source writer file
+or old admission/checker definition changed. The result is relative to the
+existing fragment; universal Source coverage and canonical endpoint
+production remain open.
+
+Controls use a direct reference-local unchecked body and the actual legacy
+allocation-parent fixture with both evaluator pipelines, including a checked
+call-program consumer. Inadequate default fuel is not treated as catalogue
+nonadmission; unsupported body shape and undeclared entries retain their
+separate refusals. All 26 guarded reports use only standard axioms. Independent
+finder and skeptic reviews found no confirmed defect. Previous broad-build
+timeouts and external-fixture failures remain separate historical evidence.

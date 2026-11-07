@@ -951,11 +951,13 @@ implies `BoundMemoryCatalogue`. `catalogueB_from_elaborate` and
 `checked_program_calls` need only a successful elaboration,
 `G.prog = progOf res.env`, `WholeProgram.check`, `catalogueB` and
 `readyCoverage`: no catalogue proof is supplied. For `BoundParentItems` bodies,
-`catalogueB` is therefore a sound (not complete) Boolean check of body/default
-admission and actual selected-body identity, with caller-chosen default fuel.
+`catalogueB` checks body/default admission and actual selected-body identity
+with caller-chosen default fuel. It is sound, and the relative completeness
+result below proves acceptance at some fuel for every existing
+`BoundMemoryCatalogue` certificate.
 A `false` answer is not a refutation. The finite-default component has
 existential fuel completeness and fuel monotonicity as described below; this
-does not establish completeness of the whole catalogue checker.
+by itself does not establish the relative catalogue result below.
 Applying the check to a concrete unit still uses proved evaluation equations
 for dispatch and body lookup, because elaboration does not reduce by `rfl`.
 
@@ -1009,3 +1011,35 @@ retain both pipelines and their declaration/body/fuel refusal boundaries.
 All 34 reports across the four adapter modules are guarded against their
 actual standard-only axiom inventories. No theorem, syntax, evaluator policy,
 allocation condition or budget in Source was changed by this extension.
+
+
+### Relative body and catalogue completeness
+
+`Lowering/P9/BodyRecognizerCompleteness.lean` proves acceptance from the
+unchanged `ReadyExpr`, `ReadyArgs`, `AllocationParent`, `ReadyStmt`,
+`ReadyItems` and `BoundParentItems` certificates. This adds no accepted syntax
+and leaves all `OpsOK`, conversion, return and memory-readiness conditions in
+place.
+
+In `CatalogueRecognizerCompleteness.lean`, `Recognize.catalogueB_complete` derives
+`∃ fuel, catalogueB G c values fuel ds = true` from an existing
+`BoundMemoryCatalogue`. Entry and catalogue acceptance are monotone in
+recognizer fuel; finite maxima give one bound for all entries and return
+defaults. The converse, `catalogueB_iff_from_elaborate`, retains successful
+Source elaboration, actual `progOf` identity and `WholeProgram.check`.
+Completeness is relative to that admitted fragment, not every elaborated
+Source program. It supplies neither a canonical SourceSpec/IntrinsicSpec nor
+a new evaluator horizon or compiler agreement.
+
+`CatalogueCompletenessControls` covers reference-local unchecked items, the
+existing allocation-parent body, both evaluator pipelines, and an actual
+checked-program consumer derived through the new completeness theorem. Its
+unit is resolved through the existing legacy fixture; runtime-pipeline
+quantification does not claim a second frontend resolution. Zero fuel still
+refuses the fixed-array default while a valid catalogue and an accepting fuel
+exist. An undeclared function is refused at every fuel, and the direct stray
+string-item body has no `BoundParentItems` certificate. These distinctions
+preserve fuel refusal separately from body/declaration nonadmission.
+All 26 new theorem/control reports are guarded and pinned to their actual
+standard-only axiom inventories. Read-only finder and skeptic reviews found
+no confirmed defect.
