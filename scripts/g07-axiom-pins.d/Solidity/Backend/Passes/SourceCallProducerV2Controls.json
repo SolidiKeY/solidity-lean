@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.small": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.source_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.transported_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.journaled_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.liar_disagrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.liar_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.wrong_buffer_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean:Solidity.Backend.Passes.SourceCallProducerV2Controls.two_cells_read": [
+  "Quot.sound",
+  "propext"
+ ]
+}
