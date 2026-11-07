@@ -28,12 +28,12 @@ partial def executableExpression (j : Json) : Except String RawExpr := do
     return ← Memory.expressionStep executableExpression Memory.typeName j
   Shared.expressionStep executableExpression j
 
-/-- Reference locals use B's strict location-aware type reader. Primitive local
-and tuple declaration paths retain their existing callbacks. -/
+/-- Reference locals use B's strict location-aware type reader. Primitive and tuple
+locals retain source narrow spellings through Shared.localTypeName. -/
 partial def executableStatements (j : Json) : Except String (List RawStmt) := do
   if (← node j) == "VariableDeclarationStatement" && memoryLocal j then
     return ← Memory.statementsStep executableExpression executableStatements Memory.typeName j
-  ControlTuple.statementsStep executableExpression executableStatements Shared.typeName j
+  ControlTuple.statementsStep executableExpression executableStatements Shared.localValueTypeName j
 
 /-- Canonical executable reader for runtime entrypoints and producer migration.
 Reference parameters and returns retain the existing Shared refusal gates. -/
