@@ -1,0 +1,5 @@
+| `Yul/Composition/SourceCatchBinding.lean` | Actual Source raw-bytes try/catch allocation and canonical rethrow: complete-state all-byte/all-horizon≥3 proof, old/new heap readback and scoped controls; no native/physical/full-Yul adequacy. |
+
+| `Yul/Composition/MonetaryLifecycleControls.lean` | H19 whole-Nat lifecycle payment/rollback and wide-balance refusal/self-beneficiary controls with nonempty caller journal; no world adequacy claim. |
+| `Yul/DirtyReadback.lean` | Readback of dirty LOCAL words into Source locals (user decision H109): `cleanWord` cleans a dirty `uintN`/`intN`/`bool` word as solc 0.8.38 does in both pipelines (wrap into the width; `bool` = nonzero), `readbackFrom`/`frame` read a raw frame back against its clean backup (untouched locals keep their value; a dirty local of another type refuses). Evidence: `tests/evm-reference/dirty-locals.json`. |
+| `Yul/Checks/DirtyReadbackControls.lean` | Controls of `DirtyReadback`: one positive per type family and pipeline matching the recorded solc evidence, frame readback of `LocalBlock`'s `dirtyTwo`/`dirtyFalse`, a refused dirty `bytes1`, coherence refusals kept. |

@@ -2984,3 +2984,12 @@ chose the foundation children.
   14 GB system-wide, sampled every 15 s, during the cold run.
 - **Remaining:** the integration steps and remaining child obligations
   above. Every ledger row stays open.
+
+
+## VY5 assembly extension ledger (2026-10-31)
+
+The separately owned [assembly ledger](../../tests/yul-composition/ledger.json)
+adds pending constructor combinations and every Y01–Y09 child/G48–G51 obligation.
+Its checked schema rejects missing edges/owners and invented proof closure.
+It supplements this generated ledger without rewriting it or reopening actual
+admission. See [VY5 evidence and boundaries](inline-assembly-vy5.md).

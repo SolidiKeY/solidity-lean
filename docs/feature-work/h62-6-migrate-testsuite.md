@@ -238,3 +238,117 @@ checksums and unchanged originals. Original assignment text is transcribed
 from the visible original thread, not authenticated as byte-identical to an
 unavailable canonical renderer artifact; see its explicit provenance note.
 The Syntax prerequisite remains awaited, not locally delivered or accepted.
+
+## Explicit resumption after coordinator merge
+
+The latest coordinator instruction reports this lane merged at master
+`20e492ee9` and explicitly directs merging origin/master and continuing. This
+resumes the previous H82 retirement in the same VM, branch and original goal;
+no reset, replacement goal, new VM or competing continuation was created.
+The merge fast-forwarded to `d96f2406d352de7e0b72ba6ac4ab29dc457582c6` after
+verifying ancestry of the pinned base, previous final head and coordinator
+merge. The earlier retirement section records history, not current disposition.
+
+All 333 source-closure files, including all 49 assigned modules, remain exactly
+identical to the accepted pinned-base census. Syntax/Raw.lean retains the same
+five known v4.35.0 error locations; no accepted prerequisite patch was delivered.
+That dependency failure was not rerun unchanged. No original Lean file or
+frozen interface was edited by this lane. Master changed lakefile defaults and
+comments, so the historical clean old build remains evidence; a final matched
+pair must satisfy the existing strict configuration/source/resource checks.
+No comparison result or renewed runtime pass is inferred from the merge.
+
+Independent H78 backfill now explicitly enumerates all kernel and compiler-added
+names for each assigned module, rather than omitting compiler-only names.
+The old inventory retains 8068 kernel declarations and 104 compiler extras,
+including all private/internal/generated names, with zero exclusions. Exact
+structured names, universe parameters, declaration kinds and type fingerprints
+join to the accepted old snapshot and its complete DAG stream. The 104 compiler
+extras have no ModuleData kernel signature and remain explicit unresolved rows.
+New signatures, export accessibility, shim names and shim signatures remain
+unresolved; naming flags are not an export-visibility proof. No H78 completeness
+or compatibility acceptance is claimed. Hash-addressed provenance links the
+actual passing official old-toolchain fixture, census, frozen signature file,
+manifest and full DAG stream. Large outputs remain off git.
+
+The first structured-name fixture placed a helper before target imports and
+failed; the generated import ordering was corrected and fresh evidence retained.
+Only a successful final fixture and validated join count toward the inventory.
+The 59 Python controls include missing kernel/compiler names, malformed types,
+false naming flags, overlap, duplicate rows, failed compiler and snapshot
+mutation refusals. Reviewer findings were fixed without source/proof changes.
+
+The Syntax prerequisite and exhaustive new API/parity/full-comparison/root-gate
+work remain typed waits; no unrelated unclaimed cleanup or ownership takeover
+was performed. No push, default-branch change or cut-over is authorized here.
+Detailed H81 policy text was not delivered; this small inventory check retained
+the original measured hard 12GiB/no-swap/4GiB-reserve serial settings and makes
+no new H81 approval or matched timing claim.
+
+Accepted structured inventory evidence: `public-inventory-old-03` and
+`public-api-old-03`. Lean exit0; 13.856743 s; sampled peak RSS 1126273024 bytes.
+Inventory SHA256:
+`646b9823dc10955d567be8c293512c5273048ef0f5677514f269768c1a585ddf`.
+The resumed checkpoint supplies the generator and 13 API-inventory controls
+(59 Python controls total). Prior unstructured/syntax-failed probes remain
+unaccepted diagnostics for the strengthened schema.
+
+Independent read-only finder and skeptic re-reviews passed the resumed partial
+inventory checkpoint. Confirmed findings fixed: structured naming flags,
+category overlap, signature schemas/hash formats and naming versus export
+visibility. Both independently verified inventory/provenance hashes and
+explicit pending fields; neither used Lean/server or edited files.
+
+## Portable artifact verification after ac9d8db2a
+
+The next explicit coordinator instruction reports this checkpoint merged at
+`ac9d8db2a`; origin/master was fetched and the lane fast-forwarded to
+`ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`, after verifying original-base and
+reviewed-head ancestry. Syntax/Raw.lean and the assigned modules are unchanged.
+No new goal, ownership takeover, source/proof edit or Lean run was introduced.
+
+The review minor about VM-only pins is addressed by the committed
+[portable evidence manifest](../../tests/h62/item6/migrate-testsuite/evidence-manifest.json)
+and [verification instructions](../../tests/h62/item6/migrate-testsuite/README-evidence.md).
+The external detailed manifest gives relative paths and sizes/SHA256 for 356 checkout
+files (333 closure sources plus 23 lane Python/shell tools and Lean fixtures),
+17 evidence-root-relative files, and the existing historical archive itself.
+The compact committed descriptor pins that detailed manifest and the archive.
+VM paths are location hints only. Bulk outputs and the expanded inventory remain
+off git; the deterministic generator and streaming verifier are in git.
+
+Without the pinned detailed inventory, verification reports pending and makes
+no source-integrity claim. Once supplied, all original checks remain required.
+Explicitly unavailable external artifacts report
+`pending_artifacts`/exit2; present mismatches fail. Supplying the manifested
+archive or a relocated evidence directory verifies the declared files without
+any dependence on the capture location. Archive verification reads compressed
+bytes and all 17 required members without extraction. Other historical members
+are not interpreted. It is integrity evidence, not a fresh proof or runtime gate.
+
+The API reporter now accepts an explicit artifact root and historical recorded
+root, confines captured receipt paths to the supplied directory and writes
+relative provenance paths. An actual relocated replay reproduced the same
+8172-row inventory SHA256 and retained all 104 unresolved signatures. Compiler
+receipt paths are checked as data, never executed. New compilation, export
+accessibility, shims, H78 parity, full comparison and root final gates remain
+pending on the same accepted Syntax prerequisite.
+
+All 75 Python controls pass, including omitted/missing artifacts, tampering,
+missing checkout files, duplicate members and root escapes. Actual archive and
+relocated-directory verification pass; checkout-only and absent-directory checks
+return expected pending2. Read-only finder/skeptic reviews confirmed the fixes:
+run-bounded.sh is now manifested, and unavailable external evidence consistently
+stays pending. Neither review used Lean/server or made edits. No RUNTIME or H78
+acceptance is inferred from these artifact checks.
+
+## H44 held-increment split
+
+The 1881-line generated inventory from held head `155b1b81e` is preserved
+off git. The unmerged increment now commits only a compact path/size/SHA256
+descriptor alongside reviewable scripts and docs. Its external detailed
+inventory preserves all 356 checkout and 17 evidence checks. The held head is
+retained at `refs/backup/h44-migrate-testsuite-155b1b81e` and in its prior bundle.
+No original Lean file, theorem, gate criterion or budget was changed.
+New loader refusal controls bring the Python total to 81; missing detail stays
+pending rather than bypassing checks. Original Syntax/API/full-build waits remain.

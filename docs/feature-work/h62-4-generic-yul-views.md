@@ -221,3 +221,136 @@ Implementation stopped for accepted successor `solidity-inline-assembly5-2026103
 Handoff files are in `scripts/h62/item4/generic-yul-views/handoff/`: original assignment transcription, scope manifest, full work/backfill queue and retirement limitations. The transcription is incomplete in its long owner-key paragraph; the exact original frozen rendered prompt has NOT been reproduced or hash-verified. Full ownership snapshot is exported off git. Successor needs exact original-thread export before new work.
 
 The exposed goal API cannot set PAUSED: its only outcomes are complete/blocked. No substitute completion or new goal was requested. No push was performed because H71 permission is not present in available inputs. Final cumulative patch, bundle, head and SHA256 manifest are recorded in the export handoff.
+
+## Explicit coordinator resume after integration
+
+The later coordinator instruction explicitly resumed this lane and authorized
+merging origin/master. The clean original branch fast-forwarded from
+67e0398f217da988605a7323efeabbfd44b1a84b to
+d96f2406d352de7e0b72ba6ac4ab29dc457582c6, which contains the reported
+20e492ee99a3fa8679aa526de0b6e731d85e4134 integration. The earlier stopped
+package is preserved as historical evidence; its pause text no longer describes
+the current authorized work. No push or new goal was requested.
+
+Independent backfill repaired the correspondence checker defect recorded by
+both retirement reviewers: comparison now retains literal and quoted-identifier
+contents and normalizes whitespace only outside them. Six external tests pass,
+including changed string values, internal string whitespace and quoted type
+identifiers. The current two selected type comparisons and all 3026 control
+theorem dispositions reproduce. This still supports only selected unquoted
+theorem names and is not a Lean parser or a semantic proof. Original-preservation
+claims continue to require the separate base-blob acceptance evidence.
+
+The integrated tree has no changes to the four previously failing dependency
+files relative to the stopped head; those known failures were not rerun.
+Roadmap axiom drift, Storage dependent elimination and Language migration remain
+waits. Independent queue work remains available; status is partial, not blocked.
+No original Lean source, axiom set, proof budget, interface or observation changed
+in this resumed checkpoint. Kernel fixture/refusal validation and matched timing
+remain open.
+
+## Repository-verifiable input pins after ac9d8db2a integration
+
+The coordinator reported the prior checkpoint integrated with passing gates and
+requested continuing from master. The original clean branch fast-forwarded to
+ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6. No prior stopped package was overwritten.
+
+Review minor addressed: the small committed source manifest is
+`scripts/h62/item4/generic-yul-views/checkpoint-manifest.json`. It records 12
+repository-relative source paths and SHA256 values, including both Lean
+candidates and the original ReadControls input. From the repository root run
+`python3 scripts/h62/item4/generic-yul-views/verify_manifest.py`; expected output
+is `SOURCE_MANIFEST_PASS files=12; source identity only`. The manifest lists
+reproduction commands. It is deliberately a source-input manifest, not a hash
+of itself or of VM-only bulk evidence. Future source edits require reviewed
+manifest regeneration; a changed file fails verification. Bulk H44 inventory
+and logs remain off git in separately checksummed exports.
+
+Three external controls pass for content mutation, escaping/absolute paths,
+and empty/duplicate inventories; six correspondence controls also pass.
+This establishes reproducibility of the selected source inputs, not semantic
+preservation of every original case, Lean validity, axiom acceptance or timings.
+The four known failing dependency files have not changed since the prior
+checkpoint; no known failing Lean gate was rerun unchanged. Roadmap, Storage
+and Language waits and all original proof/coverage/timing obligations remain.
+
+## Timing acceptance backfill after 2a43bf4fc integration
+
+The coordinator reported prior head46b06b522 integrated and instructed rebaseline.
+Fetched origin/master was 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0; task source
+files matched, but prior changes had different integrated commit IDs. A
+fast-forward attempt failed without changing files. A normal merge preserved
+both histories and completed without conflict at8e5714f9293d1efa4ffdfee34238e8795cb076d2.
+No reset or push occurred. The four known dependency source files remain unchanged.
+
+Independent backfill adds `scripts/h62/item4/generic-yul-views/compare_timings.py`
+and `scripts/h62/item4/generic-yul-views/test_timings.py`. This validates recorded
+serial timing evidence, not actual performance. Inputs have schema_version1,
+conditions (pinned toolchain archive hash, cache/resource/case/statement hashes,
+lean_threads1, heavy_jobs1, lean_args including -j1), a module inventory and
+at least three trials. Each trial records exit, resource_stop, wall_seconds and
+module_seconds. Failed/resource-stopped, incomplete, nonfinite or nonpositive
+records fail. Candidate inventory must retain every baseline module. Median
+aggregate and each original module are checked; slowdown strictly above10%
+returns TIMING_STOP and exit1. Added helper modules count toward aggregate cost.
+Three trials is this tool's measurement protocol, not a raised Lean budget.
+
+Usage: python3 scripts/h62/item4/generic-yul-views/compare_timings.py BEFORE.json AFTER.json
+Bulk records stay off git. Six synthetic controls pass: aggregate/module-key collision, threshold/STOP, cache
+mismatch, unsuccessful/incomplete evidence, helper cost and nonfinite time.
+The caller must still prove the supplied inventories cover the full affected
+closure, bind identities to actual source, and establish actual cache/resource
+equivalence. Matching metadata alone does not establish these facts. No real
+before/after delta or runtime gate is claimed. The committed repo-relative
+source manifest now includes the two new tools (14 source pins).
+All original proof, refusal-coverage and measurement obligations remain open.
+
+Independent finder/skeptic both identified aggregate-row overwrite by a module
+named aggregate. Fixed by namespace-prefixing module row keys; the added
+regression retains TIMING_STOP for +20% wall slowdown with an unchanged module.
+Reviews used no Lean server, builds or writes.
+
+## Proof-only dependency repair after cc1ea1c9c integration
+
+The clean lane fast-forwarded to coordinator-reported integration
+cc1ea1c9c99522bff459dcc57e41339e1f347243. Under H82 standing permission, a
+proof-only Storage repair was tested in the isolated pinned-v4.35 snapshot
+before adoption. `Solidity/Storage/HashedLayout.lean:376` now explicitly reduces
+`STy.locate` in the impossible word/nonempty-path hypothesis before `cases h`.
+The exact theorem signatures, definitions, premises, exclusions, budgets and
+axiom guards are unchanged. No source representation or interface changed.
+History inspection found no speed-motivated change being undone.
+
+Bounded command: lake --fail-fast build Solidity.Storage.HashedLayout, with
+LEAN_NUM_THREADS=1 and explicit -j1 in snapshot Lake configuration. Exit0;
+2.0246s wall,640237568 bytes peak sampled aggregateRSS, one Lean process,
+no resource stop, process group quiescent. Existing no-sorry axiom guards for
+STy.locate_bounded and located_word_inj pass unchanged. The adopted file matches
+the validated snapshot SHA256:
+9ac3cd0d246769c84330e724e5326446d57ce2fe408d5dcce652fdaf5f62e507.
+This removes the prior targeted Storage compile blocker; full affected
+validation remains pending behind Roadmap. No valid before/after performance
+delta exists because the original v4.35 proof failed. No slowdown claim is made.
+
+Roadmap experiments were not adopted. An explicit existential-elimination
+rewrite and constructor-elimination rewrite both still fail the unchanged
+no-axiom guard for PublicCorrectness.transfer. Print-only diagnostics establish
+that RefinesUnder.safety, RefinesUnder.completes and Prefix.Le.final_eq have no
+axioms, while the generated PublicCorrectness.refines projection reports
+propext,Classical.choice,Quot.sound. This is a dependency localization, not
+permission to change the axiom set or guard. Original Roadmap source is unchanged
+in the assigned checkout and restored in the isolated snapshot after preserving
+failed experiments off git. Relevant logs are transfer-explicit-check,
+transfer-axiom-localization, transfer-constructor-check, storage-word-refusal-check
+and storage-word-refusal-explicit-check under the existing evidence directory.
+The initial Storage simplification attempt left none=some unresolved; adding
+constructor discrimination produced the passing result. All failed checks remain
+failed evidence, not proofs.
+
+Independent finder/skeptic reviews are read-only, no Lean server/builds/writes.
+The source manifest includes the adopted Storage file (15 source pins). Current
+owner waits are Roadmap projection axiom drift and Language migration; the
+former Storage owner-relay request is superseded by this passing proof-only
+repair, with affected validation still pending. Generic fixture proofs, full
+negative/refusal coverage, semantic inventory and actual matched timings remain
+unfinished.

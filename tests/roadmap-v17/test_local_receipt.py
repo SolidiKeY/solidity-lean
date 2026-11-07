@@ -122,7 +122,7 @@ class ActualFailure(unittest.TestCase):
     def setUp(self):self.members=dict(self.original)
     def mutate(self,name,change):
         value=json.loads(self.members[name]);change(value);self.members[name]=json.dumps(value).encode()
-    def result(self):return x.account_members(self.members,self.request)
+    def result(self):return x.account_members(self.members,self.request,os.environ["V17_FAILURE_TOOLCHAIN_BIN"])
     def rejected(self):
         value=self.result();self.assertEqual(value["accountingStatus"],"REJECTED_INCOMPLETE")
         self.assertTrue(value["accountingErrors"])
@@ -130,7 +130,7 @@ class ActualFailure(unittest.TestCase):
         return value
 
     def test_actual_failure_and_missing_not_zero(self):
-        value,_=x.normalize(self.raw,self.request)
+        value,_=x.normalize(self.raw,self.request,os.environ["V17_FAILURE_TOOLCHAIN_BIN"])
         self.assertEqual(value["accountingStatus"],"CONSISTENT_FAILURE_ACCOUNTING")
         self.assertEqual(value["evidenceStatus"],"INCOMPLETE_FAILURE")
         self.assertEqual(value["reportedServiceExitCode"],125)
@@ -241,5 +241,28 @@ class ActualFailure(unittest.TestCase):
         value=self.rejected();self.assertEqual(value["reportedWrapperExitCode"],0)
         self.assertEqual(value["reportedServiceExitCode"],125)
 
+
+
+class ToolchainSelection(unittest.TestCase):
+    def test_explicit_path_is_parameter(self):
+        self.assertEqual(x.toolchain_directory('/portable/toolchain/bin'),'/portable/toolchain/bin')
+        for bad in ['relative/bin','/x/../bin','/x//bin','']:
+            with self.subTest(bad=bad),self.assertRaises(ValueError):x.toolchain_directory(bad)
+    def test_elan_selection_without_executing_lean(self):
+        from unittest.mock import patch
+        with patch('subprocess.check_output',return_value='/portable/lean/bin/lean\n') as selected:
+            self.assertEqual(x.toolchain_directory(),'/portable/lean/bin')
+            self.assertEqual(selected.call_args.args[0],['elan','which','lean'])
+    def test_failed_or_timed_out_selection_is_nonpass(self):
+        import subprocess
+        from unittest.mock import patch
+        for error in [subprocess.CalledProcessError(1,['elan']),subprocess.TimeoutExpired(['elan'],10)]:
+            with self.subTest(error=type(error).__name__),patch('subprocess.check_output',side_effect=error):
+                with self.assertRaisesRegex(ValueError,'selection failed'):x.toolchain_directory()
+    def test_malformed_elan_output(self):
+        from unittest.mock import patch
+        for output in ['', 'relative/lean\n','/one/bin/lean\n/two/bin/lean\n','/one/bin/lake\n']:
+            with self.subTest(output=output),patch('subprocess.check_output',return_value=output):
+                with self.assertRaisesRegex(ValueError,'executable path'):x.toolchain_directory()
 
 if __name__=="__main__":unittest.main()

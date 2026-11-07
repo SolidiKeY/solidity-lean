@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Verify the committed H44 bulk manifest, all external/mirror files and archive."""
 from pathlib import Path
 import hashlib
@@ -123,6 +124,56 @@ def verify(repo):
     require(digest(Path(m['backup_bundle']).read_bytes()) == m['backup_bundle_sha256'], 'bulk verification failed')
     subprocess.run(['git', 'bundle', 'verify', m['backup_bundle']], cwd=repo, check=True, stdout=subprocess.DEVNULL)
     return {'status': 'pass', 'validation_archives': validation_archives, 'explicit_off_git_inputs': external_inputs, 'command': 'python3 -B tests/h28-sol/mutation-testing/tools/verify_bulk.py', 'files': len(entries), 'uncompressed_bytes': total, 'archive': str(archive), 'archive_bytes': m['archive_bytes'], 'sha256': m['archive_sha256'], 'backup_bundle_verified': True, 'seconds': time.monotonic() - t}
+def verify_local(repo):
+    """What a checkout without the Codex VM's `/workspace` data can check.
+
+    The H44 index, archive, bundle and validation archives live only on the
+    Codex VM; their digests are never re-derived or faked here.  This checks
+    the committed side: the manifest is the committed one, every explicit
+    off-Git input pin against the bytes present in the checkout (fresh sha256
+    over repository-relative paths), and every retained support file is
+    tracked and unchanged.  The result is `local-only`, never `pass`.
+    """
+    pin = bulk_inputs.PREFIX / 'bulk-data.json'
+    head = subprocess.check_output(['git', 'show', 'HEAD:' + str(pin)], cwd=repo)
+    require((repo / pin).read_bytes() == head, 'bulk manifest differs from committed input')
+    m = json.loads(head)
+    tracked = set(subprocess.check_output(['git', 'ls-files'], cwd=repo, text=True).splitlines())
+    inputs, absent = {}, []
+    for relative, pins in m.get('frozen_manifest_inputs', {}).items():
+        require(relative in tracked, 'frozen manifest not tracked: ' + relative)
+        config = json.loads((repo / relative).read_bytes())
+        for p in pins:
+            name = Path(p['path'])
+            require(not name.is_absolute() and '..' not in name.parts and name.is_relative_to(bulk_inputs.PREFIX), 'unsafe input path')
+            require(config[p['role']] == p['path'] and config[p['role'] + '_sha256'] == p['sha256'], 'frozen manifest input pin mismatch')
+            f = repo / name
+            if not f.is_file():
+                absent.append(p['path'])
+                continue
+            require(not f.is_symlink(), 'input must not be a symlink')
+            data = f.read_bytes()
+            require(len(data) == p['bytes'] and digest(data) == p['sha256'], 'local input identity mismatch: ' + p['path'])
+            inputs[p['path']] = {'sha256': digest(data), 'bytes': len(data), 'tracked': p['path'] in tracked}
+    for rel in m['retained_reviewable_support_files']:
+        require(rel in tracked, 'support file not tracked: ' + rel)
+        require((repo / rel).read_bytes() == subprocess.check_output(['git', 'show', 'HEAD:' + rel], cwd=repo), 'support file differs from HEAD: ' + rel)
+    external = [m['index'], m['archive'], m['backup_bundle']]
+    return {'status': 'local-only', 'verified_inputs': inputs,
+            'absent_codex_vm_only': sorted(set(absent)),
+            'support_files_tracked': len(m['retained_reviewable_support_files']),
+            'unverifiable_here': [x for x in external if not Path(x).exists()],
+            'command': 'python3 -B tests/h28-sol/mutation-testing/tools/verify_bulk.py --local'}
+
+
 if __name__ == '__main__':
+    import sys
     repo = Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip())
-    print(json.dumps(verify(repo), indent=2))
+    m = json.loads((repo / bulk_inputs.PREFIX / 'bulk-data.json').read_bytes())
+    if '--local' in sys.argv or not Path(m['index']).exists():
+        # The external data is absent (any VM but the Codex one): say so and
+        # check the committed side, instead of a traceback.
+        print(json.dumps(verify_local(repo), indent=2))
+        sys.exit(3)  # local-only is never a pass
+    else:
+        print(json.dumps(verify(repo), indent=2))

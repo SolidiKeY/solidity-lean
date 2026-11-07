@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "checkpoint_base": "cc1ea1c9c99522bff459dcc57e41339e1f347243",
+  "boundary": "Source input identities only. No Lean proof, preservation of all original cases, axiom audit or performance claim.",
+  "reproduce": [
+    "python3 scripts/h62/item4/generic-yul-views/verify_manifest.py",
+    "python3 scripts/h62/item4/generic-yul-views/test_manifest.py",
+    "python3 scripts/h62/item4/generic-yul-views/test_correspondence.py",
+    "python3 scripts/h62/item4/generic-yul-views/test_timings.py"
+  ],
+  "files": [
+    {
+      "path": "Solidity/Storage/HashedLayout.lean",
+      "sha256": "9ac3cd0d246769c84330e724e5326446d57ce2fe408d5dcce652fdaf5f62e507"
+    },
+    {
+      "path": "Solidity/Yul/Views/ReadControls.lean",
+      "sha256": "6b36935fc4e3d7483cd9a54f54be9f557fd83034733d93dd0ecfc414e6b883b8"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/acceptance.py",
+      "sha256": "851aae2d54b82072990dcaf5a553b2fc73ce11bf6e850796bb45385283f13053"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/bounded.py",
+      "sha256": "0908c18704222862f4f9037919da3d212bd19ab33e0e0d6eff1469d33a05865e"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/census.py",
+      "sha256": "8716ff4d9cad4b8920fce749c00da262b15e8d85c7552de8641be598cdb2f991"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/compare_timings.py",
+      "sha256": "e04c32849f7684c91205c2958dceeefd67b2c80bcc07dc3f809f09e044cbf7e8"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/correspondence.py",
+      "sha256": "383fc9608af3fb2b9fb92323d365e2bb4a00b58232afd06e27710b121c54a477"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/test_bounded.py",
+      "sha256": "ca95bd88e696883d85a0ef019d2c62a61849a41a09de82370bb73a59a125fc33"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/test_census.py",
+      "sha256": "20f1c9faddd8e97c90fd70c407e7d39f4b156948444322bda5e4a4d0046cd339"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/test_correspondence.py",
+      "sha256": "d7478896ced2a610031d283079edb52d6cef6e438d2b652efd0f7787f7c7d874"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/test_manifest.py",
+      "sha256": "945a86aa87ae8d4de9f337b4eff6fff07f36b6d8a5b4fc60ae4bb42860816941"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/test_timings.py",
+      "sha256": "7c7f5580e7a29ff9965d24dea1c91b1f2d9e51c611b7e618bb2a290e22d327e7"
+    },
+    {
+      "path": "scripts/h62/item4/generic-yul-views/verify_manifest.py",
+      "sha256": "ba07baeba65bc20b6c452fd5d71d85bf282bfcbce5f9f86413bf6810b06adae8"
+    },
+    {
+      "path": "tests/h62/item4/generic-yul-views/Fixtures.lean",
+      "sha256": "f054d128a9f0f3750eaac84bd59cbfe9f1a57e6518e1ed59ccddc933616ebeab"
+    },
+    {
+      "path": "tests/h62/item4/generic-yul-views/GenericByteObjects.lean",
+      "sha256": "06377e0ad1c11c8bdb8a9225f10d1f8b3ce720ebce1f8152f2f2cfabe9d4a871"
+    }
+  ]
+}

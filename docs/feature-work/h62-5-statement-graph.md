@@ -402,3 +402,377 @@ budget, axiom-set or exclusion change. The specific Contracts:1104 wait still
 stands, with its exact empty guard preserved: H30 standard-axiom re-pinning does
 not authorize changing it. Full PassCorrect, witness/vacuity, public-shim/editor
 requirements and all member frozen acceptance/STOP constraints remain binding.
+
+### H82b authenticated intake and typed witness checkpoint
+
+The H82b package at `/workspace/h82-handoffs/h82b-20261106T180909Z`
+passed its archive, manifest and all 557 per-file hashes. Its authoritative
+assignment envelopes, live scope and stopped/head receipts resolve the metadata
+waits. Legacy rendered-wrapper hashes remain provenance; no byte equivalence
+with the extracted assignment text is asserted. Three exact final heads are
+integrated: result-size-cache `6c93ebcd`, pin-fragments `7587ff4e`, and
+trust-fragments `8dc693e4`. Drift, artifact and runtime final Git objects remain
+unavailable. Metadata receipt does not establish their merge or any gate pass.
+The coordinator-requested origin/master merge is `fe5140232485efba2d47ff55f0ac90e497c1e22f`.
+All own uncommitted work was preserved through that merge.
+
+Optional `#h62_witness` registrations now compute the universal closure of an
+actual elaborated binder or constructor-field type. A safe kernel-checked helper
+must match that closure with rigid consumer universes and no unresolved
+metavariables or transitive axioms. Exported witness evidence is separate from
+statement and proof-helper dependencies. The graph verifies location, exact type,
+producer ownership and preceding named premise prerequisites. Witness availability
+alone cannot discharge an earlier open premise or complete a Type-valued interface.
+The fixture separates inhabited positive witnesses from intentional contradiction.
+No production statement, definition, axiom guard, exclusion or proof budget changed;
+no new source axiom, sorry or native_decide was added.
+
+At this checkpoint 44 external Python controls pass; exporter per-file MCP
+and direct serial exporter/WitnessFixture compilation pass with official Lean
+4.35.0. Evidence is under `/workspace/h62-statement-graph-evidence/h82-witness-*`.
+The authenticated H78/H81 policy is applied conservatively: one Lean job, explicit
+-j1, 8 GiB address-space cap, no swap and 4 GiB available reserve. Full fixture
+acceptance, new negative controls and fresh timing remain pending at commit time.
+Production G49/G50 declarations and Contracts' exact empty guard fix remain waits;
+no production discharge or RUNTIME_GATE_PASS is claimed. Pin writer STOP remains
+unchanged and its explicitly paused proposal was not resumed.
+
+Final witness checkpoint gates supersede the pending note above. At committed
+source head recorded in `h82-witness-evidence.json`, full clean-tree fixture
+acceptance passed, including 44 Python controls, deterministic same/fresh-process
+exports, unsafe/axiom/type/index/duplicate/universe/import rejection checks and
+all graph count assertions. Certificate and Pair now explicitly inhabit Type;
+MCP exposed the earlier inferred-Prop fixture gap. The corrected acceptance
+checks actual elaborated sort expressions and the certificate binder's isProp
+flag. Two harness-only assertion failures (nonexistent field and repr layout)
+were fixed without weakening those checks; failed evidence is retained off git.
+Both read-only reviews found no remaining static blocker. Exporter and corrected
+WitnessFixture per-file MCP diagnostics pass without warnings. MCP library
+shutdown prints an event-loop warning after results; diagnostic calls succeed
+and exit zero. No Lean server was used by either reviewer.
+
+Official versions: Lean 4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+Lake 5.0.0-src+eb6cafb. All bounded KeySort controls pass. Seven-run medians on
+the corrected fixture tree are 1.209114830s before and 1.162983514s after,
+-3.8153%; this is an unchanged-core control, not a project speedup claim.
+The evidence manifest binds actual outputs and the tested committed head.
+Full production DAG/counts, actual G49/G50 inventory, Contracts empty-guard fix,
+project final gate, and all inherited open member obligations remain unfinished.
+No known timing STOP was rerun, no frozen production statement/guard changed,
+and no original goal was created, reset, completed or claimed paused.
+
+### Fresh-thread handoff after three implementation milestones
+
+The typed witness fixture, local H55 v1 compatibility and trust-fragment snapshot/
+resource hardening milestones are committed and independently reviewed. Follow
+user-required fresh-thread handoff now; do not self-launch a replacement goal or
+VM. Original VM environment:
+ccarenv_b64_Y2NhcmVudl9mNWI2NjA5Mjg2NDA4MTkxYjNlNzQ5ZGM2YWM0NTI5OQ.
+Repository /workspace/solidity-h62-statement-graph, same assigned branch,
+original goal objective rendered-prompt provenance SHA256
+9b5f127834cb2597a16f03dd05cba17c2467359fefcd5b5ba42db8e88933075a.
+No exposed get_goal/pause operation; do not invent a goal ID or create another.
+Implementation head before this documentation checkpoint:
+6f3e173b0fd103d0b4d59e88e3248a8399ea3c24. Entire original/H82 queue unfinished.
+
+Exact origin SHA fetches for drift faca44dc415dfbdab9b9ea6b0664f1e755abaa57,
+artifact 9cc85b14fa3f611e183379c257b10b19e1aa5325 and runtime
+f8975f25b12a5e9723b00ec794b261708280092c each exited 128 with upload-pack:
+not our ref. Preserve those typed artifact waits and recover original bundles
+through coordinator; do not assume authenticated metadata contains Git objects.
+Next independent queue work remains integrated H55 local controls and trust
+registration acceptance after required inputs, plus original graph production
+inventory when relayed. Explicitly paused pin proposal remains stopped. No
+full-project gate, production proof discharge or whole-goal completion claimed.
+
+### H70/H90 continuation: independent refusal coverage
+
+Coordinator routed compatibility waits to migrate-root-gate (Contracts:1104 exact
+empty guard and Syntax.Raw); G49 inventory forwarding is staged for Claude and
+no stale/retired owner was contacted. Routing is not validation or owner agreement.
+No fresh-thread creation, goal reset or replacement is inferred from the router.
+H86 unavailable raw evidence remains an explicit regeneration limitation.
+
+Independent graph backfill now generates named regression docstrings for witness
+refusals, including disabled kernel checking and unresolved witness universes.
+A direct syntactic unused-universe fixture was rejected by Lean before reaching
+the exporter; a first low-level driver lacked the Command/Core monad lift. Those
+failed harness attempts are retained and not counted as intended refusals. The
+corrected control uses a safe kernel-checked True definition with an unused
+universe parameter, then confirms registerWitness refuses its unresolved level.
+The kernel-skip control confirms the command refuses before adding any helper.
+No theorem is accepted with kernel checking disabled; no axiom/sorry/native_decide
+or production declaration/budget/guard change was introduced.
+
+All witness negatives require exact JSON error bodies, never filename text,
+warnings or setup failures. Forty-five Python controls pass. The corrected direct
+probes pass; full clean-tree optional fixture acceptance remains pending at this
+commit. Existing production inventory/full gate waits remain. The separate H55
+size proposal hit +21.4335% timing STOP and is stopped/unaccepted; it was not
+rerun unchanged while these independent controls were developed.
+
+Final committed-tree refusal acceptance passes at the source head recorded in
+h70-controls-evidence.json: 45 Python controls, intended JSON diagnostic bodies
+for all witness refusals, deterministic exports, original graph controls and
+bounded KeySort. Seven-run KeySort medians 1.315427167s before and 1.368037786s
+after (+3.9995%, within 10%); unchanged-core control only. Both independent
+read-only reviews found no blocking delta and used no Lean/server. Source and
+output hashes bind this actual acceptance; no production statement/guard edit,
+axiom/sorry/native_decide, budget change or RUNTIME_GATE_PASS.
+
+The queued trust coverage backfill accounts for all frozen source occurrences:
+44 blocks, 1380 headline occurrences/1373 distinct names, 77 imports and 17 print
+commands. Two regenerations are byte-identical, and all current fragments match
+the pinned central source SHA256 ece2e6cebbee95d82fec246892993662e81dcfd895831981583d2b0867a37482.
+This is current committed-source coverage, not declaration-existence proof or
+authentication of unavailable original worker runtime evidence. The held audit
+was not started. H55 size controls are functionally improved but their +21.4335%
+performance STOP remains binding. No master publication, retired-lane revival,
+fresh-thread creation, goal recreation/reset or claim of whole-goal completion.
+
+
+### Published G49 source locator intake
+
+Coordinator supplied the exact-master source inventory at SHA256
+`af4f1a69410a9df1f408d2e2d9d9b82b39f926ce48c6bb601c16092514ed733e`.
+The intake verifies all five inline bodies and Git file hashes at
+706e36825929d6d0084dc08b88de9349abcd25aa, checkpoint ancestry
+5f7c70b16090b25ea706dddf3e666d94fb5a09fe, and the published shape/bridge
+metadata. Git replacement objects are disabled and shallow/grafted/custom
+history overrides refused. The fetched master was merged into this lane before
+this checkpoint. No Claude-owned source or frozen statement was edited.
+
+All five pending views now display the source-located shared conditional theorem
+`Solidity.Roadmap.G49Final.g49_g50_of_fold`. These are owner slices of one theorem,
+not five checked theorem instances. Source labels retain ten named top-level
+binders, nine context/function/package inputs including three certificate
+packages, and all fifteen named PublicObligations fields, including externally
+owned fields. Five reported bridge requests remain pending and undelivered.
+Thirty-two explicit source declaration anchors do not assert generated projection
+existence or exhaustive lane coverage. Historical producer checking claims and
+hashes are explicitly reported metadata, not fresh local checks.
+
+The source catalog remains pending-input, blocked and unclaimable: exists and
+elaborated types are unknown, typed declarations are zero, no statement edges
+come from source text, and expanded atomic open-premise counts remain null.
+Graph validation checks pinned named coverage and internal consistency; only
+source_intake.py's main command authenticates the catalog against the delivered
+packet and exact Git blobs. Neither mechanism elaborates Lean or discharges a
+premise. Reproduce with `python3 -B scripts/h62/item5/statement-graph/source_intake.py
+--output /tmp/g49-source-catalog.json`, then compare with pending-inputs.json.
+The command requires the authenticated coordinator packet and ownership snapshot.
+
+Fifty-two Python controls pass, covering source omissions, changed package roles,
+missing/substituted bridge requests, missing views/locators, owner/provenance
+changes, false typed/done promotion, exclusive-claim refusal and determinism.
+Finder identified missing source-census coverage and replacement-sensitive
+ancestry; both were fixed. Skeptic confirmed the source/type boundary and noted
+the ancestry environment qualification, now explicitly refused. Neither reviewer
+used Lean/server. Exact catalog regeneration is byte-identical.
+
+The first inline validator hit cold CLI +11.9968% and was stopped. Moving source
+validation behind a lazy source-only entry point preserves byte-identical legacy
+fixture output, with seven-run cold median 0.040133073s to 0.042375455s (+5.5874%)
+and warm median 0.000367768s to 0.000338361s (-7.9961%). These are Python fixture
+compatibility controls, not project or Lean performance measurements. The failed
+inline version and harness setup failures remain in off-git evidence. No unchanged
+STOP was rerun. Repo-relative source pins, counts and timing outputs are committed
+in g49-source-intake-evidence.json; generated graphs and bulk logs remain off git.
+
+Actual G49 source-input wait is resolved; elaborated production types, full
+per-area DAG and G49/G50 counts remain incomplete. Wait for migrate-root-gate's
+Contracts:1104 exact empty-guard repair and Syntax.Raw compatibility, and for
+actual producer bridges. No new Lean/Lake/KeySort run or RUNTIME_GATE_PASS is
+claimed for this Python/metadata-only change. Prior official Lean 4.35.0 and
+Lake 5.0.0-src+eb6cafb checks remain historical. Exact retired member source
+objects faca44dc415dfbdab9b9ea6b0664f1e755abaa57,
+9cc85b14fa3f611e183379c257b10b19e1aa5325 and
+f8975f25b12a5e9723b00ec794b261708280092c remain unavailable; no substitution.
+H97 cold +12.7602%, H55 size +21.4335%, pin +46.58% STOP/pause, H67 central
+reconciliation and H58 audit HOLD remain unchanged. Entire same-goal queue and
+required operational handoff remain unfinished.
+
+
+### H107 Wave 0 tooling safety nets (OT-W0-TOOLING)
+
+Implemented before other new queue work, after merging origin/master
+33eb46304cdb536e6c8b686223c6d8e456b703ae. No production Lean source changed.
+The exact architecture audit tree fa5acebd43214bbe642258d862f903bcf08d3f89
+reproduces 95 pinned boundary edges, not today's 107. Immutable baseline SHA256
+is d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b;
+its deterministic Git-object generator, snapshot, checksum and shrink-only active
+subset are committed. docs/parallelism.md P1 now explains the boundary policy.
+Existing elaborator/parser bans are retained independently. The closure scanner
+handles comments, indentation and multiple modules; unsupported import syntax
+fails closed. Paths through existing exceptions remain debt, not new CORE members.
+
+The gate retries failed named build steps exactly once only if the captured log
+contains `Lean exited with code 135`, printing `RETRY-SIGBUS <step>`. It preserves
+the first log plus the combined attempts. The full run-lean wrapper is a build
+step: its read-only prefixes repeat on retry, while separately named static gates
+never retry. Ordinary/thread failures remain failures. Backup-copy failure is
+explicitly fail-closed. No actual SIGBUS occurred in this checkpoint; injected
+controls establish the retry behavior, not proof of shared-cache crash recovery.
+
+Independent finder/skeptic reviews (neither Lean/server) identified deletion and
+recreation restoring removed allowances, failed backup yielding a false pass,
+hidden multi-import edges, and configured merge-diff filtering. Fixes include
+actual-parent history checks with explicit separate merge diffs, permanent subset
+checks, deletion rejection, backup failure propagation and robust import scanning.
+Nine H107 controls now cover these, cycles/transitive paths, success/ordinary
+failure, persistent SIGBUS, once-only recovery and the full-build wrapper. All 61
+graph/tooling controls passed before the final merge-diff flag hardening; the nine
+H107 controls passed again after it, including log.diffMerges=first-parent.
+Node syntax checks, bash -n, fragments/register checks and exact95-byte regeneration
+pass. History scanning avoids unrelated empty merge probes; final layer output is
+byte-identical to the checkpoint (about2.27s versus16s observed gate timing; this
+is a changed static tool, not a Lean speed claim).
+
+The required real `bash scripts/coord-tools/gate.sh checkpoint` ran once under the
+verified official Lean4.35.0 archive, LEAN_NUM_THREADS=1, serial Lean flock with
+explicit -j1, 8GiB AS/aggregate bound, no swap and4GiB reserve. Lean reports
+4.35.0/eb6cafb; Lake5.0.0-src+eb6cafb. KeySort built successfully in1.2s, but the
+library aborted with `failed to create thread: Resource temporarily unavailable`;
+this is not the SIGBUS marker and was not retried. Checkpoint exit1 after94.154s,
+peak aggregate RSS912216064 bytes, no memory/headroom stop. Layers correctly fail
+on12 boundary edges added after the95-edge audit, and existing doc-path ambiguity
+and99 unrecorded axiom-pin changes also fail. Trust/orphans/roots/fragments and
+build-touched pass. No pin edits, guard relaxation, new allowances or hidden retry
+were used to turn those failures into success. The checkpoint preceded the final
+history-scan optimization; final static checks preserve identical layer failures.
+
+Repo-relative source pins, exact12 edge endpoints, gate outcomes and limits are in
+h107-tooling-evidence.json. Bulk checkpoint logs remain off git with a checksum
+manifest and handoff archive. The H107 implementation is reviewable as one tooling
+increment; successful task-branch final gates and the whole original/H82 queue
+remain unfinished. Existing STOPs/H58/H67 holds and original producer/artifact waits
+are unchanged. No push, master publication, new goal or RUNTIME_GATE_PASS.
+
+
+### H112 Wave 0B documentation and pin-drift gates
+
+OT-W0B-GATES was completed after H107, after fetching and merging master
+8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990. Exact intake at parent
+7dbf2748b5b0a02e42cccd6cf25c91fa77c9aade found the requested five missing
+references across four files, and99 unrecorded pin changes with zero policy
+errors among16140 source pins. The older approximate4500 count was not padded
+or substituted for actual data. The five references name unadopted destinations,
+an off-git failed experiment, or a synthetic negative input; exact source/ref
+historical exceptions now carry reasons. Other sources citing those paths and
+other missing paths in the same source still fail. Existing ambiguous references
+remain warnings in the default gate and failures under its unchanged strict mode.
+
+The99 exact file/name/kind/old-axiom-set/new-axiom-set changes are frozen in
+scripts/g07-unrecorded-baseline.json, SHA256
+4d98b1810853c54992feb064f1a7b028e23d8212fd2aad8b8b65e81895d7c701.
+The separate active subset can only shrink, including across deletions/recreation
+and merges with configured first-parent diff defaults. Linked worktrees use the
+actual absolute graft path; shallow/custom histories are refused. A changed file,
+name or axiom set is new drift. Every original policy error remains unconditional:
+nonstandard axioms, growth, missing recorded pins, malformed prints and mismatched
+targets cannot be hidden by this baseline. No central pin inventory or fragments
+were rewritten; no source theorem, definition, empty guard, axiom set, exclusion
+or proof budget changed. The core import baseline95 is untouched.
+
+Both requested real gates now pass on staged tracked sources: doc-paths exit0
+with5 explicitly explained historical pairs; axiom-pins exit0 with0errors,
+0unrecorded changes and99baselined changes. Node syntax, bash syntax,
+fragments/register and baseline SHA checks pass. Four legacy and ten new controls
+pass (14total), covering real CLI success/new-drift/error failures, permanent
+shrinking, deletion/merge resurrection, linked-worktree graft refusal, immutable
+hash/schema identities, exact doc exception scope and optimized Python refusal.
+The exact-source Git-tree reproducer exits0 and yields byte-identical pinned
+baseline bytes, independent of today's source drift. It executes no Lean.
+
+Finder and skeptic reviewed read-only without Lean/server. Their absolute-path
+and optimized-assertion findings were fixed and tested; no static H112 blocker
+remains. An initial disposable doc fixture omission is retained as failed test
+evidence, not counted as a product failure or ignored. Before/after single locked
+observations: doc34.646257s to33.501830s, pins18.364501s to17.595592s. These are
+observations, not a repeated benchmark or proof of Lean performance. Bulk logs
+and evidence remain off git with SHA manifests; repo-relative source/output pins
+and actual gate outcomes are in h112-tooling-evidence.json. docs/contributing.md
+explains the checks and exception boundaries.
+
+H112 makes these two tooling gates green; it does not claim a successful full
+checkpoint, fresh kernel validation, production premise discharge or
+RUNTIME_GATE_PASS. H107's12 import repairs, runtime readiness, Contracts exact
+empty-guard/Raw compatibility, typed G49/bridge inputs and exact missing retired
+artifacts remain waits. Preserve H97+12.7602%, size+21.4335%, pin+46.58%STOP/pause,
+trust/H67/H58 holds and the whole original/H82 queue. H110 same-thread continuation
+is authorized; no replacement goal/thread/VM, Claude source edits, push or master
+publication. This is one tooling increment with its committed handoff section.
+
+H112 CI integration: the checks job previously used actions/checkout's default
+shallow history, incompatible with permanent shrink validation. Its checkout now
+uses fetch-depth0 and it runs the two gates plus their regression controls before
+the independent layer check. Lean build/audit jobs are unchanged; no held audit
+was started. This integration fix is included in the same H112 increment.
+
+
+### Authorized current-master import baseline and merge pre-gate
+
+OT-W0-TOOLING follow-up explicitly authorizes the current-master baseline at
+fea090bf9fec1a372ad32952a5e72eb4d7015888:107edges, original95plus exactly12.
+The original95raw snapshot/hash and active cleanup history are preserved. A new
+immutable current snapshot pins all107 and full12introductions, SHA256
+880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d.
+The original95active set and additional12active set independently shrink forever;
+removing an old edge cannot be bypassed by moving it into the new component.
+No further re-pinning or baseline growth is authorized by this change. No CORE
+classification, Lean import, statement, definition, axiom, exclusion or budget
+was changed. The12 are explicit debt candidates to remove:
+
+| Direct boundary edge | Verified introducing commit | Disposition |
+|---|---|---|
+| `Solidity.Roadmap.G49Final.PassCorrectAdapters` → `Solidity.Lowering.P8b.Frozen` | `138f7a568b6aeb4a98fad985b8d7b0c628356c5e` | Open cleanup candidate |
+| `Solidity.Yul.Composition.Controls` → `Solidity.Source.StateExamples` | `e75bad809cfda97eedc97d694eaeeac3243ae353` | Open cleanup candidate |
+| `Solidity.Yul.Composition.Interface` → `Solidity.Backend.Environment.ByteConstants` | `e75bad809cfda97eedc97d694eaeeac3243ae353` | Open cleanup candidate |
+| `Solidity.Yul.Composition.MonetaryLifecycleControls` → `Solidity.Source.StateExamples` | `9572b8d3edd01e1dc11689a85f016d9d25f92af7` | Open cleanup candidate |
+| `Solidity.Yul.Composition.P6FrameCorrectness` → `Solidity.Backend.MemoryOps.PhysicalFrameImage` | `705ed8517c55ea42897c6991d252ffd45a2836be` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalBytes` → `Solidity.Yul.Views.Bytes` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalControls` → `Solidity.Yul.Views.OwnedBoolDeclarationControls` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalFrames` → `Solidity.Yul.Views.OwnedBoolFrame` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalMemory` → `Solidity.Yul.Views.MemoryControls` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalMemory` → `Solidity.Yul.Views.MemoryImages` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.SourceCatchBinding` → `Solidity.Lowering.Readonly.SourceTryEffects` | `eb9c75194d65f896c9bc483050ecea67fbe41318` | Open cleanup candidate |
+| `Solidity.Yul.Composition.SourceCatchBinding` → `Solidity.Source.FailureRuntimeControls` | `eb9c75194d65f896c9bc483050ecea67fbe41318` | Open cleanup candidate |
+
+Attribution uses the import line's Git blame and verifies it is absent from all
+introducing parents. Each source file/hash/line is in the snapshot, reproduced
+from the exact source commit. These12 also occur in the original pin's parent
+1d99e32a08271752468b027a5495233c77a66f91; the original95came from the older
+fa5acebd architecture audit. Thus attribution names the actual introduction,
+without treating the first checker commit as their source introduction.
+The reproducer rejects shallow/grafted/custom history and checks its full output
+hash before emitting bytes. This is source/history evidence, not Lean elaboration.
+
+`gate.sh touched`, the repository merge pre-gate used by coordinator merge reports,
+now runs layers before touched builds and exits immediately on layer failure,
+even for a tooling-only merge. Checkpoint/full modes use the same front check;
+the later outer duplicate was removed, while run-lean.sh's own existing check
+remains. Per-file diagnostics are unchanged. Run this on the prospective combined
+merge tree; no automatic merge, push or host timer deployment is performed here.
+CI now runs the focused Python pre-gate/history controls. Disposable mocked-build
+controls verify an invalid layer never invokes Lake and valid layers precede it.
+
+Fourteen focused controls pass, covering old/new component shrink/deletion/merge
+history, legacy debt smuggling, immutable snapshots, importer parsing, SIGBUS
+behavior and fail-before-build ordering. Independent read-only finder/skeptic
+reviews used no Lean/server; a missing attribution-history guard was fixed and
+covered, and reproduced bytes match the pin. Final real tooling gates and source
+head are recorded in the accompanying evidence manifest/handoff. No new Lean
+module or full proof build is required for these tooling-only changes.
+
+
+Follow-up final local gates pass: all66 Python graph/tooling controls,14 Node
+pin controls, node syntax, bash syntax, both baseline checksums and
+fragments/register checks. The real touched pre-gate logs PASS layers then
+PASS build-touched with targets:none; no Lean process/build was invoked. The
+negative integration uses the real checker on a newly added forbidden core
+import and verifies no Lake invocation. Attribution reproduction is byte-identical
+to the pinned107snapshot. Repo-relative source pins and exact candidate ledger
+are committed in w0-followup-evidence.json; full logs remain manifested offgit.
+No full-build/proof timing or RUNTIME_GATE_PASS is claimed. The original statement
+graph queue and producer/trust/runtime/artifact waits remain unfinished. Host merge
+runner deployment/adoption follows coordinator integration, not this local test.

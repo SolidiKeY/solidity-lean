@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEntry.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.Checks.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

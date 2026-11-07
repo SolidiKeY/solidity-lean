@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsExact.lean:Solidity.Backend.MemoryOps.nested_fixed_store_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

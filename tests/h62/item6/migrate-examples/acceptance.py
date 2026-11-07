@@ -46,7 +46,7 @@ class InterfaceAcceptance(unittest.TestCase):
         scope={"base":interfaces.BASE,"modules":[{"module":m,"path":m.replace(".","/")+".lean","source_sha256":"0"*64} for m in modules]}
         header={"schema":"h62-examples-interface-v1","modules":list(reversed(modules))}
         keys=[["str",["anonymous"],"a.b"],["str",["str",["anonymous"],"a"],"b"]]
-        rows=[{"module":modules[0],"name":"a.b","name_key":k,"kind":"definition","unsafe":False,"level_parameters":[],"type":["sort",["zero"]]} for k in keys]
+        rows=[{"module":modules[0],"name":"a.b","name_key":k,"kind":"definition","unsafe":False,"private_name":False,"protected_name":False,"level_parameters":[],"type":["sort",["zero"]]} for k in keys]
         return scope,header,rows
     def raw(self,header,rows):return "\n".join(json.dumps(x) for x in [header]+rows+[{"complete":True,"declarations":len(rows)}])
     def test_scope_and_structural_names(self):
@@ -68,5 +68,25 @@ class InterfaceAcceptance(unittest.TestCase):
         self.assertEqual(len(interfaces.compare(old,new)["changed"]),1)
         header["modules"].reverse()
         self.assertEqual(old["interface_sha256"],interfaces.inventory(self.raw(header,rows),scope)["interface_sha256"])
+
+    def test_streamed_inventory_keeps_validation(self):
+        scope,header,rows=self.fixture();raw=self.raw(header,rows)
+        expected=interfaces.inventory(raw,scope)
+        self.assertEqual(expected,interfaces.inventory(iter(raw.splitlines()),scope))
+        def truncated():
+            yield from raw.splitlines()[:-1]
+        with self.assertRaisesRegex(ValueError,"missing completion footer"):
+            interfaces.inventory(truncated(),scope)
+
+    def test_visibility_only_changes_and_missing_flags(self):
+        scope,header,rows=self.fixture();old=interfaces.inventory(self.raw(header,rows),scope)
+        for field in ("private_name","protected_name"):
+            changed=json.loads(json.dumps(rows));changed[0][field]=True
+            new=interfaces.inventory(self.raw(header,changed),scope)
+            self.assertEqual(len(interfaces.compare(old,new)["changed"]),1)
+            self.assertNotEqual(old["interface_sha256"],new["interface_sha256"])
+            del changed[0][field]
+            with self.assertRaisesRegex(ValueError,"visibility-name flags"):
+                interfaces.inventory(self.raw(header,changed),scope)
 
 if __name__=="__main__":unittest.main()

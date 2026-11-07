@@ -11,7 +11,7 @@ def ReadyReturnCatalogue (res : Resolution) (G : Glob res.env) (c : String)
     (values memory : List Decl) : Prop :=
   ∀ d ∈ memory, d ∈ WholeProgram.functions res ∧
     ∃ (ps : List STy) (τ : STy) (e : RExpr res.env (returnContext ps τ) τ)
-      (same : τ.implicit res.env.isBase τ = true),
+      (same : τ.implicit res.env.isBase res.env.mapFree τ = true),
       d.fnSig res.env = some (ps,[τ]) ∧ PlainResultType τ ∧
       ReadyExpr (fun d => d ∈ values) e ∧ ZeroReady res.env τ ∧
       G.prog.body (G.dispatchFn c d) = some (singleReturningBody ps τ e same)

@@ -1,0 +1,38 @@
+{
+  "to_owner": "existing SourceCounterexample producer via coordinator",
+  "file": "Solidity/Tools/SourceCounterexample.lean",
+  "file_sha256": "f3623c0c1c93544c75cd50b479242e52c35e278caa205dcc6af5e3d2fefc13c9",
+  "request": "Provide existing-model support/certification for storage-array contract diamond counterexamples without weakening primitive-storage guard, theorem, premise or exclusion. This requires producer ownership; no edit made.",
+  "cases": [
+    {
+      "id": "storageAlias",
+      "modality": "diamond",
+      "viaIR": false,
+      "status": "pending",
+      "sourceSha256": "e2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db"
+    },
+    {
+      "id": "storageAlias",
+      "modality": "diamond",
+      "viaIR": true,
+      "status": "pending",
+      "sourceSha256": "e2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db"
+    },
+    {
+      "id": "storageCopy",
+      "modality": "diamond",
+      "viaIR": false,
+      "status": "pending",
+      "sourceSha256": "4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c"
+    },
+    {
+      "id": "storageCopy",
+      "modality": "diamond",
+      "viaIR": true,
+      "status": "pending",
+      "sourceSha256": "4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c"
+    }
+  ],
+  "fresh_results": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/source-traces/results.json",
+  "boundary": "Four unknown results remain pending; kernel development negatives do not make the native request decisive."
+}

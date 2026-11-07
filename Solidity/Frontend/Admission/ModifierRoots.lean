@@ -30,9 +30,9 @@ abbrev DerivedModifierMembership : Prop :=
 
 /-- Actual external-overload registration, proved below. -/
 abbrev ExternalOverloadMembership : Prop :=
-  ∀ (E : Env) (B : DeclName → DeclName → Bool) (target : DeclName)
+  ∀ (E : Env) (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (target : DeclName)
     (name : String) (args : List STy) (d : Decl),
-    d ∈ extOverloads E B target name args → d ∈ E.decls
+    d ∈ extOverloads E B M target name args → d ∈ E.decls
 
 /-- info: 'Solidity.Frontend.Admission.ModifierRoots.modifier_registered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms modifier_registered
@@ -44,7 +44,7 @@ theorem derived_modifier_membership : Solidity.Frontend.Admission.ModifierRoots.
 /-- info: 'Solidity.Frontend.Admission.ModifierRoots.derived_modifier_membership' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms derived_modifier_membership
 theorem external_overload_membership : Solidity.Frontend.Admission.ModifierRoots.ExternalOverloadMembership := by
-  intro E B target name args d h
+  intro E B M target name args d h
   unfold Solidity.Source.extOverloads Solidity.Source.Env.extFunctions at h
   exact Solidity.Frontend.Admission.NameResolutionRoots.lookup_registered E (some target.name) name d
     ((List.mem_filter.mp (List.mem_filter.mp h).1).1)

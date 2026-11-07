@@ -45,3 +45,79 @@ The staged `tests/h62/item1/packet-panic/PanicBytes.lean` and `CheckedMulEquival
 ## H71 isolated fixture and Q1 routing
 
 Q1 is an owner wait, routed to `solidity-compiler10-20261028/memory-internal-calls` for `Q1 panic_not_empty proof`; the two-proof owner proposal stays unchanged. The `Init`-only `PanicBytesFixture.lean` has eight independently reviewed fixture theorems diagnosed successfully under the pinned Lean MCP, with no axioms reported. Its locally copied byte recurrence is textually compared to pinned Source bytes by `test_fixture_source_shape.py`; no kernel connection to actual `Source.panicData`, producer equivalence, or target behavior has been proved. The prior real-helper diagnostic remains failed on unavailable imports, and all original gates remain open. Details and resource/cleanup limitations are in `tests/h62/item1/packet-panic/H71-CANDIDATE.md`.
+
+## Post-merge Q1 continuation
+
+The coordinator explicitly requested continuation and a merge from published master; the assigned branch fast-forwarded to `5f14596531efea2be64f1a5e7a83afa5e151e865`, whose history contains the lane head via merge `5ca6d3315e3d76a7da28ed0831f69a8383a51efb`. Q1 was answered YES for the MIC `panic_not_empty` proof-only proposal. The current review-only Mul and Sub patch generators include all three unchanged Source propositions; neither applies edits to excluded producer files or establishes the still-missing real helper proof, registration, equivalence, axiom checks, case coverage or timing. Details and independent reviews are recorded in `tests/h62/item1/packet-panic/H71-CANDIDATE.md`.
+
+## Post-merge timing receipt controls
+
+The offline `evaluate_timings.py` checker compares caller-declared paired groups and includes a separately declared extracted-helper cost in the after total; the strict stop condition is greater than 10%, not equal to 10%. After independent review, its non-slow status is named `declared_receipts_within_limit` and malformed receipts are rejected before any delta is emitted. This status is not a build, proof, memory, cache, timing, or acceptance gate: component completeness, logs, actual commands, cache/resource descriptions, and prerequisite outcomes still require independent verification. `test_evaluate_timings.py` uses synthetic fixtures only. No actual before/after measurement or slowdown conclusion exists.
+
+Independent read-only finder and skeptic reviews identified malformed top-level JSON, boolean schema and non-string version fields as potential unstructured errors or false acceptance. These were rejected explicitly and covered by synthetic controls; both reviewers confirmed the fixes without Lean. The declared-receipt limitation remains.
+
+## Signed checked Controls continuation
+
+`signed_controls_ledger.py` records 71 manually reviewed literal declaration observations across SignedCheckedAdd (11), SignedCheckedSub (21) and SignedCheckedMul (39), pinned to exact source bytes and header locations. `test_signed_controls_ledger.py` checks missing, duplicate, forged and changed-source negative controls. The generated JSON stays off Git. These rows extend the earlier 102 unsigned Controls rows; they do not edit G25 files or H55 proof guards, prove Lean statements, establish target panic payloads, or complete dependency/consumer case accounting.
+
+Independent read-only finder and skeptic reviews matched the 71 signed rows, source hashes and stated Source/target/timeout distinctions against the originals without Lean. They found no material discrepancy in the reviewed observations, while retaining the lexical, ownership and semantic-closure limits above.
+
+## Post-merge fresh-thread handoff
+
+The post-merge continuation completed three reviewable backfill items: the Q1 review-only three-proof proposals, stricter declared timing-receipt checks, and the 71-row signed checked Controls ledger. Each was independently reviewed without Lean. The original four packet-panic checkpoints are not complete. The production helper import remains unregistered, the actual Source helper and equivalence fixtures have not elaborated, the no-build helper diagnostic last reported stale imports, and no affected/full runtime, axiom or before/after timing gates have passed. The separately reported Roadmap/Contracts 4.35 axiom issue has not been independently reproduced in this VM. The cited migration overlay is not present locally. The 4.35-compatible dependency closure and coordinator handling of the excluded generated roots/maps remain needed. No exact-file proof-only permission wait is asserted under H82; the G25 and H55 exclusions and existing statement/definition/axiom constraints remain.
+
+The current branch was explicitly continued by the coordinator after the prior retirement handoff and fast-forwarded to `5f14596531efea2be64f1a5e7a83afa5e151e865`. The earlier goal tool reported blocked and this session exposes no goal inspect/resume/pause operation; no goal was recreated or marked complete. The original rendered prompt has still not been recovered byte-for-byte; the prior `handoff/ORIGINAL-ASSIGNMENT-RECOVERED.md` is only a reconstruction. Fresh-thread continuation belongs to the coordinator; this worker does not launch its own replacement.
+
+## Checked pipeline declaration continuation
+
+`checked_pipeline_ledger.py` adds 89 manual, base-byte-pinned observations for Source, Selected, Target and Agreement declarations in six checked arithmetic families. Its negative controls reject missing/duplicate rows, wrong header fields, wrong hashes and changed source even if the supplied census hash is refreshed. These rows are disjoint from the 102 unsigned and 71 signed Controls rows; 203 of the 465 literal headers remain outside these per-declaration ledgers. This accounting does not elaborate Lean, alter G25 producers or H55 proof guards, prove target panic bytes, or establish full semantic/dependency case closure. See `tests/h62/item1/packet-panic/CASE-ACCOUNTING.md`.
+
+Independent read-only finder and skeptic reviews checked all 89 pipeline rows against the assigned-base source without Lean. The skeptic identified descriptions that did not explicitly restate the original input-range and read premises; those observations were corrected and rechecked. The finder confirmed the regenerated JSON matches the current generator. These reviews do not establish kernel checking, ownership clearance or semantic closure.
+
+## Isolated 4.35 dependency diagnostic
+
+The isolated `PanicBytes` closure build at the assigned checkout, without an overlay and with a fresh cache, failed before checking the actual helper. Lean MCP reported unsolved goals in `Solidity/Hash/CollisionBound.lean:407`, omega failures at lines 660 and 680, and guard-message mismatches at lines 950–968. The full log is `isolated-helper-build-attempt4.log` in the off-Git evidence directory. Source.Const also produced deprecation warnings. This independently observed base-checkout failure does not refute the separately reported staged Hash overlay; that overlay was not available here. The previously reported Roadmap.Contracts failure remains unverified here. No helper equivalence, axiom audit, runtime gate or timing delta follows from this failed build.
+
+The reproducible isolated harness is `scripts/h62/item1/packet-panic/run_serial_closure.sh`; its retry project uses the official 4.35.0 archive whose SHA-256 is checked by `prepare_serial_toolchain.py`, and no shared 4.24 build cache. Archive path sets matched; `tar --compare` exited nonzero for archive/extraction ownership and mode differences, with no other reported differences. Actual versions were Lean 4.35.0 and Lake 5.0.0-src+eb6cafb. The serial shim locks compiler invocations and passes `-j1`; observed cgroup peak was 4,945,932,288 bytes with sampled reserve 12,233,936,896 bytes and no swap. Sampling is not a hard aggregate memory limit; the 12 GiB virtual-memory limit applies per process, and abrupt external termination can bypass cleanup. Earlier attempts failed before proof checking due to a missing toolchain declaration, an invalid Lake target and a thread-creation failure under a 6 GiB per-process virtual limit; none establishes a proof or performance result. Fresh project caches and raw diagnostic evidence remain outside Git. Do not rerun the unchanged failed dependency closure.
+
+Independent read-only finder and skeptic reviewed the structured MCP output and diagnostic scripts without Lean. Both confirmed the dependency errors, absent helper artifact and sampled-resource limits; the skeptic also confirmed no live Lean/Lake and that the retry wrapper refuses the existing cache. No proof-guard edits or bypass were made.
+
+## SignedMod Source continuation
+
+The base-byte-pinned `signed_mod_source_ledger.py` adds 12 manually reviewed Source observations, bringing detailed textual accounting to 274 of 465 literal headers; 191 remain. This Source-only ledger does not prove Lean statements, target payloads or semantic closure. `test_signed_mod_source_ledger.py` checks valid output and rejects missing, duplicate and forged census headers and changed source bytes even when the census digest is refreshed. Independent read-only finder and skeptic matched all observations to the original declarations without Lean; the skeptic requested the negative controls, which were added. Generated JSON remains off Git.
+
+## SignedMod Selection continuation
+
+`signed_mod_selection_ledger.py` accounts for ten base-pinned Selection declarations; its tests reject missing, duplicate and forged headers and changed Source bytes. Independent read-only finder and skeptic reviews identified numeric SMOD wording and the distinction between finite-word numeric saved stacks and arbitrary symbolic tails; those descriptions were corrected and rechecked without Lean. The ledger does not prove Lean statements or full semantic closure. See `tests/h62/item1/packet-panic/CASE-ACCOUNTING.md`.
+
+## SignedDiv Origin continuation
+
+`signed_div_origin_ledger.py` adds ten base-pinned Source origin observations. Negative controls reject missing, duplicate or forged census headers and changed source, even with refreshed census hashes. Independent read-only finder and skeptic reviews matched all observations and case premises without Lean; no material discrepancy was found. This is not a semantic-closure, target-payload or proof claim.
+
+## SignedDiv Selected continuation
+
+`signed_div_selected_ledger.py` records twelve base-pinned selection declarations. Tests reject missing, duplicate, forged and changed-source inputs. Independent read-only finder and skeptic reviews matched the selection, intrinsic and symbolic observations to the originals without Lean, and found no material discrepancy. Source-only and target observations remain distinct; the textual ledger is not full semantic closure.
+
+## SignedDiv Execution continuation
+
+`signed_div_execution_ledger.py` records the six base-pinned execution declarations with original Source and target observation boundaries. Tests reject missing, duplicate and forged census headers and modified bytes. Independent read-only finder and skeptic reviews matched the statements without Lean; the checked-flag coverage was clarified and rechecked. This does not prove Lean statements or full semantic closure.
+
+## UnsignedDiv Data and SourceOrigin continuation
+
+`unsigned_div_origin_ledger.py` adds eleven base-pinned literal observations across the two files. Negative controls reject missing, duplicate or forged census headers and modified bytes in either file with refreshed hashes. Independent read-only finder and skeptic reviewed the statements without Lean; the skeptic requested and rechecked the second-file drift control. The first test run failed on a temporary directory creation collision; after correcting fixture setup, the test passed. Private `lift_result` is outside the existing literal census, so no complete declaration or dependency account is claimed.
+
+## Private header census follow-up
+
+`private_header_ledger.py` identifies and describes nine literal private theorems omitted by the original 465-header scanner, within the same 48 base-pinned files. It pins the exact file set independently and rejects missing/substituted files and changed source even with refreshed hashes. Independent read-only finder and skeptic reviews matched all nine observations and identified an equal-count substituted-file weakness; the file-set pin and negative control were added and rechecked without Lean. This lexical scan is not Lean parsing, proof validation, or full semantic coverage.
+
+## UnsignedDiv Selection and Numeric continuation
+
+The base-pinned eleven-row selection/numeric ledger includes scalar-guard payload equality separately from symbolic target revert. Both-file byte-drift and forged-census negative controls pass. Independent read-only finder and skeptic reviewed without Lean; the returned numeric value and Source witness descriptions were clarified to state their `.val` equalities, then rechecked. This is textual accounting only.
+
+## UnsignedDiv Execution and Composition continuation
+
+The base-pinned ten-row execution/composition ledger records Source, selection and symbolic target cases. Both-file modified-byte and forged-census negative controls pass. Independent read-only finder and skeptic matched all observations and premises without Lean; no material discrepancy was found. This is not full semantic closure or target payload proof.
+
+## UnsignedDiv Witness continuation
+
+The base-pinned eight-row witness ledger records the auxiliary machine, arbitrary saved stack, Source state retention and symbolic outcomes. Negative controls pass. Independent read-only finder and skeptic matched the declarations without Lean and noted that the general zero-remainder packet is not a separately named witness theorem. This ledger is not a deployment, native execution or target payload proof.

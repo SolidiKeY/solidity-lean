@@ -202,6 +202,13 @@
 | `Evm/MemoryLoopHorizonCostGrowthControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/NormalFramedTransport.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/NormalFramedTransportControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/LifecycleBalancesFit.lean` | BalancesFit through the EIP-6780 self-beneficiary burn, destruct transfer and finalization. |
+| `Yul/Views/SourceBalanceExact.lean` | The actual evaluator's `BALANCE` of an instance returns its exact Nat balance under BalancesFit; a `2 ^ 256` balance is observed as `0` without it. |
 | `Yul/RawFrameLogic.lean` | Intrinsic raw-local frame logic and transport used by P16; retained typed frame obligations remain explicit. |
 | `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
 | `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |
+| `Yul/Composition/SourceCatchBinding.lean` | Actual Source raw-bytes try/catch allocation and canonical rethrow: complete-state all-byte/all-horizon≥3 proof, old/new heap readback and scoped controls; no native/physical/full-Yul adequacy. |
+
+| `Yul/Composition/MonetaryLifecycleControls.lean` | H19 whole-Nat lifecycle payment/rollback and wide-balance refusal/self-beneficiary controls with nonempty caller journal; no world adequacy claim. |
+| `Yul/DirtyReadback.lean` | Readback of dirty LOCAL words into Source locals (user decision H109): `cleanWord` cleans a dirty `uintN`/`intN`/`bool` word as solc 0.8.38 does in both pipelines (wrap into the width; `bool` = nonzero), `readbackFrom`/`frame` read a raw frame back against its clean backup (untouched locals keep their value; a dirty local of another type refuses). Evidence: `tests/evm-reference/dirty-locals.json`. |
+| `Yul/Checks/DirtyReadbackControls.lean` | Controls of `DirtyReadback`: one positive per type family and pipeline matching the recorded solc evidence, frame readback of `LocalBlock`'s `dirtyTwo`/`dirtyFalse`, a refused dirty `bytes1`, coherence refusals kept. |

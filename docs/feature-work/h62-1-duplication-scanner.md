@@ -424,3 +424,211 @@ are outside Git under
 ordered this worker retired before the after run. The successor must check the
 fix, complete negative controls and reviews, measure the matched after run
 and stop if slowdown exceeds 10%; no passing performance gate is claimed.
+
+## Post-merge identifier controls
+
+After the published master was merged, a skeptic found that the earlier
+continuation fix still split Lean letterlike and subscript characters, so
+`(x : Nat) : x℘ = x` and the corresponding `y℘` expression could normalize
+together. The scanner now uses character classes from the pinned Lean 4.24
+`isIdFirst` and `isIdRest` rules for identifiers, binders, and literal
+predecessors. Controls cover free-name differences, alpha-renamed binders,
+subscripts, astral letterlike characters, and operators adjacent to character
+literals. The 33-test Python suite passed. A first overbroad intermediate
+range incorrectly included operators; independent finder and skeptic reviews
+found it and the final controls cover their counterexamples. One reviewer
+compared the final continuation class with a transcription of Lean's predicate
+through U+1D59F. These controls do not prove full lexer or parser equivalence.
+
+On master `20e492ee99a3fa8679aa526de0b6e731d85e4134`, the matched full-tree
+pair for the earlier punctuation change took 96.098 seconds before and 96.333
+seconds after (+0.24%). Using that same-tree after run as the before of the
+Unicode correction, the corrected scanner took 97.220 seconds (+0.92%).
+All three runs selected 6,932 Lean files, recognized 118,563 declarations and
+reported no file errors or unmatched patterns. This is lexical discovery, not
+proof of complete declaration accounting or intrinsic-signature equivalence.
+The unfinished overbroad intermediate run was interrupted and is not a gate.
+Bulk outputs, commands and timings remain outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`. Selected
+symlink aliases and broken links remain a separately identified open defect.
+
+The post-merge repository documentation-path gate exited 1 on five missing
+references in `h62-6-migrate-theory.md`, the audit-abi-world census test,
+`packet-panic/H71-CANDIDATE.md` and generic-structuredflow registration. None
+is in this scanner document. Its log is `postmerge-timing/doc-paths.log` in
+the evidence directory; the repository-wide gate remains open.
+
+## Selected symlink and nonregular input controls
+
+Selected `.lean` paths are now kept as logical paths. A selected symlink,
+symlinked parent, nonregular file or path-escape pattern makes the scan
+incomplete instead of silently collapsing or dropping that path. For
+recursive patterns, a non-following walk checks the literal prefix and
+reports symlinks and walk errors, including dangling links. This is a
+conservative refusal: a symlink under the prefix may be unrelated to the
+actual glob. Incremental added/removed/changed lists remain null on such
+errors. Nonrecursive wildcard traversal can still omit an inaccessible
+subdirectory without a reported error; checks and reads are not race-proof
+against concurrent replacement. Full selection completeness is not claimed.
+
+Finder and skeptic reviews identified the recursive directory, dangling link,
+nonregular-file and parent escape cases; controls cover them. The final Python
+suite passed 35 tests. A same-tree bounded scan took 97.220 seconds before
+and 97.746 seconds after (+0.54%), with 6,932 inputs and no scan errors. The
+complete before/after outputs agreed after normalizing the scanner hash.
+Commands, timing and differential logs are outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`. The earlier
+repository documentation-path gate remains failed on the five unrelated
+published-tree references recorded above.
+
+### Post-merge deterministic replay
+
+A repeat of the committed selector against the same caller-pinned prior report
+and current tree exited 0 in 105.414 seconds. It was byte-identical to the
+97.746-second report, SHA256
+`fb7e40a93e687b7a0865908d85cde9bf1c490be53430dc098ada7760806bdf9b`.
+Both selected 6,932 files and recognized 118,563 declarations, with no errors
+or unmatched patterns; all recognized owners remain unknown. The input delta
+versus the older caller-pinned report is 271 added, 22 changed and none
+removed. The scanner identity also changed, so candidate-group deltas include
+possible normalization and selection changes and cannot be attributed solely
+to source edits. The prior pin identifies bytes, not an authenticated scan.
+Independent finder and skeptic reviewed the evidence without Lean; these two
+runs establish byte repeatability only. Full outputs and timing records are in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`.
+
+## Nonrecursive wildcard traversal
+
+Wildcard directory components now receive an error-aware, non-following walk
+under their literal prefix, including nonrecursive patterns. Such walks stop
+at the pattern's directory depth; recursive `**` patterns still walk below
+their prefix. A traversal failure makes the report incomplete and suppresses
+incremental deltas. The walk may conservatively refuse unrelated siblings
+within that depth, and selection and reading remain non-atomic. The
+permission-error control is simulated; it does not prove behavior on every
+filesystem. These limits refine the earlier nonrecursive-wildcard caveat.
+
+The Python suite passed 36 tests. Independent finder and skeptic reviews
+without Lean identified the need to bound the nonrecursive walk; controls
+include an unrelated deeper link and a simulated inaccessible directory. A
+matched bounded full-tree pair on master
+`5da4771e63a4278ed53932ac39a032e3d7aea6ed` took 110.043 seconds before and
+104.998 seconds after (-4.58%). Both scans selected 7,143 files, recognized
+121,486 declarations, and reported no errors or unmatched patterns. Their
+complete reports agree after normalizing the scanner hash and the
+`scanner_changed` flag. This is an external lexical-tool check, not a proof
+of complete declaration accounting or intrinsic-signature equivalence.
+Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/wildcard-traversal/`.
+
+A separate review found that multiline section-variable continuations are not
+included in the lexical context hash. The scanner's intrinsic-signature
+rejection remains essential; this context hash does not establish elaborated
+signature equality. Resolving that limitation and live ownership remains open.
+
+## Multiline lexical context spans
+
+The context hash now includes comment-masked text from each recognized
+context command through the next recognized command or declaration boundary.
+This distinguishes the reported multiline section-variable universe case
+and retains literal contents while using the literal-hidden skeleton to find
+boundaries. It is still a lexical approximation: local definitions, notation,
+macros, syntax quotations and unrecognized commands can affect elaboration
+without proving different context hashes. A control with different local
+`T` definitions confirms that a remaining lexical candidate retains both
+`intrinsic-signature-unresolved` and ownership-verification rejection reasons.
+No candidate is promoted to an intrinsic-signature or unowned result.
+
+Finder and skeptic independently reviewed the implementation without Lean.
+The Python suite passed 38 tests. On the same tree and input selection, a
+bounded full scan took 104.998 seconds before and 108.550 seconds after
+(+3.38%); both read the same 7,143 input hashes and recognized 121,486
+declarations without file errors or unmatched patterns. Statement and body
+group counts remained 4,412 and 5,432 respectively, although group identities
+can change with the new context spans. These are external lexical-tool checks,
+not Lean proofs. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/multiline-context/`.
+
+### Multiline-context report replay
+
+Two bounded scans with the same tree, scanner, selection, registry and
+caller-pinned previous report took 108.550 and 105.122 seconds and produced
+byte-identical reports, SHA256
+`f70746c5529c35d14a076007a526011357d6738cc8fc5eecd64d38d3d9b79285`.
+Both selected 7,143 files and recognized 121,486 declarations, with no file
+errors or unmatched patterns; all recognized ownership remains unknown. The
+input delta against the older caller-pinned report is 211 added, 339 changed
+and none removed. Both the tree and scanner changed from that baseline, so
+group deltas cannot be attributed solely to source changes. The pin does not
+authenticate the prior report's producer. These runs demonstrate repeatability
+for this snapshot, not complete census, Lean signature equivalence or live
+ownership. Independent finder and skeptic reviewed the replay without Lean;
+full reports and timing records are outside Git in the multiline-context
+evidence directory.
+
+## Multiline attribute declaration boundaries
+
+Line-initial attribute prefixes are now balanced and masked in the scanner's
+literal-hidden skeleton, preserving source offsets and newlines. This
+recognizes stacked and nested multiline attributes before declarations,
+reports the declaration keyword's line, avoids reading attribute text as
+qualifiers, and keeps a following declaration's attribute bytes out of the
+preceding body. An unterminated prefix reports a file error. Arbitrary syntax
+quotations, detached/custom commands, macro-generated declarations and
+modifiers split across lines remain outside complete lexical coverage.
+
+Independent finder and skeptic reviews found and rechecked nested attributes,
+qualifiers, indentation and preceding-body boundaries without Lean. The
+Python suite passed 39 tests; these are external tool controls. A preliminary
+regex approach and its timing were stopped after review findings, and are not
+passing measurements. The reviewed implementation took 110.962 seconds
+versus 114.443 seconds before (-3.04%) on the same tree and selection. Both
+scans selected identical inputs, recognized 122,786 declarations, and had no
+file errors or unmatched globs. Statement-group counts were 4,476 in both;
+body-group counts changed from 5,506 to 5,510. Counts do not establish equal
+group membership or semantic equivalence. Bulk reports, timing and test logs
+remain outside Git under
+`/workspace/h62-duplication-scanner-evidence/multiline-attributes/`.
+
+A separate notation example after a preceding declaration can still share a
+lexical context hash despite different expansions. Candidate signatures and
+ownership remain explicitly unresolved; full source/environment binding and
+complete declaration accounting remain open.
+
+## Notation command context and body boundaries
+
+Line-initial notation, infix, prefix and postfix commands, including local or
+scoped modifiers, now contribute lexical context spans. The same recognized
+commands terminate preceding bodies; an indented command boundary rejects the
+body fingerprint. This addresses the reported notation-after-declaration
+case, but macros, unrecognized commands, scope resolution and imported
+meaning remain unmodeled. Signature and ownership rejection reasons remain
+mandatory for every candidate.
+
+Finder and skeptic independently reviewed the implementation without Lean
+and found the initial preceding-body boundary omission, which the final
+controls cover. The Python suite passed 40 tests. The preliminary measurement
+was interrupted after that finding and is not passing evidence. A bounded
+same-input pair took 110.962 seconds before and 112.714 seconds after
+(+1.58%). Both scans selected identical inputs, recognized 122,786
+declarations and reported no file errors or unmatched globs. Statement-group
+counts were 4,476 in both and body-group counts were 5,510 and 5,511;
+counts do not prove equal group membership or semantic equivalence. Full
+reports, controls and timing are outside Git under
+`/workspace/h62-duplication-scanner-evidence/notation-context/`.
+
+### Notation-context report replay
+
+Two bounded scans with the same tree, scanner, selection, registry and
+caller-pinned prior report took 112.714 and 114.373 seconds and produced
+byte-identical reports, SHA256
+`e60eda341e2c219f2ec92e3ac8a3f2dbacc9cdbbecd3708631225f59f04dcc22`.
+Both selected 7,247 files and recognized 122,786 declarations, with no file
+errors or unmatched patterns; all recognized owners remain unknown. Relative
+to the older caller-pinned report, 104 inputs were added, 23 changed and none
+removed. The scanner also changed, so candidate deltas combine tree and tool
+effects. The prior pin identifies bytes, not an authenticated producer.
+Independent finder and skeptic reviewed the replay without Lean. This checks
+repeatability for these runs, not complete coverage, signature equivalence or
+live ownership. Reports and timing records are outside Git in the
+notation-context evidence directory.
