@@ -99,8 +99,9 @@ value entries produce test errors, never fabricated semantic fuel failures.
 Validation uses explicit exceptions even under Python optimization.
 
 Remaining waits: V11/P6 concrete physical byte-world production; V09/G24.03
-statement production; memory-reference-structs whole-decoder execution
-integration; V15 canonical H68 P10 execution endpoints. These do not prevent
+statement production; V15 canonical H68 P10 execution endpoints. Whole-decoder
+execution is this lane's open G40 producer work, consumed by memory-reference-structs;
+it is not a wait on that consumer. These do not prevent
 continuing independent G40 controls or G46 branch work. G40 full composition,
 remaining fixture replay, G46.02 and G46.03 stay open. No pending exact-file
 request for these statement-preserving test additions is retained under H82.
@@ -173,3 +174,82 @@ Both reviews were read-only, with no Lean server/build/write. The remaining
 40 fixture files are unreplayed; this is not full body/native correspondence
 or a new kernel theorem. Full checkpoint gates and all original proof queues
 remain open, and the audit-member retirement barrier remains in force.
+
+## Raw-derived uint view packing
+
+RawUint.Execution now constructs every requested dynamic uint256 calldata view
+from the actual frame bytes and proves simultaneous coherence of the finite
+family. Requests may overlap or repeat, with no canonical-offset or length
+cutoff. The published MemoryOps.CalldataViewPacking producer packs these views;
+packedViews_uints derives each logical table lookup, and packedViews_transfer
+feeds those values to the existing checked intrinsic transfer under its original
+slice and destination bounds. No decoded payload, desired run or poststate is
+supplied as a premise.
+
+Controls retain the nonempty-prefix unequal words 7 and 42. Duplicate identities
+share keys; shifted overlapping spans and equal offsets with unequal lengths
+remain distinct. Independent read-only finder and skeptic reviews found no
+semantic issues; their request to scope both control axiom reports was fixed.
+New reports use only standard axioms. The stale G34 premise comment now points
+to its published structural producer.
+
+This is structural packing and intrinsic transfer, not native execution.
+Source raw-reference/logical-key transport, mixed-type and recursive aggregate
+coherence, reached-entry demand/guard composition, emitted decoder selection and
+whole G40 execution remain open. Standalone missing words still zero-pad; this
+does not assert that truncated guarded entries succeed. MRS remains a consumer
+of the open whole-decoder result.
+
+### Raw-view checkpoint validation
+
+At source head 90a50be6d711ddc23ddbf812bb62886c3cbccfd0, the checkpoint
+touched gate passed in 102 seconds and the library build passed all 6,049 jobs
+in 1,482 seconds. Trust passed with 6,468 sources, 289 inventoried sites and
+zero findings; orphan, layer, generated-root and fragment checks also passed.
+The checkpoint remains failed: documentation paths report four missing
+references in other owners' files, and axiom pins report zero errors but
+4,483 unrecorded changes. An external proposal records the five new owned
+standard-axiom pins; the shared inventory and checker are unchanged.
+
+Independent read-only finder and skeptic reviews verified the exact seven-pass,
+two-failure outcome and the five-pin proposal. Actual tools are Lean 4.24.0
+(commit 797c613) and Lake 5.0.0-src+797c613; the explicit KeySort build passed
+(two jobs). This is not RUNTIME_GATE_PASS, full run-lean validation or whole
+G40/G46 completion. No unchanged heavy failed gate is scheduled again.
+
+The old inactive helper cache was consolidated by verified no-overwrite copying
+and duplicate-only cleanup; missing input mappings were added after the gate.
+Six existing differing mappings were preserved. Cache conditions changed
+during this run, so its timing is not a matched-cache before/after comparison.
+The canonical retired-member thread-copy transcription remains e270551e; the
+unavailable historical 22740ba5 rendering is UNVERIFIABLE under H30/H86 and
+is neither claimed to match nor reconstructed.
+
+## Complete cf1 model replay inventory
+
+The existing unchanged runner replayed all 42 immutable cf1 fixtures at source
+head fe92bcdeee42369ef7cac013dc0dd2f0141493b9 with pinned solc 0.8.38,
+120,000 ms per job, fuel 1,000 and serial Lean under the original memory bound.
+The 93-module replay import closure matched its exact current Lake artifacts.
+All 42 reports are present: 31 working, 11 blocked, zero broken. Across 55
+required pipeline reports, 390 observations match the saved after-baseline
+exactly, including 271 successful and 119 failed observations. Neither top-level
+nor pipeline classifications changed; the saved fixture SHA256 is unchanged.
+Recorded per-fixture durations sum to 440,369 ms, not a compiler timing claim.
+
+The eleven adapter blockers remain: one nominal-enum ABI adaptation, nine
+physical calldata/memory assembly adaptations and one value-bearing expectation
+format. They are not relabelled as passes or decoder failures. Consequently
+the strict comparison exits 1 and all-runtime-working remains false, despite
+zero comparison discrepancies. The original full compiled-decoder replay and
+whole G40/G46 obligations are still open. These are Source/intrinsic model
+observations, not backend compilation, native-EVM, gas or whole-session proofs.
+
+Independent read-only finder and skeptic reviews verified the results and
+identified two comparison gaps: provenance needed independent current-source
+pins, and pipeline statuses needed explicit comparison. Both were fixed and
+confirmed. Four intentional corrupt-report controls now detect uniformly stale
+provenance, changed pipeline status, missing pipeline and changed return bytes.
+Those controls mutate only disposable copies; they are not source witnesses
+or genuine fixture failures. All raw reports, logs, the comparison scripts and
+checksums are exported outside Git; fixtures and production runner are unchanged.
