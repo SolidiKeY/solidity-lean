@@ -904,3 +904,99 @@ InstrV2 macro correspondence and complete map/resource/prefix bridge remain open
 owned work. No complete producing files/head or new acceptance is available.
 See roadmap-v15-p10.md H121c section and bridge-requests.json P10 ownership record.
 Source adoption does not discharge the15public obligations or six native FAILs.
+
+
+## H82 continuation: remaining transaction inputs and native admission
+
+H82 explicitly authorized independent work after the blocked pause; the existing
+goal was not created or reset. Clean assigned checkout9fdb074cfa1f5ca4a6e435bc7b78fd10fd9cb30c
+was preserved, fetched master merged without new local source changes, and
+original c6f550e/H121c759da340c ancestry passes. No push/default-branch publication.
+
+The existing exporter now handles transaction_test using the actual result.Osaka
+object, preserving every original fixture field and its exact selected expected
+result. It rejects wrong format, absent Osaka or transition-only selectors. All53
+unique inputs reproduce byte-identical streams/receipts under the existing serial
+12GiB cap/4GiB reserve/no-swap/300s guard. Export/replay exit0,25.085/25.077s;
+peak observed RSS76,128,256bytes. Stream SHA256:
+23e3e680d3e361c528bb3ae025f5015c51d7b794964fb7eb5b56e7d00df7f892.
+All82,508inventoried exact-Osaka representations now have prepared input streams.
+Related formats overlap semantic cases; preparation is neither execution nor
+source agreement. Transition/other-fork inventory remains separately accounted.
+
+New transaction_admission.mjs uses the pinned native @ethereumjs/tx,common,util
+10.1.3 packages, explicit Mainnet/Osaka configuration, installed/committed lock
+identity, export/archive/inventory hash bindings and exhaustive case identities.
+It executes serialized decoding/basic validation only. These fixtures have no
+account world, so no balance/nonce/basefee admission context, storage, logs,
+rollback or execution-gas comparison is claimed. A valid-fixture profile remains
+unsupported until its sender/hash/intrinsic expectations are implemented.
+
+All53cases are invalid type4transactions and all53are rejected during native
+decoding. Exact diagnostic/stage/type bindings classify49matches:40authorization
+format,8authority-field/signature bounds,1empty authorization list. The8matches
+use actual r/s/yParity overflow diagnostics, not the outer signature verifier as
+a substitute for authority validation. Ambiguous leading-zero fields require the
+native verifyAuthorizationList stack provenance. Generic host errors stay
+unsupported; no expected fixture label supplies the observed rejection category.
+
+Four RLP cases, indices6–9, remain unsupported. Native diagnostics are
+“remainder must be zero” or “total length is larger than the data”; they do not
+independently locate the expected authorization-format fault. No blanket RLP-to-
+authorization mapping is introduced. This is an owned classification gap, not
+an excluded case or a source/compiler mismatch. All53expected intrinsicGas0
+values are rejection sentinels and are not compared to measured gas.
+
+Both bounded native runs exit2 (incomplete),1.005/1.004s, no resource stops;
+peak observed RSS66,867,200bytes. Results and summaries reproduce identical bytes.
+Result SHA256:4c396db7cdf5351f37ca0f76dada6bd8e6bc5a5bfd81ed14ded60f3c0043e89c.
+fixture_admission_complete, execution_complete and differential_complete remain
+false; all53source adapters remain unsupported.49serialized-admission matches
+add0transaction execution matches and0source matches. Initial53unsupported probe
+and its source snapshot remain separate historical evidence, never padded into
+final coverage. Output/summary publication is receipt-last, not a multi-file
+transaction; consumers must check the result hash.
+
+Reproduce under the writer lock and existing resource guard:
+
+```sh
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format transaction_test
+node --max-old-space-size=4096 scripts/h62/item3/g52-differential/transaction_admission.mjs "$BULK"
+python3 -W error::ResourceWarning tests/h62/item3/g52-differential/test_blockchain_export.py
+node --test tests/h62/item3/g52-differential/transaction_admission.test.mjs
+python3 tests/h62/item3/g52-differential/test_pipeline.py
+```
+
+All23controls pass (10export,3admission,10accounting), no skips. Independent
+read-only finder and skeptic verify exact coverage, observed error mappings,
+validator provenance, source hashes, rejection sentinel boundary and replay.
+No reviewer used Lean/server, native execution or archive generation. Evidence:
+transaction-export-runs.json,transaction-admission-runs.json,
+transaction-admission-acceptance.json,transaction-final-checks.json and
+transaction-reviews.json. Bulk stays off Git; generator/adapter/controls and
+updated sha256 manifest are committed.
+
+All3,079prior sealed H44entries were rehashed unchanged before augmentation.
+Existing state/block adapters and their rejection module were not edited. Strict
+block-acceptance still exits1 for the same6reference mismatches; no new ticket is
+fabricated from four unsupported category bindings. The H121b composed producer,
+arbitrary-contract/EEST source binding, owned H121c P10 bridge and all15public
+obligations remain open. V17 is downstream; frozen V15 is not a provider wait.
+Required real inputs remain MRS/full frame, V08world-phase, original compiler
+factories, VY1/VY4/VY2/VY3, V13callee/world, executable-bytecode body/signature/site
+application and original V14/V11/PAR facts. Core/reference CALL representation
+remains owned integration; bare-prefix owner is unresolved and not guessed.
+
+Own Lean delta0files/lines/declarations; frozen statements touched0; new axioms,
+sorry/native_decide0; budgets unchanged. No Lean run/refactor/timing comparison,
+performance STOP release or RUNTIME_GATE_PASS. Historical toolchain/KeySort
+records remain historical evidence only. Next independent work includes exact
+RLP category binding and real Engine payload execution; canonical producer
+endpoint/premise integration remains owned unfinished work. The full assignment
+is not complete or blocked merely because one producer is missing. H110 permits
+continuation on this same original thread; no competing goal/thread is created.
+
+Coordinator merge receipt during this checkpoint: published master
+65e69b6426a9a4fc3fb5541f41726a4bfefda5d0 was fetched, verified against origin,
+and fast-forwarded before committing. Reviewed transaction edits were preserved;
+no reset, discard or push. Evidence:transaction-latest-rebaseline.json.

@@ -12,14 +12,26 @@ from pipeline import EEST_SHA, file_sha
 
 FORMATS = {"state_test": "eest", "blockchain_test": "blockchain",
            "blockchain_test_engine": "engine", "blockchain_test_engine_x": "engine-x",
-           "blockchain_test_sync": "sync"}
+           "blockchain_test_sync": "sync", "transaction_test": "transaction"}
 
 
 def blockchain_record(index, row, fixture, digest, kind="blockchain_test"):
-    if kind not in FORMATS or kind == "state_test" or fixture.get("network") != "Osaka" or fixture.get("_info", {}).get("fixture-format") != kind:
+    if kind not in FORMATS or kind in ("state_test", "transaction_test") or fixture.get("network") != "Osaka" or fixture.get("_info", {}).get("fixture-format") != kind:
         raise ValueError("blockchain format/fork mismatch")
     return dict(index=index, path=row["path"], case=row["case"], variant=0,
                 fixture_sha256=digest, fixture=fixture, status="input-only-not-executed")
+
+
+def transaction_record(index, row, fixture, digest):
+    """Guard wrong-fork transaction expectations being imported as Osaka inputs."""
+    results = fixture.get("result")
+    if fixture.get("_info", {}).get("fixture-format") != "transaction_test" or not isinstance(results, dict) or not isinstance(results.get("Osaka"), dict):
+        raise ValueError("transaction format/fork mismatch")
+    if not isinstance(fixture.get("txbytes"), str) or not fixture["txbytes"].startswith("0x"):
+        raise ValueError("transaction bytes missing")
+    return dict(index=index, path=row["path"], case=row["case"], variant=0,
+                fixture_sha256=digest, fixture=fixture, selected_fork="Osaka",
+                expected=results["Osaka"], status="input-only-not-executed")
 
 
 def allocation_inputs(archive, root):
@@ -111,7 +123,7 @@ def export(root, kind="state_test"):
                         if kind == "state_test" and row["sha256"] != digest: raise ValueError("census fixture bytes changed")
                         fixture = doc[row["case"]]
                         if kind != "state_test":
-                            record = blockchain_record(index, row, fixture, digest, kind)
+                            record = transaction_record(index, row, fixture, digest) if kind == "transaction_test" else blockchain_record(index, row, fixture, digest, kind)
                             if allocation:
                                 record["allocation_ref"] = allocation_reference(fixture, row["case"], allocation[0], allocation_stream)
                                 referenced_groups.add(fixture["preHash"])
