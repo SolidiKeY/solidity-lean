@@ -105,6 +105,8 @@ Finish each milestone with a read-only finder and skeptic review per area;
 neither calls the Lean server. Fix confirmed findings and record their
 resolution in that milestone's documentation.
 
+See also the [build-speed audit](audits/build-speed.md) (2026-11-06) for measured per-module time and memory.
+
 ## Toolchain and proofs
 
 The old `SolKey` reader in `side-projects/lean/solkey` no longer builds
