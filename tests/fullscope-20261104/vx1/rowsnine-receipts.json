@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "nativeBrowser": {
+    "head": "567e3b81c6c38bddf2dfce796b5bc7866295b58b",
+    "reportedPath": "tests/directruntime-20261104/native-browser/h109/rowsnine-registration.json",
+    "reportedSha256": "5594f73f12c8c07555e35f475d2dd3dd694b509926f67845210147ddb57fa0b3",
+    "receipt": "coordinator-supplied H71 ticket; classification proposal ready, central registration/proof-cost acceptance pending",
+    "independentRetrieval": "git fetch exact SHA failed: could not read Username for https://github.com; no producer code adopted"
+  },
+  "moduleTimes": {
+    "head": "605db6b63d48665e16dd6db7f68c72c21f6e39de",
+    "path": "/workspace/h62-coordinator-inputs/router-20261107T135033Z/module-times-605db6b63.md",
+    "sha256": "459990b2682acdbef2f3c34e337360c64be9b69debf81a90aa6ae6be0b2bc739",
+    "receipt": "local file independently SHA256-verified; relevant H70/H116 sections read"
+  },
+  "retainedStop": "RowsNine594seconds is not accepted under300seconds. H116600CI limit applies only to cumulative Derived17 replay, never RowsNine.",
+  "consumerFix": "TrustAudit explicitly imports child; audited declaration list unchanged. Full audit pending, no slow proof rerun.",
+  "remaining": "central15member registration and exact partition controls/planner update; source-bound ProveChunked cache and proof-cost repair"
+}

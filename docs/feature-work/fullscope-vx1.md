@@ -1301,3 +1301,48 @@ map or routing correction; neither used Lean/server/builds. fragments.sh --check
 register.sh --check and git diff --check PASS. check-doc-paths.sh PASS: every
 backticked Lean reference resolves (142 ambiguous references reported globally).
 This documentation-only increment adds no Lean verification claim.
+
+
+### H82 independent non-vacuity control and H71/H70 receipt
+
+Fresh master65e69b6426a9a4fc3fb5541f41726a4bfefda5d0 is already an ancestor.
+Added tests/fullscope-20261104/vx1/EmptyDomainControls.lean: a concrete V1.Contract
+with the existing operational source/target meanings, oracle readers/resources
+and existing live D2/D3/D4 witnesses, but Allowed=False on both sides. The input
+is admitted and compiles; no source/target run is eligible and no eligible source
+success exists. This kernel-checked limitation witness substantiates auditP10.
+It is not production adequacy, approval of empty chain domains, a weakened public
+theorem or a change to frozen V1. Concrete producer linkage must independently
+establish actual chain environments/live eligible runs.
+
+Per-file gate PASS0.486s, cgrouppeak91734016bytes, zeroOOM; all5new declarations
+use only propext. Docker8GiB/no-swap, LEAN_NUM_THREADS1/explicit-j1, parent4GiB
+reserve monitored. Initial unresolved phantom resolved indices caused elaboration
+errors; explicit resolved/art indices fixed them. Initial diagnostic sorryAx
+outputs were error recovery, not accepted evidence; final inventories have none.
+Separate read-only finder/skeptic confirmed the countermodel and boundaries;
+neither used Lean/server/builds. No production source module/import changed.
+
+RowsNine classification is proposal-ready per H71 native-browser head567e3b81;
+central15member registration and proof-cost acceptance remain pending. Exact-SHA
+Git fetch failed authentication; no producer commit/file was adopted or falsely
+reported independently verified. The forwarded module-times report at
+/workspace/h62-coordinator-inputs/router-20261107T135033Z/module-times-605db6b63.md
+is present and independently SHA256-verified459990b2682acdbef2f3c34e337360c64be9b69debf81a90aa6ae6be0b2bc739.
+Its relevant H70/H116 sections were read. Receipt boundaries are recorded in
+rowsnine-receipts.json. Historical594sSTOP remains; H116600sCI is only Derived17
+cumulative replay, never a RowsNine budget increase.
+
+H82 statement-preserving consumer repair: TrustAudit.lean explicitly imports
+OpenLoops.RowsNine, whose binomialRowsNine it already audits. Parent does not
+import child. The audited declaration list is unchanged; no root, runner, pin,
+statement or budget is edited. Static import resolution only, not a full trust
+audit pass: compiling the slow child remains blocked by its known budget and
+missing exact-source ProveChunked cache. Native-browser retains classification/
+runner ownership; central registration/planner/control work is not claimed done.
+
+Separate narrow finder/skeptic reviews confirm the TrustAudit edit is exactly
+one child import: audited declarations, trust policy and budgets unchanged.
+Both independently confirmed the forwarded report hash and receipt boundaries;
+neither ran Lean/server/builds or a slow audit. Static import-diff and receipt
+hash checks PASS; full trust-audit execution remains pending.
