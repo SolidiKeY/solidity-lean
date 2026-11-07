@@ -16,7 +16,7 @@ TEMPLATE = 'tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean'
 OUTPUT_ROOT = 'tests/h62/item2/audit-v08-adapters/generated-census'
 
 
-def render(template):
+def render(template, modules=MODULES, marker=MARKER):
     anchor = '  let constants := environment.constants.toList.mergeSort '
     if template.count(anchor) != 1:
         raise ValueError('Kernel collector anchor changed; review the generator')
@@ -25,9 +25,9 @@ def render(template):
                 'collectAxioms name', 'IO.println (marker ++ row.compress)')
     if any(token not in body for token in required):
         raise ValueError('Kernel collector shape changed; review the generator')
-    targets = ',\n'.join('    (`' + module + ', ' + json.dumps(MARKER) + ')'
-                         for module in MODULES)
-    return ('import Lean\n' + ''.join('import ' + module + '\n' for module in MODULES)
+    targets = ',\n'.join('    (`' + module + ', ' + json.dumps(marker) + ')'
+                         for module in modules)
+    return ('import Lean\n' + ''.join('import ' + module + '\n' for module in modules)
             + '\n/-! Guards omission of match-valued theorem types that remain unresolved\n'
               'by the lexical census. Kernel inventory only: no witness or statement-\n'
               'fidelity acceptance. Collector body is reused verbatim from P8StatementCensus. -/\n'
