@@ -1210,3 +1210,43 @@ no new Lean/MCP/build or stopped runtime benchmark was needed. Independent
 read-only finder/skeptic confirmed the context correction and found no remaining
 blocker; neither used Lean/server/builds/writes. Producer transport, migration,
 runtime STOP and original acceptance dependencies stay open.
+
+
+### Dynamic bytes/string boundary preparation
+
+Pinned compiler0.8.34 produced DynamicBytesBoundary.sol witnesses for default
+locals, alias initializers, allocation/literal bodies, parameters and state roots.
+The existing metadata-retention helper preserves raw and normalized ASTs
+separately. Eight function contexts and two state-contract contexts retain exact
+current bytes/string type refusals. Alias/allocation/literal examples stop at
+the enclosing type gate; they do not independently test those expression stages.
+No production reader admission changes in this checkpoint.
+
+DynamicBytesBoundaryControls.lean adds the general dynamicByteRows_preserved
+equation for the existing elabTyW: every dynamic-byte spelling preserves its
+existing dynamic marker rows. Both concrete bytes/string equations and their
+distinct marker rows are checked. The theorem depends only on propext; it does
+not prove compiler decoding, heap contents, source transport or backend adequacy.
+
+Initial diagnostics exposed an unfinished pure/Except equality and wrong
+memory-qualified parameter expectations. Explicit rfl and the actual normalized
+bytes/string spellings fix these controls. Failed diagnostics/trials remain in
+the off-Git evidence. Recovery MCP has zero errors19.331s; final per-file controls
+and KeySort pass4.488s, child maximumRSS1,070,132KiB, cgrouppeak210,022,400bytes,
+minimum outer available11,136,221,184bytes. Lean4.24/Lake5.0, serial12GiB/no-swap,
+threads1/-j1 unchanged. No production imports changed; no full build or runtime
+benchmark rerun was required. There is no pre-work equivalent checking time for
+this new additive test; no performance or existing STOP recovery is claimed.
+
+The hash-only dynamic-bytes-boundary-manifest.json records16payloads in the
+off-Git H44 archive dynamic-bytes-boundary-c02a4db5d3f2f272.tar.gz,13,933bytes,
+SHA256c02a4db5d3f2f272dcc01b46a2de80c2a71766cf4173be7f5e46c99e928ea01e.
+Outer hash/size, exact regular member set and every member hash verify. Restore
+payloads beneath artifacts/dynamic-bytes to replay the isolated test through
+bounded.sh and gate.sh per-file. No generated library-root registration or
+production API is added by this test module.
+
+Independent read-only finder/skeptic confirmed marker/refusal/provenance limits
+and found no blocker; neither used Lean/server/builds/writes. Dynamic bytes/string
+implementation, parameter/storage handling, heap semantics, full H90 parity and
+original migration/runtime/final acceptance obligations remain open.
