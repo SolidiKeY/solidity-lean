@@ -172,6 +172,13 @@ def held_path(nodes,target,held=HELD):
     return {"status":"header-dependency-unknown" if unknown else "no-declared-path-to-held-module","path":None,"unknown":sorted(set(unknown))}
 
 
+def target_records(nodes, targets):
+    """Keep target identity distinct from the optional dependency path."""
+    if len(set(targets)) != len(targets):
+        raise ValueError("duplicate target identity")
+    return [{"target": target, **held_path(nodes, target)} for target in targets]
+
+
 def control_inputs(output):
     values=json.loads(CONTROLS.read_text())["cases"]
     return values,[{"path":"@control/"+case["id"],"source":case["source"].replace("__MARKER__",json.dumps(str(output/"CONTROL-MUST-NOT-EXECUTE")))} for case in values]
@@ -239,7 +246,7 @@ def run(output):
         validate_headers(nodes,all_inputs,records)
         control_results=verify_controls(cases,records,output)
         sdk=resolve(nodes,compiler.parent.parent)
-        target_rows=[{"path":target,**held_path(nodes,target)} for target in targets]
+        target_rows=target_records(nodes,targets)
         report={"schema":1,"source_head":source_head,"original_base":BASE,"controls":control_results,"kind":"compiler-parsed-declared-header-dependency-inventory","scope":scope,"nodes":nodes,"sdk_artifacts_observed_not_loaded":[sdk[k] for k in sorted(sdk)],"frozen_map_sha256":map_hash,"original_obligations":792,"frozen_target_files":129,"targets":target_rows,"target_statuses":dict(Counter(r["status"] for r in target_rows)),"node_statuses":dict(Counter(n["status"] for n in nodes)),"held_module":HELD,"boundary":"Headers only. No inventoried project imports/bodies executed, no compilation permission, dynamic/private/body coverage, signature/artifact source binding or ownership. No-path is not clearance of any timing hold."}
         (output/"inventory.json").write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
         binder.check_inputs(compiler_pins);binding.read_bound_json(output/"fixtures/receipt.json",live_hash)

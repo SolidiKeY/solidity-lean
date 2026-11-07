@@ -265,3 +265,36 @@ At committed snapshot d34af6bfe0b50ff9a9ff3ced979a390c78d97df6 the allocation ce
 Finder and skeptic found missing staged-copy pin comparison, insufficient active resource/descendant checks and post-member blob drift. All were fixed and exercised by real controls. They confirmed final coverage/refusal boundaries without tests, Lean, benchmarks or writes. Root verified that no production or Lean source, root, module map, toolchain, statement, premise, exclusion, trust set or proof budget changed in this continuation. Lean/Lake identity, layers and registration checks pass; current model/kernel/full-goal acceptance does not follow.
 
 All 792 original obligations remain, including the three pending private run_bind mappings, with the original +80.254966536% timing STOP retained. The RO-v2 and V13 compiler-success requests remain staged for current Claude owners. Proof-cleanup's exact final Git artifact is still absent; no recovery or retired-goal wake is claimed. H86 evidence regeneration is limited to new, explicitly scoped fixture packets, never a rebaseline of old statements or missing raw evidence. Accepted evidence, hashes and remaining queues are in /workspace/h62-audit-readonly-calls/scanner-binding/. General declaration/kernel/dependency coverage and current global ownership remain unfinished. The committed binding-evidence.json pins the off-Git artifacts and generator identities.
+
+## Frozen obligation and declared dependency ledger
+
+The additive `scripts/h62/item2/audit-readonly-calls/obligation_dependencies.py`
+joins the pinned historical census with an explicitly identified header snapshot.
+All 792 original records retain their complete frozen signatures, owner tags and
+witness statuses. All 129 mapped modules remain, including two with zero named
+theorems. Current lexical comparison reports 789 retained headers and three
+removed private helpers; these removals stay pending. Historical owners do not
+establish current write ownership, and retained headers do not certify current
+kernel types or definition meaning.
+
+The join exposed and fixed a header-report collision: the optional dependency
+`path` overwrote the target filename. New reports use a separate `target` field;
+older reports cannot support per-target conclusions and are rejected by the
+ledger. A fresh compiler header capture records 25 declared paths to the held
+module and 104 no-path results. It parses inert source strings; no inventoried
+project imports or bodies execute. Neither result clears the timing hold.
+
+The ledger accounts for 50 pending ordinary statements with declared paths and
+409 with no declared path, plus the three absent private helpers. These are
+historical header classifications, not permission to compile or proof results.
+All 462 ordinary witnesses, two RO-v2 items and owner compiler-success obligations
+remain open. The 256 no-top-level-hypothesis rows establish no nested feasibility.
+
+131 scanner tests, nine ledger controls and eight live header controls passed.
+Independent read-only finder and skeptic reviews fixed held-target provenance,
+inconsistent unknown statuses and zero-theorem module validation. Final reviews
+found no remaining issue. No Lean proof statement, definition, budget or axiom
+changed. Bulk records and reproduction evidence are kept at
+`/workspace/h62-audit-readonly-calls/obligation-dependencies/` on the original VM;
+the committed evidence record pins generator and artifact hashes. The prior
++80.254966536% Lean timing STOP remains. No runtime gate pass is claimed.

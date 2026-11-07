@@ -128,6 +128,16 @@ class HeaderDependencyControls(unittest.TestCase):
             with mock.patch.object(graph,"ROOT",root),self.assertRaisesRegex(ValueError,"configuration differs"):
                 graph.collect_sources(head)
 
+    def test_target_identity_survives_missing_dependency_path(self):
+        nodes=[{"path":"A.lean","status":"parsed-header","imports":[]}]
+        rows=graph.target_records(nodes,["A.lean",graph.HELD,"Missing.lean"])
+        self.assertEqual([r["target"] for r in rows],["A.lean",graph.HELD,"Missing.lean"])
+        self.assertIsNone(rows[0]["path"])
+        self.assertEqual(rows[1]["path"],[graph.HELD])
+        self.assertEqual(rows[2]["status"],"header-dependency-unknown")
+        with self.assertRaisesRegex(ValueError,"duplicate target"):
+            graph.target_records(nodes,["A.lean","A.lean"])
+
     def test_inert_body_marker_is_a_real_refusal(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory);(output/"CONTROL-MUST-NOT-EXECUTE").write_text("EXECUTED")
