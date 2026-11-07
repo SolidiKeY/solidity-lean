@@ -618,3 +618,23 @@ peak 826016 KiB, with only existing standard axioms. Independent read-only
 finder and skeptic found no semantic defect and used no Lean/server/build/edit;
 the skeptic's fixed-marker stack qualification is explicit above. Earlier
 full-gate failures, original fidelity drift and timing STOPs remain open.
+
+### Signed division correspondence
+
+`SignedDivCorrespondence.lean` adds seven laws using public compiler selection
+and constructed populated physical inputs. Ordinary, zero-divisor and minimum
+integer divided by minus one branches retain general Source globals/frame/state
+and local tails, and arbitrary target saved stacks including empty. Ordinary
+division truncates toward zero in both modes; zero gives Source division-by-zero
+panic and coarse target revert. The exceptional branch gives checked arithmetic
+panic/revert versus unchecked minimum-integer wrap. Source fuel-zero timeout is
+separate. Truncation of -7/2 to -3 and reject-all controls derive from the new
+general law. Original producer/control statements and cases are unchanged.
+
+The final seven-law kernel check passes in 2.088 seconds, sampled workload peak
+833520 KiB, with existing standard axioms only. The first tooling attempt rejected
+an accidental nested-comment token in the module docstring before any proof ran;
+fixing that text left statements and budgets unchanged. Read-only finder and
+skeptic found no semantic defect and used no Lean/server/build/edit. This remains
+primitive content correspondence, not a whole-world/session/gas or fetched-EVM
+adequacy theorem; full C4/H68 gates, fidelity drift and timing STOPs remain open.
