@@ -1528,3 +1528,21 @@ H70 names the other seven. Its recorded final timing comparison stopped at
 inferred. A 300-second control there is not H55 runner attestation. Current
 inputs and outcomes remain unresolved. Independent read-only finder and
 skeptic reviewed these boundaries without Lean, server or builds.
+
+## Overlap-aware standalone reference index
+
+`classification_coverage.py` reconciles the 540-row historical projection,
+the 81-row observed delta and fourteen supplied per-path artifacts. At the
+recorded `fc06f636ea0668fcb1f4cc63da88e327cdb9ef9b` snapshot it reports 621
+rows: 404 have at least one supplied static reference, 217 have none, and 63
+have overlapping references. The overlaps are not counted twice. Inputs are
+checksum-bound and candidate source hashes must match the baseline; changed
+delta rows require an explicit baseline rebase.
+
+These counts describe only the supplied static artifacts, not resolved
+drivers, current tree coverage, generated inputs, proof or execution gates.
+A referenced row can still have unresolved inputs, effects or outcomes; an
+unreferenced row is not excluded. Independent read-only finder and skeptic
+reviewed overlap and snapshot provenance without Lean, server or builds.
+The skeptic found missing and numeric hash acceptance in drafts; both are
+now rejected and covered by synthetic controls.
