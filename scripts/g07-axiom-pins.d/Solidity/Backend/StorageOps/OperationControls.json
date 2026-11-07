@@ -35,6 +35,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.OperationControls.late_failure_after_successful_clear": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.recursive_fields_commute": [
   "Quot.sound",
   "propext"

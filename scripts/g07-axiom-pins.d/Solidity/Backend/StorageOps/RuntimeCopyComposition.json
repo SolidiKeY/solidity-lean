@@ -3,5 +3,30 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyComposition.lean:Solidity.Backend.StorageOps.RuntimeCopyComposition.next_footprint_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyComposition.lean:Solidity.Backend.StorageOps.RuntimeCopyComposition.positive_repetitions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyComposition.lean:Solidity.Backend.StorageOps.RuntimeCopyComposition.repeated_footprint_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyComposition.lean:Solidity.Backend.StorageOps.RuntimeCopyComposition.repeated_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyComposition.lean:Solidity.Backend.StorageOps.RuntimeCopyComposition.symbolic_positive_repetitions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

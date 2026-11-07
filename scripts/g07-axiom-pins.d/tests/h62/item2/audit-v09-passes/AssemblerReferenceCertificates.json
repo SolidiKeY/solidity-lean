@@ -1,0 +1,46 @@
+{
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.assembled_reference_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.assembled_reference_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.assembled_tag_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.LeadingRelativeFixture.assembled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.LeadingRelativeFixture.items": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.LeadingRelativeFixture.output": [],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.LeadingRelativeFixture.widths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.LeadingRelativeFixture.witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.LeadingRelativeFixture.zero_width_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean:Solidity.Yul.Compilation.relocated_relative_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
