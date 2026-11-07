@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # coord-ask [-t TITLE] "question"   (or question on stdin)
-# Pushes the question to refs/heads/coord-q/<lane>/<ts>; a GitHub Action turns it into an issue.
-# Needs only git push; does not touch the working tree, index or the lane branch.
+# Pushes the question to refs/heads/coord-q/<lane>/<ts> of the private coordination repo
+# ($COORD_Q_REPO, default SolidiKeY/solidity-lean-coord); a GitHub Action there turns it into an issue.
+# Needs only clone/push access to that repo; does not touch the lane's repository at all.
 set -euo pipefail
 title=""
 while getopts t: o; do case $o in t) title=$OPTARG;; *) echo "usage: coord-ask [-t TITLE] TEXT" >&2; exit 2;; esac; done
@@ -9,21 +10,24 @@ shift $((OPTIND-1))
 body=${1:-$(cat)}
 [ -n "$body" ] || { echo "coord-ask: empty question" >&2; exit 2; }
 [ -n "$title" ] || title=$(printf '%s' "$body" | head -1 | cut -c1-80)
-base=${COORD_Q_BASE:-origin/master}
+repo=${COORD_Q_REPO:-https://github.com/SolidiKeY/solidity-lean-coord.git}
 lane=$(git rev-parse --abbrev-ref HEAD); head=$(git rev-parse HEAD)
 IFS=/ read -r _ b_batch b_slug _ <<<"$lane/" || true
 ts=$(date -u +%Y%m%dT%H%M%SZ)
-git fetch -q origin "${base#origin/}"
-basec=$(git rev-parse FETCH_HEAD)
-f=coord/questions/$ts.md
 blob=$(printf 'title: %s\nlane: %s\nhead: %s\nbatch: %s\nslug: %s\n---\n%s\n' \
-  "$title" "$lane" "$head" "${CLOUDVM_BATCH:-$b_batch}" "${CLOUDVM_SLUG:-$b_slug}" "$body" | git hash-object -w --stdin)
-idx=$(mktemp -u); trap 'rm -f "$idx"' EXIT
-GIT_INDEX_FILE=$idx git read-tree "$basec"
-GIT_INDEX_FILE=$idx git update-index --add --cacheinfo 100644 "$blob" "$f"
-tree=$(GIT_INDEX_FILE=$idx git write-tree)
+  "$title" "$lane" "$head" "${CLOUDVM_BATCH:-$b_batch}" "${CLOUDVM_SLUG:-$b_slug}" "$body")
+# The issue workflow is read from the pushed commit, so the question commit sits on the coord repo's
+# main. A tree-less shallow clone keeps this to a few kB; only main's root tree is fetched (lazily).
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+GIT_TERMINAL_PROMPT=0 git clone -q --bare --depth 1 --filter=tree:0 "$repo" "$tmp/q"
+export GIT_DIR=$tmp/q
+basec=$(git rev-parse HEAD)
+b=$(printf '%s' "$blob" | git hash-object -w --stdin)
+qt=$(printf '100644 blob %s\t%s.md\n' "$b" "$ts" | git mktree)
+ct=$(printf '040000 tree %s\tquestions\n' "$qt" | git mktree)
+tree=$({ git ls-tree "$basec^{tree}" | grep -v $'\tcoord$'; printf '040000 tree %s\tcoord\n' "$ct"; } | git mktree --missing)
 c=$(git -c user.name="${GIT_AUTHOR_NAME:-coord-ask}" -c user.email="${GIT_AUTHOR_EMAIL:-coord-ask@localhost}" \
   commit-tree "$tree" -p "$basec" -m "question: $title")
 ref="coord-q/$(printf '%s' "$lane" | tr -c 'A-Za-z0-9._/-' '-')/$ts"
-GIT_TERMINAL_PROMPT=0 git push -q origin "$c:refs/heads/$ref"
+GIT_TERMINAL_PROMPT=0 git push -q "$repo" "$c:refs/heads/$ref"
 echo "asked: $ref"
