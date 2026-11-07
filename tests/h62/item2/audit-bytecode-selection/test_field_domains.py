@@ -111,4 +111,17 @@ class FieldDomainTests(unittest.TestCase):
         self.assertEqual(f['open_targets'],['Solidity.Backend.Selection.V2.Controls.reject_false_runtime'])
         self.assertIn('Scalar.run_capacity',f['witnesses']['legacy_capacity_aux_domain_refuted']['proof'])
 
+    def test_runtime_supplement_exactly_covers_prior_open_control(self):
+        fixture=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/runtime-control-witness.json').read_text())
+        prior=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/controls-domain-witnesses.json').read_text())
+        self.assertEqual({w['target'] for w in fixture['witnesses'].values()},set(prior['open_targets']))
+        self.assertFalse({w['target'] for w in fixture['witnesses'].values()} & set(prior['refuted_targets']))
+        self.assertEqual(fixture['support_module'],'Solidity.Backend.Selection.LiteralSelection')
+        support=(ROOT/fixture['support_source']).read_text()
+        self.assertIn('Solidity.Backend.Selection.irStack_injective stacks',support)
+        self.assertIn('Solidity.Backend.decode_encode []',support)
+        self.assertIn('theorem empty_false_runtime_refused',support)
+        self.assertIn('0,0,emptyComposition',next(iter(fixture['witnesses'].values()))['proof'])
+        self.assertNotIn('import ',support)
+
 if __name__=='__main__':unittest.main()

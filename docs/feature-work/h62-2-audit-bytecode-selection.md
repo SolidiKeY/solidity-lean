@@ -2696,3 +2696,48 @@ instantiation, compiler acceptance, runtime/G01 linkage or additional witness.
 Independent read-only finder and skeptic reviewed these boundaries. Evidence is
 kept off branch under
 /workspace/parallel-20261103/executable-bytecode/runtime-control-roles/.
+
+
+### Simultaneous false-runtime control domain: empty instance
+
+The previously open `V2.Controls.reject_false_runtime` domain now has one checked
+simultaneous witness. The fixture constructs an actual empty-program instance
+of the existing `LoweringCertificate`, `ControlCertificate` and
+`CompositionCertificate`. It reuses the published `irStack_injective` lemma for
+both directions of empty IR lowering. Control execution handles arbitrary
+assembly placement with zero steps; the exact input height zero bounds its only
+execution boundary. Assembly and `decode_encode` concern that same empty code.
+This is an instance of the existing framework, not a replacement compiler or
+control evaluator. No component certificate is assumed as an input premise.
+
+All ten parameters are supplied together, including this composition value.
+The explicit negative control then instantiates the original false-runtime
+refusal with that same value. The always-none bridge functions and empty
+reachability predicate are merely parameters of the audited refusal theorem;
+they supply no `DecoderPremise`, `RuntimeConsumer` or external Bridge producer.
+This closes only the last domain in the 13-theorem control packet: nine positive
+joint domains and four intentionally refuted control domains. Generated
+auxiliaries remain visible; source authenticity and global census coverage do
+not follow from this local packet accounting.
+
+The first native check retained two proof errors (an unreduced stack-bound goal
+and an attempted definitional roundtrip). The corrections explicitly reduce the
+bound and use the existing roundtrip theorem. The corrected witness checked in
+3.084 seconds; the final source with its concrete refusal control checked in 3.102 seconds
+under the same serial resource policy (173330432-byte workload peak). Both final
+axiom outputs are standard-only.
+The 39 exact existing import products exclude PowerBounds; no prerequisite build
+or stopped workload was retried. A clean-tree admission initially rejected three
+newly generated Python bytecode files before starting a workload; only those
+owned regenerable files were removed. All failed evidence is retained.
+
+The regression suite passes 128 tests, including exact disjoint supplementation
+of the prior open roster. The nonmutating verifier binds the checked generated
+source to the checker-read fixture, raw target type, frozen source scope, native
+output/log/monitor records and all 39 product hashes. Separate independent
+read-only finder and skeptic found no semantic issue. Logs, products, failed
+attempts and receipts stay off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-empty-domain/. Private
+archival and adoption of the newly published master still await credential
+repair. Original Source/runtime/G01, physical, Bridge, global census, performance
+and full validation obligations remain open; no runtime gate is claimed.

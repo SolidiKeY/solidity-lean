@@ -1,0 +1,53 @@
+/-! Guard regression: data-valued composition parameters must have a real joint witness; a negative conclusion is not an impossible input premise. This checks only the existing empty-program certificate. -/
+def emptyLowering : Solidity.Backend.Selection.LoweringCertificate [] (.code []) where
+  success := by
+    intro s t m stack
+    constructor
+    · intro actual
+      change Solidity.Evm.Out.ok m 0 = .ok { m with stack := Solidity.Backend.Selection.irStack t } 0 at actual
+      have same : m = { m with stack := Solidity.Backend.Selection.irStack t } := (Solidity.Evm.Out.ok.inj actual).1
+      have stacks : Solidity.Backend.Selection.irStack s = Solidity.Backend.Selection.irStack t :=
+        stack.symm.trans (congrArg Solidity.Evm.Machine.stack same)
+      have equal : s = t := Solidity.Backend.Selection.irStack_injective stacks
+      cases equal
+      exact .code rfl
+    · intro executed
+      cases executed with
+      | code ran =>
+        have equal : s = t := Option.some.inj ran
+        cases equal
+        change Solidity.Evm.Out.ok m 0 = .ok { m with stack := Solidity.Backend.Selection.irStack s } 0
+        rw [← stack]
+
+def emptyControl : Solidity.Backend.Selection.ControlCertificate (.code []) 0 0 where
+  shape := .code ⟨[], .nil 0, by decide⟩
+  room := True.intro
+  realize := by
+    intro before after label out assembly s t height executed
+    cases executed with
+    | code ran =>
+      have equal : s = t := Option.some.inj ran
+      cases equal
+      simp only [Solidity.Backend.Block.expand, List.map_nil, List.append_nil]
+      refine ⟨0, rfl, ?_⟩
+      intro k within
+      have zero : k = 0 := Nat.eq_zero_of_le_zero within
+      cases zero
+      exact ⟨_, rfl, by
+        change s.length ≤ 1024
+        omega⟩
+
+def emptyComposition : Solidity.Backend.Selection.CompositionCertificate [] (.code []) 0 0 where
+  lowering := emptyLowering
+  control := emptyControl
+  assembled := ⟨[], []⟩
+  assembly := rfl
+  roundtrip := Solidity.Backend.decode_encode []
+
+theorem empty_false_runtime_refused : ¬ Nonempty
+    (Solidity.Backend.Selection.V2.RuntimeConsumer Unit (fun _ => ()) []
+      (fun _ _ _ => False) (.code []) 0 0 emptyComposition
+      (fun _ => none) (fun _ _ => none) (fun _ => False)) :=
+  Solidity.Backend.Selection.V2.Controls.reject_false_runtime Unit (fun _ => ()) []
+    (.code []) 0 0 emptyComposition (fun _ => none) (fun _ _ => none) (fun _ => False)
+#print axioms empty_false_runtime_refused
