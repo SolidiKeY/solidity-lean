@@ -870,3 +870,156 @@ theorem length_failure_joint :
 #guard_msgs (whitespace := lax) in #print axioms length_method_eager_array_panic_domain
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_failure_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms length_failure_joint
+
+
+/-- Guard omission of either code parameter or the common certificate self. -/
+theorem offset_certificate_tail_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.tail_correct := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    68,4,32,32,[258,513],True.intro⟩
+
+theorem offset_certificate_region_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.region_correct := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    68,4,1,32,[258,513],True.intro⟩
+
+theorem offset_certificate_tail_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.tail_capacity := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    [258,513],by decide,True.intro⟩
+
+theorem offset_certificate_region_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.region_capacity := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    [258,513],by decide,True.intro⟩
+
+/-- Signed relative offsets remain allowed; no unsigned-span premise is invented. -/
+theorem offset_method_tail_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_raw := by
+  exact ⟨68,4,BitVec.ofNat 256 (2^256-32),32,[258,513],True.intro⟩
+
+/-- Wrapped products remain legal raw operands rather than an added exclusion. -/
+theorem offset_method_region_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_raw := by
+  exact ⟨0,BitVec.ofNat 256 (2^256-32),BitVec.ofNat 256 (2^255),2,[258,513],True.intro⟩
+
+theorem offset_method_tail_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_correct := by
+  exact ⟨68,4,32,32,[258,513],True.intro⟩
+
+theorem offset_method_region_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_correct := by
+  exact ⟨68,4,1,32,[258,513],True.intro⟩
+
+theorem offset_method_tail_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_capacity := by
+  exact ⟨[258,513],by decide,True.intro⟩
+
+theorem offset_method_region_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_capacity := by
+  exact ⟨[258,513],by decide,True.intro⟩
+
+private theorem frame_witness_output (input output target : Solidity.Backend.Scalar.Stack)
+    (same : output=target) (code : Solidity.Backend.Program) (peak : Nat) :
+    (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate input output,
+      frame.code=code ∧ frame.peak=peak) →
+    (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate input target,
+      frame.code=code ∧ frame.peak=peak) := by
+  cases same
+  exact fun witness => witness
+
+/-- Guard canonicalization of signed offsets/wrapped products and conflation of
+predicate flags with full-reference admission. Both emitted codes retain the
+protected suffix, opposite boundary flags and actual frame/capacity behavior. -/
+theorem offset_predicate_joint :
+    ∃ _certificate : OffsetChecksCertificate OffsetChecks.tailCode OffsetChecks.regionCode,
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode (32::68::4::32::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode (32::68::4::33::[258,513])=some (0::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode
+        (32::68::4::BitVec.ofNat 256 (2^256-32)::[258,513])=some (1::[258,513]) ∧
+      68<(BitVec.ofNat 256 (2^256-32)).toNat ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode (1::32::68::4::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode (1::32::67::4::[258,513])=some (0::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode
+        (BitVec.ofNat 256 (2^255)::2::0::BitVec.ofNat 256 (2^256-32)::[258,513])=some (1::[258,513]) ∧
+      (2^255 : Nat)*2=2^256 ∧
+      Solidity.Backend.Scalar.stackBound OffsetChecks.tailCode 1024=false ∧
+      Solidity.Backend.Scalar.stackBound OffsetChecks.regionCode 1024=true ∧
+      (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32] [1],
+        frame.code=OffsetChecks.tailCode ∧ frame.peak=1) ∧
+      (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4] [1],
+        frame.code=OffsetChecks.regionCode ∧ frame.peak=1) := by
+  have tailFlag : Solidity.Backend.Scalar.flag
+      (Solidity.AbiEntry.tailFits (68 : Solidity.Backend.Scalar.Word).toNat
+        (4 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat
+        (32 : Solidity.Backend.Scalar.Word).toNat)=1 := by
+    have agreement : some (1::([258,513] : Solidity.Backend.Scalar.Stack))=
+        some (Solidity.Backend.Scalar.flag
+          (Solidity.AbiEntry.tailFits (68 : Solidity.Backend.Scalar.Word).toNat
+            (4 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat
+            (32 : Solidity.Backend.Scalar.Word).toNat)::[258,513]) :=
+      OffsetChecksControls.tail_edges.1.symm.trans (OffsetChecks.tail_correct 68 4 32 32 [258,513])
+    exact (List.cons.inj (Option.some.inj agreement)).1.symm
+  have regionFlag : Solidity.Backend.Scalar.flag
+      (Solidity.AbiEntry.regionFits (68 : Solidity.Backend.Scalar.Word).toNat
+        (4 : Solidity.Backend.Scalar.Word).toNat (1 : Solidity.Backend.Scalar.Word).toNat
+        (32 : Solidity.Backend.Scalar.Word).toNat)=1 := by
+    have agreement : some (1::([258,513] : Solidity.Backend.Scalar.Stack))=
+        some (Solidity.Backend.Scalar.flag
+          (Solidity.AbiEntry.regionFits (68 : Solidity.Backend.Scalar.Word).toNat
+            (4 : Solidity.Backend.Scalar.Word).toNat (1 : Solidity.Backend.Scalar.Word).toNat
+            (32 : Solidity.Backend.Scalar.Word).toNat)::[258,513]) :=
+      OffsetChecksControls.region_edges.1.symm.trans (OffsetChecks.region_correct 68 4 1 32 [258,513])
+    exact (List.cons.inj (Option.some.inj agreement)).1.symm
+  have tailFrame : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32] [1],
+      frame.code=OffsetChecks.tailCode ∧ frame.peak=1 := by
+    have original : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32]
+        [Solidity.Backend.Scalar.flag (Solidity.AbiEntry.tailFits
+          (68 : Solidity.Backend.Scalar.Word).toNat (4 : Solidity.Backend.Scalar.Word).toNat
+          (32 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat)],
+        frame.code=OffsetChecks.tailCode ∧ frame.peak=1 :=
+      ⟨OffsetChecks.tailFrame 68 4 32 32,rfl,rfl⟩
+    exact frame_witness_output [32,68,4,32] _ [1]
+      (congrArg (fun value : Solidity.Backend.Scalar.Word => [value]) tailFlag)
+      OffsetChecks.tailCode 1 original
+  have regionFrame : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4] [1],
+      frame.code=OffsetChecks.regionCode ∧ frame.peak=1 := by
+    have original : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4]
+        [Solidity.Backend.Scalar.flag (Solidity.AbiEntry.regionFits
+          (68 : Solidity.Backend.Scalar.Word).toNat (4 : Solidity.Backend.Scalar.Word).toNat
+          (1 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat)],
+        frame.code=OffsetChecks.regionCode ∧ frame.peak=1 :=
+      ⟨OffsetChecks.regionFrame 68 4 1 32,rfl,rfl⟩
+    exact frame_witness_output [1,32,68,4] _ [1]
+      (congrArg (fun value : Solidity.Backend.Scalar.Word => [value]) regionFlag)
+      OffsetChecks.regionCode 1 original
+  exact ⟨OffsetChecks.certificate,
+    OffsetChecksControls.tail_edges.1, OffsetChecksControls.tail_edges.2,
+    OffsetChecksControls.signed_relative.1, OffsetChecksControls.signed_relative.2,
+    OffsetChecksControls.region_edges.1, OffsetChecksControls.region_edges.2,
+    OffsetChecksControls.wrapped_product.1, OffsetChecksControls.wrapped_product.2,
+    OffsetChecksControls.height_boundaries.1, OffsetChecksControls.height_boundaries.2,
+    tailFrame, regionFrame⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_tail_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_tail_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_region_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_region_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_tail_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_tail_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_region_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_region_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_predicate_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_predicate_joint
