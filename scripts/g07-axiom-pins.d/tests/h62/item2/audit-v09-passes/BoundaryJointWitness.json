@@ -1,0 +1,97 @@
+{
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.coarse_target_equal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.joint_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.source_alternative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.source_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.GuardFailure.transported_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.Reverting.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.Reverting.joint_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.Reverting.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.Reverting.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.Reverting.success_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.Reverting.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.Reverting.transported_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.success_excludes_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean:Solidity.Backend.Passes.AuditBoundary.supported_not_trivial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
