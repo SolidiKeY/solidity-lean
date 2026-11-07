@@ -1,0 +1,17 @@
+{
+  "current_base": "a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e",
+  "source_sha256": "4d7916cd8941e6667eb808dfb8dfa7e143111d9f791eeef197feece4b94cc712",
+  "artifact": "/workspace/mrs-checkedmul-current-census/SHA256SUMS",
+  "artifact_sha256": "be9f3c55dbd94ec00fb80451a6f6452ae368c84f9d6790dc274d580be99f4ed7",
+  "checkedmul_lines": {
+    "exact_panic_bytes": 180,
+    "panic_not_truncated": 184,
+    "panic_not_empty": 188
+  },
+  "limits": [
+    "Lexical source census, not Lean parsing or semantic completeness.",
+    "Ownership snapshot unavailable; empty source-enumeration input is not ownership evidence.",
+    "Producer runtime/kernel results are reports, not rerun here. Actual Source bytes do not establish target revert payload.",
+    "Old-base evidence retained unchanged."
+  ]
+}
