@@ -575,3 +575,51 @@ The initial monadic simplification failure and intermediate unused-simp warnings
 Target argument evaluation binds the last source argument innermost. Equal typed arity does not justify swapped names, wrong value order or reversed heterogeneous source types, as the retained negative controls show. The source unit is abstract: none of this proves independent Source function execution, deployment admission, body preservation, ABI or compiler/H68 adequacy.
 
 The initial ambiguous context-type annotation failure remains retained. Explicit Solidity.Ctx passed the final serial gate in 1.248 seconds, with one Lean process, 700,428,288 bytes peak sampled aggregate RSS and no STOP. Eight axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One metadata joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `tests/h62/item2/audit-v08-adapters/callable-metadata-joint-manifest.json`.
+
+### Callable metadata checkpoint audit closure
+
+Re-audited the complete `CallableMetadataJoint` component against adopted master `902e87762`: all three source hashes and all 13 saved evidence sizes/hashes match. The eight joint facts partition into two same-unit memberships, one function signature, identity fit, heterogeneous error fit, declared error parameters, heterogeneous argument fit and matching target names. The three original public-law applications retain their actual hypotheses in the same environment; the heterogeneous conversion retains the rational source origin.
+
+`actual_binding` evaluates target `Args.evalT` only. The refusal declarations reuse existing controls and supply no new Source execution evidence. This audit adds zero models and zero full statement-fidelity acceptances; it closes this component review, not the full audit queue. No Lean/timing rerun or full-gate pass is claimed.
+
+### Inherited metadata hypothesis coverage
+
+The four public `InheritedMetadata` theorems now have an explicit static hypothesis inventory in `tests/h62/item2/audit-v08-adapters/inherited-metadata-hypothesis-inventory.json`. The existing payable fixture supplies the full ten-field `FnOverrideOK` and an actual member of its singleton base list. `override_enter` changes only the payment Boolean on the same supplied world/context/storage; the funded target-call control is not Source override execution.
+
+The existing payable fixture cannot jointly witness `override_nonzero_rejected`, whose nonpayable premise contradicts that fixture's payable base. Separate stricter-mutability and wrong-header controls do not fill this gap. A genuine nonpayable checked-override witness remains independent backfill, not a missing-producer wait. This inventory adds no joint witnesses, kernel checks or statement-fidelity acceptances.
+
+### Nonpayable override joint witness
+
+`InheritedNonpayableJoint.lean` closes the preceding component witness gap using a separate abstract inheritance unit with nonpayable base and view override. Its full ten-field `FnOverrideOK`, actual singleton-list member, nonpayable tag and existing nonzero payment context coexist. The original `override_nonzero_rejected` yields exact `.error .revert` for arbitrary supplied target world/storage. This does not assert independent Source execution, body/admission, session or H68 adequacy. The existing payable fixture is unchanged; its rejected nonpayable premise is a tag check, not execution evidence.
+
+The final serial check passed in 1.152 seconds, one Lean process, peak sampled aggregate RSS 733,720,576 bytes and no STOP. An initial ambiguous `Address` annotation failure is retained; explicit `ContractWorld.Address` corrected it. Trust and registration checks passed. One component model is added, zero full statement-fidelity acceptances; no matched speed comparison or full-family completion is claimed. Evidence and source hashes are in `tests/h62/item2/audit-v08-adapters/inherited-nonpayable-joint-manifest.json`.
+
+### Funded payment-guard joint model
+
+`PayableGuardJoint.lean` realizes the four original `source_payable_entered` premises together: actual receive flag, sender funds100, ordinary payment7 and receiver0+7 within uint256. It applies the original theorem with the same initial world, paid context and Cell storage, preserving its exact Option/isOk conclusion. The same world/payment also yields the original exact nonpayable fallback rejection. A zero-ledger control genuinely fails funding; malformed receive refusal is inherited, not new execution evidence.
+
+This initial world is pre-deployment: the proof supplies target entry-guard evidence, not installed code, dispatch, independent Source execution, admission or body correspondence. The supplied entry and Source receive body are not asserted related. Final serial check passed in 1.050 seconds, one Lean, peak sampled aggregate RSS 696,528,896 bytes, no STOP. Initial implicit catalog-key elaboration failure is retained; explicit unit keys fixed it. Trust and registration passed. One component family, zero full statement-fidelity acceptances; full-family timings and H68 remain open. Exact source/evidence hashes are in `tests/h62/item2/audit-v08-adapters/payable-guard-joint-manifest.json`.
+
+### Role attachment framing and joint model
+
+`RoleAttachmentJoint.frames` is a general lemma packaging the original attachment law with equality of entire account and ledger functions, timestamp and another distinct catalogue key's role. Its instance uses the existing library/interface source unit and Bool catalogue: library membership, selected library role, false≠true and sender funds100 coexist. This avoids treating other-key preservation over a singleton catalogue as nontrivial coverage.
+
+The same attached world retains exact ordinary creation/callFrame rejection for arbitrary supplied typed bodies and contexts, using the original generic refusal laws. These are no new Source execution results. The initial world has no installed accounts, and metadata attachment does not fabricate them; Source deployment/body/link/layout/admission and H68 remain unproved. The serial gate passed in 2.009 seconds, one Lean, peak sampled aggregate RSS 693,489,664 bytes, no STOP; trust and registration passed. One component model, zero full statement-fidelity acceptances, no full-family timing claim. Source/evidence hashes are in `tests/h62/item2/audit-v08-adapters/role-attachment-joint-manifest.json`.
+
+### Metadata proof-component accounting
+
+`index_components.py` links the recent callable metadata, nonpayable override, payment-guard and role-attachment receipts to ten distinct original public targets. It verifies current source bindings and all receipt evidence before matching each target once to the unchanged frozen lexical inventory and one saved snapshot-qualified kernel record. Type-expression hashes are checked for consistency; this does not elaborate current imports or prove semantic fidelity.
+
+The off-Git index reproduces byte-identically under normal and optimized Python. Unknown/duplicate targets, altered source bindings and corrupted kernel type expressions are refused. The index adds zero witnesses, zero fresh kernel checks and zero full statement-fidelity acceptances. It does not count inherited refusal applications as new execution evidence. Inputs, script and output hashes are in `tests/h62/item2/audit-v08-adapters/metadata-target-accounting-manifest.json`; all original census predicates and exclusions remain unchanged.
+
+### Current pin/layer gate refresh
+
+After adopting master `e286f1843`, the actual pin gate at integrated head `3adf13b6efc0b47616361be9d38c7a7e0af3434c` exits1: zero axiom errors, 435 unrecorded changes. All thirteen WORLD-G07-13 entries remain explicitly listed as new; both pending request source hashes still match. No inventory was edited and no pin waiver or pass is claimed. The separate layer check passes: 903 core modules, zero new forbidden edges, 107 pinned allowances. Exact logs/results and hashes are retained through `tests/h62/item2/audit-v08-adapters/current-pin-layer-manifest.json`. These are static gate results, not full build or producer/session acceptance.
+
+### Typed-byte bounds and fixed Keccak joint model
+
+`TypedKeccakJoint.typed_bytes` proves the original per-member Nat-byte bound for every `List UInt8`, without an input-length restriction. The same input jointly inhabits that premise and the published complete `toyFixed.Keccak` pin, including its Sane conjunct. The original strict fold bound applies to arbitrary initial accumulators, and the two exact fixed-hash word/byte observations share the same pin and input. Nat input `[256]` genuinely refutes boundedness; it is not a collision or Source failure claim.
+
+The bounded serial check passed in 50.138 seconds including import builds, one Lean, peak sampled aggregate RSS 2,206,543,872 bytes and no STOP. This cold elapsed is not a matched timing result. Trust and registration passed. One component family, zero full statement-fidelity acceptances. The toy model's ledger/precompile mocks are not certified; no hash injectivity, Source expression execution, admission or H68 adequacy follows. Exact bindings are in `tests/h62/item2/audit-v08-adapters/typed-keccak-joint-manifest.json`.
+
+After coordinator master `32d810f1d` was adopted, the same module passed again in 0.946 seconds (one Lean, peak sampled aggregate RSS 687,300,608 bytes, no STOP). This cached revalidation is not compared with the earlier cold import build as a speed result. Independent read-only finder/skeptic reviews found no issues.
