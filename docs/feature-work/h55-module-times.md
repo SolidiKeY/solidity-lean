@@ -2027,3 +2027,22 @@ and skeptic checked the roles, hashes and history preservation without Lean or a
 server. Evidence hashes are in
 `tests/h55/module-times/readonly-audit-evidence.sha256`. This non-atomic static
 observation does not establish runtime coverage or acceptance.
+
+## V08 adapter audit observations
+
+`v08_audit_controls.py` records six previously unreferenced adapter audit
+candidates with their source hashes and audit feature document hash. Four are
+kernel-environment censuses; two are failure-resource or local-guard
+witness/control modules. P8StatementCensus has an optional
+`H62_WORLD_CENSUS=1` diagnostic. Current driver, exact inputs, effects and
+outcomes remain unresolved. The supplied subset does not establish compiler,
+execution or gas/fork adequacy.
+
+At `bed243cb1fbca5b352aa68240ec2e36c4d148551`, the refreshed static index
+has 765 candidates, 511 with supplied current references and 254 without; six
+retain historical references for review. One previously unreferenced candidate
+changed and none was added or removed since the preceding snapshot. Independent
+read-only finder and skeptic checked roles, hashes and history preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/v08-audit-evidence.sha256`. This non-atomic static
+observation does not establish runtime coverage or acceptance.
