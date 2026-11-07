@@ -1,0 +1,18 @@
+{
+  "parent": "bdc5942ac81e4e6b733fc2a7ae7711df97a6c71e",
+  "upstream": "df554535e9c8d308276a99ea23611c7d63ae5919",
+  "conflict": "Solidity/Language/FixedPoint.lean: Fx.tmod_between proof simplification",
+  "resolution": "Retain lane localrflcast equality and its simp invocation; all other upstream merge results preserved",
+  "resolved_file_equals_premerge_ours": true,
+  "resolved_sha256": "bcfc09c015e3d03927ad142617d8741ede4b9621786a6021bdfe69d3010ce66d",
+  "unconflicted_index_entries_preserved": true,
+  "frozen_statements_changed": 0,
+  "proof_budgets_changed": 0,
+  "unmerged_entries": 0,
+  "checks_evidence": "/workspace/h62-audit-language-evidence/merge-fixedpoint-20261107/check/checks.json",
+  "local_checks": "KeySort and FixedPoint official4.35 PASS, -j1,8GiBcap,zeroSwap,4GiBreserve",
+  "new_Lean_statements": 0,
+  "new_axioms_or_sorry": 0,
+  "full_gate": "not claimed; coordinator rerun pending",
+  "static_validation": "Layer/register/fragments/whitespace PASS; global doc paths has1unchanged unrelatedv09fixturefinding"
+}

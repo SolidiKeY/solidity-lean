@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export only a stopped, committed retirement handoff; never push or mutate goals."""
+"""Export committed retirement or explicitly resumed checkpoints; never push or mutate goals."""
 import argparse
 import gzip
 import hashlib
@@ -24,8 +24,30 @@ def digest(path):
             h.update(chunk)
     return h.hexdigest()
 
+def authenticate_resume_proofs(receipts, repair_manifest=None):
+    """Require both exact H70 identities before allowing either H82 source path."""
+    from overlay_review import TRUSTED, reconstruct, fidelity, receipt_patch_path
+    assert len(receipts) == len(TRUSTED)
+    assert {r.get("label") for r in receipts} == set(TRUSTED)
+    revisions = {}
+    if repair_manifest:
+        from gate_repair import approved_revisions
+        revisions = approved_revisions(repair_manifest)
+    for receipt in receipts:
+        trusted = TRUSTED[receipt["label"]]
+        for supplied, key in (("owner", "owner"), ("expected_sha256", "sha256"),
+                              ("reported_ticket_head", "ticket"), ("reported_source_head", "source")):
+            assert receipt.get(supplied) == trusted[key], "receipt identity differs"
+        patch_data = receipt_patch_path(receipt).read_bytes()
+        assert hashlib.sha256(patch_data).hexdigest() == trusted["sha256"]
+        original = git("show", BASE + ":" + trusted["path"])
+        approved, *_ = reconstruct(patch_data, original, trusted["path"])
+        fidelity(trusted["path"], original, approved)
+        assert (ROOT / trusted["path"]).read_bytes() == revisions.get(trusted["path"], approved)
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--continuation-state", type=Path, help="Committed original-lane resumption state; absence retains retirement export")
     p.add_argument("--increment-base", default=BASE, help="Existing checkout head before this isolated packaging increment")
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--evidence", type=Path, required=True)
@@ -41,8 +63,9 @@ def main():
     increment_base = git("rev-parse", "--verify", a.increment_base + "^{commit}").decode().strip()
     subprocess.run(["git", "merge-base", "--is-ancestor", increment_base, "HEAD"], cwd=ROOT, check=True)
     paths = git("diff", "--name-only", increment_base, "HEAD").decode().splitlines()
+    proof_paths = ["Solidity/Hash/CollisionBound.lean", "Solidity/Language/FixedPoint.lean"] if a.continuation_state else []
     for path in paths:
-        assert path.startswith(("tests/h62/item2/audit-language/", "scripts/h62/item2/audit-language/")) or path == "docs/feature-work/h62-2-audit-language.md", path
+        assert path in proof_paths or path.startswith(("tests/h62/item2/audit-language/", "scripts/h62/item2/audit-language/")) or path == "docs/feature-work/h62-2-audit-language.md", path
     # Mandatory original scope and prompt bytes must be committed and authenticated.
     for line in (INPUTS / "SHA256SUMS").read_text().splitlines():
         expected, name = line.split("  ", 1)
@@ -53,11 +76,21 @@ def main():
     assert bulk.resolve().is_relative_to(a.evidence), "scope bulk must be included in portable evidence"
     assert digest(bulk) == scope_manifest["artifact"]["sha256"]
     assert bulk.stat().st_size == scope_manifest["artifact"]["bytes"]
-    state = json.loads((INPUTS / "retirement.json").read_text())
-    assert state["execution_state"] == "STOPPED_BY_HUMAN_RETIREMENT"
+    state_path = a.continuation_state.resolve() if a.continuation_state else INPUTS / "retirement.json"
+    assert state_path.is_relative_to(ROOT / "tests/h62/item2/audit-language")
+    assert git("show", "HEAD:" + str(state_path.relative_to(ROOT))) == state_path.read_bytes()
+    state = json.loads(state_path.read_text())
+    if a.continuation_state:
+        assert state["execution_state"] == "RESUMED_BY_USER_20261107"
+        assert state.get("increment_base", state["accepted_baseline"]) == increment_base
+        receipts = json.loads((INPUTS.parent / "received-overlays.json").read_text())
+        repair_manifest = ROOT / state["gate_repair_manifest"] if state.get("gate_repair_manifest") else None
+        authenticate_resume_proofs(receipts, repair_manifest)
+    else:
+        assert state["execution_state"] == "STOPPED_BY_HUMAN_RETIREMENT"
     a.output.mkdir(parents=True, exist_ok=True)
     patch = a.output / "original.patch"
-    owned_paths = ["tests/h62/item2/audit-language/", "scripts/h62/item2/audit-language/", "docs/feature-work/h62-2-audit-language.md"]
+    owned_paths = ["tests/h62/item2/audit-language/", "scripts/h62/item2/audit-language/", "docs/feature-work/h62-2-audit-language.md", *proof_paths]
     patch.write_bytes(git("diff", "--binary", BASE, "HEAD", "--", *owned_paths))
     (a.output / "increment.patch").write_bytes(git("diff", "--binary", increment_base, "HEAD"))
     bundle = a.output / "audit-language.bundle"
@@ -82,6 +115,8 @@ def main():
     for file in sorted(INPUTS.iterdir()):
         if file.is_file():
             members.append(("retirement/" + file.name, file))
+    if a.continuation_state:
+        members.append(("continuation/resume.json", state_path))
     # Each archived byte stream has its own internal checksum, independent of
     # the historical manifests whose absolute paths are provenance only.
     internal = "".join(digest(file) + "  " + name + "\n" for name, file in members).encode()
@@ -101,11 +136,12 @@ def main():
     handoff = dict(state, batch="solidity-h62-2-20261106", slug="audit-language", branch=BRANCH,
                    base=BASE, head=git("rev-parse", "HEAD").decode().strip(), repository=str(ROOT),
                    clean=True, changed_paths=paths, bundle_requires_base=increment_base,
-                   increment_base=increment_base, cumulative_patch_scope="Only original lane-owned paths relative to frozen base; upstream merges excluded",
+                   increment_base=increment_base, cumulative_patch_scope="Original lane-owned paths plus exactly authenticated H82 proof-file exceptions when resumed; upstream merges excluded",
                    external_scope_manifest=scope_manifest,
                    packaging_validation="evidence/h44/split-validation.json",
                    packaging_reviews="evidence/h44/split-reviews.json",
-                   no_push_merge_publication=True, archived_files=len(members),
+                   no_push_merge_publication=not state.get("lane_push_authorized", False),
+                   no_default_branch_mutation=True, archived_files=len(members),
                    archive_exclusions="Compiled lib/cache products and toolchain archive/extraction; all remain on original VM. Official pin is included.",
                    portable_path_rule="Original absolute paths are provenance. Extract portable-evidence.tar.gz: evidence/, coordinator-inputs/, retirement/. Verify PORTABLE-SHA256SUMS.",
                    versions=json.loads((a.evidence / "versions.json").read_text()),

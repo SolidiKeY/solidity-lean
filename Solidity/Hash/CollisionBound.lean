@@ -529,11 +529,11 @@ theorem map_oracleOf {xs : List α} (hxs : xs.Nodup) {t : List Nat}
     | cons a t =>
       rw [List.nodup_cons] at hxs
       simp only [List.length_cons, Nat.add_right_cancel_iff] at hl
-      simp only [List.map_cons, oracleOf, if_pos]
+      simp only [List.map_cons, oracleOf, ite_true]
       congr 1
       refine Eq.trans (List.map_congr_left fun y hy => ?_) (ih hxs.2 hl)
       have : y ≠ x := fun h => hxs.1 (h ▸ hy)
-      simp only [if_neg this]
+      simp only [this, ite_false]
 
 /-- The list without repetitions, keeping each element's last occurrence. -/
 def dedup : List α → List α
@@ -545,17 +545,17 @@ theorem mem_dedup {xs : List α} {y : α} : y ∈ dedup xs ↔ y ∈ xs := by
   | nil => simp only [dedup]
   | cons x xs ih =>
     by_cases hx : x ∈ xs
-    · simp only [dedup, if_pos hx, ih, List.mem_cons]
+    · simp only [dedup, hx, ite_true, ih, List.mem_cons]
       exact ⟨Or.inr, fun h => h.elim (fun e => e ▸ hx) id⟩
-    · simp only [dedup, if_neg hx, List.mem_cons, ih]
+    · simp only [dedup, hx, ite_false, List.mem_cons, ih]
 
 theorem nodup_dedup (xs : List α) : (dedup xs).Nodup := by
   induction xs with
   | nil => exact List.nodup_nil
   | cons x xs ih =>
     by_cases hx : x ∈ xs
-    · simp only [dedup, if_pos hx]; exact ih
-    · simp only [dedup, if_neg hx]
+    · simp only [dedup, hx, ite_true]; exact ih
+    · simp only [dedup, hx, ite_false]
       exact List.nodup_cons.mpr ⟨fun h => hx (mem_dedup.mp h), ih⟩
 
 theorem length_dedup_le (xs : List α) : (dedup xs).length ≤ xs.length := by
@@ -563,8 +563,8 @@ theorem length_dedup_le (xs : List α) : (dedup xs).length ≤ xs.length := by
   | nil => exact Nat.le_refl 0
   | cons x xs ih =>
     by_cases hx : x ∈ xs
-    · simp only [dedup, if_pos hx, List.length_cons]; omega
-    · simp only [dedup, if_neg hx, List.length_cons]; omega
+    · simp only [dedup, hx, ite_true, List.length_cons]; omega
+    · simp only [dedup, hx, ite_false, List.length_cons]; omega
 
 /-- A run may hash the same preimage twice; the premise is that of its
 distinct preimages. -/

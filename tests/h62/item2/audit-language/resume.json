@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-2-20261106",
+  "slug": "audit-language",
+  "status": "partial",
+  "execution_state": "RESUMED_BY_USER_20261107",
+  "accepted_baseline": "48ff6a2ebd9a6531a288c0d203c682c4075be25b",
+  "original_frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "authorization": "Latest user scheduled-merge instruction explicitly re-baselines and continues original queue; H82 standing statement-preserving agreement applies. Retirement records retained as history, not current prohibition.",
+  "original_environment": "ccarenv_b64_Y2NhcmVudl9hNTQ3YjYwNzYwNjA4MTkxOGJhYmM3MGZiMTJjYzk0Mw",
+  "goal": "Original launcher goal retained and incomplete; no get_goal or resume API exposed; no API transition claimed and no goal created/reset/completed.",
+  "handoff_to": "coordinator: fresh thread on same original VM/branch/goal after five work items; no self-launched replacement",
+  "prior_handoff_to": "solidity-sol2-20261104/numeric-literals",
+  "completed_work_items": [
+    "Fast-forward original lane to exact accepted master; ancestry verified, no reset/rewrite/new merge",
+    "Apply and check exact2authenticated statement-preserving prerequisite proof patches",
+    "Complete remaining3catalog hypothesis certificates",
+    "Prove36FixedPoint full-leading-telescope certificates with realjoint intrinsic/range/overflow/nonzero cases",
+    "Reconcile51certificates and negative association control; preserve4146census byteforbyte with portableownershipinput; staticgates and independentreviews"
+  ],
+  "counts": {
+    "frozen_files": 389,
+    "frozen_candidates": 4146,
+    "checked_full_telescope_certificates": 51,
+    "new_certificates": 39,
+    "uncertified_conservative_candidates": 4095,
+    "source_classification_resolved_rows": 3664,
+    "source_classification_unresolved_rows": 482,
+    "new_intrinsic_fixture_definitions": 4,
+    "frozen_theorem_headers_preserved_in_patches": 102,
+    "new_certificates_this_repair": 0
+  },
+  "fixedpoint_coverage": "All36named statements with leading arguments in FixedPoint core. Closed Fx.solc_lossy has no leading hypotheses; retained as uncovered conservative candidate, never silently excluded. Satellites remain pending.",
+  "proof_files": [
+    "Solidity/Hash/CollisionBound.lean",
+    "Solidity/Language/FixedPoint.lean"
+  ],
+  "frozen_statements_touched": [],
+  "new_axioms": 0,
+  "new_sorry": 0,
+  "new_native_decide": 0,
+  "maxHeartbeats_changes": 0,
+  "module_registration": "Only proposed optional registration fragment updated; no generated root/central map/axiom pin/toolchain edit",
+  "evidence_directory": "/workspace/h62-audit-language-evidence/resume-20261107",
+  "versions_evidence": "resume-20261107/versions.json",
+  "validation_evidence": [
+    "resume-20261107/prerequisites/checks.json",
+    "resume-20261107/witness-check/checks.json",
+    "resume-20261107/acceptance-gates.json",
+    "resume-20261107/static-gates.json",
+    "gate-repair-20261107/after-gates.json",
+    "gate-repair-20261107/witnesses/checks.json",
+    "gate-repair-20261107/timing.json",
+    "merge-fixedpoint-20261107/check/checks.json",
+    "receipt-relocation-20261107/results.json",
+    "receipt-relocation-20261107/relocated-input-check.json",
+    "gate-containment-20261107/results.json"
+  ],
+  "review_evidence": "gate-repair-20261107/reviews.json",
+  "timing_delta": {
+    "Hash_percent": -10.654680289891639,
+    "FixedPoint_percent": 0.16253337738234563,
+    "method": "3freshserialchecks each before/after, medians,8GiBaddresscap,-j1,0swap,4GiBreserve; not a fullbuild benchmark"
+  },
+  "timing_boundary": "Gate-repair timings are focused same-resource per-file checks only. No full-build performance claim; no>10% slowdown observed.",
+  "runtime_gate_pass": false,
+  "open_queue": [
+    "Complete actual elaborated interface membership, 482remaining source domains and global-vs-per-input classification; authoritative producer routing still262files from pinned old snapshot",
+    "Prove remaining original interface joint witnesses;4095uncertified conservative candidates include private/non-interface/closed statements pending classification",
+    "Meaningful supported-program/compiler totality and success with reject-all/always-revert compiler controls, observable failures, gas/fork boundaries; ABI/reference controls do not close this",
+    "Full statement-fidelity and uncovered-owner reconciliation, complete affected/full/external gates and independent reviews"
+  ],
+  "open_backfill": [
+    "Additional within-scope witnesses and boundary cases, including FixedPoint satellite interfaces after per-file checks",
+    "Remaining lexical/telescope classification and deterministic negative controls",
+    "Portable reproduction/timing tooling without changing frozen formulas or budgets",
+    "Only coordinator-assigned newly unclaimed candidates; no scope takeover"
+  ],
+  "waits": [
+    {
+      "lane": "coordinator",
+      "item": "Frozen Source.Machine.St definition differs at accepted master: new resource cursor field/import. Original-compatible interface version or approved version/fidelity evidence needed before frozen Source.Hoare witnesses; guard failure is not a Lean theorem failure."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Syntax.Raw validation remains owner-reported pending; not reached by new source attempt."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Exact local core prerequisites now PASS. Full affected migration/satellite gates remain pending; local success is not full migration acceptance."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Authoritative producer routing for262exact files/2876declarations from original frozen inventory remains unresolved."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Repository lean-toolchain/run-lean launcher stillselectv4.24 while mandatoryarchivepin is4.35. Full ./run-lean.sh, Bridge, Solkey and runtime gates pending; no old cache reuse or toolchain cut-over authorized."
+    }
+  ],
+  "questions": [],
+  "original_scope_inputs": "tests/h62/item2/audit-language/retirement/: complete original rendered prompt, originalqueue and small H44scopepointer; full245627byte inventory remains offGit and in portable archive",
+  "increment_base": "6cd0a8f1c7d5311d651278e47247f03c91a6e769",
+  "gate_repair_manifest": "tests/h62/item2/audit-language/gate-repair-manifest.json",
+  "current_action": "Fix coordinator-blocked gate-repair symlink escape using shared resolver; no statement or proof-budget changes",
+  "gate_repair_evidence": "gate-repair-20261107/",
+  "coordinator_gate_rerun": "pending after merge resolution; no full-gate claim",
+  "merge_parent": "bdc5942ac81e4e6b733fc2a7ae7711df97a6c71e",
+  "merge_resolution": "tests/h62/item2/audit-language/merge-resolution.json",
+  "merge_evidence": "merge-fixedpoint-20261107/",
+  "lane_push_authorized": true,
+  "push_scope": "Latest user explicitly requests push of this original lane branch only; no default-branch publication",
+  "portability_evidence": "receipt-relocation-20261107/",
+  "portability_regression": "20controls including actualgate-repair oldoutside-read reproduction, file/directorysymlink rejectionbeforeopen,normalpositive,missing/invalidmembers; savedacceptancereplay,noLeanproofclaim",
+  "gate_containment_evidence": "gate-containment-20261107/"
+}
