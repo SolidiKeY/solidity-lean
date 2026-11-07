@@ -900,3 +900,30 @@ source-hash-joint-manifest.json, with bulk evidence off Git.
 Independent read-only finder and skeptic found no issue in the actual fixed pin,
 full execution/allocation joint, empty-input negative or limited claims. Neither
 ran Lean or a server; the review receipt remains with the evidence.
+
+### Environment reads at the reached hash state (2026-11-07)
+
+SourceEnvironmentJoint applies the existing literal-hash execution followed by
+three separate sender/value/timestamp observations from its exact reached heap.
+The existing populated environment fixture supplies the coherent typed model
+for arbitrary byte inputs, both pipelines/static flags and sufficient fuel.
+The conjunction is not a sequential read program or compiled session. Four
+component links reuse the original hash and environment laws; no new fixture
+or independent producer law is counted.
+
+A full-result inequality distinguishes value 7 from timestamp 12345 while their
+input state and retained state agree. It does not infer distinctness from field
+names or erase the machine before stating the negative. Other original targets,
+residual declarations and full feasibility/fidelity remain pending, as do
+canonical Source admission/origin/lifecycle and production target frame/body/H68
+obligations. No target projection is supplied by this Source-only checkpoint.
+
+The serial per-file gate passed in 1.273 seconds, one Lean, peak sampled RSS
+740,175,872 bytes and no STOP. Both declarations use only the existing standard
+axioms; registration passed. No full-root/matched timing acceptance or earlier
+STOP release. Exact bindings: source-environment-joint-manifest.json; generated
+logs remain off Git.
+
+Independent read-only finder and skeptic found no issue in the actual hash run,
+shared reached state, separate observations or full-result negative. Neither ran
+Lean or a server; review evidence remains off Git.
