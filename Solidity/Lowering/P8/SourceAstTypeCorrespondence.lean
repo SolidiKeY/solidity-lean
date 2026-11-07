@@ -118,6 +118,42 @@ theorem nonpayable_address_exact (node : Json)
     simp only [kind, nameField, plain, ok_bind, beq_self_eq_true, ite_true]
     rfl
 
+/-- Success retains the exact split and rejects every empty component. -/
+theorem path_components (written : String) (out : IdPath)
+    (converted : SourceAstTypes.path written = .ok out) :
+    ∃ head tail, written.splitOn "." = head :: tail ∧
+      (head.isEmpty || tail.any String.isEmpty) = false ∧ out = ⟨head, tail⟩ := by
+  unfold SourceAstTypes.path at converted
+  cases parts : written.splitOn "." with
+  | nil => rw [parts] at converted; cases converted
+  | cons head tail =>
+    rw [parts] at converted
+    cases valid : head.isEmpty || tail.any String.isEmpty with
+    | false =>
+      simp only [valid, Bool.false_eq_true, ite_false] at converted
+      cases converted
+      exact ⟨head, tail, rfl, valid, rfl⟩
+    | true =>
+      simp only [valid, ite_true] at converted
+      cases converted
+
+/-- Positive fuel delegates both supported leaf kinds without altering output. -/
+theorem compound_leaf_exact (fuel : Nat) (node : Json) (out : Syn .typeName)
+    (kind : node.getObjValAs? String "nodeType" = .ok "ElementaryTypeName" ∨
+      node.getObjValAs? String "nodeType" = .ok "UserDefinedTypeName")
+    (converted : SourceAstTypes.typeNameLeaf node = .ok out) :
+    SourceAstCompoundTypes.typeName (fuel + 1) node = .ok out := by
+  rcases kind with kind | kind
+  all_goals
+    rw [SourceAstCompoundTypes.typeName]
+    simp only [kind, ok_bind]
+    exact converted
+
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.path_components' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms path_components
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.compound_leaf_exact' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms compound_leaf_exact
+
 /-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_path_node_exact' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms user_path_node_exact
 /-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_name_path_exact' depends on axioms: [propext, Quot.sound] -/
