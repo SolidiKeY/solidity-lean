@@ -68,7 +68,7 @@ The timing was rerun on this VM with the unchanged checker script
 4.24.0 from elan. The Codex 13.280 s baseline came from another machine, so the
 baseline was re-measured here: the same tree with `FoldStatement`, its conjunct
 and `have folded` removed (the pre-fold statement); its source is committed as
-[h68-timing-baseline-FoldedPublic.lean.txt](../../tests/h55/g49-final-theorem/h68-timing-baseline-FoldedPublic.lean.txt). The comparison was fixed in
+[h68-timing-baseline-FoldedPublic.lean.txt](https://github.com/SolidiKeY/solidity-lean-coord/blob/004a2d81d1f19874d6afba81831c51fac7ea2b71/evidence/solidity-h55-sol-20261106/g49-final-theorem/tests/h55/g49-final-theorem/h68-timing-baseline-FoldedPublic.lean.txt). The comparison was fixed in
 advance as five interleaved baseline/current pairs, nine modules each, controls
 excluded as before, decided on the medians:
 
@@ -92,7 +92,7 @@ H64 record notes that unchanged dependencies ran slower too.
 a baseline recorded on the Codex VM; this rerun re-measures the baseline on
 the same machine and takes five predeclared pairs. Same script, limits and
 module set; the comparison method changed, so this is reported as a
-measurement, not as a self-granted lifting of the HOLD. Per-run records: [h68-timing-rerun.json](../../tests/h55/g49-final-theorem/h68-timing-rerun.json). All ten runs passed every module
+measurement, not as a self-granted lifting of the HOLD. Per-run records: [h68-timing-rerun.json](https://github.com/SolidiKeY/solidity-lean-coord/blob/004a2d81d1f19874d6afba81831c51fac7ea2b71/evidence/solidity-h55-sol-20261106/g49-final-theorem/tests/h55/g49-final-theorem/h68-timing-rerun.json). All ten runs passed every module
 and the controls (`H64_SOURCE_AND_CONTROLS_CHECK_PASS`).
 
 **Registration.** The five G49Final modules (`PassCorrect`, `PassCorrectAdapters`,
@@ -156,7 +156,7 @@ by MRS is not asserted. Original H55 base remains `4d3790ea`; the reported reque
 `Solidity.Roadmap.G49Final.cert_adapter`. These identify the shared declarations;
 no replacement API or equivalence theorem is proposed.
 
-[The exact source manifest](../../tests/h55/g49-final-theorem/h71-contract-identification.json)
+[The exact source manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/004a2d81d1f19874d6afba81831c51fac7ea2b71/evidence/solidity-h55-sol-20261106/g49-final-theorem/tests/h55/g49-final-theorem/h71-contract-identification.json)
 identifies `/workspace/h71-g49-contract-identification/shared-contract-source.tar.gz`,
 SHA256 `8c48e999bca0e23b09b014bf657aad7f782dd793c7b2a706b14e5517394a1164`.
 It contains all seven source modules in the adapters' import closure, per-file
@@ -205,7 +205,7 @@ MIC retains G38/P9 as reported; no V12/MRS/V17/V13 P1 variant is transferred.
 
 H55's generic fold does not publish those concrete bindings. H68 explicitly
 listed the family-suffixed names as required deliverables, not existing APIs.
-[The response manifest](../../tests/h55/g49-final-theorem/h71-mic-binding.json)
+[The response manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/004a2d81d1f19874d6afba81831c51fac7ea2b71/evidence/solidity-h55-sol-20261106/g49-final-theorem/tests/h55/g49-final-theorem/h71-mic-binding.json)
 records `/workspace/h71-g49-mic/mic-response.md` and
 `/workspace/h71-g49-mic/mic-binding-disposition.json` with hashes. It keeps the
 request pending canonical publication, without substituting a local agreement
@@ -276,7 +276,7 @@ four interface parameters. This is progress toward the exhaustive inventory,
 not its completion. Expanded atomic open-premises remain null, as do the
 standalone production selections described below.
 
-[The inventory manifest](../../tests/h55/g49-final-theorem/h70-dependency-inventory.json)
+[The inventory manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/004a2d81d1f19874d6afba81831c51fac7ea2b71/evidence/solidity-h55-sol-20261106/g49-final-theorem/tests/h55/g49-final-theorem/h70-dependency-inventory.json)
 records hashes for `/workspace/h70-g49-contracts/dependency-frontier.json` and
 `/workspace/h70-g49-contracts/contracts-disposition.json`. Full evidence and
 handoff are in `/workspace/h70-g49-contracts`; bulk inventory stays off Git.
@@ -311,7 +311,7 @@ note in the relayed requester history. Its path is
 The coordinator can relay these exact bytes; no host relay command or message
 to another VM was issued here. Publication does not imply requester acceptance.
 
-[The committed relay manifest](../../tests/h55/g49-final-theorem/h70-producer-relay.json)
+[The committed relay manifest](https://github.com/SolidiKeY/solidity-lean-coord/blob/004a2d81d1f19874d6afba81831c51fac7ea2b71/evidence/solidity-h55-sol-20261106/g49-final-theorem/tests/h55/g49-final-theorem/h70-producer-relay.json)
 identifies `/workspace/h70-g49-relay/g49-producer-input.tar.gz`, SHA256
 `c43ad605f0a53be78df1dd030ce25e374a785ccb4ba297a334464a5f8228a36f`.
 The archive contains the exact catalog, prior successful H68 typed export,
@@ -1149,7 +1149,7 @@ no source statement or implementation changed. This checkpoint completes the
 independent inventory step for that new producer input; full composition remains
 with the H121/H121c G52 collector.
 
-[The source review record](../../tests/h55/g49-final-theorem/p9-relative-producer-fit.json)
+[The source review record](https://github.com/SolidiKeY/solidity-lean-coord/blob/004a2d81d1f19874d6afba81831c51fac7ea2b71/evidence/solidity-h55-sol-20261106/g49-final-theorem/tests/h55/g49-final-theorem/p9-relative-producer-fit.json)
 retains exact source signatures and hashes. `catalogueB_complete` assumes the
 existing BoundMemoryCatalogue and concludes existence of accepting recognizer
 fuel. The converse in `catalogueB_iff_from_elaborate` retains successful
