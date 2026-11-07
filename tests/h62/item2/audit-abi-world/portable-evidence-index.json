@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "archive": "checkpoint-evidence.tar.gz",
+  "archive_sha256": "92ad15b2ef5cf7c118c4725e9f3f0b5229f992508f2813bf58e8f1e70fbf37d4",
+  "manifest": "tests/h62/item2/audit-abi-world/portable-evidence.sha256",
+  "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest tests/h62/item2/audit-abi-world/portable-evidence.sha256",
+  "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "coverage": {
+    "mapped_modules": 24,
+    "statements": 177,
+    "fidelity": 177,
+    "binders": 439,
+    "success_theorems": 7,
+    "identical_external_fixtures": 10
+  },
+  "full_gate_complete": false,
+  "boundary": "Byte integrity is portable; Lean diagnostics and external-test observations retain actual execution provenance. Full build remains pending."
+}
