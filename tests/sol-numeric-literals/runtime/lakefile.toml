@@ -1,6 +1,7 @@
 name = "solidity-lean"
 version = "0.1.0"
-moreLeanArgs = ["-j1"]
+# Thread count is an execution limit, not a semantic artifact-cache input.
+weakLeanArgs = ["-j1"]
 srcDir = "/workspace/solidity-lean"
 buildDir = "/workspace/solidity-lean/.lake/build"
 defaultTargets = ["Solidity", "SolidityExamples", "solkeycheck", "solidity-lean"]

@@ -12,18 +12,18 @@ Original base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-evm-compiler`.
 Repository: `/workspace/audit-evm-compiler`; old clean checkout
 `/workspace/solidity-lean` preserved.
-Authorized origin/master fast-forward: `4f0a2d6abe3a920d8c5a20c8c06d373a1014824d`,
-which contains this lane's reviewed checkpoint
-`ab2ca913786cbfa90be387cafd6854d8aabf0e41`.
-All 160 originally assigned mapped source files remain byte-identical to the
-original base. The current module map adds seven modules outside that frozen
-scope; they are reported separately and no ownership or census coverage is
-claimed for them. Nine of the original 321 core dependency files differ from
-base. Since the preceding integration, only Source/Eval changed within that
-closure. Fresh core and Bridge checks pass. Recapturing the ten affected
-Bitwise statements retains exactly the same three raw-type differences; all
-remain pending. Frozen and live captures remain separate. No original source
-or dependency definition was edited by this lane.
+Authorized origin/master: `806a972a4f1eefc367f7fe21078e56469447ce13`.
+The saved checkpoint `5fdc14800c129792e7a8f1fc8d7e8aa8288ac3c0` and its
+coordinator-rebased commit `2102e024aadba4290de064c56b4e973d1855a496`
+have the same stable patch ID. Preserving merge
+`c1bc712a9e5c07b8d5ea10d6d9511173463fa1af` integrates master without resetting
+or dropping either history. Its tracked tree matches the authorized master.
+All 160 originally assigned source files remain byte-identical to original
+base. Added module-map rows remain outside that frozen scope. The original
+321-file dependency closure is also unchanged since the previous integration;
+its ten dependency-sensitive captures are retained, including three pending
+raw-type differences from original base. Core and Bridge freshness checks pass.
+No original source or dependency definition was edited by this lane.
 
 H82 permits statement-preserving edits without exact-file agreement; changing
 existing statements, dependent definitions, signatures, budgets, axiom sets or
@@ -43,9 +43,9 @@ master mutation, generated-root/map/axiom-pin edit or new goal was performed.
    and kernel expression. Producer owner master is established for 37 Opcode/
    Jumpdest records by G45.05 and their headers; 1,793 owners remain unresolved.
    The 570 snapshot write-owner candidates and migration overlays are separate.
-2. Joint hypotheses remain partial: 335 unique exact-signature links comprise
-   46 joint witnesses, 52 H69 intentional impossibilities and 237 closed equality
-   statements. The remaining 1,495 rows await classification or witnesses. The
+2. Joint hypotheses remain partial: 340 unique exact-signature links comprise
+   51 joint witnesses, 52 H69 intentional impossibilities and 237 closed equality
+   statements. The remaining 1,490 rows await classification or witnesses. The
    committed 65-link manual ledger is combined with a separately manifested
    235-link closed-equality ledger; both require exact-once reconciliation.
    JumpdestAudit adds exactly one full-telescope witness for each of its 19
@@ -347,8 +347,8 @@ committed index authenticates all bulk data; new scripts resolve repository
 paths from their own location and receive evidence paths as command arguments.
 No push, replacement goal, pause or completion is performed.
 
-The unchanged strict census command currently fails its whole-map byte-identity
-check because the coordinator added seven rows. That failure is retained in the
+At the preceding checkpoint, the unchanged strict census command failed its
+whole-map byte-identity check after seven coordinator-added rows. That failure is retained in the
 gate report. The separate original-scope rescan does not waive it: it verifies
 original map preservation, all 160 source blobs against the frozen Git base,
 and exactly re-parses the original 1,830 records. Sequence edit validation
@@ -361,3 +361,59 @@ The earlier twelve-edge wait is resolved by coordinator integration. The current
 documentation-path gate passes with 135 ambiguity warnings. Strict historical
 map identity still fails as recorded above; original-scope verification and all
 fourteen per-file proof checks pass. Full root/library gates remain pending.
+
+## Copy selectors and output-equivalence premises
+
+[CopySelectorAudit](../../tests/h62/item2/audit-evm-compiler/CopySelectorAudit.lean)
+adds exact joint input packages for memory_copy_input, fixed_input,
+copyConstruction_input, memory_copy_free_input and object_rep in
+Compiler.Compilation. These are premise-satisfiability results for unchanged
+original equivalences. They establish neither conclusion-side representation
+truth nor source execution success. The output-equivalence witness instantiates
+both entry and output data; it does not assert that the program leaves its
+entry state unchanged.
+
+The copy-free witness explicitly supplies the defaulted hasArrayCopy=false
+hypothesis together with its backend guard. Its existing closed Input
+certificate admits a real destination-check failure, so the source reverts.
+This is an ordinary jointly inhabited input, not a contradictory H69 package
+or an always-success claim. The other fixtures exercise populated fixed memory,
+copying and construction. Three supporting example modules are read-only imports
+outside the frozen module-map census; none of their declarations is enrolled.
+
+The enrollment mode for these five cases is mutually exclusive with the old
+modes and requires exactly five joint records. Prior thirty-case and five-case
+outputs remain byte-identical. All previous 335 records remain accounted exactly
+once. The current result is 340 accounted statements (51 joint, 52 intentional
+impossibilities, 237 closed equalities), with 1,490 pending. Fifteen audit modules
+check 138 printed theorem declarations with standard axioms only. Five additional
+fixture definitions remain separate from theorem and original-census counts.
+
+The original full four-checkpoint queue remains partial. Unknown producer owners,
+three frozen-type owner tickets, general supported-program totality, complete
+negative compiler controls, failure/gas/fork boundaries and final root/library
+gates remain open. No Source adequacy or success theorem is claimed by this
+increment. Finder and skeptic reviewed the complete tuples, explicit defaulted
+guard and semantic boundaries independently without using Lean/server.
+
+The checkpoint handoff retains the original VM, branch and persistent goal,
+original rendered assignment, whole work/backfill queue and exact scope manifest.
+Its external export directory is continuation-5-handoff under the evidence root.
+The committed compact index authenticates a portable archive: downloaded-archive
+verification does not require the original VM paths. New code derives repository
+paths from its own location and accepts evidence paths as arguments. No push,
+master mutation, goal reset, replacement, pause or completion is performed.
+
+The current rescan retains exactly 160 original modules and 1,830 declarations;
+eight coordinator-added map rows remain unassigned and unenrolled. Strict map
+identity still fails, with the unchanged gate retained. The current fragment gate
+also fails because the combined documentation index is out of order relative to
+its fragments on the merged baseline; this lane leaves that generated file for
+coordinator repair. Synthetic scope-test paths were replaced with real repository
+paths so their map snippets remain meaningful and the documentation-path check
+can resolve every quoted Lean filename. No original proof or statement changed.
+
+After the owned fixture-path fix, the final scope controls pass (six tests) and
+the documentation-path gate passes with 137 ambiguity warnings. Layer checks
+pass with zero unallowed edges. Fragment synchronization and strict map identity
+remain failed separately; neither is waived by the passing proof checks.

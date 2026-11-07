@@ -1,8 +1,10 @@
 import Solidity.Lowering.V08.LibraryPremises
+import Solidity.Lowering.V08.WorldContextComposition
 import Solidity.Lowering.V08.SourceDispatchControls
 
-/-! Standalone H55 migration candidate. No production adoption or producer
-inhabitant is claimed. All four migration inputs and P8a remain unchanged. -/
+/-! Original H55 migration candidate with additive production-frame correspondence
+checks below. Full origin/body migration and concrete producer inhabitants remain
+open. Existing legacy input structures and P8a are unchanged. -/
 namespace Solidity.Lowering.V08.H55Agreements
 open Solidity ContractWorld
 open Solidity.Lowering.P8
@@ -384,4 +386,387 @@ theorem impossible_library_body (pipeline : Roadmap.Pipeline) :
 #print axioms populated_library_body
 #print axioms impossible_library_body
 
+
+/-! Guarded regression: publishing a common frame relation must preserve the
+legacy constructor/library contracts and reject a linked code address used in
+place of caller storage. These are frame witnesses, not whole producer inputs. -/
+def toProductionFrame {f : Source.Fr} {address : Address} {ctx : Context}
+    (p : FrameAgreement f address ctx) : EnvironmentProjection.FrameAgreement f address ctx :=
+  ⟨p.address, p.sender, p.value, p.static⟩
+
+def fromProductionFrame {f : Source.Fr} {address : Address} {ctx : Context}
+    (p : EnvironmentProjection.FrameAgreement f address ctx) : FrameAgreement f address ctx :=
+  ⟨p.address, p.sender, p.value, p.static⟩
+
+theorem production_frame_exact {f : Source.Fr} {address : Address} {ctx : Context} :
+    EnvironmentProjection.FrameAgreement f address ctx ↔ FrameAgreement f address ctx :=
+  ⟨fromProductionFrame, toProductionFrame⟩
+
+theorem production_constructor_correspondence {f : Source.Fr} {address : Address}
+    {ctx : Context} (p : ConstructorScalarTransport.FrameInputs f address ctx) :
+    fromProductionFrame (ConstructorScalarTransport.toFrameAgreement p) = fromConstructor p := rfl
+
+theorem production_library_correspondence {K : Type} {caller : K} {f : Source.Fr}
+    {owner : Handle caller} {ctx : Context} (p : LibraryFrameTransport.FrameInputs f owner ctx) :
+    fromProductionFrame (LibraryFrameTransport.toFrameAgreement p) = fromLibrary p := rfl
+
+theorem production_populated_frame :
+    EnvironmentProjection.FrameAgreement ConstructorScalarTransport.frame Controls.self
+      ConstructorScalarTransport.targetContext := toProductionFrame populated_frame
+
+theorem production_populated_static : EnvironmentProjection.FrameAgreement
+    {ConstructorScalarTransport.frame with value := SourcePayableDeploymentControls.word 0, static := true}
+    Controls.self {ConstructorScalarTransport.targetContext with mode := .readOnly} :=
+  toProductionFrame populated_static
+
+theorem production_wrong_sender : ¬ EnvironmentProjection.FrameAgreement
+    {ConstructorScalarTransport.frame with sender := SourcePayableDeploymentControls.self}
+    Controls.self ConstructorScalarTransport.targetContext :=
+  fun p => wrong_sender (fromProductionFrame p)
+
+theorem production_wrong_library_address : ¬ EnvironmentProjection.FrameAgreement
+    ConstructorScalarTransport.frame LibraryHandlerControls.link
+    ConstructorScalarTransport.targetContext :=
+  fun p => library_code_is_not_caller (fromProductionFrame p)
+
+#print axioms production_frame_exact
+#print axioms production_constructor_correspondence
+#print axioms production_library_correspondence
+#print axioms production_populated_frame
+#print axioms production_populated_static
+#print axioms production_wrong_sender
+#print axioms production_wrong_library_address
+
+
+/-! Guarded regression: shared production obligation names preserve the exact
+legacy quantifiers and real fixture antecedents; they do not fabricate a
+CreationPremises/LibraryPremises producer inhabitant. -/
+theorem production_origin_exact {S : P8a.Spec} {E : Source.Env}
+    (origins : P8a.SourceOrigins S) (program : Source.SrcProg E)
+    (resolved : S.Resolved) (wf : S.WellFormed resolved) (profile : S.InProfile resolved)
+    (artifact : Roadmap.Artifact) :
+    CreationPremises.OriginWitness origins program resolved wf profile artifact ↔
+      OriginWitness origins program resolved wf profile artifact := Iff.rfl
+
+theorem production_someOrigin_exact {S : P8a.Spec} {E : Source.Env}
+    (origins : P8a.SourceOrigins S) (program : Source.SrcProg E) :
+    CreationPremises.SomeOriginWitness origins program ↔ SomeOriginWitness origins program := Iff.rfl
+
+def toProductionProgram {E : Source.Env} {g : Source.Glob E} {program : Source.SrcProg E}
+    (p : GlobProgramAgreement g program) : CreationPremises.GlobProgramAgreement g program :=
+  ⟨p.prog, p.pipeline, p.fixed⟩
+
+def fromProductionProgram {E : Source.Env} {g : Source.Glob E} {program : Source.SrcProg E}
+    (p : CreationPremises.GlobProgramAgreement g program) : GlobProgramAgreement g program :=
+  ⟨p.prog, p.pipeline, p.fixed⟩
+
+theorem production_program_exact {E : Source.Env} (g : Source.Glob E) (program : Source.SrcProg E) :
+    CreationPremises.GlobProgramAgreement g program ↔ GlobProgramAgreement g program :=
+  ⟨fromProductionProgram, toProductionProgram⟩
+
+theorem production_session_fields_free {E : Source.Env} (g : Source.Glob E)
+    (program : Source.SrcProg E) (p : CreationPremises.GlobProgramAgreement g program)
+    (env : Roadmap.SessionEnv) (timestamp : Roadmap.Word) :
+    CreationPremises.GlobProgramAgreement
+      {g with
+        balance0 := env.balance
+        hasCode := env.hasCode
+        callee := env.callee
+        timestamp := timestamp} program :=
+  toProductionProgram (session_fields_free g program (fromProductionProgram p) env timestamp)
+
+theorem production_main_free {E : Source.Env} (g : Source.Glob E) (program : Source.SrcProg E)
+    (p : CreationPremises.GlobProgramAgreement g program) (name : String) :
+    CreationPremises.GlobProgramAgreement g {program with main := name} :=
+  toProductionProgram (main_free g program (fromProductionProgram p) name)
+
+theorem production_wrong_program {E : Source.Env} (g : Source.Glob E) (program : Source.SrcProg E)
+    (different : g.prog ≠ program.prog) : ¬ CreationPremises.GlobProgramAgreement g program :=
+  fun p => wrong_program g program different (fromProductionProgram p)
+
+theorem production_wrong_pipeline {E : Source.Env} (g : Source.Glob E) (program : Source.SrcProg E)
+    (different : g.pipeline ≠ program.pipeline) : ¬ CreationPremises.GlobProgramAgreement g program :=
+  fun p => wrong_pipeline g program different (fromProductionProgram p)
+
+theorem production_wrong_fixed {E : Source.Env} (g : Source.Glob E) (program : Source.SrcProg E)
+    (different : g.fixed ≠ program.fixed) : ¬ CreationPremises.GlobProgramAgreement g program :=
+  fun p => wrong_fixed g program different (fromProductionProgram p)
+
+theorem production_constructor_obligation_exact {E : Source.Env} {C : Contract}
+    (operation : Source.EM E [] Unit) (before after : Source.St E) (caller : State C [])
+    (ctor : Prog C [] []) (relation : Source.St E → State C [] → Prop) :
+    CreationPremises.ConstructorBodyObligation operation before after caller ctor relation ↔
+      ConstructorBodyObligation operation before after caller ctor relation := Iff.rfl
+
+theorem production_library_obligation_exact {E : Source.Env} {C : Contract}
+    {rs : List Source.STy} {α : Type}
+    (operation : Source.EM E [] (Source.RVal E.layout (Source.STy.ret rs)))
+    (before after : Source.St E) (sourceValue : Source.RVal E.layout (Source.STy.ret rs))
+    (caller : State C []) (entry : Entry C α)
+    (stateRelation : {Γ : Ctx} → Source.St E → State C Γ → Prop)
+    (valueRelation : Source.RVal E.layout (Source.STy.ret rs) → α → Prop) :
+    LibraryPremises.LibraryBodyObligation operation before after sourceValue caller entry
+      stateRelation valueRelation ↔ LibraryBodyObligation operation before after sourceValue
+        caller entry stateRelation valueRelation := Iff.rfl
+
+theorem production_populated_constructor_body (pipeline : Roadmap.Pipeline)
+    (bytes : Roadmap.Bytes) (n : Int) (h : ConstructorScalarTransport.range n) :
+    let operation := Source.construct (ConstructorScalarTransport.global pipeline)
+      ConstructorScalarTransport.frame 8 "Cell" (ConstructorScalarTransport.locals n h)
+    operation.run (Source.L0 ConstructorScalarTransport.E, ConstructorScalarTransport.initial bytes) =
+      (.ok (), (Source.L0 ConstructorScalarTransport.E, ConstructorScalarTransport.written bytes n h)) ∧
+    CreationPremises.ConstructorBodyObligation operation (ConstructorScalarTransport.initial bytes)
+      (ConstructorScalarTransport.written bytes n h) ConstructorScalarTransport.entered
+      (ConstructorScalarTransport.targetBody n h)
+      (fun source target => source = ConstructorScalarTransport.written bytes n h ∧
+        target = ConstructorScalarTransport.targetWritten n h) :=
+  populated_constructor_body pipeline bytes n h
+
+theorem production_false_constructor_post (pipeline : Roadmap.Pipeline)
+    (bytes : Roadmap.Bytes) (n : Int) (h : ConstructorScalarTransport.range n) :
+    ¬ CreationPremises.ConstructorBodyObligation
+      (Source.construct (ConstructorScalarTransport.global pipeline) ConstructorScalarTransport.frame
+        8 "Cell" (ConstructorScalarTransport.locals n h))
+      (ConstructorScalarTransport.initial bytes) (ConstructorScalarTransport.written bytes n h)
+      ConstructorScalarTransport.entered (ConstructorScalarTransport.targetBody n h)
+      (fun _ _ => False) := impossible_constructor_body pipeline bytes n h
+
+#print axioms production_origin_exact
+#print axioms production_someOrigin_exact
+#print axioms production_program_exact
+#print axioms production_session_fields_free
+#print axioms production_main_free
+#print axioms production_wrong_program
+#print axioms production_wrong_pipeline
+#print axioms production_wrong_fixed
+#print axioms production_constructor_obligation_exact
+#print axioms production_library_obligation_exact
+#print axioms production_populated_constructor_body
+#print axioms production_false_constructor_post
+
+
+/-- Read-only V07 consumer adapter; the actual accepted Source carrier and all
+profile proof indices are retained. No producer inhabitant is supplied. -/
+theorem production_accepted_origin {S : P8a.Spec} {reference : P8a.OperationalReference}
+    {origins : P8a.SourceOrigins S} {roots : P8a.RootModel S}
+    (producer : P8a.Producer S reference origins roots)
+    (input : S.Input) (resolved : S.Resolved)
+    (accepted : producer.admission.frontend input = some resolved) (artifact : Roadmap.Artifact) :
+    CreationPremises.OriginWitness origins
+      (V07.P8Bindings.acceptedSource producer input resolved accepted artifact).2 resolved
+      (V07.P8Bindings.accepted_profile producer input resolved accepted).1
+      (V07.P8Bindings.accepted_profile producer input resolved accepted).2 artifact :=
+  accepted_origin producer input resolved accepted artifact
+
+#print axioms production_accepted_origin
+
+
+/-- The actual library component's full Source and target observations remain
+available under the production name; this is not a canonical body producer. -/
+theorem production_populated_library_body (pipeline : Roadmap.Pipeline) :
+    let operation := Source.callInternal (SourceDispatchControls.global pipeline)
+      SourceDispatchControls.frame 25 SourceDispatchControls.libraryFunction
+      SourceDispatchControls.params SourceDispatchControls.returnTypes
+    operation.run (Source.L0 SourceDispatchControls.E, SourceDispatchControls.populated) =
+      (.ok SourceDispatchControls.result, (Source.L0 SourceDispatchControls.E,
+        SourceKeccak.afterLiteral SourceDispatchControls.populated SourceDispatchControls.binary)) ∧
+    LibraryPremises.LibraryBodyObligation (rs := SourceDispatchControls.returnTypes) operation
+      SourceDispatchControls.populated
+      (SourceKeccak.afterLiteral SourceDispatchControls.populated SourceDispatchControls.binary)
+      SourceDispatchControls.result ConstructorScalarTransport.entered
+      (LibraryFrameTransport.entry ConstructorScalarTransport.Cell)
+      (fun {_} source target =>
+        source = SourceKeccak.afterLiteral SourceDispatchControls.populated SourceDispatchControls.binary ∧
+        HEq target ConstructorScalarTransport.entered)
+      (fun source target => source = SourceDispatchControls.result ∧ target = (1, 7, 2)) :=
+  populated_library_body pipeline
+
+theorem production_false_library_post (pipeline : Roadmap.Pipeline) :
+    ¬ LibraryPremises.LibraryBodyObligation (rs := SourceDispatchControls.returnTypes)
+      (Source.callInternal (SourceDispatchControls.global pipeline) SourceDispatchControls.frame
+        25 SourceDispatchControls.libraryFunction SourceDispatchControls.params SourceDispatchControls.returnTypes)
+      SourceDispatchControls.populated
+      (SourceKeccak.afterLiteral SourceDispatchControls.populated SourceDispatchControls.binary)
+      SourceDispatchControls.result ConstructorScalarTransport.entered
+      (LibraryFrameTransport.entry ConstructorScalarTransport.Cell)
+      (fun {_} _ _ => False) (fun _ _ => True) :=
+  impossible_library_body pipeline
+
+#print axioms production_populated_library_body
+#print axioms production_false_library_post
+
+
+/-! Capture shared-contract axiom reports once in this non-default consumer,
+instead of repeating diagnostics during every production-module build. -/
+#print axioms Solidity.Lowering.V08.CreationPremises.globAgreement_exact
+#print axioms Solidity.Lowering.V08.CreationPremises.session_globAgreement
+#print axioms Solidity.Lowering.V08.CreationPremises.Inputs.originAgreement
+#print axioms Solidity.Lowering.V08.CreationPremises.Inputs.programMetadata
+#print axioms Solidity.Lowering.V08.CreationPremises.Inputs.sharedFrame
+#print axioms Solidity.Lowering.V08.CreationPremises.Inputs.bodyObligation
+#print axioms Solidity.Lowering.V08.CreationPremises.sharedContracts_exact
+#print axioms Solidity.Lowering.V08.LibraryPremises.Inputs.programMetadata
+#print axioms Solidity.Lowering.V08.LibraryPremises.Inputs.originAgreement
+#print axioms Solidity.Lowering.V08.LibraryPremises.Inputs.sharedFrame
+#print axioms Solidity.Lowering.V08.LibraryPremises.Inputs.bodyObligation
+#print axioms Solidity.Lowering.V08.LibraryPremises.sharedContracts_exact
+
+end Solidity.Lowering.V08.H55Agreements
+
+/-! Guards the component-witness regression where four separate field witnesses
+are mistaken for a simultaneous frame. These queries concern only frame inputs,
+not global SourceSpec, constructor/library bodies or admission producers. -/
+#print axioms Solidity.Lowering.V08.EnvironmentProjection.frameForContext_agrees
+#print axioms Solidity.Lowering.V08.EnvironmentProjection.frameForContext_preserves
+
+namespace Solidity.Lowering.V08.H55Agreements
+
+/-- One arbitrary template supplies all three input relations at the caller
+storage address. No library code address or global producer is substituted. -/
+theorem production_frame_joint {K : Type} {caller : K}
+    (owner : ContractWorld.Handle caller) (template : Source.Fr)
+    (ctx : ContractWorld.Context) :
+    ∃ frame : Source.Fr,
+      EnvironmentProjection.FrameAgreement frame owner.address ctx ∧
+      ConstructorScalarTransport.FrameInputs frame owner.address ctx ∧
+      LibraryFrameTransport.FrameInputs frame owner ctx ∧
+      frame.contract = template.contract ∧ frame.checked = template.checked ∧
+      frame.depth = template.depth ∧ frame.cd = template.cd := by
+  let frame := EnvironmentProjection.frameForContext template owner.address ctx
+  have agreement := EnvironmentProjection.frameForContext_agrees template owner.address ctx
+  exact ⟨frame, agreement, ConstructorScalarTransport.ofFrameAgreement agreement,
+    LibraryFrameTransport.ofFrameAgreement agreement,
+    EnvironmentProjection.frameForContext_preserves template owner.address ctx⟩
+
+#print axioms production_frame_joint
+end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+
+/-- Exact legacy constructor correspondence retains the complete reached frame. -/
+theorem constructor_frame_rebuild (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) (agreement : ConstructorScalarTransport.FrameInputs frame address ctx) :
+    EnvironmentProjection.frameForContext frame address ctx = frame :=
+  EnvironmentProjection.frameForContext_eq_self frame address ctx
+    (ConstructorScalarTransport.toFrameAgreement agreement)
+
+/-- Delegated library correspondence rebuilds at caller storage, never code. -/
+theorem library_frame_rebuild {K : Type} {caller : K}
+    (owner : ContractWorld.Handle caller) (frame : Source.Fr) (ctx : ContractWorld.Context)
+    (agreement : LibraryFrameTransport.FrameInputs frame owner ctx) :
+    EnvironmentProjection.frameForContext frame owner.address ctx = frame :=
+  EnvironmentProjection.frameForContext_eq_self frame owner.address ctx
+    (LibraryFrameTransport.toFrameAgreement agreement)
+
+#print axioms constructor_frame_rebuild
+#print axioms library_frame_rebuild
+#print axioms EnvironmentProjection.frameForContext_fixed_iff
+end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+open ContractWorld
+
+/-- Guards repeated-call observation collapse: paid and read-only contexts
+must keep their distinct ordered values at actual reset boundaries. -/
+theorem mixed_context_history :
+    transactPrefix LibraryHandlerControls.outer
+      ([Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}].map
+        (WorldContextComposition.frame false true (⟨Controls.self⟩ : Handle false)
+          LibraryHandlerControls.link)) =
+      (LibraryHandlerControls.outer.resetTransient, [.ok (1,7,2), .ok (1,0,2)]) := by
+  obtain ⟨runtime⟩ := LibraryFrameTransport.runtime_of_success
+    (contracts := LibraryHandlerControls.Catalog)
+    LibraryHandlerControls.outer LibraryHandlerControls.handled (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.library Controls.paidCtx LibraryHandlerControls.expected
+    LibraryHandlerControls.delegated_reached
+  exact WorldContextComposition.context_history LibraryHandlerControls.outer false true
+    (⟨Controls.self⟩ : Handle false) LibraryHandlerControls.link runtime
+    [Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}]
+
+#print axioms mixed_context_history
+end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+open ContractWorld
+
+/-- Guards refusal-history truncation: a real wrong-code-role revert precedes
+paid/read-only successes while the complete normalized world is retained. -/
+theorem role_refusal_mixed_history :
+    transactPrefix LibraryHandlerControls.outer
+      (WorldContextComposition.frame false false (⟨Controls.self⟩ : Handle false)
+        LibraryHandlerControls.link Controls.paidCtx ::
+       [Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}].map
+        (WorldContextComposition.frame false true (⟨Controls.self⟩ : Handle false)
+          LibraryHandlerControls.link)) =
+      (LibraryHandlerControls.outer.resetTransient,
+       [.error .revert, .ok (1,7,2), .ok (1,0,2)]) := by
+  obtain ⟨runtime⟩ := LibraryFrameTransport.runtime_of_success
+    (contracts := LibraryHandlerControls.Catalog)
+    LibraryHandlerControls.outer LibraryHandlerControls.handled (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.library Controls.paidCtx LibraryHandlerControls.expected
+    LibraryHandlerControls.delegated_reached
+  exact WorldContextComposition.role_refusal_then_history LibraryHandlerControls.outer false true
+    (⟨Controls.self⟩ : Handle false) LibraryHandlerControls.link Controls.paidCtx runtime
+    [Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}]
+
+#print axioms role_refusal_mixed_history
+end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+open ContractWorld
+
+section CanonicalContextComponent
+open LibraryFrameTransport
+variable {K : Type} [DecidableEq K] {contracts : K → Contract}
+
+/-- Actual Source sender/value reads paired with the existing intrinsic
+context-read body, on the canonical frame. Its input agreement is constructed,
+not supplied. Source admission, dispatch and general body lowering stay separate. -/
+theorem canonical_context_transport {E : Source.Env} {Γ : Source.RCtx}
+    (g : Source.Glob E) (template : Source.Fr) (fuel : Nat)
+    (locals : Source.Locals E.layout Γ) (state : Source.St E)
+    (w : World contracts) (caller kind : K) (self : Handle caller) (address : Address)
+    (ctx : Context) (runtime : RuntimeInputs w caller kind self address) :
+    let f := EnvironmentProjection.frameForContext template self.address ctx
+    (Source.evalPair g f (fuel+2)
+      (.magic .msg "sender" rfl : Source.RExpr E Γ (.address false))
+      (.magic .msg "value" rfl : Source.RExpr E Γ (.int Source.IntTy.u256))).run (locals,state) =
+      (.ok (.val (.address f.sender),.val (SourceEnvironment.sourceWord f.value)),(locals,state)) ∧
+    w.libraryCall self (library caller kind address) ctx =
+      .ok (w,((f.sender.val : Int),(f.value.val : Int),(f.this.val : Int))) :=
+by
+  let f := EnvironmentProjection.frameForContext template self.address ctx
+  have agreement : FrameInputs f self ctx :=
+    ofFrameAgreement (EnvironmentProjection.frameForContext_agrees template self.address ctx)
+  exact context_transport g f fuel locals state w caller kind self address ctx runtime agreement
+
+end CanonicalContextComponent
+
+/-- Guards field-only substitution being mistaken for execution: actual Source
+reads preserve a populated machine in either pipeline, while the real target
+context body preserves its world. This is not a Source library dispatch theorem. -/
+theorem populated_canonical_context (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    let f := EnvironmentProjection.frameForContext ConstructorScalarTransport.frame
+      Controls.self Controls.paidCtx
+    (Source.evalPair (ConstructorScalarTransport.global pipeline) f 2
+      (.magic .msg "sender" rfl : Source.RExpr ConstructorScalarTransport.E [] (.address false))
+      (.magic .msg "value" rfl : Source.RExpr ConstructorScalarTransport.E [] (.int Source.IntTy.u256))).run
+      (Source.L0 ConstructorScalarTransport.E, ConstructorScalarTransport.initial bytes) =
+      (.ok (.val (.address f.sender),.val (SourceEnvironment.sourceWord f.value)),
+       (Source.L0 ConstructorScalarTransport.E, ConstructorScalarTransport.initial bytes)) ∧
+    LibraryHandlerControls.outer.libraryCall (⟨Controls.self⟩ : Handle false)
+      (LibraryFrameTransport.library false true LibraryHandlerControls.link) Controls.paidCtx =
+      .ok (LibraryHandlerControls.outer,(1,7,2)) := by
+  obtain ⟨runtime⟩ := LibraryFrameTransport.runtime_of_success
+    (contracts := LibraryHandlerControls.Catalog)
+    LibraryHandlerControls.outer LibraryHandlerControls.handled (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.library Controls.paidCtx LibraryHandlerControls.expected
+    LibraryHandlerControls.delegated_reached
+  exact canonical_context_transport
+    (ConstructorScalarTransport.global pipeline) ConstructorScalarTransport.frame 0
+    (Source.L0 ConstructorScalarTransport.E) (ConstructorScalarTransport.initial bytes)
+    LibraryHandlerControls.outer false true (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.link Controls.paidCtx runtime
+
+#print axioms populated_canonical_context
 end Solidity.Lowering.V08.H55Agreements

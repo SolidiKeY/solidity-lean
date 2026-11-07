@@ -1,5 +1,25 @@
 # H62 item 2: audit-theories — continuing audit
 
+LATEST INVENTORY:28 original premise-role records reviewed,472 remaining.
+Three reviewed work items complete in this continuation; fresh-thread handoff
+to coordinator for the SAME original VM/branch/unfinished goal. No new/reset
+goal, completion transition or inferred retirement.
+
+LATEST CHECKPOINT: Payable6 joint packets,1 ordinary impossible-input blocker
+and3 successful model API controls. All126 helper proof receipts now match
+current dependencies;87 joint certificate names,75 full unchanged-file subset
+records and6 additional Payable packets are separately checked. Original
+witness/classification remainder1,378:389public+3private+986generated.
+Q-STATIC-VALUE and Q-FROZEN-REBASE remain pending. No full acceptance/runtime PASS.
+Evidence: /workspace/h62-audit-theories-payable-20261107-evidence.
+
+LATEST REBASE (coordinator2026-11-07): assigned branch safely rebased to
+7683091e7c35d265b3b76fdf2a93d0197ce9f556 after verifying all previous heads
+are ancestors. Frozen assignment reference remainsc6f550e281a7. Latest
+unchanged-file subset75; new Closer4 packets pass. Current layer checker
+passes under upstream107pinned allowances; original frozen-version question
+remains pending. Evidence: /workspace/h62-audit-theories-closer-20261107-evidence.
+
 RESUMPTION OVERRIDE (coordinator2026-11-07): explicitly rebaseline on
 origin/master and continue this original queue. This supersedes the historical
 retirement notices below. Same VM/branch/existing goal retained; no new goal.
@@ -792,3 +812,155 @@ full original assignment/queue copies, current proof/role/coverage manifests,
 all gate commands/results, questions/waits and SHA256SUMS. Prior retirement
 archive and every original evidence directory are preserved. No push, merge
 into master, PR, goal replacement or full-runtime PASS is claimed.
+
+## Rebased checkpoint: all four Mutability/Closer inputs
+
+Explicit coordinator merge/rebase instruction was verified against fetched
+origin/master7683091e7c35d265b3b76fdf2a93d0197ce9f556. The clean local
+bbb8c9b7179c8f4f87ab9c9befc7455302680be0 head and previous delivered
+f25a1dd1e were ancestors; git rebase origin/master preserved all work.
+rebase.json records commands/outputs and the new delivery base. The existing
+VM/branch/goal and original c6f550e281a7 frozen scope are unchanged.
+
+CloserWitnesses adds4 full joint packets for every explicit unchanged
+Theory/Mutability/Closer.lean statement. Ordinary modal and Spec packets
+correlate all μ/m/context/program/state/formula/output inputs and within,
+non-nonpayable, modal/Spec and actual-success premises. A real bool declaration
+changes the local environment and succeeds; modal facts are not fulfilled
+only by reverting. Transient packets use one named true bool cell and an
+actual read success with its observed value and preserved cells. View with
+static=false and nonpayable with static=true separately exercise both
+ReadOnlyCtx branches. The frame packet proves noPanic AND actual success.
+No impossible-input/H69 reclassification or new hypothesis on an original.
+
+The final6171374eb660 receipt passes exit0 in1.011s,666,873,856 sampled peak
+RSS, clean diagnostics and standard axioms only. One frame fixture and one
+private layout abbreviation are new. Earlier elaboration mistakes were fixed
+using the actual named-cell layout and removing a solved Spec proof step;
+failed logs are historical, never accepted. No proof budget, definition,
+statement, axiom, root/map/pin or exclusion changed. KeySort was freshly
+checked under the same serial resource bounds.
+
+The initial expanded subset correctly REFUSED the stale Outcome dependency
+fingerprint after rebasing: Source CalldataCopy/Eval/Horizon-related upstream
+changes required rebuilding. The dependency closure and Outcome were checked
+serially; fresh Outcome0ccdd38c54c6 passes1.004s. Only then did the current
+subset pass75 distinct joint records/certificates: Paths41+Mirror13+Bridge8+
+Outcome9+Closer4. All four refusal controls,13 Python tests, register and
+fragments checks pass. Both read-only reviewers independently recomputed
+75source/helper/transitive/artifact/log/axiom receipts and4signature packets:
+no residual findings and no reviewer Lean/server/build jobs.
+
+The changed upstream core-import-closure implementation was checked on this
+new base: layers now PASS901core/0elaborator/0parser/0newedges under107pinned
+allowances. This reports upstream policy, not a claim that this worker repaired
+physical edges or approved new exclusions; prior95allowance/12edge failure is
+retained historically. No worker allowance edit. Original frozen signature/
+definition fidelity Q-FROZEN-REBASE remains pending and full acceptance false.
+No RUNTIME_GATE_PASS/full final run claimed. Exact gates: closer-gates.json.
+
+Checkpoint handoff:4new joint theorems;81joint certificate names across
+versions,116audit proof declarations/21fixture definitions/7private abbreviations.
+Only75unchanged-file joints are validated together on the new base until all
+helper receipts are refreshed. Original witness/classification remainder:
+395public+3private+986originalgenerated=1,384, separate from fidelity/compiler/
+final-gate obligations. Continue original queue and independent backfill,
+fetching/logging/inspecting master before the next item. No new/reset goal,
+full-completion transition, push or master merge.
+
+## Payable checkpoint: six feasible packets and one empty ordinary interface
+
+Before this item, fetched origin/master and inspected its log and Payable,
+ContractWorld/Lifetime definitions: no duplicate witness item or prerequisite
+change landed. The original seven Payable declarations and ContractWorld source
+remain byte-identical to c6f550e281a7. PayableWitnesses adds six full joint input
+packets including the call-frame DecidableEq instance. Positive-value transactions,
+constructor flags, actual System/Prog inputs, nonempty transient read layout,
+matching installed code and funded worlds are concrete. System/deploy/transact/
+enter refusal packets also include the actual refusal result. Three separate
+positive controls prove System.run, World.enter and external World.callFrame
+success, including the sender!=self execution and settlement case. These are
+model API controls, not a proof of physical EVM compilation/ABI/gas/fork totality.
+
+ESCALATE: Solidity.Theory.Mutability.ContractWorld.World.enter_static is an ordinary interface with impossible joint hypotheses: frozen Context.Mode ordinary makes isStatic=false, readOnly makes value=0; payable_static_inputs_impossible checks the complete input telescope. Q-STATIC-VALUE options: retain ordinary witness blocker; owner-approved H57 versioned statement/model repair; explicit human disposition as an intentional H69 separation boundary (not operational refusal coverage).
+
+The checked refutation is stored in pending_impossibility.py, absent from both
+accepted joint and H69 registries. The whole original ledger retains this entry
+as public-witness-pending with its certificate/question; it reduces no gap count.
+No original statement, premise, definition, exclusion or axiom changed. No answer
+to Q-STATIC-VALUE has been received. Static input emptiness is already present
+at the frozen original base, independently of Q-FROZEN-REBASE.
+
+The final f6bfcdc998b6 Payable receipt passes exit0,1.608s,679,542,784 sampled
+peak RSS, no diagnostics or sorryAx and standard axioms only. Ten new proof
+helpers and eight fixtures; the initial address-evaluation recursion limit was
+resolved symbolically using explicit bounds and stepwise simplification, without
+raising recursion/heartbeat limits or weakening the external call control.
+Historical failed elaboration logs are retained but are not accepted receipts.
+Both changed Source helper dependency closures were serially refreshed; all126
+helper proofs/29fixture definitions/7private abbreviations now verify with
+current source/import/artifact/log hashes. Lean4.24.0(797c613), Lake5.0.0-src+
+797c613; one heavy process, explicit -j1/LEAN_NUM_THREADS=1,12GiB address-space
+cap,4GiB reserve,no host swap; KeySort prerequisite passed. No timing comparison
+is inferred from dependency rebuild durations; previous matched tool pair was
++2.073826%, within10%. No budget or runtime policy changed.
+
+payable-gates.json records commands/exits/decisive outputs: seven interfaces
+accounted as six joint +one pending refutation; strict --require-joint-all exit1
+PAYABLE_JOINT_BLOCKED; generic full-Payable subset exit1 for one missing joint.
+Those expected failures preserve the acceptance boundary. The positive75-record
+unchanged-file subset and four negative controls,13 Python tests,layers(107
+upstream pinned allowances),register/fragments checks all pass. Original500
+records remain exact once:87 joint certificates,3 accepted H69 certificates,
+18 explicitly historical empty telescopes,389 public and3 private pending;
+all986 original generated candidates remain pending. remaining-original-records
+contains1,378 unique names/owners. That remainder excludes separate pending
+frozen-version fidelity, broader compiler contracts and final runtime gates.
+
+Checkpoint handoff: preserve same VM/branch/unfinished goal and all prior
+artifacts. Continue independent original queue/backfill while two scope decisions
+wait; no automatic H69 classification, interface repair, root registration,
+push/master merge or RUNTIME_GATE_PASS. Finder/skeptic independently passed all126 receipts,500 exact original records,
+1,378 unique pending names and all recorded gate exits; no residual findings,
+edits, Lean/server/build jobs. Final reviews are in reviews.json off Git.
+
+## Inventory checkpoint: all eleven Closer/Payable telescopes
+
+Fetched origin/master before starting and inspected its log/current sources:
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has no new relevant producer changes
+or duplicate audit item beyond the already consumed7683091e7 delivery base.
+No unrequested rebase or producer edit. mutability_input_roles.py enumerates
+all11 original frozen declarations, matching every ordered elaborated binder
+and Prop flag, including inherited contracts/types, hygienic DecidableEq K,
+and state/formula/output binders after earlier premises. It distinguishes
+global configuration/operation-instance data from selected-program checks,
+selected-state modal facts, actual-success equations and selected-run noPanic.
+Neither inhabited System nor equality instance supplies admission/totality.
+
+Review corrected refuses.hv to nonzero-INTEGER, not positive value: v:Int may
+be negative. Word-valued positive-transaction tags remain justified. The other
+finding was an initially unguarded cumulative count. The final generator now
+reads the companion17 Bridge/Outcome report, verifies its original snapshot
+hash/base and all17 exact names, recomputes EVERY role record/current proof
+certificate, checks full frozen source bytes and disjointness, and derives28
+cumulative originals/472 remaining. Both generators were rerun against current
+checked dependencies. It adds no joint witness or generated disposition;10
+newly inventoried packets are already witnessed,1 static packet remains an
+ordinary pending impossibility. No H69 promotion or statement change.
+
+Final-role-gates.json records both positive generators,13 Python tests and
+clean diff check. Duplicate-prior-name and altered-prior-certificate controls
+both exit1 without producing an accepted inventory. Finder and skeptic closed
+both findings and independently validated all28 records/current certificates,
+original signatures, disjoint accounting and refusal outputs; no residual
+findings and no edits/Lean/server/build by reviewers. Bulk reports/reviews are
+/workspace/h62-audit-theories-mutability-roles-20261107-evidence.
+
+Three reviewed items in this continuation are now complete: Closer4 joint
+packets; Payable6 feasible packets/3positive controls/1ordinary blocker; and11
+additional exact premise-role records. Follow the original3–5-item fresh-thread
+handoff rule: coordinator continues this SAME original VM,branch and unfinished
+persistent goal. Do not create/reset/complete a goal or infer retirement/pause.
+All four full assignment checkpoints remain partial. Current queue is saved
+in scripts/h62/item2/audit-theories/handoff/CURRENT-QUEUE-20261107.md alongside
+the complete original prompt,original queues and exact frozen scope manifest.

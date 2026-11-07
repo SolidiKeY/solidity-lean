@@ -1036,3 +1036,131 @@ producer waits and unfinished original/inherited acceptance remain. This adds no
 feasibility, compiler-success, body-equivalence or RUNTIME_GATE_PASS claim.
 Evidence and deterministic reproduction commands are saved on the original VM
 under `/workspace/h62-audit-readonly-calls/project-accounting/`.
+
+## Declaration modifier accounting
+
+The scanner now recognizes `public`, `meta` and `nonrec` along with its
+previous declaration modifiers, including modifiers split across lines and
+following attributes. It retains visibility and all recognized modifier
+spelling in candidate keys. Body candidates with different modifiers retain
+an explicit differing-statement rejection, in addition to the unresolved
+signature and ownership reasons. Attribute-associated declaration
+indentation uses the prefix line so an indented closing attribute line does
+not itself make the declaration appear nested. This is lexical recognition;
+the scanner can still overaccept invalid modifier orders and does not account
+for macro-generated declarations or all Lean syntax.
+
+Independent finder and skeptic reviews without Lean identified the missing
+modifiers and the multiline case and rechecked the final controls. The Python
+suite passed 41 tests. Two intermediate test runs failed while correcting the
+attribute-prefix indentation and are not passing evidence. A matched bounded
+whole-tree pair took 113.383 seconds before and 109.784 seconds after
+(-3.17%). Both used the same 7,273 inputs, recognized 122,960 declarations
+and reported no file errors or unmatched globs. Statement-group counts changed
+from 4,481 to 4,412 as modifier distinctions were retained; body-group
+counts stayed 5,516. Counts do not establish group membership or signature
+semantics. Reports and controls are outside Git under
+`/workspace/h62-duplication-scanner-evidence/declaration-modifiers/`.
+
+## Scoped option lexical boundaries
+
+Line-initial `set_option` commands now contribute context spans and terminate
+preceding bodies; an indented boundary rejects the body fingerprint. Within
+recognized option spans, an `in` followed on the same line by a declaration
+keyword, modifier or attribute prefix makes the file incomplete, including
+split option headers and modifiers continued on a later line. This prevents
+the demonstrated hidden or misqualified declaration cases. The check is a
+conservative lexical heuristic: it can refuse ambiguous text, does not model
+the exact lifetime of scoped options, and does not handle every wrapper or
+macro form. Candidate signature and ownership rejection reasons remain.
+
+Independent finder and skeptic reviews without Lean identified and rechecked
+the split-header and split-modifier cases. The final Python suite passed 42
+tests. An initial overly broad guard caused a full-tree scan to exit 1 with
+eight file refusals, and one intermediate split-modifier test failed; both
+are retained as failed evidence. The refined implementation's matched pair
+on the same tree and input took 109.784 seconds before and 119.423 seconds
+after (+8.78%), within the 10% threshold. Both used the same 7,273 inputs,
+recognized 122,960 declarations and reported no file errors or unmatched
+globs. Statement-group counts changed from 4,412 to 4,413; body-group counts
+remained 5,516. Counts do not establish equal group membership, intrinsic
+signatures or complete declaration coverage. Reports, failed attempts,
+controls and timings are outside Git under
+`/workspace/h62-duplication-scanner-evidence/set-option-context/`.
+
+## Recursive and finite alias accounting after integration
+
+After rebasing onto the published signature-linkage and selector work,
+recursive `**` selection now reports an incomplete scan when it skips a
+directory symlink or encounters a dangling symlink. Finite directory
+components explicitly report dangling or inaccessible symlink targets, even
+when a different path matches. Explicit valid finite aliases retain their
+logical paths and existing shared-source and containment checks. Recursive
+selected paths continue to match the no-follow selection set, but the report
+is incomplete when a directory alias was skipped; incremental removals and
+candidate deltas remain null on selection errors.
+
+This is point-in-time accounting, not a race-proof source attestation. An
+explicit outside-root directory alias can still be enumerated before per-file
+containment rejects its selected files. Lexical candidates retain unresolved
+signature and ownership reasons; no semantic or unowned conclusion follows.
+
+Finder and skeptic independently reviewed the rebase and selection fix
+without Lean. The combined Python suite passed 195 tests. An initial run
+failed because an upstream test expected skipped recursive aliases to be
+silent; the reconciled test now requires an incomplete report while retaining
+its finite-alias checks. A matched bounded scan took 110.215 seconds before
+and 115.784 seconds after (+5.05%). Both used the same 7,303 inputs,
+recognized 123,314 declarations and reported no file errors or unmatched
+globs. Complete reports matched after normalizing scanner identity. Evidence
+is outside Git under
+`/workspace/h62-duplication-scanner-evidence/rebased-recursive-links/`.
+
+The rebased repository documentation-path gate exited 1 on two missing
+references named A.lean and B.lean, cited by the upstream audit-evm-compiler
+scope test. These are outside this scanner lane; the gate remains failed.
+
+## Finite directory alias containment
+
+Finite directory symlinks are now resolved and checked against the selected
+root before descent, for both literal and wildcard components. Outside-root,
+dangling and inaccessible targets make the report incomplete; valid
+inside-root aliases retain logical paths and existing shared-source checks.
+This closes the stable-filesystem pre-descent enumeration issue noted above.
+Resolution, containment check and enumeration are not atomic, so concurrent
+replacement remains outside this guarantee.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 196 tests, including literal and wildcard
+outside aliases, a guard against enumerating the outside alias, and prior
+inside-root alias controls. A matched bounded scan took 115.784 seconds before
+and 113.029 seconds after (-2.38%). Both used the same 7,303 inputs,
+recognized 123,314 declarations and reported no errors or unmatched globs.
+The complete reports matched after normalizing scanner identity. These are
+external lexical-tool checks, not proof of race-free confinement, complete
+census or intrinsic-signature equivalence. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/alias-containment/`.
+
+The documentation-path gate still fails on the two upstream scope-test
+references noted above. The first containment-check run also flagged two
+references in this document's description of that failure; those descriptions
+were corrected and the rerun reports only the two upstream failures.
+
+### Integrated scanner report replay
+
+Two bounded default-mode scans using the same tree, scanner, selection,
+registry and caller-pinned previous report took 113.029 and 112.626 seconds
+and produced byte-identical reports, SHA256
+`88402b7207ab6655e5b48ce066f13c168eb68fdefac431a254a38a068260beb2`.
+Both selected 7,303 files and recognized 123,314 declarations, with no file
+errors, unmatched globs or reported aliases; all recognized owners remain
+unknown. Relative to the older caller-pinned report, 30 inputs were added,
+four changed and none removed. The scanner and tree both changed from that
+baseline, so candidate deltas combine tool and input effects. The prior pin
+identifies bytes, not an authenticated producer.
+
+The scans did not invoke the upstream opt-in fixture or project
+signature-binding paths. Independent finder and skeptic reviewed the replay
+without Lean. These runs demonstrate repeatability for this snapshot, not
+complete census, signature equivalence or live ownership. Full reports and
+timing records are outside Git in the alias-containment evidence directory.

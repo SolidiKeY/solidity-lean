@@ -209,6 +209,18 @@ function hostEvidenceErrors(result,config) {
     if(config.target!=='dafny'||!ids.includes('native-trace-light-show-hide'))errors.push('missing native light trace observation');
   }else if(config.suite==='trace-visibility'){
     if(config.target!=='dafny'||!ids.includes('native-trace-tab-visibility-theme'))errors.push('missing native trace visibility observation');
+  }else if(config.suite==='custom-import-actions'){
+    if(!ids.includes('command-custom-import-actions'))errors.push('missing native compiler-only custom-import scenario');
+    const o=result.scenarios?.find(s=>s.id==='command-custom-import-actions')?.observation;
+    if(o?.request?.runId!==result.runId||!o?.request?.observation?.contextMenu?.rendered?.screenshot||!o.request.observation.prompt?.rendered?.screenshot||typeof o.request.observation.prompt.before?.value!=='string'||!o.request.observation.prompt.before.value||o.request.observation.prompt.before?.value!==o.request.observation.prompt.submitted?.value)errors.push('missing actual custom import menu/default prompt');
+    if(config.target==='local'){
+      const hash=require('node:crypto').createHash('sha256').update(o?.source||'').digest('hex'),a=o?.commandOwnership?.started,b=o?.commandOwnership?.completed;
+      if(o?.report?.operation!=='buildCustomArgs'||o.report.kind!=='compiler-ast'||o.report.verification!=='not-run'||o.report.sourceHash!==hash||!a||!b||a.phase!=='started'||b.phase!=='completed'||a.operation!=='buildCustomArgs'||a.sourceHash!==hash||a.version!==o.version||b.commandId!==a.commandId||b.sourceSession!==a.sourceSession||b.artifact!==o.report.artifact||typeof o.report.source!=='string'||a.uri!==require('node:url').pathToFileURL(o.report.source).href||b.uri!==a.uri||b.version!==a.version||b.sourceHash!==a.sourceHash)errors.push('missing exact custom Build artifact/session ownership');
+      const expectedOptions={includePaths:['vendor with spaces'],remappings:['alias/=lib/']};
+      if(JSON.stringify(o?.report?.compilerOptions)!==JSON.stringify(expectedOptions)||o?.request?.observation?.prompt?.before?.value!==JSON.stringify(expectedOptions))errors.push('missing actual resource import defaults');
+      const cancel=result.observations?.customCancellation;
+      if(cancel?.request?.runId!==result.runId||!cancel?.request?.observation?.prompt?.cancelled?.rendered?.screenshot||typeof cancel.source!=='string'||cancel.sourceHash!==require('node:crypto').createHash('sha256').update(cancel.source).digest('hex')||cancel.version>=o?.version||cancel.sourceHash===hash||cancel.trusted!==true)errors.push('missing real custom prompt cancellation');
+    }else if(o?.terminal?.exitCode!==0||!o?.request?.observation?.prompt?.submitted?.value?.startsWith('build ')||o.request.observation.prompt.submitted.value.includes('--no-verify'))errors.push('missing authentic upstream custom Build terminal exit/profile');
   }else if(config.suite==='custom-default-commands'){
     if(!ids.includes('command-custom-default-build-keybinding'))errors.push('missing native default custom command scenario');
     if(config.target==='dafny'){for(const id of ['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action','native-trace-lifecycle'])if(!ids.includes(id))errors.push('missing native observation '+id);}

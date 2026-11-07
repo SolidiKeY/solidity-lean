@@ -2,24 +2,24 @@
 """Retain all new interface declarations as PENDING; inventory is not a witness."""
 import argparse,json,hashlib,collections
 from pathlib import Path
-from accept_witnesses import checked_run
+from accept_witnesses import checked_run, require
 
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     for k in ["repo","evidence","out"]:ap.add_argument("--"+k,type=Path,required=True)
     a=ap.parse_args();repo=a.repo.resolve();out=a.out.resolve()
-    assert out!=repo and repo not in out.parents
+    require(out!=repo and repo not in out.parents, 'acceptance predicate failed')
     result=[]
     for runname,fixture,module in [
       ("h70-p8-census","P8StatementCensus","Solidity.Lowering.P8.FrozenInterface"),
       ("h70-runtime-census","RuntimeFrameStatementCensus","Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1")]:
         run,sources=checked_run(repo,a.evidence/runname)
         path="tests/h62/item2/audit-v08-adapters/"+fixture+".lean"
-        assert path in sources and run["records"][-1]["command"][-1]==path
+        require(path in sources and run["records"][-1]["command"][-1]==path, 'acceptance predicate failed')
         text=Path(run["records"][-1]["log"]).read_text()
         rows=[json.loads(line.split("H62_CENSUS_JSON ",1)[1]) for line in text.splitlines() if line.startswith("H62_CENSUS_JSON ")]
-        assert rows and len({r["name"] for r in rows})==len(rows)
-        assert all(r["module"]==module for r in rows)
+        require(rows and len({r["name"] for r in rows})==len(rows), 'acceptance predicate failed')
+        require(all(r["module"]==module for r in rows), 'acceptance predicate failed')
         parents={f["projection"]:r["name"] for r in rows for f in r["structure_fields"]}
         for row in rows:
             row["audit_status"]="PENDING"
