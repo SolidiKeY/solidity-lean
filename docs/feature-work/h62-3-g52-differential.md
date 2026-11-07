@@ -783,3 +783,100 @@ stage construction and the full public residuals, reusing existing generic
 coverage machinery rather than another conditional wrapper. G49 is now owned
 pending work, not a wait on the frozen Claude lane. V17 arbitrary-contract/EEST
 binding and the five external factory families remain typed dependencies.
+
+
+## Checkpoint: deterministic Engine, Engine-X and sync inputs
+
+The resumed checkout was clean at23c622eb31fc4a7f7ef768516561251f7e329b56 on the
+assigned branch. Its existing coordinator merge/bookkeeping commits were
+preserved. Fetch/merge of origin/master05d2c25872c4bb963a0ca7f605905e6e1e99eedc
+returned0; originalc6f550e and previousf53f026ac are ancestors. No reset, discard,
+push or default-branch publication. Evidence:engine-input-baseline.json.
+
+The existing generic exporter now supports blockchain_test_engine,
+blockchain_test_engine_x and blockchain_test_sync. All fixtures retain their
+complete original payload/configuration/expectation fields, exact archive member
+hash and identity. They are explicitly input-only-not-executed, never execution
+or source agreement. Related representations may describe the same underlying
+cases; they are not added to unique semantic witness or passing-case counts.
+
+| Format | Exact Osaka inputs | Stream SHA256 |
+|---|---:|---|
+| Engine | 21,124 | 290feabb7d26c5cfcc32c861447e6ae860a840d94031115948ff7b530cee00e3 |
+| Engine-X | 21,124 | 26117239c2da1b20734ed3f56bac609bc076bdaff535ec69e4e651cb5b4cbdae |
+| sync | 9 | 76b3eb1d653a953a89a1cc2a467b091490d2f22b9e744cc3ad606276ce1bef4e |
+
+Engine-X preHash references now bind to a seekable canonical allocation stream
+and offset/length index. All11,568Osaka allocation groups and all21,124declared
+case memberships are referenced exactly, with zero dangling refs. Each lookup
+checks canonical record SHA, path/source SHA, actual network and exact testId
+membership. Allocation records preserve pre-state, environment and genesis from
+the pinned archive; these fields have not undergone native execution validation.
+No ad-hoc allocation or fabricated genesis is supplied.
+
+All files stage under partial names. The allocation stream/index and input stream
+publish only after exhaustive input validation, with receipt last. Replacement
+of the full set is not transactional; consumers must verify every receipt hash.
+Failed membership validation preserves all four prior published Engine-X files.
+The reader closes on failures. New negative controls cover missing preHash,
+wrong case/network, corrupted bytes/offsets and mismatched path/source provenance.
+All8export controls pass with ResourceWarning treated as error; all10existing
+accounting controls also pass.
+
+Reproduce each input preparation twice (no EVM/RPC execution):
+
+```sh
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format blockchain_test_engine_x
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format blockchain_test_engine
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format blockchain_test_sync
+python3 -W error::ResourceWarning tests/h62/item3/g52-differential/test_blockchain_export.py
+python3 tests/h62/item3/g52-differential/test_pipeline.py
+```
+
+The existing serial resource guard ran each export:12GiB cap,4GiB available
+reserve, no swap,300s per command, one heavy job. All first/replay exports exit0
+without resource stops. First/replay seconds:Engine-X176.902/176.330,
+Engine47.878/48.371,sync25.703/25.234. Largest observed exporter RSS370,302,976bytes.
+All three streams, both Engine-X sidecars and full receipts reproduce identical
+bytes. Evidence:engine-input-export-runs.json,engine-input-export-replays.json,
+engine-input-first-receipts.json and engine-input-acceptance.json. The sidecar
+SHA256s are452fc176dfd074d9e460887efed298609055e0f2f568728d9edcac69d460a45c
+(allocation stream) and7254fcd67e353229b453695e7a353af0633fbffa54938e218cbd65c6c0cbf43b
+(index). Bulk remains outside Git and covered by the committed H44 manifest.
+
+Independent read-only finder and skeptic checked exact inventory coverage,
+uniqueness/order, actual format/fork, all allocation edges, gzip integrity,
+receipt hashes, failure controls and reproduction. Both cleared the milestone;
+neither ran Lean/server, native EVM or an archive export. Findings and fixes:
+engine-input-reviews.json. No new execution pass or source match is counted.
+
+Sealed state/block inputs and the six-mismatch native result are byte-identical.
+Strict block-acceptance still records actual exit1 and six reference mismatches;
+Engine inputs cannot close that gate. H70 reports the coordinator retrieved
+G52-REF-001 and routed summary+hash to V17. Its local committed bytes still hash
+f8b2151cf40f1fa9e373e64c273cb649f4220ebb4d7ec1b6581e301e1bdd9d6f.
+The sealed ticket is unchanged; routing is recorded separately in
+g52-ref-001-routing.json and is not validation/integration evidence.
+
+The native official solc0.8.38binary still passes exact SHA/version verification.
+Actual software versions are saved in engine-input-versions.json. Existing
+H49checked source hashes still match the successful prior bounded closure;
+no Lean run is added here. Historical Lean4.24.0/Lake5.0.0-src+797c613 and KeySort
+exit0/1.306s/empty diagnostics remain historical framework evidence only.
+No RUNTIME_GATE_PASS, migration, full build or whole-producer acceptance.
+Own Lean delta0files/lines/declarations; frozen statements touched0; new axioms,
+sorry/trust shortcuts0; proof budgets unchanged. No Lean refactor/checking timing
+comparison occurred. Input export timing is an external measurement only.
+
+Remaining exact-Osaka input format:53transaction_test records. Existing state,
+blockchain and these three new format exports prepare82,455of82,508inventoried
+Osaka representations; preparation is not execution coverage. Next independent
+items are transaction-test inputs/admission checks and real native Engine payload
+binding with explicit RPC/fork-choice/sync limits. Owned canonical source/session
+and emitted-code binding, five full H68factory families and all15public residuals
+remain open. Full Approved_i domains and original conclusions stay unchanged.
+Waits remain V17 arbitrary-contract/EEST binding; MRS/full P1 and other original
+frame owners; V08 world-phase; compiler-family owners; V15 P10 via coordinator
+under H118; bare_prefix_bridge actual producer owner unresolved. No owner is
+inferred, no former-Claude follow-up, and no new/reset/completed goal. H110 permits
+continuation on this same original thread when fresh-thread machinery is absent.
