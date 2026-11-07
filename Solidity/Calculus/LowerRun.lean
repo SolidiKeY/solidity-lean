@@ -14,6 +14,9 @@ syntax; these are what the update arms' soundness
 (`Calculus/SoundArms.lean`) composes.
 -/
 
+-- Retain the existing typed evaluator-agreement proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 variable {C : Contract}
@@ -217,14 +220,15 @@ theorem Val.lower_evalT : {p : PrimTy} → (v : Val C Γ p) →
     exact TRes.AgreesO.ofOpt_id _
   | _, .len b hp => by
     subst hp
+    simp only [Val.evalT, Val.lower, Tm.castV, Tm.eval_app2, Tm.eval_app0, Op0.eval,
+      Op2.eval_eq_evalM, Op2.evalM, State.glob, bind_pure]
     show TRes.AgreesO _ (do
         let r ← b.resolveT σ
         let n ← TRes.ofOpt (σ.storage.len r)
         pure n)
       ((b.lower.eval σ).bind fun r => σ.storage.len r)
     refine TRes.AgreesO.bind (SPath.lower_resolveT b) fun r => ?_
-    show TRes.AgreesO id (TRes.ofOpt (σ.storage.len r) >>= fun n => pure n) (σ.storage.len r)
-    cases σ.storage.len r <;> rfl
+    exact TRes.AgreesO.ofOpt_id _
   | _, .mlen b hp => by
     subst hp
     show TRes.AgreesO _ (do let r ← b.mvalT σ; pure (σ.heap.lenU r))

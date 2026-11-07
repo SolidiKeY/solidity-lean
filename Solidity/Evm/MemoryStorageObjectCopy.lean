@@ -4,6 +4,9 @@ import Solidity.Evm.MemoryObjectConstructionCompile
 /-! Copy simulations retain full published object ownership and allocator state.
 The projected fixed payload is proved from actual typed object words; heap and
 memory preservation are derived by execution, never assumed at input. -/
+-- Retain the existing typed object-copy proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}

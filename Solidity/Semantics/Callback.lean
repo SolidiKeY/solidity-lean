@@ -41,6 +41,9 @@ so a property of every callback run is one of the deterministic run
 runs are `holdsC` (`Calculus/CallbackHolds.lean`).
 -/
 
+-- Retain the existing typed callback proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Semantics (Word lookupBy)
@@ -978,7 +981,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
         · exact .inr (ExecS.callBody (f := f) (o := .violated) ha h)
     rcases hc with h | h
     · exact .inl (by
-        simpa only [COut.receiverOp_of_call] using (ExecS.callReceiver (op := op) h))
+        simpa only [Stmt.run, Stmt.runR_eq, Stmt.runC, Prog.runR_eq, COut.receiverOp_of_call] using
+          (ExecS.callReceiver (op := op) h))
     · exact .inr (ExecS.callReceiver (op := op) h)
   | _, _, .callReceiverPush f args r body code value, σ => by
     change ExecS J σ _ (.ofRes (TRun.callReceiverPush args r body.ext body.runR

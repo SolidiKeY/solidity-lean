@@ -22,6 +22,9 @@ are exhausted (`Val.evalT_ends` and its kin,
 exhausted (`TRun.push_nd`, decision 15), which both modalities accept.
 -/
 
+-- Retain the existing typed update-arm proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 open Solidity (Modality Srt)
 open Semantics (lookupBy setBy)
