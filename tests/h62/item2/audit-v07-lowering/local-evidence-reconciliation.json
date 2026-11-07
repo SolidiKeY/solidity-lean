@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "frozen_source_inventory_sha256": "43d0f854e22026978220b1e9925a12fbc866012ae4f01b5140c15aa1389e0db6",
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "candidate_count": 968,
+  "associated_rows": 6,
+  "rows_without_receipt_in_this_subset": 962,
+  "boundary": "Source-identity association of previously checked local results, not full telescope or feasibility acceptance. Original pending ledger is unchanged.",
+  "rows": [
+    {
+      "name": "Solidity.Lowering.V07.IntegerLocalFamily.assign_pair",
+      "path": "Solidity/Lowering/V07/DoubleAssignmentFamily.lean",
+      "signature_sha256": "2958b9825bb02d2c98ff710a1a347b0f4c6898d756b67f16a16bda521d037526",
+      "module_sha256": "b4d40fbb9c7b931df2d0e35a35e03425d795b83da494d9e83c83e89975fd5e14",
+      "audit_module": "tests/h62/item2/audit-v07-lowering/IntegerPairFamilyWitness.lean",
+      "audit_module_sha256": "d58ca80dc92e9920219223ebd86ba2969bacecae9fa7f5d51e2fb7ebc4dec343",
+      "audit_declarations": [
+        "Solidity.H62.AuditV07.IntegerPairFamilyWitness.complete_pair_hypotheses"
+      ],
+      "evidence_kind": "joint-inputs-and-derived-postfamily",
+      "packet": "/workspace/sol-numeric-literals-v07-pair-c81c799ab",
+      "packet_record_sha256": "f47b589ca3a2ce9b442f6a9dd2604e86d0e33b47540dda556da7834bf333291d",
+      "gate_sha256": "763e3d029db522c401b46e3cc4a9073e67939f03e209e05e75c1a62ed58c41a7"
+    },
+    {
+      "name": "Solidity.Lowering.V07.assignment_family_transport",
+      "path": "Solidity/Lowering/V07/IntegerLocalFamily.lean",
+      "signature_sha256": "fcd8e88eae945af231bc78c5bc19c2569b4337fe2ffecaac7e3c44ad10315499",
+      "module_sha256": "88f7cada64382a446bb910049a6c1d2ce53fa4ee9277a8c28a991fc6b13a258c",
+      "audit_module": "tests/h62/item2/audit-v07-lowering/AssignmentFamilyExecutionWitness.lean",
+      "audit_module_sha256": "24d0db1ffe814acd95c804493488c912c474cfbae04cc54333dc07561f58ada5",
+      "audit_declarations": [
+        "Solidity.H62.AuditV07.AssignmentFamilyExecutionWitness.joint_execution",
+        "Solidity.H62.AuditV07.AssignmentFamilyExecutionWitness.initial_family_inhabited"
+      ],
+      "evidence_kind": "shared-state-local-execution",
+      "packet": "/workspace/sol-numeric-literals-v07-execution-da31d36c1",
+      "packet_record_sha256": "51f056b1f334ada65ef15f2304acc23aee392b17c75b32a989179d0fffd964f1",
+      "gate_sha256": "78a773d9af98657974a087891f9fcfa3a979124b7316a2b897eb983d220f504d"
+    },
+    {
+      "name": "Solidity.Lowering.V07.NodeRank.stable_at_nodes",
+      "path": "Solidity/Lowering/V07/NodeRank.lean",
+      "signature_sha256": "cc52121073c5038beec233a5cde88202e8fd088b62886aded5c966ca8cd552c0",
+      "module_sha256": "271cf03d5498820bd50100acf775e9e31373c2e1ac2738c646e9de6223b5658f",
+      "audit_module": "tests/h62/item2/audit-v07-lowering/RankJointWitness.lean",
+      "audit_module_sha256": "b29a66b7c5106ee861ff7fdc7bdbd0d1f0f618c6261fe261ce56da04ce798629",
+      "audit_declarations": [
+        "Solidity.H62.AuditV07.RankJointWitness.joint_rank_inputs"
+      ],
+      "evidence_kind": "nonempty-joint-rank-witness",
+      "packet": "/workspace/sol-numeric-literals-v07-rank-9af0ce1c0",
+      "packet_record_sha256": "20e9b605c1fdacae0828de9ef85fb90a9d88e42c79eff859bf4dc4957cbfe17f",
+      "gate_sha256": "2609583e5fbb5c29ce779ec90f2b5f085f77fd21217f035032e1f2f5e5611316"
+    },
+    {
+      "name": "Solidity.Lowering.V07.NodeRank.stable_by_count",
+      "path": "Solidity/Lowering/V07/NodeRank.lean",
+      "signature_sha256": "4461d15ad38f5f687d0d6a7477025703edf6c9d3524b4a5a507e0aaafa1893fd",
+      "module_sha256": "271cf03d5498820bd50100acf775e9e31373c2e1ac2738c646e9de6223b5658f",
+      "audit_module": "tests/h62/item2/audit-v07-lowering/RankJointWitness.lean",
+      "audit_module_sha256": "b29a66b7c5106ee861ff7fdc7bdbd0d1f0f618c6261fe261ce56da04ce798629",
+      "audit_declarations": [
+        "Solidity.H62.AuditV07.RankJointWitness.count_stability"
+      ],
+      "evidence_kind": "conditional-application-bound-retained",
+      "packet": "/workspace/sol-numeric-literals-v07-rank-9af0ce1c0",
+      "packet_record_sha256": "20e9b605c1fdacae0828de9ef85fb90a9d88e42c79eff859bf4dc4957cbfe17f",
+      "gate_sha256": "2609583e5fbb5c29ce779ec90f2b5f085f77fd21217f035032e1f2f5e5611316"
+    },
+    {
+      "name": "Solidity.Lowering.V07.RankConvergence.iter_stable",
+      "path": "Solidity/Lowering/V07/RankConvergence.lean",
+      "signature_sha256": "eefb3ec0f6534ebc2e185f2b2c04db16a271cb60b70a2441fc9ffb42734456f4",
+      "module_sha256": "e0c45fe45b2ef6867a9874562ad80a3ab896ff5ac7ab4598f62e0a49bc08869b",
+      "audit_module": "tests/h62/item2/audit-v07-lowering/RankJointWitness.lean",
+      "audit_module_sha256": "b29a66b7c5106ee861ff7fdc7bdbd0d1f0f618c6261fe261ce56da04ce798629",
+      "audit_declarations": [
+        "Solidity.H62.AuditV07.RankJointWitness.comparison_stability"
+      ],
+      "evidence_kind": "conditional-application-bound-retained",
+      "packet": "/workspace/sol-numeric-literals-v07-rank-9af0ce1c0",
+      "packet_record_sha256": "20e9b605c1fdacae0828de9ef85fb90a9d88e42c79eff859bf4dc4957cbfe17f",
+      "gate_sha256": "2609583e5fbb5c29ce779ec90f2b5f085f77fd21217f035032e1f2f5e5611316"
+    },
+    {
+      "name": "Solidity.Lowering.V07.LocalFamilyControls.collapsed_contents_agree",
+      "path": "Solidity/Lowering/V07/LocalFamilyControls.lean",
+      "signature_sha256": "211713defd0986cd94d259a7b61ef5d6d560fb044d260d6761d5d4fba9d691df",
+      "module_sha256": "d98692dfa4a1a80afbc938243e8cc2fb61e08a4823338e7a30c0dfa4860d601e",
+      "audit_module": "tests/h62/item2/audit-v07-lowering/ResultTelescopeAudit.lean",
+      "audit_module_sha256": "384a1d98042ad563f29dcf3ee641042d55f848b18125e742dc8fc92eef709b71",
+      "audit_declarations": [
+        "Solidity.H62.AuditV07.ResultTelescopeAudit.collapsed_signature"
+      ],
+      "evidence_kind": "typed-signature-only-no-feasibility-certificate",
+      "packet": "/workspace/sol-numeric-literals-v07-telescope-32ed60a71",
+      "resolution_receipt_sha256": "72698b53ccbc46e4b9131486e2ac801827174e0e90098adaf30276af93f281d2",
+      "gate_sha256": "5a919bf7870d7998259d6a653f82a66f7e498f48daaf502ff78fa56d759b9b1e"
+    }
+  ],
+  "limitations": [
+    "Live Lean 4.24 evidence does not establish original 4.35 migration gates.",
+    "Conditional rank applications retain their bounds; they are not marked full simultaneous witnesses.",
+    "Collapsed-content row has type resolution only; it supplies no alias evidence.",
+    "No global producer feasibility, whole compiler success, gas/fork coverage or full audit acceptance follows."
+  ]
+}

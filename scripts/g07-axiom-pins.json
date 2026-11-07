@@ -8109,12 +8109,32 @@
  "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.stale_bytes": [],
  "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.word_fit_is_not_byte_fit": [],
  "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean:Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.wrong_scale": [],
+ "Solidity/Backend/AbiWorld/P1RevertBridgeControls.lean:Solidity.Backend.AbiWorld.P1RevertBridge.p1_revert_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/P1RevertBridgeControls.lean:Solidity.Backend.AbiWorld.P1RevertBridgeControls.guardNe_target_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/AbiWorld/PanicCallFrame.lean:Solidity.Backend.AbiWorld.PanicCallFrame.call_data": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Backend/AbiWorld/PanicCallFrame.lean:Solidity.Backend.AbiWorld.PanicCallFrame.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/PublicCompilerTotalControls.lean:Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/PublicCompilerTotalControls.lean:Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_core": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -20169,7 +20189,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.signed_refusal": [
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.signed_acceptance": [
   "Quot.sound",
   "propext"
  ],
@@ -28985,6 +29005,10 @@
  ],
  "Solidity/Backend/PrimitivePackets/BitNot/Target.lean:Solidity.Backend.PrimitivePackets.BitNot.value_success": [
   "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Bitwise/Selected.lean:Solidity.Backend.PrimitivePackets.Bitwise.signed_accepted": [
   "Quot.sound",
   "propext"
  ],
@@ -46078,6 +46102,10 @@
  "Solidity/Lowering/P8/SourceAstCompoundTypes.lean:Solidity.Lowering.P8.SourceAstCompoundTypes.zero_depth": [
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.bind_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.block_ok_iff_each": [
   "Quot.sound",
   "propext"
@@ -46107,12 +46135,30 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.function_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.member_exact": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.pragma_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.state_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.struct_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.top_ok_iff_each": [
   "Quot.sound",
   "propext"
  ],
@@ -46239,6 +46285,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.elementary_leaf_exact": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.function_exact": [
   "Quot.sound",
   "propext"
@@ -46247,8 +46297,26 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.nonpayable_address_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.optional_name_exact": [],
  "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.optional_name_missing": [],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.payable_address_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_name_path_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_path_node_exact": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstTypes.lean:Solidity.Lowering.P8.SourceAstTypes.elementary": [],
  "Solidity/Lowering/P8/SourceAstTypes.lean:Solidity.Lowering.P8.SourceAstTypes.parameter": [
   "propext"
@@ -46433,6 +46501,176 @@
   "propext"
  ],
  "Solidity/Lowering/P8b/MergedControls.lean:Solidity.Lowering.P8b.MergedControls.wrong_reference_no_realization": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.argsB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.boundB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.catalogueB_from_elaborate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.catalogueB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.checked_program_calls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.itemsB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.parentB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizer.lean:Solidity.Source.Calls.Recognize.readyB_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.catalogue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.no_fuel_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.stray_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.undeclared_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Local.whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.catalogue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/BoundRecognizerControls.lean:Solidity.Source.Calls.RecognizerControls.Parent.whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultsB_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.zeroReadyB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.bytes_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_larger": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_one_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.nested_zero_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.refused_fuel_not_refutation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.shared_list_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.struct_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.struct_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerControls.lean:Solidity.Source.Calls.Recognize.DefaultControls.struct_zero_refused": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -69306,6 +69544,41 @@
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanTry.attempt": [],
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix": [],
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix_head": [],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.envLocOK_implies_locOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.envLocOK_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.checkItems_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.checkStmt_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.declaration_admissible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.declaration_location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.StmtD.ofV1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaA": [],
  "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaB": [],
  "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.differentBinder": [],
