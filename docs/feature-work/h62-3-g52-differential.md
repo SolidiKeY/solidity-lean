@@ -1158,3 +1158,109 @@ when their original inputs permit. Do not repeat completed53case rejection
 classification, count unsupported rows as passes, or accept a conditional wrapper
 as the full producer. Original persistent goal stays unfinished; H110 permits
 this same thread when fresh-thread handoff machinery is unavailable.
+
+
+## Engine-X exact allocation binding and bounded native execution
+
+This item fetched origin/master and inspected its log and actual code first.
+Masterf5038bc02bc52ea08f5a3cec7de292aef424e7c8 was merged cleanly as
+32bef0894c25137105c33377de95c4f2ea68e042, preserving the assigned branch and
+prior60f596b35checkpoint. Received P9 recognizer/default-fuel proofs do not
+supply the full canonical source/runtime or P10 factories. No reset/discard/push.
+A fresh textual producer inspection still finds the three limited P1 named
+candidates; it is not a Lean check or proof of absence under renamed APIs.
+PlanWitness.planSource explicitly runs G07 toy programs/model reference and
+not Source.sessionAt, so no canonical Source adequacy is inferred from it.
+
+The shared runner now accepts blockchain_test_engine_x as an explicit format.
+The new generic EngineXAllocations reader verifies the pinned complete stream
+and index before seeking, then checks exact descriptor, record bytes/length/hash,
+source path/hash, fork, case membership, allocation counts and genesis/environment
+field agreement. The short preHash is an opaque index key, not an assumed
+cryptographic pre-state identity. Native execute mode still checks the actual
+pre-state root with the unchanged worker and all existing block validators.
+Unknown/corrupt binding data aborts; it is not counted as a match or a skip.
+
+All11568groups have the same environment shape, empty prior blockHashes,
+ommers and withdrawals, with all numeric genesis/environment fields equal.
+All21124fixture memberships bind across11568groups, repeated byte-identically.
+Binding-only output SHA256:
+b2c481b3517f558ed4b46507370222bebfa1a41cf1e462cec702115e25e1442b.
+Both complete runs exit2/incomplete,113.045/111.997s, no resource stops;
+external peak395018240/536797184bytes. These are allocation_bound_input rows,
+execution_attempted:false: ZERO payload executions or source matches are added
+by the full binding census. Binding-only mode branches before conversion or
+native execution. It validates metadata/bytes, not the actual Merkle pre-state
+root or post-execution state commitments.
+
+Engine-X has no final account/storage map. The internal normalized record uses
+an empty map only for the existing adapter shape. Each X result and summary
+explicitly declares final_account_map_present:false; successful native results
+claim payload-header commitments only. Unsupported/binding-only rows make no
+complete payload-validation claim. This adds no account-map comparison and
+weakens no existing Engine validation or approved theorem/profile. RPC,
+forkchoice, source and full fixture conformance remain incomplete. Original
+Engine-X bytes are retained unchanged and normalized records are not original
+fixture conformance evidence.
+
+The first20actual Engine-X cases execute through the real native validator:
+20payload matches,0mismatches,0unsupported in this pilot. Replay is byte-identical,
+SHA256 b5503e70b9ef9e40b46063909466eb7d10b32e35b2141cc9ff8aba75cdaac89c.
+Actual exit2 both runs,13.580/14.074s,external peak1029218304/1042878464bytes,
+no stops. The other21104native cases are UNATTEMPTED, not unsupported/pass rows.
+Shared allocations include30743accounts and a5.45MBrecord; no full native runtime
+estimate or completion is inferred from this pilot. Cross-format representations
+are not added as distinct source/proof witnesses. All21124source bindings remain
+unsupported; full G52source/runtime agreement remains open.
+
+Before reusing the runner, a possible slowdown was announced and git history
+inspected. Same1000-case Engine prefix, resources and relevant worker/cache
+configuration:43.720s before,44.240s after (+1.189percent,below10percent STOP).
+All1000result rows byte-identical, SHA256
+388dcfdfc62d5f1c6f1f2c0612d1ab500d678d90e4fd47934916f6c94fe73857.
+Earlier provisional after/source-mode probes are preserved separately. The
+prior full Engine runs still refer to the exact old wrapper at60f596b35; its
+source snapshot is retained with matching hash. This prefix check is not a full
+new-wrapper rerun. Native worker, block adapter and resource guard are byte-unchanged.
+No Lean refactor or checking-speed measurement occurred.
+
+Seven controls pass with --test-concurrency=1 and no skips: inherited Engine
+refusals/native wrong-post-state detection plus exact allocation binding/cache,
+wrong descriptor/case/fork/schema/bytes/bounds, internally consistent descriptor
+with wrong environment/history/count, and actual native wrong-pre-root rejection.
+The mutated controls add zero fixture matches. Same12GiBaggregateRSS/per-process
+AS bounds,4GiBavailable reserve,no swap and300s external job cap; worker60s/5Msteps
+and parent4096MiB old-space unchanged. Single raw-record cache; no reference
+opcode/state-manager implementation change, systemd-run or dependency install.
+
+Reproduction, using the same pinned H44inputs and installed lock:
+
+    G52_BULK=/workspace/h44/g52-differential node --max-old-space-size=4096 --test-concurrency=1 --test tests/h62/item3/g52-differential/engine_x_allocation.test.mjs tests/h62/item3/g52-differential/engine_payload_reference.test.mjs
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 21124 engine-x-bindings blockchain_test_engine_x bind-only
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 20 engine-x-pilot blockchain_test_engine_x
+
+Repeat with distinct replay labels. All commands are under writerlock and
+serial_semantics.run guard. Their actual receipts and stdout, accounting,
+reproducibility, timing, source inspection and reviews are under$BULK/evidence/
+engine-x-*. All3152prior sealed entries rehashed unchanged before augmentation.
+Strict block-acceptance still exits1 for the original six reference failures;
+no new mismatch/owner ticket. Finder/skeptic read-only review covers source,
+accounting and final claim boundaries without native/Lean/server reruns.
+
+Actual version inspection: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0. No Lean proof/build or fresh KeySort run here;
+prior bounded KeySort pass remains historical. RUNTIME_GATE_PASS remains false.
+Own Lean delta0; frozen statements/dependent definitions/interfaces, budgets,
+axioms and exclusions unchanged; no sorry/newaxiom/native_decide/trust shortcut.
+All15public obligations and full Approved_i remain open. H121b full producer/
+arbitrary-contract binding and H121c full p10_execution_bridge remain OWNED
+unfinished work; V17 is downstream, frozen Claude V15 is not a producer wait.
+Original frame/world/compiler/bare-prefix/session/event/physical/body inputs
+remain exact external dependencies. No goal create/reset/complete/stop.
+
+Next independent queue: extend bounded Engine-X native coverage without counting
+unattempted cases, implement real sync/history and negative Engine RPC support,
+and construct canonical production endpoints/premise integration as original
+inputs permit. Do not repeat completed53serialized rejection classifications or
+accept a toy/conditional wrapper as the complete producer. This is a partial
+checkpoint handoff on the original goal, not completion of its work queue.
