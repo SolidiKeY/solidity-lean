@@ -1017,3 +1017,25 @@ final generation matches byte for byte. Full queue, constraints and retrieval
 are in [the metadata plan handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-plan-handoff.md).
 All four original checkpoints remain partial. No model statements, budgets,
 axioms, interfaces, exclusions or shims changed.
+
+
+## Metadata binding follow-ups and nine old observations
+
+At coordinator rebaseline `81512fd7298eb0257a9bcbde9913d10eb8229951`, the planner
+now resolves relative summaries against `--baseline` and parses the same bytes
+it hashes. Tests additionally mutate sources and summaries during planning;
+final checks reject them before output. All 83 tests pass in 25.864 seconds,
+and final plans are byte-identical. Finder and skeptic approved without findings.
+
+All nine original modules with zero kernel declarations were then actually
+inspected with the unchanged external old metadata observer under serial bounded
+Lean 4.24.0. All probes passed with zero selected declaration/class/instance/
+default entries. This is finite observation, not absence of generic attributes,
+public classification or semantic/new compatibility proof. Peak sampled RSS
+was 1952473088 bytes; minimum available estimate 15164993536 bytes. Sum of
+individual probe walls was 17.683652906 seconds, not a clean-build comparison.
+No new-toolchain run or unchanged performance STOP retry occurred. Full scope,
+remaining queue and evidence retrieval are in
+[the binding handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-binding-handoff.md).
+All original checkpoints remain partial; no model statements, budgets, axioms,
+interfaces, exclusions or shims changed.
