@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "status": "partial-preparation",
+  "artifacts": [
+    {
+      "path": "/workspace/scratch/v17-h44-bulk-20261106/roadmap-v17-validation.historical.md",
+      "bytes": 101382,
+      "sha256": "c057d40c5d491f38043f3682867ed784728380c824f7d22ce245a879afbac509",
+      "role": "historical text, not authenticated proof"
+    },
+    {
+      "path": "/workspace/scratch/v17-h44-toolchain-20261106/SHA256SUMS",
+      "bytes": 481,
+      "sha256": "03ce5cd25b83304b7a404dcad4a0bb4bb93cd7b8d8ee396d75166b10518e5183",
+      "role": "checkpoint checksum inventory; not a release gate"
+    },
+    {
+      "path": "/workspace/scratch/v17-h44-portability-20261106/SHA256SUMS",
+      "bytes": 710,
+      "sha256": "3bb83648f3793be0f7ff1b6dc7a88f656ec08105a18a4a2bc074bcf98c0846b4",
+      "role": "checkpoint checksum inventory; not a release gate"
+    }
+  ],
+  "releaseClosed": false,
+  "semanticPremisesDischarged": false,
+  "boundary": "Hashes establish retained byte identity only. Historical claims are not independently revalidated or promoted."
+}

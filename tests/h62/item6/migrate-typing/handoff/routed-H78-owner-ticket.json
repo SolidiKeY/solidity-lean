@@ -1,0 +1,90 @@
+{
+  "authority": "H78 human correction; supersedes Q-MS-API-01",
+  "implemented_shims": [],
+  "requester": "solidity-h62-6-20261106/migrate-root-gate",
+  "requests": [
+    {
+      "action": "Apply H78 to producer work: preserve old public generated shape through compatibility shim, not project-consumer rewrites. Supply existing exact old/new exported signatures with universes/binder order/kinds and owner shim plan/provenance. No new Lean run or scope expansion authorized by root request.",
+      "files": [
+        "Solidity/Source/Syntax.lean"
+      ],
+      "id": "H78-SOURCE-GENERATED-API",
+      "names": [
+        "Solidity.Source.Syn.noConfusion"
+      ],
+      "recipient": "solidity-h62-6-20261106/migrate-source via COORD"
+    },
+    {
+      "action": "Preserve all original public names/types; supply existing exact exports and proposed shims. Include individual names/types/visibility for64 reported changed debug declarations; no blanket generated exclusion.",
+      "files": [
+        "Solidity/Roadmap/Evm.lean"
+      ],
+      "id": "H78-ROADMAP-PUBLIC-API",
+      "names": [
+        "Solidity.Roadmap.Evm.Fork.toCtorIdx",
+        "Solidity.Roadmap.Evm.Precompile.toCtorIdx",
+        "Solidity.Roadmap.Evm.beBytes._proof_2"
+      ],
+      "recipient": "solidity-h62-6-20261106/migrate-roadmap and live Evm producer via COORD"
+    },
+    {
+      "action": "Apply H78 to the3 reported missing generated aliases and per-declaration signature/type changes. Supply existing names/signatures/proposals and preserve old public shape; unchanged axiom union or consumer edits do not establish compatibility. Root grants no owner agreement or new validation.",
+      "id": "H78-SORTCHECK-ALIASES",
+      "recipient": "solidity-h62-6-20261106/migrate-sortcheck via COORD",
+      "source_paths": [
+        "/workspace/migrate-sortcheck-handoff-695674e8/proposal-provenance.json",
+        "/workspace/migrate-sortcheck-handoff-695674e8/proposed-parser.patch",
+        "/workspace/migrate-sortcheck-handoff-695674e8/proposed-annotations-compat.fragment.lean"
+      ]
+    },
+    {
+      "action": "Consolidate existing old/new public API exports with visibility/signature provenance. Require every actual shim name/old_signature/new_signature/shim_signature in result reports. Four known names are not an exhaustive census. Holds unchanged; no new command or source permission implied.",
+      "families": [
+        "noConfusion",
+        "recOn",
+        "casesOn",
+        "match_ matchers",
+        "all other original public generated declarations"
+      ],
+      "id": "H78-COMPLETE-PUBLIC-INVENTORY",
+      "recipient": "COORD/all directory migration owners",
+      "source_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
+    },
+    {
+      "action": "Include all original public generated declarations in H78 coverage;121 named APIs/97 theorem audits alone do not establish completeness. Supply existing exact old/new exports and any required shim records. Root requests no Lean rerun or source application.",
+      "files": [
+        "Solidity/Hash/CollisionBound.lean",
+        "Solidity/Hash/Adaptive.lean"
+      ],
+      "id": "H78-HASH-GENERATED-COVERAGE",
+      "recipient": "solidity-h62-6-20261106/migrate-hash via COORD",
+      "source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860"
+    },
+    {
+      "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested.",
+      "expected_bytes": 17276,
+      "expected_sha256": "9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392",
+      "id": "DELIVER160530-1",
+      "recipient": "COORD",
+      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md"
+    },
+    {
+      "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested.",
+      "expected_bytes": 15154,
+      "expected_sha256": "dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c",
+      "id": "DELIVER160530-2",
+      "recipient": "COORD",
+      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md"
+    },
+    {
+      "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested.",
+      "expected_bytes": 75555,
+      "expected_sha256": "c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72",
+      "id": "DELIVER160530-3",
+      "recipient": "COORD",
+      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch"
+    }
+  ],
+  "requirements": "/workspace/solidity-lean-migrate-root-gate/scripts/h62/item6/migrate-root-gate/h78-public-api-requirements.json",
+  "scope": "Coordination and existing evidence only; performance/trust holds retained."
+}

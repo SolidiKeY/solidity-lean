@@ -289,3 +289,19 @@ Unknown fields, runtime/proof options and malformed values are rejected; no
 shell string is executed. The artifact is a compiler AST, not a binary or proof.
 This finite JSON contract differs from Dafny's arbitrary custom CLI string;
 full custom-build equivalence and native F6/macOS observations remain open.
+
+
+Offline CI without H44 data may run `node vscode/parity/discover.cjs --check`
+and `node vscode/parity/audit.cjs --check`. They explicitly report **digest-only**:
+the committed inventory descriptor and restore manifest are consistent, but full
+feature/source/evidence reconciliation did not run. With a full payload present,
+these commands perform their original full checks; corrupt or symbolic paths
+fail. `--check-source`, `inventory-check` and `parity-gate` always require the
+checksum-bound full inventory and remain failing when it is absent.
+
+Native hover and large-file recording tests explicitly skip only when their
+entire H44 input set is absent. Partial, malformed or linked recordings fail.
+Injected transport and assertion-rejection tests run without that data and do
+not certify compiler, proof or rendered correspondence. Restore both bulk
+bundles for the complete parity checks. A script-only CI pass does not establish
+parity, runtime equivalence or a kernel proof.
