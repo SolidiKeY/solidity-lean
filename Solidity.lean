@@ -3302,10 +3302,13 @@ import Solidity.Lowering.P8b.Merged
 import Solidity.Lowering.P8b.MergedControls
 import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Lowering.P9.AdmissionControls
+import Solidity.Lowering.P9.BodyRecognizerCompleteness
 import Solidity.Lowering.P9.BoundRecognizer
 import Solidity.Lowering.P9.BoundRecognizerControls
 import Solidity.Lowering.P9.CallControls
 import Solidity.Lowering.P9.CatalogControls
+import Solidity.Lowering.P9.CatalogueCompletenessControls
+import Solidity.Lowering.P9.CatalogueRecognizerCompleteness
 import Solidity.Lowering.P9.DeclarationIdentity
 import Solidity.Lowering.P9.DefaultRecognizerCompleteness
 import Solidity.Lowering.P9.DefaultRecognizerControls

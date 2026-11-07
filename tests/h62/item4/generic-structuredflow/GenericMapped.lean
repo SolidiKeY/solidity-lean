@@ -2,8 +2,10 @@ import Solidity.Backend.StructuredFlow.MappedCondition
 
 /-! Additive proposal: one intrinsic mapped Boolean-copy execution law and two
 structurally different typed fixtures. No source outcome is reclassified here.
-Compilation on pinned v4.35.0 is BLOCKED by the read-only Syntax.Raw dependency;
-this source is not a checked-proof claim until its recorded gate passes. -/
+Checked on the live pinned Lean 4.24.0 import closure via cache-aware lake lean.
+This protects distinct-donor versus same-slot copy execution without dropping
+untouched machine fields. It does not establish migrated 4.35 compatibility,
+original-control correspondence, refusal coverage or comparative timings. -/
 namespace Solidity.Backend.StructuredFlow.GenericMapped
 open Solidity.Evm Solidity.Lowering.V07 Solidity.Lowering.G19
 

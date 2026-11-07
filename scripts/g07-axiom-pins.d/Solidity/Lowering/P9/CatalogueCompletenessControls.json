@@ -1,0 +1,57 @@
+{
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.reference_ready": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.reference_accepted": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.reference_bound": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.Parent.body_accepted": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.Parent.from_certificate": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.Parent.checked_calls_from_certificate": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.Parent.equivalence": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.Parent.low_fuel_refused": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.Parent.low_fuel_not_refutation": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.stray_not_admitted": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueCompletenessControls.lean:Solidity.Source.Calls.Recognize.CompletenessControls.undeclared_refused_every_fuel": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}

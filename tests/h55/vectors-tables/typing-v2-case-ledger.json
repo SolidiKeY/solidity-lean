@@ -43,5 +43,5 @@
     "library try/Error support"
   ],
   "compatible_witness": "Mapping-free-nameable environments imply CompatibleAt; concrete empty-env Bool declaration lifted from actual v1 proof.",
-  "timing_status": "H16 STOP: 42.1964s to 46.0804s, +9.2046%; do not merge/claim acceptance."
+  "timing_status": "Newest user decision accepts recorded 42.1964s to 46.0804s (+9.2046%) for H128/H125 and releases the historical H16 stop. Any further noticeable slowdown stops and reports. Raw history retained."
 }
