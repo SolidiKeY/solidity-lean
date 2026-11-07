@@ -122,17 +122,20 @@ namespace Fx
 variable {t : FxTy}
 
 theorem ofInt?_val {v : Int} {a : Fx t} (h : ofInt? t v = some a) : a.1 = v := by
-  unfold ofInt? at h
-  split at h
-  · simp only [Option.some.injEq] at h
-    rw [← h]
-  · exact nomatch h
+  by_cases hv : t.inRange v = true
+  · have he : ofInt? t v = some (⟨v, hv⟩ : Fx t) := dif_pos hv
+    have ha : (⟨v, hv⟩ : Fx t) = a := Option.some.inj (he.symm.trans h)
+    exact (congrArg Subtype.val ha).symm
+  · have he : ofInt? t v = none := dif_neg hv
+    rw [he] at h
+    exact nomatch h
 
 theorem ofInt?_isSome (t : FxTy) (v : Int) : (ofInt? t v).isSome = t.inRange v := by
-  unfold ofInt?
   by_cases h : t.inRange v = true
-  · simp only [h, dite_true, Option.isSome_some]
-  · simp only [h, Bool.false_eq_true, dite_false, Option.isSome_none]
+  · rw [show ofInt? t v = some (⟨v, h⟩ : Fx t) from dif_pos h]
+    exact h.symm
+  · rw [show ofInt? t v = none from dif_neg h]
+    exact (Bool.eq_false_iff.mpr h).symm
 
 /-! ### Words -/
 
@@ -208,11 +211,12 @@ theorem decodeV2_isSome_iff (w : Fin (2 ^ 256)) :
       (if t.signed ∧ 2 ^ 255 ≤ (w.val : Int) then (w.val : Int) - 2 ^ 256 else (w.val : Int)) :=
     ofInt?_isSome t _
   rw [hdec]
-  simp only [FxTy.inRange, FxTy.lo, FxTy.hi, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [FxTy.lo, FxTy.hi]
   cases hs : t.signed
-  · simp only [Bool.false_eq_true, false_and, if_false]
+  · simp only [Bool.false_eq_true, false_and, ite_false]
     omega
-  · simp only [true_and, if_true]
+  · simp only [true_and, ite_true]
     split <;> omega
 
 /-! ### ABI coder v1 -/
@@ -277,7 +281,7 @@ theorem abiDecodeV2_abiEncode (a : Fx t) : abiDecodeV2 t (abiEncode a) = some a 
     exact Nat.mod_eq_of_lt (encode a).isLt
   have hw : (⟨beNat (abiEncode a) % 2 ^ 256, Nat.mod_lt _ (Nat.two_pow_pos 256)⟩ :
       Fin (2 ^ 256)) = encode a := Fin.ext hn
-  simp only [abiDecodeV2, hl, if_true, hw]
+  simp only [abiDecodeV2, hl, ite_true, hw]
   exact decodeV2_encode a
 
 /-- Only the canonical bytes of a value decode to it: every other 32-byte
@@ -286,14 +290,14 @@ theorem abiEncode_of_abiDecodeV2 {bs : List UInt8} {a : Fx t}
     (h : abiDecodeV2 t bs = some a) : abiEncode a = bs := by
   unfold abiDecodeV2 at h
   by_cases hl : bs.length = 32
-  · simp only [hl, if_true] at h
+  · simp only [hl, ite_true] at h
     have he : encode a = ⟨beNat bs % 2 ^ 256, Nat.mod_lt _ (Nat.two_pow_pos 256)⟩ :=
       encode_of_decodeV2 h
     have hb : beBytes bs.length (beNat bs) = bs := beBytes_beNat bs
     simp only [abiEncode, he, beNat_mod_of_length hl]
     rw [hl] at hb
     exact hb
-  · simp only [hl, if_false] at h
+  · simp only [hl, ite_false] at h
     exact nomatch h
 
 /-- `abi.encodePacked(a)`: the `M/8`-byte two's complement, unpadded. -/
@@ -321,7 +325,7 @@ theorem ofPackedBytes_encodePacked (a : Fx t) : ofPackedBytes t (encodePacked a)
       omega
     rw [Nat.mod_eq_of_lt hlt]
     exact Int.toNat_of_nonneg h0
-  simp only [ofPackedBytes, hl, if_true, hn, ofBits_toBits]
+  simp only [ofPackedBytes, hl, ite_true, hn, ofBits_toBits]
 
 /-! ### Canonical type names -/
 
