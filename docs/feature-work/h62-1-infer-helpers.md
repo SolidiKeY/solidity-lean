@@ -362,3 +362,26 @@ A first test attempt in the read-only sandbox failed because no writable
 scratch directory was available; that attempt is not counted as a pass.
 Owner agreement, independent reviews of any new changes, full affected gates,
 axiom comparison, acceptance and timing remain outstanding.
+
+## Proposal live-anchor control
+
+The lane fast-forwarded to the coordinator-reported master
+`cc1ea1c9c99522bff459dcc57e41339e1f347243`, which contains the previous lane
+head. The relevant inferencer, Source/Ctor, language and hash files did not
+change from the last diagnostic tree, so the earlier failed 4.35 source
+inferencer check was not rerun unchanged.
+
+An author review found that the proposal generator counted exact anchors even
+when their only occurrence was inside a block comment. It now requires each
+import and declaration anchor to be live according to the existing limited
+Lean text mask before emitting any patch. Negative controls comment out each
+of the six helper definitions and the import; all are rejected without output.
+The generated patch remains byte-identical on the current tree and passes
+`git apply --check`. This is a lexical safeguard, not a Lean parser, semantic
+proof, independent review, or permission to apply the proposal. Unsupported
+syntax and ambiguous anchors continue to fail the generator.
+
+The coordinator reported touched-gate success and finder/skeptic reviews for
+the integrated prior head. Independent review of this new control remains
+pending. H55 agreement, Source/Infer 4.35 repair, migration gates, full
+compatibility checks, axiom comparison and before/after timings remain open.
