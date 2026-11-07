@@ -1,0 +1,10 @@
+{
+  "guardedRegression": "Address marker/identity/error-order driver stays standalone;no shared generatedroot edits.",
+  "modules": [
+    {
+      "path": "tests/directruntime-20261104/native-browser/address/MarkerIdentityControls.lean",
+      "role": "Per-file guards and3exactdecoder signatures/axiom inventories",
+      "centralAction": "Local proposal only;no generated productionroot addition"
+    }
+  ]
+}

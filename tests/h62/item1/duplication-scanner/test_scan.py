@@ -105,6 +105,42 @@ class ScannerControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unterminated attribute"):
             scanner.scan(root / "E.lean", root, b"@[foo [bar]\ndef hidden := 0\n")
 
+    def test_lean_declaration_modifiers_and_candidate_distinctions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = ("def before : Nat := 0\n"
+                      "public theorem first : True := by trivial\n"
+                      "meta def second : Nat := 0\n"
+                      "nonrec def third : Nat := 0\n"
+                      "@[foo,\n bar] public protected meta unsafe nonrec def combined : Nat := 0\n"
+                      "private def hidden : Nat := 0\n"
+                      "def visible : Nat := 0\n")
+            path = root / "A.lean"
+            path.write_text(source)
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            rows = {r["name"]: r for r in data["inventory"]}
+            self.assertEqual(set(rows), {"before", "first", "second", "third", "combined", "hidden", "visible"})
+            self.assertEqual(rows["first"]["qualifiers"], ["public"])
+            self.assertEqual(rows["second"]["qualifiers"], ["meta"])
+            self.assertEqual(rows["third"]["qualifiers"], ["nonrec"])
+            self.assertEqual(rows["combined"]["qualifiers"], ["meta", "nonrec", "protected", "public", "unsafe"])
+            self.assertEqual(rows["combined"]["line"], 6)
+            body = next(g for g in data["body_candidates"] if {"second", "third", "hidden", "visible"}.issubset({m["name"] for m in g["members"]}))
+            self.assertIn("different-or-unsupported-statements", body["reject_reasons"])
+            self.assertIn("intrinsic-signature-unresolved", body["reject_reasons"])
+            self.assertFalse(any({"second", "third"}.issubset({m["name"] for m in g["members"]}) for g in data["candidates"]))
+            parsed = scanner.scan(path, root)
+            self.assertEqual(parsed[0]["body"], ["0"])
+            split = ("def before : Nat := 0\npublic\n  def one : Nat := 0\n"
+                     "@[foo]\nprivate\n  nonrec\n  def two : Nat := 0\n")
+            split_rows = scanner.scan(path, root, split.encode())
+            self.assertEqual([r["name"] for r in split_rows], ["before", "one", "two"])
+            self.assertEqual(split_rows[1]["qualifiers"], ["public"])
+            self.assertEqual(split_rows[2]["qualifiers"], ["nonrec", "private"])
+            self.assertEqual(split_rows[1]["line"], 3)
+            self.assertEqual(split_rows[2]["line"], 7)
+            self.assertEqual(split_rows[0]["body"], ["0"])
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))
@@ -350,6 +386,45 @@ class ScannerControls(unittest.TestCase):
             b = scanner.scan(root / "B.lean", root, changed.encode())[1]
             self.assertNotEqual(a["context_hash"], b["context_hash"], keyword)
 
+    def test_set_option_context_and_body_boundaries(self):
+        root = Path("/virtual")
+        template = ("def marker : Nat := 0\nset_option autoImplicit {value}\n"
+                    "theorem same (x : Nat) : x = x := by rfl\n")
+        def rows(value):
+            return scanner.scan(root / "A.lean", root, template.format(value=value).encode())
+        a, b = rows("true"), rows("false")
+        self.assertEqual(a[0]["body"], ["0"])
+        self.assertNotEqual(a[1]["context_hash"], b[1]["context_hash"])
+        scoped = b"set_option autoImplicit false in\ntheorem next : True := by trivial\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, scoped)[0]["name"], "next")
+        nested = b"def outer : Nat := by\n  set_option autoImplicit false in\n  exact 0\ndef next : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "C.lean", root, nested)[0]["body_reject_reason"], "indented-command-boundary")
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "D.lean", root, b"set_option autoImplicit false in theorem hidden : True := by trivial\n")
+        multiline = b"set_option autoImplicit\n  false in theorem hidden : True := by trivial\ndef visible : Nat := 0\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "F.lean", root, multiline)
+        modified = b"set_option autoImplicit\n  false in @[foo [bar]] public theorem hidden : True := by trivial\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "H.lean", root, modified)
+        split_modifier = b"set_option autoImplicit false in public\n  theorem hidden : True := by trivial\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "J.lean", root, split_modifier)
+        split_attribute = b"set_option autoImplicit false in @[foo]\n  private def hidden : Nat := 0\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "K.lean", root, split_attribute)
+        other = b"set_option autoImplicit false\n#guard_msgs in #eval 1\ndef next : Nat := 0\n"
+        self.assertEqual(scanner.scan(root / "I.lean", root, other)[0]["name"], "next")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(multiline)
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+        clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
+        self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
+
     def test_equal_context_does_not_prove_local_definition_equivalence(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -502,7 +577,78 @@ class ScannerControls(unittest.TestCase):
                     actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
                     expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
                     self.assertEqual(actual,expected)
-                    self.assertEqual(errors,[])
+                    if pattern == "**/*.lean":
+                        self.assertEqual([e["path"] for e in errors], [str(root / "alias")])
+                        self.assertIn("skips directory symlink", errors[0]["reason"])
+                    else:
+                        self.assertEqual(errors,[])
+
+    def test_recursive_directory_alias_reports_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "real").mkdir()
+            (root / "real" / "A.lean").write_text("def a : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"]
+            baseline = root / "prior.json"
+            baseline.write_bytes(subprocess.check_output(cmd))
+            (root / "alias").symlink_to("real", target_is_directory=True)
+            result = subprocess.run(cmd + pinned(baseline), capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(any("skips directory symlink" in e["reason"] for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            self.assertIsNone(report["incremental"]["candidate_groups"])
+            explicit = subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"])
+            self.assertEqual(json.loads(explicit)["inputs"][0]["path"], "alias/A.lean")
+            (root / "alias").unlink()
+            (root / "dangling").symlink_to("missing", target_is_directory=True)
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(json.loads(result.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
+    def test_finite_dangling_directory_alias_is_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "good").mkdir()
+            (root / "good" / "Target.lean").write_text("def good : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*/Target.lean"]
+            baseline = root / "prior.json"
+            baseline.write_bytes(subprocess.check_output(cmd))
+            (root / "dangling").symlink_to("missing", target_is_directory=True)
+            result = subprocess.run(cmd + pinned(baseline), capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(any(Path(e["path"]).name == "dangling" for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            explicit = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "good/Target.lean", "dangling/*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(explicit.returncode, 0)
+            self.assertTrue(any(Path(e["path"]).name == "dangling" for e in json.loads(explicit.stdout)["errors"]))
+
+    def test_external_directory_alias_is_not_enumerated(self):
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside:
+            root, foreign = Path(directory), Path(outside)
+            (root / "good").mkdir()
+            (root / "good" / "Target.lean").write_text("def good : Nat := 0\n")
+            (foreign / "Target.lean").write_text("def foreign : Nat := 0\n")
+            (root / "external").symlink_to(foreign, target_is_directory=True)
+            for pattern in ("external/*.lean", "*/Target.lean"):
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), pattern], capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                report = json.loads(result.stdout)
+                self.assertTrue(any("resolves outside root" in e["reason"] for e in report["errors"]))
+                self.assertFalse(any(r["path"].startswith("external/") for r in report["inputs"]))
+                self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            original = scanner.os.scandir
+            def guarded(path):
+                if Path(path) == root / "external":
+                    raise AssertionError("outside alias must not be enumerated")
+                return original(path)
+            errors = []
+            with mock.patch.object(scanner.os, "scandir", guarded):
+                list(scanner.selected_paths(root, "external/*.lean", errors))
+            self.assertTrue(any("resolves outside root" in e["reason"] for e in errors))
 
     def test_nonrecursive_selection_does_not_read_unselected_subtree(self):
         with tempfile.TemporaryDirectory() as directory:
