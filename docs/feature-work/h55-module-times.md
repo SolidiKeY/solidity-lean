@@ -1387,3 +1387,20 @@ does not establish the assigned 300-second gate. It takes a writer lock and
 may create Docker and evidence artifacts; no run was attempted here.
 Independent read-only finder and skeptic reviews identified that deadline
 distinction. No Lean server, build, current proof or H56 measurement follows.
+
+## Generic P10 package candidates
+
+`generic_p10_controls.py` records five source-hashed standalone candidates
+in a separate Lean 4.24 Lake package depending on Bridge. Its root imports
+fixture, controls, correspondence and local axiom pins. BYTE execution has
+explicit observation and resource premises; proposition correspondence is
+not proof identity; local pins are not the central complete axiom audit.
+Subsets are accepted and current inputs, invocation and results are unresolved.
+
+The package acceptance driver requires Lean MCP and writes off-git evidence;
+generators may write candidate sources. Historical diagnostic transport exit
+alone does not prove a guard passed, and the production Bridge gate remains
+pending. An owner migration patch is not itself accepted migration. Independent
+read-only finder and skeptic reviewed these distinctions without Lean, a
+server or a build. No current proof, production timing or H56 acceptance is
+inferred.
