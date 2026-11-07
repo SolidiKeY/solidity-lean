@@ -56,3 +56,46 @@ The H55-H58 unaffected validation checkpoint is recorded in tests/primitive-pack
 Published e2c8268ec was initially rebased from 462422d4. The later adoption.json merge 9442e5b6d incorporated 3883c64e and was preserved; all 47 proof sources remained unchanged. Machine/Signed gained additive SAR APIs; existing PUSH/representation definitions are unchanged. Both read-only reviews approved compatibility. Tracked adoption-e2c execution records bind a 13.077s per-file audit and 0.557s matching-cache build (not a clean rebuild):45owned declarations plus1imported continuity equation, each with actual signature/owner/axioms. Old generated helper _proof_1_3 renamed _proof_1_2 with every non-name field equal; sword.eq_1 now belongs to Evm.Signed and remains explicitly checked. Historical46entry inventory is retained by immutable commit pin; current46aggregate is not described as46owned. Numeric991+Constants45owned+1continuity =1037audited entries.34coordinator map rows/final runtime gates remain open. No source theorem, premise, exclusion or budget change. One MCP attempt stopped after setup-file omitted explicit-j1; permitted per-file gate replaced it, failure retained.
 
 The three current audit artifacts are tracked under tests/primitive-packets-1105/Constants/adoption-e2c with SHA256SUMS. Constants/check.py reads these committed paths without SOL_NL_VALIDATION_INPUTS. Historical helper rename is checked field by field; altered dependency_sources, proof_sources and command records are refused for both audit and build. Bulk VM-only packets remain optional for separate archived-evidence scripts, not inputs to this current-audit check.
+
+## H57 rational-conversion versioned transport
+
+The requester at 8daa30efa9 reported the strict frozen-source failure against
+c6f550e281a7e5affa9a99bc2cdaed556dec00e4. The original Constants Source file
+has SHA-256 6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de;
+current master has 33401c424dad51070bd5adcbec733ae409a98b27984d6180422cc4219d592802.
+Its only source-text difference is the `E.mapFree` argument in the conversion
+refusal statement. The production file, original guards and inventories remain
+untouched. The original strict inventory remains failed.
+
+`tests/primitive-packets-1105/Constants/H57ConversionTransport.lean` supplies
+an additive versioned pair for this row. `implicitV0` copies the complete
+frozen implicit-conversion definition with only its declaration name changed.
+The source checker authenticates the frozen Git bytes, unchanged datatype and
+rational dependencies, environment/declaration data, and the constructor-data
+prefix. The original typed kernel signature also checks against V0 after only
+renaming its conversion function. V1 has the exact current production header.
+
+`rational_integer_agrees` is universal over independent old/new inheritance
+functions, every mapping-freedom function, every rational and every legal
+integer type. No environment or mapping-freedom premise is added. Both refusal
+versions retain the original outside-range hypothesis. Joint refusal witnesses
+exist for every environment/type; an inhabited in-range certificate prevents
+an always-false adapter. A separate struct-copy countercontrol proves that
+old/new conversions do differ elsewhere. It is not a contradiction of the
+rational refusal theorem or evidence for global conversion equivalence.
+
+The default-budget kernel check passes in 1.559 s. Fresh Lean 4.24.0, Lake
+5.0.0-src+797c613, KeySort, frozen-type binding and the 12-declaration inventory
+check pass together in 8.068 s. The old/new refusal pair uses only propext;
+other controls stay within the existing three standard axioms. The first
+struct-control attempt timed out while unfolding whole conversion definitions;
+explicit constructor-branch reduction and reflexivity fixed the proof without
+changing the statement or budget. Three source-fidelity mutations are rejected.
+Read-only finder and skeptic accept the limited versioned design and original
+domain; neither used Lean/server. Raw outcomes remain off Git.
+
+This is an owner-reviewable H57 transport for the Constants row, not a baseline
+re-pin or a whole-assignment acceptance result. The Comparisons/UnsignedCast
+state-cursor rows remain with their owners. Whole-library validation remains
+blocked by the recorded Source/Horizon headroom stop; no unchanged broad rerun
+or RUNTIME_GATE_PASS is claimed.

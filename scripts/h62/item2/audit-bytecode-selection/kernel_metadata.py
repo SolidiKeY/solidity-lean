@@ -462,3 +462,46 @@ def source_snapshot_bindings(mapping, sources):
         result.append({"module":module,"source_sha256":hashlib.sha256(raw).hexdigest(),
             "source_bytes":len(raw),"candidates":sorted(bound,key=lambda c:c["candidate"]["byte_start"])})
     return {"modules":result,"boundary":"Supplied lexical snapshot byte binding only; snapshots require caller authentication, no kernel correspondence or witnesses"}
+
+
+def source_obligation_inventory(mapping, sources, rows, inspected_mapping):
+    """Guard regression: an uninspected statement must not look hypothesis-free.
+
+    Join existing byte bindings and positional candidates to observed raw types.
+    Uninspected/unmatched/ambiguous sources and supplemental kernel records stay
+    explicit. Binder counts classify metadata only, never joint feasibility.
+    """
+    bound = source_snapshot_bindings(mapping, sources)
+    if not isinstance(inspected_mapping, dict) or not set(inspected_mapping) <= set(sources):
+        raise ValueError("inspection source scope differs")
+    source_snapshot_bindings(inspected_mapping, {m:sources[m] for m in inspected_mapping})
+    graph = source_candidate_graph(rows, inspected_mapping)
+    if not {r["module"] for r in rows} <= set(inspected_mapping):
+        raise ValueError("kernel record outside inspected source scope")
+    by_name = {r["name"]:r for r in rows}
+    candidates = {r["id"]:r for r in graph["sources"]}
+    obligations = []
+    for module in bound["modules"]:
+        for entry in module["candidates"]:
+            source = entry["candidate"]
+            identity = module["module"] + ":" + str(source["byte_start"]) + ":" + str(source["byte_end"])
+            candidate = candidates.get(identity)
+            if module["module"] in inspected_mapping and candidate is None:
+                raise ValueError("inspected source candidate missing")
+            types = []
+            for name in candidate["kernel_names"] if candidate is not None else []:
+                row = by_name[name]
+                types.append({"observed_type":observed_type(row),
+                    "raw_binder_count":len(row["binders"]),
+                    "observed_proof_binder_count":sum(b["proof_binder"] for b in row["binders"])})
+            obligations.append({"id":identity,"module":module["module"],
+                "source_sha256":module["source_sha256"],"source_binding":entry,
+                "inspection_status":"module_uninspected" if candidate is None else candidate["accounting_status"],
+                "candidate_types":types,
+                "hypothesis_classification":"unclassified; observed raw binders do not establish global/per-input feasibility",
+                "statement_correspondence_established":False,"joint_witness_established":False})
+    if len({o["id"] for o in obligations}) != len(obligations):
+        raise ValueError("duplicate obligation identity")
+    return {"obligations":sorted(obligations,key=lambda o:o["id"]),
+        "kernel_records":graph["records"],
+        "boundary":"Frozen lexical obligations with supplied type candidates only; kernel entries are graph summaries/hashes backed by caller-retained raw metadata; no statement correspondence, inherited instantiation or joint witnesses"}
