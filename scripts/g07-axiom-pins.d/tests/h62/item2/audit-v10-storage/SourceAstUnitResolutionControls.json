@@ -1,0 +1,7 @@
+{
+ "tests/h62/item2/audit-v10-storage/SourceAstUnitResolutionControls.lean:H62.StorageAudit.SourceAstUnitControls.cycle_resolution_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
