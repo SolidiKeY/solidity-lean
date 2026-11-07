@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/P8/DeclarationGraphConstraints.lean:Solidity.Lowering.P8.DeclarationGraphConstraints.accepted_mapping_free": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphConstraints.lean:Solidity.Lowering.P8.DeclarationGraphConstraints.mapping_program_origin_impossible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphConstraints.lean:Solidity.Lowering.P8.DeclarationGraphConstraints.program_mapping_free": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

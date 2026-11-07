@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.function_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.mapping_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.optional_name_exact": [],
+ "Solidity/Lowering/P8/SourceAstTypeCorrespondence.lean:Solidity.Lowering.P8.SourceAstTypeCorrespondence.optional_name_missing": []
+}

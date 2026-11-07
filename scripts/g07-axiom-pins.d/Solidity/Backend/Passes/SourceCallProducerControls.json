@@ -1,5 +1,10 @@
 {
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.produced_raw": [
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.call_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.frame_restored": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -9,12 +14,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.call_reached": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.frame_restored": [
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.produced_raw": [
   "Classical.choice",
   "Quot.sound",
   "propext"
