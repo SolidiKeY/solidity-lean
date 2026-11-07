@@ -77,16 +77,18 @@ class JoinControls(unittest.TestCase):
         self.bindings['declarations'][0]['declaration']['binderCount']=1
         self.bindings['declarations'][0]['declaration']['propositionBinders']=[False]
         with self.assertRaisesRegex(ValueError,'wrong checked'): self.join()
+    @unittest.skipUnless(ROOT.is_relative_to('/workspace'), 'production evidence-path guard requires workspace checkout')
     def test_mutated_retained_record_after_replay_is_rejected(self):
-        with tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+        with tempfile.TemporaryDirectory(dir=ROOT.parent) as tmp:
             path=Path(tmp)/'record.json'; path.write_text(json.dumps({'before':self.current,'after':self.current}))
             manifest={'schema':1,'snapshot':self.current,'records':[{'path':str(path),'sha256':j.e.digest(path.read_bytes())}]}
             def replay(*args):
                 path.write_text('corrupt'); return {'exit':0,'result':{'rows':[self.row]}}
             with patch.object(j.k,'validate_record',return_value={'module':'Solidity.KeySort'}),patch.object(j.k,'collect',side_effect=replay),patch.object(j.e,'snapshot',return_value=self.current),patch.object(j.k,'match_replay'),self.assertRaisesRegex(ValueError,'changed during replay'):
                 j.live_rows(manifest,self.current,Path(tmp))
+    @unittest.skipUnless(ROOT.is_relative_to('/workspace'), 'production evidence-path guard requires workspace checkout')
     def test_loader_requires_validation_and_fresh_replay(self):
-        with tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+        with tempfile.TemporaryDirectory(dir=ROOT.parent) as tmp:
             out=Path(tmp); record=out/'record.json'; record.write_text(json.dumps({'before':self.current,'after':self.current}))
             manifest={'schema':1,'snapshot':self.current,'records':[{'path':str(record),'sha256':j.e.digest(record.read_bytes())}]}
             req={'module':'Solidity.KeySort'}; replay={'exit':0,'result':{'rows':[self.row]}}
@@ -95,8 +97,9 @@ class JoinControls(unittest.TestCase):
                 self.assertEqual(rows,{self.row['name']:self.row});self.assertEqual(validation.call_count,3);collect.assert_called_once();match.assert_called_once();self.assertEqual(len(receipts),1)
             record.write_text('corrupt')
             with self.assertRaisesRegex(ValueError,'corrupt retained'): j.live_rows(manifest,self.current,out)
+    @unittest.skipUnless(ROOT.is_relative_to('/workspace'), 'production evidence-path guard requires workspace checkout')
     def test_invalid_kernel_record_never_reaches_join(self):
-        with tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+        with tempfile.TemporaryDirectory(dir=ROOT.parent) as tmp:
             path=Path(tmp)/'record.json'; path.write_text(json.dumps({'before':self.current,'after':self.current}))
             manifest={'schema':1,'snapshot':self.current,'records':[{'path':str(path),'sha256':j.e.digest(path.read_bytes())}]}
             for reason in ('stale revision','wrong module','corrupt attachment','forged type','changed tool/import inputs'):

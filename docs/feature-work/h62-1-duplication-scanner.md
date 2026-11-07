@@ -424,3 +424,75 @@ are outside Git under
 ordered this worker retired before the after run. The successor must check the
 fix, complete negative controls and reviews, measure the matched after run
 and stop if slowdown exceeds 10%; no passing performance gate is claimed.
+
+## Post-merge identifier controls
+
+After the published master was merged, a skeptic found that the earlier
+continuation fix still split Lean letterlike and subscript characters, so
+`(x : Nat) : x℘ = x` and the corresponding `y℘` expression could normalize
+together. The scanner now uses character classes from the pinned Lean 4.24
+`isIdFirst` and `isIdRest` rules for identifiers, binders, and literal
+predecessors. Controls cover free-name differences, alpha-renamed binders,
+subscripts, astral letterlike characters, and operators adjacent to character
+literals. The 33-test Python suite passed. A first overbroad intermediate
+range incorrectly included operators; independent finder and skeptic reviews
+found it and the final controls cover their counterexamples. One reviewer
+compared the final continuation class with a transcription of Lean's predicate
+through U+1D59F. These controls do not prove full lexer or parser equivalence.
+
+On master `20e492ee99a3fa8679aa526de0b6e731d85e4134`, the matched full-tree
+pair for the earlier punctuation change took 96.098 seconds before and 96.333
+seconds after (+0.24%). Using that same-tree after run as the before of the
+Unicode correction, the corrected scanner took 97.220 seconds (+0.92%).
+All three runs selected 6,932 Lean files, recognized 118,563 declarations and
+reported no file errors or unmatched patterns. This is lexical discovery, not
+proof of complete declaration accounting or intrinsic-signature equivalence.
+The unfinished overbroad intermediate run was interrupted and is not a gate.
+Bulk outputs, commands and timings remain outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`. Selected
+symlink aliases and broken links remain a separately identified open defect.
+
+The post-merge repository documentation-path gate exited 1 on five missing
+references in `h62-6-migrate-theory.md`, the audit-abi-world census test,
+`packet-panic/H71-CANDIDATE.md` and generic-structuredflow registration. None
+is in this scanner document. Its log is `postmerge-timing/doc-paths.log` in
+the evidence directory; the repository-wide gate remains open.
+
+## Selected symlink and nonregular input controls
+
+Selected `.lean` paths are now kept as logical paths. A selected symlink,
+symlinked parent, nonregular file or path-escape pattern makes the scan
+incomplete instead of silently collapsing or dropping that path. For
+recursive patterns, a non-following walk checks the literal prefix and
+reports symlinks and walk errors, including dangling links. This is a
+conservative refusal: a symlink under the prefix may be unrelated to the
+actual glob. Incremental added/removed/changed lists remain null on such
+errors. Nonrecursive wildcard traversal can still omit an inaccessible
+subdirectory without a reported error; checks and reads are not race-proof
+against concurrent replacement. Full selection completeness is not claimed.
+
+Finder and skeptic reviews identified the recursive directory, dangling link,
+nonregular-file and parent escape cases; controls cover them. The final Python
+suite passed 35 tests. A same-tree bounded scan took 97.220 seconds before
+and 97.746 seconds after (+0.54%), with 6,932 inputs and no scan errors. The
+complete before/after outputs agreed after normalizing the scanner hash.
+Commands, timing and differential logs are outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`. The earlier
+repository documentation-path gate remains failed on the five unrelated
+published-tree references recorded above.
+
+### Post-merge deterministic replay
+
+A repeat of the committed selector against the same caller-pinned prior report
+and current tree exited 0 in 105.414 seconds. It was byte-identical to the
+97.746-second report, SHA256
+`fb7e40a93e687b7a0865908d85cde9bf1c490be53430dc098ada7760806bdf9b`.
+Both selected 6,932 files and recognized 118,563 declarations, with no errors
+or unmatched patterns; all recognized owners remain unknown. The input delta
+versus the older caller-pinned report is 271 added, 22 changed and none
+removed. The scanner identity also changed, so candidate-group deltas include
+possible normalization and selection changes and cannot be attributed solely
+to source edits. The prior pin identifies bytes, not an authenticated scan.
+Independent finder and skeptic reviewed the evidence without Lean; these two
+runs establish byte repeatability only. Full outputs and timing records are in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`.
