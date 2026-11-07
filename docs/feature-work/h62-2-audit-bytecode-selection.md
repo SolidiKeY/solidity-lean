@@ -2602,3 +2602,36 @@ and archived privately under H145. Only exited lane-owned containers and
 regenerable import-view symlinks were removed; proof products remain intact.
 Original global census, Source/runtime/Bridge, physical, gas/fork, full closure
 and performance obligations remain open.
+
+
+### Frozen control source and binder accounting
+
+The 17-record InterfaceV2Controls inspection is now joined to its exact frozen
+source snapshot using the existing `source_obligation_inventory`,
+`binder_metadata` and `parent_metadata` helpers. All seven lexical theorem
+candidates have unique name/Unicode-position candidate edges. These remain
+candidate edges: no source authenticity, statement correspondence, ownership or
+additional witness credit follows. Ten records have declaration ranges; seven
+lack ranges, and ten kernel records have no lexical theorem candidate (including
+four constants). No auxiliary parent is guessed from a dotted name.
+
+The supplied records expose 34 ordered raw binders with six proof-binder flags.
+Of the 34 head observations, 24 name constants absent from this single-module
+packet and ten have no constant head. All global/per-input premise roles remain
+unclassified. In particular, a data-valued certificate can carry obligations;
+zero proof-binder flags do not show a hypothesis-free or inhabited domain. No
+private flags or structure-parent roots occur in this packet. That says nothing
+about private declarations or inherited obligations in the remaining census.
+
+The static reproduction first rejected source candidates without the required
+explicit edge metadata; supplying the independently recomputed position edges
+then reproduced byte-identical accounting. It pins the preserved parent checksum
+list, validates its manifest and three input file hashes and the frozen Git
+source hash, and records the current helper hash. It starts no
+Lean process, changes no frozen bytes, retries no stopped proof, and supplies no
+new gate, domain or full-census acceptance. Independent read-only finder and
+skeptic reviewed this accounting boundary. Original 703-source closure,
+190-core/37-Bridge inventory, joint witnesses, Source/runtime, G01 and physical
+obligations remain open. Evidence and reproduction are off branch under
+/workspace/parallel-20261103/executable-bytecode/control-source-accounting/ and
+archived privately under H145.
