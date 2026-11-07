@@ -52,5 +52,27 @@
     "evalLocal_readable": "For every fuel and runtime plan, outer admission equals selected decoder admission.",
     "evalLocal_compatible": "Conditional on readAt returning the selected clean backup, the complete Source result/state equals actual Source.evalE on original clean/world, and the original raw frame is retained.",
     "limitation": "No unconditional materialized-clean-frame decoding or general expression/statement agreement is asserted."
+  },
+  "pipeline_agreement": {
+    "api": [
+      "readValue_pipelines",
+      "readLocal_pipelines",
+      "readback_pipelines",
+      "readbackFrom_pipelines",
+      "readAt_pipelines",
+      "evalLocal_pipelines"
+    ],
+    "context_cases": [
+      "nil",
+      "cons; induction for readback and readbackFrom"
+    ],
+    "decode_cases": "Full optional equality follows existing cleanWord_pipelines; no refusal or backup fallback is removed.",
+    "source_cases": [
+      "fuel zero: actual Source timeout after successful selected decode",
+      "fuel successor: actual Source local lookup after successful selected decode"
+    ],
+    "global_change": "Only G.pipeline changes; all other global fields, frame, fuel, state, index and runtime plan are identical.",
+    "reuse": "RawFrame.Logic.frame_readback_pipelines has unchanged signature and reuses readbackFrom_pipelines.",
+    "limitation": "No equality of arbitrary Source expressions, unchecked arithmetic, statements or raw-copy propagation."
   }
 }

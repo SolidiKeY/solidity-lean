@@ -331,4 +331,65 @@ some (((Solidity.Source.evalE G F fuel (.local index) plan).run
     (state.clean.set index (state.clean.get index), state.world)), state) = _
   rw [Solidity.Yul.DirtyReadback.locals_set_get]
 
+/-- Both pinned pipelines agree on this complete optional readback, including refusal. No Source execution agreement is inferred. -/
+theorem readValue_pipelines :
+ ∀ (env : Solidity.Source.Env) (ty : Solidity.Source.STy) (value : Solidity.Yul.LocalValue env ty),
+Solidity.Yul.DirtyReadback.readValue .legacy value = Solidity.Yul.DirtyReadback.readValue .viaIR value := by
+  intros
+  simp only [Solidity.Yul.DirtyReadback.readValue, Solidity.Yul.DirtyReadback.cleanWord_pipelines]
+
+/-- Both pinned pipelines agree on this complete optional readback, including refusal. No Source execution agreement is inferred. -/
+theorem readLocal_pipelines :
+ ∀ (env : Solidity.Source.Env) (ty : Solidity.Source.STy) (value : Solidity.Yul.LocalValue env ty)
+(backup : Solidity.Source.Val env.layout ty),
+Solidity.Yul.DirtyReadback.readLocal .legacy value backup = Solidity.Yul.DirtyReadback.readLocal .viaIR value backup := by
+  intros
+  simp only [Solidity.Yul.DirtyReadback.readLocal, Solidity.Yul.DirtyReadback.readValue_pipelines]
+
+/-- Both pinned pipelines agree on this complete optional readback, including refusal. No Source execution agreement is inferred. -/
+theorem readback_pipelines :
+ ∀ (env : Solidity.Source.Env) (types : Solidity.Source.RCtx) (values : Solidity.Yul.LocalValues env types),
+Solidity.Yul.DirtyReadback.readback .legacy types values = Solidity.Yul.DirtyReadback.readback .viaIR types values := by
+  intro env types
+  induction types with
+  | nil => intro values; rfl
+  | cons ty types ih =>
+    intro values
+    simp only [Solidity.Yul.DirtyReadback.readback, Solidity.Yul.DirtyReadback.readValue_pipelines, ih]
+
+/-- Both pinned pipelines agree on this complete optional readback, including refusal. No Source execution agreement is inferred. -/
+theorem readbackFrom_pipelines :
+ ∀ (env : Solidity.Source.Env) (types : Solidity.Source.RCtx)
+(backup : Solidity.Source.Locals env.layout types) (values : Solidity.Yul.LocalValues env types),
+Solidity.Yul.DirtyReadback.readbackFrom .legacy types values backup =
+Solidity.Yul.DirtyReadback.readbackFrom .viaIR types values backup := by
+  intro env types backup
+  induction backup with
+  | nil => intro values; rfl
+  | cons value rest ih =>
+    intro values
+    simp only [Solidity.Yul.DirtyReadback.readbackFrom, Solidity.Yul.DirtyReadback.readLocal_pipelines, ih]
+
+/-- Both pinned pipelines agree on this complete optional readback, including refusal. No Source execution agreement is inferred. -/
+theorem readAt_pipelines :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+(state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty),
+Solidity.Yul.DirtyReadback.readAt .legacy state index = Solidity.Yul.DirtyReadback.readAt .viaIR state index := by
+  intros
+  exact Solidity.Yul.DirtyReadback.readLocal_pipelines _ _ _ _
+
+/-- Changing only the global pipeline preserves the full explicit selected-local
+Source read, at every fuel and runtime plan. This is local-read agreement only;
+it does not assert pipeline agreement for arbitrary Source expressions. -/
+theorem evalLocal_pipelines :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+(G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+(state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+(plan : Solidity.Source.FailureExecution.RuntimePlan),
+Solidity.Yul.DirtyReadback.evalLocal {G with pipeline := .legacy} F fuel state index plan =
+Solidity.Yul.DirtyReadback.evalLocal {G with pipeline := .viaIR} F fuel state index plan := by
+  intro ctx ty G F fuel state index plan
+  cases fuel <;> unfold Solidity.Yul.DirtyReadback.evalLocal <;>
+    rw [Solidity.Yul.DirtyReadback.readAt_pipelines] <;> rfl
+
 end Solidity.Yul.DirtyReadback

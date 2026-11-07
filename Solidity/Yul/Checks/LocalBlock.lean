@@ -1108,4 +1108,23 @@ theorem readbackRawWords :
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.DirtyReadback.evalLocal_compatible
 
+/-- info: 'Solidity.Yul.DirtyReadback.readValue_pipelines' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.readValue_pipelines
+/-- info: 'Solidity.Yul.DirtyReadback.readLocal_pipelines' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.readLocal_pipelines
+/-- info: 'Solidity.Yul.DirtyReadback.readback_pipelines' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.readback_pipelines
+/-- info: 'Solidity.Yul.DirtyReadback.readbackFrom_pipelines' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.readbackFrom_pipelines
+/-- info: 'Solidity.Yul.DirtyReadback.readAt_pipelines' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.readAt_pipelines
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_pipelines' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_pipelines
+
 end Solidity.Yul.Checks.LocalBlock

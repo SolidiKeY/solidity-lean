@@ -369,30 +369,9 @@ theorem frame_readback_pipelines :
  Solidity.Yul.DirtyReadback.frame .legacy state =
  Solidity.Yul.DirtyReadback.frame .viaIR state := by
   intro ctx state
-  have valueEq : ∀ {ty} (v : Solidity.Yul.LocalValue ctx.env ty),
-      Solidity.Yul.DirtyReadback.readValue .legacy v =
-      Solidity.Yul.DirtyReadback.readValue .viaIR v := by
-    intro ty v
-    simp only [Solidity.Yul.DirtyReadback.readValue,
-      Solidity.Yul.DirtyReadback.cleanWord_pipelines]
-  have localEq : ∀ {ty} (v : Solidity.Yul.LocalValue ctx.env ty)
-      (backup : Solidity.Source.Val ctx.env.layout ty),
-      Solidity.Yul.DirtyReadback.readLocal .legacy v backup =
-      Solidity.Yul.DirtyReadback.readLocal .viaIR v backup := by
-    intro ty v backup
-    simp only [Solidity.Yul.DirtyReadback.readLocal, valueEq]
-  have fromEq : ∀ {types} (backup : Solidity.Source.Locals ctx.env.layout types)
-      (values : Solidity.Yul.LocalValues ctx.env types),
-      Solidity.Yul.DirtyReadback.readbackFrom .legacy types values backup =
-      Solidity.Yul.DirtyReadback.readbackFrom .viaIR types values backup := by
-    intro types backup
-    induction backup with
-    | nil => intro values; rfl
-    | cons value rest ih =>
-      intro values
-      simp only [Solidity.Yul.DirtyReadback.readbackFrom, localEq, ih]
   exact congrArg (fun result => result.map (fun locals => (locals, state.world)))
-    (fromEq state.clean (Solidity.Yul.RawFrame.materialize state).1)
+    (Solidity.Yul.DirtyReadback.readbackFrom_pipelines ctx.env ctx.tys state.clean
+      (Solidity.Yul.RawFrame.materialize state).1)
 
 /-- Every raw-frame modality observing the published optional readback has
 the same meaning in both pipelines. This retains actual completions, whole

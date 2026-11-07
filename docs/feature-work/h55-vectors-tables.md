@@ -400,3 +400,30 @@ Read-only finder and skeptic both passed these conservation laws without Lean
 servers or writes. The affected LocalBlock, existing decoder controls and P16
 build passed (201 jobs), including the exact standard-axiom pins. The bounded
 run took 94.40 seconds with no swap or OOM. It is not a before/after timing gate.
+
+## Public generic readback pipeline laws
+
+After adopting master 806a972a4, the previously private value/local/context
+pipeline lemmas in RawFrameLogic were promoted to DirtyReadback's generic API.
+Both plain context readback and backup-aware readback retain full optional
+results, including refused reads and unchanged unsupported-value fallback.
+The frame-level theorem keeps its exact signature and now reuses the public
+backup-aware theorem. Existing decoder and evaluator definitions are unchanged.
+
+Selected-local readback also agrees across pipelines. The new evalLocal law
+changes only G.pipeline, with every other global field, frame, fuel, raw state,
+typed index and runtime plan identical. Fuel zero and successor cover actual
+Source timeout and local lookup; full Source result/state plus original raw
+frame are equated. Arbitrary Source execution and unchecked arithmetic are
+outside this law. Context induction covers nil/cons, not all Raw-family cases.
+The existing semantic ledger records these exact boundaries.
+
+Focused MCP/builds and scoped audits passed for all six new public lemmas;
+each uses only propext, Classical.choice and Quot.sound. No new state file,
+representation rewrite, proof-budget change or H58 release is supplied.
+
+Read-only finder and skeptic passed the public API, unchanged frame contract and
+narrow evalLocal pipeline statement, using no Lean server or writes. Affected
+LocalBlock, original dirty-readback controls and P16 built successfully (201
+jobs), including the six exact axiom pins. The bounded affected run took 84.37
+seconds with no swap/OOM; this is not a controlled before/after speed comparison.
