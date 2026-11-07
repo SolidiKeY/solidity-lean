@@ -71,6 +71,13 @@ class Preparation(unittest.TestCase):
             head = commit()
             with self.assertRaisesRegex(ValueError, "target inventory changed"):
                 M["prepare"](root, head)
+            (root / "SoliditySlowExamples.lean").write_text("".join("import " + m + "\n" for m in M["SLOW"]))
+            row = root / "Solidity/Examples/Tactics/OpenLoops/RowsNine.lean"
+            row.parent.mkdir(parents=True)
+            row.write_text("-- pending source membership fixture, never elaborated\n")
+            head = commit()
+            with self.assertRaisesRegex(ValueError, "RowsNine requires reviewed central"):
+                M["prepare"](root, head)
 
 
 if __name__ == "__main__":
