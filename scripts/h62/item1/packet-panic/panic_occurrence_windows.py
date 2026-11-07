@@ -14,8 +14,8 @@ def occurrences(file, data):
     digest = hashlib.sha256(data).hexdigest()
     source = data.decode("utf-8")
     masked = mask_comments_and_strings(source)
-    raw_lines = source.splitlines()
-    masked_lines = masked.splitlines()
+    raw_lines = source.split("\n")
+    masked_lines = masked.split("\n")
     if len(raw_lines) != len(masked_lines):
         raise ValueError("mask changed line count")
     result = []
