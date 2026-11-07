@@ -45,3 +45,8 @@ source tests/h62/item2/audit-theories/BridgeWitnesses.lean
 candidate Solidity/Theory/Audit/H62/BridgeWitnesses.lean
 import Solidity.Theory.Audit.H62.BridgeWitnesses
 row Theory/Audit/H62/BridgeWitnesses.lean | Joint input witnesses for all eight unchanged Bridge/Denote interfaces with actual SOME successes; standalone pending registration.
+
+source tests/h62/item2/audit-theories/OutcomeWitnesses.lean
+candidate Solidity/Theory/Audit/H62/OutcomeWitnesses.lean
+import Solidity.Theory.Audit.H62.OutcomeWitnesses
+row Theory/Audit/H62/OutcomeWitnesses.lean | Joint inputs for all nine unchanged Progress/Outcome interfaces with universal NS and actual model success; optional Source.Semantics/CoreTotality imports require owner-approved placement before registration.

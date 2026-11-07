@@ -6,9 +6,9 @@ retirement notices below. Same VM/branch/existing goal retained; no new goal.
 Current continuation base5da4771e63a4278ed53932ac39a032e3d7aea6ed; original
 frozen statement reference remainsc6f550e281a7e5affa9a99bc2cdaed556dec00e4.
 Latest evidence: /workspace/h62-audit-theories-resumed-20261107-evidence.
-Current validated unchanged-file subset:62 explicit joint inputs. Historical
+Current validated unchanged-file subset:71 explicit joint inputs. Historical
 60-witness/95-proof results below remain version-scoped, not relabeled as a
-passing current full census. Eight new Bridge proofs are checked on this base.
+passing current full census. Eight new Bridge and nine Outcome proofs are checked on this base.
 
 
 This is a reviewable partial audit, not completion of the frozen assignment.
@@ -612,3 +612,51 @@ unchanged files such as Progress/Outcome while retaining the four-checkpoint
 queue, full target ABI/gas/fork obligations and pending final gates. Fetch and
 inspect master before each next item. No missing producer is asserted beyond
 the specific H57/frozen-version interpretation question; no new goal or push.
+
+## Resumed checkpoint: all unchanged Progress/Outcome inputs
+
+Fresh master fetch and log/source inspection again found5da4771e6 with no
+landed duplicate or changed Outcome prerequisite. master-check.json records
+that check; original Outcome source remains byte-identical toc6f550e281a7.
+OutcomeWitnesses adds9 full input packets, one for each explicit declaration.
+The universal non-stuck premise is proved for an actual successful result;
+Ends.notStuck includes its post-premise string binder. NS.ends pairs the
+ENTIRE universal NS property with a concrete compatible state/nonempty bool
+local frame and a successful pure run. ns_iff_ends has no frozen hypothesis
+and its witness is additionally strengthened with NS and actual success.
+Core run/runF/statement packets use real bool declarations and successful
+.ok results, not merely exhaustive halt classifications. All C/context/fuel/
+program/state/result indices are correlated. Source.St.init is imported from
+its actual defining Semantics module; core Ctx is explicitly qualified.
+
+not_ends_stuck has only type/string inputs in the frozen elaborated telescope.
+They are jointly inhabited; its intentional negative CONCLUSION is checked,
+without inventing a contradictory premise or changing its disposition to H69.
+H69 remains exactly the original three intentional-input certificates.
+
+Final Lean receipt7175818f5d2e passes exit0 in1.004s with697,081,856 sampled peak
+RSS, no resource stop/diagnostics/sorryAx and only the standard axiom set.
+Changed Source dependencies were rebuilt one at a time under the same limits;
+old cached artifacts with stale fingerprints were not accepted. Individual
+dependency timings are in serial/results/history and the driver logs. No
+heartbeat limit, source definition, statement, axiom or exclusion changed.
+No new census timing pair was run and no unrelated timing comparison is made.
+
+Current scoped verification passes71 unique explicit joint inputs/certificates:
+Paths41 + MemMirror13 + Bridge8 + Outcome9. All four refusal controls pass,
+as do11 Python tests and register/fragments checks; exact commands/exits are
+in outcome-gates.json. The known merged-master layer failure and original
+frozen-source delta remain open, unchanged and not rerun as if resolved.
+No full-current500-declaration fidelity acceptance or RUNTIME_GATE_PASS.
+Finder and skeptic independently confirmed all9 original input telescopes and
+premises, current full transitive/artifact/log provenance,71 mappings and
+ordinary negative classification; no residual findings or reviewer Lean jobs.
+
+Checkpoint handoff:9 new theorem packets and one environment fixture, giving
+112 proof declarations/20 fixture-predicate definitions/6 private abbreviations
+across versioned checkpoints. Historical-plus-new original joint names total77;
+71 are validated together on the current unchanged-file subset. Original
+unwitnessed records are399 public +3 private +986 generated =1,388; generated
+candidates remain pending, not silently excluded. Q-FROZEN-REBASE is still
+pending; independent inventory/coverage continues. Full original Work/backfill
+queue, target ABI/gas/fork obligations and required final gates remain open.

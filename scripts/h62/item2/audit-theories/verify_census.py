@@ -107,6 +107,17 @@ WITNESSES.update({
  'Solidity.Op2.denote_eval': ('BridgeWitnesses', 'bridge_op2_joint_witness'),
  'Solidity.Op3.denote_eval': ('BridgeWitnesses', 'bridge_op3_joint_witness'),
 })
+WITNESSES.update({
+ 'Solidity.Theory.Progress.ends_of_notStuck': ('OutcomeWitnesses', 'outcome_notStuck_joint_witness'),
+ 'Solidity.Theory.Progress.Ends.notStuck': ('OutcomeWitnesses', 'outcome_ends_notStuck_joint_witness'),
+ 'Solidity.Theory.Progress.ns_iff_ends': ('OutcomeWitnesses', 'outcome_ns_iff_joint_witness'),
+ 'Solidity.Theory.Progress.NS.ends': ('OutcomeWitnesses', 'outcome_ns_ends_joint_witness'),
+ 'Solidity.Theory.Progress.not_ends_stuck': ('OutcomeWitnesses', 'outcome_stuck_negative_joint_witness'),
+ 'Solidity.Theory.Progress.coreEnds': ('OutcomeWitnesses', 'outcome_core_joint_witness'),
+ 'Solidity.Theory.Progress.Prog.run_ends': ('OutcomeWitnesses', 'outcome_run_joint_witness'),
+ 'Solidity.Theory.Progress.Prog.runF_ends': ('OutcomeWitnesses', 'outcome_runF_joint_witness'),
+ 'Solidity.Theory.Progress.Stmt.runF_ends': ('OutcomeWitnesses', 'outcome_stmt_runF_joint_witness'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
