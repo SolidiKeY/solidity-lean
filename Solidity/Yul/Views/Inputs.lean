@@ -66,6 +66,16 @@ theorem calldatacopy_padded_byte (m : ByteView) (input : List UInt8)
   (calldatacopy_payload m input dst src n i inside).trans
     (calldata_zero input (src + i) past)
 
+/-- The whole copied window equals the zero-extended source window, for every
+length and offset. This is a byte-view law, not native range admission. -/
+theorem calldatacopy_readBytes (m : ByteView) (input : List UInt8) (dst src n : Nat) :
+    readBytes (calldatacopy m input dst src n) dst n =
+      readBytes (calldataBytes input) src n := by
+  unfold readBytes
+  apply List.map_congr_left
+  intro i member
+  exact calldatacopy_payload m input dst src n i (List.mem_range.mp member)
+
 /-- Uses the approved fixed hash, without any collision premise. -/
 def keccak256 (fixed : Roadmap.Evm.Fixed) (m : ByteView) (a n : Nat) : Roadmap.Word :=
   ⟨fixed.keccak (readBytes m a n), fixed.keccak_lt _⟩

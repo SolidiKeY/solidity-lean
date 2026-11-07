@@ -64,6 +64,24 @@ theorem abi_wordAt_slice_calldataload (input : Roadmap.Bytes) (base i : Nat) :
     Source.wordAt (input.drop base) i=calldataload input (base+32*i) := by
   rw [abi_wordAt_calldataload,calldata_drop_load]
 
+/-- Copying the exact requested raw interval agrees with the owner's actual
+fitBytes zero-padding, regardless of residual memory or destination alignment. -/
+theorem abi_calldatacopy_fit (m : ByteView) (input : Roadmap.Bytes) (dst src n : Nat) :
+    readBytes (calldatacopy m input dst src n) dst n = Source.fitBytes n (input.drop src) :=
+  (calldatacopy_readBytes m input dst src n).trans (abi_readBytes_fit input src n)
+
+/-- A copied word agrees with the actual ABI reader of the explicitly selected
+input slice. Prefixes/selectors are retained unless the caller chooses base;
+no native destination-range or compiler admission is asserted. -/
+theorem abi_calldatacopy_slice_word (m : ByteView) (input : Roadmap.Bytes)
+    (dst base i : Nat) :
+    mload (calldatacopy m input dst (base + 32 * i) 32) dst = abiInputWord (input.drop base) i := by
+  apply Fin.ext
+  exact (abi_beValue_readBytes (calldatacopy m input dst (base + 32 * i) 32) dst 32).symm.trans
+    ((congrArg Source.beValue (calldatacopy_readBytes m input dst (base + 32 * i) 32)).trans
+      ((abi_beValue_readBytes (calldataBytes input) (base + 32 * i) 32).trans
+        (abi_wordAt_slice_calldataload input base i).symm))
+
 /-- Exact zero padding transported back to the actual source input reader. -/
 theorem abi_wordAt_past_input (input : Roadmap.Bytes) (i : Nat) (outside : input.length≤32*i) :
     Source.wordAt input i=0 := by

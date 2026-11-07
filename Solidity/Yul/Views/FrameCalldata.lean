@@ -60,11 +60,8 @@ theorem frameCalldata_padded_byte {D : Source.Layout} {h : Source.Heap D} {p : P
 theorem frameCalldata_readBytes {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     (frame : Source.CallFrame) (plan : ResidualWindowPlan p) (physical : ByteView) (source : Roadmap.Word) :
     readBytes (calldatacopy physical frame.input plan.destination.val source.val plan.size.val) plan.destination.val plan.size.val=
-      readBytes (calldataBytes frame.input) source.val plan.size.val := by
-  unfold readBytes
-  apply List.map_congr_left
-  intro i member
-  exact find_copyBytes _ _ _ _ _ i (List.mem_range.mp member)
+      readBytes (calldataBytes frame.input) source.val plan.size.val :=
+  calldatacopy_readBytes physical frame.input plan.destination.val source.val plan.size.val
 
 /-- Approved SAME Fixed hash over exactly the copied bytes, including all zero
 padding. No collision premise, original-input/selector-strip substitution,
