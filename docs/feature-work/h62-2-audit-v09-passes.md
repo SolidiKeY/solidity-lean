@@ -1562,3 +1562,31 @@ observations remain separate. Selected538/1259,721open is unchanged. The H44
 records are inventoried in `stack-capacity-evidence.json`, retained at
 `/workspace/vy3-stack-capacity-evidence-20261107`. Historical evidence, prior
 trust/timing holds and the known baseline documentation failure remain open.
+
+
+Original VY3 backfill A arity-aware composition:
+`tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean` reuses
+the existing generic stackBound_comp law from ClzBounds and Slice.comp. Its
+main theorem derives actual intermediate/final vectors, execution of both
+stages and their composition, capacity at the shifted entry height derived
+from run_height, and bounded intermediate/final arities. A constructive
+prefix theorem derives a successful bounded stack for every code decomposition;
+no desired intermediate execution is assumed. General positive addition
+preserves every caller tail with two spare words; a negative control succeeds
+mathematically but rejects the1025-word peak before a1024-word final result.
+The1024 limit and all original producer/interface definitions are unchanged.
+
+The15-module import closure was validated with six exact previously checked
+artifacts and nine fresh bounded cold checks. Allocation was unnecessarily
+recompiled instead of reusing its artifact; this is retained as dependency
+compilation, not timing credit or STOP clearance. The CLZ lowering check took
+100.107s within bounds; no source repair or budget increase was made. Final
+serial Lean4.24 companion check passed in1.307s with five axiom guards: generic
+laws and overflow use propext/Quot.sound; the positive room arithmetic also
+uses Classical.choice. No new axioms/sorry/interface copies or production edits.
+Selected538/1259,721open unchanged. Prior slot timingSTOPs, full validation,
+Source/native waits and known doc failure remain; the stopped slot companion
+was not rerun. H44 records and import/artifact provenance are inventoried in
+`slice-capacity-evidence.json`, retained at
+`/workspace/vy3-slice-capacity-evidence-20261107`. Historical evidence is still
+missing; these fresh checks do not reconstruct it or finish the lane.
