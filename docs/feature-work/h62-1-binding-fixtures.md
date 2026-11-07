@@ -149,3 +149,65 @@ H82b authenticated metadata and all package checksums were verified. Final contr
 The earlier comment false-positive controls above describe the historical scanner. The current shared lexical filter masks nested comments, strings, raw strings including zero hash delimiters, and character literals while preserving character positions and newlines. Quoted identifiers are masked and explicitly listed as unknown with original text and line in census, reconciliation and interval reports. Declaration/reference/import accounting is therefore incomplete for quoted identifiers; this remains a lexical inventory, not a Lean parser. Original interval text remains untouched and all 17 files still reconstruct byte for byte.
 
 Six lexical, four reconciliation and two reconstruction controls passed. Independent read-only finder and skeptic used no Lean/server; their raw-string, trailing-escape and quoted-name findings were fixed and re-reviewed. `lexical-controls-manifest.json` records actual commands, exits, elapsed times and off-Git evidence hashes. No Lean statement, proof, interface, axiom, budget or exclusion changed. All four fixture-extraction checkpoints, proof gates, before/after Lean timings and full acceptance remain open. H81 policy clarification still gates heavy validation.
+
+
+## Isolated P12 reference-fixture proof backfill
+
+`tests/h62/item1/binding-fixtures/ReferenceFixtureControls.lean` adds five
+controls over the unchanged P12 witness: memory/storage related-pair uniqueness,
+memory/storage absent-target refusals, and explicit inhabited pairs for both
+branches. Values and target references stay at P12's fixed layout and heap.
+These are consequences of that fixture relation, not a new relation, relation
+unification, arbitrary equal-content aliasing, cross-heap transport or a
+source/world/compiler adequacy theorem. The positive witnesses address
+empty-relation vacuity; the contradiction eliminations prove explicit refusals.
+No original V07/G19 file, frozen statement or producer interface was edited.
+
+All five kernel proofs pass and match the existing P12 `BindingRel`/`initial`
+axiom reports exactly: `propext`, `Classical.choice`, `Quot.sound`. Source
+SHA/Git comparison confirms P12Controls.lean is unchanged. The first MCP
+attempt returned incomplete after 303.947 s of cold dependency setup, exit 2,
+not a resource stop or passing diagnostic. Explicit serial dependency build
+completed 106 jobs (including cached jobs) in 134.673 s and KeySort passed.
+Cached diagnostics succeeded; after adopting published master a10b60f23315,
+the import build/kernel checks passed again and MCP reported zero errors
+in 6.6747 s. The post-merge validation command took 2.2197 s; these are checking
+wall times, not matched performance acceptance. Before/after extraction
+measurements remain pending because no extraction/refactor was performed.
+Actual versions: Lean 4.24.0/Lake 5.0.0-src+797c613; unchanged 12 GiB/no-swap,
+CPU 1, threads 1/-j1 and 4 GiB outer reserve. No runtime STOP was rerun or released.
+
+`validate_reference.py` checks the exact five-declaration inventory, unchanged
+producer bytes, standard/existing axiom footprints and the precise write scope.
+An initial multiline declaration-name pattern failed before the Lean gate;
+its exit 1 log is retained. Finder/skeptic found caller-dependent gate-log
+routing: fixed by deleting the prior log and setting the subprocess destination
+explicitly. The corrected verifier passed with caller `GATE_LOGS` unset.
+Both reviewers rechecked the fix without Lean/server/builds or writes.
+The only extra metadata edit pins the owned Shared ownership audit to immutable
+published master a10b60f23315; all allowlists are checked unchanged.
+
+Run from the checkout through the existing bounded runner:
+```bash
+bash tests/directruntime-20261104/shared-translator/bounded.sh env -u GATE_LOGS PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item1/binding-fixtures/validate_reference.py
+```
+The verifier derives its base record from pinned Git/source bytes, so these
+controls require no VM-only fixture metadata. Existing records with altered
+provenance are rejected. Shared full-evidence validators still require their
+separately manifested H44 archives; this does not close that portability follow-up.
+
+`reference-fixture-manifest.json` records the H44 evidence archive and source
+pins. `validate_reference.py --pack` deterministically packs retained logs,
+reports, authenticated assignment/scope copies and checksums; two encodings and
+member roundtrip are verified. Restore under `artifacts/reference-fixture` for
+historical evidence inspection. The packet contains proof evidence and authenticated metadata. H82b's 557 checksums and retired member ancestry were verified.
+
+| Test registration proposal | Purpose | Dependency |
+|---|---|---|
+| `tests/h62/item1/binding-fixtures/ReferenceFixtureControls.lean` | Fixed P12 reference witness positive/negative controls | `Solidity.Lowering.V07.P12Controls` |
+
+This is a standalone per-file test candidate; no generated root or central
+module map was edited and no production registration is claimed. All four
+fixture-extraction checkpoints, original declaration/case accounting, full
+before/after extraction timings and acceptance remain open. Shared translator
+H90/importer obligations and native/browser stack/cost holds also remain open.
