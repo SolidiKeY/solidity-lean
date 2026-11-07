@@ -25,6 +25,8 @@ CHAR = re.compile(r"'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.
 BINDER = re.compile(r"([({\[])\s*(" + IDENT + r"(?:\s+" + IDENT + r")*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
 
 ID_REST_CHAR = re.compile("[" + ID_REST + "]")
+# This records lexical spelling only; it is not a resolved kernel Name.
+SOURCE_NAME = re.compile(r"\s*((?:«[^»]*»|" + IDENT + r")(?:\.(?:«[^»]*»|" + IDENT + r"))*)")
 
 def signature_coverage(rows, signature_key="fixture_signature", linked_label="local-fixture-linkage"):
     """Guard partial live binding being mistaken for selected-scope coverage.
@@ -335,6 +337,19 @@ def scan(path, root, source=None):
         qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
         context = digest([span for start, span in context_spans if start < match.start()])
         kind = " ".join(match.group(1).split())
+        name = match.group(2) or "<anonymous>"
+        escaped_name = False
+        if kind != "example":
+            raw_name = SOURCE_NAME.match(text, match.end(1))
+            if raw_name and "«" in raw_name.group(1):
+                name = raw_name.group(1)
+                escaped_name = True
+            elif not raw_name:
+                cursor = match.end(1)
+                while cursor < len(text) and text[cursor].isspace():
+                    cursor += 1
+                if text.startswith("«", cursor):
+                    raise ValueError("unsupported escaped declaration name")
         unsupported = kind in {"structure", "inductive", "class", "class inductive", "class abbrev", "axiom", "constant"}
         parts = None if unsupported else split_declaration(content, skeleton=content_skeleton)
         reason = "unsupported-declaration-form" if unsupported else "missing-top-level-definition"
@@ -347,7 +362,7 @@ def scan(path, root, source=None):
         if parts is None:
             rows.append(dict(path=relative_path,
                              line=text.count("\n", 0, match.start(1))+1,
-                             kind=kind, name=match.group(2) or "<anonymous>",
+                             kind=kind, name=name,
                              statement=None, body=[], body_form=None, body_reject_reason=reason,
                              owner="unknown", context_hash=context, qualifiers=qualifiers,
                              reject_reason=reason))
@@ -366,10 +381,12 @@ def scan(path, root, source=None):
             if len(prefix.expandtabs(8)) > indent(match):
                 body_reject_reason = "indented-command-boundary"
             body = body[:boundary.start()]
-        normalized = normalize(header.strip())
+        if escaped_name:
+            body_reject_reason = "escaped-identifier-boundary"
+        normalized = None if escaped_name else normalize(header.strip())
         rows.append(dict(path=relative_path,
                          line=text.count("\n", 0, match.start(1))+1,
-                         kind=kind, name=match.group(2) or "<anonymous>",
+                         kind=kind, name=name,
                          statement=normalized, body=tokenize(body), body_form=body_form,
                          body_reject_reason=body_reject_reason, owner="unknown", context_hash=context, qualifiers=qualifiers,
                          reject_reason="unsupported-binder-syntax" if normalized is None else None))

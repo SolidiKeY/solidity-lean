@@ -1228,3 +1228,27 @@ performance bound, complete census, signature equivalence or live ownership.
 No opt-in fixture or project signature binding was invoked. Independent
 finder and skeptic reviewed the replay without Lean. Full reports and timings
 are outside Git in the universe-names evidence directory.
+
+## Escaped declaration source spellings
+
+The inventory now recovers escaped declaration components from the
+comment-masked source spelling, including qualified, empty and multiline
+components. It preserves the distinction between a single escaped component
+such as `«a.b»` and an unescaped qualified spelling. This is lexical source
+text, not a resolved Lean `Name`; escaped-name statements and bodies remain
+explicitly rejected. Anonymous examples remain anonymous, and source bindings
+must still use their admitted exact-location and environment checks.
+
+Finder and skeptic independently reviewed the change without Lean; the
+skeptic identified the empty/multiline component case and the final controls
+cover it. The combined Python suite passed 199 tests. A matched bounded scan
+took 113.984 seconds before and 118.999 seconds after (+4.40%). Both used the
+same 7,369 inputs, recognized 124,000 declarations and reported no errors or
+unmatched globs. Three checked real rows changed from anonymous to the exact
+spellings `«return»`, `«split»` and `«a.b»`; their unsupported-signature and
+escaped-body refusals remain. Group counts are not a proof of equal members,
+full lexical coverage or Lean semantics. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/escaped-declaration-names/`.
+
+Named instances with explicit priority clauses remain a separate accounting
+limitation; the scanner can still report such a named instance as anonymous.
