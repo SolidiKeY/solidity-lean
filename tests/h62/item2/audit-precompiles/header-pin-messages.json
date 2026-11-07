@@ -1,0 +1,19 @@
+{
+  "H62.AuditPrecompiles.Successor.Header.blake_malformed_lengths_joint": "'H62.AuditPrecompiles.Successor.Header.blake_malformed_lengths_joint' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.be_append_byte_data": "'H62.AuditPrecompiles.Successor.Header.be_append_byte_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.little_reader_data": "'H62.AuditPrecompiles.Successor.Header.little_reader_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.big_reader_data": "'H62.AuditPrecompiles.Successor.Header.big_reader_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.first_four_data": "'H62.AuditPrecompiles.Successor.Header.first_four_data' depends on axioms: [propext, Classical.choice, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.append_zero_data": "'H62.AuditPrecompiles.Successor.Header.append_zero_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.zero_padding_data": "'H62.AuditPrecompiles.Successor.Header.zero_padding_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_padding_data": "'H62.AuditPrecompiles.Successor.Header.blake_padding_data' depends on axioms: [propext, Classical.choice, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_zero_header_joint": "'H62.AuditPrecompiles.Successor.Header.blake_zero_header_joint' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_price_joint": "'H62.AuditPrecompiles.Successor.Header.blake_price_joint' depends on axioms: [propext, Classical.choice, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_gas_joint": "'H62.AuditPrecompiles.Successor.Header.blake_gas_joint' depends on axioms: [propext, Classical.choice, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_valid_joint": "'H62.AuditPrecompiles.Successor.Header.blake_valid_joint' depends on axioms: [propext, Classical.choice, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_insufficient_joint": "'H62.AuditPrecompiles.Successor.Header.blake_insufficient_joint' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_invalid_flag_joint": "'H62.AuditPrecompiles.Successor.Header.blake_invalid_flag_joint' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_valid_one_joint": "'H62.AuditPrecompiles.Successor.Header.blake_valid_one_joint' depends on axioms: [propext, Classical.choice, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_invalid_size_joint": "'H62.AuditPrecompiles.Successor.Header.blake_invalid_size_joint' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Header.blake_zero_gas_joint": "'H62.AuditPrecompiles.Successor.Header.blake_zero_gas_joint' depends on axioms: [propext, Classical.choice, Quot.sound]"
+}

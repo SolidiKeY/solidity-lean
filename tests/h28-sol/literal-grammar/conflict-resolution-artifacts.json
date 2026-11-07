@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "decision": "H44/H41; explicit conflict-resolution push request",
+  "master": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
+  "lean_modules": 26,
+  "public_theorems": 219,
+  "kernel_rows": 255,
+  "compiler_observations": 142,
+  "artifacts": [
+    {
+      "path": "/workspace/scratch/h28-resolve-2a43bf4f/validation-evidence.tar.gz",
+      "bytes": 37361,
+      "sha256": "df0807acf38f6d785f904d63ae47894d6e9d403d652a49f33034a2a6f09d2216"
+    },
+    {
+      "bytes": 6387334,
+      "sha256": "c07cb943fcc6ceca11c5e246746f303884f82d4ac680bd524307c528086fdc15",
+      "path": "/workspace/scratch/h28-resolve-2a43bf4f/owned-lake-cache.tar.gz"
+    }
+  ],
+  "boundaries": "Owned VM gates pass; global docpaths fails outside H28; superseded full gate interrupted, not PASS; cache ready for coordinator pull, not shipped/imported."
+}
