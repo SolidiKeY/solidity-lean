@@ -444,4 +444,59 @@ theorem evalLocal_source_capture :
     (Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state)) state rfl rfl
     (Solidity.Yul.RawFrame.view_capture state _) index plan
 
+/-- Generic residue law for the existing Source integer cleanup at every width and signedness. No new cleanup operation is defined. -/
+theorem wrapBits_emod :
+ ∀ (signed : Bool) (bits : Nat) (value : Int),
+Solidity.Source.wrapBits signed bits value % ((2 ^ bits : Nat) : Int) =
+value % ((2 ^ bits : Nat) : Int) := by
+  intro signed bits value
+  unfold Solidity.Source.wrapBits
+  dsimp only
+  split
+  · rw [Int.sub_emod_right, Int.emod_emod]
+  · rw [Int.emod_emod]
+
+/-- Equal low-bit residues produce the same Source cleanup at every width and signedness. -/
+theorem wrapBits_congr :
+ ∀ (signed : Bool) (bits : Nat) (first second : Int),
+first % ((2 ^ bits : Nat) : Int) = second % ((2 ^ bits : Nat) : Int) →
+Solidity.Source.wrapBits signed bits first = Solidity.Source.wrapBits signed bits second := by
+  intro signed bits first second residue
+  unfold Solidity.Source.wrapBits
+  dsimp only
+  rw [residue]
+
+/-- The existing Source integer cleanup is idempotent. No new cleanup operation is defined. -/
+theorem wrapBits_idempotent :
+ ∀ (signed : Bool) (bits : Nat) (value : Int),
+Solidity.Source.wrapBits signed bits (Solidity.Source.wrapBits signed bits value) =
+Solidity.Source.wrapBits signed bits value := by
+  intro signed bits value
+  exact Solidity.Yul.DirtyReadback.wrapBits_congr signed bits _ value
+    (Solidity.Yul.DirtyReadback.wrapBits_emod signed bits value)
+
+/-- Repeated integer wrapping preserves the full intrinsic Source value, not just its numeric key. -/
+theorem intWrap_idempotent :
+ ∀ (D : Solidity.Source.Layout) (ty : Solidity.Source.IntTy) (value : Int),
+Solidity.Source.intWrap (D := D) ty (ty.wrap value) =
+Solidity.Source.intWrap (D := D) ty value := by
+  intro D ty value
+  simp only [Solidity.Source.intWrap, Solidity.Source.IntTy.wrap,
+    Solidity.Yul.DirtyReadback.wrapBits_idempotent]
+
+/-- Changing only bits above the declared integer width preserves readback in both pipelines, comparing the complete optional intrinsic value. -/
+theorem cleanWord_int_lowBits :
+ ∀ (D : Solidity.Source.Layout) (pipeline : Solidity.Yul.DirtyReadback.Pipeline)
+(ty : Solidity.Source.IntTy) (first second : Solidity.Yul.Word),
+first.val % 2 ^ ty.bits = second.val % 2 ^ ty.bits →
+Solidity.Yul.DirtyReadback.cleanWord (D := D) pipeline (.int ty) first =
+Solidity.Yul.DirtyReadback.cleanWord (D := D) pipeline (.int ty) second := by
+  intro D pipeline ty first second residue
+  rw [Solidity.Yul.DirtyReadback.cleanWord_int, Solidity.Yul.DirtyReadback.cleanWord_int]
+  have residues := congrArg (fun n : Nat => (n : Int)) residue
+  simp only [Int.natCast_emod] at residues
+  have wrapped := Solidity.Yul.DirtyReadback.wrapBits_congr ty.signed ty.bits
+    (first.val : Int) (second.val : Int) residues
+  simp only [Solidity.Source.intWrap, Solidity.Source.IntTy.wrap, wrapped]
+
 end Solidity.Yul.DirtyReadback

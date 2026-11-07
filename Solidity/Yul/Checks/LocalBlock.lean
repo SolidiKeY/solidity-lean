@@ -13,7 +13,9 @@ neighbor must not block a supported read, cleanup must not rewrite raw bits,
 and fuel exhaustion remains distinct from readback refusal. The empty-program
 Source fixture below executes local reads only, not crypto or call agreement.
 Snapshot capture must preserve the complete Source observation while retaining
-the distinction between sparse and fully populated overlay metadata. -/
+the distinction between sparse and fully populated overlay metadata.
+Generic integer laws below guard cleanup idempotence and preservation under
+changes above the declared integer width; bool cleanup remains nonzero testing. -/
 namespace Solidity.Yul.Checks.LocalBlock
 open Solidity.Source
 def env : Solidity.Source.Env := ⟨[]⟩
@@ -1155,5 +1157,21 @@ Solidity.Yul.Checks.LocalBlock.selectedReadState.raw Solidity.Yul.Checks.LocalBl
 /-- info: 'Solidity.Yul.Checks.LocalBlock.readbackCaptureMetadata' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.readbackCaptureMetadata
+
+/-- info: 'Solidity.Yul.DirtyReadback.wrapBits_emod' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.wrapBits_emod
+/-- info: 'Solidity.Yul.DirtyReadback.wrapBits_congr' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.wrapBits_congr
+/-- info: 'Solidity.Yul.DirtyReadback.wrapBits_idempotent' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.wrapBits_idempotent
+/-- info: 'Solidity.Yul.DirtyReadback.intWrap_idempotent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.intWrap_idempotent
+/-- info: 'Solidity.Yul.DirtyReadback.cleanWord_int_lowBits' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.cleanWord_int_lowBits
 
 end Solidity.Yul.Checks.LocalBlock

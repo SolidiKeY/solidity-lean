@@ -458,3 +458,29 @@ remain open; H58 remains on HOLD.
 The affected LocalBlock, original decoder controls and P16 build passed (201
 jobs), including exact axiom pins. This run took 80.33 seconds within the
 existing memory/no-swap bounds; no before/after speed acceptance is claimed.
+
+## Generic integer cleanup algebra
+
+The next independent slice proves residue preservation, residue congruence and
+idempotence of the existing Source.wrapBits for every signedness, width and
+integer. Idempotence is lifted to the complete intrinsic intWrap value.
+For every valid Source integer type and both pipelines, equal low-bit residues
+of two raw words imply equal complete optional integer readback. This is a
+sufficient preservation law, not a stated iff. Bool remains nonzero testing.
+
+These are universal Lean laws, not additional finite vector copies. They do
+not prove a general Source integration or integer encode/decode roundtrip.
+The exact ledger records subtracting/non-subtracting cleanup branches.
+Existing cleanup/evaluator/state definitions and frozen statements are unchanged.
+The initial failures at local let-bindings are retained; explicit reduction
+repaired the proofs without changing statements or budgets.
+
+Read-only finder and skeptic passed the five laws without Lean or writes.
+Focused MCP/builds passed. Residue congruence is axiom-free; residue preservation
+and numeric idempotence use only propext; the two full intrinsic-value laws use
+the standard three axioms. Exact axiom pins are in existing LocalBlock controls.
+Full Raw/source/table/generator acceptance and controlled timing remain open.
+
+Affected LocalBlock, original decoder controls and P16 built successfully (201
+jobs) with exact axiom pins. The bounded run took 80.35 seconds with no
+swap/OOM; this is not a controlled before/after speed comparison.

@@ -93,5 +93,32 @@
       "No general Source expression/statement or copy integration",
       "No all-Raw-case completeness claim"
     ]
+  },
+  "integer_cleanup": {
+    "numeric_scope": "Existing Source.wrapBits for every Bool signedness, Nat width and Int input",
+    "cases": [
+      "signed cleanup conditional subtracts its modulus",
+      "non-subtracting cleanup retains residue"
+    ],
+    "laws": [
+      "residue preservation",
+      "equal residues imply equal wrapping",
+      "numeric idempotence",
+      "full intrinsic intWrap idempotence",
+      "equal low-bit word residues imply equal full optional integer readback in both pipelines"
+    ],
+    "limitations": [
+      "Sufficiency theorem, not stated as an iff",
+      "No bool modulo law: bool remains nonzero testing",
+      "No automatic Source integration or encode/decode roundtrip theorem",
+      "No Raw state or decoder definition changes"
+    ],
+    "axioms": {
+      "wrapBits_emod": "[propext]",
+      "wrapBits_congr": null,
+      "wrapBits_idempotent": "[propext]",
+      "intWrap_idempotent": "[propext, Classical.choice, Quot.sound]",
+      "cleanWord_int_lowBits": "[propext, Classical.choice, Quot.sound]"
+    }
   }
 }
