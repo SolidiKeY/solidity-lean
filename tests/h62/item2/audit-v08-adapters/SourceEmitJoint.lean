@@ -68,6 +68,31 @@ theorem panic_not_static_refusal (pipeline : Roadmap.Pipeline) :
     | _ => []) same
   exact nonempty_panic payload
 
+/-- Simultaneous premises in the original full typed domain. This deliberately
+malformed reference is a local encoding-error model, not Source admission. -/
+theorem encoding_error_joint (pipeline : Roadmap.Pipeline) :
+    bytesEvent.paramTys E = some [.bytes .memory] ∧
+    (Source.evalConvArgs (global pipeline) {frame with static:=true} 3
+      danglingArguments).run (danglingLocals,populated) =
+      (.ok danglingValues,(danglingLocals,populated)) ∧
+    (Source.encodeVals {frame with static:=true} 3 false danglingValues.toR :
+      Source.EM E [] _).run (Source.L0 E,populated) =
+      (.error (.stuck "dangling memory reference"),(Source.L0 E,populated)) :=
+  ⟨rfl,dangling_arguments_execute pipeline,dangling_encoding_execute⟩
+
+theorem encoding_error_actual (pipeline : Roadmap.Pipeline) :
+    (Source.execS (global pipeline) {frame with static:=true} 4 0 none
+      (.emit bytesEvent rfl danglingArguments : RStmt E [] false .body [.bytes .memory] [.bytes .memory])
+      danglingLocals).run (Source.L0 E,populated) =
+      (.error (.stuck "dangling memory reference"),(Source.L0 E,populated)) := by
+  have h := encoding_error_joint pipeline
+  exact SourceEmit.exec_encoding_failure (global pipeline) {frame with static:=true} 3
+    bytesEvent h.1 danglingArguments danglingLocals danglingLocals populated populated populated
+    danglingValues (.stuck "dangling memory reference") h.2.1 h.2.2
+
+#print axioms encoding_error_joint
+#print axioms encoding_error_actual
+
 #print axioms joint
 #print axioms actual
 #print axioms static_actual

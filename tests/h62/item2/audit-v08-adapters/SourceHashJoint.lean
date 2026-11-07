@@ -49,6 +49,28 @@ theorem nonheap_retained (bytes : Roadmap.Bytes) :
     (SourceKeccak.afterLiteral populated bytes).fnLocals = populated.fnLocals :=
   SourceKeccak.retained populated bytes
 
+/-- The zero-horizon run retains the entire original fixture state. -/
+theorem timeout (pipeline : Roadmap.Pipeline) (static : Bool) (bytes : Roadmap.Bytes) :
+    (Source.evalE (global pipeline) {frame with static:=static} 0
+      (SourceKeccak.literal bytes)).run (locals,populated) =
+      (.error .timeout,(locals,populated)) :=
+  SourceKeccak.zero_horizon (global pipeline) {frame with static:=static} bytes locals populated
+
+/-- Insufficient and sufficient horizons cannot be confused, even for empty input. -/
+theorem timeout_not_success (pipeline : Roadmap.Pipeline) (static : Bool) (fuel : Nat)
+    (bytes : Roadmap.Bytes) :
+    (Source.evalE (global pipeline) {frame with static:=static} 0
+      (SourceKeccak.literal bytes)).run (locals,populated) ≠
+    (Source.evalE (global pipeline) {frame with static:=static} (fuel+5)
+      (SourceKeccak.literal bytes)).run (locals,populated) := by
+  rw [timeout,(joint pipeline static fuel bytes).2.1]
+  intro same
+  have result := congrArg Prod.fst same
+  cases result
+
+#print axioms timeout
+#print axioms timeout_not_success
+
 #print axioms joint
 #print axioms unchanged_heap_refused
 #print axioms nonheap_retained
