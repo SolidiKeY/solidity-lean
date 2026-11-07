@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "decision": "H121",
+  "base": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+  "scope": "Additive V2 headline applications and actual checked-entry success on supported core inputs",
+  "compiler": "Solidity.Evm.Compiler.compile",
+  "productionModule": "Solidity.Backend.Payments.EntrySuccess",
+  "declarations": [
+    "Solidity.Evm.Compiler.compile_core_some",
+    "Solidity.Evm.Compiler.compile_core_success",
+    "Solidity.Assurance.NonVacuityH28.checked_v2_family",
+    "Solidity.Assurance.NonVacuityH28.correct_v2_success",
+    "Solidity.Assurance.NonVacuityH28.actual_entry_success",
+    "Solidity.Assurance.NonVacuityH28.closed_actual_entry_success"
+  ],
+  "sourceSha256": {
+    "Solidity/Backend/Payments/EntrySuccess.lean": "4d90bc6cb409580fcea44337c11a5c195067d3e09091a9d7b146a3d9dfb67bb9",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean": "f31cd74be0576ee6c738838faaa6d55619ad70aeb0957d304b01996d89ac7a6b"
+  },
+  "validation": {
+    "productionMCP": "success, no diagnostics; cleanup traceback retained separately",
+    "freshSuite": "27/27 compiled with exact source hashes; six scoped guards pass",
+    "layers": "pass",
+    "trust": "pass:0findings",
+    "orphans": "pass",
+    "roots": "pass",
+    "fragments": "pass",
+    "docPaths": "pass; existing ambiguity notices retained",
+    "axiomInventory": "PASS after adopting published master254c60df6:0errors,0unrecorded,0baselined. Earlier340/334finding logs remain historical; no own baseline suppression.",
+    "reviews": "Independent finder and skeptic accepted proofs and final bounded evidence; no reviewer native execution."
+  },
+  "unchanged": [
+    "H98 versioned interfaces",
+    "actual compiler definition",
+    "existing witnesses and check.py",
+    "proof budgets, exclusions, axiom policy"
+  ],
+  "remaining": "Not all-source totality, precompile/gas/fork agreement, physical EVM adequacy or V17 release completion. Downstream consumer reviews original obligations.",
+  "kernelValidatedScope": "New production theorem and private H28 suite only",
+  "releaseClosed": false,
+  "artifactFiles": [
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-axiom-pins.log",
+      "bytes": 33299,
+      "sha256": "7556f102b94cb1a75bb6552fafdb0c9cc1f940085965df2ac1ade3c4ecca1711"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-axioms.lean",
+      "bytes": 436,
+      "sha256": "edc83e98163625ebbd913f008566e18129b6c983832544c3743f0cbd9b2f5b22"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-axioms.log",
+      "bytes": 669,
+      "sha256": "257c5082ec0a9782f2726f5ac33a5f24aff680e09ebbe96223cb03c6318f0569"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-doc-paths.log",
+      "bytes": 13691,
+      "sha256": "a9668add028dcb275fb7593487b3d480d38228518847894418e8166a62a400ab"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-entry-first.log",
+      "bytes": 8843,
+      "sha256": "7325420a04d611ee33dfd519edb1028dc26a4ca4f0ab16d306a9d3eae9935516"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-entry-owned.log",
+      "bytes": 23259,
+      "sha256": "37c0aa967d53e92dc808601c217c4e29565f33d1f3b1ac1d1c89b31a8bd7775c"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-fragments.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-imports.log",
+      "bytes": 35799,
+      "sha256": "a12acc22cfd98b75bca9997bf3d6b0e5779b1a8e4d3497164030b2f6c74dbe3d"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-layers.log",
+      "bytes": 167,
+      "sha256": "32b09c9b860787b9dfaa720fe36f5f7d9d7fdec02923f1f9bd41857667c96c57"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-attempt.log",
+      "bytes": 7572,
+      "sha256": "7a3a827c8cc46c84ecb12645f65be3d501e3c78fef4bf869ac829233539f8b60"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-attempt.py",
+      "bytes": 1207,
+      "sha256": "a112eda8599a89c07767cb650d7521fe8c81917e13943ba63dd2069287607745"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-check-fixed.log",
+      "bytes": 2532,
+      "sha256": "04f222fb45a14f7973db9186ce2b53ab442d972f1076f9dfa279fb8b3c204b12"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-check.log",
+      "bytes": 4521,
+      "sha256": "686f8597b96140f38360f97a822553cb7fae38e02a9a1ff89c04c1c17c0ec81d"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-check.py",
+      "bytes": 897,
+      "sha256": "f6a1a3b25c87c4202e2e5001bfcefc9903c97bfe23fd03583e98cdbd771add99"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-families.log",
+      "bytes": 3753,
+      "sha256": "abac4c03305244ce3cbdd40642f74539fdd5ffc0e4ea9fe1e38837faeb11aafb"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-families.py",
+      "bytes": 1064,
+      "sha256": "00181c501033d8cad7d0f85f9e06d17b887d1ae2c04f1f8a95c690d73f75c264"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-goal.log",
+      "bytes": 4286,
+      "sha256": "a6e519a643f3b9966df67a9301759eddf340b6db2433b718de17a48cfffd052c"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-goal.py",
+      "bytes": 1054,
+      "sha256": "f3c16e05d7fce7e29f5f0d077d482a68595de67da3a44a3d704178c8069d4101"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-mcp-pinned.log",
+      "bytes": 2532,
+      "sha256": "a9667981c8d2268769bbcc4289567a8e009fb22a6c352e850dea5b876703034c"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-orphans.log",
+      "bytes": 42,
+      "sha256": "ba48be652bf29db611a3dffe3a92dddbe9f19a6cb6aec99bc052130665fe6cb8"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-pin-write-safety.json",
+      "bytes": 1011,
+      "sha256": "ec395831a1550f1e1912a8464cd72147f6a50e95ef293093a6a79d9fa0a47720"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-restore.log",
+      "bytes": 62,
+      "sha256": "ad6c8f7fea7445587aa9872816bf3c03dc8e63d8807b165890a5fdae38d97f26"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-roots.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-suite-final.log",
+      "bytes": 491383,
+      "sha256": "28119f9f3f9c6abff25b5f4a19cb265eebb37f86ae4017a48ff9818a836399f2"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-trust.log",
+      "bytes": 79,
+      "sha256": "02e0ee19ada7253cb6338b916d0d460a99faba0ed83872d68caf2eac592db87e"
+    },
+    {
+      "path": "/workspace/scratch/h121-compiler-success/h121-witness-first.log",
+      "bytes": 3751,
+      "sha256": "d2257ca23b24a193174541713375341974ddfc858c1ad0a7e047321d71f7c483"
+    },
+    {
+      "path": "/workspace/scratch/h121-merged-axiom-pins.log",
+      "bytes": 211,
+      "sha256": "5cc30a4f25ecd469ad8f85f7a286d67affc297b7950dcc8d065fb199e685f729"
+    }
+  ],
+  "registryFollowup": {
+    "publishedMaster": "254c60df6",
+    "mergeHead": "566c8177bb6c6c7fb8d6f9136109546f8b1a9328",
+    "sourceChanges": false,
+    "check": "node scripts/check-axiom-pins.mjs",
+    "status": "pass",
+    "evidence": {
+      "path": "/workspace/scratch/h121-merged-axiom-pins.log",
+      "bytes": 211,
+      "sha256": "5cc30a4f25ecd469ad8f85f7a286d67affc297b7950dcc8d065fb199e685f729"
+    },
+    "review": "Independent finder/skeptic verified exact master plus six owned pins, zero existing-key changes."
+  }
+}

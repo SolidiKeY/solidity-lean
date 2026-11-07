@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "guarded_regression": "Stale fixture objects, same-version compiler substitution and forged consistent snapshot promotion",
+  "lean_path": "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+  "lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "lean_toolchain_sha256": "42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434",
+  "fixture_sources": {
+    "SignatureFingerprint.lean": "0bc1ad9484fd35a83ff95d0ff6627e5759be2f40f2984758216f40b198a55fd0",
+    "SignatureEnvironment.lean": "29f6dc2df58834997e0f46416246c6985fe51168bdee2477b82f43b0acd74e02",
+    "SignatureEnvironmentProbe.lean": "7f235bd0c63d604b2d227d0b1fecc5b89e0f7082d28efa517766d838eb62f4f2",
+    "SignatureObservedConsumer.lean": "8baa0d5dc320f4118653e17cb472354c24a8e5cd8bab726c8b7efd26e3d9cfa7",
+    "check_signature_records.py": "319c5ecb3adcac17a1f5d21e54192f46d2b64f964a53053535f9fdccb321b631",
+    "signature-records.expected.jsonl": "920fb1bd55f1abbeeffc000811d5c5e989f94c7446f235fd458a10ca61956b5a"
+  }
+}

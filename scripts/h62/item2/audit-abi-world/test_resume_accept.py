@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Adversarial post-merge receipt controls; no Lean or artifact mutations."""
-import contextlib,hashlib,io,json,runpy,sys,unittest
+import contextlib,hashlib,io,json,runpy,sys,unittest,os
 from pathlib import Path
 from unittest.mock import patch
 folder=Path(__file__).resolve().parent
 root=folder.parents[3]
-e=Path("/workspace/audit-abi-world-evidence/resume-20261106")
+e=Path(os.environ.get("H62_AUDIT_TEST_EVIDENCE","/workspace/audit-abi-world-evidence/resume-20261106"))
 sys.path.insert(0,str(folder))
 class ReceiptAuthorityTests(unittest.TestCase):
  def accept(self):
