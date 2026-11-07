@@ -61,6 +61,42 @@ class ProjectScannerControls(unittest.TestCase):
         self.assertNotEqual(result.returncode,0);self.assertIn(b"incompatible version or selection",result.stderr)
         self.assertFalse(output.exists())
 
+    def test_target_requires_live_project_mode(self):
+        for extra in ((),("--source-binding-output",str(self.directory/"new"))):
+            result=self.invoke(ROOT,SOURCE,"--project-binding-target","ast",*extra)
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn(b"requires --project-binding-output",result.stderr)
+
+    def test_ast_cannot_reuse_leaf_selection_or_saved_receipt(self):
+        output=self.directory/"new"
+        result=self.invoke(ROOT,SOURCE,"--project-binding-target","ast","--project-binding-output",output)
+        self.assertNotEqual(result.returncode,0);self.assertIn(b"pinned project source",result.stderr)
+        self.assertFalse(output.exists())
+        output.mkdir();(output/"receipt.json").write_text('{"status":"pass"}')
+        result=self.invoke(ROOT,"Solidity/AST.lean","--project-binding-target","ast","--project-binding-output",output)
+        self.assertNotEqual(result.returncode,0);self.assertIn(b"saved receipts",result.stderr)
+
+    def test_closure_receipt_selects_only_target_source_hash(self):
+        live={"linked":1,"fresh_project_closure":[{"source":SOURCE,"source_sha256":"leaf"},
+              {"source":"Solidity/AST.lean","source_sha256":"ast"}]}
+        selected=scan.closure_source_receipt(live,"Solidity/AST.lean")
+        self.assertEqual(selected["source_sha256"],"ast")
+        self.assertNotIn("source_sha256",live)
+        for rows in (live["fresh_project_closure"][:1],live["fresh_project_closure"]+[live["fresh_project_closure"][1]]):
+            with self.assertRaisesRegex(ValueError,"ambiguous live closure source"):
+                scan.closure_source_receipt(dict(live,fresh_project_closure=rows),"Solidity/AST.lean")
+
+    def test_ast_scope_leaves_keysort_alias_and_unmatched_rows_unannotated(self):
+        rows,data,linked,live=inputs()
+        for row in rows[:2]:row["path"]="Solidity/AST.lean"
+        data[0]["path"]="Solidity/AST.lean"
+        for row in linked["rows"]:row["path"]="Solidity/AST.lean"
+        rows.append({"path":SOURCE,"line":1,"name":"named","kind":"theorem","reject_reason":None})
+        scan.attach_source_bindings(rows,data,linked,live,"Solidity/AST.lean","project_signature")
+        self.assertEqual(sum("project_signature" in r for r in rows),1)
+        self.assertEqual(scan.signature_coverage(rows,"project_signature","local-project-linkage")["counts"],
+                         {"local-project-linkage":1,"unresolved":3})
+
     def test_only_canonical_named_rows_receive_project_annotation(self):
         rows,data,linked,live=inputs();scan.attach_source_bindings(rows,data,linked,live,SOURCE,"project_signature")
         self.assertIn("project_signature",rows[0]);self.assertNotIn("project_signature",rows[1]);self.assertNotIn("project_signature",rows[2])

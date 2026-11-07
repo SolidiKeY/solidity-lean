@@ -80,6 +80,14 @@ def attach_source_bindings(rows, inputs, linked, live, source_path, signature_ke
                                       linkage="direct-source-location")
 
 
+def closure_source_receipt(live, source_path):
+    """Guard dependency receipt rows being mistaken for the annotated target."""
+    selected=[row for row in live["fresh_project_closure"] if row["source"]==source_path]
+    if len(selected)!=1:
+        raise ValueError("missing or ambiguous live closure source")
+    return dict(live,source_sha256=selected[0]["source_sha256"])
+
+
 def raw_literal(text, i):
     if text[i] != "r" or (i and (ID_REST_CHAR.fullmatch(text[i-1]))): return None
     match = RAW_START.match(text, i)
@@ -433,7 +441,11 @@ def main():
     binding_options.add_argument("--fixture-binding-output", type=Path, help="fresh live five-fixture rebuild directory; never accepts an old receipt")
     binding_options.add_argument("--source-binding-output", type=Path, help="fresh live fixture source-location binding directory; never accepts saved receipts")
     binding_options.add_argument("--project-binding-output", type=Path, help="fresh live pinned KeySort source binding; never accepts saved receipts")
+    parser.add_argument("--project-binding-target", choices=("keysort","ast"), help="admitted project target; requires live project output, defaults to keysort")
     args = parser.parse_args()
+    if args.project_binding_target is not None and args.project_binding_output is None:
+        parser.error("--project-binding-target requires --project-binding-output")
+    ast_binding = args.project_binding_target == "ast"
     root = args.root.resolve()
     binding_output = (args.project_binding_output if args.project_binding_output is not None else
                       args.source_binding_output if args.source_binding_output is not None else args.fixture_binding_output)
@@ -459,7 +471,10 @@ def main():
             parser.error("project binding requires the real checkout root and absolute fresh output")
         if args.project_binding_output.exists() or args.project_binding_output.is_symlink():
             parser.error("project binding output must be fresh; saved receipts are not accepted")
-        selection["project_binding_contract"] = hashlib.sha256((root/"tests/h62/item1/duplication-scanner/project-leaf-pins.json").read_bytes()).hexdigest()
+        project_contract = "project-closure-pins.json" if ast_binding else "project-leaf-pins.json"
+        selection["project_binding_contract"] = hashlib.sha256((root/"tests/h62/item1/duplication-scanner"/project_contract).read_bytes()).hexdigest()
+        if ast_binding:
+            selection["project_binding_target"] = "Solidity.AST"
     previous = None
     old_inputs, old_statements, old_bodies = {}, {}, {}
     if args.previous is not None:
@@ -612,25 +627,30 @@ def main():
         try:
             if errors or unmatched:
                 raise ValueError("cannot bind incomplete selected inputs")
-            source_path = "Solidity/KeySort.lean"
+            source_path = "Solidity/AST.lean" if ast_binding else "Solidity/KeySort.lean"
             if not any(row["path"] == source_path for row in rows):
                 raise ValueError("selected scope must contain the pinned project source")
             import importlib.util
-            spec = importlib.util.spec_from_file_location("h62_project_binder",Path(__file__).with_name("bind_project_leaf.py"))
+            spec = importlib.util.spec_from_file_location("h62_project_binder",Path(__file__).with_name("bind_project_closure.py" if ast_binding else "bind_project_leaf.py"))
             controller = importlib.util.module_from_spec(spec); spec.loader.exec_module(controller)
             binder = controller.binder
             with binder.writer_lease():
                 live = controller.run(binding_output)
                 binding_receipt_sha = live_receipt_hash(binder,binding_output,live)
-                linked = controller.source_binding.read_bound_json(binding_output/"source-bindings.json",live["bindings_sha256"])
-            attach_source_bindings(rows,inputs,linked,live,source_path,"project_signature")
-            fixture_binding = {"kind":"live-pinned-project-leaf-rebuild", "project_module":"Solidity.KeySort",
+                source_reader = controller.leaf.source_binding if ast_binding else controller.source_binding
+                linked = source_reader.read_bound_json(binding_output/"source-bindings.json",live["bindings_sha256"])
+            source_live = closure_source_receipt(live,source_path) if ast_binding else live
+            attach_source_bindings(rows,inputs,linked,source_live,source_path,"project_signature")
+            fixture_binding = {"kind":"live-pinned-project-closure-rebuild" if ast_binding else "live-pinned-project-leaf-rebuild",
+                               "project_module":"Solidity.AST" if ast_binding else "Solidity.KeySort",
                                "source_path":source_path, "records":linked["linked"],
-                               "execution_binding":"trusted-live-project-leaf", "pins_sha256":live["pins_sha256"],
+                               "execution_binding":"trusted-live-project-closure" if ast_binding else "trusted-live-project-leaf", "pins_sha256":live["pins_sha256"],
                                "coverage":signature_coverage(rows,"project_signature","local-project-linkage"),
                                "visible_kernel_constants":linked["visible_kernel_total"],
                                "kernel_without_lexical_link":linked["kernel_without_lexical_link"],
-                               "boundary":"Only pinned unchanged KeySort source/name/type linkage. Anonymous and other selected rows remain unresolved; all candidate refusals and ownership checks remain. No general/private/unloaded/body-equivalence or runtime acceptance claim."}
+                               "boundary":("Only pinned unchanged AST source/name/type linkage with fresh KeySort dependency. KeySort and other selected rows remain unresolved in this AST census; all candidate refusals and ownership checks remain. No general/private/unloaded/body-equivalence or runtime acceptance claim." if ast_binding else "Only pinned unchanged KeySort source/name/type linkage. Anonymous and other selected rows remain unresolved; all candidate refusals and ownership checks remain. No general/private/unloaded/body-equivalence or runtime acceptance claim.")}
+            if ast_binding:
+                fixture_binding["fresh_project_dependencies"] = live["fresh_project_closure"]
         except (OSError,ValueError,RecursionError) as exc:
             parser.error("live project binding: "+str(exc))
     def alias_reasons(group):

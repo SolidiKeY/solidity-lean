@@ -710,3 +710,37 @@ workload or clear its +80.254966536% timing STOP. Actual Lean is 4.24.0, Lake
 are observations, not a matched production timing gate or RUNTIME_GATE_PASS.
 Raw outputs and manifests remain under
 `/workspace/h62-audit-readonly-calls/project-closure-binding/` on the original VM.
+
+## Live AST scanner integration
+
+The existing live project mode now accepts `--project-binding-target ast`
+with `--project-binding-output` pointing to a fresh absolute directory. KeySort
+remains the default. AST uses its own pinned closure contract and explicit target
+in the selection, so leaf or unbound baselines cannot be promoted into this mode.
+The scanner verifies the original live receipt before deriving the single AST
+source hash and applying the shared exact source/row/count checks. Saved execution
+receipts remain inadmissible.
+
+A mixed selection contains 187 lexical rows: 98 direct AST links and 89 unresolved
+rows. Selected KeySort and fixture declarations receive no AST annotations, even
+though KeySort is freshly compiled as a dependency. All original candidate and
+ownership refusals remain; every row still lacks verified live ownership. A second
+fresh AST scan has identical metadata/bindings and no incremental candidate change.
+The live KeySort default output matches its previously committed hash-pinned
+historical report exactly except for the scanner hash.
+
+All 144 controls pass. Independent read-only finder and skeptic reviews found no
+substantive issue and used no Lean server or execution. A matched text-only timing
+check over 27 WorldCalls files (107364 bytes), five alternating measured pairs
+after warmup, changed median from 0.138316705998 s to 0.135584431999 s (-1.98%).
+Default outputs match except for scanner hash. This text-scanner comparison does
+not execute Lean or clear its original +80.254966536% STOP. Fresh bounded KeySort
+prerequisites pass; actual tools remain Lean 4.24.0 and Lake 5.0.0-src+797c613.
+No production Lean files or lines changed, no new Lean declaration was added, and
+no statement, definition, exclusion, budget or axiom changed.
+
+All 792 original theorem obligations and pending owner/compiler-success work
+remain open as previously classified. General dependency admission, live ownership,
+private/unloaded coverage and full original/inherited acceptance remain unfinished.
+Raw evidence and manifests are retained at
+`/workspace/h62-audit-readonly-calls/scanner-closure-binding/` on the original VM.
