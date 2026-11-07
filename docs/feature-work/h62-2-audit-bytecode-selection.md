@@ -1721,3 +1721,53 @@ Evidence: /workspace/parallel-20261103/executable-bytecode/raw-tail-fields/.
 Checkpoint82tests, trust/orphans, roots/fragments, doc paths and whitespace
 PASS. Strict native proof/replay remains separately required; no global pin,
 full-source or runtime gate is waived or inferred from these checks.
+
+
+## Public tail-method domains and initial representation fidelity
+
+Fetched master3a5b9de41 already adopted in d14210dea; registries regenerated
+without delta. Existing explicit renderer/fixture now includes all public
+theorems in TailGuard(correct/capacity/reference) and RawTailGuard(raw/reference).
+These five additions yield77exactdomains. They do not include private helpers,
+all predicate definitions or other families, and do not finish the whole census.
+TailGuard.reference retains its six initial representation equalities and prefix
+proof simultaneously on the SAME32zero-byte input/arrayuint256shape: size32,
+base0,relative0,extent32,length0,stride32,address0, pointer0. The address denotes
+the length-word header, while existing semantic reference returns data address32.
+Capacity keeps its actual room premise and populated protected suffix258,513.
+New size33 mismatch control refuses the sizeSame premise for inputsize32; this
+is not an execution-trap or native-load correctness claim.
+
+Direct native proof probePASS27.500s observed all five new domains and size
+control axiom-free. Added exact guards for those observed results, without
+changing proof declarations/tokens. Final strict nativePASS23.214s emptylog;
+83guardedtheorems=77domains+6transport/joint/refusal controls, standard sets
+11none/25propext/2pair/45trio, plus2expected classifierrefusals. Both runs
+validate proofs; they are not paired performance measurements. Existing macro
+implementation reused byte-for-byte,19frozenproducerleaves/249importproducts
+matched. Strict verifier reconstructs exact acceptedsource/manifest, binds both
+probe/strict kernel outputs/logs, checks proof-token equality ignoring only
+print/guard commands, derives all guard counts and binds77target observations
+to sealed150module metadata. No global source/ledger acceptance is promoted.
+
+Independent readonly finder/skepticPASS with no findings; representation facts
+and protected suffix/room, address interpretation, premise-only refusal, native
+hashes/monitors and limited domain claims reviewed. No edits/builds/Lean/server
+by reviewers. Same05:20→09:20aggregate epoch/deadline and12GiB/noSwap/CPU1/
+4GiBreserve/300sgroup bounds retained. No new epoch, prerequisite build,
+PowerBounds retry, maxHeartbeats/axiom/trust increase or new module>60s. No
+production/interface/statement/definition/premise/exclusion changes.
+
+Generated probes/acceptedsource/logs/products stay offGit; explicit native
+checking remains necessary beyond82Python tests/seven-file verifier. No native
+operand loading/order, encoded execution, Source admission, full703closure/
+40remainingcore+37Bridge, owner/private/global-input-inherited classification,
+remaining witness/globalledger/correspondence or Bridge/package/performance
+acceptance follows. All original producer/final-gate waits remain open; no
+RUNTIME_GATE_PASS or whole-goal completion claimed.
+Evidence: /workspace/parallel-20261103/executable-bytecode/tail-method-domains/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, doc paths and
+whitespacePASS. These checks do not replace the explicit native probe/strict
+receipts. Scoped global28pin registrations remain coordinator work; full
+source/kernel/runtime gates and original proof obligations remain unwaived.

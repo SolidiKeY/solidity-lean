@@ -721,3 +721,50 @@ theorem raw_tail_unprefixed_refused :
 #guard_msgs (whitespace := lax) in #print axioms raw_tail_operand_joint
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_unprefixed_refused' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms raw_tail_unprefixed_refused
+
+
+/-- Guard omission of the public correctness method's numeric/frame binders. -/
+theorem tail_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.correct := by
+  exact ⟨32, 0, 0, 32, 0, 32, 0, [258,513], True.intro⟩
+
+/-- Guard loss of the public method's actual room premise. -/
+theorem tail_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.capacity := by
+  exact ⟨[258,513], by decide, True.intro⟩
+
+/-- All six initial operand-representation facts coexist with the SAME input,
+shape and prefix premise. No successful native load is assumed. -/
+theorem tail_method_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.reference := by
+  exact ⟨tailInput, tailShape, 0, 32, 0, 0, 32, 0, 32, 0,
+    by decide, by decide, by decide, by decide, by decide, by decide,
+    by decide, True.intro⟩
+
+/-- Public raw method uses the exact common input/shape/protected suffix. -/
+theorem raw_tail_method_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.RawTailGuard.raw := by
+  exact ⟨tailInput, tailShape, 0, 0, [258,513], True.intro⟩
+
+/-- Public reference method retains its length-prefix hypothesis. -/
+theorem raw_tail_method_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.RawTailGuard.reference := by
+  exact ⟨tailInput, tailShape, 0, 0, by decide, True.intro⟩
+
+/-- Guard forged initial-size facts in a reference-method witness.
+This rejects a representation premise, not native execution. -/
+theorem tail_initial_size_mismatch_refused :
+    ¬ ((33 : Solidity.Backend.Scalar.Word).toNat=tailInput.size) := by decide
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_reference_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_method_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_method_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_method_reference_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_method_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_initial_size_mismatch_refused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_initial_size_mismatch_refused
