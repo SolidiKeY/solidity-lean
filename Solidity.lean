@@ -384,6 +384,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreementControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2FramedRevert
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2FramedRevertControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2Lift
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridgeControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls
 import Solidity.Backend.InternalFlow.RuntimeFrameReference

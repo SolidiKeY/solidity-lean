@@ -934,3 +934,52 @@ disk reserve; sources, sealed evidence and the shared Lake cache were retained.
 All nine new axiom reports contain only the existing standard axioms. Static
 layer/trust/roots/fragments checks pass; no focused module exceeded 60 seconds.
 Full checkpoint/Bridge acceptance and all original fidelity/timing debts remain.
+
+### H121 selected readAt full-certificate bridge
+
+Master 05d2c2587 is adopted. RuntimeFrameP1V2ReadAtBridge constructs an actual
+PassCorrect and BridgeGoal for the existing compiler-selected readAt family.
+It reuses canonical P1LangV2 sourceLang/targetLang and the exact private-result
+image. The source Allowed judgment is the original external approved predicate;
+the target Allowed judgment is the original physical admission. Identity envAbs
+and the fixed Unit resource calculation are the canonical map/bound. Both
+environment directions and prefix transports are proved from actual execution.
+No complete certificate, desired run or no-failure predicate is assumed.
+
+Local retains all six original V3 duties with their original quantifiers and
+antecedents: profile agreement, universal physical Entry coverage, genuine
+successful and reverting entries, full physical ReturnClaim and BareRevertClaim.
+The original producer is constructed with exact plan equality; producer_image
+binds its code to the same canonical target. Controls show that the original
+profile admits both real outcomes with arbitrary V2 metadata, is nonempty, and
+retains the actual reverting-entry obligation. This is a complete CONDITIONAL
+bridge for this supported ordinary-call family, not authentication of approved,
+a replacement for the full P1 native/profile/session domain, or G42.04 adequacy.
+
+Fresh kernel times: final bridge 1.072s and importing controls 0.859s, sampled
+workload peaks 750200/750460 KiB. Final MCP diagnostics pass in 2.384/1.286s.
+Independent read-only finder and skeptic found no defect and used no Lean/server/
+build/edit. Original statements, admission, exclusions and budgets are unchanged.
+
+The newly merged SourceCallProducerV2 transports captured input/returndata but
+explicitly does not execute callee code or establish full physical P1 framing.
+The newly merged P8 PlanWitness explicitly uses G07 toy programs, empty Source
+programs and a model reference rather than Source.sessionAt. Neither publication
+is treated as actual Source/library admission or a full external-call release.
+G42.04 body adequacy remains owned work; protected P8 actual-Source H24 admission
+and origin/realization evidence for library-containing Source programs remain a
+separate dependency, without weakening LibraryPremises.Inputs or assuming that
+its generic admission is impossible for every resource type.
+
+The controls also execute an actual always-revert image in the same canonical
+target language and prove that no full fixed-map BridgeGoal for that substitute
+exists: need_ok on the real successful physical input forces a completed-success
+prefix, contradicting that image's revert. This is an intentional negative
+counterexample to the substitute, not an assumed source failure. Initial parser/
+Nat annotation errors and two accidentally renamed lemma references are retained;
+only proof-local repairs changed. No focused kernel module exceeded 60 seconds.
+Generated fragments also restore the P8 README row's sorted position after the
+union merge; no bookkeeping content was edited directly. Original global gates,
+full acceptance, fidelity debt and timing STOPs remain open.
+All sixteen final axiom reports use only existing standard axioms. Final
+layer/trust/roots/fragments checks pass, with no new core edges or trust findings.
