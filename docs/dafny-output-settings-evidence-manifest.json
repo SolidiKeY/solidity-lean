@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligation": "setting:dafny.compilerOutputDir",
+  "sourceHead": "2452f1e51de6381c86eaafff64324411ef4403df",
+  "fileCount": 142,
+  "uncompressedBytes": 20241549,
+  "boundaries": [
+    "Actual local Settings UI default bin, resource JSON relative-with-spaces/absolute paths and scoped API inspect/readback. DOM/AX/PNG not complete glyph/raster or paired upstream evidence.",
+    "Six ordinary/custom native key builds bind unchanged primary/dependency source, current producer receipts, immutable old artifact history and content SHA256.",
+    "Actual held F6 owning change refuses admission/new artifact; unrelated folder change preserves legitimate current build. Finite change/Enter order and source session bound.",
+    "All four owned configuration slots restored/read back; owned cleanup remaining[]. Native matrix exits0 passed-with-gaps/partial.",
+    "Upstream source uses executable output stems and CLI custom-argument splitting; its configured-path matrix, macOS and full lifecycle/performance/judgments remain unproved."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-output-settings-evidence-20261107/bulk.tar.gz",
+    "bytes": 4341279,
+    "sha256": "83185e852f7ea0fc941298f9d6e10670641a1634b22482e54d7d181c5fffbe7b"
+  },
+  "index": {
+    "path": "/workspace/dafny-output-settings-evidence-20261107/files.json",
+    "bytes": 34783,
+    "sha256": "fc64d38b48851b06451692828767c61268c717cc01851725376d598a28a4dc5e"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-output-settings-evidence-manifest.json --restore"
+}

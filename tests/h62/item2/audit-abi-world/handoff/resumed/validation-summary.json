@@ -39,24 +39,20 @@
   "static": {
     "trust": "trust: 6660 sources, 289 inventoried implementation/recovery sites, 0 findings",
     "orphans": "6643 reachable, 0 orphaned, 0 not allowed",
-    "doc_paths": "fail:one stale reference in Solidity/Yul/Compilation/P20InterfaceV2Controls.lean to tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean",
+    "doc_paths": "Historical 902e failure: one stale P20 citation; resolved on a282 by c9cf710a8 and the existing fixture.",
     "roots": "pass",
     "fragments": "pass",
-    "axiom_pins": "fail:16837theorems/0errors/247newstandard-only registrations"
+    "axiom_pins": "Historical 902e failure: 16837 theorems, 0 errors, 247 new standard-only registrations."
   },
   "timing_delta_percent": 0.6356973493804041,
   "waits": [
     {
       "lane": "coordinator/G07 inventory owners",
-      "item": "PIN-902e8776: review/register exact247 existing standard-only pins from authenticated off-Git ticket."
-    },
-    {
-      "lane": "audit-v09-passes / P20 interface owner",
-      "item": "Correct stale migrated-file citation in Solidity/Yul/Compilation/P20InterfaceV2Controls.lean; no worker source edit to that lane."
+      "item": "Historical PIN-902e8776: 247 existing standard-only registrations at 902e; revalidate the central-file hash and inventory before applying on another integration."
     }
   ],
   "questions": [],
-  "boundary": "Current full6654-job gate and nine-module+KeySort audit/acceptance177/439/7/10 pass. Global inventory and foreign documentation gates remain blocked. Archived external gas/fork fixture reuse is not fresh EVM or formal gas/world/generalcompiler proof.",
+  "boundary": "The 902e full 6654-job gate and nine audit modules plus KeySort pass, with acceptance 177/439/7/10. The P20 documentation wait is resolved on a282. No fresh a282 build or inventory result is claimed. Archived external gas/fork observations are not fresh EVM execution or formal gas/world/general compiler proofs.",
   "previous_full_lean_build": {
     "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
     "status": "pass",
@@ -76,15 +72,15 @@
   "owner_ticket": "/workspace/audit-abi-world-evidence/resume-902e-20261107/axiom-pin-owner-ticket.json",
   "historical_806_validation": {
     "integration": "806a972a4f1eefc367f7fe21078e56469447ce13",
-    "audit": "pass177/439/7/10",
+    "audit": "pass: 177/439/7/10",
     "full_attempts": [
       {
         "resource_receipt": "resume-806-20261107/full-resource.json",
-        "outcome": "exit1 beforeLean: stale README rowordering fixed in c460"
+        "outcome": "exit 1 before Lean: stale README row ordering fixed in c460"
       },
       {
         "resource_receipt": "resume-806-20261107/full-2-resource.json",
-        "outcome": "cancelled at coordinator request before newmastermerge;exit-15/cleanuptrue/4801.177982943seconds;notpass"
+        "outcome": "Cancelled at coordinator request before new master merge; exit -15, cleanup true, 4801.177982943 seconds; not a pass."
       }
     ]
   },
@@ -137,5 +133,22 @@
     "cleanup_complete": true,
     "resource_receipt": "resume-master-20261107-2/full-resource.json",
     "stdout_sha256": "3d4261604c593902a3b4dc54681d36f67d718836820e6ff346ab89c2f737acaa"
+  },
+  "validation_scope": "Historical worker validation on 902e; documentation corrected on a282a282003a992eb334acefd1ef8f5490e0fe71. No fresh Lean build or inventory claim on a282.",
+  "documentation_correction_base": "a282a282003a992eb334acefd1ef8f5490e0fe71",
+  "resolved_waits": [
+    {
+      "lane": "audit-v09-passes / P20 interface owner",
+      "item": "Historical 902e citation wait resolved on a282a282003a992eb334acefd1ef8f5490e0fe71; fixture exists and c9cf710a8 rewrote the docstring."
+    }
+  ],
+  "ticket_authentication": "The bulk manifest hashes the external ticket. The ticket records the 902e central-file SHA; the manifest has no separate central-file entry.",
+  "documentation_correction_validation": {
+    "command": "bash scripts/check-doc-paths.sh",
+    "exit_code": 1,
+    "missing_references": 1,
+    "source": "docs/feature-work/h62-2-audit-v09-passes.md",
+    "missing": "SelectedHeapBoundaryWitness.lean",
+    "p20_missing": false
   }
 }
