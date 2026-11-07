@@ -19,6 +19,9 @@
   "Quot.sound",
   "propext"
  ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.empty_enum_has_no_valid_word": [
+  "propext"
+ ],
  "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.entry_rejection_hypotheses_jointWitness": [
   "Classical.choice",
   "Quot.sound",
@@ -29,6 +32,7 @@
   "Quot.sound",
   "propext"
  ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_gate_positive_domain": [],
  "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.reject_all_fails_selection": [
   "Classical.choice",
   "Quot.sound",
@@ -40,6 +44,11 @@
   "propext"
  ],
  "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.short_head_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.single_word_success_jointWitness": [
   "Classical.choice",
   "Quot.sound",
   "propext"

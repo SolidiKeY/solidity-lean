@@ -244,4 +244,53 @@ theorem zero_word_input_success_jointWitness :
 /-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.zero_word_input_success_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms zero_word_input_success_jointWitness
 
+/-- Every modeled kind shares one selected gate and simultaneously represented
+execution hypotheses. Validity is an explicit per-input domain, not a claim
+that every kind has an inhabitant. -/
+theorem single_word_success_jointWitness (C : Solidity.Contract) (base : Nat)
+    (kind : Solidity.AbiEntry.Kind) (label word : Fin W) (machine : Machine)
+    (valid : kind.valid word.val = true) :
+    ∃ (_certificate : SingleWordGateCertificate SingleWordGate.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx)
+        (SingleWordGate.program C kind label)) (prepared : Machine) (size : Fin W),
+      Compiler.compile base (Frag.init RouteCtx)
+        (SingleWordGate.program C kind label) = some result ∧
+      prepared.mem base = .val word ∧ prepared.mem (base + 1) = .val size ∧
+      ¬ size.val < 36 ∧
+      run result.code prepared =
+        .ok {prepared with mem := upd prepared.mem (base + 1) (.val label)} 0 := by
+  let size : Fin W := wmod 36
+  let prepared : Machine := seeded base word size machine
+  have full : ¬ size.val < 36 := by decide
+  refine ⟨SingleWordGate.certificate, SingleWordGate.compiled C base kind label,
+    prepared, size, SingleWordGate.selected C base kind label,
+    seeded_word base word size machine, seeded_size base word size machine, full, ?_⟩
+  rw [SingleWordGate.executed C base kind label _
+    (SingleWordGate.selected C base kind label) prepared word size
+    (seeded_word base word size machine) (seeded_size base word size machine)]
+  simp only [singleWordOutcome, if_neg full, wordGateOutcome, if_pos valid]
+
+/-- A globally inhabited generic certificate does not manufacture a valid
+input for the modeled empty-enumeration domain. This is an intentional domain
+control, not a claim that Source admits an empty enum. -/
+theorem empty_enum_has_no_valid_word :
+    ¬ ∃ word : Fin W, (Solidity.AbiEntry.Kind.enumBelow 0).valid word.val = true := by
+  intro witness
+  obtain ⟨word, valid⟩ := witness
+  change decide (word.val < 0) = true at valid
+  have impossible : ¬ word.val < 0 := Nat.not_lt_zero word.val
+  simp only [impossible, decide_false, Bool.false_eq_true] at valid
+
+/-- A positive domain instance accompanies the empty-domain negative control. -/
+theorem generic_gate_positive_domain :
+    ∃ kind : Solidity.AbiEntry.Kind, ∃ word : Fin W, kind.valid word.val = true := by
+  exact ⟨.bool, wmod 1, by decide⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.single_word_success_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_word_success_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.empty_enum_has_no_valid_word' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_enum_has_no_valid_word
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_gate_positive_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms generic_gate_positive_domain
+
 end Solidity.H62.BytecodeSelection.BoolBindingFixture

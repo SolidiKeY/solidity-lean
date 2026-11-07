@@ -775,3 +775,31 @@ checks pass. The global pin scan reports zero errors and 111 unrecorded changes,
 including the twelve proposed here. The known five off-scope missing citations
 remain an unresolved documentation gate; it was not repeated unchanged. No
 checkpoint/full-gate waiver or whole-lane completion is asserted.
+
+
+## Generic single-word joint success and domain boundary
+
+After adopting published master at 625b839e, the same standalone audit file
+instantiates SingleWordGateCertificate for every modeled word kind. The new
+single_word_success_jointWitness simultaneously carries the actual generic
+certificate, selected compilation, both represented memory cells, full size
+and successful execution for any valid word. The producer and frozen statements
+are unchanged. No per-kind compiler or file family was added.
+
+empty_enum_has_no_valid_word is an intentional negative domain control:
+modeled enumBelow 0 has no valid word despite the global certificate being
+inhabited. It is not an assertion that Source admits an empty enum or a defect
+in a conditionally scoped theorem. generic_gate_positive_domain provides an
+inhabited Boolean domain. Native loads, Source adequacy, charged gas/fork
+behavior, exact expanded census linkage and full package gates remain open.
+
+The first direct proof attempt kernel-checked in 9.985 seconds with empty
+diagnostics and fifteen standard-only axiom guards for the whole audit file.
+Both independent runtime monitors passed. The new independent checkpoint has
+its own <=14,400-second budget under Q-BUDGET-01/#69; it does not extend the
+expired H86 window or retry PowerBounds. No prerequisite source was rebuilt.
+Evidence: /workspace/parallel-20261103/executable-bytecode/generic-word-gate/.
+
+Independent read-only finder and skeptic reviews passed before and after the
+kernel check, with no concrete findings. The 58 audit-tool tests passed.
+Scoped pins remain a coordinator registration proposal, not a global pass.
