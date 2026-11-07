@@ -1056,3 +1056,105 @@ No Lean statement, dependent definition, interface, budget, axiom or exclusion
 changed. Full H121b/H121c producer/world/source obligations remain open. Next
 independent item is real native Engine payload/history support, after fetching
 and inspecting master again. No RUNTIME_GATE_PASS or full-assignment completion.
+
+
+## Engine payload execution and real history, with full byte replay
+
+Before this item, origin/master was fetched and its log/code inspected; no
+existing Engine payload runner was found. Before the next checkpoint commit,
+origin/master advanced to1b3ab0676e24620af56e1408c1aabde9cb4bbdb7 and was merged
+cleanly asac34aa548add7acae7d0df5cbc51ae9dddd1950f. Owned additions were preserved;
+the five execution/guard/adapter source hashes stayed unchanged. Received
+central registration/pin updates are upstream merge contents, not own pin edits.
+No reset, discard, push or default-branch publication.
+
+The additive engine_payload_reference.mjs reads every pinned exact-Osaka
+blockchain_test_engine fixture in inventory order. It verifies export, compressed
+input, inventory and installed/committed dependency-lock identity. Genuine native
+Osaka block constructors with the pinned KZG setup recompute genesis and payload
+hashes, transaction/withdrawal roots, blob-versioned hashes and EIP7685 request
+commitments from exact parameter bytes. Converted blocks retain original
+pre/post worlds and history, then run through the unchanged strict native block
+worker/provider. Header, complete block-size, state, receipt, log/gas and final
+fixture-declared account/storage checks remain enabled. No synthetic case is
+counted as an original fixture; the original Engine input stream is unchanged.
+
+This is payload execution/history support only. Negative API profiles, unknown
+versions and unimplemented protocol behavior remain unsupported. Fork-choice
+RPCs are not executed, and Engine-X allocation joins and sync protocol behavior
+remain pending. The original full assignment is not restricted to this positive
+profile: engine_fixture_conformance_complete, engine_rpc_complete and
+ differential_complete remain false. Every source adapter remains unsupported.
+Native payload matches do not establish Engine RPC or source/compiler agreement.
+
+Both complete runs selected21124unique contiguous records:19479
+payload_reference_match,1645unsupported (all engine-rpc-negative-or-version-profile-pending),
+zero payload mismatches or engine errors. Actual exit2 correctly preserves
+incomplete conformance. The19479matches contain21183executed blocks,261multiblock
+fixtures (maximum68blocks),22849transaction observations (20383returns,
+265reverts,2201faults) and1858raw log entries. Counts overlap other fixture formats;
+they are not added as unique semantic witnesses. Native return/revert bytes and
+gas are retained observations: these fixtures have no direct expected return
+bytes, and no isolated per-transaction storage snapshot or source rollback claim
+is added. Receipts/state commitments and final fixture-declared storage are checked.
+
+Full result streams are byte-identical, SHA256
+b96194ec9e143a544f616e45d7c95c83147f0f8a8482a9062291d1af59736093.
+Only sampled peak RSS differs between summary files. First run693.873s,
+external peak1390759936bytes; replay696.108s,external peak1422544896bytes.
+The first internal sampled peak1391923200bytes is a separate measurement.
+No resource stop. Native replay delta+0.322percent measures unchanged runtime
+code, not a Lean refactor or checking-speed claim. All3122previously sealed H44
+entries were rehashed unchanged before adding this evidence.
+
+Commands, under writerlock and serial_semantics.run process-group guard:
+
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 21124 engine-payload-full
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 21124 engine-payload-replay
+    G52_BULK=/workspace/h44/g52-differential node --max-old-space-size=4096 --test tests/h62/item3/g52-differential/engine_payload_reference.test.mjs
+
+Three controls pass with no skips: wrong domain/profile refusal, native bad
+payload hash/blob parameter rejection plus real wrong-post-state detection, and
+oversized parent-heap refusal. Native worker60s/5million-step limits are unchanged.
+The external full-job timeout is1200s, with12GiB aggregate RSS/address-space
+limits,4GiB available reserve and no swap. Streaming output, process-tree polling,
+worker-close-before-replacement and final publication checks preserve refusals.
+The first pre-execution launch refused because Node24 adds192MiB of young-gen
+heap to4096MiB old-space; the detector allowance was corrected to256MiB. That
+refusal is preserved separately and adds no fixture observation. Node24.19.0;
+no dependency/compiler installation or systemd-run.
+
+Finder and skeptic independently verified source, all21124case identities,
+hashes, native block/transaction/log counts and incomplete claim boundaries.
+Neither used Lean/server or reran native jobs. Their initial resource/cleanup
+findings were fixed before the full run; summary publication now rechecks the
+guard after hashing. Evidence under$BULK/evidence:engine-payload-accounting.json,
+engine-payload-reproducibility.json,engine-payload-checks.json,command receipts,
+controls.log and engine-payload-reviews.json. Strict block-acceptance still exits1
+for the same six existing reference failures. No new mismatch/owner ticket.
+
+Received producer inspection is recorded separately with exact source hashes:
+P1V2ReadAtBridge is a constant ordinary-call family retaining external approved
+profile agreement; P1V2ValueBridge retains its physical/profile duties; V13's
+P1RevertBridge states a core totality domain excluding assert. These useful
+results do not supply the complete independently approved P1 production factory.
+No owner is inferred for bare_prefix_bridge. This is textual inspection, not a
+new Lean check or a proof that no differently named producer exists.
+
+Own Lean delta0files/lines/declarations; frozen statements/dependent definitions,
+interfaces, budgets, exclusions and axiom set unchanged. No new axiom, sorry,
+native_decide or trust shortcut. Historical Lean4.24.0/Lake5.0.0-src+797c613 and
+bounded KeySort evidence remain historical; no fresh Lean/full-build or
+RUNTIME_GATE_PASS is claimed. Full H121b composed source/runtime producer,
+H121c p10_execution_bridge, canonical source/session/emitted-code identities,
+full Approved_i coverage and all15PublicObligations remain open. Real external
+factory/session/world/physical/body inputs remain listed in the handoff; V17 is
+downstream and frozen Claude V15 is not a producer wait.
+
+Next independent queue: reuse strict native payload machinery for Engine-X
+allocation-bound inputs, account actual sync/history and negative RPC support,
+and construct the owned canonical production endpoints and premise integration
+when their original inputs permit. Do not repeat completed53case rejection
+classification, count unsupported rows as passes, or accept a conditional wrapper
+as the full producer. Original persistent goal stays unfinished; H110 permits
+this same thread when fresh-thread handoff machinery is unavailable.

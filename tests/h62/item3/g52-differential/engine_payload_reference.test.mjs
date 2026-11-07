@@ -1,0 +1,20 @@
+/** Guarded regression: wrong Engine domains, bad hashes/parameters or resource
+ * refusals must not manufacture payload matches or complete RPC/source claims. */
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createReadStream} from 'node:fs';import {createGunzip} from 'node:zlib';import {createInterface} from 'node:readline';import {createRequire} from 'node:module';import {pathToFileURL,fileURLToPath} from 'node:url';import {fork,spawnSync} from 'node:child_process';
+import {convertEngineFixture} from '../../../../scripts/h62/item3/g52-differential/engine_payload_reference.mjs';
+test('wrong fork/format and negative/version RPC profiles refuse before native conversion',async()=>{
+ for(const f of [{network:'Prague'},{network:'Osaka',_info:{'fixture-format':'blockchain_test_sync'}},{network:'Osaka',_info:{'fixture-format':'blockchain_test_engine'},pre:{},postState:{},genesisBlockHeader:{},engineNewPayloads:[{params:[],newPayloadVersion:5,forkchoiceUpdatedVersion:3}]}])assert.equal((await convertEngineFixture({fixture:f},{})).status,'unsupported');
+});
+test('real constructors reject bad payload hash/blob parameters and native worker detects wrong post-state',{timeout:65000},async()=>{
+ const bulk=process.env.G52_BULK;if(!bulk)throw new Error('G52_BULK required; never skip');const require=createRequire(bulk+'/reference/package.json');const loaded=[];for(const name of ['@ethereumjs/common','@ethereumjs/block','@ethereumjs/util','micro-eth-signer/kzg.js','@paulmillr/trusted-setups/fast-peerdas.js'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));const m={...loaded[0],...loaded[1],...loaded[2],kzg:new loaded[3].KZG(loaded[4].trustedSetup)};
+ const source=createReadStream(bulk+'/engine-inputs.jsonl.gz').pipe(createGunzip()),lines=createInterface({input:source,crlfDelay:Infinity});let record;for await(const line of lines){record=JSON.parse(line);break;}lines.close();source.destroy();
+ const badHash=structuredClone(record);badHash.fixture.engineNewPayloads[0].params[0].blockHash='0x'+'00'.repeat(32);await assert.rejects(()=>convertEngineFixture(badHash,m),/Invalid blockHash/);
+ const blobs=structuredClone(record);blobs.fixture.engineNewPayloads[0].params[1]=['0x'+'00'.repeat(32)];assert.equal((await convertEngineFixture(blobs,m)).reason,'engine-blob-parameter-disagreement');
+ const wrongState=structuredClone(record);const address=Object.keys(wrongState.fixture.postState)[0];wrongState.fixture.postState[address].nonce='0x1234';const converted=await convertEngineFixture(wrongState,m);assert.equal(converted.status,'converted');
+ const child=fork(fileURLToPath(new URL('../../../../scripts/h62/item3/g52-differential/eest_reference.mjs',import.meta.url)),['--worker',bulk],{execArgv:['--max-old-space-size=4096'],stdio:['ignore','ignore','inherit','ipc']});
+ try{const result=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('native control timeout')),60000);child.once('message',r=>{clearTimeout(timer);resolve(r);});child.once('error',reject);child.send(converted.record);});assert.equal(result.status,'reference_mismatch');assert.ok(result.fields.includes('post-account:'+address));}finally{if(child.exitCode===null)await new Promise(done=>{child.once('close',done);child.kill('SIGKILL');});}
+});
+test('oversized parent heap is refused before any payload can run',()=>{
+ const bulk=process.env.G52_BULK;if(!bulk)throw new Error('G52_BULK required');const result=spawnSync(process.execPath,['--max-old-space-size=8192',fileURLToPath(new URL('../../../../scripts/h62/item3/g52-differential/engine_payload_reference.mjs',import.meta.url)),bulk,'1','heap-refusal-control'],{encoding:'utf8',timeout:10000});assert.notEqual(result.status,0);assert.match(result.stderr,/parent heap prerequisite/);
+});
