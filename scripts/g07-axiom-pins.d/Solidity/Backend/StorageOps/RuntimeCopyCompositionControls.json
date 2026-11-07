@@ -4,6 +4,26 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_footprints": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_stores": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_symbolic_stores": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.bad_old_evidence": [
   "Classical.choice",
   "Quot.sound",
@@ -20,6 +40,16 @@
   "propext"
  ],
  "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.next_generated_footprint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.next_generated_run": [
   "Classical.choice",
   "Quot.sound",
   "propext"

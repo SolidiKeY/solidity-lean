@@ -1,0 +1,57 @@
+{
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.body_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.returned_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.source_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.stale_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReferenceCallReadbackWitness.lean:Solidity.Backend.Passes.AuditReferenceCallReadback.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

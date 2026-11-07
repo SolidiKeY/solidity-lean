@@ -1,0 +1,97 @@
+{
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.actual_failing_turn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.body_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.condition_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.distinct_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.effect_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.emitted_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.failed_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.failed_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.failing_body_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.failing_prefix_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.loop_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.reached_body_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.reached_divergence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.scope_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.skipped_failure_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.spin_condition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.spin_scope_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LoopPrefixWitness.lean:Solidity.Backend.Passes.AuditLoopPrefix.spin_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
