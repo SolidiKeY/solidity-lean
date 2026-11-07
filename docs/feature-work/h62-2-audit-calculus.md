@@ -344,3 +344,13 @@ The ledger retains bounded lookup guards separately from unbounded logical lengt
 
 
 Measured table/plan accounting passed at 0.257004s / 74,080 KiB maximum child RSS; complete acceptance failed exit 1 at 0.233578s / 73,968 KiB; 89 controls passed at 0.121883s / 15,236 KiB. Documentation gate failed exit 1 at 41.758961s / 9,216 KiB on four missing references in unchanged master citing sources. Exact argv, metrics and comparisons are archived; no whole-gate or matched-performance pass is claimed.
+
+
+## Graph/search/operational-leaf source roles (2026-11-07)
+
+After fresh master inspection at 94f9862b65b98a0ca5aad630a1cbb2f4532057e4, classified every Graph2/Search3/OperationalBase11/Leaf9 declaration against exact frozen/current source identities. Prior 197 rows and owners unchanged; ledger now 222 roles reviewed, 5,061 pending; 3,746 owners confirmed, 1,537 unresolved. No fresh audit witnesses.
+
+The ledger separates raw guarded table clauses from represented functions, retained proposal counts/twin equality from traversal/native correctness, and logical no-push/exhaustion from physical resources. Exact evaluation/summary equations, full representation and no-push premises remain; actual logical definition models prevent empty-antecedent shortcuts. Both modalities, ordered power/failure semantics and exact caller posts are retained, with full haltPost size rather than performance/cap claims. Both read-only reviews pass; all 89 Python controls pass; complete acceptance remains FAIL exit 1. No source/tactic/budget edit or runtime acceptance. Off-Git measured evidence and snapshots are indexed by the call-graph-search-leaf manifest; original queues/pauses, historical gaps and STOPs remain binding.
+
+
+Measured graph/search/operational-leaf accounting passed at 0.729631s / 74,232 KiB maximum child RSS; complete acceptance failed exit 1 at 1.374805s / 74,476 KiB; 89 controls passed at 0.239797s / 15,240 KiB. Documentation failed exit 1 at 40.857819s / 9,216 KiB on four missing references in unchanged master citing sources. Exact argv/metrics/comparisons are archived. These are static gate observations, not matched tactic-performance acceptance or a whole-gate pass.
