@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/state-facts-roles-v64/semantic-roles-reviewed.json",
-    "bytes": 1911461,
-    "sha256": "fa9b09d14f58be0cdf675d42ae7d8d56aa1747fe8356bcb44057d0ed3234979e"
+    "path": "/workspace/h62-successor-bulk/solkey-derivation-roles-v66/semantic-roles-reviewed.json",
+    "bytes": 1939287,
+    "sha256": "410da2f92a12700f6308b413a035b45942eec037d42d54dfbd2cc86e2d5e7f80"
   }
 }
