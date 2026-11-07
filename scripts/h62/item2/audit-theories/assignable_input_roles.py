@@ -56,10 +56,11 @@ def main():
         rows=payload["declarations"];assert len(rows)==len(expected) and {r["theorem"]for r in rows}==set(expected)
         previous.extend(rows)
     union=previous+records;names=[r["theorem"]for r in union];assert len(names)==len(set(names))==36
-    pending=[r for r in union if "pending_impossibility_certificate"in r];assert len(pending)==1 and pending[0]["accepted_H69"]is False
+    pending=[r for r in union if "pending_impossibility_certificate"in r];assert not pending
+    intentional=[r for r in union if "current_impossibility_certificate"in r];assert len(intentional)==1 and intentional[0]["accepted_H69"]is True
     payload={"frozen_assignment_base":BASE,"current_head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),"historical_typed_snapshot_sha256":digest(source),
       "declarations":records,"reviewed_role_records":len(records),"companion_reports":{str(p):digest(p)for p in paths},"companion_validation_commands":commands,
-      "cumulative_original_roles":len(union),"remaining_original_roles":500-len(union),"joint_certificates_in_role_union":len(union)-len(pending),"ordinary_pending_impossibilities":len(pending),
+      "cumulative_original_roles":len(union),"remaining_original_roles":500-len(union),"joint_certificates_in_role_union":len(union)-len(pending)-len(intentional),"accepted_H69_in_role_union":len(intentional),"ordinary_pending_impossibilities":len(pending),
       "new_joint_witnesses_added_by_inventory":0,"new_H69_dispositions":0,"generated_candidates_dispositioned":0,"full_assignment_acceptance":False,
       "boundary":"Frozen historical typed signatures, byte-unchanged selected files, current proof receipts; no equivalence for changed definitions elsewhere or target compiler totality."}
     (out/"assignable-input-roles.json").write_text(json.dumps(payload,indent=2)+"\n")

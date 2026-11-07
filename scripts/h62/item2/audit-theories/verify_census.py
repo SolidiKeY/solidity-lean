@@ -161,7 +161,10 @@ INTENTIONAL_REASONS={
  "Solidity.Theory.Progress.Val.not_tuple":"Intentional representation refutation: plain Val has no tuple constructor; tuples use RVal.tuple.",
  "Solidity.Theory.Progress.Controls.no_tuple_local":"Intentional negative boundary: a locals head would require a plain tuple Val, already impossible.",
  "Solidity.Ty.Finite.not_array":"Intentional separation lemma: finite shapes have no direct path to a dynamic array."}
-H69_POLICY="H69 human decision 2026-11-06: checked joint-impossibility is the audit result for intentional negative controls/separation/refutation theorems; ordinary interfaces require joint witnesses."
+from audit_dispositions import ACCEPTED
+IMPOSSIBLE.update({n:(item["module"],item["helper"])for n,item in ACCEPTED.items()})
+INTENTIONAL_REASONS.update({n:item["reason"]for n,item in ACCEPTED.items()})
+H69_POLICY="H69 human decision 2026-11-06: checked joint-impossibility is the audit result for intentional negative controls/separation/refutation theorems; ordinary interfaces require joint witnesses. Coordinator Q-STATIC-VALUE option3 explicitly includes enter_static; no operational refusal coverage."
 
 def sha(b): return hashlib.sha256(b).hexdigest()
 

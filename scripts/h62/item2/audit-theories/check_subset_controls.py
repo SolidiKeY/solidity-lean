@@ -14,7 +14,7 @@ def main():
     assert positive.returncode==0,(positive.stdout,positive.stderr)
     cases=[("changed-frozen-source",["Solidity/Theory/Progress/Tuple.lean"],"frozen source changed"),
       ("uncovered-statements",["Solidity/Theory/Typed/Mem.lean"],"explicit joint witnesses missing"),
-      ("ordinary-impossible-not-H69",["Solidity/Theory/Mutability/Payable.lean"],"1 explicit joint witnesses missing"),
+      ("intentional-H69-not-joint",["Solidity/Theory/Mutability/Payable.lean"],"1 explicit joint witnesses missing"),
       ("partial-Pure-not-complete",["Solidity/Theory/Mutability/Pure.lean"],"explicit joint witnesses missing"),
       ("outside-map",["../../unmapped.lean"],"outside original frozen module map"),
       ("duplicate-module",[selected[0],selected[0]],"duplicate module")]

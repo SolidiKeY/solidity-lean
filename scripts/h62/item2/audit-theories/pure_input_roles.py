@@ -55,10 +55,11 @@ def main():
     assert len(prior)==len(previous_names)==36 and{r["theorem"]for r in prior}==previous_names
     assert previous["reviewed_role_records"]==len(prior)and not previous_names&set(SPECS)
     union=prior+records;assert len(union)==len({r["theorem"]for r in union})==44
-    pending=[r for r in union if"pending_impossibility_certificate"in r];assert len(pending)==1 and pending[0]["accepted_H69"]is False
+    pending=[r for r in union if "pending_impossibility_certificate"in r];assert not pending
+    intentional=[r for r in union if "current_impossibility_certificate"in r];assert len(intentional)==1 and intentional[0]["accepted_H69"]is True
     payload={"frozen_assignment_base":BASE,"current_head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),"historical_typed_snapshot_sha256":digest(source),
       "declarations":records,"reviewed_role_records":len(records),"companion_report":str(companion),"companion_report_sha256":digest(companion),"companion_validation":dict(command=cmd,exit=x.returncode,decisive=x.stdout),
-      "cumulative_original_roles":len(union),"remaining_original_roles":500-len(union),"joint_certificates_in_role_union":len(union)-len(pending),"ordinary_pending_impossibilities":len(pending),
+      "cumulative_original_roles":len(union),"remaining_original_roles":500-len(union),"joint_certificates_in_role_union":len(union)-len(pending)-len(intentional),"accepted_H69_in_role_union":len(intentional),"ordinary_pending_impossibilities":len(pending),
       "new_joint_witnesses_added_by_inventory":0,"new_H69_dispositions":0,"generated_candidates_dispositioned":0,"full_assignment_acceptance":False,
       "boundary":"Eight selected Pure roles, no full Pure coverage. Historical frozen types plus byte-unchanged files/current proof receipts; no dependent-definition equivalence, termination of arbitrary loops, compiler target totality or gas guarantee."}
     (out/"pure-input-roles.json").write_text(json.dumps(payload,indent=2)+"\n")

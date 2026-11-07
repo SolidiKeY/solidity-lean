@@ -1,3 +1,12 @@
+LATEST COORDINATOR DECISIONS (2026-11-07): Q-FROZEN-REBASE option1 and
+Q-STATIC-VALUE option3 are resolved. Audit original frozen statements in original
+history; report rebased coverage separately, without auditor-created versioned
+pairs or statement changes. enter_static is an explicit intentional H69 separation
+boundary; checked joint-impossibility is its result, with NO operational refusal
+coverage. Accepted H69 count4;103joint certificates unchanged;1,361original gaps.
+Original-history proof replay is the next validation item, not a scope blocker.
+Verbatim answers: scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json.
+
 LATEST HANDOFF AFTER a8 REBASE: three reviewed items complete: Pure8joint
 packets/4support-controls,8newrole inventories, and44-role/all25module acceptance
 snapshot.148current helper proofs,103joint certificates,1,362original witness/
@@ -634,7 +643,7 @@ definitions. No worker edit caused these changes. Exact old/new headers, hashes
 and diffs are in frozen-fidelity-delta.json. The full original census correctly
 refuses changed source and is not loosened or relabeled as passing.
 
-ESCALATE: action H62.audit_theories.frozen_rebaseline — current5da4771e6 changes four frozen Progress headers and dependent definitions versus c6f550e281a7; evidence frozen-fidelity-delta.json and bridge-gate-2.log. Options: keep original obligations and report current-version coverage separately with a fidelity blocker; provide owner-approved H57 versioned pairs so both versions are accounted for. Q-FROZEN-REBASE is pending; no exclusion or new premise is recommended.
+ESCALATE: action H62.audit_theories.frozen_rebaseline — current5da4771e6 changes four frozen Progress headers and dependent definitions versus c6f550e281a7; evidence frozen-fidelity-delta.json and bridge-gate-2.log. Options: keep original obligations and report current-version coverage separately with a fidelity blocker; provide owner-approved H57 versioned pairs so both versions are accounted for. Resolved by coordinator option1: audit original statements atc6 by history and report rebased coverage separately; no auditor versioned pairs or statement changes.
 
 Independent unchanged work proceeds while that question is pending. New
 verify_subset.py validates only selected original-map files whose bytes equal
@@ -925,7 +934,7 @@ positive controls prove System.run, World.enter and external World.callFrame
 success, including the sender!=self execution and settlement case. These are
 model API controls, not a proof of physical EVM compilation/ABI/gas/fork totality.
 
-ESCALATE: Solidity.Theory.Mutability.ContractWorld.World.enter_static is an ordinary interface with impossible joint hypotheses: frozen Context.Mode ordinary makes isStatic=false, readOnly makes value=0; payable_static_inputs_impossible checks the complete input telescope. Q-STATIC-VALUE options: retain ordinary witness blocker; owner-approved H57 versioned statement/model repair; explicit human disposition as an intentional H69 separation boundary (not operational refusal coverage).
+ESCALATE: Solidity.Theory.Mutability.ContractWorld.World.enter_static is an ordinary interface with impossible joint hypotheses: frozen Context.Mode ordinary makes isStatic=false, readOnly makes value=0; payable_static_inputs_impossible checks the complete input telescope. Resolved by coordinator option3: intentional H69 separation boundary, checked impossibility is the audit result; no operational refusal coverage or statement changes.
 
 The checked refutation is stored in pending_impossibility.py, absent from both
 accepted joint and H69 registries. The whole original ledger retains this entry
@@ -1283,3 +1292,46 @@ path above. Prior original evidence is preserved. Lean4.24.0/Lake5.0.0-src+
 not matched timing comparisons; historic authorized+2.073826% pair remains
 historical, no unchanged STOP rerun or raised proof budget. Full ./run-lean.sh
 and final gates remain pending; NO RUNTIME_GATE_PASS.
+
+## Explicit coordinator disposition checkpoint
+
+The two latest user-supplied coordinator answers are saved verbatim and hashed
+in handoff/COORDINATOR-ANSWERS-20261107.json; audit_dispositions.py records only
+those scoped authorizations. No scope question remains pending. History policy
+closes the fidelity question by auditing original obligations against original
+c6 statements, with current rebased coverage separately recorded. No theorem,
+definition, exclusion, premise or versioned pair was changed/created by auditor.
+Full original-history proof revalidation follows as a separate validation item.
+
+World.enter_static is now the fourth accepted H69 intentional boundary. Its
+existing payable_static_inputs_impossible certificate is the audit result;
+no joint witness, model operational refusal or physical EVM execution is claimed.
+PENDING is empty. All role/report metadata carry the decision hash, exact reason,
+accepted status and operational_refusal_coverage=false.43joint+1H69 remain44roles.
+Ordinary Payable completeness passes6joint+1acceptedH69/0pending. Literal
+--require-joint-all intentionally exits1 as inapplicable to an impossible
+intentional boundary; it is no longer an unresolved scope blocker.
+
+All148current helper receipts verify. Payable audit file changed ONLY docstrings;
+proof body/signature tokens unchanged, original interfaces untouched. Rechecked
+under unchanged resource bounds. Initial retry was stopped BEFORE Lean for
+less than4GiB reserve: owned artifact page cache accounted for12.6GB. Advised
+only owned evidence files POSIX_FADV_DONTNEED; no file contents deleted/edited,
+no process killed or resource limit relaxed. Cgroup memory12,865,265,664→
+1,248,505,856 restored reserve; bounded check then passed. This is resource
+recovery, not a timing comparison. Exact evidence in decisions evidence root.
+
+Current ledger500 records:103joint,4acceptedH69,18historicalempty,372public+
+3private pending plus986generated=1,361unique pending names/owners. The ordinary
+static record is no longer a gap; generated candidates are unchanged.13tool
+tests pass. Positive+7new corruption controls refuse acceptedH69→joint,
+operationalcoverage,decisionhash tampering,unauthorized ordinaryPure→H69,
+rolecount corruption,original/rebased equivalence claim and altered owner.
+Live subset-control label now intentional-H69-not-joint. Finder and skeptic
+passed policy,all148receipts and controls; no residual findings or reviewer
+edits/Lean/server/build. Evidence: /workspace/h62-audit-theories-decisions-20261107-evidence.
+
+Checkpoint handoff: preserve same original VM/branch/unfinished goal. Both
+questions resolved, questions=[] and no scope waits; original-history validation
+and all remaining original proofs/roles/generated/compiler/final gates remain
+work. Do not infer full assignment completion or operational static refusal.
