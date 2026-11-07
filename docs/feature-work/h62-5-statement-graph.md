@@ -52,6 +52,24 @@ not the frozen acceptance entrypoint, complete pinned corpus, coordinator rerun,
 Lean validation or a before/after timing gate. Source and fixture hashes are
 recorded privately; none of these fresh results authenticates a missing capture.
 
+### Fresh H70 exact-context reproduction
+
+The five existing H70 Python controls were freshly reproduced using current owned
+tooling from `248b8f8432eddaede1d8c4a8517c34fb1fb15c7c` in a disposable checkout
+at `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The original CollisionBound blob
+was `b54c93a5b24340a19160c1fb378d057ccee60f84` and remained byte-identical.
+All five controls passed: exact base/target and original preservation, wrong-base
+and checkout-destination rejection, preserved-original-checkout rejection,
+unexpected-copy preservation, and changed-relay-patch rejection.
+
+This establishes fresh Python source-copy and refusal behavior in the required
+historical context. It does not establish Lean checking of the overlay, owner
+commit-object availability, Contracts' empty guard, Raw compatibility or any
+production premise discharge. The current-master source still differs from this
+pin and must be refused by the unchanged guard. The historical current-tree
+failures are not relabeled as passing. Missing original captures remain
+UNVERIFIABLE; this is a new source-bound result with private H145 records.
+
 Owner: `solidity-h62-5-20261106/statement-graph`. Base:
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Branch:
 `codex/solidity-h62-5-20261106/statement-graph`.
