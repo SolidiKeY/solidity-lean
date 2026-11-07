@@ -1,4 +1,10 @@
-# C3 gate-preserving re-cut
+# C3 gate-preserving re-cut (historical intermediate version)
+
+CURRENT: the optional receipt adapter described below was subsequently removed.
+See EVIDENCE-AUTHORITY-HANDOFF.md. The live checker is byte-identical to21043
+and uses tracked evidence unconditionally; the earlier optional-adapter review
+is not acceptance authorization.
+
 
 Coordinator hold: c7c5685e4 at merge b7c3cc511. The previous successor upstream
 pin change, mandatory direct-audit check and MCP acceptance alternative were

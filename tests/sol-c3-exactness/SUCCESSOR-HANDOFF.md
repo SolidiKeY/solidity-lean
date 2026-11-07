@@ -1,11 +1,9 @@
 # H82 C3 successor checkpoint (historical gate results)
 
-CURRENT POLICY: GATE-RECUT-HANDOFF.md supersedes the gate/pin and acceptance
-claims below. The e684 pin and original lake-only acceptance policy are restored;
-no required direct/MCP audit is imposed. Historical successor PASS results under
-the withdrawn changes are not approved acceptance. Artifact observations and
-intake provenance remain preserved.
-
+CURRENT POLICY: EVIDENCE-AUTHORITY-HANDOFF.md supersedes both the earlier gate
+changes and the optional receipt adapter. The checker is byte-identical to21043,
+uses tracked evidence and ignores SUCCESSOR-EVIDENCE.json. Historical successor
+PASS results are not approved acceptance; independent observations remain history.
 
 Status: partial implementation/validation checkpoint; whole inheritance goal
 remains blocked. Original OV goal retained; no new/resumed retiree goal, master

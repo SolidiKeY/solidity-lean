@@ -226,31 +226,6 @@ def write_scope_errors(paths, adopted_is_ancestor):
     return errors
 
 
-def bound_evidence(key, legacy):
-    """Use optional checksum-bound receipts only when the complete pair exists.
-
-    Clean checkouts retain the original tracked-evidence path and all original
-    command, snapshot, scope, resource, axiom and final-gate requirements.
-    An available pair with changed bytes is rejected, never silently ignored.
-    """
-    index = AREA / 'SUCCESSOR-EVIDENCE.json'
-    if not index.exists():
-        return legacy
-    records = json.loads(index.read_text())
-    pair = ('audit_log', 'audit_receipt') if key.startswith('audit_') else ('fixture_log', 'fixture_receipt')
-    if not all(name in records for name in pair):
-        return legacy
-    paths = {name: ROOT / records[name]['path'] for name in pair}
-    if any(not path.resolve().is_relative_to(AREA.resolve()) for path in paths.values()):
-        raise ValueError('successor evidence path escapes C3 area')
-    if not all(path.is_file() for path in paths.values()):
-        return legacy
-    for name, path in paths.items():
-        if sha(path.read_bytes()) != records[name]['sha256']:
-            raise ValueError('successor evidence digest drift: ' + name)
-    return paths[key]
-
-
 def validate(m, overlays=None, receipt_override=None):
     overlays = overlays or {}
     def read(path):
@@ -347,8 +322,8 @@ def validate(m, overlays=None, receipt_override=None):
     changed += subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard"],
                                        cwd=ROOT, text=True).splitlines()
     errors.extend(write_scope_errors(changed, ancestry))
-    log_path = bound_evidence("audit_log", AREA / "evidence/audit-confirmation.log")
-    receipt_path = bound_evidence("audit_receipt", AREA / "evidence/audit-confirmation.log.json")
+    log_path = AREA / "evidence/audit-confirmation.log"
+    receipt_path = log_path.with_suffix(".log.json")
     require(receipt_path.exists(), "missing bounded audit receipt")
     receipt = receipt_override if receipt_override is not None else (
         json.loads(receipt_path.read_text()) if receipt_path.exists() else {})
@@ -413,9 +388,8 @@ def fixture_errors(overlays=None, receipt_override=None):
         else:
             require(bool(observed), "negative fixture accepted")
         require(row.get("comparison_limit") == f.get("comparison_limit"), "fixture comparison boundary drift")
-    log_path = str(bound_evidence("fixture_log", AREA / "evidence/compiler-fixtures-final.log").relative_to(ROOT))
-    fixture_receipt = str(bound_evidence("fixture_receipt", AREA / "evidence/compiler-fixtures-final.log.json").relative_to(ROOT))
-    receipt = receipt_override if receipt_override is not None else json.loads(read(fixture_receipt))
+    log_path = "tests/sol-c3-exactness/evidence/compiler-fixtures-final.log"
+    receipt = receipt_override if receipt_override is not None else json.loads(read(log_path + ".json"))
     cmd = ["node", checker_path, str(AREA / ".artifacts/compiler" / fm["compiler"]["file"]), packet_path]
     require(receipt.get("command") == cmd, "fixture command drift")
     require(receipt.get("exit") == 0 and not receipt.get("interrupted") and not receipt.get("pressure_stop"), "fixture run did not pass")

@@ -480,3 +480,17 @@ is retained as failure, not waived. No pin, theorem or budget was changed to
 force parity. See tests/sol-c3-exactness/GATE-RECUT-HANDOFF.md. Gate-owner route,
 shared inventory, full runtime/cache/final acceptance and original external
 retirement evidence remain waits. No known timing STOP was rerun.
+
+
+## Evidence-authority review: substitution removed
+
+The optional successor adapter described above is withdrawn: its index declared
+both paths and hashes. The checker is now byte-identical to authenticated21043,
+including its e684 pin and all original checks, and reads original tracked
+audit/fixture evidence only. SUCCESSOR-EVIDENCE.json is ignored historical data.
+No MCP diagnostic substitutes for the required lake run. Four regression tests
+PASS, including exact-file equality and a poisoned index having no effect.
+A clean checkout without successor artifacts runs without missing-file errors;
+it retains original source/scope/snapshot refusals, now including upstream
+Source/WellFormed.lean pin drift. No pin or gate was changed to force success.
+Current acceptance remains open. See tests/sol-c3-exactness/EVIDENCE-AUTHORITY-HANDOFF.md.
