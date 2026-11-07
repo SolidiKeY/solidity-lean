@@ -1,5 +1,8 @@
 import Solidity.Yul.Views.JointPlacement
 
+-- Retain dependent heap/placement reductions in the existing retained proof.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Yul.Views
 
 /-- Retained capacity comes ONLY from the supplied actual allocation lineage.

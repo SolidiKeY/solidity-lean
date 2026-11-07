@@ -1,5 +1,8 @@
 import Solidity.Yul.Views.JointMemory
 
+-- Retain dependent placement reductions in the existing 4.35 proof bodies.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Yul.Views
 
 /-- Two actual same-type writes, with proof terms erased by proof irrelevance. -/
@@ -118,7 +121,7 @@ theorem retainSameShapeWrite {D : Source.Layout} {origin h : Source.Heap D}
     (shape : HasMemoryShape x (p.shape a)) : RetainedAllocation allocated (heapWritePlacement h p a x ha shape) := by
   have present : (h.cells a).isSome := by
     have yes := congrArg Option.isSome ha
-    simpa only [Source.Heap.ty, Option.isSome_map] using yes
+    simpa only [Source.Heap.ty, Option.isSome_map, Option.isSome_some] using yes
   have actual := retainWritten allocated p history a x ha (p.shape a) shape (history.fits a present)
   have eq : retainedWritePlacement allocated p history a x ha (p.shape a) shape (history.fits a present) = heapWritePlacement h p a x ha shape := by
     refine placement_choices_ext (retainedWritePlacement allocated p history a x ha (p.shape a) shape (history.fits a present))

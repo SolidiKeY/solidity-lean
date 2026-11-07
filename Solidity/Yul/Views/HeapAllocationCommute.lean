@@ -6,7 +6,7 @@ namespace Solidity.Yul.Views
 theorem heap_type_present {D} (h : Source.Heap D) (a : Nat) (τ : Source.STy)
     (typed : h.ty a=some τ) : (h.cells a).isSome := by
   have present := congrArg Option.isSome typed
-  simpa only [Source.Heap.ty,Option.isSome_map] using present
+  simpa only [Source.Heap.ty,Option.isSome_map,Option.isSome_some] using present
 
 theorem heap_alloc_old_type {D} (h : Source.Heap D) (x : Σ τ,Source.Data D τ) (a : Nat) (τ : Source.STy)
     (typed : h.ty a=some τ) : (h.alloc x).1.ty a=some τ := by

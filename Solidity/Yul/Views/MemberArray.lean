@@ -157,7 +157,8 @@ theorem memberArrayView_residual (k : Option Nat) (n : Nat) (bound : n < 2 ^ 256
   | none => exact dynamicUint_residual n bound words m base pos outside
   | some x =>
     apply wordList_residual
-    simpa only [List.length_ofFn] using outside
+    simpa only [List.length_ofFn, arrayPayloadOffset, Option.isNone_some,
+      Bool.false_eq_true, ite_false, Nat.add_zero] using outside
 
 theorem memberArrayHeap_encode {D : Source.Layout} (h : Source.Heap D) (p : Placement h) (es : List (MixedHeapEntry p))
     (coverage : CoversMixedHeap es) (root : Nat) (τ : Source.STy) (supported : OrdinaryMemberType τ) (k : Option Nat) (n : Nat)

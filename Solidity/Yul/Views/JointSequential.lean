@@ -1,5 +1,8 @@
 import Solidity.Yul.Views.JointRaw
 
+-- Retain dependent placement reductions for the unchanged sequential decoder proof.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Yul.Views
 
 /-- Snapshot joint decoding is EXACTLY the second concrete root decoder after
