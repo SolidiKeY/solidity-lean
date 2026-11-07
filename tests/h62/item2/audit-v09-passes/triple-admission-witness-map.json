@@ -1,0 +1,169 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryTripleAdmissionControls.lean",
+  "interface_sha256": "60914e491ccea7879eadd4a971623ba72ba00c9e50836b8e0b485b78cba4f956",
+  "joint_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.length_source",
+      "signature_sha256": "fc4cd7a7cd5493cc00e42504f48e3d51a9d9d87f43625f1f6a31662c4b66e860",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.capture_source",
+      "signature_sha256": "bd42f61a25300879f40266f382d1413b6bf207e1bf0d1429f3aa721d243ba6ca",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.capture_public",
+      "signature_sha256": "abdd9d19a218b0c089caf0a2881f662224aba4ef401a43f0355d9aa8e35fda88",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.total_cost",
+      "signature_sha256": "2cfcbe776de0fcfeec2a9a64afbb942f8f9cbf0e908dd04dd102814293a2b4e0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.budget",
+      "signature_sha256": "387a6e97fb28e3f6dc07c7bf14b11bcd8237a350a42227d79f02291939a5f7b5",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.shared",
+      "signature_sha256": "6b469ca8d21f6870e911b6f6714cf9c3b8bb55fa8db74030aa6d5fa128ac0478",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.complete_result",
+      "signature_sha256": "57938f3f3b281721d3d38346c3e0638ba9263f269e9c3e5a5f8a34343601acd5",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.wrong_old_length",
+      "signature_sha256": "98b4415fd4b0ad32ef57eb794804008caefcf08790708f6ff95e35ee223e0dc9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.third_frame_required",
+      "signature_sha256": "67b49f5dfb522356317a634dad956642846967a1f0bf68d06e8f56f3bd235f73",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.bad_public",
+      "signature_sha256": "09a2cfd7e07093d503bb0141c4c69979683c6aa18c66aab982bead96c0379180",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.bad_source",
+      "signature_sha256": "d6ab39147b33cc08b560208793b29b048b019dcd7414fb4882b3ed80daba8471",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.bad_budget",
+      "signature_sha256": "141a204a9ae53293e9611488d9b55c4e78c54d42f1d2fbf060f909a016cc5587",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.reached_third_failure",
+      "signature_sha256": "7540e5d78f2d235f8b65d038aa7ec2dc802d07b5846daefb013742a76b7569e1",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell0",
+      "signature_sha256": "82422f61265212da65f0a77ba9ae98f6c2216ca4627f71330da465d3a8a2a772",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell1",
+      "signature_sha256": "6d4ec2c0dbc7366e21cc283ad5e62541414be8b56f70559bae030f39b5dd9eca",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell2",
+      "signature_sha256": "27d9066650f223640351caf8bec403684bb2f41c02e9ae7c3945881ecd873059",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell3",
+      "signature_sha256": "dba85963c6fd472c896146984c69805cd24fe60508d8134c2176e55302062f17",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell4",
+      "signature_sha256": "ac336df376da8c7f4ff68f00cb0ff07c0aee0c57751528abb2e6412e2a273a44",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell5",
+      "signature_sha256": "3f257fa0c60fbfdf88cf919476084af66de83901eb8860c844669e0751b4a8f2",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell6",
+      "signature_sha256": "a2fb08cff1aaa44a7a7cbcfdeb6ceea6274f376b941c56b1da187507ec3f4857",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell7",
+      "signature_sha256": "ad9f4a146af0adc6f583016d2595ddbf58f32f37900daae465bb7837905ce52d",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell8",
+      "signature_sha256": "c30e4cbc2a98b10b26a74de4664db0e6621b642ff08d712bf5a11decf580d2aa",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell9",
+      "signature_sha256": "fd2cbf21855fcc171bbfa5505e84d32fc82508c132520f36589244d7739f92a2",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell10",
+      "signature_sha256": "d0a0683dcf07236b6ae32c0823ffd6132807ab7b7677a66d1aaa9ac437a0c487",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell11",
+      "signature_sha256": "1d1978c7939667f9aafd68d4769663d8c6ab2c7cf77fb30a9f2d722a13919b64",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell12",
+      "signature_sha256": "0d9d8c70da13bc9d904a807c89c634a4e568572ada273370e83b990f7ed76ead",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell13",
+      "signature_sha256": "fac62a0a3a63461504bcd68ba7a1e615b08ceeae34aef1c4dfbf175a04ebda65",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell14",
+      "signature_sha256": "cbf6faff80e2454b78def4df2fa634e3020d40a99408211cd5b198107d3d4b20",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell15",
+      "signature_sha256": "8eb82b4ad67f1ae451f01d91b2d5d9e8f599ffda933ecf41be27325b2f9dfbbd",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryTripleAdmission.Controls.cell16",
+      "signature_sha256": "408ca0461544b9bc68026dd66e6d8ffabbfebbf3f8ca0ca5b3f213a93f646330",
+      "kind": "private-exact-kernel-signature"
+    }
+  ],
+  "uncovered_private_names": [],
+  "aggregate_selected": 309,
+  "aggregate_remaining": 950,
+  "limits": "Thirteen public and seventeen actual private rows checked. Model source/target admission and observations only; no native ByteWorld/emission or full Source/G24/resource adequacy.",
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.MemoryTripleAdmissionControls.0.",
+  "private_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
+}
