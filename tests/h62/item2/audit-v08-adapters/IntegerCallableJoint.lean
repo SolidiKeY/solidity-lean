@@ -46,7 +46,8 @@ theorem inputs (t : Source.IntTy) (p : Roadmap.Pipeline) :
   · cases t with | mk signed bits valid => rfl
   · rfl
 
-/-- The numeric range premise has a value in the SAME selected input model. -/
+/-- The selected-input proof is paired with the type-level range witness zero;
+`t.zero_mem` is independent of the selected input model. -/
 theorem joint (t : Source.IntTy) (p : Roadmap.Pipeline) :
     IntegerCallable.Inputs (global t p) frame (declaration t) t ∧
       ∃ n : Int, t.lo ≤ n ∧ n ≤ t.hi :=
