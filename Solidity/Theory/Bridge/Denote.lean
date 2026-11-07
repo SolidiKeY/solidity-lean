@@ -34,6 +34,9 @@ R10); `Theory/Typed/Mem.lean` reads it (`MAddrT`, `Grown.writeT`) through
 `Calculus/StateFacts.lean`.
 -/
 
+-- Preserve the pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Semantics (lookupBy)
@@ -395,7 +398,7 @@ theorem Op3.denote_eval {a b c s : Srt} (o : Op3 C a b c s) {x : Option (a.Den C
        obtain ⟨_, _, rfl⟩ := hv
        rfl)
     | (rw [Op3.denote, ← SVal.obs_strip, Storage.obs_push hv])
-    | (simpa only [Op3.denote, Option.bind_some] using hv)
+    | (simpa only [Op3.denote, Option.bind_eq_bind, Option.bind_some] using hv)
 
 end Bridge
 

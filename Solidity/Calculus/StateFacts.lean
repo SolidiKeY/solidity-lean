@@ -175,7 +175,7 @@ def OLe {α : Type} (a b : Option α) : Prop := ∀ x, a = some x → b = some x
 
 theorem OLe.refl {α : Type} (a : Option α) : OLe a a := fun _ h => h
 
-theorem OLe.none {α : Type} (b : Option α) : OLe none b := fun _ h => Option.noConfusion h
+theorem OLe.none {α : Type} (b : Option α) : OLe none b := fun _ h => by cases h
 
 theorem OLe.trans {α : Type} {a b c : Option α} (h₁ : OLe a b) (h₂ : OLe b c) : OLe a c :=
   fun x h => h₂ x (h₁ x h)

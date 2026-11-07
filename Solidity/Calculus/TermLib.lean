@@ -191,8 +191,8 @@ escape's term prints as the closer's does. -/
 /--
 info: @TermTaclet.findOnSave : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {P : PrimTy}
   {p q : Tm C Γ (Srt.path (Ty.prim P))} {v : P.Denote},
-  autoParam (p.hasSeg = true) _auto✝ →
-    autoParam (p.sameSegs q = true) _auto✝¹ → TermTaclet tm{ find(save(s, p, lit(v)), q) } tm{ lit(v) }
+  autoParam (p.hasSeg = true) TermTaclet._auto_1 →
+    autoParam (p.sameSegs q = true) TermTaclet._auto_3 → TermTaclet tm{ find(save(s, p, lit(v)), q) } tm{ lit(v) }
 -/
 #guard_msgs in
 #check @TermTaclet.findOnSave
@@ -201,7 +201,7 @@ info: @TermTaclet.findOnSave : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st
 info: @TermTaclet.findOnPushFrame : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {E : Ty}
   {p : Tm C Γ (Srt.path (Ty.ref (RefTy.array E)))} {v : Tm C Γ (Srt.sv E)} {P : PrimTy}
   {q : Tm C Γ (Srt.path (Ty.prim P))},
-  autoParam (p.diverges q = true) _auto✝ →
+  autoParam (p.diverges q = true) TermTaclet._auto_69 →
     TermTaclet tm{ find(save(save(s, p[p.length], v), p.length, p.length + 1), q) } tm{ find(s, q) }
 -/
 #guard_msgs in
@@ -212,7 +212,7 @@ info: @TermTaclet.selectOnSaveMemberIn : ∀ {C : Contract} {Γ : Ctx} {s : Tm C
   {v : Tm C Γ (Srt.sv T)} {r sn : Name} {hr : C.rootType r = some (Ty.ref (RefTy.struct sn))}
   {p' : Tm C Γ (Srt.spath sn T)} {sn₁ : Name} (K : SCtxS C Γ sn sn₁) {P : PrimTy}
   {q : Tm C Γ (Srt.spath sn₁ (Ty.prim P))},
-  autoParam (p.shift? = some { r := r, sn := sn, h := hr, p := p' }) _auto✝ →
+  autoParam (p.shift? = some { r := r, sn := sn, h := hr, p := p' }) TermTaclet._auto_25 →
     TermTaclet (Tm.app2 Op2.findIn (K.fill tm{ select(save(s, p, v), r) }) q)
       (Tm.app2 Op2.findIn (K.fill (Tm.app3 Op3.saveIn tm{ select(s, r) } p' v)) q)
 -/

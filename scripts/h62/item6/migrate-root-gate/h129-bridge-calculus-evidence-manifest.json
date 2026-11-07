@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "checkpoint": "H129-bridge-calculus",
+  "archive": {
+    "path": "/workspace/h62-migrate-root-gate-evidence/h129-v435-bridge-calculus-20261107.tar.gz",
+    "size_bytes": 3558538,
+    "sha256": "1e00b1ee9de0e7ed1c22ed350b6514379162067e22b8aca5d33923148dfe31fe"
+  },
+  "payload_files": 86,
+  "payload_size_bytes": 70996061,
+  "validated_prefix_modules": 78,
+  "planned_modules": 6630,
+  "checked_declarations": 1572,
+  "outside_standard_three": [],
+  "old_new_api_and_axiom_acceptance": false,
+  "full_acceptance": false,
+  "timing_comparison": false
+}

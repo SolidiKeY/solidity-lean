@@ -1027,7 +1027,7 @@ private theorem UpdElem.applyV_ok {Δ : Ctx} {σ₀ : State C Γ} (e : UpdElem C
     simp only [UpdElem.applyVM, Option.bind_eq_some_iff, Option.some.injEq,
       Prod.mk.injEq] at h
     obtain ⟨g₁, hg, rfl, rfl⟩ := h
-    exact ⟨hg, .inr ⟨fun _ _ _ he => UpdElem.noConfusion he, rfl⟩⟩
+    exact ⟨hg, .inr ⟨fun _ _ _ he => (by cases he), rfl⟩⟩
 
 /-- **What `applyV` computes is the typed global part `globT` computes and,
 in each local, what `Upd.held` says.** -/
@@ -1416,7 +1416,6 @@ theorem State.eq_of_readsAs {σ σ' : State C Γ} (h : σ.ReadsAs σ') : σ = σ
   rcases σ' with ⟨st', H', hp', env', nt', sb', tx'⟩
   simp only [State.glob, State.mk.injEq] at hg
   obtain ⟨rfl, rfl, hh, -, rfl, rfl, rfl⟩ := hg
-  cases hh
   have he : env = env' :=
     TEnv.ext fun _ i => LTy.VDen.ofT_injective _ (hl i)
   rw [he]

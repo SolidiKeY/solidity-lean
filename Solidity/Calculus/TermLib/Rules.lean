@@ -31,6 +31,9 @@ which imports this module: the printers stay above the core
 `Tm.denote_eval` (`Calculus/Lands.lean`).
 -/
 
+-- Preserve the pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Semantics
