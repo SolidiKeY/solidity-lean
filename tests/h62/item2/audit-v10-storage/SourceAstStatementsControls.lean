@@ -1,9 +1,10 @@
-import Solidity.Lowering.P8.SourceAstStatementCorrespondence
+import Solidity.Lowering.P8.SourceAstBranchCorrespondence
 import Solidity.Source.Ctor
 
 /-! Runtime checks of all four existing LibraryTry function bodies per pipeline.
 Regression purpose: retain ordered prefixes, dirty storage receiver, success
 returns and Error(string memory) handlers, plus absent return/initializer syntax.
+Absent-else and plain/unnamed-catch boundaries are guarded as syntax too.
 Generic syntax cases are not valid-program witnesses. Conversion is not elaboration,
 Source execution, artifact origin or H24 admission. -/
 namespace H62.StorageAudit.SourceAstStatementsControls
@@ -87,6 +88,28 @@ def refusals : Except String Unit := do
   match ← statement 128 uninitialized with
   | .simpleStmt (.declVar (.varDecl (.elem (.int false 256 _)) none "fresh") .none) => pure ()
   | _ => throw "local declaration or absent initializer changed"
+
+  -- Absent branches/catch names stay absent; these are syntax-only fixtures.
+  let condition := Json.mkObj [("nodeType", .str "Literal"), ("kind", .str "bool"), ("value", .str "true")]
+  let branch := Json.mkObj [("nodeType", .str "IfStatement"), ("condition", condition),
+    ("trueBody", empty), ("falseBody", .null)]
+  match ← statement 128 branch with
+  | .ifStmt (.lit (.bool true)) (.blockStmt (.block .nil)) .none => pure ()
+  | _ => throw "absent else or conditional body changed"
+  let plain := Json.mkObj [("nodeType", .str "TryCatchClause"), ("errorName", .str ""),
+    ("parameters", .null), ("block", empty)]
+  match ← catchWith 128 (block 128) plain with
+  | .catchPlain (.block .nil) => pure ()
+  | _ => throw "plain catch changed"
+  let rawParam := Json.mkObj [("nodeType", .str "VariableDeclaration"),
+    ("typeName", Json.mkObj [("nodeType", .str "ElementaryTypeName"), ("name", .str "bytes")]),
+    ("storageLocation", .str "memory"), ("name", .str "raw")]
+  let unnamed := Json.mkObj [("nodeType", .str "TryCatchClause"), ("errorName", .str ""),
+    ("parameters", Json.mkObj [("nodeType", .str "ParameterList"), ("parameters", .arr #[rawParam])]),
+    ("block", empty)]
+  match ← catchWith 128 (block 128) unnamed with
+  | .catchSig none (.param (.elem .bytes) (some .memory) (some "raw")) .nil (.block .nil) => pure ()
+  | _ => throw "unnamed catch signature changed"
 
 #eval do
   match refusals with
