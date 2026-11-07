@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "f0fbbff837bd5c0df583ec434ba11f1b14eceec3908ce30858ee7a66a1dfc23f",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayRead.lean:15:run_current",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayRead.run_current",
+      "signature": "theorem run_current (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)\n    (i : Nat) (fits : i < Evm.W) :\n    Evm.run code { machine with stack := .val \u27e8i,fits\u27e9 :: .slot slot :: tail } =\n      if i < machine.store slot then .ok { machine with stack := .val (machine.store.cells (.data slot i)) :: tail } 0 else .revert",
+      "signature_sha256": "731ed72f288899eaf72a85a5b7b93c9f6f2d395bed333e7ed38299eba24c075f",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.read_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayRead.lean:57:failure_matches",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayRead.failure_matches",
+      "signature": "theorem failure_matches {n : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) (machine : Evm.Machine)\n    (tail : List Evm.Word) (slot : Evm.Slot) (header : machine.store slot = old.length.val) :\n    Evm.run code { machine with stack := .val \u27e8i.val,i.isLt\u27e9 :: .slot slot :: tail } = .revert \u2194\n      (path i).readLive Value.dflt old = none",
+      "signature_sha256": "bb6eb1b72031e8c4ec07b895c39ff958b3668d6284a41963d22764e31ca97402",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.read_failure_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayRead.lean:74:represented_read",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayRead.represented_read",
+      "signature": "theorem represented_read {n : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) (value : Value G (.prim p))\n    (found : (path i).readLive Value.dflt old = some value)\n    (base : Solidity.Storage.Loc) (fits : TargetOperations.KeysFit base) (store : Store)\n    (machine : Evm.Machine) (tail : List Evm.Word)\n    (before : Represented old (PrimitivePop.queries [i]) base store)\n    (initial : \u2200 q \u2208 PrimitivePop.queries (G := G) (p := p) [i],\n      machine.store.cells (TargetOperations.toSlot (q.location base) (TargetOperations.query_keysFit q base fits)) = TargetOperations.encodeWord (store (q.location base))) :\n    Evm.run code { machine with stack := .val \u27e8i.val,i.isLt\u27e9 :: .slot (TargetOperations.toSlot base fits) :: tail } =\n      .ok { machine with stack := .val (TargetOperations.encodeWord (PrimTy.toWord value.head)) :: tail } 0",
+      "signature_sha256": "86478a8101136efd32e8fc63677bee34851935c11809d4ec751bb442b2ed579d",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.represented_read_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayRead.lean:110:complete_read",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayRead.complete_read",
+      "signature": "theorem complete_read {n N : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) (value : Value G (.prim p))\n    (found : (path i).readLive Value.dflt old = some value)\n    (base : Solidity.Storage.Loc) (fits : TargetOperations.KeysFit base) (store : Store)\n    (machine : Evm.Machine) (tail : List Evm.Word) (numeric : WordStore)\n    (hash : Solidity.Storage.Pre \u2192 Nat) (locations : List Solidity.Storage.Loc)\n    (before : Represented old (PrimitivePop.queries [i]) base store)\n    (transported : Transport N hash locations store numeric)\n    (covered : Solidity.Storage.Loc.data base i.val \u2208 locations)\n    (initial : \u2200 q \u2208 PrimitivePop.queries (G := G) (p := p) [i],\n      machine.store.cells (TargetOperations.toSlot (q.location base) (TargetOperations.query_keysFit q base fits)) = TargetOperations.encodeWord (store (q.location base))) :\n    Evm.run code { machine with stack := .val \u27e8i.val,i.isLt\u27e9 :: .slot (TargetOperations.toSlot base fits) :: tail } =\n      .ok { machine with stack := .val (TargetOperations.encodeWord (PrimTy.toWord value.head)) :: tail } 0 \u2227\n    numeric ((Solidity.Storage.Loc.data base i.val).word N hash) = PrimTy.toWord value.head",
+      "signature_sha256": "67e30ae299ff0572439351d9250912cb09b7775397fea0569a83c821905bc28e",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.complete_read_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}
