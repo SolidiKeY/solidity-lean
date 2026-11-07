@@ -197,8 +197,14 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='proof-help'){
+  if(['proof-help','proof-hover'].includes(config.suite)){
     if(config.target!=='local'||!ids.includes('native-certified-proof-help'))errors.push('missing native certified proof-help observation');
+    if(config.suite==='proof-hover'){
+      const observation=result.scenarios.find(s=>s.id==='native-certified-proof-help')?.observation?.observations,popup=observation?.hoverPopup?.capture?.hoverPopup;
+      if(!popup?.shown||!popup?.shownAfterCapture||!popup?.hidden||observation?.hoverPopup?.status!=='captured'||!observation.hoverPopup.capture?.screenshot||!Number.isInteger(observation?.hoverDuringVerification?.wire?.popupRequestIndex))errors.push('missing actual popup, dismissal or second wire observation');
+      if(!observation?.actions||observation.actions.length!==2||!['guide','index'].every(choice=>observation.actions.some(a=>a.choice===choice&&a.menu?.status==='captured'&&a.menu.capture?.screenshot&&a.document?.status==='captured'&&a.document.capture?.screenshot)))errors.push('missing both native documentation actions');
+    }
+
   }else if(config.suite==='trace-light-show'){
     if(config.target!=='dafny'||!ids.includes('native-trace-light-show-hide'))errors.push('missing native light trace observation');
   }else if(config.suite==='trace-visibility'){
