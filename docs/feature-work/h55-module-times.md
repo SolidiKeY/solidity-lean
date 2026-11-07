@@ -1703,3 +1703,20 @@ not excluded. Independent read-only finder and skeptic reviewed the counts
 and source-hash boundaries without Lean, server or builds. The skeptic
 identified stale same-byte context mappings in the initial join; they are now
 rejected and covered by a synthetic control.
+
+## Signature fixture standalone candidates
+
+`signature_fixture_controls.py` records seven supplied source-hashed rows.
+The isolated driver builds private fingerprint/environment oleans and checks
+signature records, guarded missing-name refusal and axiom diagnostics. The
+intentional missing-name diagnostic requires successful guarded elaboration.
+Equal type serialization does not prove equal bodies, ownership or safe
+movement; environment snapshots do not authenticate loader bytes or prevent
+an ABA replacement.
+
+The candidate driver writes private logs, snapshots and oleans; it checks
+resources before commands and applies a 120-second timeout, but does not
+continuously monitor the four-GiB reserve during each command. Its virtual
+limit is not an RSS cap or H55 runner attestation. Current inputs and outcomes
+remain unresolved. Independent read-only finder and skeptic reviewed the
+fixtures without Lean, server or builds; no runtime acceptance is inferred.
