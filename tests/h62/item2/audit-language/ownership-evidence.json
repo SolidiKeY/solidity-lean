@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "recipient": "solidity-sol2-20261104/numeric-literals",
+  "ownership": {
+    "path": "tests/h62/item2/audit-language/ownership.json",
+    "sha256": "7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce",
+    "bytes": 663394
+  },
+  "portable_evidence": {
+    "path": "/workspace/h62-audit-language-relocation-export-20261107/portable-evidence.tar.gz",
+    "sha256": "de76b7a75a4cc224c335172e6a21a00c3045bf0dcf1c6c9cc5d584eed0d33382",
+    "bytes": 29018738,
+    "ownership_member": "coordinator-inputs/ownership.json",
+    "member_sha256": "7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce",
+    "checksums": "/workspace/h62-audit-language-relocation-export-20261107/SHA256SUMS",
+    "checksums_sha256": "74e04a3bd5519569c61721fb5b96e4616e788e13fe18dd89aea66d3b20b59ff7"
+  },
+  "boundary": "Pinned original audit input and existing portable evidence; no live-owner reassignment or full audit completion. Bulk archive remains off Git."
+}

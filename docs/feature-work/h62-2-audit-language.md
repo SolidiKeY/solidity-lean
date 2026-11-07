@@ -1,4 +1,4 @@
-# H62 item 2: audit-language — stopped retirement handoff
+# H62 item 2: audit-language — resumed partial witness checkpoint
 
 Batch `solidity-h62-2-20261106`, owner `audit-language`.
 Repository `/workspace/solidity-lean`; branch
@@ -10,7 +10,164 @@ inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
 
 
-## H44 reviewability split — current packaging
+## Coordinator finder portability corrections on 2026-11-07
+
+The held head is `60f3df88d6dcb7b9dd1a31e9e8358e8348a01484`. Historical
+receipt paths remain provenance/defaults; each receipt now also declares its
+member relative to the evidence root. A shared resolver is used by verification,
+export authentication and the other receipt readers. With `H62_EVIDENCE` set,
+only that root is used: missing or corrupt relocated files fail, without reading
+the historical absolute path. Absolute relative-members, parent traversal and
+symlinks escaping the selected root are rejected. Identity, SHA256, reconstruction,
+fidelity, source, axiom and witness predicates are unchanged.
+
+The subsequent coordinator review found that gate-repair patches still used a
+separate path join. `approved_revisions` now routes those reads through the same
+containment resolver. Valid-byte file and directory symlink escapes are rejected
+before opening outside patch contents; normal authentication still succeeds.
+The regression demonstrates the old held implementation attempting that read,
+then checks rejection through the actual gate-repair entry point.
+
+The regression reproduces both reported failures using the held scripts, then
+accepts both repaired flows while all legacy-root file reads are forbidden.
+It also runs from relocated input data with setup-time legacy reads forbidden.
+All 20 controls pass, including gate-repair escapes, corruption/missing receipts, no fallback, default
+path behavior, containment and the five contiguous registration rows. This is
+saved acceptance replay using source bytes matching actual recorded check hashes;
+it invokes no Lean and establishes no new proof or full runtime gate.
+
+The blank line before the FixedPoint registration row is removed. No Lean file,
+statement, proof budget or existing gate predicate changes. The latest user
+explicitly authorizes pushing the original lane branch after these corrections;
+no default-branch push or publication is authorized. Original audit obligations
+remain unfinished and are retained in `resume.json` and the exported handoff.
+
+## Requested master merge resolution on 2026-11-07
+
+Merged fetched master `df554535e9c8d308276a99ea23611c7d63ae5919` into the
+existing lane parent `bdc5942ac81e4e6b733fc2a7ae7711df97a6c71e`, as explicitly
+requested. The only conflict is the cast simplification in FixedPoint's
+`tmod_between`. Retaining the local `rfl` cast equality preserves the earlier
+portable gate repair; the complete resolved file equals its pre-merge lane bytes
+(SHA256 `bcfc09c015e3d03927ad142617d8741ede4b9621786a6021bdfe69d3010ce66d`).
+Every other upstream merge result is preserved. No new proof implementation,
+statement, computational definition, axiom, exclusion or budget change is made
+by this resolution. Existing upstream changes remain attributed to the merge.
+
+Fresh official v4.35 checks pass for KeySort and the resolved FixedPoint module,
+with explicit `-j1`, 8 GiB address-space cap, zero swap and 4 GiB reserve. Independent
+read-only finder and skeptic reviews confirm all 18,532 previously unconflicted
+index entries remain unchanged and no unresolved entries or markers remain.
+This establishes the focused resolution checks, not full build/runtime acceptance
+or a new timing comparison. The full audit remains partial; earlier waits persist.
+
+`merge-resolution.json` and the external evidence directory's
+`merge-fixedpoint-20261107/` record both parents, chosen blob, checks and reviews.
+No history is reset and no push or default-branch merge is performed. The new
+merge head is recorded by the exported handoff to avoid a self-reference in Git.
+
+## Coordinator build-touched repair on 2026-11-07
+
+The failed coordinator head is `683cab3cabe94700b2275f6f380c014e05c1e824`.
+After fetch, current origin/master is `05d2c25872c4bb963a0ca7f605905e6e1e99eedc`,
+already an ancestor of that lane head; no reset, rebase or new merge was needed.
+This is the cleanup increment base, not a claim that the failed head was accepted.
+
+Hash proofs now use their existing branch facts with `ite_true`/`ite_false`,
+removing all references to the renamed `ite_eq_left`/`ite_eq_right` lemmas.
+FixedPoint's remainder proof uses a local cast equality proved by `rfl` rather
+than either version-specific named cast lemma. Only five proof bodies change;
+all 102 theorem and 173 declaration headers remain unchanged. No statements,
+computational definitions, axioms, exclusions or proof budgets change.
+
+Both repaired files pass three fresh official v4.35 serial checks without
+warnings, with the same 8 GiB address-space cap, explicit `-j1`, zero swap and
+4 GiB reserve as three pre-edit checks. Median Hash time changes from 4.724 s
+to 4.221 s (-10.65%); FixedPoint from 1.9136 s to 1.9167 s (+0.16%). Neither
+crosses the greater-than-10% slowdown stop. Raw trials are retained; these focused
+measurements do not establish full-build performance or a v4.24 gate pass.
+The first attempted cast-lemma removal failed locally; that failed evidence is
+retained, and no failed artifact is reused in final fresh checks.
+
+A small committed gate-repair manifest pins the exact two source/patch hashes.
+Full patches stay off Git. The checker, verifier and exporter accept this revision
+only when explicitly selected, checking the exact path set, original frozen base,
+strict patch context, source headers, options and current bytes. Historical H70
+producer receipts remain unchanged. Set `H62_EVIDENCE` to relocate external patch
+artifacts; no workspace-root path is hardcoded in the new validation script.
+
+The repository pin remains v4.24 while the mandatory migration archive is v4.35.
+The requested newer-name errors have been removed without choosing a different
+build or reusing old-toolchain caches. The global documentation-path check finds two unchanged fixture-placeholder
+references in a different audit lane; they are recorded, not repaired here.
+The coordinator must rerun its actual gate;
+no coordinator/full/runtime pass is inferred from local v4.35 checks. Original
+51-certificate coverage, remaining queue, version/fidelity waits and goal remain
+unfinished; this repair adds no new witness theorem.
+
+## Resumed at accepted master on 2026-11-07
+
+The latest user explicitly requested re-baselining and continuation. The original
+lane fast-forwarded from `e8801a56d985202d80a12b5e8f2ea6525d8bb239` to accepted
+master `4f0a2d6abe3a920d8c5a20c8c06d373a1014824d`; original frozen base and all
+lane commits remain ancestors. Earlier retirement/H44 sections below are history.
+The original goal is incomplete; no goal was created/reset or API state invented.
+
+Under H82, the exact two authenticated H70 producer proof patches are now applied
+locally. All 102 theorem headers/section contexts and declaration headers remain
+unchanged. FixedPoint and Hash/CollisionBound both pass bounded official v4.35
+checks. The checker retains original frozen-byte guards and permits only exact
+checksum-authenticated postimages when explicitly supplied; it has no generic
+snapshot override. Other changed core sources still fail closed.
+
+There are now 51 kernel-checked full-leading-telescope certificates: the previous
+12, three additional catalog statements and all 36 FixedPoint core statements
+with leading arguments. The same concrete unsigned 8-bit, zero-digit type supplies
+the intrinsic values and their proofs, with actual 255+1 overflow and a nonzero
+divisor. Closed `Fx.solc_lossy` has no leading hypotheses and stays accounted for
+as an uncovered conservative candidate; no statement was dropped. The 4,146-row
+frozen census now has 4,095 uncertified candidates, pending interface classification.
+These are feasibility results, not compiler totality or solc code generation.
+
+Acceptance verifies actual target-import bytes against the frozen source or exact
+approved proof postimage, plus current witness-module hashes, axiom lines and exact
+association markers. All 51 pass; reassigned witness controls are rejected. Both
+new and existing mismatch commands reject the wrong imported telescope. Witnesses
+introduce no axioms, sorry, native evaluation shortcuts or increased proof budgets.
+
+The ownership input defaults to a repository sibling and can be relocated with
+`H62_COORDINATOR_INPUTS`; its required SHA256 is unchanged. Regeneration produces
+the exact original census bytes. New scripts avoid a fixed VM workspace root;
+absolute paths in saved manifests remain required evidence provenance.
+
+The next Source/Hoare attempt stops before Lean: accepted master's
+`Source.Machine.St` adds an imported resource cursor field absent at the frozen
+base. No replacement premise, state definition or unauthorized repair is invented.
+A compatible version/fidelity artifact remains a typed producer dependency. The
+Syntax.Raw report remains pending rather than a newly observed local failure.
+
+Actual tools: Lean 4.35.0, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`,
+and Lake 5.0.0-src+eb6cafb. Fresh bounded KeySort passes (2.413 s prerequisite run;
+1.413 s witness import run). Every Lean invocation uses explicit `-j1`, no swap,
+a bounded address-space cap and a 4 GiB available reserve. Existing source proofs
+were not refactored for performance; no comparable passing old migration baseline
+or full-build timing result is claimed.
+
+Evidence is under the externally supplied evidence directory's
+`resume-20261107/`: exact re-baseline record, applied receipts, prerequisite and
+witness checks, fidelity/negative acceptance, byte-identical census, static gates,
+actual versions and independent finder/skeptic reviews. Layer, generated-root,
+fragment, documentation-path and whitespace gates pass. Full runtime/Bridge/Solkey
+checks remain pending; the repository launcher still selects v4.24, whereas this
+lane must use the pinned official v4.35 archive. No RUNTIME_GATE_PASS is claimed.
+
+This is the required fresh-thread handoff after five work items, on the same
+original VM/branch/goal. `resume.json` retains every open queue/backfill item and
+wait. No replacement goal/thread is self-launched and no completion is requested.
+The full assignment remains partial: semantic coverage, remaining witnesses,
+compiler success/failure/gas/fork obligations, producer routing and full gates.
+
+## H44 reviewability split — historical packaging
 
 The generated 389-file scope/ownership inventory is preserved off Git at
 `/workspace/h62-audit-language-evidence/h44/scope-manifest.full.json`.
@@ -31,7 +188,7 @@ Exact scope reproduction and whitespace checks pass. The global documentation
 checker fails on five unrelated references whose citing files equal the cleanup
 parent; none is changed here. The failures remain recorded in H44 split evidence.
 
-## H82 retirement — authoritative current disposition
+## H82 retirement — historical, superseded by explicit 2026-11-07 resumption
 
 The human explicitly stopped this worker and assigned the handoff to
 `solidity-sol2-20261104/numeric-literals`. No further proof implementation,
