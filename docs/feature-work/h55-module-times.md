@@ -2351,3 +2351,20 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/primitive-extra-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Backend migration diagnostic observations
+
+`backend_migration_controls.py` records two previously unreferenced backend
+migration diagnostics with source hashes and the migration document hash. One
+copies the pinned Scalar.ternary body and enumerates actual opcode constructors;
+the other isolates its library dependencies. Neither replaces the original
+backend definition or changes its signature or axiom pin. Current invocation,
+inputs, effects and outcomes remain unresolved; this is supplied-subset evidence.
+
+At merge head `9d847d390d68a5a29d0f1f8257f60e9dba33341e`, the refreshed static
+index has 790 candidates, 586 with supplied current references and 204 without;
+seven retain historical references for review. Eleven candidates were added and
+none changed or removed since the preceding snapshot. Independent read-only finder
+and skeptic checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/backend-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
