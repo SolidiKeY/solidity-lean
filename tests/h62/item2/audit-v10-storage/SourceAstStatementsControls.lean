@@ -1,9 +1,10 @@
-import Solidity.Lowering.P8.SourceAstStatements
+import Solidity.Lowering.P8.SourceAstStatementCorrespondence
 import Solidity.Source.Ctor
 
 /-! Runtime checks of all four existing LibraryTry function bodies per pipeline.
 Regression purpose: retain ordered prefixes, dirty storage receiver, success
-returns and Error(string memory) handlers. Conversion is not elaboration,
+returns and Error(string memory) handlers, plus absent return/initializer syntax.
+Generic syntax cases are not valid-program witnesses. Conversion is not elaboration,
 Source execution, artifact origin or H24 admission. -/
 namespace H62.StorageAudit.SourceAstStatementsControls
 open Lean Solidity.Source Solidity.Lowering.P8.SourceAstStatements
@@ -72,6 +73,20 @@ def refusals : Except String Unit := do
     unless !(statement 128 (← Json.parse raw)).isOk do throw "invalid/unsupported statement accepted"
   let empty := Json.mkObj [("nodeType", .str "Block"), ("statements", .arr #[])]
   unless (block 128 empty).isOk && !(statement 0 empty).isOk do throw "empty/depth boundary changed"
+
+  -- Optional syntax boundaries: no value-return or initializer may be invented.
+  let bareReturn := Json.mkObj [("nodeType", .str "Return"), ("expression", .null)]
+  match ← statement 128 bareReturn with
+  | .returnStmt .none => pure ()
+  | _ => throw "bare return gained a value"
+  let declaration := Json.mkObj [("nodeType", .str "VariableDeclaration"),
+    ("typeName", Json.mkObj [("nodeType", .str "ElementaryTypeName"), ("name", .str "uint256")]),
+    ("storageLocation", .str "default"), ("name", .str "fresh")]
+  let uninitialized := Json.mkObj [("nodeType", .str "VariableDeclarationStatement"),
+    ("declarations", .arr #[declaration]), ("initialValue", .null)]
+  match ← statement 128 uninitialized with
+  | .simpleStmt (.declVar (.varDecl (.elem (.int false 256 _)) none "fresh") .none) => pure ()
+  | _ => throw "local declaration or absent initializer changed"
 
 #eval do
   match refusals with
