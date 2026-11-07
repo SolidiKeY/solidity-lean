@@ -1175,3 +1175,38 @@ Both archives remain off Git under H44. Read-only finder/skeptic found no
 confirmed restore-scope or freeze-boundary defect; neither used Lean/server,
 builds or writes. Original H90/importer, inherited extraction, binary-courier
 and native/browser obligations remain open.
+
+
+### Saved H90 first-refusal frontier
+
+After fetching master81512fd7298e, the lane contains that publication and keeps
+its prior portability commit. The immutable scope publication pin advances to
+81512fd7298e without changing allowlists; historical checkpoint source pins remain
+versioned observations, not current-file equality promises.
+
+`census-refusal-frontier.py` reuses the complete frozen H90 census verifier, joins
+all1,655 rows to exact pinned fixture/contract/function/source-ID AST identities,
+and partitions them as241both,1,245printed-only,4canonical-only and165neither.
+The1,245 printed-only rows have66distinct first-refusal diagnostics. The largest
+are binary common-type metadata293, unsupported expression211, unsupported type
+declaration158, String expected86 and unsupported statement80. These counts
+describe the saved reader observations; no fresh reader execution or admission
+gain is claimed. Printed bodies still do not establish existing-route elaboration.
+
+Each printed-only row retains its full identity, canonical function-AST hash and
+observed elementary/user-defined type occurrences. Context labels follow the
+outer function signature versus body; nested function-type parameter syntax in a
+body stays body context. Occurrences are neither failing-node attribution nor
+later-blocker discovery. The report does not infer an algorithm repair or relax
+refusals. All original form-by-form support/parity obligations remain.
+
+`census-refusal-frontier-manifest.json` pins generator, input census and off-Git
+H44 report4233c0585c733b012656e8542d3b9dc13a0e06060c2b350de8ec83165cd4238e
+(68,357bytes). Default replay compares the frozen manifest and full report bytes
+without rewriting either. External controls cover all four partitions, duplicate
+identity, invalid outcome/identity rejection and nested type contexts. Capture,
+replay and controls pass. No Lean source/proof/interface/budget changes occurred;
+no new Lean/MCP/build or stopped runtime benchmark was needed. Independent
+read-only finder/skeptic confirmed the context correction and found no remaining
+blocker; neither used Lean/server/builds/writes. Producer transport, migration,
+runtime STOP and original acceptance dependencies stay open.
