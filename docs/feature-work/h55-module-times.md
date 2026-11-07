@@ -2487,3 +2487,22 @@ finder and skeptic checked roles, hashes and history preservation without Lean o
 a server. Evidence hashes are in
 `tests/h55/module-times/v09-allocation-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## V08 callable component observations
+
+`v08_callable_controls.py` records ten previously unreferenced callable and
+world-image component sources with hashes and the audit document hash. They
+cover coherent metadata, reflection, conditional, argument, tuple, unchecked
+update and cast cases. The world-image fixture uses a toy history-insensitive
+ledger. These component observations do not establish the canonical H68 bridge,
+SourceSpec admission, ABI or general compiler adequacy. Current invocation,
+inputs, effects and outcomes remain unresolved.
+
+At merge head `0d8b9bb2e8fd6cd36b23a440a067cb4fdacbe4d4`, the refreshed static
+index has 816 candidates, 615 with supplied current references and 201 without;
+seven retain historical references for review. Three candidates were added and
+none changed or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, hashes and history preservation without Lean
+or a server. Evidence hashes are in
+`tests/h55/module-times/v08-callable-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
