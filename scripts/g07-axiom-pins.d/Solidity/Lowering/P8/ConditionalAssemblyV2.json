@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/P8/ConditionalAssemblyV2.lean:Solidity.Lowering.P8.ConditionalAssemblyV2.checked_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssemblyV2.lean:Solidity.Lowering.P8.ConditionalAssemblyV2.from_v1_graphs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssemblyV2.lean:Solidity.Lowering.P8.ConditionalAssemblyV2.rejected_receipt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssemblyV2.lean:Solidity.Lowering.P8.ConditionalAssemblyV2.withGraphs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

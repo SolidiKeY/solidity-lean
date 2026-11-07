@@ -1,0 +1,17 @@
+{
+ "tests/h62/item2/audit-v10-storage/H24V2Controls.lean:H128.H24V2ConsumptionControls.mixed_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H24V2Controls.lean:H128.H24V2ConsumptionControls.mixed_contract_and_ids": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H24V2Controls.lean:H128.H24V2ConsumptionControls.no_refusal_backtransport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
