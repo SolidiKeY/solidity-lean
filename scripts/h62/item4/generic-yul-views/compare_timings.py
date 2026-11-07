@@ -24,8 +24,16 @@ def validate(record):
             raise ValueError("missing or invalid condition hash: " + key)
     if conditions["toolchain_archive_sha256"] != PIN:
         raise ValueError("toolchain differs from coordinator pin")
-    if conditions.get("lean_threads") != 1 or conditions.get("heavy_jobs") != 1 or "-j1" not in conditions.get("lean_args", []):
-        raise ValueError("serial Lean conditions required")
+    counts = [conditions.get(key) for key in ("lean_threads", "heavy_jobs")]
+    args = conditions.get("lean_args")
+    if any(type(count) is not int or count != 1 for count in counts):
+        raise ValueError("serial Lean conditions require integer counts of one")
+    if not isinstance(args, list) or any(not isinstance(arg, str) for arg in args):
+        raise ValueError("Lean arguments must be a string list")
+    if args.count("-j1") != 1 or any(
+            (arg.startswith("-j") and arg != "-j1") or
+            arg.startswith("--threads") for arg in args):
+        raise ValueError("one unambiguous -j1 thread option required")
     modules = record["modules"]
     if not modules or len(modules) != len(set(modules)): raise ValueError("empty/duplicate module inventory")
     trials = record["trials"]
