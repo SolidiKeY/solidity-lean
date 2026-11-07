@@ -375,6 +375,17 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1BridgeV2Controls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1Lang
 import Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2
 import Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2Migration
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreement
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreementControls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2FramedRevert
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2FramedRevertControls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2Lift
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridgeControls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceAgreement
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceControls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
 import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore
@@ -1535,6 +1546,7 @@ import Solidity.Backend.PrimitivePackets.Constants.Controls
 import Solidity.Backend.PrimitivePackets.Constants.Selected
 import Solidity.Backend.PrimitivePackets.Constants.Source
 import Solidity.Backend.PrimitivePackets.Constants.Target
+import Solidity.Backend.PrimitivePackets.PanicBytes
 import Solidity.Backend.PrimitivePackets.Shifts.Controls
 import Solidity.Backend.PrimitivePackets.Shifts.General
 import Solidity.Backend.PrimitivePackets.Shifts.Transport
