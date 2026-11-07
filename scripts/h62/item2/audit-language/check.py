@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Serial isolated Lean checks of unchanged core imports and additive audit files.
-No .lake or old-toolchain cache reuse. Results are off Git; this focused check
+No .lake or old-toolchain cache reuse. Exact core source bytes must match the
+frozen base or an explicitly supplied authenticated proof-only receipt. Results are off Git; this focused check
 does not replace run-lean.sh or certify unbuilt dependencies/Bridge packages.
 """
 import argparse
@@ -20,6 +21,9 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--lean", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--proof-overlays", type=Path, help="Authenticated H70 proof-only receipts, permitted under H82")
+    p.add_argument("--gate-repair-manifest", type=Path, help="Exact user-requested proof revision manifest; original guards remain")
+    p.add_argument("--memory-cap-gib", type=int, default=12, choices=range(1,13), help="Lower address-space cap for like-for-like checks; never exceeds existing12GiB")
     p.add_argument("files", type=Path, nargs="+")
     args = p.parse_args()
     args.output = args.output.resolve()
@@ -30,6 +34,30 @@ def main():
                XDG_CACHE_HOME=str(args.output / "cache"))
     results = []
     visited = set()
+    overlays = {}
+    if args.proof_overlays:
+        from overlay_review import TRUSTED, reconstruct, fidelity, receipt_patch_path
+        rows = json.loads(args.proof_overlays.read_text())
+        if len(rows) != len(TRUSTED) or {r.get("label") for r in rows} != set(TRUSTED):
+            raise RuntimeError("missing or duplicate authenticated receipts")
+        for row in rows:
+            trusted = TRUSTED[row["label"]]
+            for supplied, key in (("owner", "owner"), ("expected_sha256", "sha256"),
+                                  ("reported_ticket_head", "ticket"), ("reported_source_head", "source")):
+                if row.get(supplied) != trusted[key]: raise RuntimeError("receipt identity differs")
+            patch = receipt_patch_path(row).read_bytes()
+            if hashlib.sha256(patch).hexdigest() != trusted["sha256"]:
+                raise RuntimeError("receipt checksum differs")
+            original = subprocess.check_output(["git", "show", f"{BASE}:{trusted['path']}"], cwd=ROOT)
+            postimage, *_ = reconstruct(patch, original, trusted["path"])
+            fidelity(trusted["path"], original, postimage)
+            overlays[trusted["path"]] = postimage
+    if args.gate_repair_manifest:
+        from gate_repair import approved_revisions
+        overlays.update(approved_revisions(args.gate_repair_manifest))
+    for path, expected in overlays.items():
+        if (ROOT / path).read_bytes() != expected:
+            raise RuntimeError("source differs from authenticated proof postimage")
     reserve = 4 * 1024**3
     def available_memory():
         host = int(next(x.split()[1] for x in open("/proc/meminfo") if x.startswith("MemAvailable:"))) * 1024
@@ -44,7 +72,8 @@ def main():
         text = source.read_text()
         if str(path).startswith("Solidity/"):
             frozen = subprocess.check_output(["git", "show", f"{BASE}:{path}"], cwd=ROOT)
-            if frozen != source.read_bytes(): raise RuntimeError(f"frozen source differs: {path}")
+            expected = overlays.get(str(path), frozen)
+            if expected != source.read_bytes(): raise RuntimeError(f"source differs from exact snapshot or authenticated postimage: {path}")
         for line in text.splitlines():
             if line.startswith("import "):
                 for name in line[7:].split():
@@ -56,7 +85,7 @@ def main():
                         raise RuntimeError(f"external import requires owner toolchain/package: {name}")
         available = available_memory()
         swap = int(next(x.split()[1] for x in open("/proc/meminfo") if x.startswith("SwapTotal:")))
-        cap = min(12 * 1024**3, available - reserve - 256 * 1024**2)
+        cap = min(args.memory_cap_gib * 1024**3, available - reserve - 256 * 1024**2)
         if cap < 1024**3 or swap:
             raise RuntimeError(f"resource guard: available={available}, swap={swap}")
         artifact = lib / path.with_suffix(".olean")
@@ -79,7 +108,7 @@ def main():
                     break
                 time.sleep(0.1)
             code = process.wait()
-        record = {"file": str(path), "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        record = {"file": str(path), "source_snapshot": BASE, "proof_overlay_paths": sorted(overlays), "gate_repair_manifest": str(args.gate_repair_manifest) if args.gate_repair_manifest else None, "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                   "command": cmd, "exit": code, "outcome": outcome, "wall_seconds": time.monotonic()-start,
                   "log": str(log), "virtual_memory_cap": cap, "reserve": reserve,
                   "minimum_available": minimum_available,
