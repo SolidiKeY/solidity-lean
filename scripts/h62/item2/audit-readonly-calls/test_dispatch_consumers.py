@@ -2,10 +2,16 @@
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 import check_dispatch_consumers as check
 
 
 class ConsumerHeaderControls(unittest.TestCase):
+    def test_empty_migrated_scope_refused_before_output_or_lean(self):
+        with patch.object(check.audit, 'MIGRATED', []):
+            with self.assertRaisesRegex(ValueError, 'empty migrated consumer scope'):
+                check.main()
+
     def run_case(self,before,after):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
