@@ -1,4 +1,4 @@
-import Solidity.Lowering.Readonly.SourceAllHistories
+import Solidity.Lowering.Readonly.SourceAllHistoriesV2
 import Solidity.Backend.WorldCalls.SourceCallHistoryControls
 
 /-! Concrete all-value unknown Source calls and clients of CLOSED Source laws.
@@ -14,7 +14,7 @@ def run (amount : Solidity.Roadmap.Word) (out : Solidity.Roadmap.Outcome) :=
 def successRun := run (word 3) (.success [5,6])
 def revertRun := run (word 3) (.revert [7,9])
 def insufficient := run (word 11) (.success [5,6])
-def balance (s : St EB) := (s.ex.world.accounts thisC).balance.val
+def balance (s : St EB) := (s.ex.world.accounts thisC).balance
 def reentrant (out : Solidity.Roadmap.Outcome) :=
   (callAddr (GB (SourceCallHistoryControls.callee out)) FC 30 ext (word 3) [4,5] false).run (L0 EB,entry)
 theorem successful_bytes : successRun.1 = .ok (.success [5,6]) := by rfl
@@ -37,16 +37,16 @@ theorem depth_before_value_guard :
     ((callAddr (global (.success [])) {FC with static := true, depth := 1024} 30 ext (word 1) [] false).run
       (L0 EB,entry)).1 = .ok (.revert []) := by rfl
 theorem closed_positive_bound : SourceHistory.At (global (.success [1,2])) 30 :=
-  SourceHistory.all_at _ _
+  SourceDispatchV2.all_at _ _
 theorem closed_callbacks : EnvironmentHistory.CallbackHistories (global (.success [1,2])) true 30 :=
-  SourceHistory.all_callbacks _ _ _
+  SourceDispatchV2.all_callbacks _ _ _
 theorem closed_storage :
     StaticJournal.SameStorage
       ((callAddr (global (.success [1,2])) FC 30 ext (word 0) [4,5] true).run (L0 EB,entry)).2.2.ex entry.ex :=
-  SourceHistory.static_call_storage _ _ _ _ _ _ _ _ rfl
+  SourceDispatchV2.static_call_storage _ _ _ _ _ _ _ _ rfl
 theorem closed_reentrant_storage :
     StaticJournal.SameStorage
       ((callAddr (GB (SourceCallHistoryControls.callee (.success [1,2]))) FC 30 ext (word 0) [4,5] true).run
         (L0 EB,entry)).2.2.ex entry.ex :=
-  SourceHistory.static_call_storage _ _ _ _ _ _ _ _ rfl
+  SourceDispatchV2.static_call_storage _ _ _ _ _ _ _ _ rfl
 end Solidity.Backend.WorldCalls.ClosedSourceControls

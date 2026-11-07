@@ -1,0 +1,63 @@
+{
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileBreakCompiler.Controls.condition_write_required": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileBreakCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileBreakCompiler.Controls.nonzero_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileBreakCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileBreakCompiler.Controls.omitted_condition_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileBreakCompiler.Controls.wrong_base_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileBreakCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.code": [
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.reached": [
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileBreakCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

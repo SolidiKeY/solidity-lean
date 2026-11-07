@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.covers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.distinct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.observe": [
+  "Quot.sound",
+  "propext"
+ ]
+}

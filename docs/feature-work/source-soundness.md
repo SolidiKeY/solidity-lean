@@ -561,6 +561,19 @@ ledger `semExprGaps`, which lists only constructors S01 does not type):
   runs, and a `storage`/`calldata` type has no default, so
   `function g() internal view returns (uint[] storage r) { r = a; }` is
   `stuck` at entry although solc accepts it.
+- **`calldata` to memory copies of arrays with dynamically encoded
+  elements** (new, 2026-11-06): once `STy.implicit` compares array elements
+  at the target's location, `bytes[] calldata`, `string[] calldata` and
+  `uint256[][] calldata` convert to memory as in solc, but `cdToMem` copies
+  only one-word and statically encoded elements, so these copies are
+  `stuck` (`CalldataNestedCopyControls.dynamic_elements_stuck`); so are
+  copies to memory of any `calldata` array whose elements are dynamically
+  encoded (`uint8[][]`, `bytes[2]`) and of `calldata` structs (not
+  modelled, below). These `calldata` copies are the type-checks-but-stuck
+  conversions left: copies out of storage of a struct holding a mapping,
+  or of an array of such structs, are refused by `STy.implicit`
+  (`Env.mapFree`; `struct_mapping_refused`, `array_mapping_refused`,
+  `nested_mapping_refused`), as solc refuses them.
 
 **Typing gaps** (S01 types them, solc refuses them, the semantics is
 `stuck`), fixed in S01's rules and G13's checker:
@@ -1004,10 +1017,12 @@ Horizon's step proofs take them without new lemmas, except
   fails at the read, not at entry;
 - `b[i]` on `bytes calldata` (`cdByte`): past the length, Panic `0x32`;
 - `x[s:e]`, `x[s:]`, `x[:e]`, `x[:]` (`Typed.slice`, `sliceFrom`,
-  `sliceTo`, `sliceAll`; `RExpr.slice`; `sliceR`): on `bytes calldata` and
-  one-word-element dynamic `calldata` arrays (`STy.sliceable`; `string
-  calldata` slices, and slices of arrays of static multi-word elements,
-  are refused here; solc may accept them, not checked against solc); after evaluating the base, the start and the end (in
+  `sliceTo`, `sliceAll`; `RExpr.slice`; `sliceR`): on `bytes calldata`,
+  `string calldata`, and dynamic `calldata` arrays whose element is
+  statically encoded (`STy.sliceable`, stepping by `STy.cdStride`; solc
+  0.8.38 accepts `string calldata` slices, as its
+  `viaYul/conversion/explicit_string_bytes_calldata_cast.sol` shows; slices
+  of dynamically encoded elements remain refused, solc 2148); after evaluating the base, the start and the end (in
   that order, as solc), `e < s` or a length below `e` reverts with no data
   (solc's `calldata_array_index_range_access`); the slice is a reference at
   the base's type (solc's slice type converts implicitly to it);
@@ -1015,7 +1030,19 @@ Horizon's step proofs take them without new lemmas, except
   bytes; an array element by element, each validated (an invalid element
   reverts with no data at the copy, as solc's
   `abi_decode_available_length` copy); a `calldata` target keeps the
-  reference;
+  reference. A dynamic array of static arrays (`uint256[2][]`) and a static
+  array (`uint256[2]`) copy their statically encoded elements at the
+  element's head stride (`STy.cdHeadBytes`) through `cdStaticToMem`
+  (G18.05): inner arrays are allocated before the outer one, as `zeroData`
+  allocates (solc allocates the outer first; heap addresses are abstract
+  indices, so no observation here depends on the order). An element that is
+  not statically encoded is not inline and stays `stuck`, and is now
+  reachable (census above). The nested copy
+  is reachable from typed source: `STy.implicit` compares array elements
+  at the target's location (`STy.withLoc`, as `copiesTo` does; user
+  decision 2026-11-06), so `uint256[2][] calldata` converts to
+  `uint256[2][] memory` and `convRV` runs the nested arm
+  (`convRV_cd_static_ok`, controls in `CalldataNestedCopyControls.lean`);
 - `abi.decode(b, …)` on `bytes calldata` (`STy.decodeSrc` now admits it;
   `bytesOfRV` reads the reference).
 
@@ -1034,6 +1061,7 @@ and `OpsOK`. `x[i]`, `x.length` and copies were already typed by S01.
 | `decodeArg_cd_ok`, `decodeArg_entry_ok`, `decodeArgs_entry_ok` | every type dispatch decodes (`STy.entryDecodable`: the decoder's and `calldata` references) keeps `MemOK`, agrees, and is never `stuck` |
 | `readLoc_cd_ok`, `cdByte_ok`, `sliceR_ok` | element reads, byte reads and slices are never `stuck` |
 | `cdToMem_ok` | a copy into memory keeps `MemOK`; the copy agrees |
+| `cdStaticToMem_ok`, `cdToMem_static_ok` | the static-element copies (`STy.cdCopyElem`) keep `MemOK` and are never `stuck`; controls in `Source/CalldataStaticCopyControls.lean` |
 | `evalE_cdLength_ok`, `evalE_cdIndex_ok`, `evalE_cdSlice_ok` | the `x.length`, `x[j]` and `x[s:e]` nodes on `calldata` locals (index locals) keep `MemOK` and are never `stuck` (closed) |
 
 **Ledger.** `.slice` is typed (`exprCoverage` classifies it `typed`, witness

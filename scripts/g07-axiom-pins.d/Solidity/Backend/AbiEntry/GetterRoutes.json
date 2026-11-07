@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/AbiEntry/GetterRoutes.lean:Solidity.Backend.AbiEntry.GetterRoutes.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutes.lean:Solidity.Backend.AbiEntry.GetterRoutes.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutes.lean:Solidity.Backend.AbiEntry.GetterRoutes.getter_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutes.lean:Solidity.Backend.AbiEntry.GetterRoutes.getter_short": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutes.lean:Solidity.Backend.AbiEntry.GetterRoutes.lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutes.lean:Solidity.Backend.AbiEntry.GetterRoutes.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutes.lean:Solidity.Backend.AbiEntry.GetterRoutes.source_getter_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

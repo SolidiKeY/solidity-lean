@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "original_queue_file": "original-work-backfill-queue.txt",
+  "work_queue": [
+    {
+      "checkpoint": 1,
+      "status": "done_component_only",
+      "completed": "Pinned census21files/360named declarations,57closure modules,old full assigned-component build57/57,160.346414358s,848093184 sampledRSS bytes,1065old kernel type records",
+      "remaining": "No old component obligation hidden; full repository final gates are separate checkpoint3/4 obligations."
+    },
+    {
+      "checkpoint": 2,
+      "status": "partial",
+      "completed": "Exact official4.35archive SHA7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d and actual Lean/Lake versions; exact owner Hash overlay passes in privatefixture",
+      "remaining": "Integrate permitted proof-only HashedLayout proposal or equivalent, preserve frozen statements/definitions/budgets/axioms; all21assignedmodules stillunpassed onnew compiler; diagnose furtherdependencies onlyafterthis; no exact-file agreement needed for proof-only edits underH82."
+    },
+    {
+      "checkpoint": 3,
+      "status": "pending",
+      "completed": "Partial4attempt/3pass run; stopped atHashedLayout; exactinput/resource evidence retained",
+      "remaining": "Build all21onofficial4.35; new frozen API export/equality; complete CLEAN matchedbefore/afterwall/RSS undercurrentH81; resource disposition; escalateanyregression andSTOP>10%; do not rerunknownSTOPunchanged; all1576affectedmodules/finalgatesstillpending."
+    },
+    {
+      "checkpoint": 4,
+      "status": "partial",
+      "completed": "Cumulative committed patch/bundle,oldtype/sourcehashes,dependencyreports,fixtureproofs,independentreviews andevidence manifests",
+      "remaining": "Successor integrate finalhead; finalroottoolchain changebelongsroot; completefinalvalidation, finaltiming/meaning/axiom checks,independentreviews andcompletehandoff; no successfulmigration/fullgateclaim."
+    }
+  ],
+  "backfill_queue": [
+    {
+      "item": "scanner/census alloriginaldeclarations/cases",
+      "status": "completed_assigned_snapshot",
+      "evidence": "census-base.json;whole-sourcehashes21files;1065oldkerneltypes"
+    },
+    {
+      "item": "negativecontrols",
+      "status": "completed_existing_controls",
+      "evidence": "scanner comments/imports/cycles/drift; ownerpostimagevalid/tampered/unpatchedchecks"
+    },
+    {
+      "item": "isolatedfixtureproofs",
+      "status": "completed_existing_fixtures",
+      "evidence": "ApiControls bothversions;LocateRejectControls11invalidheadcombinations+valid/boundscontrols bothversions; oldaxiomsnone/newpropext forLocate"
+    },
+    {
+      "item": "deterministic reproduction/timing tooling",
+      "status": "completed_tooling_partial_validation",
+      "evidence": "committed census/measure/fixture/report/ownerfixture/export generators; completecandidate/matchedtiming stillpending"
+    },
+    {
+      "item": "additional within-scope witness/casecoverage whilewaiting",
+      "status": "generic_authorized_backfill_not_exhausted",
+      "remaining": "No namedunfinishedfixture orunclaimedregistrycandidate assigned bythisworker; successor may select independentoriginal-scope work. Thisretiringworkerdoesnotcontinue."
+    },
+    {
+      "item": "continuouscleanup registry candidates",
+      "status": "not_claimed",
+      "remaining": "Onlynewlyunclaimedauditcandidates viacoordinator/registry;donotstealscopeorH55work."
+    }
+  ]
+}

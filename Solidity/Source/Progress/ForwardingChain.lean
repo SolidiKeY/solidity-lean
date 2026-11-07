@@ -17,7 +17,7 @@ inductive ForwardingChain (res : Resolution) (G : Glob res.env) (c : String) (va
       (d : Decl) (ps : List STy) (τ : STy)
       (declared : d ∈ WholeProgram.functions res) (fresh : forwardFresh values ds d = true)
       (signature : d.fnSig res.env = some (ps,[τ]))
-      (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase τ = true)
+      (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase res.env.mapFree τ = true)
       (plain : PlainResultType τ) (defaults : ZeroReady res.env τ)
       (expression : ComposedExpr (fun d => d ∈ values) (fun d => d ∈ ds) e)
       (body : G.prog.body (G.dispatchFn c d) = some (singleReturningBody ps τ e same)) :

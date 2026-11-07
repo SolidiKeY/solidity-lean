@@ -26,7 +26,7 @@ def saved : Source.SPath := ⟨⟨some "C", "saved"⟩, []⟩
 def scratch : Source.SPath := ⟨⟨some "C", "scratch"⟩, []⟩
 def initialS : SState :=
   { world := ⟨fun address =>
-      { balance := if address = senderS then ⟨100, by decide +kernel⟩ else ⟨0, by decide +kernel⟩,
+      { balance := if address = senderS then 100 else 0,
         nonce := 0, code := if address = selfS then some 0 else if address = senderS then some 1 else none, storage := Source.Storage.empty }⟩,
     transient := Source.Transient.empty, journal := [] }
 
@@ -50,7 +50,7 @@ def readInt (value : Option (Source.Val layout (.int Source.IntTy.u256))) : Opti
 def observeS (state : SState) : Option (Int × Int × Int × Int) := do
   let persistent ← readInt ((state.world.accounts selfS).storage.read saved)
   let temporary ← readInt ((state.transient.cells selfS).read scratch)
-  pure ((state.world.accounts senderS).balance.val, (state.world.accounts selfS).balance.val,
+  pure ((state.world.accounts senderS).balance, (state.world.accounts selfS).balance,
     persistent, temporary)
 
 /-- Both real source transfers succeed; getD does not witness a failed payment. -/

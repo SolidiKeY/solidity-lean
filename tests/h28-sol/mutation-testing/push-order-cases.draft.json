@@ -1,0 +1,34 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Order-only retry; recycled-tail case already passed six checks unchanged in push-tail-order-development.",
+  "cases": [
+    {
+      "id": "push.compound-updates-swapped",
+      "kind": "negative-control",
+      "family": "push-tail-length",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } \u27e8[ ]\u27e9 }",
+      "new": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) }\n        { storage := save(storage, sp.length, sp.length + 1) } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storagePushAddAssign",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.lean",
+      "oracle_sha256": "a80cda87cbfbe10b940740335d890c62c893e7f1725acc5cf63937e363016510",
+      "oracle_declarations": [
+        "H28.PushOrderBaseline.source_link",
+        "H28.PushOrderBaseline.input_inhabited",
+        "H28.PushOrderBaseline.empty_run",
+        "H28.PushOrderBaseline.populated_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PushOrderSwappedKill.lean",
+      "witness_sha256": "ad4b4bf25e014c1ecef419a5bd85800b183689586b59546db709798e6420dff5",
+      "witness_declarations": [
+        "H28.PushOrderSwappedKill.source_link",
+        "H28.PushOrderSwappedKill.input_inhabited",
+        "H28.PushOrderSwappedKill.checked_kill",
+        "H28.PushOrderSwappedKill.typed_landing",
+        "H28.PushOrderSwappedKill.first_not_exhausted"
+      ]
+    }
+  ]
+}

@@ -12,8 +12,8 @@ open Solidity Lowering.V07
 variable {E : Source.Env} {C : Contract} {Γ : Ctx} {tail : Source.RCtx}
 
 def sourceArgs (a b : Source.IntTy)
-    (ha : (Source.STy.int a).implicit E.isBase (.int a) = true)
-    (hb : (Source.STy.int b).implicit E.isBase (.int b) = true) :
+    (ha : (Source.STy.int a).implicit E.isBase E.mapFree (.int a) = true)
+    (hb : (Source.STy.int b).implicit E.isBase E.mapFree (.int b) = true) :
     Source.RConvArgs E (.int a :: .int b :: tail) [.int a,.int b] :=
   .cons (.local .here) ha (.cons (.local (.there .here)) hb .nil)
 
@@ -27,8 +27,8 @@ def targetArgs (a b : Source.IntTy)
 remaining caller locals may contain references and populated memory objects. -/
 theorem source_actual (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
     (a b : Source.IntTy)
-    (ha : (Source.STy.int a).implicit E.isBase (.int a) = true)
-    (hb : (Source.STy.int b).implicit E.isBase (.int b) = true)
+    (ha : (Source.STy.int a).implicit E.isBase E.mapFree (.int a) = true)
+    (hb : (Source.STy.int b).implicit E.isBase E.mapFree (.int b) = true)
     (x y : Int) (hx : a.lo ≤ x ∧ x ≤ a.hi) (hy : b.lo ≤ y ∧ y ≤ b.hi)
     (rest : Source.Locals E.layout tail) (s : Source.St E) :
     (Source.evalConvArgs G F (fuel+3) (sourceArgs a b ha hb)).run

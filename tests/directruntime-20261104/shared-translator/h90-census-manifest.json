@@ -1,0 +1,153 @@
+{
+  "regression": "H90 narrow/fixed-byte/address local function admission",
+  "decision": "Q-H90-CENSUS GitHub42 option2: all78 files at CR e0a5ac26",
+  "inputHead": "e0a5ac26ed521bde70e3ce4da5120d05a991d9ca",
+  "inputSha256": "f93e5718928cfc74b0fb9262f4d76949f742c5ca1b3d5024e5d727aca93f07da",
+  "measurementBase": "3a1e70479092b11d4d0f12e48690b82d316ad5ff",
+  "sourceFiles": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "baseSha256": "f915d2fdc5a7fd1cf36284df63f4952b99f6f8d8dc913432dde6627f583b4594",
+      "headSourceSha256": "29ad41e9204addcadfccb42c71fe344f9cba7690e870be57400aadc35e08658e"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "baseSha256": "0c55d2dda8f700efd314b98ee9a284fd3ad73a17ae68ae4decf7d6eab15ccee5",
+      "headSourceSha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
+      "baseSha256": "d2add700343022d94d89fa4b4769d70063084f768f6d6aaf86a671a31dcfbfaa",
+      "headSourceSha256": "12abef1db6404447a71cd500f6e0d8d16cc33bd75a5c286e9de4172bb3925ace"
+    }
+  ],
+  "base": {
+    "parsedUnits": 78,
+    "functions": 1655,
+    "existingPrinted": 1486,
+    "canonicalAdmitted": 236,
+    "candidateFiles": 78,
+    "both": 232
+  },
+  "head": {
+    "parsedUnits": 78,
+    "functions": 1655,
+    "existingPrinted": 1486,
+    "canonicalAdmitted": 245,
+    "candidateFiles": 78,
+    "both": 241
+  },
+  "gains": [
+    {
+      "identity": {
+        "fixture": "tests/solc/CanonicalReaderContract.ast.json",
+        "contract": "CanonicalReaderContract",
+        "function": "narrowLocal",
+        "sourceId": 40
+      },
+      "before": "compact verifier: unsupported type uint8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/DeclarationsLowering.ast.json",
+        "contract": "ForwardImmutable",
+        "function": "observed",
+        "sourceId": 340
+      },
+      "before": "compact verifier: unsupported type uint8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/DeclarationsLoweringIR.ast.json",
+        "contract": "ForwardImmutable",
+        "function": "observed",
+        "sourceId": 340
+      },
+      "before": "compact verifier: unsupported type uint8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/SignedNumeric.ast.json",
+        "contract": "SignedNumeric",
+        "function": "uncheckedControls",
+        "sourceId": 388
+      },
+      "before": "compact verifier: unsupported type int8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/SignedNumeric.ast.json",
+        "contract": "SignedNumeric",
+        "function": "checkedOverflow",
+        "sourceId": 454
+      },
+      "before": "compact verifier: unsupported type int8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/SignedNumeric.ast.json",
+        "contract": "SignedNumeric",
+        "function": "wrongShift",
+        "sourceId": 476
+      },
+      "before": "compact verifier: unsupported type int8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/SignedNumericIR.ast.json",
+        "contract": "SignedNumeric",
+        "function": "uncheckedControls",
+        "sourceId": 388
+      },
+      "before": "compact verifier: unsupported type int8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/SignedNumericIR.ast.json",
+        "contract": "SignedNumeric",
+        "function": "checkedOverflow",
+        "sourceId": 454
+      },
+      "before": "compact verifier: unsupported type int8",
+      "after": "ok"
+    },
+    {
+      "identity": {
+        "fixture": "tests/solc/SignedNumericIR.ast.json",
+        "contract": "SignedNumeric",
+        "function": "wrongShift",
+        "sourceId": 476
+      },
+      "before": "compact verifier: unsupported type int8",
+      "after": "ok"
+    }
+  ],
+  "refusalRefinements": 19,
+  "lostAdmissions": 0,
+  "historicalBaseline": {
+    "functions": 1599,
+    "existingPrinted": 1446,
+    "canonicalAdmitted": 226,
+    "boundary": "Historical reported68-fixture baseline; exact original selection unavailable. Exploratory69-top-level run reproduced counts but is not authoritative. Not used for matched78-file parity."
+  },
+  "boundary": "Printer/name-matched census and decoder admissions only; no elaboration, overload identity, whole-contract, source or backend adequacy claim.",
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/census-813e846f5886f4a1.tar.gz",
+    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/census-813e846f5886f4a1.tar.gz",
+    "sha256": "813e846f5886f4a149cb72303afa045248d8b3d3e53a865df8e8e4bbfd5d9aae",
+    "bytes": 46279,
+    "files": {
+      "cr-census-inputs.json": "f93e5718928cfc74b0fb9262f4d76949f742c5ca1b3d5024e5d727aca93f07da",
+      "base-census-results.json": "cb811c532e38ca90d3673e74d15f3ab71bb4fe9d1229227c329917bf2fd52182",
+      "cr-census-results.json": "f3ff65833fb0e48f13a674c07021a3122b296f7075696b98e4e09d9088640953",
+      "census-changes.json": "05543dc210fa23a4199123f128fa0e4157002143cdfe3156c6c55537d6b10cc2"
+    }
+  }
+}

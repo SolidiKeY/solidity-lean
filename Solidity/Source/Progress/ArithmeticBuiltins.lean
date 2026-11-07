@@ -17,7 +17,7 @@ def builtinU (F : Fr) (n : Nat) {s : STy} (v : RVal E.layout s) : EM E Γ Int :=
   | .int i _ => pure i
 
 theorem builtinU_ns (F : Fr) (n : Nat) {s : STy}
-    (hs : ScalarSource s) (hc : s.implicit E.isBase (.int IntTy.u256) = true)
+    (hs : ScalarSource s) (hc : s.implicit E.isBase E.mapFree (.int IntTy.u256) = true)
     (v : RVal E.layout s) : NS (Γ := Γ) (builtinU F n v) := by
   refine NS.bind (convRV_ns F n (.inl hc) hs v) fun w => ?_
   refine NS.bind (getV_ns rfl w) fun x => ?_
@@ -29,9 +29,9 @@ No nonzero runtime modulus assumption is added. -/
 theorem evalBuiltin_mod_ns (G : Glob E) (F : Fr) (n : Nat) (b : Builtin)
     (hb : b = .addmod ∨ b = .mulmod) {x y k : STy} (args : RArgs E Γ [x,y,k])
     (hx : ScalarSource x) (hy : ScalarSource y) (hk : ScalarSource k)
-    (cx : x.implicit E.isBase (.int IntTy.u256) = true)
-    (cy : y.implicit E.isBase (.int IntTy.u256) = true)
-    (ck : k.implicit E.isBase (.int IntTy.u256) = true)
+    (cx : x.implicit E.isBase E.mapFree (.int IntTy.u256) = true)
+    (cy : y.implicit E.isBase E.mapFree (.int IntTy.u256) = true)
+    (ck : k.implicit E.isBase E.mapFree (.int IntTy.u256) = true)
     (ha : NS (evalArgs G F n args)) (hr : NS (evalArgsRev G F n args)) :
     NS (evalBuiltin G F (n + 1) b args (.int IntTy.u256)) := by
   have after (a : RVal E.layout x) (c : RVal E.layout y) (m : RVal E.layout k) :

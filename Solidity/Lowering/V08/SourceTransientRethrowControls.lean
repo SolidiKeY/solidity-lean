@@ -101,8 +101,8 @@ theorem zero_timeout (pipeline : Roadmap.Pipeline) (static packed : Bool)
 
 /-- Complete pre/post observation; execution equality above retains all fields. -/
 theorem complete_vector (packed : Bool) (bytes : Roadmap.Bytes) :
-    ((after packed bytes).ex.world.accounts sender).balance.val = 93 ∧
-    ((after packed bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((after packed bytes).ex.world.accounts sender).balance = 93 ∧
+    ((after packed bytes).ex.world.accounts self).balance = 7 ∧
     ((after packed bytes).ex.world.accounts self).code = some 0 ∧
     ((after packed bytes).ex.world.accounts self).nonce = 1 ∧
     ((after packed bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧

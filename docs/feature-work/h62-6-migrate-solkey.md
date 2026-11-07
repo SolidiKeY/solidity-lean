@@ -267,3 +267,62 @@ against integration base d96f2406d, not a claim that unrelated imported master
 changes are this lane's edits. Earlier complete original assignment, queue,
 scope, original evidence and cumulative lane patch/bundle remain authenticated
 in /workspace/migrate-solkey-h82-final. No new goal/reset or lane push.
+
+## Portable evidence review follow-up at ac9d8db2a
+
+The coordinator merged8b325fb7a and explicitly instructed fetching master and
+continuing. The branch fast-forwarded cleanly to
+ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6 after verifying ancestry.
+Assigned Solkey and Raw sources remain unchanged. No Lean run or known timing
+STOP rerun occurred; the merge message is not a disposition of those holds.
+
+Review minor fixed: compact old-API and SDK summaries are now committed under
+tests/h62/item6/migrate-solkey/portable-evidence, referenced by repository-relative
+catalog paths. Existing absolute capture paths remain only in historical bulk.
+verify-portable-evidence.py can verify repository files without any VM-only
+artifact. External H44 archives use relative filenames/member paths and pinned
+hashes; --require-bulk refuses missing or corrupted input. With both supplied
+archives, all archive/member checks pass. Streaming uses no extraction or writes.
+The absence of bulk remains explicit unavailable, never acceptance.
+
+Independent read-only finder/skeptic verified repo-only and full supplied-bulk
+checks and reported no defect. Negative controls reject missing required bulk
+and corrupt bytes. This validates artifact integrity, not Lean/theorems or H78
+compatibility. No statements, definitions, proof budgets, axiom sets or exclusions
+changed. Raw/RSS/H81/H78 waits are retained in portable-evidence/status.json.
+Q-SOLKEY-HOLDS requests actual policy/disposition/prerequisite delivery, not a
+waiver. All presently independent static items are finished; further Lean and
+performance acceptance await those inputs. No push, new goal or reset.
+
+## 2026-11-07 working-baseline integration and RSS proposal
+
+The coordinator reports8036ad277 merged to2a43bf4fc and authorizes rebasing the
+working baseline/continuing. Fetch verified2a43bf4fcdaf24750265afc8f8be5b420d1d22b0.
+Its owned lane files match8036, but8036 is not an ancestor. A normal merge
+584a6a5f7ec2d4f55cae3f54e2ca969c2464d6d9 preserves both histories; its tree
+equals origin/master. No reset/rewrite, conflict repair, master mutation or push.
+
+Static re-census still equals the pinned assigned/fixture/dependency entries.
+Raw, assigned Solkey files and lean-toolchain are unchanged. The new lean-verify
+skill requires future outside-server checks through gate.sh per-file; no Lean
+was run. No explicit Root RSS disposition or full H81 policy was delivered; a
+different lane's documented conservative8GiB setting is not task-specific policy.
+
+Independent backfill: an unapplied import-only proposal for the isolated4.35 API
+fixture is committed under tests/h62/item6/migrate-solkey/rss-proposal. It keeps
+every statement and proof-body byte unchanged while replacing the umbrella
+String.Lemmas header with two defining modules. The captured SDK source graph
+shrinks361->330 reachable modules. This is a static hypothesis, not measured
+memory, visibility, type/axiom equivalence, or permission to lift STOP.
+
+Generator input checks authenticate both versioned captures and graph against
+committed hashes; failed, mismatched-source, old-as-new or altered-graph inputs
+are rejected. Both read-only reviewers confirmed the proposal/boundaries; their
+missing false-iff lemma-map and version-provenance notes were fixed. No source
+application, proof implementation, signature/axiom/budget change or Lean rerun.
+
+All available independent static items are complete. Schema-v1 waits and future
+candidate validation are in rss-proposal/status.json. Raw/RSS/H81/H78 holds and
+all unfinished original gates remain. Candidate validation, if later permitted,
+must use the current per-file gate and compare meaning/signatures/axioms and
+resources; no performance result is inferred from import count.

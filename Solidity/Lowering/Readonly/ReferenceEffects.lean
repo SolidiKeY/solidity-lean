@@ -20,6 +20,24 @@ theorem bytesOfRV_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.R
   · exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
   · exact Solidity.Lowering.Readonly.SourceHistory.Effect.halt mode _
 
+theorem cdElems_effect {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx} {σ : Solidity.Source.STy} (mode : Bool)
+    {go : Nat → Solidity.Source.EM E Γ (Solidity.Source.Val E.layout σ)} (hgo : ∀ off, Solidity.Lowering.Readonly.SourceHistory.Effect mode (go off))
+    (stride : Nat) : ∀ (off m : Nat), Solidity.Lowering.Readonly.SourceHistory.Effect mode (Solidity.Source.cdElems go stride off m)
+  | _, 0 => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
+  | off, m + 1 => Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (hgo off) fun _ =>
+      Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (cdElems_effect mode hgo stride (off + stride) m) fun _ => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
+
+theorem cdStaticToMem_effect {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx} (mode : Bool) (F : Solidity.Source.Fr)
+    (σ : Solidity.Source.STy) (off : Nat) :
+    Solidity.Lowering.Readonly.SourceHistory.Effect mode (Solidity.Source.cdStaticToMem (E := E) (Γ := Γ) F σ off) := by
+  unfold Solidity.Source.cdStaticToMem
+  split
+  · split
+    · exact Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (cdElems_effect mode (fun o => cdStaticToMem_effect mode F _ o) _ _ _) fun _ =>
+        Solidity.Lowering.Readonly.SourceHistory.allocRef_effect mode _
+    · exact Solidity.Lowering.Readonly.SourceHistory.Effect.halt mode _
+  · exact Solidity.Lowering.Readonly.SourceHistory.Effect.lift mode _
+
 theorem cdToMem_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx} (mode : Bool) (F : Solidity.Source.Fr) (τ : Solidity.Source.STy) (off len : Nat),
  Solidity.Lowering.Readonly.SourceHistory.Effect mode (Solidity.Source.cdToMem (E := E) (Γ := Γ) F τ off len) := by
   intro E Γ mode F τ off len
@@ -29,7 +47,11 @@ theorem cdToMem_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCt
   · split
     · exact Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (Solidity.Lowering.Readonly.SourceHistory.allocRef_effect mode _) (fun _ => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _)
     · exact Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (Solidity.Lowering.Readonly.SourceHistory.allocRef_effect mode _) (fun _ => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _)
+    · exact Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (cdElems_effect mode (cdStaticToMem_effect mode F _) _ _ _) (fun _ =>
+        Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (Solidity.Lowering.Readonly.SourceHistory.allocRef_effect mode _) (fun _ => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _))
     · exact Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (Solidity.Lowering.Readonly.SourceHistory.Effect.mapM mode _ (fun _ => Solidity.Lowering.Readonly.SourceHistory.Effect.lift mode _) _) (fun _ =>
+        Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (Solidity.Lowering.Readonly.SourceHistory.allocRef_effect mode _) (fun _ => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _))
+    · exact Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (cdElems_effect mode (cdStaticToMem_effect mode F _) _ _ _) (fun _ =>
         Solidity.Lowering.Readonly.SourceHistory.Effect.bind _ _ _ (Solidity.Lowering.Readonly.SourceHistory.allocRef_effect mode _) (fun _ => Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _))
     · exact Solidity.Lowering.Readonly.SourceHistory.Effect.halt mode _
 

@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-const path='/tools/soljson-v0.8.38+commit.1835d247.js';
+const pins=JSON.parse(readFileSync(new URL('./compiler-artifacts.json',import.meta.url),'utf8'));
+const path=process.env.SOL_QN_SOLJSON || '/tools/soljson-v0.8.38+commit.1835d247.js';
+const out=process.env.SOL_QN_EVIDENCE || 'tests/sol-qualified-units/evidence';
 const sha=createHash('sha256').update(readFileSync(path)).digest('hex');
-assert.equal(sha,'6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+if(!pins.artifacts.some(a=>a.sha256===sha))throw Error('pin');
 const solc=createRequire(import.meta.url)(path);
 const version=solc.cwrap('solidity_version','string',[])();
 assert.equal(version,'0.8.38+commit.1835d247.Emscripten.clang');
@@ -22,6 +24,6 @@ const rows=sources.map(([id,body])=>{
 });
 const expected=[['overload-variable-barrier',false,['9097','9097']],['getter-override',true,[]]];
 assert.deepEqual(rows.map(r=>[r.id,r.accepted,r.errors.map(e=>e.code)]),expected);
-writeFileSync('tests/sol-qualified-units/evidence/resolution-barrier-probe.json',JSON.stringify({version,sha256:sha,
+writeFileSync(out+'/resolution-barrier-probe.json',JSON.stringify({version,sha256:sha,
  script_sha256:createHash('sha256').update(readFileSync(new URL(import.meta.url))).digest('hex'),expected,compiler_fixtures_pass:true,rows},null,2)+'\n');
 console.log(rows.map(r=>r.id+': '+r.accepted+' '+r.errors.map(e=>e.code).join(',')).map(s=>s.trimEnd()).join('\n'));

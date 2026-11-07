@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GeneralBoundaryControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.rebuilt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GeneralBoundaryControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundaryControls.trivial_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

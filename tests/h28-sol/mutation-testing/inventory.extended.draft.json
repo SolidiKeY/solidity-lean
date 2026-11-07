@@ -1,0 +1,3291 @@
+{
+  "schema": 2,
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "state": "draft-not-frozen",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "inventory": [
+    {
+      "id": "Taclet.storageFieldRead_unfold_rightFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 425,
+      "line_end": 426,
+      "span_sha256": "71a30e9df40d8cc504cff0313e871ddd0c2dbe801753cbd5b28c2756a3c88a41",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexRead_unfold_rightFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 427,
+      "line_end": 428,
+      "span_sha256": "7429cc3293abd138894e023eb7d72d06bbe3b1f0d763896a99a6705da516b0e4",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexRead_unfold_rightSndIndex",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 429,
+      "line_end": 430,
+      "span_sha256": "31f1a4a60aa4f5155ea96b6715932f4e2d58950cefa27f73050d00ee8f5cef42",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldRead_unfold_rightSndResult",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 431,
+      "line_end": 432,
+      "span_sha256": "0d1349257899412b0fa6e050001e8cb0b5012cf67677251310187e83217cebea",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexRead_unfold_rightSndResult",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 433,
+      "line_end": 435,
+      "span_sha256": "6831c20f948e5482c25f9c8b28c97c9efbdb234c2ca046e604e50aed5f8880a1",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldWrite_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 436,
+      "line_end": 437,
+      "span_sha256": "03111216d96c5119394b9a25b5c19e4fd6d9073223e74d6218ab140845c1aaac",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldWriteStorageRef_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 438,
+      "line_end": 439,
+      "span_sha256": "de14a688b00a45ccbb2e4cd86cef94cb17ab3aee49fafacdea31a31603b1f448",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteCaptureAllComplexRecv",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 440,
+      "line_end": 441,
+      "span_sha256": "9df103a646f5b2cd1beed31e9859ccdf736d302e6df7edc9dc7e4eb491617944",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 442,
+      "line_end": 443,
+      "span_sha256": "b397ab89e9d3e81946411d5d5123a998a8e9dbc056fe706c8dbd54ce41df4e6b",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteCaptureAllNonSimpleIndex",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 444,
+      "line_end": 445,
+      "span_sha256": "2091961d53e02f5dca443970c84455370c2e72ee8cfe9e861b07cb4388d3c7fc",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 446,
+      "line_end": 447,
+      "span_sha256": "7082889b5588b9f7a03956ebcf9170f777c136dd1e46419f4c8128586f0e399e",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageRootWriteValueRhsCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 448,
+      "line_end": 449,
+      "span_sha256": "dedeb445c1d23b9826910de84856a27415d657c0862150e70ea735c0e0dbceaa",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.fieldWriteValueRhsCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 450,
+      "line_end": 451,
+      "span_sha256": "8ee01e4d9da188491ccac55e629c9d54abb475ec01fbab92933e45c17e7128d3",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.indexWriteValueRhsCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 452,
+      "line_end": 453,
+      "span_sha256": "4a47fe4fdf0b5f5b336aa0cf96e87847f68cb12e5f2c6a78f74cf84f69170cab",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldDelete_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 454,
+      "line_end": 455,
+      "span_sha256": "6945801723dd3afa3bb125450e54480d5b0eaf4f829bafd172d608b477d6b03c",
+      "families": [
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexDelete_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 456,
+      "line_end": 457,
+      "span_sha256": "96b7907355fd7b7243836a12843f8a955ab531d8227b391e4141a84ed56ff46a",
+      "families": [
+        "index-bounds",
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexDeleteNonSimpleIndexCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 458,
+      "line_end": 460,
+      "span_sha256": "b49219be95ddb6de85fde9e9741003537593e01654b6fe67959504a4fa470a22",
+      "families": [
+        "index-bounds",
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.localValueDeclInitDrop",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 461,
+      "line_end": 462,
+      "span_sha256": "f10e87c97658de7ddde86b761805ca9f319d28fda292d54631fa168a3fb91b7f",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.valueDeclSkip",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 463,
+      "line_end": 464,
+      "span_sha256": "32c640b344187f0785ade618f4c2a45ba4396d04c3b75865476f47f029e86255",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageLocalDeclInitDrop",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 465,
+      "line_end": 467,
+      "span_sha256": "348704de0a090797c4ab6e8f196409629f0a2d2c1f0aa85412ccba0bee1c5eee",
+      "families": [
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageLocalDeclSkip",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 468,
+      "line_end": 469,
+      "span_sha256": "b4c7e7feeab458876265fddc81ac1f9bbf585f5432b9930708d792eb2e668a69",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryLocalDeclInitDrop",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 470,
+      "line_end": 471,
+      "span_sha256": "00c02ea5d5871ed05330c8addec5e5857500455bc48e15784905b65cda9ab840",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryReferenceDeclFreshAlloc",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 472,
+      "line_end": 474,
+      "span_sha256": "bc1c3038262332c1c0d46c08d55e617f622dfa2ad5866def7530c0315a322a53",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.localValueAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 475,
+      "line_end": 476,
+      "span_sha256": "c0496161675af4a7cc1725b3ec96c7bed05d950f90a7e56eca1d6a7abe19649c",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageRootReadSelect",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 477,
+      "line_end": 478,
+      "span_sha256": "231f026ea79a9f82de09090fce604b903c32540561b06d91242270c5ad52cc73",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageFieldReadFind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 479,
+      "line_end": 480,
+      "span_sha256": "0afff9388a6d5b04713d69876843c05766b4a0182ef5eba4db6c9157d25d82e9",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageIndexReadMappingFind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 481,
+      "line_end": 482,
+      "span_sha256": "b52950c985cefa4e5297a26f37f81ae2999e918ca340029bcd9c243d6e05d953",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexReadArrayFind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 483,
+      "line_end": 484,
+      "span_sha256": "c24fa6e47b31c91076ffeeba79a94d76eabdc12837bcd795c456939fe5c736fa",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageRootWriteStore",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 485,
+      "line_end": 486,
+      "span_sha256": "891672e833cca223d37875faa72c0b121b4fd7f27a19ecdcf3f1a23b33ad398b",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageRootWriteCopySource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 487,
+      "line_end": 488,
+      "span_sha256": "ec673b9323790918b58cfe160c0aecbb6563122e7bdb5607aa107e4f53f3d3e8",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageFieldReadStoreRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 489,
+      "line_end": 490,
+      "span_sha256": "d061c2172c93cf707d7062062c19da350d1b0ff1c7c384900683c43632e17dc2",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageIndexReadMappingStoreRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 491,
+      "line_end": 492,
+      "span_sha256": "3abdbcd3c2b4aa50fded205651b3862f04a299613af3945d83668f10cd2bda6e",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexReadArrayStoreRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 493,
+      "line_end": 494,
+      "span_sha256": "7a0bf0ae5a830c6a85607a2340941275f573eb6c606c51c6297d3ffb5c115a8f",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldWriteSave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 495,
+      "line_end": 496,
+      "span_sha256": "25d911c3334fc0ffb4ce04eb3491c555cc99ebfdcfec0f66eda53968be7eac4e",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageFieldWriteCopySource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 497,
+      "line_end": 498,
+      "span_sha256": "3e71006d66fcdd6b3eb4e309284b3e3dc7fe2656f1c5a97d15e2eea4d804fee2",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteMappingSave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 499,
+      "line_end": 500,
+      "span_sha256": "48191249896c5f5a0efbd6b35bb3eaedff789e1d43b08c07ec860863a8f81c1a",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteArraySave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 501,
+      "line_end": 502,
+      "span_sha256": "3b538dd6dd2625c2a3dde42252132a94689b4a62733c663a03f4ff56745dcdef",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteMappingCopySource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 503,
+      "line_end": 504,
+      "span_sha256": "4120d8322ea6bf9cc7d7eed591d54edac41e60fe737cad73e0d95d2e72e2c4b2",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexWriteArrayCopySource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 505,
+      "line_end": 506,
+      "span_sha256": "c7c8b7d1403dbc2031043f579fd50e241ce0d89b02d1a9c337653a85ec947a3a",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageLocalRootRebind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 507,
+      "line_end": 508,
+      "span_sha256": "2372ef1adc3f14476911c53a0c9c9191a5f39163abcec6a7e638e25ae0c2751c",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageFieldReadBindLocalRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 509,
+      "line_end": 510,
+      "span_sha256": "568f0881c03a1d335535a923cefc8f0b20a3adf2d5805f4024c5b9ea310d4946",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageIndexReadMappingBindLocalRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 511,
+      "line_end": 512,
+      "span_sha256": "99be17059372c3d0ef72d56505597ec6b33a8d6bef9a48dad2a9e2aa525b0af8",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexReadArrayBindLocalRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 513,
+      "line_end": 514,
+      "span_sha256": "15db7940d59cccf20942806fc171584abeed3acd156dfe021fcb38888bb1caed",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexReadArrayBindLocalRootMappingElement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 515,
+      "line_end": 516,
+      "span_sha256": "f7fb7e99d247cc402b23cd6430d66818a7788a9049fb6d62793d590962365e1a",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageRootDelete",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 517,
+      "line_end": 518,
+      "span_sha256": "aa7599ea45978b2566a52a25d0139e40e988de3559f8ed6c73d341661e538d20",
+      "families": [
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldDelete",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 519,
+      "line_end": 520,
+      "span_sha256": "04849be8ee379d8c503978f016f844e5681b82535ca6eff9ac61d7d771d16a6e",
+      "families": [
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexDelete",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 521,
+      "line_end": 522,
+      "span_sha256": "2dd373bca0c3cec0e08d2291087ea0c34318e851858100f13e70599279bc02b0",
+      "families": [
+        "index-bounds",
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexArrayDelete",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 523,
+      "line_end": 525,
+      "span_sha256": "77733807888e2bd84abcca1457cb950a11ff7d3c827d884f8c466414da918537",
+      "families": [
+        "index-bounds",
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageLengthRead",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 526,
+      "line_end": 527,
+      "span_sha256": "a6b4c2e801b92d9bbfe35486ae15b8d96221a644052bc5b2c35f155167d050e8",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.storageLengthRead_unfold_rightFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 528,
+      "line_end": 529,
+      "span_sha256": "81d3edfe58fc5faee1884fa1edd645df78cf2c3db6bef1ae9a3481e45e6e3f98",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryLengthRead",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 530,
+      "line_end": 531,
+      "span_sha256": "115fa3c992a30473b04a0f73914c1340f975c5b3cecdde6fd35ba29a27b0243c",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryLengthRead_unfold_rightFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 532,
+      "line_end": 534,
+      "span_sha256": "1d21fa0aed1e06809d05ecaa49e0e3deae74401a6a64a320f22af4f9632677ca",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.binopAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 535,
+      "line_end": 536,
+      "span_sha256": "9b358fb39549211ca6d2ff61b6ea2e285b37e956ef39ed126080680b2d71c871",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.binopUnfoldLeft",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 537,
+      "line_end": 540,
+      "span_sha256": "e3c2fc81159cac6da7b82dbafe06ba4ff69e0ed785ca564cd6e25e35b1517b99",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.binopUnfoldRight",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 541,
+      "line_end": 542,
+      "span_sha256": "f774d8a4482bcf275c8e7cf07d0af8ac759e00e071960035a90808cb0ff317da",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.logicalAndShortCircuitRhs",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 543,
+      "line_end": 544,
+      "span_sha256": "f04c4db9fedcd85564fb3f361e69047ee8a956f21a02741bcedfe01534f686b4",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.logicalOrShortCircuitRhs",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 545,
+      "line_end": 546,
+      "span_sha256": "92d38fbc9139b336a3907adc059f0270f3496e2572d1cb865ae688008f70216c",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.unopAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 547,
+      "line_end": 548,
+      "span_sha256": "87af8a89b6106726745296fb7d35bc0430bed27db01ec3f356e48561bfe3bf2f",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.unopCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 549,
+      "line_end": 551,
+      "span_sha256": "32e5321281359e41d3895ea1b0738fb8720b4aebfdf3b5014438ec110ff2d267",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.ternaryToIf",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 552,
+      "line_end": 554,
+      "span_sha256": "b46556b974cf01b62a95a2fdb591622d929af654d95e54ef4d697e33d188fd03",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.ternaryCaptureCond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 555,
+      "line_end": 558,
+      "span_sha256": "251ed9fcf3246205d1ee1532e51cc1e44cf25edca0b0c25e2de9ec34f21b0767",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.localOpAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 559,
+      "line_end": 560,
+      "span_sha256": "dcbb6fcdf34ba0e2e0661b70785936c7bb96ce08b25cc9c0dd461d87f065ff94",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageRootOpAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 561,
+      "line_end": 562,
+      "span_sha256": "47995c99e783611b457115d6fab46cf10d7b45e4d6fb7373632c07b099589dac",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldOpAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 563,
+      "line_end": 564,
+      "span_sha256": "3c593997263c8f4cafc82ddba6524a5986f87fb76d9ef93a784a687085eb6b90",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexMappingOpAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 565,
+      "line_end": 566,
+      "span_sha256": "2f40e5642a549c1bf34af58df6c6c0b5d22b744e3bced89d61081f3e7320339c",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "index-bounds"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexArrayOpAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 567,
+      "line_end": 568,
+      "span_sha256": "0a96503c5423d13c3c05b3e5bd2ca5f5a577c8ab28b1aee18e2fe9df82f1212b",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "index-bounds"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldOpAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 569,
+      "line_end": 570,
+      "span_sha256": "c2e94256d2513caac4374e9961bc127ce6a47e08eea1b8effb2eb23a34e94e83",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexArrayOpAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 571,
+      "line_end": 572,
+      "span_sha256": "1e754620aed4e38d82f6a66ab7dc3987ebcdf7e79fd6d3f45286b83203ae7e69",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "index-bounds"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldOpAssignUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 573,
+      "line_end": 574,
+      "span_sha256": "05f4d7bbbe95880adf98f7b7562f5a910ea739db0a82c3538baa7cf0d4216a0b",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexOpAssignUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 575,
+      "line_end": 576,
+      "span_sha256": "535eff099be1d659e1b80a57b8b257f733b07e67e789697a12f0d368f46d7c99",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldOpAssignUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 577,
+      "line_end": 578,
+      "span_sha256": "d64211be1f786779d224c9932dcf976c8f6fbfd6829f8987572d7f2813334c90",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexOpAssignUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 579,
+      "line_end": 580,
+      "span_sha256": "28b629f041fd42eba9b26a6af47627ad36127e704a88e3acefec0f9c999f94a3",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.compoundAssignValueRhsCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 581,
+      "line_end": 582,
+      "span_sha256": "b31f176816ba940eb12b0135154ee25af2cedb79bc9a31535dfe3d6954f912ef",
+      "families": [
+        "overflow",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.localIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 583,
+      "line_end": 584,
+      "span_sha256": "df81cc7e16872a6ab8c5dadd5f7b27a87b4eef7d53a6c1da034f51aad4510196",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageRootIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 585,
+      "line_end": 586,
+      "span_sha256": "8ee70c46b83dcd7aeee8757cea2fb7958ffb9b31861845e035fe965ed872b093",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 587,
+      "line_end": 588,
+      "span_sha256": "ceb8c0a58d50e0f931cf4938aa0f61554347ba608ba4244a9d3753bb33a9881f",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 589,
+      "line_end": 590,
+      "span_sha256": "e895e7a5f335fcee5cb8845cf2326c16a5a7ca59f6fdcfe63f4ebfd278712487",
+      "families": [
+        "overflow",
+        "index-bounds"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 591,
+      "line_end": 592,
+      "span_sha256": "181f8a343ed28913adf698c423bc8c2a2427cc78e593a650896a7ced93179e36",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexArrayIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 593,
+      "line_end": 594,
+      "span_sha256": "dfcb55cc75b5cb117420e1446d1abb558a1c662877d06147dc03ace33dabcec2",
+      "families": [
+        "overflow",
+        "index-bounds"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldIncrementUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 595,
+      "line_end": 596,
+      "span_sha256": "107404b14e25dc564f0ef3ef5be8bf072fd722bf7dd8141253152f654a98b692",
+      "families": [
+        "overflow",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexIncrementUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 597,
+      "line_end": 598,
+      "span_sha256": "1d7a902469a211a02f5fd4dbbf526d2b10c06e47bda8b0fbca24bdc4e699d9b2",
+      "families": [
+        "overflow",
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldIncrementUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 599,
+      "line_end": 600,
+      "span_sha256": "63643df8c15f64e6731d2ebe5202cd14f53389b8d956bd874d98285f502eba31",
+      "families": [
+        "overflow",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexIncrementUnfoldLeftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 601,
+      "line_end": 602,
+      "span_sha256": "900045739e6028b05985fd6048e4a6c1816eaa50758c1925434ddb05d1c773e4",
+      "families": [
+        "overflow",
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.localAssignIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 603,
+      "line_end": 604,
+      "span_sha256": "8297a20e4b7c30ddcb0804f29374328cee5c13c5c1f49302f30cee7eb64d5939",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageRootIncrementAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 605,
+      "line_end": 606,
+      "span_sha256": "c48268c33c84dd4f393a3ac4721efe386c449cc3626bfa56cad3ec481982cff1",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageFieldIncrementAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 607,
+      "line_end": 609,
+      "span_sha256": "b76d1996b6e9173da7338f3b02b8689bd0be66ac9e0c59ff4867771d42e55080",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageIndexIncrementAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 610,
+      "line_end": 612,
+      "span_sha256": "ccd98a57ba2683dc11bb06a80827fb84f3991285094962c8d51083520490b883",
+      "families": [
+        "overflow",
+        "index-bounds"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldIncrementAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 613,
+      "line_end": 615,
+      "span_sha256": "748775729ad9fe69ffd126b52fb3ddb2d75f0a43ddc9907829d2c9a25c3ca8ca",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexArrayIncrementAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 616,
+      "line_end": 619,
+      "span_sha256": "89be0a3d2e027200f300e6f40ec46564d722198ac2c10d66fd7cc660ef92f241",
+      "families": [
+        "overflow",
+        "index-bounds"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushAddAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 620,
+      "line_end": 623,
+      "span_sha256": "de9aafbd3ece21e4d4055759e3f49ab11ebb485b21ada8f178abbc0dfef97577",
+      "families": [
+        "overflow",
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushSubAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 624,
+      "line_end": 627,
+      "span_sha256": "469ea2e7a332495b697555a74bcd89deadc4b8cf2e556e5158418ff897389b4f",
+      "families": [
+        "overflow",
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushMulAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 628,
+      "line_end": 631,
+      "span_sha256": "9e9944af8bc8665ee3a685325fb82667c9cbf91818eae4ff72a243cea3861339",
+      "families": [
+        "overflow",
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushDivAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 632,
+      "line_end": 635,
+      "span_sha256": "31ae51d0f701769b93335dd8cfcc05201aabb2f69d5ddad78bfb36dfae1f39d7",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "push-tail-length",
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushModAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 636,
+      "line_end": 639,
+      "span_sha256": "1fd41d0fcdfa833b160f8348adfb78f71af6601de50d373fe3334167e1ac2555",
+      "families": [
+        "overflow",
+        "division-minimum",
+        "push-tail-length",
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushPreincrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 640,
+      "line_end": 643,
+      "span_sha256": "240c4ce52c832409becf774b36908ce7ef6cd293dad720bf8adcc7bb141d865c",
+      "families": [
+        "overflow",
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushPostincrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 644,
+      "line_end": 647,
+      "span_sha256": "807138b2234d677d915d71c8e5abb18f13e3002e69d119b6df291f0ebc09afaf",
+      "families": [
+        "overflow",
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushPredecrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 648,
+      "line_end": 651,
+      "span_sha256": "230b2a6832b99f4ae1ff1bcfb8faabb324bb8c52525eaf54eede5dbe930469a3",
+      "families": [
+        "overflow",
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushPostdecrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 652,
+      "line_end": 655,
+      "span_sha256": "dd3b0801b0771e28dd4fedf1c3209e0270db504dd0b7248ef0ad271b427dd040",
+      "families": [
+        "overflow",
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.pushCompoundAssignValueRhsCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 656,
+      "line_end": 658,
+      "span_sha256": "6b11dd2f67f4d5c3604a3f853495f347d1b49dc281a5cd2b32d9368416615733",
+      "families": [
+        "overflow",
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushValueSave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 659,
+      "line_end": 661,
+      "span_sha256": "5947d8fbca2c14afa60e6be9bcbd1c8293aa8a96a140cf8ee188afb0e4d28179",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushValueCopySource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 662,
+      "line_end": 666,
+      "span_sha256": "e8f01ec704a3490318fbf9e891e7f1c1a28563a0b266836b18b271379d423e80",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushMemoryCopySource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 667,
+      "line_end": 670,
+      "span_sha256": "2d5ebe914617bbd88666efb130863bb1b5f78634cb118362f304636d6fd3b1e2",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushValue_unfold_rightFstReferenceArgument",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 671,
+      "line_end": 673,
+      "span_sha256": "05f78eda7199832811502f80dbcd952b44ca3359dc7fa4044d946ba92f1f391d",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushValue_unfold_rightFstPrimitiveArgument",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 674,
+      "line_end": 676,
+      "span_sha256": "bf04beee76dacd7eff29d18b0527bcda2529a4fecd913529c9086826b8384b58",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushLengthSave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 677,
+      "line_end": 680,
+      "span_sha256": "61a522b32b15553b7c6cd6db5f3c20bf9a6122cd82e3ba55d407362911988467",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushLengthSaveReferenceElement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 681,
+      "line_end": 684,
+      "span_sha256": "7e25b7091a06ca7eda6039792ba6f36a93f4c26e7f603f72c5cb470a7c52c678",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushLengthSaveMappingElement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 685,
+      "line_end": 686,
+      "span_sha256": "c0901d8778ad3317a2e35bc115725c78e2127735a4bc14a1c4a6b99db650b1d6",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushValue_unfold_rightSndArgument",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 687,
+      "line_end": 688,
+      "span_sha256": "035c56a0c009bfd113cd2b64856b8d219966cf4b8da36371779c72a2764e57c7",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushValue_unfold_leftFstReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 689,
+      "line_end": 690,
+      "span_sha256": "6ee25f67fa2d0f56c6caa64b728b28114581a296bdfc38f56c7464d7d6efbade",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePush_unfold_leftFstReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 691,
+      "line_end": 692,
+      "span_sha256": "4b8517f65f337790a56293b7714118780d9c7874f57926124ada9b432cf1c492",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePop_unfold_leftFstReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 693,
+      "line_end": 695,
+      "span_sha256": "2489e7e0d88bd315d1da0935d5443e79474fba3ec036f842f4239151b8579045",
+      "families": [
+        "push-tail-length",
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePushValue_unfold_leftCallReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 696,
+      "line_end": 698,
+      "span_sha256": "13e03be9149537ae84ea8b69df2227fa8511495e33079b21cbf195ef7cf53adb",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePush_unfold_leftCallReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 699,
+      "line_end": 701,
+      "span_sha256": "4304ed292258ace7fb05c0b00fcf64256cefbbd0cfbdf79ffd5c6a6cf69a7897",
+      "families": [
+        "push-tail-length",
+        "pop-delete",
+        "alias-capture-once",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePop_unfold_leftCallReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 702,
+      "line_end": 703,
+      "span_sha256": "71dfc325617052d709fd08e041f1f0914814c4e596d68abc83175318a0d653e4",
+      "families": [
+        "pop-delete",
+        "alias-capture-once",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePopSave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 704,
+      "line_end": 707,
+      "span_sha256": "f1c5c44f7e0e71077879fa3634365fa0d784b2c494a7316437485e6ba4b1beaa",
+      "families": [
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storagePopSaveMappingElement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 708,
+      "line_end": 709,
+      "span_sha256": "c45bcce78bcf3025e04bc935d622512af22174c35d75ef6b8a8f0de06fa10400",
+      "families": [
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageLocalRootPush_unfold_leftFstReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 710,
+      "line_end": 711,
+      "span_sha256": "387b104918cb21d3cfdf3da11011894ec7d573870fe2b75bac32f08227d12e9f",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageLocalRootPushBind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 712,
+      "line_end": 716,
+      "span_sha256": "2d97ab277f1d89531e29fcb92097fe57a30327e65811d32d759b9288cd06ef17",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageLocalPrimitivePushBind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 717,
+      "line_end": 720,
+      "span_sha256": "28d3228514ec2d7c6722b494982b2d5e3c3d9d8a2d2a3d0ce2a2508198e7cdcc",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.localValuePush_unfold_leftFstReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 721,
+      "line_end": 722,
+      "span_sha256": "d7a74e0b07fe96600c3c6c08400f2204f214451ba709b25cb498480397e8e685",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.storageLocalRootPushBindMappingElement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 723,
+      "line_end": 727,
+      "span_sha256": "9da694e5b28052c312ebdc71d9bfa809795e3bd4ace20e2e8bb588ef1b95e079",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.transfer_unfold_leftFstReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 728,
+      "line_end": 729,
+      "span_sha256": "98016a1c7ffa29faa33ada9a8c5af04f0f5049068475e222450a29290b5e970e",
+      "families": [
+        "alias-capture-once",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.transfer_unfold_rightSndArgument",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 730,
+      "line_end": 734,
+      "span_sha256": "a38afd8b65d5bed80d02e37e526a1755e5b0398c685b7aaf53b823310f3e6b29",
+      "families": [
+        "alias-capture-once",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.transferNoCallbackBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 735,
+      "line_end": 738,
+      "span_sha256": "9ce765750e85cda369bc8a3a9936075a4bba0368dc22ac0d7502b766cbb5dadb",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.send_unfold_leftFstReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 739,
+      "line_end": 740,
+      "span_sha256": "62c2096f87f4ca58c82876de303539d2c8e0e1b10438945971e1f22e77934c96",
+      "families": [
+        "alias-capture-once",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.send_unfold_rightSndArgument",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 741,
+      "line_end": 745,
+      "span_sha256": "e1b9eb92787ae8c068cd16f092e36023c1bdd922daa5b781640338858c2335ab",
+      "families": [
+        "alias-capture-once",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.sendNoCallbackBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 746,
+      "line_end": 753,
+      "span_sha256": "7c88131242704fa624a172c15d28ad5696d4ed20789af7df3c8a6e6ff8a5caaa",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.sendNoCallbackDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 754,
+      "line_end": 761,
+      "span_sha256": "7675fe39ad45659283a9c81c9512c69a87a44df7565f8e05db2114cd8f31a3dc",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldRead_unfold_rightFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 762,
+      "line_end": 763,
+      "span_sha256": "c4205351da4fb7a69abcf9fd5a887968f30d75125e2f53d0a51fd179e2ef31fd",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexRead_unfold_rightFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 764,
+      "line_end": 765,
+      "span_sha256": "b19ab11963cf3928d9edeec97a5d778ca210740012465dae10e693e0dc114703",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexRead_unfold_rightSndIndex",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 766,
+      "line_end": 767,
+      "span_sha256": "f83a69b64672604da783a87bb6b8e4a6822c8f93a90b2bb1c84e6e1521ac5387",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldRead",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 768,
+      "line_end": 769,
+      "span_sha256": "8485dc47249c00bd44752892271cc42cf21f79539ee3f4378bbb73badae7ae4b",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryIndexReadArrayValue",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 770,
+      "line_end": 771,
+      "span_sha256": "78fc98c9bbc0bd692588c1267cec61d96aaa1079aef40f1b7505313b4a0023eb",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryRootRebind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 772,
+      "line_end": 773,
+      "span_sha256": "6b1e21db6f8454dfaeab1acc0214a48ec07d0a4668b1af9ea28b677bebb2bc00",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryFieldReadAliasRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 774,
+      "line_end": 775,
+      "span_sha256": "1645e9eb918013a9d89f40d58f65990ada3589e41abe5f68082232a574b6db15",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexReadArrayMemory",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 776,
+      "line_end": 777,
+      "span_sha256": "4f1bade87e9e2d437a74415a6f21863b978c365419f67e8022a5fd5582e0bb14",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldWrite",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 778,
+      "line_end": 779,
+      "span_sha256": "d7328fee4903f2dd83d1a2943029da707acb42693c2f7a92fb35761b9da65fa1",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryIndexWriteArray",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 780,
+      "line_end": 781,
+      "span_sha256": "77e676d98b67963154b985bc0483c6ab44c73b3a5959aab3aaedebacd09b869a",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldWriteCopy",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 782,
+      "line_end": 783,
+      "span_sha256": "180c66e70d11c4ce708de199c82616f112cff64fd68c46194d38d0731599e65d",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryIndexWriteCopy",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 784,
+      "line_end": 785,
+      "span_sha256": "61c031e42ce5b71b0dbc41e6112153d89221df56c50018364635eac17496f147",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldWrite_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 786,
+      "line_end": 787,
+      "span_sha256": "40eaef91ce31bf1b12bc72e9b8d1f8686aa8f3aaeb01b9ae333f0c3727111df0",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexWriteCaptureAllComplexRecv",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 788,
+      "line_end": 789,
+      "span_sha256": "c584b7f5dab2cc59f7b673c131bd2ebb557cb24ee74153da229855a0b884d874",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 790,
+      "line_end": 795,
+      "span_sha256": "b17406c1a40dbc99cf6086005ee264f2923714bf617e98ff94ed5d4b56ca2ec8",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexWriteCaptureAllNonSimpleIndex",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 796,
+      "line_end": 797,
+      "span_sha256": "f8a576bdf14a329e83bce12d823f59f718b5af4d5caac11442fb2f000eab8d2c",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 798,
+      "line_end": 799,
+      "span_sha256": "3e412828085765f03cdf47662786cc399f2b90f54bc0287d3d96a8b7d464bb31",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldWriteUnfoldSource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 800,
+      "line_end": 801,
+      "span_sha256": "2e8a7f701fd5e2bf914ceed0fe205b8bbbf9b26fa03bd8f6e6147d9849aa1c0f",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexWriteUnfoldSource",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 802,
+      "line_end": 804,
+      "span_sha256": "b44a63d68f1f93bbf42715ba539991e8eba54f6f2653b6f45145a086944d3188",
+      "families": [
+        "index-bounds",
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryRootDeleteFreshRebind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 805,
+      "line_end": 806,
+      "span_sha256": "0afac7eff33af3eeae7400426c20cfb8a3a637bf92210d5ef730f5af418ed505",
+      "families": [
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldDeletePrimitive",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 807,
+      "line_end": 809,
+      "span_sha256": "9a2ab6125226ec2182a5196c09eaee7c046630d101a1c045a27f6814bfcc0f39",
+      "families": [
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldDeleteReference",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 810,
+      "line_end": 812,
+      "span_sha256": "a6c900e750bc7b1383174cd35cdd4196eaa37261562d82e96e858f4253c5da6f",
+      "families": [
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexDeletePrimitive",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 813,
+      "line_end": 814,
+      "span_sha256": "cea66ced920fad903c32ff8b7c5aea0cec0c49069a110f961b244c75bdac322e",
+      "families": [
+        "index-bounds",
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexDeleteReference",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 815,
+      "line_end": 817,
+      "span_sha256": "2d76f4b8a9e02774a0abacb38426c2b000258caad4a7ed6ad3125acb5ad92fa3",
+      "families": [
+        "index-bounds",
+        "pop-delete"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryFieldDelete_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 818,
+      "line_end": 819,
+      "span_sha256": "fad910e389acc402c50e6ea4b049a90758b318aabd96845566b084af3a406f2f",
+      "families": [
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexDelete_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 820,
+      "line_end": 821,
+      "span_sha256": "78f0c20bfed7e3e0262d7d2034c4916c8cd01c63007cbf0c036d2bfd42d6a911",
+      "families": [
+        "index-bounds",
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryIndexDeleteNonSimpleIndexCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 822,
+      "line_end": 824,
+      "span_sha256": "5f74bc82b296fd68b7af31357a191d5c6930cfdf9e08d09e390f047923ab32a4",
+      "families": [
+        "index-bounds",
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryArrayFreshAlloc",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 825,
+      "line_end": 829,
+      "span_sha256": "05fed17750ce707f47ba3957d75b3b388980af6a9345f1df491c2e58550a3902",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.newArrayCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 830,
+      "line_end": 832,
+      "span_sha256": "15933c8e04ef11d61ce2be84bfa96bf0215580416bbc2c3559b0ccb335ddb8f7",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryStorageCopy",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 833,
+      "line_end": 836,
+      "span_sha256": "ddde6a43d4fffb7398decb8454023d1eeb02abbf3103b8b16245b6da7133c01b",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryStorageCopyUnfold",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 837,
+      "line_end": 838,
+      "span_sha256": "7919214d9333b9a697392bcbcd85647b896bed1c0b64fdeb9d5121947b3c41b4",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryToStorageStoreRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 839,
+      "line_end": 840,
+      "span_sha256": "42890d2618c7785ccaed52f84012dfa12bde20cbf93461c93847e6ff924df4f0",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryToStorageFieldCopyRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 841,
+      "line_end": 842,
+      "span_sha256": "c1a11bcd51ad11cf4c9be76499d68e2941cfa04a00ce7333de564e3273d637a9",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.memoryToStorageIndexMappingCopyRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 843,
+      "line_end": 844,
+      "span_sha256": "3f42214860d3f6ba8e7ae63c7ad0139afa4d44b1b4fb4612770eec6daed424d6",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryToStorageIndexArrayCopyRoot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 845,
+      "line_end": 846,
+      "span_sha256": "5b8bbdb9895d94a799a53a986b5152a619826c48824b172544e120edce6ae478",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryToStorageField_unfold_leftFst",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 847,
+      "line_end": 848,
+      "span_sha256": "706054430fa8007942282c2a3e5e8bfd1ff44c4cd950ab2bb7109651dafcf2f6",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryToStorageIndexCaptureAllComplexRecv",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 849,
+      "line_end": 850,
+      "span_sha256": "bd911bc0203bc4e93e4f9a01a30b8fca5daca8041e22cd1b24f62e2d56612cf9",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 851,
+      "line_end": 853,
+      "span_sha256": "6573efed3a8e6fa648c4e3ad8b0109f4c232d6491d298ca113477c8fb1e65f37",
+      "families": [
+        "index-bounds",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.ifElseUnfold",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 854,
+      "line_end": 858,
+      "span_sha256": "2b62ac50ea0def6110ed79f2a5f43be58de5612ce5b02271aa9e7014083e68d0",
+      "families": [
+        "alias-capture-once",
+        "guard-polarity"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.ifElseSplit",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 859,
+      "line_end": 862,
+      "span_sha256": "64665f3ed6c52d1c826fb522e4e6788518b4b117fe4f441e72a0f7b3af94be28",
+      "families": [
+        "guard-polarity"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.requireConditionCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 863,
+      "line_end": 865,
+      "span_sha256": "53f34386f41cc3fe775fcf2f737fa0bda63e405c64aeb3e7476216ba3fd4e97d",
+      "families": [
+        "alias-capture-once",
+        "guard-polarity",
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.requireSimple",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 866,
+      "line_end": 867,
+      "span_sha256": "e581230776fe5466fa55d6edcc91d4784ad430ad9c581a7bc4e229ad799426fe",
+      "families": [
+        "guard-polarity",
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.assertConditionCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 868,
+      "line_end": 871,
+      "span_sha256": "8519d6894ea3218a966701b4dd506da8ed70bd92a8d62f1d43823b41ff395dc7",
+      "families": [
+        "division-minimum",
+        "alias-capture-once",
+        "guard-polarity"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.assertSimple",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 872,
+      "line_end": 874,
+      "span_sha256": "efe46e35f6a02ab0addc4dc64e1290cb27f7c6fe12342f3c5bc0e0347a889a3b",
+      "families": [
+        "guard-polarity",
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.revertBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 875,
+      "line_end": 877,
+      "span_sha256": "10d942d5e89baa15933c0b6b9f80439faf9aba24c5d37cb5cfa51775ec7f0c98",
+      "families": [
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.revertDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 878,
+      "line_end": 885,
+      "span_sha256": "65fb796ca227f32bb03c183497a01d2d34a4a235a0273a7ecb6e1e063e5d9b79",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.functionBodyExpand",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 886,
+      "line_end": 890,
+      "span_sha256": "fce8a4cc00aafb28cb1ab60e9163235a8b10cf01602bb13e079790a651b913b4",
+      "families": [
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.internalCallExpand",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 891,
+      "line_end": 898,
+      "span_sha256": "afe0715e70dc6c4fc1a3aa684cb6a7b70ed205eb6a432c4eb9297f7a26fe7f91",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.tryCallNoCallbackBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 899,
+      "line_end": 907,
+      "span_sha256": "feb6d9a8fc77b1217a709eb44d9c9ec1b81b311e38ee1e4600b78ad1c39431ea",
+      "families": [
+        "pop-delete",
+        "alias-capture-once",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.blockEmpty",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 908,
+      "line_end": 913,
+      "span_sha256": "bd390076f2da3e5b06f8d9859e52915b626e65645abfbe4248ee03f1ec11c3ef",
+      "families": [
+        "division-minimum",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.whileUnwind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 914,
+      "line_end": 932,
+      "span_sha256": "5cefce9490752148f9f754742f3687863eef32fc6fc6e3843202430908fd3e58",
+      "families": [
+        "push-tail-length",
+        "pop-delete",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Taclet.whileInvariantBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 933,
+      "line_end": 947,
+      "span_sha256": "153fb8c37152a51f8aa934eae2ae9cc73409d714d99a1a9bba39fa91b96c2802",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Taclet.whileInvariantDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 948,
+      "line_end": 959,
+      "span_sha256": "63555aa8cc5bc3135fbb1d88a2cc253c8dc61c2ae0330d787e73d005f4c287c6",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "LeanTaclet.ifElseJoin",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 969,
+      "line_end": 974,
+      "span_sha256": "dc9a3821e5b4129495ceaf3133e86947ebf8b762a4e42e2060629541d2286a39",
+      "families": [
+        "guard-polarity"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.ifElseJoinSequence",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 975,
+      "line_end": 980,
+      "span_sha256": "6880bec19eb2b27967da89fcf60c5e25f7e74eb12f92d4ba1c916c541061d909",
+      "families": [
+        "guard-polarity"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.addmodAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 981,
+      "line_end": 984,
+      "span_sha256": "6b91296964cb79b48a53f1037c91f61392f45e99444900ca34f73b34e2e462ec",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.mulmodAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 985,
+      "line_end": 990,
+      "span_sha256": "4add3b7106227c85df75f28a78e71fac1b1557c96e1ad454e1d4855aa3393bf0",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.hashAssignment",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 991,
+      "line_end": 995,
+      "span_sha256": "b97d356f42013a68bb5509bbc7e26457d31b7ded1e05954c6bf36414b0322e77",
+      "families": [
+        "overflow"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.storageMemorySourceSave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 996,
+      "line_end": 1002,
+      "span_sha256": "fe49f0c8244252c3493968f2b2e65672bd1d9df0c720aa95b5f4a7ba4f415751",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "LeanTaclet.storageFixedCopySave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1003,
+      "line_end": 1008,
+      "span_sha256": "f907d0e4222313cff3861c71638cad6e8c4f6167291c7b00eb95eac7a9821097",
+      "families": [
+        "push-tail-length"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.pushFixedCopySave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1009,
+      "line_end": 1015,
+      "span_sha256": "767dff87369aa08480861a56de71e8b1a7a8302e132b460c9f43394f6b26ec30",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.pushMemorySourceCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1016,
+      "line_end": 1021,
+      "span_sha256": "cf113c69e829ef5c4ba197d21da4e415be53383155bb02e741cc80bb24d48138",
+      "families": [
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.pushCompoundUnfoldReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1022,
+      "line_end": 1026,
+      "span_sha256": "997627e9222dac78c936c35e345fa337a9e9074d286cb1f83a37385e6a92a413",
+      "families": [
+        "overflow",
+        "push-tail-length",
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.pushIncrementUnfoldReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1027,
+      "line_end": 1033,
+      "span_sha256": "1e686f44954ac126b3b2e1e8697286c20df503dc6de6a8c2d359fae5cdb8789a",
+      "families": [
+        "overflow",
+        "push-tail-length",
+        "alias-capture-once",
+        "rollback-payment"
+      ],
+      "operator_instances": "pending",
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.tryCallDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1034,
+      "line_end": 1047,
+      "span_sha256": "58f040f29df85c6468f87fef810cb69342f562d28994c57c47834a8632000418",
+      "families": [
+        "guard-polarity",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.tryCallSelfBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1048,
+      "line_end": 1058,
+      "span_sha256": "411606ecbb664354c570ff322ffcfae1111f1a7af0c9876b160b5ced4f22ffb5",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.tryCallSelfDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1059,
+      "line_end": 1070,
+      "span_sha256": "d4ce54c5c859a794874a801ec4ee36342ee21ac6d0a138408383343ba17cf992",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.transferDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1071,
+      "line_end": 1076,
+      "span_sha256": "0a380a1ab4e7c89811d8947abe2ced7d33e8603ddddd4cdee3f8ceb82962328b",
+      "families": [
+        "division-minimum",
+        "guard-polarity",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.assumeFalse",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1077,
+      "line_end": 1083,
+      "span_sha256": "7863ace530132365c4af98629c1c78014c36663f3d63af14962764c2e4c12ea5",
+      "families": [
+        "division-minimum",
+        "guard-polarity",
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.revertDataBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1084,
+      "line_end": 1085,
+      "span_sha256": "34045489674dc330ab6a8a568f3578b8b5a77782cd52f10a57692005bee76f9c",
+      "families": [
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.revertDataDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1086,
+      "line_end": 1093,
+      "span_sha256": "ccb86c4dcfe5fbb36dc93ac4af2cb2aefda9a84a7428eae5d40bec6c25ccac2f",
+      "families": [
+        "rollback-payment"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.catchDataBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1094,
+      "line_end": 1100,
+      "span_sha256": "743b9359e5ea04ddbdb345665d4b1b2faeee263f4eb0853b2441fa58322b7332",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.catchDataDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1101,
+      "line_end": 1109,
+      "span_sha256": "751303b38e8bc552ac96934f65d6f35da95840825944fdf2eac1c2719bd313f4",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.recursiveCallUnfold",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1110,
+      "line_end": 1122,
+      "span_sha256": "aae7be22258402846a8951b3439b7f1f9d91225b25231f563b9691a60d77eba8",
+      "families": [
+        "alias-capture-once",
+        "guard-polarity",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.loopExit",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1123,
+      "line_end": 1134,
+      "span_sha256": "2d1ad5a526a398f4e6647cf65abbad7dd5dd9d87e7201619da233dbcd3f2ee1d",
+      "families": [
+        "index-bounds"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.loopLexErase",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1135,
+      "line_end": 1144,
+      "span_sha256": "dde26219f29f6c2f8182058d44897d8651af89bbb7396c4d2d70dca0c8dec0fa",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.whileInvariantLexDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1145,
+      "line_end": 1159,
+      "span_sha256": "4295e02d5dcf777be357b762a4247cd6dc799d6e68f27d91836430f896a8a8c1",
+      "families": [
+        "division-minimum"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.whileClose",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1160,
+      "line_end": 1166,
+      "span_sha256": "1578e201cbef7b05c85d8372d880ed595f1f5b4d7d77399699f68d59c1cf04ad",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "LeanTaclet.whileNoVariantDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1167,
+      "line_end": 1174,
+      "span_sha256": "4febd942722382e2b946a493b0405b19ded9357987a83c263f6d58e0155947e8",
+      "families": [
+        "alias-capture-once"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.functionCallArgCapture",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1175,
+      "line_end": 1186,
+      "span_sha256": "5f1dd99a7d35e3f29795a36bc633ca9bef21bb27adeac88e98b6d5066b8c07d4",
+      "families": [
+        "alias-capture-once",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "LeanTaclet.internalCallSummary",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1187,
+      "line_end": 1194,
+      "span_sha256": "db43270eef87a5627b1db1ce43652d2fb81648a0528e17c06f9956561fad2316",
+      "families": [
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Rule.key",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1197,
+      "line_end": 1197,
+      "span_sha256": "476037fe04db0f69c984f75ba3c33db91823e99101182909a43692e4ad5b10f0",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "Rule.lean",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 1198,
+      "line_end": 1199,
+      "span_sha256": "ceaf2abc2305f4841fcd5876d27dcb8b8703bf82eeef98c9d4656bd603dbb9c3",
+      "families": [],
+      "operator_instances": null,
+      "disposition": "outside-requested-families-pending-review"
+    },
+    {
+      "id": "CallbackTaclet.transferWithCallbackBox",
+      "file": "Solidity/Calculus/CallbackRules.lean",
+      "line_start": 27,
+      "line_end": 29,
+      "span_sha256": "dc6aa04286c23644ece6fffade7d7617f58130fa9e53f653945f0630bc76e919",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "CallbackTaclet.sendWithCallbackBox",
+      "file": "Solidity/Calculus/CallbackRules.lean",
+      "line_start": 30,
+      "line_end": 35,
+      "span_sha256": "ab4939865161b75f05b22b018e09a603464f650e92b98dc6fa8e69a5b79a2412",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "CallbackTaclet.sendWithCallbackDiamond",
+      "file": "Solidity/Calculus/CallbackRules.lean",
+      "line_start": 36,
+      "line_end": 42,
+      "span_sha256": "139052e140b5dec17a93dae664cd63cb936f07d10decf48cdf5582001e24b043",
+      "families": [
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "CallbackTaclet.tryCallWithCallbackBox",
+      "file": "Solidity/Calculus/CallbackRules.lean",
+      "line_start": 43,
+      "line_end": 53,
+      "span_sha256": "ca1950a76f8bcb08bcafadbe100ecc77a7146e43518e7086bbe17aff5d4ff3ef",
+      "families": [
+        "division-minimum",
+        "rollback-payment",
+        "callback-frames"
+      ],
+      "operator_instances": null,
+      "disposition": "pending-oracle-review"
+    },
+    {
+      "id": "Tms.Term.modular",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 72,
+      "line_end": 74,
+      "span_sha256": "ff20c20c6d4d9ae939068440bac8074ff2dd9f81c60e088469b92dee5c7ae093",
+      "families": [
+        "division-minimum"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.lit",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 75,
+      "line_end": 75,
+      "span_sha256": "7a5d9ae5e9694d7d22a78b9da1af52cd9c8232b01b172669774395fadfe24359",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.litB",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 76,
+      "line_end": 77,
+      "span_sha256": "c44a57afa7c291c65df6c9cb06aff0873a97fe38626ab8da99ccd28d782a7ee7",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.nat",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 78,
+      "line_end": 81,
+      "span_sha256": "9828b9e596df4c34bef4c691d777dd0b3c16097b4896658f9a7a493e77c13a95",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.dflt",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 82,
+      "line_end": 83,
+      "span_sha256": "a642b3500e0ef9107efc674f12c590281aa69a304476a57f049c054b16ce1ef1",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.one",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 84,
+      "line_end": 84,
+      "span_sha256": "da6fed6d1d822e6e85679e8249cc191bc6a90e139e6d2ce8e586d8528e3c13f5",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.pv",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 85,
+      "line_end": 86,
+      "span_sha256": "77bdf7ebe0a527bd0d24032220a4f9d01acf67266ebf2a2c79096e72296e4aaa",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.binop",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 87,
+      "line_end": 90,
+      "span_sha256": "5094d41d403310e298154fc5e373958cde383a76882cf1fb1c0f578c236726dc",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.binopS",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 91,
+      "line_end": 94,
+      "span_sha256": "8880495bed8acc85f83dcd46d4bb058c9b4f906d030aa579a09b9ea0f9fcbfa3",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.binopC",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 95,
+      "line_end": 98,
+      "span_sha256": "79dba3c73c04a143f0dc63fb6c5cc385be457dafd9b5c813c42832a5962c0878",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "disposition": "pending-full-clause-and-operator-review",
+      "affected_constructor_uses": [
+        "Taclet.localOpAssign",
+        "Taclet.storageRootOpAssign",
+        "Taclet.storageFieldOpAssign",
+        "Taclet.storageIndexMappingOpAssign",
+        "Taclet.storageIndexArrayOpAssign",
+        "Taclet.memoryFieldOpAssign",
+        "Taclet.memoryIndexArrayOpAssign",
+        "Taclet.storagePushAddAssign",
+        "Taclet.storagePushSubAssign",
+        "Taclet.storagePushMulAssign",
+        "Taclet.storagePushDivAssign",
+        "Taclet.storagePushModAssign"
+      ],
+      "attribution": "RuleSyntax/Schemas.lean compoundOps and pushArithmetic specialize numeric operator terms; size arithmetic is excluded.",
+      "mutation_effect": "Fixed-sub replacement changes generic non-sub operators; storagePushSubAssign remains the same at its fixed sub operator."
+    },
+    {
+      "id": "Tms.Term.binopI",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 99,
+      "line_end": 102,
+      "span_sha256": "2a389a08178cfa4061f2d20ec01f6db0bb6815df6ed35126f305cf918179c330",
+      "families": [
+        "overflow",
+        "division-minimum"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.unopS",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 103,
+      "line_end": 105,
+      "span_sha256": "2a54d292ce5e6386d468f835abb076e9697e8dee1dbfde98422ae32a40f16ee1",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.find",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 106,
+      "line_end": 107,
+      "span_sha256": "6a05ff5d97fbda24e7e08bbf7a03aa7143c01d2ecdcd488b37dffdedd6a37c73",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.len",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 108,
+      "line_end": 110,
+      "span_sha256": "e669056e307784b42677a4747ec2da26d43ad716e70ff0303216e91604f1f4bf",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.lenH",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 111,
+      "line_end": 114,
+      "span_sha256": "3a8b28e724f093253e6c265a236debecb843692fd434e2161ca352b60e8c9af2",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.mlenH",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 115,
+      "line_end": 117,
+      "span_sha256": "8fbcc7a676df48c39be6420714a5a6cb3008895750be412237c40bb6af7a0b9d",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.read",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 118,
+      "line_end": 119,
+      "span_sha256": "7d8a6ae0647ef6c903a7eaeb7768f0b9c1f08f72ac1000a7414f6c17ff1835db",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.mlen",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 120,
+      "line_end": 122,
+      "span_sha256": "217d39fee73f424d5b7d2ad8f156bf7c1d57f9baa53427c339c644e949900998",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.hashH",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 123,
+      "line_end": 127,
+      "span_sha256": "c7a93059299510112f239fd2f9027053965cc0636946ae47e60d5ecb7a4a0a15",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.hash",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 128,
+      "line_end": 129,
+      "span_sha256": "d60c7914499c62ba77b07e0da829bf219859dfba8bebfdbddc550f44641c7c6c",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.env",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 130,
+      "line_end": 130,
+      "span_sha256": "f2b2e440a2509f8e2f9f3674bb5f804a23b496df7796d487bcfe44c6913f8916",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.net",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 131,
+      "line_end": 131,
+      "span_sha256": "54ed6c7046b56c98dc97ef20ab828ef5665934d7aa5516fec666ad66a6d31f07",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.delValue",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 132,
+      "line_end": 133,
+      "span_sha256": "3c0b39adcffb795cc5a24bc7ad40e4e3a98d1dee48c5df6f32f3a92e9a6b7008",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.Term.bumped",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 134,
+      "line_end": 137,
+      "span_sha256": "59f4d2519c64eeb397615efa0595d92f531ed2c47fcc8de45d77632c442fd887",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.PTerm.root",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 138,
+      "line_end": 139,
+      "span_sha256": "6c75836a4a9b9aa229afcc588072712c088c91b97c4b50a4379a8087a6b6a72a",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.PTerm.pv",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 140,
+      "line_end": 140,
+      "span_sha256": "0c73870ef5f4ce284cb617feb01e8b84f557bb27a1b6c428c3b92545787912ef",
+      "families": [
+        "alias-capture-once"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.PTerm.field",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 141,
+      "line_end": 142,
+      "span_sha256": "b81c25447679acf21ff0b7fb45b29118be8683b3a7dbda7a8c96d424a0a0c280",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.PTerm.at",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 143,
+      "line_end": 145,
+      "span_sha256": "9ec9a09b39f7e1f2e2b974cfc5385c30d70020526fc2d2b61815a7ecfb2a039b",
+      "families": [
+        "index-bounds"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.PTerm.next",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 146,
+      "line_end": 148,
+      "span_sha256": "822280b4d5bd2dab2fed957342f629378f2e05e2875d7b979d83278db04feb45",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.storage",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 149,
+      "line_end": 149,
+      "span_sha256": "a1158acd3e87cb1781bd329d9f5a07d5442add18d44add02c9229d2679a5727d",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.save",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 150,
+      "line_end": 151,
+      "span_sha256": "bcbef80938597abce7d42a688fb8fce6ce55ff3ac2dd33d30eee78d414133a9c",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.delAt",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 152,
+      "line_end": 153,
+      "span_sha256": "c1be751020e4c7144001b03b2746cefe32d65541f657d203ddb7e5628803820a",
+      "families": [
+        "pop-delete"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.push",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 154,
+      "line_end": 155,
+      "span_sha256": "9161372c5da203603f88a87d6c55d5c0286d308abde98d36b5a3f5ee58479826",
+      "families": [
+        "push-tail-length"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.pushSlot",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 156,
+      "line_end": 157,
+      "span_sha256": "4557db38e3be3db2069066ede69e7bb8edde9f46ffb239af6f6c63f61e13c1d3",
+      "families": [
+        "push-tail-length"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.pop",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 158,
+      "line_end": 159,
+      "span_sha256": "3d73233b3f0004540e2f0ad427e7ca893fb3fb201aae1851c8f0fc396eaa3dd1",
+      "families": [
+        "pop-delete"
+      ],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.shrink",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 160,
+      "line_end": 161,
+      "span_sha256": "e9529f48b3f79fa407fdb0818fba711af34a643ea4c7b4f9f80d2fda3e1963b1",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.extend",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 162,
+      "line_end": 163,
+      "span_sha256": "ea06a6ec18b6429bf295375dab475f7d559ea817db4acd4bb3ffa8d203d1c228",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.STerm.select",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 164,
+      "line_end": 166,
+      "span_sha256": "f9bb30a44fc6d10f0322428b13b1c42f49107c2effdb6226416aa9b2ccd9a9bf",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.SValT.val",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 167,
+      "line_end": 168,
+      "span_sha256": "36dcb442f0c49751fc43adbe0d54425c43f01f2b6ed46a62d1601971dae9fdee",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.SValT.find",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 169,
+      "line_end": 170,
+      "span_sha256": "1b6962a167c14aa502953bbf4797bc038ad1be36549a36b83208c3cefb064251",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.SValT.copyMem",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 171,
+      "line_end": 172,
+      "span_sha256": "723d0de4889344456e00ffff298ced43ec80c1ca3aad0c3c22c897b2eb4f600c",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.SValT.newArr",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 173,
+      "line_end": 176,
+      "span_sha256": "b4df9a9fb1b5c55d63bdd4876ce01e8f4ef344605c3c0f74dac23f3024f59702",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.SValT.fixedCopyTo",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 177,
+      "line_end": 180,
+      "span_sha256": "d25545bc3642545c3a778a6a87fa8a831db18a4f37a16646a8fda74c5121b940",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.ITerm.pv",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 181,
+      "line_end": 181,
+      "span_sha256": "d37694c00bd89e29e3b62bdea02bba9c4c555a807cee04ed9a3b012e90a9650c",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.ITerm.read",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 182,
+      "line_end": 183,
+      "span_sha256": "662d1686b517c9f27d4fda9612adfc6ba453e5b1b0a0cd2a483504ab5b4dacdb",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.ITerm.alloc",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 184,
+      "line_end": 185,
+      "span_sha256": "4c933ca536861177355e9df561f98a4a49ee0cd88e69fd8ba88227a7e996bbb6",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.ITerm.copy",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 186,
+      "line_end": 188,
+      "span_sha256": "8b37252cfa69f95c9d5c7ec62f15a51d3fc6d56f63ba5ac33a5116cf253c3448",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MAddr.field",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 189,
+      "line_end": 190,
+      "span_sha256": "4ddbccb2ded6b2edf0cd3f9241cccda29d56a93d4d0ac8820921b091b6a385a4",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MAddr.at",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 191,
+      "line_end": 193,
+      "span_sha256": "1f969d7396b4b3740d401eec8809b133ded71fd6f6ef84ae71761cab3442a39f",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MTerm.memory",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 194,
+      "line_end": 194,
+      "span_sha256": "093781cb164707d2bd9dd4c2d7d14726dc8e7517ee3e712dc56dfe259812e3d7",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MTerm.write",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 195,
+      "line_end": 196,
+      "span_sha256": "937982b6dad6ce4c40c49e4ef0aabcdfa71aee5a1f45b1735a520ba77044d9c3",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MTerm.addM",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 197,
+      "line_end": 198,
+      "span_sha256": "e187cdfd6164c3ef1055477d177d9b80806867c80ac8769d724a82413df893c2",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MTerm.copySt",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 199,
+      "line_end": 201,
+      "span_sha256": "76a1c6c41ed0ad11e977c840dfc4422b0de16ab38c82823af019f0f420213ef3",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MValT.val",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 202,
+      "line_end": 203,
+      "span_sha256": "65564b73ab05372474b89cd60f26f6c13ca62dedc1fad555c839345394679b3c",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    },
+    {
+      "id": "Tms.MValT.ref",
+      "kind": "term-helper",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 204,
+      "line_end": 206,
+      "span_sha256": "25f186694029f412c0b8b866ff74aaf6c87bd4fa008a2c75af22dd463baef03c",
+      "families": [],
+      "disposition": "pending-full-clause-and-operator-review"
+    }
+  ],
+  "families": [
+    "overflow",
+    "division-minimum",
+    "index-bounds",
+    "push-tail-length",
+    "pop-delete",
+    "alias-capture-once",
+    "guard-polarity",
+    "rollback-payment",
+    "callback-frames"
+  ],
+  "mutants": [],
+  "outstanding": [
+    "Review helper uses and full constructor clauses/operator instances before full freeze.",
+    "Add all nine families and selected oracles; pilot and development runs are not full acceptance."
+  ],
+  "coverage_note": "Constructor census plus every Tms term-helper definition. Full clause/operator candidate coverage remains pending."
+}

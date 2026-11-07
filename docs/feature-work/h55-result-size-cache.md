@@ -26,6 +26,10 @@ H62/H63 supersedes the v4.24 per-master cache item. No cache implementation or r
 
 H82 supersedes the previous exact-file agreement protocol for statement-preserving edits; interface and semantic changes still require the applicable owner. The draft schema now requires typed, nonblank `waits` entries and forbids nonempty waits for `done`. Independent finder and skeptic reviews identified those validation gaps and they were fixed. A simulated digest-write refusal leaves an old digest readable even though the poller continues and records the error; a fail-closed consumer or independent invalidation protocol remains a coordinator dependency. The source approval/base trust, real inspect metadata, owner-controlled rollout and final proof gates also remain open.
 
+## Post-merge controls
+
+Coordinator-reported `d86c7faf15ec9e4df3702b208622b2a7720cdb94` is an ancestor of fetched master `20e492ee99a3fa8679aa526de0b6e731d85e4134`; the lane fast-forwarded to that master. Five added isolated controls check staged paths containing newline/tab and binary content, forced staging of ignored oversized data, skip-worktree flags, non-UTF-8 leading-dash paths, and oversized renamed content. The full helper test suite passed 26 tests on the merged head. Finder and skeptic reviews, read-only without Lean server, found no defects in the first three controls; reviewer-identified path and rename gaps motivated the last two. The skeptic then identified that the initial rename fixture was too dissimilar to prove rename handling; the replacement asserts Git reports R100 for unchanged oversized content and checks both deletion and rejected destination. These tests do not establish full bypass resistance. The owner gate must protect the interval between census and use, and coordinator-trusted base and reviewed approval integration remain open. No proof or runtime gate pass is claimed.
+
 ## H82 successor: versioned report compatibility
 
 The authenticated H82b assignment/scope and final stopped receipt were verified;
@@ -78,3 +82,60 @@ and hashes: tests/h55/result-size-cache/h82-size-evidence.json and
 H86 unavailable original worker/host raw evidence remains a regeneration limit;
 no synthetic fixture is claimed to authenticate it. H58 audit HOLD, the separate
 pin pause/+46.58% STOP and H67 reconciliation remain unchanged.
+
+## H97 envelope compatibility — functional checks pass, performance STOP
+
+The coordinator's H97 notice replaces the current v1 envelope requirements.
+The prior local validator rejected its minimal example because artifacts were
+mandatory. The new profile requires batch, slug, status, branch, full 40-hex head,
+gates, reviews, limitations, questions and waits. Artifacts and owner_tickets are
+optional. H97 question options are objects with label/consequence; sources are
+optional. Ticket payloads are opaque because the notice specifies no inner
+contract; validation cannot establish owner agreement. H97 waits are arrays of
+objects; this lane continues to emit H82 lane/item records. Known optional
+legacy fields remain typed. Completion still requires nonempty all-pass gates
+and no questions/waits; provided checkpoints/artifact paths retain their guards.
+
+Unversioned legacy reports retain their separate profile, including nullable
+partial heads and string question options. Explicit schema_version=1 selects
+H97 exclusively; it cannot fall through to legacy. Earlier documentation that
+v1 accepts nullable legacy heads is superseded. JSON Schema treats numeric 1.0
+as integer one; no lexical-number restriction is claimed. Duplicate keys,
+non-JSON/non-finite numbers, marker errors and decoder limits fail explicitly.
+
+Schema checks are cached by exact source contents, with an eight-entry bound.
+The file is reread each call, so changed, invalid or missing schema content cannot
+reuse stale acceptance. The full union decides acceptance; complete profile
+validators only improve diagnostic paths. Shared rules were factored without
+removing constraints. Static finder/skeptic reviews found no acceptance/cache
+blocker and used no Lean/server. Profile and union corpus checks accompany the
+standard controls. Actual report suite: 23 run, 20 pass, 3 host-snapshot skips.
+No host/API metadata or production adoption is inferred from synthetic reports.
+
+The first candidate and three changed equivalent layouts all exceeded the cold
+CLI time budget; every result and stopped source variant is retained. Final
+candidate: warm-call median 14.657222 ms to 0.252894 ms (-98.2746%); fresh CLI
+median 103.651028 ms to 116.877156 ms (+12.7602%, above 10%). Output is identical.
+Measured CLI max RSS is 17920 KiB before and 18172 KiB after; warm helper lifetime
+high-water is 17920/49284 KiB, not per-report allocation. Warm improvement does
+not override the cold STOP. The final proposal is stopped and unaccepted; no
+host deployment, budget waiver or unchanged timing rerun. The earlier size
++21.4335% STOP and pin pause/+46.58% STOP remain separate and untouched.
+
+measure_result_validation.py records replayable fixed-input warm/CLI controls,
+source hashes and RSS. It relies on the caller's writer lock, matching runtime
+and resources; it is an observational helper, not a standalone trusted-host
+gate. It does not attest baseline runtime/library identity or enforce child
+timeouts. Those limits are recorded instead of inventing provenance. One initial
+after-driver setup error split a marker twice and failed before measurement;
+corrected and measured runs are distinguished in evidence.
+
+Coordinator master ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6 was integrated after
+remote ancestry checks; WIP source hashes matched before and after the merge.
+Repo-relative source pins and the off-git archive SHA are committed in
+h97-validation-evidence.json. Payload names and hashes are relative to the
+manifested archive, addressing the review's VM-only pin limitation. Source
+regenerators and synthetic inputs are provided; unavailable original host/raw
+worker evidence remains an H86 limitation. H58 HOLD, original goal identity,
+frozen statements, axioms, premises, exclusions and proof/resource budgets remain
+unchanged. No Lean files or shared roots/maps/pins were edited.

@@ -1,0 +1,22 @@
+{
+ "tests/v14-constructor/StorageFailureAxioms.lean:Solidity.Backend.Executable.ConstructorStorageFailure.giveArgs_failed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/StorageFailureAxioms.lean:Solidity.Backend.Executable.ConstructorStorageFailure.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/StorageFailureAxioms.lean:Solidity.Backend.Executable.ConstructorStorageFailure.run_inner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/StorageFailureAxioms.lean:Solidity.Backend.Executable.ConstructorStorageFailure.state_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

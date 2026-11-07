@@ -1,0 +1,60 @@
+{
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.capture_eager_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.capture_guard_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.core": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.eager_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.eager_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.eager_split": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.eagerEmitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.emitted_split": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalContinuationCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalContinuationCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,422 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.and_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.and_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.bitwise_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.bitwise_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.bitwise_nonzero_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.bitwise_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.comparison_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.comparison_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.comparison_nonzero_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.comparison_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.div_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.div_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup_depth_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup_empty_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.dup16_nonzero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.eq_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.eq_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.gt_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.gt_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.iszero_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.iszero_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.lt_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.lt_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.mod_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.mod_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.not_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.not_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.or_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.or_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_empty_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sdiv_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sdiv_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sgt_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sgt_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shift_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shift_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shift_nonzero_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shift_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shl_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shl_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shr_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.shr_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.signed_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.signed_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.signed_nonzero_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.signed_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.slt_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.slt_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.smod_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.smod_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sub_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sub_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sub_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sub_nonzero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sub_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.sub_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_depth_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_empty_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap16_nonzero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_empty_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unsigned_input_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unsigned_native_fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unsigned_nonzero_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unsigned_priority_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.xor_native_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.xor_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

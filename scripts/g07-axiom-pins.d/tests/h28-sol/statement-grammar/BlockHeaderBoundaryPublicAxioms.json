@@ -1,0 +1,47 @@
+{
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.atom_pair_no_named": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.block_items_no_named_body": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.block_yield_no_named_header": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BlockBodyParts": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.decl_head_no_named": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.item_list_no_named_body": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.item_no_named": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.namedArgStart": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.NoNamedFrame": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.NoNamedParts": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.nonIdent_no_named_frame": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.postLoop_no_named_lookahead": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.postLoop_yielded_block": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.revert_statement_no_named": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.simple_statement_no_named": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.SimpleNamedParts": [],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.statement_all_root": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.statement_no_named": [
+  "Quot.sound",
+  "propext"
+ ]
+}

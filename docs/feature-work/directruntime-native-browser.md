@@ -397,3 +397,488 @@ budget changed in the split. Existing reproduction scripts require the archived
 evidence at its original relative paths; extract the archive at repository root
 when reproducing elsewhere. Earlier artifact receipts retain their original heads.
 Required runtime/Identity/semantic/full-gate obligations remain open.
+
+## H81 fresh native/browser checkpoint (partial)
+
+[Compact manifest](../../tests/directruntime-20261104/native-browser/h81-progress-manifest.json)
+records the externally retained, individually hash-verified evidence and cache.
+Fresh builds at source head0140eb13 use206 matching extracted C modules.
+All343 runtime Lean source hashes also match B head64796174; all9 source pins
+in the delivered A packet match. Exact B external journal delivery is still
+pending; independently regenerated requests do not constitute its receipt.
+
+The exact published Identity diamond twin, both compiler modes, proves through
+fresh native and real Chromium WASM workers. The84-case matrix has exact result
+object parity:64 proved,16 refuted,4 pending per backend; all64 required-positive
+cases and72 concrete halt expectations pass. The four storage diamond pending
+cases remain undecided. All13 C construct functions remain unsupported with
+`plain return obligation`; the addition guard passes. Admission is not proof.
+
+Both83-function benchmarks complete249/249 requests over3 rounds. Native median
+1.017780ms versus0.838905ms is a21.32% STOP. Browser median191.497978ms and
+p95235.344016ms rise3.00% and4.88%, while fresh-page startup4531.930874ms
+versus3428.200938ms is a32.20% STOP. Startup is not machine-cold. No unchanged
+stopped candidate was rerun; H68 metadata/runtime/UI differences confound cause.
+Existing browser negative controls complete13/14 verdicts: invariantCountsToBound
+still throws a traversal stack overflow. Offline/edit/staleness/spec controls
+pass. No budgets, metadata requirements or refusals changed.
+
+The selected206-module C/object/import/export inventory agrees across builds.
+Three coarse frontend-origin flags remain visible; exact-body and machine-call
+classification matches previously reviewed generic helpers. The original audit
+source/execution is archived; review strengthened exact-label/direct-jump checks
+against its retained disassembly without overwriting the original run. This
+inventory and request-specific no-environment traces are not a universal purity
+or compiler/source-preservation proof. Twelve existing intrinsic model controls
+and their axiom inventory pass read-only; no worker Lean theorem was changed.
+
+Actual Lean4.24.0 (797c613), Lake5.0.0-src+797c613; KeySort377/131/131
+annotations match. Gates used serial12GiB/no-swap scopes with4GiB outer reserve.
+Native/WASM builds took289.45s/278.82s, sampled RSS1.81GB/1.47GB. MCP checks
+have zero errors; builder/closure regressions pass. The343-module verified cache
+pack stays on this VM for coordinator pull under H41; no ship-cache was run.
+H44 bulk stays out of Git. Full acceptance, semantic/source transport, owner
+repairs, timing resolution and final combined gates remain open.
+
+Final independent read-only finder and skeptic reviews pass with the stated
+limits. Their archive denominator clarification was fixed:453 payload files plus
+the index,454 archive members. Neither reviewer used Lean or reran benchmarks.
+
+## Exact B journal receipt and reconciliation
+
+[Reconciliation manifest](../../tests/directruntime-20261104/native-browser/b-original-reconciliation-manifest.json)
+records verified delivery of the original537822-byte journal and handoff. The
+84 cases match saved source/compiler identities; explicit selectors identify
+the intended function. Common-field values match, but zero complete request
+objects are identical: delivered raw AST/sourceId fields differ from normalized
+line metadata. All field-presence differences are retained; the checker permits
+missing fields generally and does not establish metadata-only equivalence.
+The exact delivered bytes have not been replayed through either backend.
+
+Both saved backend denominators and wire hashes reconcile. Selector and shared
+value drift controls reject their mutations. Four primary input files have
+before/after metadata/hash checks; referenced sources are hashed once. Finder
+and skeptic pass with these limits; finder provenance advice was applied.
+The initial /usr/bin/time setup failed before comparison (exit127), retained
+externally; Python resource accounting and final comparison pass. No Lean,
+browser, build or stopped benchmark rerun was needed for this tooling change.
+
+This clears only the exact B delivery wait. Prior four pending diamond cases,
+13 unsupported C constructs, browser stack failure and both timing STOPs remain.
+The A H44 archive is still pending. Under H88 no new cache shipment or semantic
+gate is inferred from the old343-module pack. Original full acceptance remains
+open. All bulk stays outside Git with the committed checksum manifest.
+
+## Exact B journal functional replay
+
+[Replay manifest](../../tests/directruntime-20261104/native-browser/b-original-replay-manifest.json)
+advances the preceding receipt-only checkpoint. The exact delivered original
+84-request journal now runs through native and real Chromium WASM. All84
+complete request objects and reconstructed compact wire lines match delivery.
+Results match across backends:64 proved,16 refuted,4 pending, with all64 required
+positives and72 concrete halt expectations satisfied. Positive Identity diamond
+passes both compiler modes in both backends; paired controls reject vacuity.
+Statuses also match the earlier normalized-request run. These are trusted
+compiled-checker observations, not source/compiler preservation or proof terms.
+
+The run revalidates prior fresh H81 binaries and343 source hashes; no new
+runtime build occurred. Freshly compiled companion fixtures bind source/compiler
+provenance; submitted ASTs come from the exact original journal. The141.65s
+functional run used12GiB/no swap/CPU1, sampled RSS1.376GB and minimum outer
+headroom10.587GB. Native trace and browser asset observations found no forbidden
+environment/kernel loads. No performance benchmark was rerun.
+
+Finder and skeptic requested this mode-specific wording. The executed harness
+is archived; the subsequent edit changes only report boundary text. The final
+checker and syntax gates pass. Four pending storage diamond cases,13 unsupported
+C constructs, the existing browser stack failure and both timing STOPs remain.
+External A data and reviewed producer repairs remain required; no final runtime
+gate or whole-assignment completion is claimed.
+
+## OT-PAGES-IDE: explicit pinned SDK config
+
+The Pages IDE job in run42295102972 (job128158368938) builds GMP and leanrt,
+then fails the strict explicit `EM_CONFIG` guard. The existing compact builder
+already invokes `build-direct.sh` inside the digest-pinned Emscripten4.0.15
+image. That entrypoint now exports `/emsdk/.emscripten` after SDK activation
+and refuses a missing file before invoking Python. The Python builder retains
+its explicit-config requirement and all compiler/config provenance checks.
+
+The regression control executes the real entrypoint in bounded Docker with a
+fixture SDK and capture-only builder: unset and inherited unrelated configs
+select the pinned path; a missing SDK config fails before Python. All three
+controls and the eight existing builder/provenance tests pass. These tests
+check plumbing, not actual SDK compilation or Pages success. Read-only finder
+and skeptic reviews find no blocking defect. No Lean source, proof budget or
+trust boundary changed; no runtime build or stopped benchmark was repeated.
+
+A `pages.yml` workflow_dispatch on the published lane branch and a green IDE
+job remain required. The VM CLI token is invalid and the available connector
+has no dispatch action; host-owned branch publication/dispatch is pending.
+The non-default-branch workflow does not deploy Pages. H100 remains open until
+the actual IDE result is retrieved. Exact evidence is retained outside Git at
+`/workspace/solidity-lean/.lake/native-browser-pages-sdk-config/receipt.json`.
+
+H100 IDE verification completed on the exact reviewed fix head
+`39d914b72eb31f116fe628282026437346a70deb`: [Pages run42300556762](https://github.com/SolidiKeY/solidity-lean/actions/runs/42300556762),
+IDE job128176919315, succeeded. All16 reported steps passed, including the
+native build/audit guards, generated-C/leanrt/GMP WASM build, offline HTML and
+fresh offline launch/proof/reopening tests. Independent finder and skeptic
+confirmed the head and result through live GitHub reads. The
+[CI manifest](../../tests/directruntime-20261104/native-browser/pages-sdk-config-ci-manifest.json)
+pins externally retained logs and metadata. This clears the IDE-fix validation
+wait; the overall workflow was still running its Solidity job at inspection.
+No default-branch deployment, original timing STOP resolution or whole-goal
+completion is inferred. This documentation increment changes no tested code.
+
+## Reviewed primitive-return intake and fresh regressions
+
+[Results manifest](../../tests/directruntime-20261104/native-browser/primitive-return/results-manifest.json)
+records source build `1e8b4cee884df7f90bf711abfddce5a6f8957d10`. After adopting
+published master33eb46304, this consumes exactly the listed production file
+`Shared/Intrinsic.lean` from reviewed producer957e5def, SHA74c01bac…4577.
+It does not consume the unpublished H90 Translate/Compose changes or qualify
+the whole producer branch. No producer definition was manually rewritten.
+
+Fresh native and WASM builds pass in294.26s/268.69s, sampled RSS1.74GB/1.47GB.
+All heavy checks use serial12GiB/no-swap scopes, thread1/-j1 and the4GiB reserve.
+The206-module selected C/object inventory matches across backends:9963functions
+and4988closed values. Request-specific traces show no forbidden environment
+loads; this inventory is not a universal purity or machine-correctness theorem.
+
+| Functional corpus | Per-backend observations | Boundary |
+|---|---|---|
+| C construct fixture,13functions |9proved,4unsupported |Exact reviewed refusal strings retained |
+| A primitive-return fixture,8functions |6proved,2refuted |Defaults,tuple,earlyexit,shadow,falseassert,division |
+| B exact delivered journal,84requests |64proved,16refuted,4pending |All64required positives and Identitydiamond both compiler modes pass |
+| Existing83functions |83proved in each backend |One functional pass;no timing comparison |
+
+C and A each also execute a separate positive addition guard, so raw reports
+have14 and9 rows respectively. All four corpora have exact native/browser
+result-object parity. The B corpus removed by published H44 cleanup was recovered
+from exact Git0140 bytes: its manifest SHAe492ab28…ddd35 matches the prior
+receipt and all84case fields match the authenticated original handoff. Its
+original537822-byte journal is unchanged; no regenerated substitution was used.
+
+The18finite modal cases, return side-effect check and2refusal guards pass.
+`#check` preserves explicit callback signatures; both obligation definitions
+print only `propext` and `Quot.sound`. The existing12intrinsic memory controls
+also pass read-only. These model controls do not prove compiler/source transport.
+Five per-file MCP diagnostics report zero errors. The supplied H44 verifier runs
+unmodified in an isolated layout and verifies all50files/3229786data bytes.
+
+Fresh native negatives/specs pass14verdicts. Fresh browser negatives retain
+13/14: invariantCountsToBound still raises a stack error. Edited-source,
+counterexample and offline UI controls pass. The original native median and
+browser startup STOPs remain; no stopped83-function timing benchmark was rerun.
+
+Setup failures are retained individually: missing output parent; B live manifest
+removal and a subsequent non-overwrite guard;109-byte MCP socket path; the
+retired check-solkey helper; symbol postprocessing filename. Recovery does not
+relabel those failed receipts. Eighteen unit checks and syntax pass before the
+retired-helper failure; on-demand KeySort separately passes377/131/131 matching
+annotations on actual Lean4.24.0/Lake5.0.0-src+797c613.
+
+| Local registration proposal | Role | Central action |
+|---|---|---|
+| `tests/directruntime-20261104/native-browser/primitive-return/FiniteControls.lean` |Standalone per-file model driver |No generated library root addition |
+
+## OT-STACK-SYMBOLS exact historical mapping
+
+A diagnostic relink of retained H81objects with `--emit-symbol-map` reproduces
+the historical WASM byte-for-byte, SHA6ae1d6db…b563. Its3939-entry symbol map
+binds indices2203/2205 to `Solidity.Decide.LTm.fitsM` and its boxed lambda,
+2208/2210 to `Solidity.Decide.LFml.fitsM` and its boxed lambda,3126 to
+`lean_apply_1`, and3207 to `emscripten_builtin_malloc`. The historical source
+anchor is Calculus/ReadBounds.lean. This identifies active routines, not a
+complete causal explanation or algorithm repair. No source algorithm was edited.
+
+The relink itself succeeded; postprocessing first looked for direct.symbols
+instead of the emitted direct.js.symbols. A post-only recovery verifies whole
+binary equality and reads the existing map, without another relink or request
+run. Exact trace/map/source bytes are packaged for A. The map qualifies only
+the historical6ae binary, not the fresh19e or whole H90 reader.
+
+Final read-only finder and skeptic reviews pass with these limits. They
+independently checked both archive hashes/counts, gate exits and the exact
+historical binary equality; neither ran Lean, builds or timing reruns.
+
+
+## Fixed-byte producer intake and exact prerequisite recovery
+
+[Results manifest](../../tests/directruntime-20261104/native-browser/fixed-byte/results-manifest.json)
+pins amended source build1b2bdb490054293c86cddb5e4b7fa15736bae25b and exact
+producer2738af9966 Translate,Compose and ControlTuple.Adapter bytes. The first
+intake matched Shared/DirectRuntime but omitted the adapter's local scalar
+callback. Both backends refused tupleSwap/repeated; those failed reports and a
+separate missing-activation setup failure remain archived. The exact committed
+adapter prerequisite fixes the omissions with unchanged expectations.
+
+Fresh native and real Chromium runs match all20fixed-byte fixtures:12proved,
+4refuted,4unsupported per backend,plus2positive harness guards. The source-level
+box twin erases to the exact producer diamond source after removing10annotations.
+Tags and specific parameter/positive-length refusal strings are asserted.
+C13,A8,B84 and83existing functions all pass their unchanged observation checks
+on both amended binaries. B retains64proved/16refuted/4pending; exact positive
+Identitydiamond passes in both compiler modes. Native negatives pass14/14,
+browser negatives remain13/14 with invariantCountsToBound stack overflow.
+Edited-source,counterexample and disconnected fresh-edit UI controls pass.
+
+The206-module inventory has9966functions/4989closed values with selected C
+parity. Seven per-file diagnostics report0errors;32marker guards,18finite modal
+cases/effect/refusal controls and12intrinsic memory controls pass. Both decoder
+lemmas print only propext,Classical.choice,Quot.sound. These are decoder/model
+facts and trusted compiled-checker observations,not source/compiler/ABI/native
+preservation or exhaustive source/H90 migration proofs. Ordinary-request traces
+and browser assets load no forbidden serialized environment/frontend resources;
+reviewed frontend-origin generic bodies remain explicitly classified.
+
+Actual Lean4.24.0/Lake5.0.0-src+797c613,18unit checks and on-demand KeySort
+377/131/131 with matching annotations pass. Every heavy gate uses serial12GiB,
+swap0,CPU1,threads1/-j1 and4GiB outer reserve. Amended native30.52s reuses
+content-addressed objects and performs a new link; WASM285.05s recompiles selected
+C. The first371.15s native build was26.13% above prior294.26s; this conservatively
+retains a build-cost STOP. Empty native output is not a fully cold machine or
+matched invalidation workload. Unchanged SliceCopy source/C does not establish
+a cause. The incremental rebuild cannot clear that STOP. Original native median
++21.32% and browser startup+32.20% STOPs remain; no stopped timing benchmark
+was rerun. Full performance/final runtime acceptance remains pending repairs.
+
+| Local registration proposal | Role | Central action |
+|---|---|---|
+| fixed-byte/MarkerControls.lean |Standalone32-spelling/signature/axiom driver |No generated production root addition |
+
+Bulk fixtures,logs andruntime binaries remain off Git under the manifest's
+absolute paths with per-file SHA256 indexes. Independent read-only finder and
+skeptic inspect the exact intake,denominators,failures andarchive receipts;
+no proof budgets,statements,exclusions,trust pins or optional-certificate boundary
+are weakened. This checkpoint does not complete the original queue.
+
+The locally verified24-artifact incremental cache pack is retained for coordinator
+pull with path/size/SHA in the manifest. Delivery is coordinator-pending; no
+ship-cache.sh or H88 cross-cache coherence claim is made.
+
+
+## H71 address-local qualification and owner conflict versions
+
+[Address results manifest](../../tests/directruntime-20261104/native-browser/address/results-manifest.json)
+pins source build4234b74778787f681ebb50f2890355d99f37731a,exact producer0834bc67
+Translate/Compose hashes and verified packet c19c588e…ec5dfb. The delivered
+0a96c06e producer archive was inspected without execution. H71authorizes scoped
+consumption while the coordinator publication/merge wait remains separate.
+Both conflict files now equal the reviewed owner versions;no manual producer
+rewrite or unpublished master adoption occurred.
+
+All343runtime source files match reviewed owner09bb5b5e. Compared with the full
+0834tree,only the published LinearCountermodel dependency differs. This dependency
+context is explicit;the packet is a two-file increment,not wholebranch,census or
+source/ABI qualification.
+
+Both freshly built native and real Chromium backends match all16source-backed
+address fixtures:10proved,2refuted,4unsupported,plus2positive harness guards per
+backend. Eight source-level box annotations erase to the exact diamond source.
+Parameter/payable refusals retain the exact unsupported-address diagnostic.
+A separate compiler-produced AddressStateRefusal contract fails closed on both
+backends;that gap request is neither a positive proof nor part of the16fixtures.
+
+The new kernel decoder equation and prior narrow/fixed-byte equations print
+only propext,Classical.choice,Quot.sound. Marker/identity/malformed/payable guards,
+3builtinidentity negatives,base-first error priority,32fixed-byte spellings,
+18finite modal cases,one return-effect check,two refusal guards and12intrinsic memory controls pass.
+Eight per-file diagnostics report0errors. These prove decoder/model facts and
+record trusted checker observations;source/compiler/ABI/native preservation,
+full importer parity and original semantic/world obligations remain open.
+
+Retained fresh fixed-byte20,C13,A8,B84 and83function controls match their unchanged
+expectations on both backends. B retains64proved/16refuted/4pending,including the
+positive exact Identitydiamond in both compiler modes. Native negatives pass14/14;
+browser negatives remain13/14 with invariantCountsToBound stack overflow. Edited
+source,counterexample and disconnected fresh-edit UI controls pass.
+
+The206-module selected-C/object inventory has9985functions/5006closed values,
+with native/WASM parity and current request-specific no-forbidden-load traces.
+Its exact-body classification is not a universal purity or machine-correctness
+proof. Actual Lean4.24.0/Lake5.0.0-src+797c613,18unit checks and on-demand KeySort
+377/131/131 with matching annotations pass. Every heavy gate uses serial12GiB,
+swap0,CPU1,threads1/-j1 and4GiB outer reserve. Native28.80s is incremental;WASM
+269.95s recompiles selected C. The191.48s marker gate includes transitive rebuilds.
+These are not matched-cold measurements and do not clear the prior native median
++21.32%,browser startup+32.20% or native build+26.13% STOPs. No unchanged stopped
+benchmark was rerun;RUNTIME_GATE_PASS remains pending.
+
+Finder and skeptic caught a supplementary-harness provenance gap before use:
+fixture/source/compiler were initially only self-consistent. The tested version
+binds them to the exact pinned suite and completed parent report,checks its
+single public function,current binaries/bridge/closure/sourcepins,and fails
+closed on RPC timeout. Both reviewers confirmed the correction. The executed
+private script and committed script are byte-identical.
+
+| Local registration proposal | Role | Central action |
+|---|---|---|
+| address/MarkerIdentityControls.lean |Standalone marker/identity/signature/axiom driver |No generated productionroot addition |
+
+Bulk ASTs,logs,binaries and24incremental cache artifacts remain off Git with
+absolute paths,per-file indexes and SHA256 in the manifest. Cache delivery is
+coordinator-pending;no ship-cache or H88cross-cache coherence is inferred.
+Independent final finder/skeptic review remains scoped to these receipts and
+limits;this increment does not complete the original assigned queue.
+
+
+### Published owner merge and refreshed current evidence
+
+Published master4f0a2d6abe3a920d8c5a20c8c06d373a1014824d contains reviewed
+owner09bb5b5e. After saving the qualification checkpoint,the clean ort merge
+0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d retained both exact owner files and
+the H100explicit EM_CONFIG fix. The coordinator merge wait is fulfilled.
+[Post-merge manifest](../../tests/directruntime-20261104/native-browser/address/post-merge-manifest.json)
+records refreshed builds and all controls;prior4234receipts remain frozen.
+
+All343currentruntime sourcefiles match published4f0. Compared with09bb,the only
+delta is the published additive SourceCounterexample companion. A complete
+206-module/object/current-binary inventory binds native and WASM parity and
+excludes the four new optional kernel-candidate helper families from selected
+functions/native symbols. This limited exclusion is not universal purity or
+source/ABI preservation. Reviewers required and confirmed nonempty complete
+module coverage,current object hashes,companion-summary/binary/source bindings,
+actual HEAD/provenance hashes and non-overwriting receipts before execution.
+
+Fresh postmerge native25.49s and WASM272.51s builds pass under the same bounded
+policy. Nine per-file diagnostics report0errors;actual toolchain,KeySort,axioms
+and model controls pass. Address16plus2guards and the extra state gap,retained
+fixed-byte20,C13,A8,B84 and83functions pass unchanged native/browser observation
+checks. Identitydiamond succeeds in both compiler modes. Native negatives and
+edited-source/offline UI pass;browser negatives remain13/14 with invariant stack
+overflow. Four storage-diamond cases and all timing/build-cost STOPs remain.
+No stopped timing benchmark was rerun;RUNTIME_GATE_PASS remains pending.
+
+The new exclusion script is committed byte-identical to its tested private
+copy. Current archives and32incremental cache artifacts stay off Git with
+per-file indexes and SHA256;cache delivery remains coordinator-pending.
+
+
+## Environment frontier delivery and source-ID preparation
+
+The H71environment packet pins producer44d89439 and an eight-module frontier.
+Seven current file hashes match;Translate90479 is missing. The advertised branch
+fetch succeeds,but exact-SHA fetch returns128/notourref,and packet/evidence paths
+are absent. The [exact delivery request](../../tests/directruntime-20261104/native-browser/environment-source-request.json)
+records hashes and required bytes;no decoder/source fixture is reconstructed.
+The requested16environment cases and15metadata negatives remain unqualified.
+
+Independent [source-ID preparation](../../tests/directruntime-20261104/native-browser/request-identity/preparation-manifest.json)
+now binds actual positive unique compiler function IDs into fixture and guard
+requests,then checks returned IDs on native and real Chromium. Sixteen retained
+address fixtures plus2guards perbackend pass unchanged verdict/tag expectations,
+with18identity checks. Four intentionally mismatched/malformed selectors per
+backend fail closed with exact gaps. Positive guards prevent counting an
+always-gap implementation as success. Four fresh external compiler runs occur;
+the existing0eb native/WASM/site are retained,with343runtime sourcepins each still
+matching current04c6context. These are selector API regressions,not freshbinary,
+newenvironment,source/ABI orperformance qualification. No cachedverdict is used.
+
+Allthree bounded gates pass12GiB/swap0/CPU1,threads1 and4GiB reserve;Node syntax
+passes. No Lean/productionruntime source or proof budget changed,so no new
+Lean/axiom/cache gate is claimed. Existing stack,cost,startup andfour storage
+holds remain;no stopped timing benchmark was rerun. Independent finder/skeptic
+review covers these limits. Bulk ASTs/logs remain off Git with per-file hashes.
+
+
+## Authenticated environment source and published guard theorem
+
+The delivered source archive and ticket match their recorded hashes. All eight
+frontier snapshots and all twelve source/control/manifest entries were verified.
+Seven published frontier files match the snapshots byte for byte. Translate
+contains the delivered definitions plus a 37-line standalone guard theorem;
+removing only that theorem and its docstring reproduces the delivered hash.
+The published proof remains in place. This does not establish full file or
+binary equivalence, source preservation, or ABI adequacy.
+
+Fresh native and real Chromium runs use source build
+4d7285b80e89741e9da8cb49ce7ab8b62a828a72. The sixteen environment requests match:
+eight proved, four refuted and four unsupported per backend, plus two positive
+guards. Compiler function IDs select each request and match each reply.
+Unsupported block.number and tx.origin retain their exact diagnostics; wrong
+value/time assertions refute. Eight box annotations erase to the exact producer
+source. Fifteen metadata foils, three supported keys, two unsupported siblings
+and base-first error priority pass. The helper has no axioms; its published
+guard theorem uses propext and Quot.sound. These are decoder/model observations,
+not compiler identity or world adequacy proofs.
+
+Thirteen per-file diagnostics and the retained decoder/model controls pass.
+Address, fixed-byte, C, A, B and all 83 functional observations match their
+recorded expectations on native and browser. Identity diamond succeeds in both
+compiler modes; four storage-diamond cases remain pending. Native negatives
+and browser UI checks pass. Browser negatives remain 13/14, failing on the known
+invariant stack overflow. The candidate-exclusion check initially rejected a
+stale private output path; correcting that path passed. Both receipts remain.
+Executable inventories and observed absence of forbidden loads have their
+recorded finite scope. Every existing timing/build-cost STOP remains open;
+no stopped benchmark was rerun and RUNTIME_GATE_PASS remains pending.
+
+After validation, the branch fast-forwarded to published master
+3a5b9de412b84a13777b6fbf8c8f310e10b3448e. All 343 compiled runtime sources and
+checked repository build inputs are unchanged. The original source-build and
+binary identities remain explicit in the
+[results manifest](../../tests/directruntime-20261104/native-browser/environment/results-manifest.json).
+
+The original producer AST and evidence archive remain undelivered. A fresh
+independent compilation of the authenticated source with the producer arguments
+reproduces the expected AST hash exactly; this is content reproduction, not a
+producer transport receipt. Bulk evidence, binaries and the verified 32-artifact
+incremental cache stay off Git with hashes and indexes. Cache delivery remains
+coordinator-pending; no ship-cache or release-cache coherence claim is made.
+The local registration proposal covers the standalone MetadataControls driver;
+no generated root was edited.
+
+
+## Reviewable environment validation wrappers
+
+The P2 review note identified that private `.lake` wrapper locations were not
+reviewable from Git. The [wrapper index](../../tests/directruntime-20261104/native-browser/environment/wrapper-index.json)
+now maps twenty preserved source/configuration snapshots to repository paths,
+sealed archive members, sizes and SHA256 hashes. The
+[scripts README](../../tests/directruntime-20261104/native-browser/environment/scripts/README.md)
+explains the original preparation, failed/recovered continuation and bounds.
+A read-only verifier checks the tracked snapshots and optionally their sealed
+archive members; it executes no historical wrapper.
+
+The index records the original VM handoff locator and exact evidence/runtime/
+cache archive hashes for the existing coordinator retrieval channel. H71
+relayed the handoff metadata; bulk retrieval and recipient inspection remain
+coordinator-pending under H41. No public download or completed delivery is
+claimed. Generated fixtures, logs, binaries and caches remain outside Git.
+These snapshots retain historical paths and private prerequisites; they are
+review artifacts, not a turnkey or newly accepted runtime replay. All original
+stack, performance, storage-semantic and final-gate holds remain open.
+
+This increment adopts published master d7a1cbdf597826add5af3533fdaf6b8d91e28f66
+and changes no production Lean source, theorem, budget, trusted boundary or
+historical verdict. Syntax/identity controls and independent read-only reviews
+are recorded in the portable preservation receipt. No Lean build or unchanged
+stopped benchmark was rerun for these documentation/tooling changes.
+
+
+## Narrow browser-negative continuation
+
+The maintained environment checks.sh and remaining-checks.sh no longer use a
+blanket browser-negative failure bypass. A read-only
+[continuation guard](../../tests/directruntime-20261104/native-browser/environment/known-stack-continuation.py)
+permits independent checks to continue only when the sole failed control is the
+known invariantCountsToBound source with the documented WASM stack-overflow
+error. It requires the failed gate exit, bounded resources, complete requests,
+matching worker/binary and request identities, and healthy sibling verdicts.
+Other errors, missing results, timeouts, resource stops, changed source or
+unexpected sibling outcomes stop the wrapper. The original browser gate stays
+failed; no STOP or acceptance requirement is released.
+
+Both original scripts remain byte-identical in scripts/historical and are
+indexed against their sealed archive members. The maintained copies are
+explicitly distinct from those historical snapshots. The guard reconstructs request hashes from retained AST bytes, checks sources
+against the six retained baseline controls and tracked ClosedSpecs, and pins
+the runner plus reviewed failing fixture
+and wire. Offline tests use the
+retained receipt and twenty-six mutations; they run no browser/runtime or stopped
+workload. The first test harness attempt mistook pop()'s return value for an
+exit status; explicit status handling fixed the test setup. This was not a
+browser/runtime rerun or a guard-acceptance defect. Existing seals remain
+unchanged; no Lean source, theorem, budget or trust boundary changed.

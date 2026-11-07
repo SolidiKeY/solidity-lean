@@ -302,3 +302,234 @@ passed twice with identical JSON reports and verified snapshot cleanup.
 Existing-report and in-checkout report destinations were refused without
 overwriting or creating those files. Logs are under
 `/workspace/vy1-words-evidence/h55-frozen-runner-*`.
+
+## Successor fresh oracle kernel check
+
+At source head `71c5963f3cd9da2eb2989be1e19c810def6ff019`, two operand-only
+extractions were identical and matched committed operand SHA-256
+`1b55bbe41a160d767f50087caca296dbf64cc6d8dd972de43564651366456aef`.
+The integer oracle regenerated all 6,903 declarations, matching the complete
+bytes of all nine original modules.
+
+A fresh external output tree compiled KeySort, six dependencies and all nine
+generated modules with Lean 4.24.0 / Lake 5.0.0-src+797c613, explicit `-j1`,
+`LEAN_NUM_THREADS=1`, stack 131072, enforced 12 GiB/no-swap container cap
+and the compiler runner's 4 GiB host/cgroup headroom guard. The bounded job
+exited zero in 168.74 seconds, peak aggregate VM RSS 3,820,744 KiB, with no OOM
+events. Per-command wall times and the raw tool versions are retained in
+`/workspace/vy1-words-evidence/words-oracle-kernel-recheck.log` and sibling
+resource/host-configuration records. No production source or theorem changed.
+
+Both independent read-only reviewers found no oracle, lossless-inventory or
+negative-control defect. They did not run Lean. This checks finite generated
+kernel controls, not universal opcode agreement, semantic Raw parametrisation,
+table migration, full-lane acceptance or a before/after performance delta.
+The failed v4.35 migration gate was not repeated.
+
+Fresh operand data, emitted sources, provenance hashes and object cache are
+under `/workspace/scratch/words-oracle-recheck-71c5963/`, off Git.
+The object pack is `oracle-objects.tar.gz`, SHA-256
+`2c34c1a8bca044687e5a2dadf4d38a392e993ee7c070ebcfc531c55e9d5ad3c9`; it is left for coordinator pull, not shipped.
+
+## Additive typed-scope closure slice (gh#77 option A)
+
+The coordinator approved additive generic lemmas over existing context-indexed
+RawFrame and RawTypedScope operations. No stronger element abstraction, new
+state file, representation rewrite or H58 hold release is supplied.
+RawTypedScope now exposes generic clean-tail/world preservation, full captured
+closure metadata, and `project_close`: existing clean-backup projection
+commutes with typed closure without a coherence premise. The original
+`close_correct` signature and coherence premise are unchanged; its proof
+reuses the new generic projection lemma.
+
+`tests/h55/vectors-tables/typed-scope-case-ledger.json` accounts for exactly
+the scope projection's semantic cases: arbitrary halt, normal, break, continue
+and intrinsically impossible leave. An arbitrary halt covers every halt value
+parametrically; the impossible branch claims no joint inhabitant. This ledger
+does not count all Raw files as covered. These are existing clean-backup
+projections, not H109 dirty-readback or general Source execution semantics.
+
+## Selected-local Source read boundary (H121)
+
+DirtyReadback now exposes an additive selected typed local read and an explicit
+boundary that invokes actual Source.evalE with the same global, frame, fuel and
+runtime plan. It uses the global pipeline and prepares only the selected local;
+an unrelated dirty unsupported neighbor does not block the read. The full Source
+result and prepared Source state are returned alongside the untouched original
+RawFrame.State. Unsupported decoding is outer none; zero fuel is an actual
+Source timeout. No decoder body, Source core or state representation changed.
+
+The source-readback-case-ledger.json in tests/h55/vectors-tables accounts for
+decode refusal, decoded zero fuel and decoded successor fuel; the typed-index
+helper covers here and there. It does not claim all Raw or Source cases.
+Six existing LocalBlock controls check both pipelines, raw 511 cleaned to u8 255,
+a dirty fixed-bytes neighbor, timeout/refusal separation and raw 511/5 retention.
+The inhabited empty-program fixture is solely a local-read control.
+
+Read-only finder and skeptic both passed the core and all six controls without
+Lean servers. MCP reported zero errors; affected LocalBlock, existing decoder
+controls and P16 built successfully. Scoped axiom checks show the index lemma
+uses no axioms; the other ten new lemmas/controls use only propext,
+Classical.choice and Quot.sound. The bounded check exited zero in 90.44 seconds,
+with no swap or OOM; this is not a before/after speed comparison or full gate.
+Earlier fixture syntax and proof-attempt failures remain in the evidence logs.
+
+Ordinary Source evaluation still does not consult raw frames automatically.
+General expression/statement integration and raw-copy propagation remain open
+H121 work; address/bytesN/enum dirty decoding remains refused. Full inherited
+Raw/table/generator acceptance, affected whole-lane gates and timing remain open.
+
+## Selected-read conservation
+
+After adopting master 7683091e7, three additive generic laws complete the
+selected-read boundary's conservation slice. Setting a typed local to its own
+value preserves the entire Source local environment (here/there induction).
+Outer admission equals selected decoding admission for every fuel and runtime
+plan: an admitted timeout remains distinct from unsupported decoding.
+If selected decoding returns the existing clean backup, evalLocal equals
+actual Source.evalE on the original complete Source state, with the original
+raw frame retained. This explicit premise is not replaced by a claim that
+all clean materialized frames decode definitionally.
+
+MCP and the focused 93-job build passed. The local-environment lemma is
+axiom-free; admission and compatibility use only the standard three axioms.
+No decoder, evaluator or state definition changed. This does not close general
+Source integration, raw-copy propagation or the whole Raw-family queue.
+
+Read-only finder and skeptic both passed these conservation laws without Lean
+servers or writes. The affected LocalBlock, existing decoder controls and P16
+build passed (201 jobs), including the exact standard-axiom pins. The bounded
+run took 94.40 seconds with no swap or OOM. It is not a before/after timing gate.
+
+## Public generic readback pipeline laws
+
+After adopting master 806a972a4, the previously private value/local/context
+pipeline lemmas in RawFrameLogic were promoted to DirtyReadback's generic API.
+Both plain context readback and backup-aware readback retain full optional
+results, including refused reads and unchanged unsupported-value fallback.
+The frame-level theorem keeps its exact signature and now reuses the public
+backup-aware theorem. Existing decoder and evaluator definitions are unchanged.
+
+Selected-local readback also agrees across pipelines. The new evalLocal law
+changes only G.pipeline, with every other global field, frame, fuel, raw state,
+typed index and runtime plan identical. Fuel zero and successor cover actual
+Source timeout and local lookup; full Source result/state plus original raw
+frame are equated. Arbitrary Source execution and unchecked arithmetic are
+outside this law. Context induction covers nil/cons, not all Raw-family cases.
+The existing semantic ledger records these exact boundaries.
+
+Focused MCP/builds and scoped audits passed for all six new public lemmas;
+each uses only propext, Classical.choice and Quot.sound. No new state file,
+representation rewrite, proof-budget change or H58 release is supplied.
+
+Read-only finder and skeptic passed the public API, unchanged frame contract and
+narrow evalLocal pipeline statement, using no Lean server or writes. Affected
+LocalBlock, original dirty-readback controls and P16 built successfully (201
+jobs), including the six exact axiom pins. The bounded affected run took 84.37
+seconds with no swap/OOM; this is not a controlled before/after speed comparison.
+
+## Source read observations under view agreement and capture
+
+After adopting master 05d2c2587, four additive generic laws connect selected
+readback to the existing authoritative RawFrame view. Equal clean backups and
+word views give equal selected decoding, with no world premise. Equal worlds
+additionally give equal complete optional Source result/state under the same
+global, frame, fuel, index and runtime plan. Only the original raw-frame return
+component is projected away; its metadata is deliberately not equated.
+
+The existing capture operation preserves backup, world and authoritative view,
+so it preserves selected decoding and the Source observation. One concrete
+LocalBlock control exercises both pipelines and records that sparse flag
+metadata is none while captured flag metadata is some(view flag). Equal Source
+observations therefore do not imply equal raw frames. Refusal remains explicit.
+
+The semantic ledger records decoder none/some cases and exact premises.
+Read-only finder and skeptic both passed the four laws and the control without
+Lean or writes. MCP and the 121-job LocalBlock build passed; all five declarations
+use only the standard three axioms. The bounded control/audit run exited zero in
+122.50 seconds with no swap/OOM. Its earlier inference failure is retained;
+the repair supplies the captured frame explicitly and changes no statement.
+
+No existing decoder, Source evaluator, representation, premise, exclusion or
+proof budget changed. General Source expression/statement integration,
+raw-copy propagation, complete Raw-family accounting and timing acceptance
+remain open; H58 remains on HOLD.
+
+The affected LocalBlock, original decoder controls and P16 build passed (201
+jobs), including exact axiom pins. This run took 80.33 seconds within the
+existing memory/no-swap bounds; no before/after speed acceptance is claimed.
+
+## Generic integer cleanup algebra
+
+The next independent slice proves residue preservation, residue congruence and
+idempotence of the existing Source.wrapBits for every signedness, width and
+integer. Idempotence is lifted to the complete intrinsic intWrap value.
+For every valid Source integer type and both pipelines, equal low-bit residues
+of two raw words imply equal complete optional integer readback. This is a
+sufficient preservation law, not a stated iff. Bool remains nonzero testing.
+
+These are universal Lean laws, not additional finite vector copies. They do
+not prove a general Source integration or integer encode/decode roundtrip.
+The exact ledger records subtracting/non-subtracting cleanup branches.
+Existing cleanup/evaluator/state definitions and frozen statements are unchanged.
+The initial failures at local let-bindings are retained; explicit reduction
+repaired the proofs without changing statements or budgets.
+
+Read-only finder and skeptic passed the five laws without Lean or writes.
+Focused MCP/builds passed. Residue congruence is axiom-free; residue preservation
+and numeric idempotence use only propext; the two full intrinsic-value laws use
+the standard three axioms. Exact axiom pins are in existing LocalBlock controls.
+Full Raw/source/table/generator acceptance and controlled timing remain open.
+
+Affected LocalBlock, original decoder controls and P16 built successfully (201
+jobs) with exact axiom pins. The bounded run took 80.35 seconds with no
+swap/OOM; this is not a controlled before/after speed comparison.
+
+## Intrinsic integer and Boolean encoder-cleanup roundtrips
+
+With master unchanged at 05d2c2587, the next slice connects cleanup to actual
+Source.Val.word. The existing intWord encoder carries the nonnegative 256-bit
+residue; for every valid width, 2^bits divides 2^256 and preserves the narrower residue,
+including for negative inputs. Cleanup after encoding any integer yields the
+complete intrinsic intWrap value. An unsigned/signed range proof then establishes
+that every already bounded intrinsic integer is returned unchanged by its actual
+word encoder and published cleanup, in both pipelines. Boolean false/true
+roundtrip separately through the existing nonzero test.
+
+These are universal kernel proofs, not a new finite oracle or decoder.
+The exact unsigned, signed-nonnegative, signed-negative and Boolean cases are
+recorded in the semantic ledger. An initial header elaboration failure is retained:
+Word erases the layout, so the new roundtrip statement supplies D explicitly.
+No existing statement or definition was changed to accommodate a proof.
+
+Focused diagnostics/builds and axiom audits passed. Numeric encoder/range helpers
+use propext and Quot.sound; the decoder laws use only the standard three axioms.
+No unsupported-type roundtrip, arbitrary materialized-frame adequacy, complete
+Source execution agreement or raw-copy integration is inferred. Those broader
+queues and acceptance/timing gates remain open; H58 remains on HOLD.
+
+Read-only finder and skeptic passed the six laws without Lean or writes.
+Affected LocalBlock, original decoder controls and P16 built successfully (201
+jobs), including all exact axiom pins. The bounded affected run took 78.32
+seconds with no swap/OOM; no controlled before/after timing is claimed.
+
+## VY2 Raw adapter producer handoff
+
+H70 requested exact producer contracts under the H123 generic scope.
+tests/h55/vectors-tables/raw-adapter-producer-handoff.json pins producer source
+head 239f71cd3d547c01c0d751f9053c6442c918d0fc and the bytes, Git blobs,
+source commits, line positions and 20 exact signatures in RawFrame, RawCoherent
+and RawTypedScope. Pure Tier-A projection/preservation, certified Source
+coherence transport and generic typed closure remain distinct contracts.
+
+Completion and coherence premises remain explicit. RawSource.Supported remains
+the existing LocalBoolControl-certified expression-statement slice.
+Coherence is equality with the clean backup, not successful dirty cleanup.
+No arbitrary physical adapter correctness, VY2 integration, gate acceptance,
+new admission predicate or H58 release is claimed. The consumer must instantiate
+the exact contracts and retain every premise.
+
+Both static reviewers found a direct-proof signature extraction error; all
+entries were corrected and reauthenticated, and both final reviews passed.
+No Lean source changed. Prior source gate provenance is recorded separately
+from consumer acceptance; the handoff does not close VY2's whole waiting item.

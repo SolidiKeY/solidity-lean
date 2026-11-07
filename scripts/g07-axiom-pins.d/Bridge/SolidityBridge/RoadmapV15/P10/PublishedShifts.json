@@ -1,0 +1,18 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean:SolidityBridge.RoadmapV15.P10.PublishedShifts.shl_fetched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean:SolidityBridge.RoadmapV15.P10.PublishedShifts.shl_word": [
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean:SolidityBridge.RoadmapV15.P10.PublishedShifts.shr_fetched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean:SolidityBridge.RoadmapV15.P10.PublishedShifts.shr_word": [
+  "propext"
+ ]
+}

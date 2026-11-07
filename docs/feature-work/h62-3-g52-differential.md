@@ -199,3 +199,693 @@ Typed dependent-item blockers (not blanket permission to stop useful work):
 `B-SOURCE-GAS` (existing primitive source model has no gas observation).
 Independent EEST/reference and accounting backfill can continue while these
 are resolved. No scope exclusion or premise change is requested or approved.
+
+
+## EEST reference milestone and authorized master update
+
+The coordinator explicitly instructed merging origin/master before the next
+commit. The lane backed up its uncommitted work under H44, verified that the
+published master contains d448d0f7658bec8e4a41e0d35b00dea98154c580, and fast-forwarded
+to 5f14596531efea2be64f1a5e7a83afa5e151e865. Existing lane work was preserved.
+The original base/goal and branch remain unchanged in identity. This explicit
+merge authorization does not authorize pushing, publishing, or another merge.
+H82 now replaces exact-file agreement for statement-preserving work; no such
+agreement request is pending here. Frozen statements/interfaces/budgets and
+axioms remain unchanged. All29 previously checked producer sources retain their
+original recorded hashes after this integration.
+
+New reference evidence supersedes the earlier pending-only EEST census:
+all19,093 unique Osaka state-test variants were selected;18,315 match the pinned
+fixture state-root and logs-hash expectations;778 expected-invalid transactions
+remain unsupported by the rejection adapter. There are zero reference mismatches
+or engine errors in the corrected bounded run. These results are **not source
+semantics differential matches**: all19,093 source adapters remain unsupported,
+reference_complete=false and differential_complete=false. Strict exit2 means
+incomplete conformance, never a gate pass. Return/revert bytes and gas are retained
+as observations; the fixtures provide no direct expectations for those fields.
+
+The deterministic gzip stream retains every original fixture identity, post-state
+variant/index, pre-state, environment, transaction bytes and expected post-state.
+Its SHA256 is d7dcc3b6f969359d44bfdaec88b7dffcbd80cddacc2b06b8a135964e2cbbc602.
+Export verifies the archive and census/fixture bytes; the runner verifies the
+stream/census binding and every selected identity. It runs a fresh VM and full
+signed transaction for each fixture, checks all fork blob parameters, and compares
+complete state-root and log-hash commitments. The archive's absent block history
+uses the explicitly recorded zero-hash state-test convention.
+
+Real cryptography is pinned: micro-eth-signer0.20.1 and
+@paulmillr/trusted-setups0.3.0, full npm integrity lock and127 installed public-file
+hashes at evidence/kzg-pin.json. No stub is used. All cryptographic package loads
+are serial to avoid an observed Node CJS/ESM loader race.
+
+The engine's optional step tracer caused huge-memory REVERT allocation errors
+before gas validation; the isolated index6551 stack trace is retained at
+ evidence/eest-reference-memory-reproducer.jsonl. The production adapter instead
+counts calls to the unchanged original Interpreter.runStep with a transparent
+Reflect.apply forwarding wrapper. The five-million-instruction bound is preserved;
+no opcode implementation or installed engine file is edited. Index6551 now matches
+its fixture. This is a reference-observer root cause, not a Solidity theorem or
+compiler mismatch; no source-semantics mismatch ticket is fabricated.
+
+Each case runs serially in an owned worker with a60-second limit,4GiB V8 old-space
+limit,12GiB aggregate RSS guard,4GiB available-memory reserve and zero-swap
+prerequisite. Worker replacement waits for termination. The full bounded replay
+required352.501seconds and peaked at1,059,794,944 sampled aggregate RSS bytes.
+No resource stop occurred. No checking-speed refactor or Lean budget changed, so
+checking regression delta remains inapplicable. No speedup is claimed from the
+interrupted exploratory run.
+
+Reproduce after bootstrap/census:
+
+```sh
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK"
+node --test tests/h62/item3/g52-differential/eest_observation.test.mjs
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 19093 bounded
+```
+
+Optional arguments select LIMIT,LABEL,INDEX. Partial/rejected cases return exit2;
+engine errors/mismatches return1. Read the summary boolean and exact counts, not
+just process success. The complete-run evidence is
+ evidence/eest-reference-bounded-summary.json and its JSONL; provenance and
+regression gates are in evidence/eest-acceptance.json. Historical failed KZG and
+loader runs remain saved as failures; they are never added to successful counts.
+
+Independent finder and skeptic reviewed read-only without Lean/server. Both
+verified exact fixture accounting, unchanged executor forwarding, and explicit
+unsupported semantics. Finder found a queued IPC-success/resource-stop race;
+it is fixed by guardedResult and a negative control. Three Node control tests pass,
+including changed roots/logs, altered fork parameters, and stop-over-success.
+The full-run adapter hash records the actual pre-race-fix source; no resource stop
+occurred in that run. A final20-case pilot verifies the unchanged normal path;
+the targeted race control verifies the changed stop path. Earlier ten accounting
+controls,732 generated reference observations,320 real primitive comparisons and
+fail-closed unsupported accounting were rerun successfully with the new lock.
+
+Continue the existing goal. Next independent items: implement expected-invalid
+transaction rejection classification for all778 cases, reproduce the deterministic
+export, expand archive-format census, and inspect newly integrated
+scripts/roadmap-v17-differential.py for the live producer adapter. Dependent waits
+must be reported as {lane,item} per H82; they never justify stopping independent
+backfill. Full source/runtime integration, applicable gas/world/deployment evidence,
+actual mismatch minimization/owner relay, and final original gates stay open.
+
+Finder's final lifecycle review also required ignoring queued messages after a
+stop request until onExit resets the worker; this is implemented and cleared.
+The final20-case pilot reports20reference matches and strict incomplete exit2.
+No independent work is blocked by these completed fixes. The pre-merge source
+backup retains the actual full-run adapter before the targeted IPC-stop fixes.
+
+
+## Expected-invalid transaction classification and H70 binding answer
+
+This checkpoint executes and classifies all778 formerly unsupported invalid
+transactions. The observed rejection category is derived from pinned engine
+validation diagnostics, actual transaction type, and engine-computed intrinsic
+and calldata-floor gas. Expected labels are consulted only afterward. Unknown
+host errors remain unsupported; an accepted expected-invalid transaction is a
+reference mismatch. Classification requires unchanged pre/post state roots,
+the exact fixture post-state root, and the expected empty-log commitment.
+Validation rejections do not provide captured execution logs; the empty-log
+commitment is inferred from the recognized pre-execution validation refusal.
+
+All778 cases match. They cover19 observed categories and22 expectation/alternative
+forms. In91 cases both intrinsic and calldata-floor constraints fail; both facts
+are retained and only explicit expected alternatives can match. No skip or
+arbitrary exception is counted as a match. New control module docstrings name
+the guarded regression as required by H90; no new phase/roadmap folders exist.
+Nine pure controls and one real-worker accepted-invalid contradiction control
+pass without skips. Wrong expected roots, overlapping gas failures, unknown host
+errors, and incompatible rejection categories are covered.
+
+The complete serial replay now has19093unique reference matches:18315valid cases
+and778observed rejections, zero unknown rejections, errors, or mismatches.
+It took351.765seconds with sampled aggregate RSS peak
+1191260160bytes. The earlier replay took352.501seconds but
+skipped778transactions; these are different workloads, so no checking-speed
+improvement is claimed. No Lean representation/refactor/budget changed; the
+checking-regression comparison remains inapplicable. Resource and instruction
+limits remain unchanged.
+
+The full reference command exits0 and reference_complete=true **only for pinned
+state-root/log commitments and expected transaction admission/refusal**. All19093
+source semantics adapters remain unsupported; differential_complete=false.
+Return/revert and gas data lack direct expected values in these fixtures. This
+is neither source/compiler agreement nor RUNTIME_GATE_PASS/full-G52 closure.
+The invalid-only778case command still exits2 because it leaves18315unselected.
+Evidence: evidence/eest-reference-rejection-complete-summary.json, its JSONL,
+rejection-acceptance.json, rejection-controls.log, rejection-integration-control.log,
+and rejection-reviews.json. Both independent reviewers verified the complete
+result SHA256 e4d572dd0dec3f202dc62256a92174919fd85438320e6c2fa90de37a39305a55,
+all rejection invariants, and explicit source incompleteness; neither used Lean
+or a server. This checkpoint creates no Lean declarations, axioms, sorry,
+frozen statement changes, exclusions, or proof-budget changes.
+
+Reproduce the rejection subset and controls:
+
+```sh
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 778 rejected-classified all invalid-only
+node --test tests/h62/item3/g52-differential/eest_rejection.test.mjs tests/h62/item3/g52-differential/eest_observation.test.mjs
+G52_BULK="$BULK" node --test tests/h62/item3/g52-differential/eest_rejection_integration.test.mjs
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 19093 rejection-complete
+```
+
+H70 owner answer: V17 at e13a151f8f5252a038ff051dde797cc00e173f87 confirms
+scripts/roadmap-v17-differential.py, scripts/roadmap-v17-runtime.mjs and
+scripts/roadmap-v17-compare.mjs, last adapter change21a2807ddd1f7cd8315d6b2202e904d64162c10f.
+The domain is the complete ordered schema1 SolCases enumeration, seed0,
+indices0-159,kinds0-9, four viaIR/optimizer combinations, pinned solc0.8.38,Osaka.
+Runtime binds exact records, settings, hashes, revision, toolchain and before/after
+inputs. This resolves the bounded lookup wait only. The answer is read-only
+source inspection, with no new runtime/gate claim. Its existing soljson path
+is not substituted for this lane's required official native compiler.
+Arbitrary-contract/EEST binding remains unestablished. Exact owner answer and
+consumer inspection hashes are saved at evidence/v17-adapter-inspection.json.
+G49's current owner is claudecloud/move6-20261106/g49-final; do not duplicate it.
+
+Continue the same original unfinished goal after these three bounded work items
+(classification, live-binding inspection, reviewed conformance/control validation).
+Next independent work: census/account non-state Osaka archive formats and expand
+admitted deterministic witnesses while awaiting arbitrary-contract/EEST source
+binding. Record waits for V17/G49 integration and the full G49 producer; do not
+stop at either while independent work remains. Full source/gas/deployment/world
+integration, mismatch minimization/relay when a real mismatch exists, all remaining
+original gates and full four-checkpoint completion stay open. No mismatch or
+owner ticket was fabricated from these reference-only matches.
+
+
+## All-format archive census and admitted boundary witnesses
+
+Resume identity: the actual clean checkout was761bb4865dc5f7702549966061b84acdeecd6ac8,
+a pre-existing merge of origin/master into this same branch. Its ancestry includes
+the prior checkpoint d45dfa588519efb86e2d264e55cec2850e9e6cd8. This turn did not
+reset, merge, publish or push. The original base/goal identity remains unchanged.
+
+The pinned archive now has complete format/fork inventory accounting:
+46,928members,46,927JSONfiles, one fixture metadata JSON,11,211fixture JSONfiles,
+and35,715engine-X shared allocation JSONfiles. The inventory has248,411fixture
+records and35,715separate support rows. The61,756support references contribute
+zero fixture variants and no execution passes. Shared data are not extra tests.
+An initial parser refused a pre-allocation root shape; the generic support-group
+inspector and malformed/zero-padding controls now guard that regression.
+
+| Exact Osaka format | Representations |
+|---|---:|
+| state_test | 19,093 |
+| blockchain_test | 21,105 |
+| blockchain_test_engine | 21,124 |
+| blockchain_test_engine_x | 21,124 |
+| blockchain_test_sync | 9 |
+| transaction_test | 53 |
+| Total | 82,508 |
+
+Other inventory selections:276Osaka-related/transition representations and
+165,627other-fork representations. There are no unresolved fork selectors in the
+final census. Transaction-test forks come from their actual result mapping:
+53Osaka and53Prague records. Unknown/empty selector shapes remain explicit
+unresolved rows in the general inspector rather than disappearing. The existing
+state-test count remains19,093. These counts describe fixture representations,
+which can overlap in semantic origin across formats; they are not deduplicated
+program counts, new theorems or additional successful comparisons. Every inventory
+row is inventory-only or support-data-only; inventory execution_passes=0.
+
+`archive_census.py` reuses the existing pinned archive SHA/commit and emits the
+bulk inventory to `/workspace/h44/g52-differential/archive-inventory.jsonl.gz`.
+Its SHA256 is f7f19d170ea0ae9fea4d85ea2fb344a21b16bfa494c34d6084345541abca2959.
+A second full census regenerated identical compressed bytes and summary bytes;
+it took38.222seconds. Five pure controls cover state variants, non-state networks,
+transition forks, transaction result forks, unknown/empty records and shared
+allocation groups. The source, generator and controls stay in existing assigned
+folders and their docstrings name the guarded regression as H90b/H112 require.
+
+The additive22-line standalone BoundaryWitness.lean driver reuses the unchanged
+`Solidity.Tools.SolCases.emit` and actual `Prog.run ... withPanics`. Its uint-word
+pool adds2^255-1,2^255,2^255+1,and2^256-2 to the existing four values, and excludes
+all original4x4operand pairs. Thus(8²−4²)×10=480new closed witnesses,48per existing
+kind, with zero source overlap against the original160. No new semantic family,
+signed-type support, arbitrary-contract admission or replacement arithmetic oracle
+is claimed. All actual expected observations come from the existing executable
+semantics, not host arithmetic.
+
+The witness driver passed bounded Lean -j1 execution in1.513seconds,
+peak sampled RSS1140264960bytes, no resource stop, zero swap,
+and unchanged300second/12GiB/4GiBreserve limits. All29original producer source hashes
+remain unchanged and match their fresh private build. Actual Lean4.24.0 commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b and Lake5.0.0-src+797c613 were recorded again.
+The prior passing KeySort source/receipt binding remains unchanged. No Lean MCP
+was available; the standalone file used the existing serial bounded fallback.
+
+The generic typed.mjs runner now admits exactly two named corpora, preserving the
+original default160cases/320comparisons. Boundary mode verifies the exact driver
+path, source/output hashes,480count, zero overlap and successful bounded receipt.
+Both official native solc0.8.38 optimizer-enabled200/osaka modes executed480cases
+each:960new observational matches. The default320comparisons were also rerun and
+still match. Their union has640unique sources and1,280mode comparisons, not a
+sum including repeated validation runs. Gas remains source-free/uncompared;
+deployment/world and general source binding remain outside this admitted fragment.
+Every report keeps full_g52_complete=false. No pending778classification or bounded
+V17lookup was repeated. Those prior completed items remain completed.
+
+Reproduce after the existing bootstrap/private producer build:
+
+```sh
+python3 scripts/h62/item3/g52-differential/archive_census.py --bulk "$BULK"
+python3 tests/h62/item3/g52-differential/test_archive_census.py
+flock /tmp/solidity-lean-feature-groups-20261025/writer.lock \
+  python3 scripts/h62/item3/g52-differential/serial_semantics.py --boundary-only \
+  --repo /workspace/solidity-lean --bulk "$BULK" \
+  --lean-bin /workspace/h44/g52-differential/toolchain/lean-4.24.0-linux/bin
+# This reuses the verified producer build; no second proof implementation.
+node scripts/h62/item3/g52-differential/typed.mjs "$BULK" boundary
+node scripts/h62/item3/g52-differential/typed.mjs "$BULK"
+python3 scripts/h62/item3/g52-differential/pipeline.py manifest --bulk "$BULK"
+```
+
+Registration fragment for coordinator: BoundaryWitness is a standalone IO test
+entrypoint under tests/h62/item3/g52-differential importing only existing
+Solidity.Tools.SolCases; no library root or core module registration is proposed.
+One new Lean definition is the test's main; there are no new theorems, axioms,
+sorry, frozen statement/definition changes, exclusions or raised proof budgets.
+Checkpoint delta against the pre-existing761bb4865checkout: +1Leanfile,+22Leanlines,
+no existing Lean file edits. H112's5f1459653baseline(1.21MLeanlines,7,449files,
+~24minfullbuild) is context only, not a new measurement or gate result.
+No checking-speed refactor occurred; old fresh-closure and new test-driver times
+are different workloads, so no before/after checking-speed improvement is claimed.
+
+Finder and skeptic independently reviewed read-only with no Lean/server. They
+verified tuple coverage/zero overlap,960real matches, allocation support separation,
+format/fork accounting, original default compatibility and named regression guards.
+Their manifest clearance is recorded only after regenerated manifests include the
+new inventory, boundary compiler artifacts and receipts. Evidence includes
+archive-census.json,archive-census-replay.json,archive-census-controls.log,
+boundary-generator.json,boundary-differential.json,boundary-toolchain.json,
+boundary-validation.log,boundary-default-regression.log and
+census-boundary-acceptance.json, all off Git under H44.
+
+The original goal remains active. Next independent queue: a bounded reference
+adapter for explicitly admitted blockchain_test records, with exact refusal and
+transition/fork accounting; do not claim engine/engine-X/sync support from the
+census. Keep waits for V17/G49 arbitrary-contract/EEST source binding and
+claudecloud/move6-20261106/g49-final's full producer. Full source/runtime agreement,
+applicable gas/deployment/world observations, real mismatch minimization/owner
+relay and original final gates remain open. Reference inventory and finite witness
+matches do not close the full assignment.
+
+The final generic emitter CLI was also checked for guard races: a recorded
+resource stop now fails directly even if the process exit code is zero. A
+synthetic CLI control asserts nonzero exit and absence of a success receipt,
+without executing Lean. The real guarded rerun succeeds and preserves exact
+compared output bytes. Both reviewers cleared the implementation after this fix.
+The final manifest is regenerated only after all receipt/control updates.
+
+Final manifest clearance: both copies are identical with2,952entries and SHA256
+af86aad07e56852bed960d99850a6917ebe09c60124278e1e96e1c382a5debb4.
+The skeptic independently verified every required census/boundary artifact and
+all1,920boundary compiler files against those hashes. No outstanding findings.
+
+
+## Coordinator re-baseline and blockchain input preparation
+
+The coordinator authorized re-baselining on origin/master advertised at
+5da4771e63a4278ed53932ac39a032e3d7aea6ed. Fetch showed that it did **not** contain
+local6a68fe831eaa6b4a9132499e243c3a7a80732dcf in ancestry, despite the merge notice.
+The common ancestor was761bb4865dc5f7702549966061b84acdeecd6ac8; the remote owned
+lane files were unchanged from that ancestor. Fast-forward correctly refused.
+The worker performed a normal authorized merge into this lane, preserving both
+heads at2cd1303a269a129ef2a84a1478e9ec5d1a3f1470. No reset, discard or push occurred;
+no owned file changed as a result of the merge. The original c6f550e base and
+persistent goal remain unchanged. Evidence:blockchain-rebaseline.json. Coordinator
+retrieval must retain the local6a68checkpoint, rather than assuming it was already
+published; the integration patch includes it.
+
+The existing generic exporter now accepts --format blockchain_test. It reuses
+the pinned archive, verifies the full inventory hash/census binding, selects only
+exact-Osaka blockchain_test rows, rejects duplicate identities, checks every
+actual fixture's network and format, and verifies exhaustive selection coverage.
+It preserves complete genesis/pre-state/block/expected-post fixture data without
+interpreting those values as successful execution.
+
+All21,105selected records across2,693files were exported, with contiguous indices
+and status input-only-not-executed. No blockchain execution or source agreement
+is claimed. The stream is /workspace/h44/g52-differential/blockchain-inputs.jsonl.gz;
+SHA256:89082881102be9e9a6cf021c95636375c21810bb631844f8c345a336749866a3.
+A second export produced identical bytes and exact identity coverage. The original
+state-test input stream remains byte-identical at
+ d7dcc3b6f969359d44bfdaec88b7dffcbd80cddacc2b06b8a135964e2cbbc602;
+its completed rejection classification/runtime comparisons were not repeated.
+
+Reviewer inspection exposed an in-progress publication weakness: truncating a
+stream while its prior receipt was visible. The shared exporter now writes a
+partial stream and replaces the published path only after exhaustive validation;
+it publishes the receipt through a temporary file too. Stream and receipt hashes
+must still be checked together. A synthetic failed-export test proves the prior
+completed stream and receipt survive a wrong-fork refusal. All3controls pass.
+The final atomic full export matches the same reviewed hash. Module docstrings
+name guarded wrong-format/fork and partial-publication regressions per H90/H112.
+
+Read-only finder and skeptic independently verified coverage, identity, exact
+network/format, input-only status, default-state compatibility, and publication
+fix. Neither used Lean/server or executed blockchain EVM cases. Evidence includes
+blockchain-export.json,blockchain-export-replay.json,blockchain-atomic-export.log,
+blockchain-export-controls.log and blockchain-export-reviews.json. Bulk streams
+remain off Git and are included in the committed H44 manifest.
+
+Reproduce input preparation only:
+
+```sh
+python3 tests/h62/item3/g52-differential/test_blockchain_export.py
+python3 scripts/h62/item3/g52-differential/eest_export.py --format blockchain_test --bulk "$BULK"
+```
+
+Inspection of the pinned VM runBlock path found it requires a real
+blockchain.validateHeader method when header validation is enabled. The next
+independent work is to pin/provision that real provider, establish genesis/history
+and block validation bindings, then execute bounded admitted fixtures. Do not
+set skipHeaderValidation or fabricate a validator to turn preparation into a
+match. Engine, engine-X, sync and transition records remain outside this adapter's
+currently selected input format and explicitly accounted by the full census.
+
+Checkpoint Lean delta:+0files,+0lines; no existing theorem, definition, exclusion,
+axiom or proof-budget change. No Lean/full build or new checking-speed measurement
+was performed; H112's1.21Mlines/7,449files/~24min baseline remains context only.
+All full-goal obligations stay open. Waits remain V17/G49 arbitrary-contract/EEST
+source binding and claudecloud/move6-20261106/g49-final's full composed producer;
+independent reference-provider work remains actionable. No source mismatch ticket
+or complete-goal result is fabricated from input preparation.
+
+
+## Checkpoint: validated Osaka blockchain reference provider
+
+The checkout was already at fetched origin/master
+ba3c0f1539c8b64ac0c6c89e729481d3d398ee83. Strict ancestry checks confirm both
+053803649a3ed7809c6eed957361e07d68399ec0 and the original c6f550e base are
+ancestors; no reset, discard or additional merge was needed. Evidence:
+block-provider-baseline.json. Original branch, goal and ownership remain intact.
+
+The optional reference integration now pins @ethereumjs/blockchain@10.1.3 in the
+existing test package lock. The dependency-free Lean core has no new dependency.
+The real provider validates fixture genesis/history and supplied block headers;
+runBlock uses generate:false, skipBlockValidation:false,
+skipHeaderValidation:false and validateBlockSize:true. Fixture genesis activates
+Osaka from block zero rather than Mainnet historical heights. The adapter checks
+genesis pre-state, block commitments (state/receipt roots, bloom, requests and
+gas), tip hash and declared post-state account/code/full storage tries. It refuses
+wrong domains, expected-invalid blocks, nonlinear histories and partial post-state
+shapes rather than converting these into matches.
+
+Review exposed a missing block-size-validation option in the initial run; those
+7,581 provisional rows were stopped and excluded from acceptance. The real
+oversize-block control then failed because the pinned Common defaults omit Osaka
+EIP7934 activation. The corrected configuration explicitly enables EIP7934 with
+8,388,608 bytes, taken from the immutable EEST v5.3.0 spec at commit6824474
+(SHA256 21b08f2757e5f9f6d3be31eb98acfa26f07c8e7694a0456156481b596bad88fc).
+The pinned source, failed-control history, excluded-run receipt and final passing
+control are preserved off Git. No installed reference implementation was edited.
+The negative controls exercise the actual provider's timestamp rejection and
+actual block-size validation; temporary test serialization is restored in finally.
+
+Corrected exhaustive command (raw exit2 means intentionally incomplete):
+
+```sh
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 21105 block-size-bounded all none blockchain_test
+```
+
+All21,105 unique, contiguous inputs were accounted for:19,479 reference fixture
+matches and1,626 unsupported expected-block-rejection cases; zero errors,
+mismatches or resource stops. Every source-semantic result remains unsupported.
+Both reference_complete and differential_complete are false. Result SHA256:
+d138d806f1cd893a1d3edfb2c9ee37947f77a8151c51da3badeedecdc84ea20e.
+The full corrected run took687.619s, peak aggregate RSS1,308,512,256 bytes,
+under unchanged serial time/memory/step bounds. This is a new workload, not a
+before/after checking-speed measurement. Evidence: block-provider-acceptance.json,
+eest-reference-block-size-bounded-summary.json and matching JSONL/run log.
+
+NoProof scope means execution/header checks only: no beacon consensus, signatures
+or fork-choice proof is claimed even though the provider validation option is
+true. Per-transaction return/revert bytes and raw logs are not yet retained and
+compared by this block adapter; receipt commitments alone do not close that
+original observation obligation. The native-solc source corpus and source/EEST
+binding also remain separate from these reference fixture matches.
+
+Commands recorded in block-provider-acceptance.json and control-0..3.log:
+
+```sh
+node --test tests/h62/item3/g52-differential/blockchain_adapter.test.mjs
+G52_BULK="$BULK" node --test tests/h62/item3/g52-differential/blockchain_header_integration.test.mjs
+G52_BULK="$BULK" node --max-old-space-size=4096 --test tests/h62/item3/g52-differential/blockchain_size_integration.test.mjs
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 1 state-provider-compat
+```
+
+The first three commands exit0 (four tests, no skips). The default-state
+compatibility probe returns one reference match with expected incomplete exit2;
+it does not repeat or add to the completed19,093-state-case accounting. Finder
+and skeptic independently inspect source, exact hashes, exhaustive result counts,
+NoProof/source boundaries and controls without Lean/server or heavy execution.
+Their final findings and fixes are recorded in block-provider-reviews.json.
+
+Checkpoint Lean delta:+0files,+0lines,+0declarations/helpers; frozen statements
+untouched, axioms/sorry/trust additions0, proof budgets unchanged. No Lean or full
+build was rerun, and no RUNTIME_GATE_PASS is claimed. Prior actual Lean4.24.0 /
+Lake5.0.0-src+797c613 and bounded KeySort success remain historical evidence;
+H112's1.21Mlines/7,449files/~24min baseline is not a new measurement.
+
+Next independent work: retain transaction return/revert/log/gas observations and
+classify expected-invalid block rejections without weakening incomplete status;
+nonlinear histories and other census formats remain explicit pending coverage.
+Waits: V17/G49 arbitrary-contract/EEST source binding and
+claudecloud/move6-20261106/g49-final full composed source/runtime producer.
+No source mismatch or owner ticket is fabricated from this reference-only run.
+Original persistent full goal remains active and unfinished; this is a committed
+handoff checkpoint for the coordinator, with no push or publication.
+
+
+## Checkpoint: native transaction observations and block rejection classification
+
+The existing adapter now retains native runBlock transaction results: ordered
+transaction hash/type, exact return/revert bytes, execution exception, raw logs,
+receipt status/cumulative gas, total/execution gas, gas limit and the native
+refund counter. The refund counter is not necessarily the capped applied refund.
+No step tracer or reference engine patch was added. Receipt logs/status and
+transaction gas totals are checked against the native validated block result.
+There is no independent fixture expectation for return/revert bytes, and no
+isolated per-transaction storage-snapshot claim.
+
+Expected-invalid blocks now run real provider validation before native execution.
+Finder review caught the importance of completing validateBlock (including blob
+transaction checks) before deciding admission. Known native diagnostic categories
+must match an expected alternative, with both unchanged state root and canonical
+head. Gas classifications bind the diagnostic's transaction index to the actual
+decoded transaction and computed intrinsic/floor facts. Accepted-invalid blocks
+remain mismatches; unknown diagnostics remain unsupported. No expected label is
+used as evidence of the observed reason. Final tip/post-state checks still apply.
+
+Full command:
+
+```sh
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 21105 block-transactions-final all none blockchain_test
+python3 scripts/h62/item3/g52-differential/pipeline.py block-acceptance --bulk "$BULK"
+```
+
+All21,105cases are unique/contiguous:21,099reference matches,6reference mismatches,
+zero unsupported classifications or engine errors. The former1,626unsupported
+negative cases now comprise1,620observed rejection matches and6native admissions
+that disagree with expected SYSTEM_CONTRACT_CALL_FAILED. Every source adapter
+remains unsupported; reference_complete and differential_complete remain false.
+Strict deterministic acceptance records exit1. The full PTY process exit was not
+retained before session expiry; its receipt records null rather than inventing
+an exit. The exact fixture replay separately captures actual exit1. This capture
+limitation does not turn six observed mismatches into a passing gate.
+
+The full stream retains23,289transaction observations:20,823returns,265reverts,
+2,201faults and1,858raw logs. Of these,23,283transactions belong to21,562accepted
+blocks;6transactions belong to the mismatched candidate blocks. Finder caught
+that the first aggregate omitted the latter six. The committed deterministic
+block-acceptance action now checks both locations and reports separate subtotals;
+these candidate observations add no fixture matches. Synthetic controls add no
+fixture matches either. Result SHA256:
+a44cb1a7b52a6ba27b792e2ba84681a6cbfae80cbff72d4d0bfc413a4526a12a.
+Runtime714.003s, peak aggregate RSS1,509,691,392bytes under unchanged serial bounds.
+No checking-speed comparison is inferred from different observation workloads.
+The earlier7,581provisional rows remain excluded.
+
+One root-cause ticket, G52-REF-001, covers fixture indices18780,18782,18783,19914,
+19916,19917. Native EIP7002/7251 request accumulators return call output without
+checking execResult.exceptionError. Four reduced probes (two predeploys, bytecodes
+0xfe and0x5f5ffd) independently show invalid-opcode/revert failures followed by
+normal accumulator returns. These are minimal native probes, not claimed fully
+minimized blockchain fixtures. All six original fixture identities and hashes
+remain pinned in tests/h62/item3/g52-differential/reference-tickets.json.
+Reproduction commands and actual exits are in system-request-reproduction.json:
+
+```sh
+node --max-old-space-size=4096 scripts/h62/item3/g52-differential/system_request_reproducer.mjs "$BULK"
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 1 system-request-fixture-replay 18783 none blockchain_test
+```
+
+Both commands return1 and preserve the disagreement. The probe's initial missing
+VM parameter initialization was corrected; its setup error is saved separately,
+never counted as a reproduced mismatch. No native engine code was changed.
+The ticket is staged for coordinator routing to V17/G52 reference validation:
+relay.sh and the coordinator filesystem are unavailable on this VM. No external
+publication or former-Claude follow-up occurred. This is a reference-engine
+conformance ticket, not a source/compiler/proof mismatch.
+
+Fourteen distinct controls pass without skips:11classification/observation unit
+controls,2real-provider header/admission controls and1real block-size control.
+Read-only finder/skeptic reviews cover runtime source, all rows/hashes, minimizer,
+controls and ticket boundaries; findings and fixes are in
+block-transactions-reviews.json. Independent G49 adoption reviews are recorded
+separately in g49-h121-reviews.json. Reviewers used no Lean/server or heavy run.
+
+## H121: composed producer ownership and exact remaining obligations
+
+H121 transfers the frozen Claude G49 producer to this same lane and original
+persistent goal; no new goal or former-Claude follow-up is created. We merged
+origin/master254c60df6, then exact frozen producer8e9a052f115cb12c2549db8654422a1728046a01,
+then the coordinator's latest master7683091e7c35d265b3b76fdf2a93d0197ce9f556.
+Integration head before local checkpoint edits is6039dfe7b7122e8d178f4b18ea055feea1ec1c0e.
+All ongoing owned edits were preserved. No push/default-branch publication.
+
+The existing bridge request metadata records current collector ownership while
+retaining historical provider routes and unchanged H68 Approved_i requirements.
+Remaining external factory families:
+
+| Factory | Producer obligations still retained by other lanes |
+|---|---|
+| bare_prefix_bridge | Actual canonical producer owner; cannot infer an owner from RefinesUnder alone |
+| compiler_agreement_bridge | V07/V09/V11/V12 and recorded memory/copy/internal-call producers |
+| p1_frame_bridge | V12 ordinary/recursive/profile; MRS calls; V17 thunks; V13 bare reverts |
+| v08_world_phase_bridge | V08 creation/libraries/world/source-unit/transient composition and original dependencies |
+| p10_execution_bridge | V15 opcode execution, with V14/V11/PAR dependencies |
+
+Two actual P1 examples exist, but neither closes the full independently approved
+H68 domain. V1 is explicitly trivial/coarse; V2 uses a handwritten image and a
+depth-constant Boolean-cell family. They do not preserve the complete original
+Local, canonical emitted-code identity, full domain agreement or public-map
+compatibility required for production acceptance. All five full factories remain
+pending; no successful-fragment filter or certificate premise is accepted.
+
+A fresh existing serial H49 checker rebuilt the unchanged FoldedPublic closure
+and controls in a private cache: H64_SOURCE_AND_CONTROLS_CHECK_PASS, actual exit0.
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake5.0.0-src+797c613. KeySort passed bounded -j1, exit0,1.306s, empty diagnostic
+log. Command/evidence: g49-adoption-check-command.json and g49-adoption-check/.
+No Lean MCP was available. This framework check is not a concrete producer,
+PublicObligations proof, migration cut-over, final full build or RUNTIME_GATE_PASS.
+The existing three full certificate inputs and all15PublicObligations fields
+remain open. Exact fields and source-hashed candidate census appear in the
+existing tests/h55/g49-final-theorem/bridge-requests.json:h121Adoption.
+
+Own Lean delta:+0files,+0lines,+0declarations/helpers; frozen statements touched0,
+new axioms/sorry/trust shortcuts0, budgets unchanged. No refactor or paired timing
+measurement occurred; H102's accepted historical timing protocol stays binding.
+Next owned work is canonical production endpoint/code/admission binding, actual
+stage construction and the full public residuals, reusing existing generic
+coverage machinery rather than another conditional wrapper. G49 is now owned
+pending work, not a wait on the frozen Claude lane. V17 arbitrary-contract/EEST
+binding and the five external factory families remain typed dependencies.
+
+
+## Checkpoint: deterministic Engine, Engine-X and sync inputs
+
+The resumed checkout was clean at23c622eb31fc4a7f7ef768516561251f7e329b56 on the
+assigned branch. Its existing coordinator merge/bookkeeping commits were
+preserved. Fetch/merge of origin/master05d2c25872c4bb963a0ca7f605905e6e1e99eedc
+returned0; originalc6f550e and previousf53f026ac are ancestors. No reset, discard,
+push or default-branch publication. Evidence:engine-input-baseline.json.
+
+The existing generic exporter now supports blockchain_test_engine,
+blockchain_test_engine_x and blockchain_test_sync. All fixtures retain their
+complete original payload/configuration/expectation fields, exact archive member
+hash and identity. They are explicitly input-only-not-executed, never execution
+or source agreement. Related representations may describe the same underlying
+cases; they are not added to unique semantic witness or passing-case counts.
+
+| Format | Exact Osaka inputs | Stream SHA256 |
+|---|---:|---|
+| Engine | 21,124 | 290feabb7d26c5cfcc32c861447e6ae860a840d94031115948ff7b530cee00e3 |
+| Engine-X | 21,124 | 26117239c2da1b20734ed3f56bac609bc076bdaff535ec69e4e651cb5b4cbdae |
+| sync | 9 | 76b3eb1d653a953a89a1cc2a467b091490d2f22b9e744cc3ad606276ce1bef4e |
+
+Engine-X preHash references now bind to a seekable canonical allocation stream
+and offset/length index. All11,568Osaka allocation groups and all21,124declared
+case memberships are referenced exactly, with zero dangling refs. Each lookup
+checks canonical record SHA, path/source SHA, actual network and exact testId
+membership. Allocation records preserve pre-state, environment and genesis from
+the pinned archive; these fields have not undergone native execution validation.
+No ad-hoc allocation or fabricated genesis is supplied.
+
+All files stage under partial names. The allocation stream/index and input stream
+publish only after exhaustive input validation, with receipt last. Replacement
+of the full set is not transactional; consumers must verify every receipt hash.
+Failed membership validation preserves all four prior published Engine-X files.
+The reader closes on failures. New negative controls cover missing preHash,
+wrong case/network, corrupted bytes/offsets and mismatched path/source provenance.
+All8export controls pass with ResourceWarning treated as error; all10existing
+accounting controls also pass.
+
+Reproduce each input preparation twice (no EVM/RPC execution):
+
+```sh
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format blockchain_test_engine_x
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format blockchain_test_engine
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format blockchain_test_sync
+python3 -W error::ResourceWarning tests/h62/item3/g52-differential/test_blockchain_export.py
+python3 tests/h62/item3/g52-differential/test_pipeline.py
+```
+
+The existing serial resource guard ran each export:12GiB cap,4GiB available
+reserve, no swap,300s per command, one heavy job. All first/replay exports exit0
+without resource stops. First/replay seconds:Engine-X176.902/176.330,
+Engine47.878/48.371,sync25.703/25.234. Largest observed exporter RSS370,302,976bytes.
+All three streams, both Engine-X sidecars and full receipts reproduce identical
+bytes. Evidence:engine-input-export-runs.json,engine-input-export-replays.json,
+engine-input-first-receipts.json and engine-input-acceptance.json. The sidecar
+SHA256s are452fc176dfd074d9e460887efed298609055e0f2f568728d9edcac69d460a45c
+(allocation stream) and7254fcd67e353229b453695e7a353af0633fbffa54938e218cbd65c6c0cbf43b
+(index). Bulk remains outside Git and covered by the committed H44 manifest.
+
+Independent read-only finder and skeptic checked exact inventory coverage,
+uniqueness/order, actual format/fork, all allocation edges, gzip integrity,
+receipt hashes, failure controls and reproduction. Both cleared the milestone;
+neither ran Lean/server, native EVM or an archive export. Findings and fixes:
+engine-input-reviews.json. No new execution pass or source match is counted.
+
+Sealed state/block inputs and the six-mismatch native result are byte-identical.
+Strict block-acceptance still records actual exit1 and six reference mismatches;
+Engine inputs cannot close that gate. H70 reports the coordinator retrieved
+G52-REF-001 and routed summary+hash to V17. Its local committed bytes still hash
+f8b2151cf40f1fa9e373e64c273cb649f4220ebb4d7ec1b6581e301e1bdd9d6f.
+The sealed ticket is unchanged; routing is recorded separately in
+g52-ref-001-routing.json and is not validation/integration evidence.
+
+The native official solc0.8.38binary still passes exact SHA/version verification.
+Actual software versions are saved in engine-input-versions.json. Existing
+H49checked source hashes still match the successful prior bounded closure;
+no Lean run is added here. Historical Lean4.24.0/Lake5.0.0-src+797c613 and KeySort
+exit0/1.306s/empty diagnostics remain historical framework evidence only.
+No RUNTIME_GATE_PASS, migration, full build or whole-producer acceptance.
+Own Lean delta0files/lines/declarations; frozen statements touched0; new axioms,
+sorry/trust shortcuts0; proof budgets unchanged. No Lean refactor/checking timing
+comparison occurred. Input export timing is an external measurement only.
+
+Remaining exact-Osaka input format:53transaction_test records. Existing state,
+blockchain and these three new format exports prepare82,455of82,508inventoried
+Osaka representations; preparation is not execution coverage. Next independent
+items are transaction-test inputs/admission checks and real native Engine payload
+binding with explicit RPC/fork-choice/sync limits. Owned canonical source/session
+and emitted-code binding, five full H68factory families and all15public residuals
+remain open. Full Approved_i domains and original conclusions stay unchanged.
+Waits remain V17 arbitrary-contract/EEST binding; MRS/full P1 and other original
+frame owners; V08 world-phase; compiler-family owners; V15 P10 via coordinator
+under H118; bare_prefix_bridge actual producer owner unresolved. No owner is
+inferred, no former-Claude follow-up, and no new/reset/completed goal. H110 permits
+continuation on this same original thread when fresh-thread machinery is absent.
+
+
+H70 downstream clarification received after this checkpoint: V17 release head
+ a2b8558db548751e414f71d1d3c7889f64cc0ee8 waits on our H121b full composed
+producer and arbitrary-contract/EEST executable binding. V17 is a consumer of
+those deliverables, not their provider; the generic V17 binding wait above is
+superseded. These are owned unfinished work. No complete producing files/head
+are available; conditional G49 framework and input exports do not satisfy them.
+This dependency notice changes no scope, paused-goal state or acceptance gate.

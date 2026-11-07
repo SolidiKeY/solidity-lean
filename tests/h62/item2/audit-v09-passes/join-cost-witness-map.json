@@ -1,0 +1,103 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryJoinCostControls.lean",
+  "interface_sha256": "72ca4e82c37e4ef7df75cbed2d12ac2673b023b6fe54d61183a9cea782b184a4",
+  "joint_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditJoinedAllocation.CostControls",
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.MemoryJoinCostControls.0.",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.prefix_public",
+      "signature_sha256": "3dafd907cb6d1b0e7ec93430e2afe477e90465e4fbaca4a79719f5087c6493dc",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.suffix_public",
+      "signature_sha256": "5ce29ecef6914d633d621daa4e500667bf4572a3e4d62515d56e8f6abe6732c0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.suffix_cost",
+      "signature_sha256": "ba98de5e2ff43ca9d53e7048e41902e1706585c34573cab883b7c1c7bdbb0541",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.total_cost",
+      "signature_sha256": "5f1cdf3c33277cecb3dc0420e23ff2156243b007696d5471e105d501f7b5c29e",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.reached_budget",
+      "signature_sha256": "db7019d42a654b837b560475d009db71d6b2c7fabcf476b6147ef5a7d23d311b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell0",
+      "signature_sha256": "daad80d27a8573656317afba9b770a8dd3f9abf0af7b675a39fecbd03369db8f",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell1",
+      "signature_sha256": "9bb339b9add3fd28d6f2edb546f9ca6a59c67c456446b3404840a7c4d51323c9",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell2",
+      "signature_sha256": "91b4f13664335cb8e62cd2e28b1d0ed3843494b0af9f5783153aa544f854502b",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell3",
+      "signature_sha256": "682d10ece905e85a189311b8fb9862076dbbbaccf4c4bc36ea74175c8e0d5f32",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell4",
+      "signature_sha256": "a066cbbefa8f521238ba326c64342100395a9e139c421cab600c3be7461d6df4",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell5",
+      "signature_sha256": "36f6f4d2c67bf0b2867b572f1ebe82c721f2b6c712c4d29e2484a545bd72cbdd",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell6",
+      "signature_sha256": "cd1069357e8917fdd7a7250b7d9da4d1033a3ef142e364fed7020e41e169b9be",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.cell7",
+      "signature_sha256": "a6b2e884a124a34b684a3ceac6aed6de2280390d060e7b04d9c470fcf5ed0e0a",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.complete_prefix",
+      "signature_sha256": "f56877becb74c07a6f5c652aa5b97361f2976e48081ee364b5bd676aa610b6ad",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.wrong_total",
+      "signature_sha256": "66ef28eb0047f5dd770bcefd55feaaf1fdd2939b8383a9d07c76f10e98992a81",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.fail_source",
+      "signature_sha256": "84ba34a8c06f0b1c0beb1846e2c75bd219d4bd685bc041503f1fbf701214c828",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.skipped_allocation",
+      "signature_sha256": "4c72093e8c09cc3fdb2b19c5d21ed1e6e14bdbb172d1e9222efc50fa483ff984",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinCost.Controls.failed_public",
+      "signature_sha256": "64f8e0bbf6ece2bf54dc6c3c47ea028e31ccb508ae696947fb7117d634e16f8c",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 269,
+  "aggregate_remaining": 990,
+  "limits": "Ten original public plus eight private cost-control rows only; model cost/revert semantics, not native gas or physical resource adequacy."
+}

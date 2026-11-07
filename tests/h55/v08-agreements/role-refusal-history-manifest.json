@@ -1,0 +1,246 @@
+{
+  "scope": "Actual intrinsic library-role refusal and context-read suffix only; Source/session/payment/general-body/pass adequacy remain open.",
+  "evidence": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107",
+  "timing": [
+    {
+      "file": "Solidity/Lowering/V08/WorldContextComposition.lean",
+      "baseline": 1.343,
+      "candidate": 1.342,
+      "ratio": 0.9992553983618765,
+      "stop_gt_10_percent": false,
+      "restored_sha256": "32303fd3edae21b45860b1e9049e8c9cfc506225c48815ceab847587150f4760"
+    },
+    {
+      "file": "tests/h55/v08-agreements/Agreements.lean",
+      "baseline": 5.267,
+      "candidate": 5.178,
+      "ratio": 0.9831023352952344,
+      "stop_gt_10_percent": false,
+      "restored_sha256": "2ec5ba95e8b3f0b2496d9d4d6237492b828493f71320c209dd7bb01f81c39805"
+    }
+  ],
+  "preservation": {
+    "production_original_declarations_exact": true,
+    "consumer_original_source_prefix_exact": true,
+    "imports_unchanged": true,
+    "source_sha256": {
+      "Solidity/Lowering/V08/WorldContextComposition.lean": "32303fd3edae21b45860b1e9049e8c9cfc506225c48815ceab847587150f4760",
+      "tests/h55/v08-agreements/Agreements.lean": "2ec5ba95e8b3f0b2496d9d4d6237492b828493f71320c209dd7bb01f81c39805"
+    }
+  },
+  "checks": [
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exit": 0,
+      "log": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/trust.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/register.sh",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/registration.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/whitespace.log"
+    }
+  ],
+  "files": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/console.log",
+      "bytes": 145,
+      "sha256": "ed578ff482280b3d5de8a81d255d13831ac4751e9f4531b052dcfc92c843e8fc"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer/console.log",
+      "bytes": 144,
+      "sha256": "68eb45c2638ea945a50975c1f8248581f3aa6f29b6cc907b50388c4e5011c0ae"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer/gates/1.log",
+      "bytes": 95029,
+      "sha256": "319cb3526348ce2eed6a5a9dbb6918331852f662d2425c237bce6e70eaa628ba"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer/gates/HEAD",
+      "bytes": 41,
+      "sha256": "18b283b0a5cb9d75edbe62fcb5676dcb52af82b36ad6e28f97dac052024f3999"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer/gates/gates.tsv",
+      "bytes": 214,
+      "sha256": "ea43397b315eb5c4ee4262ad002ce6b9a5cd654f57db058c88bd43dbe23eece4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer/results.json",
+      "bytes": 380,
+      "sha256": "b192da5c22002c03580a3d2140199e6eb7a5ea08e80481b871bfaadb82783a15"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-baseline/console.log",
+      "bytes": 153,
+      "sha256": "d6a6a9ced38222b5f747a2237a768edf745a1a1d01c0922b4d3ebaee76465348"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-baseline/gates/1.log",
+      "bytes": 94831,
+      "sha256": "229d7ba0cf1c5382ef4100f071a80225f6f5cd77609a86cb7ad9eccceae99485"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-baseline/gates/HEAD",
+      "bytes": 41,
+      "sha256": "18b283b0a5cb9d75edbe62fcb5676dcb52af82b36ad6e28f97dac052024f3999"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-baseline/gates/gates.tsv",
+      "bytes": 223,
+      "sha256": "98f246b92ca54cd57e76bc54c1289c8d1f37aff1b900b21ce64f5fc4025fc529"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-baseline/results.json",
+      "bytes": 380,
+      "sha256": "94dd365432a9cf6eb47f2900e045b84df11f2c6185a408edd56cbca2294232c4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-candidate/console.log",
+      "bytes": 154,
+      "sha256": "2e1f9707b7c8c40f11020adfe58556858251772e6621072d49074112d21efe24"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-candidate/gates/1.log",
+      "bytes": 94957,
+      "sha256": "1ac979edb5ee28937c5c12066878679aff129353446bd0d80d865a18b3dab987"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-candidate/gates/HEAD",
+      "bytes": 41,
+      "sha256": "18b283b0a5cb9d75edbe62fcb5676dcb52af82b36ad6e28f97dac052024f3999"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-candidate/gates/gates.tsv",
+      "bytes": 224,
+      "sha256": "71b6d2a96c8fc61d9a60c42b130318054be9bd861e15817c481b1db12fa4445c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/consumer-candidate/results.json",
+      "bytes": 380,
+      "sha256": "1eaac9776cff31f393bb48608d9b00527bc04f958cb7d1112035768f4c679ac6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/gates/1.log",
+      "bytes": 54804,
+      "sha256": "94718f4e397cad8a05519ce8ac002831fb55aaac6f6c4fb6560c4d4d33beb832"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/gates/HEAD",
+      "bytes": 41,
+      "sha256": "18b283b0a5cb9d75edbe62fcb5676dcb52af82b36ad6e28f97dac052024f3999"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/gates/gates.tsv",
+      "bytes": 225,
+      "sha256": "56793f99816006f468c5cbe28f655ee2f9c1b6d1b75600140471b9cdbeea7e37"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/preservation.json",
+      "bytes": 398,
+      "sha256": "029a7d70f2f44263c2b67db4a10ba54ae236e1222b59178c0bafe3c809b7295d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-baseline/console.log",
+      "bytes": 165,
+      "sha256": "0c5805b88056d92592a9956d2307b9f714500ded3593c97af8c2c40007520e25"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-baseline/gates/1.log",
+      "bytes": 54804,
+      "sha256": "94718f4e397cad8a05519ce8ac002831fb55aaac6f6c4fb6560c4d4d33beb832"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-baseline/gates/HEAD",
+      "bytes": 41,
+      "sha256": "18b283b0a5cb9d75edbe62fcb5676dcb52af82b36ad6e28f97dac052024f3999"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-baseline/gates/gates.tsv",
+      "bytes": 245,
+      "sha256": "d846edbbb518022169bdc1b5a253e28b364115171a125b17b32ff4de909dab19"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-baseline/results.json",
+      "bytes": 390,
+      "sha256": "b898d5813ff1d164d65d4733ddff5158d397663e5f15efdca29a52c96608d0df"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-candidate/console.log",
+      "bytes": 166,
+      "sha256": "f05a5b7a5fd1f2062379810c5bc2b577957e75dbf4930be8ed1ce972f84aed2f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-candidate/gates/1.log",
+      "bytes": 54804,
+      "sha256": "94718f4e397cad8a05519ce8ac002831fb55aaac6f6c4fb6560c4d4d33beb832"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-candidate/gates/HEAD",
+      "bytes": 41,
+      "sha256": "18b283b0a5cb9d75edbe62fcb5676dcb52af82b36ad6e28f97dac052024f3999"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-candidate/gates/gates.tsv",
+      "bytes": 246,
+      "sha256": "7086ff90faef6bb11f46366ca56e35cb082cfb6a34d12bd29e26f5539e5586b9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/production-candidate/results.json",
+      "bytes": 390,
+      "sha256": "a0fbb012af39952b3014e9fa524c59829264b1b9a0fe5732b1c2172c235d56d6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/results.json",
+      "bytes": 390,
+      "sha256": "de2172534977505d4f473f6e9289f45d39f00c41c8b555ff6200db2aa20004e3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/reviews.json",
+      "bytes": 612,
+      "sha256": "f495f5495c7daeaca0dc16ace03060d7301b82909d6a048e2c56304e31ab588d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/static-results.json",
+      "bytes": 594,
+      "sha256": "9536b616a75b841fb5b572b580b82fd75d8e50ae131e4ea1751e57985f339430"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/timing.json",
+      "bytes": 549,
+      "sha256": "75e8a48ef51354426c0334cb65816fb655a9f9f087679298f87eb7b04467a380"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "7bbc41d392914ba096e5328a3cea92ec3d1b98c759fc720592079fc02efe6f70"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-refusal-history-20261107/whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

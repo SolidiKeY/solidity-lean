@@ -1,0 +1,22 @@
+{
+  "H62.AuditPrecompiles.Successor.Bls.replicate_getD": "'H62.AuditPrecompiles.Successor.Bls.replicate_getD' does not depend on any axioms",
+  "H62.AuditPrecompiles.Successor.Bls.constant_table_bounds": "'H62.AuditPrecompiles.Successor.Bls.constant_table_bounds' does not depend on any axioms",
+  "H62.AuditPrecompiles.Successor.Bls.g1Discount_length_fidelity": "'H62.AuditPrecompiles.Successor.Bls.g1Discount_length_fidelity' does not depend on any axioms",
+  "H62.AuditPrecompiles.Successor.Bls.g2Discount_length_fidelity": "'H62.AuditPrecompiles.Successor.Bls.g2Discount_length_fidelity' does not depend on any axioms",
+  "H62.AuditPrecompiles.Successor.Bls.decodeFp_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.decodeFp_eq_none_iff_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.g1Add_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.g1Add_eq_none_iff_data' depends on axioms: [propext]",
+  "H62.AuditPrecompiles.Successor.Bls.g2Add_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.g2Add_eq_none_iff_data' depends on axioms: [propext]",
+  "H62.AuditPrecompiles.Successor.Bls.bind_some_eq_none_data": "'H62.AuditPrecompiles.Successor.Bls.bind_some_eq_none_data' depends on axioms: [propext]",
+  "H62.AuditPrecompiles.Successor.Bls.g1Msm_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.g1Msm_eq_none_iff_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.g2Msm_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.g2Msm_eq_none_iff_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.pair_eq_none_data": "'H62.AuditPrecompiles.Successor.Bls.pair_eq_none_data' depends on axioms: [propext]",
+  "H62.AuditPrecompiles.Successor.Bls.pairing_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.pairing_eq_none_iff_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.msmGas_succ_joint": "'H62.AuditPrecompiles.Successor.Bls.msmGas_succ_joint' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.msmGas_mono_joint": "'H62.AuditPrecompiles.Successor.Bls.msmGas_mono_joint' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.g1MsmGas_mono_joint": "'H62.AuditPrecompiles.Successor.Bls.g1MsmGas_mono_joint' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.g2MsmGas_mono_joint": "'H62.AuditPrecompiles.Successor.Bls.g2MsmGas_mono_joint' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.pairingGas_mono_joint": "'H62.AuditPrecompiles.Successor.Bls.pairingGas_mono_joint' depends on axioms: [propext]",
+  "H62.AuditPrecompiles.Successor.Bls.mapFpToG1_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.mapFpToG1_eq_none_iff_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.decodeFp2_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.decodeFp2_eq_none_iff_data' depends on axioms: [propext, Quot.sound]",
+  "H62.AuditPrecompiles.Successor.Bls.mapFp2ToG2_eq_none_iff_data": "'H62.AuditPrecompiles.Successor.Bls.mapFp2ToG2_eq_none_iff_data' depends on axioms: [propext]"
+}

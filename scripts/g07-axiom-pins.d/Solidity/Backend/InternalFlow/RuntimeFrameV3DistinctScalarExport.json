@@ -1,0 +1,69 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.allocator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.counter_before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.exact_code": [],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.exported": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.exterior": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_child_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_erased_private": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_noop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.reference_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.result_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.source_bindings": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.source_exit": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarExport.words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,335 @@
+{
+  "status": "PROOF_ACCOUNTING_ONLY",
+  "operation_head": "202ceb0df322eb7d0d49f4e46f82630c4fa5580e",
+  "counted_targets": 7,
+  "uncounted_backfill": [
+    {
+      "target": "Solidity.Lowering.V08.FixedBytesCallableArgument.transport_argument",
+      "reason": "Module absent from frozen audit snapshot; unchanged predicate, never counted here.",
+      "status": "OUTSIDE_FROZEN_SNAPSHOT",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/fixed-bytes-joint-manifest.json"
+    }
+  ],
+  "fresh_kernel_records": 50,
+  "replaced_older_snapshot_modules": [
+    "Solidity.Lowering.V08.WorldCatalogueTransport"
+  ],
+  "ambiguous_generated_captures": [
+    {
+      "name": "Solidity.Source.evalConvArgs.eq_1",
+      "captures": [
+        {
+          "snapshot": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+          "module": "Solidity.Lowering.V08.LocalCallableTransport",
+          "type_sha256": "86f83ffcb836afcdc5770418df234c082e53eb226913e7d76ffa54fd3079840c"
+        },
+        {
+          "snapshot": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+          "module": "Solidity.Lowering.V08.UnsignedUpdateCallable",
+          "type_sha256": "86f83ffcb836afcdc5770418df234c082e53eb226913e7d76ffa54fd3079840c"
+        }
+      ],
+      "status": "PENDING_CAPTURED_PROVENANCE",
+      "same_type_hash": true
+    },
+    {
+      "name": "Solidity.Source.evalConvArgs.eq_2",
+      "captures": [
+        {
+          "snapshot": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+          "module": "Solidity.Lowering.V08.LocalCallableTransport",
+          "type_sha256": "4444ed79ab821f1a5e492b9dd35a7e94414535914ddefdd2466ae8afebb74882"
+        },
+        {
+          "snapshot": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+          "module": "Solidity.Lowering.V08.UnsignedUpdateCallable",
+          "type_sha256": "4444ed79ab821f1a5e492b9dd35a7e94414535914ddefdd2466ae8afebb74882"
+        }
+      ],
+      "status": "PENDING_CAPTURED_PROVENANCE",
+      "same_type_hash": true
+    },
+    {
+      "name": "Solidity.Source.evalConvArgs.eq_3",
+      "captures": [
+        {
+          "snapshot": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+          "module": "Solidity.Lowering.V08.LocalCallableTransport",
+          "type_sha256": "066fba61fffd62985e799af7c5cb92866683caa206e9bb4591caa111470aa609"
+        },
+        {
+          "snapshot": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+          "module": "Solidity.Lowering.V08.UnsignedUpdateCallable",
+          "type_sha256": "066fba61fffd62985e799af7c5cb92866683caa206e9bb4591caa111470aa609"
+        }
+      ],
+      "status": "PENDING_CAPTURED_PROVENANCE",
+      "same_type_hash": true
+    }
+  ],
+  "new_witnesses": 0,
+  "fidelity_acceptances": 0,
+  "complete_interface_inventory": false,
+  "inputs": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census/census.json",
+      "sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+      "sha256": "2440a4983aee1f3e582cbf3961cdc12f68dbfbcefeb60f33317235675ac55a3a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+      "sha256": "20ce40474953c40620b7113eabb2aa4d45b7bc1ef017c7982353f78ba74e2352"
+    }
+  ],
+  "limitations": [
+    "Captured modules of generated equations differ across import snapshots; both records retained, no canonical-owner inference.",
+    "This is not one merged kernel environment or a global unique-declaration inventory.",
+    "Type digests and lexical name matches do not prove frozen-statement or dependency-closure equivalence.",
+    "Current fixture-byte agreement with a prior proof receipt is not fresh validation of its whole import/dependency closure."
+  ],
+  "accepted_targets": 0,
+  "counted_targets_qualification": "Indexed once for proof accounting, not accepted or discharged in the frozen audit.",
+  "component_models_indexed": 6,
+  "targets": [
+    {
+      "target": "Solidity.Lowering.V08.IntegerCallable.transport",
+      "captured_module": "Solidity.Lowering.V08.IntegerCallable",
+      "kernel_capture": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+      "lexical_id": "Solidity/Lowering/V08/IntegerCallable.lean:101:transport",
+      "kernel_type_sha256": "7c56ec18a3bd3496c0769ea740824f0bab9bee28b14ac702d203789e1f2c380c",
+      "joint_proof": "H62.AuditV08Adapters.IntegerCallableJoint.joint",
+      "actual_proof": "H62.AuditV08Adapters.IntegerCallableJoint.transport_actual",
+      "fixture": "tests/h62/item2/audit-v08-adapters/IntegerCallableJoint.lean",
+      "fixture_sha256": "94e37dfb835449b3e6281b1e56e0e9243cf46ada80a6c4484707360f0deafd1b",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/integer-boundaries-manifest.json",
+      "proof_manifest_sha256": "9e7b2f81f6fca53eef156893409e112a12d7ba1cd8264cdc3b09ecf71a41ec8f",
+      "witness_status": "PREVIOUSLY_CHECKED_COMPONENT_MODEL",
+      "fidelity_status": "PENDING",
+      "owner_confirmation": "UNCONFIRMED"
+    },
+    {
+      "target": "Solidity.Lowering.V08.ConditionalCallable.transport_context",
+      "captured_module": "Solidity.Lowering.V08.ConditionalCallable",
+      "kernel_capture": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+      "lexical_id": "Solidity/Lowering/V08/ConditionalCallable.lean:76:transport_context",
+      "kernel_type_sha256": "189d07b902022ea68d3e419e565fb8ba530d409acb0b4acb08669321c116bb6f",
+      "joint_proof": "H62.AuditV08Adapters.ConditionalCallableJoint.joint",
+      "actual_proof": "H62.AuditV08Adapters.ConditionalCallableJoint.actual",
+      "fixture": "tests/h62/item2/audit-v08-adapters/ConditionalCallableJoint.lean",
+      "fixture_sha256": "0b717b465f29aed9827888f8a38c551c240fbff9ba7d7c9386891a67b91824c6",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/conditional-joint-manifest.json",
+      "proof_manifest_sha256": "a0c566be1d3a94d19b82f125dac054b743fa5fd21af850b5a3995b705c0029cb",
+      "witness_status": "PREVIOUSLY_CHECKED_COMPONENT_MODEL",
+      "fidelity_status": "PENDING",
+      "owner_confirmation": "UNCONFIRMED"
+    },
+    {
+      "target": "Solidity.Lowering.V08.WorldCatalogue.assembled_image",
+      "captured_module": "Solidity.Lowering.V08.WorldCatalogueTransport",
+      "kernel_capture": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+      "lexical_id": "Solidity/Lowering/V08/WorldCatalogueTransport.lean:35:assembled_image",
+      "kernel_type_sha256": "9453dcade908907f66d12284e22927c0f5f64cd033b220dfe3bcd1be1012ee6f",
+      "joint_proof": "H62.AuditV08Adapters.WorldImageJoint.joint",
+      "actual_proof": "H62.AuditV08Adapters.WorldImageJoint.joint",
+      "fixture": "tests/h62/item2/audit-v08-adapters/WorldImageJoint.lean",
+      "fixture_sha256": "dd0b1b60309f5f44fa5fb38ab33974cd5116fef053ab2c6349459d295c5bc69b",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/world-image-joint-manifest.json",
+      "proof_manifest_sha256": "b9cd5c80dd906083646b5cd86d19f26dff057e41c789507b6802b725dee5a76d",
+      "witness_status": "PREVIOUSLY_CHECKED_COMPONENT_MODEL",
+      "fidelity_status": "PENDING",
+      "owner_confirmation": "UNCONFIRMED"
+    },
+    {
+      "target": "Solidity.Lowering.V08.WorldImage.image_reset",
+      "captured_module": "Solidity.Lowering.V08.WorldReset",
+      "kernel_capture": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+      "lexical_id": "Solidity/Lowering/V08/WorldReset.lean:32:image_reset",
+      "kernel_type_sha256": "7f4b823ae6fae3b102054660e5e1cb0dba813fe8922afc696974d5ec8840202f",
+      "joint_proof": "H62.AuditV08Adapters.WorldImageJoint.joint",
+      "actual_proof": "H62.AuditV08Adapters.WorldImageJoint.reset_actual",
+      "fixture": "tests/h62/item2/audit-v08-adapters/WorldImageJoint.lean",
+      "fixture_sha256": "dd0b1b60309f5f44fa5fb38ab33974cd5116fef053ab2c6349459d295c5bc69b",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/world-image-joint-manifest.json",
+      "proof_manifest_sha256": "b9cd5c80dd906083646b5cd86d19f26dff057e41c789507b6802b725dee5a76d",
+      "witness_status": "PREVIOUSLY_CHECKED_COMPONENT_MODEL",
+      "fidelity_status": "PENDING",
+      "owner_confirmation": "UNCONFIRMED"
+    },
+    {
+      "target": "Solidity.Lowering.V08.TupleCallable.transport",
+      "captured_module": "Solidity.Lowering.V08.TupleCallable",
+      "kernel_capture": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+      "lexical_id": "Solidity/Lowering/V08/TupleCallable.lean:136:transport",
+      "kernel_type_sha256": "7bbbefa27f4e4e270f199a0c86b399e096692a281b278fba1f048ec301f9cf5f",
+      "joint_proof": "H62.AuditV08Adapters.TupleCallableJoint.joint",
+      "actual_proof": "H62.AuditV08Adapters.TupleCallableJoint.actual",
+      "fixture": "tests/h62/item2/audit-v08-adapters/TupleCallableJoint.lean",
+      "fixture_sha256": "7c9f7002b66f4c93c413bc948c8a3184f2d2d5b9e81fee618212d219d7f13da0",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/tuple-joint-manifest.json",
+      "proof_manifest_sha256": "4a135f5fbde223ce39da1f59eccdd92941f94616c80897f5e744003f7b332fdd",
+      "witness_status": "PREVIOUSLY_CHECKED_COMPONENT_MODEL",
+      "fidelity_status": "PENDING",
+      "owner_confirmation": "UNCONFIRMED"
+    },
+    {
+      "target": "Solidity.Lowering.V08.WordCastCallable.transport",
+      "captured_module": "Solidity.Lowering.V08.WordCastCallable",
+      "kernel_capture": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+      "lexical_id": "Solidity/Lowering/V08/WordCastCallable.lean:52:transport",
+      "kernel_type_sha256": "240c2c4cb5e7fe9f9fd3d1a820b9bdef85f99b5658b58a0113d3293d7c136899",
+      "joint_proof": "H62.AuditV08Adapters.WordCastCallableJoint.joint",
+      "actual_proof": "H62.AuditV08Adapters.WordCastCallableJoint.actual",
+      "fixture": "tests/h62/item2/audit-v08-adapters/WordCastCallableJoint.lean",
+      "fixture_sha256": "bce6b95064e0947b36ff6b9f061316efa5c3449ce2e5634c549876ab78f40cc9",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/word-cast-joint-manifest.json",
+      "proof_manifest_sha256": "beb64029d5bc5dd5c06f449acbb66349f3b3274c043e56543ab8ad188fd72fe0",
+      "witness_status": "PREVIOUSLY_CHECKED_COMPONENT_MODEL",
+      "fidelity_status": "PENDING",
+      "owner_confirmation": "UNCONFIRMED"
+    },
+    {
+      "target": "Solidity.Lowering.V08.UnsignedUpdateCallable.transport_context",
+      "captured_module": "Solidity.Lowering.V08.UnsignedUpdateCallable",
+      "kernel_capture": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+      "lexical_id": "Solidity/Lowering/V08/UnsignedUpdateCallable.lean:69:transport_context",
+      "kernel_type_sha256": "f57ca13c61762ed26fe3f22fe10c75eb6b42e884fcac192b4f5bf803435c4288",
+      "joint_proof": "H62.AuditV08Adapters.UnsignedUpdateJoint.joint",
+      "actual_proof": "H62.AuditV08Adapters.UnsignedUpdateJoint.actual",
+      "fixture": "tests/h62/item2/audit-v08-adapters/UnsignedUpdateJoint.lean",
+      "fixture_sha256": "c075f318231cea88bc50df84f2ae327ca0e56ff71145dd68a7c894f79d3224eb",
+      "proof_manifest": "tests/h62/item2/audit-v08-adapters/unsigned-update-joint-manifest.json",
+      "proof_manifest_sha256": "bada6180871dbcce981b9b6913f3e960c941ec00b0da2163887e6b37fde0d550",
+      "witness_status": "PREVIOUSLY_CHECKED_COMPONENT_MODEL",
+      "fidelity_status": "PENDING",
+      "owner_confirmation": "UNCONFIRMED"
+    }
+  ],
+  "gate_results": [
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/ScopedJointTargets20261107.lean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "seconds": 11.064,
+      "peak_sampled_aggregate_rss": 919420928,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/ResetJointTargets20261107.lean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "seconds": 7.914,
+      "peak_sampled_aggregate_rss": 834072576,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/build-index.py",
+      "bytes": 4987,
+      "sha256": "00d1e90f3ba0fedb7efaf7384875423c4b3764f58d5603876615754cbe0dafbe"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/generation.json",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/index.json",
+      "bytes": 628059,
+      "sha256": "f592524cad3ec0116fe7e831ba357f55ff3b9272037f4fd11e64a11073bb9131"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/inventory.json",
+      "bytes": 875271,
+      "sha256": "20ce40474953c40620b7113eabb2aa4d45b7bc1ef017c7982353f78ba74e2352"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/reset-generation.json",
+      "bytes": 624,
+      "sha256": "c415b161f474b031b82b7d3b531f9d69e8780aeca918da7229803e4c42aa4ce4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/reset-run/console.log",
+      "bytes": 185,
+      "sha256": "d57c144717b87dde608861f09b5a0682e99a553c5f99e0e59350ec72d31c2e7c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/reset-run/gates/1.log",
+      "bytes": 25028,
+      "sha256": "5866139c94cd82c91998f2206ce4a5db1f3cbcde367f993d77972c34beeaba93"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/reset-run/gates/HEAD",
+      "bytes": 41,
+      "sha256": "26d6d62c88c29fe858b5862667d906ca230523d928ab3fd55462853b03369ac9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/reset-run/gates/gates.tsv",
+      "bytes": 297,
+      "sha256": "9224fe5777bf5541166510d74de73bc71f71f7d20ee1fb58097d8dcd3ba05b22"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/reset-run/results.json",
+      "bytes": 422,
+      "sha256": "dc08f90a5658800f35786c23c04e4c1118833b59d7e1b1ac356c4df7cec69c93"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/run/console.log",
+      "bytes": 181,
+      "sha256": "89caae6b790507ddf0ce00e3aa89dc1172dc251491b790158d1372fcb334360c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/run/gates/1.log",
+      "bytes": 853021,
+      "sha256": "fd42f5fdf32d4c6a1be8e1bffbc9282535cc4654759259c83f889a715be9fb5c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/run/gates/HEAD",
+      "bytes": 41,
+      "sha256": "26d6d62c88c29fe858b5862667d906ca230523d928ab3fd55462853b03369ac9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/run/gates/gates.tsv",
+      "bytes": 294,
+      "sha256": "d67b3d3f05bb67522c776d558b48dfca0ef71abc8141622bb1812708ca9eca8f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/run/results.json",
+      "bytes": 424,
+      "sha256": "1c1ebf7a8ec99e1b8e62ca69c301e253d8cb2f37e8174a7a8ab42946d6521ce7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/scope-refusal.json",
+      "bytes": 545,
+      "sha256": "2d68d587106088ff25133a32c8be1770233434288142e2cee278a5237d973541"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/scope-refusal.stderr",
+      "bytes": 781,
+      "sha256": "be452f5b5293750f44bbb427ab4cd973b81e7282e1f0d2c2c2d13c109fa5248f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/joint-target-index-20261107/scoped-generation.json",
+      "bytes": 1012,
+      "sha256": "9f61c0dfb1683a2dfef20f5177f08cf372ccf614b2006774e7997b208cb8c2ab"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic verified evidence/input hashes, seven unique bindings across six component models, fixed-scope exclusion and preserved generated-name ambiguity; no findings, no reviewer scripts/tests/Lean."
+}

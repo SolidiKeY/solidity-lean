@@ -1,0 +1,82 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.actual_different": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.after_repr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.capture_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.capture_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.capture_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.captured_repr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.entry_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.parent_repr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_active": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_counter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_cursor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctParentRestore.Controls.wrong_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

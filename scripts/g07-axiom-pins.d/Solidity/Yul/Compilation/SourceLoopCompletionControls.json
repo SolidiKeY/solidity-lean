@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean:Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.arbitrary_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean:Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.arbitrary_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean:Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.exhaustion_not_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean:Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.pending_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean:Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.recovered_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean:Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean:Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.zero_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

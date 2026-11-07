@@ -10,7 +10,7 @@ inductive ExactArgs {E : Env} (A : Decl → Prop) {Γ : RCtx} :
     {ts : List STy} → RConvArgs E Γ ts → Prop
   | nil : ExactArgs A .nil
   | cons {τ : STy} {ts : List STy} {e : RExpr E Γ τ} {es : RConvArgs E Γ ts}
-      (h : τ.implicit E.isBase τ = true) :
+      (h : τ.implicit E.isBase E.mapFree τ = true) :
       AllocatingExpr A e → ExactArgs A es → ExactArgs A (.cons e h es)
 
 /-- Extracting a plain value retains its reference witness on success. A

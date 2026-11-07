@@ -19,7 +19,7 @@ theorem actual_layout : E.layout.fields name = PairFields := rfl
 def initial : Source.St E :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩, Source.Transient.empty, []⟩,
     (Source.Heap.empty.alloc ⟨.bytes .memory, .bytes [17,23]⟩).1,
-    [], [], ⟨[], .nil⟩⟩
+    [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩
 def state : Source.EMState E [] := (.nil, initial)
 
 def completed : Source.EMState E [] :=

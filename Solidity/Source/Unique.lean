@@ -32,8 +32,8 @@ def Syn.hexLit? : {c : Cat} → Syn c → Option NumLit
   | _, _ => Option.none
 
 /-- **Two constant types never meet**: no implicit conversion between them. -/
-theorem STy.common?_const {B : DeclName → DeclName → Bool} {a b : STy} (ha : a.isConstTy = true)
-    (hb : b.isConstTy = true) : STy.common? B a b = Option.none := by
+theorem STy.common?_const {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {a b : STy} (ha : a.isConstTy = true)
+    (hb : b.isConstTy = true) : STy.common? B M a b = Option.none := by
   simp only [STy.common?, ha, hb, Bool.true_or, Bool.and_self, if_true]
 
 /-- A bind that succeeds had a value. -/
@@ -300,7 +300,7 @@ theorem bin_same {e a b a' b' : Syn .expr} {k k' : BinKind} (hb : e.binOp? = Opt
 /-- Two constant operands make no typed operation (they fold). -/
 theorem bin_const_false {Γ : Ctx} {a b : Syn .expr} {qa qb : Q} {τa τb τ : STy} (ha : a.const = Option.some qa)
     (hb : b.const = Option.some qb) (da : Typed Γ a τa) (db : Typed Γ b τb)
-    (hc : STy.common? Γ.isBase τa τb = Option.some τ) : False := by
+    (hc : STy.common? Γ.isBase Γ.mapFree τa τb = Option.some τ) : False := by
   rw [STy.common?_const (Typed.constShape da ha).isConstTy (Typed.constShape db hb).isConstTy] at hc
   cases hc
 
@@ -806,8 +806,8 @@ theorem uniqE_suffix {Γ : Ctx} {op : SuffixOp} {x : Syn .expr} (ih : Uniq Γ (s
     | (exfalso; apply no_binOp hbo; assumption)
 
 /-- A copy into storage is never an implicit conversion. -/
-theorem STy.implicit_of_copiesTo {B : DeclName → DeclName → Bool} {σ τ : STy} (h : σ.copiesTo τ = true) :
-    σ.implicit B τ = false := by
+theorem STy.implicit_of_copiesTo {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {σ τ : STy} (h : σ.copiesTo τ = true) :
+    σ.implicit B M τ = false := by
   cases σ <;> cases τ
   all_goals first
     | (cases h; done)
@@ -820,11 +820,11 @@ theorem STy.implicit_of_copiesTo {B : DeclName → DeclName → Bool} {σ τ : S
   case array.array l1 e1 n1 l2 e2 n2 =>
     cases l1 <;> cases l2 <;> first
       | (cases h; done)
-      | (change (_ && false) = false; exact Bool.and_false _)
+      | (change ((_ && false) && _) = false; simp only [Bool.and_false, Bool.false_and])
   case struct.struct l1 d1 l2 d2 =>
     cases l1 <;> cases l2 <;> first
       | (cases h; done)
-      | (change (_ && false) = false; exact Bool.and_false _)
+      | (change ((_ && false) && _) = false; simp only [Bool.and_false, Bool.false_and])
 
 /-- **Indexing.** -/
 theorem uniqE_index {Γ : Ctx} {a : Syn .expr} {o : Syn (.opt .expr)} (ih : Uniq Γ (sizeOf (Syn.index a o))) :
@@ -1669,8 +1669,8 @@ theorem underscore_isUnderscore : (Syn.ident "_" : Syn .expr).isUnderscore = tru
 
 /-- `return (a, b);` is not `return t;` of a single return: the tuple has
 two or more components. -/
-theorem argsFit_single {B : DeclName → DeclName → Bool} {σ τ : STy} {σs : List STy} (hne : σs ≠ [])
-    (h : argsFit B (σ :: σs) [τ] = true) : False := by
+theorem argsFit_single {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {σ τ : STy} {σs : List STy} (hne : σs ≠ [])
+    (h : argsFit B M (σ :: σs) [τ] = true) : False := by
   cases σs with
   | nil => exact hne rfl
   | cons _ _ => simp only [argsFit, List.length_cons, List.length_nil, Bool.and_eq_true, beq_iff_eq] at h; omega
@@ -1865,18 +1865,18 @@ theorem RBody.ofDerivation_unique {E : Env} {scope : Option String} (f : Frame)
 /-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
 /-- `bytes2 x = 0x1234;` converts. -/
-theorem hex_to_bytes2 (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 2 (by decide)) = true := rfl
+theorem hex_to_bytes2 (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 2 (by decide)) = true := rfl
 /-- `bytes4 x = 0x1234;` does not (solc requires the exact size). -/
-theorem hex_to_bytes4_refused (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 4 (by decide)) = false := rfl
+theorem hex_to_bytes4_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 4 (by decide)) = false := rfl
 /-- `uint16 x = 0x1234;` converts by value. -/
-theorem hex_to_uint16 (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.hexConst (Q.ofInt 0x1234) 2) (.int ⟨false, 16, by decide⟩) = true := rfl
+theorem hex_to_uint16 (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.hexConst (Q.ofInt 0x1234) 2) (.int ⟨false, 16, by decide⟩) = true := rfl
 /-- `bytes4 x = 0;` converts (zero to every `bytesN`); `bytes4 x = 1;` does not. -/
-theorem zero_to_bytes4 (B : DeclName → DeclName → Bool) :
-    STy.implicit B (.rational (Q.ofInt 0)) (.fixedBytes 4 (by decide)) = true ∧
-    STy.implicit B (.rational (Q.ofInt 1)) (.fixedBytes 4 (by decide)) = false := ⟨rfl, rfl⟩
+theorem zero_to_bytes4 (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.implicit B M (.rational (Q.ofInt 0)) (.fixedBytes 4 (by decide)) = true ∧
+    STy.implicit B M (.rational (Q.ofInt 1)) (.fixedBytes 4 (by decide)) = false := ⟨rfl, rfl⟩
 
 /-- The canonical rethrow names its buffer: `revert(add(data, 32), mload(data))`
 rethrows `data`, and with two different buffers it names none. -/
@@ -1898,13 +1898,13 @@ theorem shiftTy_literal : STy.shiftTy (.rational (Q.ofInt 1)) = .int IntTy.u256 
 
 /-- `0x12 == b` and `0 == b` with `b : bytes1` have no common type: a
 constant on the left of a `bytesN` is refused. -/
-theorem common_literal_bytes_refused (B : DeclName → DeclName → Bool) :
-    STy.common? B (.hexConst (Q.ofInt 0x12) 1) (.fixedBytes 1 (by decide)) = Option.none ∧
-    STy.common? B (.rational (Q.ofInt 0)) (.fixedBytes 1 (by decide)) = Option.none := ⟨rfl, rfl⟩
+theorem common_literal_bytes_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.common? B M (.hexConst (Q.ofInt 0x12) 1) (.fixedBytes 1 (by decide)) = Option.none ∧
+    STy.common? B M (.rational (Q.ofInt 0)) (.fixedBytes 1 (by decide)) = Option.none := ⟨rfl, rfl⟩
 
 /-- `x + 0x0100` with `x : uint8` is at `uint16`, the constant's mobile type. -/
-theorem common_mobile_step (B : DeclName → DeclName → Bool) :
-    STy.common? B (.int IntTy.u8) (.hexConst (Q.ofInt 0x0100) 2) =
+theorem common_mobile_step (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
+    STy.common? B M (.int IntTy.u8) (.hexConst (Q.ofInt 0x0100) 2) =
       Option.some (.int ⟨false, 16, by decide⟩) := rfl
 
 /-- Hexadecimal literals of 39 to 41 digits are neither bytes nor numbers

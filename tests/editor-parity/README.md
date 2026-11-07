@@ -84,3 +84,25 @@ skips tests or changes gate predicates. CI performs the same preparation using
 fail preparation. Hosted-runner delivery still requires coordinator provisioning;
 no storage destination or publication was selected. Native data-dependent tests
 and the frozen baseline trace remain exact, with no synthetic replacement.
+
+
+### Native compiler-only custom imports
+
+`run.cjs --suite custom-import-actions` extends the existing native launcher.
+Provide the pinned Code/Dafny/extension/.NET paths and use `--workers 1 --cache
+none --trials 1 --warmups 0 --obligations 1`. Default operation/launch deadlines
+remain unchanged. Local verification is disabled. The paired source fixtures
+exercise imports; they do not replace the annotated workload or its failed
+admission receipt. Resource defaults, actual F6 input/cancellation, a subsequent
+dirty edit, owned command/session receipts, both source hashes and artifact
+contents are observed. Request/reply files reuse the atomic phase writer;
+partial reads are retained and replayed request IDs do not dispatch twice.
+
+A failing annotated CRLF case is still a failure. Raw compiler diagnosis can
+identify a documentation-span mismatch without producing an admitted artifact.
+Producer repair is required before that unchanged case can pass. Missing
+positioned traces cannot be replaced with certified model-prestate strings.
+All native compiler/action observations remain separate from kernel proofs,
+rendered full-lifecycle equivalence, performance/scaling matrices and row judges.
+
+`--suite dafny-compiler-output --targets dafny` isolates the pinned upstream output-directory contract in the existing native runner. It preserves ordinary/custom CLI quoting, actual terminal outcomes and output bytes; relative-path space splitting and unsupported folder scope remain failed evidence. No local AST/executable equality is inferred. Artifact scans require observed recursive filesystem support rather than a newly invented product Node floor.

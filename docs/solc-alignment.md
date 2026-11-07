@@ -190,6 +190,15 @@ programs, and the check is a statement the rules already run.
   least as wide is expected, and a literal where it fits; `uint8 x = total;`
   and `uint8 x = 300;` are elaboration errors (`fitCheck`), as they are
   compile errors.  So a narrow variable only ever holds a value of its range.
+  Reference conversions (Source `STy.implicit`, 2026-11-06) compare array
+  elements at the target's location, so a nested `calldata` or `storage`
+  array converts to `memory` as in solc, and refuse a copy out of `storage`
+  of a struct holding a mapping, or of an array of such structs (solc's
+  "only valid in storage"); a storage pointer keeps its type. The
+  remaining deviation is in `calldata`: arrays of dynamically encoded
+  elements (`bytes[]`, `string[]`, `uint256[][]`, `bytes[2]`) and structs
+  convert to `memory` as in solc, but the Source copy of them is not modelled and is `stuck`
+  (`docs/feature-work/source-soundness.md`, stuck census).
 - **Casts.**  A cast keeps the low bits of its operand's 256-bit word, as
   solc's conversions do: `uintN(e)` of a `uint` is `e % 2^N`, of an `int`
   `uint(e) % 2^N` (`uint(i)`, `UnOp.toUint`, the two's complement word), and
@@ -717,6 +726,71 @@ recorded in [solidity-upstream-tests.md](solidity-upstream-tests.md#group-01-via
 This lowering uses existing typed statements and sound rules. Runtime/EVM
 agreement and the fixed-program proof controls do not constitute a universal
 compiler-correctness theorem.
+
+### VY5 H3: pinned canonical-rethrow operational traces (2026-11-02)
+
+Human decision H3 **“Per-pipeline”** authorizes the versioned finite trace
+contract in `tests/yul-composition/rethrow-trace-contract.json`. The unchanged
+NativeRethrowControls fixture, solc0.8.38 commit
+1835d247de183f23e7b0e2bc4a50732af525b77c, Osaka, optimizer runs200 and exact
+four settings have these required caught-call persistent-write sequences:
+
+| Pipeline | Optimizer | Required persistent writes (frame,value) |
+|---|---|---|
+| legacy | off | (0,7), (1,99), (0,8) |
+| legacy | on | (0,7), (1,99), (0,8) |
+| viaIR | off | (0,7), (1,99), (0,8) |
+| viaIR | on | (0,7) |
+
+Optimized viaIR removes reverted persistent99/8 stores. All four profiles still
+require exact transient writes (0,17),(1,51),(0,34), rollback frame order1,0,
+full error/return bytes, logs, buffers, caller/child memory windows, account
+world/storage/transient state and restoration. No arbitrary write subset is
+accepted. Each call validator requires an explicit exact pipeline/optimizer
+identity; report provenance binds the actual settings/source/compiler/code.
+
+This is a compiler-aware external operational trace contract, consistent with
+recording pipeline differences under YQ4. It is NOT a compiler-independent source
+observation/G01 contract or a proof that any optimizer may erase arbitrary
+operations. The original strict validator, fixture, semantic-result oracle and
+original36-call report remain unchanged and FAILED with five optimized-viaIR
+journal mismatches. The separate H3 validator passed fresh36calls/4profiles,
+20actual Source failure/full-byte projections and8intended negative projections;
+those projections are not Source/world/compiler correspondence. LIB1 and frozen
+unchecked-add decisions are unaffected. See the VY5 handoff for full evidence.
+
+
+H3 continuation relayed2026-11-02 also authorizes unchecked-add expectations
+legacy512/viaIR0 and a reviewed per-pipeline LIB1 library-codegen contract.
+VY1 owns their implementation/fresh validation. VY5 records the approved mapping
+in `tests/yul-composition/vy1-h3-input-obligations.json`; it awaits exact committed
+producer evidence, without re-asking or presenting approval as implemented support.
+This does not change any existing sealed fixture/report or establish adequacy.
+
+## Dirty narrow and `bool` locals after assembly (YQ4, H109)
+
+An assembly block may leave a dirty word in a narrow integer or `bool`
+local. Pinned solc 0.8.38 cleans it at every Solidity-level use, identically
+in both pipelines (`tests/evm-reference/dirty-locals.json`, from
+`scripts/evm-reference/dirty-locals.mjs`, optimizer off, 33 probes, none
+reverting): `uintN` keeps the low `N` bits, `intN` sign-extends them, `bool`
+is true exactly when the word is not zero (comparisons, checked and
+unchecked arithmetic operands, division, shifts, conditions, storage
+writes). `Solidity.Yul.DirtyReadback.cleanWord`/`frame` read a raw LOCAL
+frame back into Source locals that way, keeping Source values intrinsic.
+Dirty locals of other types (addresses, `bytesN`, enums, user-defined value
+types, contracts, fixed point, function values) are not cleaned there and
+refuse the readback.
+
+Limit: solc cleans lazily and the stack slot stays dirty, so a later
+assembly read of the local, or of a Solidity copy of it, sees the raw word
+in both pipelines (`u8_asm_direct`, `b_asm_direct`, `u8_asm_reread`). The
+readback drops those bits: it agrees with solc when no later assembly block
+reads the local or a copy before it is rewritten; the raw frame keeps the
+bits for that case. No Source semantics calls the readback yet. The one
+pipeline difference observed is the recorded H3 one, an unchecked narrow
+addition's result left dirty by legacy and cleaned by via-IR
+(`u8_unchecked_add_widen`: `0x200` and `0`), not a read of a dirty local.
 
 ## Overloads differing only in return types
 

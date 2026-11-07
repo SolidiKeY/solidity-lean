@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.actual_fresh_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.actual_fresh_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.fresh_full_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/P6FrameControls.lean:Solidity.Yul.Composition.P6FrameControls.represented_fresh_after_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

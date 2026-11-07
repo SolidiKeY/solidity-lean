@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean:Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.dirty_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean:Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.dirty_retired": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean:Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.dirty_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean:Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.no_fresh_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean:Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean:Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean:Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

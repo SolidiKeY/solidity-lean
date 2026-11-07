@@ -1,0 +1,711 @@
+{
+  "guardedRegression": "H90 address locals must retain marker/identity/error order on the shared executable boundary",
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "sourceBuildHead": "0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d",
+  "parentContext": "c21364ef9 (premergequalification checkpoint)",
+  "producerHead": "0834bc67b042a63a8c804162781802245ae59c98",
+  "reviewedOwnerHead": "09bb5b5e3b65a7df5e35aa8bffd3fbc41769dbbf",
+  "packet": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/address-handoff/address-api-packet.json",
+    "sha256": "c19c588e1ae27a39f39c410d2e3d2e7bf393a59c01a087d25aacf01fe2ec5dfb"
+  },
+  "producerEvidence": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/address-evidence.tar.zst",
+    "sha256": "0a96c06eb01deb54781449269fdbb9f6a4f41d0596825b4d950344d7f3a77dea",
+    "inspectedFiles": 55,
+    "inspectedDataBytes": 1386682,
+    "executedProducerEvidence": false
+  },
+  "sourceFiles": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "352b8caf7b4a070d9e5c77c0353d1edd47dadc5b4871d74f05b5600c37e2dae9"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "sha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed"
+    }
+  ],
+  "runtimeSourceComparison": {
+    "sourceBuildHead": "0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d",
+    "comparisons": [
+      {
+        "head": "0834bc67b042a63a8c804162781802245ae59c98",
+        "runtimeSourceFiles": 343,
+        "mismatches": [
+          "Solidity/Calculus/LinearCountermodel.lean",
+          "Solidity/Tools/SourceCounterexample.lean"
+        ],
+        "missing": []
+      },
+      {
+        "head": "09bb5b5e3b65a7df5e35aa8bffd3fbc41769dbbf",
+        "runtimeSourceFiles": 343,
+        "mismatches": [
+          "Solidity/Tools/SourceCounterexample.lean"
+        ],
+        "missing": []
+      },
+      {
+        "head": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+        "runtimeSourceFiles": 343,
+        "mismatches": [],
+        "missing": []
+      }
+    ],
+    "boundary": "Exact runtime-source bytes/context only;not wholebranch/sourceadequacy orperformance acceptance."
+  },
+  "sourceBoundary": "Clean ort merge of published master containing reviewed09bb;both formerconflictfiles retain exact0834/09bbhashes.All343runtime sourcefiles matchpublished4f0a2d6ab.Compared09bbonlyTools.SourceCounterexample differs;compared0834alsoLinearCountermodel differs.Not wholebranch/sourceABI adequacy orperformance qualification.",
+  "binaries": {
+    "native": "b66aa042683596c84f23c861e43c11e23696575b0743cddb072d2f16b38f735d",
+    "wasm": "97e05db7b219ee38255ef69b626c386d8422435cadcfd35666f6027b16b6ec2c",
+    "nativeBytes": 21013560,
+    "wasmBytes": 16579437
+  },
+  "closure": {
+    "modules": 206,
+    "functions": 9985,
+    "closedValues": 5006,
+    "sourceModules": 1631,
+    "nativeRoots": [
+      "lean_array_to_list_impl",
+      "lean_io_cancel_token_is_set",
+      "lean_io_eprintln",
+      "lean_io_error_to_string",
+      "lean_list_to_array",
+      "lean_mk_io_error_already_exists",
+      "lean_mk_io_error_already_exists_file",
+      "lean_mk_io_error_hardware_fault",
+      "lean_mk_io_error_illegal_operation",
+      "lean_mk_io_error_inappropriate_type",
+      "lean_mk_io_error_inappropriate_type_file",
+      "lean_mk_io_error_interrupted",
+      "lean_mk_io_error_invalid_argument",
+      "lean_mk_io_error_invalid_argument_file",
+      "lean_mk_io_error_no_file_or_directory",
+      "lean_mk_io_error_no_such_thing",
+      "lean_mk_io_error_no_such_thing_file",
+      "lean_mk_io_error_other_error",
+      "lean_mk_io_error_permission_denied",
+      "lean_mk_io_error_permission_denied_file",
+      "lean_mk_io_error_protocol_error",
+      "lean_mk_io_error_resource_busy",
+      "lean_mk_io_error_resource_exhausted",
+      "lean_mk_io_error_resource_exhausted_file",
+      "lean_mk_io_error_resource_vanished",
+      "lean_mk_io_error_time_expired",
+      "lean_mk_io_error_unsatisfied_constraints",
+      "lean_mk_io_error_unsupported_operation",
+      "lean_mk_io_user_error",
+      "lean_stream_of_handle"
+    ]
+  },
+  "addressControlsPerBackend": {
+    "fixtureRequests": 16,
+    "proved": 10,
+    "refuted": 2,
+    "unsupported": 4,
+    "additionalPositiveHarnessGuards": 2,
+    "modalities": [
+      "diamond",
+      "box"
+    ],
+    "strictRefusal": "compact verifier: unsupported type address",
+    "actualSourceBoxAnnotations": 8,
+    "eraseRecoversExactDiamondSource": true,
+    "tagAndExactResultParity": true
+  },
+  "stateRefusalSupplement": {
+    "requestsPerBackend": 1,
+    "actualCompilerContract": "AddressStateRefusal",
+    "expectedGap": "compact verifier: unsupported type address",
+    "passedBoth": true,
+    "countedIn16Fixtures": false,
+    "positiveProof": false
+  },
+  "supplementaryHarness": {
+    "committed": "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/address/state-refusal-controls.mjs",
+    "executed": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/state-refusal-controls.mjs",
+    "sha256": "141249484004442646bddc3bb7343d75d2e25b817166f89b28b7316ecea25bae",
+    "reviewFindingFixedBeforeExecution": "Bind fixture/source/compiler/suite to completed parent plus current binary/bridge/closure/sourcepins;check exactlyonepublicf;RPCtimeouts failclosed."
+  },
+  "retainedControlsPerBackend": {
+    "fixedByte20": {
+      "proved": 12,
+      "refuted": 4,
+      "unsupported": 4,
+      "additionalGuards": 2
+    },
+    "C13": {
+      "proved": 9,
+      "unsupported": 4,
+      "additionalGuard": 1
+    },
+    "A8": {
+      "proved": 6,
+      "refuted": 2,
+      "additionalGuard": 1
+    },
+    "B84": {
+      "proved": 64,
+      "refuted": 16,
+      "pending": 4,
+      "originalDeliveredJournal": true,
+      "positiveIdentityDiamondBothCompilerModes": true
+    },
+    "existing83": {
+      "proved": 83,
+      "rounds": 1,
+      "timingAcceptance": false
+    },
+    "nativeNegatives": {
+      "passed": 14,
+      "total": 14
+    },
+    "browserNegatives": {
+      "passed": 13,
+      "total": 14,
+      "failure": "invariantCountsToBound RangeError: Maximum call stack size exceeded"
+    },
+    "UI": "Edited-source/counterexample/disconnected fresh-edit controls pass"
+  },
+  "proofs": {
+    "newDecoderLemma": "localValueTypeName_of_address",
+    "otherPrintedLemmas": [
+      "localTypeName_of_narrow",
+      "localTypeName_of_fixedBytes"
+    ],
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "baseBoundary": "Shared.Translate/new address decoder absent at original b419base;exact new/current signatures andaxioms printed in marker-controls/1.log.No worker-authored producer theorem/definition changes.",
+    "shapeControls": [
+      "explicitnonpayable marker",
+      "payable/missing/invalidmutability refusal",
+      "strictparameter/state type reader",
+      "3builtinidentity negatives",
+      "base-first competingerror priority"
+    ],
+    "fixedByteSpellings": 32,
+    "finiteModalCases": 18,
+    "returnEffectCheck": 1,
+    "finiteRefusals": 2,
+    "intrinsicMemoryControls": 12,
+    "MCPfiles": 9,
+    "MCPerrors": 0,
+    "boundary": "Kernel decoder equations/model controls and trusted compiled-checker observations;not source/compiler/ABI/native preservation or exhaustive lexical/overload/world correctness."
+  },
+  "ordinaryRequests": "Actualnative/generated-c-wasm boot/binary/requestidentity andexact result parity,source/compiler pins,request-specific traces/assets no forbidden serializedenv/frontend loads.Static selected-C/import/export inventory andexactbodyclassification are not universalpurity/machinecorrectness;optional certificates stay separate.",
+  "toolchain": {
+    "lean": "4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "5.0.0-src+797c613",
+    "emscripten": "4.0.15 explicit EM_CONFIG",
+    "keySort": "377taclets/131read-bearing/131table;annotations match",
+    "unitTests": 18
+  },
+  "resources": "Allheavy gates serial12GiB/swap0/CPU1,LEAN_NUM_THREADS1/-j1,writerlock,4GiBouterreserve;actualwall/RSS/headroomreceipts below.",
+  "costBoundary": "Postmerge native25.491s incremental,newlink;WASM272.514s selectedCrecompile,newlink.Marker10.689s includes imported-module checking.No matchedcold/cause/performance recovery inferred.",
+  "retainedSTOPs": {
+    "nativeMedianPercent": 21.32,
+    "browserStartupPercent": 32.2,
+    "priorNativeBuildIncreasePercent": 26.13076760652298,
+    "priorNativeBuildWallSeconds": 371.14980405399547,
+    "comparisonNativeBuildWallSeconds": 294.2579444309995,
+    "status": "Investigation pending;causesunestablished.No unchanged stopped timing benchmark rerun."
+  },
+  "publication": "Merge wait fulfilled:published4f0contains09bb;cleanmerge0eb,ownerSource hashes retained,H100explicitEMCONFIGfixpreserved.No unowned manualproducer edits.",
+  "runtimeGate": "pending",
+  "gates": [
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/A-controls-gate.json",
+      "sha256": "2eedea0549060f95b536e41e1868afa6823cec84976ce89915fe0c782e602d81",
+      "exitCode": 0,
+      "wallSeconds": 13.379792988998815,
+      "sampledRssPeakBytes": 1563516928,
+      "minimumOuterHeadroomBytes": 8521650176,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/h81-memory-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/B-controls-authenticated-gate.json",
+      "sha256": "7db07521fe9f832eca1de9420ec6b92f29f86383af1f7c3ddc1ade3ae2cb6bc2",
+      "exitCode": 0,
+      "wallSeconds": 138.85605945399584,
+      "sampledRssPeakBytes": 1422589952,
+      "minimumOuterHeadroomBytes": 8671813632,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-address-postmerge/B-kernel-controls.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/B-kernel-gate.json",
+      "sha256": "f0daa3eff70bd65a9806624c45f961bd8ac1f3d5ab23979e981e2bda4c9ca3e8",
+      "exitCode": 0,
+      "wallSeconds": 10.87228051499551,
+      "sampledRssPeakBytes": 1344700416,
+      "minimumOuterHeadroomBytes": 9386315776,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/C-controls-gate.json",
+      "sha256": "bf70ea6a0f6175b5a2f28efc17be7950138c9509b9cbdd02010ea75443c82525",
+      "exitCode": 0,
+      "wallSeconds": 24.561982726001588,
+      "sampledRssPeakBytes": 1583120384,
+      "minimumOuterHeadroomBytes": 8517365760,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/box-controls-gate.json",
+      "sha256": "5735264e0e1b0d006da8151a0d7e676c84b49c65d53e1115b2409973a6fbd05a",
+      "exitCode": 0,
+      "wallSeconds": 12.479352624002786,
+      "sampledRssPeakBytes": 1487962112,
+      "minimumOuterHeadroomBytes": 8602701824,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/browser-control-completion.cjs"
+      ],
+      "status": "fail",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/browser-negatives-gate.json",
+      "sha256": "5d0fb8e724593966bc7fc49c117f72103f5deb7d29b45e3f8c5e6f2388646f74",
+      "exitCode": 1,
+      "wallSeconds": 20.745272248997935,
+      "sampledRssPeakBytes": 1538641920,
+      "minimumOuterHeadroomBytes": 8543035392,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "python3",
+        ".lake/native-browser-address-postmerge/check-candidate-exclusion.py"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/candidate-exclusion-gate.json",
+      "sha256": "656567078218df6f5c60e92a6451175ed74a68be22594d10e8e2b42449aba1d8",
+      "exitCode": 0,
+      "wallSeconds": 0.2014436850004131,
+      "sampledRssPeakBytes": 44412928,
+      "minimumOuterHeadroomBytes": 9643130880,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "python3",
+        ".lake/native-browser-address-postmerge/closure-audit.py"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/closure-gate.json",
+      "sha256": "3a065bf0f836a74dd7cd6627231b7b142acbf342db1092ed03a709eaca4a8767",
+      "exitCode": 0,
+      "wallSeconds": 24.269497465000313,
+      "sampledRssPeakBytes": 1274744832,
+      "minimumOuterHeadroomBytes": 8412495872,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/diamond-controls-gate.json",
+      "sha256": "9c843439280d0857dc55479e0837a86cfcc3db61ef3a3c3edd707c8693eec740",
+      "exitCode": 0,
+      "wallSeconds": 12.575015408998297,
+      "sampledRssPeakBytes": 1453174784,
+      "minimumOuterHeadroomBytes": 8637546496,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-address-postmerge/finite-gate.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/finite-gate.json",
+      "sha256": "19b6bcace99847b74850ba01ce5c0a30f5d089e0ff6ee26f4d7f37d4e55f7788",
+      "exitCode": 0,
+      "wallSeconds": 2.116929979005363,
+      "sampledRssPeakBytes": 1201102848,
+      "minimumOuterHeadroomBytes": 9461391360,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/fixed-byte-box-controls-gate.json",
+      "sha256": "d29cf0f66c92208aa22e83f9144ee5c787eb2bdee44c95d59faf54320dd918f4",
+      "exitCode": 0,
+      "wallSeconds": 14.093734768001013,
+      "sampledRssPeakBytes": 1373122560,
+      "minimumOuterHeadroomBytes": 8711385088,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/fixed-byte-diamond-controls-gate.json",
+      "sha256": "8485241604fe7f1e47cdc92b5716b465ee034b8f0caff4fa00ef78e6859e441a",
+      "exitCode": 0,
+      "wallSeconds": 14.413580284999625,
+      "sampledRssPeakBytes": 1328754688,
+      "minimumOuterHeadroomBytes": 8758534144,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address-postmerge/fixed-byte-gate.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/fixed-byte-marker-gate.json",
+      "sha256": "f7b0217ac1249393205045a453030f458729febeb83494c02accbfd1de8b890c",
+      "exitCode": 0,
+      "wallSeconds": 1.1076284910013783,
+      "sampledRssPeakBytes": 1121533952,
+      "minimumOuterHeadroomBytes": 9669308416,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/primitive-return/functional83.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/functional83-gate.json",
+      "sha256": "3a722f7bf76f6f554d3fbdb320ad9bd6aa4735dc065b89e82d9be130ceaf7f5d",
+      "exitCode": 0,
+      "wallSeconds": 141.88394761100062,
+      "sampledRssPeakBytes": 1528184832,
+      "minimumOuterHeadroomBytes": 8560406528,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte/keys.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/keys-gate.json",
+      "sha256": "26c5328331e6c01fb2e20584f5ed0588067222272cc08e9df077d3b1b7726602",
+      "exitCode": 0,
+      "wallSeconds": 0.30237554400082445,
+      "sampledRssPeakBytes": 109469696,
+      "minimumOuterHeadroomBytes": 9732087808,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address-postmerge/marker-gate.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/marker-gate.json",
+      "sha256": "b6eb7ac90965ee2817450f263baef6be0c15c1a83f48f00ff5c2f6972bcee90b",
+      "exitCode": 0,
+      "wallSeconds": 10.688614998995035,
+      "sampledRssPeakBytes": 1213120512,
+      "minimumOuterHeadroomBytes": 9591369728,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address-postmerge/mcp.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/mcp-gate.json",
+      "sha256": "59d3d85e12c180148d3e7e2625fb66d0a0d6e4f587b323cb90a73e147fd5ec36",
+      "exitCode": 0,
+      "wallSeconds": 23.532158122005058,
+      "sampledRssPeakBytes": 1880748032,
+      "minimumOuterHeadroomBytes": 8835399680,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/hardening-native-build.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/native-build-gate.json",
+      "sha256": "35ccc9c0977ad34f848c441f284e3c49f284c5af2a1841191b2d40fa6cb092c6",
+      "exitCode": 0,
+      "wallSeconds": 25.490526871995826,
+      "sampledRssPeakBytes": 1287012352,
+      "minimumOuterHeadroomBytes": 8585670656,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "python3",
+        ".lake/native-browser-address-postmerge/native-negatives.py"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/native-negatives-gate.json",
+      "sha256": "4be9eea6024f773506b42e1f1742dcfc516b65313337c9aab2e100ace92f7b90",
+      "exitCode": 0,
+      "wallSeconds": 5.138127101003192,
+      "sampledRssPeakBytes": 119345152,
+      "minimumOuterHeadroomBytes": 9582817280,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-address-postmerge/browser-build.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/package-gate.json",
+      "sha256": "b7010c4751c195d1fd6d4db277b00b5eebcf918af1cd41eec0f54b8d9ecefe91",
+      "exitCode": 0,
+      "wallSeconds": 1.9448365729986108,
+      "sampledRssPeakBytes": 315154432,
+      "minimumOuterHeadroomBytes": 9399943168,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        ".lake/native-browser-address-postmerge/state-refusal-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/state-refusal-gate.json",
+      "sha256": "0ea2ea94245bab75b7ef4bb405f9c032f12d7fff020077bc67f6b6ba513553fb",
+      "exitCode": 0,
+      "wallSeconds": 2.571955291001359,
+      "sampledRssPeakBytes": 755765248,
+      "minimumOuterHeadroomBytes": 9327792128,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "web/test/website.cjs",
+        "--single",
+        "--proofs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/ui-gate.json",
+      "sha256": "91ef0ed27e50acc220ec57a931c50b0f5ff47ae654c18062cb9265028e7a43e4",
+      "exitCode": 0,
+      "wallSeconds": 25.71193780699832,
+      "sampledRssPeakBytes": 1603534848,
+      "minimumOuterHeadroomBytes": 8456933376,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/hardening-validation.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/units-gate.json",
+      "sha256": "fc8fcd2da29937704435e9f35157121ac9cc6808b62adbba26826102724ec98e",
+      "exitCode": 0,
+      "wallSeconds": 0.9073947279975982,
+      "sampledRssPeakBytes": 51720192,
+      "minimumOuterHeadroomBytes": 9736900608,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address-postmerge/wasm-build.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address-postmerge/wasm-build-gate.json",
+      "sha256": "7920a27846682d8887b584e345af7a6386ee8a296f1f1d255236284645ec1235",
+      "exitCode": 0,
+      "wallSeconds": 272.514262718003,
+      "sampledRssPeakBytes": 1467510784,
+      "minimumOuterHeadroomBytes": 8873607168,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    }
+  ],
+  "archives": [
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/handoff-data/evidence.tar.gz",
+      "bytes": 810912,
+      "sha256": "48088cab88741758d127c654adfb0c54059c19a71a8d54c1993b29e8426c1b98"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/handoff-data/runtime-artifacts.tar.gz",
+      "bytes": 9953380,
+      "sha256": "8bbc961d08b553ed2b1ea29df6e5d543e7ceb09f5340072b7edd399a98acbee6"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/handoff-data/incremental-cache.tar.gz",
+      "bytes": 1277645,
+      "sha256": "ade3e32458927cabc7eceb4d067e67fc740fc53446d8c052682a74ad3c00f7c0"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/handoff-data/evidence-files.json",
+      "bytes": 91005,
+      "sha256": "23194ec1e41925cdf2acb4456d8b7478aed961d82ebcabd1191d7450bc70a580"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/handoff-data/runtime-files.json",
+      "bytes": 727,
+      "sha256": "ccd7cd19b6edd96cf1cfc7ec2a9944d19c763abe0323d58b84b831c5110934fe"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/handoff-data/cache-files.json",
+      "bytes": 6625,
+      "sha256": "cb66013c7434d813ed17cdd84edba509c9a7a836e2c5ee82e891bcf115ba588c"
+    }
+  ],
+  "cache": "32incremental artifacts verifiedlocal/coordinatorpending;no ship-cache/noH88releaseorcross-cachecoherence success inferred.",
+  "reviews": "Independent read-only finder and skeptic PASS final scope/source/control/proof/STOP reviews.Both streamed andverified494evidencepayloads,5runtimepayloads and32cacheartifacts against exactindexes;executedcandidateexclusionscript equalscommittedcopy.All24gatereceipts inspected;solebrowserstackfailure retained.Neither used Lean/server/builds.No whole-goal acceptance inferred.",
+  "status": "Postmerge16address/currentruntime functionalqualification passes;wholeoriginalgoal incomplete.",
+  "publishedMaster": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+  "mergeReceipt": {
+    "sourceBuildHead": "0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d",
+    "publishedMaster": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+    "ownerMergeContains": "09bb5b5e3b65a7df5e35aa8bffd3fbc41769dbbf",
+    "resolution": "ort merge clean;both conflicted Leanfiles retain exactreviewed ownerbytes",
+    "ownerSourceHashes": {
+      "Translate.lean": "352b8caf7b4a070d9e5c77c0353d1edd47dadc5b4871d74f05b5600c37e2dae9",
+      "Compose.lean": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed"
+    },
+    "runtimeSourceDelta": [
+      "Solidity/Tools/SourceCounterexample.lean"
+    ],
+    "ordinaryBoundaryCheck": "New optionalcandidate/kernel helpers must be absent from selectedC/ordinarybinary;freshclosure/controlgates required.",
+    "historicalQualifiedSourceBuild": "4234b74778787f681ebb50f2890355d99f37731a",
+    "preserveSTOPs": true
+  },
+  "optionalKernelCandidateExclusion": {
+    "passed": true,
+    "newOptionalHelpersSelected": [],
+    "newOptionalHelperNativeSymbols": [],
+    "nativeSha256": "b66aa042683596c84f23c861e43c11e23696575b0743cddb072d2f16b38f735d",
+    "wasmSha256": "97e05db7b219ee38255ef69b626c386d8422435cadcfd35666f6027b16b6ec2c",
+    "modulesInventoried": 206,
+    "inventorySha256": "d72d5faab25525237f6f5dba25b4696e6ed94875f2b3495a4aff0cf00b39ba93",
+    "companionSummarySha256": "7e75c6069166ca8c85a53b6c21e7870e1920e19f21a4371236b296aaf08ee17f",
+    "nativeManifestSha256": "717220adf7a65d8897e37ff202d4893930ad828eda371c607a1d15193367c0b4",
+    "wasmManifestSha256": "35c880ae2ec7ff2c9a52520a2b6de8a5c013e4b1b1177e3caf0719b963fa8eab",
+    "sourceBuildHead": "0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d",
+    "actualHead": "0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d",
+    "boundary": "AllselectedC/object/currentbinary manifests bound to passingWASM/nativecompanionclosure. Newoptionalhelper families absent;not universalpurity,sourcepreservation orwhole-goal acceptance."
+  },
+  "candidateExclusionHarness": {
+    "committed": "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/address/check-candidate-exclusion.py",
+    "executed": "/workspace/solidity-lean/.lake/native-browser-address-postmerge/check-candidate-exclusion.py",
+    "sha256": "14c863ed78afbc5ce7ed0f312842b4f8e434e58f41d2deda3f66541f6c3a0e6f",
+    "reviewFindingsFixedBeforeExecution": "Reject empty/stale C inventory;bind unique complete modulecoverage,currentobjects/binaries/sourcepins andpassingcompanion summaries;recordactualHEAD/provenancehashes;receiptopenx."
+  },
+  "historicalQualification": {
+    "manifest": "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/address/results-manifest.json",
+    "sha256": "8ce0782bacbea291f3c78863a3a0114ba1a879b81a6c409cc22cd2c55bebdbeb",
+    "sourceBuildHead": "4234b74778787f681ebb50f2890355d99f37731a",
+    "boundary": "Prior frozen receipts retained,not relabelled postmergecurrent."
+  }
+}

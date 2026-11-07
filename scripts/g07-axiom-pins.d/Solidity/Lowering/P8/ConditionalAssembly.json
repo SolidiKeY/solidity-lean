@@ -1,0 +1,31 @@
+{
+ "Solidity/Lowering/P8/ConditionalAssembly.lean:Solidity.Lowering.P8.ConditionalAssembly.accepted_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssembly.lean:Solidity.Lowering.P8.ConditionalAssembly.accepts_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssembly.lean:Solidity.Lowering.P8.ConditionalAssembly.admissionHalf": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssembly.lean:Solidity.Lowering.P8.ConditionalAssembly.checked_graphs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssembly.lean:Solidity.Lowering.P8.ConditionalAssembly.checked_source_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ConditionalAssembly.lean:Solidity.Lowering.P8.ConditionalAssembly.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

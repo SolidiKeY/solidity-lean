@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsBounds.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.eval_nested_loc_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsBounds.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.resolved_write_bounds_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

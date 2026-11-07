@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeReturnRepresentation.canonical_env_heq": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeReturnRepresentation.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

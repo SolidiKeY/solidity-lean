@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.body_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.composed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.decoded_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.short_before_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.whole_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

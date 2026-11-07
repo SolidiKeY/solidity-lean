@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.result_and_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.three_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.too_small_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.two_bool": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedEndpoint.Controls.zero_without_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

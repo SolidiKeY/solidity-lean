@@ -1,0 +1,11 @@
+--- a/Solidity/Storage/HashedLayout.lean
++++ b/Solidity/Storage/HashedLayout.lean
+@@ -373,7 +373,7 @@
+     have hfit : v.size ≤ L := hf.1
+     simp only [Loc.add, Loc.Bounded]
+     exact ⟨hl, by omega⟩
+-  | .word, _, _ :: _, _, _, _, _, h => by cases h
++  | .word, _, s :: _, _, _, _, _, h => by cases s <;> cases h
+   | .strct _, _, .index _ :: _, _, _, _, _, h => by cases h
+   | .strct _, _, .key _ :: _, _, _, _, _, h => by cases h
+   | .sarr _ _, _, .field _ :: _, _, _, _, _, h => by cases h

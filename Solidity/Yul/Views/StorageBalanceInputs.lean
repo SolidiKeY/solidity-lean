@@ -47,7 +47,7 @@ theorem packedSourceStep_observed_balance {E Γ ps ts}
     obtain ⟨code,balance⟩ := packedPlan_balance_fields p s.2.ex b
     unfold sourceObservedBalance
     change (match ((s.2.ex.apply p.sourceOp).world.accounts b).code with
-      | some _ => ((s.2.ex.apply p.sourceOp).world.accounts b).balance
+      | some _ => Source.Monetary.wordView ((s.2.ex.apply p.sourceOp).world.accounts b).balance
       | none => G.fixed.ledger G.balance0 s.2.events b) = _
     rw [code,balance]
     rfl
@@ -68,3 +68,6 @@ theorem packedSourceStep_target_funds {E Γ ps ts}
   rw [packedSourceStep_observed_funds]
 
 end Solidity.Yul.Views
+
+/-- info: 'Solidity.Yul.Views.packedSourceStep_observed_balance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.packedSourceStep_observed_balance

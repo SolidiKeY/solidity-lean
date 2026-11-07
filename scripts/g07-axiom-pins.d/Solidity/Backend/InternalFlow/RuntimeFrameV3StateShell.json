@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3StateShell.lean:Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.refl": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3StateShell.lean:Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.state_eq": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3StateShell.lean:Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.symm": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3StateShell.lean:Solidity.Backend.InternalFlow.RuntimeFrame.StateShell.trans": [
+  "propext"
+ ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "cc00792d64aa107509d39c6c3918cb7054eb407c602d88148ba37624946538f0",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LayoutAccess.lean:18:resolve_bounded",
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolve_bounded",
+      "signature": "theorem resolve_bounded {L R : Nat} {ty : STy} {base address : Solidity.Storage.Loc}\n    {path : List Solidity.Storage.Step} {offset : Nat}\n    (fits : ty.Fits L) (placed : Placed L R ty base)\n    (accepted : resolve ty base path offset = some address) : address.Bounded L R",
+      "signature_sha256": "513e10550af079d19654844635e7b443f2bc4382f14312b82eda2f2bbac3313c",
+      "witness": "H62.StorageAudit.LayoutWitnesses.single_joint",
+      "status": "kernel-checked nonempty finite layout premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LayoutAccess.lean:46:resolveMany_length",
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolveMany_length",
+      "signature": "theorem resolveMany_length {ty : STy} {base : Solidity.Storage.Loc}\n    (requests : List (List Solidity.Storage.Step \u00d7 Nat)) (addresses : List Solidity.Storage.Loc)\n    (accepted : resolveMany ty base requests = some addresses) : addresses.length = requests.length",
+      "signature_sha256": "c1d25153daad3dbe8fc869128efb768baf1f9608f6b74141e3e5d5e6fa773c46",
+      "witness": "H62.StorageAudit.LayoutWitnesses.left_accepted",
+      "status": "kernel-checked nonempty finite layout premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LayoutAccess.lean:64:resolveMany_bounded",
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolveMany_bounded",
+      "signature": "theorem resolveMany_bounded {L R : Nat} {ty : STy} {base : Solidity.Storage.Loc}\n    (fits : ty.Fits L) (placed : Placed L R ty base)\n    (requests : List (List Solidity.Storage.Step \u00d7 Nat)) (addresses : List Solidity.Storage.Loc)\n    (accepted : resolveMany ty base requests = some addresses) :\n    \u2200 address \u2208 addresses, address.Bounded L R",
+      "signature_sha256": "8dacc94337f3e73a7c7bd75e0c0330cae23367b6b44ecb81962b682bcce43f6e",
+      "witness": "H62.StorageAudit.LayoutWitnesses.many_joint",
+      "status": "kernel-checked nonempty finite layout premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LayoutAccess.lean:92:mem_runPreimages",
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.mem_runPreimages",
+      "signature": "theorem mem_runPreimages {N : Nat} {hash : Pre \u2192 Nat}\n    {addresses : List Solidity.Storage.Loc} {address : Solidity.Storage.Loc} {pre : Pre}\n    (access : address \u2208 addresses) (hashed : pre \u2208 address.pres N hash) :\n    pre \u2208 runPreimages N hash addresses",
+      "signature_sha256": "964184c773467b8b96d173b0bcd4363d11dc3bf67724671bcd4422dfafca7c52",
+      "witness": "H62.StorageAudit.LayoutWitnesses.preimage_joint",
+      "status": "kernel-checked nonempty finite layout premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LayoutAccess.lean:102:resolved_families_commute",
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolved_families_commute",
+      "signature": "theorem resolved_families_commute {n N L R : Nat} {G : TypeGraph.Schema n}\n    {E : TypeGraph.Ty n} {hash : Pre \u2192 Nat} {ty : STy} {base : Solidity.Storage.Loc}\n    (hH : \u2200 p, hash p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (fits : ty.Fits L) (placed : Placed L R ty base)\n    (left right : List (List Solidity.Storage.Step \u00d7 Nat))\n    (a b : List Solidity.Storage.Loc)\n    (leftAccepted : resolveMany ty base left = some a)\n    (rightAccepted : resolveMany ty base right = some b)\n    (regions : RegionsDisjoint N L hash (List.range R) (runPreimages N hash (a ++ b)))\n    (separate : \u2200 x \u2208 a, \u2200 y \u2208 b, x \u2260 y)\n    (slots : Nat \u2192 TypeGraph.Slot G E)\n    (f g : Nat \u2192 TypeGraph.Value G E \u2192 Option (TypeGraph.Value G E)) :\n    (modifyMany f (a.map (Solidity.Storage.Loc.word N hash)) slots).bind\n      (modifyMany g (b.map (Solidity.Storage.Loc.word N hash))) =\n    (modifyMany g (b.map (Solidity.Storage.Loc.word N hash)) slots).bind\n      (modifyMany f (a.map (Solidity.Storage.Loc.word N hash)))",
+      "signature_sha256": "282a4646850504dc4e76ab5330d88d47266392d82a4fecfc8d24c1f24f050437",
+      "witness": "H62.StorageAudit.LayoutWitnesses.families_joint",
+      "status": "kernel-checked nonempty finite layout premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LayoutAccess.lean:132:resolved_family_outside",
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolved_family_outside",
+      "signature": "theorem resolved_family_outside {n N L R : Nat} {G : TypeGraph.Schema n}\n    {E : TypeGraph.Ty n} {hash : Pre \u2192 Nat} {ty : STy} {base : Solidity.Storage.Loc}\n    (hH : \u2200 p, hash p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (fits : ty.Fits L) (placed : Placed L R ty base)\n    (requests : List (List Solidity.Storage.Step \u00d7 Nat)) (addresses : List Solidity.Storage.Loc)\n    (accepted : resolveMany ty base requests = some addresses)\n    (queryPath : List Solidity.Storage.Step) (queryOffset : Nat) (query : Solidity.Storage.Loc)\n    (queryAccepted : resolve ty base queryPath queryOffset = some query)\n    (regions : RegionsDisjoint N L hash (List.range R) (runPreimages N hash (addresses ++ [query])))\n    (outside : query \u2209 addresses)\n    (slots result : Nat \u2192 TypeGraph.Slot G E)\n    (effect : Nat \u2192 TypeGraph.Value G E \u2192 Option (TypeGraph.Value G E))\n    (performed : modifyMany effect (addresses.map (Solidity.Storage.Loc.word N hash)) slots = some result) :\n    result (query.word N hash) = slots (query.word N hash)",
+      "signature_sha256": "bd2bdcb022ad8e18a3f442c555b134edf59788ccb0978699a47317ca43f7b653",
+      "witness": "H62.StorageAudit.LayoutWitnesses.outside_joint",
+      "status": "kernel-checked nonempty finite layout premise bundle; independent fidelity reviews passed"
+    }
+  ],
+  "substitutions": "N32/L4/R1, map(sarr word2) atroot0, key7/index0 repeatedleft and key7/index1 right/outside, constant hash8 onlyone run preimage, existing Schema0 fixture with primitive Bool slots, actual clear/set effects.",
+  "scope": "Finite word-layout request model only. No emitted-access, Source-value/layout, liveness, packing, cryptographic or physical adequacy bridge is supplied."
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Yul/Views/StorageBalanceInputs.lean:Solidity.Yul.Views.packedSourceStep_observed_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

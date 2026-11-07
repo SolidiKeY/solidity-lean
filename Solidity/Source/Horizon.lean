@@ -1,13 +1,14 @@
-import Solidity.Source.Horizon.Const
+import Solidity.Source.HorizonConst
 
 /-!
 # Horizons: timed-out runs show a prefix of the events
 
-The last layer of the horizon development (S05 item 2): `approxAt` and
-`runTx_events_mono`. The module documentation of the whole development is in
-`Solidity/Source/Horizon/Below.lean`; the `Grow` and `Const` layers are
-`Horizon/Grow.lean` and `Horizon/Const.lean`. Importing this module imports
-all of them, as before the split (8 GiB pre-gate bound).
+The last part of the horizon results (S05 item 2), whose overview is in
+`Solidity/Source/HorizonFuel.lean`: fuel monotonicity and horizon
+independence there, events only grow in `HorizonGrow`, helpers keep the
+events in `HorizonConst`, and here `approxAt` and `runTx_events_mono`. The
+module was split for checking cost; importers of `Solidity.Source.Horizon`
+see every part.
 -/
 
 namespace Solidity.Source

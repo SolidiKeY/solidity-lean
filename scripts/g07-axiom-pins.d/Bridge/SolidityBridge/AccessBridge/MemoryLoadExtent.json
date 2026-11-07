@@ -1,0 +1,17 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtent.lean:SolidityBridge.AccessBridge.MemoryLoadExtent.active": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtent.lean:SolidityBridge.AccessBridge.MemoryLoadExtent.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtent.lean:SolidityBridge.AccessBridge.MemoryLoadExtent.post_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

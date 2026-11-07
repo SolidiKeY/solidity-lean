@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/ForCompilationControls.lean:Solidity.Yul.Compilation.ForCompilation.Controls.artifact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ForCompilationControls.lean:Solidity.Yul.Compilation.ForCompilation.Controls.code_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ForCompilationControls.lean:Solidity.Yul.Compilation.ForCompilation.Controls.source_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ForCompilationControls.lean:Solidity.Yul.Compilation.ForCompilation.Controls.target_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

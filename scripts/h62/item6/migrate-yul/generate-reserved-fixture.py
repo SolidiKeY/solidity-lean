@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Reproduce H70 B05 without editing its live-owner original."""
-import argparse, difflib, fcntl, hashlib, pathlib
+"""Reproduce H70 B05 fixtures from the exact pinned pre-migration source."""
+import argparse, difflib, fcntl, hashlib, pathlib, subprocess
 p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');a=p.parse_args()
 if not a.check:
     lock=open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','a')
     fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
 r=pathlib.Path(__file__).resolve().parents[4]
-s=r/'Solidity/Yul/ReservedNames.lean';src=s.read_text()
-assert hashlib.sha256(s.read_bytes()).hexdigest() == '723d2c323f67e8d0c4db6a4d0d0e2d267b9707d9bfaf9df3f502f9747dfed1b9'
+source=subprocess.check_output(['git','show','c6f550e281a7e5affa9a99bc2cdaed556dec00e4:Solidity/Yul/ReservedNames.lean'],cwd=r)
+src=source.decode()
+assert hashlib.sha256(source).hexdigest() == '723d2c323f67e8d0c4db6a4d0d0e2d267b9707d9bfaf9df3f502f9747dfed1b9'
 old='theorem reservedNames_count : reservedNames.length = 157 := rfl'
 new='theorem reservedNames_count : reservedNames.length = 157 := by decide +kernel'
 assert src.count(old)==1

@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.checked_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.malformed_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.no_collision_fallthrough": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.no_match_label": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.nonzero_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.payable_later": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/PayableRoutesControls.lean:Solidity.Backend.AbiEntry.PayableRoutesControls.zero_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

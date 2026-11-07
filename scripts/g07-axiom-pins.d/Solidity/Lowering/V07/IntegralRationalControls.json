@@ -1,0 +1,67 @@
+{
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.allowed_client": [],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.assignment_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.assignment_extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.assignment_transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.equal_content_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.eqv_client": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.fractional_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.not_allowed_client": [],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.numerator_client": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.outside_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.pure_extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.repeated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegralRationalControls.lean:Solidity.Lowering.V07.IntegralRationalControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

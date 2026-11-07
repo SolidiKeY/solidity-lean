@@ -78,7 +78,7 @@ def flatCount : RBody E where
   items := .stmt (.retVal rfl (.const (Q.ofInt 2)) (by decide +kernel)) .nil
 def resultExpr : RExpr E (returnContext [] Aty) Aty :=
   .newArray rfl (.call countDecl count_signature .nil) rfl
-def same : Aty.implicit E.isBase Aty = true := by decide +kernel
+def same : Aty.implicit E.isBase E.mapFree Aty = true := by decide +kernel
 def flatFresh := singleReturningBody [] Aty resultExpr same
 
 theorem count_flat : countBody = flatCount := rfl

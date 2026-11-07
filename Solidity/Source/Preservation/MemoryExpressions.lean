@@ -18,7 +18,7 @@ inductive BodyExpr (A : Decl → Prop) {Γ : RCtx} : {τ : STy} → RExpr E Γ �
   | inlineArray {σ : STy} {m : Nat} {args : RConvArgs E Γ (List.replicate m σ)}
       (hs : σ.oneWord = true) : ExactArgs A args → BodyExpr A (.inlineArray args hs)
   | encode {ts : List STy} (kind : AbiKind) {args : RArgs E Γ ts}
-      (hk : kind.argsOK E.isBase ts = true) : EncodingArgs A args → BodyExpr A (.abiEncode kind args)
+      (hk : kind.argsOK E.isBase E.mapFree ts = true) : EncodingArgs A args → BodyExpr A (.abiEncode kind args)
   | rebind {τ} (i : Idx Γ τ) {e : RExpr E Γ τ} :
       AllocatingExpr A e → BodyExpr A (.assign (.local i) e)
   | arrayWrite {τ σ : STy} {size : Option Nat}

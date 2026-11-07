@@ -1,0 +1,112 @@
+{
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.collectArgs_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.collectArgs_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.construct_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.construct_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.ancestor_stop_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.body_cut_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.changed_plan_not_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.completed_cut_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.Controls.initializer_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deploy_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deployRun_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deployRun_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.deployRun_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.giveArgs_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.giveArgs_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runCtorBody_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runCtorBody_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runInits_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureDeploymentControls.lean:Solidity.Source.FailureExecution.PlannedDeploy.runInits_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -87,8 +87,9 @@ class BindingControls(unittest.TestCase):
         r['headroomBytes']=0
         with self.assertRaisesRegex(ValueError,'available RAM'): k.check_runtime(r,{},Path('/workspace/scratch/example'))
 class RuntimeControls(unittest.TestCase):
+    @unittest.skipUnless(ROOT.is_relative_to('/workspace'), 'production evidence-path guard requires workspace checkout')
     def test_valid_runtime_then_corruptions(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(dir=ROOT.parent) as tmp:
             out=Path(tmp); req=KernelControls().req(); closure={'order':[],'modules':{}}
             current={'runtime':{'lean':{'path':'/tools/bin/lean','version':'lean version','sha256':'a'*64},'lake':{'path':'/tools/bin/lake','version':'lake version','sha256':'b'*64}},'buildTools':{tool:{'sha256':'c'*64} for tool in k.e.BUILD_TOOL_NAMES}}
             r=dict(request=req,sourceClosure=closure,headroomBytes=14*1024**3,hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=2*1024**3,diskFreeBytes=1024**3,freshStartAbsent=True,sampleFormat=k.p.SAMPLE_FORMAT,elapsedSeconds=1,samples=[{'leanWorkers':1,'unclassifiedLeanWorkers':0,'unknownLeanProcesses':[]}],attachments={})
@@ -135,10 +136,11 @@ class HeadroomControls(unittest.TestCase):
             bad=copy.deepcopy(r); bad[key]=value
             with self.subTest(key=key),self.assertRaises(ValueError): k.check_headroom(bad)
 class PreflightObservationControls(unittest.TestCase):
+    @unittest.skipUnless(ROOT.is_relative_to('/workspace'), 'production evidence-path guard requires workspace checkout')
     def test_failed_guard_retains_partial_numeric_evidence_and_never_launches(self):
         cases=[('starved',str(16*1024**3),str(13*1024**3)),('unlimited','max','0'),('unavailable',None,'0')]
         for label,limit,used in cases:
-            with self.subTest(label=label),tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+            with self.subTest(label=label),tempfile.TemporaryDirectory(dir=ROOT.parent) as tmp:
                 out=Path(tmp)/'evidence'
                 readings={'/proc/self/cgroup':'0::/','/proc/meminfo':'MemAvailable: 20971520 kB','/sys/fs/cgroup/memory.max':limit,'/sys/fs/cgroup/memory.current':used}
                 def read(path):
@@ -157,8 +159,9 @@ class PreflightObservationControls(unittest.TestCase):
                 else:
                     self.assertNotIn('headroomBytes',obs['measurements']);self.assertIsNone(r['preflight']['comparisons']['effectiveAtLeastAdmissionFloor'])
                 self.assertEqual(k.e.load(out/'record.json'),r)
+    @unittest.skipUnless(ROOT.is_relative_to('/workspace'), 'production evidence-path guard requires workspace checkout')
     def test_disk_failure_does_not_invent_resource_observations(self):
-        with tempfile.TemporaryDirectory(dir='/workspace/scratch') as tmp:
+        with tempfile.TemporaryDirectory(dir=ROOT.parent) as tmp:
             with patch.object(k.p,'ensure_no_unresolved'),patch.object(k.os,'statvfs',side_effect=OSError('disk unavailable')),patch.object(k,'resource_snapshot') as resources,patch.object(k.p,'docker') as docker:
                 r=k.collect(KernelControls().req(),Path(tmp)/'out')
             self.assertEqual(r['exit'],2);self.assertIsNone(r['preflight']['comparisons']['diskAtLeastRequired'])

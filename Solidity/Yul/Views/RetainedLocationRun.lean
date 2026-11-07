@@ -9,6 +9,10 @@ def locationStoragePathsM {D Γ σ} (loc : Source.Loc D Γ σ) : List Source.SPa
   | mem _ _ => exact []
   | memByte _ _ => exact []
   | cd _ => exact []
+  | cdBytes _ _ => exact []
+  | cdString _ _ => exact []
+  | cdArray _ _ => exact []
+  | cdFixedArray _ _ => exact []
 
 /-- Locations are observed before reading: scalar storage locations still carry
 paths. This syntactic collector establishes neither pathTy nor reachability.
@@ -18,7 +22,8 @@ in the independently preserved Source.Fr.cd carrier. -/
 @[implemented_by locationStoragePathsM]
 def locationStoragePaths {D Γ σ} (loc : Source.Loc D Γ σ) : List Source.SPath :=
   Source.Loc.rec (motive := fun _ _ => List Source.SPath)
-    (fun _ => []) (fun p => [p]) (fun _ _ => []) (fun _ _ => []) (fun _ => []) loc
+    (fun _ => []) (fun p => [p]) (fun _ _ => []) (fun _ _ => []) (fun _ => [])
+    (fun _ _ => []) (fun _ _ => []) (fun _ _ => []) (fun _ _ => []) loc
 
 theorem locationStoragePaths_eq_M {D Γ σ} (loc : Source.Loc D Γ σ) :
     locationStoragePaths loc=locationStoragePathsM loc := by

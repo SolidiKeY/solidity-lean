@@ -245,7 +245,7 @@ private def sourceStorage : Source.Storage sourceEnv.layout sourceEnv.cellTy :=
 private def sourceState : Source.St sourceEnv :=
   { ex :=
       { world := ⟨fun a => if a = address then
-          { balance := ⟨19,by decide⟩, nonce := 3, code := some 0, storage := sourceStorage }
+          { balance := 19, nonce := 3, code := some 0, storage := sourceStorage }
           else Source.Account.empty _⟩
         transient := Source.Transient.empty.set address
           ((Source.Storage.empty : Source.Storage sourceEnv.layout sourceEnv.cellTy).write scratch (.int 5 (by decide)))

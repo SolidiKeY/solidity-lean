@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransportControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedTransport.Controls.at_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransportControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedTransport.Controls.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

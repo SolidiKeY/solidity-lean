@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/InitializedLoopCompletionControls.lean:Solidity.Yul.Compilation.InitializedLoopCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedLoopCompletionControls.lean:Solidity.Yul.Compilation.InitializedLoopCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

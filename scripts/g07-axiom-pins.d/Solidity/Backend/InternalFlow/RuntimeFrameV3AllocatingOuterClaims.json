@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.bare_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.decrement_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.next_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.source_short": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.target_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

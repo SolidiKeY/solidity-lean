@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeScalarAgreement.Controls.coupled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

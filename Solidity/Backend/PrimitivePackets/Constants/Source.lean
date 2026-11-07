@@ -21,7 +21,7 @@ theorem source_refused {D : Source.Layout} (t : Source.IntTy) (z : Int)
 
 theorem conversion_refused (E : Source.Env) (t : Source.IntTy) (z : Int)
     (outside : ¬ (t.lo ≤ z ∧ z ≤ t.hi)) :
-    (Source.STy.rational (Source.Q.ofInt z)).implicit E.isBase (.int t) = false :=
+    (Source.STy.rational (Source.Q.ofInt z)).implicit E.isBase E.mapFree (.int t) = false :=
   IntegerConstants.not_allowed E t z outside
 
 end Solidity.Backend.PrimitivePackets.Constants

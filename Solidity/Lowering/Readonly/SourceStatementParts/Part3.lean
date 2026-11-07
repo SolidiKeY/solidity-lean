@@ -19,7 +19,7 @@ theorem execS_placeholder_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_hi
      | split
      | dsimp only
 
-theorem execS_declTuple_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs)) (h : slotsFit E.isBase slots σs = true) (locals : Locals E.layout Γ) :
+theorem execS_declTuple_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs)) (h : slotsFit E.isBase E.mapFree slots σs = true) (locals : Locals E.layout Γ) :
     Effect F.static (execS G F (fuel+1) nps ph ((RStmt.declTuple (E := E) (R := R) (M := M) slots e h) : RStmt E R M k Γ (pushTys slots Γ)) locals) := by
   simp only [Solidity.Source.execS]
   repeat' first
@@ -35,7 +35,7 @@ theorem execS_declTuple_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_hist
      | split
      | dsimp only
 
-theorem execS_retVal_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {σ τ : STy} (hR : R = [τ]) (e : RExpr E Γ σ) (h : σ.implicit E.isBase τ = true) (locals : Locals E.layout Γ) :
+theorem execS_retVal_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {σ τ : STy} (hR : R = [τ]) (e : RExpr E Γ σ) (h : σ.implicit E.isBase E.mapFree τ = true) (locals : Locals E.layout Γ) :
     Effect F.static (execS G F (fuel+1) nps ph ((RStmt.retVal (E := E) (R := R) (M := M) hR e h) : RStmt E R M k Γ Γ) locals) := by
   simp only [Solidity.Source.execS]
   repeat' first

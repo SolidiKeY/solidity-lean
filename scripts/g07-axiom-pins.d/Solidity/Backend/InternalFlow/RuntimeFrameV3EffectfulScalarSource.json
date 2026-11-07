@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulScalarSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.all_horizons": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulScalarSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.write_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

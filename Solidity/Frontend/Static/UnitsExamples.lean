@@ -214,14 +214,14 @@ def u16 : STy := .int ⟨false, 16, by decide⟩
 call is refused. -/
 theorem ambiguous_refused :
     (((Syn.env overloadUnit).inheritedFns "C" "f").filter
-        (accepts (Syn.env overloadUnit) (Syn.env overloadUnit).isBase [.rational (Q.ofInt 1)])).length = 2 ∧
-    (selectOverload (Syn.env overloadUnit) (Syn.env overloadUnit).isBase
+        (accepts (Syn.env overloadUnit) (Syn.env overloadUnit).isBase (Syn.env overloadUnit).mapFree [.rational (Q.ofInt 1)])).length = 2 ∧
+    (selectOverload (Syn.env overloadUnit) (Syn.env overloadUnit).isBase (Syn.env overloadUnit).mapFree
       ((Syn.env overloadUnit).inheritedFns "C" "f") [.rational (Q.ofInt 1)]).isNone = true := by
   decide
 
 /-- With a `uint16` argument exactly `f(uint16)` is selected. -/
 theorem exact_selected :
-    ((selectOverload (Syn.env overloadUnit) (Syn.env overloadUnit).isBase
+    ((selectOverload (Syn.env overloadUnit) (Syn.env overloadUnit).isBase (Syn.env overloadUnit).mapFree
       ((Syn.env overloadUnit).inheritedFns "C" "f") [u16]).bind
         (fun d => paramsOf (Syn.env overloadUnit) d)).map (STy.sameList [u16]) = Option.some true := by
   decide

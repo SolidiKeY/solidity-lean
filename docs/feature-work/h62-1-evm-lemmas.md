@@ -106,3 +106,44 @@ Lean 4.24.0 / Lake 5.0.0-src+797c613 were used for this non-migration lane.
 The migration-only official 4.35 pin is separate. Use the writer lock, serial
 Lean `-j1`, no systemd-run, no swap and the stated 4 GiB reserve. A missing
 cache object issue and repair are recorded above. No merge, push or publish.
+
+## H82 successor: symbolic location extraction
+
+The authenticated H82b intake supplies the frozen assignment and scope and confirms
+the final stopped heads. The successor merged all three storage-chain member heads
+before continuing their queues. Earlier exact-file waits for proof-only Codex work
+are superseded; Claude-owned consumers and trust-sensitive changes remain outside
+the live write scope. No migration timing STOP is released by this intake.
+
+The existing shared hashed-separation module now proves symbolic child and
+grandchild inequalities once. Four unchanged private statements in PushTransport,
+NestedPopTransport and TargetPrimitivePop are exact instances. The inherited
+location fixture uses the same public laws and retains sibling equality, distinct
+indices, reverse orientations and unconstrained-word alias controls. Existing
+operation definitions, representations, query cases and finite-run numeric
+premises are unchanged. No new production module or import edge is introduced.
+
+Standard automation failed on both general location goals; the original depth
+arguments passed the scratch checks. The affected build passed 119 jobs and the
+three consumer axiom guards. Single warm before/after samples for the shared file
+and those consumers stayed within the 10% limit; page caches were not normalized,
+so these measurements do not establish a statistical speedup. Raw dispatch errors
+from a missing host Docker PATH are retained separately from Lean results.
+
+This is a partial extraction: the other symbolic consumers, concrete-word uses,
+allocation and fragment lemmas, Claude-owned revert consumers, complete audit
+witnesses, generic control correspondence and final combined gates remain open.
+The current live toolchain remains Lean 4.24.0; no v4.35 cutover is implied.
+
+## Remaining consumer timing boundary
+
+A second packet instantiated the shared laws in eight further owned consumers,
+retaining every numeric word-injectivity application and its covered-location
+premises. The affected build passed 145 jobs and all eight candidate per-file
+kernel checks passed. Four single warm timing comparisons exceeded the 10% limit:
+TargetClearRepresentation, TargetArrayWrite, PrimitiveCycleNumeric and
+NumericRetainedCycle. The entire second packet was rejected and all eight
+original proof bodies were restored. The rejected patch, raw cold and warm
+measurements and failed timing disposition remain off Git. No unchanged timing
+retry, gate relaxation or production acceptance is inferred from the kernel
+passes. The first committed shared-law extraction remains separate.

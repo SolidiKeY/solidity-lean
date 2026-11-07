@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintSliceBinding.lean:Solidity.Backend.MemoryOps.source_uint_slice_bind_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceBinding.lean:Solidity.Backend.MemoryOps.source_uint_slice_bind_delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceBinding.lean:Solidity.Backend.MemoryOps.source_uint_slice_bind_native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,93 @@
+{
+  "aggregate_old_interface_sha256": "8844d2b7374c085fbf07aafa1d50202f19c4228314dd6dc84b0dfc28f80bb67a",
+  "axiom_union": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch_site_lines": 707,
+  "elaborated_constants": 1317,
+  "new_clean": {
+    "failed_module": "Solidity.Syntax.Raw",
+    "passed": false,
+    "peak_aggregate_rss_bytes": 1546231808,
+    "planned_modules": 64,
+    "wall_seconds": 23.28171363699994
+  },
+  "new_sorry_or_axioms": 0,
+  "old_api_file_sha256": "d9b0983e2466df231ae301a0676eed79d60cec60fb1ce8a7bfa9dcbda5d664d9",
+  "old_clean": {
+    "children_maxrss_kib": 908900,
+    "passed": true,
+    "peak_aggregate_rss_bytes": 930451456,
+    "planned_modules": 64,
+    "wall_seconds": 331.83185655100004
+  },
+  "rss_regression_escalation": {
+    "action": "ESCALATE to migrate-root-gate: investigate pinned-toolchain RSS increase before resuming Lean work; retain source scope, official release pin and all existing proof/resource budgets. No threshold exception is assumed.",
+    "full_wall_time_comparison": "INCOMPARABLE; new full closure failed",
+    "id": "B-PREFIX-RSS-435",
+    "limit": "sampled RSS; prefix evidence only, not full new-build metrics",
+    "no_further_lean_after_observation": true,
+    "partial_peak_vs_complete_old_peak_percent": 66.18081448840249,
+    "prefix_modules": [
+      {
+        "module": "Solidity.KeySort",
+        "new_exit": 0,
+        "new_rss_bytes": 519520256,
+        "new_wall_seconds": 2.0893354090000003,
+        "old_rss_bytes": 256090112,
+        "old_wall_seconds": 3.0402472759999455,
+        "rss_change_percent": 102.86619110073256
+      },
+      {
+        "module": "Solidity.AST",
+        "new_exit": 0,
+        "new_rss_bytes": 1546231808,
+        "new_wall_seconds": 12.627854727999988,
+        "old_rss_bytes": 731336704,
+        "old_wall_seconds": 16.136111208000045,
+        "rss_change_percent": 111.42543503464033
+      },
+      {
+        "module": "Solidity.SpecSyntax",
+        "new_exit": 0,
+        "new_rss_bytes": 1456537600,
+        "new_wall_seconds": 2.8662060599999677,
+        "old_rss_bytes": 581120000,
+        "old_wall_seconds": 9.204059577000066,
+        "rss_change_percent": 150.64317180616743
+      },
+      {
+        "module": "Solidity.Syntax.Raw",
+        "new_exit": 1,
+        "new_rss_bytes": 1496690688,
+        "new_wall_seconds": 5.690297703999931,
+        "old_rss_bytes": 651517952,
+        "old_wall_seconds": 10.997770039999978,
+        "rss_change_percent": 129.72362977958278
+      }
+    ],
+    "type": "resource-regression-escalation-stop"
+  },
+  "source_declaration_sites": 563,
+  "source_files": 12,
+  "source_identity_is_not_cross_version_elaborated_equality": true,
+  "source_sha256": {
+    "Solidity/Typing/CanonTest.lean": "e14e8c0b8658e78c74d5d28034e77cf2176ed391a5faafe0ae5c9976216fee94",
+    "Solidity/Typing/CleanTail.lean": "31fddba4c6e1b500a1e2aafc1ac205050ca184f9f80c52dc27dfbf049655650f",
+    "Solidity/Typing/CleanTailRun.lean": "2186b4ee3a4d9e9ec5a371e6fc7519e875ec70c2dfc657b19aa2cf3e1e0dac30",
+    "Solidity/Typing/Constructibility.lean": "ef7f71c95f25f70e395d6da5f14f36fbc48714cf2e3e4fc130a4fa1de03bb9fa",
+    "Solidity/Typing/Fits.lean": "077bb72e812053667f559a0b271c052f0f7f00f2fb1db1a2776929c8c89fba71",
+    "Solidity/Typing/HeredRun.lean": "8bf6f4713b0939a60cf713591f3ac928dfb3a47ce2743ec20838d7a2f120d659",
+    "Solidity/Typing/Reachability.lean": "2004789b49a1b9e054fccd84bfb4bf44e941c9fb279db53597341bc58c224fc2",
+    "Solidity/Typing/Sorts.lean": "42491f1a21d579ca6a535a6df997a0f204938bb536ed171761b6f6de0b858d0a",
+    "Solidity/Typing/Soundness.lean": "a4aafcddf6e0aedb60a371a8ef0c926268f7aa1fcb4e3ee2f4d3d0aae847434d",
+    "Solidity/Typing/Tight.lean": "6b5648af0064ec36f47a13324316c487c61608a2f1d4be7660b0f545e403b4e6",
+    "Solidity/Typing/TypedRunInv.lean": "ff3afec81bcf237ec4fa9f93ef45d3c3ce5604a15df27c59196e046b40cea236",
+    "Solidity/Typing/Values.lean": "8b6c32a3816e4613470608c860b727180d0dde2c0c22038b44b220bb0406099c"
+  },
+  "timing_delta": null,
+  "timing_status": "INCOMPARABLE"
+}

@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/AbiEntry/ValueGateControls.lean:Solidity.Backend.AbiEntry.ValueGateControls.maximum_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateControls.lean:Solidity.Backend.AbiEntry.ValueGateControls.nonzero_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateControls.lean:Solidity.Backend.AbiEntry.ValueGateControls.payable_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateControls.lean:Solidity.Backend.AbiEntry.ValueGateControls.payable_nonzero_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateControls.lean:Solidity.Backend.AbiEntry.ValueGateControls.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ValueGateControls.lean:Solidity.Backend.AbiEntry.ValueGateControls.zero_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,17 +1,15 @@
 # H28 G09 type-name grammar exactness
 
-Status: **conditional proof/fixture scope complete and reviewed; full assignment
-blocked on final integration/gates**. All original constructors, both array
-branches and parameter/list clauses have finite-dependency completeness,
-arbitrary-depth boundary/AST/layout exactness, frozen-fuel and source corollaries.
-The 18 modules contain 444 source-bound checked statements. Read-only length
-atom contracts remain explicit external dependencies; no universal expression
-support, resolution, evaluation or whole-compiler correctness is claimed.
-All18 modules are now centrally registered after rebase onto e6849d3b. Fresh
-full VM validation passes run-lean, roots, orphans and every other stage except
-shared axiom pins:0errors,479unrecorded changes,0owned TypeGrammarH28 entries.
-This shared inventory is outside the lane's write scope; whole acceptance remains
-blocked without a trust waiver.
+Status: **STOPPED by human H82 retirement; successor handoff pending integration**.
+The original owned conditional proof/fixture scope is preserved. Per H67 the
+current re-cut excludes all G07 inventory/fragment changes; reconciliation belongs
+to a separate one-off job. Earlier pin-check results are historical, not current
+candidate acceptance. Fresh full validation remains unperformed for this re-cut.
+Successor: `solidity-sol2-20261104/numeric-literals`. No new proof work or automatic
+continuation is authorized. See `tests/h28-sol/type-grammar/handoff/` for the
+complete original rendered assignment, exact scope and full work/backfill queue.
+The tool cannot set PAUSED: only complete/blocked goal outcomes are exposed.
+The existing goal was not completed/reset; coordinator PAUSED transition remains.
 
 ## Frozen scope and source identities
 
@@ -1581,3 +1579,44 @@ or freshness claim. No scope waiver or shared-inventory edit is requested.
 Separate read-only finder/skeptic accepted rebase fidelity, original-queue
 accounting, complete fresh VM evidence and this thin handoff with no findings,
 without Lean server use. Their verdicts are in the committed summary.
+
+## Final human-authorized stop-and-handoff, 2026-11-06
+
+H82 permits statement-preserving edits across files. The current patch adds3554
+missing records to `scripts/g07-axiom-pins.json`, preserving all8154old records
+and all6492tracked Lean source hashes/checker bytes. No theorem, definition,
+interface, actual axiom set, proof budget, exclusion or trust policy changed.
+Independent read-only finder/skeptic accepted the additive diff with no findings.
+Checker regressions and static inventory pass:11708pins,0errors,0notes.
+Fresh runtime/solc/ownedaxiom/parser controls passed. Human retirement canceled
+the active full gate,exit137;no passing full acceptance or later default/SolKey
+result is claimed. This supersedes old shared-pin-blocker counts without
+rewriting their historical evidence.
+
+Mandatory original scope is committed in `tests/h28-sol/type-grammar/handoff/`.
+`OPEN-QUEUE-AND-WAITS.json` enumerates open validation/backfill boundaries. Bulk
+raw evidence remains `/workspace/scratch/h28-type-grammar/h82-additive-pins/`;
+final authenticated patch/bundles/manifests identify all exact paths and hashes.
+No H71 push authorization text was available,so no push. Successor is responsible
+for integrating the final head. No ownership takeover precedes final stopped/head
+acknowledgment. No Claude-owned source edit or message;no new proof implementation.
+
+PAUSED was explicitly requested;the exposed goal tool cannot express it. No
+complete/blocked substitution was attempted. Coordinator must apply PAUSED;the
+worker stops after this handoff with no automatic implementation continuation.
+
+## H67 re-cut requested by coordinator, 2026-11-06
+
+The held candidate `bcbac2605b359b501e21e33d004e9f5df5d1f014` and observed
+merge head `dce2d51265abc160827f56517a7d7341025624ad` are preserved under
+`refs/codex-backups/type-grammar/pre-h67-recut` and the external pre-cut bundle.
+The replacement is cut directly on `20e492ee99a3fa8679aa526de0b6e731d85e4134`.
+It retains docs/handoff only and omits every G07 inventory/fragment delta, plus
+the nonessential solc timing-only receipt delta. No Lean source or statement,
+definition,actual axiom set,budget,checker or trust policy changed.
+
+H67 assigns G07 reconciliation to the separate one-off job. Historical H82
+metadata and test results above remain historical evidence only;they do not
+validate this replacement head. No new Lean/full gate was run. Original prompt,
+work/backfill queue,scope and stopped-state handoff remain committed. The worker
+remains retired;this correction is not automatic implementation continuation.

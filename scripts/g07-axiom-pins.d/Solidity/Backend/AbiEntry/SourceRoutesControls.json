@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/AbiEntry/SourceRoutesControls.lean:Solidity.Backend.AbiEntry.SourceRoutesControls.protected_and_saved": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutesControls.lean:Solidity.Backend.AbiEntry.SourceRoutesControls.runtime_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutesControls.lean:Solidity.Backend.AbiEntry.SourceRoutesControls.runtime_miss": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutesControls.lean:Solidity.Backend.AbiEntry.SourceRoutesControls.short_numeric_collision": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutesControls.lean:Solidity.Backend.AbiEntry.SourceRoutesControls.short_source_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutesControls.lean:Solidity.Backend.AbiEntry.SourceRoutesControls.source_miss": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourceRoutesControls.lean:Solidity.Backend.AbiEntry.SourceRoutesControls.source_table": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.Controls.available": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.Controls.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

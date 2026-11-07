@@ -3,11 +3,11 @@
   "kind": "external-dafny-parity-inventory",
   "inventory": {
     "path": "tests/editor-parity/inventory/dafny-editor-features.json",
-    "bytes": 682606,
-    "sha256": "6f1048ae9ee78cf7ba8f7013c6d09495c59c7d4d9d8ee0a6e4e1b5ed0d4a1348",
-    "rows": 486,
+    "bytes": 768347,
+    "sha256": "e63777f8f896e511e91dc3d1eebad2da9e5079adb0a22c9fc1fd05b560a407ad",
+    "rows": 489,
     "features": 93,
-    "mechanicalRows": 393
+    "mechanicalRows": 396
   },
   "restoreManifest": "docs/dafny-editor-inventory-manifest.json",
   "restoreCommand": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",

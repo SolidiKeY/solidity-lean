@@ -5,6 +5,8 @@ import {readFileSync,mkdtempSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 import {checkCompiler,sameInputs,reportBinding,verifyOutputs,checkoutStatus,VERSION} from '../../scripts/roadmap-v17-runtime.mjs';
+const historicalReport=process.env.V17_HISTORICAL_DIFFERENTIAL_REPORT;
+const historicalUnavailable=!historicalReport;
 const sha='6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390';
 const good={sha256:sha,version:VERSION,bytes:10798266};
 test('approved identity and changed/missing compiler controls',()=>{
@@ -15,8 +17,8 @@ test('whole runtime/source/revision equality controls',()=>{
  const input={revision:'a',files:{source:'x',runtime:'y'},compiler:good};sameInputs(input,structuredClone(input));
  for(const bad of [{...input,revision:'b'},{...input,files:{source:'changed',runtime:'y'}},{...input,compiler:null}])assert.throws(()=>sameInputs(input,bad));
 });
-test('historical actual640 report shape baseline is never current evidence',()=>{
- const report=JSON.parse(readFileSync('/workspace/scratch/v17-recovery/generated-seed-0-compatible.json'));
+test('historical actual640 report shape baseline is never current evidence',{skip:historicalUnavailable},()=>{
+ const report=JSON.parse(readFileSync(historicalReport));
  const m=report.metadata,files={};
  for(const [key,path] of Object.entries({runnerSha256:'scripts/evm-reference/generated.mjs',replaySha256:'scripts/evm-reference/replay.mjs',lockSha256:'scripts/evm-reference/package-lock.json',generatorBinarySha256:'.lake/build/bin/solcases',driverSha256:'SolCases.lean',generatorSha256:'Solidity/Tools/SolCases.lean'}))files[path]=m[key];
  const inputs={revision:m.checkoutCommit,compiler:good,leanVersion:m.leanVersion,lakeVersion:m.lakeVersion,files};
@@ -27,8 +29,8 @@ test('historical actual640 report shape baseline is never current evidence',()=>
  }
 });
 
-test('actual retained observation corruption is refused by existing consumer',()=>{
- const report=JSON.parse(readFileSync('/workspace/scratch/v17-recovery/generated-seed-0-compatible.json'));
+test('actual retained observation corruption is refused by existing consumer',{skip:historicalUnavailable},()=>{
+ const report=JSON.parse(readFileSync(historicalReport));
  report.records[0].variants[0].run.returnData='0x01';
  assert.throws(()=>execFileSync(process.execPath,['scripts/roadmap-v17-compare.mjs'],{input:JSON.stringify(report),timeout:60000,maxBuffer:16*1024*1024,stdio:['pipe','pipe','pipe']}));
 });

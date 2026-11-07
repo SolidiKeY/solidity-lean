@@ -2315,6 +2315,506 @@
       ],
       "flags": [],
       "bytecodeSha256": "3442df1d517411750afe5ba3e671da396cfe9a8841805ff665ae593750cf4604"
+    },
+    {
+      "id": "plain-raw-TAB",
+      "viaIR": false,
+      "sourceSha256": "d8b3b80add249ea0bae76824d34266d13e141537a02f866e8c3194805516ba32",
+      "inputSha256": "8cf95b424e52e96084ed1260abc625e09c59bb6da0ded180bb119153f6182b4c",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-TAB",
+      "viaIR": true,
+      "sourceSha256": "d8b3b80add249ea0bae76824d34266d13e141537a02f866e8c3194805516ba32",
+      "inputSha256": "ef6705eab0a528eef58a7e906abbca01aff6cdec433cd0831dec1bd9bcd5404f",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-NUL",
+      "viaIR": false,
+      "sourceSha256": "80a315603fe722629154edb9644b73d975082acdb0f70ee33605cd13374ec9cd",
+      "inputSha256": "12372a8fe6f0b73040dc4dfa35713626eca03ad1098ca6a3eaad3ee22e84300e",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-NUL",
+      "viaIR": true,
+      "sourceSha256": "80a315603fe722629154edb9644b73d975082acdb0f70ee33605cd13374ec9cd",
+      "inputSha256": "2371931ec1bd53dabd83838aba040037f5c924c4914f3dfab3f0154b174fbf5e",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-DEL",
+      "viaIR": false,
+      "sourceSha256": "55125b25045e73140e10b8157f152e039057545caca585eccba1a0a147eccf81",
+      "inputSha256": "29835329dbc4b1cd83d7991d92aa938ebc7fb3dafbaf0e65870e9473bc03f195",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-DEL",
+      "viaIR": true,
+      "sourceSha256": "55125b25045e73140e10b8157f152e039057545caca585eccba1a0a147eccf81",
+      "inputSha256": "818260110642a9c63bf697a23a2c02f35ba6b4ccc08ee0630b7cce762e70755b",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-raw-TAB",
+      "viaIR": false,
+      "sourceSha256": "f7a09165bbd62077289634a214972a9c76bd022123bfd8b537f6bf12f941d150",
+      "inputSha256": "ba3b69efd5f1ba32b30c7f7d3252e7dbc072a2e81c286ce80386472d0cddcdc8",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "410942",
+          "src": "134:12:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "0054b1827ac07cfa8ad1a5058cb24622be8760b6f051e5ea3c5a8cf8872fbb73"
+    },
+    {
+      "id": "unicode-raw-TAB",
+      "viaIR": true,
+      "sourceSha256": "f7a09165bbd62077289634a214972a9c76bd022123bfd8b537f6bf12f941d150",
+      "inputSha256": "0cf5304372cf7ce737afe81ee0f9c3d195fd83f3e0210b585c77f6e2904b10e4",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "410942",
+          "src": "134:12:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "bd4322acd7d63e9cbbb268371163a4fa6f99a9fd328b3da43bcedbb5ca98cf63"
+    },
+    {
+      "id": "unicode-raw-NUL",
+      "viaIR": false,
+      "sourceSha256": "dc5d295f66c483df2adaeecb5e66d6d2ce239ec69217eb536b6af5dd000cec62",
+      "inputSha256": "b6e5de8fe049532c76dfb00a3a3986fffd5fca449346b3287680ce611f1354a7",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "00",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "f2e3bfad8f195bd891346b0e6aec69b8f3f4033f0f8236ee3431277d196c337d"
+    },
+    {
+      "id": "unicode-raw-NUL",
+      "viaIR": true,
+      "sourceSha256": "dc5d295f66c483df2adaeecb5e66d6d2ce239ec69217eb536b6af5dd000cec62",
+      "inputSha256": "36c132e7bb8cc055b0a640e6a7268d750ece1e6b80ada6445e5770c9d3a0b17f",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "00",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "663876368aa15b7ed99834262a5612b0a447af2de50afe02337853c02c523281"
+    },
+    {
+      "id": "unicode-raw-DEL",
+      "viaIR": false,
+      "sourceSha256": "6163ac31eee982ac07b40532d65a0b4745d79d321277b70b8cd4ba4b11e2773d",
+      "inputSha256": "508a5d8f6676650bc54321f597e7fc488572bccc02f79d94bfb67e6751893618",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "7f",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "38eef58fc8c27a6bca93dd1d132ba07607af4f261039a21a4873aff8ac9a5bef"
+    },
+    {
+      "id": "unicode-raw-DEL",
+      "viaIR": true,
+      "sourceSha256": "6163ac31eee982ac07b40532d65a0b4745d79d321277b70b8cd4ba4b11e2773d",
+      "inputSha256": "277a4c3788403c7f84e8e11422b291558df69c212a5c195856cd6362b39ae689",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "7f",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "f5631b840556d4c9378e5b443bab4512cc6ed3473172ce63e0e04e154564d7c5"
+    },
+    {
+      "id": "unicode-raw-CR",
+      "viaIR": false,
+      "sourceSha256": "3e352ab55d2d0f7877140e2c7bfc0adbec6a0cb3b1dc137cf162ea483db84535",
+      "inputSha256": "fbb5bf9106ed42098f6595174c43885b04e61c6d9bc03a4064584594fe5fbad1",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 143,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-raw-CR",
+      "viaIR": true,
+      "sourceSha256": "3e352ab55d2d0f7877140e2c7bfc0adbec6a0cb3b1dc137cf162ea483db84535",
+      "inputSha256": "659dc7e402c149e445cffd149b88878529cf9d04ed4b59f94329634b4d00c87c",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 143,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-raw-TAB",
+      "viaIR": false,
+      "sourceSha256": "6fd6a9f7a9fa54de9cb1aa49b48900076d13166146618381560f940a3e4eedb4",
+      "inputSha256": "32eab130febc5951ebfb4ab6bd5a4737c1fa22d17f34e5fc5c31e35edafa2818",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Invalid character in string.",
+          "location": {
+            "end": 144,
+            "file": "Case.sol",
+            "start": 141
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-raw-TAB",
+      "viaIR": true,
+      "sourceSha256": "6fd6a9f7a9fa54de9cb1aa49b48900076d13166146618381560f940a3e4eedb4",
+      "inputSha256": "573de9e90a955f6520ba414c7b2023a1e9a357bdeb788a5d5b55e2f919c935d1",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Invalid character in string.",
+          "location": {
+            "end": 144,
+            "file": "Case.sol",
+            "start": 141
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-double-other-quote",
+      "viaIR": false,
+      "sourceSha256": "560dc847bce8a2e097f9164ff32de0b06e4ed6d4ab464e2b5b1afe2623dfb20d",
+      "inputSha256": "e43880de692b01bd6f76ead4dc391d217db38e833938c0a53916ebb470a6b4a3",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "960e2422d946185bd9b6ac3aba4bda1b00271dfa2911dd8df7337dcf47fe471c"
+    },
+    {
+      "id": "plain-double-other-quote",
+      "viaIR": true,
+      "sourceSha256": "560dc847bce8a2e097f9164ff32de0b06e4ed6d4ab464e2b5b1afe2623dfb20d",
+      "inputSha256": "db589c41fedf224cfa5208a2c6a3fadfefedcd5ec995774925737f11a442952f",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "5b295d2d2cd0ab42abbadaed3bb750257bb77002c45914bea5849a47c9854bd0"
+    },
+    {
+      "id": "plain-single-other-quote",
+      "viaIR": false,
+      "sourceSha256": "9d745f07552adc225fa16170cd8d00e28a8d1b9c363e359c0a164669d8add5be",
+      "inputSha256": "d7745e725fbabaf692f2e04f9de7ed6dbd89f5d505914902356b1c0cfd4141fb",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "4f1f8190bb73fec6a285f840d3dd0fc26be00632220eded0f8098df547e5b001"
+    },
+    {
+      "id": "plain-single-other-quote",
+      "viaIR": true,
+      "sourceSha256": "9d745f07552adc225fa16170cd8d00e28a8d1b9c363e359c0a164669d8add5be",
+      "inputSha256": "de4ea84d746abf32a38b84c8a8dd80a34633acb5584615c617374595d55826e9",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "bf88713c2e253a18d4f53d7e1954120e22a019424d9c12217a978294eae39910"
+    },
+    {
+      "id": "unicode-double-other-quote",
+      "viaIR": false,
+      "sourceSha256": "9a0fdadfd323457f393e36f443eb12b7865fa886d7f15ae08546afd0e1f7b5d1",
+      "inputSha256": "bc1392b1747a0d5e308fc63dd54618d562efa89b29bc9f5b7b4e85f8ec4263de",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "27",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "63dc52d1835f5f746092912f3454d9923f1534c94a7388308b6acbf14d525474"
+    },
+    {
+      "id": "unicode-double-other-quote",
+      "viaIR": true,
+      "sourceSha256": "9a0fdadfd323457f393e36f443eb12b7865fa886d7f15ae08546afd0e1f7b5d1",
+      "inputSha256": "25f3bb7372b2f1b5f5ec5fd7fb6e9027f972e4beec3d5f1af3789a196a0c0b5a",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "27",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "4f85893f5f3fcc2c779cc5ee7174a23103406c409ba984efdbee8a83d43a6330"
+    },
+    {
+      "id": "unicode-single-other-quote",
+      "viaIR": false,
+      "sourceSha256": "a310cec00fd35d44021e922583392e1913797d4164fb9c389cc297efe8620d73",
+      "inputSha256": "c76f34a089618350d0686f50a4236f3d79c061d8762e7214ed6d6787a69640af",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "22",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "b823a0aa43da84bf93fb27aa40a1d4c4773cb9abc105953b63da5d10351833cb"
+    },
+    {
+      "id": "unicode-single-other-quote",
+      "viaIR": true,
+      "sourceSha256": "a310cec00fd35d44021e922583392e1913797d4164fb9c389cc297efe8620d73",
+      "inputSha256": "62aeab92e3d7e6f37b38e28616a1690350b88d1918aeee5946a9f6221482c391",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "22",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "6d4f2333c677cbbf62a58b00397c8d63820e1db019e945bab475f1fe1b04eca0"
+    },
+    {
+      "id": "yul-single-other-quote",
+      "viaIR": false,
+      "sourceSha256": "b4fb2694c9710f847ec06f9dd7d36bd4d23a02411c4386298278744d7a50de8d",
+      "inputSha256": "717299ceaf206a9ecb4fce71ca9b83e4696088e5c1dfa2ee620570ada2e73249",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "141:3:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "be703e20f76cea96796f781b51a9a3882ac24731e3780aad2389cb10414d7411"
+    },
+    {
+      "id": "yul-single-other-quote",
+      "viaIR": true,
+      "sourceSha256": "b4fb2694c9710f847ec06f9dd7d36bd4d23a02411c4386298278744d7a50de8d",
+      "inputSha256": "f3035530ba2397d80bb3ac1c05e65515b5569fbeaaa48758ebb76aa54fe30179",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "141:3:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "8a89022b39ae010a2cab8f562e5b559304602ea220bdee018aab9f1c54c7fb3a"
     }
   ],
   "failures": []

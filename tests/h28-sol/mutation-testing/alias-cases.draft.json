@@ -1,0 +1,38 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Getter runs twice but receiver append runs once. Counter1 actual versus2 mutated, with pure getter unchanged control and explicit typed alias capture/pop frames. No production interface changed.",
+  "cases": [
+    {
+      "id": "alias.receiver-getter-twice",
+      "kind": "mutant",
+      "family": "alias-capture-once",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storagePush_unfold_leftCallReceiver :\n      dl{ \u27e8[ fc.push(); ]\u27e9 \u21dd \u27e8[ aliasType storage sp = fc; sp.push(); ]\u27e9 }",
+      "new": "  | storagePush_unfold_leftCallReceiver {m : Modality} {\u0393 : Ctx} {f : Name} {x : Ctx}\n      {args : Args C \u0393 x} {r : Var} {x_1 : Ty} {x_2 : Ctx}\n      {body : Prog C ([.alias (.array x_1)] ++ x) x_2}\n      {hd : ((none : Option (Src C \u0393 x_1)).isSome || x_1.defaultOkS) = true} :\n      Taclet C k m (.callReceiver f args r body (.push none hd))\n        (.unfold\n          (.cons (.call f args (.storage (.array x_1) r) body)\n            (.cons (.call f (args.wk (.drop .refl)) (.storage (.array x_1) r) body)\n              (.cons (.push (.alias .here) none hd) .nil)))\n          (.push (.push .refl)))",
+      "source_symbol": "Taclet.storagePush_unfold_leftCallReceiver",
+      "interface_note": "Disposable constructor uses explicit typed premise to express duplicated getter. All original input binders/types and LHS preserved; only semantic RHS changes. Both constructor signatures printed for audit.",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/AliasBaseline.lean",
+      "oracle_sha256": "138befa4d0e3a9c8452201fe8c8dcd599c297f249e2134ca40f5394525a8a751",
+      "oracle_declarations": [
+        "H28.AliasBaseline.source_link",
+        "H28.AliasBaseline.input_inhabited",
+        "H28.AliasBaseline.getter_once",
+        "H28.AliasBaseline.pure_once",
+        "H28.AliasBaseline.pure_twice_control",
+        "H28.AliasBaseline.actual_counter_one",
+        "H28.AliasBaseline.actual_rejects_post"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/AliasTwiceKill.lean",
+      "witness_sha256": "53bd884bc0d62de6ac11bff9affa040f3ae42979ee5270b6caceab00abe1f624",
+      "witness_declarations": [
+        "H28.AliasTwiceKill.source_link",
+        "H28.AliasTwiceKill.input_inhabited",
+        "H28.AliasTwiceKill.checked_kill",
+        "H28.AliasTwiceKill.typed_landing",
+        "H28.AliasTwiceKill.pure_twice_control"
+      ]
+    }
+  ]
+}

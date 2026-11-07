@@ -1,0 +1,9 @@
+{
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.destructTransfer_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.finish_balancesFit": [],
+ "Solidity/Yul/World/LifecycleBalancesFit.lean:Solidity.Yul.World.selfBeneficiary_balancesFit": [
+  "propext"
+ ]
+}

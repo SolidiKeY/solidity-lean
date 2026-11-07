@@ -1,0 +1,64 @@
+{
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.bool_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.bool_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.condition_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.enum_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.enum_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.rejected_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.uint_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGate.lean:Solidity.Backend.AbiEntry.UnsignedGate.uint_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

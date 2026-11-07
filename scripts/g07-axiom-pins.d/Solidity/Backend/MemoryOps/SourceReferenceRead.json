@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceRead.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_reference_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceRead.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_reference_rhs_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

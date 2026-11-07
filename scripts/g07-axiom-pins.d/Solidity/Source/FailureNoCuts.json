@@ -1,0 +1,28 @@
+{
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.check_cutFree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.CutFree": [],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_advanceEvent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_empty": [],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_enterFrame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_enterRequest": [],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_leaveFrame": [
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_leaveRequest": [
+  "propext"
+ ],
+ "Solidity/Source/FailureNoCuts.lean:Solidity.Source.FailureExecution.Cursor.cutFree_stop": [
+  "Quot.sound",
+  "propext"
+ ]
+}

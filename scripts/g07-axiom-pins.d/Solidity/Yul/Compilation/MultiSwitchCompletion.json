@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/MultiSwitchCompletion.lean:Solidity.Yul.Compilation.MultiSwitchCompletion.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompletion.lean:Solidity.Yul.Compilation.MultiSwitchCompletion.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

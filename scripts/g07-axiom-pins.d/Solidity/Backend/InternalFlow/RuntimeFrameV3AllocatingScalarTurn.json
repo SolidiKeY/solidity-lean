@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTurn.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTurn.turn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

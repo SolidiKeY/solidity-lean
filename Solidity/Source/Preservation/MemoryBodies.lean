@@ -14,10 +14,10 @@ inductive MemoryStmt {E : Env} (A : Decl → Prop) (R : List STy) (M : Bool) :
   | value {k Γ Δ} {s : RStmt E R M k Γ Δ} : s.ValFragC A → s.OpsOK → MemoryStmt A R M s
   | expr {k Γ τ} {e : RExpr E Γ τ} : BodyExpr A e → MemoryStmt A R M (.expr (k := k) e)
   | declVar {k Γ} (τ : STy) : MemoryStmt A R M (.declVar (k := k) (Γ := Γ) τ)
-  | declInit {k Γ τ} {e : RExpr E Γ τ} (h : τ.implicit E.isBase τ = true) :
+  | declInit {k Γ τ} {e : RExpr E Γ τ} (h : τ.implicit E.isBase E.mapFree τ = true) :
       BodyExpr A e → MemoryStmt A R M (.declInit (k := k) e h)
   | returnValue {k Γ τ} {e : RExpr E Γ τ} (hR : R = [τ])
-      (same : τ.implicit E.isBase τ = true) :
+      (same : τ.implicit E.isBase E.mapFree τ = true) :
       BodyExpr A e → MemoryStmt A R M (.retVal (k := k) hR e same)
   | returns {k Γ} {args : RConvArgs E Γ R} : ExactArgs A args → MemoryStmt A R M (.retTuple (k := k) args)
   | ifThen {k Γ Δ} {cond : RExpr E Γ .bool} {t : RStmt E R M k Γ Δ} :

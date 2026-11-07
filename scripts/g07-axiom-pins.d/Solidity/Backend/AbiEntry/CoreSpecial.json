@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.endpoint_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.endpoint_pushes": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.endpoint_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.nonempty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecial.lean:Solidity.Backend.AbiEntry.CoreSpecial.target_choice": [
+  "propext"
+ ]
+}

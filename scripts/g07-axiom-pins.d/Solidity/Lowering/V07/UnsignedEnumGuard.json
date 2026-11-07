@@ -1,0 +1,48 @@
+{
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.allowed": [],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.enum_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.source_failed_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.source_value_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.transport_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.transport_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.value_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuard.lean:Solidity.Lowering.V07.UnsignedEnumGuard.word_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

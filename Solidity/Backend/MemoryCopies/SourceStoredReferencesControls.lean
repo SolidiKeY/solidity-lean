@@ -38,7 +38,7 @@ private def storage : Source.Storage E.layout E.cellTy :=
     (nodePath.go (.field 1)) (.int 0 Source.IntTy.u256.zero_mem)
 private def before : Source.EMState E [.bool] :=
   (.cons (.bool true) .nil,
-    {ex := ⟨⟨fun _ => ⟨⟨17,by decide⟩,3,some 9,storage⟩⟩,Source.Transient.empty,[]⟩,
+    {ex := ⟨⟨fun _ => ⟨17,3,some 9,storage⟩⟩,Source.Transient.empty,[]⟩,
      heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,events := [],
      logs := [(⟨13,by decide⟩,[1,2])],fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩})
 private def bytesInput : StoredSourceBytes frame (firstPath.go (.field 0)) before [17,23] := by

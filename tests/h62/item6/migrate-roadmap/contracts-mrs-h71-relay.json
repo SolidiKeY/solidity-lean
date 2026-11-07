@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "id": "H71-MRS-ROADMAP-CONTRACTS",
+  "requester": "solidity-compiler10-20261028/memory-reference-structs",
+  "requester_head": "5f7bb1441566aaad64a34436904afc61de762fd2",
+  "original_path_as_relayed": "/workspace/h70-mrs-update-08162/owner-response.md",
+  "original_sha256_as_relayed": "2604d32e68406842da9735805584cd82e8758e19458d9b616943f46d24725ad3",
+  "raw_bytes_verified_locally": false,
+  "evidence_kind": "secondary coordinator relay of generic-primitive-packets report; not an independent MRS reproduction",
+  "independently_reproduced_by_mrs": false,
+  "current_import_closure_blocker": "B-MIGRATION-ROADMAP-CONTRACTS",
+  "file": "Solidity/Roadmap/Contracts.lean",
+  "line": 1104,
+  "theorem": "Solidity.Roadmap.PublicCorrectness.transfer",
+  "expected_axioms": [],
+  "observed_axioms_as_reported": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "upstream_reporter": "solidity-h62-4-20261106/generic-primitive-packets",
+  "upstream_reporter_head": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+  "hash_clearance": {
+    "status": "cleared_for_isolated_consumer_check_as_relayed",
+    "owner_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+    "full_migration_gate_complete": false,
+    "current_reported_import_blocker": false,
+    "original_file_edit_authority": false
+  },
+  "permissions": {
+    "grants_original_file_edit": false,
+    "grants_guard_or_pin_change": false,
+    "grants_CheckedSub_application_agreement": false,
+    "grants_H68_certificate": false
+  },
+  "mrs_evidence_boundary": "Roadmap dependency log and packet declarations are absent on MRS VM as reported; the response path is also absent on this Roadmap VM. No independent retrieval/hash verification or new semantic/runtime/performance result is inferred.",
+  "requested_resolution": "Route to migrate-roadmap for owner-reviewed exact-base resolution preserving frozen statement, empty trust policy, guard, pins and budgets; retain blocked while current STOPs and owner gates remain.",
+  "unrelated_scope": {
+    "CheckedSub": "Read-only; ONE current writer retained under H72; no exact-file application agreement or broader family permission.",
+    "packet_ledger": "Reported465 literal headers/48files and7arithmeticfixture rows are lexical/backfill evidence, not a semantic generic helper or full equivalence/timing package; not independently verified here.",
+    "H68": "Same prior request payload; MRS canonical instantiation/native family bridge duties and full-session/all-prefix/all-outcome obligations remain pending. No H55 takeover.",
+    "other_waits": "Retained with existing owners; no source/premise/observation/budget/trust change or new passing gate."
+  },
+  "related_routes_as_relayed": [
+    {
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "head": "cd0b723b1fbe7db6866fc9905a5b57b9d455a7b0",
+      "handoff_sha256_as_relayed": "f1222377777314280072e4b74437ad288169d0e29f5de075b8dc62c29a45309d",
+      "Contracts_disposition": "Pending owner/fleet migration; exact empty-axiom guard unchanged. Requester source hash unknown; no4.35 reproduction/diagnosis by G49.",
+      "scope_boundary": "G49 inventory, atomic premises and H68 full-certificate bridges stay with their owners; not adopted or validated by Roadmap. Timing hold+14.46% remains their reported hold."
+    },
+    {
+      "owner": "solidity-h62-5-20261106/statement-graph",
+      "head": "7974163ce7443d49e19e84abedaab95c41d386f7",
+      "previous_requester_head": "372e46284787e57e294d7c549f325f82f24ccfb2",
+      "handoff_sha256_as_relayed": "6b53b021f348d35723f4877018c48d65ca6f26b033bc53cff6f25ecf7d046c81",
+      "continuation": "Routing/documentation only; no new Lean or migration validation reported.",
+      "current_wait": "Roadmap Contracts exact-statement/empty-trust-preserving resolution and G49 inventory; five pending-input G49/G50 entries remain blocked/unclaimable as reported.",
+      "scope_boundary": "No production graph/count/owner-agreement verification by Roadmap; H64 excludes guard relaxation."
+    },
+    {
+      "owner": "solidity-h62-6-20261106/migrate-hash",
+      "ticket_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
+      "source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+      "raw_patch_sha256_as_relayed": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+      "source_base_blob_prefix": "b54c93a5b",
+      "source_target_blob_prefix": "092971eda",
+      "scope_boundary": "Same partial owner source overlay as prior private replay. Full affected gates pending; no original edit permission or STOP waiver. Raw transport patch hash not locally reverified."
+    }
+  ]
+}

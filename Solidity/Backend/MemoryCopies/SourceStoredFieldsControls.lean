@@ -22,7 +22,7 @@ private def storage : Source.Storage E.layout E.cellTy :=
     ((path.go (.field 2)).go (.index 0)) (.fixedBytes [65] rfl)
 private def before : Source.EMState E [.bool] :=
   (.cons (.bool true) .nil,
-    {ex := ⟨⟨fun _ => ⟨⟨17,by decide⟩,3,some 9,storage⟩⟩,Source.Transient.empty,[]⟩,
+    {ex := ⟨⟨fun _ => ⟨17,3,some 9,storage⟩⟩,Source.Transient.empty,[]⟩,
      heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,events := [],
      logs := [(⟨13,by decide⟩,[1,2])],fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩})
 private def bytesInput : StoredSourceBytes frame (path.go (.field 1)) before [17,23] := by

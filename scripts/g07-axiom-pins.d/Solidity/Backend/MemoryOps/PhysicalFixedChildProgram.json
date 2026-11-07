@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildProgram.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.join_word_after_store": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildProgram.lean:Solidity.Backend.MemoryOps.Physical.resolved_fixed_parent_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

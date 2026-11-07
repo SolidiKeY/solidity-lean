@@ -9,7 +9,7 @@ open Solidity
 open Lowering.V08.SourceEnvironmentControls
 
 def ops : List (Source.Op E.layout E.lay E.lay) :=
-  [.account sender (fun a => {a with balance:=⟨88,by decide⟩}),
+  [.account sender (fun a => {a with balance := 88}),
    .account self (fun a => {a with storage:=a.storage.write saved (.bool false)}),
    .transient self (fun s => s.write scratch (.bool false))]
 def reached : Source.St E := {populated with ex:=populated.ex.run ops}
@@ -27,8 +27,8 @@ theorem initial_frame : WordFrame wordMachine savedBytes represented := by
   exact h.write 2 (Evm.wmod 7) (by decide)
 
 def view (state : Source.St E) :=
-  ((state.ex.world.accounts sender).balance.val,
-   (state.ex.world.accounts self).balance.val,
+  ((state.ex.world.accounts sender).balance,
+   (state.ex.world.accounts self).balance,
    (state.ex.world.accounts self).storage.read saved,
    (state.ex.transient.cells self).read scratch,state.ex.journal.length,
    state.heap.next,state.heap.get 0,state.events,state.logs,state.fnLocals)
@@ -82,7 +82,7 @@ theorem not_automatic_and_timeout (pipeline : Roadmap.Pipeline) :
   constructor
   · intro same
     have h := congrArg (fun s : Source.ExecState E.layout E.lay E.lay =>
-      (s.world.accounts sender).balance.val) same
+      (s.world.accounts sender).balance) same
     change (88 : Nat)=93 at h
     contradiction
   · exact Lowering.V08.SourceFailures.reason_low_horizon (global pipeline) frame reason locals reached

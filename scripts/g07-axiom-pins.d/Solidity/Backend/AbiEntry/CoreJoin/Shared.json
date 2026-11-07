@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/AbiEntry/CoreJoin/Shared.lean:Solidity.Backend.AbiEntry.CoreJoin.core_join": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoin/Shared.lean:Solidity.Backend.AbiEntry.CoreJoin.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoin/Shared.lean:Solidity.Backend.AbiEntry.CoreJoin.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

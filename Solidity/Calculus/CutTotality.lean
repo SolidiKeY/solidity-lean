@@ -261,6 +261,32 @@ theorem cut2_comm_src {op : BinOp} (h : op.accepts .uint = true) (hop : litCutL 
          · exact (lit?_none ha hv).elim
          · exact (lit?_none hb hv).elim)
 
+/-- `LTm.cut_src` at a binary operator the cut leaves: both operands are cut
+in sequence, `cut2_default` rebuilds the node, and `mk` (the fragment
+constructor) puts it in the fragment. `hop` restates `cut2_default`'s side
+condition (`Calculus/QuotientCut.lean`) and must stay in step with it. -/
+private theorem LTm.cut_src_binop {k kx : SrcKind} {op : BinOp} {p : PrimTy}
+    (h : op.accepts p = true) {a b : LTm C (.val p)}
+    (mk : ∀ {x y : LTm C (.val p)}, x.SrcL false false l kx → y.SrcL false false l kx →
+      (LTm.app2 (.binop op h) x y).SrcL false false l k)
+    (iha : ∀ prev n, (a.cut prev n).term.SrcL false false l kx ∧
+      ∀ d ∈ (a.cut prev n).defs, d.SrcL false false l)
+    (ihb : ∀ prev n, (b.cut prev n).term.SrcL false false l kx ∧
+      ∀ d ∈ (b.cut prev n).defs, d.SrcL false false l)
+    (hop : op ≠ .div ∧ op ≠ .mod ∧ op ≠ .shr ∧ op ≠ .shl ∧ op ≠ .addW ∧ op ≠ .subW ∧
+      op ≠ .band ∧ op ≠ .pow ∧ op ≠ .powW ∧ op ≠ .mulW ∧ op ≠ .bor ∧ op ≠ .bxor := by decide) :
+    ∀ prev n, ((LTm.app2 (.binop op h) a b).cut prev n).term.SrcL false false l k ∧
+      ∀ d ∈ ((LTm.app2 (.binop op h) a b).cut prev n).defs, d.SrcL false false l := by
+  intro prev n
+  obtain ⟨h1, h2⟩ := iha prev n
+  obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+  show (cut2 (.binop op h) prev (a.cut prev n)
+      (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l k ∧
+    ∀ d ∈ (cut2 (.binop op h) prev (a.cut prev n)
+      (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
+  rw [cut2_default h hop prev]
+  exact ⟨mk h1 h3, defs_append h2 h4⟩
+
 /-- **The cut of a source term is in the fragment without cut operators**, and so
 is every definition it makes. -/
 theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false true l k → ∀ prev n,
@@ -542,21 +568,9 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false tr
     exact ⟨.seq (.seq h1 h3) (.var _), quotAtom_src (defs_append h2 h4)
       (LFml.defn_src rfl (.seq h1 h3) (.defSubW rfl h _ h1 h3))⟩
   | @add p h a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .num ∧
-      ∀ d ∈ (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default h (by decide) prev]
-    exact ⟨.add h h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop h (.add h) iha ihb
   | @sub p h a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .num ∧
-      ∀ d ∈ (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default h (by decide) prev]
-    exact ⟨.sub h h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop h (.sub h) iha ihb
   | @mulL p h v b _ ihb =>
     intro prev n
     obtain ⟨h3, h4⟩ := ihb (prev ++ []) n
@@ -572,85 +586,25 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false tr
     rw [cut2_default h (by decide) prev]
     exact ⟨.mulR h v h1, defs_append h2 (fun _ h => nomatch h)⟩
   | @and a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default rfl (by decide) prev]
-    exact ⟨.and h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop rfl .and iha ihb
   | @or a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default rfl (by decide) prev]
-    exact ⟨.or h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop rfl .or iha ihb
   | @eqB a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default rfl (by decide) prev]
-    exact ⟨.eqB h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop rfl .eqB iha ihb
   | @neB a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default rfl (by decide) prev]
-    exact ⟨.neB h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop rfl .neB iha ihb
   | @eqN p hp a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default rfl (by decide) prev]
-    exact ⟨.eqN hp h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop rfl (.eqN hp) iha ihb
   | @neN p hp a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ rfl) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default rfl (by decide) prev]
-    exact ⟨.neN hp h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop rfl (.neN hp) iha ihb
   | @lt p h a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default h (by decide) prev]
-    exact ⟨.lt h h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop h (.lt h) iha ihb
   | @gt p h a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default h (by decide) prev]
-    exact ⟨.gt h h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop h (.gt h) iha ihb
   | @le p h a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default h (by decide) prev]
-    exact ⟨.le h h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop h (.le h) iha ihb
   | @ge p h a b _ _ iha ihb =>
-    intro prev n
-    obtain ⟨h1, h2⟩ := iha prev n
-    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
-    show (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.SrcL false false l .bool ∧
-      ∀ d ∈ (cut2 (.binop _ h) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).defs, d.SrcL false false l
-    rw [cut2_default h (by decide) prev]
-    exact ⟨.ge h h1 h3, defs_append h2 h4⟩
+    exact LTm.cut_src_binop h (.ge h) iha ihb
 
 /-- **The cut of a source formula is in the fragment without cut operators.** -/
 theorem LFml.cut_src : ∀ {φ : LFml C}, φ.SrcL false true l → ∀ prev n,

@@ -59,7 +59,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (ctx : Solidity.Source.R
         have sub : (Solidity.Source.EM.sub (Γ := []) locals
             (Solidity.Source.evalE glob frame fuel expr)).run (Solidity.Source.L0 env,world) =
               (.error halt,(Solidity.Source.L0 env,next.2)) := by
-          have actualRun : Solidity.Source.evalE glob frame fuel expr (locals,world) =
+          have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel expr (locals,world) =
             (.error halt,(nextLocals,nextWorld)) := actual
           simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
           rfl
@@ -76,7 +76,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (ctx : Solidity.Source.R
             have sub : (Solidity.Source.EM.sub (Γ := []) locals
                 (Solidity.Source.evalE glob frame fuel expr)).run (Solidity.Source.L0 env,world) =
                   (.ok (.val (.int value valid),next.1),(Solidity.Source.L0 env,next.2)) := by
-              have actualRun : Solidity.Source.evalE glob frame fuel expr (locals,world) =
+              have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel expr (locals,world) =
                 (.ok (.val (.int value valid)),(nextLocals,nextWorld)) := actual
               simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
               rfl

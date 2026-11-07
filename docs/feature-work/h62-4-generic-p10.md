@@ -364,3 +364,53 @@ bundle; bulk evidence stays off git with SHA256SUMS. The exposed goal tool
 cannot set PAUSED, and no available H71 permission authorizes a lane push.
 
 Coordinator resolution: KEEP RETIREMENT AND HANDOFF to solidity-parallel-20261103/executable-bytecode. Generic Continue now broadcasts do not revoke retirement. No human decision pending. Coordinator will set existing goal PAUSED after final head report and idle turn because worker lacks pause tool. No further proof implementation.
+
+
+## H82 successor source acceptance
+
+The authenticated final member head `dcb2efa56558cfd7c056b8c8fcda724b9683750a`
+is merged into the successor branch
+`codex/solidity-parallel-20261103/executable-bytecode`. The retired worker is
+stopped; this does not establish its historical gates or finish the queue.
+The successor retains the original branch-bound acceptance entry point unchanged.
+
+The additive `scripts/h62/item4/generic-p10/successor_accept.py` checks the exact
+retired receipt and scanner, final-head ancestry, all 198 original family files
+against the frozen Git base and current bytes, staged family fidelity, inventory
+checksum and byte-identical reproduction. It requires the assigned successor
+branch. The inherited census is byte-identical to the committed receipt, including
+all 2,068 declaration records. The current-head identifier and verifier hash are
+saved separately from the inherited historical `base` field.
+
+This is source reproduction only. It does not certify the successor's entire
+merge diff, kernel checking, correspondence, runtime, gas/fork, migration or
+performance. Twelve adversarial tests include changed premises with unchanged
+counts, forged statements and hashes, missing or additional files, changed
+receipt/scanner, wrong branch or ancestry, symlinked sources and staged-only
+corruption. The scanner is authenticated before any of its code executes; a
+modified-scanner regression confirms executable tampering is refused without
+executing it. An initial missing-source test reported the scanner's empty-family
+error; the gate now checks the exact file set first. Both receipts are retained.
+
+Run from the successor checkout, with fresh off-Git output:
+
+```sh
+python3 -B -m unittest discover -s tests/h62/item4/generic-p10 -p test_successor_accept.py -v
+python3 -B scripts/h62/item4/generic-p10/successor_accept.py \
+  --inventory /workspace/parallel-20261103/executable-bytecode/h82-integration/evidence/generic-p10-current-source-census.json \
+  --output /workspace/parallel-20261103/executable-bytecode/h82-p10-source/evidence/source-acceptance-FRESH.json
+```
+
+The original no-push rule, live production partition and overlay-only migration
+restriction remain. H82 removes obsolete proof-only exact-file permission waits;
+it does not authorize live production edits outside the partition. BYTE production
+integration, inherited families, affected Lean/Bridge gates and final performance
+acceptance remain open. Four historical MCP evidence files are absent locally;
+their dependent tests are not replaced with fabricated fixtures. Current H81
+resource-policy text remains requested before new heavy work. No runtime pass or
+whole-assignment completion is claimed.
+
+Independent read-only finder and skeptic reviewed this successor check without
+Lean or builds. The finder requested binding the final committed verifier to the
+receipt. The skeptic found and prompted the pre-authentication import repair
+described above; original acceptance and all production statements remain unchanged.

@@ -41,8 +41,8 @@ theorem standard_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
     (SourceRethrow.allocated_object (SourceKeccak.afterLiteral populated binary) _)
 
 theorem standard_vector (pipeline : Roadmap.Pipeline) :
-    ((after pipeline).ex.world.accounts sender).balance.val = 93 ∧
-    ((after pipeline).ex.world.accounts self).balance.val = 7 ∧
+    ((after pipeline).ex.world.accounts sender).balance = 93 ∧
+    ((after pipeline).ex.world.accounts self).balance = 7 ∧
     ((after pipeline).ex.world.accounts self).code = some 0 ∧
     ((after pipeline).ex.world.accounts self).nonce = 1 ∧
     ((after pipeline).ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -66,8 +66,8 @@ theorem reversed_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
     (SourceRethrow.allocated_object (SourceKeccak.afterLiteral populated binary) _)
 
 theorem reversed_vector (pipeline : Roadmap.Pipeline) :
-    ((reversedAfter pipeline).ex.world.accounts sender).balance.val = 93 ∧
-    ((reversedAfter pipeline).ex.world.accounts self).balance.val = 7 ∧
+    ((reversedAfter pipeline).ex.world.accounts sender).balance = 93 ∧
+    ((reversedAfter pipeline).ex.world.accounts self).balance = 7 ∧
     ((reversedAfter pipeline).ex.world.accounts self).code = some 0 ∧
     ((reversedAfter pipeline).ex.world.accounts self).nonce = 1 ∧
     ((reversedAfter pipeline).ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -182,8 +182,8 @@ theorem literal_cases (pipeline : Roadmap.Pipeline) (static : Bool) :
     literal_complete pipeline static SourceAbiControls.long33⟩
 
 theorem literal_vector (bytes : Roadmap.Bytes) :
-    ((SourceKeccak.afterLiteral populated (Source.abiLayout [(true,bytes)])).ex.world.accounts sender).balance.val = 93 ∧
-    ((SourceKeccak.afterLiteral populated (Source.abiLayout [(true,bytes)])).ex.world.accounts self).balance.val = 7 ∧
+    ((SourceKeccak.afterLiteral populated (Source.abiLayout [(true,bytes)])).ex.world.accounts sender).balance = 93 ∧
+    ((SourceKeccak.afterLiteral populated (Source.abiLayout [(true,bytes)])).ex.world.accounts self).balance = 7 ∧
     ((SourceKeccak.afterLiteral populated (Source.abiLayout [(true,bytes)])).ex.world.accounts self).code = some 0 ∧
     ((SourceKeccak.afterLiteral populated (Source.abiLayout [(true,bytes)])).ex.world.accounts self).nonce = 1 ∧
     ((SourceKeccak.afterLiteral populated (Source.abiLayout [(true,bytes)])).ex.world.accounts self).storage.read saved = some (.bool true) ∧

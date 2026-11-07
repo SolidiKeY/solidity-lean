@@ -1,0 +1,60 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.bad_arguments": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.discarded_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.discarded_result": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.heap_observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native_discarded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.not_keeps": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.private_not_escaped": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.retained_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.retained_scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.wrong_destination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.wrong_scalar": [
+  "propext"
+ ]
+}

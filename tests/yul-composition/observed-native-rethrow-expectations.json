@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "derivation": "ADDITIVE fixture frozen BEFORE its execution. Original unaudited fixture/oracle/mismatch preserved. External STATICCALL checkMarker(99) in child and checkMarker(8) in catch require written states to be visible before rethrow, so compiler cannot remove these writes. Audits return empty bytes and preserve state. Four frames ordered root0/child1/audit99frame2depth2/audit8frame3depth1; root final returndata buffer is now empty from audit8, but catch-memory data retains original full failure bytes. Frozen BEFORE compiler/VM execution from unchanged new source and documented revert/try/catch semantics. marker slot0; caller prefix7/transient11/log55, child99/transient33/log77 is reverted; catch8/transient22/log66 then canonical full-byte rethrow rolls back entire root to preMarker with no retained logs/transient. Success retains marker7/log55 and returns BEEF; next getter/dead/getter prove retained prefix across later rollback. Wrong payload AABB same length2 MUST differ from Source DEAD, never length-only equality. Panic selector4e487b71 + assert code1, full36bytes. Source fuel0 is not native execution. Native world effects independently asserted, not equated to different Source companion logical state. Explicit alwaysRevert fixture must differ from the Source success branch and prevents an always-reverting target from passing.",
+  "plan": [
+    {
+      "signature": "dead()",
+      "kind": "caught",
+      "mode": 0,
+      "bytes": "0xdead",
+      "preMarker": "0",
+      "postMarker": "0",
+      "sourceCase": 1
+    },
+    {
+      "signature": "empty()",
+      "kind": "caught",
+      "mode": 1,
+      "bytes": "0x",
+      "preMarker": "0",
+      "postMarker": "0",
+      "sourceCase": 4
+    },
+    {
+      "signature": "panicPayload()",
+      "kind": "caught",
+      "mode": 2,
+      "bytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000001",
+      "preMarker": "0",
+      "postMarker": "0",
+      "sourceCase": 7
+    },
+    {
+      "signature": "wrongPayload()",
+      "kind": "negative-payload",
+      "mode": 3,
+      "bytes": "0xaabb",
+      "preMarker": "0",
+      "postMarker": "0",
+      "mustDifferFromSourceCase": 1
+    },
+    {
+      "signature": "success()",
+      "kind": "success",
+      "bytes": "0xbeef",
+      "preMarker": "0",
+      "postMarker": "7",
+      "sourceCase": 9
+    },
+    {
+      "signature": "marker()",
+      "kind": "getter",
+      "bytes": "0x0000000000000000000000000000000000000000000000000000000000000007",
+      "preMarker": "7",
+      "postMarker": "7"
+    },
+    {
+      "signature": "dead()",
+      "kind": "caught",
+      "mode": 0,
+      "bytes": "0xdead",
+      "preMarker": "7",
+      "postMarker": "7",
+      "sourceCase": 1
+    },
+    {
+      "signature": "marker()",
+      "kind": "getter",
+      "bytes": "0x0000000000000000000000000000000000000000000000000000000000000007",
+      "preMarker": "7",
+      "postMarker": "7"
+    },
+    {
+      "signature": "alwaysRevert()",
+      "kind": "negative-always",
+      "bytes": "0xdead",
+      "preMarker": "7",
+      "postMarker": "7",
+      "mustDifferFromSourceCase": 9
+    }
+  ],
+  "caller": "0x1212121212121212121212121212121212121212",
+  "callerBalance": "1000000000000000000000000000000",
+  "createdNonce": "1",
+  "slot": "0",
+  "transientSlot": "0",
+  "childPersistent": "99",
+  "callerPrefix": "7",
+  "catchPersistent": "8",
+  "transientValues": [
+    17,
+    51,
+    34
+  ],
+  "logBytes": [
+    "0x55",
+    "0x77",
+    "0x66"
+  ],
+  "profiles": [
+    [
+      "legacy",
+      false
+    ],
+    [
+      "legacy",
+      true
+    ],
+    [
+      "viaIR",
+      false
+    ],
+    [
+      "viaIR",
+      true
+    ]
+  ],
+  "auditReads": [
+    {
+      "frame": 2,
+      "parent": 1,
+      "depth": 2,
+      "persistent": "99",
+      "transient": "51"
+    },
+    {
+      "frame": 3,
+      "parent": 0,
+      "depth": 1,
+      "persistent": "8",
+      "transient": "34"
+    }
+  ]
+}

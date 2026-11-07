@@ -1,0 +1,100 @@
+{
+  "automatic_implementation_continuation_authorized": false,
+  "backfill_queue": [
+    {
+      "evidence": "census-base.json; all 12 source hashes; 563 source declaration sites and 1317 old elaborated constants",
+      "item": "scanner/census",
+      "status": "done"
+    },
+    {
+      "evidence": "6 census controls and 14 acceptance controls passed",
+      "item": "negative controls",
+      "status": "done"
+    },
+    {
+      "evidence": "8 new String API proof examples; no parser-equivalence claim",
+      "item": "isolated fixture proofs",
+      "status": "done"
+    },
+    {
+      "evidence": "committed census.py, bounded-build.py, compare.py, freeze.py; old64 pass/new4-prefix failure",
+      "item": "reproduction/timing tooling",
+      "status": "done"
+    },
+    {
+      "item": "additional newly unclaimed cleanup",
+      "remaining": "No registry claim or independent candidate assigned. Do not steal scope.",
+      "status": "not_claimed"
+    }
+  ],
+  "goal_complete": false,
+  "goal_pause_backend": "unsupported: no exposed goal operation can set PAUSED; user-directed behavioral pause honored, no completion/reset/replacement",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "original_branch": "codex/solidity-h62-6-20261106/migrate-typing",
+  "original_environment_id": "ccarenv_b64_Y2NhcmVudl83ZmVjNTQxZTdhZTA4MTkxYTczOTA1YmE2NDIwZmNmNQ",
+  "original_repository": "/workspace/solidity-lean-migrate-typing",
+  "prior_head": "f96d0f085bda5193040edd5eb46653d92ff58d37",
+  "public_api": {
+    "compatibility_claim": "No cross-version equality established; include all original public generated declarations, not only named source statements.",
+    "frozen_manifest": "/workspace/migrate-typing-evidence/frozen-interfaces.json",
+    "implemented_shims": [],
+    "new_export": null,
+    "old_constant_count": 1317,
+    "old_file": "/workspace/migrate-typing-evidence/old-interfaces.json",
+    "old_modules": 12,
+    "visibility_provenance": "Not separately exported; private name prefixes alone are not complete visibility provenance. No new export performed during retirement."
+  },
+  "push": "not attempted; H71 authorization unavailable",
+  "schema_version": 1,
+  "validation": {
+    "current_turn": "No Lean/proof implementation or known STOP rerun; preservation-only checks.",
+    "new_clean": {
+      "failed_module": "Solidity.Syntax.Raw",
+      "full_wall_delta": null,
+      "passed": false
+    },
+    "old_clean": {
+      "modules": 64,
+      "peak_sampled_rss_bytes": 930451456,
+      "wall_seconds": 331.83185655100004
+    }
+  },
+  "waits": [
+    {
+      "item": "B-SYNTAX-RAW-435: Syntax/Raw.lean lines 597,650,665,682,684 migration dependency. No owner patch delivered locally.",
+      "lane": "solidity-h62-6-20261106/migrate-syntax"
+    },
+    {
+      "item": "B-PREFIX-RSS-435: resource disposition required for observed >10% sampled RSS regression; do not rerun unchanged STOP.",
+      "lane": "solidity-h62-6-20261106/migrate-root-gate"
+    },
+    {
+      "item": "H78-COMPLETE-PUBLIC-INVENTORY: consolidate existing full old/new public generated inventory, visibility/signatures/universes/binder kinds and exact shim records; new Typing export absent.",
+      "lane": "solidity-h62-6-20261106/migrate-root-gate"
+    }
+  ],
+  "work_queue": [
+    {
+      "checkpoint": 1,
+      "remaining": "None for source census/old olean baseline; source branch-site lines are not individual alternative counts.",
+      "status": "done"
+    },
+    {
+      "checkpoint": 2,
+      "done": "Official pinned archive SHA and exact Lean/Lake release versions; no source adaptation.",
+      "remaining": "Successor assesses/adapts all 12 Typing modules once holds/dependencies permit, preserving complete public generated APIs under H78.",
+      "status": "partial"
+    },
+    {
+      "checkpoint": 3,
+      "remaining": "Build all 12 Typing modules on new toolchain; full new elaborated types/axioms comparison; complete clean common-tree/resource measurements; regressions escalated and >10% STOP; affected validation and run-lean final gates.",
+      "status": "blocked"
+    },
+    {
+      "checkpoint": 4,
+      "remaining": "Successor integrates final committed head and cumulative patch/bundle; obtains fully passing migration patch, new frozen interfaces, final cross-directory report, reviews and acceptance.",
+      "status": "partial"
+    }
+  ],
+  "worker_lifecycle": "PAUSED_BY_H82_RETIREMENT"
+}

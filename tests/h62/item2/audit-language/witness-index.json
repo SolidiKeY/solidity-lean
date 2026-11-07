@@ -1,0 +1,110 @@
+[
+  {
+    "target": "Solidity.Language.Feature.exclusion_complete",
+    "source_id": "Solidity/Language/FeatureInfo.lean:1120:Feature.exclusion_complete",
+    "signature_sha256": "c94dd88db8714eaa959557855907a7a00f322b635d888ddc00cdc477d92e286c",
+    "witness": "Solidity.H62.AuditLanguage.feature_exclusion_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Language.Unmodelled.excluded",
+    "source_id": "Solidity/Language/FeatureInfo.lean:1094:Unmodelled.excluded",
+    "signature_sha256": "a26d8348e08ba6a9f99c279e45cd07395981a8f389830d2703e6a54b67b06bf5",
+    "witness": "Solidity.H62.AuditLanguage.diagnostic_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "global diagnostic structure inhabited; the theorem uses that same inhabitant; no compiler producer structure"
+  },
+  {
+    "target": "Solidity.KeySort.ofName_name",
+    "source_id": "Solidity/KeySort.lean:197:ofName_name",
+    "signature_sha256": "f12a85104fe26814812015b93338867926b09dcba392b3aa4c167dfb95e6212f",
+    "witness": "Solidity.H62.AuditLanguage.sort_name_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.KeySort.le_trans",
+    "source_id": "Solidity/KeySort.lean:237:le_trans",
+    "signature_sha256": "2d8ab059d096af626a55025be4c6eef0d8f3664c6360ad3c507bd9c583602c26",
+    "witness": "Solidity.H62.AuditLanguage.sort_trans_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.emod_of_ge",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:14:emod_of_ge",
+    "signature_sha256": "f5cef7ba2dd0772f4af8158b3646b7eaa3b168183137572bd63e8e1c9f661227",
+    "witness": "Solidity.H62.AuditLanguage.emod_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.add_uint_exact",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:22:add_uint_exact",
+    "signature_sha256": "d25b8c279988b49846ad72b24398193f26ad8046dd010cb1fc407ea7c3fabc41",
+    "witness": "Solidity.H62.AuditLanguage.add_uint_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.mul_uint_exact",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:32:mul_uint_exact",
+    "signature_sha256": "9bb09b8e001a655f30ee89bf4fb7438c89b7f815d7c82be111564c11031bd1f6",
+    "witness": "Solidity.H62.AuditLanguage.mul_uint_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.add_int_exact",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:59:add_int_exact",
+    "signature_sha256": "fc331a23f6a6a6f1d113f655453bc7f7041c49fdf28ecaff3fbf718c37238022",
+    "witness": "Solidity.H62.AuditLanguage.add_int_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.sub_int_exact",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:64:sub_int_exact",
+    "signature_sha256": "920c30395b24ec26d75a9472dc79d47e8c10f8eaa84d8b4f383f390b22ac229c",
+    "witness": "Solidity.H62.AuditLanguage.sub_int_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.neg_int_exact",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:69:neg_int_exact",
+    "signature_sha256": "51105b6ea619ecf39eebd2e5dcf4a7486549b524d50aaa53d5b6a997938c2cc9",
+    "witness": "Solidity.H62.AuditLanguage.neg_int_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.div_int_exact",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:74:div_int_exact",
+    "signature_sha256": "7a09c4bb502bcef2d85b302c382edba7182df0e48660383812e1fd9d9250d496",
+    "witness": "Solidity.H62.AuditLanguage.div_int_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Checked.mul_int_exact",
+    "source_id": "Solidity/Syntax/CheckedExact.lean:89:mul_int_exact",
+    "signature_sha256": "3e655f288ef5910c63a479a2ada534a9bb3481a94d956e921953ee7f0bcd1053",
+    "witness": "Solidity.H62.AuditLanguage.mul_int_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading telescope; final conclusion not assumed",
+    "classification": "per-input feasibility; no global compiler producer structure"
+  }
+]

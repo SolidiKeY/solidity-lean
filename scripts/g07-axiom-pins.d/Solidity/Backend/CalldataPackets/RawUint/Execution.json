@@ -24,11 +24,25 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.packedViews_transfer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.packedViews_uints": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.raw_value_exact": [
   "Quot.sound",
   "propext"
  ],
  "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.raw_word_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUint/Execution.lean:Solidity.Backend.CalldataPackets.RawUint.rawViews_coherent": [
   "Quot.sound",
   "propext"
  ],

@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/AbiEntry/HeadGate.lean:Solidity.Backend.AbiEntry.HeadGate.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGate.lean:Solidity.Backend.AbiEntry.HeadGate.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGate.lean:Solidity.Backend.AbiEntry.HeadGate.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGate.lean:Solidity.Backend.AbiEntry.HeadGate.rejected_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGate.lean:Solidity.Backend.AbiEntry.HeadGate.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGate.lean:Solidity.Backend.AbiEntry.HeadGate.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGate.lean:Solidity.Backend.AbiEntry.HeadGate.semantic_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

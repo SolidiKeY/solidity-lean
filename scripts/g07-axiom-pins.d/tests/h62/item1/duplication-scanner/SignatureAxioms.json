@@ -1,0 +1,12 @@
+{
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaA": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaB": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.differentBinder": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.differentType": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.First.sameSpelling": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.indexedOne": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.indexedTwo": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.Second.sameSpelling": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.universeA": [],
+ "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.universeB": []
+}

@@ -446,7 +446,7 @@ def storeAt (σ : Store) (slot off : Nat) (h : off + t.storageBytes ≤ 32) (a :
 
 theorem loadAt_storeAt (σ : Store) (slot off : Nat) (h : off + t.storageBytes ≤ 32) (a : Fx t) :
     loadAt t (storeAt σ slot off h a) slot off = a := by
-  simp only [loadAt, storeAt, if_true, load_store]
+  simp only [loadAt, storeAt, ite_true, load_store]
 
 /-- A write leaves every value apart from it unchanged, in its own slot or
 any other. -/
@@ -457,12 +457,12 @@ theorem loadAt_storeAt_apart (σ : Store) {slot off slot' off' : Nat}
   simp only [loadAt, storeAt]
   by_cases hs : slot' = slot
   · subst hs
-    simp only [if_true]
+    simp only [ite_true]
     rcases hA with hA | hA | hA
     · exact absurd rfl hA
     · exact load_store_disjoint _ h a (Or.inr hA)
     · exact load_store_disjoint _ h a (Or.inl hA)
-  · simp only [hs, if_false]
+  · simp only [hs, ite_false]
 
 /-- Writing variable `i` of a layout leaves every other variable `j`
 unchanged. -/

@@ -1,0 +1,20 @@
+{
+ "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean:H62.AuditPrecompiles.Successor.PointEval.bind_failure_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean:H62.AuditPrecompiles.Successor.PointEval.bind_success_joint": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean:H62.AuditPrecompiles.Successor.PointEval.decode_length_joint": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean:H62.AuditPrecompiles.Successor.PointEval.failure_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean:H62.AuditPrecompiles.Successor.PointEval.pointEval_length_joint": [
+  "Quot.sound",
+  "propext"
+ ]
+}

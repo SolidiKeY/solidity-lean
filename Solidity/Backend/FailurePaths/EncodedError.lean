@@ -9,20 +9,20 @@ namespace Solidity.Backend.FailurePaths.EncodedError
 open Source EM
 variable {E : Source.Env} {Γ : RCtx} {τ : STy}
 
-def arguments (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true) : RConvArgs E Γ [τ] :=
+def arguments (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true) : RConvArgs E Γ [τ] :=
   .cons (.local i) same .nil
 
 def values (v : Source.Val E.layout τ) : Source.Vals E.layout [τ] := .cons v .nil
 
 def statement {R : List STy} (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true) : RStmt E R false .body Γ Γ :=
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true) : RStmt E R false .body Γ Γ :=
   .revertError error typed (arguments i same)
 
 def packet (global : Glob E) (error : Decl) (data : Roadmap.Bytes) : Roadmap.Bytes :=
   global.selector (sigOf E.layout error.name [τ]) ++ data
 
 theorem arguments_run (global : Glob E) (frame : Fr) (extra : Nat)
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial : St E) :
     (evalConvArgs global frame (extra+2) (arguments i same)).run (locals,initial) =
       (.ok (values (locals.get i)),(locals,initial)) := by
@@ -33,7 +33,7 @@ theorem arguments_run (global : Glob E) (frame : Fr) (extra : Nat)
 statement selection of the error selector and the final failure are derived. -/
 theorem source_run {R : List STy} (global : Glob E) (frame : Fr) (extra parameters : Nat)
     (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial reached : St E) (data : Roadmap.Bytes)
     (encoded : Premises.EncodingAt frame (extra+2) (values (locals.get i)).toR initial reached data) :
     (execS global frame (extra+3) parameters none
@@ -57,7 +57,7 @@ theorem source_run {R : List STy} (global : Glob E) (frame : Fr) (extra paramete
 it is never reclassified as a completed revert. H16 supplies the premise. -/
 theorem source_incomplete {R : List STy} (global : Glob E) (frame : Fr) (extra parameters : Nat)
     (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial reached : St E)
     (incomplete : Premises.IncompleteAt
       (encodeVals frame (extra+2) false (values (locals.get i)).toR : EM E [] Roadmap.Bytes)
@@ -107,7 +107,7 @@ The frame premise relates the numeric and byte machines, not the whole Source
 world. G41's encoder fact remains explicit. -/
 theorem emitted_frame {R : List STy} (global : Glob E) (frame : Fr) (extra parameters offset : Nat)
     (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial reached : St E) (data : Roadmap.Bytes)
     (encoded : Premises.EncodingAt frame (extra+2) (values (locals.get i)).toR initial reached data)
     (slice : Failure.Slice.Machine) (numeric : Evm.Machine) (live : Nat → Prop)
@@ -138,7 +138,7 @@ journal rollback and local persistent/transient/machine restoration are then
 proved, without restoring the Source heap or claiming full transaction semantics. -/
 theorem world_unwind {R : List STy} (global : Glob E) (frame : Fr) (extra parameters offset : Nat)
     (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial reached caller : St E) (data : Roadmap.Bytes)
     (encoded : Premises.EncodingAt frame (extra+2) (values (locals.get i)).toR initial reached data)
     (ops : List (Source.Op E.layout E.lay E.lay))
@@ -163,7 +163,7 @@ source statement and suffix-absorbing byte emitter are still derived here.
 This theorem supplies no nonempty-payload P7 producer instance. -/
 theorem transient_transport {R : List STy} (global : Glob E) (frame : Fr)
     (extra parameters offset : Nat) (error : Decl) (typed : error.paramTys E = some [τ])
-    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase τ = true)
+    (i : Source.Idx Γ τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (locals : Source.Locals E.layout Γ) (initial reached : St E) (data : Roadmap.Bytes)
     (encoded : Premises.EncodingAt frame (extra+2) (values (locals.get i)).toR initial reached data)
     (target : Transient.State) (slice : Failure.Slice.Machine) (cells : List Nat)

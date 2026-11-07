@@ -1,0 +1,69 @@
+{
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.allowed_from": [],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.allowed_to": [],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.enum_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.enum_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.enum_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.from_assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.from_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.source_from_refused_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.source_from_refused_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.source_from_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.source_from_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.source_from_uint_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.source_to_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.source_to_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumConversions.lean:Solidity.Lowering.V07.EnumConversions.to_assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

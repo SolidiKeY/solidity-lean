@@ -38,15 +38,10 @@ theorem popped_child {n : Nat} {G : Schema n} {p : PrimTy}
    simp only [recursiveClearSlot,Slot.getD,recursiveClear_eq_clear]
 
 private theorem child_ne_root (base : Solidity.Storage.Loc) (i : Nat) : Solidity.Storage.Loc.data base i ≠ base := by
- intro same
- have depths := congrArg Solidity.Storage.Loc.depth same
- change base.depth+1=base.depth at depths
- omega
+  exact Solidity.Storage.Loc.data_ne_self base i
+
 private theorem grand_ne_root (base : Solidity.Storage.Loc) (i j : Nat) : Solidity.Storage.Loc.data (.data base i) j ≠ base := by
- intro same
- have depths := congrArg Solidity.Storage.Loc.depth same
- change base.depth+1+1=base.depth at depths
- omega
+  exact Solidity.Storage.Loc.data_data_ne_self base i j
 
 /-- The concrete outer-header write frames OLD primitive-child query outcomes.
 This operation adapter applies the EXISTING owner, without new representation. -/

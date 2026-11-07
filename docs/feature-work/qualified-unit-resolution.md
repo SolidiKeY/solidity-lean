@@ -1,11 +1,12 @@
 # Qualified multi-unit declaration resolution (SOL-QN / G12)
 
-Status: active and incomplete. The signature-aware resolver now agrees with
-all 17 direct compiler queries, including the two inherited-overload cases.
-Legacy resolver observations remain preserved. Independent C3/bound and
-normalization adequacy, complete supported-type coverage, central registration
-and final full validation remain open. No G13/G15, cross-unit typing,
-Solidity-wide correctness, source-to-EVM or RUNTIME_GATE_PASS claim is made.
+Status: moved to a Claude VM (moved4, 2026-11-06); see "Moved4 Claude-VM
+checkpoint" at the end for the current state. The final target relation,
+the independent C3 judgment with the `idUniverse` bound, target
+completeness and supported-type adequacy are proved, each with the
+boundaries stated there. The signature-aware resolver agrees with all 17
+direct compiler queries. No G13/G15, cross-unit typing, Solidity-wide
+correctness, source-to-EVM or RUNTIME_GATE_PASS claim is made.
 
 ## Checkout, inputs and protected interfaces
 
@@ -88,10 +89,10 @@ separate. dependency-20261104.json records commands and review findings.
 
 | Item | Status | Remaining |
 |---|---|---|
-| Inventory and independent relation | partial | Complete structural inventory and universal reference/owner proofs; final target relation still needs inherited-overload behavior |
-| Arbitrary finite qualified lookup | partial | Signature-aware integration and 17 direct queries pass; independent C3/bound and normalization adequacy remain |
-| Soundness/completeness and preservation | partial | Candidate-relation equivalence, identities, no-clash and actual owner-body layout proved; full target completeness awaits integration |
-| Fixtures, acceptance and handoff | partial | All 112 source constructor rows, 15 main fixtures, seven supplementary probes and 17 queries pass; supported-type adequacy and final registration/runtime gates remain |
+| Inventory and independent relation | done (moved4) | `Target.Target` is the final relation, including inherited overloads; its overload hierarchy is the independent C3 `Linearization.Linear`. Executable leaves (`normalize`, `hides`, `overload`, `group`) are stated in its docstring. |
+| Arbitrary finite qualified lookup | done (moved4) | `Linearization.order_iff` covers C3 existence and the `idUniverse` bound, with no premise. Precedence is `Linear.precedence` and acyclicity is `Linear.acyclic`. Adequacy against Source elaboration is `NormalizationAdequacy.types_adequate`. |
+| Soundness/completeness and preservation | done (moved4) | `Target.target_iff` (premise-free), plus `Target.identity`, `Target.noClash` and `refused_no_target`. |
+| Fixtures, acceptance and handoff | see moved4 checkpoint | The supported-type adequacy theorems are `types_sound`, `types_complete` and `types_adequate`. A cross-unit control discharges their premises. The gate outcomes are listed in the moved4 checkpoint. |
 
 H27 authorizes the owned normalization repair. Required resolver integration
 and full acceptance remain outstanding. The separately assigned G25 packet
@@ -693,3 +694,245 @@ acceptance remain pending. Frozen Source transitive G0 remains outside the
 owned repair; no RUNTIME_GATE_PASS or full-lane completion is claimed.
 The existing persistent goal remains incomplete; get_goal/per-file Lean MCP
 are unavailable, and no goal was created/reset. Separate G25 work is preserved.
+
+
+## Moved4 Claude-VM checkpoint (2026-11-06)
+
+The lane moved from the Codex VM to a Claude VM. Branch
+`cloud/moved4-20261105/qualified-units` merges the move branch
+`cloud/qualified-units-move` (f94495e3) and current origin/master. The lane
+base is aec9adf1ad8666a7e591e42a537069a93dc858cb.
+
+None of the following were reachable from this VM, and none are cited as
+evidence here:
+- the Codex evidence directory;
+- the H44 bulk bundle (`bulk-evidence-H44.json` indexes it);
+- the Codex Docker runner.
+
+All validation below was re-run on this VM.
+
+### New modules
+
+| Module | Content |
+|---|---|
+| `Linearization.lean` | Fuel-free C3 judgment `Linear`, built from `Routes`/`Bases` and `MergeSpecification.Merge` (see note 1). `order_iff`: `SignatureMembers.order` is sound and complete for `Linear` with no premise, so the `idUniverse` depth bound and the `bound * bound + 2` merge budget never refuse a valid hierarchy. Also `Linear.unique`, `Linear.bounded` (duplicate-free linearizations; cycles have no derivation), `Linear.members`, `Merge.sublist` (C3 monotonicity), `Linear.precedence` (base linearizations and the reversed local base list are sublists) and `Linear.acyclic`. |
+| `Target.lean` | The final relation `Target` (see note 2). `target_iff`: `SignatureResolution.resolve` is sound and complete for it, with no premise. Also `identity`, `noClash` and `refused_no_target`. |
+| `NormalizationAdequacy.lean` | `erase` keeps only the Source `DeclName`. `types_sound` holds for every constructor. `types_complete` and `types_adequate` hold on every supported signature category (see note 3). `fields_refused` covers struct members and variable declarations. |
+| `TargetControls.lean` | Kernel controls: the diamond linearization and its local precedence; no linearization for a self-cycle or a missing base; both inherited-overload targets; a multi-hop target. Refusals: missing, ambiguous, local shadow, failed signature, visible barrier. Adequacy: a function type, refused struct members, and `adequacy_instance` (see note 4). |
+
+Notes:
+1. `Linear` never mentions `linearize`, `mergeOwners`, `bases` or `order`. It shares only `basePaths` with the executable code.
+2. `Target` copies `SignatureResolution.Resolved`, with the hierarchy replaced by `Linear` and readiness replaced by `Normalized`. Its docstring names the trusted executable leaves: `normalize`, `hides`, `overload` and `group`.
+3. The premises `LeafSound`/`LeafComplete` range only over `references s`, the paths written in the signature syntax.
+4. `adequacy_instance` discharges those premises for a program where unit A imports B, and both B and an unimported C declare enum `T`.
+
+### Proof boundaries
+
+These follow from the finder and skeptic reviews.
+- `target_iff` is completeness against an implementation-shaped relation. Only its hierarchy part is independent. It is not independent Solidity semantics.
+- `Target`'s plain branch and global barrier use `InheritedMember`. That is reachability along the syntactic base graph, and it does not require a valid linearization. Only the overload branch requires `Linear`.
+- C3 precedence is proved as monotonicity. Agreement with solc's exact order rests on the deterministic first-head rule and on pinned fixtures. There is no compiler differential of `Linear`.
+- Normalization adequacy is relative to Source `Syn.tys`. Where Source `userTy` cannot follow a written path, the localized premises fail for that syntax, and the theorem says nothing about it. This covers unit aliases, paths with more than one qualifier, and homonyms visible in its flat environment.
+- Adequacy is stated for `types`, the parameter elaborator that `normalize` uses. It is not stated for `ownerScope`/`parts`. `Source.arrayLen` folding is reused.
+- No G13/G14/G15, source-to-EVM or RUNTIME_GATE_PASS claim is made.
+
+### Queue items 5-8 of the move handoff
+
+- check-trust passes with 0 findings. The two `References.lean` `@[implemented_by]` sites are inventoried, in `tests/trust-inventory.json` near lines 1388 and 1393.
+- Registration: all 28 lane modules are in the generated `Solidity.lean` root (`register.sh --check` passes). Each has a module-map row; this checkpoint adds rows for 4 new and 6 previously missing modules to `docs/module-map/frontend.d/qualified-units.md`. The 12 pending central registration proposals are closed.
+- `scripts/coord-tools/fragments.sh` also regenerated master's stale combined `docs/module-map/v08-adapters.md`, which failed `fragments.sh --check` on master.
+- `check-doc-paths.sh` fails on master before this lane. `docs/feature-work/after-roadmap-va1.md` cites a Bridge Mathlib cache path. This lane does not own or change that file.
+
+### Claude-VM gate driver
+
+`tests/sol-qualified-units/claude-gates.py` replaces the Docker runner here. On this VM the shell refuses `lean` and `lake build`; Lean evidence comes from language-server elaboration of generated probe files in the VM-local `claude-evidence/` directory.
+
+Under H44 that directory stays off git; the lane's `.gitignore` excludes it. The committed `tests/sol-qualified-units/claude-evidence-manifest.json` names all 36 files with their bytes and sha256, and records the receipt outcomes, the lane source digests, the runner digest and the two pin-file digests.
+- `check-sol-qualified-units.py --claude-vm` with the directory present requires every file to match the manifest, then runs the full content audit.
+- Without the directory it prints `EVIDENCE_OFF_GIT` and checks the manifest against the current sources, runner and pins, then applies the recorded receipt outcomes.
+- `--write-claude-manifest` re-records the manifest.
+- `probe M` writes the probe, deletes any old output and records source digests.
+- The queries and declarations probes write their own `.out` files through `IO.FS.writeFile`.
+- `record M F` requires the saved language-server diagnostics `F` to contain no errors. It also requires the sources to be unchanged since `probe`, and the output to be newer than its input.
+- The axioms log is re-derived from the saved diagnostics by the checker (`--claude-vm`).
+- Build and repository receipts come from `scripts/coord-tools/gate.sh full`'s own PASS/FAIL lines and per-gate logs.
+- KeySort runs the built `solkeycheck` against the vendored solkey taclets.
+- The pins grew without changing any old entry:
+  - 1857 reflected declarations; all 1575 previous entries are unchanged.
+  - 414 axiom pins; all 353 previous ones are unchanged.
+  - New theorems use only `propext`, `Quot.sound` and `Classical.choice`, or no axiom at all.
+  - The three compiler-generated `_unsafe_rec` helpers of `erase`, `eraseList` and `Supported` are listed in `partial-helpers.json`.
+
+The compiler differentials ran on npm `solc@0.8.38` `soljson.js`.
+- SHA-256 `0b15fcb2…`; tarball integrity `sha512-DsDLa7uA…`.
+- binaries.soliditylang.org is refused by this VM's proxy, so the pinned `6c74ffba…` artifact was unavailable.
+- Both report `0.8.38+commit.1835d247.Emscripten.clang`, but they are not byte-identical.
+- The accepted set is pinned in the checker's code, and each report records the artifact that actually ran.
+
+Limitations of this driver, from the tooling reviews:
+- The diagnostics JSON carries no language-server session binding.
+- Sources are hashed at probe time and at record time, not inside the elaboration.
+- `minimum_available_bytes` is null: there is no monitored run. A point-in-time `MemAvailable` is recorded separately.
+- `private theorem`s are outside the axiom probe, as on the Codex runner. Their transitive use is covered by the public theorems.
+
+### Gates at this checkpoint
+
+`scripts/coord-tools/gate.sh full` ran at c5c3a308 with elan on `PATH`. The sources are unchanged from that head except `scope.json`. The receipts (`gate-build.json`, `gate-repository.json`, `gate-keysort.json`, `gate-sh-summary.log`) are VM-local and listed in `tests/sol-qualified-units/claude-evidence-manifest.json`.
+
+| Gate | Result | Cause |
+|---|---|---|
+| build-touched | PASS | |
+| run-lean | FAIL | `lake build` passes (6122 jobs, no `error`). The failure comes from `check-solkey.sh` (note 1). |
+| trust | PASS | 0 findings |
+| orphans, layers, roots, fragments | PASS | |
+| doc-paths | FAIL | Fails on master: `docs/feature-work/after-roadmap-va1.md` cites a Bridge Mathlib path. |
+| axiom-pins | FAIL | 0 errors and 3919 unrecorded new pins in the repository-wide inventory (note 2). |
+| testsuite, corpus | FAIL | They compare the same sibling checkout's `TestSuite.sol` (`519abdd5…`) with the imported AST (`12de663e…`). |
+| automatic-strict | PASS | |
+| KeySort (`claude-gates.py keysort`) | PASS | `solkeycheck --key` matches the vendored `tests/migration/solkey` taclets. |
+
+Notes:
+1. `check-solkey.sh` reads the sibling `../solkey` checkout. On this VM that checkout is upstream HEAD `b8d5f883`, not the pinned revision, and it reports 167 annotation mismatches.
+2. None of the 3919 unrecorded pins is a `QualifiedUnits` theorem. The lane's own pins are in `tests/sol-qualified-units/axiom-pins.json` and pass.
+
+The lane gates pass: solc, signature probes, resolution probes, queries, declarations and axioms. `check-sol-qualified-units.py --claude-vm` stops at `required gate failures: build, repository`.
+
+A full build run started before the last source edits, and it reported errors in `TargetControls.lean`. They came from compiling against a stale `NormalizationAdequacy` olean. The rerun above rebuilt both modules cleanly, and the language server reports no errors in either file.
+
+These receipts are recorded as failures and are not waived. Queue items 1-4 and the proofs are done. `scope.json` keeps `fixtures-acceptance-handoff` partial and `acceptance_complete` false until `run-lean` and the repository gates pass. That needs either the pinned solkey sibling or a fixed master.
+
+## Moved4 follow-up: fixture acceptance (2026-11-06)
+
+This section supersedes the gate table of the previous checkpoint. All
+evidence below was produced on this VM at d9146bb1 (sources unchanged since).
+
+### Pinned compiler
+
+- `soljson-v0.8.38+commit.1835d247.js` came from GitHub's solc-bin mirror
+  (`raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/`). Its SHA-256 is
+  `6c74ffba…d390`, the pinned value.
+- `compiler-artifacts.json` and the checker's hard-coded set now accept only
+  that artifact. The npm `soljson.js` (`0b15fcb2…`) used by the previous
+  session is no longer accepted.
+- With it: 15/15 `compiler-matrix.json` rows pass, and the signature and
+  resolution probes pass. All three reports record `6c74ffba…`.
+- The direct differential (17 queries against the Lean resolver) passes. It
+  includes the multi-hop reference (`N.M.T`), the ambiguous refusal (`N.T`) and
+  the missing-symbol refusal (`N.M.Missing`, solc error 7920).
+- The agreement on the ambiguous case is accept/reject, not the reason. solc
+  rejects `ambiguous-namespace` with error 2333 at the second `import * as N`,
+  a duplicate declaration of the alias. The Lean resolver refuses the reference
+  `N.T` as `ambiguous`. `ambiguous-base` works the same way.
+
+### H44 bulk manifest
+
+`verify_bulk_h44` in the checker checks `bulk-evidence-H44.json` for
+internal consistency and prints `BULK_H44_MANIFEST_PASS`. It checks:
+- the file's sha256 (`4affb5e3…`, as committed by the Codex lane at f94495e3);
+- the 269 entries are unique, and each lies under `bulk_directory` with a
+  `tests/sol-qualified-units/evidence/` original;
+- every digest is well formed;
+- the byte sizes add up to `total_bytes` (73851319);
+- nothing under `evidence/` is tracked by git.
+
+This is a structural check only. The files stay on the Codex VM, and no file's
+content is verified here. A one-off search found that no tracked file matches
+any of the 269 digests, and that git history has no `evidence/` path. Neither
+result is recorded in an evidence file.
+
+### Gate changes
+
+- **KeySort removed.** Master a897dac76 (H89) dropped the SolKey checker from
+  every gate. `claude-gates.py` no longer has a `keysort` command, and the
+  checker no longer requires that receipt.
+- **Repository receipt.** `gatelog` lists in `MASTER_ONLY` the gate.sh
+  failures that do not come from this branch. The repository receipt passes
+  only when every other gate passes. It keeps the full status table and the
+  `master_only_failures` and `lane_failures` fields.
+- Each exemption has a guard:
+  - axiom-pins must report 0 errors and must not name `QualifiedUnits`. No lane
+    theorem is in that inventory, so the name check cannot fail; the lane's own
+    414 pins are the axiom evidence.
+  - doc-paths: every `missing:` line must cite from a file that this branch
+    does not change against origin/master.
+  - testsuite and corpus: every log line must be the sibling `TestSuite.sol`
+    revision check.
+- All 12 gate.sh gates must be present in the run.
+- The checker re-checks the receipt. It pins the four exempt names, requires
+  every other gate to be PASS, and requires `lane_failures` to be empty.
+- **Build receipt.** It now requires every one of the 28 lane modules to be
+  covered:
+  - 23 are built, replayed or fetched by run-lean;
+  - the 5 changed modules are compiled by build-touched, then found up to date
+    by run-lean.
+- **Module map.** The master merge had duplicated a module-map row (a union
+  merge in `v08-adapters.md`). `fragments.sh --resolve` repaired it.
+
+### Gates at this checkpoint
+
+`scripts/coord-tools/gate.sh full` ran at d9146bb1, with the Lake cache seeded
+from master's `lake-cache` release (pack master b7c3cc51). After it, only
+the driver, the checker, the lane doc, `scope.json` and the manifest changed;
+the lane sources and inputs did not. The receipts were re-recorded from that
+run's logs.
+
+| Gate | Result | Note |
+|---|---|---|
+| build-touched, run-lean | PASS | `lake build` of the default targets plus SolkeyTestSuite: 6465 jobs, 0 `error` lines |
+| trust, orphans, layers, roots, fragments, automatic-strict | PASS | |
+| doc-paths | FAIL (master) | 5 missing references in h62 docs, scripts and tests; none in this lane |
+| axiom-pins | FAIL (master) | 0 errors; 4478 unrecorded repository-wide pins, none in `QualifiedUnits` |
+| testsuite, corpus | FAIL (environment) | The VM's sibling `../solkey` `TestSuite.sol` (`993bad1c…`) is not the imported pin (`12de663e…`). It is not caused by this branch, but neither gate got past that check here. |
+
+Lane receipts, via `claude-gates.py`, all pass:
+- solc, signature-probes and resolution-probes;
+- axioms: 414 pins match `axiom-pins.json`;
+- declarations: 1857 reflected declarations match `declaration-pins.json`;
+- queries (`DIRECT_DIFFERENTIAL PASS`);
+- build;
+- repository (`LANE_FAILURES []`).
+
+The Lean probes were elaborated by the language server and showed no errors.
+
+`check-sol-qualified-units.py --claude-vm` passes in both modes:
+- with the local evidence directory, the full content audit;
+- without it, `EVIDENCE_OFF_GIT`, which checks the manifest against the
+  current sources.
+
+`scope.json` now marks `fixtures-acceptance-handoff` done and sets
+`acceptance_complete` to true. The proof boundaries of the previous checkpoint
+are unchanged.
+
+### Remaining limitations
+
+- The four exempt gate failures above remain. doc-paths and axiom-pins fail on
+  master's files. testsuite and corpus depend on this VM's sibling checkout.
+  No master baseline run was made.
+- The generated `Solidity.lean` root and `docs/module-map/frontend.md` carry
+  this lane's registrations. Under H21 they are produced by `register.sh` and
+  `fragments.sh`, not hand-edited.
+- The legacy Codex runner `run-candidate-gates.py` still has a `keysort` mode.
+  Nothing calls it.
+- The H44 bulk files cannot be content-verified from a Claude VM.
+- `test-signature-audit.py` and the default (non-`--claude-vm`) acceptance mode
+  read the Codex-only `tests/sol-qualified-units/evidence/` directory. They
+  cannot run here.
+- The Claude-driver limitations listed in the previous checkpoint still apply.
+
+### Reviews (follow-up)
+
+The finder and skeptic reviews were read-only and used no Lean server. The
+following findings were confirmed and fixed:
+- The checker did not re-check the exemption.
+- Nothing guarded the testsuite and corpus exemptions, and the doc blamed
+  master for them.
+- The build receipt named no lane module.
+- The H44 manifest digest was not pinned.
+- The required gate set was incomplete.
+- `h27_status` was stale.
+- The doc overstated the ambiguous-case agreement and the H44 check.
+
+Two findings were accepted as documented limitations, not fixed:
+- The acceptance flag is set by hand. The receipts are checked independently
+  of it.
+- The axiom-pins guard cannot fail for a lane name.

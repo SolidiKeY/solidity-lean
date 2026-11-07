@@ -1,6 +1,6 @@
 # H62 item 2: typing/frontend empty-statement audit
 
-Status: partial; resumed on v4.24.0. RAW-435 and QRAW-435 are resolved by coordinator clarification. No global checkpoint is complete.
+Status: H82 RETIRED / IMPLEMENTATION STOPPED; assignment incomplete. PAUSED transition unavailable in exposed goal API; backend goal state not changed. No automatic implementation continuation authorized.
 Owner: solidity-h62-2-20261106/audit-typing.
 Branch: codex/solidity-h62-2-20261106/audit-typing.
 Frozen base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
@@ -201,3 +201,11 @@ Remaining unblocked work exists: further source witnesses,293 unprovisioned modu
 Latest acceptance samples: Closure.lean=0.904s, DeclarationCensus.lean=1.606s, ClosureWitnesses.lean=0.502s, ClosureCensus.lean=1.006s, ClosureFidelity.lean=0.905s, ValuesListsWitnesses.lean=0.904s, ValuesListsFidelity.lean=1.907s, ValuesDefaultsWitnesses.lean=0.803s, ValuesDefaultsFidelity.lean=0.904s, UnitsSuccess.lean=0.803s, UnitsSuccessFidelity.lean=1.004s, ValuesHeredWitnesses.lean=0.803s, ValuesHeredFidelity.lean=0.903s, ValuesOpsWitnesses.lean=0.803s, ValuesOpsFidelity.lean=0.903s, ProvisionedCensus.lean=7.727s
 
 Housekeeping: moved generated classifier bytecode off Git and disabled future local import bytecode in the acceptance runner. No Lean source or proof behavior changed.
+
+## Final H82 stop-and-handoff
+
+User retirement supersedes all earlier continuation instructions. No proof implementation began after this retirement request. Current implementation head9d2a24f3ca06438c7651f7b43e2ed27158632d22 is preserved; final retirement commit adds only assignment/queue/scope/handoff documents. No proof/timing gate rerun. All task work committed, original VM/branch/evidence retained. handoff_to solidity-v12-v17-20261031/v17-validation-release; successor integrates final head after stopped acknowledgment.
+
+Committed handoff directory tests/h62/item2/audit-typing/handoff contains the complete original visible assignment (including owner keys), original goal objective, current authorizations/retirement, full original work/backfill queue, current remaining work and exact309-file frozen scope manifest. Original renderer-envelope bytes were not exposed; source-provenance.json records that limitation and actual file hashes without falsely claiming the transcript hash equals supplied rendered-prompt identifier. The files are included in cumulative patch and self-contained lane bundle; no dependency on inaccessible coordinator-local paths.
+
+Pause failure: only stop_goal(outcome complete|blocked) is exposed, not PAUSED. No substitute complete/blocked transition or new/reset goal was used; implementation is stopped and must not automatically resume. H71 push permission was not available in provided decisions or origin/master, so no push. Full local bundle and evidence archive are supplied. H70 wait retained for migrate-syntax Raw.lean isolated-v4.35 path; original v4.24 work remains valid but now retired by user instruction. All four global checkpoints and queues remain incomplete.

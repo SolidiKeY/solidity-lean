@@ -1,10 +1,10 @@
 {
- "Solidity/Backend/MemoryCopies/FixedReferencePathCopy.lean:Solidity.Backend.MemoryCopies.fixedReferencePathCopy": [
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopy.lean:Solidity.Backend.MemoryCopies.fixed_reference_path_copy_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferencePathCopy.lean:Solidity.Backend.MemoryCopies.fixed_reference_path_copy_correct": [
+ "Solidity/Backend/MemoryCopies/FixedReferencePathCopy.lean:Solidity.Backend.MemoryCopies.fixedReferencePathCopy": [
   "Classical.choice",
   "Quot.sound",
   "propext"

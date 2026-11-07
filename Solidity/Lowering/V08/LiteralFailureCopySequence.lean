@@ -9,9 +9,9 @@ open LiteralFailureLocatedFields (Head Fields)
 open LiteralFailureConvertedFields (Keeps)
 
 inductive Step {E : Env} {Γ : RCtx} (F : Fr) (state : St E) (locals : Locals E.layout Γ) :
- {σ τ : STy} → (index : Source.Idx Γ σ) → (conversion : σ.implicit E.isBase τ=true) →
+ {σ τ : STy} → (index : Source.Idx Γ σ) → (conversion : σ.implicit E.isBase E.mapFree τ=true) →
  {shape : AbiEntry.Shape} → AbiEntry.Val shape → Nat → Prop
- | read {type shape encoded} (index : Source.Idx Γ type) (typed : type.implicit E.isBase type=true)
+ | read {type shape encoded} (index : Source.Idx Γ type) (typed : type.implicit E.isBase E.mapFree type=true)
    (head : @Head E F state type (locals.get index) shape encoded) :
    Step F state locals index typed encoded 0
  | bytes (index : Source.Idx Γ (.bytes .calldata)) (off len : Nat)
@@ -27,14 +27,14 @@ inductive Plan {E : Env} {Γ : RCtx} (F : Fr) (state : St E) (locals : Locals E.
  {types : RCtx} → RConvArgs E Γ types → {shapes : List AbiEntry.Shape} → AbiEntry.Vals shapes → Nat → Prop
  | nil : Plan F state locals .nil .nil 0
  | cons {σ τ types arguments shape shapes encoded encodeds cost copies}
-   (index : Source.Idx Γ σ) (conversion : σ.implicit E.isBase τ=true)
+   (index : Source.Idx Γ σ) (conversion : σ.implicit E.isBase E.mapFree τ=true)
    (head : @Step E Γ F state locals σ τ index conversion shape encoded cost)
    (tail : @Plan E Γ F state locals types arguments shapes encodeds copies) :
    Plan F state locals (.cons (.local index) conversion arguments : RConvArgs E Γ (τ::types))
     (.cons encoded encodeds) (cost+copies)
 
 theorem step_transport {E : Env} {Γ σ τ shape cost} {locals : Locals E.layout Γ}
- {index : Source.Idx Γ σ} {conversion : σ.implicit E.isBase τ=true} {encoded : AbiEntry.Val shape}
+ {index : Source.Idx Γ σ} {conversion : σ.implicit E.isBase E.mapFree τ=true} {encoded : AbiEntry.Val shape}
  (F : Fr) (initial final : St E) (kept : Keeps F initial final)
  (step : Step F initial locals index conversion encoded cost) : Step F final locals index conversion encoded cost := by
  cases step with
@@ -51,7 +51,7 @@ theorem plan_transport {E : Env} {Γ types shapes copies} {locals : Locals E.lay
  | cons index conversion head tail ih => exact .cons index conversion (step_transport F initial final kept head) ih
 
 theorem step_run {E : Env} {Γ σ τ shape cost} {locals : Locals E.layout Γ}
- {index : Source.Idx Γ σ} {conversion : σ.implicit E.isBase τ=true} {encoded : AbiEntry.Val shape}
+ {index : Source.Idx Γ σ} {conversion : σ.implicit E.isBase E.mapFree τ=true} {encoded : AbiEntry.Val shape}
  (F : Fr) (fuel : Nat) (state : St E) (step : Step F state locals index conversion encoded cost) :
  ∃ (value : Source.Val E.layout τ) (middle : St E),
  (convRV F fuel τ (.val (locals.get index)) : EM E Γ _).run (locals,state)=(.ok (.val value),(locals,middle)) ∧

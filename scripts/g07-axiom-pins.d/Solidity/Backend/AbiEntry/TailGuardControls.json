@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/AbiEntry/TailGuardControls.lean:Solidity.Backend.AbiEntry.TailGuardControls.accepted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuardControls.lean:Solidity.Backend.AbiEntry.TailGuardControls.capacity_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuardControls.lean:Solidity.Backend.AbiEntry.TailGuardControls.inhabited_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuardControls.lean:Solidity.Backend.AbiEntry.TailGuardControls.raw_empty_array": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuardControls.lean:Solidity.Backend.AbiEntry.TailGuardControls.rejected_components": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuardControls.lean:Solidity.Backend.AbiEntry.TailGuardControls.signed_accepted": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,44 @@
+{
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.negative_reading": [],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.raw_decoded_and_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.raw_dirty_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.short_before_malformed_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.signed8_edges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.typed_signed_branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.wide_accepts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBindingControls.lean:Solidity.Backend.AbiEntry.SignedBindingControls.zero_full_width_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

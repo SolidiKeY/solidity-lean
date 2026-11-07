@@ -30,8 +30,13 @@
   "g49": {
     "ownerRoute": "solidity-h55-sol-20261106/g49-final-theorem",
     "artifact": "h64-shapes.json",
-    "status": "pending-input",
-    "declarationInventory": "not present locally"
+    "status": "source-located-awaiting-elaboration",
+    "declarationInventory": "Static exact-master source inventory verified; no fresh elaborated type export",
+    "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa",
+    "sourceInventorySha256": "af4f1a69410a9df1f408d2e2d9d9b82b39f926ce48c6bb601c16092514ed733e",
+    "currentCoordinatorRoute": "Claude move6-20261106/g49-final via coordinator",
+    "freshLeanRun": false,
+    "premisesDischarged": 0
   },
   "pendingIds": [
     "G49.01",

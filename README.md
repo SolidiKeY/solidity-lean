@@ -65,7 +65,7 @@ and the remaining semantic gaps.
 
 ```sh
 lake build              # the formalization and its examples; elaboration is the test suite
-./run-lean.sh           # default targets, SolkeyTestSuite, then the solkey cross-check
+./run-lean.sh           # layer/root/fragment checks, default targets and SolkeyTestSuite
 ```
 
 The package declares no dependencies at all — no Mathlib, nothing — so

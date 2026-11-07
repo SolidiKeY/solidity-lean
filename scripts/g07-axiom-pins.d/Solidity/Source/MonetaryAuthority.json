@@ -1,0 +1,12 @@
+{
+ "Solidity/Source/MonetaryAuthority.lean:Solidity.Source.Monetary.Authority.funding_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthority.lean:Solidity.Source.Monetary.Authority.set_at": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryAuthority.lean:Solidity.Source.Monetary.wide_authority_control": [
+  "propext"
+ ]
+}

@@ -27,15 +27,15 @@ def originTypes {E : Source.Env} {Γ : RCtx} : {ps : List STy} →
   | _, @RConvArgs.cons _ _ σ _ _ _ _ rest => σ :: originTypes rest
 
 /-- The fitting test enforces exact arity, including nonempty argument lists. -/
-theorem argsFit_length {B : DeclName → DeclName → Bool} {σs ps : List STy}
-    (fits : argsFit B σs ps = true) : σs.length = ps.length := by
+theorem argsFit_length {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {σs ps : List STy}
+    (fits : argsFit B M σs ps = true) : σs.length = ps.length := by
   simp only [argsFit, Bool.and_eq_true, beq_iff_eq] at fits
   exact fits.1
 
 /-- S01 argument conversion retains the original types in their original order. -/
 theorem convert_originTypes {E : Source.Env} {Γ : RCtx} {σs : List STy}
     (arguments : RArgs E Γ σs) (ps : List STy)
-    (fits : argsFit E.isBase σs ps = true) :
+    (fits : argsFit E.isBase E.mapFree σs ps = true) :
     originTypes (arguments.convert ps fits) = σs := by
   cases arguments with
   | nil =>
@@ -52,12 +52,12 @@ termination_by σs.length
 
 /-- The source-selected event/error parameter list is unique, not chosen by
 an adapter consumer to make an unrelated signature fit. -/
-theorem paramsOf_unique (E : Source.Env) (B : DeclName → DeclName → Bool)
+theorem paramsOf_unique (E : Source.Env) (B : DeclName → DeclName → Bool) (M : DeclName → Bool)
     (σs : List STy) (declaration : Decl)
-    (fits : declaration.fitsParams E B σs = true) (ps : List STy)
+    (fits : declaration.fitsParams E B M σs = true) (ps : List STy)
     (declared : declaration.paramTys E = some ps) :
-    (paramsOf E B σs declaration fits).1 = ps := by
-  exact Option.some.inj ((paramsOf E B σs declaration fits).2.1.symm.trans declared)
+    (paramsOf E B M σs declaration fits).1 = ps := by
+  exact Option.some.inj ((paramsOf E B M σs declaration fits).2.1.symm.trans declared)
 
 /-- A selected function fixes both parameter and result lists simultaneously. -/
 theorem function_signature_unique (E : Source.Env) (declaration : Decl)

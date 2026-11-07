@@ -1,5 +1,15 @@
 {
+ "Solidity/Source/Calldata.lean:Solidity.Source.cdStaticToMem_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/Calldata.lean:Solidity.Source.cdToMem_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.cdToMem_static_ok": [
   "Classical.choice",
   "Quot.sound",
   "propext"

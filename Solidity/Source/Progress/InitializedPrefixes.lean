@@ -10,12 +10,12 @@ variable {E : Env}
 
 inductive InitializedReturns (A B : Decl → Prop) (τ : STy) :
     {Γ Δ : RCtx} → RItems E [τ] false .body Γ Δ → Prop where
-  | returned {Γ} {e : RExpr E Γ τ} (same : τ.implicit E.isBase τ = true)
+  | returned {Γ} {e : RExpr E Γ τ} (same : τ.implicit E.isBase E.mapFree τ = true)
       (plain : PlainResultType τ) : ComposedExpr A B e →
       InitializedReturns A B τ (.stmt (.retVal rfl e same) .nil)
   | initialized {Γ Δ σ} {e : RExpr E Γ σ}
       {rest : RItems E [τ] false .body (σ :: Γ) Δ}
-      (same : σ.implicit E.isBase σ = true) (plain : PlainResultType σ) :
+      (same : σ.implicit E.isBase E.mapFree σ = true) (plain : PlainResultType σ) :
       ComposedExpr A B e → InitializedReturns A B τ rest →
       InitializedReturns A B τ (.stmt (.declInit e same) rest)
 

@@ -12,7 +12,7 @@ variable {E : Env}
 namespace CallPrefix
 def fund (frame : Fr) (receiver : Address) (value : Word) : EM E [] Bool := do
   if receiver = frame.this then
-    pure (decide (value.val ≤ ((← EM.st).ex.world.accounts receiver).balance.val))
+    pure (decide (value.val ≤ ((← EM.st).ex.world.accounts receiver).balance))
   else
     match (← EM.st).ex.transfer frame.this receiver value with
     | some ex => EM.modSt fun s => { s with ex := ex }; pure true

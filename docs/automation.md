@@ -3,8 +3,9 @@
 The milestones towards a closer that decides a fragment and a symbolic
 execution of polynomial size.  M0–M5 and M8's A1/A3 are built; M6 is the
 gate in force and the user's decisions; M7 is the decision theorem, its 33
-features and what is still open; M7-next is the plan waiting for the
-user's go.  Labels (M*n*, features *n*, plan steps *n*, decisions c … e3″)
+features and what is still open; M7-next is in progress (the user lifted
+its hold on 2026-11-06; `DecisionTheorem'` modulo the decidable residue is
+merged, 41f8b61be).  Labels (M*n*, features *n*, plan steps *n*, decisions c … e3″)
 are cited by Lean docstrings: keep them.
 
 ## M0 · The leaves of a type (`Theory/Typed/Leaves.lean`)
