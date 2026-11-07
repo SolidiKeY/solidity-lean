@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/term-weakening-roles-v62/semantic-roles-reviewed.json",
-    "bytes": 1833106,
-    "sha256": "b95ed75066d3fa78cf8f765236b31a78cec19a5120b9209c75ed9907e8afd672"
+    "path": "/workspace/h62-successor-bulk/scope-shift-roles-v63/semantic-roles-reviewed.json",
+    "bytes": 1866870,
+    "sha256": "b922c6c054fe68fa17c9f2f46c121211ee7bbca7743b3ce51e1e5c0bd94ee6d0"
   }
 }
