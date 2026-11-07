@@ -5,9 +5,13 @@ All explicit binders are retained with exact source text. Effective source-scope
 variables are recorded separately; only used variables are prepended to full types.
 The manual proof-role table is reviewed, not inferred from binder names or types.
 """
-import argparse, collections, hashlib, json, pathlib, re
+import argparse, collections, hashlib, json, os, pathlib, re
 from census import BASE, ROOT, census, mask
 ROLE_FILE=ROOT/'tests/h62/item2/audit-precompiles/hypothesis-roles.json'
+
+def external_record(name):
+ """Read archived receipt data without changing source/fixture roots or acceptance."""
+ return pathlib.Path(os.environ.get('SOLIDITY_LANE_EVIDENCE_ROOT',str(ROOT)))/'tests/h62/item2/audit-precompiles'/name
 
 
 def boundary(text):
@@ -134,7 +138,7 @@ def in_memory_raw_target(source,patch):
 
 def pending_wait_disposition(rows,evidence):
  """Attach current producer waits. Content-addressed partial input is never acceptance."""
- packet=json.loads((ROOT/'tests/h62/item2/audit-precompiles/partial-Raw-receipt.json').read_text())
+ packet=json.loads(external_record('partial-Raw-receipt.json').read_text())
  raw=(evidence/packet['inline_patch_evidence']).read_bytes()
  assert hashlib.sha256(raw).hexdigest()==packet['reported_host_patch_sha256']==packet['inline_excerpt_sha256']
  source=(ROOT/'Solidity/Syntax/Raw.lean').read_bytes()
@@ -143,7 +147,7 @@ def pending_wait_disposition(rows,evidence):
  assert packet['reconstructed_source_sha_verified'] and packet['strict_in_memory_hunks_verified']==5
  assert packet['reported_axiom_growth_entries']==30 and packet['axiom_growth_root_review'].startswith('pending')
  assert not packet['dependency_accepted'] and not packet['trust_accepted'] and not packet['holds_lifted'] and not packet['original_source_modified']
- disposition=json.loads((ROOT/'tests/h62/item2/audit-precompiles/h70-waits.json').read_text())['current_disposition']
+ disposition=json.loads(external_record('h70-waits.json').read_text())['current_disposition']
  assert disposition['compiler_success_owner']=='claudecloud/move5-20261106/v14-g43'
  assert disposition['compiler_route_status']=='staged-pending-delivery' and not disposition['compiler_delivery_confirmed']
  assert not disposition['partial_Raw_is_dependency_acceptance']

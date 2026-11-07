@@ -1,5 +1,13 @@
 # H62 item 1: TrustAudit fragments — incomplete work
 
+H145 archival notice: historical receipts, source-hash manifests, routing/chain
+records and handoffs named below now live in the private coordination repository:
+https://github.com/SolidiKeY/solidity-lean-coord/tree/4cb216278ddc62582604b4348d65749fcf9bfeb6/evidence/solidity-h62-5-20261106/statement-graph/
+The private archive preserves their exact bytes and source revision. References
+to “committed evidence” in older milestones describe those earlier revisions.
+Current checker inputs, executable fixtures and checksum constants remain here;
+evidence records are no longer code-branch inputs.
+
 Base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The isolated branch contains a prototype ordered raw-byte collector, a baseline splitter, 44 fragments, six external Python tests, and an unapplied central-file marker patch. The central `TrustAudit.lean`, theorem statements, axiom allowlist and generated roots were not edited. No new theorem, axiom, `sorry`, `native_decide`, or proof-budget change is claimed. This is a partial checkpoint, not acceptance of the migration.
 
 The frozen baseline is 106217 bytes, SHA-256 `ece2e6cebbee95d82fec246892993662e81dcfd895831981583d2b0867a37482`. The external census counts 44 `run_cmd` blocks and 44 identical `[``propext, ``Classical.choice, ``Quot.sound]` allowlists, 17 `#print axioms` commands and 1380 quoted `Solidity` occurrences. Raw concatenation reproduces all baseline bytes, including the imports and output commands. The first fragment contains the header and print commands. A migration patch adds a generated-file marker only; a test applies the patch to a temporary copy and compares the result to `collect.py --migration --stdout`. It does not integrate generation into CI or establish producer ownership.

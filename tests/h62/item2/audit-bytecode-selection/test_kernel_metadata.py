@@ -20,6 +20,51 @@ class MetadataSchemaTests(unittest.TestCase):
             "type_expr": "closed type expression", "type": "True", "level_params": [],
             "binders": [], "parents": [],
         }
+    def report_fixture(self, row, identity="one", status="proved"):
+        return {"id":identity,"receipt":{key:"a"*64 for key in
+            ("artifact_manifest_sha256","source_sha256","output_sha256","native_result_sha256","seal_sha256")},
+            "entries":[{"target":observed_type(row),"helper":"Audit.h","status":status,
+                        "reason":"" if status=="proved" else "no supported default"}]}
+    def test_hypothesis_reports_deduplicate_successes_and_retain_failures_and_gaps(self):
+        row=self.ranged_row();other=self.row();other.update(name="unreported",user_name="unreported",declaration_range=None)
+        mapping={"M":[self.source_candidate(row)]}
+        artifacts=[self.report_fixture(row,"old","unsupported-default"),self.report_fixture(row,"new"),self.report_fixture(row,"repeat")]
+        result=hypothesis_report_index([row,other],mapping,artifacts)
+        self.assertEqual(result['summary'],{'kernel_records':2,'source_candidates':1,'artifact_reports':3,'distinct_reported_proof_targets':1,'unsupported_only_targets':0,'unreported_records':1,'unreported_by_record_kind':{'theorem':1}})
+        entry=next(r for r in result['declarations'] if r['name']==row['name'])
+        self.assertTrue(entry['private']);self.assertEqual(entry['report_status'],'reported_proof')
+        self.assertEqual([r['reported_status'] for r in entry['hypothesis_reports']],['proved','unsupported-default','proved'])
+        self.assertTrue(all(not r['joint_witness_established'] and not r['proof_acceptance_established'] and not r['inherited_obligations_established'] and not r['global_witness_ledger_linked'] for r in result['declarations']))
+        self.assertFalse(result['source_correspondence_established']);self.assertFalse(result['full_census_accepted'])
+        self.assertEqual(result,hypothesis_report_index([other,row],mapping,list(reversed(artifacts))))
+        before=copy.deepcopy(result);artifacts[0]['entries'][0]['target']['type_expr']='changed';mapping['M'][0]['kernel_names'].append('changed')
+        self.assertEqual(result,before)
+    def test_hypothesis_reports_reject_stale_type_private_and_unknown_targets(self):
+        row=self.ranged_row();mapping={"M":[self.source_candidate(row)]}
+        for changes in ({'type_expr':'forged'},{'private':False},{'private':1},{'proof_type':1},{'name':'absent'},{'name':[]}):
+            artifact=self.report_fixture(row);artifact['entries'][0]['target'].update(changes)
+            with self.subTest(changes=changes),self.assertRaises(ValueError):hypothesis_report_index([row],mapping,[artifact])
+        with self.assertRaises(ValueError):hypothesis_report_index([row],[],[])
+    def test_hypothesis_reports_refuse_duplicate_id_target_helper_and_bad_outcome(self):
+        row=self.ranged_row();mapping={"M":[self.source_candidate(row)]};artifact=self.report_fixture(row)
+        with self.assertRaises(ValueError):hypothesis_report_index([row],mapping,[artifact,copy.deepcopy(artifact)])
+        bad=copy.deepcopy(artifact);bad['entries']*=2
+        with self.assertRaises(ValueError):hypothesis_report_index([row],mapping,[bad])
+        for changes in ({'status':'uninhabited'},{'status':[]},{'reason':'proof was assumed'},{'status':'unsupported-default','reason':''}):
+            bad=copy.deepcopy(artifact);bad['entries'][0].update(changes)
+            with self.subTest(changes=changes),self.assertRaises(ValueError):hypothesis_report_index([row],mapping,[bad])
+        for change in (None,'x'*64,'a'*63):
+            bad=copy.deepcopy(artifact);bad['receipt']['output_sha256']=change
+            with self.subTest(change=change),self.assertRaises(ValueError):hypothesis_report_index([row],mapping,[bad])
+    def test_hypothesis_reports_keep_unsupported_unreported_and_inherited_uninstantiated(self):
+        row=self.ranged_row();row['parents']=[{'structure':'Parent','projection':'toParent','subobject':True}]
+        mapping={"M":[self.source_candidate(row)]};artifact=self.report_fixture(row,status='unsupported-default')
+        result=hypothesis_report_index([row],mapping,[artifact]);entry=result['declarations'][0]
+        self.assertEqual(entry['report_status'],'reported_unsupported_attempts');self.assertEqual(entry['parent_metadata'],row['parents'])
+        self.assertFalse(entry['inherited_obligations_established'])
+        self.assertEqual(hypothesis_report_index([row],mapping,[])['declarations'][0]['report_status'],'no_report')
+        entry['parent_metadata'][0]['structure']='changed';self.assertEqual(row['parents'][0]['structure'],'Parent')
+
     def test_binder_join_keeps_order_private_heads_and_unresolved_categories(self):
         row=self.row(); row["binders"]=[
             {"name":"x","binder_info":"Lean.BinderInfo.implicit","type":"N.P", "proof_binder":False,"head_constant":"N.P"},

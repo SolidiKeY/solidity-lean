@@ -2049,7 +2049,7 @@ corrected.
 
 ### G49 `p10_execution_bridge` status (move6)
 
-[`bridge-requests.json`](../../tests/h55/g49-final-theorem/bridge-requests.json)
+[`tests/h55/g49-final-theorem/bridge-requests.json`](../../tests/h55/g49-final-theorem/bridge-requests.json)
 routes the P10 family to V15 as `p10_execution_bridge : (x : NativeContext_opcode)
 → Approved_opcode x → BridgeGoal …` over `G49Final.PassCorrect`
 (`Solidity/Roadmap/G49Final/BridgeGoal.lean`). It is not delivered. Its two
@@ -2112,6 +2112,17 @@ above: `depth_disagreement` added, `hreply` weakened to entered calls, the
 wording corrected.
 
 
+### Successor review tracking (2026-11-07)
+
+The entered branch of `callIn_agrees` obtains its buffer equality from `hreply`;
+the theorem contributes case alignment and the non-entered empty-buffer case.
+A concrete simultaneous `depth_disagreement` witness remains open: it must
+instantiate a non-erroring reference CALL at depth1024 together with a covered
+core value and nonempty core reply. No premise-only control is counted as that
+witness. Current local Bridge prerequisite products remain unavailable; the
+coordinator's published Bridge gate is separate evidence, not a local cache or
+witness-construction pass.
+
 ## H121c: frozen V15 ownership transfer (2026-11-07)
 
 Human H121c transfers the full p10_execution_bridge from the frozen Claude V15
@@ -2159,7 +2170,7 @@ run, runtime gate, producer closure or final acceptance is claimed. The full
 p10_execution_bridge has no delivered complete producing files/head yet.
 Read-only finder/skeptic adoption reviews inspect these dependencies and limits;
 no Lean/server/build/native EVM or old-lane contact. Detailed source fingerprints
-and ownership metadata are in the existing bridge-requests.json P10 family.
+and ownership metadata are in the existing tests/h55/g49-final-theorem/bridge-requests.json P10 family.
 
 Owner-boundary clarification from finder review: V13 supplies the actual
 callee/world execution producer. The separately missing core/reference CALL

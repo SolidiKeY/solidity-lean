@@ -2155,3 +2155,376 @@ The non-Lean doc-path gate took65.995s;142 ambiguous basenames remain
 informational, all paths resolve. Scoped touched validation is recorded for
 this Python/docs delta only, not the pending P10 proof application. No full
 Lean/Bridge gate or runtime pass is claimed.
+
+
+### Closed explicit-hypothesis witnesses (2026-11-07)
+
+The existing exact-domain renderer now supports a generic closed-domain path.
+It selects355 source-position candidates from the sealed150-module inspection,
+including57 private kernel names, with no recorded binders/universe parameters.
+Lean then independently resolves the unique actual kernel name, compares the
+full recorded type expression, rechecks original theorem kind and universes,
+and runs the unchanged pinned hypothesis transformation. Only a derived `True`
+domain is accepted; each `True.intro` theorem is checked through `Lean.addDecl`.
+Command-local name indexes in batches of64 share lookup work without changing
+any target/type/domain check. Original theorem statements/conclusions are
+unchanged, and their conclusions are not established by these audit witnesses.
+
+The final guarded native group passes in17.581s, including7.078s serial toolkit
+automation. All355 generated witnesses are axiom-free. Eight refusal controls
+cover nonempty binders, non-theorems, universes, hidden binders, missing names
+and corrupted recorded types, including direct batch lookup/type controls.
+All615 selected import products were rebound to their saved frozen-source
+receipts. The355 target names are disjoint from the earlier103-target roster;
+no combined global ledger or full-census acceptance is inferred. Exact native
+hashes, parent inspection/type/source bindings and monitor receipts are checked
+by the external verify-proof.py recipe under
+`/workspace/parallel-20261103/executable-bytecode/closed-source-domains`.
+
+Failures remain preserved and rejected: first namespace/type-name/reserved-token
+errors, then a295s lookup timeout. The proof-only lookup optimization yielded
+an initial strict pass in10.223s; the final changed program added direct batch
+negative controls and toolkit checks. MCP diagnostics were attempted but failed
+on a read-only socket-lock path; the guarded CLI fallback and try-tactics ran
+serially (`decide` and `simp only` passed). No heartbeat or proof budget was
+raised. A genuinely new Q-BUDGET-01/H30/H33 checkpoint epoch spans13:23:24 to
+17:23:24 UTC; the older expired window was not extended. Four native groups
+consume329.653s total; the timeout is not treated as accepted evidence.
+
+Read-only finder/skeptic reviews pass the corrected batched implementation and
+final refusal controls. New source tests guard private type/name pinning,
+nonclosed/unmapped rosters, support-only WordValidation exclusion and exact
+renderer determinism. Source/kernel statement correspondence and global ledger
+links remain open; only these closed explicit-hypothesis domains are accepted.
+Original703-source closure, full190core+37Bridge inspection/statement/inherited
+accounting, supported-program success, other joint witnesses, Source/native/
+gas/fork and package/performance gates remain unfinished. PowerBounds STOP and
+producer/cache waits are unchanged. Masterc71469fa was adopted during this
+checkpoint. Its coordinator-reported full Bridge pass is recorded separately
+from local artifact readiness. The P10 review path is fully qualified, case
+alignment wording remains explicit, and the concrete depth witness remains an
+open implementation/validation obligation requiring Bridge prerequisites.
+
+
+Final checkpoint99source tests, trust/orphans/roots/fragments/whitespace and doc
+paths pass (56.145s;142 ambiguous basenames informational). No newly tracked
+Lean module or default-build import was added; generated355proofs remain H44
+external artifacts requiring the explicit native verifier. Scoped touched
+checks cover this generator/test/docs delta only. Full lane, P10 depth-control,
+Bridge/local-cache recovery and runtime acceptance are not asserted.
+
+### Data-only dependent hypothesis defaults
+
+The existing exact-domain renderer now attempts data-only, universe-free
+source candidates through the same pinned `hypotheses_of%` transformation.
+It retains every dependent existential binder, refuses proof binders, and asks
+existing `Inhabited` instances for concrete values. Each successful complete
+witness passes `Lean.addDecl`; unsupported synthesis creates no witness and
+is not evidence that a domain is empty. Resource errors propagate.
+
+The frozen-map slice has 363 candidates across 84 modules. A probe and a
+strict repeat produced 124 joint hypothesis witnesses and 239 explicitly
+unsupported default attempts. Exact kernel names, raw types and result JSON
+are pinned; standard axioms are checked. Eight refusal controls guard omitted
+proofs, empty/default failures, universes, hidden binders and corrupted records;
+two synthetic positive domains and a separate `Fin 0` impossibility control
+also check. The latter refutes only its intentional toy domain.
+
+Evidence is external under
+`/workspace/parallel-20261103/executable-bytecode/default-data-domains/`.
+`verify-proof.py` reproduces the source and binds native outputs, guards and
+602 existing frozen import products. The first probe failed on the command's
+IO API; that receipt is retained. No prerequisite or PowerBounds retry ran.
+The existing 13:23:24–17:23:24 UTC budget window was reused, not extended.
+Independent finder/skeptic static reviews found no blocking issue; native
+acceptance remains distinct from source authenticity or statement correspondence.
+
+These witnesses prove hypothesis feasibility, not the original conclusions,
+compiler success, G01 linkage or full census closure. The 239 unsupported
+cases remain uncovered by this strategy. The original 703-source closure,
+190-core/37-Bridge inspection and all remaining correspondence, joint-witness,
+physical, Source, gas/fork, performance and package gates remain open.
+H126 A remains binding: the nine out-of-census WordValidation domains are
+support-only, with no census or domain credit. No new tracked Lean module or
+public import is introduced.
+
+Final read-only reviews identified two verifier provenance gaps: probe-manifest
+import rebinding and an unpinned parent report. The verifier now rebinds the
+reconstructed strict manifest and checks the exact sealed parent hash/size
+before selection. Both reviewers confirmed the fixes; verifier replay passes.
+Native probe/strict times are 43.675s/39.822s, with no new module over 60s.
+
+### Decidable dependent premises
+
+The same generic default-domain constructor now has an opt-in proof-bearing
+mode. It retains every dependent existential binder, synthesizes a decision
+for each proof premise, and constructs `of_decide_eq_true` only when Lean
+reduces that decision to true. Complete witnesses still pass the kernel and
+standard-axiom checks. False, stuck or missing decisions are unsupported;
+resource exceptions propagate. The default data-only mode remains byte-exact
+against its prior renderer and its sealed artifact replays unchanged.
+
+The selected frozen-map slice contains 328 proof-bearing candidates across
+82 modules. Probe/strict kernel checks pass in 30.393s/28.826s: 18 hypothesis
+witnesses, including five private declarations, and 310 unsupported attempts.
+Five accepted targets repeat the existing public renderer roster; 13 lie
+outside that roster. These are local slice counts, not distinct global witness
+or census totals. Original conclusions and source correspondence remain open.
+
+Nine refusal controls, four synthetic inhabited domains and two intentional
+impossibility controls pass. In particular, a premise unsupported at default
+`n=0` has a checked alternative witness at `n=1`; a separate `False` premise
+has a checked impossible domain. Unsupported synthesis must never be read as
+an impossibility result for a frozen statement.
+
+External evidence is under
+`/workspace/parallel-20261103/executable-bytecode/decidable-premise-domains/`.
+The non-mutating `verify-proof.py --check` reconstructs the strict source,
+pins parent metadata/original source receipts, and rechecks 603 existing frozen
+import products and native guard/output receipts. Independent read-only
+finder and skeptic reviews pass. No Lean module exceeds 60s; no prerequisite,
+PowerBounds retry, proof-budget increase, new registered module or public
+import was added. The existing budget deadline remains 17:23:24 UTC.
+All original full-source/census, supported-program success, Source/physical,
+gas/fork, Bridge/runtime and performance obligations remain unfinished.
+
+### Bounded typed input sampling
+
+The existing checked-premise renderer now optionally tries four shared seeds
+(0, 1, 4, 32) for Nat/Bool/Fin inputs. This is diagonal sampling, not a search
+of all input combinations. Other data still use existing inhabited instances;
+all dependent proof premises still need actual checked decisions. Fin values
+use Fin.ofNat with NeZero evidence: if instance lookup misses a computed bound,
+the constructor first proves that bound nonzero through the checked decision
+path. Fin 0 is refused. No proof premise or bound is assumed.
+
+The same 328-candidate slice now has 49 accepted joint hypothesis witnesses
+and 279 unsupported attempts. All 18 prior successes are retained; 31 cases
+are recovered relative to that policy. Fifteen accepted declarations are private.
+Six accepted targets also occur in the existing public renderer roster; these
+counts do not imply new distinct global/census coverage. Probe/strict checks
+pass in 51.490s/37.088s, with no module above 60s. Two intervening elaboration
+failures and the earlier instance-only probe remain preserved, not accepted.
+
+Eleven inherited/sampled refusal checks, six synthetic positive domains and
+two intentional impossibility controls pass. Recovery at a nonzero Nat and a
+computed Fin bound is checked; the corresponding False/Fin-zero cases are
+refused. Unsupported sampling is never an emptiness result or a new exclusion.
+The prior data-only and unsampled checked-premise source/artifact replays still
+pass unchanged. No package performance or original-conclusion proof follows.
+
+Evidence is external under
+/workspace/parallel-20261103/executable-bytecode/sampled-premise-domains/.
+Its non-mutating verifier reconstructs the strict source, checks 603 frozen
+import products and sealed parent/source receipts, and pins the prior-policy
+comparison. Independent read-only finder and skeptic pass. The existing
+17:23:24 UTC budget deadline was reused; no prerequisite or PowerBounds retry,
+new registered module, public import or proof-budget increase occurred.
+
+The requested disk helper at /workspace/coord-tools/disk.sh was absent. H1
+cleanup removed only this worktree’s inactive regenerable native IR outputs
+and two CLI binaries with their build metadata. Shared caches, sealed evidence
+and Lean olean products remain untouched. Cleanup records include exact paths,
+file inventories and before/after free bytes; free space was restored above
+2 GiB. Native outputs will need regeneration for future full builds. All
+original source/census, supported-success, Source/physical, gas/fork, full
+runtime/Bridge and performance obligations remain open; H126 support-only
+WordValidation treatment is unchanged.
+
+### Deduplicated hypothesis-report accounting
+
+The existing metadata graph now accepts explicit report pointers with exact
+observed-type snapshots and receipt fingerprints. It preserves every source
+candidate and kernel record, earlier unsupported attempts beside later successful
+reports, unreported constants/fields/theorems, private names and uninstantiated
+parent metadata. Repeated successful reports count once per kernel target.
+Requested helper names do not assert that declarations exist, especially for
+unsupported attempts. The pure join validates metadata shape and association;
+it does not independently validate native proofs or grant source coverage.
+
+A replay bound to four existing sealed artifacts joins 1,374 reports to 3,262
+metadata records. It records 528 distinct targets with supplied successful
+reports, 518 with unsupported-only reports, and 2,216 with no report. The latter
+are 1,281 constants, 130 fields and 805 theorems; they are not silently omitted
+or classified as failed proof attempts. These are prefix report-accounting
+counts, not global witness-ledger or completed-census totals. Manual evidence
+outside these four artifacts is not classified by this index.
+
+The full 1,660 frozen lexical candidates remain in the source-position table.
+Their position joins retain exact signature hashes; 150 modules have supplied
+inspection metadata, while 40 core and 37 Bridge modules remain uninspected.
+Source identity/correspondence, inherited instantiation, global-versus-input
+premise roles and all acceptance flags remain open. Source-position matches and
+native-report pointers establish no additional theorem or full-source closure.
+
+Evidence is under
+/workspace/parallel-20261103/executable-bytecode/hypothesis-report-accounting/.
+The non-mutating replay pins parent metadata, the frozen census, four seal hashes
+and relevant native source/output/log/guard receipts. It reruns no Lean workload
+and mutates no earlier seal. Independent finder and skeptic found a Boolean/int
+snapshot-equality issue: Python treats True and 1 as equal. Canonical JSON
+comparison now rejects those substitutions; regression cases cover private and
+proof-type flags. Both reviewers pass the correction and final provenance join.
+All original 703-source, source/statement/owner, joint-witness/supported-success,
+Source/physical, gas/fork, Bridge/runtime and performance obligations remain.
+
+### Projection registry and raw type metadata
+
+A supplemental native inspector observes the actual projection registry, constructor
+and inductive types for all 130 projection records in the existing 150-module
+metadata prefix. It retains missing-metadata statuses explicitly and preserves the
+original inspector schema and template. The 130 records span 42 modules and 50
+constructors; parameter counts, field indices and structure membership agree in
+all records. RawTailGuardCertificate is the sole parent-bearing structure in this
+subset. These are uninstantiated type expressions, not inherited-type proofs,
+source ownership, field feasibility or joint witnesses.
+
+Two serial native checks took 6.718 and 7.429 seconds. Repeated metadata is
+identical apart from receipt fingerprints; the second source adds class-flag and
+wrong-module controls. Four hundred thirty-two frozen import products are
+rechecked against the earlier source/product receipt. The parser rejects stale
+types, modules, fingerprints, malformed Boolean/natural fields and incomplete
+streams. All 115 Python tests pass. The failed initial Name-qualification probe
+is retained alongside both passing runs. Independent finder and skeptic pass
+the generator, parser and provenance verifier. No census, source correspondence,
+inherited instantiation, global ledger or runtime acceptance is inferred.
+
+Evidence and non-mutating replay: /workspace/parallel-20261103/executable-bytecode/
+projection-registry-inspection/verify-inspection.py --check. H1 cleanup records
+retain SHA256-identical frozen products while removing owned live build copies;
+shared caches and earlier seals are unchanged. Original source closure and
+PowerBounds STOP remain binding.
+
+### Projection-to-kernel and parent-route join
+
+The generic registry join now binds the native supplement to every supplied
+kernel projection snapshot, rejecting stale types and incomplete rosters. It
+retains all 3,262 records: 130 projection nodes and 3,132 nonprojection names.
+The structure index has 50 roots and one parent edge, with no missing records
+or cycles in this supplied prefix. RawTailGuardCertificate reaches its three
+direct fields and the two TailGuardCertificate fields. Repeated parent routes
+retain all edges while counting each observed field name once per root.
+
+Of the 130 projection types, 117 are proposition-valued and 13 are data-valued.
+This classification proves no inhabitance. Registry ownership means the
+observed containing structure only; it establishes no actor/source ownership.
+Raw types remain uninstantiated, and inherited instantiation, correspondence,
+joint-witness, ledger and completed-census flags remain false. Missing records,
+cycles and unavailable parent projections remain explicit in synthetic controls.
+
+The pure replay verifies the preceding seal, exact parent metadata and native
+receipts, then invokes its non-mutating source/product check. It executes no
+new Lean inspection or prerequisite build. Evidence is under
+/workspace/parallel-20261103/executable-bytecode/projection-kernel-join/.
+The full Python suite passes 119 tests; direct projection-file execution passes
+eight tests. Finder and skeptic confirmed a test entry-point omission, now
+fixed by placing unittest.main after both classes and avoiding inherited test
+duplication. Both final reviews pass. Original source closure, all remaining
+190-core/37-Bridge obligations, producer waits and PowerBounds STOP persist.
+
+### Exact V2 frame-field hypothesis witnesses
+
+The existing pinned binder extractor now supports actual registered,
+monomorphic proposition-valued projections, rechecking their exact raw kernel
+types before extracting domains. It retains all input/output/self, tail and
+capacity-room binders. Data projections, nonprojections, unsupported universes,
+stale type snapshots and duplicate field targets are refused. The generic
+extractor is reused; no frozen field signature or original conclusion changes.
+
+Three named positive domains cover FrameCertificate.inputRoom, frame and
+capacity in the frozen Selection V2 interface. They use duplicateHead 7 over
+input [7], output [7,7], and tail [11,99] for the frame/capacity cases. The
+capacity witness includes its actual room proof. The original certificate
+supplies self; it is never silently assumed inhabited. A synthetic certificate
+with a False field has a refuted domain, retained as an intentional negative
+control rather than positive coverage. These are hypothesis-feasibility proofs,
+not the original field conclusions or whole-source/runtime adequacy.
+
+The three proofs pass native checking in 3.326 seconds. Their only axioms are
+propext, Classical.choice and Quot.sound; the empty-domain refutation uses none.
+The sole missing support module, the unchanged frozen FrameCapacityV2, was
+kernel-built in 8.066 seconds under the single 180-second prerequisite
+allowance. Including the failed receipt-wrapper group, its guarded total is
+12.791 seconds. No checked file exceeds 60 seconds. Original prefix products
+and the new module are SHA256-bound under unchanged module names; no cache key
+or artifact bytes are reconstructed. Initial missing-import, receipt-path and
+package-search-path failures remain recorded. No timing STOP was retried.
+
+The fixture frame-field-witnesses.json is checker-read proof source, not a
+receipt. The 122-test suite passes. Finder and skeptic confirmed a native
+receipt-path verification gap: the replay now pins complete stage-specific
+Lean commands, source/output paths and the reconstructed generated-source hash.
+Both final reviews pass. Proofs, native output and guards are sealed outside
+the code branch under /workspace/parallel-20261103/executable-bytecode/
+frame-field-domains/ and archived separately under H145. No global witness
+ledger, full census, inherited instantiation or original 703-source closure
+acceptance is inferred; all original producer waits and STOPs remain.
+
+### Literal and legacy-frame field domains
+
+The generic fixture is now selection-field-witnesses.json. It retains the
+three V2 frame domains and adds four exact frozen field domains: literal
+InstructionCertificate.success/refusal and legacy FrameCertificate.frame/
+prefixes. The instruction witnesses use the existing literalCertificate with
+an explicitly bounded finite word seven and a matching nonempty input stack.
+The refusal-domain witness establishes the equivalence's hypotheses; it does
+not claim that PUSH actually faults. The legacy witnesses adapt the genuine
+DUP frame and call the existing Scalar.prefix_capacity theorem. Their prefix
+case supplies an actual stackBound premise, split and reached-prefix equation.
+This does not repair V1's known conditional physical-capacity limitation.
+
+All seven distinct domains pass native checking in 5.538 seconds; four are new
+and three rechecked, not seven additional domains. Only standard axioms occur
+in the positive proofs; the shared impossible-certificate refutation remains
+axiom-free. All 36 import products were already verified, including the prior
+FrameCapacityV2 kernel build. No new prerequisite or timing-STOP retry ran.
+The first isolated check lacked the read-only parent-product mount, now fixed
+with an in-container product-hash preflight. Failed finite-word numeral
+elaboration was repaired with an explicit Fin constructor and decide bound.
+Both failures remain recorded. MCP diagnostics were unavailable because the
+checkout socket lock is read-only; the guarded native fallback was used.
+
+The 122-test suite passes, and independent read-only finder/skeptic source and
+provenance reviews pass. Replay pins intended source, complete command, output,
+standard axiom reports, prior seal and all 36 products. Evidence is sealed at
+/workspace/parallel-20261103/executable-bytecode/selection-field-domains/ and
+archived separately under H145. Earlier frame-field evidence must be replayed
+from its recorded historical commit because its checker-read fixture was
+renamed and extended. No inherited instantiation, global ledger, full census,
+Source/runtime adequacy or original closure acceptance is claimed.
+
+### Compiler-premise inspection and joint domains
+
+Two previously uninspected frozen modules, Selection.Premises and PremisesV2,
+now have native all-constant inspection packets: 41 records and 11 proposition
+fields. Their fingerprints remain separate from the earlier 150-module packet.
+This brings independently observed core modules to 152; 38 core and 37 Bridge
+modules remain uninspected. Native type/module observations establish no Source
+identity, actor ownership or statement correspondence. All 41 records remain
+accounted for, including the eight fields not witnessed by this checkpoint.
+
+Three exact field domains are witnessed: V1 CompilerPremise.preserves, and V2
+CompilerPremise.inhabited/preserves. They reuse Controls.identityCompiler and
+its preserves field, with all global parameters and real certificate self.
+Preservation cases include a concrete caller whose numeric stack is [11] and
+the actual final=initial relation proof. This demonstrates coexistence of the
+producer and per-input hypotheses. The identity relation remains source-
+independent; this is not Source coverage or a general G24/G49/runtime producer.
+The existing reject_false_compiler control was kernel-checked and reused.
+
+Three missing frozen support modules were checked serially in one 4.793-second
+group under a single 180-second prerequisite allowance. No allowance was
+multiplied per import. The two-module inspection took 6.797 seconds; the three
+field-domain proofs took 11.728 seconds. Every checked file stayed below 60
+seconds. Positive proofs use standard axioms only; the shared empty-certificate
+refutation remains axiom-free. No PowerBounds or other timing STOP was retried.
+
+The checker-read compiler-field-witnesses.json fixture and its regression test
+are code. The 123-test suite and independent finder/skeptic reviews pass. Native
+source, products, guard receipts and deterministic replay are sealed off-branch
+at /workspace/parallel-20261103/executable-bytecode/compiler-premise-inspection/
+and archived under H145. Owned inactive regenerable build outputs were removed
+for disk headroom; source, frozen products, shared cache and evidence remain
+intact. Future full builds may need those outputs fetched or rebuilt. Original
+closure, full census, source adequacy, runtime/Bridge and performance gates
+remain open; no global ledger or full-source acceptance is inferred.

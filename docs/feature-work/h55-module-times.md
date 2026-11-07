@@ -2351,3 +2351,556 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/primitive-extra-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Backend migration diagnostic observations
+
+`backend_migration_controls.py` records two previously unreferenced backend
+migration diagnostics with source hashes and the migration document hash. One
+copies the pinned Scalar.ternary body and enumerates actual opcode constructors;
+the other isolates its library dependencies. Neither replaces the original
+backend definition or changes its signature or axiom pin. Current invocation,
+inputs, effects and outcomes remain unresolved; this is supplied-subset evidence.
+
+At merge head `9d847d390d68a5a29d0f1f8257f60e9dba33341e`, the refreshed static
+index has 790 candidates, 586 with supplied current references and 204 without;
+seven retain historical references for review. Eleven candidates were added and
+none changed or removed since the preceding snapshot. Independent read-only finder
+and skeptic checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/backend-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Automation migration probe observations
+
+`automation_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ContextInterface
+checks original context signatures and inhabited caller/option controls; its
+handoff reports historical old and new passes. SyntaxControls covers positive
+syntax forms and malformed argument parser refusals; its handoff reports an old
+pass and a blocked new-toolchain import. Parser compatibility does not establish
+tactic-owner proof or refusal semantics. Current invocation, inputs, effects
+and outcomes remain unresolved; this is supplied-subset evidence.
+
+At `1c0eedf852f39e24e36f5d00ebce286ba7b7e834`, the refreshed static index
+has 790 candidates, 588 with supplied current references and 202 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. The
+skeptic requested the historical toolchain asymmetry above; the regenerated
+artifact and index linkage were rechecked. Evidence hashes are in
+`tests/h55/module-times/automation-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Historical delta binding in extended updates
+
+The coordinator identified that extended reference updates no longer accepted
+classifications bound to the earlier snapshot delta. The legacy CLI allowed that
+binding, but extended mode reserved its third argument for the version manifest.
+`reference_index_update.py` now accepts an optional `--delta PATH` immediately
+after that manifest in extended mode. The path and bytes must match recursively
+verified prior-index lineage, the artifact must have the snapshot delta list
+shape, and candidate hashes and mapping fields must still match the current drift.
+The output records the delta as a hashed input. Calls without the flag retain their
+previous interface; legacy mode rejects the extra flag.
+
+Synthetic CLI controls accept a lineage-bound delta and reject a stale candidate,
+a same-content unbound path and changed delta bytes. The full H55 Python suite
+passes 116 tests. Independent read-only finder and skeptic reviewed the change
+without Lean or a server. They identified two limits: a classification self-declares
+its input digest, so the updater does not prove each classified row belongs to
+the historical delta; and the new drift is not independently authenticated by
+this optional historical binding. This is static integrity checking, not runner,
+producer or runtime attestation. No historical result was reclassified as a pass.
+
+## Historical delta format control
+
+The extended updater was exercised with the actual historical
+`fc06-snapshot-delta-v2.json` from verified prior-index lineage and a deliberately
+synthetic classification of an unchanged candidate. The output binds the real
+delta and synthetic artifact by hash. The entire
+`/workspace/h55-module-times-evidence/delta-real-format-output.json` is test-only:
+it contains a synthetic current reference and must never be promoted into an
+operational index or counted as genuine coverage. It tests format and binding,
+not current runner provenance or acceptance.
+
+The CLI regression also rebuilds the baseline, drift and classification hashes
+after corrupting the delta shape, then verifies rejection specifically as an
+invalid delta artifact. All 116 H55 Python tests pass. Independent read-only
+finder and skeptic reviewed the artifact linkage and test-only boundary without
+Lean or a server. The non-atomic snapshot at
+`e015024a5b7b45c48ca63d809badd06d57c2aecf` observed 21 new candidates;
+classification and authenticated runtime coverage remain incomplete. Evidence
+hashes are in `tests/h55/module-times/delta-real-format-evidence.sha256`.
+
+## SortCheck migration probe observations
+
+`sortcheck_migration_controls.py` records five newly observed migration probes
+with source hashes and the migration document hash. They cover alias metadata,
+constructor-tag expectations, finite scanner controls and structural/interface
+inventories. The finite controls do not establish external-parser equivalence;
+structural serialization is not cross-toolchain definitional equality. Current
+invocation, inputs, effects and outcomes remain unresolved.
+
+At `3e3e2c0b423ad9fd5fb157f961be43c218f89275`, the operational static index
+was rebased from `reference-update-1c0.json`, preserving 21 newly observed paths
+without using the synthetic delta-control output. The refreshed index has 811
+candidates, 593 with supplied current references and 218 without; seven retain
+historical references for review. Independent read-only finder and skeptic checked
+roles, hashes, historical preservation and synthetic-reference exclusion without
+Lean or a server. Evidence hashes are in
+`tests/h55/module-times/sortcheck-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## V09 audit candidate observations
+
+`v09_audit_controls.py` records nine previously unreferenced V09 audit sources
+with hashes and the audit document hash. Their stated roles distinguish joint
+boundary, sequence, stack and memory premises, private premise fixtures and
+private kernel identity checks. The CoreBoundary over-limit bundle is a negative
+case with refused Input, not a successful-input witness. Current invocation,
+inputs, effects and outcomes remain unresolved; this subset does not establish
+whole-audit, native ByteWorld or general compiler adequacy.
+
+At merge head `d4f4b381d82b3e8c66cdc0b135d546a61aeeb3b0`, the refreshed static
+index has 813 candidates, 602 with supplied current references and 211 without;
+seven retain historical references for review. Two candidates were added and
+three previously unreferenced candidates changed since the preceding snapshot.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/v09-audit-evidence.sha256`. This non-atomic observation
+does not establish current runtime acceptance.
+
+## V09 allocation audit observations
+
+`v09_allocation_controls.py` records three previously unreferenced allocation
+audit sources with hashes and the audit document hash. Their stated roles cover
+joint allocation inputs and private identity checks, reached allocation capacity
+and failure, and mapped-prefix allocator preservation. The failure case does not
+invent a post-failure machine or tail. Current invocation, inputs, effects and
+outcomes remain unresolved; this subset does not establish native ByteWorld or
+whole compiler adequacy.
+
+At `3e5a58fad5118c5b58e86964ce9920ffe8e6d40f`, the refreshed static index has
+813 candidates, 605 with supplied current references and 208 without; seven retain
+historical references for review. One previously unreferenced candidate changed
+and none was added or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, hashes and history preservation without Lean or
+a server. Evidence hashes are in
+`tests/h55/module-times/v09-allocation-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## V08 callable component observations
+
+`v08_callable_controls.py` records ten previously unreferenced callable and
+world-image component sources with hashes and the audit document hash. They
+cover coherent metadata, reflection, conditional, argument, tuple, unchecked
+update and cast cases. The world-image fixture uses a toy history-insensitive
+ledger. These component observations do not establish the canonical H68 bridge,
+SourceSpec admission, ABI or general compiler adequacy. Current invocation,
+inputs, effects and outcomes remain unresolved.
+
+At merge head `0d8b9bb2e8fd6cd36b23a440a067cb4fdacbe4d4`, the refreshed static
+index has 816 candidates, 615 with supplied current references and 201 without;
+seven retain historical references for review. Three candidates were added and
+none changed or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, hashes and history preservation without Lean
+or a server. Evidence hashes are in
+`tests/h55/module-times/v08-callable-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## V10 Source AST audit observations
+
+`v10_source_ast_controls.py` records nine previously unreferenced storage audit
+sources with hashes and the audit document hash. They cover symbolic array and
+target-write witnesses, structural conversion, list correspondence, AST type,
+expression and statement checks, unit resolution and a full-unit elaboration
+probe. Several AST modules read LibraryTry fixture files or `fixtureInputs`.
+The full-unit probe is manual and currently fails; its source says that failure
+is not an accepted expected-failure gate and full acceptance remains open.
+Current invocation, inputs, effects and outcomes remain unresolved; this subset
+does not establish Source execution or physical/world adequacy.
+
+At `14b1740d853c4dad38d5f2d7c1918bdd7248db86`, the refreshed static index
+has 816 candidates, 624 with supplied current references and 192 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, file reads, hashes and history preservation without Lean or a
+server. Evidence hashes are in `tests/h55/module-times/v10-source-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Language migration probe observations
+
+`language_migration_controls.py` records three previously unreferenced language
+migration probes with source hashes and the migration document hash. They cover
+isolated decision/bounds controls, a structural type/axiom transcript and a
+read-only elaborated interface transcript. Binder-name normalization and
+version-specific printing do not establish cross-version kernel identity.
+Current invocation, inputs, effects and outcomes remain unresolved.
+
+At merge head `e19141234da8865154664a7305184d489d46ce5d`, the refreshed static
+index has 819 candidates, 626 with supplied current references and 193 without;
+eight retain historical references for review. Three candidates were added and
+IntegerCallableJoint changed since the preceding snapshot. Its earlier callable
+artifact and source identity are retained as historical, not counted current.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/language-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Calculus migration probe observations
+
+`calculus_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. They cover exact
+closed-type metadata encoding and isolated String API controls. The encoder
+returns before opening a file when its default expected-module list is empty;
+when populated it opens the path in `H62_INTERFACE_OUTPUT` for writing. The
+transcript proves no interface-equivalence theorem, and the String cases do not
+establish full Calculus preservation. Current invocation, inputs, effects and
+outcomes remain unresolved.
+
+At `126c27de59d9badfc961a3cf02cea23af378de15`, the refreshed static index
+has 819 candidates, 628 with supplied current references and 191 without; eight
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, conditional file effect, hashes and history preservation without
+Lean or a server. Evidence hashes are in
+`tests/h55/module-times/calculus-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Examples migration probe observations
+
+`examples_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ApiFixture exercises
+isolated Lean parser/elaborator/evaluator APIs, not a Solidity program property.
+InterfaceDump serializes loaded Examples constants, requires
+`H62_INTERFACE_OUTPUT` and opens that path for writing; it does not prove type
+equivalence. The historical handoff says the full dump awaits all-module
+compilation. Current invocation, inputs and outcomes remain unresolved.
+
+At `9248f6ddc804f2cf20462dfc61235909f58d9eaa`, the refreshed static index has
+823 candidates, 628 with supplied current references and 195 without; ten retain
+historical references for review. Four candidates were added, while two formerly
+referenced V10 Source AST controls changed and their old source identities and
+artifact references are retained as historical. Independent read-only finder and
+skeptic checked roles, file effect, hashes and history preservation without Lean
+or a server. Evidence hashes are in
+`tests/h55/module-times/examples-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Bytecode selection witness observations
+
+`bytecode_witness_controls.py` records two previously unreferenced bytecode
+selection sources with hashes and the audit document hash. One describes
+Boolean-binding joint witnesses and supported gasless intrinsic IR controls; the
+other describes source/encoding and checked terminal-slice failure witnesses.
+These do not establish a native byte loader, charged execution, fork agreement
+or general Source adequacy. Current invocation, inputs, effects and outcomes
+remain unresolved; this is supplied-subset evidence.
+
+At `ec6c7440857cb4b55872b1c33be7889921d8d7e1`, the refreshed static index has
+823 candidates, 630 with supplied current references and 193 without; ten retain
+historical references for review. No candidates were added, changed or removed
+since the preceding snapshot. Independent read-only finder and skeptic checked
+roles, hashes and history preservation without Lean or a server. Evidence hashes
+are in `tests/h55/module-times/bytecode-witness-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Yul byte-object view observations
+
+`yul_views_controls.py` records two previously unreferenced Yul view sources
+with hashes and the feature document hash. They describe a typed schema over
+bytes, addresses and residual memory, plus a seven-row table with original
+statement instances and boundary cases. Current invocation, inputs, effects and
+outcomes remain unresolved; these source observations do not establish
+whole-model or native runtime acceptance.
+
+At `4ba389750144438633a43808af9d85f6257adeab`, the refreshed static index has
+823 candidates, 632 with supplied current references and 191 without; ten retain
+historical references for review. No candidates were added, changed or removed
+since the preceding snapshot. Independent read-only finder and skeptic checked
+roles, hashes and history preservation without Lean or a server. Evidence hashes
+are in `tests/h55/module-times/yul-views-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Memory audit tool observations
+
+`memory_audit_controls.py` records two previously unreferenced audit sources
+with hashes and the audit document hash. EntryAudit describes mapped ABI-entry
+component observations; HeaderParser extracts source-signature boundaries with
+Lean parsing only, without elaborating the inventoried source as proof. The
+extractor reads `H62_HEADER_INPUT` and writes `H62_HEADER_OUTPUT`. Current
+invocation and outcomes remain unresolved; this does not establish a compiled
+decoder, charged execution or fork acceptance.
+
+At `4a90547d1e8645e34521d0ddaa5b073706447cf7`, the refreshed static index has
+823 candidates, 634 with supplied current references and 189 without; ten retain
+historical references for review. One previously unreferenced candidate changed
+and none was added or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, file effects, hashes and history preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/memory-audit-evidence.sha256`. This non-atomic observation
+does not establish current runtime acceptance.
+
+## Readonly binding phase observations
+
+`readonly_bind_controls.py` records five previously unreferenced source-model
+controls with hashes and the feature document hash. They distinguish callback
+depth/static refusals from credit failure and continuation, and preserve the
+order of receiver, value, argument and encoding-failure phases. Joint capture
+and credit inputs remain model witnesses, not compiler, EVM, gas, fork or frame
+adequacy. Current invocation, inputs, effects and outcomes remain unresolved.
+
+At `a15daa6f6c7390eb0dadeb0c69d25691623c0633`, the refreshed static index has
+823 candidates, 639 with supplied current references and 184 without; ten retain
+historical references for review. No candidates were added, changed or removed
+since the preceding snapshot. Independent read-only finder and skeptic checked
+roles, hashes and history preservation without Lean or a server. Evidence hashes
+are in `tests/h55/module-times/readonly-bind-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Yul audit follow-up observations
+
+`yul_audit_followup.py` records two previously unreferenced audit sources with
+hashes and the audit document hash. AllocationWitnesses distinguishes nine
+ordinary joint witnesses from three H69 separation certificates;
+ReservedRefutation records SLOTNUM reservation-table nonmembership as an H69
+refutation, not a success contract or new exclusion. Current invocation, inputs,
+effects and outcomes remain unresolved; no runtime memory, executable builtin,
+fork or gas adequacy follows.
+
+At `4047430d40c5c4c6e1892535e4d167eb7cbb3d5b`, the refreshed static index has
+834 candidates, 638 with supplied current references and 196 without; thirteen
+retain historical references for review. Eleven candidates were added and four
+changed since the preceding snapshot. Three changed candidates had current
+references, which were demoted to versioned historical records using hashes from
+their committed manifests; the fourth already lacked a current reference.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/yul-followup-evidence.sha256`. This non-atomic observation
+does not establish current runtime acceptance.
+
+## Trust-audit fixture observations
+
+`trust_fixture_controls.py` records two previously unreferenced isolated audit
+fixtures with source, feature document and harness hashes. Fixture exercises a
+propext-dependent theorem and allowed-axiom audit loop; FixtureAddon supplies an
+isolated imported witness. The historical harness copies fixture inputs and writes
+isolated oleans and logs for positive and negative controls. Current invocation,
+paths and outcomes remain unresolved; these fixtures are not the project-wide
+axiom audit.
+
+At `6fdb6d08f294983acb3a730fa7b3485c113c0a5e`, the refreshed static index has
+834 candidates, 640 with supplied current references and 194 without; thirteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, harness effects, hashes and history preservation without Lean or
+a server. Evidence hashes are in `tests/h55/module-times/trust-fixture-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+H127 assigns H109 runner remediation to native-browser
+(`solidity-directruntime-20261104`); five-module A/B evidence is to be handed
+over when requested. H93 and the quiet-window requirement remain in force.
+
+## Optimizer migration probe observations
+
+`optimizer_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. They cover isolated
+validator/pipeline and typed-control fixtures plus an imported kernel type and
+selected axiom transcript. Current invocation, inputs, effects and outcomes
+remain unresolved; this subset does not establish complete optimizer equivalence
+or production acceptance.
+
+At `f1fd29f2ece70f33009195446bc744a33b036baf`, the refreshed static index has
+834 candidates, 641 with supplied current references and 193 without; fourteen
+retain historical references for review. One previously referenced V10 unit
+resolution source changed; its old source identity and artifact reference are
+retained as historical, not counted current. Independent read-only finder and
+skeptic checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/optimizer-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Semantics migration probe observations
+
+`semantics_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ExceptCompatibility
+contains isolated constructor discrimination/injectivity fixtures; ExportAbiTypes
+serializes elaborated ABI constant types and writes the path in `H62_API_OUTPUT`.
+The fixtures do not validate AbiAccess or establish cross-version equivalence.
+Current invocation, inputs and outcomes remain unresolved.
+
+At merge head `a074dd53d465860d748cdf33cce654d8061d7317`, the refreshed static
+index has 837 candidates, 643 with supplied current references and 194 without;
+fourteen retain historical references for review. Three candidates were added
+and none changed or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, file effect, hashes and history preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/semantics-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
+
+## Source migration probe observations
+
+`source_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. IntegerInstanceSemantics
+states a bounded Q.isInt bridge and nonvacuous zero control; Inventory emits a
+compiler-format Source constant/type ledger to `H62_API_OUTPUT`. These do not
+establish unrelated function behavior, semantic API equivalence or complete
+migration. Current invocation, inputs and outcomes remain unresolved.
+
+At `b11f931bdfa81d543319ba05d04e22e5d0e5b023`, the refreshed static index has
+837 candidates, 645 with supplied current references and 192 without; fourteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, output effect, hashes and history preservation without Lean or a
+server. Evidence hashes are in `tests/h55/module-times/source-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## Typing migration probe observations
+
+`typing_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ExportInterfaces
+emits an old-toolchain imported Typing constant/type/axiom inventory to
+`TYPING_API_OUTPUT`; StringAPIFixture contains isolated new-toolchain candidate
+adapters for Raw dependency errors. The historical full new build remains blocked
+in Syntax.Raw. Current invocation and outcomes remain unresolved; this subset
+does not establish producer migration or global semantic equivalence.
+
+At `c7159a6690cc5527a94c43770fce1a5175434f6c`, the refreshed static index has
+837 candidates, 647 with supplied current references and 190 without; fourteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, output effect, hashes and history preservation without Lean or a
+server. Evidence hashes are in `tests/h55/module-times/typing-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+## TestSuite migration probe observations
+
+`testsuite_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. StandardAPIs isolates
+kernel typing-refusal classification, including distinguishing successful actions
+and propagating non-refusal errors. StringApiBoundary contains isolated String/
+Slice conversion witnesses. These do not validate imported Solidity obligations
+or the complete parser. Current invocation, inputs, effects and outcomes remain
+unresolved; this is supplied-subset evidence.
+
+At `cb6261f85de2ab71f4e8029dddaffe42a47d09fe`, the refreshed static index has
+837 candidates, 649 with supplied current references and 188 without; fourteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. Evidence
+hashes are in `tests/h55/module-times/testsuite-migration-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
+
+## V08 callable follow-up observations
+
+`v08_callable_followup.py` records five previously unreferenced V08 component
+sources with hashes and the audit document hash. Their roles cover nonpayable
+and payable target guards, integer callable inputs, role attachment and typed
+Keccak byte-bound premises. The UInt8 bound is not hash injectivity, and the
+guards do not establish Source admission or the canonical H68 bridge. Current
+invocation, inputs, effects and outcomes remain unresolved.
+
+At `693bba27f2e2d11a4d6ea86d1c6f5a8e4d1d57a5`, the refreshed static index has
+837 candidates, 654 with supplied current references and 183 without; fourteen
+retain historical references for review. One previously unreferenced candidate
+changed and none was added or removed since the preceding snapshot. The updated
+IntegerCallable source has a new current static observation; its earlier source
+and artifact record remains historical. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. Evidence
+hashes are in `tests/h55/module-times/v08-callable-followup-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
+
+
+## H70: OpenLoops.RowsNine static build membership
+
+Source reviewed: VX1 commit `ee8eccaf5f9536a44912c7d2ec31329e7b46adaf`, fetched from `codex/solidity-fullscope-20261104/vx1-contracts-environment`. At that commit, `Solidity/Examples/Tactics/OpenLoops/RowsNine.lean` (Git blob `92d1a2dfbabed7efa9ba468ae14c121898f467c1`) imports `Solidity.Examples.Tactics.OpenLoops` and contains the existing `binomialRowsNine` proof. This is the expensive split-out example, not a separate test input or a measured timing result.
+
+The generated `SolidityExamples.lean` (blob `c52cd46fe0ed5db8a43cc357a3fd89db637cb069`) explicitly imports `Solidity.Examples.Tactics.OpenLoops.RowsNine`. `SolidityExamples` is a default target, so the split module is currently enrolled in the default example root at that VX1 commit. The generated `SoliditySlowExamples.lean` (blob `e6ccdf63b3a7b4b0891e256727aeef16a84fa35a`) imports `OpenLoops` but not `OpenLoops.RowsNine`; its `SLOW_EXAMPLES` generator list contains the former and not the latter. Import direction matters: importing the parent does not import its child. The `gate.sh checkpoint` touched-module filter removes names explicitly in the slow root; it does not itself remove this child, and the conditional examples build uses the current default root. Thus this source snapshot does not establish the requested non-default classification.
+
+H109 static classification for integration: enroll `Solidity.Examples.Tactics.OpenLoops.RowsNine` in the non-default slow library with `OpenLoops`, preserving its source and imports, and remove it from the generated default root. Preserve CI's build of both example libraries and `gate.sh full` via `run-lean.sh`; check transitive default-root reachability as well as generated root membership. VX1 and `solidity-directruntime-20261104/native-browser` are the intended consumers. This is a source-based classification and integration requirement, not an executed build, timing result, proof pass, or authorization to relocate axiom pins. Current H55 master `65e69b6426a9a4fc3fb5541f41726a4bfefda5d0` has no separate RowsNine file, so the finding is bound to the specified VX1 commit and cannot be inferred from the H55 checkout alone.
+
+H116 clarification supplied with the request: the Derived17 replay limit is **cumulative**, 300 seconds on VM/local and runner-calibrated 600 seconds in CI. It is not a per-module H109 allowance. The current CI command passes `--budget 600` under an outer 660-second timeout; `scripts/check-memory-loop-timing.py` defaults to 300 seconds. This clarification supersedes any older intake statement that the deadline scope was unknown; it does not authenticate the H109 serial runner or grant timing acceptance.
+
+Independent read-only finder and skeptic reviews (no Lean server) confirmed the import-direction and checkpoint risks. The existing `test_slow_partition_and_reverse_imports` control rejects a non-slow `RowsNine` importing slow `OpenLoops`, and also assumes exactly 14 slow entries; an integration adding the child must update that control without weakening its reachability checks. At the VX1 commit `TrustAudit.lean` imports the parent while referring to `binomialRowsNine`, which the child now defines: the integration must account for an explicit child import and CI's trust audit. These are static findings, not executed failures. The source's recorded 594-second chunk-64 observation is historical, not a new measurement or a 300-second pass. Reviews identified no permission to alter VX1 or shared producer files in this classification checkpoint.
+
+
+## Vectors syntax probe observations
+
+`vectors_parser_controls.py` records the source-hashed `ParseContext.lean` and `ParseProbe.lean` syntax probes and hashes their cited drivers. They report selected parser nodes and, for ParseContext, declaration boundaries; they do not elaborate project imports or establish proofs or timing. The programs accept paths and name a hard-coded Lean 4.24 sysroot; actual current execution and toolchain identity remain unverified. Driver modes can write external logs or JSON, and the context manifest mode can write `tests/h55/vectors-tables/master-raw-context-manifest.json` if absent. No parser or Lean process was run for this classification.
+
+At sampled head `605db6b63d48665e16dd6db7f68c72c21f6e39de`, the updated static index has 837 candidates, 656 with supplied current references and 181 without; fourteen retain historical references for review. Existing historical records and tombstones are preserved. Artifact hashes are in `tests/h55/module-times/vectors-parser-evidence.sha256`; this non-atomic static observation does not establish full inventory or runtime acceptance. Independent read-only finder and skeptic reviewed source, drivers, hashes and index preservation without Lean or a server. Both found that the initial effects text omitted the possible in-repository context-manifest write; the classification and external artifacts were corrected before this checkpoint.
+
+
+## Backend vector exporter observations
+
+`backend_vector_controls.py` records three source-hashed standalone exporters and their cited handoff documents: environment instructions (`tests/backend-environment/Emit.lean`), creation payloads (`tests/creation-artifacts/Export.lean`) and failure-emitter programs (`tests/failure-emission/Export.lean`). Their `#eval` commands emit finite vector data; handoffs describe external EVM harnesses. Current execution, dependencies, exit status and harness output remain unverified. External vectors do not prove whole-program behavior or provide module timing evidence.
+
+At sampled head `5d89b5bb966ca743bc4a52443f42cfc7dfb77b85`, the refreshed static index contains 837 candidates, 659 with supplied current references and 178 without; fourteen retain historical references for review. Existing candidate rows, historical records and tombstones are preserved. Hashes are in `tests/h55/module-times/backend-vector-evidence.sha256`. Independent read-only finder and skeptic checked the roles, effects, source and document hashes and index lineage without Lean or a server; no concrete mismatch remained. This non-atomic static observation is not runtime or full-inventory acceptance.
+
+
+## Control-tuple fixture observations
+
+`control_tuple_controls.py` records source hashes and cited JSON fixture and handoff hashes for four standalone candidates: trusted-verifier obligation controls, Lean-hosted production status controls, signature/axiom inspection and an intrinsic model runtime probe. These roles do not establish Source/EVM adequacy, current execution or module timing. Per-file and native execution outcomes remain unverified. The candidate drift tracks Lean source, not changes to auxiliary JSON fixtures or the handoff document; recheck the embedded auxiliary hashes before reusing these references.
+
+At sampled head `5300bdd3dffff06a418a7125356969bb5f00c34a`, the refreshed static index has 837 candidates, 663 with supplied current references and 174 without; fourteen retain historical references for review. Candidate rows, historical records and tombstones are preserved. Hashes are in `tests/h55/module-times/control-tuple-evidence.sha256`. Independent read-only finder and skeptic checked roles, fixture and document hashes and index lineage without Lean or a server; skeptic identified the auxiliary-drift boundary, which is recorded above and in the artifact. This non-atomic static observation does not establish runtime or full-inventory acceptance.
+
+
+## VA1 standalone witness observations
+
+`va1_standalone_controls.py` records three source-hashed standalone decision witnesses and their handoff document hash: a source target/coverage counterexample, its link to a generic coefficient boundary, and a two-prefix normalization client with adjacent fuel controls. These static roles do not establish complete decision coverage, a current proof check or module timing. Current invocation, driver effects and output remain unverified. The document hash must be checked separately on reuse because candidate drift tracks Lean files.
+
+At sampled head `f5312b8e80ce3d7eafa20dd1ff6e01c884bc0a88`, the index contains 849 candidates, 661 with supplied current references and 188 without; nineteen retain historical references for review. Since the previous snapshot twelve paths were added and six changed; five changed referenced rows preserve historical source and artifact versions and the sixth had no current reference. Fourteen earlier historical rows remain represented. Hashes are in `tests/h55/module-times/va1-standalone-evidence.sha256`. The updater initially refused missing historical artifact versions; verified version hashes were supplied and the rerun passed. The focused test initially failed because its temporary directory already existed; fixture setup was corrected and the test passed. Independent read-only finder and skeptic checked the roles, source/document hashes and history without Lean or a server. This non-atomic static observation is not full-inventory or runtime acceptance.
+
+
+## EVM compiler audit helper observations
+
+`evm_audit_helpers.py` records source and driver hashes for `Closed.lean` and `Inspect.lean`. The former inspects requested direct closed equalities and allowed axioms, leaving non-equalities pending; the latter emits requested theorem metadata, binders and axioms with witness status pending. Both require a names file and one module, emit JSON rows, and have Python drivers that can write names, logs and evidence at caller-selected paths. Current inputs, workspace, execution and output remain unverified. Candidate drift does not track driver or names-file changes; recheck the embedded driver hashes and supplied inputs before reuse. These inspections do not establish witness completeness, semantic success or timing acceptance.
+
+At sampled head `07bc0726edd2dc93ea30eefb8c0dc9d670d0ff60`, the index has 850 candidates, 663 with supplied current references and 187 without; nineteen retain historical references for review. One candidate was added and no previously tracked candidate changed or was removed. Evidence hashes are in `tests/h55/module-times/evm-audit-helper-evidence.sha256`. Independent read-only finder and skeptic checked roles, driver hashes and index lineage without Lean or a server. The finder suggested Inspect accepted multiple modules, but source line 28 explicitly rejects any module count other than one; the existing classification was retained. No runtime or full-inventory acceptance follows.
+
+
+## Calldata audit control observations
+
+`calldata_audit_controls.py` records the source and handoff hashes for the standalone RawBool `Signatures.lean` theorem/control signature checks and RawInt `Axioms.lean` guarded exact axiom messages. Their current invocation and outcome remain unverified; source-level descriptions do not establish full calldata coverage or module timing. Candidate drift does not track handoff document changes, so embedded document hashes require separate checking before reuse.
+
+At sampled head `3e8aaf292a45d80e25dfda68fa0309ecab0cf0fa`, the index contains 850 candidates, 665 with supplied current references and 185 without; nineteen retain historical references for review. Candidate rows, history and tombstones were preserved. Hashes are in `tests/h55/module-times/calldata-audit-evidence.sha256`. Independent read-only finder and skeptic reviewed roles, source/document hashes and lineage without Lean or a server; no concrete mismatch remained. This non-atomic static observation is not runtime or full-inventory acceptance.
+
+
+## V17 query template observations
+
+`v17_query_controls.py` records three source-hashed V17 query templates and their cited driver hashes: creation-try replay, bounded kernel metadata and memory-call observation. Drivers compose query source and may write logs and JSON, start a Docker container and write `/workspace/scratch/v17-unresolved-container.json`; current invocation, producer inputs and results remain unverified. Candidate drift does not track driver or producer input changes, so recheck their identities and embedded driver hashes before reuse. These observations do not establish semantic premises, release closure or module timing.
+
+At sampled head `715b767fb56861d8fc4db9ce087e8ea214246e59`, the index has 850 candidates, 668 with supplied current references and 182 without; nineteen retain historical references for review. Existing candidate rows, history and tombstones remain preserved. Evidence hashes are in `tests/h55/module-times/v17-query-evidence.sha256`. Independent read-only finder and skeptic checked source roles, driver hashes and index lineage without Lean or a server. Skeptic identified the fixed state-file and container side effects; the classification and evidence were corrected. This non-atomic static observation is not runtime or full-inventory acceptance.
+
+
+## Memory-reference development control observations
+
+`memory_reference_controls.py` records three source- and handoff-hashed standalone controls: AST admission/model observations, focused intrinsic calculus controls and a generated kernel matrix. The admission file reads `tests/directruntime-20261104/memory-references/evidence/admission-inputs.json` and listed files and writes two model-results JSON files; the generator reads `tests/directruntime-20261104/memory-references/manifest.json` and overwrites `KernelMatrix.lean`. Both named inputs were absent in this checkout when sampled; that blocks those corresponding runs until inputs are supplied. The generator hash and observed presence are recorded, but auxiliary input and handoff drift is not tracked by candidate drift and must be rechecked separately. No control or generator was run. These observations do not establish source adequacy, native/browser acceptance or timing.
+
+At sampled head `90f69fc4e0bf70de0fe89778b128754e47c47b2a`, the index has 850 candidates, 671 with supplied current references and 179 without; nineteen retain historical references for review. Existing candidate rows, history and tombstones remain preserved. Evidence hashes are in `tests/h55/module-times/memory-reference-evidence.sha256`. Independent read-only finder and skeptic checked roles, missing inputs, effects, hashes and index lineage without Lean or a server; no concrete mismatch remained. This non-atomic static observation is not runtime or full-inventory acceptance.
+
+
+## Shared translator audit observations
+
+`shared_translator_audits.py` records source and handoff hashes for standalone shared API signature checks, axiom inventory and the H90 printed-body/name parity census. The census reads `tests/directruntime-20261104/shared-translator/artifacts/h90/cr-census-inputs.json` and the fixture paths it lists, and writes `cr-census-results.json` in the same directory. Its input manifest was absent in this checkout when sampled; the corresponding run requires that manifest and its listed inputs. Candidate drift does not track those inputs or handoff changes, which require separate rechecks. Current execution and results remain unverified; these observations do not establish Source adequacy, semantic closure or timing.
+
+At sampled head `ab4cd72c0590f220c517195fb66f16d19e01fc07`, the index has 850 candidates, 674 with supplied current references and 176 without; nineteen retain historical references for review. Existing candidate rows, history and tombstones remain preserved. Evidence hashes are in `tests/h55/module-times/shared-audit-evidence.sha256`. Independent read-only finder and skeptic checked roles, missing input, output effect, source/document hashes and index lineage without Lean or a server; no concrete mismatch remained. This non-atomic static observation is not runtime or full-inventory acceptance.
+
+
+## Shared translator local-control observations
+
+`shared_local_controls.py` records source and handoff hashes for address, fixed-byte and narrow-local finite controls. Each requires an AST fixture absent at this snapshot: `tests/directruntime-20261104/shared-translator/artifacts/address/AddressLocals.ast.json`, `artifacts/fixed-bytes/FixedByteLocals.ast.json`, `artifacts/h90/CanonicalReaderContract.ast.json`, and `artifacts/h90/NarrowLocalRuntime.ast.json` (the last three relative to the shared-translator directory). The corresponding per-file executions need those inputs. Fixed-byte length-check refusal and narrow checked-overflow revert versus Panic payload remain documented gaps. Candidate drift does not track fixture or handoff changes; recheck them separately. These observations do not establish Source/ABI adequacy, native closure or timing.
+
+At sampled head `a47cc5d05d519f2558791fa9719d716a807bf46c`, the index has 850 candidates, 678 with supplied current references and 172 without; nineteen retain historical references for review. Candidate rows, history and tombstones are preserved. Evidence hashes are in `tests/h55/module-times/shared-local-evidence.sha256`. Independent read-only finder and skeptic confirmed roles, missing fixtures, source/document hashes and index lineage without Lean or a server; no concrete mismatch remained. This non-atomic static observation is not runtime or full-inventory acceptance.
+
+
+## Shared translator boundary-control observations
+
+`shared_boundary_controls.py` records source and handoff hashes for dynamic bytes/string boundary refusals, finite dynamic-memory model controls and environment-member routing controls. The first and third read respectively `tests/directruntime-20261104/shared-translator/artifacts/dynamic-bytes/DynamicBytesBoundary.ast.json` and `tests/directruntime-20261104/shared-translator/artifacts/environment/EnvironmentMembers.ast.json`; both inputs were absent at this snapshot, blocking those executions. The finite model control uses in-source cases and has no such AST input. Candidate drift does not track fixture or handoff changes, which require separate checks. These observations do not establish Source/ABI adequacy, native closure or timing.
+
+At sampled head `86cae6a297ef6fabaa4e23940fb88bb0ae75a889`, the index has 850 candidates, 681 with supplied current references and 169 without; nineteen retain historical references for review. One other candidate changed and had no current reference. Candidate history and tombstones are preserved. Evidence hashes are in `tests/h55/module-times/shared-boundary-evidence.sha256`. Independent read-only finder and skeptic confirmed roles, fixture status, hashes and index lineage without Lean or a server; no concrete mismatch remained. This non-atomic static observation is not runtime or full-inventory acceptance.
+
+
+## H145 evidence relocation
+
+The lane's 35 added checksum manifests and the two delivered input packets were archived in the private coordination repository at `evidence/solidity-h55-terra-20261106/module-times/`, archived in commit `864cb8cedfffdd19a5fba7b955009436aebbad97` and verified at archive tree `5764776438f25be1ad6467dab3e542f53ae9c4e6`. Earlier mentions of `tests/h55/module-times/*-evidence.sha256` describe historical records now held there, not files in this code branch. The 345 retained input files were separately staged and checksum-verified in `/workspace/h62-coordinator-inputs/router-20261107T163113Z/verified-module-times-inputs`; staging does not authenticate execution or replace the missing original VM/census lineage. No Lean validation or timing acceptance is implied.
+
+Independent finder review confirmed all 35 manifest bytes match the archive, but their 136 distinct referenced absolute artifact paths are absent in this recovered VM. Archiving the manifests alone does not recover or verify those underlying historical artifacts.

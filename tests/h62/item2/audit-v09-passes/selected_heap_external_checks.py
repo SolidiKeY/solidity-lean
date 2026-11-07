@@ -5,7 +5,8 @@ Run selected_heap_artifacts.py --acceptance after staging the manifest artifacts
 These original detailed assertions are deliberately not portable source tests.
 
 Authorized live statement transitions are recorded separately in
-tests/h62/item2/audit-v09-passes/authorized-statement-transitions.json.
+the private H145 evidence archive cited in
+docs/feature-work/h62-2-audit-v09-passes.md (authorized-statement-transitions.json).
 Do not relabel this frozen historical signed_refusal as signed_acceptance or
 transfer its proof credit before explicit replacement-statement validation.
 """
