@@ -139,6 +139,10 @@
 # H125 additive Source typing pair
 
 | `Source/TypingV2.lean` | H57 additive environment-aware local declaration judgment over frozen v1 derivations; generic policy fold, compatibility bridge and positive H24 admission, with no Lowering import. |
+
+| `Source/ExpressionTyping.lean` | Byte-preserving split of expression/type-name rules; re-exported by Source/Typing. |
+| `Source/LibraryTyping.lean` | Generic qualified/using library target lookup, typed receiver matching and supported boundary. |
+| `Source/LibrarySemantics.lean` | Shared typed calldata guard and ordinary/unavailable/non-calldata laws; no physical pointer ABI fabrication. |
 | `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
 | `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
 | `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly; its typed-source reachability is in `CalldataNestedCopyControls`. |

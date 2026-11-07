@@ -21,7 +21,8 @@
     "retTuple": "unchanged v1 premises; no recursive statement child",
     "emit": "unchanged v1 premises; no recursive statement child",
     "revertError": "unchanged v1 premises; no recursive statement child",
-    "rethrow": "unchanged v1 premises; no recursive statement child"
+    "rethrow": "unchanged v1 premises; no recursive statement child",
+    "tryLibrary": "H125/H157 additive new syntax: recursively check success and Error catch items; existing v1 premises byte-identical"
   },
   "items_cases": {
     "nil": "true",
@@ -43,5 +44,13 @@
     "library try/Error support"
   ],
   "compatible_witness": "Mapping-free-nameable environments imply CompatibleAt; concrete empty-env Bool declaration lifted from actual v1 proof.",
-  "timing_status": "Newest user decision accepts recorded 42.1964s to 46.0804s (+9.2046%) for H128/H125 and releases the historical H16 stop. Any further noticeable slowdown stops and reports. Raw history retained."
+  "timing_status": "Newest user decision accepts recorded 42.1964s to 46.0804s (+9.2046%) for H128/H125 and releases the historical H16 stop. Any further noticeable slowdown stops and reports. Raw history retained.",
+  "baseline_commit": "571feb661294a4c53d926040b51d0507902e7575",
+  "v1_constructor_extension": {
+    "before": 21,
+    "after": 22,
+    "authority": "H125/H157",
+    "new_constructor": "tryLibrary",
+    "existing_premises": "unchanged"
+  }
 }

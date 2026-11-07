@@ -3,7 +3,7 @@
   "status": "SOURCE_CHECKPOINT_TIMING_RELEASED_CONSUMER_MIGRATIONS_PENDING",
   "source_base": "fc060cb4b9ee49b744c6805e31638971a172facc",
   "module": "Solidity/Source/TypingV2.lean",
-  "module_sha256": "ccfaee52e9891284f5e4bd71687fd9c09f8db9fd7af00df72bd0bd6c5f4b1de2",
+  "module_sha256": "22f8edfa60f63780eb3f09e875a3faa0533690ac6423344de0ce7702795e9535",
   "version_pair": {
     "v1": "Source.StmtD/ItemsD in unchanged Source/Typing.lean",
     "v2": "Source.V2.StmtD/ItemsD in additive Source/TypingV2.lean",
@@ -61,7 +61,7 @@
     }
   ],
   "inventory_limit": "These are direct H24 refusal/assembly consumers identified in the current tree, not a claimed census of every v1 typing user.",
-  "pending": "Consumer migrations require versioned predicates and reproof, V10 first. Library try/Error(string memory) is a separate Source checkpoint; this checkpoint supplies no library support.",
+  "pending": "H128 remains accepted/on master. Separate library candidate is H16 STOP, unmergeable pending further timing disposition, static companion and enabled-plan repair. V10-first H24 migrations/v1 retirement remain open.",
   "timing_release": {
     "authority": "Newest coordinator-relayed user decision, 2026-11-07",
     "accepted_before_seconds": 42.19636442301271,
@@ -71,5 +71,6 @@
       "H125 library try/Error(string memory)"
     ],
     "remaining_stop": "Any further noticeable Source checking slowdown stops and reports; no budget change."
-  }
+  },
+  "library_extension": "H125/H157 permits new tryLibrary syntax; v2 traverses both bodies without changing existing v1 premises."
 }

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT_H16_STOP_DO_NOT_MERGE",
+  "to_lane": "solidity-v07-v11-20261030/v10-storage-operations",
+  "consumer": "V10 checkpoint246 C.f/C.g, source library try/Error",
+  "authorizations": [
+    "H125",
+    "H132",
+    "H154 (#154)",
+    "H157 (#157)"
+  ],
+  "modules": [
+    "Solidity/Source/Typing.lean",
+    "Solidity/Source/LibraryTyping.lean",
+    "Solidity/Source/LibrarySemantics.lean",
+    "Solidity/Source/Infer.lean",
+    "Solidity/Source/Resolved.lean",
+    "Solidity/Source/Eval.lean"
+  ],
+  "control": "tests/h55/vectors-tables/LibraryTryControls.lean",
+  "fixtures": {
+    "LibraryTry.ast.json": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+    "LibraryTryIR.ast.json": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1"
+  },
+  "typing_extension": {
+    "new_constructor": "StmtD.tryLibrary",
+    "before": 21,
+    "after": 22,
+    "existing_constructors": "byte-identical after excluding only new constructor",
+    "existing_theorems": "same statements; only new proof cases"
+  },
+  "migration": "Adopt the separate Source checkpoint and rerun the actual whole-unit elaboration probe for both JSON inputs. Preserve H128 v1/H24 negative controls and migrate H24 refusal consumers explicitly to v2; library support does not retire v1.",
+  "coverage": "Both original units and f/g outcomes; independent derived Source-only write/revert stress; generic typed guard laws and actual refusal/zero-horizon controls.",
+  "limits": [
+    "No physical storage-pointer ABI or linked library installation evidence",
+    "No compiler/G01 SourceSpec/IntrinsicSpec adequacy or lifecycle/admission rescope",
+    "Only value/storage-pointer library parameters and value results; caller Error string remains supported",
+    "Named Error handler only; no Panic/multi-catch completeness",
+    "Not a fresh EVM replay"
+  ],
+  "timing": {
+    "accepted_seconds": 46.08038527399185,
+    "candidate_seconds": 48.673995498000295,
+    "further_percent": 5.628447350400734,
+    "status": "STOP under H132; disposition requested in H125-LIBRARY-TIMING-02"
+  },
+  "remaining": [
+    "H16 timing disposition",
+    "Frontend/Static checker branch and unchanged-statement completeness proof",
+    "Enabled-plan preflight/pending-stop repair and validation",
+    "Full affected/checkpoint gates after repairs"
+  ]
+}

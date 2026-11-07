@@ -4133,6 +4133,7 @@ import Solidity.Source.Elaborated
 import Solidity.Source.Eval
 import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
+import Solidity.Source.ExpressionTyping
 import Solidity.Source.FailureApproxControls
 import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
@@ -4181,6 +4182,8 @@ import Solidity.Source.InferHelpers
 import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger
+import Solidity.Source.LibrarySemantics
+import Solidity.Source.LibraryTyping
 import Solidity.Source.Machine
 import Solidity.Source.MemoryLocalDelete
 import Solidity.Source.Monetary

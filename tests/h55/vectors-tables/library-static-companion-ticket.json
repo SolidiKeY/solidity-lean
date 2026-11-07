@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "to_lane": "coordinator",
+  "item": "H125-STATIC-COMPLETE-01",
+  "status": "LIVE_STATIC_OWNER_OR_SCOPED_AUTHORIZATION_REQUIRED",
+  "files": [
+    "Solidity/Frontend/Static/InferStmt.lean",
+    "Solidity/Frontend/Static/InferStmtComplete.lean"
+  ],
+  "needed": "Add library/Error enumeration using existing typed argument/overload/signature/boundary/body enumeration; add only the tryLibrary completeness proof case. Keep every existing rule/theorem statement and budget.",
+  "gate_failure": "Source H24 per-file gates fail through the missing companion: stmt_complete elaboration reaches 200000 heartbeats; no budget increase authorized.",
+  "evidence": [
+    "/workspace/vy1-words-evidence/h125-library-functional-gates/1.log",
+    "/workspace/vy1-words-evidence/h125-library-functional-gates/2.log"
+  ],
+  "limits": "No live Frontend/Static file edited. Source timing STOP also remains; no gate acceptance claimed."
+}

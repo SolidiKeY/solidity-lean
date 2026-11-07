@@ -577,3 +577,73 @@ the positive v2 theorem must never be supplied to the false v1 predicate. Global
 frontend/physical/compiler adequacy, automatic migration and library try/Error
 support are not claimed. Coordinator approval is still required before any v1
 retirement. Library support will be published as its own checkpoint/head.
+
+
+## H125 library try/Error(string) — separate candidate checkpoint
+
+H154 authorizes a typed delegated Source entry, preserving storage identity,
+with explicit unavailable-calldata refusal and no physical/linkage adequacy.
+H157 authorizes the one new StmtD.tryLibrary constructor: the family grows from
+21 to 22 constructors; every existing constructor/premise remains byte-identical
+and old theorem statements remain unchanged. No H57 pair is needed for this
+new syntax. The environment-aware H128 pair and its negative v1 H24 controls
+remain separate; v1 retirement and V10-first migrations remain open.
+
+ExpressionTyping is a byte-preserving module split, re-exported through the
+public Typing import. LibraryTyping reuses existing type elaboration, overload
+selection and argument conversion for qualified and current-scope using calls.
+Only public/external library functions with value/storage-pointer parameters
+and value results are admitted by the new boundary. The caller may still
+return a string from the Error handler. Memory/calldata library arguments,
+non-value library results, Panic/multiple catch clauses and broader using
+forms remain unsupported, with no claim of complete library coverage.
+
+The typed entry preserves this/sender/value/static/storage context, increments
+depth, uses fresh memory, restores caller memory, and rolls back callee
+storage/logs on revert before the handler. Arguments and successful return
+extraction are outside the callee catch. Value-only input uses the existing
+Source ABI encoding; pointer input has no fabricated bytes and never uses
+caller calldata. The generic withLibraryCalldata guard propagates through
+internal computation and explicitly refuses unsupported calldata observation.
+Its ordinary mode is the original action. Normal callAddr/enterInstance/
+envLoop/dispatch source text is byte-identical to H128.
+
+Both original LibraryTry JSON inputs resolve, elaborate every original body,
+and execute f/g success and Error paths with Source results 8/18 and 9/19,
+including the failure string. A separately labeled derived Source-only stress
+input writes 13 through the library pointer, then reverts; the caller storage
+observation remains 9. It is not compiler provenance for the derived input.
+Malformed/foreign Error payloads, target shadowing/type/member refusals, actual
+unavailable-calldata evaluation and zero-horizon timeout are controlled. Five
+new guarded axiom reports are standard-only. Finder and skeptic found no
+confirmed defect read-only without Lean. The optional descriptor experiment
+and unsuccessful proof attempts are retained as raw failures off Git; no
+budget/maxHeartbeats change, sorry, native_decide or new axiom was introduced.
+
+The final same-resource timing comparison and affected/checkpoint gates are
+tracked separately; this candidate is not declared mergeable before they pass.
+Physical storage-pointer ABI encoding, linked-library installation and G01/
+compiler adequacy remain gaps under H154. Source-only execution is not a fresh
+EVM replay or an active-catalog rescope approval.
+
+
+H16 STOP for the separate library candidate: the final three-run sum of
+medians is 48.6740s versus accepted 46.0804s (+5.6284%, another 2.5936s),
+counting all added/split modules. H132 requires stop/report on further
+noticeable slowdown. No Source edits/checks or unchanged timing rerun follow.
+This is a preserved draft, DO NOT MERGE. KeySort/version/layer checks passed;
+raw timing samples and the new H16-HOLD report remain off Git.
+
+The affected H24 gates are not passing: Frontend/Static/InferStmt lacks the
+new library form and InferStmtComplete needs its new proof case. The failure
+is a 200000-heartbeat elaboration timeout, not permission to raise budgets.
+H125-STATIC-COMPLETE-01 requests the two live companion files or their owner
+patch. Existing H24 negative source text is unchanged; no new passing H24
+kernel claim is made across the failing dependency.
+
+A final enabled-resource-plan review also found a real pending repair:
+callLibrary needs preflight before positive-fuel early refusals/encoding and
+when exposing completed success/revert outcomes after rollback. The current
+frame wrapper alone does not preserve the pending-stop outcome protocol.
+Plan=None functional controls remain valid; enabled-plan integration is not
+accepted. The proposed repair is saved off Git for work after H16 release.
