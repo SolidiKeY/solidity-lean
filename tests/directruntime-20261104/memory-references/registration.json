@@ -1,9 +1,19 @@
 {
-  "modules": [{
-    "module": "Solidity.Frontend.ExecutableAst.Memory.Reader",
-    "root": "Solidity.lean",
-    "area": "docs/module-map/frontend.md",
-    "row": "ExecutableAst/Memory/Reader | Location-aware primitive/array reference locals and dynamic allocation through Shared.Reader; existing intrinsic elaboration owns alias/copy and indexing semantics."
-  }],
-  "centralRegistration": "proposal only; coordinator owns generated roots and shared maps"
+  "modules": [
+    {
+      "module": "Solidity.Frontend.ExecutableAst.Memory.Reader",
+      "root": "Solidity.lean",
+      "area": "docs/module-map/frontend.md",
+      "row": "ExecutableAst/Memory/Reader | Location-aware primitive/array reference locals and dynamic allocation through Shared.Reader; existing intrinsic elaboration owns alias/copy and indexing semantics."
+    }
+  ],
+  "centralRegistration": "proposal only; coordinator owns generated roots and shared maps",
+  "developmentModules": [
+    {
+      "module": "V1StorageCases",
+      "path": "tests/directruntime-20261104/memory-references/V1StorageCases.lean",
+      "scope": "owned test library only; no ordinary verifier import",
+      "row": "V1 storage-array counterexample capability probe on four original fixture imports; retained metadata is not certification."
+    }
+  ]
 }
