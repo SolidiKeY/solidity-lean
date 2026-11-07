@@ -231,7 +231,7 @@ Owned worker retirement now waits for closure before reusing capacity. The match
 ### Concrete execution contract (human decision Q-CLI-01)
 
 Build Compiler Artifact saves the current file and runs the pinned compiler,
-writing an AST plus source-hash manifest under the backend's ignored
+writing an AST plus source-hash manifest under
 `solidityLean.compilerOutputDir` (default `bin`, relative to this file's workspace folder, or an absolute path). Each build writes a fresh source-named child directory; the report records that directory and the source hash. This setting affects Build and custom Build only; concrete Run/Test retain their existing artifact storage. It does not prove obligations or claim an EVM
 binary. Concrete Run uses the existing `scripts/solidity-lean.mjs run` typed-model
 executor (`Solidity.Frontend.Cli`), with an explicit `Contract::function(signature)`
