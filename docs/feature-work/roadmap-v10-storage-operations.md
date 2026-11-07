@@ -562,3 +562,46 @@ for this increment; no shared inventory is written. Independent read-only
 finder/skeptic source and metadata reviews and strict committed-tree document
 comparisons accompany the handoff. Earlier producer, performance, documentation
 and full-validation holds remain open.
+
+
+### Checkpoint 230: complete numeric write with a retained frame
+
+After adopting published master, the existing ArrayAccessWitnesses module
+supplies every exact frozen TargetArrayWrite.complete_numeric premise together.
+The same populated array, successful index-0 false write and machine are used.
+The selected frame is nonempty: raw retained index 1, distinct from written
+index 0. Logical apartness and symbolic nonaliasing are proved. The explicit
+FiniteRun uses N=16, L=2, R=1, local hash 8, preimage data0 and covered locations
+root0, child0 and child1. Initial header/frame representation, Transport, key
+fitting and every covered target cell agree on these same inputs.
+
+The actual theorem destructs this joint bundle and applies the original law,
+retaining successful whole-machine execution, postrepresentation, numeric
+Transport and all covered target observations. Observations distinguish numeric
+addresses 0/8/9 and target header/written/retained cells as 1/0/1, preserving the
+outside slot and non-store context. A hash-zero negative control refutes the
+finite-run premise via two covered colliding addresses and the existing
+word_inj law. This is a finite-model premise refusal, not a physical hash
+collision or global injectivity claim. Source/compiler/world adequacy stays open.
+
+Corrected source commit `f2189455bb6c61b10022b6d81e5a49cb241c4461` passed all
+39 guards in 3.02 seconds, peak aggregate RSS 717266944 bytes, with no resource
+stop. Fifteen new proofs use two empty axiom sets, three propext-only sets and
+ten standard-three sets. Initial local hash/boundedness reductions failed and
+were corrected. Guard generation also matched a theorem-name prefix, nesting
+an accidental duplicate guard; commit 833a5ed14779235e3ffaae6abc09c6ce4e7ddaea
+and its exact-head check FAIL are retained. The corrected guard preserves all
+measured expectations and the passing receipt names only the corrected source.
+
+Only one new frozen statement is counted. The registry maps 65 rows: 53 joint
+bundles and 12 data inhabitants, with 3216 of 3281 conservative rows uncovered.
+Prior source identities remain in historical_checks; complete and unrelated
+source receipts remain historical. Registry corruption controls pass.
+
+Trust scanning passes 6616 sources and 289 inventoried sites with zero findings.
+Strict pins remain FAIL: 16559 pinned, zero errors, 384 unrecorded and zero
+baselined changes. The fifteen new entries are standard-only; no shared
+inventory or gate policy was edited by this increment. Independent read-only
+finder and skeptic reviews, exact committed-tree documentation comparisons and
+all rejected diagnostics accompany the sealed handoff. Original producer,
+performance, full-validation and documentation holds remain open.
