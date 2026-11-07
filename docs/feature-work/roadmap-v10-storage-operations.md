@@ -1221,3 +1221,33 @@ probe remains a historical failed manual check outside automated gates, not
 replaced by these proofs; H16 library try/Error(string) support is still pending.
 General mapping-bearing H24, Y04 and separate4.35 waits and every STOP remain.
 Original/consolidated proof/backfill/coverage and full final gates remain open.
+
+### C250 — tuple components and decoded string bytes
+
+SourceAstTupleCorrespondence proves the existing tuple child adapter agrees
+with the shared optional-expression reader, null remains a hole, and successful
+tuples contain a nonempty ordered Each correspondence for every component.
+Empty-tuple rejection is proved as the existing explicit conversion gap, not a
+Source exclusion. Ordinary string conversion retains exactly the bytes returned
+by the existing decoder under exact field/digit/decoded-result hypotheses;
+this is not source provenance or independent compiler fidelity.
+
+Two adapter/hole guards use propext; three tuple/rejection/string laws use
+propext+Quot.sound. All five have exact measured guards. No reader definition,
+Source file, frozen statement/interface/premise/budget/exclusion or trust policy
+changed. Initial proofs failed while the optional reader and selected tuple
+branch were hidden; unfolding that existing reader and exposing the selected
+branch before the extensional adapter rewrite fixes the proof. Failed diagnostics
+and rejected recovery reports are retained, never accepted or pinned.
+
+Existing expression controls retain all37actual expressions per pipeline and
+add generic hole/empty/inline-array conversion boundaries with regression intent
+in the docstring. No per-case Source fixture copies or new phase folders.
+Finder and skeptic reviewed final code read-only without Lean/server/build and
+found no findings. This is structural syntax progress only; actual Source
+origin/H24/lifecycle and S03-PANIC41 producers remain undelivered local H121b
+obligations. C246 remains a historical failed MANUAL elaboration probe outside
+automated gates, not replaced by these proofs. H16 library try support, separate
+mapping-bearing H24, Y04 physical,4.35 trust/timing waits and all STOPs remain.
+Original/consolidated coverage, child/declaration/statement correspondence,
+accepted-artifact binding and full final gates remain open.
