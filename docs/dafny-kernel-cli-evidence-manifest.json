@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "sourceHead": "bf8cda11719d5cd3c1ed22901c3d8971280779b6",
+  "status": "partial",
+  "archive": {
+    "path": "/workspace/dafny-parity-kernel-cli-20261106/kernel-cli-evidence.tar.gz",
+    "bytes": 9876,
+    "sha256": "b65204b71920436d922839bfe0b9f4480d73c18d4df6c1fa86ee81d13e99f20f"
+  },
+  "observations": [
+    {
+      "function": "f0()",
+      "cliExit": 0,
+      "status": "proved"
+    },
+    {
+      "function": "f1()",
+      "cliExit": 1,
+      "status": "refuted",
+      "certificate": "SolTests.Parity.f1.refuted",
+      "certified": true
+    }
+  ],
+  "boundary": "Existing default certified CLI, source-bound actualLean observations only; originalfailedexit preserved. No failed-clause span, UI/EVM/fullruntime or parity claim."
+}

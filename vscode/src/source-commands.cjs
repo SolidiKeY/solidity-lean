@@ -19,6 +19,7 @@ function processJob(config,args,signal,timeoutMs){return new Promise((resolve,re
  child.on('close',async(code,signalCode)=>{if(stopping||settled)return;try{await waitForGroup(child);finish(null,{code,signalCode,stdout,stderr});}catch(error){error.cleanupFailed=true;finish(error);}});
  });}
 async function execute(operation,config,source,input={},signal){
+ const requestedOperation=operation;
  if(operation==='buildCustomArgs'){config={...config,...buildArguments(input)};operation='build';}
  if(!Number.isSafeInteger(config.timeoutMs)||config.timeoutMs<1||config.timeoutMs>3600000)throw Error('Invalid source-command timeout');
  const deadline=Date.now()+config.timeoutMs,remaining=()=>{const n=deadline-Date.now();if(n<=0)throw Object.assign(Error('Source command timed out'),{code:'TIMEOUT'});return n;};
@@ -34,7 +35,7 @@ async function execute(operation,config,source,input={},signal){
   if(admitted.length>1||units!==undefined){
    if(!Array.isArray(units)||units.length!==admitted.length||units.some(unit=>!unit||typeof unit.name!=='string')||new Set(units.map(unit=>unit.name)).size!==units.length||admitted.some(([name,file])=>!units.some(unit=>unit.name===name&&unit.sourceSha256===file.hash)))throw Error('Compiler artifact does not match admitted project');
   }
-  if((fixture.header?.sourceSha256??fixture.sourceUnits?.find(unit=>unit.name===fixture.header?.mainSource)?.sourceSha256)!==digest(text)||!require('./project.cjs').current(project,[]))throw Error('Source changed during build');const report={schemaVersion:1,operation,kind:'compiler-ast',source,sourceHash:digest(text),artifact,projectDigest:project.digest,compilerOptions:{includePaths:[...(config.includePaths||[])],remappings:[...(config.remappings||[])]},verification:'not-run'};fs.writeFileSync(path.join(scratch,'manifest.json'),JSON.stringify(report,null,2)+'\n');return report;
+  if((fixture.header?.sourceSha256??fixture.sourceUnits?.find(unit=>unit.name===fixture.header?.mainSource)?.sourceSha256)!==digest(text)||!require('./project.cjs').current(project,[]))throw Error('Source changed during build');const report={schemaVersion:1,operation:requestedOperation,kind:'compiler-ast',source,sourceHash:digest(text),artifact,projectDigest:project.digest,compilerOptions:{includePaths:[...(config.includePaths||[])],remappings:[...(config.remappings||[])]},verification:'not-run'};fs.writeFileSync(path.join(scratch,'manifest.json'),JSON.stringify(report,null,2)+'\n');return report;
  }
  if(operation!=='run'&&operation!=='test')throw Error('Unknown source command');
  if(config.includePaths?.length||config.remappings?.length)throw Error('Concrete CLI currently supports its default import resolution; custom include paths/remappings are not silently ignored');
@@ -81,7 +82,7 @@ function install(vscode,context,{settings,output,cancelVerification}){
    job.promise.catch(error=>{if(error.cleanupFailed&&!retiring.has(uri)){const poison=Promise.reject(error);poison.catch(recordFailure);retiring.set(uri,poison);}});
    try{
     const report=await job.promise;if(!isCurrent(doc,version,text,epoch)||abort.signal.aborted||jobs.get(uri)!==job)return;
-    if(report.sourceHash!==digest(text))throw Error('Source changed before command admission');output.appendLine(JSON.stringify(report,null,2));receipt('completed');if(report.passed===false)vscode.window.showErrorMessage('Concrete '+operation+' failed; see output. No verification verdict was produced.');return report;
+    if(report.sourceHash!==digest(text))throw Error('Source changed before command admission');output.appendLine(JSON.stringify(report,null,2));receipt('completed',{artifact:report.artifact});if(report.passed===false)vscode.window.showErrorMessage('Concrete '+operation+' failed; see output. No verification verdict was produced.');return report;
    }finally{if(jobs.get(uri)===job)jobs.delete(uri);}
   }catch(error){
    if(error.cleanupFailed)recordFailure(error);

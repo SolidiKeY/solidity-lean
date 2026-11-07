@@ -26,22 +26,82 @@ theorem wrap_of_lt {a : Nat} (h : a < W) : wrap a = a := Nat.mod_eq_of_lt h
 
 theorem lim_lt_W : lim < W := by decide
 
+private def subAt (w a b : Nat) : Nat := (a + (w - b % w)) % w
+
+private theorem subAt_eq_sub_of_le {w a b : Nat} (hb : b ≤ a) (ha : a < w) :
+    subAt w a b = a - b := by
+  have hbW : b < w := by omega
+  have heq : a + (w - b) = (a - b) + w := by omega
+  simp only [subAt, Nat.mod_eq_of_lt hbW, heq, Nat.add_mod_right,
+    Nat.mod_eq_of_lt (Nat.lt_of_le_of_lt (Nat.sub_le a b) ha)]
+
+private theorem tailFits_at {w k l size base rel tail : Nat}
+    (hLH : l + 1 < k) (hHW : k < w) (hs : size ≤ l) (hr : rel ≤ l)
+    (h : base + rel + tail ≤ size) :
+    ((if rel < k then (rel : Int) else (rel : Int) - (w : Int)) <
+      (if subAt w (subAt w size base) (subAt w tail 1) < k then
+        (subAt w (subAt w size base) (subAt w tail 1) : Int)
+      else (subAt w (subAt w size base) (subAt w tail 1) : Int) - (w : Int))) := by
+  have h1W : 1 < w := by omega
+  have hsize : size < w := by omega
+  have hbase : base ≤ size := by omega
+  have hrel : rel < k := by omega
+  have hsb : subAt w size base = size - base := subAt_eq_sub_of_le hbase hsize
+  have h01 : subAt w 0 1 = w - 1 := by
+    simp only [subAt, Nat.mod_eq_of_lt h1W, Nat.zero_add]
+    exact Nat.mod_eq_of_lt (by omega)
+  by_cases ht : tail = 0
+  · have hbW : w - 1 < w := by omega
+    have hWW : w - (w - 1) = 1 := by omega
+    have hnext : size - base + 1 < k := by omega
+    have hsub : subAt w (size - base) (w - 1) = size - base + 1 := by
+      simp only [subAt, Nat.mod_eq_of_lt hbW, hWW]
+      exact Nat.mod_eq_of_lt (by omega)
+    simp only [ht, h01, hsb, hsub, if_pos hrel, if_pos hnext]
+    omega
+  · have htail : tail < w := by omega
+    have hsmall : tail - 1 ≤ size - base := by omega
+    have hrem : size - base < w := by omega
+    have hnext : size - base - (tail - 1) < k := by omega
+    rw [hsb, subAt_eq_sub_of_le (by omega : 1 ≤ tail) htail,
+      subAt_eq_sub_of_le hsmall hrem]
+    simp only [if_pos hrel, if_pos hnext]
+    omega
+
+private theorem tailFits_transfer {w k l size base rel tail : Nat}
+    (f : Nat → Nat → Nat) (g : Nat → Int)
+    (hf : ∀ a b, f a b = subAt w a b)
+    (hg : ∀ a, g a = if a < k then (a : Int) else (a : Int) - (w : Int))
+    (hLH : l + 1 < k) (hHW : k < w) (hs : size ≤ l) (hr : rel ≤ l)
+    (h : base + rel + tail ≤ size) :
+    g rel < g (f (f size base) (f tail 1)) := by
+  rw [hf size base, hf tail 1, hf, hg rel, hg]
+  exact tailFits_at hLH hHW hs hr h
+
+private theorem slt_of_toInt_lt {a b : Nat} (h : toInt a < toInt b) : slt a b = true := by
+  exact decide_eq_true h
+
+private theorem lim_add_one_lt_H : lim + 1 < H := by decide
+private theorem H_lt_W : H < W := by decide
+
 /-- `access_calldata_tail`'s offset check holds for every tail that fits. -/
 theorem tailFits_of {size base rel tail : Nat} (hs : size ≤ lim) (hr : rel ≤ lim)
     (h : base + rel + tail ≤ size) : tailFits size base rel tail = true := by
-  simp only [tailFits, slt, sub, toInt, decide_eq_true_eq]
-  simp only [W, H, lim] at *
-  by_cases ht : tail = 0
-  · subst ht
-    split <;> split <;> omega
-  · split <;> split <;> omega
+  unfold tailFits
+  apply slt_of_toInt_lt
+  exact tailFits_transfer (w := W) (k := H) (l := lim)
+    (size := size) (base := base) (rel := rel) (tail := tail) sub toInt
+    (fun _ _ => rfl) (fun _ => rfl) lim_add_one_lt_H H_lt_W hs hr h
 
 /-- `access_calldata_tail`'s region check holds for every region that fits. -/
 theorem regionFits_of {size addr len stride : Nat} (hs : size ≤ lim)
     (h : addr + 32 + len * stride ≤ size) : regionFits size addr len stride = true := by
-  simp only [regionFits, slt, sub, toInt, wrap, Bool.not_eq_true', decide_eq_false_iff_not]
-  simp only [W, H, lim] at *
-  split <;> split <;> omega
+  unfold regionFits
+  rw [Bool.not_eq_true']
+  unfold slt
+  apply decide_eq_false
+  unfold toInt
+  split <;> split <;> simp only [sub, wrap, W, H, lim] at * <;> omega
 
 /-- What a successful eager decode of a dynamic value checked: room for its
 tail, and for `bytes`/an array its length and element region. -/
@@ -233,7 +293,7 @@ theorem mdec_cval_all (I : Input) (hs : I.size ≤ lim) : ∀ f : Nat,
         have hv := ih1 _ _ _ _ _ h
         have hp : e.lengthPrefixed = false := by
           cases e <;> simp_all [Shape.lengthPrefixed, Shape.dynamic]
-        simpa only [cvalAt, hp] using hv
+        simpa only [cvalAt, hp, Bool.false_eq_true, if_false] using hv
     · intro ms base pos a vs a' hb h
       cases ms with
       | nil => cases vs; simp [cmembers]
