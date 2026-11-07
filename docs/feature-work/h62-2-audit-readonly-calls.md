@@ -733,3 +733,79 @@ RO-DOC-P20-REF routes this exact docstring repair to the live Yul/original vy3
 owner through the coordinator. That source remains read-only here. The global
 documentation gate is failing, not waived; native source/object bindings and
 proof results remain unchanged. Original/inherited full acceptance is pending.
+
+
+## Native caller execution with the checked void-call frame (2026-11-07)
+
+On coordinator master 902e87762e5c3fb863bc3a592892f2dc09dfa979, additive audit
+modules ExecutionCall and CheckedExecutionCall connect the earlier native reply
+adapter to the actual stores/pushes/CALLIN/POP caller image. Generic proofs keep
+the caller stack/storage, the written input window and every memory word outside
+that window; funded and poor cases remain separate. The caller prefix returns
+normally even for child revert; its journal retains the actual child flag and
+raw bytes. It remains a precomputed, single-input adapter for frozen CALLIN.
+
+The checked composition uses the existing Mutation.compileCall-selected void
+family and classifies its actual typed-core Stmt.run outcome. It keeps the entire
+InterfaceV1.Returned certificate, including representation, stack, base extension,
+allocator growth, cursor and older words, alongside actual native child execution.
+No desired source outcome or target-run premise replaces that proof. Existing
+compiler-selected success and write-before-OOB bare-revert fixtures supply both
+branches. Entry.capacity survives the stack-only preparation lemma.
+
+This is typed-core compiler/frame composition, not resolved Source callee
+selection or Source/world adequacy. Generic physical Entry is required AFTER
+input preparation; only empty byte input has concrete entry-preserving fixtures.
+There is no ABI bytes-to-typed-arguments theorem, arbitrary-input preparation
+frame, child state commit, world/code selection, nested-call, gas/fork or general
+P1/G42.02 result. No approved Source profile is introduced. The original compiler
+success/G42.04 producer remains memory-reference-structs work. These helpers are
+unregistered audit modules under the tests directory, not a published core API.
+
+The final sealed check passed in 708.784 seconds at 1666904064 bytes peak
+aggregate RSS: 214 fresh project dependencies, 17 authenticated native parent
+objects, two new modules, 17 theorem axiom sets and five canonical module identity
+controls. The dependency union contains 230 project modules, plus three audit
+helpers. The current source/import graph, staged bytes, objects, tools and logs
+are verified before success. No held Premises import is allowed; a new negative
+control rejects such drift. The authenticated parent includes the passing bounded
+KeySort prerequisite. Actual Lean 4.24.0 / Lake 5.0.0-src+797c613, explicit -j1,
+12 GiB virtual-memory cap, 4 GiB reserve, no swap. Only propext, Classical.choice
+and Quot.sound occur in the 17 axiom sets. Eight external refusal/inventory
+controls pass; they are tooling tests, not proofs of original audit coverage.
+
+Failed attempts remain in the evidence: resource stop; deliberate module-root
+correction; TermSize thread-creation failure; global async=false triggering
+Evm/Correct's unchanged 11000-heartbeat limit; and two local elaboration errors.
+The last two proof errors were fixed without changing statements. A bounded
+TermSize diagnostic passed with async=false, reducing peak virtual memory from
+about 10.9 GiB (44 observed threads) to about 2.8 GiB (five threads). The first
+thread diagnostic had a log/data filename collision and lost its detailed
+samples; the corrected diagnostic uses distinct files. Final scheduling disables
+asynchronous elaboration ONLY for TermSize; all proof budgets remain unchanged.
+This additive check is not a before/after rebaseline and does not clear the
+historical Premises +80.254966536% STOP.
+
+Read-only finder and skeptic found no further defect after the log/root fixes,
+held-module fence and proof repairs; neither used Lean/server/tests or wrote
+files. Final kernel evidence is separate from those source reviews. Raw evidence,
+failed attempts and handoff are under
+/workspace/h62-audit-readonly-calls/execution-call/; portable content pins are in
+`tests/h62/item2/audit-readonly-calls/execution-call.sha256`. Internal receipt
+paths remain VM-specific; no independent off-VM acceptance is claimed.
+
+All 792 original obligations and coverage classifications remain byte-identical:
+35 joint, three target-failure joint, 45 intentional impossibility, 256 without
+top-level input hypotheses, two refuted-V1 migration cases and 451 ordinary
+pending. Three current private-identity gaps remain. This checkpoint discharges
+ZERO original rows, changes no frozen statement/definition/premise/exclusion or
+budget and adds no sorry, axiom or native_decide. New fixture delta: two audit
+modules, 339 Lean lines; zero production modules changed. Full inherited work,
+Source-selected compiler/world binding and scope-complete acceptance remain open.
+No RUNTIME_GATE_PASS, goal completion or master publication is claimed.
+
+RO-DOC-P20-REF now has an owner repair at
+c9cf710a8459581006150a462b69ae8c4f0d13e0. It is not on this master; the repository
+documentation gate remains failing until adoption and recheck. The exact retired
+proof-cleanup object fb0defdca5c5fe9baa7fd8c1e1271a91d255e1c9 remains unavailable;
+its historical acceptance stays UNVERIFIABLE, without rebaselining or revival.
