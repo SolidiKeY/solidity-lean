@@ -1,3 +1,13 @@
+LATEST COORDINATOR P1 FIX: portable verification now binds EVERY audited joint
+or H69 ledger declaration to its designated helper theorem AND source file.
+Snapshot and portable checks share one trusted data-only witness_registry.py;
+all103joint/4H69 mappings are unchanged. Both unrelated valid-certificate attacks
+outside the44reviewed roles pass the legacy verifier and refuse the fixed one.
+Positive+7controls and independent finder/skeptic review PASS; no proof changes.
+Evidence: /workspace/h62-audit-theories-certificate-binding-20261107-evidence.
+Origin authentication recovered: successful fetch640a99f4151c79c1503895e547d02e4045fec563.
+Original full goal remains unfinished; fix ready for coordinator's next merge.
+
 LATEST DISPOSITION HANDOFF: both coordinator questions RESOLVED. Original
 fidelity CLOSED by checked c6 history; static nonzero value accepted as the
 fourth intentional H69 boundary, NO operational refusal coverage. Original and
@@ -1452,3 +1462,51 @@ Known local deliverybasea8/historyc6 and all existing proof evidence remain vali
 newest remote is unknown. No credentials changed/exposed or network policy
 bypassed. Restore origin authentication before future new implementation work;
 this is a typed infrastructure wait, not either resolved scope question.
+
+## Coordinator review P1: designate every portable certificate
+
+Coordinator reported review of merge7c4b17c4 with second parent883c4153cba0f1dc14e3569468613cc63cb18602,
+not merged. Actual clean worker checkout at82992434624d2537342a5bea7b85d3ca80518ad5
+contains that reviewed commit. Preserved it and all prior work; no reset, master
+merge or push. Fetched origin/master640a99f4151c79c1503895e547d02e4045fec563; no
+landed duplicate in owned audit paths. Previous fetch authentication wait is
+resolved; no scope/permission question or new goal was introduced.
+
+P1 confirmed: generic certificate validity did not establish which audited
+declaration it witnessed. An entry outside the44-role subset could name another
+valid same-class helper with no proof/source/artifact/log changes. Mechanically
+moved existing103joint+4H69 mappings into trusted witness_registry.py; both
+verify_census and paired_evidence import the SAME mappings. The module is pure
+verifier data, performs no file I/O and never reads mappings from an archive.
+Saved before/after equality confirms every name/tuple unchanged. Explicit H69
+approval/reasons and no-operational-refusal policy remain unchanged.
+
+Portable verification now requires the exact canonical joint/H69 declaration
+sets and checks each ledger certificate's fully qualified helper name AND source
+file against its designated tuple before normal proof/log/axiom receipt checks.
+Role and Payable records remain bound to that validated ledger. This closes the
+substitution route for ALL103joint and4H69 statements, including those outside
+reviewed roles. No Lean statement/proof/module/import/axiom/budget changes.
+
+New controls rehash ONLY the rebased ledger/archive index: Path.append_assoc
+receives append_nil_right's valid helper; Ty.Finite.not_array receives the valid
+static-input refutation helper. Both targets are outside roles/Payable. Legacy
+verifier accepts BOTH; fixed verifier refuses Designated certificate mismatch.
+All source,olean,metadata,log,dependency,mapped and authority references are
+unchanged. Existing positive+5refusals plus these2 make positive+7controls; all
+pass with old workspace artifact paths denied.13 Python tests pass. Source-only
+change requires no new Lean/Lake proof jobs or RUNTIME_GATE_PASS.
+
+One matched warm-cache positive archive pair on the same VM/input passes:
+6.375981218s before →6.491232125s after,+1.807579148%, within10%. This measures
+verifier runtime, not proof speed. Independent read-only finder/skeptic confirmed
+registry parity, actual attacks, legacy acceptance/fixed refusal, unchanged proof
+blobs, all saved outcomes and pair arithmetic; P1 CLOSED/no residual findings.
+No edits,Lean/Lake jobs or network calls by reviewers. Checkpoint handoff and
+exact commands/evidence are in handoff/CERTIFICATE-BINDING-FIX-20261107.md.
+
+Overall original queue still has1,361pending records/456roles and compiler/final
+gates; those historical proof counts are not newly checked against this later
+rebased source tree. Both scoped coordinator questions remain resolved. Commit
+only this isolated fix; coordinator takes the next merge. No full-goal completion,
+reset/replacement/pause, publication or proof-budget change is claimed.

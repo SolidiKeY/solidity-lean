@@ -1,3 +1,11 @@
+LATEST P1 HANDOFF: coordinator portable-certificate substitution finding FIXED.
+Trusted shared registry103joint/4H69 unchanged; exactname+sourcebinding for every
+ledger entry. Legacyaccepts/newrejects two outside-role attacks,positive+7controls,
+13tests and finder/skeptic PASS. No Lean/source/proof changes. Original1361pending/
+456roles and broader gates remain unfinished. Scopequestionsresolved. Fetch now
+succeeds at640a99f4151c79c1503895e547d02e4045fec563; prior authwait cleared.
+Fix checkpoint: CERTIFICATE-BINDING-FIX-20261107.md. No push/mastermerge/PR/goalchange.
+
 # Current disposition handoff — same original goal, 2026-11-07
 
 Repository /workspace/audit-theories; branch
@@ -66,9 +74,9 @@ scope. Do not pad cases, weaken statements or steal new candidate ownership.
 Fetch/log/code-inspect master before new item; consume landed prerequisites.
 Latest fetch failed authentication twice (username for https://github.com);
 last successful65e69b6426a9a4fc3fb5541f41726a4bfefda5d0, newest remote unknown.
-Restore origin auth before next new implementation increment. Existing history/
+Prior authentication failure is now resolved by successful640a99f4151 fetch; fetch again before future increments. Existing history/
 paired packaging completed using already verified local commits; no network or
-credential bypass. Real infrastructure wait: GitHub origin authentication.
+credential bypass. No current infrastructure wait; authentication recovered during P1 fix.
 
 ## Checks/resources/provenance
 

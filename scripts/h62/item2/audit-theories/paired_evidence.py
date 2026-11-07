@@ -8,6 +8,7 @@ import argparse,gzip,hashlib,io,json,re,subprocess,tarfile
 from collections import Counter
 from pathlib import Path
 from census import ROOT,mask,module_to_path,scan
+from witness_registry import WITNESSES,IMPOSSIBLE
 ALLOW={"propext","Classical.choice","Quot.sound"}
 def h(data):return hashlib.sha256(data).hexdigest()
 def canonical(obj):return(json.dumps(obj,sort_keys=True,separators=(",",":"))+"\n").encode()
@@ -111,7 +112,10 @@ def verify(a):
                 axioms={s.strip()for s in(match[2]or"").split(",")if s.strip()};assert axioms<=ALLOW and sorted(axioms)==theorem["axioms"]
         assert len(names)==helpers["proved_theorems"]
         by_helper={item["name"]:(module,item)for module in helpers["modules"]for item in module["theorems"]}
-        def check_certificate(cert):
+        def check_certificate(cert,designation=None):
+            if designation is not None:
+                module_name,helper_name=designation
+                assert cert["theorem"]=="H62.AuditTheories."+helper_name and cert["source"]=="tests/h62/item2/audit-theories/"+module_name+".lean","Designated certificate mismatch"
             assert cert["theorem"]in by_helper
             module,item=by_helper[cert["theorem"]];meta=json.loads(source_data[records[module["source"]]["metadata_blob"]])
             assert cert["source"]==module["source"]and cert["axioms"]==item["axioms"]and cert["log"]==meta["log"]
@@ -122,7 +126,8 @@ def verify(a):
         assert{r["source_name"]for r in entries}==set(originals);by_name={r["source_name"]:r for r in entries}
         counts=dict(Counter(r["status"]for r in entries));assert counts==ledger["original_explicit_counts"]
         joint={r["source_name"]for r in entries if r["status"]=="joint-certificate-present-version-fidelity-separate"}
-        intentional={r["source_name"]for r in entries if r["status"]=="H69-intentional-impossibility-certificate-present"};assert intentional==H69_NAMES
+        intentional={r["source_name"]for r in entries if r["status"]=="H69-intentional-impossibility-certificate-present"};assert intentional==H69_NAMES==set(IMPOSSIBLE)
+        assert joint==set(WITNESSES),"Designated witness census mismatch"
         assert len(joint)==snap["joint_certificates"]and len(intentional)==snap["accepted_H69"],"Snapshot/ledger counts mismatch"
         assert snap["checked_helper_theorems"]==len(names)and snap["original_explicit_declarations"]==500 and snap["original_generated_pending"]==986
         assert snap["current_head"]==ctx["git_head"],"Snapshot/context commit mismatch"
@@ -130,7 +135,8 @@ def verify(a):
         for row in entries:
             name=row["source_name"];orig=originals[name]
             for key in("file","line","visibility","source_header","elaborated_type_sha256","documented_producing_lane","proving_owner"):assert row[key]==orig[key]
-            if name in joint or name in intentional:check_certificate(row["current_certificate"])
+            if name in joint:check_certificate(row["current_certificate"],WITNESSES[name])
+            elif name in intentional:check_certificate(row["current_certificate"],IMPOSSIBLE[name])
             elif row["status"]=="historical-empty-input-telescope":assert orig["status"]=="no-inputs"
             else:
                 assert row["status"]==("private-witness-pending"if orig["visibility"]=="private"else"public-witness-pending")

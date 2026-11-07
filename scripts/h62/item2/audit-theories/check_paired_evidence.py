@@ -15,7 +15,7 @@ def main():
     with archive.open("rb")as stream:input_sha=hashlib.file_digest(stream,"sha256").hexdigest()
     with tarfile.open(archive,mode="r|gz")as tar:
         index=json.loads(tar.extractfile(next(iter(tar))).read())
-    targets={index["contexts"]["rebased"]["reports"][n]for n in("acceptance-snapshot.json","verified-payable.json")};targets.add(index["contexts"]["original"]["reports"]["mapped-module-dispositions.json"]);captured={};first=None
+    targets={index["contexts"]["rebased"]["reports"][n]for n in("acceptance-snapshot.json","verified-payable.json")};targets.add(index["contexts"]["original"]["reports"]["mapped-module-dispositions.json"]);targets.update(index["contexts"]["rebased"]["reports"][name]for name in("original-coverage-ledger.json","all-reviewed-pure-input-roles.json"));captured={};first=None
     with tarfile.open(archive,mode="r|gz")as tar:
         for member in tar:
             if member.name=="index.json":continue
@@ -49,7 +49,20 @@ def main():
     def mismatch(report):
         row=next(r for r in report["modules"]if r["file"]=="Solidity/Theory/Mutability/Pure.lean");row["current_source_sha256"]=wrong;row["original_source_sha256"]=wrong
     mapped=rehash_case("rehashed-mapped-source","mapped-module-dispositions.json",mismatch,label="original",index_change=lambda obj:obj["contexts"]["original"]["mapped_sources"].__setitem__("Solidity/Theory/Mutability/Pure.lean",wrong))
-    cases=[("positive",archive,None),("corrupt-blob",bad_blob,"Blob integrity failure"),("missing-olean",bad_olean,"Referenced artifact missing from blob index"),("rehashed-snapshot-count",counts,"Snapshot/ledger counts mismatch"),("rehashed-static-row",static,"Static Payable row mismatch"),("rehashed-mapped-source",mapped,"Mapped/proof source mismatch")]
+    role_key=index["contexts"]["rebased"]["reports"]["all-reviewed-pure-input-roles.json"]
+    role_names={row["theorem"]for row in json.loads(captured[role_key])["declarations"]};substitutions=[]
+    def substitute(kind):
+        def change(report):
+            rows=report["original_explicit_declarations"]
+            status="joint-certificate-present-version-fidelity-separate"if kind=="joint"else"H69-intentional-impossibility-certificate-present"
+            candidates=[row for row in rows if row["status"]==status and row["source_name"]not in role_names and row["file"]!="Solidity/Theory/Mutability/Payable.lean"]
+            target=candidates[0];donor=next(row for row in rows if row["status"]==status and row["current_certificate"]!=target["current_certificate"])
+            substitutions.append({"kind":kind,"declaration":target["source_name"],"designated_certificate":target["current_certificate"],"unrelated_valid_certificate":donor["current_certificate"]})
+            target["current_certificate"]=donor["current_certificate"]
+        return change
+    unrelated_joint=rehash_case("unrelated-joint-certificate","original-coverage-ledger.json",substitute("joint"))
+    unrelated_h69=rehash_case("unrelated-H69-certificate","original-coverage-ledger.json",substitute("H69"))
+    cases=[("positive",archive,None),("corrupt-blob",bad_blob,"Blob integrity failure"),("missing-olean",bad_olean,"Referenced artifact missing from blob index"),("rehashed-snapshot-count",counts,"Snapshot/ledger counts mismatch"),("rehashed-static-row",static,"Static Payable row mismatch"),("rehashed-mapped-source",mapped,"Mapped/proof source mismatch"),("unrelated-joint-certificate",unrelated_joint,"Designated certificate mismatch"),("unrelated-H69-certificate",unrelated_h69,"Designated certificate mismatch")]
     allowed={p for _,p,_ in cases};rows=[]
     with contextlib.ExitStack()as stack:
         logs={name:stack.enter_context((out/(name+".log")).open("w"))for name,_,_ in cases};result=stack.enter_context((out/"portable-controls.json").open("w"))
@@ -66,6 +79,6 @@ def main():
             else:
                 assert expected is None,name;status="pass"
             rows.append(dict(case=name,archive=str(path),result=status,expected_refusal=expected,old_VM_path_access="denied"))
-        result.write(json.dumps(dict(input_archive_sha256=input_sha,preserved_input_archive=str(archive),cases=rows,old_VM_paths_opened=0,kernel_rerun=False,full_assignment_acceptance=False),indent=2)+"\n")
-    print("PAIRED_PORTABLE_CONTROLS_PASS:positive+5refusals;old_VM_paths_denied;no_kernel_rerun")
+        result.write(json.dumps(dict(input_archive_sha256=input_sha,preserved_input_archive=str(archive),certificate_substitutions=substitutions,cases=rows,old_VM_paths_opened=0,kernel_rerun=False,full_assignment_acceptance=False),indent=2)+"\n")
+    print("PAIRED_PORTABLE_CONTROLS_PASS:positive+7refusals;old_VM_paths_denied;no_kernel_rerun")
 if __name__=="__main__":main()
