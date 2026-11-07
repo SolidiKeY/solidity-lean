@@ -1336,3 +1336,29 @@ is not replaced by these structural laws. H16 exact library try support,
 separate mapping-bearing H24, Y04 physical and 4.35 trust/timing waits and all
 STOPs remain. Original/consolidated proof/backfill/coverage and full gates remain
 unfinished; no semantic producer or whole-lane completion is delivered here.
+
+### C255 — block, return and local statement correspondence
+
+SourceAstStatementCorrespondence proves exact block output, expression statement,
+optional return value and complete single-local type/location/name/initializer
+preservation through unchanged readers. Field and child-result premises describe
+syntax conversion, not Source validity, admission, provenance or execution.
+Unsupported tuple declarations remain a converter gap, not a Source exclusion.
+Three measured guards use propext and Quot.sound; the local law uses the standard
+trio. All four guards pass. No existing reader, protected Source, frozen statement/
+interface/premise/budget/exclusion, axiom declaration or trust policy changed.
+
+Existing statement controls retain all four complete actual function bodies per
+pipeline and original prefix/handler/census/refusal checks. Added generic bare
+return and uninitialized-local boundaries ensure no value or initializer is
+invented. They are syntax checks, not valid Source-program witnesses. No Source
+case copies or new phase folders. C255 lane history records read-only finder and
+skeptic reviews with no findings; neither used Lean, its server or build commands.
+Initial and guarded focused checks passed without a failed proof attempt.
+
+Actual Source origin/H24/lifecycle/S03-PANIC41 and artifact binding remain local
+H121b obligations, undelivered here. The historical C246 manual failed probe is
+outside automated gates and is not replaced by structural laws. H16 exact library
+try support, separate mapping-bearing H24, Y04 physical,4.35 trust/timing waits
+and all STOPs remain. Original/consolidated proofs, backfill, coverage and full
+final gates remain unfinished; no whole-lane completion is claimed.

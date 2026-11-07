@@ -157,3 +157,4 @@
 | `Lowering/P8/SourceAstLiteralCorrespondence.lean` | Supported literal kind/value and expression-wrapper correspondence; no source binding or semantic claim |
 | `Lowering/P8/SourceAstParameterCorrespondence.lean` | Parameter qualifier/name/order and array base/bound correspondence; no semantic or provenance claim |
 | `Lowering/P8/SourceAstTypeCorrespondence.lean` | Mapping name/key/value and function signature/qualifier correspondence; no Source validity or origin claim |
+| `Lowering/P8/SourceAstStatementCorrespondence.lean` | Block/expression/return/local statement structure preservation; no semantic or Source validity claim |
