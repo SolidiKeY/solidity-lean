@@ -1,8 +1,0 @@
-file:///workspace/solidity-lean/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs:34
-if(Object.keys(delta).length!==17)throw Error('expected exact17 owned pin delta');
-                                        ^
-
-Error: expected exact17 owned pin delta
-    at file:///workspace/solidity-lean/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs:34:41
-
-Node.js v24.19.0

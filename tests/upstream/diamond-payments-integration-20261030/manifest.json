@@ -282,9 +282,9 @@
   },
   "original_evidence_supplement": {
     "verification": "original-evidence-verification.json",
-    "verification_sha256": "f170b44d7da33f7b548eff29a46d22f45066af5991c86c8f977434ebf1dfc7d3",
+    "verification_sha256": "3024aabe0aeb2a6fb09f8f0796b6894faf35f5a51b52e123b8189808199af2f7",
     "retrieval": "supplemental-retrieval.json",
-    "retrieval_sha256": "9d762c79c1c3aaaaa8e14fc56e704cb2ab7578e365d5455672ff0faf41f8f9e1",
+    "retrieval_sha256": "cc63ed81609ebaea2df7c3bee3f87d3c4239713ea32c49dfd3d0f5956bc108a2",
     "archive": "original-source-evidence.tar.gz",
     "archive_sha256": "e8bc40d0aa74edb65d0a99f76891102d0c0ea4ed8d43260e70a096c616fb68b1",
     "archive_members_verified": 177,
@@ -300,7 +300,7 @@
   "original_validation_verified_note": "Recorded evidence and unchanged documentation findings are verified. Required documentation still exited 1; this is not an all-gates-passing validation.",
   "coordinator_evidence": {
     "verification": "coordinator-evidence-verification.json",
-    "verification_sha256": "60b7ab31774179938ef278e11632e6bd5970c411e95008819ec48df188a31210",
+    "verification_sha256": "34ac155c809c528255b0bba1e0da056caa93b5b481cc9f174c8e7a40226374fb",
     "archive": "coordinator-evidence.tar.gz",
     "archive_sha256": "27ca82682ac38c94efc9f774a97a9cc07ffd2cadafd1d37cff01b6ea93ca2992",
     "original_source_checksum_coverage_added": 0

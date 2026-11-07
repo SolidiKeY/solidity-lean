@@ -1,0 +1,175 @@
+{
+  "status": "blocked",
+  "resolved": [
+    {
+      "id": "Q-HASH-OWNER",
+      "answer": "Coordinator: relay.sh exists only on the coordinator host; the isolated migration lane is the registered writer. Apply statement-preserving patches and list live-owner changes for cut-over relay."
+    },
+    {
+      "id": "Q-HASH-RSS",
+      "answer": "Coordinator: per-module time or memory increases do not stop a lane. Record them, continue to matched clean full-build comparison; coordinator reports growth with cut-over escalation."
+    }
+  ],
+  "requests": [
+    {
+      "id": "REQ-HASH-SYNTAX-RAW",
+      "type": "OUT_OF_SCOPE_DEPENDENCY_MIGRATION_REQUIRED",
+      "recipient": "solidity-h62-6-20261106/migrate-syntax via migrate-root-gate",
+      "sources": [
+        "H62 checkpoint 3",
+        "/workspace/migrate-hash-full/new-full-4/Solidity.Syntax.Raw.log"
+      ],
+      "files": [
+        "Solidity/Syntax/Raw.lean"
+      ],
+      "action": "Provide the owner migration overlay for official pinned Lean4.35 while preserving frozen interfaces. Hash lane must not edit this file.",
+      "errors": [
+        {
+          "line": 597,
+          "column": 44,
+          "detail": "f.drop1 returns String.Slice; HashKind.ofName? expects String"
+        },
+        {
+          "line": 650,
+          "column": 23,
+          "detail": "String.Slice.toList unavailable"
+        },
+        {
+          "line": 665,
+          "column": 27,
+          "detail": "slice dropRight result supplied where splitTopCommas expects String"
+        },
+        {
+          "line": 684,
+          "column": 34,
+          "detail": "String.dropRight unavailable"
+        },
+        {
+          "line": 682,
+          "column": 46,
+          "detail": "c.endsWith no longer has the String\u2192Bool type expected by List.find?"
+        }
+      ],
+      "evidence": "Clean canonical full probe exit1 after4/6389 modules; source hashes unchanged; no resource stop; no full-build timing conclusion."
+    },
+    {
+      "id": "REQ-HASH-BASELINE-NATIVE-TIMEOUT",
+      "type": "BASELINE_NATIVE_COMPILE_TIMEOUT",
+      "recipient": "solidity-h62-6-20261106/migrate-root-gate",
+      "sources": [
+        "H62 checkpoint3",
+        "/workspace/migrate-hash-full/old-full-2/summary.json"
+      ],
+      "files": [
+        "Solidity/Calculus/RuleSyntax/Grammar.lean"
+      ],
+      "action": "Record incomplete clean old baseline:18/6389 modules passed; combined exported/non-exported native build command hit existing300s cap. Preserve supervisor outputs and budgets; root-gate disposition needed before a new matched full baseline. No restart or source repair performed.",
+      "evidence": "/workspace/migrate-hash-evidence/full-old-baseline/Solidity.Calculus.RuleSyntax.Grammar.log"
+    }
+  ],
+  "pending_gates": [
+    "Matched clean full comparison remains unavailable: old baseline terminated by native command cap; new full probe awaits Syntax.Raw owner overlay.",
+    "owner-provided Syntax.Raw and further out-of-scope migration overlays",
+    "full affected importer validation and ./run-lean.sh",
+    "migrate-root-gate receipt"
+  ],
+  "live_owner_changes": {
+    "Solidity/Hash/CollisionBound.lean": [
+      "countP_contains_le: replace congr1 with explicit List.contains_cons simplification",
+      "countP_near_le and countP_covers_le: explicitly extract propositions using of_decide_eq_true before unfold/omega",
+      "Replace deprecated if_true/if_pos/if_neg proof lemma names with ite_true/ite_eq_left/ite_eq_right"
+    ],
+    "Solidity/Hash/Adaptive.lean": [
+      "two_mul_eagerCollides_le and two_mul_eagerRegionsFail_le: direct zero-query negation proofs using of_decide_eq_true and existing .nil lemmas",
+      "Replace deprecated if_pos/if_neg proof lemma names with ite_eq_left/ite_eq_right"
+    ]
+  },
+  "frozen_interface_changes": [],
+  "proof_budget_changes": [],
+  "new_axioms": 0,
+  "sorry": 0,
+  "proof_declarations_touched": {
+    "Solidity/Hash/CollisionBound.lean": [
+      "countP_contains_le",
+      "countP_covers_le",
+      "countP_near_le",
+      "countP_or_le",
+      "length_dedup_le",
+      "map_oracleOf",
+      "mem_dedup",
+      "nodup_dedup"
+    ],
+    "Solidity/Hash/Adaptive.lean": [
+      "length_upd",
+      "mem_upd",
+      "oracleOf_mem",
+      "oracleOf_upd_ne",
+      "oracleOf_upd_self",
+      "two_mul_eagerCollides_le",
+      "two_mul_eagerRegionsFail_le",
+      "upd_oracleOf",
+      "upd_upd"
+    ]
+  },
+  "baseline_terminal": {
+    "pid": 36556,
+    "command": [
+      "flock",
+      "/tmp/solidity-lean-feature-groups-20261025/writer.lock",
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/migrate-hash/scripts/h62/item6/migrate-hash/full_measure.py",
+      "/workspace/.setup/tools/lean-4.24.0-linux",
+      "/workspace/migrate-hash-full/old-full-2"
+    ],
+    "log": "/workspace/migrate-hash-full/old-full-2-driver.log",
+    "directory": "/workspace/migrate-hash-full/old-full-2",
+    "head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+    "state": "terminal: MODULE_TIMEOUT; controller PID36556 is zombie; no active heavy jobs; no restart performed",
+    "no_duplicate_job": true,
+    "not_a_new_goal": true,
+    "summary": {
+      "exit": -9,
+      "completed_modules": 18,
+      "total_modules": 6389,
+      "full_gate_pass": false,
+      "wall_seconds": 463.80747677099953,
+      "max_rss_kib": 826256,
+      "inputs_unchanged": true,
+      "resource_stop": "MODULE_TIMEOUT"
+    },
+    "measurement_boundary": "Incomplete old full-build attempt. Grammar Lean elaboration finished in36s; combined native facet command timed out at300s. Killed-wrapper RSS is not a completed descendant/group RSS measurement; no full-build wall/RSS comparison."
+  },
+  "routed_requester_heads": {
+    "solidity-h62-1-20261106/infer-helpers": "5652c3e3d75d586d4edbd7ea2f95e3fe9f908d35",
+    "solidity-h62-2-20261106/audit-roadmap": "4ce2bfb8bc2ed558f4efd7423229363719b6625b",
+    "solidity-h62-2-20261106/audit-v10-storage": "2d53437157aeb2385aeaaab7b7bb891e92566058",
+    "solidity-h62-4-20261106/generic-primitive-packets": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+    "solidity-h62-5-20261106/statement-graph": "d8c1eaf4f0d4aedfb5d650d12ad6a40b2d9dd3b7",
+    "solidity-h62-6-20261106/migrate-roadmap": "1498f324e0def23f2eb727c6638179df6743c050",
+    "solidity-inline-assembly5-20261031/vy2-physical": null,
+    "solidity-h62-2-20261106/audit-label-execution": "d89b309029f9ad57f17711432aeef4990005994b",
+    "solidity-h62-2-20261106/audit-language": "c2ffe26194e661f11b6ef4673090fdc97021ed74",
+    "solidity-h62-2-20261106/audit-v07-lowering": "b0729bc582ba51d966e2d05fe85739f3ebe924c3",
+    "solidity-h62-6-20261106/migrate-lowering": "d604931a80481157b5bd56469a852150fa0e5339",
+    "solidity-h62-6-20261106/migrate-solcvalidation": "0bd9e2519c43f1757674d2051a7786ac5688c2bb",
+    "solidity-h62-6-20261106/migrate-root-gate": "ac7d4535b16c9a393a2b86ec91dd44fae2f418f2"
+  },
+  "root_provenance_reply": {
+    "requester": "solidity-h62-6-20261106/migrate-root-gate",
+    "requester_head": "ac7d4535b16c9a393a2b86ec91dd44fae2f418f2",
+    "type": "OVERLAY_PROVENANCE_ONLY",
+    "source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+    "manifest": "/workspace/migrate-hash-evidence/source-provenance-2a18afcdb/manifest.json",
+    "manifest_sha256": "23e366c6e73ab79a4a32e9739db4dae58ff8aadfe69854b6353b54a1edfe1a9a",
+    "bundle": "/workspace/migrate-hash-evidence/source-provenance-2a18afcdb/source.bundle",
+    "bundle_sha256": "a17167daff48fbe5a74b33d95676a66130c88ed92f4309329fc3ca801a60cabc",
+    "status": "ready for coordinator retrieval/static ancestry binding; root acceptance not claimed",
+    "boundary": "No repeat repair, Lean rerun, source application, baseline restart, budget change or STOP disposition."
+  },
+  "peer_resolution": {
+    "source": "coordinator inline H70 generic-primitive-packets blockers.json",
+    "requester_head": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+    "reported": "Both Hash modules checked in isolated staged sources; Hash cleared for isolated consumer check; Roadmap.Contracts axiom guard remains with migrate-roadmap",
+    "independently_replayed": false
+  }
+}

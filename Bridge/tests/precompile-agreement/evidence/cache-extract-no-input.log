@@ -1,2 +1,0 @@
-COMMAND: /workspace/.setup/cache/mathlib/leantar-0.1.15 -x -j --jobs 1; cwd=/workspace/solidity-lean/Bridge; stdin=cache-extract.json
-EXIT=0 SECONDS=0.001

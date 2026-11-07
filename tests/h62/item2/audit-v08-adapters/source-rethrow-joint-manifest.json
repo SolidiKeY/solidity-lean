@@ -1,0 +1,138 @@
+{
+  "status": "SOURCE_RETHROW_COMPONENT_JOINT_PREMISES",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceRethrowJoint.lean": "2297e1644fd02f0ac0c99a0830a8d66eafeea93ccb4809107e77fdb5896a1ce8",
+    "Solidity/Lowering/V08/SourceRethrow.lean": "30fb23f7648f6df727f26940e4277f8af2146f48b45e11d2540e9b507cb31262",
+    "Solidity/Lowering/V08/SourceAbi.lean": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62",
+    "Solidity/Lowering/V08/SourceCustomErrorControls.lean": "9dd4c65999c53ed2609f8db7f0b703933f004e83ef5fe05f81495572e53bf297"
+  },
+  "target_links": [
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceRethrow.lean:100:expression_rethrow",
+      "target": "Solidity.Lowering.V08.SourceRethrow.expression_rethrow",
+      "component": "actual",
+      "fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceRethrow.lean:119:expression_failure",
+      "target": "Solidity.Lowering.V08.SourceRethrow.expression_failure",
+      "component": "expression_timeout",
+      "fidelity": "PENDING"
+    }
+  ],
+  "new_body_fixtures": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "joint_model": "Existing populated SourceCustomErrorControls fixture; allocation result pointer and same final heap lookup proved together, universally in pipeline/static and sufficient fuel.",
+  "negative": "Statement timeout retains new allocation; allocation timeout retains original heap. Complete results differ through heap.next 2 versus 1.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceRethrowJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.379,
+    "peak_sampled_aggregate_rss": 732459008,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axioms": {
+    "joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "fixture_joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "actual": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "expression_timeout": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "timeout_states_differ": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "limitations": [
+    "Only two conditional SourceRethrow targets linked; seven remaining original module targets and generated/helper records require full audit.",
+    "General laws keep arbitrary typed environments/contexts; fixture_joint supplies one existing concrete parameter model, not global Source admission.",
+    "Original expression_failure premise is discharged at zero expression horizon. No new failure-after-effects body fixture is claimed.",
+    "No compiler selection, physical frame/body correspondence, rollback, actual Source admission/session/lifecycle or canonical H68 bridge.",
+    "No full-root gate or matched timing acceptance; prior STOP receipts remain."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/check/console.log",
+      "bytes": 159,
+      "sha256": "44225f561cc8ebf4cf27f8ef8eeae6a4c90cf289d7ca2511d19dd56d6fee76b4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/check/gates/1.log",
+      "bytes": 31338,
+      "sha256": "397e7f988b20c551cfb875d1c666f521823b183419c3d26f8873b7ba53e018b6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "17b6799bcb2a0194feae9a9a90b160069ecd2b548d5b19749dcf95e02b09b4eb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/check/gates/gates.tsv",
+      "bytes": 247,
+      "sha256": "0a2c0352b4aac0b4f6282c78ac5c0d02cb55545583b897f5261593eb7fb3518a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/check/results.json",
+      "bytes": 398,
+      "sha256": "64ce2227392187008248f324853b2e71c983d846145025c6ac119b6951c797ac"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/final-check/console.log",
+      "bytes": 165,
+      "sha256": "529c7905474299f8932b01606a01e5cce8814befa6859d7233e0259b920b6f73"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/final-check/gates/1.log",
+      "bytes": 31453,
+      "sha256": "868a350b00eb9a8b13f3cbcc5f96f2b9298191ec0ccc4a75e787df284ee74aee"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/final-check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "17b6799bcb2a0194feae9a9a90b160069ecd2b548d5b19749dcf95e02b09b4eb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/final-check/gates/gates.tsv",
+      "bytes": 253,
+      "sha256": "a3e7322bf2671c35f3d31d664c97db8a90a81d6c98f2fbe4a791ab62ff0511e0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/final-check/results.json",
+      "bytes": 398,
+      "sha256": "345b2535da1cfce48b93b4ba95c01fb392c508d0f4854fd3ef0383cc4908b541"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-joint-20261107/trust.json",
+      "bytes": 411,
+      "sha256": "c92f0dc2ac2c1e4eb2eec2cdfc3cbaf992325f6d3a7a6514b8717122117bee37"
+    }
+  ]
+}

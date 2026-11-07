@@ -1,8 +1,0 @@
-{
-  "source": "user-delivered H70 message",
-  "requester_head": "16d7e371a1e013f492784b596397cf500dbd7543",
-  "expected_original_owner_request_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
-  "reserialized_payload_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
-  "original_file_delivered": false,
-  "boundary": "Coordinator/other-VM paths are provenance only; original exact file bytes and H78 requirements file were not delivered to this VM."
-}

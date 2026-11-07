@@ -1,6 +1,0 @@
-# Preservation only; not proof implementation or resume authorization.
-git format-patch --stdout c6f550e281a7e5affa9a99bc2cdaed556dec00e4..HEAD > /workspace/migrate-lowering-artifacts/retirement/cumulative.patch
-git bundle create /workspace/migrate-lowering-artifacts/retirement/cumulative.bundle HEAD ^c6f550e281a7e5affa9a99bc2cdaed556dec00e4
-tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf /workspace/migrate-lowering-artifacts/retirement/evidence.tar.gz -C /workspace/migrate-lowering-artifacts evidence old-config -C /workspace h62-coordinator-inputs
-# SHA256SUMS authenticates the closed evidence and cumulative patch/bundle.
-# Diagnostic build/cache directories remain on the original VM and are not an accepted clean benchmark.

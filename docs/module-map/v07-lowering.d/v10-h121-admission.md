@@ -19,3 +19,5 @@
 | `Lowering/P8/SourceAstBranchCorrespondence.lean` | Conditional and catch syntax preservation; no Source typing or semantic claim |
 | `Lowering/P8/SourceAstTryCorrespondence.lean` | Try success/ordered handler correspondence and short-clause conversion refusal; no Source typing or admission claim |
 | `Lowering/P8/SourceAstDeclarationCorrespondence.lean` | Struct member/order and using-path syntax correspondence; no resolution or Source validity claim |
+| `Lowering/P8/DeclarationGraphAdmissionV2.lean` | H57/H128 v2 local refusal and separately versioned H24 assembly; unchanged graph/source/artifact indices, no actual producer |
+| `Lowering/P8/ConditionalAssemblyV2.lean` | H57/H128 joint checked-receipt/program-origin/location-graph/v2-refusal binding; conditional only, frozen v1 assembly unchanged |

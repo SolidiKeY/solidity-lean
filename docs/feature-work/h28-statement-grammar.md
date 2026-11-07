@@ -1520,7 +1520,7 @@ is revalidated at its own committed head before another delivery attempt.
 ## H41: checkpoint Q cache receipt and amended delivery policy
 
 The coordinator reports receipt statement-grammar-cache-received-20261105T020412Z.json
-at /home/guilherme/.local/state/cloudvm-coord/receipts/ and confirms its
+at $XDG_STATE_HOME/cloudvm-coord/receipts/ and confirms its
 SHA256 verification. The worker independently recomputed the saved pack SHA:
 17559f6df217563456007fb5ec2ce5ce33e3f6ec90eb65f9bbf96fcf4f593e3b.
 The pack remains /workspace/h35-q-final-cache-1793832269544630195.tar.gz.

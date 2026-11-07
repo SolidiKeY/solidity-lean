@@ -1,0 +1,109 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/LoopPrefixControls.lean",
+  "interface_sha256": "f79c4046c6df3cc27894ea9040c966725e64ea170aa343b54bec8d1d1c4443ef",
+  "joint_witness": "Solidity.Backend.Passes.AuditLoopPrefix.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditLoopPrefix",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.body_failure",
+      "signature_sha256": "20767b5afe5058a321a1d58ab3ae9316d20a93d4d87211db5eb35061ca3960ed",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.failed_cost",
+      "signature_sha256": "d6692c8fba1b90037a757a9a564e030361ca24ea79a6fb4e9234f044b5e35ed0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.loop_failure",
+      "signature_sha256": "0d8e312a9ccf0018c668101e0c3d9f55f3c6740fd3224e0a12a599b03d6422fc",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.scope_failure",
+      "signature_sha256": "e5fce3a3acf0b902ec9a06c0c8053acb7f8f2ba9feefeca92b02a30f2a618a01",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.failed_room",
+      "signature_sha256": "020d70efa80c51bd7822ce4a4493a587737b4e70dec8d42e4812a870635fae93",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.reached_body_failure",
+      "signature_sha256": "d965b7cc452bef93ba18a49a7007dca9152ac11713556b7efa4830c672db7c31",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.effect_target",
+      "signature_sha256": "bf98d7b3d9538af463cfe1553874ca76677707b3dd4e2baf3abeb66c66ca7cf7",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.emitted_failure",
+      "signature_sha256": "c302c841bb8ca4d62706c7177dd2c06448b6bdbc2fe1716b9555ed5e0b56a6b2",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.failing_body_target",
+      "signature_sha256": "4797fe69bb4392bda6e00ceff599d70fbefabcef02108438eb4d4cd3d22ec8d3",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.condition_target",
+      "signature_sha256": "3f5279e880824cf668a253ad8dfe15a784a1448a9dd9f4c2c2ab04166c172b2a",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.actual_failing_turn",
+      "signature_sha256": "fad906f3eb4f77aec771efafda617473bfaba86be1c4f0d35d3470582ab8a585",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.failing_prefix_vector",
+      "signature_sha256": "601bbf00b15cb801ce0eaa34ad146ea26147ec6949f7dc4d5d7fd622bfc89624",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.skipped_failure_effect",
+      "signature_sha256": "d8ecaf43a026ab27199ea367f8a0bd3483fbbd576d508e676a94e8eb2d2ebf82",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.spin_condition",
+      "signature_sha256": "803cb1c6dceb7474e3e8180cf7deaf7081f898660b217b405f9e27bb9d5bdb99",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.spin_source",
+      "signature_sha256": "e299d5a63cc16dba911c9355041dbfaf0991284c47c6bdd68d9b3f92ceba31a9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.spin_scope_source",
+      "signature_sha256": "cd6677671e9a76db0435971e62dd47bac9b29e194cfd2f38aee6346d0d486542",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.reached_divergence",
+      "signature_sha256": "c6f1640d2bb971f4c1f531ca8a9b078980d49a3f8cca106fe66e24ffd87d7887",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopPrefixControls.distinct_failures",
+      "signature_sha256": "7a94c287bf7c4d1ee2a3e65cdd97328d075da22c3c560d84624bcdbe6dbecd98",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 449,
+  "aggregate_remaining": 810,
+  "joint_contract": "actual-preparation-input-and-reached-failure-divergence-inputs",
+  "limits": "Eighteen original public loop-prefix rows. Reached zero allocation cost excludes unreachable allocation, not prefix effects. Source divergence is proved without infinite evaluation; internal fault/revert are not native gas or ABI observations. No ByteWorld/emission or full Source/G24 adequacy.",
+  "checked_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

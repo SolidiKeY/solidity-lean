@@ -1,9 +1,0 @@
-{
-  "pack": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-packet/native-parity.tar.zst",
-  "sha256": "dc2e7041beab617cb5f57ef4d5c3e299cbaa92e7691f5a67869faa03c17ced60",
-  "bytes": 7901648,
-  "verifiedPayloadMembers": 38,
-  "binarySha256": "1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d",
-  "status": "verified-local; coordinator-pending",
-  "boundary": "Existing native producer build,18exact fixture comparisons+2failclosed,and reviewed candidate bodies. Not exhaustive closure,WASM,source preservation or full migration proof. No serialized Lean environments included."
-}
