@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "handoff_to": "solidity-v07-v11-20261030/v10-storage-operations",
+  "worker_state": "STOPPED_AFTER_PRESERVATION",
+  "implementation_authorized": false,
+  "automatic_continuation_authorized": false,
+  "goal_pause": {
+    "requested": "PAUSED",
+    "applied": false,
+    "error": "UNAVAILABLE_OPERATION: only codex_goals.stop_goal(outcome: complete | blocked) is exposed; no pause/get_goal operation. Do not substitute complete or blocked for PAUSED."
+  },
+  "goal_created_or_reset": false,
+  "goal_completed": false,
+  "push": {
+    "performed": false,
+    "reason": "No H71 original-lane push authorization is present in available thread/files; original no-push rule retained. Never push master."
+  },
+  "snapshot_head": "b99808cca35e0cee53df6aa3d11f79616cf35b58",
+  "latest_hash_owner_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
+  "latest_hash_overlay_sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+  "overlay_applied": false,
+  "verified_witnesses": 0,
+  "uncovered_rows": 3281,
+  "manual_source_plans": 25
+}

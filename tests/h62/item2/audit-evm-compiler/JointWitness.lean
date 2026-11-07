@@ -16,7 +16,7 @@ elab_rules : command
     unless candidates.length == 1 do throwError "expected exactly one original constant"
     let (originalName, ci) := candidates.head!
     unless ci matches .thmInfo _ do throwError "expected an original theorem"
-    forallTelescope ci.type fun xs _ => do
+    forallTelescopeReducing ci.type fun xs _ => do
       let type ← jointPackage xs.toList
       let proof ← elabTermEnsuringType value type
       synthesizeSyntheticMVarsNoPostponing
@@ -31,6 +31,28 @@ elab_rules : command
         setEnv previous
         throwError "audit_joint_witness requires only standard axioms"
     logInfo m!"JOINT: {originalName} => {target.getId}"
+/-- Check closed equalities without manufacturing a new proof declaration.
+Opening reducible telescope tails prevents Not/abbreviation-hidden hypotheses
+from being classified as closed. The caller still checks identity and axioms. -/
+def ensureClosedEquality (ci : ConstantInfo) : MetaM Unit := do
+  forallTelescopeReducing ci.type fun xs conclusion => do
+    unless xs.isEmpty do throwError "closed equality audit found hypotheses"
+    unless (← whnf conclusion).isAppOfArity ``Eq 3 do
+      throwError "closed equality audit requires an equality proposition"
+
+syntax (name := closedEqualityCmd) "#audit_closed_eq " str : command
+elab_rules : command
+  | `(#audit_closed_eq $original:str) => liftTermElabM do
+    let candidates := (← getEnv).constants.toList.filter fun entry =>
+      entry.1.toString == original.getString ||
+        (privateToUserName entry.1).toString == original.getString
+    unless candidates.length == 1 do throwError "expected exactly one original constant"
+    let (name, ci) := candidates.head!
+    unless ci matches .thmInfo _ do throwError "expected an original theorem"
+    ensureClosedEquality ci
+    unless (← collectAxioms name).all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
+      throwError "closed equality has nonstandard axioms"
+
 /-- Intentional impossible fixture exercises rejection of ambient assumptions. -/
 private theorem closureControl (n : Nat) (h : n < 0) : False := Nat.not_lt_zero n h
 
@@ -39,5 +61,20 @@ private theorem closureControl (n : Nat) (h : n < 0) : False := Nat.not_lt_zero 
 #audit_joint_witness "Solidity.H62.EvmCompilerAudit.Tool.closureControl" as rejectedAmbientWitness := by
   exact ⟨n, h, True.intro⟩
 
+private abbrev HiddenInputs := ∀ n : Nat, n < 0 → False
+private theorem aliasControl : HiddenInputs := fun n h => Nat.not_lt_zero n h
+
+/-- error: closed equality audit found hypotheses -/
+#guard_msgs in
+#audit_closed_eq "Solidity.H62.EvmCompilerAudit.Tool.aliasControl"
+
+private abbrev PositiveInputs := ∀ n : Nat, n = 0 → n = n
+private theorem aliasPositive : PositiveInputs := fun _ _ => rfl
+#audit_joint_witness "Solidity.H62.EvmCompilerAudit.Tool.aliasPositive" as Solidity.H62.EvmCompilerAudit.Tool.aliasJoint := by
+  exact ⟨0, rfl, True.intro⟩
+
 #print axioms closureControl
+#print axioms aliasControl
+#print axioms aliasPositive
+#print axioms aliasJoint
 end Solidity.H62.EvmCompilerAudit.Tool
