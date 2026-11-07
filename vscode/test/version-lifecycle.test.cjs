@@ -30,12 +30,12 @@ test('missing, malformed and late injected versions use the separate 5000ms unkn
  const cases=[['missing',''],['malformed',`peer.notify('${method}',{name:'Notification fixture',version:42});`],['late',`setTimeout(()=>peer.notify('${method}',{name:'Notification fixture',version:'1.2.3'}),5200);`]],resources=[];
  try{
   await Promise.all(cases.map(async([name,send])=>{
-   const f=fixture(`peer.onNotification('initialized',()=>{peer.notify('window/logMessage',{message:'started'});${send}});`),client=new LanguageClient({...configuration,nodePath:f.nodePath}),identities=[];resources.push({f,client});client.on('identity',i=>identities.push(i));let started;
+   const f=fixture(`peer.onNotification('initialized',()=>{peer.notify('window/logMessage',{message:'started'});${send}});`),client=new LanguageClient({...configuration,nodePath:f.nodePath}),identities=[];const events=[];resources.push({name,f,client,events});client.once('log',()=>{const child=client.child;events.push({event:'started',at:performance.now(),pid:child.pid,birth:child.processBirth});for(const event of ['exit','close'])child.once(event,(code,signal)=>events.push({event,at:performance.now(),code,signal}));});client.on('identity',i=>identities.push(i));let started;
    client.on('log',()=>{started=performance.now();});await client.ready;
    assert.ok(performance.now()-started>=4900,name+' must wait for version fallback after startup');assert.equal(client.serverInfo.version,'unknown');assert.equal(client.versionSource,'timeout');assert.equal(client.peer.notifications.has(method),false);
    await new Promise(resolve=>setTimeout(resolve,350));assert.equal(identities.length,1);assert.equal(client.serverInfo.version,'unknown');
   }));
- }finally{await Promise.all(resources.map(async({f,client})=>{await client.dispose();fs.rmSync(f.directory,{recursive:true,force:true});}));}
+ }finally{await require('./fixture-cleanup.cjs').settleFixtures(resources,{record:rows=>{if(process.env.DAFNY_CHILD_CLOSURE_EVIDENCE)fs.writeFileSync(process.env.DAFNY_CHILD_CLOSURE_EVIDENCE,JSON.stringify({scope:'Actual Node/RPC transport with injected version producer; no solver/kernel/rendered evidence.',rows},null,2));}});}
 });
 test('transport failure and disposal while awaiting version cannot publish identity',async()=>{
  for(const fail of [true,false]){
