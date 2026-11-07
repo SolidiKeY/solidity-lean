@@ -1531,3 +1531,29 @@ tests, trust, orphans, roots/fragments and whitespace allPASS. Prior global
 doc-path failure remains retained at gate-kernel-metadata/evidence/gate-6.log;
 unchanged failing check not rerun. No new kernel build or runtime/performance
 pass is implied by pure bookkeeping/tests.
+
+
+## H82 synthetic fixture citation repair
+
+Freshly fetched master05d2c2587 is already adopted. Revisited the known
+documentation gate failure under H82 statement-preserving-any-file authority.
+The two nonexistent filenames in the audit-evm-compiler scope tests are synthetic
+module-map fixtures, not intended repository links. Construct those names from
+components and interpolate them; actual original/added fixture bytes are checked
+against the committed parent and unchanged, including duplicate-original input.
+All six existing add/duplicate/remove/modify controls pass. No scanner rule,
+fixture domain, production source, Lean statement, interface, budget, axiom or
+exclusion changed. Prior RED receipt remains at gate-kernel-metadata; this is a
+distinct repaired-input validation, not an unchanged failing rerun.
+
+Genuinely new independent checkpoint starts a fresh bounded window under
+Q-BUDGET-01/H30/H33; expired generic-domain window remains closed. No new Lean
+workload, prerequisite build, PowerBounds retry or RUNTIME_GATE_PASS. Original
+semantic/source/producer/final-gate waits remain open.
+Evidence: /workspace/parallel-20261103/executable-bytecode/synthetic-doc-citations/.
+
+Changed-input documentation gate nowPASS; six fixture tests,82bytecode tests,
+roots/fragments and whitespacePASS. Independent readonly finder/skepticPASS
+with no findings and identical fixture/duplicate-control behavior confirmed.
+This resolves only the synthetic-citation documentation wait. Other producer,
+PowerBounds, owner/pin and full semantic/package obligations remain open.
