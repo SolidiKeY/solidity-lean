@@ -2110,3 +2110,59 @@ unmentioned, that the depth claim lacked a theorem and its balance condition,
 and that the encoder paragraph ignored the frozen-`Instr` assembler. Fixed
 above: `depth_disagreement` added, `hreply` weakened to entered calls, the
 wording corrected.
+
+
+## H121c: frozen V15 ownership transfer (2026-11-07)
+
+Human H121c transfers the full p10_execution_bridge from the frozen Claude V15
+lane to solidity-h62-3-20261106/g52-differential on its existing isolated branch.
+Exact implementation90153461127d8d0f1f188021e79bc1ccb256e1e5 is integrated after
+published master1ab348cf7e2c59a462235fd5656c70a90a5e6874. Remote tip0db48c0a48a8aef8dd6dc6ccbeababf409d67c2d
+is the later result receipt; the supplied implementation pin is retained.
+The former V15 provider wait/staged notice is superseded. No frozen-Claude
+follow-up or general paused-queue resume occurs. This is adoption, not delivery.
+
+Remaining inputs from other lanes:
+
+| Lane | Required input |
+|---|---|
+| VY1 | Concrete admitted assembly SourceSpec/frontend and raw session semantics |
+| VY4 | Unified log/emit Event observations and raw world/frame coupling |
+| VY2 | Physical allocation/layout/MemOK and representation refinement |
+| VY3 | Concrete lowering/compilation/opcode/pass certificates |
+| V13 | Actual callee/world WorldCalls execution producers for the entered Theta run |
+| executable-bytecode | P10 body/signature application and exact emitted-code/PC/Site source-origin binding |
+| V14/V11/PAR | Original execution/bytecode, memory/resource and ABI-entry dependencies |
+
+Missing canonical same-Artifact assembly-session Lang and pinned Osaka EvmSpec
+remain owned construction/integration work, using those actual inputs. The G06
+session/failure-point/hash-preimage observations, independent Approved_opcode
+coverage, fixed uniform environment map, executable resource bound and complete
+two-sided failure/prefix transports are not supplied by the local laws.
+All15public residuals remain open. No assumed certificate or favourable-call,
+gate-success or implemented-fragment domain is accepted as the full bridge.
+
+The existing CodeLayout encoder covers frozen Instr push/pop/jump/jumpi/loop;
+separate storage macros do not turn it into a general InstrV2 encoder. Fixed-cell
+MLOAD/MSTORE, CALL/CALLIN, RETURNDATASIZE/COPY, data REVERT/RETURN still require
+macro lowering and execution correspondence. This adoption does not reassign
+all lowering ownership; executable-bytecode retains body/signature application.
+Existing arity obstructions and depth_disagreement remain intact. In particular,
+callIn_agrees depends on the exact entered-call Theta reply and does not prove
+operand, flag, balance, journal or gas agreement. The CLZ/INVALID discrepancy
+also remains a gap, not an approved Osaka exclusion.
+
+Existing H68 signatures/domains/local statements are unchanged. Imported
+CallInAgreement/CallReturndataLaw/CallReturndata and FrozenInterface match the
+exact frozen source bytes. No manual proof, axiom, pin or budget edit, fresh Lean
+run, runtime gate, producer closure or final acceptance is claimed. The full
+p10_execution_bridge has no delivered complete producing files/head yet.
+Read-only finder/skeptic adoption reviews inspect these dependencies and limits;
+no Lean/server/build/native EVM or old-lane contact. Detailed source fingerprints
+and ownership metadata are in the existing bridge-requests.json P10 family.
+
+Owner-boundary clarification from finder review: V13 supplies the actual
+callee/world execution producer. The separately missing core/reference CALL
+operand/state representation is owned bridge integration with the real provider
+inputs, not an inferred additional V13 assignment. Flag/balance/journal/gas
+correspondence remains unproved. No dependency owner is assigned by proximity.
