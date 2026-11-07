@@ -453,6 +453,46 @@ theorem default_updates_nonempty :
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_updates_nonempty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms default_updates_nonempty
 
+/-- Input inhabitance only for the no-hypothesis logical read laws. The
+existing retained index is populated but outside the live header. -/
+theorem logical_read_inputs : Nonempty (Value graph (.array (.prim .bool)) × Index) :=
+  ⟨(old, one)⟩
+
+/-- Input inhabitance only for the no-hypothesis primitive-write failure law;
+no logical premise bundle or compiler totality is claimed. -/
+theorem logical_write_inputs :
+    Nonempty (Value graph (.array (.prim .bool)) × Index × Bool) :=
+  ⟨(old, one, false)⟩
+
+/-- Exercise the original word law at the existing dirty retained cell; the
+raw query can observe true while the live path refuses the same index. -/
+theorem retained_word_law :
+    ((TargetArrayRead.path one).readLive Value.dflt old).map (fun v => PrimTy.toWord (p := .bool) v.head) =
+      if one.val < old.length.val then (PrimitivePop.elementQuery one).read old else none :=
+  TargetArrayRead.live_word old one
+
+/-- Reuse the original logical failure equivalence on the retained fixture. -/
+theorem retained_none_law :
+    (TargetArrayRead.path one).readLive Value.dflt old = none ↔ old.length.val ≤ one.val :=
+  TargetArrayRead.live_none_iff old one
+
+/-- Reuse the original primitive save failure equivalence, keeping raw
+retained save distinct from the live adapter's refusal. -/
+theorem retained_write_failure_law :
+    TargetArrayWrite.writeAt old one false = none ↔ old.length.val ≤ one.val :=
+  TargetArrayWrite.failure old one false
+
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.logical_read_inputs' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms logical_read_inputs
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.logical_write_inputs' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms logical_write_inputs
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.retained_word_law' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms retained_word_law
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.retained_none_law' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms retained_none_law
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.retained_write_failure_law' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms retained_write_failure_law
+
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.read_joint' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms read_joint
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_joint' does not depend on any axioms -/
