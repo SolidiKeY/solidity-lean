@@ -63,3 +63,7 @@ The 89 pipeline rows are disjoint from the prior 102 unsigned and 71 signed Cont
 ## SignedMod Selection
 
 The base-byte-pinned `signed_mod_selection_ledger.py` adds ten literal declarations: public selection, operator-level nonzero/zero results, representation uniqueness, combined Source and selected execution, and separate symbolic success, zero-revert and origin success. The combined numeric theorem requires the stated finite-word saved stack and both capacity hypotheses; symbolic success and zero-revert quantify a separate arbitrary EVM-word tail. This is manual textual accounting, not Lean validation or a target panic-payload claim. Together the ledgers account for 284 of 465 literal headers; 181 remain.
+
+## SignedDiv Origin
+
+The base-byte-pinned `signed_div_origin_ledger.py` covers ten literal declarations for Source signed division origins. It distinguishes zero divisor in both modes, checked minimum/-1 arithmetic panic, unchecked minimum/-1 success, and ordinary division with a nonzero divisor and the overflow pair excluded. Local origin retains the original reads, frame, fuel+3 and full Source state. This is a textual Source account, not a target proof. The ledgers now account for 294 of 465 literal headers; 171 remain unclassified.

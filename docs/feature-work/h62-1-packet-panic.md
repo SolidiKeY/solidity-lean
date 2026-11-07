@@ -89,3 +89,7 @@ The base-byte-pinned `signed_mod_source_ledger.py` adds 12 manually reviewed Sou
 ## SignedMod Selection continuation
 
 `signed_mod_selection_ledger.py` accounts for ten base-pinned Selection declarations; its tests reject missing, duplicate and forged headers and changed Source bytes. Independent read-only finder and skeptic reviews identified numeric SMOD wording and the distinction between finite-word numeric saved stacks and arbitrary symbolic tails; those descriptions were corrected and rechecked without Lean. The ledger does not prove Lean statements or full semantic closure. See `tests/h62/item1/packet-panic/CASE-ACCOUNTING.md`.
+
+## SignedDiv Origin continuation
+
+`signed_div_origin_ledger.py` adds ten base-pinned Source origin observations. Negative controls reject missing, duplicate or forged census headers and changed source, even with refreshed census hashes. Independent read-only finder and skeptic reviews matched all observations and case premises without Lean; no material discrepancy was found. This is not a semantic-closure, target-payload or proof claim.
