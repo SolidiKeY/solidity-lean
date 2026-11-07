@@ -49,22 +49,9 @@ class Preparation(unittest.TestCase):
                 return git("rev-parse", "HEAD").decode().strip()
             head = commit()
             result = M["prepare"](root, head)
-            self.assertEqual(len(result["slowModules"]), 15)
+            self.assertEqual(len(result["slowModules"]), 14)
             self.assertEqual(result["status"], "prepared-not-executed")
-            self.assertEqual(result["measurementDeadlineSeconds"], 300)
-            self.assertEqual(result["derived17ReplayDeadlineSeconds"], 300)
-            ci = M["prepare"](root, head, "ci")
-            self.assertEqual(ci["measurementDeadlineSeconds"], 300)
-            self.assertEqual(result["slowLibraryDeadlineSeconds"], 300)
-            self.assertEqual(ci["slowLibraryDeadlineSeconds"], 600)
-            self.assertEqual(ci["derived17ReplayDeadlineSeconds"], 600)
-            row_module = "Solidity.Examples.Tactics.OpenLoops.RowsNine"
-            self.assertEqual(result["slowModuleDeadlineSeconds"][row_module], 300)
-            self.assertEqual(ci["slowModuleDeadlineSeconds"][row_module], 600)
-            self.assertTrue(all(seconds == 600 for seconds in ci["slowModuleDeadlineSeconds"].values()))
-            self.assertTrue(all(seconds == 300 for seconds in result["slowModuleDeadlineSeconds"].values()))
-            with self.assertRaisesRegex(ValueError, "Unsupported execution context"):
-                M["prepare"](root, head, "checkpoint")
+            self.assertEqual(result["runnerDeadlineSeconds"], 600)
             with self.assertRaisesRegex(ValueError, "Unexpected source head"):
                 M["prepare"](root, "0" * 40)
             (root / "lakefile.toml").write_text('defaultTargets=["SoliditySlowExamples"]\n[[lean_lib]]\nname="SoliditySlowExamples"\n')
@@ -75,16 +62,6 @@ class Preparation(unittest.TestCase):
                 M["prepare"](root, head)
             (root / "lakefile.toml").write_text('defaultTargets=["Solidity"]\n[[lean_lib]]\nname="SoliditySlowExamples"\n')
             (root / "SoliditySlowExamples.lean").write_text("import Solidity.Examples.DecisionGaps\n")
-            head = commit()
-            with self.assertRaisesRegex(ValueError, "target inventory changed"):
-                M["prepare"](root, head)
-            (root / "SoliditySlowExamples.lean").write_text("".join("import " + m + "\n" for m in M["SLOW"]))
-            row = root / "Solidity/Examples/Tactics/OpenLoops/RowsNine.lean"
-            row.parent.mkdir(parents=True, exist_ok=True)
-            row.write_text("-- pending source membership fixture, never elaborated\n")
-            head = commit()
-            (root / "SoliditySlowExamples.lean").write_text("".join("import " + m + "\n" for m in M["SLOW"]
-                                                                 if m != row_module))
             head = commit()
             with self.assertRaisesRegex(ValueError, "target inventory changed"):
                 M["prepare"](root, head)

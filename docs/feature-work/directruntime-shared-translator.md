@@ -1390,9 +1390,3 @@ remains at SHA256 f7501b31521131172ae774afb006adcee546a90ea503b592ddfb0dfaa55b12
 No candidate was installed and no production, proof, validation contract or
 resource budget changed. The test-standing-owner and static-handoff script notes
 belong to the audit-calculus scope and were left unchanged in this lane.
-
-### H126 ReadBounds compiled traversal repair
-
-The typed tail worklist preserves every tree occurrence and existing fuel limit. Generic equalities prove exactly the old counters’ remaining-fuel results; the original ReadBounds definitions and statements are unchanged apart from selecting their compiled implementations. The correctness module stays outside the ordinary runtime import path.
-
-The affected DirectRuntime build and 27 per-file checks pass. Matched checking of the existing module has median ratio 0.9265; this is not total cold-build or native performance acceptance. Earlier checking failures remain in the off-Git H44 evidence archive indexed by `read-bounds-stack-manifest.json`. Emitted C has a worklist back edge and no direct recursive worker call. Fresh native/WASM validation and all historical global performance STOPs remain open.
