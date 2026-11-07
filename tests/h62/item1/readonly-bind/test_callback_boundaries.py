@@ -46,6 +46,11 @@ class ReuseRefusals(unittest.TestCase):
             artifact.write_bytes(b'changed')
             with self.assertRaises(ValueError):m.verify_objects(root,parent,receipt)
 
+    def test_report_counts_are_observed(self):
+        axioms={m.PREFIX+n:[] for n in ['depth_inputs','admitted_inputs','observed_events']}
+        self.assertEqual(m.observed_counts(axioms,{'artifacts':{'one':{}}}),
+                         {'joint_inputs':2,'theorems':3,'parent_objects':1})
+
     def test_axiom_record_refusals(self):
         rows=["'"+m.PREFIX+n+"' depends on axioms: [propext, Classical.choice, Quot.sound]" for n in m.NAMES]
         self.assertEqual(len(m.parse_axioms('\n'.join(rows))),8)

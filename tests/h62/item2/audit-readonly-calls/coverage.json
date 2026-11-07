@@ -342,6 +342,35 @@
       "question_id": "Q-CALLBACK-INTENT",
       "witness_rule": "H69: RO confirms intentional no-callback specialization; checked callback-choice impossibility is the audit result, never a positive callback witness",
       "owner_resolution": "Q-CALLBACK-INTENT resolved by coordinator relaying RO decision"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentSteps.refused",
+      "signature_sha256": "477824a58222450cbced77be19725ba2f0609c25c2c06b8f47232b0996ada385",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyBind.CallbackBoundaryControls.depth_inputs",
+      "client": "Solidity.H62.ReadonlyBind.CallbackBoundaryControls.depth_refusal_continues",
+      "global_premises": "One concrete Glob EB/program/strategy constructed without assumed operation equations; frozen C6 dependency closure compiled verbatim",
+      "per_input": "Same rich state, thisC/ext, word1, cb() input, requested=false, n=1, depth1024 ordinary; actual choice and true guard checked together",
+      "evidence": "original-callback/sealed/probe.log",
+      "evidence_manifest": "tests/h62/item1/readonly-bind/original-callback.sha256",
+      "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "frozen_type_sha256": "50de51195a293abab386e28a1573e607b3988a647c3a0a00bc67cebfae2234c2",
+      "boundary": "Frozen source-model premise satisfiability and instantiated run, not EVM gas/fork, constructor reachability or compiler/source-callee/frame adequacy",
+      "additional_checked_case": "Solidity.H62.ReadonlyBind.CallbackBoundaryControls.static_inputs"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentCredit.callback_credit_failed",
+      "signature_sha256": "efeb4ef18f01f36db54fa67644561b6f75fc22a1efa5eca420eaca9e65469b8a",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyBind.CallbackBoundaryControls.admitted_inputs",
+      "client": "Solidity.H62.ReadonlyBind.CallbackBoundaryControls.admitted_credit_failure",
+      "global_premises": "One concrete Glob EB/program/strategy constructed without assumed operation equations; frozen C6 dependency closure compiled verbatim",
+      "per_input": "Same rich state and entered poststate, thisC/ext, word1, cb() input, requested=false, n=1, depth1023 ordinary; choice, false guard, instance lookup and failed credit checked together",
+      "evidence": "original-callback/sealed/probe.log",
+      "evidence_manifest": "tests/h62/item1/readonly-bind/original-callback.sha256",
+      "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "frozen_type_sha256": "dc5988b8ee54ad5dde4ddd956004b6a109a52cf0848ed946384fd22a1eb39af8",
+      "boundary": "Frozen source-model premise satisfiability and instantiated run, not EVM gas/fork, constructor reachability or compiler/source-callee/frame adequacy"
     }
   ]
 }

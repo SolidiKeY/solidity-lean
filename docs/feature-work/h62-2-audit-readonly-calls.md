@@ -435,3 +435,65 @@ open. H121 compiler-success/G42.04 adequacy still belongs to
 solidity-compiler10-20261028/memory-reference-structs; our full RO source/callee
 outcome and physical-frame producer remains unfinished. The historical exact
 proof-cleanup object remains UNVERIFIABLE without original recovered bytes.
+
+
+## Frozen callback witness fidelity and coverage (2026-11-07)
+
+Two original interface rows now have checked joint witnesses against the exact
+assigned base c6f550e281a7e5affa9a99bc2cdaed556dec00e4:
+Solidity.Lowering.Readonly.EnvironmentSteps.refused and
+Solidity.Lowering.Readonly.EnvironmentCredit.callback_credit_failed. The first
+has depth and static-value cases; the second has one admitted credit-overflow
+case. These are three joint cases for two statements, not three new obligations.
+The unchanged additive CallbackBoundaryControls module supplies actual choice/
+guard and instance/credit equations together, and clients check the resulting
+source runs. No statement, premise, definition, exclusion or budget was repaired.
+
+`scripts/h62/item1/readonly-bind/check_original_callback.py` reads the original
+Git blobs and freshly compiles the complete57-module unheld callback closure in
+an isolated library with pinned SDK root and no current project-cache fallback.
+It then checks all eight witness theorems and exports both original public
+interface types using the existing metadata helper's kind/module/name checks.
+Their raw type digests match the prior792-declaration export. All eight new
+axiom sets contain only propext,Classical.choice and Quot.sound. SDK modules
+remain toolchain inputs, not independently source-certified dependencies.
+
+Review fixed two analogous digest-retention gaps: the authenticated census
+artifact digest and Git-base toolchain digest are retained before compilation,
+then verified at final sealing rather than adopted from a later read. Five
+external refusal controls passed. The final sealed gate passed in376.049s with
+1675214848bytes aggregate peak RSS. Earlier390.981s and382.576s observations are
+retained separately; they are not matched speed comparisons or a rebaseline.
+Actual tools remain Lean4.24.0/Lake5.0.0-src+797c613,-j1,12GiB cap,4GiB reserve,
+no swap. Original KeySort compiled successfully within the frozen closure.
+The held Premises module is rejected before dependency compilation.
+
+An owned detached C6 checkout was used only for the strict source census.
+All129 module hashes and all792 declaration identities, source headers, variable
+contexts and visibilities match the authenticated original inventory. Only the
+callback closure/two interfaces received new kernel validation. Other790 semantic
+records retain their previous evidence; the current three deleted private IDs
+are not restored by historical objects.
+
+Coverage now contains26 joint-witness rows plus3 target-failure joint rows.
+The retained full ledger has45 intentional impossibility rows,256 no-top-level
+input-hypothesis rows,2 frozen-V1-refuted/versioned-migration rows and460 pending
+ordinary rows:792 total. These are bookkeeping categories, not a whole-goal
+completion claim. The source-only census separately reports758 pending because
+it does not rerun the retained semantic classification; it is not a replacement
+for that full ledger. Exactly two witness statuses changed from the previous
+current coverage view, with all other790 rows retained.
+
+`tests/h62/item1/readonly-bind/original-callback.sha256` pins the frozen receipt,
+types, raw probe log, inventory, outer bounded receipt and coverage/fidelity
+reports. Raw bulk evidence remains off Git under
+`/workspace/h62-audit-readonly-calls/original-callback/`.
+Independent read-only finder and skeptic confirmed the fixes and final two-row
+integration; neither executed Lean or wrote files. The current callback checker
+also now derives its PASS counts from observed records; five controls and its
+current kernel check passed. Exact older helper bytes are preserved with the
+frozen validation provenance. Rebased onto coordinator master a10b60f23315.
+No Lean theorem/proof changed in this checkpoint; no new axioms/sorry/native_decide.
+All remaining original/inherited queues, full acceptance, broader binding/live
+ownership and RO source/callee plus physical-frame adequacy remain open. The
+historical +80.254966536% Premises STOP is unchanged; no RUNTIME_GATE_PASS.
