@@ -873,3 +873,30 @@ Read-only finder and skeptic reviews found no semantic issue. The finder's
 precision note was fixed: literal_rethrow uses independent allocationFuel+4
 and statementFuel+1 horizons, not one shared fuel. Evidence hashes were refreshed
 for that description change. Neither reviewer ran Lean or a server.
+
+### Source hash pin and reached allocation (2026-11-07)
+
+SourceHashJoint supplies the original fixed.Keccak premise together with the
+actual full-word hash execution and same returned-pointer byte-object lookup in
+an existing populated model. Input bytes remain arbitrary, including empty
+bytes; both pipelines, static flags and all sufficient fuel are retained. It
+uses the existing generic laws and fixed pin, with no new evaluator or assumed
+successful run. A full-result inequality refuses the exact hash paired with the
+unchanged prestate: the reached heap.next is 2 rather than 1 even for empty input.
+
+Three original target links distinguish one conditional application from two
+existing total allocation/nonheap identities. Reusing the latter is not new
+fixture or producer evidence. Four other original hash targets, residual records
+and all full fidelity remain pending. This does not supply noncollision,
+canonical admission/origin/session/lifecycle, target compiler selection,
+production body/frame relation or the assigned H68 bridge.
+
+The serial per-file check passed in 1.382 seconds with one Lean, peak sampled
+aggregate RSS 732,078,080 bytes and no STOP. All three declarations use only the
+existing standard axioms; registration passed. No matched timing/full-root
+acceptance or earlier STOP release. Exact source/receipt bindings are in
+source-hash-joint-manifest.json, with bulk evidence off Git.
+
+Independent read-only finder and skeptic found no issue in the actual fixed pin,
+full execution/allocation joint, empty-input negative or limited claims. Neither
+ran Lean or a server; the review receipt remains with the evidence.
