@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/block-guards-classification-v25/semantic-roles-reviewed.json",
-    "bytes": 778880,
-    "sha256": "1a134dbabcfbf480a916e9d38741a3c53a93c41ee2e820dde1265396feb6348a"
+    "path": "/workspace/h62-successor-bulk/dispatch-soundness-classification-v26/semantic-roles-reviewed.json",
+    "bytes": 796689,
+    "sha256": "7bf69b3b8f09f3acecec4fa8120e5c46bb7e1a5af146425812e1ac88a012735b"
   }
 }
