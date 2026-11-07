@@ -104,7 +104,9 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(config.suite==='output-lifecycle'){
+    if(config.suite==='compiler-output'){
+      await scenario('native-compiler-output-configuration',()=>require('./compiler-output.cjs').run({vscode,config,events,keybindingRequest,until}));
+    }else if(config.suite==='output-lifecycle'){
       await scenario('native-output-restart',async()=>{
         const name=target==='local'?'Solidity Lean':'Dafny VSCode',channel=events.filter(e=>e.kind==='output.create'&&e.data.channel===name);assert.equal(channel.length,1,'one actual extension output channel');
         const outputUri=vscode.Uri.file(file('output-lifecycle'));writeFileSync(outputUri.fsPath,workload(target,1));await vscode.commands.executeCommand('vscode.open',outputUri,{preview:false});await until(()=>vscode.window.activeTextEditor?.document.uri.toString()===outputUri.toString(),'real source editor open');let doc=vscode.window.activeTextEditor.document;const source=doc.getText(),version=doc.version;
