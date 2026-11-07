@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/symex-roles-v82/semantic-roles-reviewed.json",
-    "bytes": 2583141,
-    "sha256": "9369e0eb43c44901c6655710a2fd5cd173e68d430856cfbc9e198ad1eb1e95f6"
+    "path": "/workspace/h62-successor-bulk/recursion-roles-v83/semantic-roles-reviewed.json",
+    "bytes": 2620345,
+    "sha256": "f8d752668385674b9ce9827ff5a8c67ff1e71cc5bf01497c1d12b4f73a1b2b39"
   }
 }
