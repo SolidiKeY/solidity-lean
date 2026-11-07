@@ -41,6 +41,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   const sourceCommands=require('./source-commands.cjs').install(vscode,context,{settings,output,cancelVerification:uri=>cancel(uri,true)});
   const tracePresentation=require('./trace-presentation.cjs').install(vscode,context,{notify:message=>{output.appendLine(message);vscode.window.showInformationMessage?.(message);}});
   function cancel(uri,preserveSource=false) {
+    for(const [id,snapshot]of symbolSnapshots)if(snapshot.compilerOnly&&(!uri||id===key(uri))){snapshot.abort.abort();symbolSnapshots.delete(id);}
     if(!preserveSource)sourceCommands.cancel(uri?key(uri):undefined);
     automaticTests.stop(uri);
     service?.cancel(uri);
