@@ -47,6 +47,18 @@ example : boolBytes.decode (fun _ => 2) = none := dirty_bool_not_canonical
 example : readBytes (mstore zero 128 ⟨0x12345678, by decide⟩) 156 4 ≠
     [0x78, 0x56, 0x34, 0x12] := not_little_endian
 
+/-- Regression guard: the existing short and long unaligned rows share base 129
+but cannot share an image. This instantiates the semantic decoder law, rather
+than deciding equality of an enumerated byte table. -/
+theorem unaligned_images_distinct :
+    (fixtures[1]'(by decide)).view ≠ (fixtures[5]'(by decide)).view := by
+  intro same
+  have bytes := byteObjectBytes_injective
+    (fixtures[1]'(by decide)) (fixtures[5]'(by decide)) rfl same
+  have lengths : 2 = 33 := congrArg List.length bytes
+  omega
+
+#print axioms unaligned_images_distinct
 #print axioms all_fixtures
 #print axioms original_byte_component
 #print axioms original_byte_component_decode
