@@ -616,3 +616,76 @@ end Controls
 #print axioms Controls.refused_original
 #print axioms Controls.source_completes
 end Solidity.Yul.Compilation.H55ControlFamilies.MultiSwitch
+
+namespace Solidity.Yul.Compilation.H55ControlFamilies.Statements
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel depth : Nat} {stmt : Stmt [] [] c n}
+
+def certify (a : ProducerStatements.Compiled fuel stmt) (depth : Nat) (program : Backend.Program)
+    (code : List Evm.Instr) (emitted : a.lowered.code depth = some program)
+    (selected : WordMachine.selectCode program = some code) : Artifact depth stmt :=
+  Artifact.ofTotalRun a.profile code fuel a.update a.source
+    (WordExecution.loweredStmt_machine a.lowered depth program code emitted selected)
+
+def prepare (depth : Nat) (a : ProducerStatements.Compiled fuel stmt) : Option (Artifact depth stmt) :=
+  Artifact.afterSelection (fun a : ProducerStatements.Compiled fuel stmt => a.lowered.code depth)
+    WordMachine.selectCode
+    (fun compiled program emitted code selected => certify compiled depth program code emitted selected) a
+
+abbrev Preparation (fuel depth : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt) depth)
+
+theorem prepared (a : ProducerStatements.Compiled fuel stmt) (program : Backend.Program)
+    (code : List Evm.Instr) (emitted : a.lowered.code depth = some program)
+    (selected : WordMachine.selectCode program = some code) :
+    prepare depth a = some (certify a depth program code emitted selected) :=
+  Artifact.afterSelection_some _ _ _ a program code emitted selected
+
+theorem emission_none (a : ProducerStatements.Compiled fuel stmt)
+    (refused : a.lowered.code depth = none) : prepare depth a = none :=
+  Artifact.afterSelection_first_none
+    (fun a : ProducerStatements.Compiled fuel stmt => a.lowered.code depth) WordMachine.selectCode
+    (fun compiled program emitted code selected => certify compiled depth program code emitted selected) a refused
+
+namespace Controls
+def source : Stmt [] [] SourceLoop.Controls.root 1 :=
+  .assign (fun _ : Fin 1 => .local 0)
+    (.builtin (.pure .add) (Fin.cases (.local 0) (fun _ => .literal 3)))
+def producer : ProducerStatements.Compiled 3 source := (ProducerStatements.compile 3 source).get (by rfl)
+def program := (producer.lowered.code 2).get (by rfl)
+def code := (WordMachine.selectCode program).get (by rfl)
+def artifact : Artifact 2 source := certify producer 2 program code rfl rfl
+
+theorem selected : prepare 2 producer = some artifact := prepared _ _ _ rfl rfl
+
+theorem effectful (locals : Vector Scalar.Word 1) (newer : Vector Scalar.Word 2)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run artifact.code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+      .ok {m with stack := (newer.toList ++ (producer.update locals).toList).map coreWord ++ caller} 0 :=
+  artifact.normal_to_model 3 locals (producer.update locals) (producer.source locals) newer m caller
+
+#guard producer.update #v[7] = #v[10]
+theorem refused_emission : producer.lowered.code 16 = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage (prepare 16) producer).artifact = none :=
+  emission_none _ refused_emission
+theorem refused_original : Artifact.recoverPreparation
+    (Artifact.toPreparationImage (prepare 16) producer) = producer :=
+  Artifact.preparation_source_roundtrip (prepare 16) producer
+theorem source_completes (locals : Vector Scalar.Word 1) :
+    evalStmt 3 .nil True.intro source producer.profile (sourceLocals locals) =
+      some ⟨sourceLocals (producer.update locals), .normal⟩ := producer.source locals
+#guard (ProducerStatements.compile 0 source).isNone
+end Controls
+
+#print axioms Artifact.ofTotalRun
+#print axioms certify
+#print axioms prepare
+#print axioms prepared
+#print axioms emission_none
+#print axioms Controls.selected
+#print axioms Controls.effectful
+#print axioms Controls.refused_emission
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.Statements

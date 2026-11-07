@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.CompletionControls
+import Solidity.Yul.ClosedHorizon
 /-! Intrinsic normal-completion artifact for the existing Yul/Compilation
 source and model. Both directions retain the complete frame and newer prefix.
 Concrete producer adapters must derive these fields from their existing proofs;
@@ -55,6 +56,29 @@ def ofZero (profile : StmtWordP stmt) (code : List Evm.Instr)
     have empty : newer.toList = [] := List.length_eq_zero_iff.mp (by simp only [Vector.length_toList])
     simp only [empty, List.nil_append] at ran
     simpa only [empty, List.nil_append] using backward locals m final caller skip ran
+
+/-- A proved total source update and its actual complete machine run give
+both certificate directions. This is a proof combinator, not compiler totality. -/
+def ofTotalRun (profile : StmtWordP stmt) (code : List Evm.Instr) (horizon : Nat)
+    (update : Vector Scalar.Word n → Vector Scalar.Word n)
+    (source : ∀ locals, evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+      some ⟨sourceLocals (update locals), .normal⟩)
+    (model : ∀ (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+      (m : Evm.Machine) (caller : List Evm.Word),
+      Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+        .ok {m with stack := (newer.toList ++ (update locals).toList).map coreWord ++ caller} 0) :
+    Artifact depth stmt where
+  profile := profile
+  code := code
+  source_to_model := by
+    intro actualHorizon locals result ran newer m caller
+    exact ⟨update locals,
+      evalStmt_completed_unique .nil True.intro stmt profile (sourceLocals locals) ran (source locals),
+      model locals newer m caller⟩
+  model_to_source := by
+    intro locals newer m final caller skip ran
+    have same := Evm.Out.ok.inj ((model locals newer m caller).symm.trans ran)
+    exact ⟨horizon, update locals, source locals, same.2.symm, same.1.symm⟩
 
 theorem normal_to_model (artifact : Artifact depth stmt) (horizon : Nat)
     (locals out : Vector Scalar.Word n)

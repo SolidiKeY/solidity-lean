@@ -180,6 +180,15 @@
       "declaration_name": "Artifact",
       "adapter_kind": "selected_artifact",
       "boundary": "Instantiates generic zero-prefix Artifact and exact Image from both actual finite-case switch laws. Actual selector, cases/default, fuel, emitted block, selected code and full source/profile data retained; original empty-newer-prefix convention and arbitrary caller/machine frame preserved."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ProducerStatements.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Statements",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic actual-total-update certificate and two-stage preparation from unchanged source/update/lowered machine proofs. Raw producer, exact emitted program and selected code context retained; source-completing depth16 refusal remains preparation None, not runtime failure."
     }
   ]
 }

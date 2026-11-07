@@ -11,5 +11,5 @@
 | `Yul/Views/DynamicJournalChild.lean` | Original actual child sequence, rollback, static, error and MemOK facts. |
 | `Yul/Views/DynamicJournalControls.lean` | Original dynamic journal reencoding, reset, account, padding and path-isolation facts. |
 | `Yul/Compilation/CompletionControls.lean` | General closed-normal completion and exact full-frame reasoning. |
-| `Yul/Compilation/Artifact.lean` | Shared intrinsic normal-completion certificate, reusable empty-prefix constructor and exact successful-producer image. |
+| `Yul/Compilation/Artifact.lean` | Shared intrinsic normal-completion certificate, empty-prefix/actual-total-update constructors and exact successful-producer image. |
 | `Yul/Compilation/ArtifactPreparation.lean` | General certified one/two-stage selection, accepted-object totality and exact preparation-image laws preserving Some/None without runtime-failure semantics. |
