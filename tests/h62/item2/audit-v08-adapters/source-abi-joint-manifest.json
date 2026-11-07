@@ -1,0 +1,73 @@
+{
+  "status": "PROVED_SOURCE_ABI_COMPONENT_JOINT_MODEL",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceAbiJoint.lean": "270bad822d4b2a19a02854ce16bd3fa99f4db91739ac91c54c6e8a68e51fed4f",
+    "Solidity/Lowering/V08/SourceAbi.lean": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62",
+    "Solidity/Lowering/V08/SourceAbiControls.lean": "8c962b36053c8cedcc966668f547d7e91a78c34072b4c11a42aba7cc60280d52",
+    "Solidity/Lowering/V08/SourceCustomErrorControls.lean": "9dd4c65999c53ed2609f8db7f0b703933f004e83ef5fe05f81495572e53bf297"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceAbi.execute"
+  ],
+  "captured_original_type_sha256": "cb5bfbc03a34c3c0e03b8def3ab0f603b675c26ff793e2f6ed26b783a1896e01",
+  "domain": "Every Pipeline and both static/packed flags at the existing mixed five-argument fixture and sufficient horizon17.",
+  "joint_premises": "Actual argument evaluation reaches callerfalse/afterLiteral hash-input heap; actual encodeVals starts at precisely that reached locals/state and leaves it unchanged before result allocation.",
+  "full_result": "Pointer2 and complete afterLiteral(afterLiteral populated binary)(data packed pipeline), caller localfalse retained.",
+  "controls": {
+    "timeout_not_rollback": "Actual horizon6 timeout retains earlier argument assignment. Source evaluation horizon is not EVM gas.",
+    "skipped_allocation_refused": "Inherited existing wrong_skipped_hash full-state refusal; not a newly discovered execution case."
+  },
+  "new_joint_model_families": 1,
+  "new_source_fixtures": 0,
+  "new_encoders": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceAbiJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 16.165,
+    "peak_sampled_aggregate_rss": 1101459456,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Reuses existing Source argument/encoding evaluator proofs, not a new canonical producer.",
+    "No syntax/artifact-origin/admission, general target preservation, gas/fork adequacy or H68 certificate.",
+    "One original ABI target application; remaining ABI/custom-error/dispatch laws and original full audit remain open.",
+    "Per-file elapsed includes import builds, not a matched timing comparison or STOP release."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "b201ce8da825f2745d4e9fcfcabf1703911dd2c9de7c97c9165c3782c3e5f591"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-joint-20261107/check/results.json",
+      "bytes": 396,
+      "sha256": "d07d1533780a9d3f4bb68027d900d6efcd6cf1f44f0f6c077c139004073b0ab1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-joint-20261107/check/gates/1.log",
+      "bytes": 41688,
+      "sha256": "289796a8584c4e2a661bf2087245c7e7f17bf35cf302000613a65b2c5ad18a71"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic verified exact reached-state argument/encoding premises, full allocations and inherited-control boundaries; no findings, no reviewer scripts/tests/Lean/server."
+}
