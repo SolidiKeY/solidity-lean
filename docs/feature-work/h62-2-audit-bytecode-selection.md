@@ -2664,3 +2664,35 @@ performed. The original closure, full validation, Source/runtime/G01 and physica
 obligations are unchanged. Reproduction and evidence remain off branch under
 /workspace/parallel-20261103/executable-bytecode/premise-source-accounting/ and
 are archived privately under H145.
+
+
+### False-runtime control: reviewed parameter roles
+
+Source/signature review of the frozen `V2.Controls.reject_false_runtime` now
+classifies the intent of all ten parameters. `Observation`, `source`,
+`bridgeStep`, `bridgeRun` and `reachable` describe the chosen observation and
+runtime model. `ir`, `b`, `input` and `output` identify the compiled instance.
+`composition` is a data-valued certificate for that same instance. These are
+review annotations, not kernel-proved role classifications or inhabited domains.
+
+All ten observed binders have `proof_binder = false`. This does not make the
+hypothesis domain automatically inhabited: `composition` must be an actual
+`CompositionCertificate ir b input output`, carrying lowering, whole-control,
+assembly and roundtrip obligations. The other parameters cannot be selected
+independently of this dependent certificate and counted as a simultaneous
+witness. No certificate inhabitant is supplied by this review. The published
+`scalarComposition` constructor remains the reuse target; its unavailable
+import products include the held PowerBounds dependency. No replacement
+certificate framework or stopped build is introduced.
+
+The constantly-false relation occurs in the *negated conclusion* about
+`Nonempty RuntimeConsumer`, not as an assumed input relation or an impossible
+input proof. This is an intentional negative control, not an unexpected
+vacuous theorem. The only open domain in the 13-theorem control packet remains
+open; prior eight positive and four refuted controls are unchanged. The static
+reproduction binds the preserved native-record seal, exact raw target type and
+frozen source bytes. It establishes no source correspondence, inherited
+instantiation, compiler acceptance, runtime/G01 linkage or additional witness.
+Independent read-only finder and skeptic reviewed these boundaries. Evidence is
+kept off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-control-roles/.
