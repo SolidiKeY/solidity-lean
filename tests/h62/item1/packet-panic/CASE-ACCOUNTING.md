@@ -59,3 +59,27 @@ The 89 pipeline rows are disjoint from the prior 102 unsigned and 71 signed Cont
 ## SignedMod Source
 
 `signed_mod_source_ledger.py` records all 12 literal headers in SignedMod/Source.lean, pinned to the assigned base bytes. They include the signed type/range and remainder bound; arbitrary checked-flag Source nonzero and zero-divisor outcomes; local reads with fuel+3 and the complete retained Source state; sign identities; and the pure minimum remainder -1 equality. The latter is not an execution theorem. The observations do not assert target payloads, unlisted cases or Lean validation. With this ledger, 274 of 465 enumerated literal headers have manual per-declaration observations; 191 remain unclassified. This is still not full semantic or dependency closure.
+
+## SignedMod Selection
+
+The base-byte-pinned `signed_mod_selection_ledger.py` adds ten literal declarations: public selection, operator-level nonzero/zero results, representation uniqueness, combined Source and selected execution, and separate symbolic success, zero-revert and origin success. The combined numeric theorem requires the stated finite-word saved stack and both capacity hypotheses; symbolic success and zero-revert quantify a separate arbitrary EVM-word tail. This is manual textual accounting, not Lean validation or a target panic-payload claim. Together the ledgers account for 284 of 465 literal headers; 181 remain.
+
+## SignedDiv Origin
+
+The base-byte-pinned `signed_div_origin_ledger.py` covers ten literal declarations for Source signed division origins. It distinguishes zero divisor in both modes, checked minimum/-1 arithmetic panic, unchecked minimum/-1 success, and ordinary division with a nonzero divisor and the overflow pair excluded. Local origin retains the original reads, frame, fuel+3 and full Source state. This is a textual Source account, not a target proof. The ledgers now account for 294 of 465 literal headers; 171 remain unclassified.
+
+## SignedDiv Selected
+
+The base-byte-pinned `signed_div_selected_ledger.py` adds twelve literal declarations covering public compiler selection, checked raw division and the unchecked minimum/-1 conditional, intrinsic evaluation under local-read premises, and symbolic `ValOutT` under the original physical StateRepr and arbitrary EVM-word tail. This is not a numeric capacity proof, target panic-payload claim, Lean proof or complete semantic account. The ledgers now account for 306 of 465 literal headers; 159 remain unclassified.
+
+## SignedDiv Execution
+
+`signed_div_execution_ledger.py` records six base-pinned intrinsic and joint Source/selected symbolic execution declarations. Ordinary and zero-divisor cases retain both checked modes; the minimum/-1 case separately records checked arithmetic panic/coarse revert and unchecked minimum success. Original Source/target local reads, physical StateRepr and arbitrary EVM-word tail remain binding. This is textual accounting, not Lean validation or a target panic-payload assertion. The ledgers now account for 312 of 465 literal headers; 153 remain unclassified.
+
+## UnsignedDiv Data and SourceOrigin
+
+`unsigned_div_origin_ledger.py` records eleven base-pinned literal declarations across Data and SourceOrigin. These include operand contexts, local-tail ordering, Source and intrinsic div/mod expressions, and Source local div/mod outcomes at n+3 across both pipelines with the complete local/state pair retained. A private helper `SourceOrigin.lift_result` lies outside the 465 literal-header census and is a dependency of both origins. The ledgers now account for 323 of those 465 headers; 142 remain unclassified, and the 465 count does not include private headers. This is textual accounting, not Lean validation or complete dependency coverage.
+
+## Additional private and protected headers
+
+The original census matches only unmodified line-start headers and omitted private or protected declarations. `private_header_ledger.py` scans the same independently enumerated 48 pinned files and finds nine additional literal `private theorem` headers. Their manual observations cover fixture heap references, representation uniqueness, unsigned success/refusal observations, numeric conversion, Source result lifting, and local-word representation. With these separately counted rows, 332 of 474 observed literal headers have manual observations; 142 of the original 465 remain unclassified. Neither scanner is a Lean parser: modifier combinations, alternate formatting, comments and declarations beyond the fixed files may be missed or misidentified. These counts are not full declaration, semantic or dependency coverage.

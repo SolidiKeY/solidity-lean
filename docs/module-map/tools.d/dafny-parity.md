@@ -1,0 +1,1 @@
+| `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |

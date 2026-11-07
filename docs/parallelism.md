@@ -9,7 +9,9 @@ The tools: `node scripts/import-fanout.mjs` prints each module's rebuild
 fan-out (how many modules import it transitively) and the longest import
 chain, `--path A B` one import path from `A` to `B`;
 `node scripts/check-layers.mjs` fails when a core module reaches the
-elaborator.
+elaborator or introduces an unapproved core-to-non-core import boundary.
+
+Audits (2026-11-06): [architecture](audits/architecture.md) (layering, copies, Controls cost), [build-speed](audits/build-speed.md) (where check time and memory go) and [coordination](audits/coordination-process.md) (lane time, gates, merge latency).
 
 ## P1. The core apart from the elaborator
 
@@ -43,14 +45,56 @@ elaborator.
 `Tools.SolCases` is an external-source printer and is explicitly included in
 the forbidden frontend set checked from the core.
 
-The list is meant to be closed under imports, but it is not today: the
-architecture audit (`cloud/audit-20261106/architecture`, fa5acebd4) found 95
-direct imports from core modules to modules outside the list.
-`scripts/check-layers.mjs` checks only that no core module reaches the
-elaborator, the printers or the tactic front ends, not closure.  The elaborator is `Syntax/{Elab,Quote,Splice}` and
-`Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`.  Source
-extraction for the core's composed models stays above it
-(`Frontend/WorldImport`, `Examples/Tactics/TransientStorage.lean`).
+The list is meant to be closed under imports. The architecture audit
+(`cloud/audit-20261106/architecture`, fa5acebd43214bbe642258d862f903bcf08d3f89)
+found 95 direct core-to-non-core boundary edges. Those exact edges are pinned in
+`scripts/core-import-baseline.json`, SHA256
+`d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b`
+(also recorded in `scripts/core-import-baseline.sha256`). Reproduce the audited
+bytes with `python3 -B scripts/h62/item5/statement-graph/audit_core_baseline.py`.
+They are existing debt, not proof that the core is already closed.
+
+The authorized OT-W0-TOOLING follow-up re-pins current master
+`fea090bf9fec1a372ad32952a5e72eb4d7015888` at **107** boundary edges.
+`scripts/core-import-current-baseline.json` contains that full snapshot and the
+12 additional edges, each attributed to its verified import-introduction commit;
+its SHA256 is `880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d`.
+Reproduce it with
+`node scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs`.
+The original 95-edge snapshot remains immutable. The twelve are cleanup candidates,
+listed in [the tooling handoff section](feature-work/h62-5-statement-graph.md#authorized-current-master-import-baseline-and-merge-pre-gate),
+not a declaration that the package is closed under imports.
+
+`scripts/check-layers.mjs` now checks the Solidity-package import closure as well
+as the existing elaborator/parser restrictions. It follows paths through core
+modules and rejects each new boundary to a non-core module, printing a witness
+path. Paths through a pinned boundary are grandfathered; the downstream modules
+are not promoted into CORE. This is a boundary-edge policy, not a baseline of
+all transitive module pairs. Standard Lean library imports remain outside this
+package-layer graph. The scanner handles comments, indented imports, and multiple
+modules on one import line; unsupported quoted or multiline import syntax fails
+closed. Existing elaborator/parser bans still apply even to an allowed edge.
+
+The active subset is the union of `scripts/core-import-allowlist.json` (original
+95) and `scripts/core-import-additions-allowlist.json` (authorized twelve). Each
+component has independent permanent shrink-only history; an original edge cannot
+be moved into the additions to restore it. Remove obsolete entries when fixing
+debt. Both can only shrink: additions outside the audited set, duplicate
+edges, re-adding a previously removed edge, and delete/recreate histories are
+rejected. Validation checks committed change history and the working tree;
+shallow histories, grafts and custom history overrides are refused. The immutable
+95-edge and current 107-edge snapshots and their checksums must not be enlarged
+to silence a later failure. No further allowance is authorized by this re-pin.
+
+The merge pre-gate `bash scripts/coord-tools/gate.sh touched` runs the layer check
+first and fails before invoking a build. Run it on the prospective merged tree
+before committing/publishing the merge. Checkpoint/full modes use the same
+preflight; per-file diagnostics remain unchanged.
+
+The elaborator is `Syntax/{Elab,Quote,Splice}` and
+`Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`. Source extraction for
+the core's composed models stays above it (`Frontend/WorldImport`,
+`Examples/Tactics/TransientStorage.lean`).
 
 **A new module** that only states or proves (no `sol{}`, `dl!{}`, `#wp`,
 `#guard_msgs` of a printer) belongs in the core if what it imports is: add

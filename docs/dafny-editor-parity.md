@@ -907,22 +907,24 @@ remain outstanding. Goal status is untouched. Full receipts and hashes are in
 ### Human decisions H47-H50 and serial resource authorization —2026-11-05
 
 The five prior questions now have answers, recorded in docs/dafny-human-decisions.json.
-H49 excludes the proof-help action only: it is removed and the mixed status-actions
-row records that human exclusion without waiving other aspects or changing gates.
+Historical H49 exclusion claims in this checkpoint are superseded by incoming H80:
+proof help links project README and calculus guide; no current exclusion is assumed.
 The official VSCode1.108.0 archive provisioned at /workspace/vscode-official/ passes
 sha256sum -c against the saved official API hash. docs/dafny-provisioned-assets.json
 records exact paths/sizes/hashes. Editor/version is1.108.0/94e8ae2b28cb5cc932b86e1070569c4463565c37;
 archive, extraction and cached Xvfb remain offgit under H44; no download retried.
 Rendered rows remain open until fresh paired evidence is collected.
 
-Q-CLI-01 chooses the existing concrete typed-model CLI, documented in vscode/README.md.
+Historical concrete-model CLI work is documented in vscode/README.md. H80 now
+specifies compiler-only Build and keeps runtime/test equivalence incomplete.
 Build writes a real compiler AST/source-hash artifact; Run selects Contract::function;
 Test executes concrete cases and compares exact status/text. None publishes proof
 or EVM-equivalence evidence. Source/dependency/function identity, pending prompt
 nonces/resource config, stale errors and physical child retirement are guarded.
 Reviewer failures were retained before fixes;25 targeted command/status and39
 command/editor checks pass. The initial full Node run retained an old contextual
-help assertion failure; its H49-excluded action was replaced by ordinary output,
+help assertion failure; that checkpoint replaced help with ordinary output. H80
+has since restored proof documentation help, superseding the H49 claim,
 while unrelated-folder picker ownership assertions remain. No budgets increased.
 
 Q-REL-01 is authorized but not implemented: whole-goal kernel refutation cannot
@@ -956,7 +958,7 @@ Final paired observations: pinned Dafny five phases partial, local open missing/
 
 Bulk, prior failed attempts, ordered logs and review findings remain on this VM. Committed `docs/dafny-decisions-evidence-manifest.json` binds the external archive and official provisioning assets by absolute path, size and SHA256; no screenshots/log dumps committed (H44). Final exact-head receipts follow outside git in the same artifact root. All484 rows and frozen270 retained; no row newly complete.
 
-Whole original remaining scope: real failed-postcondition producer/source provenance/certification and decorations; actual concrete CLI kernel/native validation; outstanding contribution/API/protocol/lifecycle implementations; local proof-phase screenshots and visual differences; full native proof/solver/adversarial/retention/scheduler/large-project/cold-warm/median-p95/scaling matrices; both independent fresh-process judgments per complete row; mandatory full build/TestSuite/timed strict/trust/KeySort and unchanged parity-gate exit0. Five prior questions are answered as recorded in `docs/dafny-human-decisions.json`; H49 excludes proof-help alone. No goal mutation or push/merge/PR.
+Whole original remaining scope: real failed-postcondition producer/source provenance/certification and decorations; actual concrete CLI kernel/native validation; outstanding contribution/API/protocol/lifecycle implementations; local proof-phase screenshots and visual differences; full native proof/solver/adversarial/retention/scheduler/large-project/cold-warm/median-p95/scaling matrices; both independent fresh-process judgments per complete row; mandatory full build/TestSuite/timed strict/trust/KeySort and unchanged parity-gate exit0. Incoming H80 scoped answers are recorded in `docs/dafny-human-decisions.json`; the earlier H49 exclusion claim is superseded and no row is waived. No goal mutation or push/merge/PR.
 
 ### H44 inventory bulk follow-up — 2026-11-06
 
@@ -1257,3 +1259,429 @@ switch/configuration/disposal/trust rejection and no backend restart. Finder and
 skeptic found no concrete defect; this is source evidence, not native UI parity
 or either fresh row judgment. Metadata and mandatory proof gates continue after
 dependency provisioning; no local positioned trace is fabricated.
+
+H80 documentation follow-up: guide and index are now independently selectable,
+opening actual calculus.md and README.md respectively. Missing/incomplete or
+escaping documentation produces a configuration-oriented message instead of raw
+ENOENT. Current-state, trust and picker lifetime guards remain. Native rendered
+help evidence remains pending; injected tests are not kernel/visual parity.
+
+H80 provisioning result: existing pinnedLean4.24.0/Lake5.0.0-src+797c613 was reused
+with recorded archive/binary/config hashes. Source-pinned CLI/Frontend now builds
+under12GiB virtual address cap, aggregateRSS/no-swap/12GiBreserve monitoring and
+serial-j1. A TermSize thread-stack ENOMEM was diagnosed; standardElab.async=false
+serializes declaration checking without changing proof statements or budgets.
+Dependencyresume exits0 (peak1,780,371,456bytes RSS); KeySort sourcecheck exits0
+with exact versions. No full/TestSuite/timedstrict or overall runtime pass follows.
+An environmenttransition monitoringgap, previous failures and invalidinitial
+pipe-close fixture remain explicitly classified. The hardened source supervisor
+checks resource admission/terminal state, prevents receipt overwrites, retains
+root identity for unsampled private-session readback and fails on retirement or
+survivors. Native process fixtures are not proof or rendered-editor evidence.
+[The small H80 manifest](dafny-h80-provision-evidence-manifest.json) binds VM-only
+logs, reviews and immutable installed artifact copies; bulk remains offgit.
+
+
+### H80 full-gate resource STOP; H82b intake and next CI queue
+
+At `d1ec2a900024f5b0a74d4deb87a66464ce5698b5`, the unchanged full gate
+passed build-touched, then stopped in `Solidity.Source.Horizon` at the original
+12GiB available-memory reserve. Command exit -9 (shell247), sampled aggregate
+RSS4,875,681,792bytes, available12,880,228,352bytes, swap0, owned survivors none.
+The [H80 manifest](dafny-h80-provision-evidence-manifest.json) binds the complete
+failed receipt. No unchanged heavy retry, source/budget change or runtime pass.
+Full build/TestSuite/timed strict remain unpassed. The source is Claude-owned;
+its resource-compatible proof check is an external dependency.
+
+H82b intake hashes and per-file checks passed; the editor member list is empty.
+Goal identity/status is untouched. H80 metadata requires a producer-owned typed
+candidate hook and per-clause source identity/span through serialization; a
+whole-obligation refutation does not establish a particular failed clause.
+No guessed spans or display-triggered proof search were added.
+
+OT-CI-PARITY is the next independent item: preserve strict mandatory parity
+failure without full inputs while allowing explicitly labeled digest-only CI
+checks, repair stale H49 tests under H80, and retain fresh-checkout failures.
+All486 rows/frozen270 remain; paired native/rendered/proof/performance/scaling
+and independent row judgments remain unfinished. KeySort's saved success is a
+source check, not a full runtime gate. No integration or completion claim.
+
+
+### OT-CI-PARITY: portable offline checks, full gates remain strict
+
+The [CI evidence manifest](dafny-ci-evidence-manifest.json) retains fresh-checkout
+failures, partial-input/symlink counterexamples, repaired regressions and required
+finder/skeptic reviews. Offline discover/audit `--check` may report digest-only
+when the H44 payload is wholly absent: they verify the committed transport
+metadata and explicitly omit full reconciliation. Present payloads retain full
+checks; strict source inventory and mandatory parity-gate never use digest-only.
+The missing-input mandatory gate remains exit1. No row or gate was weakened.
+
+Hermetic injected transport fixtures replace VM-data dependencies in unit tests.
+Native hover/large-file assertions remain unchanged when recordings are present;
+wholly absent recordings are explicit skips, and partial/symbolic/malformed input
+fails. Always-running injected mutation tests cannot certify native observations.
+H80 help assertions require both documentation destinations. The mock workspace
+is checkout-relative, and scratch fixtures create their ignored parent without
+requiring a prior Lean build. Initial fresh fullsuite failures remain retained;
+48focused fresh path cases and102targeted present-recording cases pass. A full
+committed-head fresh run and GitHub hosted runner observation remain pending at
+this checkpoint; no blocking-CI or parity success is claimed.
+
+All486 obligations/frozen270 remain. Full build/TestSuite/timed strict, native
+macOS, paired rendered/proof and performance/scaling/adversarial matrices, real
+metadata producer integration and paired independent row judgments remain open.
+
+
+### Portable sibling expectation and H70 startup boundary
+
+Clean checkout at `520a60802` gave391Node passes/1failure/9explicit skips;
+offline digest checks passed and strict missing-input inventory/parity both
+exited1. The remaining `/workspace/other` expectation is now derived from the
+checkout's sibling directory, preserving relative backend semantics. Focused
+fresh extension tests pass; independent finder/skeptic found no defect. The
+[CI followup receipt](dafny-ci-evidence-manifest.json) preserves that failure;
+a new clean committed full run and hosted GitHub observation remain required.
+
+H70's exact `3efa0a3832de30e514ca9d2fd286f129c0ca9984` object was fetched read-only,
+without integration. The [startup inspection manifest](dafny-startup-owner-evidence-manifest.json)
+binds source inspection: the measured offline browser startup includes HTML,
+Monaco, compiler worker and compiled-WASM readiness. Shared editor JS modules
+are imported, but desktop extension startup is not this offline boot path.
+No causal attribution follows without original receipts/asset binding. The
+hash-bound841027byte native-browser evidence archive/index is absent here.
+No stopped benchmark rerun, threshold/metadata/profile change or web/producer
+scope takeover occurred. This is an evidence wait; independent editor work
+continues. Kernel metadata and Source.Horizon resource waits remain separate.
+
+
+### Exact-head CI validation and bounded certified CLI observations
+
+At `bf8cda11719d5cd3c1ed22901c3d8971280779b6`, full-input checks pass399Node
+tests with2original skips, inventory/pins/audit/statictrust/classification exit0.
+The unchanged mandatory parity gate exits1 with0/486. A new clean checkout at
+that exact commit passes392Node tests with9explicit unavailable-input skips;
+digest-only offline checks exit0 and strict missing-input inventory/parity both
+exit1. [Receipts](dafny-ci-evidence-manifest.json) distinguish localLinux/Node24.19
+from an unobserved hostedGitHub runner. Timedstrict remains separate; CI is not
+claimed ready to become blocking. Frozen270 hash is unchanged.
+
+[Certified CLI observations](dafny-kernel-cli-evidence-manifest.json) use the
+original `constant.sol`: f0() exits0/proved; f1() withcounterexamples exits1/refuted,
+certified=true, theorem `SolTests.Parity.f1.refuted`, only standardaxioms. Actual
+AST, generatedLean input, command/output and resource receipts are retained.
+Default API budgets/options and source are unchanged; no Lean changes since
+validated c35 dependencies. Each is a freshLean process with warmOS/artifactcache,
+not a cold/warm performance matrix. Both stay within the original guard with no
+owned survivors. The witness refutes the testedformula; it does not identify a
+failed clause span or establish constructor reachability/compiler/EVM agreement.
+No rendered/LSP lifecycle or fullruntime pass follows. FullgateSource.Horizon,
+TestSuite/timedstrict, realmetadata producer, H70rawarchive, nativeMac, allpaired
+rendered/proof/performance/scaling/adversarial and rowjudgment obligations remain.
+
+
+### Native certified proof-help observation and strict retirement guards (partial)
+
+The [H44 evidence bundle](dafny-proof-help-evidence-manifest.json) restores
+repo-relative raw LSP, PNG/DOM/AX, source snapshots, reports and original failed
+receipts. A real local certified refutation drives the registered status menu;
+CDP selects each native QuickPick action, and actual source-bound `calculus.md`
+and `README.md` document editors are captured. The command is invoked via API,
+not a physical status-bar click. This explicit existing certify:true request
+changes no default product verification profile. Native synchronized run exits0
+with a partial scenario, not full parity. Paired Dafny/macOS/lifecycle and both
+independent row judgments remain missing.
+
+Two native failures remain: a60s observer timeout waiting for an unpublished
+phase field, and rejection before actual didOpen synchronization. Repairs use
+actual producer fields and await production open, with URI/version/text/session/
+synchronization/range ownership. Finder/skeptic reviews additionally found a
+PID-birth loss and missing next-trial refusal barrier; both have retained failing
+controls and repaired regressions. All54targeted tests pass. Refused termination
+is not counted as completed cleanup, and blocks new trials. No budget increased.
+
+Readback found3exact-owned Lean zombies after each proof UI process cycle;
+there is no live owned proof work, but PID entries remain. This is a retention
+gap queued for investigation, not a solver/thread-retention pass. Source/runtime
+semantics, metadata and axioms are unchanged. Resource caps/reserve/no-swap and
+serial-j1 are retained; no cgroup claim. FullSource.Horizon/TestSuite/timedstrict/
+runtime, verifier clause metadata and H70rawarchive waits remain.
+
+All original486 IDs/order/discovery expectations are retained. Three original
+proof-help/lifecycle/adversarial scenario rows are appended (489total), all
+partial. Stale H49 help-exclusion assessment claims are corrected under H80;
+no row/premise/exclusion or judge contract was weakened. Exact committed-head
+native and full lightweight checks remain required after this development slice.
+
+
+### Handoffs — cooperative Lean retirement (2026-11-06)
+
+Real normal Lean disposal previously left two exact-owned descendant PID births
+as zombies. The retained failing regression exits1; cooperative shutdown now
+exits0 and all three sampled process entries disappear (61ms in the first
+after sample). Idle production workers use internal shutdown IPC irrespective
+of successful result metadata. Active cancellation retains immediate force
+retirement. Asynchronous startup guards and tracked native version probes
+prevent work from escaping terminal disposal, within the original 1000ms bound.
+
+Finder and skeptic found and re-reviewed the failed-task metadata and startup/
+probe races; no remaining concrete finding. Serial targeted checks pass41
+with two explicit actual-Lean opt-in skips. The actual compiler/kernel pool
+observation passes, including a deliberately rejected source-hash task followed
+by exact descendant readback. Its first missing-SOLKEY_ROOT failure is retained.
+These samples do not establish forced/crash/direct/mixed or solver retention.
+
+The small [evidence manifest](dafny-retention-evidence-manifest.json) binds
+off-git development receipts, exact270 native proof-help observations and
+the executable KeySort check:377 parsed taclets,131 read-bearing,131 covered,
+annotations match. Lean4.24.0/Lake5.0.0-src+797c613 are observed; this is not an
+overall RUNTIME_GATE_PASS. FullSource.Horizon retains its resource STOP; full
+build/TestSuite/timed strict, clause metadata, H70 raw packet, native macOS,
+paired rendered/performance/scaling evidence and both judgments remain open.
+All489 obligations/frozen270 and gate/judge/budget contracts remain unchanged.
+
+
+### Handoffs — compiler action identity and independent TestSuite attempt (2026-11-06)
+
+A real compiler regression failed because custom Build's artifact reported
+`build`. It now retains `buildCustomArgs`; the current completed command receipt
+contains its actual artifact path. Native observation requires matching command
+ID, session, URI, version, source hash, operation and artifact. Ordinary Build
+output cannot satisfy custom Build. All36 targeted compiler/injected-editor/
+process controls pass. Finder and skeptic inspected the actual changes and
+reported no remaining finding. No annotated fixture/admission guard changed;
+original native F6 and runtime/test equivalence remain incomplete.
+
+At source head92aadd00475c7027eec52a958219188ae1669e1e, serial Node passes414
+with four skips (two original runtime and two separately exercised real-Lean
+retention opt-ins). Inventory/source pins/audit/static trust/classification pass;
+the unchanged mandatory parity gate exits1,0/489. Classification is not timed
+strict. Frozen270 SHA remains unchanged.
+
+The independent `lake build SolkeyTestSuite` target excludes Source.Horizon,
+but also hit the unchanged OS reserve guard: command exit-9/shell247,
+aggregateRSS5557956608 bytes, MemAvailable12859424768, swap0, ownedSurvivors[].
+This is a failed incomplete target, not a theorem rejection or full gate pass.
+Derived17 and all24 fresh replay prerequisites completed before the STOP; the
+single300s fresh group and timed strict validator remain separate obligations.
+No unchanged TestSuite/full-library retry is authorized by this receipt.
+
+Original resource samples omitted child argv. Derived21's setup is the latest
+prepared input, an inference only; active module attribution is unknown. Future
+samples read argv only for already-owned PID births and reject identity reuse,
+without environment readback or changed caps. The small
+[evidence manifest](dafny-command-identity-evidence-manifest.json) binds the
+retained failing/passing controls, proof source hashes and failed target receipts.
+H16/full-root resource work, kernel clause/span and positioned-trace producers,
+H70 raw packet, hosted CI, native macOS, paired rendered/performance/scaling
+matrices and both fresh-process judgments remain open.
+
+
+### Handoffs — owned native-runtime retirement and authoritative merge (2026-11-06)
+
+Merged origin/master33eb46304cdb536e6c8b686223c6d8e456b703ae as
+3b02f54880b8d655cec106797b4d0da83a1edeb3 and pushed only the assigned lane
+with explicit user authorization. Eight conflicts retain newest H80 guide/index
+behavior and capture guards; both reviewers cleared the resolutions. All415
+Node tests pass/four skip; inventory/pins/audit/static trust/classification pass.
+Parity remains exit1,0/489. Whole-merge whitespace check reports inherited
+upstream findings; owned resolution paths are clean. Unfinished retention work
+was checksum-preserved in an owned worktree/patch/stash before the merge.
+
+A real-compiler/pending-only injected executable reproduced another normal
+retirement defect: successful disposal left an owned zombie. Native children
+are now tracked and physically closed before worker success. Private cache
+ownership prevents old failures evicting newer entries, superseded admission
+and terminal late results. Three failing controls are retained; all32 targeted
+cases pass/two actual-Lean opt-ins skip. Finder/skeptic report no remaining
+concrete finding; runtime payload/H68metadata/proof profiles/budgets unchanged.
+This is not actual native-C/solver or full forced/crash/detached/Wasm retention.
+
+Fresh replay at2b37d239d149c878c7471567877227009267dd6c timed out at the original
+300s guard (exit124); validator exits1 after only helper/Discover00–06 completed.
+No resource STOP or survivors. The separate TestSuite resource STOP remains
+failed. All334 TestSuite and24 replay source hashes still match after merge;
+no unchanged retry. Horizon changed through semantic support, with no demonstrated
+proof-cost repair or bounded artifact. Independent CLI/frontend closures are
+unchanged and validate successfully (347jobs, exit0, peak110821376); current
+serial TOML preserves master defaults and old configurations remain immutable.
+
+The [checksum manifest](dafny-direct-retention-evidence-manifest.json) binds
+raw before/after controls, failed replay and merge receipts outside git. Only
+assessment/evidence fields of two existing partial retention rows change; all489
+IDs/order/expectations/frozen270 are unchanged. Full roots/trust/TestSuite/timed
+strict, actual solver/performance/scaling/paired rendered/macOS matrices,
+producer-owned clause/span/positioned traces, hosted CI and both per-row
+judgments remain open. No completed row or overall runtime gate pass is claimed.
+
+
+### Handoffs — exact native proof-help and deadline observation (2026-11-06)
+
+At65fc533e9d71fec0714b48de4d7b22e1b178747a the official checksum-verified
+VSCode1.108 Linux observer exits0 with a partial certified proof-help scenario.
+It records a genuine kernel-certified refutation, native QuickPick selection
+and both actual project documents. Peak sampledRSS3775954944 bytes; no resource
+STOP. All sampled normal Lean/Lake PID births disappear; remaining Electron
+zombies stay visible, so complete process/solver retention is not established.
+The [native receipt manifest](dafny-native-retirement-evidence-manifest.json)
+binds screenshots, DOM/AX, source/protocol/OS observations and failed checks.
+
+The full65fcNode suite found one new observer timestamp assertion error
+(418pass/1fail/4skip). Measuring the real admission clock read now requires
+exactly+1000ms, with no tolerance or production change. Targeted22pass/two
+actual-Lean opt-ins skip; independent finder/skeptic cleared the measurement
+fix. A fresh full suite remains required at the measurement-only follow-up head.
+
+Checkpoint exports: `/workspace/dafny-parity-handoff-20261106T231530Z/original.patch`, `/workspace/dafny-parity-handoff-20261106T231530Z/HANDOFF.md`,
+`/workspace/dafny-parity-handoff-20261106T231530Z/SHA256SUMS`; exact head/base/source and gate exits are recorded
+in `/workspace/dafny-parity-handoff-20261106T231530Z/SOURCE.json` after commit. Bulk evidence remains outside git.
+
+
+### Handoffs — native hover before certified-request completion (2026-11-06)
+
+The preserved65fc native proof-help trace contains no hover during its proof
+request. A real assertion against that saved trace exits1. Initial computed
+summary/exit labels were explicitly corrected and retained as non-executed
+summary values; the executed receipt is authoritative. No product hover defect
+was established. The existing harness now requests the actual registered
+VSCode provider during the same single genuine certified verification request.
+No verifier pause, injection, extra proof job or deadline/profile change.
+
+Native development observation exits0/partial: exact source comment/signature
+and UTF16 range4:11–13; hoverrequest25/response26 precede current terminal32
+and actual certified response33. Hover wire RTT45ms and proofrequest5632ms
+are single observations, not a performance matrix. Exact provider/report wire
+payloads and stable source URI/version/hash/open/synchronization match. Source
+checks retain local editor-session ownership. PeakRSS4120514560, no resource
+STOP/live survivors.20targeted tests pass; finder/skeptic found no scoped defect.
+
+Pinned HoverTest.cs SHA40f95c3cd72acef186e6ea7adea7aed2e77e8858e1e43f819bcbaa18f5711e5b
+uses NeverVerifies, waits for compilation and confirms hover wins while its
+diagnostics task remains incomplete. Our bounded finishing proof/explicit
+request is a partial corresponding observation, not that entire fixture or
+auto-on-open/rendered-hover/pairedDafny/macOS/lifecycle equivalence. Existing
+row behavior:hover-before-verification-completes remains partial; all489 IDs,
+order, expected fields/frozen270 and judge/gate/budget contracts are unchanged.
+[Checksum-bound evidence](dafny-hover-proof-evidence-manifest.json) stays off git.
+Exact committed-head native/full lightweight checks remain required. Full
+build/TestSuite/timedstrict/trust, metadata/trace producers, hostedCI and the
+entire original performance/paired judgment queue remain unfinished.
+
+
+### Handoffs — hover validation and explicit CI prerequisites (2026-11-07)
+
+At fdd46539a2f75f1c26442d547b4f35c4cb766bde,421Node tests pass/four
+opt-ins skip; inventory/pins/audit/statictrust/classification exit0. Unchanged
+parity exits1,0/489. Native committed Code observation exits0/partial: hover
+25/26 before terminal33/proofresponse34, exact original payload/range and
+source/open/session/version/hash/sync. PeakRSS4195979264,no sampled survivors.
+This is registered-provider API evidence, not a rendered hover popup or paired
+Dafny/macOS observation.
+
+Fresh local checkout, no compiler/bulk/backend environment: exact current
+lean.yml editor-parity commands give discover/audit0 explicitly digest-only,
+then9native-test failures from missing SolKey compiler. Supplying real pinned
+compiler bytes removes those failures but exposes an incomplete PID marker
+read and a separate closure-deadline failure/stall. The already-failed run was
+explicitly cancelled; its exit1 and cancellation are retained, not a pass or
+workflow timeout. No assertion that the closure failure is repaired.
+
+Complete PID tuple observation now stays inside the original3000ms bound.
+A separate deterministic regression establishes valid version metadata could
+win after5000ms when its timeout callback was overdue (before exit1). Monotonic
+admission now preserves that exact deadline; before-deadline/early metadata
+still works, no initialization/disposal budget changed.23targeted tests pass;
+independent finder/skeptic found no concrete scoped defect.
+
+Owned editor-parity.yml now provisions/checksums the existing compiler before
+native tests and exports SOLKEY_ROOT. OT-CI-PARITY still needs the lean.yml
+owner to supply the same prerequisite and serial test runner, then an actual
+hosted Node22 fresh-checkout run. Local Node24 is not that result.
+[Native/failed CI receipts and review](dafny-hover-ci-evidence-manifest.json)
+remain off git. No complete row or paired judge claim. Exact follow-up-head
+checks remain required. Fullbuild/TestSuite/timedstrict/trust, source-bound
+failed-postcondition/positioned-trace producers, paired rendered phases,
+macOS and the entire original performance/adversarial/scaling/judgment queue
+remain open; unchanged resource/timing STOPs are not retried.
+
+
+### Handoffs — confirmed transport closure and kernel split-slot foundation (2026-11-07)
+
+The retained original concurrent CI failure remains unattributed. A small
+actual owned-process fixture demonstrates a concrete failure family: root exit
+leaves a same-session descendant holding stdout; waiting for close before
+retiring the group exhausts the original1000ms. Both low-level and production
+LanguageClient regressions fail before1 and pass after0. The repair responds
+to actual root exit, retires only its owned private group and still requires
+physicalclose/group quiescence. It does not equate exit with close. Real ordered
+shutdownrequest/reply/exitnotification/process-exit/close observations and PID
+birth/group readback are retained. The server is explicitly injected, not a
+real verifier. Zombies remain visible, so this is not full entry-retention parity.
+
+Fixture cleanup now attempts and settles every admitted disposal before
+reporting aggregate errors. Ownership readback/receipt failures cannot pass or
+prevent other cleanup, and unconfirmed fixtures remain on disk. The bounded
+three-version-case replay passes with all three actual exit/close sequences;
+this does not reproduce original whole-run contention or prove its cause fixed.
+
+New owned module Solidity/Tools/VerifierMetadata.lean adds conditional kernel
+facts for exact typed postFails slots and final run states. Per-file MCP
+diagnostics0 and isolated214job modulebuild0; both lemmas depend only on
+propext/Classical.choice/Quot.sound. No new axioms/sorry/options/budget changes.
+Generated roots and modulemap were updated through required scripts. Canonical
+n/split provenance remains essential: conjN's last slot may contain a remaining
+conjunction. These lemmas do not identify a source ensures/span, associate the
+candidate/original obligation/entry premises, emit verifier metadata or drive
+a postcondition decoration. Producer-owned hooks remain required.
+
+Finder/skeptic source reviews for lifecycle and Lean foundation found no
+concrete defect. Initial unsolved proof/MCP-retirement failures are retained;
+the off-git wrapper now forwards EOF and confirms owned MCP retirement within
+the existing5s shutdown bound. No resource gate is weakened. Exact follow-up
+head checks remain required. [H44 evidence](dafny-child-closure-evidence-manifest.json)
+is off git. Only two existing assessments change and remain partial; all489
+ordered obligations, frozen270, expected observations, pairedjudge contracts
+and budgets remain. Firstfailed submenus:dafny.context still needs actual
+positioned producer/trace actions and paired rendered lifecycle evidence. Full
+build/TestSuite/timedstrict/kerneltrust, macOS, original proof/performance/
+adversarial/scaling matrices and every paired judgment remain unfinished. No
+unchanged stopped heavy command, goal status mutation, checkout creation,
+push, merge or PR occurs in this recovery.
+
+
+### Handoffs — refreshed master and canonical clause-count facts (2026-11-07)
+
+Fetched actual master94f9862b6 and then announced master5da4771e6 before new
+work. The latest closure/metadata commit was not in that master tree, so it
+is retained locally after rebase as d7c9f22418bfe7d09baaea96737ed0b4021a5f04.
+Originalec16 and firstrebased9569 heads remain under checkpoint refs; exact WIP
+bytes/patch and retainedstash survive refresh. Editor code is byte-identical
+across rebases. Duplicate upstream patches were omitted only after empty-index
+readback or Git's patch-equivalence check. An initial combined command was
+rejected by automaticreview for skip-risk; nothing ran, and safer staged
+resolution/readback/explicit continuation completed. No push/masterchange or
+goal mutation.
+
+New general facts in Tools/VerifierMetadata prove that canonicalcount
+clauses.length recovers exactly the original typed list, even when its last
+clause is itself a conjunction. The canonical slot equivalence retains exact
+index/member identity and falsity in the same typed state. Earlier definitions
+and statements remain unchanged. Per-fileMCP0, isolated214job build0; actual
+axiom output uses only the existing allowedset. Finder/skeptic read-only source
+reviews found no defect.
+
+This is conditional on the actual canonical construction/count. Connecting
+that supplied list to source ensures, originalcandidate/obligation/entrypremises
+and exact locations remains a producer task; no JSON metadata or decoration is
+emitted. One existing related-diagnostics assessment changes and stayspartial.
+All489 IDs/order/expected observations, frozen270 and gate/judge/budgets remain.
+[Checksum-bound proof/rebase evidence](dafny-canonical-slot-evidence-manifest.json)
+stays off git. Exact committed-head checks remain required.
+
+Read-only upstream comparison found all334TestSuite sources/closure and24fresh
+replay modules unchanged. Horizon body is unchanged; a dependency proof change
+has no boundedcost-repair receipt. No stopped heavy gate is retried. Current
+Frontend proofhelper changes need independent validation for later native work.
+Full library/checkpoint/build/TestSuite/timedstrict/kerneltrust, actual source
+metadata/positionedtrace, paired rendering/macOS, full performance/adversarial/
+scaling matrices and both judgments per row remain mandatory and unfinished.
