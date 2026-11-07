@@ -42,5 +42,15 @@
     "Classical.choice",
     "Quot.sound",
     "propext"
+  ],
+  "Solidity.Backend.AbiWorld.P1RevertBridge.p1_revert_bridge": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Backend.AbiWorld.P1RevertBridgeControls.guardNe_target_reverts": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
   ]
 }

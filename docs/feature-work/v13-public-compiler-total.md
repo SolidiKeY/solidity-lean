@@ -141,32 +141,53 @@ H68 asks V13 for `p1_frame_bridge` in its P1-REVERT variant: a
 `plan.code` session, with `Local` the original `PendingBareRevertProducer`
 fields (`RevertingEntry`, `BareRevertClaim`).
 
-Status after the G49 merge (origin/master `706e36825`, 2026-11-06):
+**Delivered (H114/H115, master `d3597eca2`).** With V12's canonical
+version-2 P1 languages (`Backend/InternalFlow/RuntimeFrameP1LangV2`) and the
+version-2 machine (`Evm/MachineV2`) on master, `Backend/AbiWorld/P1RevertBridge`
+proves
 
-1. **Resolved.** `Solidity.Roadmap.G49Final.PassCorrect`, `Behaviour`,
-   `BridgeGoal` (`G49Final/BridgeGoal.lean`), `PassChain` and `FoldedPublic`
-   are on master; this lane merged them.
-2. **Still missing: the canonical endpoints.** `BridgeGoal A B ps pt beta nu
-   Local` needs the canonical `Lang Event Outcome` for the source call session
-   (`A`) and for the emitted `plan.code` session (`B`). Neither exists on
-   master, nor on V12's latest P1 branch (`cloud/move5-20261106/v12-p1`, head
-   `207bb483`; its `Lang Event Outcome` occurrences are the generic G01
-   contracts, Source sessions and Yul composition, none a P1 call-session
-   language). The coordinator's instruction is not to define a second one but
-   to use V12's; any `A`/`B` built here would be an "arbitrary Behaviour",
-   which H68 rejects.
-3. **Still missing: all-outcome transports.** `PendingBareRevertProducer`
-   supplies only `RevertingEntry` and `BareRevertClaim`; `PassCorrect.need_ok`
-   and `back` need every outcome and prefix (success via `ReturnClaim`,
-   panic, exhaustion, divergence), which are V12/MRS/V17 producers.
+```lean
+p1_revert_bridge (b) (hF : Matches K F) (hs : StmtOk K s K')
+    (noAssert : Stmt.asserts s = false) :
+  BridgeGoal (A b F s) (B b F s) () () id (fun _ _ => ()) (Local b F s)
+```
 
-So the P1-REVERT bridge stays pending on V12's canonical P1 languages (and the
-success/other-outcome producers). Once V12 publishes `A_frame`/`B_frame`
-with their programs, `beta` and `nu`, this lane's delivery is the factory
-`p1_revert_bridge : (x : NativeContext_frame) → Approved_frame x →
-BridgeGoal (A_frame x) (B_frame x) (ps x) (pt x) (beta x) (nu x) (Local x)`
-with `Local` the original failure-only fields. No frozen statement was changed
-and no premise was added.
+- **Context (NativeContext_frame):** a statement `s` of this lane's totality
+  domain, its alias kinds `K`, a matching fragment `F` and base `b`.
+- **Approved_frame:** `Matches K F`, `StmtOk K s K'` and no `assert`.
+- **A / B:** `sourceLang (fun _ => s)` and `targetLang (lift code)` of
+  `P1LangV2`, where `code` is what `Compiler.compile b F (s;)` emits (compiler
+  output, not a hand-written image). No second language is defined.
+- **Domain (`admitted`):** exactly the compiler's own core `Input`:
+  `Sim C L b F caller machine ∧ L ≤ Lmax`; it does not mention the outcome.
+- **beta / nu:** the identity environment map and the unit bound, as in V12's
+  `p1_frame_bridge`.
+- **Local:** for every admitted input, the version-2 form of
+  `PendingBareRevertProducer.required_bare_revert` (a bare source revert is a
+  target revert with empty data and the caller's journal) and the frame
+  agreement `targetSem (lift code) e = sourcePrefix (s.run caller)`.
+
+The full `PassCorrect` (`need_ok`, `back`, both directions, every admitted
+input and every outcome) comes from `agree`, which reads
+`PublicCompilerTotal.compile_agrees`: success with no data, a bare revert as a
+version-2 revert with empty data and an unchanged journal, divergence as a
+fault; payment is impossible in the domain.
+
+Controls (`P1RevertBridgeControls`): `require(total != 0)` from the published
+fresh contract (`Sim.init`) is a genuine reverting entry, with the target
+revert derived from the bridge's `Local`; `require(total == 0)` succeeds on
+both sides at the same input; axioms are guarded.
+
+Limits the bridge depends on (from `P1LangV2`): callee code is never run
+(the domain makes no external call, so the version-2 reply/accepts oracles are
+not consulted); gas and depth are not resources; data windows play no part
+(the core code reverts without data). **`assert` is excluded:** the source
+observes a failing `assert` as `revert(Panic(0x01))` while the core compiler
+emits a data-free revert (`assertFalse_source`, `assertFalse_target_bare`) —
+a compiler gap in panic data, recorded. The bridge is not an instance of an
+InterfaceV1 `PendingBareRevertProducer` (no such producer instance exists);
+it delivers that producer's failure-only conclusion for compiled code
+directly.
 
 ## Remaining V13 queue
 
