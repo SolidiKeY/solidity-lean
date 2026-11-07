@@ -301,3 +301,33 @@ Inputs now proves that any in-range blob index returns the exact supplied list e
 The existing nonzero blob/environment and emTx fixtures are reused to check the last valid and first invalid indices before and after transaction binding. Existing MemoryControls and SourceEnvironmentControls both pass, and all four new laws use only propext. Matched serial Lean4.24 medians are Inputs0.40→0.43 seconds (+7.5%) and SourceEnvironmentInputs0.25→0.27 seconds (+8.0%), below the stop. Exact preservation, boundary reuse, axiom outputs and raw timings are retained at /workspace/vy2-evidence/source-blob-boundaries/.
 
 These are supplied-input/data-binding laws, not Source program admission, native/emission behavior, compiler dispatch, physical adequacy or a reached-state bridge. Global census/pin acceptance, the separate documentation-reference wait, original producer dependencies and all prior STOPs remain open.
+
+
+### H151: historical census gap and fresh lexical inventory
+
+The historical h69 census with SHA256
+1a6f4f9352a0004aa3cfcc67e8e3abd313e5c83864dfe436880aeeb0cb2adcde is
+UNVERIFIABLE: no authenticated artifact was recovered. Claims that depend on
+that capture remain unproven; it is no longer an indefinite delivery wait.
+Neither a new inventory nor old summary counts reconstruct its proof credit.
+
+Fresh evidence binds source head 88802c0bba963d42ace559fec7a46a376b8fa8b9,
+the current yul module map, and the exact existing census collector/driver
+hashes. It uses the collector's files/declarations APIs, without changing its
+frozen-base acceptance mode or supplying historical parser/kernel/witness data.
+Every selected file, module map and collector byte sequence was verified against
+that Git tree before and after collection. Two runs produced identical bytes:
+SHA256 b94f34e090e5f89be5c74e37c8587d042fab1095b18d67f50d773da9bedc3840.
+
+The current-map/local-Yul-import scope selects 2,010 files and yields 22,061
+lexical declarations: 19,864 theorem candidates, 1,921 examples and 276
+structures. No scanner failures or unmatched patterns occurred; declaration IDs
+are unique. These are lexical results only: owner labels remain heuristic,
+section/type/elaboration reconciliation is pending, and all candidates remain
+uncovered. Zero kernel records, joint witnesses or intentional refutations are
+credited. This does not replace the original frozen scope or establish semantic
+hypothesis coverage, nonvacuity, totality or full assignment acceptance.
+
+The fresh census, reproduction driver and checks are private H145 evidence;
+no census payload or receipt is committed here. Original measured timing/import
+STOPs, budgets, physical producer obligations and final gates remain unchanged.
