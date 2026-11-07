@@ -1,0 +1,22 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryAssociationControls.lean",
+  "interface_sha256": "dc52b5f41841d55ca80cc7ded0a65645b335d4a42ecc9dd741f247c86947f71e",
+  "joint_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.AssociationControls.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditJoinedAllocation.AssociationControls",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryAssociation.Controls.both_outputs",
+      "signature_sha256": "3f9c5050b4090a66253a5f6a94493db25389ab4537c8b35055a46d37513b96a9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryAssociation.Controls.both_failures",
+      "signature_sha256": "36ad36e0d33ed2c266d78410e36f5587c27e86e5855d3906773de80b44d17c49",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 311,
+  "aggregate_remaining": 948,
+  "limits": "Actual public associations retain shared full output map or reached failure; no native ByteWorld/emission, gas or full domain adequacy."
+}
