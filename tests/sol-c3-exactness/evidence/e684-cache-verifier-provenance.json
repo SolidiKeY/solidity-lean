@@ -1,7 +1,0 @@
-{
-  "archived_source": "/workspace/c3-exactness-artifacts/b86-a005a47075e23d123a7c5c71ed47d05bba2c885c/evidence/adoption-cache-identity.py",
-  "archived_sha256": "e48496d198cea657a63a940f0c4d4579437eed0cee2c875dc9b75cc5887f17fc",
-  "adapted_helper": "/workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/e684-cache-identity.py",
-  "adapted_sha256": "2fd58f51a353a6d72d11b3517f38c3aac411a85381a81406eb69d29199a0e394",
-  "change": "Only ROOT location adapter; all24source/Lakeinput-output/72artifact/archive/manifest checks unchanged. Helper is ignored runtime evidence, not a producer/API change."
-}

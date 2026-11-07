@@ -308,8 +308,9 @@ theorem mod_zero (m : Mode) (a : Fx t) : mod m a (zero t) = .error .divZero := b
 /-- `|a tmod b| ≤ |a|`, with the sign of `a`. -/
 theorem tmod_between (x y : Int) : (0 ≤ x → 0 ≤ x.tmod y ∧ x.tmod y ≤ x) ∧
     (x < 0 → x ≤ x.tmod y ∧ x.tmod y ≤ 0) := by
+  have cast_ofNat (n : Nat) : Int.ofNat n = (n : Int) := rfl
   rcases x with m | m <;> rcases y with n | n <;>
-    simp only [Int.tmod, Int.ofNat_eq_natCast, Nat.succ_eq_add_one] <;>
+    simp only [Int.tmod, cast_ofNat, Nat.succ_eq_add_one] <;>
     refine ⟨fun h => ?_, fun h => ?_⟩ <;>
     have := Nat.mod_le m n <;> have := Nat.mod_le m (n + 1) <;>
     have := Nat.mod_le (m + 1) n <;> have := Nat.mod_le (m + 1) (n + 1) <;> omega

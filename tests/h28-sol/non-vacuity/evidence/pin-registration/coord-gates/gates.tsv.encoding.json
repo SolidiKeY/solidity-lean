@@ -1,7 +1,0 @@
-{
-  "encoding": "base64",
-  "decoded_sha256": "0134fe71f993f43bf034a06a452dcd91f11e860c19f56a85ccf2677e51374bc1",
-  "decoded_bytes": 1566,
-  "original_raw_path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/final-v2/retry-02/coord-gates/gates.tsv",
-  "reason": "Exact generated command trailing spaces preserved without adding whitespace errors to committed prose/data. Original raw evidence is unchanged; decode this copy to recover identical bytes."
-}

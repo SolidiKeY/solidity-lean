@@ -1,0 +1,16 @@
+{
+ "Solidity/Lowering/P8/SourceAstParameterCorrespondence.lean:Solidity.Lowering.P8.SourceAstParameterCorrespondence.array_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstParameterCorrespondence.lean:Solidity.Lowering.P8.SourceAstParameterCorrespondence.parameter_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstParameterCorrespondence.lean:Solidity.Lowering.P8.SourceAstParameterCorrespondence.parameters_ok_iff_each": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

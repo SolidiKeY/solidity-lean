@@ -1,0 +1,52 @@
+{
+  "scope": "Complete6 PrintedRules metadata roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 943,
+    "pending": 4340,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/printed-rule-roles-v80/evidence.tar.gz",
+      "bytes": 250167,
+      "sha256": "6e921979d3a392d28c1d25c85b46ad5a327438d4bc75aabde10b87b9f946c0ed"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/printed-rule-roles-v80/inputs.json",
+      "bytes": 765,
+      "sha256": "d6cb55aa69229e62b752226b4be5c0664c2beff9c109b01024946d0929997783"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/printed-rule-roles-v80/gates.json",
+      "bytes": 2823,
+      "sha256": "7564a338753799ffbace9cb915132a0addd5504e488d2aa4514bfb7d3bc9b342"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/printed-rule-roles-v80/reviews.md",
+      "bytes": 550,
+      "sha256": "d761c04774b3ba103966df70304682f929616fcf78c369388371481a3c23e7e1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/printed-rule-roles-v80/case-rosters.json",
+      "bytes": 14963,
+      "sha256": "0206af5323824942e8dd93c7a56a87741fd6e58db3c3d705e0b3cdcc20a472b1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/printed-rule-roles-v80/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "f44f0648a1d2a91ab3423a0e408ee497b145c71839eb51ec8f45a258bd053619"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/printed-rule-roles-v80/external-retention.json",
+      "bytes": 252954,
+      "sha256": "f4d1dd07595d115b33a6213be65610f7f091656d1eb5d007c9647e10e164bb2c"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/printed-rule-roles-v80/semantic-roles-reviewed.json",
+      "bytes": 2535242,
+      "sha256": "a6615c54e45925ef9dd984f64ff97e84406dc8b7a38b0376e6233ca101322ec0"
+    }
+  ]
+}

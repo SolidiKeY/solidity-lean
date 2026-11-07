@@ -1,0 +1,362 @@
+{
+  "status": "NAME_RECONCILIATION_ONLY",
+  "kernel_records": 381,
+  "lexical_targets": 32,
+  "name_status_counts": {
+    "PUBLIC_NAME_CANDIDATE": 31,
+    "PRIVATE_NAME_CANDIDATE": 1
+  },
+  "new_witnesses": 0,
+  "statement_fidelity_verified": 0,
+  "optimization": "Hash-only diagnostic removes only global constants mergeSort; selection and captured fields unchanged. Saved rows sorted by module/name afterward. Earlier OOM runs preserved.",
+  "gates": {
+    "check": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/SourceEffectsBoundaryCensus.lean"
+      ],
+      "exit": 1,
+      "stop": null,
+      "seconds": 41.402,
+      "peak_sampled_aggregate_rss": 2411540480,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    "environment": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/SourceEnvironmentHashCensus.lean"
+      ],
+      "exit": 1,
+      "stop": null,
+      "seconds": 25.051,
+      "peak_sampled_aggregate_rss": 2098798592,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    "rethrow": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/SourceEmitRethrowCensus.lean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "seconds": 21.116,
+      "peak_sampled_aggregate_rss": 938110976,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    "environment-only": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/SourceEnvironmentOnlyCensus.lean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "seconds": 19.32,
+      "peak_sampled_aggregate_rss": 984064000,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    "hash-only": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/SourceHashOnlyCensus.lean"
+      ],
+      "exit": 1,
+      "stop": null,
+      "seconds": 14.76,
+      "peak_sampled_aggregate_rss": 2228772864,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    "hash-trace": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/SourceHashTraceCensus.lean"
+      ],
+      "exit": 1,
+      "stop": null,
+      "seconds": 15.514,
+      "peak_sampled_aggregate_rss": 2098896896,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    },
+    "hash-unsorted": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "per-file",
+        "tests/h62/item2/audit-v08-adapters/generated-census/SourceHashUnsortedCensus.lean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "seconds": 13.022,
+      "peak_sampled_aggregate_rss": 1533571072,
+      "max_lean_processes": 1,
+      "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+      "LEAN_NUM_THREADS": "1"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/check/console.log",
+      "bytes": 187,
+      "sha256": "5483a962079431062af35217d7d60108d29a0d569a5dd8c0c3b87029722198d2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/check/gates/1.log",
+      "bytes": 21183,
+      "sha256": "ad5ec6308ddf2fef545c1fd337cee15364b6bc308fe968d806957a4d0c6fbc43"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "c10c7592f1f8063c08ca263cd8f0032de2b13241408f8f37fdcb5007135ce995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/check/gates/gates.tsv",
+      "bytes": 301,
+      "sha256": "4880f7c60f87e89da55dfd9c5ac9aff7bcf458033202f2e616c11bd9f90c89ce"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/check/results.json",
+      "bytes": 426,
+      "sha256": "2130318f1c58db3d037b8890b0f347c1a3b01e70045abb74d927a2cd40913003"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment/console.log",
+      "bytes": 193,
+      "sha256": "48694c37acc156e29815236242c1898f4cc9cfc975fa41eed790d8ad44fd916c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment/gates/1.log",
+      "bytes": 12370,
+      "sha256": "f1f70c955d491fed67013bb97792a338cab9e708aa9b572ed72baa4baf2175d8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment/gates/HEAD",
+      "bytes": 41,
+      "sha256": "c10c7592f1f8063c08ca263cd8f0032de2b13241408f8f37fdcb5007135ce995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment/gates/gates.tsv",
+      "bytes": 307,
+      "sha256": "2328da3e58e74ac3ce9fdf4b26b3c726e54f488f3d016c38aca3b59e3da3c703"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment/results.json",
+      "bytes": 426,
+      "sha256": "e2bf6ab3d2097f05b27a5fbc01b750480aa1af344b4aeb92cec44fb7084d13de"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-generation.json",
+      "bytes": 816,
+      "sha256": "490654b3e8d5e18193ab1e6cfea6d174a04272375a9e68ac9f4c3ebd6d6ccf96"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-only/console.log",
+      "bytes": 198,
+      "sha256": "bfcff4550e475b737ba1707063355fab21730e411c3923e394c08c6beff3f70d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-only/gates/1.log",
+      "bytes": 32783686,
+      "sha256": "39710e9705e0790ca0f47c3f5ae8072e1ea75d8c8e3c62708b735c12e2e4081a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-only/gates/HEAD",
+      "bytes": 41,
+      "sha256": "c10c7592f1f8063c08ca263cd8f0032de2b13241408f8f37fdcb5007135ce995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-only/gates/gates.tsv",
+      "bytes": 312,
+      "sha256": "37c7e72653a6bce3691798b369aebebbb35f8e028cc1da6e19903b0a3da1ac92"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-only/results.json",
+      "bytes": 424,
+      "sha256": "602ebd286c62ce4e48af984a10696a9820b270fb4679036c988a97d660d8f60b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-only-generation.json",
+      "bytes": 633,
+      "sha256": "761cb851fe56e977f67dfea9081e66caefca9b4b3018d758bacad17db7631095"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-only-runner.log",
+      "bytes": 386,
+      "sha256": "ede008b5bb1c57db558c8fad5f970c8ce19e15fe532b784f6b0716277f3ff979"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/environment-runner.log",
+      "bytes": 388,
+      "sha256": "c1ef3fe771bc3a621f2e4a385b527b3b7512fcdc3d249e344a17f891116a75c4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/generation.json",
+      "bytes": 1181,
+      "sha256": "5481571e6b11920ff8c95d7cdae2bbad018ba2eb2e10f173ca74f2a5784f180e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-only/console.log",
+      "bytes": 184,
+      "sha256": "9f3f7480e4f20134043e2cb85fe1550634b78bb0ec8ce252bafe975b46453bad"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-only/gates/1.log",
+      "bytes": 12370,
+      "sha256": "f1f70c955d491fed67013bb97792a338cab9e708aa9b572ed72baa4baf2175d8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-only/gates/HEAD",
+      "bytes": 41,
+      "sha256": "c10c7592f1f8063c08ca263cd8f0032de2b13241408f8f37fdcb5007135ce995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-only/gates/gates.tsv",
+      "bytes": 291,
+      "sha256": "877e2d8da824e13f9093c842b13fa2be42134c55d1371f4cf14fa363b4b1489d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-only/results.json",
+      "bytes": 418,
+      "sha256": "26f69fb2480f0d3e79cc0e573f0d3f9d19a51ced258ba3d33787153c5785a80e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-only-generation.json",
+      "bytes": 621,
+      "sha256": "0dc7f4335af3cfddc24dec75c9d022aa4248dc2b924463cd855f46f22566fe3e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-only-runner.log",
+      "bytes": 380,
+      "sha256": "b8d113eca92c09b31fa8a7c75bb56ccd11e16a284a6e5de66eb26ae82aa72998"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-trace/console.log",
+      "bytes": 186,
+      "sha256": "6bb0a7e2efdc8b365315e4adeeb6c4a9e9f65566848ba5bad887bd828aa5f5d9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-trace/gates/1.log",
+      "bytes": 12370,
+      "sha256": "f1f70c955d491fed67013bb97792a338cab9e708aa9b572ed72baa4baf2175d8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-trace/gates/HEAD",
+      "bytes": 41,
+      "sha256": "c10c7592f1f8063c08ca263cd8f0032de2b13241408f8f37fdcb5007135ce995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-trace/gates/gates.tsv",
+      "bytes": 294,
+      "sha256": "9bc5257c5ea8f51e6d70aa483d42234cd2c933284acf2e3960698aa2b4d3fb21"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-trace/results.json",
+      "bytes": 420,
+      "sha256": "270d2c27e5ca078bec73433e1123a9e4f587ca96fce7e1b2122dcff498ce5b62"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-unsorted/console.log",
+      "bytes": 192,
+      "sha256": "0541ad3502a9ea12ecbbe60f91dc4b4fc7c62dc549b22c41007739751d0ca3b2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-unsorted/gates/1.log",
+      "bytes": 71306934,
+      "sha256": "4b6988fb77d0cff3c8b91d430db4d6ebf44a3c543170b1359e42b68d828955ac"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-unsorted/gates/HEAD",
+      "bytes": 41,
+      "sha256": "c10c7592f1f8063c08ca263cd8f0032de2b13241408f8f37fdcb5007135ce995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-unsorted/gates/gates.tsv",
+      "bytes": 303,
+      "sha256": "9ac00d00b92f38eca55306d24b692d75bde0e9d2007de637d937f08401c1ee2f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/hash-unsorted/results.json",
+      "bytes": 423,
+      "sha256": "f0a178ffe003c71fa24a5f232681dee176e82401f797b6db7117c041b8de61b0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/individual-results.json",
+      "bytes": 335,
+      "sha256": "1b904c427cf34d26ca8a98f85d61f5ccc0f28e413ebf93c09060091deaaa2e4f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/inventory.json",
+      "bytes": 124700201,
+      "sha256": "48e345c0cc8be556ed38e28541ca242391eab84962b4ef306f38fc05a3497069"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/reconciliation.json",
+      "bytes": 219518,
+      "sha256": "3e08ffea4c7ad35932470cfe6db3be21c4615b94246705dac90b44ad1c9d5495"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/rethrow/console.log",
+      "bytes": 185,
+      "sha256": "4c313a76ac4ef17b587e7b7a696ef23d6c87ec978ec3da6591234f1da9890c59"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/rethrow/gates/1.log",
+      "bytes": 20029745,
+      "sha256": "2a9df2cd5d38e20ffdb3800c73183f97d90c3db0f6758f339a921147c0bfa514"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/rethrow/gates/HEAD",
+      "bytes": 41,
+      "sha256": "c10c7592f1f8063c08ca263cd8f0032de2b13241408f8f37fdcb5007135ce995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/rethrow/gates/gates.tsv",
+      "bytes": 295,
+      "sha256": "499187624d41ca79c6ce2b913555141360fa6967fc02cfcbe1e1ce27842745f9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/rethrow/results.json",
+      "bytes": 421,
+      "sha256": "48a709f63f734217c9e51b32ace9f2de0a98260e1f0628e180aacd37d23fc8ba"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/rethrow-generation.json",
+      "bytes": 806,
+      "sha256": "30a71f59f7cd54169f49fe09e48f1af52e61d72dfe5821cf6e96fd05f04c9a81"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/rethrow-runner.log",
+      "bytes": 383,
+      "sha256": "96105f8bb3b40d39aa5161c7bf57bb88df29d28919611f0930b047af147a77d3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-census-20261107/split-results.json",
+      "bytes": 321,
+      "sha256": "f8a98afff0c80781fe96284c44afb1e9d84ac0912a9d0c01b30e836ab2b1dd78"
+    }
+  ],
+  "limitations": "All ownership, joint feasibility and statement fidelity remain pending. These are kernel/name records, not full Source admission, compiler adequacy or H68 bridge evidence."
+}

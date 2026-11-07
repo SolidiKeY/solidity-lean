@@ -1,5 +1,0 @@
-{
-  "status": "interrupted; not a passing gate",
-  "reason": "Seed only missing cache artifacts; Lake must validate input traces on resumed full gate",
-  "implementation_head": "96780494a943f45035d3d8164321bff6c30d3be7"
-}

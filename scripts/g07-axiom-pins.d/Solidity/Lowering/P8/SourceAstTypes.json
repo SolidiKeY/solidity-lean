@@ -1,0 +1,9 @@
+{
+ "Solidity/Lowering/P8/SourceAstTypes.lean:Solidity.Lowering.P8.SourceAstTypes.elementary": [],
+ "Solidity/Lowering/P8/SourceAstTypes.lean:Solidity.Lowering.P8.SourceAstTypes.parameter": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTypes.lean:Solidity.Lowering.P8.SourceAstTypes.typeNameLeaf": [
+  "propext"
+ ]
+}

@@ -2110,3 +2110,48 @@ prior SelectedHeapBoundaryWitness documentation wait only; historical failure
 receipts remain preserved. It supplies no kernel, materialized-control or
 producer-adequacy credit. Missing P10 prerequisite products and all original
 proof/acceptance obligations remain pending.
+
+
+### Frozen source/type obligation inventory (2026-11-07)
+
+The generic inventory combines existing complete source-byte bindings, two-way
+positional candidates and observed raw types. It preserves every lexical
+obligation with explicit uninspected/unmatched/ambiguous states; absent type
+evidence is distinct from an observed type with zero raw binders. Hypothesis
+roles remain unclassified and correspondence/joint-witness flags remain false.
+
+Actual frozen227-file accounting retains all1,660 lexical obligations:1,046
+one-to-one positional type candidates and614 obligations in uninspected modules.
+The candidate types retain3,688 raw binders and697 observed proof-binder flags;
+328 type candidates have at least one such flag, and189 are private. These are
+metadata observations, not simultaneous feasibility or global-premise proofs.
+All3,262 kernel graph summaries/hashes remain accounted for, including2,216
+without a source candidate. Supplemental full raw metadata is not duplicated
+in this output: the sealed ready-core-inspection/metadata-report.json remains
+the required lossless backing artifact, with its hash bound in the receipt.
+
+Four regression tests cover unknown versus observed-zero binders, ambiguous
+multiple types, unmatched summaries, stale/scope-mixed metadata, deterministic
+ordering and detached snapshots. The full96-test audit suite passes. The actual
+recipe checks frozen Git bytes, sealed parent inputs and reverse reproduction;
+recipe/helper/scanner/test/output hashes and bulk inventory remain off Git at
+`/workspace/parallel-20261103/executable-bytecode/source-obligation-accounting`.
+Independent read-only finder/skeptic pass; skeptic's summary-versus-raw-metadata
+qualification is explicit in the output boundary and here. No reviewer builds,
+server use or edits.
+
+Mastera8f684928 was merged before work, preserving H126's pending P10 application;
+roots/fragments regenerated. No new Lean/prerequisite workload or proof epoch,
+no statement/interface/definition/axiom/exclusion weakening. The original703
+source closure, full190core+37Bridge generated census/statement/inherited
+correspondence, remaining joint witnesses and Source/native/gas/fork/full
+validation obligations remain open. PowerBounds STOP remains binding. P10
+kernel validation still awaits exact prerequisite products; Q-WV remains
+resolved support-only, and no documentation wait is reopened by this inventory.
+
+
+Checkpoint96tests, trust/orphans/roots/fragments/whitespace and doc paths pass.
+The non-Lean doc-path gate took65.995s;142 ambiguous basenames remain
+informational, all paths resolve. Scoped touched validation is recorded for
+this Python/docs delta only, not the pending P10 proof application. No full
+Lean/Bridge gate or runtime pass is claimed.

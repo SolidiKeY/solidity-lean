@@ -406,8 +406,9 @@ theorem leavesF_occ : ∀ (fuel : Nat) (T : Ty) (s : Slot) (o : Nat), o ∈ leav
 /-- The operators compiled at operand type `p`: arithmetic and comparisons
 at `uint` and `int`, `**` at `uint` (the only type it takes), `==`/`!=` at any
 type, `&&`/`||` at `bool`, `>>` at `uint` and `int` (`SAR` on the clamped
-count, `sarCode`), and the other bitwise, shift and wrapping operators at
-`uint`, the only type they take. -/
+count, `sarCode`), `&`, `|`, `^` at `uint` and `int` (the opcode on the
+two's-complement words), and `<<` and the wrapping operators at `uint`, the
+only type they take. -/
 def binInFrag : BinOp → PrimTy → Bool
   | .add, p | .sub, p | .mul, p | .div, p | .mod, p => p != .bool
   | .lt, p | .gt, p | .le, p | .ge, p => p != .bool
@@ -415,7 +416,8 @@ def binInFrag : BinOp → PrimTy → Bool
   | .and, p | .or, p => p == .bool
   | .pow, p => p == .uint
   | .shr, p => p != .bool
-  | .band, p | .bor, p | .bxor, p | .shl, p => p == .uint
+  | .band, p | .bor, p | .bxor, p => p != .bool
+  | .shl, p => p == .uint
   | .addW, p | .subW, p | .mulW, p | .powW, p => p == .uint
 
 /-- The unary operators compiled: `!` (at `bool`, the only type it takes),
@@ -560,8 +562,12 @@ def sTail : BinOp → List Instr
   | .eqB => [.eq]
   | .neB => [.eq, .iszero]
   | .shr => sarCode
+  -- two's complement: the opcode is the operator on the words (`uintBitwise`)
+  | .band => [.and]
+  | .bor => [.or]
+  | .bxor => [.xor]
   | .pow | .and | .or => []
-  | .band | .bor | .bxor | .shl | .addW | .subW | .mulW | .powW => []
+  | .shl | .addW | .subW | .mulW | .powW => []
 
 /-- An operator's tail at its operand type: signed at `int`. -/
 def binTail : PrimTy → BinOp → List Instr

@@ -1,3 +1,0 @@
-PASS lean:tests/directruntime-20261104/shared-translator/IntrinsicControls.lean 3s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/evidence/intrinsic-controls/1.log
-{"childMaxRssKiB": 695144, "command": ["env", "GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/evidence/intrinsic-controls", "bash", "scripts/coord-tools/gate.sh", "per-file", "tests/directruntime-20261104/shared-translator/IntrinsicControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "173084672", "wallSeconds": 3.109287404999577}
-{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 15136272384, "outerWallSeconds": 7.5259781070003555}

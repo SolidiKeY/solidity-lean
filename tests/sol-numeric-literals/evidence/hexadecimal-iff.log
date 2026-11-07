@@ -1,3 +1,0 @@
-ERROR 127:11 Invalid rewrite argument: Expected an equality or iff proof or definition name, but `he` is a value of type
-  List UInt8
-diag: 1 errors

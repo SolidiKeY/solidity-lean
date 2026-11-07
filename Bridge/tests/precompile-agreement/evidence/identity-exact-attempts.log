@@ -1,3 +1,0 @@
-FAIL congr 2; exact congrArg UInt256.mk (sub_self _)
-FAIL simp only [UInt256.sub, sub_self]
-FAIL congr 2 <;> first | rfl | exact congrArg UInt256.mk (sub_self _)

@@ -120,7 +120,7 @@ def declarations(path, source):
             owner="solidity-v12-v17-20261031/v13-abi-world",
             owner_key="H30-WRITER-solidity-v12-v17-20261031--v13-abi-world",
             owner_status="coordination-only",
-            owner_snapshot_sha256="7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce",
+            owner_snapshot_sha256="49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe",
             last_change_provenance=provenance,
             global_producer_premises=[],
             representation_premises=REPRESENTATIONS.get(fq.removeprefix("Solidity.Backend.AbiWorld."), []),

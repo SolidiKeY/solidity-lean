@@ -1294,3 +1294,150 @@ reviewed the replay without Lean. This establishes repeatability for these
 runs, not complete census, resolved kernel names, signature equivalence or
 live ownership. Full reports and timing records are outside Git in the
 priority-instances evidence directory.
+
+## Scoped open command guard
+
+The conservative inline scoped-command guard now covers `open` as well as
+`set_option`. An inline declaration keyword, modifier or attribute prefix
+after `in` makes the file incomplete, including split headers and prefixes.
+Following-line declarations and ordinary open commands remain recognized.
+This prevents the reported silent omission, but scoped namespace lifetime and
+arbitrary wrappers or macros remain lexical approximations; ambiguous text
+may be refused. Candidate signature and ownership rejection reasons remain.
+
+Finder and skeptic independently reviewed the implementation without Lean.
+The combined Python suite passed 201 tests, including incomplete-report,
+multiline, attribute and string controls. A first baseline attempt was refused
+before starting because the conservative resource preflight lacked 2 GiB of
+job headroom beyond the 4 GiB reserve. Task-owned bulk-report cache pages
+were released without changing files; the actual matched pair used the same
+8 GiB address-space cap, re-advised the prior report before the after scan,
+and sampled cgroup availability every half second. Neither run hit the
+resource stop. This sampling is not a continuous or hidden-ancestor guarantee.
+
+The pair took 118.079 seconds before and 118.075 seconds after (-0.0034%).
+Both used the same 7,445 inputs, recognized 124,796 declarations and reported
+no file errors or unmatched globs. Complete reports matched after normalizing
+scanner identity. This is an external lexical-tool measurement, not a Lean
+runtime gate, complete census or signature proof. Evidence is outside Git
+under `/workspace/h62-duplication-scanner-evidence/scoped-open/`.
+
+The repository documentation-path gate exited 1 on a missing witness reference
+in the upstream audit-v09-passes document, outside this scanner lane. The
+initial resource refusal is recorded as a transcription of the visible tool
+response, not an independently captured runner log. Cache advice was applied
+to the prior report before each scan, but the receipts do not prove identical
+operating-system cache state.
+
+## Initializer inventory boundaries
+
+Line-initial `initialize` and `builtin_initialize` commands now terminate a
+preceding declaration body and appear in the lexical inventory. The optional
+named form is recognized only when a source-spelled identifier and type are
+followed by a top-level left arrow; anonymous initializer bodies remain
+anonymous. All initializer statements and bodies are explicitly rejected as
+unsupported, and inline scoped initializer declarations make a scan
+incomplete. This is not an elaboration of initializer semantics or a complete
+parser for every layout and macro form.
+
+Finder and skeptic independently reviewed the implementation without Lean;
+they identified and rechecked the scoped-wrapper omission. The combined
+Python suite passed 202 tests. A matched bounded scan took 118.075 seconds
+before and 118.580 seconds after (+0.43%); both used the same 7,445 inputs,
+8 GiB address-space cap and sampled reserve monitor, with no resource stop,
+file error or unmatched glob. The prior report cache was re-advised before
+each scan, but the receipts do not prove identical operating-system cache
+state. Recognized declarations increased from 124,796 to 124,822, including
+26 initializer rows, all explicitly rejected. The checked real source rows
+include nextAuditOrigin, auditOrigin and importedAudit. Equal group counts do
+not establish equal members or semantics. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/initializer-inventory/`.
+
+The repository documentation-path gate remains failed on the same missing
+witness reference in the upstream audit-v09-passes document noted above.
+
+### Initializer report replay
+
+Two bounded default-mode scans with the same tree, scanner, selection,
+registry and caller-pinned previous report took 118.580 and 124.087 seconds
+and produced byte-identical reports, SHA256
+`1f589f93859bf026421c9e3ef06bffc815f0dc3f73c1ef0c04db30b3ea7b52be`.
+Both selected 7,445 files and recognized 124,822 declarations, with no file
+errors or unmatched globs; all recognized owners remain unknown. All 26
+initializer rows retain statement and body rejection. Relative to the older
+caller-pinned report, 76 inputs were added, 11 changed and none removed. The
+scanner and tree both changed from that baseline, so candidate deltas combine
+tool and input effects. The prior pin identifies bytes, not an authenticated
+producer.
+
+No opt-in fixture or project signature binding was invoked. Finder and skeptic
+reviewed the replay without Lean. The 8 GiB cap and sampled reserve monitor
+did not trigger a resource stop; sampling and cache advice do not prove
+continuous or identical operating-system conditions. These runs demonstrate
+repeatability for this snapshot, not complete census, Lean semantics or live
+ownership. Full reports and timings are outside Git in the
+initializer-inventory evidence directory.
+
+## Include and omit context boundaries
+
+Line-initial `include` and `omit` commands now contribute lexical context
+spans and terminate preceding bodies. Indented command boundaries reject the
+body fingerprint, and inline scoped declaration prefixes make a file
+incomplete. This addresses the reported body contamination and context-hash
+collision. Scope lifetime and implicit dependencies remain lexical
+approximations; signature and ownership rejection reasons remain mandatory.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 203 tests, including differing include/omit
+contexts, prior-body boundaries, nested commands and incomplete inline scopes.
+A bounded same-tree scan took 123.081 seconds before and 123.593 seconds after
+(+0.42%). Both used the same 7,491 inputs, recognized 125,638 declarations
+and reported no errors or unmatched globs. Statement-group counts were 4,511
+in both; body-group counts changed from 5,664 to 5,666. Counts do not prove
+equal memberships or semantic equivalence. Both scans used an 8 GiB address
+space cap and sampled cgroup reserve monitor without a resource stop; cache
+advice does not prove identical operating-system cache state. Evidence is
+outside Git under
+`/workspace/h62-duplication-scanner-evidence/include-omit/`.
+
+## Anonymous examples and unsupported binders
+
+Examples are recorded as anonymous: identifiers after `example` are not
+source declaration names. An example signature is rejected from statement and
+body grouping unless its result type follows only supported explicit binder
+groups. In particular, bare binders both before and after typed binders are
+rejected. This conservative lexical rule can refuse valid complex examples;
+it does not identify generated kernel declarations or establish source binding.
+
+The Python suite passed 204 tests. Independent finder and skeptic reviews
+without Lean identified and rechecked the mixed-binder case. A bounded scan
+of the same selected tree and pinned previous report took 123.593 seconds
+before and 124.583 seconds after (+0.80%), with an 8 GiB address-space cap
+and a sampled 4 GiB reserve monitor that did not stop either scan. Cache
+advice does not prove identical cache state and sampling does not prove
+continuous reserve. Evidence is outside Git in
+`/workspace/h62-duplication-scanner-evidence/example-binders/`. Complete
+Lean declaration and case accounting, authenticated source/dependency binding,
+current ownership and final gates remain open.
+
+
+### Merged-tree report replay
+
+At merged tree `fc17f01e229480bda02baa4394be0157efb0e8a4`, two
+serial default-mode scans used identical selection, historical registry and
+caller-pinned prior report. Both exited successfully and produced SHA256
+`9eb5b90bc8b86c7efbcea04e5cdb434f0862d03b0dce0198ea5bc12aeb08172f`;
+they selected 7,497 files and recorded 125,729 lexical declarations, 4,503
+statement groups and 5,665 body groups, with no errors or unmatched patterns.
+All recorded owners are unknown. Times were 122.090 and 128.599 seconds.
+Both used an 8 GiB process cap and a sampled 4 GiB local cgroup reserve
+monitor without a stop; cache equality and continuous system-wide reserve are
+not established.
+
+Finder and skeptic independently reviewed the replay without Lean. The
+prior report predates both scanner and source changes, so its incremental
+deltas combine their effects. Its digest identifies caller-supplied bytes,
+not an authenticated producer. The replay does not invoke opt-in signature
+binding or establish complete Lean census, semantic duplication, or live
+ownership. Evidence is outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-replay/`.

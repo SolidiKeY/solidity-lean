@@ -21,10 +21,10 @@
       "chain": "precompiles",
       "phase": "retire",
       "lane": "solidity-h62-2-20261106/audit-precompiles",
-      "messageFile": "/home/guilherme/.local/state/cloudvm-coord/receipts/h82-20261106T174134Z/messages/precompiles-retire-audit-precompiles.txt",
+      "messageFile": "$XDG_STATE_HOME/cloudvm-coord/receipts/h82-20261106T174134Z/messages/precompiles-retire-audit-precompiles.txt",
       "sha256": "c8d9dc5b92d3abe7f1998c024425f19868a3f2fd3f97b0a2e9c06a12d0d94a59",
       "state": "accepted",
-      "send_receipt": "/home/guilherme/.local/state/cloudvm-coord/sends/a0ec4f59-4bbf-4a15-a60f-9662d43407c9.json",
+      "send_receipt": "$XDG_STATE_HOME/cloudvm-coord/sends/a0ec4f59-4bbf-4a15-a60f-9662d43407c9.json",
       "turnId": "01a1b1f8-e0e1-70a2-b42c-b51b8c613416",
       "acceptedAt": "2026-11-06T17:49:22.685972+00:00"
     }

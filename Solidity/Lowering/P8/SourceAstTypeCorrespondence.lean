@@ -1,8 +1,9 @@
 import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 
-/-! Mapping and function-type structural correspondence.
+/-! Leaf, mapping and function-type structural correspondence.
 Regression purpose: retain mapping names/key/value and function parameter /
-result lists, visibility and mutability through the unchanged readers. These
+result lists, visibility and mutability through the unchanged readers. Leaf
+paths retain explicit-node precedence and address payability. These
 are syntax laws, not Source validity, artifact binding or execution proofs. -/
 namespace Solidity.Lowering.P8.SourceAstTypeCorrespondence
 open Lean Solidity.Source
@@ -60,6 +61,109 @@ theorem function_exact (fuel : Nat) (node rawArgs rawResults : Json)
   simp only [kind, argsField, argsValue, resultsField, resultsValue,
     visField, visValue, mutField, mutValue, ok_bind]
   rfl
+
+/-- An explicit compiler path node takes precedence over fallback spelling. -/
+theorem user_path_node_exact (node pathNode : Json) (written : String) (out : IdPath)
+    (kind : node.getObjValAs? String "nodeType" = .ok "UserDefinedTypeName")
+    (pathField : node.getObjVal? "pathNode" = .ok pathNode)
+    (nameField : pathNode.getObjValAs? String "name" = .ok written)
+    (converted : SourceAstTypes.path written = .ok out) :
+    SourceAstTypes.typeNameLeaf node = .ok (.userType out) := by
+  rw [SourceAstTypes.typeNameLeaf]
+  simp only [kind, pathField, nameField, converted, ok_bind]
+  rfl
+
+/-- Fallback spelling is selected only when pathNode lookup fails. -/
+theorem user_name_path_exact (node : Json) (message written : String) (out : IdPath)
+    (kind : node.getObjValAs? String "nodeType" = .ok "UserDefinedTypeName")
+    (pathMissing : node.getObjVal? "pathNode" = .error message)
+    (nameField : node.getObjValAs? String "namePath" = .ok written)
+    (converted : SourceAstTypes.path written = .ok out) :
+    SourceAstTypes.typeNameLeaf node = .ok (.userType out) := by
+  rw [SourceAstTypes.typeNameLeaf]
+  simp only [kind, pathMissing, nameField, converted, ok_bind]
+  rfl
+
+/-- Non-address elementary types retain the exact existing width/name conversion. -/
+theorem elementary_leaf_exact (node : Json) (name : String) (out : Elem)
+    (kind : node.getObjValAs? String "nodeType" = .ok "ElementaryTypeName")
+    (nameField : node.getObjValAs? String "name" = .ok name)
+    (notAddress : (name == "address") = false)
+    (converted : SourceAstTypes.elementary name = .ok out) :
+    SourceAstTypes.typeNameLeaf node = .ok (.elem out) := by
+  rw [SourceAstTypes.typeNameLeaf]
+  simp only [kind, nameField, notAddress, converted, ok_bind, Bool.false_eq_true, ite_false]
+  rfl
+
+/-- Payability remains a distinct intrinsic elementary constructor. -/
+theorem payable_address_exact (node : Json)
+    (kind : node.getObjValAs? String "nodeType" = .ok "ElementaryTypeName")
+    (nameField : node.getObjValAs? String "name" = .ok "address")
+    (payable : node.getObjVal? "stateMutability" = .ok (.str "payable")) :
+    SourceAstTypes.typeNameLeaf node = .ok (.elem .addressPayable) := by
+  rw [SourceAstTypes.typeNameLeaf]
+  simp only [kind, nameField, payable, ok_bind, beq_self_eq_true, ite_true]
+  rfl
+
+/-- Both existing nonpayable encodings retain plain address syntax. -/
+theorem nonpayable_address_exact (node : Json)
+    (kind : node.getObjValAs? String "nodeType" = .ok "ElementaryTypeName")
+    (nameField : node.getObjValAs? String "name" = .ok "address")
+    (plain : node.getObjVal? "stateMutability" = .ok (.str "nonpayable") ∨
+      ∃ message, node.getObjVal? "stateMutability" = .error message) :
+    SourceAstTypes.typeNameLeaf node = .ok (.elem .address) := by
+  rcases plain with plain | ⟨message, plain⟩
+  all_goals
+    rw [SourceAstTypes.typeNameLeaf]
+    simp only [kind, nameField, plain, ok_bind, beq_self_eq_true, ite_true]
+    rfl
+
+/-- Success retains the exact split and rejects every empty component. -/
+theorem path_components (written : String) (out : IdPath)
+    (converted : SourceAstTypes.path written = .ok out) :
+    ∃ head tail, written.splitOn "." = head :: tail ∧
+      (head.isEmpty || tail.any String.isEmpty) = false ∧ out = ⟨head, tail⟩ := by
+  unfold SourceAstTypes.path at converted
+  cases parts : written.splitOn "." with
+  | nil => rw [parts] at converted; cases converted
+  | cons head tail =>
+    rw [parts] at converted
+    cases valid : head.isEmpty || tail.any String.isEmpty with
+    | false =>
+      simp only [valid, Bool.false_eq_true, ite_false] at converted
+      cases converted
+      exact ⟨head, tail, rfl, valid, rfl⟩
+    | true =>
+      simp only [valid, ite_true] at converted
+      cases converted
+
+/-- Positive fuel delegates both supported leaf kinds without altering output. -/
+theorem compound_leaf_exact (fuel : Nat) (node : Json) (out : Syn .typeName)
+    (kind : node.getObjValAs? String "nodeType" = .ok "ElementaryTypeName" ∨
+      node.getObjValAs? String "nodeType" = .ok "UserDefinedTypeName")
+    (converted : SourceAstTypes.typeNameLeaf node = .ok out) :
+    SourceAstCompoundTypes.typeName (fuel + 1) node = .ok out := by
+  rcases kind with kind | kind
+  all_goals
+    rw [SourceAstCompoundTypes.typeName]
+    simp only [kind, ok_bind]
+    exact converted
+
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.path_components' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms path_components
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.compound_leaf_exact' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms compound_leaf_exact
+
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_path_node_exact' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms user_path_node_exact
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.user_name_path_exact' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms user_name_path_exact
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.elementary_leaf_exact' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms elementary_leaf_exact
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.payable_address_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms payable_address_exact
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.nonpayable_address_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nonpayable_address_exact
 
 /-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.optional_name_missing' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms optional_name_missing

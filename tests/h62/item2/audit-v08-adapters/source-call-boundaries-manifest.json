@@ -1,0 +1,142 @@
+{
+  "status": "SOURCE_CALL_MODULE_COMPONENT_COVERAGE_ONLY",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean": "b5ed9523eb5dfea10fe1f1b3ef122e906467c9a4c654212ee3aabb372b1f8633",
+    "Solidity/Lowering/V08/SourceCallable.lean": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a",
+    "Solidity/Lowering/V08/SourceCallableControls.lean": "f1c63dc4e4b491bfe5c4c0f53652f7c779fe41b3e42085215a2b2ff9558094df"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceCallable.zero_horizon",
+    "Solidity.Lowering.V08.SourceCallable.missing_body",
+    "Solidity.Lowering.V08.SourceCallable.wrong_frame"
+  ],
+  "additional_original_target_applications": 3,
+  "module_component_targets": [
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.zero_horizon",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:9:zero_horizon",
+      "lexical_signature_sha256": "b58602ef144d82b5464df07e70900d3e98ae90937a8a04dd8f58edf4c62b4716",
+      "captured_type_sha256": "50605c3c380bf83333fb472cef2f28ee59a86fd37cd215afa414c83fc041863f",
+      "component_declarations": "actual_zero_horizon",
+      "model_kind": "TIMEOUT_COMPONENT",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.missing_body",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:14:missing_body",
+      "lexical_signature_sha256": "b760db44300d3e2d5a4b176d91ac1be53f2c01a16588f53e11328f90f9625035",
+      "captured_type_sha256": "f241bdcce87dffb109c3cafd481099765daa410c767bf9bd3637d8a54448a6be",
+      "component_declarations": "missing_selected + actual_missing_body",
+      "model_kind": "MISSING_BODY_RUNTIME_MODEL",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.complete",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:21:complete",
+      "lexical_signature_sha256": "b7d5c4a6d9a71c57039063d9a32304e5738114b419ac0ba252c21d47e0af8734",
+      "captured_type_sha256": "95bc43a606a0e0e49c5ffa47cc5498d0f257deae0e5dd2d20f158670f97aa92d",
+      "component_declarations": "joint + actual",
+      "model_kind": "OPERATIONAL_SUCCESS_COMPONENT",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.body_failure",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:39:body_failure",
+      "lexical_signature_sha256": "b3d6852871d5c96d7610b0a03201fb169fcf6676ff72f014244554dfbd78a9ed",
+      "captured_type_sha256": "ac2fa4a18dfef55fb77b63bdc7333774c7e113e2a14f3c28a64d474491b4eedf",
+      "component_declarations": "failure_joint + actual_body_failure",
+      "model_kind": "OPERATIONAL_FAILURE_COMPONENT",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.wrong_frame",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:54:wrong_frame",
+      "lexical_signature_sha256": "28469467fa3d41cba5b8c9c0c3ec8dc9e033852b49240509108e511c399cb373",
+      "captured_type_sha256": "631bdfd79612bfb92538786fe901172f884646ca9d388d357ae243a188d57930",
+      "component_declarations": "frame_mismatch_joint + actual_wrong_frame",
+      "model_kind": "INTENTIONAL_MISMATCH_NEGATIVE_MODEL",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.expression_complete",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:66:expression_complete",
+      "lexical_signature_sha256": "832c66a466b245f7e650fdbe43d6cbbb2a9b4fc61dd0ee5261c260d598d7c57f",
+      "captured_type_sha256": "141ec31b96db782c1c852171136a6a79ccbf912b72bc2f5763d64e79d2197386",
+      "component_declarations": "expression_steps + actual_expression",
+      "model_kind": "OPERATIONAL_SUCCESS_COMPONENT",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.expression_failure",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:80:expression_failure",
+      "lexical_signature_sha256": "d705d346e6d00753493c2e3d2d55a9b4e10964127320878dfa178807b8987a8f",
+      "captured_type_sha256": "66e11d1c8d8e43668f49f7549efbe50d211648c18af54cc759acbfb5e8d2861e",
+      "component_declarations": "actual_body_expression",
+      "model_kind": "OPERATIONAL_FAILURE_COMPONENT",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceCallable.argument_failure",
+      "lexical_id": "Solidity/Lowering/V08/SourceCallable.lean:94:argument_failure",
+      "lexical_signature_sha256": "6daba97f28b68d5e34eaa6542b550703509b97c081c2c4e17157657334c20919",
+      "captured_type_sha256": "35a96d07fc4da34eaa2327b8ec7400bf2324696980ae9841245e361d49d267b3",
+      "component_declarations": "argument_step_same_program + actual_argument_failure",
+      "model_kind": "OPERATIONAL_FAILURE_COMPONENT",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    }
+  ],
+  "module_public_targets_accounted_once": 8,
+  "new_joint_model_families": 0,
+  "new_body_fixtures": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "negative_model_boundary": "The mismatched body table deliberately violates call-frame fit; it is an inhabited runtime-error model, not a SourceSpec/global admission inhabitant. Missing body and timeout models also assert no admitted total compiler.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 3.293,
+    "peak_sampled_aggregate_rss": 766078976,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Eight public SourceCallable laws have component applications; remaining source-facing modules and full original mapped audit remain unfinished.",
+    "Lexical/type hashes identify the records; component application coverage does not establish full original statement-fidelity acceptance.",
+    "No canonical origin/admission, general target body/frame correspondence, session adequacy or H68 certificate.",
+    "Additional proof coverage is not a matched timing comparison and releases no prior STOP."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-boundaries-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "b201ce8da825f2745d4e9fcfcabf1703911dd2c9de7c97c9165c3782c3e5f591"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-boundaries-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-boundaries-20261107/check/results.json",
+      "bytes": 399,
+      "sha256": "0653e84f4284e0d80129b29658e87abd7a707a4d7e79d22d240f08e66f4bfc14"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-boundaries-20261107/check/gates/1.log",
+      "bytes": 29580,
+      "sha256": "54f88893a0eb76d412500d1b2b6d5196b3f6a28f471263f6f6835891032992e0"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic verified boundary premises, exact states/reasons, negative-model distinction and eight unique component links; no findings, no reviewer scripts/tests/Lean/server."
+}

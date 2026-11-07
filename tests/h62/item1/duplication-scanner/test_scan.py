@@ -242,6 +242,66 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(names[name]["reject_reason"], "unsupported-instance-priority")
             self.assertEqual(names[name]["body_reject_reason"], "unsupported-instance-priority")
 
+    def test_initializer_inventory_is_rejected_and_bounded(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "private initialize named : IO.Ref (Option Nat) ←\n  IO.mkRef none\n"
+                  "builtin_initialize other : IO.Ref Nat <- IO.mkRef 0\n"
+                  "initialize registerTraceClass `Foo\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["kind"], r["name"]) for r in rows],
+                         [("def", "before"), ("initialize", "named"),
+                          ("builtin_initialize", "other"), ("initialize", "<anonymous>"), ("def", "after")])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        self.assertEqual(rows[1]["qualifiers"], ["private"])
+        for row in rows[1:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-declaration-form")
+            self.assertIsNone(row["statement"])
+            self.assertEqual(row["body"], [])
+        fixture = ROOT / "Solidity/Frontend/Testing.lean"
+        names = {r["name"]: r for r in scanner.scan(fixture, ROOT)}
+        for name in ("nextAuditOrigin", "auditOrigin", "importedAudit"):
+            self.assertEqual(names[name]["reject_reason"], "unsupported-declaration-form")
+        for keyword in ("initialize", "builtin_initialize"):
+            for wrapper in ("open Nat", "set_option autoImplicit false"):
+                scoped = f"{wrapper} in {keyword} hidden : IO.Ref Nat <- IO.mkRef 0\ndef visible : Nat := 0\n"
+                with self.subTest(keyword=keyword, wrapper=wrapper):
+                    with self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                        scanner.scan(root / "B.lean", root, scoped.encode())
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("open Nat in initialize hidden : IO.Ref Nat <- IO.mkRef 0\n")
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
+    def test_examples_with_bare_binders_stay_anonymous_and_rejected(self):
+        root = Path("/virtual")
+        source = ("example x : x = (x : Nat) := rfl\n"
+                  "example y z : y = (y : Nat) := rfl\n"
+                  "example (x : Nat) y : y = x → y = x := id\n"
+                  "example {x : Nat} y : y = x → y = x := id\n"
+                  "example (x : Nat) : x = x := by rfl\n"
+                  "example : True := by trivial\ndef next : Nat := 0\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([r["name"] for r in rows], ["<anonymous>"] * 6 + ["next"])
+        for row in rows[:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-example-binder")
+            self.assertEqual(row["body_reject_reason"], "unsupported-example-binder")
+            self.assertIsNone(row["statement"])
+        self.assertIsNone(rows[4]["reject_reason"])
+        self.assertIsNone(rows[5]["reject_reason"])
+        self.assertEqual(rows[-1]["body"], ["0"])
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("example x : x = (x : Nat) := rfl\nexample y : y = (y : Nat) := rfl\nexample (x : Nat) y : y = x → y = x := id\n")
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"]))
+            self.assertEqual(report["candidates"], [])
+            self.assertEqual(report["body_candidates"], [])
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))
@@ -525,6 +585,58 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
         clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
         self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
+
+    def test_scoped_open_inline_declarations_fail_closed(self):
+        root = Path("/virtual")
+        cases = (
+            b"open Nat in theorem hidden : True := by trivial\ndef visible : Nat := 0\n",
+            b"open Nat\n  in private\n  def hidden : Nat := 0\ndef visible : Nat := 0\n",
+            b"open scoped Foo in @[simp]\n  theorem hidden : True := by trivial\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "unsupported same-line scoped open declaration"):
+                    scanner.scan(root / "A.lean", root, source)
+        following = b"open Nat in\ntheorem visible : True := by trivial\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, following)[0]["name"], "visible")
+        ordinary = b'open Nat\ndef str : String := "open Nat in theorem fake"\n'
+        self.assertEqual(scanner.scan(root / "C.lean", root, ordinary)[0]["name"], "str")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(cases[0])
+            (temp / "B.lean").write_bytes(following)
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            value = json.loads(report.stdout)
+            self.assertEqual(value["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(value["incremental"]["removed"])
+
+    def test_include_omit_context_and_body_boundaries(self):
+        root = Path("/virtual")
+        template = ("variable (x : Nat)\ndef marker : Nat := 0\n{cmd}\n"
+                    "theorem target : True := by trivial\n")
+        def rows(command):
+            return scanner.scan(root / "A.lean", root, template.format(cmd=command).encode())
+        included, omitted, plain = rows("include x"), rows("omit x"), rows("")
+        self.assertEqual(included[0]["body"], ["0"])
+        self.assertEqual(omitted[0]["body"], ["0"])
+        self.assertNotEqual(included[1]["context_hash"], omitted[1]["context_hash"])
+        self.assertNotEqual(included[1]["context_hash"], plain[1]["context_hash"])
+        for command in ("include x", "omit x"):
+            inline = f"{command} in theorem hidden : True := by trivial\ndef visible : Nat := 0\n"
+            with self.subTest(command=command), self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                scanner.scan(root / "B.lean", root, inline.encode())
+            following = f"{command} in\ntheorem visible : True := by trivial\n"
+            self.assertEqual(scanner.scan(root / "C.lean", root, following.encode())[0]["name"], "visible")
+        nested = b"def outer : Nat := by\n  include x\n  exact 0\ndef next : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "D.lean", root, nested)[0]["body_reject_reason"], "indented-command-boundary")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("include x in theorem hidden : True := by trivial\n")
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
 
     def test_equal_context_does_not_prove_local_definition_equivalence(self):
         with tempfile.TemporaryDirectory() as directory:

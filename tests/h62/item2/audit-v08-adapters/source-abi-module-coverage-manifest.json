@@ -1,0 +1,262 @@
+{
+  "status": "ABI_SEVENTEEN_LAW_COMPONENT_COVERAGE_ONLY",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceAbiJoint.lean": "abeb70ae4bd0599515c232e3d4a5505bc7ff80ff1119385fe2305858350e3a29",
+    "Solidity/Lowering/V08/SourceAbi.lean": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62",
+    "Solidity/Lowering/V08/SourceAbiControls.lean": "8c962b36053c8cedcc966668f547d7e91a78c34072b4c11a42aba7cc60280d52"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceAbi.literal_execution",
+    "Solidity.Lowering.V08.SourceAbi.zero_horizon",
+    "Solidity.Lowering.V08.SourceAbi.argument_horizon_zero",
+    "Solidity.Lowering.V08.SourceAbi.selector_literal_execution",
+    "Solidity.Lowering.V08.SourceAbi.signature_literal_execution"
+  ],
+  "module_component_targets": [
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.execute",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:10:execute",
+      "signature_sha256": "5c2b35eca15cde7303d05a1549407fb711d4c429e9fa9bc9dce5da6ba97e0aa7",
+      "captured_type_sha256": "cb5bfbc03a34c3c0e03b8def3ab0f603b675c26ff793e2f6ed26b783a1896e01",
+      "proposition_binders": [
+        "arguments",
+        "encoding"
+      ],
+      "component_reference": "joint + actual",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.literal_execution",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:37:literal_execution",
+      "signature_sha256": "1e6acbe4225addb9627d429a20a163ba5bd8f8a67a9d0c6e9cc88fa0039eb01a",
+      "captured_type_sha256": "832a3c0d39070e7e54170c2c40dff412edea67d4148213165d98f16fc2cbc336",
+      "proposition_binders": [],
+      "component_reference": "literal_boundaries",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.single_dynamic_bytes",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:55:single_dynamic_bytes",
+      "signature_sha256": "414fc803dc6b7e4bda8bcd3bcd1a7861996cf5fd4d5ffc54640d6143c038e02b",
+      "captured_type_sha256": "ba47c73dd95da787ba544e47b98483d51134c72e347e7f72336bed30feac16e4",
+      "proposition_binders": [],
+      "component_reference": "Solidity.Lowering.V08.SourceAbi.single_dynamic_bytes",
+      "component_kind": "DIRECT_TOTAL_OBSERVATION_REFERENCE",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.error_payload_projection",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:63:error_payload_projection",
+      "signature_sha256": "776a09cfff901172fcf7970d53f0769b45c4b074a3d516394b56d7be7cbba264",
+      "captured_type_sha256": "71cbb3aab46a6c0486c0e997d1d58d033778c26c50b048756ef3a118f9c9cf23",
+      "proposition_binders": [],
+      "component_reference": "Solidity.Lowering.V08.SourceAbi.error_payload_projection",
+      "component_kind": "DIRECT_TOTAL_OBSERVATION_REFERENCE",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.zero_horizon",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:68:zero_horizon",
+      "signature_sha256": "ec2759476e9a99fa477eec5e3496623c907382697a669820f7efc21a0f542d0e",
+      "captured_type_sha256": "07e3d7c7972b3b072aa9db8addff2deeb1454aa25ed9d181ea5e9f8626dfbdbf",
+      "proposition_binders": [],
+      "component_reference": "literal_boundaries",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.argument_horizon_zero",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:73:argument_horizon_zero",
+      "signature_sha256": "0fc29de4d4f87fa128404139d3eab5664d60801b432e67693ad666a56f5a46a2",
+      "captured_type_sha256": "90e6e13bfad0430d7299639e6190231989b06a435a17c7d36d9326e6edc92546",
+      "proposition_binders": [],
+      "component_reference": "literal_boundaries",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.word_bytes_field",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:79:word_bytes_field",
+      "signature_sha256": "d71c67dbbdf62fcdc4aed0dedb92bbd0ff6e88890a5de53faabb57064b4d99d0",
+      "captured_type_sha256": "89d5728486d6b117377fa17cab4dd955116a685f2d1529cf13069ba200376818",
+      "proposition_binders": [],
+      "component_reference": "word_joint",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.encode_fixed_bytes32",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:88:encode_fixed_bytes32",
+      "signature_sha256": "fd4a997e3d053a3ffe2a3a9dd5b5120b9937f9dd4f6b12413f6d3f2d94ee2d8f",
+      "captured_type_sha256": "e13b37562a778f8ac75123e14df402b6021cb3f0bc3fbcbcaf39411bda40bf5f",
+      "proposition_binders": [
+        "observation"
+      ],
+      "component_reference": "word_joint + word_actual_run",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.five_parts",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:99:five_parts",
+      "signature_sha256": "d5c205b618b2b2d9273eb8145d0149388b7476cf8c243a2747d898af977f19e5",
+      "captured_type_sha256": "a42e31c48b8bfb151c0b18d1bba335810db1a439f8fe6ce4790e8b5a53fe5fd0",
+      "proposition_binders": [],
+      "component_reference": "Solidity.Lowering.V08.SourceAbi.five_parts",
+      "component_kind": "DIRECT_TOTAL_OBSERVATION_REFERENCE",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.take_word",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:109:take_word",
+      "signature_sha256": "91aef9dc1f1215a1483bdc6f12a17d15e2d9c69828c8908e2bff96ceebc97371",
+      "captured_type_sha256": "931eb74d0ffb4fc6ca3103c8a8db61688eb5245811f3ea406bc184a3d52aefa3",
+      "proposition_binders": [],
+      "component_reference": "Solidity.Lowering.V08.SourceAbi.take_word",
+      "component_kind": "DIRECT_TOTAL_OBSERVATION_REFERENCE",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.drop_word",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:113:drop_word",
+      "signature_sha256": "fa17011d6e9889a9d750bed0a466f169c0d6cc42ab8ca2505eeac3937a274076",
+      "captured_type_sha256": "b327ef912539469e69406750592f398ca2d64aa861101b88c20c91531407d265",
+      "proposition_binders": [],
+      "component_reference": "Solidity.Lowering.V08.SourceAbi.drop_word",
+      "component_kind": "DIRECT_TOTAL_OBSERVATION_REFERENCE",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.selector_execute",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:133:selector_execute",
+      "signature_sha256": "725535a3fd383d12c363555705800e9e52a10fa84dffe1b4a62d737576029a72",
+      "captured_type_sha256": "89ada186cc1e2b7e8b873f8d56e74edee6e06e66b63812dc6ae0288020b946f0",
+      "proposition_binders": [
+        "arguments",
+        "conversion",
+        "encoding"
+      ],
+      "component_reference": "selector_joint + actual_selector",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.signature_execute",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:159:signature_execute",
+      "signature_sha256": "1339264ba733726132d5d162917d7b4909e61536aba17ddae76eecd98e317d9b",
+      "captured_type_sha256": "b23b18c8861ecc9e3157af488dbd163e33288def6aa66a78e476201d6ee9f890",
+      "proposition_binders": [
+        "arguments",
+        "reading",
+        "encoding"
+      ],
+      "component_reference": "signature_joint + actual_signature",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.signature_prefix_transport",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:185:signature_prefix_transport",
+      "signature_sha256": "5948cf28a430f330d7a6dbe327455368a2a3d427c99a4118a6b135c542d56b84",
+      "captured_type_sha256": "8054b9ff5abb93e962253717bdc3073bb35e16371061a73cf99dd1a124f7de27",
+      "proposition_binders": [
+        "pin"
+      ],
+      "component_reference": "prefix_pin_joint",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.selector_literal_execution",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:198:selector_literal_execution",
+      "signature_sha256": "5f28cfb3f60faec9285503bfcd7a9320dcd43e72e5dd9275106a24d6074c37b7",
+      "captured_type_sha256": "0b54542dab47c1cb759d7a1c6a265a23585de3c011fb147ce55a9a1d14a5d479",
+      "proposition_binders": [],
+      "component_reference": "prefixed_literal_boundaries",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.signature_literal_execution",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:206:signature_literal_execution",
+      "signature_sha256": "f2a2244c46667688ff6e8d7ce20ea180700fb716d788fc2d7f4b90ab890416d4",
+      "captured_type_sha256": "08d19e38144f4a66e3712a3701dd1e21d77bd1b6f5bfcc41ce09cd1d69db391c",
+      "proposition_binders": [],
+      "component_reference": "prefixed_literal_boundaries",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceAbi.prefixed_arguments_failure",
+      "lexical_id": "Solidity/Lowering/V08/SourceAbi.lean:216:prefixed_arguments_failure",
+      "signature_sha256": "cae9bcd611c738e98ff90989047f52e5294c229cc729261a194281e469ea8a5f",
+      "captured_type_sha256": "caaa5073d3762904bc667caf07a4b0b02c155e8f2ae12e46c3683b333cf4073e",
+      "proposition_binders": [
+        "arguments"
+      ],
+      "component_reference": "prefix_argument_step + actual_prefix_failure",
+      "component_kind": "OPERATIONAL_OR_TYPED_COMPONENT_APPLICATION",
+      "status": "COMPONENT_ACCOUNTED_FIDELITY_PENDING"
+    }
+  ],
+  "public_targets_accounted_once": 17,
+  "direct_total_observation_references": 5,
+  "operational_or_typed_component_applications": 12,
+  "new_joint_model_families": 0,
+  "new_source_fixtures": 0,
+  "new_encoders": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "data_feasibility": "Existing global/frame/populated Source locals/state instantiate execution data. Arbitrary UInt8 lists, typed words (including0), and Nat indices inhabit the observation data domains. Absence of a proof binder is not used to infer validity of arbitrary bundled program premises.",
+  "literal_boundary": "All raw byte lists and extra sufficient horizons retain original literal result; result pointer1 distinguishes raw-literal allocation from mixed hash-input pointer2. Horizon0/1 retain full prestate.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceAbiJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 2.985,
+    "peak_sampled_aggregate_rss": 750346240,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Seventeen module-local component links, not full semantic fidelity or original whole-area acceptance.",
+    "The five observations are existing total identities, not new execution cases or an aggregate ABI emitter/admission theorem.",
+    "No canonical Source origin/admission, complete target body/frame/session correspondence, gas/fork or H68 certificate.",
+    "Additional coverage is not matched performance acceptance and clears no STOP."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-module-coverage-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "1c8d28a925af0b25808d33f1fd4fcbea9b69543423882e9a0ed49a2ebed5d530"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-module-coverage-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-module-coverage-20261107/check/results.json",
+      "bytes": 394,
+      "sha256": "d622c0e050341181689b896976e218f74b74e30574ba2be6e357734640599cdc"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-module-coverage-20261107/check/gates/1.log",
+      "bytes": 43280,
+      "sha256": "a258c0769a1f1be520ae08ca27fefc000c1e16ae8ab4d7e9c32e5778051485a9"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic verified literal full-state results, exact 17-link partition and nonacceptance boundaries; no findings, no reviewer scripts/tests/Lean/server."
+}

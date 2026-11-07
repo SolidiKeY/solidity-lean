@@ -4,12 +4,12 @@
   "Quot.sound",
   "propext"
  ],
- "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.invalid_call": [
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.absent_then_size": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.absent_then_size": [
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.invalid_call": [
   "Classical.choice",
   "Quot.sound",
   "propext"

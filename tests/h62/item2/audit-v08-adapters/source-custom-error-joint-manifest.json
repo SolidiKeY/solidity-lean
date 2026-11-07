@@ -1,0 +1,78 @@
+{
+  "status": "PROVED_CUSTOM_ERROR_COMPONENT_JOINT_MODEL",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceCustomErrorJoint.lean": "e6d1f76bb67a6cd6f40c79eba5c0150f8c9bb82d6e912102da1661440146414c",
+    "Solidity/Lowering/V08/SourceCustomErrors.lean": "29d81d560c49abafb96aee795ef172464ffaf0165ec023e3f8407cc816714e78",
+    "Solidity/Lowering/V08/SourceCustomErrorControls.lean": "9dd4c65999c53ed2609f8db7f0b703933f004e83ef5fe05f81495572e53bf297"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceCustomErrors.execute",
+    "Solidity.Lowering.V08.SourceCustomErrors.selector_of_bytes"
+  ],
+  "joint_premises": [
+    "actual error declaration parameter types",
+    "actual evalConvArgs including hash allocation and internal local update",
+    "actual encodeVals starting at the same reached heap with L0 outer locals",
+    "full published Fixed.Keccak pin",
+    "actual sigOf character-byte equality with supplied UTF8 signature"
+  ],
+  "domain": "Every Pipeline/static flag and extra sufficient horizon in the existing Bad(bytes32,bool,bool) fixture.",
+  "full_result": "Exact revert selector+encoded payload and full afterLiteral Source state. Statement outer locals remain L0, as prescribed by original execS API; no invented caller-local result.",
+  "controls": {
+    "error_not_rollback": "Same exact revert payload with original pre-argument heap is refused by heap.next2 versus1.",
+    "unicode_premise_refused": "Inherited distinct_input_encodings refutes a selector input-equality premise, not identifier admission, collision freedom or program execution."
+  },
+  "new_joint_model_families": 1,
+  "new_source_fixtures": 0,
+  "new_emitters": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceCustomErrorJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.831,
+    "peak_sampled_aggregate_rss": 728281088,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Existing Source evaluator/encoding fixture proofs reused; no general parser/origin/admission or target compiler certificate.",
+    "No ASCII restriction or other new admitted-domain exclusion.",
+    "No automatic transaction rollback, gas/fork/session adequacy or H68 certificate.",
+    "Two original target applications, not full original audit or matched performance acceptance."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "9b03f274f651a98e90f73f589129688104c7f055fc8768d472ca58efe87b3a05"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-joint-20261107/check/results.json",
+      "bytes": 402,
+      "sha256": "2f553c71249c08b3b4a9959b3405514e6f41ad33dde29bac2c961ea422b3a4a5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-joint-20261107/check/gates/1.log",
+      "bytes": 25912,
+      "sha256": "cb8a2a1db165c96b54bbf513f1b60604a1f144e48f1b0762ade86c762ee971ba"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic verified coherent original premises, exact outer-local/state result and non-ASCII premise boundary; no findings, no reviewer scripts/tests/Lean/server."
+}

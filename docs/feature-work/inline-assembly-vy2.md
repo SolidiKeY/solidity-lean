@@ -4399,10 +4399,17 @@ physical closure. V10 must retain those remaining premises.
 
 Pinned serial kernel checks pass. The explicit bridge import has median 0.54 s
 and peak 1,050,020 KiB, compared with layout-only import median 0.18 s; this is
-an opt-in 0.36 s dependency cost, not a passing speed-neutral replacement.
+a separate 0.36 s import dependency cost, not a passing speed-neutral replacement.
+The generated Solidity.lean root includes this module in the default full build.
+Isolation preserves NestedMappingLayout's import closure, not optional build
+membership; these import-only timings do not establish a full-build delta.
 The unchanged layout checks remain 0.40 s median (pre-check 0.43 s), and the
 existing layout import-expansion STOP remains. Axiom exports retain inherited
 propext/Classical.choice/Quot.sound; no axiom or policy was added. Detailed
 measurements and preservation checks stay outside Git at
-`/workspace/vy2-evidence/source-graph-production/`. Full validation and Y04
+`/workspace/vy2-evidence/source-graph-production/`. These absolute paths are
+H44 external VM artifact locations, not checkout-relative or portable links;
+retrieve the listed artifacts from the originating VM and verify the committed
+size/hash manifest before reuse. Missing artifacts remain an evidence wait.
+Full validation and Y04
 physical adequacy/reached-state work remain open.

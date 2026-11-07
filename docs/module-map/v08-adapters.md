@@ -900,6 +900,15 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
 | `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
 | `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
+| `Lowering/P9/BoundRecognizer.lean` | Executable sound recognizers (`readyB`, `boundB`, fuelled `finiteDefaultB`) and `catalogueB`, which implies `BoundMemoryCatalogue` from the actual dispatch target and body; `OpsOK` from elaboration. |
+| `Lowering/P9/BoundRecognizerControls.lean` | `catalogueB` replaces two hand-built catalogue proofs on elaborated units; refuses zero default fuel and an undeclared function. |
+
+| `Lowering/P9/DefaultRecognizerCompleteness.lean` | Monotonic and existential fuel completeness for the finite-default component only; common fuel for finite lists. |
+| `Lowering/P9/DefaultRecognizerControls.lean` | Nested fixed-array and actual struct-layout acceptance, insufficient-fuel controls, larger/shared fuel. |
+
+| `Lowering/P9/BodyRecognizerCompleteness.lean` | Existing readiness certificates imply their Boolean body checks; no new syntax admitted. |
+| `Lowering/P9/CatalogueRecognizerCompleteness.lean` | Entry/catalogue fuel monotonicity and relative completeness up to existential recognizer fuel, with original converse premises. |
+| `Lowering/P9/CatalogueCompletenessControls.lean` | Reference/unchecked and existing elaborated-unit controls, checked calls, inadequate-fuel distinction and all-fuel refusal. |
 | `Lowering/P8/HelperPackets/MonetaryBounds/Laws.lean` | Exact credit/debit round trips, checkedWord characterization and same-case algebraic consequences over the frozen monetary interface; no reachability claim. |
 | `Lowering/P8/HelperPackets/MonetaryBounds/Controls.lean` | Kernel positive/refusal controls at zero, maximum Word, the Word limit and limit+1, including reverse-roundtrip counterexamples without Fits. |
 | `Lowering/P8/HelperPackets/MonetaryBounds/AxiomPins.lean` | Exact standard-axiom pins for all six helper laws and 34 controls. |
@@ -993,3 +1002,15 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean` | Frozen-API CALL controls: absent and INVALID-body callees clear the stale return buffer, the following RETURNDATASIZE reads the new buffer, and the same caller frame gives callee-dependent CALL flags. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean` | General post-CALL law: a non-erroring fetched CALL leaves the return buffer of the exact `Θ` run `EVM.call` makes (all inputs pinned) when its entry condition holds, and an empty buffer otherwise. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean` | Core `CALLIN` (`Evm.callIn_returndata`) against the reference CALL buffer: case alignment under explicit entry-test, depth-below-1024 and exact-`Θ`-oracle premises, and `depth_disagreement` at depth 1024. |
+| `Backend/StructuredFlow/SourceDispatch.lean` | Executable exact Source-template dispatch into Compiler.compile with typed refusals and actual artifact/code equations. |
+| `Backend/StructuredFlow/SourceDispatchAxioms.lean` | Exact kernel axiom pins for the dispatcher, all public proofs and operational factory. |
+| `Backend/StructuredFlow/SourceDispatchControls.lean` | Existing-fixture actual-entry, incompatible-mapping, syntax-refusal and observable return-flag regression controls. |
+| `Backend/StructuredFlow/SourceDispatchCorrect.lean` | All sixteen original operational correctness laws, bound to the selected program and original emitted instruction code. |
+| `Backend/StructuredFlow/SourceDispatchCoverage.lean` | Generic original-domain actual-entry coverage and proof that defensive internal refusals are unreachable. |
+| `Backend/StructuredFlow/SourceDispatchDomain.lean` | Indexed union of precisely the sixteen published Source compiler templates. |
+| `Backend/StructuredFlow/SourceDispatchLower.lean` | Case-specific original mapping requirements and reuse of the existing intrinsic target builders. |
+| `Backend/StructuredFlow/SourceDispatchRecognitionLaws.lean` | Exact plan reconstruction, arbitrary finite-block completeness and explicit outside-domain refusal equivalence. |
+| `Backend/StructuredFlow/SourceDispatchRecognize.lean` | Executable exact Source template extraction with generalizing indexed eliminators. |
+| `Backend/StructuredFlow/SourceDispatchSlotLaws.lean` | Exact operand-check reconstruction and preservation of every original selected mapping witness. |
+| `Backend/StructuredFlow/SourceDispatchSlots.lean` | Executable typed slot checks carrying the original context-map equations. |
+| `Backend/StructuredFlow/SourceDispatchViews.lean` | General exact indexed views of existing Source expressions, statements and item spines. |
