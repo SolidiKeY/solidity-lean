@@ -1787,3 +1787,20 @@ Six additional group files appeared after the snapshot and are not included
 in this report. Current inputs, invocation and results remain unverified.
 Independent read-only finder and skeptic reviewed these boundaries without
 Lean, server or builds. No production timing or runtime acceptance is inferred.
+
+## Later EVM compiler audit candidates
+
+`evm_compiler_later_controls.py` observes six later source-hashed candidates
+at `be353619c9d86aff6aedac3631df1e006b83b558`, while listing the remaining
+group paths separately. EntryAudit and SelectorAudit use selected correlated
+input tuples; selector equivalences are not totality statements.
+JointRefutation and RefutationAudit construct intentional impossibility
+packages, not positive witnesses. InputFixture and JointFromCertificate
+retain existing closed certificates rather than fabricating missing inputs.
+
+`enroll_audits.py` parses prior receipt records and writes a ledger; it is not
+a Lean runner. Current per-file drivers, inputs and outcomes remain unresolved.
+The index/worktree scan is non-atomic and does not authenticate ignored or
+generated inputs, index flags or runtime. Independent read-only finder and
+skeptic reviewed these boundaries without Lean, server or builds. No runtime
+acceptance is inferred.
