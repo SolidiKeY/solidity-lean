@@ -1278,3 +1278,26 @@ read-only without Lean/server/builds; skeptic ran the lightweight checker.
 Their checker findings are fixed: source-pin counts are computed, lifecycleV10
 is validated, and a ninth stale-lifecycle-owner mutation is rejected. Prose
 truth remains a reviewed conclusion, not something hashes alone prove.
+
+
+### Consequences map registration and H121 route correction
+
+Coordinator explicitly assigns the Consequences roadmap fragment row to VX1.
+Added it to roadmap.d/vx1-contracts-environment.md and regenerated the combined
+map with scripts/coord-tools/fragments.sh. The existing root import is retained.
+The row describes conditional backward-completion/exact-observation lemmas,
+not production adequacy. No Lean source/import or frozen V1 change.
+
+Current H121 EVM/resource routes supersede the historical owner strings in the
+sealed premise audit: V14 items go to Codex v17-validation-release; V15 items
+go to Codex executable-bytecode. The router now delivers directly. Source
+remains H125 vy1-words; aggregate lifecycle remains V10 under H121b. H127
+slow-library work remains solidity-directruntime-20261104/native-browser.
+The Consequences fragment-row dependency is resolved locally by this commit;
+no producer review, cache delivery or full gate is inferred.
+
+Separate read-only finder/skeptic reviews found no defect in the row, generated
+map or routing correction; neither used Lean/server/builds. fragments.sh --check,
+register.sh --check and git diff --check PASS. check-doc-paths.sh PASS: every
+backticked Lean reference resolves (142 ambiguous references reported globally).
+This documentation-only increment adds no Lean verification claim.
