@@ -1,0 +1,35 @@
+{
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.bind_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.block_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.build_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.each_of_mapM_ok": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.Each.length_eq": [],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.Each.mapM_ok": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.mapM_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.nonempty_build_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCorrespondence.lean:Solidity.Lowering.P8.SourceAstCorrespondence.unit_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean:H62.StorageAudit.SourceAstCorrespondenceControls.cannot_drop": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean:H62.StorageAudit.SourceAstCorrespondenceControls.cannot_swap": [],
+ "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean:H62.StorageAudit.SourceAstCorrespondenceControls.failed_child_not_skipped": [],
+ "tests/h62/item2/audit-v10-storage/SourceAstCorrespondenceControls.lean:H62.StorageAudit.SourceAstCorrespondenceControls.ordered": []
+}

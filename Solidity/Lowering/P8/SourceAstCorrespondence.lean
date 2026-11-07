@@ -61,6 +61,29 @@ theorem mapM_ok_iff_each {α β ε : Type} (read : α → Except ε β)
     xs.mapM read = .ok ys ↔ Each (fun x y => read x = .ok y) xs ys :=
   ⟨each_of_mapM_ok, Each.mapM_ok⟩
 
+/-- A fallible container finish cannot discard child conversion obligations. -/
+theorem bind_ok_iff_each {α β γ ε : Type} (read : α → Except ε β)
+    (finish : List β → Except ε γ) (xs : List α) (out : γ) :
+    (do let ys ← xs.mapM read; finish ys) = .ok out ↔
+      ∃ ys, Each (fun x y => read x = .ok y) xs ys ∧ finish ys = .ok out := by
+  cases hm : xs.mapM read with
+  | error message =>
+    constructor
+    · intro h; cases h
+    · intro ⟨ys, hy, _⟩
+      have bad := hy.mapM_ok
+      rw [hm] at bad
+      cases bad
+  | ok values =>
+    constructor
+    · intro h
+      exact ⟨values, each_of_mapM_ok hm, h⟩
+    · intro ⟨ys, hy, result⟩
+      have same := hy.mapM_ok
+      rw [hm] at same
+      cases same
+      exact result
+
 /-- Building a typed container after traversal does not alter child accounting. -/
 theorem build_ok_iff_each {α β γ ε : Type} (read : α → Except ε β)
     (build : List β → γ) (xs : List α) (out : γ) :
@@ -172,4 +195,6 @@ theorem unit_ok_iff_each (fuel : Nat) (node : Json) (children : Array Json)
 #guard_msgs (whitespace := lax) in #print axioms unit_ok_iff_each
 /-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.nonempty_build_ok_iff_each' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nonempty_build_ok_iff_each
+/-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.bind_ok_iff_each' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bind_ok_iff_each
 end Solidity.Lowering.P8.SourceAstCorrespondence
