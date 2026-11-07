@@ -274,6 +274,22 @@ class CollectorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'duplicate committed headline'):
             HISTORY.add(inventory, 'owner-b', data.decode())
 
+    def test_real_git_tree_rejects_uncommitted_audit(self):
+        if COLLECTOR.LANES.exists():
+            self.skipTest('fixture assumes no real lane fragments')
+        base = COLLECTOR.AUDIT.read_bytes()
+        self.assertEqual(base, COLLECTOR.collect(COLLECTOR.FRAGMENTS))
+        with tempfile.TemporaryDirectory() as directory:
+            installed = pathlib.Path(directory) / 'TrustAudit.lean'
+            installed.write_bytes(COLLECTOR.MARKER + base)
+            with mock.patch.object(COLLECTOR, 'AUDIT', installed):
+                with self.assertRaisesRegex(ValueError, 'installed audit does not match committed HEAD'):
+                    MIGRATION.accept(COLLECTOR.LANES, require_installed=True, prior_commit=ACCEPT.BASE)
+                result = MIGRATION.accept(COLLECTOR.LANES, prior_commit=ACCEPT.BASE)
+        self.assertEqual(result['checkout_state'], 'migrated')
+        self.assertEqual(result['new_headlines'], 0)
+        self.assertEqual(COLLECTOR.AUDIT.read_bytes(), base)
+
     def test_fragment_symlinks_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
