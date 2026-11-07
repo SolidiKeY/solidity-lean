@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean:Solidity.Lowering.P8.DeclarationGraphAdmissionV2.admission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean:Solidity.Lowering.P8.DeclarationGraphAdmissionV2.declarationGraphProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean:Solidity.Lowering.P8.DeclarationGraphAdmissionV2.from_v1_graphs_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean:Solidity.Lowering.P8.DeclarationGraphAdmissionV2.location_policy_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean:Solidity.Lowering.P8.DeclarationGraphAdmissionV2.of_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean:Solidity.Lowering.P8.DeclarationGraphAdmissionV2.source_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

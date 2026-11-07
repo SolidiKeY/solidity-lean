@@ -1,4 +1,5 @@
 import Solidity.Lowering.V08.SourceFailures
+import Solidity.Lowering.V08.ProjectionControls
 import Solidity.Lowering.V08.SourceKeccak
 import Solidity.Lowering.V08.SourceCustomErrorControls
 
@@ -135,6 +136,37 @@ theorem statement_not_rollback (pipeline : Roadmap.Pipeline) (static : Bool)
 #print axioms statement_actual
 #print axioms statement_tail_timeout
 #print axioms statement_not_rollback
+
+/-- Existing projected target data supplies the original explicit-state parameter.
+This is an independent constructor execution, not a compiler-selected body. -/
+theorem target_explicit (bytes : Roadmap.Bytes) :
+    (SourceFailures.reasonStatement bytes : Stmt Controls.Cell [] []).runC
+      ProjectionControls.projected = .error (.revertWith (Semantics.encodeError bytes)) :=
+  SourceFailures.target_reason bytes ProjectionControls.projected
+
+/-- Same payload in two actual runs, without asserting their states are related. -/
+theorem independent_runs (pipeline : Roadmap.Pipeline) (static : Bool)
+    (fuel : Nat) (bytes : Roadmap.Bytes) :
+    (Source.evalE (global pipeline) {frame with static:=static} (fuel+5)
+      (SourceFailures.reason bytes)).run (locals,populated) =
+      (.error (.revert (Semantics.encodeError bytes)),(locals,populated)) ∧
+    (SourceFailures.reasonStatement bytes : Stmt Controls.Cell [] []).runC
+      ProjectionControls.projected = .error (.revertWith (Semantics.encodeError bytes)) :=
+  SourceFailures.reason_execution_transport (global pipeline) {frame with static:=static}
+    fuel bytes locals populated ProjectionControls.projected
+
+/-- Empty reason text is still encoded reason data, not the bare intrinsic revert. -/
+theorem empty_reason_not_plain :
+    (SourceFailures.reasonStatement [] : Stmt Controls.Cell [] []).runC
+      ProjectionControls.projected ≠ .error .revert := by
+  rw [target_explicit]
+  intro same
+  have status := Except.error.inj same
+  cases status
+
+#print axioms target_explicit
+#print axioms independent_runs
+#print axioms empty_reason_not_plain
 
 #print axioms actual
 #print axioms tail_timeout
