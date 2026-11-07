@@ -3,5 +3,62 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.actual_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.aligned": [],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.aligned_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.compilation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.memory_changed": [],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.no_block_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.no_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.scalar_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.Controls.StoreBoundary.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.no_lowering_of_memory_sensitivity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV1Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV1.represented_of_successful_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

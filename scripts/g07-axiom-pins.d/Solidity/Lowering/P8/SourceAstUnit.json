@@ -1,0 +1,8 @@
+{
+ "Solidity/Lowering/P8/SourceAstUnit.lean:Solidity.Lowering.P8.SourceAstUnit.part": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstUnit.lean:Solidity.Lowering.P8.SourceAstUnit.unit": [
+  "propext"
+ ]
+}

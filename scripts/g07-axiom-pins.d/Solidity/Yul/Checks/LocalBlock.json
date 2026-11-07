@@ -64,6 +64,41 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.readbackCaptureMetadata": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.readbackRawWords": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.readbackSelectedLazy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.readbackSourceLocal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.readbackSourceRaw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.readbackSourceRefusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.readbackSourceTimeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.recursiveConjunctionContrast": [
   "Classical.choice",
   "Quot.sound",
@@ -191,6 +226,132 @@
  "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.Checks.LocalBlock.transferRejectNormal": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.cleanWord_bool_roundtrip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.cleanWord_int_encode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.cleanWord_int_lowBits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.cleanWord_int_roundtrip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_pipelines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_readable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_source_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_source_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.evalLocal_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.intWord_value": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.intWrap_idempotent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.intWrap_of_range": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.locals_get_set": [],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.locals_set_get": [],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.readAt_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.readAt_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.readAt_pipelines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.readback_pipelines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.readbackFrom_pipelines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.readLocal_pipelines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.readValue_pipelines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.wrap_intWord": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.wrapBits_congr": [],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.wrapBits_emod": [
+  "propext"
+ ],
+ "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.DirtyReadback.wrapBits_idempotent": [
   "propext"
  ],
  "Solidity/Yul/Checks/LocalBlock.lean:Solidity.Yul.RawFrame.firstDone_agrees": [

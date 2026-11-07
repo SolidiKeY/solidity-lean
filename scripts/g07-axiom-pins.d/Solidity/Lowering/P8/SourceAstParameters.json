@@ -1,0 +1,9 @@
+{
+ "Solidity/Lowering/P8/SourceAstParameters.lean:Solidity.Lowering.P8.SourceAstParameters.elements_syntaxList": [],
+ "Solidity/Lowering/P8/SourceAstParameters.lean:Solidity.Lowering.P8.SourceAstParameters.parameterList": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstParameters.lean:Solidity.Lowering.P8.SourceAstParameters.parameters_elements": [
+  "propext"
+ ]
+}

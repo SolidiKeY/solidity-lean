@@ -1,0 +1,9 @@
+{
+ "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean:H62.AuditV08Adapters.FailureResourceWitnesses.exact_refusals": [],
+ "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean:H62.AuditV08Adapters.FailureResourceWitnesses.no_retraction_joint_impossible": [],
+ "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean:H62.AuditV08Adapters.FailureResourceWitnesses.nofail_predicate_witness": [],
+ "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean:H62.AuditV08Adapters.FailureResourceWitnesses.refusal_joint": [],
+ "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean:H62.AuditV08Adapters.FailureResourceWitnesses.replacement_joint": [],
+ "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean:H62.AuditV08Adapters.FailureResourceWitnesses.schedule_change_joint": [],
+ "tests/h62/item2/audit-v08-adapters/FailureResourceWitnesses.lean:H62.AuditV08Adapters.FailureResourceWitnesses.trans_joint": []
+}
