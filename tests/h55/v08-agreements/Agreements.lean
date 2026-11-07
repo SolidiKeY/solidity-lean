@@ -685,3 +685,29 @@ theorem mixed_context_history :
 
 #print axioms mixed_context_history
 end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+open ContractWorld
+
+/-- Guards refusal-history truncation: a real wrong-code-role revert precedes
+paid/read-only successes while the complete normalized world is retained. -/
+theorem role_refusal_mixed_history :
+    transactPrefix LibraryHandlerControls.outer
+      (WorldContextComposition.frame false false (⟨Controls.self⟩ : Handle false)
+        LibraryHandlerControls.link Controls.paidCtx ::
+       [Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}].map
+        (WorldContextComposition.frame false true (⟨Controls.self⟩ : Handle false)
+          LibraryHandlerControls.link)) =
+      (LibraryHandlerControls.outer.resetTransient,
+       [.error .revert, .ok (1,7,2), .ok (1,0,2)]) := by
+  obtain ⟨runtime⟩ := LibraryFrameTransport.runtime_of_success
+    (contracts := LibraryHandlerControls.Catalog)
+    LibraryHandlerControls.outer LibraryHandlerControls.handled (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.library Controls.paidCtx LibraryHandlerControls.expected
+    LibraryHandlerControls.delegated_reached
+  exact WorldContextComposition.role_refusal_then_history LibraryHandlerControls.outer false true
+    (⟨Controls.self⟩ : Handle false) LibraryHandlerControls.link Controls.paidCtx runtime
+    [Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}]
+
+#print axioms role_refusal_mixed_history
+end Solidity.Lowering.V08.H55Agreements
