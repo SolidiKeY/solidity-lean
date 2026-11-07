@@ -11,6 +11,8 @@ chain, `--path A B` one import path from `A` to `B`;
 `node scripts/check-layers.mjs` fails when a core module reaches the
 elaborator or introduces an unapproved core-to-non-core import boundary.
 
+Audits (2026-11-06): [architecture](audits/architecture.md) (layering, copies, Controls cost), [build-speed](audits/build-speed.md) (where check time and memory go) and [coordination](audits/coordination-process.md) (lane time, gates, merge latency).
+
 ## P1. The core apart from the elaborator
 
 ### The core
