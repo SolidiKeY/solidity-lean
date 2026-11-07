@@ -1,0 +1,93 @@
+{
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.input_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.insufficient_frame": [],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.left_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.right_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.saturated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.SourceCase.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.SourceCase.short_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.wrong_order_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.wrong_order_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.wrong_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ShiftCaptureWitness.lean:Solidity.Backend.Passes.AuditShiftCapture.wrong_saturated_modulo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

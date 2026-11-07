@@ -1,0 +1,46 @@
+{
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.frame_allocation_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Frame.arg_bounds": [],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Frame.arg_injective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Frame.covers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Frame.local_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Frame.local_injective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Frame.result_bounds": [],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Frame.result_injective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.label_bounds": [],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.label_covers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.label_regions_disjoint": [],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.slot_label_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Slots.covers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean:Solidity.Yul.Compilation.Slots.fresh_above_old": [
+  "Quot.sound",
+  "propext"
+ ]
+}
