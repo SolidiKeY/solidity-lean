@@ -2564,3 +2564,41 @@ receipts and handoff are sealed outside the code branch under
 archived privately under H145. H1 cleanup removed only exited containers whose
 IDs match this lane's saved workload records, reclaiming VFS copies while
 retaining every host-bound proof product and receipt.
+
+### Frozen V2 control inspection and theorem domains
+
+The already built InterfaceV2Controls module now has an independent native
+all-constant packet: 17 records, comprising 13 kernel theorems and four other
+constants. Seven theorem names match frozen lexical candidates; six additional
+kernel theorem records receive no inferred source-parent ownership. This
+brings independently observed core modules to 153, leaving 37 core and 37
+Bridge modules uninspected. Packet fingerprints remain separate.
+
+The existing binder renderer now supports original theorems and explicitly
+refuted domains as well as registered projections. Original theorem kind,
+universes and raw type snapshots are checked before reusing the same pinned
+extractor. The projection entry point remains a backward-compatible wrapper;
+default source and manifest output tests still pass. A refuted-target roster
+emits negated domains and is pinned separately, preventing refutations from
+being counted as inhabited hypotheses. No original statement changes.
+
+Eight domains are positively witnessed, all axiom-free. Four domains are
+refuted as intentional negative controls: the oversized V2 program and its
+length auxiliary, the impossible wrong-result length auxiliary, and the V1
+overflow example's impossible stackBound premise. This reproduces the known
+conditional V1 capacity defect without repairing or endorsing it. These four
+refutations receive no positive witness credit. The remaining domain,
+reject_false_runtime, stays open because its composition argument was not
+supplied; no composition or source assumption is invented.
+
+Native inspection passed in 5.888 seconds. Domain checks passed in 6.956 and
+7.295 seconds, using 38 existing verified import products and no new
+prerequisite build or STOP retry. Refutations use only standard axioms; no file
+exceeds 60 seconds. The 127-test suite and independent read-only finder/skeptic
+source and provenance reviews pass. Raw packets, complete 17-record ledger,
+resource receipts and replay are sealed off-branch at
+/workspace/parallel-20261103/executable-bytecode/selection-controls-inspection/
+and archived privately under H145. Only exited lane-owned containers and
+regenerable import-view symlinks were removed; proof products remain intact.
+Original global census, Source/runtime/Bridge, physical, gas/fork, full closure
+and performance obligations remain open.
