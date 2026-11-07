@@ -1252,3 +1252,26 @@ full lexical coverage or Lean semantics. Evidence is outside Git under
 
 Named instances with explicit priority clauses remain a separate accounting
 limitation; the scanner can still report such a named instance as anonymous.
+
+## Named priority instances
+
+The lexical inventory now recovers an optional source-spelled instance name
+after a balanced priority clause and recognizes `scoped` among declaration
+modifiers. All priority-instance statements and bodies remain explicitly
+rejected as `unsupported-instance-priority`; anonymous instances remain
+anonymous, and malformed unterminated priority clauses make the file
+incomplete. Recovered private and scoped names are source spellings, not
+canonical kernel identities. This resolves the named-priority accounting
+case noted above without asserting priority semantics or full parser coverage.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 200 tests, including five real metadata-fixture
+names, anonymous and escaped names, scoped/private qualifiers and malformed
+clauses. A matched bounded scan took 118.999 seconds before and 112.620
+seconds after (-5.36%). Both used the same 7,369 inputs and reported no file
+errors or unmatched globs; recognized declaration count changed from 124,000
+to 124,001. In the checked fixture, five named rows are now recorded and each
+retains both statement and body refusal. Group counts do not establish equal
+membership, intrinsic signatures, proof semantics or live ownership. Evidence
+is outside Git under
+`/workspace/h62-duplication-scanner-evidence/priority-instances/`.

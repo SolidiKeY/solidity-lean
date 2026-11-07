@@ -15,7 +15,7 @@ import re
 import stat
 from pathlib import Path
 
-DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class[ \t\r\n]+(?:inductive|abbrev)|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+?)(?=\.\{|[\s(:{\[]|\Z))?")
+DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|scoped[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class[ \t\r\n]+(?:inductive|abbrev)|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+?)(?=\.\{|[\s(:{\[]|\Z))?")
 ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
 ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
 IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
@@ -27,6 +27,7 @@ BINDER = re.compile(r"([({\[])\s*(" + IDENT + r"(?:\s+" + IDENT + r")*)\s*:\s*([
 ID_REST_CHAR = re.compile("[" + ID_REST + "]")
 # This records lexical spelling only; it is not a resolved kernel Name.
 SOURCE_NAME = re.compile(r"\s*((?:«[^»]*»|" + IDENT + r")(?:\.(?:«[^»]*»|" + IDENT + r"))*)")
+INSTANCE_PRIORITY = re.compile(r"\s*\(\s*priority\s*:=")
 
 def signature_coverage(rows, signature_key="fixture_signature", linked_label="local-fixture-linkage"):
     """Guard partial live binding being mistaken for selected-scope coverage.
@@ -298,7 +299,7 @@ def scan(path, root, source=None):
         if index >= 0:
             prefix_start, prefix_end = attribute_spans[index]
             between = skeleton[prefix_end:match.start(1)]
-            if re.fullmatch(r"\s*(?:(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\s+)*", between):
+            if re.fullmatch(r"\s*(?:(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe)\s+)*", between):
                 start = min(start, prefix_start)
         declaration_starts.append(start)
     context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe|set_option)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
@@ -312,7 +313,7 @@ def scan(path, root, source=None):
         # A scoped command may place `in` on a later line. Refuse an inline
         # declaration that the line-initial recognizer would silently miss.
         if (re.match(r"[ \t]*set_option\b", command.group()) and
-            re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
+            re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
             raise ValueError("unsupported same-line scoped set_option declaration")
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
@@ -334,7 +335,7 @@ def scan(path, root, source=None):
             command_inside = len(prefix.expandtabs(8)) > indent(match)
             content = content[:command.start()]
             content_skeleton = content_skeleton[:command.start()]
-        qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
+        qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
         context = digest([span for start, span in context_spans if start < match.start()])
         kind = " ".join(match.group(1).split())
         name = match.group(2) or "<anonymous>"
@@ -350,9 +351,27 @@ def scan(path, root, source=None):
                     cursor += 1
                 if text.startswith("«", cursor):
                     raise ValueError("unsupported escaped declaration name")
+        priority = False
+        if kind == "instance":
+            priority_start = INSTANCE_PRIORITY.match(skeleton, match.end(1), end)
+            if priority_start:
+                priority = True
+                cursor = priority_start.end()
+                depth = 1
+                while cursor < end and depth:
+                    if skeleton[cursor] == "(": depth += 1
+                    elif skeleton[cursor] == ")": depth -= 1
+                    cursor += 1
+                if depth:
+                    raise ValueError("unterminated instance priority")
+                priority_name = SOURCE_NAME.match(text, cursor, end)
+                if priority_name:
+                    name = priority_name.group(1)
+                    escaped_name = "«" in name
         unsupported = kind in {"structure", "inductive", "class", "class inductive", "class abbrev", "axiom", "constant"}
         parts = None if unsupported else split_declaration(content, skeleton=content_skeleton)
-        reason = "unsupported-declaration-form" if unsupported else "missing-top-level-definition"
+        reason = ("unsupported-declaration-form" if unsupported else
+                  "unsupported-instance-priority" if priority else "missing-top-level-definition")
         if parts is not None:
             head_skeleton = content_skeleton[:len(parts[0])]
             if re.search(r"\bwhere\b", head_skeleton):
@@ -383,13 +402,16 @@ def scan(path, root, source=None):
             body = body[:boundary.start()]
         if escaped_name:
             body_reject_reason = "escaped-identifier-boundary"
-        normalized = None if escaped_name else normalize(header.strip())
+        if priority:
+            body_reject_reason = "unsupported-instance-priority"
+        normalized = None if escaped_name or priority else normalize(header.strip())
         rows.append(dict(path=relative_path,
                          line=text.count("\n", 0, match.start(1))+1,
                          kind=kind, name=name,
                          statement=normalized, body=tokenize(body), body_form=body_form,
                          body_reject_reason=body_reject_reason, owner="unknown", context_hash=context, qualifiers=qualifiers,
-                         reject_reason="unsupported-binder-syntax" if normalized is None else None))
+                         reject_reason=("unsupported-instance-priority" if priority else
+                                        "unsupported-binder-syntax" if normalized is None else None)))
     return rows
 
 def digest(obj):

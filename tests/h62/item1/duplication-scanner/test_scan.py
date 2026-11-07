@@ -209,6 +209,39 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(row["reject_reason"], "unsupported-binder-syntax")
             self.assertEqual(row["body_reject_reason"], "escaped-identifier-boundary")
 
+    def test_named_and_anonymous_priority_instances_are_accounted(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "instance (priority := 17) global17 : Marker Nat := foo\n"
+                  "private instance (priority := low) hidden : Marker Bool := foo\n"
+                  "scoped instance (priority := 41) scoped41 : Marker Int := foo\n"
+                  "instance (priority := 100) : Marker String := foo\n"
+                  "@[simp] instance (priority := (10)) «a.b» : Marker UInt64 := foo\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([r["name"] for r in rows], ["before", "global17", "hidden", "scoped41", "<anonymous>", "«a.b»", "after"])
+        self.assertEqual(rows[2]["qualifiers"], ["private"])
+        self.assertEqual(rows[3]["qualifiers"], ["scoped"])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        for row in rows[1:6]:
+            self.assertEqual(row["reject_reason"], "unsupported-instance-priority")
+            self.assertEqual(row["body_reject_reason"], "unsupported-instance-priority")
+            self.assertIsNone(row["statement"])
+        with self.assertRaisesRegex(ValueError, "unterminated instance priority"):
+            scanner.scan(root / "B.lean", root, b"instance (priority := 10\ndef after : Nat := 1\n")
+        split = ("instance (priority :=\n  17)\n  named : Marker Nat := foo\n"
+                 "instance (priority := 42) : Marker Bool := foo\ndef next : Nat := 1\n")
+        split_rows = scanner.scan(root / "C.lean", root, split.encode())
+        self.assertEqual([r["name"] for r in split_rows], ["named", "<anonymous>", "next"])
+        self.assertEqual(split_rows[0]["reject_reason"], "unsupported-instance-priority")
+        fixture = ROOT / "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean"
+        fixture_rows = scanner.scan(fixture, ROOT)
+        names = {r["name"]: r for r in fixture_rows}
+        for name in ("global17", "global63", "private11", "scoped41", "local97"):
+            self.assertEqual(names[name]["reject_reason"], "unsupported-instance-priority")
+            self.assertEqual(names[name]["body_reject_reason"], "unsupported-instance-priority")
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))
